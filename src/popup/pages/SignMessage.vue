@@ -6,7 +6,7 @@
 import { IonPage } from '@ionic/vue';
 import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+
 import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
@@ -23,12 +23,11 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
-      const { getAeSdk } = useAeSdk({ store });
+      const { getAeSdk } = useAeSdk();
       const { openModal } = useModals();
       const { setLoaderVisible } = useUi();
 
@@ -39,13 +38,14 @@ export default defineComponent({
         const isHexEncodedMessage = !!rawMessage && route.query.encoding?.toString() === 'hex';
         const message = isHexEncodedMessage ? Buffer.from(rawMessage, 'hex') : rawMessage;
         const displayMessage = message?.toString();
+        const { host, href } = callbackOrigin.value || {} as any;
 
         await openModal(MODAL_MESSAGE_SIGN, {
           message: displayMessage,
           app: {
-            name: callbackOrigin.value?.host,
-            host: callbackOrigin.value?.host,
-            url: callbackOrigin.value?.href,
+            host,
+            name: host,
+            url: href,
           },
         });
 

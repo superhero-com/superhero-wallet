@@ -34,7 +34,7 @@
               name="url"
               :rules="{
                 required: true,
-                url: permissionHostValidation
+                url: permissionHostValidation,
               }"
             >
               <InputField
@@ -90,6 +90,7 @@
               name="transactionSignLimit"
               :rules="{
                 min_value_exclusive: 0,
+                does_not_exceed_decimals: selectedAsset.decimals,
               }"
             >
               <InputAmount
@@ -99,32 +100,32 @@
                 name="transactionSignLimit"
                 label=" "
                 :selected-asset="selectedAsset"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
                 readonly
               />
             </Field>
 
-            <div class="limit-info">
+            <DetailsItem :label="$t('pages.permissions.spent-today')">
               <TokenAmount
-                :label="$t('pages.permissions.spent-today')"
-                :amount="permission.transactionSignLimitLeft"
-                :protocol="PROTOCOL_AETERNITY"
+                class="transaction-limit-amount"
+                :amount="permission.transactionSignSpent"
+                :protocol="PROTOCOLS.aeternity"
               />
-            </div>
-            <div class="limit-info">
+            </DetailsItem>
+            <DetailsItem :label="$t('pages.permissions.left-today')">
               <TokenAmount
-                :label="$t('pages.permissions.left-today')"
-                :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
-                :protocol="PROTOCOL_AETERNITY"
+                class="transaction-limit-amount"
+                :amount="permission.transactionSignLimit - permission.transactionSignSpent"
+                :protocol="PROTOCOLS.aeternity"
               />
-            </div>
-            <div class="limit-info">
+            </DetailsItem>
+            <DetailsItem :label="$t('pages.account.balance')">
               <TokenAmount
-                :label="$t('pages.account.balance')"
+                class="transaction-limit-amount"
                 :amount="+balance"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
-            </div>
+            </DetailsItem>
           </div>
         </transition>
 
@@ -133,7 +134,7 @@
             <BtnMain
               variant="muted"
               :text="$t('common.cancel')"
-              :to="{ name: 'permissions-settings' }"
+              :to="{ name: ROUTE_PERMISSIONS_SETTINGS, replace: true }"
             />
             <BtnMain
               class="confirm"
@@ -149,7 +150,7 @@
             variant="muted"
             :text="$t('pages.permissions.delete')"
             :icon="DeleteIcon"
-            @click="removePermission"
+            @click="removePermissionAndRedirect()"
           />
         </div>
       </div>
@@ -164,7 +165,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
 import { IonPage, IonContent } from '@ionic/vue';
@@ -172,13 +172,13 @@ import { IonPage, IonContent } from '@ionic/vue';
 import type { IPermission } from '@/types';
 import {
   PERMISSION_DEFAULTS,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
-import { useBalances, useCurrencies } from '@/composables';
-import { useState } from '@/composables/vuex';
-import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { useBalances, useCurrencies, usePermissions } from '@/composables';
+import { ROUTE_NOT_FOUND, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import DetailsItem from '../components/DetailsItem.vue';
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmount.vue';
 import InputField from '../components/InputField.vue';
@@ -188,44 +188,40 @@ import DeleteIcon from '../../icons/trash.svg?vue-component';
 
 export default defineComponent({
   components: {
-    SwitchButton,
-    InputField,
-    InputAmount,
-    TokenAmount,
     BtnMain,
+    DetailsItem,
     Field,
-    IonPage,
+    InputAmount,
+    InputField,
     IonContent,
+    IonPage,
+    SwitchButton,
+    TokenAmount,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { validate, setValues } = useForm();
 
-    const { balance } = useBalances({ store });
-    const { getCurrentCurrencyRate } = useCurrencies({ store });
+    const { balance } = useBalances();
+    const { marketData } = useCurrencies();
+    const { permissions, addPermission, removePermission } = usePermissions();
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;
 
     const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
-    const originalTransactionSignLimit = ref<number>(0);
 
-    const permissions = useState<Record<string, IPermission>>('permissions');
-
-    const selectedAsset = computed(() => ({
-      contractId: AE_CONTRACT_ID,
-      symbol: AE_SYMBOL,
-      currentPrice: getCurrentCurrencyRate(PROTOCOL_AETERNITY),
-    }));
+    const selectedAsset = computed(() => ProtocolAdapterFactory
+      .getAdapter(PROTOCOLS.aeternity)
+      .getDefaultCoin(marketData.value!, +balance.value));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
 
-    function removePermission() {
-      store.commit('permissions/removePermission', routeHost);
-      router.push({ name: 'permissions-settings' });
+    function removePermissionAndRedirect() {
+      removePermission(routeHost);
+      router.replace({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 
     async function savePermission() {
@@ -238,22 +234,15 @@ export default defineComponent({
       ));
 
       if (host !== routeHost) {
-        store.commit('permissions/removePermission', routeHost);
+        removePermission(routeHost);
       }
 
       if (!permission.value.dailySpendLimit) {
         permission.value.transactionSignLimit = 0;
-      } else if (originalTransactionSignLimit.value !== permission.value.transactionSignLimit) {
-        permission.value.transactionSignLimitLeft += (
-          permission.value.transactionSignLimit - originalTransactionSignLimit.value
-        );
       }
 
-      store.commit('permissions/addPermission', {
-        ...permission.value,
-        host,
-      });
-      router.push({ name: 'permissions-settings' });
+      addPermission({ ...permission.value, host });
+      router.replace({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 
     if (editView) {
@@ -262,22 +251,11 @@ export default defineComponent({
         router.replace({ name: ROUTE_NOT_FOUND });
       } else {
         if (typeof savedPermission.transactionSignLimit === 'string') {
-          savedPermission.transactionSignLimit = parseInt(
-            savedPermission.transactionSignLimit,
-            10,
-          );
-          originalTransactionSignLimit.value = savedPermission.transactionSignLimit;
-        }
-
-        if (typeof savedPermission.transactionSignLimitLeft === 'string') {
-          savedPermission.transactionSignLimitLeft = parseInt(
-            savedPermission.transactionSignLimitLeft,
-            10,
-          );
+          savedPermission.transactionSignLimit = +savedPermission.transactionSignLimit;
         }
 
         setValues({ url: savedPermission.host, ...savedPermission });
-        permission.value = savedPermission;
+        permission.value = { ...PERMISSION_DEFAULTS, ...savedPermission };
       }
     }
 
@@ -286,7 +264,8 @@ export default defineComponent({
     }, { deep: true });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
+      ROUTE_PERMISSIONS_SETTINGS,
       DeleteIcon,
       editView,
       balance,
@@ -294,7 +273,7 @@ export default defineComponent({
       permissionHostValidation,
       permissionChanged,
       selectedAsset,
-      removePermission,
+      removePermissionAndRedirect,
       savePermission,
     };
   },
@@ -331,8 +310,9 @@ export default defineComponent({
       margin-bottom: 16px;
     }
 
-    .limit-info {
-      padding: 4px 0;
+    .transaction-limit-amount {
+      justify-content: space-between;
+      width: 100%;
     }
   }
 

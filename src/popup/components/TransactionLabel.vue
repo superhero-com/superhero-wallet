@@ -76,16 +76,12 @@ import {
 } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 
-import { useAccounts, useTransactionTx } from '@/composables';
-import { useState } from '@/composables/vuex';
-import {
-  ITokenList,
-  ITransaction,
-} from '@/types';
-import { TX_DIRECTION } from '@/constants';
-import { getAccountNameToDisplay } from '@/utils';
+import type { ITransaction } from '@/types';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { getDefaultAccountLabel } from '@/utils';
+import { useAccounts, useFungibleTokens, useTransactionData } from '@/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import {
   TX_FUNCTIONS,
   TX_RETURN_TYPE_ABORT,
@@ -111,9 +107,9 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { accounts, activeAccount } = useAccounts({ store });
+    const { activeAccount, getAccountByAddress } = useAccounts();
     const { t } = useI18n();
+    const { getName } = useAeNames();
 
     const {
       outerTxTag,
@@ -127,13 +123,12 @@ export default defineComponent({
       isErrorTransaction,
       isTip,
       txTypeListLabel,
-    } = useTransactionTx({
-      store,
-      tx: props.transaction.tx,
+    } = useTransactionData({
+      transaction: props.transaction,
       externalAddress: props.transaction.transactionOwner,
     });
 
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const label = computed((): {
       text: string;
@@ -172,7 +167,7 @@ export default defineComponent({
         text = t('transaction.listType.tipSent');
       } else if (
         outerTxTag.value === Tag.ContractCallTx
-        && availableTokens.value[innerTx.value.contractId]
+        && getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer
           || props.transaction.incomplete
@@ -196,9 +191,10 @@ export default defineComponent({
       return { text, customPending, hasComma };
     });
 
-    const ownerName = computed(() => getAccountNameToDisplay(
-      accounts.value.find((acc) => acc.address === props.transaction.transactionOwner),
-    ));
+    const ownerName = computed(() => {
+      const accountFound = getAccountByAddress(props.transaction.transactionOwner!);
+      return getName(accountFound?.address).value || getDefaultAccountLabel(accountFound);
+    });
 
     const errorTypeName = computed((): string | null => {
       switch (props.transaction.tx.returnType) {

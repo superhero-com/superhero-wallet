@@ -1,30 +1,60 @@
 import BigNumber from 'bignumber.js';
 import type {
+  AccountAddress,
   AdapterNetworkSettingList,
-  ICoin,
-  IHdWalletAccount,
+  AssetContractId,
   INetworkProtocolSettings,
+  ITransactionApiPaginationParams,
+  ICoin,
+  IFetchTransactionResult,
+  IHdWalletAccount,
+  IToken,
+  ITokenBalance,
+  ITransaction,
+  ITransferResponse,
   MarketData,
+  NetworkType,
   NetworkTypeDefault,
+  Protocol,
+  IAmountDecimalPlaces,
 } from '@/types';
+import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
 /**
- *  Represents common attributes and behavior of a protocol
+ * Represents common attributes and behavior of a protocol
  */
 export abstract class BaseProtocolAdapter {
+  abstract protocol: Protocol;
+
   abstract protocolName: string;
+
+  abstract coinName: string;
+
+  abstract coinSymbol: string;
+
+  abstract coinContractId: AssetContractId;
+
+  abstract coinPrecision: number;
+
+  /**
+   * Defines if the protocol supports fungible tokens (token contracts).
+   */
+  abstract hasTokensSupport: boolean;
+
+  /**
+   * Estimated time we need to wait for the middleware to sync it's state with the node.
+   */
+  abstract mdwToNodeApproxDelayTime: number;
 
   abstract getAccountPrefix(): string;
 
-  abstract getExplorer(): any;
+  abstract getExplorer(): ProtocolExplorer;
 
-  abstract getAmountPrecision(args?: any): number;
+  abstract getAmountPrecision(args?: IAmountDecimalPlaces): number;
 
-  abstract getCoinSymbol(getShort: boolean): string;
+  abstract getUrlTokenKey(): string;
 
   abstract getCoinGeckoCoinId(): string;
-
-  abstract getDefaultAssetContractId(): string;
 
   abstract getDefaultCoin(
     marketData: MarketData,
@@ -42,13 +72,24 @@ export abstract class BaseProtocolAdapter {
    */
   abstract getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings;
 
-  abstract fetchBalance(address: string): Promise<string>;
+  /**
+   * Validates if the account address matches the protocol.
+   */
+  abstract isAccountAddressValid(address: AccountAddress, networkType?: NetworkType): boolean;
+
+  /**
+   * Validates if the address or name encoding matches the protocol.
+   */
+    abstract isValidAddressOrNameEncoding(
+      address: AccountAddress,
+      networkType?: NetworkType,
+    ): boolean;
 
   /**
    * Check whether the network has encountered this account.
    * @param address Account address
    */
-  abstract isAccountUsed(address: string): Promise<boolean>;
+  abstract isAccountUsed(address: AccountAddress): Promise<boolean>;
 
   /**
    * Generate account from Mnemonic
@@ -63,9 +104,9 @@ export abstract class BaseProtocolAdapter {
   /**
    * Discover accounts that have been used in the past
    * @param seed 12 word seed array buffer
-   * @returns total number of used accounts
+   * @returns index of the last account that has any history records (-1 means no accounts found)
    */
-  abstract discoverAccounts(seed: Uint8Array): Promise<number>;
+  abstract discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number>;
 
   abstract constructAndSignTx(
     amount: number,
@@ -73,12 +114,44 @@ export abstract class BaseProtocolAdapter {
     options: Record<string, any>,
   ): Promise<any>;
 
-  abstract getTransactionByHash(hash: string): Promise<any>
+  fetchAvailableTokens?(): Promise<IToken[] | null>;
 
-  abstract fetchTransactions(
-    address: string,
-    lastTxId?: string,
-  ): Promise<any>;
+  fetchAccountTokenBalances?(address: AccountAddress): Promise<ITokenBalance[] | null>;
+
+  transferToken?(
+    amount: number,
+    recipient: string,
+    contractId: AssetContractId,
+    options: Record<string, any>,
+  ): Promise<ITransferResponse | undefined>;
+
+  fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
+
+  abstract fetchBalance(address: AccountAddress): Promise<string>;
+
+  abstract fetchTransactionByHash(
+    hash: string,
+    transactionOwner?: AccountAddress,
+  ): Promise<ITransaction>;
+
+  fetchPendingTransactions?(address: AccountAddress): Promise<ITransaction[]>;
+
+  /**
+   * Fetches all asset transactions (Both Coin AND Token) for an account.
+   */
+  abstract fetchAccountTransactions(
+    address: AccountAddress,
+    params?: ITransactionApiPaginationParams,
+  ): Promise<IFetchTransactionResult>;
+
+  /**
+   * Fetches specified asset transactions (Coin OR Token) for an account.
+   */
+  abstract fetchAccountAssetTransactions(
+    address: AccountAddress,
+    assetContractId: AssetContractId,
+    params?: ITransactionApiPaginationParams,
+  ): Promise<IFetchTransactionResult>;
 
   /**
    * Spend coin
@@ -88,5 +161,7 @@ export abstract class BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: Record<string, any>,
-  ): Promise<{ hash: string }>;
+  ): Promise<ITransferResponse>;
+
+  abstract waitTransactionMined(hash: string): Promise<any>;
 }

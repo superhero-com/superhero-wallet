@@ -5,18 +5,25 @@
         <template v-if="transaction">
           <TransactionDetailsBase
             :transaction="transaction"
-            :coin-symbol="BTC_SYMBOL"
-            :transaction-fee="transactionFee"
-            :token-symbol="BTC_SYMBOL"
-            :total-amount="totalAmount"
-            :direction="direction"
-            :explorer-url="explorerUrl"
+            :amount="amount"
+            :amount-total="amountTotal"
+            :fee="fee"
             :hash="hash"
-            :none-ae-coin="tokens"
-            :protocol="PROTOCOL_BITCOIN"
-          />
+            :non-ae-assets="assets"
+            :protocol="PROTOCOLS.bitcoin"
+            show-header
+          >
+            <template #tokens>
+              <TransactionAssetRows
+                :assets="assets"
+                :is-rounded="!!assets"
+                :protocol="PROTOCOLS.bitcoin"
+                icon-size="rg"
+                multiple-rows
+              />
+            </template>
+          </TransactionDetailsBase>
         </template>
-        <div />
       </div>
     </IonContent>
   </IonPage>
@@ -33,20 +40,21 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { IonContent, IonPage } from '@ionic/vue';
 
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import type { ITransaction } from '@/types';
-import { TX_DIRECTION, PROTOCOL_BITCOIN } from '@/constants';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
-import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import type { ITokenResolved, ITransaction } from '@/types';
+import { TX_DIRECTION, PROTOCOLS } from '@/constants';
 import { useUi } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
-import BtcIcon from '@/icons/coin/bitcoin.svg';
+import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
 
 export default defineComponent({
   components: {
     TransactionDetailsBase,
+    TransactionAssetRows,
     IonContent,
     IonPage,
   },
@@ -56,34 +64,26 @@ export default defineComponent({
     const { setLoaderVisible } = useUi();
 
     const hash = route.params.hash as string;
-
     const transactionOwner = route.params.transactionOwner as string;
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
 
     const transaction = ref<ITransaction>();
 
-    const explorerUrl = computed(
-      () => ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_BITCOIN)
-        .getExplorer()
-        .prepareUrlForHash(transaction.value?.hash),
-    );
-
-    const transactionFee = computed((): number => transaction.value?.tx?.fee ?? 0);
-
-    const totalAmount = computed((): number => transaction.value?.tx
-      ? getTxAmountTotal(transaction.value, transaction.value.tx.recipientId === transactionOwner)
+    const isReceived = computed(() => transaction.value?.tx?.senderId !== transactionOwner);
+    const fee = computed((): number => transaction.value?.tx?.fee || 0);
+    const amount = computed((): number => transaction.value?.tx?.amount || 0);
+    const amountTotal = computed((): number => transaction.value?.tx
+      ? getTxAmountTotal(transaction.value, isReceived.value)
       : 0);
 
-    const direction = computed(() => transactionOwner === transaction.value?.tx?.senderId
-      ? TX_DIRECTION.sent
-      : TX_DIRECTION.received);
+    const direction = computed(() => isReceived.value ? TX_DIRECTION.received : TX_DIRECTION.sent);
 
-    const tokens = computed(() => [{
-      amount: totalAmount.value,
+    const assets = computed((): ITokenResolved[] => [{
+      amount: amount.value,
       symbol: BTC_SYMBOL,
+      name: BTC_COIN_NAME,
       isReceived: direction.value === TX_DIRECTION.received,
-      isAe: false,
-      image: BtcIcon,
+      contractId: adapter.coinContractId,
     }]);
 
     watch(
@@ -96,26 +96,26 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
         transaction.value = {
-          ...await bitcoinAdapter.getTransactionByHash(hash),
+          ...await adapter.fetchTransactionByHash(hash),
           transactionOwner,
         };
       } catch (e) {
+        setLoaderVisible(false);
         router.push({ name: ROUTE_NOT_FOUND });
       }
     });
 
     return {
       BTC_SYMBOL,
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
+      amount,
+      amountTotal,
       direction,
-      explorerUrl,
+      fee,
       hash,
+      assets,
       transaction,
-      transactionFee,
-      tokens,
-      totalAmount,
     };
   },
 });

@@ -11,22 +11,25 @@ import {
   isAddressValid,
   unpackTx,
 } from '@aeternity/aepp-sdk';
+import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import BigNumber from 'bignumber.js';
 
 import type {
+  AccountAddress,
+  AssetContractId,
   IAccount,
   IActiveMultisigTransaction,
   ICommonTransaction,
   IDexContracts,
   IGAAttachTx,
-  INameEntryFetched,
+  IMultisigAccount,
   ITransaction,
   ITx,
   TxFunction,
   TxFunctionRaw,
   TxType,
 } from '@/types';
-import { HASH_REGEX, TX_DIRECTION } from '@/constants';
+import { HASH_REGEX, PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   compareCaseInsensitive,
   errorHasValidationKey,
@@ -37,6 +40,7 @@ import {
   AE_AENS_DOMAIN,
   AE_AENS_NAME_MAX_LENGTH,
   AE_CONTRACT_ID,
+  AE_FAUCET_URL,
   AE_HASH_PREFIXES_ALLOWED,
   AE_SIMPLEX_URL,
   AE_TRANSACTION_OWNERSHIP_STATUS,
@@ -48,29 +52,33 @@ import {
 
 export * from './transactionTokenInfoResolvers';
 
-export function buildSimplexLink(address: string) {
-  const link = new URL(AE_SIMPLEX_URL);
-  link.searchParams.set('wallet_address', address);
-  return link.toString();
-}
-
-export function aeToAettos(value: number | string) {
+export function aeToAettos(value: number | string | BigNumber) {
   return formatAmount(value.toString(), {
     denomination: AE_AMOUNT_FORMATS.AE,
     targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
 }
 
-export function aettosToAe(value: number | string) {
+export function aettosToAe(value: number | string | BigNumber) {
   return formatAmount(value.toString(), {
     denomination: AE_AMOUNT_FORMATS.AETTOS,
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 }
 
+export function buildAeFaucetUrl(address: string): string {
+  return `${AE_FAUCET_URL}?address=${address}`;
+}
+
+export function buildSimplexLink(address: string): string {
+  const link = new URL(AE_SIMPLEX_URL);
+  link.searchParams.set('wallet_address', address);
+  return link.toString();
+}
+
 export function calculateSupplyAmount(balance: number, totalSupply: number, reserve: number) {
   if (!balance || !totalSupply || !reserve) {
-    return null;
+    return undefined;
   }
   const share = new BigNumber(balance).times(100).div(totalSupply);
   const amount = new BigNumber(reserve).times(share).div(100);
@@ -78,53 +86,72 @@ export function calculateSupplyAmount(balance: number, totalSupply: number, rese
 }
 
 export function categorizeContractCallTxObject(transaction: ITransaction): {
-  amount?: string | number;
+  amount: number;
+  assetContractId: AssetContractId;
   to?: string;
-  token?: string;
   url?: string;
   note?: string;
 } | null {
-  if (!compareCaseInsensitive(transaction.tx.type, Tag[Tag.ContractCallTx])) {
+  const { tx, incomplete, pending } = transaction || {};
+  if (!compareCaseInsensitive(tx.type, Tag[Tag.ContractCallTx])) {
     return null;
   }
-  if (transaction.incomplete || transaction.pending) {
-    const { tx } = transaction;
+
+  if (incomplete || pending) {
     return {
       amount: tx.amount,
-      token: tx.selectedTokenContractId ?? tx.contractId,
-      to: transaction.incomplete ? tx.recipientId : tx.callerId,
+      assetContractId: tx.selectedTokenContractId ?? tx.contractId,
+      to: incomplete ? tx.recipientId : tx.callerId,
     };
   }
-  const { tx } = transaction as ITransaction;
+
+  // TODO Consider picking the argument by the `type` value instead of the array index value.
+  const txArgValues = (tx.arguments || []).map((arg) => arg.value);
+
   switch (tx.function) {
-    case 'transfer':
-    case 'transfer_payload':
-    case 'change_allowance':
-    case 'create_allowance':
+    case TX_FUNCTIONS.transfer:
+    case TX_FUNCTIONS.transferPayload:
+    case TX_FUNCTIONS.changeAllowance:
+    case TX_FUNCTIONS.createAllowance:
       return {
-        to: tx.arguments[0].value,
-        amount: tx.arguments[1].value,
-        token: tx.contractId,
+        to: txArgValues[0],
+        amount: txArgValues[1],
+        assetContractId: tx.contractId,
       };
-    case 'tip_token':
+    case TX_FUNCTIONS.tipToken:
       return {
-        url: tx.arguments[0].value,
-        note: tx.arguments[1].value,
-        amount: tx.arguments[3].value,
-        token: tx.arguments[2].value,
+        url: txArgValues[0],
+        note: txArgValues[1],
+        amount: txArgValues[3],
+        assetContractId: txArgValues[2],
       };
-    case 'retip_token':
+    case TX_FUNCTIONS.retipToken:
       return {
-        url: tx.arguments[0].value,
-        amount: tx.arguments[2].value,
-        token: tx.arguments[1].value,
+        url: txArgValues[0],
+        amount: txArgValues[2],
+        assetContractId: txArgValues[1],
       };
     default:
       return null;
   }
 }
 
-export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
+/**
+ * As there is no UI element that displays multisig account index we can use the 0 as the idx values
+ * to only satisfy the requirements of the interface.
+ */
+export function convertMultisigAccountToAccount(
+  multisigAccount: IMultisigAccount,
+): Partial<IAccount> {
+  return {
+    address: multisigAccount.gaAccountId,
+    protocol: PROTOCOLS.aeternity,
+    idx: 0,
+    globalIdx: 0,
+  };
+}
+
+export function getAddressByNameEntry(nameEntry: NameEntry, pointer = 'account_pubkey') {
   return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 }
 
@@ -147,9 +174,12 @@ export function isContainingNestedTx(tx: ITx): boolean {
   ].includes(tx.type);
 }
 
+/**
+ * TODO: Update returned type
+ */
 export function getInnerTransaction(tx?: ITx): any {
   if (!tx) {
-    return null;
+    return undefined;
   }
   if (isContainingNestedTx(tx)) {
     return tx.tx?.tx;
@@ -160,7 +190,7 @@ export function getInnerTransaction(tx?: ITx): any {
 export function getMultisigTransaction(
   transaction: ICommonTransaction,
 ): IActiveMultisigTransaction | undefined {
-  return (transaction as any).isMultisigTransaction
+  return (transaction.isMultisig)
     ? transaction as IActiveMultisigTransaction
     : undefined;
 }
@@ -181,14 +211,15 @@ export function getOwnershipStatus(
 }
 
 export function getTransaction(transaction: ICommonTransaction): ITransaction | undefined {
-  return (transaction as any).isMultisigTransaction
+  return (transaction.isMultisig)
     ? undefined
     : transaction as ITransaction;
 }
 
 export function getTransactionPayload(transaction: ITransaction) {
-  return (transaction.tx?.payload)
-    ? decode(transaction.tx?.payload).toString()
+  const innerTx = getInnerTransaction(transaction.tx);
+  return (innerTx?.payload)
+    ? decode(innerTx?.payload).toString()
     : null;
 }
 
@@ -205,13 +236,13 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
         [TX_FUNCTIONS.tip, TX_FUNCTIONS.claim],
         transaction.tx.function,
       )
-      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString())
-    || categorizeContractCallTxObject(transaction)?.url
+      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString()
+    )
     || ''
   );
 }
 
-export function getTxDirection(tx?: ITx | IGAAttachTx, address?: Encoded.AccountAddress) {
+export function getTxDirection(tx?: ITx | IGAAttachTx, address?: AccountAddress) {
   type ICommonTx = ITx & IGAAttachTx; // All possible properties of the tx
 
   if ((tx as ITx)?.tag === Tag.SpendTx) {
@@ -270,20 +301,22 @@ export function isAensNameValid(value: string) {
   );
 }
 
+/**
+ * Check if transaction does not refers to AE Coin.
+ */
 export function isTransactionAex9(transaction: ITransaction): boolean {
-  const token = categorizeContractCallTxObject(transaction)?.token;
-  return !!transaction.tx && !!token && token !== AE_CONTRACT_ID;
+  const contractId = categorizeContractCallTxObject(transaction)?.assetContractId;
+  return !!transaction.tx && !!contractId && contractId !== AE_CONTRACT_ID;
 }
 
 export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
   const { wae = [], router = [] } = dexContracts || {};
 
   return !!(
-    tx
-    && tx.contractId
-    && tx.function
+    tx?.contractId
+    && tx?.function
     && Object.values(TX_FUNCTIONS_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
-    && [...wae, ...router].includes(tx.contractId)
+    && [...wae, ...router].includes(tx.contractId as Encoded.ContractAddress)
   );
 }
 

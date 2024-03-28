@@ -3,7 +3,7 @@
     <div class="invite-info">
       <TokenAmount
         :amount="inviteLinkBalance"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
       />
       <span class="date">{{ formatDate(createdAt) }}</span>
     </div>
@@ -22,6 +22,7 @@
         v-if="inviteLinkBalance > 0"
         class="button"
         variant="muted"
+        data-cy="invite-claim"
         :text="$t('pages.invite.claim')"
         @click="claim"
       />
@@ -29,11 +30,13 @@
         v-else
         class="button"
         variant="muted"
+        data-cy="invite-delete"
         :text="$t('pages.invite.delete')"
         @click="deleteItem"
       />
       <BtnMain
         class="button"
+        data-cy="invite-top-up"
         :text="$t('pages.invite.top-up')"
         @click="topUp = true"
       />
@@ -46,6 +49,7 @@
         :rules="{
           required: true,
           max_value: max,
+          does_not_exceed_decimals: formModel.selectedAsset?.decimals,
         }"
       >
         <InputAmount
@@ -55,7 +59,7 @@
           class="input-amount"
           :label="$t('pages.invite.top-up-with')"
           :message="errorMessage"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
           readonly
         />
         <div class="centered-buttons">
@@ -89,7 +93,6 @@ import {
   encode,
   Encoding,
 } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
@@ -97,15 +100,16 @@ import type { IFormModel } from '@/types';
 import { formatDate } from '@/utils';
 import {
   APP_LINK_WEB,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
   useAccounts,
-  useBalances,
-  useMaxAmount,
   useAeSdk,
+  useBalances,
   useCurrencies,
+  useInvites,
+  useMaxAmount,
 } from '@/composables';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -127,21 +131,21 @@ export default defineComponent({
     createdAt: { type: Number, required: true },
   },
   setup(props, { emit }) {
-    const store = useStore();
     const router = useRouter();
 
-    const { marketData } = useCurrencies({ store });
-    const { getAeSdk } = useAeSdk({ store });
-    const { balance } = useBalances({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts();
+    const { marketData } = useCurrencies();
+    const { balance } = useBalances();
+    const { getAeSdk } = useAeSdk();
+    const { claimInvite, removeInvite, handleInsufficientBalanceError } = useInvites();
 
     const formModel = ref<IFormModel>({
       amount: '',
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
-    const { max } = useMaxAmount({ formModel, store });
+    const { max } = useMaxAmount({ formModel });
 
     const topUp = ref(false);
     const inviteLinkBalance = ref(0);
@@ -160,7 +164,7 @@ export default defineComponent({
     const address = computed(() => getAccountFromSecret(props.secretKey).address);
 
     function deleteItem() {
-      store.commit('invites/delete', props.secretKey);
+      removeInvite(props.secretKey);
     }
 
     async function updateBalance() {
@@ -177,14 +181,14 @@ export default defineComponent({
     async function claim() {
       emit('loading', true);
       try {
-        await store.dispatch('invites/claim', {
+        await claimInvite({
           secretKey: Buffer.from(props.secretKey),
-          recipientId: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address,
+          recipientId: getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address!,
           isMax: true,
         });
         await updateBalance();
-      } catch (error) {
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
+      } catch (error: any) {
+        if (await handleInsufficientBalanceError(error, true)) {
           return;
         }
         throw error;
@@ -215,7 +219,7 @@ export default defineComponent({
         await updateBalance();
         resetTopUpChanges();
       } catch (error: any) {
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) {
+        if (await handleInsufficientBalanceError(error)) {
           return;
         }
         throw error;
@@ -231,7 +235,7 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       formModel,
       max,
       topUp,

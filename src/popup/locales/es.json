@@ -257,16 +257,6 @@
       "addressesLabel": "Direcciones",
       "addressesRequest": "Esta aepp está solicitando acceso para ver las direcciones de tu cuenta"
     },
-    "fungible-tokens": {
-      "add": "Agregar Token Fungible",
-      "add-info": "Ésto te permite agregar un token desde el contrato de token fungible desplegado",
-      "deploy": "Desplegar Token",
-      "deploy-info": "Ésto te permite desplegar tu propio contrato de token fungible",
-      "allowances": "Asignaciones",
-      "allowances-info": "Dar o tomar una asignación",
-      "mint": "Crear/Quemar token",
-      "mint-info": "Ésto te permite crear o quemar una cantidad de tokens"
-    },
     "names": {
       "default": "por defecto",
       "balance-error": "El saldo de tu cuenta no es sufciente para ejecutar esta transacción.",

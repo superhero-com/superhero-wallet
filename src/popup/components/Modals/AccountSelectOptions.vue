@@ -18,11 +18,11 @@
 
     <div>
       <AccountSelectOptionsItem
-        v-for="(account, index) in optionsFiltered"
-        :key="index"
-        :account="account"
-        :value="value"
-        @click="resolve(account.address)"
+        v-for="(option, index) in optionsFiltered"
+        :key="option.value || index"
+        :option="option"
+        :selected="option.value === value"
+        @click="resolve(option.value)"
       />
     </div>
   </Modal>
@@ -35,7 +35,13 @@ import {
   PropType,
   ref,
 } from 'vue';
-import type { IFormSelectOption, RejectCallback, ResolveCallback } from '../../../types';
+import type {
+  AccountAddress,
+  IFormSelectOption,
+  RejectCallback,
+  ResolveCallback,
+} from '@/types';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Modal from '../Modal.vue';
 import AccountSelectOptionsItem from '../AccountSelectOptionsItem.vue';
@@ -55,12 +61,15 @@ export default defineComponent({
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
   },
   setup(props) {
+    const { getName } = useAeNames();
+
     const searchPhrase = ref('');
 
     const optionsFiltered = computed(() => (
       props.options.filter(({ text, value }) => (
         text.toLowerCase().includes(searchPhrase.value)
         || value.toString().includes(searchPhrase.value)
+        || getName(value as AccountAddress).value.includes(searchPhrase.value)
       ))
     ));
 

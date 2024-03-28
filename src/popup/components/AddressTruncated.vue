@@ -57,7 +57,7 @@ export default defineComponent({
       () => ProtocolAdapterFactory
         .getAdapter(props.protocol)
         .getExplorer()
-        .prepareUrlByHash(props.address),
+        .prepareUrlForAccount(props.address),
     );
 
     return {

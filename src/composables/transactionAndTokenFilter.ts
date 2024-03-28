@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
+import { tg } from '@/popup/plugins/i18n';
 import { IFilterInputPayload, IFilters, ObjectValues } from '../types';
-import { tg } from '../store/plugins/languages';
 
 const FILTER_MODE_BASE = {
   all: 'all',
@@ -25,7 +25,7 @@ function createEmptyFilter(): TransactionsFilterPayload {
 const searchPhrase = ref<string>('');
 const displayMode = ref<TransactionsFilterPayload>(createEmptyFilter());
 
-export const useTransactionAndTokenFilter = () => {
+export function useTransactionAndTokenFilter() {
   const isSearchBarAndFilterExpanded = computed(
     () => displayMode.value.key !== FILTER_MODE.all || !!searchPhrase.value.length,
   );
@@ -55,4 +55,4 @@ export const useTransactionAndTokenFilter = () => {
     resetFilter,
     FILTER_MODE,
   };
-};
+}

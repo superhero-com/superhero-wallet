@@ -10,10 +10,9 @@ import { useViewport } from '../../composables/viewport';
 
 export default defineComponent({
   name: 'InfiniteScroll',
-  props: {
-    isMoreData: { type: Boolean, required: true },
-  },
-  emits: ['loadMore'],
+  emits: [
+    'load-more',
+  ],
   setup(props, { emit }) {
     const { viewportElement, onViewportScroll } = useViewport();
 
@@ -21,8 +20,8 @@ export default defineComponent({
       viewportElement,
       () => {
         onViewportScroll(({ isOutsideOfViewport }) => {
-          if (props.isMoreData && isOutsideOfViewport) {
-            emit('loadMore');
+          if (isOutsideOfViewport) {
+            emit('load-more');
           }
         });
       },

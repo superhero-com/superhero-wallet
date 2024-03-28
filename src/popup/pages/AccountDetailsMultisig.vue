@@ -2,15 +2,14 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
       <AccountDetailsBase
-        v-if="activeMultisigAccount"
+        v-if="activeMultisigAccount && isPageActive"
         without-default-buttons
       >
         <template #account-info>
           <AccountInfo
-            :address="activeMultisigAccount.gaAccountId"
-            :protocol="PROTOCOL_AETERNITY"
+            :account="convertMultisigAccountToAccount(activeMultisigAccount)"
             is-multisig
-            with-protocol-icon
+            show-protocol-icon
             can-copy-address
           />
         </template>
@@ -18,7 +17,7 @@
         <template #balance>
           <BalanceInfo
             :balance="+(activeMultisigAccount.balance || 0)"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
 
@@ -34,7 +33,13 @@
         </template>
 
         <template #navigation>
-          <AccountDetailsNavigation is-multisig />
+          <AccountDetailsNavigation
+            :route-names="[
+              ROUTE_MULTISIG_DETAILS,
+              ROUTE_MULTISIG_DETAILS_INFO,
+              ROUTE_MULTISIG_DETAILS_ASSETS,
+            ]"
+          />
         </template>
       </AccountDetailsBase>
     </IonContent>
@@ -42,12 +47,21 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from '@ionic/vue';
-import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
+import {
+  IonContent,
+  IonPage,
+  onIonViewDidEnter,
+  onIonViewDidLeave,
+} from '@ionic/vue';
+import { computed, defineComponent, ref } from 'vue';
+import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
-import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import {
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_ASSETS,
+  ROUTE_MULTISIG_DETAILS_INFO,
+} from '@/popup/router/routeNames';
+import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -72,8 +86,9 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const isPageActive = ref(false);
+
+    const { activeMultisigAccount } = useMultisigAccounts();
 
     const simplexLink = computed(
       () => (activeMultisigAccount.value)
@@ -81,12 +96,25 @@ export default defineComponent({
         : '',
     );
 
+    onIonViewDidEnter(() => {
+      isPageActive.value = true;
+    });
+
+    onIonViewDidLeave(() => {
+      isPageActive.value = false;
+    });
+
     return {
       UNFINISHED_FEATURES,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
+      ROUTE_MULTISIG_DETAILS,
+      ROUTE_MULTISIG_DETAILS_INFO,
+      ROUTE_MULTISIG_DETAILS_ASSETS,
       activeMultisigAccount,
+      isPageActive,
       simplexLink,
       CreditCardIcon,
+      convertMultisigAccountToAccount,
     };
   },
 });

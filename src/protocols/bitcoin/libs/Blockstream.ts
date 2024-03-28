@@ -1,10 +1,13 @@
+import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
+
 /**
  * @link https://blockstream.info/
  */
-export class Blockstream {
+export class Blockstream extends ProtocolExplorer {
   explorerUrl: string;
 
   constructor(explorerUrl: string) {
+    super();
     this.explorerUrl = explorerUrl;
   }
 

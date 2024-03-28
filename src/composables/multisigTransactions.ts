@@ -10,14 +10,14 @@ import {
 } from '@aeternity/aepp-sdk';
 
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
-import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 
 import type {
   IActiveMultisigTransaction,
-  IDefaultComposableOptions,
   TxFunctionMultisig,
   IRawMultisigTx,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -29,12 +29,16 @@ import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
 
+interface InternalOptions {
+  fromAccount?: Encoded.AccountAddress;
+}
+
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
-export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
+export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk({ store });
-  const { fetchCurrentTopBlockHeight } = useTopHeaderData({ store });
+  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk();
+  const { fetchCurrentTopBlockHeight } = useTopHeaderData();
 
   async function buildSpendTx(
     senderId: Encoded.AccountAddress,
@@ -70,7 +74,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * @returns transaction with consensus details if exists or null
    */
   async function fetchActiveMultisigTx(): Promise<IActiveMultisigTransaction | null> {
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
     const txHash = activeMultisigAccount.value?.txHash;
 
     if (
@@ -87,8 +91,9 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
         totalConfirmations: activeMultisigAccount.value.confirmedBy.length,
         hash: txHash,
         tx: rawTx ? unpackTx(rawTx.tx) as any : undefined,
-        isMultisigTransaction: true,
+        isMultisig: true,
         microTime: rawTx ? Date.now() : undefined,
+        protocol: PROTOCOLS.aeternity,
       };
     }
     return null;
@@ -131,6 +136,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     action: TxFunctionMultisig,
     contractId: Encoded.ContractAddress,
     spendTxHash: string,
+    options?: Record<string, any> & InternalOptions,
   ) {
     const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
@@ -141,6 +147,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
 
     const result = await gaContractRpc[action](spendTxHash, {
       FixedTTL: [expirationHeight],
+      ...options,
     });
 
     return result;

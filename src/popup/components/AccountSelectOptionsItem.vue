@@ -1,29 +1,28 @@
 <template>
   <BtnPlain
+    v-if="account"
     class="account-select-options-item"
     :style="bgColorStyle"
     @click.prevent="$emit('click')"
   >
     <div
       class="option-wrapper"
-      :class="{ selected: account.address === value }"
+      :class="{ selected }"
     >
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
-        :protocol="account.protocol"
+        :account="account"
+        class="account-info"
         avatar-size="rg"
         avatar-borderless
         is-list-name
-        class="account-info"
+        show-protocol-icon
       />
       <TokenAmount
         :amount="balance"
         :symbol="tokenSymbol"
         :protocol="account.protocol"
-        fiat-below
         class="token-amount"
+        vertical
         small
       />
     </div>
@@ -36,13 +35,13 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { IFormSelectOption } from '@/types';
-import { useBalances } from '@/composables';
+import { useAccounts, useBalances } from '@/composables';
 import { getAddressColor } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import AccountInfo from './AccountInfo.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -54,29 +53,32 @@ export default defineComponent({
     BtnPlain,
   },
   props: {
-    account: {
+    option: {
       type: Object as PropType<IFormSelectOption>,
-      default: () => {},
+      default: () => ({}),
     },
-    value: { type: [String, Number], default: null },
+    selected: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { getAccountBalance } = useBalances({ store });
+    const { getAccountBalance } = useBalances();
+    const { getAccountByAddress } = useAccounts();
 
-    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.account.address) }));
+    const account = getAccountByAddress(props.option.value as any);
+
+    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.option.value) }));
 
     const balance = computed(
-      () => (props.account?.address)
-        ? getAccountBalance(props.account.address).toNumber()
+      () => (props.option?.value)
+        ? getAccountBalance(props.option.value as string).toNumber()
         : 0,
     );
 
     const tokenSymbol = computed(
-      () => ProtocolAdapterFactory.getAdapter(props.account.protocol!).getCoinSymbol(true),
+      () => ProtocolAdapterFactory.getAdapter(account!.protocol).coinSymbol,
     );
 
     return {
+      account,
       balance,
       bgColorStyle,
       tokenSymbol,
@@ -87,8 +89,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
-
 .account-select-options-item {
   --border-width: 3px;
 
@@ -96,8 +96,9 @@ export default defineComponent({
   padding: 2px 8px;
 
   .option-wrapper {
-    @include mixins.flex(space-between, flex-start, row);
-
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
     padding: 6px 8px;
     border-radius: 10px;

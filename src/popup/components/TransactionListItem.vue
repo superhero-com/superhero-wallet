@@ -2,14 +2,15 @@
   <ListItemWrapper
     class="transaction-item"
     :to="redirectRoute"
+    :data-cy="currentTransaction.pending ? 'pending-txs' : null"
     replace
-    :data-cy="currentTransaction.pending && 'pending-txs'"
   >
     <div class="body">
-      <TransactionTokenRows
-        :ext-tokens="tokens"
+      <TransactionAssetRows
+        :assets="transactionAssets"
         :error="isErrorTransaction"
-        icon-size="md"
+        :protocol="transactionProtocol"
+        icon-size="rg"
       />
       <div class="footer">
         <div
@@ -33,15 +34,15 @@
         />
 
         <template v-if="!multisigTransaction">
-          <span v-if="fiatAmount && !showTransactionOwner">
-            {{ fiatAmount }}
-          </span>
+          <span
+            v-if="fiatAmount && !showTransactionOwner"
+            v-text="fiatAmount"
+          />
           <span
             v-else-if="showTransactionOwner"
             class="date"
-          >
-            {{ transactionDate }}
-          </span>
+            v-text="transactionDate"
+          />
         </template>
       </div>
     </div>
@@ -59,11 +60,11 @@ import {
 } from 'vue';
 import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
-import { useStore } from 'vuex';
 import type {
   IActiveMultisigTransaction,
   ITransaction,
 } from '@/types';
+import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
   amountRounded,
   executeAndSetInterval,
@@ -72,19 +73,17 @@ import {
   relativeTimeTo,
   toShiftedBigNumber,
 } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import {
+  useCurrencies,
+  useTransactionData,
+} from '@/composables';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
-} from '../router/routeNames';
-import {
-  useCurrencies,
-  useTransactionTokens,
-  useTransactionTx,
-} from '../../composables';
+} from '@/popup/router/routeNames';
 
-import TransactionTokenRows from './TransactionTokenRows.vue';
+import TransactionAssetRows from './TransactionAssetRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
 import ListItemWrapper from './ListItemWrapper.vue';
 import ConsensusApprovedLabel from './ConsensusApprovedLabel.vue';
@@ -93,7 +92,7 @@ export default defineComponent({
   components: {
     ConsensusApprovedLabel,
     TransactionLabel,
-    TransactionTokenRows,
+    TransactionAssetRows,
     ListItemWrapper,
   },
   props: {
@@ -104,35 +103,30 @@ export default defineComponent({
     hasConsensus: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
+    const { getFormattedAndRoundedFiat } = useCurrencies();
 
     let timerInterval: NodeJS.Timer;
     const transactionDate = ref();
 
     const currentTransaction = computed(
-      () => (props.multisigTransaction || props.transaction),
+      (): ITransaction => (props.multisigTransaction as any || props.transaction),
     );
 
-    const transactionOwner = computed(() => props.transaction?.transactionOwner);
+    // temp if protocol undefined assume it is aeternity
+    const transactionProtocol = computed(() => props.transaction?.protocol ?? PROTOCOLS.aeternity);
+
+    const transactionOwner = computed(() => props.multisigTransaction
+      ? props.multisigTransaction?.tx?.senderId
+      : props.transaction?.transactionOwner);
 
     const {
       direction,
-      isDexAllowance,
       isDexPool,
       isErrorTransaction,
-    } = useTransactionTx({
-      store,
-      tx: currentTransaction.value.tx,
+      transactionAssets,
+    } = useTransactionData({
+      transaction: currentTransaction.value,
       externalAddress: transactionOwner.value,
-    });
-
-    const { tokens } = useTransactionTokens({
-      store,
-      direction: direction.value,
-      isAllowance: isDexAllowance.value,
-      // TODO - refactor useTransactionTokens to use only tx
-      transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {
@@ -152,25 +146,27 @@ export default defineComponent({
     });
 
     const fiatAmount = computed(() => {
-      const aeToken = tokens.value?.find((t) => t?.isAe);
-      if (!aeToken || isErrorTransaction.value || isDexPool.value) {
+      const protocolCoin = transactionAssets.value?.find(
+        ({ assetType }) => assetType === ASSET_TYPES.coin,
+      );
+      if (!protocolCoin || isErrorTransaction.value || isDexPool.value || !protocolCoin.protocol) {
         return 0;
       }
       return getFormattedAndRoundedFiat(
         +amountRounded(
           (
-            aeToken.decimals
-              ? toShiftedBigNumber(aeToken.amount || 0, -aeToken.decimals)
-              : aeToken.amount
+            protocolCoin.decimals
+              ? toShiftedBigNumber(protocolCoin.amount || 0, -protocolCoin.decimals)
+              : protocolCoin.amount
           )!,
         ),
-        PROTOCOL_AETERNITY,
+        protocolCoin.protocol,
       );
     });
 
     onMounted(() => {
       timerInterval = executeAndSetInterval(() => {
-        transactionDate.value = (props.transaction)
+        transactionDate.value = (props.transaction?.microTime)
           ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
           : undefined;
       }, 5000);
@@ -185,8 +181,9 @@ export default defineComponent({
       fiatAmount,
       transactionDate,
       isErrorTransaction,
-      tokens,
       currentTransaction,
+      transactionAssets,
+      transactionProtocol,
       transactionOwner,
       direction,
       formatDate,

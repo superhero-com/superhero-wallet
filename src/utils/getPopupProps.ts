@@ -1,25 +1,21 @@
 import { v4 as genUuid } from 'uuid';
 import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
-import type { Dictionary, IPopupConfig, TxType } from '@/types';
+import type {
+  Dictionary,
+  IPopupActions,
+  IPopupData,
+  IPopupProps,
+  TxType,
+} from '@/types';
 import { STUB_TX_PARAMS, STUB_POPUP_PROPS } from '@/constants/stubs';
 import {
   CONNECTION_TYPES,
   IS_EXTENSION,
+  POPUP_ACTIONS,
   POPUP_TYPE,
   RUNNING_IN_TESTS,
 } from '@/constants';
-
-interface PopupMessageData {
-  type: 'resolve' | 'reject' | 'getProps'
-  payload?: any
-}
-
-interface IPendingRequest {
-  resolve: (res: any) => void;
-  reject: () => void;
-}
-
-type PostMessageReturn = Promise<Partial<IPopupConfig> | null>;
+import { PopupMessageData } from '@/background';
 
 export function buildTx(txType: TxType) {
   const params = {
@@ -31,16 +27,16 @@ export function buildTx(txType: TxType) {
 }
 
 const postMessage = (() => {
-  const pendingRequests: Dictionary<IPendingRequest> = {};
-  let background: any;
+  const pendingRequests: Dictionary<IPopupActions> = {};
+  let background: browser.runtime.Port;
 
-  return async ({ type, payload }: PopupMessageData): PostMessageReturn => {
+  return async ({ type, payload }: PopupMessageData): Promise<IPopupData | null> => {
     if (!IS_EXTENSION || !browser) {
       throw new Error('Supported only in browser extension');
     }
 
     if (!background) {
-      background = await browser.runtime.connect({ name: CONNECTION_TYPES.POPUP });
+      background = browser.runtime.connect({ name: CONNECTION_TYPES.POPUP });
       background.onMessage.addListener(({ uuid, res }: any) => {
         if (!pendingRequests[uuid]) {
           throw new Error(`Can't find request with id: ${uuid}`);
@@ -58,19 +54,19 @@ const postMessage = (() => {
   };
 })();
 
-const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn => {
+const postMessageTest = async ({ type }: PopupMessageData): Promise<IPopupData | null> => {
   switch (type) {
-    case 'getProps': {
+    case POPUP_ACTIONS.getProps: {
       const { txType } = await browser.storage.local.get('txType');
       if (txType) {
-        const props = STUB_POPUP_PROPS.base as IPopupConfig;
+        const props = STUB_POPUP_PROPS.base;
         props.tx = unpackTx(buildTx(txType as any)) as any;
         return props;
       }
       return POPUP_TYPE ? STUB_POPUP_PROPS[POPUP_TYPE] : {};
     }
-    case 'resolve':
-    case 'reject':
+    case POPUP_ACTIONS.resolve:
+    case POPUP_ACTIONS.reject:
       (window as any)[type] = 'send';
       break;
     default:
@@ -83,15 +79,15 @@ const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn =>
  * Handle the communication between browser popup windows opened by the extension
  * and the extension itself.
  */
-export async function getPopupProps() {
+export async function getPopupProps(): Promise<IPopupProps> {
   const internalPostMessage = (RUNNING_IN_TESTS)
     ? postMessageTest
     : postMessage;
 
   let resolved = false;
 
-  const resolve = async () => internalPostMessage({ type: 'resolve' });
-  const reject = async () => internalPostMessage({ type: 'reject' });
+  const resolve = async () => internalPostMessage({ type: POPUP_ACTIONS.resolve });
+  const reject = async () => internalPostMessage({ type: POPUP_ACTIONS.reject });
 
   const unloadHandler = () => {
     if (!resolved) {
@@ -107,8 +103,11 @@ export async function getPopupProps() {
     window.close();
     setTimeout(() => window.close(), 1000);
   };
-  const props = (await internalPostMessage({ type: 'getProps' })) || {};
-  props.resolve = closingWrapper(resolve);
-  props.reject = closingWrapper(reject);
-  return props;
+
+  const popupProps = await internalPostMessage({ type: POPUP_ACTIONS.getProps });
+  return {
+    ...popupProps || {},
+    resolve: closingWrapper(resolve),
+    reject: closingWrapper(reject),
+  };
 }

@@ -52,7 +52,7 @@ export default defineComponent({
   -ms-user-select: none;
   user-select: none;
 
-  & > * {
+  > * {
     transition: all 0.15s ease-in-out;
   }
 

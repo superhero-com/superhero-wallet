@@ -1,8 +1,12 @@
 import { createAnimation } from '@ionic/vue';
+import type { IonAnimationBuilder } from '@/types';
 
 const ANIMATION_DURATION = 100;
 
-export const fadeAnimation = (_: Element, opts: { enteringEl: Element, leavingEl: Element }) => {
+export const fadeAnimation: IonAnimationBuilder = (
+  baseEl: Element,
+  opts: { enteringEl: Element; leavingEl: Element },
+) => {
   const enteringAnimation = createAnimation()
     .addElement(opts.enteringEl)
     .fromTo('opacity', 0, 1)

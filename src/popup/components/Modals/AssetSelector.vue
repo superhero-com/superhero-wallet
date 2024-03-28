@@ -21,47 +21,52 @@
     </template>
 
     <Loader
-      :class="['appearing-element', { visible: loading }]"
+      class="appearing-element"
+      :class="{ visible: loading }"
     />
     <div
       v-show="isFullyOpen"
-      :class="['appearing-element', { visible: !loading }]"
+      class="appearing-element"
+      :class="{ visible: !loading }"
     >
-      <TokensListItem
-        v-for="token in filteredTokens"
-        :key="token.contractId || token.id"
-        :token-data="token"
-        :selected="isTokenSelected(token)"
+      <AssetListItem
+        v-for="asset in accountAssetsToDisplay"
+        :key="asset.contractId"
+        :asset="asset"
+        :selected="isTokenSelected(asset)"
         show-current-price
         prevent-navigation
-        @click="resolve(token)"
+        @click="resolve(asset)"
       />
     </div>
-    <BackToTop />
   </Modal>
 </template>
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   nextTick,
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
-import type { IToken, RejectCallback, ResolveCallback } from '../../../types';
+import type {
+  IToken,
+  Protocol,
+  RejectCallback,
+  ResolveCallback,
+} from '@/types';
+import { useAccountAssetsList } from '@/composables';
+
 import Modal from '../Modal.vue';
-import TokensListItem from '../FungibleTokens/TokensListItem.vue';
+import AssetListItem from '../Assets/AssetListItem.vue';
 import InputSearch from '../InputSearch.vue';
-import BackToTop from '../BackToTop.vue';
 import Loader from '../Loader.vue';
-import { useTokensList } from '../../../composables';
 
 export default defineComponent({
   name: 'AssetSelector',
   components: {
-    BackToTop,
-    TokensListItem,
+    AssetListItem,
     Modal,
     InputSearch,
     Loader,
@@ -70,19 +75,22 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     selectedToken: { type: Object as PropType<IToken | null>, default: null },
+    protocol: { type: String as PropType<Protocol>, default: null },
     showTokensWithBalance: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const loading = ref(true);
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
 
-    const { filteredTokens } = useTokensList({
-      store,
+    const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });
+
+    const accountAssetsToDisplay = computed(() => (props.protocol)
+      ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
+      : accountAssetsFiltered.value);
 
     function isTokenSelected(token: IToken): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
@@ -104,7 +112,7 @@ export default defineComponent({
       loading,
       searchTerm,
       isFullyOpen,
-      filteredTokens,
+      accountAssetsToDisplay,
       isTokenSelected,
       onModalOpen,
     };
@@ -136,6 +144,7 @@ export default defineComponent({
     opacity: 0;
     z-index: -1;
     transition: opacity 0.25s ease-in-out;
+    padding-bottom: 40px; // Back-to-top button height
 
     &.visible {
       opacity: 1;

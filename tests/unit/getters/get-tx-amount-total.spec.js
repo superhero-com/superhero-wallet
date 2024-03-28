@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
-import getters from '../../../src/store/getters';
-import { TX_DIRECTION } from '../../../src/constants';
+import { useFungibleTokens } from '@/composables';
+import { PROTOCOLS, TX_DIRECTION } from '../../../src/constants';
 import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
 import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
 
@@ -52,31 +52,28 @@ const tests = [{
 })),
 ];
 
-const store = {
-  fungibleTokens: {
-    availableTokens: {
-      [STUB_TOKEN_CONTRACT_ADDRESS]: {
-        decimals: TEST_TOKEN_DECIMALS,
-      },
-    },
-  },
-};
-
 describe('getTxAmountTotal', () => {
+  const { tokensAvailable, getTxAmountTotal } = useFungibleTokens();
+
+  tokensAvailable.value[PROTOCOLS.aeternity] = {};
+  tokensAvailable.value[PROTOCOLS.aeternity][STUB_TOKEN_CONTRACT_ADDRESS] = {
+    decimals: TEST_TOKEN_DECIMALS,
+  };
+
   tests.forEach((test) => it(
     `should return correct result for each type of transaction: for \
 ${test.transaction.tx.type}/${test.transaction.tx.function}`,
     () => {
       expect(
-        new BigNumber(getters.getTxAmountTotal(store)(test.transaction, TX_DIRECTION.sent))
+        new BigNumber(getTxAmountTotal(test.transaction, TX_DIRECTION.sent))
           .isEqualTo(test.resultSent),
       ).toBeTruthy();
       expect(
-        new BigNumber(getters.getTxAmountTotal(store)(test.transaction)).isEqualTo(test.resultSent),
+        new BigNumber(getTxAmountTotal(test.transaction)).isEqualTo(test.resultSent),
       ).toBeTruthy();
       if (test.resultReceived !== undefined) {
         expect(
-          new BigNumber(getters.getTxAmountTotal(store)(test.transaction, TX_DIRECTION.received))
+          new BigNumber(getTxAmountTotal(test.transaction, TX_DIRECTION.received))
             .isEqualTo(test.resultReceived),
         ).toBeTruthy();
       }

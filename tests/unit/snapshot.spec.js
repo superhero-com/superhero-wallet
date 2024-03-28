@@ -1,5 +1,4 @@
 import { mount, RouterLinkStub } from '@vue/test-utils';
-import Vuex from 'vuex';
 import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
@@ -7,8 +6,6 @@ import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
 import * as environment from '../../src/constants/environment';
 
 const OLD_ENV = process.env;
-
-const store = new Vuex.Store({ state: {}, getters: {} });
 
 beforeEach(() => {
   jest.resetModules();
@@ -26,7 +23,10 @@ jest.mock('../../src/constants/environment', () => ({
   IS_MOBILE_DEVICE: false,
 }));
 jest.mock('../../src/composables', () => ({
-  useMiddleware: jest.fn(() => ({
+  useAccounts: jest.fn(() => ({
+    accounts: [],
+  })),
+  useAeMiddleware: jest.fn(() => ({
     fetchMiddlewareStatus: jest.fn(),
   })),
   useModals: jest.fn(() => ({
@@ -87,12 +87,13 @@ const testCases = [
 
 describe.each(testCases)('Pages', (test) => {
   it(test.name, async () => {
+    // eslint-disable-next-line no-import-assign
     environment.IS_WEB = !!test.data?.IS_WEB;
+    // eslint-disable-next-line no-import-assign
     environment.IN_FRAME = !!test.data?.IN_FRAME;
 
     const wrapper = mount(test.page, {
       global: {
-        plugins: [store],
         mocks: {
           $t: () => 'locale-specific-text',
           $tm: () => 'locale-specific-text',

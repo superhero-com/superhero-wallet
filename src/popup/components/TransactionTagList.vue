@@ -17,16 +17,14 @@
 import { computed, defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
-import { useTippingContracts, useTransactionTx } from '@/composables';
-import type {
-  ITokenList,
-  ITransaction,
-} from '@/types';
+
+import type { ITransaction } from '@/types';
+import { useFungibleTokens, useTippingContracts, useTransactionData } from '@/composables';
 import { excludeFalsy, includes } from '@/utils';
 import {
   AENS,
   DEX,
+  PROTOCOLS,
   TX_DIRECTION,
 } from '@/constants';
 import { TX_FUNCTIONS, TX_TAGS_AENS } from '@/protocols/aeternity/config';
@@ -45,7 +43,6 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const {
@@ -57,17 +54,14 @@ export default defineComponent({
       txFunctionLabel,
       isDex,
       isDexAllowance,
-    } = useTransactionTx({
-      store,
-      tx: props.transaction?.tx,
+    } = useTransactionData({
+      transaction: props.transaction,
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    const { tippingContractAddresses } = useTippingContracts({ store });
+    const { tippingContractAddresses } = useTippingContracts();
 
-    const availableTokens = computed<ITokenList>(
-      () => store.state.fungibleTokens.availableTokens,
-    );
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const labels = computed((): string[] => {
       if (props.customTitle) {
@@ -118,13 +112,19 @@ export default defineComponent({
             ? t('transaction.dexType.pool')
             : t('common.swap'),
         );
-      } else if (props.transaction.claim) {
+      } else if (
+        props.transaction.claim
+        || (
+          [tippingV1, tippingV2].includes(innerTx.value?.contractId)
+          && innerTx.value.function === TX_FUNCTIONS.claim
+        )
+      ) {
         arr.push(
           t('pages.token-details.tip'),
           t('transaction.spendType.in'),
         );
       } else if (
-        innerTx.value.contractId
+        innerTx.value?.contractId
         && [tippingV1, tippingV2].includes(innerTx.value.contractId)
         && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
       ) {
@@ -139,7 +139,7 @@ export default defineComponent({
         arr.push(t('transaction.type.createMultisigVault'));
       } else if (
         outerTxTag.value === Tag.ContractCallTx
-        && availableTokens.value[innerTx.value.contractId]
+        && getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value?.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer
           || props.transaction.incomplete
@@ -159,7 +159,7 @@ export default defineComponent({
           txFunctionLabel.value,
           txTypeLabel.value,
         );
-      } else {
+      } else if (txTypeLabel.value !== arr?.[0]) {
         arr.push(txTypeLabel.value);
       }
 

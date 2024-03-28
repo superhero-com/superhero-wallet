@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+
 import {
   AensName,
   AeSdkWallet,
@@ -5,21 +7,16 @@ import {
   spend,
   Encoded,
 } from '@aeternity/aepp-sdk';
-import { Store } from 'vuex';
+import { Accounts } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
+import { Ref } from 'vue';
 import type { IWalletInfo } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { AccountSuperhero } from '@/lib/accounts/AccountSuperhero';
+import { PROTOCOLS } from '@/constants';
 import { useAccounts } from '@/composables/accounts';
+import { AeAccountHdWallet } from './AeAccountHdWallet';
 
-/**
- * Custom fields in options, `modal` and `payload` for spend function.
- * `modal` is true when user consent popup modal is required
- * `payload` support payload along with the transaction
- */
 type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
   & {
-    modal?: boolean,
-    payload?: Encoded.Any,
+    payload?: Encoded.Any; // support payload along with the transaction
   }
 
 /**
@@ -27,30 +24,33 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
  * provides flexibility to manage the accounts the way wallet would like to handle
  */
 export class AeSdkSuperhero extends AeSdkWallet {
-  store: Store<any>;
+  nodeNetworkId: Ref<string | undefined>;
 
-  constructor(store: Store<any>, options: any) {
+  constructor(options: any, nodeNetworkId: Ref<string | undefined>) {
     super(options);
-    this.store = store;
+    this.nodeNetworkId = nodeNetworkId;
   }
 
   _resolveAccount() {
-    return new AccountSuperhero(this.store);
+    // TODO cache the account instead of instantiating it whenever the library is asked for it
+    return new AeAccountHdWallet(this.nodeNetworkId);
   }
 
   getAccounts() {
-    const { getLastActiveProtocolAccount } = useAccounts({ store: this.store });
-    const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
-    return ({
-      current: { [account.address]: {} },
-      connected: {
-      },
-    });
+    const accounts: Accounts = { connected: {}, current: {} };
+    const { getLastActiveProtocolAccount } = useAccounts();
+    const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
+
+    if (account) {
+      accounts.current[account.address as Encoded.AccountAddress] = {};
+    }
+
+    return accounts;
   }
 
   addresses() {
-    const { aeAccounts } = useAccounts({ store: this.store });
-    return aeAccounts.value.map(({ address }) => address);
+    const { aeAccounts } = useAccounts();
+    return aeAccounts.value.map(({ address }) => address as Encoded.AccountAddress);
   }
 
   spendWithCustomOptions(
@@ -58,7 +58,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
     recipientId: Encoded.AccountAddress | AensName,
     options: ISpendOptions,
   ): ReturnType<typeof sendTransaction> {
-    return super.spend(amount, recipientId, options as any); // TODO: remove type casting once https://github.com/aeternity/aepp-sdk-js/issues/1791 is resolved
+    return super.spend(amount, recipientId, options);
   }
 
   async getWalletInfo(): Promise<IWalletInfo> {

@@ -1,19 +1,37 @@
 /* eslint-disable no-console */
 import { pick } from 'lodash-es';
 import { detect } from 'detect-browser';
-import { App } from 'vue';
-import { IS_PRODUCTION } from '@/constants';
-import { getState } from '../store/plugins/persistState';
-import { useModals } from '../composables';
+import { App, ComputedRef } from 'vue';
+import { IS_PRODUCTION, STORAGE_KEYS } from '@/constants';
+import { useModals, useUi } from '../composables';
 import { RejectedByUserError } from './errors';
+import { WalletStorage } from './WalletStorage';
 
 interface ILoggerOptions {
   background?: boolean;
   app?: App;
 }
 
+interface ILoggerEntry {
+  error: any;
+  appVersion?: string;
+  browser: any;
+  platform: string;
+  time: number;
+}
+
+interface ILoggerInput {
+  modal?: boolean;
+  message: string;
+  type: 'vue-error' | 'unhandledrejection' | 'window-error' | 'api-response';
+  stack?: string;
+  info?: string | Error;
+}
+
 export default class Logger {
   static background: boolean;
+
+  static saveErrorLog: ComputedRef<boolean> = useUi().saveErrorLog;
 
   static init(options: ILoggerOptions = {}) {
     const { background = false, app } = options;
@@ -60,7 +78,7 @@ export default class Logger {
 
     window.onerror = (message, source, line, col, error) => {
       Logger.write({
-        message,
+        message: (typeof message === 'object') ? message.type : message,
         stack: `${source} ${line}:${col}`,
         type: 'window-error',
         info: error,
@@ -68,27 +86,27 @@ export default class Logger {
     };
   }
 
-  static async write({ modal = !IS_PRODUCTION, ...error }) {
-    const { saveErrorLog } = await getState() as any;
-    if (!saveErrorLog) return;
-    const errorLog = await Logger.get() as any;
-    const logEntry = {
+  static async write({ modal = !IS_PRODUCTION, ...error }: ILoggerInput) {
+    if (!Logger.saveErrorLog.value) {
+      return;
+    }
+    const errorLog = await Logger.get();
+    const logEntry: ILoggerEntry = {
       error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
       browser: detect(),
-      platform: process.env.PLATFORM,
+      platform: process.env.PLATFORM!,
       time: Date.now(),
     };
-    browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
+    WalletStorage.set(STORAGE_KEYS.errorLog, [...errorLog, logEntry]);
     if (!Logger.background && modal && error.message) {
       const { openErrorModal } = useModals();
       openErrorModal(logEntry);
     }
   }
 
-  static async get() {
-    const { errorLog = [] } = await browser.storage.local.get('errorLog');
-    return errorLog;
+  static async get(): Promise<ILoggerEntry[]> {
+    return (await WalletStorage.get(STORAGE_KEYS.errorLog)) || [];
   }
 
   static async sendLog() {

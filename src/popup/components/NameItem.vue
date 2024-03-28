@@ -24,32 +24,35 @@
           v-else
           class="buttons"
         >
-          <button
+          <BtnPlain
             v-show="canBeDefault"
+            class="button-plain"
             :class="{ set: isDefault }"
             :disabled="isDefault"
-            @click="setDefault"
+            @click="handleSetDefault"
           >
             {{
               (isDefault)
                 ? $t('pages.names.list.default')
                 : $t('pages.names.list.default-make')
             }}
-          </button>
-          <button
+          </BtnPlain>
+          <BtnPlain
             v-show="expand"
+            class="button-plain"
             :class="{ set: autoExtend }"
-            @click="setAutoExtend"
+            @click="toggleAutoExtend"
           >
             {{ $t('pages.names.auto-extend') }}
-          </button>
-          <button
+          </BtnPlain>
+          <BtnPlain
             v-show="expand || !canBeDefault"
+            class="button-plain"
             :class="{ edit: showInput }"
             @click="expandAndShowInput"
           >
             {{ $t('pages.names.details.set-pointer') }}
-          </button>
+          </BtnPlain>
           <BtnHelp
             v-if="expand && !hasPointer"
             :title="$t('modals.name-pointers-help.title')"
@@ -75,7 +78,7 @@
         v-model="newPointer"
         class="input-address"
         :placeholder="$t('pages.names.details.address-placeholder')"
-        :message="error ? $t('pages.names.list.valid-identifier-error') : null"
+        :message="nameError ? $t('pages.names.list.valid-identifier-error') : null"
         code
       >
         <template #after>
@@ -140,12 +143,12 @@ import {
   computed,
   defineComponent,
   nextTick,
+  PropType,
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { IName } from '@/types';
+import { ChainName } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
@@ -154,9 +157,21 @@ import {
   UNFINISHED_FEATURES,
 } from '@/constants';
 import Logger from '@/lib/logger';
-import { blocksToRelativeTime } from '@/utils';
-import { useAccounts, useModals, useTopHeaderData } from '@/composables';
+import {
+  blocksToRelativeTime,
+  handleUnknownError,
+  postJson,
+} from '@/utils';
+import {
+  useAccounts,
+  useAeSdk,
+  useModals,
+  useTopHeaderData,
+} from '@/composables';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
@@ -184,25 +199,36 @@ export default defineComponent({
     Paste,
   },
   props: {
-    name: { type: String, default: '' },
+    name: { type: String as PropType<ChainName>, default: '' },
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
   },
   setup(props) {
-    const store = useStore();
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { t } = useI18n();
-    const { topBlockHeight } = useTopHeaderData({ store });
+    const { topBlockHeight } = useTopHeaderData();
+    const {
+      ownedNames,
+      setAutoExtend,
+      updateNamePointer,
+      getName,
+      setDefaultName,
+    } = useAeNames();
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    const { nodeNetworkId, fetchRespondChallenge } = useAeSdk();
 
     const expand = ref(false);
     const newPointer = ref<string>('');
     const showInput = ref(false);
-    const error = ref(false);
+    const nameError = ref(false);
     const pointerInput = ref();
 
-    const nameEntry = computed<IName | null>(() => store.getters['names/get'](props.name));
-    const isDefault = computed(() => activeAccount.value.name === props.name);
+    const nameEntry = computed(
+      () => ownedNames.value.find((ownedName) => ownedName.name === props.name),
+    );
+
+    const isDefault = computed(() => getName(activeAccount.value.address).value === props.name);
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
       (): boolean => nameEntry.value?.pointers?.accountPubkey === activeAccount.value.address,
@@ -254,14 +280,34 @@ export default defineComponent({
       showInput.value = false;
     }
 
-    async function setDefault() {
-      await store.dispatch('names/setDefault', {
-        address: activeAccount.value.address,
-        name: props.name,
-      });
+    async function handleSetDefault() {
+      try {
+        const { address } = activeAccount.value;
+        const { name } = props;
+        const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
+        const currentNetworkId = nodeNetworkId.value;
+
+        const response = await postJson(url, {
+          body: {
+            preferredChainName: name,
+          },
+        });
+
+        const respondChallenge = await fetchRespondChallenge(response);
+
+        await postJson(url, { body: respondChallenge });
+
+        if (currentNetworkId !== nodeNetworkId.value) {
+          return;
+        }
+
+        setDefaultName({ address, name });
+      } catch (error: any) {
+        handleUnknownError(error);
+      }
     }
 
-    async function setAutoExtend() {
+    async function toggleAutoExtend() {
       if (!props.autoExtend) {
         await openModal(MODAL_CONFIRM, {
           icon: 'info',
@@ -269,48 +315,47 @@ export default defineComponent({
           msg: t('modals.autoextend-help.msg'),
         });
       }
-      store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
+      setAutoExtend(props.name);
     }
 
     async function setPointer() {
       if (!checkAddressOrChannel(newPointer.value)) {
-        error.value = true;
+        nameError.value = true;
         return;
       }
-      store.dispatch('names/updatePointer', {
+      updateNamePointer({
         name: props.name,
         address: newPointer.value,
-        type: 'update',
+        type: UPDATE_POINTER_ACTION.update,
       });
       newPointer.value = '';
       showInput.value = false;
     }
 
     watch(newPointer, () => {
-      error.value = false;
+      nameError.value = false;
     });
 
     return {
       UNFINISHED_FEATURES,
-      expand,
-      newPointer,
-      showInput,
-      error,
-      pointerInput,
       activeAccount,
-      nameEntry,
-      isDefault,
-      hasPointer,
       addressOrFirstPointer,
-      topBlockHeight,
       canBeDefault,
+      nameError,
+      expand,
+      hasPointer,
+      isDefault,
+      nameEntry,
+      newPointer,
+      pointerInput,
+      showInput,
+      topBlockHeight,
       blocksToRelativeTime,
-      checkAddressOrChannel,
-      insertValueFromClipboard,
       expandAndShowInput,
+      handleSetDefault,
+      insertValueFromClipboard,
       onExpandCollapse,
-      setDefault,
-      setAutoExtend,
+      toggleAutoExtend,
       setPointer,
     };
   },
@@ -365,13 +410,15 @@ export default defineComponent({
         margin-top: 2px;
         user-select: none;
 
-        button:not(.btn-help) {
+        .button-plain:not(.btn-help) {
           @extend %face-sans-12-medium;
 
           padding: 2px 8px;
-          cursor: pointer;
+          white-space: nowrap;
+          color: variables.$color-grey-light;
           background: variables.$color-border-hover;
           border-radius: 6px;
+          opacity: 1;
 
           @include mixins.mobile {
             padding: 2px 6px;
@@ -433,8 +480,6 @@ export default defineComponent({
     }
 
     > .details-item {
-      margin: 8px 0;
-
       :deep(.value) {
         @extend %face-mono-10-medium;
 

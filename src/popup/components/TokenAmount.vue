@@ -1,38 +1,27 @@
 <template>
   <span
     class="token-amount"
-    :class="[{ large, 'has-label': !!label, small }]"
+    :class="[{ large, small, vertical }]"
   >
-    <span>
+    <span
+      class="amount"
+      :style="dynamicSizing
+        ? { '--font-size': calculateFontSize(amountRounded) }
+        : {}"
+    >
+      {{ amountRounded }}
       <span
-        v-if="label"
-        class="label"
-      >
-        {{ label }}
-      </span>
-
-      <span
-        class="amount"
-        :style="dynamicSizing
-          ? { '--font-size': calculateFontSize(amountRounded) }
-          : {}"
-      >
-        {{ amountRounded }}
-        <span
-          v-if="!noSymbol"
-          class="symbol"
-        >
-          {{ symbol }}
-        </span>
-      </span>
+        v-if="!hideSymbol"
+        class="symbol"
+        v-text="symbolComputed"
+      />
     </span>
+
     <span
       v-if="amountFiat"
       class="fiat"
-      :class="{ 'fiat-below': fiatBelow }"
-    >
-      {{ amountFiat }}
-    </span>
+      v-text="amountFiat"
+    />
   </span>
 </template>
 
@@ -42,56 +31,58 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
 import {
   calculateFontSize,
   formatNumber,
 } from '@/utils';
 import { useCurrencies } from '@/composables';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   props: {
     amount: { type: Number, required: true },
-    label: { type: String, default: null },
-    symbol: { type: String, default: AE_SYMBOL },
-    aex9: { type: Boolean, default: false },
-    fiatBelow: { type: Boolean, default: false },
+    symbol: { type: String, default: null },
+    protocol: { type: String as PropType<Protocol>, required: true },
+    vertical: Boolean,
     hideFiat: Boolean,
-    large: Boolean,
-    row: Boolean,
-    noSymbol: Boolean,
+    hideSymbol: Boolean,
     highPrecision: Boolean,
     dynamicSizing: Boolean,
+    large: Boolean,
     small: Boolean,
-    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
+    const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+
+    const { getFormattedAndRoundedFiat } = useCurrencies();
 
     const amountRounded = computed(() => {
       if (Number.isInteger(props.amount) || props.amount === 0) {
         return props.amount;
       }
-      return formatNumber(props.amount,
+      return formatNumber(
+        props.amount,
         {
           minimumFractionDigits: 2,
-          maximumFractionDigits: ProtocolAdapterFactory
-            .getAdapter(props.protocol)
-            .getAmountPrecision({ amount: props.amount, highPrecision: props.highPrecision }),
-        });
+          maximumFractionDigits: adapter.getAmountPrecision({
+            amount: props.amount,
+            highPrecision: props.highPrecision,
+          }),
+        },
+      );
     });
 
     const amountFiat = computed(
-      (): string => (props.hideFiat || props.aex9) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
+      (): string => (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
     );
+
+    const symbolComputed = computed(() => props.symbol || adapter.coinSymbol);
 
     return {
       amountRounded,
       amountFiat,
+      symbolComputed,
       calculateFontSize,
     };
   },
@@ -105,14 +96,10 @@ export default defineComponent({
 .token-amount {
   @extend %face-sans-15-medium;
 
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
   color: variables.$color-white;
-
-  .label {
-    @extend %face-sans-14-medium;
-
-    color: rgba(variables.$color-white, 0.5);
-    display: block;
-  }
 
   .amount {
     font-size: var(--font-size);
@@ -127,22 +114,14 @@ export default defineComponent({
   .fiat {
     @extend %face-sans-15-regular;
 
-    margin-left: 8px;
     color: rgba(variables.$color-white, 0.75);
-
-    &.fiat-below {
-      display: block;
-      margin-left: 0;
-      padding-top: 4px;
-      white-space: nowrap;
-    }
+    white-space: nowrap;
   }
 
-  &.has-label {
-    display: inline-flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    width: 100%;
+  &.vertical {
+    flex-direction: column;
+    align-items: normal;
+    gap: 4px;
   }
 
   &.large {

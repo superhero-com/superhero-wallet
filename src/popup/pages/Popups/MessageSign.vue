@@ -22,6 +22,7 @@
     <DetailsItem
       :label="$t('pages.popupMessageSign.message')"
       data-cy="message"
+      class="message-text"
     >
       <template #value>
         <CopyText :value="popupProps?.message" />
@@ -47,8 +48,7 @@
 
 <script lang="ts">
 import { defineComponent, onUnmounted } from 'vue';
-import { useStore } from 'vuex';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
 
@@ -67,11 +67,10 @@ export default defineComponent({
     CopyText,
   },
   setup() {
-    const store = useStore();
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts();
     const { popupProps, sender, setPopupProps } = usePopupProps();
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
@@ -96,14 +95,10 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .message-sign {
-  .transaction-info {
-    margin-bottom: 16px;
-  }
-
   .subtitle {
     @extend %face-sans-15-medium;
 
-    margin-top: 24px;
+    margin-top: 28px;
     margin-bottom: 16px;
     color: variables.$color-grey-light;
     text-align: center;
@@ -113,9 +108,8 @@ export default defineComponent({
     }
   }
 
-  .details-item {
-    margin: 16px;
-    text-align: left;
+  .message-text {
+    margin-top: 16px;
   }
 }
 </style>

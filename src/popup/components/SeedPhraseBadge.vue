@@ -38,8 +38,9 @@ export default defineComponent({
 .seed-phrase-badge {
   @extend %face-sans-16-light;
 
-  height: 30px;
+  display: inline-flex;
   align-items: center;
+  height: 30px;
   border: 1px solid rgba(variables.$color-white, 0.44);
   border-radius: 4px;
   padding: 4px 6px;
@@ -61,9 +62,7 @@ export default defineComponent({
 
   &.editable {
     background: rgba(variables.$color-black, 0.25);
-    border-radius: 4px;
     border: none;
-    display: inline-flex;
 
     .close-icon {
       color: rgba(variables.$color-white, 0.44);

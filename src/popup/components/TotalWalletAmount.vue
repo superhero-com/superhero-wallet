@@ -1,20 +1,17 @@
 <template>
   <div class="total-amount">
-    <span>{{ totalAmount }}</span>
+    <span
+      v-text="totalAmount"
+    />
     <span
       class="label"
-    >
-      {{ isMultisig ? $t('common.totalMultisig') : $t('common.total') }}
-    </span>
+      v-text="isMultisig ? $t('common.totalMultisig') : $t('common.total')"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-} from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent } from 'vue';
 import { useCurrencies } from '@/composables';
 
 export default defineComponent({
@@ -23,8 +20,7 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { formatCurrency } = useCurrencies({ store });
+    const { formatCurrency } = useCurrencies();
 
     const totalAmount = computed(
       () => formatCurrency(+props.totalBalance),
@@ -44,16 +40,18 @@ export default defineComponent({
 .total-amount {
   @extend %face-sans-16-bold;
 
+  display: flex;
+  align-items: center;
   color: variables.$color-white;
-  line-height: 18px;
-  margin-bottom: 12px;
-  margin-left: 24px;
+  line-height: 1;
 
   .label {
     @extend %face-sans-14-medium;
 
-    margin-left: 6px;
-    line-height: 18px;
+    display: inline-block;
+    margin-top: 1px;
+    margin-left: 4px;
+    line-height: inherit;
     opacity: 0.5;
   }
 }

@@ -1,6 +1,6 @@
 /**
  * All utility helper functions.
-*/
+ */
 
 /* eslint-disable no-use-before-define */
 
@@ -8,16 +8,19 @@ import { WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
-import { useI18n } from 'vue-i18n';
+import { ComposerTranslation } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
+  AssetContractId,
   BigNumberPublic,
   IAccount,
   ICommonTransaction,
   IDashboardTransaction,
+  IFormSelectOption,
   IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
+  ITokenResolved,
   ITransaction,
   StorageKeysInput,
   Truthy,
@@ -28,24 +31,22 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
+  PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
-import { tg } from '@/store/plugins/languages';
-import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
-import { isAddressValid } from '@aeternity/aepp-sdk';
+import { tg } from '@/popup/plugins/i18n';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 /**
  * Round the number to calculated amount of decimals.
  * If the number is between high and low precision
  * no argument is passed to the `toFixed` method which means there will be no trailing zeros.
  */
-export function amountRounded(rawAmount: number | BigNumberPublic): string {
+export function amountRounded(rawAmount: number | BigNumberPublic | string): string {
   const ZERO_AND_COMA_LEN = 2;
   const amount: BigNumberPublic = (typeof rawAmount === 'object')
     ? rawAmount
-    : new BigNumber(rawAmount);
+    : new BigNumber(Number(rawAmount));
   if (
     amount.lt(0.01)
     && amount.toString().length - ZERO_AND_COMA_LEN < DECIMAL_PLACES_HIGH_PRECISION
@@ -63,7 +64,7 @@ export function blocksToRelativeTime(blocks: number) {
   return secondsToRelativeTime(blocks * 3 * 60);
 }
 
-export function calculateFontSize(amountValue: BigNumber | number) {
+export function calculateFontSize(amountValue: BigNumber | number | string) {
   const amountLength = amountRounded(amountValue).replace(/\D/g, '').length;
 
   if (amountLength <= 8) {
@@ -104,8 +105,44 @@ export function composeStorageKeys(keys: StorageKeysInput): string {
   ].join('_');
 }
 
+/**
+ * Convert wrapped coin tokens into coins (eg.: WAE => AE).
+ */
+export function convertWrappedCoinTokenToCoin(asset: ITokenResolved): ITokenResolved {
+  return (asset.isWrappedCoin && asset.protocol)
+    ? {
+      ...asset,
+      ...ProtocolAdapterFactory.getAdapter(asset.protocol).getDefaultCoin({} as any),
+    }
+    : asset;
+}
+
 export function errorHasValidationKey(error: any, expectedKey: string): boolean {
   return error.validation?.some(({ key }: any) => expectedKey === key);
+}
+
+/**
+ * Create list of callbacks
+ */
+export function createCallbackRegistry<T extends(...args: any) => any>() {
+  let currentId = 0;
+  const callbackRegistry = new Map<number, T>();
+
+  return {
+    /**
+     * Add callback that will be fired when `runCallbacks` is ran.
+     * @returns function that allows to remove the callback from registry.
+     */
+    addCallback: (callback: T) => {
+      currentId += 1;
+      const savedId = currentId;
+      callbackRegistry.set(savedId, callback);
+      return () => callbackRegistry.delete(savedId);
+    },
+    runCallbacks: (...args: Parameters<T>) => {
+      callbackRegistry.forEach((callback) => callback?.(...args as Array<any>));
+    },
+  };
 }
 
 /**
@@ -122,8 +159,8 @@ export function executeAndSetInterval(handler: () => any, timeout: number) {
 }
 
 export async function fetchAllPages<T = any>(
-  getFunction: () => Promise<IPageableResponse<T>>,
-  getNextPage: (url: string) => Promise<IPageableResponse<T>>,
+  getFunction: () => Promise<IPageableResponse<T> | null>,
+  getNextPage: (url: string) => Promise<IPageableResponse<T> | null>,
 ) {
   const result = [];
   let nextPageUrl: string | null = '';
@@ -158,24 +195,18 @@ export async function fetchJson<T = any>(
  * Prepare human-readable name with protocol for an account.
  * E.g.: `Æternity account 1`, `Bitcoin account 2`
  */
-export function getDefaultAccountLabel(
-  { protocol, protocolIdx }: { protocol?: string, protocolIdx?: number },
-) {
-  return `${protocol || ''} ${tg('pages.account.heading')} ${(protocolIdx || 0) + 1}`;
-}
-
-/**
- * Prepare human-readable name from the user account object.
- * E.g.: `somehuman.chain`, `Account 2`
- */
-export function getAccountNameToDisplay(acc: IAccount | undefined) {
-  return acc?.name || getDefaultAccountLabel({ protocol: acc?.protocol, protocolIdx: acc?.idx });
+export function getDefaultAccountLabel({ protocol, idx }: Partial<IAccount> = {}): string {
+  return [
+    (protocol) ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null,
+    tg('pages.account.heading'),
+    (idx || 0) + 1,
+  ]
+    .filter(excludeFalsy)
+    .join(' ');
 }
 
 export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
-  const result = window.localStorage.getItem(
-    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
-  );
+  const result = window.localStorage.getItem(prepareStorageKey(keys));
   return result ? JSON.parse(result) : undefined;
 }
 
@@ -183,6 +214,14 @@ export function removeLocalStorageItem(keys: string[]) {
   return window.localStorage.removeItem(
     [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
   );
+}
+
+/**
+ * Removes `propertyName: undefined` from the object.
+ * `{ a: 1, b: undefined }` => `{ a: 1 }`
+ */
+export function removeObjectUndefinedProperties(obj: object): object {
+  return Object.fromEntries(Object.entries(obj).filter((item) => item[1] !== undefined));
 }
 
 /**
@@ -224,12 +263,36 @@ export function isNotFoundError(error: any) {
   return error?.statusCode === 404;
 }
 
+/**
+ * Check if object has at least one property with a value, where 0 is also a correct value.
+ * `{ test: null }` => false
+ * `{ test: 'Foo' }` => true
+ * `{ test: 0 }` => true
+ */
+export function objectHasNonEmptyProperties(obj: object): boolean {
+  return Object.values(obj).some((val) => ![null, undefined, false].includes(val));
+}
+
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
 }
 
 export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
   return (data: T) => fns.reduce((currData, func) => func(currData), data);
+}
+
+/**
+ * Run asynchronous callbacks one by one and pass previous returned value to the next one.
+ */
+export function asyncPipe<T = any[]>(fns: ((data: T) => PromiseLike<T>)[]) {
+  return (data: T): Promise<T> => fns.reduce(
+    async (currData, func) => func(await currData),
+    Promise.resolve(data),
+  );
+}
+
+export function prepareStorageKey(keys: string[]) {
+  return [LOCAL_STORAGE_PREFIX, ...keys].join('_');
 }
 
 export function postJson(url: string, options?: IRequestInitBodyParsed) {
@@ -241,6 +304,16 @@ export function postJson(url: string, options?: IRequestInitBodyParsed) {
   });
 }
 
+/**
+ * Accounts data formatted as the form select options
+ */
+export function prepareAccountSelectOptions(accountList: IAccount[]): IFormSelectOption[] {
+  return accountList.map((acc): IFormSelectOption => ({
+    text: getDefaultAccountLabel(acc),
+    value: acc.address,
+  }));
+}
+
 export function removeDuplicatedTransactions(transactions: ITransaction[]) {
   return uniqWith(
     transactions,
@@ -249,7 +322,7 @@ export function removeDuplicatedTransactions(transactions: ITransaction[]) {
 }
 
 export function secondsToRelativeTime(seconds: number, shortForm?: boolean) {
-  const { t } = useI18n();
+  const t = tg as ComposerTranslation;
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
@@ -273,9 +346,14 @@ export function secondsToRelativeTime(seconds: number, shortForm?: boolean) {
 
 export function setLocalStorageItem(keys: string[], value: any): void {
   return window.localStorage.setItem(
-    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
+    prepareStorageKey(keys),
     JSON.stringify(value),
   );
+}
+
+export async function sleep<T>(ms: number, fn?: () => Promise<T>) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  return fn?.();
 }
 
 export function sortTransactionsByDate(transactions: ICommonTransaction[]) {
@@ -357,20 +435,10 @@ export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable
   });
 }
 
-export function detectProtocolByOwner(network: string, address?: string) {
-  if (!address) {
-    return null;
-  }
-  if (address.startsWith('ak_') && isAddressValid(address)) {
-    return PROTOCOL_AETERNITY;
-  }
-  if (isBtcAddressValid(address, network)) {
-    return PROTOCOL_BITCOIN;
-  }
-  return null;
-}
-
-export async function defaultAccountDiscovery(
+/**
+ * @returns {number} between -1 and n where -1 means there are no accounts found.
+ */
+export async function getLastNotEmptyAccountIndex(
   isAccountUsed: (address: string) => Promise<boolean>,
   getHdWalletAccountFromMnemonicSeed: (
     seed: Uint8Array,
@@ -385,6 +453,7 @@ export async function defaultAccountDiscovery(
     try {
       lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
       lastIndex += isAccountUsedArray.length;
+
       // eslint-disable-next-line no-await-in-loop
       isAccountUsedArray = await Promise.all(
         Array.from(
@@ -413,4 +482,23 @@ export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
   return [query['x-success'], query['x-cancel']].every(
     (value) => value && (value as string).startsWith(slicedAggregatorUrl),
   );
+}
+
+export function isAssetCoin(assetContractId: AssetContractId): boolean {
+  return PROTOCOL_LIST.some(
+    (protocol) => ProtocolAdapterFactory
+      .getAdapter(protocol)
+      .coinContractId === assetContractId,
+  );
+}
+
+/**
+ * Clean options from members that cause issues when sending messages
+ * or when signing transactions.
+ */
+export function getCleanModalOptions<T>(options: T): Omit<T, 'onCompiler' | 'onNode'> {
+  const cleanedOptions: any = { ...options };
+  delete cleanedOptions?.onCompiler;
+  delete cleanedOptions?.onNode;
+  return cleanedOptions;
 }

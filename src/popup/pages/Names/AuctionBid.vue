@@ -11,6 +11,7 @@
             :rules="{
               enough_coin: amountTotal.toString(),
               required: true,
+              does_not_exceed_decimals: AE_COIN_PRECISION,
             }"
           >
             <InputAmount
@@ -18,7 +19,7 @@
               v-model="amount"
               name="amount"
               :message="amountError || errorMessage"
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
               readonly
             />
           </Field>
@@ -27,7 +28,7 @@
               <template #value>
                 <TokenAmount
                   :amount="+txFee"
-                  :protocol="PROTOCOL_AETERNITY"
+                  :protocol="PROTOCOLS.aeternity"
                   hide-fiat
                 />
               </template>
@@ -36,7 +37,7 @@
               <template #value>
                 <TokenAmount
                   :amount="+amountTotal"
-                  :protocol="PROTOCOL_AETERNITY"
+                  :protocol="PROTOCOLS.aeternity"
                 />
               </template>
             </DetailsItem>
@@ -65,7 +66,6 @@ import {
 } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -76,16 +76,16 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useForm, useFieldError, Field } from 'vee-validate';
 
-import type { IAuctionBid } from '@/types';
 import { useModals, useAeSdk, useUi } from '@/composables';
-import { useGetter } from '@/composables/vuex';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import {
   AE_AENS_BID_MIN_RATIO,
   AE_COIN_PRECISION,
 } from '@/protocols/aeternity/config';
+import { ROUTE_AUCTION_HISTORY } from '@/popup/router/routeNames';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
@@ -109,21 +109,21 @@ export default defineComponent({
     name: { type: String as PropType<AensName>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
     const { validate } = useForm();
     const errorName = useFieldError('amount');
 
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
+    const { getNameAuctionHighestBid } = useAeNames();
     const { openDefaultModal } = useModals();
     const { setLoaderVisible } = useUi();
 
     const amount = ref('');
 
-    const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
-
-    const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
+    const highestBid = computed(
+      () => getNameAuctionHighestBid(props.name)?.nameFee || new BigNumber(0),
+    );
     const txFee = computed<BigNumber>(
       () => BigNumber(unpackTx(
         buildTx({
@@ -133,7 +133,7 @@ export default defineComponent({
           name: props.name,
           nameSalt: 0,
           nameFee: aeToAettos(highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO).toString()),
-        }) as any,
+        }),
         Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION),
     );
@@ -157,7 +157,7 @@ export default defineComponent({
         openDefaultModal({
           msg: t('pages.names.auctions.bid-added', { name: props.name }),
         });
-        router.push({ name: 'auction-history', params: { name: props.name } });
+        router.push({ name: ROUTE_AUCTION_HISTORY, params: { name: props.name } });
       } catch (error: any) {
         let msg = error.message;
         if (msg.includes('is not enough to execute')) {
@@ -170,7 +170,8 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      AE_COIN_PRECISION,
+      PROTOCOLS,
       amount,
       amountTotal,
       amountError,

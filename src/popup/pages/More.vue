@@ -16,7 +16,7 @@
           <PanelItem
             :to="{ name: 'tips-claim' }"
             :title="$t('pages.claimTips.title')"
-            :disabled="!isAccountAe"
+            :disabled="!isActiveAccountAe"
             data-cy="tips-claim"
           >
             <template #icon>
@@ -26,7 +26,7 @@
           <PanelItem
             :to="{ name: 'invite' }"
             :title="$t('pages.titles.giftCards')"
-            :disabled="!isAccountAe"
+            :disabled="!isActiveAccountAe"
             data-cy="invite"
           >
             <template #icon>
@@ -88,11 +88,11 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { IonContent, IonPage } from '@ionic/vue';
-import { BUG_REPORT_URL, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
-import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
+import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useAccounts, useAeSdk } from '@/composables';
+import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
+import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
 
 import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
@@ -120,12 +120,13 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
+    const { activeAccount } = useAccounts();
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
-    const { activeAccount, activeAccountFaucetUrl, isActiveAccountAe } = useAccounts({ store });
-    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
-
-    const isAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
+    const activeAccountFaucetUrl = computed(
+      () => (isActiveAccountAe.value) ? buildAeFaucetUrl(activeAccount.value.address) : null,
+    );
 
     return {
       AE_DEX_URL,
@@ -136,7 +137,6 @@ export default defineComponent({
       isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
-      isAccountAe,
     };
   },
 });

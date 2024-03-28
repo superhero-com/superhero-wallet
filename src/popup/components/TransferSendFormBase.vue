@@ -41,9 +41,9 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
 import { useAccounts } from '@/composables';
+
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import ModalHeader from './ModalHeader.vue';
@@ -64,9 +64,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup() {
-    const store = useStore();
-
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     return {
       activeAccount,

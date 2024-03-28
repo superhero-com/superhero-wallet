@@ -2,15 +2,18 @@
   <a
     :class="['link-button', variant, { underlined }]"
     :href="IS_MOBILE_APP ? undefined : to"
+    rel="noopener noreferrer"
     target="_blank"
     @click="onClick"
   >
     <slot />
     <span
-      v-if="$slots.icon"
+      v-if="isExternal || $slots.icon"
       class="link-icon"
     >
+      <ExternalLinkIcon v-if="isExternal" />
       <slot
+        v-else
         name="icon"
       />
     </span>
@@ -22,6 +25,8 @@ import { defineComponent } from 'vue';
 
 import { IS_MOBILE_APP } from '@/constants';
 
+import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
+
 export const LINK_BUTTON_VARIANT = [
   'default',
   'muted',
@@ -31,9 +36,13 @@ export const LINK_BUTTON_VARIANT = [
 export type LinkButtonVariant = typeof LINK_BUTTON_VARIANT[number];
 
 export default defineComponent({
+  components: {
+    ExternalLinkIcon,
+  },
   props: {
     to: { type: String, required: true },
     underlined: Boolean,
+    isExternal: Boolean,
     variant: {
       type: String,
       validator: (value: LinkButtonVariant) => LINK_BUTTON_VARIANT.includes(value),

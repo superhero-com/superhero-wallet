@@ -1,13 +1,18 @@
 <template>
   <div class="transaction-info">
-    <TransactionTagList v-bind="$attrs" />
+    <TransactionTagList
+      v-bind="$attrs"
+      :transaction="transaction"
+    />
+
     <div class="parties">
       <Avatar
         v-if="sender.address"
         :name="sender.name"
         :address="sender.address"
-        borderless
+        size="lg"
       />
+
       <div class="mid">
         <TriangleRight class="triangle" />
         <div class="line" />
@@ -17,11 +22,11 @@
         v-if="recipient.address"
         :address="recipient.address"
         :name="recipient.name"
-        borderless
+        size="lg"
       />
       <div
         v-else
-        class="avatar"
+        class="custom-avatar"
       >
         <AensIcon
           v-if="recipient.aens"
@@ -58,7 +63,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { IAccountOverview } from '../../types';
+import type { IAccountOverview, ITransaction } from '@/types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
@@ -80,6 +85,7 @@ export default defineComponent({
     SHLogo,
   },
   props: {
+    transaction: { type: Object as PropType<ITransaction>, default: null },
     sender: { type: Object as PropType<IAccountOverview>, required: true },
     recipient: { type: Object as PropType<IAccountOverview>, required: true },
   },
@@ -95,10 +101,13 @@ export default defineComponent({
     display: flex;
     padding-bottom: 8px;
 
-    .avatar {
-      width: 56px;
-      height: 56px;
-      padding: 8px;
+    .custom-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
       border: 2px solid variables.$color-grey-border;
       border-radius: 100px;
     }

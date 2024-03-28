@@ -11,71 +11,79 @@ exports[`Pages About 1`] = `
       class="about"
     >
       <div
-        class="table"
+        class="panel"
       >
-        <div
-          class="table-item"
-        >
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-             Superhero Wallet 
-          </div>
-        </div>
-        <a
-          class="link-button default table-item link"
-          href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
-          target="_blank"
-        >
-          
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-            a1c1c5a 
-            <svg />
-          </div>
-          
-          <!--v-if-->
-        </a>
-        <div
-          class="table-item"
-        >
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-             v.version-specific-text
-          </div>
-        </div>
-        <div
-          class="table-item"
-        >
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-            13.0.0
-          </div>
-        </div>
         <!--v-if-->
+        <div
+          class="panel-body"
+        >
+          
+          <div
+            class="table-item"
+          >
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+               Superhero Wallet 
+            </div>
+          </div>
+          <a
+            class="link-button default table-item link"
+            href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+              a1c1c5a 
+              <svg />
+            </div>
+            
+            <!--v-if-->
+          </a>
+          <div
+            class="table-item"
+          >
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+               v.version-specific-text
+            </div>
+          </div>
+          <div
+            class="table-item"
+          >
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+              13.0.0
+            </div>
+          </div>
+          <!--v-if-->
+          
+        </div>
       </div>
       <div
         class="additional-links"
@@ -220,7 +228,7 @@ exports[`Pages Index 1`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -228,7 +236,7 @@ exports[`Pages Index 1`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -257,7 +265,7 @@ exports[`Pages Index 1`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -265,7 +273,7 @@ exports[`Pages Index 1`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -369,7 +377,7 @@ exports[`Pages Index 2`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -377,7 +385,7 @@ exports[`Pages Index 2`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -406,7 +414,7 @@ exports[`Pages Index 2`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -414,7 +422,7 @@ exports[`Pages Index 2`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -518,7 +526,7 @@ exports[`Pages Index 3`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -526,7 +534,7 @@ exports[`Pages Index 3`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -555,7 +563,7 @@ exports[`Pages Index 3`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -563,7 +571,7 @@ exports[`Pages Index 3`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -599,6 +607,7 @@ exports[`Pages PrivacyPolicy 1`] = `
 >
   <ion-content
     class="ion-padding ion-content-bg"
+    data-cy="privacy-policy"
   >
     <div
       class="privacy-policy"
@@ -687,6 +696,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             <a
               class="link-button default"
               href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
+              rel="noopener noreferrer"
               target="_blank"
             >
               
@@ -698,6 +708,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             <a
               class="link-button default"
               href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
+              rel="noopener noreferrer"
               target="_blank"
             >
               
@@ -712,6 +723,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             <a
               class="link-button default"
               href="https://wallet.superhero.com"
+              rel="noopener noreferrer"
               target="_blank"
             >
               
@@ -726,6 +738,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             <a
               class="link-button default"
               href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+              rel="noopener noreferrer"
               target="_blank"
             >
               
@@ -740,6 +753,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             <a
               class="link-button default"
               href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
+              rel="noopener noreferrer"
               target="_blank"
             >
               
@@ -1501,6 +1515,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             <a
               class="link-button default"
               href="mailto:superherowallet@protonmail.com"
+              rel="noopener noreferrer"
               target="_blank"
             >
               
@@ -1513,495 +1528,514 @@ exports[`Pages PrivacyPolicy 1`] = `
         </li>
       </ol>
     </div>
+    <div
+      class="back-to-top"
+    >
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
   </ion-content>
 </div>
 `;
 
 exports[`Pages TermsOfService 1`] = `
 <div
-  data-v-app=""
+  class="ion-page"
 >
-  
-  <!-- eslint-disable max-len -->
-  <div
-    class="ion-page"
+  <ion-content
+    class="ion-padding ion-content-bg"
+    data-cy="terms-of-service"
   >
-    <ion-content
-      class="ion-padding ion-content-bg"
+    <div
+      class="terms-of-service"
     >
-      <div
-        class="terms-of-service"
+      <!-- header -->
+      <p
+        class="italic"
       >
-        <!-- header -->
-        <p
-          class="italic"
+         The present 
+        <b>
+          TERMS OF USE
+        </b>
+         are effective since 9th April 2020. 
+      </p>
+      <p
+        class="italic"
+      >
+        <b>
+          Superhero.com LVC
+        </b>
+         reserves its right to modify and update these 
+        <b>
+          TERMS OF USE
+        </b>
+         according to the policy and practice of the 
+        <b>
+          company
+        </b>
+        . The new version of the 
+        <b>
+          TERMS OF USE
+        </b>
+         becomes effective from the day it is announced on 
+        <b>
+          Our Superhero Wallet
+        </b>
+         unless stated otherwise. 
+      </p>
+      <hr />
+      <p
+        class="bolder"
+      >
+         THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+      </p>
+      <p>
+         These 
+        <b>
+          TERMS OF USE („TERMS“)
+        </b>
+         apply exclusively for the 
+        <b>
+          Superhero Wallet
+        </b>
+         (hereinafter referred to as the “
+        <b>
+          Wallet
+        </b>
+        ” or the “
+        <b>
+          application
+        </b>
+        ”) and all the content available on the website extension. Please make sure that you have carefully read the 
+        <b>
+          TERMS
+        </b>
+         before using the 
+        <b>
+          application
+        </b>
+        . Otherwise, by using it, we consider these actions implicit agreement to the 
+        <b>
+          TERMS OF USE
+        </b>
+        . These 
+        <b>
+          TERMS OF USE
+        </b>
+         represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „
+        <b>
+          YOU
+        </b>
+        “) and 
+        <b>
+          Superhero.com LVC (“Superhero”, “we”, “us”
+        </b>
+         or 
+        <b>
+          “our”)
+        </b>
+         in connection to your use of the 
+        <b>
+          Superhero Wallet application.
+        </b>
+        . 
+      </p>
+      <p>
+         Please, do not use the application provided by 
+        <b>
+          Superhero
+        </b>
+        , if you do not agree to the 
+        <b>
+          TERMS
+        </b>
+         applied within this document. 
+      </p>
+      <p>
+        <b>
+          WE
+        </b>
+         preserve our right to modify the 
+        <b>
+          TERMS
+        </b>
+         at any time in our sole discretion. 
+        <b>
+          USERS
+        </b>
+         will be notified of such changes by posting information for the new Effective Date of the 
+        <b>
+          TERMS
+        </b>
+         on the 
+        <b>
+          application
+        </b>
+        . 
+        <b>
+          YOU
+        </b>
+         may be required to read and accept the updated 
+        <b>
+          TERMS
+        </b>
+         in order to continue your use of the 
+        <b>
+          Wallet
+        </b>
+        . If 
+        <b>
+          YOU
+        </b>
+         continue to use the 
+        <b>
+          Wallet
+        </b>
+         after a notification for the amended 
+        <b>
+          TERMS
+        </b>
+        , 
+        <b>
+          YOU
+        </b>
+         are agreeing to be bound by the modifications. If you don’t agree to be bound by the modified 
+        <b>
+          TERMS
+        </b>
+        , then you should discontinue any use of the 
+        <b>
+          Wallet
+        </b>
+        . Please contact 
+        <b>
+          Superhero
+        </b>
+         via an email to 
+        <a
+          class="link-button simple"
+          href="mailto:superherowallet@protonmail.com"
+          rel="noopener noreferrer"
+          target="_blank"
         >
-           The present 
-          <b>
-            TERMS OF USE
-          </b>
-           are effective since 9th April 2020. 
-        </p>
-        <p
-          class="italic"
+          
+          superherowallet@protonmail.com
+          
+          <!--v-if-->
+        </a>
+         for the provision of information about the steps for termination of your use. Please check the Effective Date above to determine if there have been any changes since 
+        <b>
+          YOU
+        </b>
+         have last reviewed these 
+        <b>
+          TERMS
+        </b>
+        . 
+      </p>
+      <p
+        class="italic underline"
+      >
+         Once you agree to the 
+        <b>
+          TERMS OF USE
+        </b>
+        , we consider this an explicit consent to the following: 
+      </p>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
         >
-          <b>
-            Superhero.com LVC
-          </b>
-           reserves its right to modify and update these 
-          <b>
-            TERMS OF USE
-          </b>
-           according to the policy and practice of the 
-          <b>
-            company
-          </b>
-          . The new version of the 
-          <b>
-            TERMS OF USE
-          </b>
-           becomes effective from the day it is announced on 
-          <b>
-            Our Superhero Wallet
-          </b>
-           unless stated otherwise. 
-        </p>
-        <hr />
-        <p
-          class="bolder"
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
         >
-           THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-        </p>
-        <p>
-           These 
-          <b>
-            TERMS OF USE („TERMS“)
-          </b>
-           apply exclusively for the 
-          <b>
-            Superhero Wallet
-          </b>
-           (hereinafter referred to as the “
-          <b>
-            Wallet
-          </b>
-          ” or the “
-          <b>
-            application
-          </b>
-          ”) and all the content available on the website extension. Please make sure that you have carefully read the 
-          <b>
-            TERMS
-          </b>
-           before using the 
-          <b>
-            application
-          </b>
-          . Otherwise, by using it, we consider these actions implicit agreement to the 
-          <b>
-            TERMS OF USE
-          </b>
-          . These 
-          <b>
-            TERMS OF USE
-          </b>
-           represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „
-          <b>
-            YOU
-          </b>
-          “) and 
-          <b>
-            Superhero.com LVC (“Superhero”, “we”, “us”
-          </b>
-           or 
-          <b>
-            “our”)
-          </b>
-           in connection to your use of the 
-          <b>
-            Superhero Wallet application.
-          </b>
-          . 
-        </p>
-        <p>
-           Please, do not use the application provided by 
-          <b>
-            Superhero
-          </b>
-          , if you do not agree to the 
-          <b>
-            TERMS
-          </b>
-           applied within this document. 
-        </p>
-        <p>
-          <b>
-            WE
-          </b>
-           preserve our right to modify the 
-          <b>
-            TERMS
-          </b>
-           at any time in our sole discretion. 
-          <b>
-            USERS
-          </b>
-           will be notified of such changes by posting information for the new Effective Date of the 
-          <b>
-            TERMS
-          </b>
-           on the 
-          <b>
-            application
-          </b>
-          . 
-          <b>
-            YOU
-          </b>
-           may be required to read and accept the updated 
-          <b>
-            TERMS
-          </b>
-           in order to continue your use of the 
-          <b>
-            Wallet
-          </b>
-          . If 
-          <b>
-            YOU
-          </b>
-           continue to use the 
-          <b>
-            Wallet
-          </b>
-           after a notification for the amended 
-          <b>
-            TERMS
-          </b>
-          , 
-          <b>
-            YOU
-          </b>
-           are agreeing to be bound by the modifications. If you don’t agree to be bound by the modified 
-          <b>
-            TERMS
-          </b>
-          , then you should discontinue any use of the 
-          <b>
-            Wallet
-          </b>
-          . Please contact 
-          <b>
-            Superhero
-          </b>
-           via an email to 
-          <a
-            class="link-button simple"
-            href="mailto:superherowallet@protonmail.com"
-            target="_blank"
-          >
-            
-            superherowallet@protonmail.com
-            
-            <!--v-if-->
-          </a>
-           for the provision of information about the steps for termination of your use. Please check the Effective Date above to determine if there have been any changes since 
-          <b>
-            YOU
-          </b>
-           have last reviewed these 
-          <b>
-            TERMS
-          </b>
-          . 
-        </p>
-        <p
-          class="italic underline"
-        >
-           Once you agree to the 
-          <b>
-            TERMS OF USE
-          </b>
-          , we consider this an explicit consent to the following: 
-        </p>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
-        <div
-          class="accordion-item"
-        >
-          <a
-            class="accordion-label"
-            data-cy="accordion-item-label"
-          >
-            <svg
-              class="accordion-label-chevron"
-            />
-            <span
-              class="accordion-label-text"
-            >
-              locale-specific-text
-            </span>
-          </a>
-          <transition-stub
-            appear="false"
-            css="true"
-            name="fade-transition"
-            persisted="false"
-          >
-            <!--v-if-->
-          </transition-stub>
-        </div>
+          <!--v-if-->
+        </transition-stub>
       </div>
-    </ion-content>
-  </div>
-  
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+      <div
+        class="accordion-item"
+      >
+        <a
+          class="accordion-label"
+          data-cy="accordion-item-label"
+        >
+          <svg
+            class="accordion-label-chevron"
+          />
+          <span
+            class="accordion-label-text"
+          >
+            locale-specific-text
+          </span>
+        </a>
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
+      </div>
+    </div>
+    <div
+      class="back-to-top"
+    >
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+  </ion-content>
 </div>
 `;

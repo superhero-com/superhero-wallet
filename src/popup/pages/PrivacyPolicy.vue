@@ -1,7 +1,10 @@
-<!-- eslint-disable max-len -->
+<!-- eslint-disable vue/max-len -->
 <template>
   <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
+    <IonContent
+      class="ion-padding ion-content-bg"
+      data-cy="privacy-policy"
+    >
       <div class="privacy-policy">
         <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
         <ol class="policy-list">
@@ -353,6 +356,7 @@
           </li>
         </ol>
       </div>
+      <BackToTop />
     </IonContent>
   </IonPage>
 </template>
@@ -367,10 +371,12 @@ import {
   APP_LINK_IOS,
 } from '@/constants';
 import LinkButton from '@/popup/components/LinkButton.vue';
+import BackToTop from '@/popup/components/BackToTop.vue';
 
 export default {
   components: {
     LinkButton,
+    BackToTop,
     IonContent,
     IonPage,
   },

@@ -1,48 +1,23 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
-import { mnemonicToSeed } from '@aeternity/bip39';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/constants/stubs';
 import {
   formatDate,
   formatTime,
+  prepareStorageKey,
 } from '../../../src/utils';
 import {
-  LOCAL_STORAGE_PREFIX,
-  TRANSACTIONS_LOCAL_STORAGE_KEY,
+  NETWORK_NAME_TESTNET,
+  PROTOCOLS,
+  STORAGE_KEYS,
 } from '../../../src/constants';
-import {
-  AE_NETWORK_MAINNET_ID,
-} from '../../../src/protocols/aeternity/config';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
-import runMigrations from '../../../src/store/migrations';
-
-export async function getLoginState({
-  backedUpSeed,
-  balance,
-  name,
-  network,
-}) {
-  const { mnemonic, address } = STUB_ACCOUNT;
-  const account = {
-    address,
-    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
-  };
-  return {
-    ...(await runMigrations()),
-    account,
-    mnemonic,
-    backedUpSeed,
-    current: { network: network || 'Testnet' },
-    balance,
-    ...(name && { names: { defaults: { [`${account.address}-${AE_NETWORK_MAINNET_ID}`]: name } } }),
-  };
-}
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
-  const { address } = testAccount;
+  const { address } = STUB_ACCOUNT;
 
   return {
-    [address]: { loaded: [], pending: { [AE_NETWORK_MAINNET_ID]: [pendingTransaction] } },
+    [address]: { loaded: [], localPendingTransaction: pendingTransaction },
   };
 }
 
@@ -97,24 +72,33 @@ Cypress.Commands.add('mockExternalRequests', () => {
   cy.stub(CoinGecko, 'fetchCoinCurrencyRates', { usd: 0.05 });
 });
 
-Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
+Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
   if (isMockingExternalRequests) cy.mockExternalRequests();
+
+  const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
+
   cy.openPopup(async (contentWindow) => {
-    /* eslint-disable-next-line no-param-reassign */
-    contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
+    const dataToBeStored = {
+      [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
+      [prepareStorageKey([STORAGE_KEYS.mnemonic])]: STUB_ACCOUNT.mnemonic,
+      [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
+        idx: 0,
+        protocol: PROTOCOLS.aeternity,
+        isRestored: true,
+        type: 'hd-wallet',
+      }],
+      [prepareStorageKey([STORAGE_KEYS.otherSettings])]: {
+        isSeedBackedUp,
+      },
+      [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
+        [STUB_ACCOUNT.address]: pendingTransaction || [],
+      },
+    };
 
-    if (options.pendingTransaction) {
-      const localStorageKey = [
-        LOCAL_STORAGE_PREFIX,
-        TRANSACTIONS_LOCAL_STORAGE_KEY,
-        AE_NETWORK_MAINNET_ID,
-      ].join('_');
-
-      // eslint-disable-next-line no-param-reassign
-      contentWindow.localStorage[localStorageKey] = JSON.stringify(
-        preparePendingTransactionToLocalStorage(options.pendingTransaction),
-      );
-    }
+    Object.entries(dataToBeStored).forEach(([key, data]) => {
+      /* eslint-disable-next-line no-param-reassign */
+      contentWindow.localStorage[key] = JSON.stringify(data);
+    });
   }, route);
 });
 

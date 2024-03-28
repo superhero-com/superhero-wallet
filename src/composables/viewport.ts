@@ -2,7 +2,7 @@ import { debounce } from 'lodash-es';
 import { onBeforeUnmount, ref } from 'vue';
 
 export interface IScrollCallbackParams {
-  isOutsideOfViewport: boolean
+  isOutsideOfViewport: boolean;
 }
 
 export type OnViewportScrollCallback = (p: IScrollCallbackParams) => any;

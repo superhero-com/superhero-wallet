@@ -16,7 +16,7 @@
         dense,
         'semi-dense': semiDense,
         'blur-bg': !(IS_FIREFOX && IS_EXTENSION),
-        'min-height': minHeight
+        'min-height': minHeight,
       }"
     >
       <div class="container">
@@ -53,11 +53,13 @@
           class="body"
           :class="{
             'text-center': centered,
-            'without-padding-bottom': bodyWithoutPaddingBottom
+            'without-padding-bottom': bodyWithoutPaddingBottom,
           }"
         >
           <slot />
         </div>
+
+        <BackToTop sticky />
 
         <FixedScreenFooter
           v-if="$slots.footer"
@@ -86,11 +88,13 @@ import { BackButtonEvent } from '@ionic/vue';
 import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
+import BackToTop from './BackToTop.vue';
 
 export default defineComponent({
   components: {
     FixedScreenFooter,
     BtnClose,
+    BackToTop,
   },
   props: {
     show: Boolean,
@@ -256,7 +260,6 @@ export default defineComponent({
 
   &.full-screen {
     padding-top: env(safe-area-inset-top);
-    padding-bottom: 0; // needed to overwrite .app-wrapper .main styles
     padding-bottom: env(safe-area-inset-bottom); // needed to overwrite .app-wrapper .main styles
 
     @include mixins.desktop {
@@ -298,6 +301,7 @@ export default defineComponent({
   }
 
   // This is not working correctly in Firefox extension
+
   &.blur-bg {
     backdrop-filter: blur(5px);
   }

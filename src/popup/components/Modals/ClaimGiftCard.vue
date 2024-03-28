@@ -29,7 +29,7 @@
         <AccountItem
           v-else-if="!isCardEmpty"
           :address="recipientId"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
       </template>
     </DetailsItem>
@@ -39,7 +39,7 @@
       </span>
       <BalanceInfo
         :balance="balance.toNumber()"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         :class="{
           gray: balance.toNumber() === 0,
         }"
@@ -56,7 +56,7 @@
       v-model="amount"
       :errors="errors"
       readonly
-      :protocol="PROTOCOL_AETERNITY"
+      :protocol="PROTOCOLS.aeternity"
       :custom-label="$t('modals.claimGiftCard.amount')"
       :validation-rules="{
         max_redeem: max.toString(),
@@ -64,13 +64,10 @@
       without-margin
     >
       <template #label-after>
-        <BtnPlain
-          class="max-button"
-          :class="{ chosen: isMax }"
+        <BtnMaxAmount
+          :is-max="isMax"
           @click="setMaxAmount"
-        >
-          {{ $t('common.max') }}
-        </BtnPlain>
+        />
       </template>
     </TransferSendAmount>
     <template #footer>
@@ -102,7 +99,6 @@ import {
   PropType,
   onMounted,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useForm } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
 import {
@@ -115,15 +111,21 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import type { RejectCallback, ResolveCallback, ObjectValues } from '@/types';
+import type {
+  AccountAddress,
+  ObjectValues,
+  RejectCallback,
+  ResolveCallback,
+} from '@/types';
 import {
   useAccounts,
   useAeSdk,
   useCurrencies,
+  useInvites,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import CheckCircleIcon from '@/icons/check-circle.svg?vue-component';
 
 import DetailsItem from '../DetailsItem.vue';
@@ -160,22 +162,22 @@ export default defineComponent({
     secretKey: { type: Buffer, required: true },
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const { errors } = useForm();
-    const { getAeSdk } = useAeSdk({ store });
-    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
-    const { getFormattedFiat } = useCurrencies({ store });
+    const { getAeSdk } = useAeSdk();
+    const { aeAccounts, aeAccountsSelectOptions } = useAccounts();
+    const { getFormattedFiat } = useCurrencies();
+    const { claimInvite } = useInvites();
 
-    const recipientId = ref<Encoded.AccountAddress>(aeAccounts.value[0].address);
+    const recipientId = ref<AccountAddress>(aeAccounts.value[0].address);
     const amount = ref('');
     const balance = ref(new BigNumber(0));
     const step = ref<Step>(STEPS.initial);
     const isCardEmpty = ref(false);
     const loading = ref(false);
 
-    const currencyFormatted = computed(() => getFormattedFiat(+amount.value, PROTOCOL_AETERNITY));
+    const currencyFormatted = computed(() => getFormattedFiat(+amount.value, PROTOCOLS.aeternity));
     const mainButtonText = computed(() => {
       switch (step.value) {
         case STEPS.initial:
@@ -196,7 +198,7 @@ export default defineComponent({
       buildTx({
         tag: Tag.SpendTx,
         senderId: address,
-        recipientId: recipientId.value,
+        recipientId: recipientId.value as Encoded.AccountAddress,
         amount: +amount.value,
         payload: encode(new TextEncoder().encode(''), Encoding.Bytearray),
         nonce: 1,
@@ -226,7 +228,7 @@ export default defineComponent({
       switch (step.value) {
         case STEPS.initial:
           setMaxAmount();
-          await store.dispatch('invites/claim', {
+          await claimInvite({
             secretKey: props.secretKey,
             recipientId: recipientId.value,
             isMax: true,
@@ -234,7 +236,7 @@ export default defineComponent({
           step.value = STEPS.redeemFull;
           break;
         case STEPS.form:
-          await store.dispatch('invites/claim', {
+          await claimInvite({
             secretKey: props.secretKey,
             recipientId: recipientId.value,
             amount: amount.value,
@@ -286,7 +288,7 @@ export default defineComponent({
       loading,
       mainButtonText,
       max,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       recipientId,
       setMaxAmount,
       step,
@@ -356,7 +358,7 @@ export default defineComponent({
     .balance-info {
       padding: 8px 0 16px 0;
       border-radius: 10px;
-      background-image: url("../../../image/dashboard/buy-ae.jpg");
+      background-image: url("../../../image/dashboard/buy-ae.webp");
 
       &.gray {
         filter: grayscale(1);
@@ -371,25 +373,6 @@ export default defineComponent({
     text-align: center;
     margin-top: 24px;
     color: variables.$color-white;
-  }
-
-  .max-button {
-    @extend %face-sans-14-medium;
-
-    padding: 2px 8px;
-    color: variables.$color-primary;
-    line-height: 20px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-
-    &:hover {
-      background: rgba(variables.$color-primary, 0.15);
-    }
-
-    &.chosen {
-      background: rgba(variables.$color-primary, 0.15);
-      border-color: rgba(variables.$color-primary, 0.5);
-    }
   }
 
   .buttons {

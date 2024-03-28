@@ -1,21 +1,21 @@
 <template>
   <BtnBox
+    data-cy="send"
     :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('common.send')"
     :subtitle="subtitle"
     :icon="ArrowSendIcon"
-    :disabled="!isOnline || (!!pendingMultisigTransaction && isMultisig)"
-    data-cy="send"
+    :disabled="disabled || !isOnline"
     :is-big="isBig"
     @click="openTransferSendModal()"
   />
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent, computed, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { AssetContractId } from '@/types';
 import { MODAL_TRANSFER_SEND } from '@/constants';
-import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
+import { useConnection, useModals } from '@/composables';
 
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
@@ -25,15 +25,14 @@ export default defineComponent({
   props: {
     isBig: Boolean,
     isMultisig: Boolean,
-    tokenContractId: { type: String, default: '' },
+    tokenContractId: { type: String as PropType<AssetContractId>, default: '' },
+    disabled: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     function openTransferSendModal() {
       openModal(MODAL_TRANSFER_SEND, {
@@ -48,7 +47,6 @@ export default defineComponent({
 
     return {
       isOnline,
-      pendingMultisigTransaction,
       subtitle,
       ArrowSendIcon,
       openTransferSendModal,

@@ -4,12 +4,12 @@
       <div class="auction-tabs">
         <Tabs>
           <Tab
-            :to="{ name: 'auction-bid', params: routeParams }"
+            :to="{ name: ROUTE_AUCTION_BID, params: routeParams }"
             :text="$t('pages.names.auctions.place-bid')"
             exact-path
           />
           <Tab
-            :to="{ name: 'auction-history', params: routeParams }"
+            :to="{ name: ROUTE_AUCTION_HISTORY, params: routeParams }"
             :text="$t('pages.names.auctions.bid-history')"
           />
         </Tabs>
@@ -31,16 +31,21 @@ import {
   defineComponent,
   onBeforeUnmount,
   watch,
+  PropType,
 } from 'vue';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { produceNameId } from '@aeternity/aepp-sdk';
 
+import type { ChainName } from '@/types';
+
 import { executeAndSetInterval } from '@/utils';
-import { aettosToAe } from '@/protocols/aeternity/helpers';
-import { useMiddleware, useUi } from '@/composables';
+import { ROUTE_AUCTION_BID, ROUTE_AUCTION_HISTORY } from '@/popup/router/routeNames';
+import { useUi } from '@/composables';
 import { fadeAnimation } from '@/popup/animations';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -56,22 +61,22 @@ export default defineComponent({
     IonPage,
   },
   props: {
-    name: { type: String, required: true },
+    name: { type: String as PropType<ChainName>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
 
-    const { getMiddleware } = useMiddleware();
+    const { getMiddleware } = useAeMiddleware();
     const { params: routeParams } = useRoute();
     const { isAppActive, isLoaderVisible, setLoaderVisible } = useUi();
+    const { setAuctionEntry } = useAeNames();
 
     setLoaderVisible(true);
 
     async function updateAuctionEntry() {
       const middleware = await getMiddleware();
       try {
-        const nameId = produceNameId(props.name as any);
+        const nameId = produceNameId(props.name);
         const [auctionInfo, accountActivities] = await Promise.all([
           middleware.getName(props.name),
           // TODO: show more than 100 bids
@@ -87,13 +92,14 @@ export default defineComponent({
             nameFee: new BigNumber(aettosToAe(nameFee)),
             accountId,
           }));
-        store.commit('names/setAuctionEntry', {
+
+        setAuctionEntry({
           name: props.name,
           expiration: auctionEnd,
           bids,
         });
       } catch (error) {
-        router.push({ name: 'auction-bid' });
+        router.push({ name: ROUTE_AUCTION_BID });
       }
       setLoaderVisible(false);
     }
@@ -114,6 +120,8 @@ export default defineComponent({
     );
 
     return {
+      ROUTE_AUCTION_BID,
+      ROUTE_AUCTION_HISTORY,
       isLoaderVisible,
       routeParams,
       fadeAnimation,

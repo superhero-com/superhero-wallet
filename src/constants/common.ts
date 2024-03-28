@@ -1,26 +1,19 @@
-import { METHODS } from '@aeternity/aepp-sdk';
-import type {
-  ICurrency,
-  INotificationSetting,
-  IPermission,
-} from '@/types';
-import { tg } from '@/store/plugins/languages';
+import type { ICurrency, IPermission } from '@/types';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
-export const PROTOCOL_AETERNITY = 'aeternity';
-export const PROTOCOL_BITCOIN = 'bitcoin';
+export const PROTOCOLS = {
+  aeternity: 'aeternity',
+  bitcoin: 'bitcoin',
+  ethereum: 'ethereum',
+} as const;
 
-export const PROTOCOLS = [
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
-] as const;
+export const PROTOCOL_LIST = Object.values(PROTOCOLS);
 
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
-export const PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS = 'AccountDetailsTransactions';
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS = 'AccountDetailsTokens';
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES = 'AccountDetailsNames';
 export const PROTOCOL_VIEW_TRANSACTION_DETAILS = 'TransactionDetails';
@@ -32,7 +25,6 @@ export const PROTOCOL_VIEW_TRANSFER_SEND = 'TransferSendModal';
  */
 export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-  PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
@@ -85,56 +77,48 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
 export const NOTIFICATION_STATUS_READ = 'READ';
 
-export const NOTIFICATION_TYPE_WALLET = 'wallet';
-export const NOTIFICATION_TYPE_COMMENT_ON_TIP = 'COMMENT_ON_TIP';
-export const NOTIFICATION_TYPE_COMMENT_ON_COMMENT = 'COMMENT_ON_COMMENT';
-export const NOTIFICATION_TYPE_TIP_ON_COMMENT = 'TIP_ON_COMMENT';
-export const NOTIFICATION_TYPE_CLAIM_OF_TIP = 'CLAIM_OF_TIP';
-export const NOTIFICATION_TYPE_CLAIM_OF_RETIP = 'CLAIM_OF_RETIP';
-export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
+export const NOTIFICATION_TYPES = {
+  wallet: 'wallet',
+  commentOnTip: 'COMMENT_ON_TIP',
+  commentOnComment: 'COMMENT_ON_COMMENT',
+  tipOnComment: 'TIP_ON_COMMENT',
+  claimOfTip: 'CLAIM_OF_TIP',
+  claimOfRetip: 'CLAIM_OF_RETIP',
+  retipOnTip: 'RETIP_ON_TIP',
+} as const;
 
 export const AENS = 'AENS';
 export const DEX = 'DEX';
 
-export const DASHBOARD_TRANSACTION_LIMIT = 3;
-
-export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
-  {
-    text: tg('pages.notification-settings.wallet'),
-    checked: true,
-    type: NOTIFICATION_TYPE_WALLET,
-  },
-  {
-    text: tg('pages.notification-settings.commentOnTip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_COMMENT_ON_TIP,
-  },
-  {
-    text: tg('pages.notification-settings.commentOnComment'),
-    checked: false,
-    type: NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
-  },
-  {
-    text: tg('pages.notification-settings.retipOnTip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_RETIP_ON_TIP,
-  },
-  {
-    text: tg('pages.notification-settings.tipOnComment'),
-    checked: true,
-    type: NOTIFICATION_TYPE_TIP_ON_COMMENT,
-  },
-  {
-    text: tg('pages.notification-settings.claimOfTip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_CLAIM_OF_TIP,
-  },
-  {
-    text: tg('pages.notification-settings.claimOfRetip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_CLAIM_OF_RETIP,
-  },
-];
+/**
+ * List of string keys used to save app data in user's device (local/browser storage).
+ * Doing any change to the existing values would require creating migration.
+ */
+export const STORAGE_KEYS = {
+  mnemonic: 'mnemonic',
+  accountsRaw: 'accounts-raw',
+  activeAccountGlobalIdx: 'active-account-global-idx',
+  protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',
+  balances: 'balances',
+  customNetworks: 'custom-networks',
+  activeNetworkName: 'active-network-name',
+  hiddenCards: 'hidden-cards',
+  otherSettings: 'other-settings',
+  errorLog: 'error-log',
+  invites: 'invites',
+  namesOwned: 'names-owned',
+  namesDefault: 'names-default',
+  notificationsSettings: 'notifications-settings',
+  lastRoute: 'last-route',
+  fungibleTokenList: 'fungible-token-list',
+  fungibleTokenBalances: 'fungible-token-balances',
+  permissions: 'permissions',
+  appsBrowserHistory: 'apps-browser-history',
+  transactionsLatest: 'transactions-latest',
+  transactionsLoaded: 'transactions-loaded',
+  transactionsPending: 'transactions-pending',
+  transferSendData: 'transfer-send-data',
+} as const;
 
 export const CURRENCIES: ICurrency[] = [
   {
@@ -340,7 +324,6 @@ export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
-export const POPUP_TYPE_TX_SIGN = METHODS.sign;
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
@@ -348,11 +331,16 @@ export const POPUP_TYPES = [
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  POPUP_TYPE_TX_SIGN,
 ] as const;
 
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
 export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
+
+export const POPUP_ACTIONS = {
+  getProps: 'getProps',
+  resolve: 'resolve',
+  reject: 'reject',
+} as const;
 
 export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
@@ -362,7 +350,7 @@ export const PERMISSION_DEFAULTS: IPermission = {
   messageSign: false,
   dailySpendLimit: false,
   transactionSignLimit: 0,
-  transactionSignLimitLeft: 0,
+  transactionSignSpent: 0,
   transactionSignFirstAskedOn: null,
 };
 
@@ -374,7 +362,7 @@ export const INPUT_MESSAGE_STATUSES = {
   error: 'error',
 } as const;
 
-export const DASHBOARD_CARD_ID = {
+export const DASHBOARD_CARD_ID: Record<string, string | null> = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',
@@ -391,8 +379,18 @@ export const ALLOWED_ICON_STATUSES = [
   'warning',
 ] as const;
 
-export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';
-export const TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY = 'transfer-send-data';
+/**
+ * Pixel size is defined in css variables in global.scss
+ */
+export const ICON_SIZES = {
+  xs: 'xs', // 12px
+  sm: 'sm', // 16px
+  rg: 'rg', // 18px
+  md: 'md', // 20px
+  lg: 'lg', // 24px
+  xl: 'xl', // 28px
+  xxl: 'xxl', // 30px
+} as const;
 
 export const TRANSFER_SEND_STEPS = {
   form: 'form',
@@ -412,3 +410,15 @@ export const BROWSER_ACTIONS = {
 } as const;
 
 export const PAGE_TRANSITION_DURATION = 150;
+
+export const MAX_BROWSER_HISTORY_ITEMS = 10;
+
+export const ASSET_TYPES = {
+  coin: 'coin',
+  token: 'token',
+} as const;
+
+/** 10 minutes is the time we are 100% sure the transaction was mined */
+export const TRANSACTION_CERTAINLY_MINED_TIME = 600000;
+
+export const POLLING_INTERVAL_TRANSACTIONS = 15000;

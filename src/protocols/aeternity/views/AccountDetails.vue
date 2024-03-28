@@ -1,7 +1,10 @@
 <template>
   <IonPage>
     <IonContent class="account-ion-content">
-      <AccountDetailsBase class="account-details">
+      <AccountDetailsBase
+        v-if="pageDidEnter"
+        class="account-details"
+      >
         <template #buttons>
           <BtnBox
             v-if="isNodeMainnet && UNFINISHED_FEATURES"
@@ -25,7 +28,13 @@
         </template>
 
         <template #navigation>
-          <AccountDetailsNavigation />
+          <AccountDetailsNavigation
+            :route-names="[
+              ROUTE_ACCOUNT_DETAILS,
+              ROUTE_ACCOUNT_DETAILS_ASSETS,
+              ROUTE_ACCOUNT_DETAILS_NAMES,
+            ]"
+          />
         </template>
       </AccountDetailsBase>
     </IonContent>
@@ -33,8 +42,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import {
+  computed,
+  defineComponent,
+} from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 import {
   IS_MOBILE_APP,
@@ -47,8 +58,14 @@ import {
   useConnection,
   useAeSdk,
 } from '@/composables';
+import {
+  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_ASSETS,
+  ROUTE_ACCOUNT_DETAILS_NAMES,
+  ROUTE_APPS_BROWSER,
+} from '@/popup/router/routeNames';
 import { AE_DEX_URL } from '@/protocols/aeternity/config';
-import { ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
+import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
 import AccountDetailsNavigation from '@/popup/components/AccountDetailsNavigation.vue';
@@ -68,21 +85,23 @@ export default defineComponent({
     IonPage,
     IonContent,
   },
+  props: {
+    pageDidEnter: Boolean,
+  },
   setup() {
-    const store = useStore();
     const { isOnline } = useConnection();
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
+    const { activeAccount } = useAccounts();
 
-    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
-
-    const {
-      activeAccount,
-      activeAccountSimplexLink,
-      activeAccountFaucetUrl,
-    } = useAccounts({ store });
+    const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
+    const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
     return {
       UNFINISHED_FEATURES,
       ROUTE_APPS_BROWSER,
+      ROUTE_ACCOUNT_DETAILS,
+      ROUTE_ACCOUNT_DETAILS_ASSETS,
+      ROUTE_ACCOUNT_DETAILS_NAMES,
       AE_DEX_URL,
       IS_MOBILE_APP,
       IS_IOS,

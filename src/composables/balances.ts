@@ -2,30 +2,29 @@ import { computed } from 'vue';
 import { mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
+  AccountAddress,
   Balance,
   BalanceRaw,
-  IDefaultComposableOptions,
 } from '@/types';
+import { STORAGE_KEYS } from '@/constants';
 import { handleUnknownError, isNotFoundError } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from '@/composables/currencies';
-import {
-  createPollingBasedOnMountedComponents,
-  useStorageRef,
-} from './composablesHelpers';
+import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAccounts } from './accounts';
-import { createNetworkWatcher } from './networks';
+import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
 
-type Balances = Record<string, Balance>;
+type Balances = Record<AccountAddress, Balance>;
+
+let composableInitialized = false;
 
 // TODO: Set it to 3000 once the own middleware is ready
 const POLLING_INTERVAL = 5000;
-const LOCAL_STORAGE_BALANCES_KEY = 'balances';
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
-const balances = useStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
+const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
   serializer: {
     read: (val) => mapValues(val, (balance: BalanceRaw) => new BigNumber(balance)),
     write: (val) => mapValues(val, (balance) => balance.toFixed()),
@@ -36,9 +35,10 @@ const balances = useStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
  * This composable detects if any app components requires balances data and polls the API
  * to live update the values. If no components are using it the polling stops.
  */
-export function useBalances({ store }: IDefaultComposableOptions) {
-  const { activeAccount, accounts } = useAccounts({ store });
-  const { getCurrentCurrencyRate } = useCurrencies({ store });
+export function useBalances() {
+  const { activeAccount, accounts } = useAccounts();
+  const { onNetworkChange } = useNetworks();
+  const { getCurrentCurrencyRate } = useCurrencies();
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
 
@@ -62,7 +62,8 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   }
 
   async function updateBalances() {
-    const balancesPromises = accounts.value.map(
+    const accountsCached = accounts.value; // Store the accounts for the time of update process
+    const balancesPromises = accountsCached.map(
       async ({
         address,
         protocol,
@@ -74,20 +75,20 @@ export function useBalances({ store }: IDefaultComposableOptions) {
       }),
     );
     const rawBalances = await Promise.all(balancesPromises);
-    balances.value = rawBalances.reduce(
-      (acc, val, index) => ({
-        ...acc,
-        [accounts.value[index].address]: BigNumber(val),
-      }),
-      {},
-    );
+    balances.value = Object.fromEntries(rawBalances.map(
+      (val, index) => [accountsCached[index].address, BigNumber(val || 0)],
+    ));
   }
 
-  onNetworkChange(() => {
-    updateBalances();
-  });
-
   initPollingWatcher(() => updateBalances());
+
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    onNetworkChange(() => {
+      updateBalances();
+    });
+  }
 
   return {
     balances,

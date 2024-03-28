@@ -10,12 +10,11 @@ import { AeTippingContractAddresses, IAeNetworkPredefinedSettings, IAeNetworkSet
 
 export * from './libs/multisig';
 
-export const AE_CONTRACT_ID = 'aeternity';
-export const AE_SYMBOL = 'AE';
-export const AE_SYMBOL_SHORT = '\xC6';
-export const AE_COIN_SYMBOL = 'AE Coin';
-export const AE_COIN_NAME = 'Aeternity';
 export const AE_PROTOCOL_NAME = 'æternity';
+export const AE_CONTRACT_ID = 'aeternity';
+
+export const AE_COIN_NAME = 'Æ Coin';
+export const AE_SYMBOL = 'AE'; // TODO rename to `AE_COIN_SYMBOL`
 export const AE_COIN_PRECISION = 18; // Amount of decimals
 
 export const AE_COINGECKO_COIN_ID = 'aeternity';
@@ -128,6 +127,8 @@ export const TX_FUNCTIONS = {
   pendingTipToken: 'pending_tip_token',
   payForGaAttach: 'pay_for_ga_attach',
   gaMetaSpend: 'ga_meta_spend',
+  /** For example Connecting to superhero.chat */
+  verifyAccount: 'verify_account',
 } as const;
 
 /**
@@ -282,3 +283,8 @@ export const AE_TIPPING_CONTRACTS_TESTNET: AeTippingContractAddresses = {
   tippingV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
   tippingV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
 };
+
+export const UPDATE_POINTER_ACTION = {
+  update: 'update',
+  extend: 'extend',
+} as const;

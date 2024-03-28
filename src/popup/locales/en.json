@@ -42,6 +42,7 @@
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
+    "unrecognized": "Unrecognized",
     "you": "You",
     "verifying": "Verifying",
     "max": "MAX",
@@ -50,7 +51,9 @@
       "fast": "Fast",
       "medium": "Medium",
       "slow": "Slow"
-    }
+    },
+    "actionMayTakeFewMoments": "This may take a few moments.",
+    "backToHome": "Proceed to dashboard"
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -68,6 +71,7 @@
     "notVerified": "Not verified"
   },
   "dashboard": {
+    "selectAccount": "Select active account",
     "receiveCard": {
       "description": "from existing wallet",
       "descriptionMultisig": "to multisig vault"
@@ -201,14 +205,15 @@
     },
     "creatingMultisigAccount": {
       "title": "Creating vault progress",
-      "btnText": "Go to multisig vault",
-      "vaultAccessibleMessage": "It's ready! Your new multisig vault is added to Superhero wallet.",
-      "vaultCreatedMessage": "You may proceed and explore your newly created vault.",
-      "vaultCreatedMessageSub": "However it will become visible to the other authorized signers in a short period of time (usually it takes between 30 seconds and 1 minute).",
+      "btnText": "Go to wallet dashboard",
+      "vaultAccessibleMessage": "Multisig vault has been successfully added to you wallet dashboard.",
+      "vaultCreatedMessage": "You may proceed to wallet dashboard.",
+      "vaultCreatedMessageSub": "Your newly created multisig vault will become visible to other authorized signers in a short period of time (usually it takes about a minute or two).",
       "preparingMultisigVault": "Preparing multisig vault",
       "deployingSmartContract": "Deploying smart contract",
       "creatingMultisigVault": "Creating multisig vault account",
       "addingToWallet": "Adding multisig vault to the wallet",
+      "addingToWalletCard": "Adding to wallet...",
       "syncingVault": "Syncing multisig vault",
       "takingLong": "This step may take a few moments.",
       "syncing": "Syncing..."
@@ -341,6 +346,7 @@
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
       "recipientPlaceholderProtocol": "Enter {name} public address",
+      "recipientPlaceholderENS": "or ENS name",
       "transactionSpeed": "Transaction speed",
       "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
       "payload": "Payload"
@@ -570,7 +576,8 @@
       "viewMore": "View full transaction history",
       "noTransactionsFound": "There are no recent transactions for this account.",
       "searchPlaceholder": "Search transactions by asset name",
-      "unknownMode": "Unknown display mode type:"
+      "unknownMode": "Unknown display mode type:",
+      "transactionListEnd": "There are no older transactions for this account."
     },
     "advancedSettings": {
       "heading": "Advanced",
@@ -621,23 +628,10 @@
       "connecting": "Connecting"
     },
     "fungible-tokens": {
-      "add": "Add Fungible Token",
-      "add-info": "This allows you to add token from given deployed fungible token contract",
-      "deploy": "Deploy Token",
-      "deploy-info": "This allows you to deploy your own fungible token contract",
-      "allowances": "Allowances",
-      "allowances-info": "Give or take an allowance",
-      "mint-info": "This allows you to mint or burn token amount",
-      "tokens": "Tokens",
+      "tokens": "Tokens | Token | Tokens",
       "searchPlaceholder": "Search by token name or contract address",
       "searchAssetsPlaceholder": "Search for assets",
-      "myTokens": "My Tokens",
-      "mcap": "MCap",
-      "price": "Price",
-      "not-available": "N/A",
-      "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "receiveTokens": "Receive tokens",
       "select-asset": "Select asset"
     },
     "token-details": {
@@ -647,6 +641,7 @@
       "token-details": "Token details",
       "coin-details": "Coin details",
       "token": "Token",
+      "name": "Name",
       "coin": "Coin",
       "token-description": "Token Description",
       "community": "Community",
@@ -655,7 +650,7 @@
       "total-supply": "Total supply",
       "max-supply": "Max supply",
       "supply": "Supply",
-      "price-ae": "Price (AE)",
+      "priceAe": "Price (AE)",
       "price": "Price",
       "volume": "Total Volume",
       "volumeDaily": "Volume (24h)",
@@ -663,7 +658,7 @@
       "market-cap": "Market Cap",
       "atl-change": "All time low",
       "ath-change": "All time high",
-      "chart": "Chart",
+      "more": "More",
       "poolShare": "Pool share",
       "holders": "Holders",
       "transactions": "Transactions",
@@ -773,7 +768,8 @@
       "accountNotFound": "Account not found. Please check again your seed phrase.",
       "invalidSeed": "Your seed phrase should consist of 12 words or more separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here",
-      "scanSeedPhrase": "Scan Seed Phrase"
+      "scanSeedPhrase": "Scan Seed Phrase",
+      "restoringAccounts": "Restoring accounts..."
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "How to connect from Ledger",
@@ -796,7 +792,7 @@
       "goToStore": "Go to store",
       "noNotifications": "You do not have any unread notifications."
     },
-    "notification-settings": {
+    "notificationSettings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",
       "description2": "You can choose below which notifications to receive from social platform Superhero.com.",
       "commentOnTip": "Someone commented on your tip or post.",
@@ -827,7 +823,7 @@
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.",
+      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as password to access and restore your wallet accounts.",
       "seedRecoverySmall-2": "Never disclose this to anyone.",
       "seedRecoverySmall-3": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
       "seedRecoverySmall-4": "Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
@@ -837,7 +833,7 @@
       "copy": "Copy to clipboard",
       "this-your-seed-phrase": "This is your seed phrase. Keep it safe!",
       "confirm-that-you-save-your-seed-phrase": "Confirm that you got your seed phrase correctly.",
-      "compose-your-seed-phrase": "Tap the words below {0} to  compose your seed phrase.",
+      "compose-your-seed-phrase": "Tap the words below {0} to compose your seed phrase.",
       "in-correct-order": "in the correct order",
       "seed-phrase-correct": "Seed phrase has been verified!",
       "seed-phrase-incorrect": "Seed phrase words are not in the correct order. Please enter your seed phrase again!"
@@ -958,7 +954,7 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
-      "url": "Send Tip to",
+      "url": "Send tip to",
       "claimingExplanation": "With Superhero wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
       "minAmountError": "Tips should be over 0.01 USD in tokens."
@@ -1102,6 +1098,8 @@
       "networkMiddlewareLabel": "Network middleware",
       "backendUrlPlaceholder": "Enter tipping Backend URL",
       "backendUrlLabel": "Tipping backend",
+      "chainIdPlaceholder": "0x1",
+      "chainIdLabel": "Chain id (hex)",
       "showTippingConfig": "Show Tipping Configuration",
       "hideTippingConfig": "Hide Tipping Configuration",
       "save": "Connect",
@@ -1164,6 +1162,7 @@
     },
     "appsBrowser": {
       "popularApps": "Featured",
+      "recentApps": "Latest visited",
       "inputPlaceholder": "Enter URL"
     },
     "warningDappBrowser": {
@@ -1195,19 +1194,21 @@
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "Invalid address or .chain name",
     "nameUnregistered": "This name has already been registered.",
-    "notSameAs": "Sender and receiver address are the same. You will send {0} to your own account.",
+    "addressNotSameAs": "Sender and receiver address are the same. You will send {0} to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
-    "addressBtc": "Invalid BTC address",
+    "addressGeneric": "Invalid {protocol} address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughCoin": "Not enough {0} balance",
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxLength": "The value should be no longer than {0} characters",
     "maxValue": "This field must be {0} or less",
+    "hexFormat": "The value should be in hex format",
     "maxRedeem": "Maximum redeemable amount is {0} AE.",
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",
-    "invalidAddress": "Invalid account address"
+    "invalidAddress": "Invalid account address",
+    "doesNotExceedDecimals": "Amount should not exceed {0} decimals"
   }
 }

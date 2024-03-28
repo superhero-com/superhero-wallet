@@ -4,26 +4,32 @@
       <div class="retip">
         <BalanceInfo
           :balance="numericBalance"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
-        <div class="section-title">
-          {{ $t('pages.tipPage.url') }}
-        </div>
 
-        <div
-          v-if="urlStatus"
-          class="url-bar"
+        <DetailsItem
+          v-if="tip.url"
+          class="url-info"
+          :label="$t('pages.tipPage.url')"
         >
-          <UrlStatus :status="urlStatus" />
-          <a>{{ tip.url }}</a>
-        </div>
+          <a
+            :href="tip.url"
+            class="url"
+            v-text="tip.url"
+          />
+          <UrlStatus
+            v-if="urlStatus"
+            :status="urlStatus"
+          />
+        </DetailsItem>
 
         <Field
-          v-slot="{ field, errorMessage}"
+          v-slot="{ field, errorMessage }"
           name="amount"
           :rules="{
             required: true,
             min_value_exclusive: 0,
+            does_not_exceed_decimals: formModel?.selectedAsset?.decimals,
             ae_min_tip_amount: true,
             ...+balance.minus(fee) > 0 ? { max_value: max } : {},
             enough_coin: fee.toString(),
@@ -36,7 +42,7 @@
             class="amount-input"
             readonly
             :message="errorMessage"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </Field>
 
@@ -47,24 +53,23 @@
           {{ tip.title }}
         </div>
 
-        <BtnMain
-          class="bottom-btn"
-          extend
-          :disabled="!isTippingSupported || errorAmount"
-          @click="sendTip"
-        >
-          {{ $t('common.confirm') }}
-        </BtnMain>
-        <BtnMain
-          class="bottom-btn"
-          extend
-          @click="openCallbackOrGoHome(false)"
-        >
-          {{ $t('common.cancel') }}
-        </BtnMain>
+        <div class="button-wrapper">
+          <BtnMain
+            variant="muted"
+            extra-padded
+            :text="$t('common.cancel')"
+            @click="openCallbackOrGoHome(false)"
+          />
+          <BtnMain
+            wide
+            :disabled="!isTippingSupported || errorAmount"
+            :text="$t('common.confirm')"
+            @click="sendTip"
+          />
+        </div>
       </div>
-    </ioncontent>
-  </ionpage>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -77,7 +82,6 @@ import {
 } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
 import type {
@@ -87,27 +91,28 @@ import type {
 } from '@/types';
 import { toShiftedBigNumber } from '@/utils';
 import {
+  useAccounts,
+  useAeSdk,
+  useBalances,
   useCurrencies,
   useDeepLinkApi,
+  useFungibleTokens,
+  useLatestTransactionList,
   useMaxAmount,
-  useBalances,
   useModals,
-  useAccounts,
   useTippingContracts,
-  useAeSdk,
-  useTransactionList,
   useUi,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { useAeTippingBackend } from '@/protocols/aeternity/composables';
-import { useGetter } from '../../composables/vuex';
+import { PROTOCOLS } from '@/constants';
+import { useAeTippingBackend, useAeTippingUrls } from '@/protocols/aeternity/composables';
+
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
+import DetailsItem from '../components/DetailsItem.vue';
 
 export default defineComponent({
   name: 'Retip',
@@ -119,9 +124,9 @@ export default defineComponent({
     Field,
     IonPage,
     IonContent,
+    DetailsItem,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
     const errorAmount = useFieldError();
@@ -131,32 +136,34 @@ export default defineComponent({
       amount: '',
     });
     const { getCacheTip } = useAeTippingBackend();
-    const { isTippingSupported } = useAeSdk({ store });
+    const { isTippingSupported } = useAeSdk();
     const { openDefaultModal } = useModals();
-    const { marketData } = useCurrencies({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { marketData } = useCurrencies();
+    const { getLastActiveProtocolAccount } = useAccounts();
     const { openCallbackOrGoHome } = useDeepLinkApi();
-    const { balance } = useBalances({ store });
-    const { max, fee } = useMaxAmount({ formModel, store });
-    const { getTippingContracts } = useTippingContracts({ store });
-    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
+    const { balance } = useBalances();
+    const { max, fee } = useMaxAmount({ formModel });
+    const { getTippingContracts } = useTippingContracts();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
+    const { getTippingUrlStatus } = useAeTippingUrls();
+    const { createOrChangeAllowance } = useFungibleTokens();
 
     const tipId = route.query.id;
-    const tip = ref<{ url: string, id: string }>({
+    const tip = ref<{ url: string; id: string; title?: string }>({
       url: 'default',
       id: '',
     });
 
-    const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
+    const urlStatus = computed(() => getTippingUrlStatus(tip.value.url));
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     async function sendTip() {
       const precision = (formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID)
-        ? (formModel.value.selectedAsset as IToken).decimals
+        ? (formModel.value.selectedAsset as IToken).decimals!
         : AE_COIN_PRECISION;
       const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
-      const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+      const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
       setLoaderVisible(true);
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
@@ -172,11 +179,9 @@ export default defineComponent({
           && formModel.value.selectedAsset?.contractId
           && formModel.value.selectedAsset.contractId !== AE_CONTRACT_ID
         ) {
-          await store.dispatch(
-            'fungibleTokens/createOrChangeAllowance',
-            [
-              formModel.value.selectedAsset.contractId,
-              formModel.value.amount],
+          await createOrChangeAllowance(
+            formModel.value.selectedAsset.contractId,
+            formModel.value.amount || 0,
           );
 
           retipResponse = await tippingV2.retip_token(
@@ -200,6 +205,7 @@ export default defineComponent({
           hash: retipResponse.hash,
           tipUrl: tip.value.url,
           pending: true,
+          protocol: PROTOCOLS.aeternity,
           transactionOwner: account.address,
           tx: {
             amount,
@@ -212,7 +218,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        upsertCustomPendingTransactionForAccount(account.address, transaction);
+        addAccountPendingTransaction(account.address, transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
@@ -229,7 +235,7 @@ export default defineComponent({
     onMounted(async () => {
       setLoaderVisible(true);
       formModel.value.selectedAsset = ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value);
 
       if (!tipId) throw new Error('"id" param is missing');
@@ -244,7 +250,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       tip,
       formModel,
       urlStatus,
@@ -268,44 +274,24 @@ export default defineComponent({
 .retip {
   padding: 16px;
 
-  .url-bar {
-    display: flex;
-    align-items: center;
+  .url-info {
+    margin-block: 30px 20px;
 
-    svg {
-      width: 24px;
-      height: 24px;
-    }
+    .url {
+      @extend %face-sans-14-medium;
 
-    > a {
+      display: block;
+      margin-bottom: 2px;
       overflow-wrap: anywhere;
-      text-align: left;
+      line-height: 1.4em;
       color: variables.$color-white;
-      flex-grow: 1;
       text-decoration: none;
-      width: 90%;
-      margin: 8px 0 8px 10px;
-
-      @extend %face-sans-11-regular;
     }
   }
 
-  .input-field + .button {
-    margin-top: 50px;
-  }
-
-  .section-title {
-    margin-bottom: 8px;
-    margin-top: 16px;
-    color: variables.$color-white;
-    text-align: left;
-
-    @extend %face-sans-16-regular;
-  }
-
-  .bottom-btn {
-    max-width: 280px;
-    margin: 10px auto 0;
+  .button-wrapper {
+    display: flex;
+    gap: var(--gap);
   }
 }
 </style>

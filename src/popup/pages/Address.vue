@@ -5,7 +5,6 @@
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
 import { computed, defineComponent, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import type { IAppData } from '@/types';
 import {
   useAccounts,
@@ -23,11 +22,9 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
-
-    const { nodeNetworkId } = useAeSdk({ store });
+    const { nodeNetworkId } = useAeSdk();
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { openModal } = useModals();
 
     const app = computed((): IAppData => callbackOrigin.value ? {

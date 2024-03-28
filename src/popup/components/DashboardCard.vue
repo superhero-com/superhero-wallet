@@ -20,21 +20,24 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { VueI18nTranslation } from 'vue-i18n';
 
 import Card from './Card.vue';
 import BtnMain from './buttons/BtnMain.vue';
+import { BtnVariant } from './buttons/BtnBase.vue';
 
 export default defineComponent({
-  components: { BtnMain, Card },
+  components: {
+    BtnMain,
+    Card,
+  },
   props: {
-    title: { type: String as PropType<string | VueI18nTranslation>, required: true },
-    description: { type: String as PropType<string | VueI18nTranslation>, required: true },
-    btnText: { type: String as PropType<string | VueI18nTranslation>, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    btnText: { type: String, required: true },
     background: { type: String, default: null },
-    variant: { type: String, default: 'secondary' },
+    variant: { type: String as PropType<BtnVariant>, default: 'secondary' },
     href: { type: String, default: null },
-    cardId: { type: String, default: null },
+    cardId: { type: String as PropType<string | null>, default: null },
     to: { type: Object, default: null },
     icon: { type: Object, default: null },
   },

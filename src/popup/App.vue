@@ -14,6 +14,7 @@
         v-if="qrScannerOpen"
         id="camera-close-btn"
         class="camera-close-button"
+        type="button"
       >
         <Close />
       </button>
@@ -28,7 +29,7 @@
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-          :class="{ 'show-header': delayedShowHeader, 'ios': IS_IOS }"
+          :class="{ 'show-header': delayedShowHeader, ios: IS_IOS }"
           class="main"
         />
 
@@ -40,7 +41,9 @@
         <Component
           v-bind="props"
           :is="component"
-          v-for="({ component, key, props, viewComponentName }) in modalsOpen"
+          v-for="({
+            component, key, props, viewComponentName,
+          }) in modalsOpen"
           :key="key"
           :view-component-name="viewComponentName"
         />
@@ -65,11 +68,9 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
-import { watchUntilTruthy } from '@/utils';
 import {
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
@@ -80,22 +81,22 @@ import {
   IS_EXTENSION,
   IS_CHROME_BASED,
   IS_FIREFOX,
-  NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
   PAGE_TRANSITION_DURATION,
 } from '@/constants';
+import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useConnection,
   useCurrencies,
+  useLanguages,
   useModals,
   useMultisigAccounts,
   useNotifications,
   useUi,
 } from '@/composables';
-import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
 
 import Header from '@/popup/components/Header.vue';
@@ -115,30 +116,28 @@ export default defineComponent({
     Loader,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
-    const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
     const {
+      isSeedBackedUp,
       qrScannerOpen,
       isLoaderVisible,
       initVisibilityListeners,
     } = useUi();
     const { modalsOpen } = useModals();
-    const { isLoggedIn } = useAccounts({ store });
-    const { addWalletNotification } = useNotifications({ store });
-    const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
+    const { isLoggedIn } = useAccounts();
+    const { addWalletNotification } = useNotifications();
+    const { loadCoinsData } = useCurrencies({ pollingDisabled: true });
+    const { restoreLanguage } = useLanguages();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
-    const { multisigAccounts } = useMultisigAccounts({ store, pollingDisabled: true });
+    const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
     const delayedShowHeader = ref(false);
 
-    const isRestored = computed(() => store.state.isRestored);
-    const backedUpSeed = computed(() => store.state.backedUpSeed);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -159,7 +158,7 @@ export default defineComponent({
     }
 
     async function checkExtensionUpdates() {
-      // `requestUpdateCheck` does not exists in the `runtime` type
+      // `requestUpdateCheck` does not exist in the `runtime` type
       // because this feature is available only for selected browsers.
       const updateCheck = (browser?.runtime as any)?.requestUpdateCheck;
 
@@ -183,19 +182,8 @@ export default defineComponent({
       }
     }
 
-    async function setNotificationSettings() {
-      await watchUntilTruthy(isRestored);
-      if (store.state.notificationSettings.length === 0) {
-        store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
-      }
-    }
-
-    async function fetchAndSetChainNames() {
-      store.commit('setChainNames', await getCacheChainNames());
-    }
-
-    watch(isLoggedIn, (val) => {
-      if (val && !backedUpSeed.value) {
+    async function verifyBackedUpSeed() {
+      if (!isSeedBackedUp.value) {
         addWalletNotification({
           title: t('pages.account.secureYourAccount'),
           text: t('pages.account.seedNotification'),
@@ -204,7 +192,7 @@ export default defineComponent({
           isSeedBackup: true,
         });
       }
-    });
+    }
 
     watch(() => route.fullPath, () => {
       if (innerElement.value) {
@@ -253,9 +241,12 @@ export default defineComponent({
       }
     });
 
-    onMounted(async () => {
+    onMounted(() => {
       setDocumentHeight();
       checkExtensionUpdates();
+      restoreLanguage();
+      restoreTransferSendForm();
+      watchConnectionStatus();
 
       // Hide splash screen programmatically when app is ready
       // to avoid white screen on app start
@@ -267,17 +258,15 @@ export default defineComponent({
         }, 2000);
       }
 
-      watchConnectionStatus();
-
-      restoreTransferSendForm();
-
       if (!RUNNING_IN_POPUP) {
-        Promise.allSettled([
-          loadCoinsData(),
-          fetchAndSetChainNames(),
-          setNotificationSettings(),
-        ]);
+        loadCoinsData();
       }
+
+      watchUntilTruthy(isLoggedIn).then(() => {
+        setTimeout(() => {
+          verifyBackedUpSeed();
+        }, 100);
+      });
     });
 
     return {
@@ -374,6 +363,7 @@ export default defineComponent({
     }
 
     // Imitate the appearance of the mobile/extension app in a desktop browser
+
     &.is-desktop-web {
       --screen-border-radius: #{variables.$border-radius-app};
 

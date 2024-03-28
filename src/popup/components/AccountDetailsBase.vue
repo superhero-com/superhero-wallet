@@ -1,5 +1,8 @@
 <template>
-  <div class="account-details">
+  <div
+    class="account-details"
+    :data-account-address="activeAccount.address"
+  >
     <div class="account-info-wrapper">
       <slot
         v-if="$slots['account-info']"
@@ -7,14 +10,12 @@
       />
       <AccountInfo
         v-else
-        :address="activeAccount.address"
-        :name="activeAccount.name"
-        :idx="activeAccount.idx"
-        :protocol="activeAccount.protocol"
+        :account="activeAccount"
         can-copy-address
-        with-protocol-icon
+        show-protocol-icon
       />
       <BtnClose
+        data-cy="btn-close"
         class="close-button"
         @click="close"
       />
@@ -49,14 +50,14 @@
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
-          :key="routeName"
-          :show-filters="showFilters"
+          :key="routeName!"
+          :show-filters="isScrollEnabled"
         />
       </div>
 
       <div
         class="tabs-content"
-        :style="{ height: routerHeight || '350px' }"
+        :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px` }"
       >
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
@@ -75,30 +76,29 @@ import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
-  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
-  watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
 
 import {
   useAccounts,
   useBalances,
-  useTransactionAndTokenFilter,
   useUi,
   useScrollConfig,
 } from '@/composables';
+import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+
 import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
-import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+
+const INITIAL_TABS_HEIGHT = 330;
 
 export default defineComponent({
   name: 'AccountDetailsBase',
@@ -116,28 +116,19 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const store = useStore();
     const ionRouter = useIonRouter();
 
-    const { activeAccount } = useAccounts({ store });
-
-    const { resetFilter } = useTransactionAndTokenFilter();
-
+    const { activeAccount } = useAccounts();
     const { isScrollEnabled } = useScrollConfig();
-
     const { homeRouteName } = useUi();
-
-    const { balance } = useBalances({ store });
+    const { balance } = useBalances();
 
     const routerHeight = ref<string>();
-
     const headerEl = ref<HTMLDivElement>();
+    const resizeObserver = ref<ResizeObserver>();
 
     const balanceNumeric = computed(() => balance.value.toNumber());
-
     const routeName = computed(() => route.name);
-
-    const showFilters = computed<boolean>(() => (isScrollEnabled.value));
 
     function calculateRouterHeight() {
       const ionicWrapperBottom = document.querySelector('#app-wrapper')?.getBoundingClientRect()?.bottom;
@@ -155,34 +146,26 @@ export default defineComponent({
      * Tabs change height when filters are shown/hidden
      */
     function observeTabsHeight() {
-      const resizeObserver = new ResizeObserver(() => {
-        nextTick(() => {
-          calculateRouterHeight();
-        });
-      });
-      resizeObserver.observe(headerEl.value!);
+      resizeObserver.value = new ResizeObserver(calculateRouterHeight);
+      resizeObserver.value.observe(headerEl.value!);
     }
 
-    watch(
-      () => route,
-      () => {
-        resetFilter();
-      },
-    );
-
     onMounted(() => {
+      observeTabsHeight();
+      // The timeout ensures that the height is calculated correctly in some edge cases
+      setTimeout(() => {
+        calculateRouterHeight();
+      }, 150);
+
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#191919',
         });
       }
-      setTimeout(() => {
-        observeTabsHeight();
-        calculateRouterHeight();
-      }, 250);
     });
 
     onBeforeUnmount(() => {
+      resizeObserver.value?.disconnect();
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#141414',
@@ -194,13 +177,14 @@ export default defineComponent({
       close,
       headerEl,
       homeRouteName,
-      showFilters,
       routeName,
       balanceNumeric,
       activeAccount,
       routerHeight,
+      isScrollEnabled,
       fadeAnimation,
       IS_FIREFOX,
+      INITIAL_TABS_HEIGHT,
     };
   },
 });

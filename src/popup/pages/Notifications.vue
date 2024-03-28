@@ -7,8 +7,7 @@
       >
         <InfiniteScroll
           v-if="notificationsToShow.length"
-          :is-more-data="canLoadMore"
-          @loadMore="loadMoreNotifications"
+          @load-more="loadMoreNotifications"
         >
           <NotificationItem
             v-for="notification in notificationsToShow"
@@ -36,13 +35,11 @@ import {
   nextTick,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { IS_EXTENSION } from '@/constants';
+import { useViewport, useNotifications } from '@/composables';
 
-import { useViewport } from '@/composables';
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
-import { useNotifications } from '../../composables/notifications';
 
 export default defineComponent({
   name: 'Notifications',
@@ -53,17 +50,15 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLElement>();
 
     const {
       notificationsToShow,
-      canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
-    } = useNotifications({ store, requirePolling: true });
+    } = useNotifications({ requirePolling: true });
 
     onMounted(async () => {
       initViewport(innerElement.value?.parentElement!);
@@ -83,7 +78,6 @@ export default defineComponent({
     return {
       innerElement,
       notificationsToShow,
-      canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
     };

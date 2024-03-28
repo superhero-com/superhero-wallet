@@ -3,10 +3,7 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="tips-claim">
         <AccountInfo
-          :address="activeAccount.address"
-          :name="activeAccount.name"
-          :idx="activeAccount.idx"
-          :protocol="activeAccount.protocol"
+          :account="activeAccount"
         />
 
         <div class="header">
@@ -21,7 +18,7 @@
             :option="{
               attrs: {
                 href: AE_BLOG_CLAIM_TIP_URL,
-                target: '_blank'
+                target: '_blank',
               },
             }"
             icon="success"
@@ -36,11 +33,10 @@
 
         <BtnMain
           :disabled="!normalizedUrl || !isTippingSupported"
+          :text="$t('common.confirm')"
           extend
-          @click="handleClaimTips"
-        >
-          {{ $t('common.confirm') }}
-        </BtnMain>
+          @click="handleClaimTips()"
+        />
       </div>
     </IonContent>
   </IonPage>
@@ -53,7 +49,6 @@ import {
   ref,
   onMounted,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IonContent, IonPage } from '@ionic/vue';
@@ -67,10 +62,11 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
-
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
+
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -88,7 +84,6 @@ export default defineComponent({
   },
   setup() {
     const { t } = useI18n();
-    const store = useStore();
     const router = useRouter();
     const {
       claimTips,
@@ -96,10 +91,10 @@ export default defineComponent({
       cacheInvalidateTips,
     } = useAeTippingBackend();
 
-    const { isTippingSupported } = useAeSdk({ store });
-    const { activeAccount } = useAccounts({ store });
+    const { isTippingSupported } = useAeSdk();
+    const { activeAccount } = useAccounts();
     const { openModal, openDefaultModal } = useModals();
-    const { getTippingContracts } = useTippingContracts({ store });
+    const { getTippingContracts } = useTippingContracts();
     const { setLoaderVisible } = useUi();
 
     const tipUrl = ref('');

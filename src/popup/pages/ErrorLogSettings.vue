@@ -18,16 +18,28 @@
   </IonPage>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
-import { mapState, mapMutations } from 'vuex';
+import { useUi } from '@/composables';
+
 import SwitchButton from '../components/SwitchButton.vue';
 
-export default {
-  components: { SwitchButton, IonPage, IonContent },
-  computed: mapState(['saveErrorLog']),
-  methods: mapMutations(['setSaveErrorLog']),
-};
+export default defineComponent({
+  components: {
+    SwitchButton,
+    IonPage,
+    IonContent,
+  },
+  setup() {
+    const { saveErrorLog, setSaveErrorLog } = useUi();
+
+    return {
+      saveErrorLog,
+      setSaveErrorLog,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

@@ -40,9 +40,8 @@ import {
   watch,
 } from 'vue';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { postJson } from '@/utils';
 import {
   useAccounts,
@@ -68,23 +67,22 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
     const { setLoaderVisible } = useUi();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
+    const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const {
       aeAccountsSelectOptions,
       getLastActiveProtocolAccount,
       setActiveAccountByAddress,
-    } = useAccounts({ store });
+    } = useAccounts();
 
-    const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address);
+    const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address);
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');

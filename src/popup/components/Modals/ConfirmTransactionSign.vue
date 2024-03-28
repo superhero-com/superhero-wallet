@@ -61,7 +61,7 @@
         <template #value>
           <TokenAmount
             :amount="nameAeFee"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
       </DetailsItem>
@@ -74,9 +74,8 @@
           <TokenAmount
             :amount="tokenAmount"
             :symbol="tokenSymbol"
-            :aex9="isTransactionAex9(transactionWrapped)"
-            :hide-fiat="!swapTokenAmountData.isAe"
-            :protocol="PROTOCOL_AETERNITY"
+            :hide-fiat="!swapTokenAmountData.isWrappedCoin || isTransactionAex9(transactionWrapped)"
+            :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
         </DetailsItem>
@@ -84,7 +83,7 @@
         <DetailsItem :label="$t('transaction.fee')">
           <TokenAmount
             :amount="txAeFee"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             data-cy="fee"
           />
         </DetailsItem>
@@ -95,9 +94,9 @@
         >
           <TokenAmount
             :amount="executionCost || totalAmount"
-            :symbol="getTxSymbol(popupProps?.tx)"
-            :aex9="isTransactionAex9(transactionWrapped)"
-            :protocol="PROTOCOL_AETERNITY"
+            :symbol="singleToken.symbol"
+            :hide-fiat="isTransactionAex9(transactionWrapped)"
+            :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
         </DetailsItem>
@@ -158,10 +157,11 @@ import {
   ref,
 } from 'vue';
 import { camelCase } from 'lodash-es';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { decode, Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
+import {
+  decode, Encoded, getExecutionCost, unpackTx, Tag, getTransactionSignerAddress, buildTx,
+} from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import JsonBig from '@/lib/json-big';
@@ -173,12 +173,12 @@ import type {
   TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
-import { tg } from '@/store/plugins/languages';
 import { AeDecodedCallData } from '@/protocols/aeternity/types';
+import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
+  PROTOCOLS,
   SUPERHERO_CHAT_URLS,
-  PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
 import {
@@ -190,11 +190,10 @@ import {
 import {
   useAccounts,
   useAeSdk,
-  useDeepLinkApi,
+  useFungibleTokens,
   usePopupProps,
-  useTransactionTx,
+  useTransactionData,
 } from '@/composables';
-import { useGetter, useState } from '@/composables/vuex';
 import {
   AE_SYMBOL,
   DEX_TRANSACTION_TAGS,
@@ -250,26 +249,21 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup() {
-    const store = useStore();
     const { t } = useI18n();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { getAeSdk } = useAeSdk({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
-    const { callbackOrigin } = useDeepLinkApi();
-
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
-
+    const { getAeSdk } = useAeSdk();
+    const { getLastActiveProtocolAccount } = useAccounts();
     const { popupProps, setPopupProps } = usePopupProps();
+    const { getProtocolAvailableTokens, getTxAssetSymbol, getTxAmountTotal } = useFungibleTokens();
 
     const {
       direction,
       isDexAllowance,
       isDex,
-      setTransactionTx,
-    } = useTransactionTx({
-      store,
-      tx: popupProps.value?.tx as ITx,
+      setActiveTransaction,
+    } = useTransactionData({
+      transaction: { tx: popupProps.value?.tx } as ITransaction,
     });
 
     const showAdvanced = ref(false);
@@ -281,17 +275,12 @@ export default defineComponent({
     const verifying = ref(false);
     const decodedCallData = ref<AeDecodedCallData | undefined>();
 
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
-    const getTxSymbol = useGetter('getTxSymbol');
-    const getTxAmountTotal = useGetter('getTxAmountTotal');
-
     const isAeppChatSuperhero = computed(
-      () => callbackOrigin.value?.origin
-        && SUPERHERO_CHAT_URLS.includes(callbackOrigin.value.origin),
+      () => SUPERHERO_CHAT_URLS
+        .includes(`${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}`),
     );
-
     const transactionWrapped = computed(
-      (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
+      (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as any }),
     );
 
     const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
@@ -300,6 +289,8 @@ export default defineComponent({
     const isMinReceived = computed(() => isTxFunctionDexMinReceived(txFunction.value));
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
+
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     const swapDirection = computed(() => {
       if (isMaxSpent.value) {
@@ -320,13 +311,13 @@ export default defineComponent({
     });
 
     const totalAmount = computed(
-      () => getTxAmountTotal.value(transactionWrapped.value, direction.value),
+      () => getTxAmountTotal(transactionWrapped.value as ITransaction, direction.value),
     );
 
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol.value(popupProps.value?.tx),
+      symbol: getTxAssetSymbol(popupProps.value?.tx as any),
     }));
 
     const decodedPayload = computed(() => popupProps.value?.tx?.payload
@@ -351,7 +342,7 @@ export default defineComponent({
     ));
 
     const tokenSymbol = computed(
-      () => swapTokenAmountData.value.isAe ? AE_SYMBOL : swapTokenAmountData.value.symbol,
+      () => swapTokenAmountData.value.isWrappedCoin ? AE_SYMBOL : swapTokenAmountData.value.symbol,
     );
 
     const completeTransaction = computed(
@@ -377,7 +368,7 @@ export default defineComponent({
       }
       const tokens = resolver(
         { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
-        availableTokens.value,
+        getProtocolAvailableTokens(PROTOCOLS.aeternity),
       )?.tokens;
       if (!isPool.value) {
         return tokens;
@@ -424,12 +415,15 @@ export default defineComponent({
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(activeAccount!.address).catch((err) => {
-            if (!isNotFoundError(err)) {
-              handleUnknownError(err);
-            }
-            return 0;
-          });
+          const balance = await sdk.getBalance(
+            (popupProps.value?.fromAccount || activeAccount!.address) as Encoded.AccountAddress,
+          )
+            .catch((err) => {
+              if (!isNotFoundError(err)) {
+                handleUnknownError(err);
+              }
+              return 0;
+            });
           // We've chosen the approach to trust the aepp itself in amount of gas,
           // they think is needed
           const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
@@ -439,11 +433,11 @@ export default defineComponent({
             error.value = t('validation.enoughCoin');
             return;
           }
-          if (popupProps.value.tx?.contractId) {
-            const dryRunResult = await sdk.txDryRun(
-              popupProps.value.txBase64,
-              popupProps.value.tx.callerId || popupProps.value.tx.senderId!,
-            );
+          const txParams = unpackTx(popupProps.value.txBase64);
+          if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
+            const accountAddress = getTransactionSignerAddress(popupProps.value.txBase64);
+            txParams.nonce = (await sdk.api.getAccountByPubkey(accountAddress)).nonce + 1;
+            const dryRunResult = await sdk.txDryRun(buildTx(txParams), accountAddress);
             if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
               error.value = new ContractByteArrayEncoder().decode(
                 dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
@@ -487,12 +481,14 @@ export default defineComponent({
               value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
             })) as TxArguments[],
           };
+          const tx: ITx = { ...txParams, ...popupProps.value.tx };
 
           txFunction.value = txParams.function;
 
-          setTransactionTx({ ...txParams, ...popupProps.value.tx as ITx });
+          // TODO temporary solution to create transaction boilerplate
+          setActiveTransaction({ tx } as ITransaction);
 
-          const allTokens = getTokens({ ...txParams, ...popupProps.value.tx as ITx });
+          const allTokens = getTokens(tx);
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
@@ -530,11 +526,9 @@ export default defineComponent({
     });
 
     return {
-      AE_SYMBOL,
+      PROTOCOLS,
       AnimatedSpinner,
       PAYLOAD_FIELD,
-      PROTOCOL_AETERNITY,
-      TX_FIELDS_TO_DISPLAY,
       cancel,
       completeTransaction,
       decodedCallData,
@@ -544,7 +538,7 @@ export default defineComponent({
       filteredTxFields,
       getLabels,
       getTxKeyLabel,
-      getTxSymbol,
+      getTxAssetSymbol,
       isAeppChatSuperhero,
       isDex,
       isDexAllowance,
@@ -555,6 +549,7 @@ export default defineComponent({
       nameAeFee,
       popupProps,
       showAdvanced,
+      singleToken,
       swapDirection,
       swapDirectionTranslation,
       swapTokenAmountData,

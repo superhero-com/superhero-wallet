@@ -4,7 +4,7 @@
     :transfer-data="transferData"
     :fee="+fee.toFixed()"
     :fee-symbol="AE_SYMBOL"
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
     class="transfer-send-form"
   >
     <template
@@ -49,8 +49,8 @@
         >
           <template #value>
             <AccountItem
-              :address="multisigVaultAddress"
-              :protocol="PROTOCOL_AETERNITY"
+              :address="(multisigVaultAddress as string)"
+              :protocol="PROTOCOLS.aeternity"
             />
           </template>
         </DetailsItem>
@@ -62,14 +62,16 @@
         v-model.trim="formModel.address"
         :errors="errors"
         :is-tip-url="isTipUrl"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         :placeholder="(isUrlTippingEnabled)
           ? $t('modals.send.recipientPlaceholderUrl')
           : $t('modals.send.recipientPlaceholder')"
         :validation-rules="{
-          name_registered_address_or_url: isUrlTippingEnabled,
-          name_registered_address: !isUrlTippingEnabled,
-          ...(isMultisig ? { not_same_as: multisigVaultAddress } : {}),
+          aens_name_registered_or_address_or_url: isUrlTippingEnabled,
+          aens_name_registered_or_address: !isUrlTippingEnabled,
+          ...(isMultisig
+            ? { address_not_same_as: [multisigVaultAddress, PROTOCOLS.aeternity] }
+            : {}),
           token_to_an_address: [!isAe],
         }"
         @openQrModal="openScanQrModal"
@@ -83,7 +85,7 @@
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         :readonly="isMultisig"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         :validation-rules="{
           ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
           ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_coin: fee.toString() },
@@ -95,14 +97,11 @@
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
-          <BtnPlain
+          <BtnMaxAmount
             v-if="!isMultisig"
-            class="max-button"
-            :class="{ chosen: isMaxValue }"
+            :is-max="isMaxValue"
             @click="setMaxValue"
-          >
-            {{ $t('common.max') }}
-          </BtnPlain>
+          />
         </template>
       </TransferSendAmount>
     </template>
@@ -162,21 +161,28 @@ import {
 import { useRoute } from 'vue-router';
 import { Field } from 'vee-validate';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
+import type {
+  AssetContractId,
+  IAsset,
+  IFormSelectOption,
+  TransferFormModel,
+} from '@/types';
 import {
   MODAL_PAYLOAD_FORM,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   checkIfSuperheroCallbackUrl,
   isUrlValid,
+  prepareAccountSelectOptions,
 } from '@/utils';
 import {
   useAccounts,
   useBalances,
   useCurrencies,
+  useFungibleTokens,
   useMaxAmount,
   useModals,
   useMultisigAccounts,
@@ -185,13 +191,6 @@ import {
   AE_CONTRACT_ID,
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
-import type {
-  IAsset,
-  IFormSelectOption,
-  ITokenList,
-  TransferFormModel,
-} from '@/types';
-import { useState } from '@/composables/vuex';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
@@ -207,7 +206,7 @@ import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import PayloadDetails from '@/popup/components/PayloadDetails.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
 
 import EditIcon from '@/icons/pencil.svg?vue-component';
@@ -217,7 +216,7 @@ import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
 export default defineComponent({
   name: 'AeTransferSendForm',
   components: {
-    BtnPlain,
+    BtnMaxAmount,
     TransferSendAmount,
     TransferSendRecipient,
     DetailsItem,
@@ -238,9 +237,12 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  emits: ['update:transferData', 'success', 'error'],
+  emits: [
+    'update:transferData',
+    'success',
+    'error',
+  ],
   setup(props, { emit }) {
-    const store = useStore();
     const route = useRoute();
 
     const hasMultisigTokenWarning = ref(false);
@@ -248,33 +250,30 @@ export default defineComponent({
     const amountField = ref<InstanceType<typeof Field> | null>(null);
 
     const { openModal } = useModals();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
-    const { balance } = useBalances({ store });
-    const { marketData } = useCurrencies({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
+    const { balance } = useBalances();
+    const { marketData } = useCurrencies();
     const {
       accounts,
       activeAccount,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
-      prepareAccountSelectOptions,
-    } = useAccounts({ store });
+    } = useAccounts();
 
-    const fungibleTokens = useState('fungibleTokens');
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
-    const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
-
-    function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
+    function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value);
 
-      if (tokenContractId) {
-        if (props.isMultisig && ![AE_SYMBOL, AE_CONTRACT_ID].includes(tokenContractId)) {
+      if (assetContractId) {
+        if (props.isMultisig && ![AE_SYMBOL, AE_CONTRACT_ID].includes(assetContractId)) {
           hasMultisigTokenWarning.value = true;
           return undefined;
         }
         hasMultisigTokenWarning.value = false;
-        return availableTokens.value[tokenContractId] || aeCoin;
+        return getProtocolAvailableTokens(PROTOCOLS.aeternity)[assetContractId] || aeCoin;
       } if (!selectedAsset) {
         return aeCoin;
       }
@@ -294,18 +293,15 @@ export default defineComponent({
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
-      protocol: PROTOCOL_AETERNITY,
     });
 
-    const { max, fee } = useMaxAmount({ formModel, store });
+    const { max, fee } = useMaxAmount({ formModel });
 
     const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
     const isAe = computed(
       () => formModel.value.selectedAsset?.contractId === AE_CONTRACT_ID,
     );
-
-    const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
 
     const isTipUrl = computed(() => (
       !!formModel.value.address
@@ -355,12 +351,14 @@ export default defineComponent({
     function setMaxValue() {
       const _fee = fee.value;
       formModel.value.amount = max.value;
-      setTimeout(() => {
-        if (_fee !== fee.value) {
-          formModel.value.amount = max.value;
-        }
-      },
-      100);
+      setTimeout(
+        () => {
+          if (_fee !== fee.value) {
+            formModel.value.amount = max.value;
+          }
+        },
+        100,
+      );
     }
 
     function emitCurrentFormModelState() {
@@ -423,7 +421,7 @@ export default defineComponent({
     return {
       INFO_BOX_TYPES,
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       isAe,
       hasMultisigTokenWarning,
       multisigVaultAddress,
@@ -441,7 +439,7 @@ export default defineComponent({
       activeAccount,
       editPayload,
       clearPayload,
-      openScanQrModal: () => openScanQrModal(tokenBalances.value),
+      openScanQrModal,
       handleAssetChange,
       selectAccount,
       setMaxValue,
@@ -486,26 +484,6 @@ export default defineComponent({
 
   .account-selector {
     color: rgba(variables.$color-white, 0.75);
-  }
-
-  .max-button {
-    padding: 2px 8px;
-    color: variables.$color-primary;
-
-    @extend %face-sans-14-medium;
-
-    line-height: 20px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-
-    &:hover {
-      background: rgba(variables.$color-primary, 0.15);
-    }
-
-    &.chosen {
-      background: rgba(variables.$color-primary, 0.15);
-      border-color: rgba(variables.$color-primary, 0.5);
-    }
   }
 
   .payload-add-wrapper {

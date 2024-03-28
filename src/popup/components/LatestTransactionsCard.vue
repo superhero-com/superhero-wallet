@@ -1,13 +1,10 @@
 <template>
-  <div
+  <Panel
     v-if="showWidget"
-    ref="latestTransactionCard"
+    ref="latestTransactionCardEl"
     class="latest-transaction-card"
+    :header="$t('dashboard.latestTransactionCard.title')"
   >
-    <div class="title">
-      {{ $t('dashboard.latestTransactionCard.title') }}
-    </div>
-
     <Transition name="page-transition">
       <AnimatedSpinner
         v-if="isLoading"
@@ -15,7 +12,7 @@
       />
       <div v-else>
         <TransactionListItem
-          v-for="transaction in latestTransactions"
+          v-for="transaction in latestTransactionsToDisplay"
           :key="`${transaction.transactionOwner}-${transaction.hash}`"
           class="transaction-item"
           :transaction="transaction"
@@ -23,7 +20,7 @@
         />
       </div>
     </Transition>
-  </div>
+  </Panel>
 </template>
 
 <script lang="ts">
@@ -31,49 +28,65 @@ import {
   computed,
   defineComponent,
   onMounted,
-  watch,
   ref,
+  watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import { useConnection, useLatestTransactionList, useViewport } from '../../composables';
+import type { ComponentRef } from '@/types';
+import {
+  useConnection,
+  useLatestTransactionList,
+  useViewport,
+} from '@/composables';
+
+import Panel from './Panel.vue';
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+
+const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export default defineComponent({
   name: 'LatestTransactionsCard',
   components: {
+    Panel,
     TransactionListItem,
     AnimatedSpinner,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
-    const latestTransactionCard = ref<HTMLDivElement | null>(null);
+    const latestTransactionCardEl = ref<ComponentRef | null>(null);
+
     const { isOnline } = useConnection();
     const { viewportElement } = useViewport();
     const {
-      isTransactionListLoading,
-      latestTransactions,
-    } = useLatestTransactionList({ store });
+      allLatestTransactions,
+      areLatestTransactionsUpdating,
+    } = useLatestTransactionList();
 
     const query = computed(() => route.query);
 
     const isLoading = computed(
-      () => isTransactionListLoading.value && !latestTransactions.value.length,
+      () => areLatestTransactionsUpdating.value && !allLatestTransactions.value.length,
     );
 
     const showWidget = computed(() => (
       isOnline.value
-      && (isTransactionListLoading.value || latestTransactions.value.length)
+      && (areLatestTransactionsUpdating.value || allLatestTransactions.value.length)
     ));
 
+    const latestTransactionsToDisplay = computed(
+      () => allLatestTransactions.value.slice(0, DASHBOARD_TRANSACTION_LIMIT),
+    );
+
+    /**
+     * Scroll the page to this component instance if the page was opened
+     * with "latestTxHash" query param and all required elements are mounted.
+     * TODO: Functionality broken due to unaccessible viewportElement
+     */
     function conditionalUpdatingState(param?: string) {
-      // if we get "latestTxHash" query params, and also all container is mounted,
-      // then we can scroll the page to LatestTransactionCard
-      if (param && viewportElement.value && latestTransactionCard.value) {
-        viewportElement.value.scrollTo({
-          top: latestTransactionCard.value.getBoundingClientRect().x + 50,
+      if (param && viewportElement.value && latestTransactionCardEl.value?.$el) {
+        viewportElement.value!.scrollTo({
+          top: latestTransactionCardEl.value!.$el.getBoundingClientRect().x + 50,
         });
       }
     }
@@ -87,8 +100,9 @@ export default defineComponent({
     });
 
     return {
-      latestTransactionCard,
-      latestTransactions,
+      allLatestTransactions,
+      latestTransactionCardEl,
+      latestTransactionsToDisplay,
       showWidget,
       isLoading,
     };
@@ -97,34 +111,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
-
 .latest-transaction-card {
-  width: 100%;
-  background-color: variables.$color-bg-6;
-  border-radius: variables.$border-radius-interactive;
-  padding-block: 8px;
-  display: flex;
-  flex-direction: column;
-
-  .title {
-    @extend %face-sans-16-semi-bold;
-
-    color: variables.$color-white;
-    line-height: 24px;
-    padding-inline: 12px;
-    margin-bottom: 4px;
-  }
-
-  .offline-message {
-    margin: auto;
-    padding-block: 10px;
-  }
-
   .spinner {
-    align-self: center;
+    display: block;
+    margin-inline: auto;
     height: 60px;
   }
 

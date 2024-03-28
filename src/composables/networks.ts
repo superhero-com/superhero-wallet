@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type {
   INetwork,
   NetworkProtocolsSettings,
@@ -9,39 +9,58 @@ import {
   NETWORK_NAME_TESTNET,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
-  PROTOCOLS,
+  PROTOCOL_LIST,
+  STORAGE_KEYS,
 } from '@/constants';
+import { createCallbackRegistry } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { tg } from '@/store/plugins/languages';
-import { useStorageRef } from './composablesHelpers';
+import { tg } from '@/popup/plugins/i18n';
 import { useModals } from './modals';
+import { useStorageRef } from './storageRef';
+
+let composableInitialized = false;
+
+const {
+  addCallback: onNetworkChange,
+  runCallbacks: runOnNetworkChangeCallbacks,
+} = createCallbackRegistry<(newNetwork: INetwork, oldNetwork: INetwork) => any>();
 
 const defaultNetworks: INetwork[] = [];
+const areNetworksRestored = ref(false);
 
 /**
  * Networks added by the user by providing some custom URLs for each of the protocols.
  */
-const customNetworks = useStorageRef<INetwork[]>([], 'custom-networks', {
-  backgroundSync: true,
-});
+const customNetworks = useStorageRef<INetwork[]>(
+  [],
+  STORAGE_KEYS.customNetworks,
+  { backgroundSync: true },
+);
 
 /**
- * As the network is an unique string we are using it to differentiate the networks.
+ * As the network name is an unique string we are using it to differentiate the networks.
  */
-const activeNetworkName = useStorageRef(NETWORK_NAME_MAINNET, 'active-network-name', {
-  backgroundSync: true,
-});
+const activeNetworkName = useStorageRef<string>(
+  NETWORK_NAME_MAINNET,
+  STORAGE_KEYS.activeNetworkName,
+  {
+    backgroundSync: true,
+    onRestored: () => {
+      areNetworksRestored.value = true;
+    },
+  },
+);
 
 const networks = computed(
-  (): Record<string, INetwork> => [
+  (): Record<string, INetwork> => Object.fromEntries([
     ...defaultNetworks,
     ...customNetworks.value,
-  ].reduce((acc, network) => ({ ...acc, [network.name]: network }), {}),
+  ].map((network) => [network.name, network])),
 );
 
 const activeNetwork = computed(() => networks.value[activeNetworkName.value]);
 
-let initialized = false;
+const isActiveNetworkTestnet = computed(() => activeNetwork.value.type === NETWORK_TYPE_TESTNET);
 
 function ensureDefaultNetworksExists() {
   if (defaultNetworks.length === 0) {
@@ -49,12 +68,9 @@ function ensureDefaultNetworksExists() {
     networkTypes.forEach((type) => {
       defaultNetworks.push({
         name: (type === NETWORK_TYPE_MAINNET) ? NETWORK_NAME_MAINNET : NETWORK_NAME_TESTNET,
-        protocols: PROTOCOLS.reduce((accumulator, protocol) => {
-          // eslint-disable-next-line no-param-reassign
-          accumulator[protocol] = ProtocolAdapterFactory.getAdapter(protocol)
-            .getNetworkTypeDefaultValues(type);
-          return accumulator;
-        }, {} as NetworkProtocolsSettings),
+        protocols: Object.fromEntries(PROTOCOL_LIST.map((protocol) => [
+          protocol, ProtocolAdapterFactory.getAdapter(protocol).getNetworkTypeDefaultValues(type),
+        ])) as NetworkProtocolsSettings,
         type,
       });
     });
@@ -70,7 +86,9 @@ export function useNetworks() {
 
   function switchNetwork(name: string) {
     if (networks.value[name]) {
+      const oldNetwork = activeNetwork.value;
       activeNetworkName.value = name;
+      runOnNetworkChangeCallbacks(activeNetwork.value, oldNetwork);
     } else {
       throw Error(`Could not switch to "${name}" network as it does not exist`);
     }
@@ -106,44 +124,34 @@ export function useNetworks() {
     }
   }
 
-  if (!initialized) {
+  function resetNetworks() {
+    customNetworks.value = [];
+    activeNetworkName.value = NETWORK_NAME_MAINNET;
+  }
+
+  if (!composableInitialized) {
+    composableInitialized = true;
+
     ensureDefaultNetworksExists();
+
     if (!activeNetwork.value) {
       switchNetwork(NETWORK_NAME_MAINNET);
     }
-    initialized = true;
   }
 
   return {
+    areNetworksRestored,
     networks,
     customNetworks,
     defaultNetworks,
     activeNetwork,
+    isActiveNetworkTestnet,
     activeNetworkName,
     switchNetwork,
     addCustomNetwork,
     updateCustomNetwork,
     deleteCustomNetwork,
-  };
-}
-
-/**
- * Monitor the network state and compare it with stored custom state to know when
- * user changes the network.
- */
-export function createNetworkWatcher() {
-  ensureDefaultNetworksExists();
-
-  let storedNetworkName: string;
-
-  return {
-    onNetworkChange: (callback: (newNetwork: INetwork, oldNetwork: INetwork) => void) => {
-      if (!storedNetworkName) {
-        storedNetworkName = activeNetwork.value.name;
-      } else if (storedNetworkName !== activeNetwork.value.name) {
-        callback(activeNetwork.value, networks.value[storedNetworkName]);
-        storedNetworkName = activeNetwork.value.name;
-      }
-    },
+    resetNetworks,
+    onNetworkChange,
   };
 }

@@ -7,21 +7,20 @@
     "
     :account-address="activeAccountAddress"
     :account-name="activeAccountName"
-    :tokens="availableTokens"
+    :tokens="tokens"
     :disable-asset-selection="isMultisig"
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
   />
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import type { ITokenList } from '@/types';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
-import { useAccounts, useMultisigAccounts } from '@/composables';
+import { useAccounts, useFungibleTokens, useMultisigAccounts } from '@/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
 
@@ -34,25 +33,22 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
-    const { activeAccount } = useAccounts({ store });
-
-    const availableTokens = computed<ITokenList>(
-      () => store.state.fungibleTokens.availableTokens,
-    );
+    const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
+    const { activeAccount } = useAccounts();
+    const { getName } = useAeNames();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccountId.value
       : activeAccount.value.address);
 
-    const activeAccountName = computed(
-      () => props.isMultisig ? undefined : activeAccount.value.name,
-    );
+    const activeAccountName = props.isMultisig ? undefined : getName(activeAccount.value.address);
+
+    const tokens = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
 
     return {
-      PROTOCOL_AETERNITY,
-      availableTokens,
+      PROTOCOLS,
+      tokens,
       activeAccountAddress,
       activeAccountName,
     };

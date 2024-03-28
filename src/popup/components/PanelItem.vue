@@ -16,7 +16,7 @@
         {{ info }}
       </div>
       <slot
-        v-if="$slots['content']"
+        v-if="$slots.content"
         name="content"
       />
       <slot

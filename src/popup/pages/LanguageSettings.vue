@@ -8,11 +8,12 @@
 
         <div class="languages">
           <RadioButton
-            v-for="{ code, name } in list"
+            v-for="{ code, name } in languageList"
             :key="code"
-            :value="active && active.name == name"
+            :value="activeLanguage === code"
             :disabled="false"
-            :class="['language', {active: active && active.name == name}]"
+            class="language"
+            :class="[{ active: activeLanguage === code }]"
             @input="switchLanguage(code)"
           >
             <div
@@ -31,22 +32,30 @@
   </IonPage>
 </template>
 
-<script>
-/* eslint-disable global-require */
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
+import { languages } from '@/popup/plugins/i18n';
+import { useLanguages } from '@/composables';
+
 import RadioButton from '../components/RadioButton.vue';
 
-export default {
+const languageList = Object.entries(languages)
+  .map(([code, { name }]) => ({ code, name }))
+  .sort();
+
+export default defineComponent({
   components: { RadioButton, IonPage, IonContent },
-  computed: mapGetters('languages', ['list', 'active']),
-  methods: {
-    async switchLanguage(code) {
-      this.dropdown = false;
-      this.$store.commit('languages/setActiveCode', code);
-    },
+  setup() {
+    const { activeLanguage, switchLanguage } = useLanguages();
+
+    return {
+      languageList,
+      activeLanguage,
+      switchLanguage,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -56,30 +65,30 @@ export default {
 .language-settings {
   padding-inline: var(--screen-padding-x);
 
-  .languages {
-    margin-top: 16px;
+  .text-description {
+    margin-bottom: 16px;
+  }
 
-    .language {
-      padding: 6px 0;
-      font-weight: 500;
-      font-size: 14px;
-      line-height: 24px;
-      opacity: 0.5;
+  .language {
+    @extend %face-sans-14-medium;
 
-      &.active {
-        opacity: 1;
-      }
+    padding: 6px 0;
+    opacity: 0.5;
 
-      span {
-        text-transform: uppercase;
-      }
+    &.active {
+      opacity: 1;
+    }
 
-      .row {
-        width: 100%;
-        display: inline-flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    .language-code {
+      text-transform: uppercase;
+    }
+
+    .row {
+      width: 100%;
+      display: inline-flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 4px;
     }
   }
 }

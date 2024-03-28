@@ -17,33 +17,35 @@
           :avatar="avatarOnly"
           :model-value="modelValue"
           :options="options || accountsSelectOptions"
-          unstyled
           :hide-arrow="avatarOnly"
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
+          unstyled
           @update:modelValue="$emit('update:modelValue', $event)"
         >
           <template #current-text="{ text }">
-            <div v-if="!avatarOnly">
-              <Truncate
-                class="account-select-text"
-                :str="text"
+            <slot>
+              <div v-if="!avatarOnly">
+                <Truncate
+                  class="account-select-text"
+                  :str="text"
+                />
+              </div>
+              <Avatar
+                v-if="avatarOnly"
+                :address="modelValue.toString()"
+                size="sm"
               />
-            </div>
-            <Avatar
-              v-if="avatarOnly"
-              :address="modelValue.toString()"
-              size="sm"
-            />
+            </slot>
           </template>
         </FormSelect>
       </BtnPill>
       <AddressTruncated
         v-if="!avatarOnly"
-        v-bind="$attrs"
         show-explorer-link
         show-protocol-icon
         :address="modelValue.toString()"
+        :protocol="selectedAccount?.protocol!"
         class="address-truncated"
       />
     </div>
@@ -51,10 +53,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
-import { useAccounts } from '../../composables';
-import type { IFormSelectOption } from '../../types';
+import { computed, defineComponent, PropType } from 'vue';
+import type { AccountAddress, IFormSelectOption } from '@/types';
+import { useAccounts } from '@/composables';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -74,17 +75,23 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    modelValue: { type: [String, Number], default: null },
+    modelValue: { type: String as PropType<AccountAddress>, default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
     avatarOnly: Boolean,
   },
   emits: ['update:modelValue'],
-  setup() {
-    const store = useStore();
+  setup(props) {
+    const { accountsSelectOptions, getAccountByAddress } = useAccounts();
 
-    const { accountsSelectOptions } = useAccounts({ store });
-
-    return { accountsSelectOptions };
+    const selectedAccount = computed(
+      () => (props.modelValue)
+        ? getAccountByAddress(props.modelValue)
+        : undefined,
+    );
+    return {
+      accountsSelectOptions,
+      selectedAccount,
+    };
   },
 });
 </script>

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <div class="multisig-vault-create-review">
     <h2 class="text-heading-1">
@@ -9,7 +10,6 @@
         <AccountSelector
           v-model="creatorAddress"
           :options="aeAccountsSelectOptions"
-          :protocol="PROTOCOL_AETERNITY"
         />
         <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
@@ -44,7 +44,7 @@
           >
             <AccountItem
               :address="signer.address"
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
             />
             <DialogBox
               v-if="isLocalAccountAddress(signer.address)"
@@ -66,7 +66,7 @@
           <TokenAmount
             :amount="fee"
             :symbol="AE_SYMBOL"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
       </DetailsItem>
@@ -97,15 +97,15 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
+  AccountAddress,
   IAccountFetched,
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '@/types';
-import { MODAL_CONSENSUS_INFO, PROTOCOL_AETERNITY } from '@/constants';
+import { MODAL_CONSENSUS_INFO, PROTOCOLS } from '@/constants';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import { handleUnknownError } from '@/utils';
 import {
@@ -143,21 +143,19 @@ export default defineComponent({
     accountId: { type: String as PropType<Encoded.AccountAddress>, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
+    const { aeAccounts, aeAccountsSelectOptions, isLocalAccountAddress } = useAccounts();
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store });
-    const { isLocalAccountAddress } = useAccounts({ store });
+    } = useMultisigAccountCreate();
 
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
 
     const { openModal } = useModals();
 
-    const creatorAddress = ref<Encoded.AccountAddress>(
+    const creatorAddress = ref<AccountAddress>(
       props.signers[0].address || aeAccounts.value[0].address,
     );
     const creatorAccountFetched = ref<IAccountFetched>();
@@ -209,7 +207,7 @@ export default defineComponent({
       callData,
       notEnoughBalanceToCreateMultisig,
       openConsensusInfoModal,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
     };
   },
 });

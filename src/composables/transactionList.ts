@@ -1,354 +1,224 @@
-import { orderBy, uniqBy } from 'lodash-es';
-import { ref, watch } from 'vue';
-import { Encoded, Tag } from '@aeternity/aepp-sdk';
+import { computed, ref } from 'vue';
+import { uniqBy } from 'lodash-es';
 import type {
-  ITransaction,
-  ITransactionsState,
-  IAccountTransactionsState,
-  IDefaultComposableOptions,
+  AccountAddress,
+  AssetContractId,
+  ICommonTransaction,
+  ITransactionApiPaginationParams,
+  Protocol,
 } from '@/types';
-import {
-  TRANSACTIONS_LOCAL_STORAGE_KEY,
-  TX_DIRECTION,
-} from '@/constants';
-import {
-  fetchJson,
-  getLocalStorageItem,
-  setLocalStorageItem,
-} from '@/utils';
-import JsonBig from '@/lib/json-big';
-import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { POLLING_INTERVAL_TRANSACTIONS, STORAGE_KEYS } from '@/constants';
+import { objectHasNonEmptyProperties } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useConnection } from './connection';
+import { useUi } from './ui';
+import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
+import { useLatestTransactionList } from './latestTransactionList';
 
-import { useAccounts } from './accounts';
-import { useMiddleware } from './middleware';
-import { useAeSdk } from './aeSdk';
-
-const transactions = ref<IAccountTransactionsState>({});
-
-function generateEmptyTransactionState(): ITransactionsState {
-  return {
-    loaded: [],
-    nextPageUrl: '',
-    pending: {},
-    tipWithdrawnTransactions: [],
-  };
+interface UseTransactionListOptions {
+  accountAddress: AccountAddress;
+  /**
+   * Decides whether all transactions for the account (undefined)
+   * or only one asset are to be fetched and stored.
+   */
+  assetContractId?: AssetContractId;
+  protocol: Protocol;
 }
 
-function getAccountTransactionsState(address: Encoded.AccountAddress): ITransactionsState {
-  return transactions.value[address] || generateEmptyTransactionState();
-}
+/**
+ * `accountAddress`, `assetContractId` and `networkName` are used to determine
+ * if the cached list should be cleared and fetched again.
+ */
+const state = useStorageRef<{
+  accountAddress?: AccountAddress;
+  assetContractId?: AssetContractId;
+  isEndReached: boolean;
+  isInitialLoadDone: boolean;
+  networkName?: string;
+  nextPagePaginationParams: ITransactionApiPaginationParams;
+  transactionsLoaded: ICommonTransaction[];
+}>(
+  {
+    isEndReached: false,
+    isInitialLoadDone: false,
+    nextPagePaginationParams: {},
+    transactionsLoaded: [],
+  },
+  STORAGE_KEYS.transactionsLoaded,
+);
 
-function ensureAccountTransactionStateExists(address: Encoded.AccountAddress) {
-  if (!transactions.value[address]) {
-    transactions.value[address] = generateEmptyTransactionState();
-  }
-}
+const isEndReached = computed(() => state.value.isEndReached);
+const transactionsLoaded = computed(() => state.value.transactionsLoaded);
 
-function updateAccountTransaction(address: Encoded.AccountAddress, transaction: ITransaction) {
-  const transactionIndex = transactions.value[address]?.loaded?.findIndex(
-    (tr) => tr.hash === transaction.hash,
+/**
+ * Manages the state of transaction list for the components. Allows to cache the results
+ * when switching between pages or closing and opening the extension window.
+ * The list is stored only for one account and list type (assetContractId).
+ * Whenever different list type accesses the list the cache is cleared and the results
+ * are fetched again.
+ */
+export function useTransactionList({
+  accountAddress,
+  assetContractId,
+  protocol,
+}: UseTransactionListOptions) {
+  let pollingIntervalId: NodeJS.Timer | undefined;
+  const isLoading = ref(false);
+
+  const { isOnline } = useConnection();
+  const { isAppActive } = useUi();
+  const { activeNetwork } = useNetworks();
+  const { accountsTransactionsPending } = useLatestTransactionList();
+
+  const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+
+  const transactionsPending = computed(
+    () => (accountsTransactionsPending.value[accountAddress] || [])
+      .filter(({ tx }) => tx?.contractId === assetContractId),
   );
 
-  if (transactionIndex !== undefined && transactionIndex >= 0) {
-    transactions.value[address].loaded[transactionIndex] = transaction;
-  } else {
-    ensureAccountTransactionStateExists(address);
-    transactions.value[address].loaded.push(transaction);
-  }
-}
+  const transactionsLoadedAndPending = computed(() => [
+    ...transactionsPending.value,
+    ...transactionsLoaded.value,
+  ]);
 
-const setTransactionsNextPage = (address: Encoded.AccountAddress, url: string) => {
-  transactions.value[address].nextPageUrl = url;
-};
-
-export function useTransactionList({ store }: IDefaultComposableOptions) {
-  const { aeActiveNetworkSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { isLoggedIn, accounts } = useAccounts({ store });
-  const {
-    fetchFromMiddlewareCamelCased,
-    getMiddleware,
-  } = useMiddleware();
-
-  function getAccountAllTransactions(address: Encoded.AccountAddress) {
-    if (!isLoggedIn) {
-      return [];
-    }
-    const { pending, loaded } = getAccountTransactionsState(address);
-
-    return [...loaded, ...(pending[nodeNetworkId.value!] || [])];
+  function resetState() {
+    state.value = {
+      accountAddress,
+      assetContractId,
+      isEndReached: false,
+      isInitialLoadDone: false,
+      networkName: activeNetwork.value.name,
+      nextPagePaginationParams: {},
+      transactionsLoaded: [],
+    };
   }
 
-  function getTransactionByHash(address: Encoded.AccountAddress, hash: string) {
-    return accounts.value.flatMap(
-      (account) => getAccountAllTransactions(account.address),
-    ).find((transaction) => transaction.hash === hash);
+  function fetchTransactions(paginationParams?: ITransactionApiPaginationParams) {
+    return (assetContractId)
+      ? adapter.fetchAccountAssetTransactions(accountAddress, assetContractId, paginationParams)
+      : adapter.fetchAccountTransactions(accountAddress, paginationParams);
   }
 
-  function setPendingTransactionSentByHash(address: Encoded.AccountAddress, hash: string) {
-    const index = transactions.value[address].pending[nodeNetworkId.value!]
-      ?.findIndex((transaction) => transaction.hash === hash);
+  async function loadCurrentPageTransactions() {
+    if (isOnline.value && !isLoading.value && !state.value.isEndReached) {
+      isLoading.value = true;
 
-    if (index !== undefined && index !== -1) {
-      transactions.value[address]
-        .pending[nodeNetworkId.value!][index][TX_DIRECTION.sent] = true;
-    }
-  }
+      const {
+        paginationParams,
+        regularTransactions,
+        pendingTransactions,
+        tipWithdrawnTransactions,
+      } = await fetchTransactions(state.value.nextPagePaginationParams);
 
-  function removePendingTransactionByAccount(address: Encoded.AccountAddress, hash: string) {
-    const pendingTransactionForAccount: ITransaction[] = (
-      transactions.value[address]?.pending?.[nodeNetworkId.value!] || []
-    );
-
-    if (pendingTransactionForAccount.length) {
-      transactions.value[address].pending[nodeNetworkId.value!] = (
-        pendingTransactionForAccount.filter((transaction) => transaction.hash !== hash)
-      );
-    }
-  }
-
-  async function waitTransactionMined(address: Encoded.AccountAddress, hash?: Encoded.TxHash) {
-    if (hash) {
-      try {
-        const aeSdk = await getAeSdk();
-        await aeSdk.poll(hash);
-        setPendingTransactionSentByHash(address, hash);
-      } catch (error) {
-        removePendingTransactionByAccount(address, hash);
+      if (accountAddress !== state.value.accountAddress
+        || assetContractId !== state.value.assetContractId
+        || activeNetwork.value.name !== state.value.networkName) {
+        return;
       }
-    }
-  }
 
-  function upsertCustomPendingTransactionForAccount(
-    address: Encoded.AccountAddress,
-    transaction: ITransaction,
-  ) {
-    ensureAccountTransactionStateExists(address);
-    transactions.value[address].pending[nodeNetworkId.value!] = [transaction];
-    waitTransactionMined(address, transaction.hash);
-  }
-
-  async function fetchTransactionsFromMiddleware(
-    transactionState: ITransactionsState,
-    address: Encoded.AccountAddress,
-    recent: boolean,
-    limit: number,
-  ) {
-    const url = (recent || transactionState.nextPageUrl === '')
-      ? `/v2/accounts/${address}/activities?limit=${limit}`
-      : transactionState.nextPageUrl!;
-
-    try {
-      const { data, next } = await fetchFromMiddlewareCamelCased(url);
-      if (!recent) {
-        setTransactionsNextPage(address, next);
+      if (objectHasNonEmptyProperties(paginationParams)) {
+        state.value.nextPagePaginationParams = paginationParams;
+      } else {
+        state.value.isEndReached = true;
       }
-      return data || [];
-    } catch (error) {
-      return [];
-    }
-  }
 
-  async function fetchPendingTransactions(address: Encoded.AccountAddress) {
-    const sdk = await getAeSdk();
-
-    try {
-      const fetchedPendingTransaction = (
-        await sdk.api.getPendingAccountTransactionsByPubkey(address)
-      );
-      const transactionState = getAccountTransactionsState(address);
-
-      return JsonBig.parse(JsonBig.stringify(
-        fetchedPendingTransaction?.transactions || [],
-      ))
-        .filter(
-          (transaction: ITransaction) => !transactionState.pending[nodeNetworkId.value!]?.find(
-            (tx) => tx?.hash === transaction?.hash,
-          ),
-        ).map((transaction: ITransaction) => ({ ...transaction, pending: true }));
-    } catch (error) {
-      return [];
-    }
-  }
-
-  async function fetchTipWithdrawnTransactions(address: Encoded.AccountAddress, recent: boolean) {
-    try {
-      await getAeSdk();
-      const response = await fetchJson(
-        `${aeActiveNetworkSettings.value.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? '&limit=5' : ''}`,
-      );
-      if (response.message) {
-        return [];
-      }
-      // TODO prepare interface for response
-      const tipWithdrawnTransactions: ITransaction[] = (response as any[]).map(({
-        amount,
-        contract,
-        height,
-        data: { tx },
-        ...t
-      }) => ({
-        tx: {
-          ...tx,
-          address,
-          amount,
-          contractId: contract,
-          type: Tag[Tag.ContractCallTx],
-        },
-        ...t,
-        microTime: new Date(t.createdAt).getTime(),
-        blockHeight: height,
-        claim: true,
-      }));
-
-      return tipWithdrawnTransactions;
-    } catch (error) {
-      return [];
-    }
-  }
-
-  async function fetchTransactions(
-    limit: number,
-    recent: boolean,
-    address: Encoded.AccountAddress,
-  ): Promise<ITransaction[]> {
-    await getAeSdk(); // Ensure the `nodeNetworkId` is established
-
-    ensureAccountTransactionStateExists(address);
-    const transactionState = transactions.value[address];
-
-    if (transactionState.nextPageUrl === null && !recent) {
-      return [];
-    }
-
-    const [
-      regularTransactions,
-      pendingTransactions,
-      tipWithdrawnTransactions,
-    ] = await Promise.all([
-      fetchTransactionsFromMiddleware(transactionState, address, recent, limit),
-      fetchPendingTransactions(address),
-      fetchTipWithdrawnTransactions(address, recent),
-    ]);
-
-    const lastRegularTransaction = regularTransactions?.[regularTransactions.length - 1];
-    // DEX transaction is represented in 3 objects, only last one should be used
-    // this condition checking edge case when not all 3 objects in one chunk
-    if (lastRegularTransaction?.type === AEX9_TRANSFER_EVENT) {
-      const middleware = await getMiddleware();
-      regularTransactions[regularTransactions.length - 1] = (
-        await middleware.getTx(lastRegularTransaction.payload.txHash)
-      );
-    }
-
-    let preparedTransactions = [
-      ...pendingTransactions,
-      ...regularTransactions,
-    ]
-      .filter(({ type }) => !type?.startsWith('Internal'))
-      .map((transaction) => ({
-        ...(transaction.payload || transaction),
-        transactionOwner: address,
-        ...(transaction.type === AEX9_TRANSFER_EVENT
-          ? {
-            tx: {
-              ...transaction.payload,
-              callerId: transaction.payload.senderId,
-              type: 'ContractCallTx',
-            },
-            hash: transaction.payload.txHash,
-            incomplete: true,
-          } as ITransaction
-          : {}),
-      }));
-
-    preparedTransactions = uniqBy(preparedTransactions.reverse(), 'hash').reverse();
-    const minMicroTime = Math.min.apply(null, preparedTransactions.map((tx) => tx.microTime));
-    tipWithdrawnTransactions.forEach((f) => {
-      if (f.microTime
-        && (
-          minMicroTime < f.microTime
-          || (preparedTransactions.length === 0 && minMicroTime > f.microTime))
+      if (
+        regularTransactions?.length
+        || pendingTransactions?.length
+        || tipWithdrawnTransactions?.length
       ) {
-        preparedTransactions.push({ ...f, transactionOwner: address });
+        state.value.transactionsLoaded = uniqBy(
+          [
+            ...(state.value.isInitialLoadDone ? state.value.transactionsLoaded : []),
+            ...regularTransactions,
+            ...(pendingTransactions || []),
+            ...(tipWithdrawnTransactions || []),
+          ],
+          'hash',
+        );
       }
-    });
-    preparedTransactions = orderBy(preparedTransactions, ['microTime'], ['desc']);
 
-    const oldPendingTransactionForAccount: ITransaction[] = (
-      transactions.value[address]?.pending[nodeNetworkId.value!] || []
-    );
-
-    oldPendingTransactionForAccount.forEach(({ hash }) => {
-      if (preparedTransactions.some((tx) => tx.hash === hash && !tx.pending)) {
-        removePendingTransactionByAccount(address, hash);
-      }
-    });
-
-    (transactions.value[address]?.loaded?.filter(({ pending }) => pending) || [])
-      .forEach((transaction) => {
-        const newTransaction = preparedTransactions
-          .find((tx) => tx.hash === transaction.hash && !tx.pending);
-        if (newTransaction) {
-          updateAccountTransaction(address, newTransaction);
-        }
-      });
-
-    preparedTransactions = recent
-      ? preparedTransactions.slice(0, limit)
-      : preparedTransactions;
-
-    transactions.value[address].loaded = uniqBy(
-      [...transactions.value[address].loaded, ...preparedTransactions],
-      'hash',
-    );
-
-    return preparedTransactions;
-  }
-
-  async function fetchAllPendingTransactions() {
-    await Promise.all(
-      accounts.value.map(
-        (account) => fetchTransactions(0, false, account.address),
-      ),
-    );
-  }
-
-  watch(nodeNetworkId, (value, oldValue) => {
-    if (value) {
-      setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, oldValue!], transactions.value);
-      transactions.value = getLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, value!]) || {};
-
-      Object.entries(transactions.value).forEach(([address, transactionState]) => {
-        (transactionState.pending[nodeNetworkId.value!])?.filter(({ sent = false }) => !sent)
-          .forEach((transaction) => {
-            if (Date.now() - (transaction.microTime || 0) > 600000) {
-              removePendingTransactionByAccount(
-                address as Encoded.AccountAddress,
-                transaction.hash,
-              );
-            } else {
-              waitTransactionMined(address as Encoded.AccountAddress, transaction.hash);
-            }
-          });
-      });
+      isLoading.value = false;
+      state.value.isInitialLoadDone = true;
     }
-  });
+  }
 
-  watch(transactions, (value) => {
-    setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, nodeNetworkId.value!], value);
-  }, { deep: true, immediate: true });
+  async function initializeTransactionListPolling() {
+    if (!state.value.isInitialLoadDone || !transactionsLoaded.value.length) {
+      if (state.value.isInitialLoadDone && !transactionsLoaded.value.length) {
+        resetState();
+      }
+      await loadCurrentPageTransactions();
+      if (
+        accountAddress !== state.value.accountAddress
+        || assetContractId !== state.value.assetContractId
+        || activeNetwork.value.name !== state.value.networkName
+      ) {
+        isLoading.value = false;
+        return;
+      }
+    }
+
+    pollingIntervalId = setInterval(async () => {
+      if (isAppActive.value) {
+        const {
+          paginationParams,
+          regularTransactions,
+          pendingTransactions,
+          tipWithdrawnTransactions,
+        } = await fetchTransactions();
+
+        if (accountAddress !== state.value.accountAddress
+          || assetContractId !== state.value.assetContractId
+          || activeNetwork.value.name !== state.value.networkName) {
+          isLoading.value = false;
+          clearInterval(pollingIntervalId);
+          return;
+        }
+
+        const filteredLoadedTransactions = (state.value.transactionsLoaded as any)
+          .filter(({ claim = false, pending = false }) => !claim && !pending);
+
+        // If newly fetched first transaction is different than the first transaction stored
+        // it means that the list and the pagination params needs to be reset.
+        if (
+          regularTransactions?.length
+          && regularTransactions?.[0]?.hash !== filteredLoadedTransactions?.[0]?.hash
+        ) {
+          state.value.transactionsLoaded = [
+            ...regularTransactions,
+            ...(pendingTransactions || []),
+            ...(tipWithdrawnTransactions || []),
+          ];
+          state.value.nextPagePaginationParams = paginationParams;
+          state.value.isEndReached = false;
+        }
+      }
+    }, POLLING_INTERVAL_TRANSACTIONS);
+  }
+
+  function stopTransactionListPolling() {
+    clearInterval(pollingIntervalId);
+  }
+
+  if (
+    state.value.accountAddress !== accountAddress
+    || state.value.assetContractId !== assetContractId
+    || state.value.networkName !== activeNetwork.value.name
+  ) {
+    resetState();
+  }
 
   return {
-    getAccountAllTransactions,
-    transactions,
-    getTransactionByHash,
-    getAccountTransactionsState,
+    isLoading,
+    isEndReached,
+    transactionsLoaded,
+    transactionsLoadedAndPending,
     fetchTransactions,
-    upsertCustomPendingTransactionForAccount,
-    updateAccountTransaction,
-    fetchPendingTransactions,
-    fetchAllPendingTransactions,
+    loadCurrentPageTransactions,
+    initializeTransactionListPolling,
+    stopTransactionListPolling,
   };
 }

@@ -1,33 +1,43 @@
 <template>
-  <div
-    v-if="pendingMultisigTransaction && pendingMultisigTransaction.tx"
+  <Panel
+    v-if="pendingMultisigTransaction?.tx"
     class="pending-multisig-transaction-card"
+    :header="$t('dashboard.pendingMultisigCard.title')"
   >
-    <div class="title">
-      {{ $t('dashboard.pendingMultisigCard.title') }}
-    </div>
-    <TransactionListItem
-      :multisig-transaction="pendingMultisigTransaction"
-    />
-  </div>
+    <Transition name="page-transition">
+      <AnimatedSpinner
+        v-if="isLoading"
+        class="spinner"
+      />
+      <div v-else>
+        <TransactionListItem
+          is-multisig
+          :multisig-transaction="pendingMultisigTransaction"
+        />
+      </div>
+    </Transition>
+  </Panel>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { usePendingMultisigTransaction } from '../../composables';
+import { usePendingMultisigTransaction } from '@/composables';
 
+import Panel from './Panel.vue';
 import TransactionListItem from './TransactionListItem.vue';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 
 export default defineComponent({
   components: {
+    AnimatedSpinner,
+    Panel,
     TransactionListItem,
   },
   setup() {
-    const store = useStore();
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
+    const { isLoading, pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     return {
+      isLoading,
       pendingMultisigTransaction,
     };
   },
@@ -40,17 +50,10 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .pending-multisig-transaction-card {
-  width: 100%;
-  background-color: variables.$color-bg-6;
-  border-radius: variables.$border-radius-interactive;
-  padding: 8px 12px;
-  display: flex;
-  flex-direction: column;
-
-  .title {
-    @extend %face-sans-15-bold;
-
-    margin-bottom: 4px;
+  .spinner {
+    display: block;
+    margin-inline: auto;
+    height: 60px;
   }
 }
 </style>

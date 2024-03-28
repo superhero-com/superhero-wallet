@@ -12,6 +12,7 @@
           v-if="IN_FRAME"
           class="iframe-image"
           src="../../icons/iframe/sendAndReceive.svg"
+          alt="Send & receive tips across the globe!"
         >
         <div
           v-else
@@ -90,10 +91,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import { generateMnemonic } from '@aeternity/bip39';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
   IN_FRAME,
@@ -102,12 +101,14 @@ import {
   IS_WEB,
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
+  PROTOCOLS,
 } from '@/constants';
 import {
+  useAccounts,
   useModals,
   useUi,
 } from '@/composables';
-import { getRestoreMnemonicFromCordova, cleanMnemonicFiles } from '@/utils/storeMigrator';
+import { watchUntilTruthy } from '@/utils';
 
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
@@ -126,20 +127,35 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
+    const {
+      isLoggedIn,
+      addRawAccount,
+      setGeneratedMnemonic,
+      mnemonic,
+      discoverAccounts,
+      setActiveAccountByGlobalIdx,
+    } = useAccounts();
     const { openModal } = useModals();
-    const { loginTargetLocation, setLoaderVisible } = useUi();
+    const { loginTargetLocation } = useUi();
 
     const termsAgreed = ref(false);
 
+    let isWalletNew = false;
+
     async function createWallet() {
-      store.commit('setMnemonic', generateMnemonic());
+      isWalletNew = true;
+      setGeneratedMnemonic();
+      addRawAccount({
+        isRestored: false,
+        protocol: PROTOCOLS.aeternity,
+      });
       router.push(loginTargetLocation.value);
     }
 
     async function importWallet() {
-      return openModal(MODAL_ACCOUNT_IMPORT);
+      isWalletNew = true;
+      await openModal(MODAL_ACCOUNT_IMPORT);
     }
 
     /**
@@ -147,13 +163,13 @@ export default defineComponent({
      */
     onMounted(async () => {
       if (IS_IOS && IS_MOBILE_APP) {
-        setLoaderVisible(true);
-        const mnemonic = await getRestoreMnemonicFromCordova();
-        setLoaderVisible(false);
-        if (mnemonic) {
-          store.commit('setMnemonic', mnemonic);
-          cleanMnemonicFiles();
-          router.push(loginTargetLocation.value);
+        await watchUntilTruthy(mnemonic);
+        if (mnemonic.value && !isWalletNew) {
+          await discoverAccounts();
+          setActiveAccountByGlobalIdx(0);
+          if (isLoggedIn.value) {
+            router.push(loginTargetLocation.value);
+          }
         }
       }
     });

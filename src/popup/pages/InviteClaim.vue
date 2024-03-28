@@ -11,11 +11,10 @@ import {
 
 import { defineComponent } from 'vue';
 import { decode } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 
 import { MODAL_CLAIM_GIFT_CARD } from '@/constants';
-import { useModals, useUi } from '@/composables';
+import { useInvites, useModals, useUi } from '@/composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -23,11 +22,11 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
     const router = useIonRouter();
     const route = useRoute();
     const { openDefaultModal, openModal } = useModals();
     const { setLoaderVisible } = useUi();
+    const { handleInsufficientBalanceError } = useInvites();
 
     onIonViewDidEnter(async () => {
       setLoaderVisible(true);
@@ -48,7 +47,7 @@ export default defineComponent({
           });
           return;
         }
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
+        if (await handleInsufficientBalanceError(error, true)) {
           return;
         }
         throw error;

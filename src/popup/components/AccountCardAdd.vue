@@ -1,26 +1,31 @@
 <template>
-  <BtnBase
+  <AccountCardBase
     class="account-card-add"
+    data-cy="account-card-add"
+    :selected="selected"
     @click="openCreateAccountModal()"
   >
-    <div class="wrapper">
-      <span class="title">
-        <PlusCircle />
+    <template #top>
+      <div class="title">
+        <PlusCircleIcon class="plus-icon" />
         {{
           isMultisig
             ? $t('pages.vaults.addVault')
             : $t('pages.accounts.addAccount')
         }}
-      </span>
-      <span class="description">
+      </div>
+    </template>
+
+    <template #middle>
+      <div class="description">
         {{
           isMultisig
             ? $t('pages.vaults.addVaultDescription')
             : $t('pages.accounts.addAccountDescription')
         }}
-      </span>
-    </div>
-  </BtnBase>
+      </div>
+    </template>
+  </AccountCardBase>
 </template>
 
 <script lang="ts">
@@ -28,16 +33,17 @@ import { defineComponent } from 'vue';
 import { MODAL_ACCOUNT_CREATE, MODAL_AE_ACCOUNT_CREATE } from '@/constants';
 import { useModals } from '@/composables';
 
-import BtnBase from '@/popup/components/buttons/BtnBase.vue';
-import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
+import AccountCardBase, { accountCardBaseCommonProps } from '@/popup/components/AccountCardBase.vue';
+import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
-    BtnBase,
-    PlusCircle,
+    AccountCardBase,
+    PlusCircleIcon,
   },
   props: {
     isMultisig: Boolean,
+    ...accountCardBaseCommonProps,
   },
   setup(props) {
     const { openModal } = useModals();
@@ -58,32 +64,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 @use '../../styles/typography';
 
 .account-card-add {
-  border-radius: variables.$border-radius-card;
-  background: variables.$color-bg-6;
-  width: 100%;
-  height: 192px;
-
-  .wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 16px;
-  }
-
   .title {
-    display: inline-flex;
-    align-items: center;
-    padding-bottom: 12px;
-    color: variables.$color-white;
-    font-weight: 500;
-
     @extend %face-sans-20-bold;
 
-    svg {
+    display: flex;
+    align-items: center;
+    padding-bottom: 12px;
+    color: $color-white;
+    font-weight: 500;
+
+    .plus-icon {
       width: 48px;
       height: 48px;
       margin-right: 8px;
@@ -91,12 +85,11 @@ export default defineComponent({
   }
 
   .description {
-    text-align: center;
-    padding: 0 4px 0 12px;
-    color: rgba(variables.$color-white, 0.85);
-    line-height: 22px;
+    @extend %face-sans-16-medium;
 
-    @extend %face-sans-16-regular;
+    padding-left: 12px;
+    color: rgba($color-white, 0.85);
+    line-height: 22px;
   }
 }
 </style>

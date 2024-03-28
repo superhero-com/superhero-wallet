@@ -38,11 +38,12 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useTransactionAndTokenFilter,
@@ -62,17 +63,18 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
-    const store = useStore();
+
     const {
       isSearchBarAndFilterExpanded,
       searchPhrase,
       displayMode,
       filtersConfig,
       filtersConfigAe,
+      resetFilter,
     } = useTransactionAndTokenFilter();
 
     const { viewportElement } = useViewport();
-    const { isActiveAccountAe } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const scrollTopThreshold = 140;
     const maxHeight = ref(0);
@@ -80,6 +82,8 @@ export default defineComponent({
     const inputIsFocused = ref(false);
     const transactionFilterEl = ref<HTMLDivElement>();
     const resizeObserver = ref<ResizeObserver>();
+
+    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
 
     const openHeight = computed(() => (
       props.showFilters
@@ -120,13 +124,15 @@ export default defineComponent({
       }
     });
 
-    onMounted(async () => {
+    onMounted(() => {
       if (showFilterBar.value) {
         maxHeight.value = (transactionFilterEl?.value)?.clientHeight!;
         firstRender.value = false;
         observeFilterElHeight();
       }
     });
+
+    onUnmounted(() => resetFilter());
 
     return {
       transactionFilterEl,

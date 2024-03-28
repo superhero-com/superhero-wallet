@@ -2,13 +2,13 @@ import {
   ref,
   watch,
   computed,
+  effectScope,
 } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import type {
+  AccountAddress,
   IAccount,
   IActiveMultisigTransaction,
-  IDefaultComposableOptions,
   ITransaction,
 } from '@/types';
 import { handleUnknownError } from '@/utils';
@@ -16,26 +16,27 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   TX_FUNCTIONS_MULTISIG,
 } from '@/protocols/aeternity/config';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
-import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useMultisigTransactions } from './multisigTransactions';
 import { useTopHeaderData } from './topHeader';
 
-const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
+let composableInitialized = false;
 
-export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
-  const { getMiddleware } = useMiddleware();
-  const { activeMultisigAccount } = useMultisigAccounts({ store });
-  const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
-  const { topBlockHeight } = useTopHeaderData({ store });
-  const { aeAccounts } = useAccounts({ store });
+const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>(null);
 
-  const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
+/** Used only to establish the multisig transaction function */
+const activeMultisigTransactionData = ref<ITransaction | null>(null);
 
-  async function assignPendingMultisigTx() {
-    pendingMultisigTransaction.value = await fetchActiveMultisigTx();
-  }
+const isLoading = ref(false);
+
+export function usePendingMultisigTransaction() {
+  const { getMiddleware } = useAeMiddleware();
+  const { activeMultisigAccount } = useMultisigAccounts();
+  const { fetchActiveMultisigTx } = useMultisigTransactions();
+  const { topBlockHeight } = useTopHeaderData();
+  const { aeAccounts } = useAccounts();
 
   /**
    * The minimum required number of confirmations to process the current proposal.
@@ -47,14 +48,14 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   /**
    * Current proposal signers.
    */
-  const pendingMultisigTxSigners = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxSigners = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.signers ?? []
   ));
 
   /**
    * The Signers who approved the current proposal.
    */
-  const pendingMultisigTxConfirmedBy = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxConfirmedBy = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.confirmedBy ?? []
   ));
 
@@ -68,14 +69,14 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   /**
    * The Signers who refused the current proposal.
    */
-  const pendingMultisigTxRefusedBy = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxRefusedBy = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.refusedBy ?? []
   ));
 
   /**
    * Sorted list of signatories, with confirmed signatories appearing first.
    */
-  const pendingMultisigTxSortedSigners = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxSortedSigners = computed((): AccountAddress[] => (
     [...pendingMultisigTxSigners.value].sort(
       (a) => activeMultisigAccount.value?.confirmedBy.includes(a) ? -1 : 1,
     )
@@ -134,7 +135,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const pendingMultisigTxLocalSigners = computed((): IAccount[] => (
     aeAccounts.value.filter(
-      (_account) => pendingMultisigTxSigners.value.includes(_account.address),
+      ({ address }) => pendingMultisigTxSigners.value.includes(address),
     )
   ));
 
@@ -144,7 +145,8 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const pendingMultisigTxConfirmedByLocalSigners = computed((): boolean => (
     pendingMultisigTxLocalSigners.value.filter(
-      (acc) => activeMultisigAccount.value?.confirmedBy?.includes(acc.address),
+      ({ address }) => activeMultisigAccount.value?.confirmedBy
+        ?.includes(address),
     ).length === pendingMultisigTxLocalSigners.value.length
   ));
 
@@ -160,7 +162,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const isPendingMultisigTxCompletedAndRevoked = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTIONS_MULTISIG.revoke
+    && activeMultisigTransactionData.value?.tx.function === TX_FUNCTIONS_MULTISIG.revoke
   ));
 
   /**
@@ -168,7 +170,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const isPendingMultisigTxCompletedAndConfirmed = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTIONS_MULTISIG.confirm
+    && activeMultisigTransactionData.value?.tx.function === TX_FUNCTIONS_MULTISIG.confirm
   ));
 
   /**
@@ -181,25 +183,53 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
       const { data: [latestTransaction] } = await middleware.getTxs({
         direction: 'backward', limit: 1, contract: contractId,
       });
-      latestMultisigAccountTransaction.value = latestTransaction;
+      return latestTransaction;
     } catch (error) {
       handleUnknownError(error);
+      return null;
     }
   }
 
-  watch(
-    () => activeMultisigAccount.value,
-    (newValue, oldValue) => {
-      if (!isEqual(newValue, oldValue)) {
-        assignPendingMultisigTx();
+  if (!composableInitialized) {
+    composableInitialized = true;
 
-        if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
-          fetchLatestMultisigAccountTransaction();
-        }
-      }
-    },
-    { immediate: true },
-  );
+    // Create persistent effect scope to avoid watcher being disposed
+    effectScope(true).run(() => {
+      const { activeMultisigAccount: scopedActiveMultisigAccount } = useMultisigAccounts();
+
+      watch(
+        scopedActiveMultisigAccount,
+        async (newValue, oldValue) => {
+          if (newValue && !isEqual(newValue, oldValue)) {
+            if (!newValue?.txHash) {
+              activeMultisigTransactionData.value = null;
+              pendingMultisigTransaction.value = null;
+            } else if (newValue.txHash !== oldValue?.txHash) {
+              isLoading.value = true;
+              [
+                activeMultisigTransactionData.value,
+                pendingMultisigTransaction.value,
+              ] = await Promise.all([
+                fetchLatestMultisigAccountTransaction(),
+                fetchActiveMultisigTx(),
+              ]);
+              isLoading.value = false;
+            } else if (
+              !isEqual(newValue.confirmedBy, oldValue.confirmedBy)
+              && pendingMultisigTransaction.value
+            ) {
+              pendingMultisigTransaction.value = {
+                ...pendingMultisigTransaction.value,
+                ...newValue,
+                totalConfirmations: newValue.confirmedBy.length,
+              };
+            }
+          }
+        },
+        { immediate: true },
+      );
+    });
+  }
 
   return {
     pendingMultisigTransaction,
@@ -217,6 +247,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
     pendingMultisigTxCanBeSent,
     pendingMultisigTxLocalSigners,
     pendingMultisigTxConfirmedByLocalSigners,
+    isLoading,
     isPendingMultisigTxCompleted,
     isPendingMultisigTxCompletedAndRevoked,
     isPendingMultisigTxCompletedAndConfirmed,

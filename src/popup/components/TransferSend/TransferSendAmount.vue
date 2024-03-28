@@ -2,7 +2,7 @@
   <div
     class="transfer-send-amount"
     :class="{
-      'without-margin': withoutMargin
+      'without-margin': withoutMargin,
     }"
   >
     <Field
@@ -14,6 +14,7 @@
       :rules="{
         required: true,
         min_value_exclusive: 0,
+        does_not_exceed_decimals: assetDecimals,
         ...validationRules,
       }"
     >
@@ -28,9 +29,9 @@
         :message="amountMessage"
         :protocol="protocol"
         :readonly="readonly"
-        :selected-asset="selectedAsset"
+        :selected-asset="(selectedAsset as IAsset)"
         @update:modelValue="$emit('update:modelValue', $event)"
-        @asset-selected="(asset) => $emit('assetSelected', asset)"
+        @asset-selected="(asset) => $emit('asset-selected', asset)"
       >
         <template #label-after>
           <slot name="label-after" />
@@ -47,9 +48,12 @@ import {
   PropType,
 } from 'vue';
 import { Field } from 'vee-validate';
-import type { Protocol } from '@/types';
-import InputAmount from '@/popup/components/InputAmount.vue';
+
+import type { Protocol, IAsset } from '@/types';
 import { getMessageByFieldName } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
+import InputAmount from '@/popup/components/InputAmount.vue';
 
 export default defineComponent({
   components: {
@@ -59,7 +63,7 @@ export default defineComponent({
   props: {
     modelValue: { type: String, default: '' },
     validationRules: { type: Object, default: () => {} },
-    selectedAsset: { type: Object, default: () => {} },
+    selectedAsset: { type: Object as PropType<IAsset>, default: () => {} },
     errors: { type: Object, required: true },
     customLabel: { type: String, default: '' },
     readonly: Boolean,
@@ -70,7 +74,13 @@ export default defineComponent({
   setup(props) {
     const amountMessage = computed(() => getMessageByFieldName(props.errors.amount));
 
+    const assetDecimals = computed(() => (
+      props.selectedAsset?.decimals
+      ?? ProtocolAdapterFactory.getAdapter(props.protocol).coinPrecision
+    ));
+
     return {
+      assetDecimals,
       amountMessage,
     };
   },

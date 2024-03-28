@@ -1,15 +1,15 @@
 # Superhero Wallet
 
-**Superhero is a browser extension that allows you to send and receive value to URLs and content producers across the internet.**
+**Superhero is a multi-blockchain wallet to manage crypto assets and navigate the web3 and DeFi space. Powered by æternity.**
 
-[![Build Status](https://travis-ci.com/aeternity/superhero-wallet.svg?branch=develop)](https://travis-ci.com/aeternity/superhero-wallet) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/aeternity/superhero-wallet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/aeternity/superhero-wallet/context:javascript)
+[![main action](https://github.com/superhero-com/superhero-wallet/actions/workflows/main.yml/badge.svg)](https://github.com/superhero-com/superhero-wallet/actions/workflows/main.yml) [![codeql](https://github.com/superhero-com/superhero-wallet/actions/workflows/codeql.yml/badge.svg)](https://github.com/superhero-com/superhero-wallet/actions/workflows/codeql.yml) [![test](https://github.com/superhero-com/superhero-wallet/actions/workflows/test.yml/badge.svg)](https://github.com/superhero-com/superhero-wallet/actions/workflows/test.yml)
 
 ## Build
 
 Clone the master branch of this repo.
 
 ```
-$ git clone https://github.com/aeternity/superhero-wallet.git
+$ git clone https://github.com/superhero-com/superhero-wallet.git
 $ cd superhero-wallet
 ```
 
@@ -18,7 +18,9 @@ $ cd superhero-wallet
 ```
 $ npm install
 $ npm run build
-$ npm run build:extension # build an extension
+$ npm run build:extension:ff # build firefox extension
+$ npm run build:extension:chrome # build chrome extension
+$ npm run build:extension # build firefox and chrome extensions
 $ npm run build:web # build a web version
 $ npm run build:android # to build android application
 $ npm run build:ios # to build ios application
@@ -53,7 +55,7 @@ $ npm run test # to run both unit and e2e tests
 
 1. Open the Firefox menu and select `Add-ons` section.
 2. Click the `Tools for  all add-ons` button and select `Debug Add-ons`
-3. Click `Load a temorary add-on` and navigate to the generated `dist` folder in the cloned repo or the unarchived release folder and select the `manifest.json` file.
+3. Click `Load a temporary add-on` and navigate to the generated `dist` folder in the cloned repo or the unarchived release folder and select the `manifest.json` file.
 
 ### Build Cordova version for production
 
@@ -89,6 +91,6 @@ This project is tested with BrowserStack.
 
 Contributions are more than welcome.
 
-If you spot an issue while testing/using the extension - [submit an issue](https://github.com/aeternity/superhero-wallet/issues)
+If you spot an issue while testing/using the extension - [submit an issue](https://github.com/superhero-com/superhero-wallet/issues)
 
 If you want to help us with building this amazing project submit your PR!

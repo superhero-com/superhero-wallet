@@ -267,16 +267,6 @@
     "token-details": {
       "token": "代币"
     },
-    "fungible-tokens": {
-      "add": "添加可替换代币",
-      "add-info": "这允许您从给定地已部署的可替换代币合约中添加代币",
-      "deploy": "部署代币",
-      "deploy-info": "这允许你部署你自己的可替换代币合约",
-      "allowances": "津贴",
-      "allowances-info": "给出或获取津贴",
-      "mint": "铸造/销毁代币",
-      "mint-info": "这允许你铸造或销毁代币数量"
-    },
     "names": {
       "default": "默认",
       "balance-error": "你的帐户余额不足以支付这笔交易。",

@@ -1,7 +1,6 @@
 import type { WalletAppRouteConfig } from '@/types';
 import {
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-  PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
@@ -12,6 +11,7 @@ import {
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_ASSETS,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_APPS_BROWSER,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
   ROUTE_TOKEN,
@@ -34,10 +34,20 @@ import {
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
-  ROUTE_APPS_BROWSER,
+  ROUTE_AUCTION_BID,
+  ROUTE_AUCTION_HISTORY,
+  ROUTE_PERMISSIONS_ADD,
+  ROUTE_POPUP_ACCOUNT_LIST,
+  ROUTE_POPUP_SIGN_TX,
+  ROUTE_POPUP_CONNECT,
+  ROUTE_POPUP_RAW_SIGN,
+  ROUTE_POPUP_MESSAGE_SIGN,
+  ROUTE_PERMISSIONS_DETAILS,
+  ROUTE_PERMISSIONS_SETTINGS,
 } from './routeNames';
 
 import About from '../pages/About.vue';
+import AccountDetailsTransactions from '../components/AccountDetailsTransactionsBase.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
 import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
 import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
@@ -48,9 +58,9 @@ import CommentNew from '../pages/CommentNew.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import DonateError from '../pages/DonateError.vue';
-import TokenContainer from '../pages/FungibleTokens/TokenContainer.vue';
-import TokenTransactions from '../pages/FungibleTokens/TokenTransactions.vue';
-import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
+import AssetDetails from '../pages/Assets/AssetDetails.vue';
+import AssetDetailsTransactions from '../pages/Assets/AssetDetailsTransactions.vue';
+import AssetDetailsInfo from '../pages/Assets/AssetDetailsInfo.vue';
 import Index from '../pages/Index.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
@@ -137,8 +147,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: '',
             name: ROUTE_ACCOUNT_DETAILS,
-            component: ProtocolSpecificView,
-            props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS },
+            component: AccountDetailsTransactions,
             meta: {
               hideHeader: true,
               showFilterBar: true,
@@ -265,13 +274,27 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
       {
-        path: 'coins/:id',
-        component: TokenContainer,
+        /**
+         * When a route is defined with a parameter and user leaves this route, vue-router will
+         * throw a "missing required param" error even though the parameter was set for the route
+         * Making the parameter optional & checking for it in the beforeEnter hook fixes the issue
+         *
+         * @see https://github.com/vuejs/router/issues/845
+         */
+        path: 'coins/:id?',
+        component: AssetDetails,
+        beforeEnter: (to, from, next) => {
+          if (!to.params.id) {
+            next({ name: ROUTE_MULTISIG_ACCOUNT });
+            return;
+          }
+          next();
+        },
         children: [
           {
             name: ROUTE_MULTISIG_COIN,
             path: '',
-            component: TokenTransactions,
+            component: AccountDetailsMultisigTransactions,
             props: true,
             meta: {
               title: 'coinDetails',
@@ -285,7 +308,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             name: ROUTE_MULTISIG_COIN_DETAILS,
             path: 'details',
-            component: TokenDetails,
+            component: AssetDetailsInfo,
             props: true,
             meta: {
               title: 'coinDetails',
@@ -303,7 +326,7 @@ export const routes: WalletAppRouteConfig[] = [
     redirect: '/account/:a(.*)',
   },
   {
-    name: 'popup-sign-tx',
+    name: ROUTE_POPUP_SIGN_TX,
     path: '/popup-sign-tx',
     component: ConfirmTransactionSign,
     props: true,
@@ -312,7 +335,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'popup-raw-sign',
+    name: ROUTE_POPUP_RAW_SIGN,
     path: '/popup-raw-sign',
     component: ConfirmRawSign,
     props: true,
@@ -321,7 +344,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'connect',
+    name: ROUTE_POPUP_CONNECT,
     path: '/connect',
     component: PopupConnect,
     props: true,
@@ -330,7 +353,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'message-sign',
+    name: ROUTE_POPUP_MESSAGE_SIGN,
     path: '/message-sign',
     component: PopupMessageSign,
     props: true,
@@ -339,7 +362,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'account-list',
+    name: ROUTE_POPUP_ACCOUNT_LIST,
     path: '/account-list',
     component: PopupAccountList,
     props: true,
@@ -452,7 +475,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings/permissions',
     component: PermissionsSettings,
-    name: 'permissions-settings',
+    name: ROUTE_PERMISSIONS_SETTINGS,
     meta: {
       title: 'permissionsSettings',
       showHeaderNavigation: true,
@@ -461,7 +484,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings/permissions/add',
     component: PermissionManager,
-    name: 'permissions-add',
+    name: ROUTE_PERMISSIONS_ADD,
     meta: {
       title: 'permissionsAdd',
       showHeaderNavigation: true,
@@ -470,7 +493,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings/permissions/:host',
     component: PermissionManager,
-    name: 'permissions-details',
+    name: ROUTE_PERMISSIONS_DETAILS,
     meta: {
       title: 'permissionsEdit',
       showHeaderNavigation: true,
@@ -566,7 +589,7 @@ export const routes: WalletAppRouteConfig[] = [
         path: '',
         component: AuctionBid,
         props: true,
-        name: 'auction-bid',
+        name: ROUTE_AUCTION_BID,
         meta: {
           title: 'auction',
           showHeaderNavigation: true,
@@ -576,7 +599,7 @@ export const routes: WalletAppRouteConfig[] = [
         path: 'history',
         component: AuctionHistory,
         props: true,
-        name: 'auction-history',
+        name: ROUTE_AUCTION_HISTORY,
         meta: {
           title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
@@ -615,13 +638,21 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/coins/:id',
-    component: TokenContainer,
+    // see https://github.com/vuejs/router/issues/845
+    path: '/coins/:id?',
+    component: AssetDetails,
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: ROUTE_ACCOUNT });
+        return;
+      }
+      next();
+    },
     children: [
       {
         name: ROUTE_COIN,
         path: '',
-        component: TokenTransactions,
+        component: AssetDetailsTransactions,
         props: true,
         meta: {
           title: 'coinDetails',
@@ -634,7 +665,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         name: ROUTE_COIN_DETAILS,
         path: 'details',
-        component: TokenDetails,
+        component: AssetDetailsInfo,
         props: true,
         meta: {
           title: 'coinDetails',
@@ -645,13 +676,21 @@ export const routes: WalletAppRouteConfig[] = [
     ],
   },
   {
-    path: '/tokens/:id',
-    component: TokenContainer,
+    // see https://github.com/vuejs/router/issues/845
+    path: '/tokens/:id?',
+    component: AssetDetails,
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: ROUTE_ACCOUNT });
+        return;
+      }
+      next();
+    },
     children: [
       {
         name: ROUTE_TOKEN,
         path: '',
-        component: TokenTransactions,
+        component: AssetDetailsTransactions,
         props: true,
         meta: {
           title: 'tokenDetails',
@@ -664,7 +703,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         name: ROUTE_TOKEN_DETAILS,
         path: 'details',
-        component: TokenDetails,
+        component: AssetDetailsInfo,
         props: true,
         meta: {
           title: 'tokenDetails',
@@ -713,8 +752,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/notifications',
     name: ROUTE_NOTIFICATIONS,
+    path: '/notifications',
     component: Notifications,
     meta: {
       title: 'notifications',
@@ -724,8 +763,19 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_NOT_FOUND,
-    path: '/:pathMatch(.*)*',
+    path: '/page-not-found',
     component: NotFound,
+    props: true,
+    meta: {
+      ifNotAuth: true,
+      notPersist: true,
+      showHeaderNavigation: true,
+      title: 'notFound',
+    },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: { name: ROUTE_NOT_FOUND },
     props: true,
     meta: {
       ifNotAuth: true,

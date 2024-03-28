@@ -1,17 +1,44 @@
 <template>
-  <ul class="panel-list">
-    <slot />
-  </ul>
+  <div class="panel">
+    <div
+      v-if="header"
+      class="panel-header"
+      v-text="header"
+    />
+
+    <div class="panel-body">
+      <slot />
+    </div>
+  </div>
 </template>
 
-<style lang="scss" scoped>
-@use '../../styles/variables';
+<script lang="ts">
+import { defineComponent } from 'vue';
 
-.panel-list {
-  padding: 0;
-  background: variables.$color-bg-1;
-  box-shadow: 0 0 8px rgba(variables.$color-primary, 0.15);
-  border-radius: 4px;
-  margin-top: 30px;
+export default defineComponent({
+  props: {
+    header: { type: String, default: null },
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+@use '../../styles/variables' as *;
+@use '../../styles/typography';
+
+.panel {
+  --card-padding: 12px;
+
+  background: rgba($color-white, 0.08);
+  border-radius: $border-radius-interactive;
+  overflow: hidden;
+
+  &-header {
+    @extend %face-sans-16-semi-bold;
+
+    color: $color-white;
+    line-height: 24px;
+    padding: 8px var(--card-padding);
+  }
 }
 </style>

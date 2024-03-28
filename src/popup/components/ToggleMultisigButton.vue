@@ -31,10 +31,10 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
+
 import { useRouter } from 'vue-router';
-import { useMultisigAccounts } from '../../composables';
-import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
+import { useMultisigAccounts } from '@/composables';
+import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 
 import BtnPlain from './buttons/BtnPlain.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
@@ -50,10 +50,9 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
 
-    const { multisigAccounts } = useMultisigAccounts({ store });
+    const { multisigAccounts } = useMultisigAccounts();
 
     const hasPendingMultisigTransaction = computed(
       () => multisigAccounts.value.some((acc) => acc.hasPendingTransaction),

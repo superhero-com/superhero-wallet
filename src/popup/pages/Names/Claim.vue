@@ -8,8 +8,8 @@
           :rules="{
             enough_coin: totalNameClaimAmount.toString(),
             required: true,
-            name: true,
-            name_unregistered: true,
+            aens_name: true,
+            aens_name_unregistered: true,
           }"
         >
           <InputField
@@ -55,7 +55,7 @@
         <BtnMain
           class="btn-register"
           extend
-          :disabled="!isAeSdkReady || !name || errorName"
+          :disabled="isLoaderVisible || !name || errorName"
           @click="claim"
         >
           {{
@@ -70,7 +70,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import {
+  defineComponent,
+  ref,
+  computed,
+  nextTick,
+} from 'vue';
 import {
   AensName,
   buildTx,
@@ -81,7 +86,6 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
@@ -102,6 +106,7 @@ import {
   AE_AENS_NAME_MAX_LENGTH,
   AE_AENS_NAME_AUCTION_MAX_LENGTH,
 } from '@/protocols/aeternity/config';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -123,12 +128,19 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const store = useStore();
     const { validate } = useForm();
     const errorName = useFieldError('name');
     const { t } = useI18n();
 
-    const { setLoaderVisible } = useUi();
+    const { activeAccount } = useAccounts();
+    const { openDefaultModal } = useModals();
+    const { getAeSdk } = useAeSdk();
+    const { isLoaderVisible, setLoaderVisible } = useUi();
+    const {
+      setPendingAutoExtendName,
+      updateOwnedNames,
+      updateNamePointer,
+    } = useAeNames();
 
     const name = ref('');
     const autoExtend = ref(false);
@@ -140,13 +152,13 @@ export default defineComponent({
     const totalNameClaimAmount = computed(() => !name.value.length
       ? BigNumber(0)
       : BigNumber(unpackTx(
-          buildTx({
-            tag: Tag.NamePreclaimTx,
-            accountId: STUB_ADDRESS,
-            nonce: STUB_NONCE,
-            commitmentId: commitmentHash(fullName.value, STUB_NAME_SALT),
-          }) as any,
-          Tag.NamePreclaimTx,
+        buildTx({
+          tag: Tag.NamePreclaimTx,
+          accountId: STUB_ADDRESS,
+          nonce: STUB_NONCE,
+          commitmentId: commitmentHash(fullName.value, STUB_NAME_SALT),
+        }),
+        Tag.NamePreclaimTx,
       ).fee)
         .plus(getExecutionCost(buildTx({
           tag: Tag.NameClaimTx,
@@ -158,37 +170,38 @@ export default defineComponent({
         }) as any).toString())
         .shiftedBy(-AE_COIN_PRECISION));
 
-    const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
-
     async function claim() {
+      // Show loader at the beginning because the validation is also fetching some data
+      // so we need to block user from double clicking the claim button.
+      setLoaderVisible(true);
+
       if (!(await validate()).valid) {
+        setLoaderVisible(false);
         return;
       }
-
-      const { openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store });
 
       const aeSdk = await getAeSdk();
       const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);
 
       if (nameEntry) {
+        setLoaderVisible(false);
         openDefaultModal({
           title: t('modals.name-exist.msg'),
         });
       } else {
-        setLoaderVisible(true);
         let claimTxHash;
 
         try {
           const { salt } = await aeSdk.aensPreclaim(fullName.value);
           claimTxHash = (await aeSdk.aensClaim(fullName.value, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
-            store.commit('names/setPendingAutoExtendName', fullName.value);
+            setPendingAutoExtendName(fullName.value);
           }
+          await nextTick();
           router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
-        } catch (e: any) {
-          let msg = e.message;
-          if (msg.includes('is not enough to execute') || e.statusCode === 404) {
+        } catch (error: any) {
+          let msg = error.message;
+          if (msg.includes('is not enough to execute') || error.statusCode === 404) {
             msg = t('pages.names.balance-error');
           }
           openDefaultModal({
@@ -201,18 +214,17 @@ export default defineComponent({
         }
 
         try {
-          store.dispatch('names/fetchOwned');
           await aeSdk.poll(claimTxHash);
           if (AE_AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
-            store.dispatch('names/updatePointer', {
+            await updateNamePointer({
               name: fullName.value,
               address: activeAccount.value.address,
             });
           }
-        } catch (e: any) {
-          openDefaultModal({ msg: e.message });
+        } catch (error: any) {
+          openDefaultModal({ msg: error.message });
         } finally {
-          store.dispatch('names/fetchOwned');
+          updateOwnedNames();
         }
       }
     }
@@ -224,8 +236,8 @@ export default defineComponent({
     return {
       AE_AENS_DOMAIN,
       autoExtend,
+      isLoaderVisible,
       isNameValid,
-      isAeSdkReady,
       name,
       totalNameClaimAmount,
       errorName,

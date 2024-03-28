@@ -1,10 +1,19 @@
 <template>
-  <img
+  <div
     class="avatar"
-    :src="hasProfileImage ? profileImage : avatar"
-    :class="[size, { borderless }]"
-    :style="avatarStyle"
+    :class="[size, {
+      borderless,
+      placeholder: isPlaceholder,
+    }]"
+    :style="{ '--color': color }"
   >
+    <img
+      v-if="!isPlaceholder && srcUrl"
+      class="avatar-img"
+      :src="srcUrl"
+      alt="Avatar"
+    >
+  </div>
 </template>
 
 <script lang="ts">
@@ -31,33 +40,30 @@ export default defineComponent({
       validator: (val: string) => SIZES.includes(val),
     },
     borderless: Boolean,
+    isPlaceholder: Boolean,
   },
   setup(props) {
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
-    const error = ref(false);
     const hasProfileImage = ref(false);
 
-    const avatar = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
-    const color = computed(() => props.address ? getAddressColor(props.address) : null);
-    const profileImage = computed(() => (isContract(props.address) || props.address === '')
+    const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
+    const color = computed(() => props.address ? getAddressColor(props.address) : undefined);
+    const profileImageUrl = computed(() => (props.address === '' || isContract(props.address))
       ? null
       : `${aeActiveNetworkSettings.value.backendUrl}/profile/image/${props.address}`);
-    const avatarStyle = computed(() => !props.borderless ? { 'border-color': color.value } : null);
+    const srcUrl = computed(() => hasProfileImage.value ? profileImageUrl.value : avatarUrl.value);
 
     onMounted(async () => {
       hasProfileImage.value = (
-        !!profileImage.value
-        && await checkImageAvailability(profileImage.value)
+        !!profileImageUrl.value
+        && await checkImageAvailability(profileImageUrl.value)
       );
     });
 
     return {
-      error,
-      avatar,
+      srcUrl,
       color,
-      profileImage,
-      avatarStyle,
       hasProfileImage,
     };
   },
@@ -65,7 +71,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 @use '../../styles/mixins';
 
 $size-xs: 18px;
@@ -84,7 +90,17 @@ $size-xl: 56px;
   object-fit: cover;
   user-select: none;
   flex-shrink: 0;
-  border: 1px solid transparent;
+  border: 1px solid var(--color);
+  background-color: $color-bg-2;
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+  }
+
+  &.placeholder {
+    background-color: rgba($color-white, 0.15);
+  }
 
   &.sm {
     height: $size-sm;

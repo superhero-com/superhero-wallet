@@ -18,17 +18,13 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
-import type {
-  IDefaultComposableOptions,
-  IFormModel,
-} from '@/types';
+import type { IFormModel } from '@/types';
 import {
   executeAndSetInterval,
   handleUnknownError,
   isUrlValid,
 } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
@@ -38,23 +34,24 @@ import {
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 
 import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
-export interface MaxAmountOptions extends IDefaultComposableOptions {
-  formModel: Ref<IFormModel>
+export interface MaxAmountOptions {
+  formModel: Ref<IFormModel>;
 }
 
 /**
  * Composable that allows to use real max amount of selected token
  * considering the fee that needs to be paid.
  */
-export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
-  const { getAeSdk } = useAeSdk({ store });
-  const { balance } = useBalances({ store });
-  const { getLastActiveProtocolAccount } = useAccounts({ store });
+export function useMaxAmount({ formModel }: MaxAmountOptions) {
+  const { getAeSdk } = useAeSdk();
+  const { balance } = useBalances();
+  const { getLastActiveProtocolAccount } = useAccounts();
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
@@ -73,7 +70,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   });
 
   function getAccount() {
-    return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+    return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
   }
 
   watch(
@@ -119,14 +116,14 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         fee.value = BigNumber(unpackTx(
           buildTx({
             tag: Tag.ContractCallTx,
-            callerId: account.address,
+            callerId: account.address as Encoded.AccountAddress,
             contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
             amount: 0,
             callData: calldata,
             nonce: nonce.value,
-          }) as any,
+          }),
           Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
         ).fee).shiftedBy(-AE_COIN_PRECISION);
         return;
@@ -139,12 +136,12 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const minFee = BigNumber(unpackTx(
         buildTx({
           tag: Tag.SpendTx,
-          senderId: account.address,
-          recipientId: account.address,
+          senderId: account.address as Encoded.AccountAddress,
+          recipientId: account.address as Encoded.AccountAddress,
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,
-        }) as any,
+        }),
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
@@ -168,7 +165,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       try {
         nonce.value = (await aeSdk.api
-          .getAccountByPubkey(getAccount().address))?.nonce;
+          .getAccountNextNonce(getAccount().address)).nextNonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);
       }

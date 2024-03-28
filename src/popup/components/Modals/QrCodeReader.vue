@@ -28,7 +28,9 @@
         <video
           ref="qrCodeVideoEl"
           class="video"
-        />
+        >
+          <track kind="captions" title="Scanning Qr Code" />
+        </video>
       </div>
     </div>
     <template
@@ -86,6 +88,7 @@ export default defineComponent({
   },
   setup(props) {
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
+    // eslint-disable-next-line no-undef
     const cameraStatus = ref<PermissionState>(
       IS_MOBILE_APP ? 'granted' : 'denied',
     );
@@ -137,7 +140,9 @@ export default defineComponent({
 
       return new Promise((resolve) => {
         browserReader.value?.decodeFromVideoDevice(
-          undefined, qrCodeVideoEl.value, (result, _, controls) => {
+          undefined,
+          qrCodeVideoEl.value,
+          (result, _, controls) => {
             browserReaderControls.value = controls;
             if (result) {
               controls?.stop();
@@ -187,7 +192,7 @@ export default defineComponent({
             cameraStatus.value = 'granted';
           }).catch(() => {
             openInNewWindow(
-              browser.extension.getURL('./CameraRequestPermission.html'),
+              browser.runtime.getURL('./CameraRequestPermission.html'),
             );
             props.reject(new NoUserMediaPermissionError());
           });
@@ -245,6 +250,7 @@ export default defineComponent({
 
       await initBrowserReader();
       const status = navigator.permissions
+        // eslint-disable-next-line no-undef
         && (await navigator.permissions.query({ name: 'camera' as PermissionName }).catch((error) => {
           const firefoxExceptionMessage = "'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.";
           if (error.message !== firefoxExceptionMessage) {
@@ -307,6 +313,11 @@ export default defineComponent({
 
     .video {
       height: var(--camera-size);
+
+      @include mixins.mobile {
+        height: unset;
+        width: var(--camera-size);
+      }
     }
 
     .video-loader {

@@ -1,8 +1,14 @@
 import { Router } from 'vue-router';
 import { Dictionary } from '@/types';
-import { useModals } from '@/composables';
-import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '@/constants';
+import { useAccounts, useModals } from '@/composables';
+import {
+  APP_LINK_WEB,
+  MODAL_TRANSFER_SEND,
+  PROTOCOL_LIST,
+  PROTOCOLS,
+} from '@/constants';
 import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 // Allowed action names
 export type RouteQueryActionName = 'transferSend' | 'addNetwork';
@@ -14,6 +20,7 @@ export type RouteQueryActionMethod = (router: Router, query: Dictionary) => bool
  * The query object key whose value determines which controller method to use.
  */
 const ACTION_PROP = 'op';
+const TOKEN_PROP = 'token';
 
 /**
  * Function that handles URLs that has the `op` key present in the query string.
@@ -38,8 +45,27 @@ export const RouteQueryActionsController = (() => {
     /**
      * Take action after opening the link copied in the transfer receive modal.
      */
-    transferSend: () => {
+    transferSend: (_, query) => {
       const { openModal } = useModals();
+      const { setActiveAccountByProtocol } = useAccounts();
+
+      // Determine the active protocol for the current transfer
+      const token = query[TOKEN_PROP];
+
+      const currentActionProtocol = PROTOCOL_LIST.find((protocol) => {
+        const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+        return adapter.getUrlTokenKey() === token;
+      });
+
+      /**
+       * Default is Aeternity to support AEX9 token transfers.
+       * Token key starts with the contract Id 'ct_...'.
+       * Aeternity: https://wallet...?op=transferSend&token=AE&amount=1&account=
+       * Bitcoin: https://wallet...?op=transferSend&token=bitcoin&amount=0.0002103&account=
+       * AEX9 tokens: https://wallet...?op=transferSend&token=ct_mijZGKXeqQBS1dDmdJbbrDzKRrP58XLjJ2u5edkwafzfcXMsY&amount=1&account=
+       */
+      setActiveAccountByProtocol(currentActionProtocol || PROTOCOLS.aeternity);
+
       openModal(MODAL_TRANSFER_SEND);
       return true;
     },

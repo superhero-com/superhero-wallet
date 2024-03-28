@@ -1,6 +1,9 @@
-window.browser = process.env.IS_EXTENSION
-  ? require('webextension-polyfill')
-  : {
+if (process.env.IS_EXTENSION) {
+  import('webextension-polyfill').then((webExtensionPolyfill) => {
+    browser = webExtensionPolyfill;
+  });
+} else {
+  window.browser = {
     runtime: {
       getURL: (url) => url,
     },
@@ -9,13 +12,13 @@ window.browser = process.env.IS_EXTENSION
         get(key) {
           const keys = Array.isArray(key) ? key : [key];
           return Promise.resolve(
-            keys
+            Object.fromEntries(keys
               .map((k) => {
                 const v = localStorage.getItem(k);
                 return [k, v === null ? undefined : JSON.parse(v)];
               })
               .filter(([, value]) => value !== undefined)
-              .reduce((p, [k, v]) => ({ ...p, [k]: v }), {}),
+              .map(([k, v]) => [k, v])),
           );
         },
         set(object) {
@@ -35,3 +38,4 @@ window.browser = process.env.IS_EXTENSION
       },
     },
   };
+}

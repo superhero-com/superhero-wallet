@@ -3,7 +3,7 @@ import {
   RouteRecordRaw,
 } from 'vue-router';
 import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue-router';
-import { Dictionary } from '@/types';
+import { IPopupProps, WalletRouteMeta } from '@/types';
 import {
   APP_LINK_WEB,
   IS_MOBILE_APP,
@@ -13,21 +13,18 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  POPUP_TYPE_TX_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
-import store from '@/store';
-import initSdk from '@/lib/wallet';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
+import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   usePopupProps,
-  useAeSdk,
   useUi,
 } from '@/composables';
 import { routes } from './routes';
@@ -36,6 +33,11 @@ import {
   ROUTE_APPS_BROWSER,
   ROUTE_INDEX,
   ROUTE_NOT_FOUND,
+  ROUTE_POPUP_ACCOUNT_LIST,
+  ROUTE_POPUP_CONNECT,
+  ROUTE_POPUP_MESSAGE_SIGN,
+  ROUTE_POPUP_RAW_SIGN,
+  ROUTE_POPUP_SIGN_TX,
 } from './routeNames';
 
 const router = createRouter({
@@ -44,36 +46,28 @@ const router = createRouter({
   scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
-const lastRouteKey = 'last-path';
-
 const {
   isLoggedIn,
   activeAccount,
+  areAccountsRestored,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
-} = useAccounts({ store });
+} = useAccounts();
 const { setPopupProps } = usePopupProps();
 
 const { setLoginTargetLocation } = useUi();
 
 RouteQueryActionsController.init(router);
-
-const unbind = router.beforeEach(async (to, from, next) => {
-  await watchUntilTruthy(() => store.state.isRestored);
-  next(
-    (
-      !RUNNING_IN_POPUP
-      && to.name === ROUTE_INDEX
-      && ((await browser?.storage.local.get(lastRouteKey)) as any)[lastRouteKey]
-    )
-    || undefined,
-  );
-  unbind();
-});
+RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
+  // Wait until we are sure that the user login state is correct
+  await watchUntilTruthy(areAccountsRestored);
+
+  const meta = to.meta as WalletRouteMeta;
+
   if (!isLoggedIn.value) {
-    if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
+    if (meta?.ifNotAuthOnly || meta?.ifNotAuth) {
       next();
     } else {
       setLoginTargetLocation(to);
@@ -90,34 +84,27 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // In-app browser only works with AE accounts
-    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
-      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
+      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
       setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
       next({ name: ROUTE_APPS_BROWSER });
       return;
     }
   }
 
-  const { isAeSdkReady } = useAeSdk({ store });
-
-  if (!isAeSdkReady.value && !RUNNING_IN_POPUP) {
-    initSdk();
-  }
-
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {
-      [POPUP_TYPE_CONNECT]: 'connect',
-      [POPUP_TYPE_ACCOUNT_LIST]: 'account-list',
-      [POPUP_TYPE_SIGN]: 'popup-sign-tx',
-      [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
-      [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
-      [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
+      [POPUP_TYPE_CONNECT]: ROUTE_POPUP_CONNECT,
+      [POPUP_TYPE_ACCOUNT_LIST]: ROUTE_POPUP_ACCOUNT_LIST,
+      [POPUP_TYPE_SIGN]: ROUTE_POPUP_SIGN_TX,
+      [POPUP_TYPE_RAW_SIGN]: ROUTE_POPUP_RAW_SIGN,
+      [POPUP_TYPE_MESSAGE_SIGN]: ROUTE_POPUP_MESSAGE_SIGN,
     }[POPUP_TYPE];
 
-    let popupProps: Dictionary = {};
+    let popupProps: IPopupProps | null = null;
 
     if (!Object.keys(to.params).length) {
-      popupProps = await getPopupProps() as Dictionary;
+      popupProps = await getPopupProps();
       if (!popupProps?.app) {
         next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
         return;
@@ -132,16 +119,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // @ts-ignore
-  next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
-});
-
-router.afterEach(async (to) => {
-  if (RUNNING_IN_POPUP) return;
-  if (to.meta?.notPersist) {
-    await browser?.storage.local.remove(lastRouteKey);
-  } else {
-    await browser?.storage.local.set({ [lastRouteKey]: to.path });
-  }
+  next(meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));

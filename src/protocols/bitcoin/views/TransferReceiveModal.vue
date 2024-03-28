@@ -3,16 +3,15 @@
     v-bind="$attrs"
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOLS.bitcoin"
     disable-asset-selection
   />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import {
-  PROTOCOL_BITCOIN,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
 import { useAccounts } from '@/composables';
@@ -26,13 +25,12 @@ export default defineComponent({
     TransferReceiveBase,
   },
   setup() {
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     return {
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       activeAccount,
-      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN).protocolName,
+      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin).protocolName,
     };
   },
 });

@@ -6,7 +6,7 @@
           {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
         </div>
 
-        <div class="mnemonics">
+        <CardMnemonic class="mnemonics">
           <p class="mnemonics-text">
             {{ mnemonic }}
           </p>
@@ -25,7 +25,7 @@
               {{ $t('common.addressCopied') }}
             </template>
           </BtnMain>
-        </div>
+        </CardMnemonic>
 
         <i18n-t
           keypath="pages.seedPhrase.backUpYourSeedPhrase"
@@ -48,17 +48,15 @@
           <BtnMain
             class="button"
             extend
+            :text="$t('pages.seedPhrase.verifySeed')"
             :to="{ name: 'settings-seed-phrase-verify' }"
-          >
-            {{ $t('pages.seedPhrase.verifySeed') }}
-          </BtnMain>
+          />
           <BtnMain
             variant="muted"
             extend
-            @click="setBackedUpSeed"
-          >
-            {{ $t('pages.seedPhrase.doneThis') }}
-          </BtnMain>
+            :text="$t('pages.seedPhrase.doneThis')"
+            @click="markSeedPhraseAsBackedUp()"
+          />
         </div>
       </div>
     </IonContent>
@@ -66,13 +64,19 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useCopy } from '../../composables';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+import {
+  useAccounts,
+  useCopy,
+  useNotifications,
+  useUi,
+} from '@/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+
 import BtnMain from '../components/buttons/BtnMain.vue';
+import CardMnemonic from '../components/CardMnemonic.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
 
@@ -82,16 +86,21 @@ export default defineComponent({
     BtnMain,
     IonPage,
     IonContent,
+    CardMnemonic,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
 
+    const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
-    const mnemonic = computed(() => store.state.mnemonic);
+    const { mnemonic } = useAccounts();
+    const { removeIsSeedBackedUpNotification } = useNotifications({
+      requirePolling: false,
+    });
 
-    function setBackedUpSeed() {
-      store.commit('setBackedUpSeed');
+    function markSeedPhraseAsBackedUp() {
+      setBackedUpSeed(true);
+      removeIsSeedBackedUpNotification();
       router.push({ name: ROUTE_ACCOUNT });
     }
 
@@ -101,41 +110,30 @@ export default defineComponent({
       copy,
       copied,
       mnemonic,
-      setBackedUpSeed,
+      markSeedPhraseAsBackedUp,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 @use '../../styles/typography';
 
 .seed-phrase-details {
   padding-inline: var(--screen-padding-x);
 
   .mnemonics {
-    background: rgba(variables.$color-white, 0.15);
-    border: 2px solid rgba(variables.$color-white, 0.1);
-    border-radius: variables.$border-radius-modal;
-    margin: 0 0 20px 0;
-    padding: 12px;
-    text-align: center;
-    box-shadow: 0 4px 8px 2px rgb(60 60 60 / 10%);
-    box-sizing: border-box;
-
-    :deep(.content) {
-      padding: 12px;
-    }
+    margin-bottom: 18px;
 
     .mnemonics-text {
+      @extend %face-sans-18-regular;
+
       letter-spacing: 0.1em;
       line-height: 32px;
-      color: variables.$color-white;
+      color: $color-white;
       text-align: left;
       margin-bottom: 12px;
-
-      @extend %face-sans-18-regular;
     }
 
     .copy-btn {

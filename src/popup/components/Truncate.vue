@@ -38,8 +38,10 @@ import {
   watch,
   nextTick,
   onMounted,
+  onBeforeUnmount,
 } from 'vue';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
+import { debounce } from 'lodash-es';
 
 export default defineComponent({
   props: {
@@ -51,13 +53,14 @@ export default defineComponent({
     const container = ref<HTMLDivElement>();
     const scroll = ref<HTMLDivElement>();
     const shouldScroll = ref(false);
+    const animationTranslate = ref<string>();
+    const animationDuration = ref<string>();
+
+    let resizeObserver: ResizeObserver;
 
     const nameComponent = computed(() => props.str?.endsWith(AE_AENS_DOMAIN)
       ? props.str.replace(AE_AENS_DOMAIN, '')
       : props.str);
-
-    const animationTranslate = ref<string>();
-    const animationDuration = ref<string>();
 
     const calculateTruncate = async () => {
       shouldScroll.value = false;
@@ -76,13 +79,33 @@ export default defineComponent({
       }
     };
 
+    /**
+     * Observe container size changes
+     * in order to correctly truncate when container size changes
+     */
+    function observeContainerSize() {
+      resizeObserver = new ResizeObserver(
+        debounce(() => {
+          calculateTruncate();
+        }, 100),
+      );
+      resizeObserver.observe(container.value!);
+    }
+
     watch(nameComponent, calculateTruncate);
 
     onMounted(() => {
+      observeContainerSize();
       // sometimes setTimeout is needed for scroll to calculate proper width
       setTimeout(() => {
         calculateTruncate();
       }, 500);
+    });
+
+    onBeforeUnmount(() => {
+      if (container.value && resizeObserver) {
+        resizeObserver.disconnect();
+      }
     });
 
     return {

@@ -57,17 +57,17 @@
 
 <script lang="ts">
 import { computed, defineComponent, onUnmounted } from 'vue';
-import { useStore } from 'vuex';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { RejectedByUserError } from '../../../lib/errors';
-import { useAccounts, usePopupProps } from '../../../composables';
+import { PROTOCOLS } from '@/constants';
+import { RejectedByUserError } from '@/lib/errors';
+import { useAccounts, usePopupProps } from '@/composables';
 
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import DetailsItem from '../DetailsItem.vue';
-import Warning from '../../../icons/warning.svg?vue-component';
 import CopyText from '../CopyText.vue';
+
+import Warning from '../../../icons/warning.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -80,16 +80,11 @@ export default defineComponent({
   },
   setup() {
     const { popupProps, sender, setPopupProps } = usePopupProps();
-    const store = useStore();
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts();
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
-    const dataAsString = computed(
-      (): string => (typeof popupProps.value?.data === 'string')
-        ? popupProps.value?.data
-        : Buffer.from(popupProps.value?.data as any).toString('hex'),
-    );
+    const dataAsString = computed((): string => popupProps.value?.txBase64?.toString() || '');
 
     function confirm() {
       popupProps.value?.resolve();
@@ -124,7 +119,7 @@ export default defineComponent({
   }
 
   .warning {
-    margin: 16px;
+    margin-block: 16px;
     text-align: left;
 
     .title {
@@ -150,7 +145,7 @@ export default defineComponent({
   }
 
   .details-item {
-    margin: 24px 16px 16px;
+    margin-top: 24px;
     text-align: left;
   }
 }

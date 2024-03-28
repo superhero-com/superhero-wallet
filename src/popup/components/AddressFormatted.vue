@@ -1,13 +1,15 @@
 <template>
   <div class="address-formatted">
-    <template v-if="isAddress || splitAddress">
+    <template v-if="isAddress">
       <span
         v-for="(chunk, index) in addressChunks"
         :key="index"
         class="address-formatted-chunk"
         :class="{ 'align-right': alignRight }"
         :style="cssVariable"
-      >{{ chunk }}</span>
+      >
+        {{ chunk }}
+      </span>
     </template>
     <span v-else>{{ address }}</span>
   </div>
@@ -15,26 +17,28 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { validateHash } from '@/protocols/aeternity/helpers';
+import { useNetworks } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   props: {
     address: { type: String, required: true },
     columnCount: { type: Number, default: 6 },
-    splitAddress: Boolean,
     alignRight: Boolean,
   },
   setup(props) {
     const maxLength = 3;
+
+    const { activeNetwork } = useNetworks();
 
     function prepareChunk(chunk: any) {
       return chunk.length === maxLength ? chunk : `${chunk}${' '.repeat(maxLength - chunk.length)}`;
     }
 
     const isAddress = computed(() => {
-      // TODO - use validateHash to check for BTC addresses instead of 'splitAddress' prop
-      const { valid, isName } = validateHash(props.address);
-      return valid && !isName;
+      const networkType = activeNetwork.value?.type;
+      return !!ProtocolAdapterFactory
+        .getAdapterByAddressOrNameEncoding(props.address, networkType);
     });
     const addressChunks = computed(() => props.address.match(/.{1,3}/g)?.map(prepareChunk));
     const cssVariable = computed(() => ({

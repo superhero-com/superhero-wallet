@@ -9,7 +9,7 @@ const testValues = [{
 }, {
   value: 0,
 }, {
-  value: 0.123456789123456789,
+  value: '0.123456789123456789',
 }, {
   value: null,
   isError: true,

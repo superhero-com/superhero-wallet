@@ -38,7 +38,7 @@
       <BtnMain
         class="footer"
         extend
-        :text="$t('ok')"
+        :text="$t('common.ok')"
         @click="resolve"
       />
     </template>

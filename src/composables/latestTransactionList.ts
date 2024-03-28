@@ -1,151 +1,217 @@
+import { computed, ref, watch } from 'vue';
+import { isEqual, remove } from 'lodash-es';
+import type {
+  AccountAddress,
+  IAccount,
+  ICommonTransaction,
+  ITransaction,
+} from '@/types';
+import { STORAGE_KEYS, TRANSACTION_CERTAINLY_MINED_TIME } from '@/constants';
 import {
-  computed,
-  ref,
-  watch,
-} from 'vue';
-import { isEqual } from 'lodash-es';
-import { Encoded } from '@aeternity/aepp-sdk';
-import type { IDefaultComposableOptions, ITransaction } from '@/types';
-import { DASHBOARD_TRANSACTION_LIMIT, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
-import {
-  handleUnknownError,
   pipe,
   removeDuplicatedTransactions,
   sortTransactionsByDate,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
+
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
-import { useTransactionTx } from './transactionTx';
-import { useTransactionList } from './transactionList';
-import { useAeSdk } from './aeSdk';
-import { createNetworkWatcher } from './networks';
+import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
+import { useFungibleTokens } from './fungibleTokens';
 
-const isTransactionListLoading = ref(false);
+type AccountsTransactionList = Record<AccountAddress, ICommonTransaction[]>;
 
-const { onNetworkChange } = createNetworkWatcher();
+let composableInitialized = false;
 
 /**
- * Store the state of the latest transactions to avoid multiple fetching when opening pages
- * that wants to use this data.
+ * First page of the transactions done for each of the accounts
  */
-export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const { accounts } = useAccounts({ store });
-  const { accountsTotalBalance } = useBalances({ store });
-  const { nodeNetworkId } = useAeSdk({ store });
+const accountsTransactionsLatest = useStorageRef<AccountsTransactionList>(
+  {},
+  STORAGE_KEYS.transactionsLatest,
+);
 
-  const {
-    transactions,
-    fetchTransactions,
-  } = useTransactionList({ store });
+/**
+ * Local pending transactions added manually right after transferring assets.
+ */
+const accountsTransactionsPending = useStorageRef<AccountsTransactionList>(
+  {},
+  STORAGE_KEYS.transactionsPending,
+);
 
-  const btcTransactions = ref<ITransaction[]>([]);
+const areLatestTransactionsUpdating = ref(false);
 
-  const tokens = computed(() => store.state.fungibleTokens.tokens);
+/**
+ * All pending and latest fetched transactions as a flat list sorted by date.
+ */
+const allLatestTransactions = computed((): ICommonTransaction[] => {
+  const transactionsArray = [
+    ...Object.values(accountsTransactionsLatest.value).flat(),
+    ...Object.values(accountsTransactionsPending.value).flat(),
+  ];
+  return pipe([
+    removeDuplicatedTransactions,
+    sortTransactionsByDate,
+  ])(transactionsArray);
+});
 
-  const latestTransactions = computed(() => {
-    const aeTransactions = Object.entries(transactions.value)
-      .map(([
-        accountAddress,
-        { loaded, pending }]) => [...(pending[nodeNetworkId.value!] || []), ...(loaded || [])]
-        .map((tr) => {
-          const {
-            direction,
-          } = useTransactionTx({
-            store,
-            tx: tr.tx,
-            externalAddress: accountAddress as Encoded.AccountAddress,
-          });
-          return {
-            ...tr,
-            direction: direction.value,
-          };
-        }))
-      .flatMap((transaction) => transaction);
+/**
+ * Store, manage and update latest transactions for the purpose of displaying them on the dashboard
+ * and any transaction list before loading the lists in the component scope.
+ */
+export function useLatestTransactionList() {
+  const { accounts, getAccountByAddress } = useAccounts();
+  const { activeNetwork, onNetworkChange } = useNetworks();
+  const { balances } = useBalances();
+  const { tokenBalances } = useFungibleTokens();
 
-    const allTransactions: ITransaction[] = [
-      ...aeTransactions,
-      ...btcTransactions.value,
-    ];
+  function removeAccountPendingTransaction(address: AccountAddress, hash: string) {
+    accountsTransactionsPending.value[address] = remove(
+      accountsTransactionsPending.value[address],
+      (transaction) => hash === transaction.hash,
+    );
+  }
 
-    return pipe([
-      removeDuplicatedTransactions,
-      sortTransactionsByDate,
-    ])(allTransactions)
-      .slice(0, DASHBOARD_TRANSACTION_LIMIT);
-  });
+  async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const currentNetworkName = activeNetwork.value.name;
+    const {
+      regularTransactions,
+      pendingTransactions,
+      tipWithdrawnTransactions,
+    } = await adapter.fetchAccountTransactions(address);
 
-  /**
-   * TODO The logic here should be updated as it mixes different approaches for each protocol
-   */
-  async function updateTransactionListData() {
-    if (isTransactionListLoading.value) {
-      return;
+    // This is necessary in case the user switches between networks faster,
+    // than transactions are returned (limitations of the free Ethereum middleware)
+    if (currentNetworkName !== activeNetwork.value.name) {
+      return true;
     }
 
-    isTransactionListLoading.value = true;
+    if (
+      regularTransactions.length
+      || pendingTransactions?.length
+      || tipWithdrawnTransactions?.length
+    ) {
+      accountsTransactionsLatest.value[address] = [
+        ...regularTransactions,
+        ...(pendingTransactions || []),
+        ...(tipWithdrawnTransactions || []),
+      ];
 
-    const btcAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
-
-    await Promise.all(accounts.value.map(async ({ address, protocol }) => {
-      switch (protocol) {
-        case PROTOCOL_AETERNITY:
-          try {
-            await fetchTransactions(
-              DASHBOARD_TRANSACTION_LIMIT,
-              true,
-              address,
-            );
-          } catch (error) {
-            handleUnknownError(error);
-          }
-          break;
-        case PROTOCOL_BITCOIN:
-          try {
-            btcTransactions.value = await btcAdapter.fetchTransactions(address);
-          } catch (error) {
-            handleUnknownError(error);
-          }
-          break;
-        default:
+      if (accountsTransactionsPending.value[address]?.length) {
+        regularTransactions.forEach(({ hash }) => removeAccountPendingTransaction(address, hash));
       }
-      return true;
-    }));
+    }
 
-    isTransactionListLoading.value = false;
+    return true; // Required to be able to use Promise.all
   }
 
   /**
-   * To avoid unnecessary data transfers instead of constant polling
-   * we are fetching the transactions only if the total balance of the accounts changes.
+   * Loads all latest transactions for every account.
    */
-  watch(
-    accountsTotalBalance,
-    (val, oldVal) => {
-      if (val !== oldVal) {
-        setTimeout(() => updateTransactionListData(), AE_MDW_TO_NODE_APPROX_DELAY_TIME);
-      }
-    },
-    { immediate: true },
-  );
+  async function loadAllLatestTransactions() {
+    if (!areLatestTransactionsUpdating.value) {
+      areLatestTransactionsUpdating.value = true;
+      await Promise.all(accounts.value.map(
+        async (account) => loadAccountLatestTransactions(account),
+      ));
+      areLatestTransactionsUpdating.value = false;
+    }
+  }
 
-  watch(
-    tokens,
-    (oldTokens, newTokens) => {
-      if (!isEqual(oldTokens, newTokens)) {
-        updateTransactionListData();
+  /**
+   * Add temporary pending transaction and remove it when it's mined.
+   */
+  async function addAccountPendingTransaction(address: AccountAddress, transaction: ITransaction) {
+    const account = getAccountByAddress(address);
+    if (account && transaction?.hash) {
+      if (!accountsTransactionsPending.value[address]) {
+        accountsTransactionsPending.value[address] = [];
       }
-    },
-    { deep: true },
-  );
+      accountsTransactionsPending.value[address].push({ ...transaction, microTime: Date.now() });
 
-  onNetworkChange(() => {
-    updateTransactionListData();
-  });
+      try {
+        await ProtocolAdapterFactory
+          .getAdapter(account.protocol)
+          .waitTransactionMined(transaction.hash);
+        loadAccountLatestTransactions(account);
+      } finally {
+        removeAccountPendingTransaction(address, transaction.hash);
+      }
+    }
+  }
+
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    loadAllLatestTransactions();
+
+    /**
+     * Remove old pending transactions that we can consider as already mined.
+     * This prevents situation where user creates transaction and closes the app/extension
+     * immediately so the `waitTransactionMined` couldn't work properly.
+     */
+    setInterval(() => {
+      Object.entries(accountsTransactionsPending.value)
+        .forEach(([accountAddress, transactionList]) => {
+          transactionList.forEach(({ hash, microTime }) => {
+            if (Date.now() - (microTime || 0) > TRANSACTION_CERTAINLY_MINED_TIME) {
+              removeAccountPendingTransaction(accountAddress, hash);
+            }
+          });
+        });
+    }, 60000);
+
+    /**
+     * To avoid unnecessary data transfers, instead of polling data at intervals,
+     * we only load account transactions when the account balance changes.
+     */
+    watch(
+      balances,
+      (newBalances, oldBalances) => {
+        accounts.value.forEach((account) => {
+          const oldBalance = oldBalances[account.address];
+          const newBalance = newBalances[account.address];
+          if (oldBalance && newBalance && !newBalance.isEqualTo(oldBalance)) {
+            setTimeout(
+              () => loadAccountLatestTransactions(account),
+              ProtocolAdapterFactory.getAdapter(account.protocol).mdwToNodeApproxDelayTime,
+            );
+          }
+        });
+      },
+      { deep: true },
+    );
+
+    watch(
+      tokenBalances,
+      (oldTokens, newTokens) => {
+        if (!isEqual(oldTokens, newTokens)) {
+          loadAllLatestTransactions();
+        }
+      },
+      { deep: true },
+    );
+
+    /**
+     * Reset all cached transactions and fetch again when user switched the network.
+     */
+    onNetworkChange((newNetwork, oldNetwork) => {
+      if (newNetwork.name !== oldNetwork.name) {
+        accountsTransactionsLatest.value = {};
+        accountsTransactionsPending.value = {};
+        loadAllLatestTransactions();
+      }
+    });
+  }
 
   return {
-    isTransactionListLoading,
-    latestTransactions,
+    accountsTransactionsLatest,
+    accountsTransactionsPending,
+    areLatestTransactionsUpdating,
+    allLatestTransactions,
+    addAccountPendingTransaction,
+    loadAllLatestTransactions,
   };
 }

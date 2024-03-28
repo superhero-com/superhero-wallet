@@ -1,37 +1,42 @@
 import BigNumber from 'bignumber.js';
 import {
-  ITokenList,
+  AssetList,
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
-import { AE_SYMBOL, AE_COIN_PRECISION } from '@/protocols/aeternity/config';
+import {
+  AE_SYMBOL,
+  AE_COIN_PRECISION,
+  AE_CONTRACT_ID,
+  AE_COIN_NAME,
+} from '@/protocols/aeternity/config';
 
-/* eslint-disable no-unused-vars */
 interface TransactionResolverReturnData {
-  tokens: ITokenResolved[]
-  sender?: any
-  recipient?: any
+  tokens: ITokenResolved[];
+  sender?: any;
+  recipient?: any;
 }
 
 type TransactionResolver = (
   transaction: ITransaction,
-  tokens: ITokenList | null
+  tokens?: AssetList | null
 ) => TransactionResolverReturnData;
 
 type TransactionResolverGenerator = (
-  tokenAMapper: (t: ITransaction) => any,
-  tokenBMapper: (t: ITransaction) => any,
-  poolTokenAmountMapper?: (t: ITransaction) => any,
+  tokenAMapper: (t: ITransaction) => ITokenResolved,
+  tokenBMapper: (t: ITransaction) => ITokenResolved,
+  poolTokenAmountMapper?: (t: ITransaction) => BigNumber,
   liquidityMethod?: 'add' | 'remove'
 ) => TransactionResolver;
 
 type TransactionResolvers = Partial<Record<TxFunctionParsed, TransactionResolver>>;
-/* eslint-enable no-unused-vars */
 
-const defaultToken = {
+const defaultToken: ITokenResolved = {
   symbol: AE_SYMBOL,
+  name: AE_COIN_NAME,
   decimals: AE_COIN_PRECISION,
+  contractId: AE_CONTRACT_ID,
 };
 const defaultPoolToken = {
   symbol: 'Pool Token',
@@ -58,10 +63,10 @@ const genLiquiditySwapResolver: TransactionResolverGenerator = (
     returns = transaction.tx.return.value;
   }
   let poolTokenSymbol;
-  if ((tokens?.[tokenA.contractId] || tokenA.isAe)
-    && (tokens?.[tokenB.contractId] || tokenB.isAe)) {
-    const symbolA = tokenA.isAe ? AE_SYMBOL : tokens?.[tokenA.contractId].symbol;
-    const symbolB = tokenB.isAe ? AE_SYMBOL : tokens?.[tokenB.contractId].symbol;
+  if ((tokens?.[tokenA.contractId!] || tokenA.isWrappedCoin)
+    && (tokens?.[tokenB.contractId!] || tokenB.isWrappedCoin)) {
+    const symbolA = tokenA.isWrappedCoin ? AE_SYMBOL : tokens?.[tokenA.contractId!].symbol;
+    const symbolB = tokenB.isWrappedCoin ? AE_SYMBOL : tokens?.[tokenB.contractId!].symbol;
     poolTokenSymbol = `${symbolA}/${symbolB}`;
   }
 
@@ -70,15 +75,13 @@ const genLiquiditySwapResolver: TransactionResolverGenerator = (
       ...tokenA,
       amount: returns?.[0]?.value || tokenA.amount,
       ...defaultToken,
-      symbol: 'Token A',
-      ...tokens?.[tokenA.contractId], /** token_a: IAEX9Minimal */
+      ...tokens?.[tokenA.contractId!], /** token_a: IAEX9Minimal */
       isReceived: liquidityMethod === 'remove',
     }, {
       ...tokenB,
       amount: returns?.[1]?.value || tokenB.amount,
       ...defaultToken,
-      symbol: 'Token B',
-      ...tokens?.[tokenB.contractId], /** token_b: IAEX9Minimal */
+      ...tokens?.[tokenB.contractId!], /** token_b: IAEX9Minimal */
       isReceived: liquidityMethod === 'remove' || !liquidityMethod,
     }, ...poolTokenAmountMapper ? [{
       ...defaultPoolToken,
@@ -130,7 +133,7 @@ const addLiquidityAe = genLiquiditySwapResolver(
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount, // amount_b_desired: int
-    isAe: true,
+    isWrappedCoin: true,
   }),
   // min_liquidity: int
   ({ tx: { arguments: _arguments, amount } }) => new BigNumber(_arguments[1]?.value)
@@ -173,7 +176,7 @@ const removeLiquidityAe = genLiquiditySwapResolver(
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
-    isAe: true,
+    isWrappedCoin: true,
   }),
   ({ tx: { arguments: _arguments } }) => _arguments[1]?.value, // min_liquidity: int
   'remove',
@@ -189,7 +192,7 @@ const swapExactTokensForTokens = genLiquiditySwapResolver(
     amount: _arguments[0]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     minAmount: _arguments[1]?.value, // amount_b_min: int
     amount: _arguments[1]?.value, // amount_b_desired: int
   }),
@@ -206,7 +209,7 @@ const swapTokensForExactTokens = genLiquiditySwapResolver(
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
 );
@@ -219,10 +222,10 @@ const swapExactAeForTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
-    isAe: true,
+    isWrappedCoin: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
+    contractId: _arguments[1]?.value?.at(-1)?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
@@ -239,10 +242,10 @@ const swapTokensForExactAe = genLiquiditySwapResolver(
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
-    isAe: true,
+    isWrappedCoin: true,
   }),
 );
 
@@ -257,10 +260,10 @@ const swapExactTokensForAe = genLiquiditySwapResolver(
     amount: _arguments[0]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     maxAmount: _arguments[1]?.value,
     amount: _arguments[1]?.value, // amount_b_desired: int
-    isAe: true,
+    isWrappedCoin: true,
   }),
 );
 
@@ -271,10 +274,10 @@ const swapAeForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
-    isAe: true,
+    isWrappedCoin: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
+    contractId: _arguments[1]?.value?.at(-1)?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
 );
@@ -322,7 +325,7 @@ const deposit: TransactionResolver = (transaction, tokens = null) => ({
       ...defaultToken,
       amount: transaction.tx.amount,
       isReceived: false,
-      isAe: true,
+      isWrappedCoin: true,
     },
     {
       ...defaultToken,
@@ -350,7 +353,7 @@ const withdraw: TransactionResolver = (transaction, tokens = null) => ({
       ...defaultToken,
       amount: transaction.tx.arguments?.[0]?.value,
       isReceived: true,
-      isAe: true,
+      isWrappedCoin: true,
     },
   ],
 });

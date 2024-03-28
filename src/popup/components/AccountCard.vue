@@ -2,15 +2,13 @@
   <AccountCardBase
     class="account-card"
     :selected="selected"
+    :address="account.address"
   >
     <template #top>
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
-        :protocol="account.protocol"
+        :account="account"
         avatar-borderless
-        with-protocol-icon
+        show-protocol-icon
       />
     </template>
 
@@ -23,8 +21,7 @@
 
     <template #bottom>
       <AccountCardTotalTokens
-        v-if="account.protocol === PROTOCOL_AETERNITY"
-        :current-account="account"
+        :account="account"
       />
     </template>
   </AccountCardBase>
@@ -36,16 +33,13 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
-
-import { IAccount } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import type { IAccount } from '@/types';
 import { useBalances } from '@/composables';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
 import AccountCardTotalTokens from './AccountCardTotalTokens.vue';
-import AccountCardBase from './AccountCardBase.vue';
+import AccountCardBase, { accountCardBaseCommonProps } from './AccountCardBase.vue';
 
 export default defineComponent({
   components: {
@@ -56,17 +50,14 @@ export default defineComponent({
   },
   props: {
     account: { type: Object as PropType<IAccount>, required: true },
-    selected: Boolean,
+    ...accountCardBaseCommonProps,
   },
-  setup() {
-    const store = useStore();
+  setup(props) {
+    const { getAccountBalance } = useBalances();
 
-    const { balance } = useBalances({ store });
-
-    const numericBalance = computed<number>(() => balance.value.toNumber());
+    const numericBalance = computed(() => getAccountBalance(props.account.address).toNumber());
 
     return {
-      PROTOCOL_AETERNITY,
       numericBalance,
     };
   },

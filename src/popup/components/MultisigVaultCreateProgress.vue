@@ -1,8 +1,9 @@
 <template>
   <div class="multisig-vault-creation-progress">
-    <h2 class="text-heading-1">
-      {{ $t('modals.creatingMultisigAccount.title') }}
-    </h2>
+    <h2
+      class="text-heading-1"
+      v-text="$t('modals.creatingMultisigAccount.title')"
+    />
 
     <ProgressBar :progress="progressPercentage" />
 
@@ -26,9 +27,8 @@
         <div
           v-else
           class="phase-number"
-        >
-          {{ index + 1 }}
-        </div>
+          v-text="index + 1"
+        />
 
         <div class="phase-item-name">
           <div v-if="isPhaseCurrent(index)">
@@ -49,29 +49,24 @@
 
     <Transition name="fade-transition">
       <div
-        v-if="isAccessible"
+        v-if="isAccessible || isCreated"
         class="multisig-account-created"
       >
-        <div class="message">
-          {{ $t('modals.creatingMultisigAccount.vaultAccessibleMessage') }}
-        </div>
-        <AvatarWithChainName
-          :address="multisigAccount.gaAccountId"
-          class="ae-address"
-          show-address
-          :column-count="9"
+        <div
+          v-if="isAccessible"
+          class="message"
+          v-text="$t('modals.creatingMultisigAccount.vaultAccessibleMessage')"
         />
-      </div>
-      <div
-        v-else-if="isCreated"
-        class="multisig-account-created left"
-      >
-        <div class="message">
-          {{ $t('modals.creatingMultisigAccount.vaultCreatedMessage') }}
-        </div>
-        <div class="sub-message">
-          {{ $t('modals.creatingMultisigAccount.vaultCreatedMessageSub') }}
-        </div>
+        <div
+          v-else-if="isCreated"
+          class="message"
+          v-text="$t('modals.creatingMultisigAccount.vaultCreatedMessage')"
+        />
+
+        <div
+          class="sub-message"
+          v-text="$t('modals.creatingMultisigAccount.vaultCreatedMessageSub')"
+        />
       </div>
     </Transition>
   </div>
@@ -87,7 +82,6 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import type { IMultisigAccount, IMultisigCreationPhase } from '@/types';
 import { MULTISIG_CREATION_PHASES } from '@/protocols/aeternity/config';
 
-import AvatarWithChainName from './AvatarWithChainName.vue';
 import ProgressBar from './ProgressBar.vue';
 import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 import CheckSuccessCircleIcon from '../../icons/check-success-circle.svg?vue-component';
@@ -104,7 +98,6 @@ export default defineComponent({
   name: 'MultisigVaultCreateProgress',
   components: {
     ProgressBar,
-    AvatarWithChainName,
     CheckSuccessCircleIcon,
     PendingIcon,
   },
@@ -222,23 +215,13 @@ export default defineComponent({
   }
 
   .multisig-account-created {
-    padding-top: 30px;
-    text-align: center;
-
-    &.left {
-      text-align: left;
-
-      .message,
-      .sub-message {
-        margin-inline: 8px;
-      }
-    }
+    margin-top: 30px;
+    padding-inline: 8px;
 
     .message {
       @extend %face-sans-15-medium;
 
       max-width: 250px;
-      margin-inline: auto;
       padding-bottom: 16px;
       color: variables.$color-white;
       line-height: 22px;
@@ -249,13 +232,6 @@ export default defineComponent({
 
       color: rgba(variables.$color-white, 0.85);
       line-height: 20px;
-    }
-
-    .ae-address {
-      @extend %face-sans-11-regular;
-
-      align-items: flex-end;
-      color: variables.$color-white;
     }
   }
 }

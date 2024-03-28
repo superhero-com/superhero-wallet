@@ -1,5 +1,8 @@
 <template>
-  <div class="pool-tokens">
+  <div
+    class="pool-tokens"
+    :class="{ reversed }"
+  >
     <TransactionDetailsPoolTokenRow
       v-for="(token, index) in tokens"
       :key="index"
@@ -13,10 +16,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import type { ITransaction, TxFunctionRaw } from '@/types';
-import { useTransactionTokens } from '@/composables';
+import type { ITokenResolved, ITransaction, TxFunctionRaw } from '@/types';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
@@ -31,35 +32,16 @@ export default defineComponent({
     TransactionDetailsPoolTokenRow,
   },
   props: {
-    transaction: {
-      type: Object as PropType<ITransaction>,
-      required: true,
-    },
-    txFunction: {
-      type: String as PropType<TxFunctionRaw>,
-      required: true,
-    },
-    direction: {
-      type: String,
-      required: true,
-    },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
+    tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     hideAmount: Boolean,
-    isAllowance: Boolean,
+    reversed: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
-    const { tokens } = useTransactionTokens({
-      store,
-      transaction: props.transaction,
-      direction: props.direction,
-      isAllowance: props.isAllowance,
-      showDetailedAllowanceInfo: true,
-    });
-
     function getLabel(isPool?: boolean): string {
-      const tag = DEX_TRANSACTION_TAGS[props.txFunction];
+      const tag = DEX_TRANSACTION_TAGS[props.transaction.tx.function as TxFunctionRaw];
       const provideLiquidity = tag === DEX_PROVIDE_LIQUIDITY;
 
       if (tag === DEX_ALLOW_TOKEN) {
@@ -76,7 +58,6 @@ export default defineComponent({
     }
 
     return {
-      tokens,
       aettosToAe,
       getLabel,
     };
@@ -93,5 +74,9 @@ export default defineComponent({
   @include mixins.flex(flex-start, flex-start, column);
 
   gap: 16px;
+
+  &.reversed {
+    flex-direction: column-reverse;
+  }
 }
 </style>

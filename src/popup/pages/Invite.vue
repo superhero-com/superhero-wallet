@@ -3,12 +3,9 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="invite-page">
         <AccountInfo
-          :address="activeAccount.address"
-          :name="activeAccount.name"
-          :idx="activeAccount.idx"
-          :protocol="activeAccount.protocol"
+          :account="activeAccount"
           can-copy-address
-          with-protocol-icon
+          show-protocol-icon
         />
         <BalanceInfo
           :balance="balance.toNumber()"
@@ -23,6 +20,7 @@
           v-model="formModel.amount"
           name="amount"
           :rules="{
+            does_not_exceed_decimals: formModel.selectedAsset?.decimals,
             min_value_exclusive: 0,
             ...+balance.minus(fee) > 0 ? { max_value: max } : {},
             enough_coin: fee.toString(),
@@ -36,7 +34,7 @@
             :label="$t('pages.invite.tip-attached')"
             :message="errorMessage"
             readonly
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             :selected-asset="formModel.selectedAsset"
             @asset-selected="(val) => formModel.selectedAsset = val"
           />
@@ -44,6 +42,7 @@
             extend
             :icon="PlusCircleFillIcon"
             :disabled="!formModel.amount || !!errorMessage"
+            data-cy="invite-generate"
             @click="generate"
           >
             {{ $t('pages.invite.generate') }}
@@ -59,7 +58,7 @@
           <InviteItem
             v-for="link in invites"
             v-bind="link ?? null"
-            :key="link.secretKey"
+            :key="link.secretKey.toString()"
             @loading="(val) => setLoaderVisible(val)"
           />
         </div>
@@ -74,19 +73,18 @@ import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
 import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 
-import { useStore } from 'vuex';
 import type { IFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { useState } from '../../composables/vuex';
+import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
   useBalances,
-  useMaxAmount,
   useCurrencies,
+  useInvites,
+  useMaxAmount,
   useUi,
-} from '../../composables';
+} from '@/composables';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -107,24 +105,21 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
-
-    const { activeAccount } = useAccounts({ store });
-    const { marketData } = useCurrencies({ store });
-    const { getAeSdk } = useAeSdk({ store });
-    const { balance } = useBalances({ store });
+    const { activeAccount } = useAccounts();
+    const { marketData } = useCurrencies();
+    const { getAeSdk } = useAeSdk();
+    const { balance } = useBalances();
+    const { invites, addInvite, handleInsufficientBalanceError } = useInvites();
     const { setLoaderVisible } = useUi();
 
     const formModel = ref<IFormModel>({
       amount: '',
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
-    const { max, fee } = useMaxAmount({ formModel, store });
-
-    const invites = useState('invites', 'invites');
+    const { max, fee } = useMaxAmount({ formModel });
 
     async function generate() {
       setLoaderVisible(true);
@@ -138,19 +133,21 @@ export default defineComponent({
           // @ts-ignore
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
-      } catch (error) {
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
+      } catch (error: any) {
+        if (await handleInsufficientBalanceError(error)) {
+          return;
+        }
         throw error;
       } finally {
         setLoaderVisible(false);
       }
 
-      store.commit('invites/add', Buffer.from(secretKey, 'hex').slice(0, 32));
+      addInvite(Buffer.from(secretKey, 'hex').slice(0, 32));
       formModel.value.amount = '';
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       PlusCircleFillIcon,
       activeAccount,
       balance,

@@ -5,6 +5,7 @@
         <img
           class="image"
           :src="NotFoundImage"
+          alt="Feature not found"
         >
         <div class="title">
           {{ $t('pages.notFound.header') }}
@@ -40,7 +41,7 @@ import { IonContent, IonPage } from '@ionic/vue';
 import { BUG_REPORT_URL } from '@/constants';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
-import NotFoundImage from '../../image/not-found.jpg';
+import NotFoundImage from '../../image/not-found.webp';
 import BugIcon from '../../icons/bug.svg?vue-component';
 
 export default defineComponent({

@@ -1,19 +1,13 @@
 <template>
-  <IonPage class="transaction-list-wrapper">
-    <IonContent class="ion-padding ion-content-bg">
-      <div ref="innerScrollElem">
-        <TransactionList
-          v-if="isOnline"
-          :loading="loading"
-          :transactions="loadedTransactionList"
-          is-multisig
-        />
-        <MessageOffline
-          v-else
-          :text="$t('modals.accountDetails.transactionsNotAvailable')"
-        />
-      </div>
-    </IonContent>
+  <IonPage>
+    <TransactionList
+      v-if="isPageActive"
+      is-multisig
+      :transactions="transactionList"
+      :is-loading="isLoading"
+      :is-end-reached="isEndReached"
+      @load-more="loadCurrentPageTransactions()"
+    />
   </IonPage>
 </template>
 
@@ -23,194 +17,78 @@ import {
   defineComponent,
   onUnmounted,
   ref,
-  watch,
 } from 'vue';
-import { useStore } from 'vuex';
-import { throttle } from 'lodash-es';
-import {
-  IonContent,
-  IonPage,
-  onIonViewWillEnter,
-  onIonViewWillLeave,
-} from '@ionic/vue';
-import type { ICommonTransaction } from '@/types';
-import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
-import {
-  useConnection,
-  useMultisigAccounts,
-  usePendingMultisigTransaction,
-  useTransactionAndTokenFilter,
-  useTransactionList,
-  useUi,
-  useViewport,
-  useScrollConfig,
-} from '@/composables';
+import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
-import MessageOffline from '../components/MessageOffline.vue';
+import type { ICommonTransaction } from '@/types';
+import { PROTOCOLS } from '@/constants';
+import { useMultisigAccounts, usePendingMultisigTransaction, useTransactionList } from '@/composables';
+
 import TransactionList from '../components/TransactionList.vue';
+
+let initialized = false;
 
 export default defineComponent({
   components: {
-    TransactionList,
-    MessageOffline,
     IonPage,
-    IonContent,
-  },
-  props: {
-    showFilters: Boolean,
+    TransactionList,
   },
   setup() {
-    /**
-     * TODO Extract duplicated logic of this component
-     * Some of the following code was taken from
-     * `src/protocols/aeternity/views/AccountDetailsTransactions.vue`
-     * during the multichain development.
-     */
-
-    let polling: NodeJS.Timer | null;
-
-    const store = useStore();
-    const { setScrollConf } = useScrollConfig();
-
-    const { isOnline } = useConnection();
-    const { isAppActive } = useUi();
-    const { viewportElement } = useViewport();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     const {
-      getAccountAllTransactions,
-      getAccountTransactionsState,
-      fetchTransactions,
-    } = useTransactionList({ store });
+      transactionsLoaded,
+      isLoading,
+      isEndReached,
+      initializeTransactionListPolling,
+      loadCurrentPageTransactions,
+      stopTransactionListPolling,
+    } = useTransactionList({
+      accountAddress: activeMultisigAccount.value?.gaAccountId!,
+      protocol: PROTOCOLS.aeternity,
+    });
 
-    const { displayMode } = useTransactionAndTokenFilter();
+    /** Delay displaying the TransactionList so it can calculate parent element size */
+    const isPageActive = ref(false);
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
-
-    const loading = ref(false);
-    const isDestroyed = ref(false);
-    const innerScrollElem = ref<HTMLElement>();
-    const appInnerScrollTop = ref<number>(0);
-
-    const currentAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
-
-    const canLoadMore = computed(() => (
-      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
-    ));
-
-    const appInnerElem = computed<HTMLElement | null | undefined>(
-      () => innerScrollElem.value?.parentElement,
-    );
-
-    const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountAllTransactions(currentAddress.value!),
-      ...pendingMultisigTransaction.value ? [pendingMultisigTransaction.value] : [],
+    const transactionList = computed((): ICommonTransaction[] => [
+      ...(pendingMultisigTransaction.value) ? [pendingMultisigTransaction.value] : [],
+      ...transactionsLoaded.value,
     ]);
 
-    async function fetchTransactionList(recent?: boolean) {
-      loading.value = true;
-      try {
-        await fetchTransactions(
-          TXS_PER_PAGE,
-          !!recent,
-          currentAddress.value!,
-        );
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function loadMore() {
-      if (!loading.value) {
-        await fetchTransactionList();
-      }
-    }
-
-    async function checkLoadMore() {
-      if (viewportElement.value && (isDestroyed.value || !canLoadMore.value)) {
-        return;
-      }
-
-      const {
-        scrollHeight,
-        scrollTop,
-        clientHeight,
-      } = viewportElement.value!;
-
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        await loadMore();
-      }
-    }
-
-    function throttledScroll() {
-      return throttle(() => {
-        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
-      }, 200);
-    }
-
-    function onViewDidLeaveHandler() {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    }
-
-    watch(
-      appInnerScrollTop,
-      (value) => {
-        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
-      },
-    );
-
-    watch(displayMode, () => {
-      checkLoadMore();
-    });
-
-    watch(loading, async (val) => {
-      if (!val) {
-        await checkLoadMore();
+    // Fired when accessing the page both as tab and whole AccountDetails page.
+    onIonViewDidEnter(() => {
+      isPageActive.value = true;
+      // IonRouterOutlet re-renders the page twice
+      // https://github.com/ionic-team/ionic-framework/issues/25254
+      if (!initialized) {
+        initializeTransactionListPolling();
+        initialized = true;
       }
     });
 
-    onIonViewWillEnter(() => {
-      setScrollConf(false);
-      if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', throttledScroll());
-      }
-      loadMore();
-      polling = setInterval(() => {
-        if (isAppActive.value) {
-          fetchTransactionList(true);
-        }
-      }, 10000);
+    // Fired only when leaving to different tab within the AccountDetails.
+    onIonViewDidLeave(() => {
+      isPageActive.value = false;
+      stopTransactionListPolling();
+      initialized = false;
     });
 
-    onIonViewWillLeave(onViewDidLeaveHandler);
-
-    onUnmounted(onViewDidLeaveHandler);
+    // Fired when leaving the AccountDetails page.
+    onUnmounted(() => {
+      isPageActive.value = false;
+      stopTransactionListPolling();
+      initialized = false;
+    });
 
     return {
-      isOnline,
-      loading,
-      loadedTransactionList,
-      loadMore,
-      innerScrollElem,
+      isPageActive,
+      isLoading,
+      isEndReached,
+      transactionList,
+      loadCurrentPageTransactions,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.transaction-list-wrapper {
-  --filter-top-offset: 175px;
-
-  :deep(.filters) {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
-  }
-
-  .offline-message {
-    text-align: center;
-  }
-}
-</style>

@@ -26,16 +26,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+
+import type { ObjectValues } from '@/types';
 import { useConnection } from '@/composables';
 import {
   ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_ASSETS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
   ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-  ROUTE_ACCOUNT_DETAILS_ASSETS,
   ROUTE_MULTISIG_DETAILS,
   ROUTE_MULTISIG_DETAILS_INFO,
   ROUTE_MULTISIG_DETAILS_ASSETS,
@@ -45,9 +47,20 @@ import BtnPill from './buttons/BtnPill.vue';
 import Tab from './tabs/Tab.vue';
 import Tabs from './tabs/Tabs.vue';
 
+const navigationPossibleItems: Record<string, string> = {
+  [ROUTE_ACCOUNT_DETAILS]: ROUTE_ACCOUNT_DETAILS,
+  [ROUTE_ACCOUNT_DETAILS_ASSETS]: ROUTE_ACCOUNT_DETAILS_ASSETS,
+  [ROUTE_ACCOUNT_DETAILS_NAMES]: ROUTE_ACCOUNT_DETAILS_NAMES,
+  [ROUTE_MULTISIG_DETAILS]: ROUTE_MULTISIG_DETAILS,
+  [ROUTE_MULTISIG_DETAILS_INFO]: ROUTE_MULTISIG_DETAILS_INFO,
+  [ROUTE_MULTISIG_DETAILS_ASSETS]: ROUTE_MULTISIG_DETAILS_ASSETS,
+} as const;
+
+type NavigationItem = ObjectValues<typeof navigationPossibleItems>;
+
 interface NavigationElement {
   text: string;
-  routeName: string;
+  routeName?: string;
   exact?: boolean;
   children?: NavigationElement[];
 }
@@ -60,26 +73,28 @@ export default defineComponent({
     BtnPill,
   },
   props: {
-    isMultisig: Boolean,
+    routeNames: {
+      type: Array as PropType<NavigationItem[]>,
+      required: true,
+      validator: (items: string[]) => items
+        .every((routeName: string) => !!navigationPossibleItems[routeName]),
+    },
   },
   setup(props) {
     const route = useRoute();
     const { t } = useI18n();
     const { isOnline } = useConnection();
 
-    const navigationConfigRegular: NavigationElement[] = [
-      {
+    const navigationConfig: Record<string, NavigationElement> = {
+      [ROUTE_ACCOUNT_DETAILS]: {
         text: t('modals.accountDetails.transactions'),
-        routeName: ROUTE_ACCOUNT_DETAILS,
         exact: true,
       },
-      {
+      [ROUTE_ACCOUNT_DETAILS_ASSETS]: {
         text: t('modals.accountDetails.assets'),
-        routeName: ROUTE_ACCOUNT_DETAILS_ASSETS,
       },
-      {
+      [ROUTE_ACCOUNT_DETAILS_NAMES]: {
         text: t('modals.accountDetails.names'),
-        routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
         children: [
           {
             text: t('pages.names.tabs.my-names'),
@@ -96,30 +111,25 @@ export default defineComponent({
           },
         ],
       },
-    ];
-
-    const navigationConfigMultisig: NavigationElement[] = [
-      {
+      [ROUTE_MULTISIG_DETAILS]: {
         text: t('modals.accountDetails.transactions'),
-        routeName: ROUTE_MULTISIG_DETAILS,
         exact: true,
       },
-      {
+      [ROUTE_MULTISIG_DETAILS_ASSETS]: {
         text: t('modals.accountDetails.assets'),
-        routeName: ROUTE_MULTISIG_DETAILS_ASSETS,
       },
-      {
+      [ROUTE_MULTISIG_DETAILS_INFO]: {
         text: t('modals.accountDetails.details'),
-        routeName: ROUTE_MULTISIG_DETAILS_INFO,
       },
-    ];
+    };
 
-    const currentTabs = computed(() => (
-      props.isMultisig ? navigationConfigMultisig : navigationConfigRegular
-    ));
+    const currentTabs = props.routeNames.map((routeName) => ({
+      routeName,
+      ...navigationConfig[routeName],
+    }));
 
     const currentSubTabs = computed(
-      () => (currentTabs.value.find(
+      () => (currentTabs.find(
         ({ children }) => children?.some(
           ({ routeName }) => routeName === route.name,
         ),

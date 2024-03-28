@@ -1,9 +1,9 @@
 import { computed, ref, watch } from 'vue';
 import type {
-  IDefaultComposableOptions,
   INotification,
-  INotificationSetting,
+  INotificationSettings,
   NotificationStatus,
+  NotificationType,
 } from '@/types';
 import {
   fetchJson,
@@ -13,18 +13,21 @@ import {
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_STATUS_READ,
-  NOTIFICATION_TYPE_WALLET,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
+  STORAGE_KEYS,
+  NOTIFICATION_TYPES,
 } from '@/constants';
+import migrateNotificationsSettingsVuexToComposable from '@/migrations/007-notifications-settings-vuex-to-composable';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
+import { useStorageRef } from './storageRef';
 
-export interface UseNotificationsOptions extends IDefaultComposableOptions {
-  requirePolling?: boolean
+export interface UseNotificationsOptions {
+  requirePolling?: boolean;
 }
 
 const POLLING_INTERVAL = 30000;
@@ -32,53 +35,63 @@ const FETCHED_NOTIFICATIONS_LIMIT = 20;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
+const notificationsSettings = useStorageRef<Partial<INotificationSettings>>(
+  {},
+  STORAGE_KEYS.notificationsSettings,
+  {
+    migrations: [
+      migrateNotificationsSettingsVuexToComposable,
+    ],
+  },
+);
 const notificationsSuperhero = ref<INotification[]>([]);
 const notificationsWallet = ref<INotification[]>([]);
 
 export function useNotifications({
   requirePolling = false,
-  store,
-}: UseNotificationsOptions) {
+}: UseNotificationsOptions = {}) {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
-  const { fetchRespondChallenge } = useAeSdk({ store });
-  const { activeAccount } = useAccounts({ store });
+  const { fetchRespondChallenge } = useAeSdk();
+  const { activeAccount } = useAccounts();
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);
-  const notificationSettings = computed(
-    (): INotificationSetting[] => store.state.notificationSettings,
-  );
-  const chainNames = computed(() => store.state.chainNames);
 
-  const notificationSettingsCheckedTypes = computed<string[]>(
-    () => notificationSettings.value
-      .filter(({ checked }) => checked)
-      .map((s) => s.type),
-  );
+  /**
+   * If user don't have the setting explicitly set to false we assume it's true (checked).
+   */
+  function isNotificationTypeAllowed(type: NotificationType): boolean {
+    return [undefined, true].includes(notificationsSettings.value[type]);
+  }
 
   const notificationsAll = computed<INotification[]>(
-    () => [...notificationsSuperhero.value, ...notificationsWallet.value],
-  );
-
-  const notificationsFiltered = computed<INotification[]>(
-    () => notificationsAll.value
-      .filter(
-        ({ status, type }) => (
-          status === NOTIFICATION_STATUS_READ
-          || notificationSettingsCheckedTypes.value.includes(type)
-        ),
-      )
+    () => [...notificationsSuperhero.value, ...notificationsWallet.value]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
   );
 
+  /**
+   * List of notifications that user allowed to display.
+   */
+  const notificationsAllowed = computed<INotification[]>(
+    () => notificationsAll.value.filter(({ type }) => isNotificationTypeAllowed(type)),
+  );
+
+  const notificationsRead = computed(
+    () => notificationsAllowed.value.filter(({ status }) => status === NOTIFICATION_STATUS_READ),
+  );
+
+  const notificationsNew = computed(
+    () => notificationsAllowed.value.filter(({ status }) => status === NOTIFICATION_STATUS_CREATED),
+  );
+
   const notificationsToShow = computed<INotification[]>(
-    () => notificationsFiltered.value
+    () => notificationsAllowed.value
       .slice(0, fetchedNotificationsOffset.value * FETCHED_NOTIFICATIONS_LIMIT),
   );
 
   async function fetchAllNotifications(): Promise<INotification[]> {
     // TODO: Remove this condition once global filter is ready
-    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
       return [];
     }
 
@@ -118,7 +131,7 @@ export function useNotifications({
   function addWalletNotification(payload: Partial<INotification>) {
     notificationsWallet.value.push({
       ...payload,
-      type: NOTIFICATION_TYPE_WALLET,
+      type: NOTIFICATION_TYPES.wallet,
       status: NOTIFICATION_STATUS_CREATED,
       createdAt: new Date().toISOString(),
     });
@@ -136,7 +149,7 @@ export function useNotifications({
   function loadMoreNotifications() {
     canLoadMore.value = false;
     fetchedNotificationsOffset.value += 1;
-    if (notificationsToShow.value.length < notificationsFiltered.value.length) {
+    if (notificationsToShow.value.length < notificationsRead.value.length) {
       canLoadMore.value = true;
     }
   }
@@ -158,7 +171,7 @@ export function useNotifications({
 
   function markAsReadWallet() {
     notificationsWallet.value.forEach((notification) => {
-      if (notification.type === NOTIFICATION_TYPE_WALLET) {
+      if (notification.type === NOTIFICATION_TYPES.wallet) {
         setWalletNotificationsStatus(
           notification.createdAt,
           NOTIFICATION_STATUS_READ,
@@ -172,8 +185,17 @@ export function useNotifications({
     markAsReadSuperhero();
   }
 
+  function removeIsSeedBackedUpNotification() {
+    notificationsWallet.value = notificationsWallet.value
+      .filter(({ isSeedBackup }) => !isSeedBackup);
+  }
+
+  function toggleNotificationsSetting(type: NotificationType) {
+    notificationsSettings.value[type] = !isNotificationTypeAllowed(type);
+  }
+
   if (requirePolling) {
-    watch(() => notificationsFiltered.value, () => {
+    watch(() => notificationsRead.value, () => {
       loadMoreNotifications();
     }, { deep: true });
 
@@ -183,19 +205,13 @@ export function useNotifications({
           entityId,
           sourceId,
           entityType,
-          sender,
-          receiver,
           ...other
         }) => ({
           sourceId,
           entityId,
           entityType,
           ...other,
-          sender,
-          receiver,
-          senderName: sender && chainNames.value?.[sender],
-          receiverName: receiver && chainNames.value?.[receiver],
-          path: entityType === NOTIFICATION_ENTITY_TYPE_TIP
+          path: (entityType === NOTIFICATION_ENTITY_TYPE_TIP)
             ? `${AGGREGATOR_URL}tip/${entityId}`
             : `${AGGREGATOR_URL}tip/${sourceId}/comment/${entityId}`,
         }));
@@ -203,13 +219,19 @@ export function useNotifications({
   }
 
   return {
+    notificationsAll,
+    notificationsAllowed,
+    notificationsRead,
+    notificationsNew,
     notificationsToShow,
     notificationsSuperhero,
     notificationsWallet,
-    notificationsAll,
-    canLoadMore,
+    notificationsSettings,
     loadMoreNotifications,
     markAsReadAll,
     addWalletNotification,
+    removeIsSeedBackedUpNotification,
+    toggleNotificationsSetting,
+    isNotificationTypeAllowed,
   };
 }

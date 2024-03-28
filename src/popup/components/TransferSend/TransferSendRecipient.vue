@@ -7,15 +7,16 @@
       :validate-on-mount="!!modelValue"
       :rules="{
         required: true,
-        not_same_as: [activeAccount.address, protocol],
+        address_not_same_as: [activeAccount.address, protocol],
         ...validationRules,
       }"
     >
-      <InputField
+      <FormTextarea
         v-bind="field"
         :model-value="modelValue"
         name="address"
         data-cy="address"
+        auto-height
         show-help
         show-message-help
         :label="$t('modals.send.recipientLabel')"
@@ -25,21 +26,21 @@
         @help="showRecipientHelp()"
       >
         <template #label-after>
-          <a
+          <BtnPlain
             class="scan-button"
             data-cy="scan-button"
             @click="$emit('openQrModal')"
           >
             <QrScanIcon />
-          </a>
+          </BtnPlain>
         </template>
-      </InputField>
+      </FormTextarea>
     </Field>
-    <div class="status">
-      <UrlStatus
-        v-show="isTipUrl"
-        :status="urlStatus"
-      />
+    <div
+      v-if="isTipUrl"
+      class="status"
+    >
+      <UrlStatus :status="urlStatus" />
     </div>
   </div>
 </template>
@@ -50,50 +51,47 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import { Field } from 'vee-validate';
 
 import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
-
+import { MODAL_RECIPIENT_INFO, PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useModals,
 } from '@/composables';
+import { useAeTippingUrls } from '@/protocols/aeternity/composables';
+
 import UrlStatus from '@/popup/components/UrlStatus.vue';
-import InputField from '@/popup/components/InputField.vue';
+import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-import { MODAL_RECIPIENT_INFO } from '@/constants';
+import BtnPlain from '../buttons/BtnPlain.vue';
 
 export default defineComponent({
   components: {
-    InputField,
+    FormTextarea,
     UrlStatus,
     Field,
     QrScanIcon,
+    BtnPlain,
   },
   props: {
     isTipUrl: Boolean,
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
     protocol: { type: String as PropType<Protocol>, required: true },
-    validationRules: {
-      type: Object,
-      default: () => {
-      },
-    },
+    validationRules: { type: Object, default: () => ({}) },
     errors: { type: Object, required: true },
   },
   emits: ['openQrModal', 'update:modelValue'],
   setup(props) {
-    const store = useStore();
+    const isAe = computed(() => props.protocol === PROTOCOLS.aeternity);
 
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
+    const { getTippingUrlStatus } = useAeTippingUrls({ ensureFetchedOnInit: isAe.value });
 
-    const urlStatus = computed(
-      () => store.getters['tipUrl/status'](props.modelValue),
-    );
+    const urlStatus = computed(() => getTippingUrlStatus(props.modelValue));
 
     const addressMessage = computed((): IInputMessage => {
       if (props.isTipUrl) {
@@ -101,7 +99,6 @@ export default defineComponent({
           case 'verified':
             return { status: 'success', text: '', hideMessage: true };
           case 'not-secure':
-            return { status: 'warning', text: '', hideMessage: true };
           case 'not-verified':
             return { status: 'warning', text: '', hideMessage: true };
           case 'blacklisted':

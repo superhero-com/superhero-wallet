@@ -1,12 +1,9 @@
 <template>
-  <div
+  <DetailsItem
     v-if="rates.length"
     class="swap-rates"
+    :label="$t('pages.transactionDetails.rates')"
   >
-    <div class="title">
-      {{ $t('pages.transactionDetails.rates') }}
-    </div>
-
     <div
       v-for="(rate, idx) of rates"
       :key="idx"
@@ -22,11 +19,10 @@
       <div>
         <TokenAmount
           :amount="rate.price"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
           class="price"
           hide-fiat
-          no-symbol
-          aex9
+          hide-symbol
           high-precision
         />
         <Tokens
@@ -35,7 +31,7 @@
         />
       </div>
     </div>
-  </div>
+  </DetailsItem>
 </template>
 
 <script lang="ts">
@@ -44,24 +40,27 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { camelCase } from 'lodash-es';
-import { useState } from '@/composables/vuex';
+
+import type {
+  ITransaction,
+  TxFunctionParsed,
+} from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   getTransactionTokenInfoResolver,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
+import { useFungibleTokens } from '@/composables';
 
-import {
-  ITransaction,
-  TxFunctionParsed,
-} from '@/types';
+import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
 
 export default defineComponent({
   components: {
+    DetailsItem,
     Tokens,
     TokenAmount,
   },
@@ -69,10 +68,12 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
-    const isSwapTx = computed(() => isTxFunctionDexSwap(props.transaction.tx.function)
-        || isTxFunctionDexPool(props.transaction.tx.function));
+    const isSwapTx = computed(() => (
+      isTxFunctionDexSwap(props.transaction.tx.function)
+      || isTxFunctionDexPool(props.transaction.tx.function)
+    ));
 
     const rates = computed(() => {
       if (!isSwapTx.value) {
@@ -80,12 +81,15 @@ export default defineComponent({
       }
 
       const resolver = getTransactionTokenInfoResolver(
-          camelCase(props.transaction.tx.function) as TxFunctionParsed,
+        camelCase(props.transaction.tx.function) as TxFunctionParsed,
       );
 
       if (!resolver) return [];
 
-      const { tokens } = resolver(props.transaction, availableTokens.value);
+      const { tokens } = resolver(
+        props.transaction,
+        getProtocolAvailableTokens(PROTOCOLS.aeternity),
+      );
 
       if (tokens?.length <= 1) {
         return [];
@@ -93,22 +97,26 @@ export default defineComponent({
 
       const hasAmount = tokens.every((token) => !!token.amount);
 
+      const tokenAmount = [
+        Number(tokens[0].amount),
+        Number(tokens[1].amount),
+      ];
+
       return [
         {
           from: tokens[0],
           to: tokens[1],
-          price: hasAmount ? tokens[1].amount! / tokens[0].amount! : 0,
+          price: hasAmount ? tokenAmount[1] / tokenAmount[0] : 0,
         }, {
           from: tokens[1],
           to: tokens[0],
-          price: hasAmount ? tokens[0].amount! / tokens[1].amount! : 0,
+          price: hasAmount ? tokenAmount[0] / tokenAmount[1] : 0,
         },
       ];
     });
 
     return {
-      PROTOCOL_AETERNITY,
-      availableTokens,
+      PROTOCOLS,
       isSwapTx,
       rates,
     };
@@ -122,13 +130,6 @@ export default defineComponent({
 
 .swap-rates {
   width: 100%;
-
-  .title {
-    color: variables.$color-grey-dark;
-    padding-bottom: 8px;
-
-    @extend %face-sans-14-medium;
-  }
 
   .rate {
     padding-bottom: 6px;

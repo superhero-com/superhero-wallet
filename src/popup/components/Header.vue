@@ -25,7 +25,7 @@
             :is="isLogoDisabled ? 'div' : 'RouterLink'"
             v-else-if="isLoggedIn"
             :to="isLogoDisabled ? null : { name: homeRouteName }"
-            :class="['home-button', { 'disabled': isLogoDisabled }]"
+            :class="['home-button', { disabled: isLogoDisabled }]"
           >
             <Logo class="home-icon" />
           </Component>
@@ -44,7 +44,7 @@
         <div class="right">
           <BtnClose
             v-if="showHeaderNavigation"
-            data-cy="close"
+            data-cy="btn-close"
             class="btn-close"
             @click="close"
           />
@@ -76,7 +76,6 @@ import {
   useBackButton,
   useIonRouter,
 } from '@ionic/vue';
-import { useStore } from 'vuex';
 import {
   computed,
   defineComponent,
@@ -102,7 +101,7 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import NetworkButton from './NetworkButton.vue';
-import AppsBrowserBtn from './AppsBrowserBtn.vue';
+import AppsBrowserBtn from './AppsBrowser/AppsBrowserBtn.vue';
 
 export default defineComponent({
   components: {
@@ -118,13 +117,12 @@ export default defineComponent({
     IonToolbar,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const ionRouter = useIonRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn } = useAccounts();
 
     const pageTitles: Record<string, () => string> = {
       settings: () => t('pages.titles.settings'),

@@ -1,7 +1,11 @@
-import { PAGE_TRANSITION_DURATION } from '@/constants';
 import { createAnimation } from '@ionic/vue';
+import type { IonAnimationBuilder } from '@/types';
+import { PAGE_TRANSITION_DURATION } from '@/constants';
 
-export const popInAnimation = (_: Element, opts: { enteringEl: Element, leavingEl: Element }) => {
+export const popInAnimation: IonAnimationBuilder = (
+  baseEl: Element,
+  opts: { enteringEl: Element; leavingEl: Element },
+) => {
   const enteringAnimation = createAnimation()
     .addElement(opts.enteringEl)
     .fromTo('opacity', 0, 1)

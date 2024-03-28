@@ -4,7 +4,6 @@ import type {
   CurrencyCode,
   CurrencyRates,
   ICurrency,
-  IDefaultComposableOptions,
   Protocol,
   MarketData,
 } from '@/types';
@@ -20,12 +19,14 @@ import {
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAccounts } from '@/composables/accounts';
-import { CoinGecko } from '../lib/CoinGecko';
+import { CoinGecko } from '@/lib/CoinGecko';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
-export interface UseCurrenciesOptions extends IDefaultComposableOptions {
-  withoutPolling?: boolean;
+export interface UseCurrenciesOptions {
+  pollingDisabled?: boolean;
 }
+
+let composableInitialized = false;
 
 const POLLING_INTERVAL = 3600000;
 const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
@@ -49,10 +50,9 @@ const currentCurrencyCode = ref<CurrencyCode>(
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useCurrencies({
-  withoutPolling = false,
-  store,
-}: UseCurrenciesOptions) {
-  const { protocolsInUse, isLoggedIn } = useAccounts({ store });
+  pollingDisabled = false,
+}: UseCurrenciesOptions = {}) {
+  const { protocolsInUse, isLoggedIn } = useAccounts();
   const currentCurrencyInfo = computed(
     (): ICurrency => CURRENCIES.find(({ code }) => code === currentCurrencyCode.value)!,
   );
@@ -76,16 +76,12 @@ export function useCurrencies({
         currentCurrencyCode.value,
       ) || [];
 
-      const convertedMarketData = fetchedMarketData.reduce(
-        (o, coinMarketData) => {
-          // TODO Temporary solution. We need to map the coingecko IDs to our protocols.
-          const protocol = coinMarketData.id;
-          return { ...o, [protocol]: coinMarketData };
-        },
-        {},
-      );
+      // TODO Temporary solution. We need to map the coingecko IDs to our protocols.
+      const convertedMarketData = Object.fromEntries(fetchedMarketData.map(
+        (coinMarketData) => [coinMarketData.id as Protocol, coinMarketData],
+      ));
 
-      marketData.value = isEmpty(convertedMarketData) ? null : convertedMarketData;
+      marketData.value = isEmpty(convertedMarketData) ? null : convertedMarketData as MarketData;
     } catch (e) {
       handleUnknownError(e);
       marketData.value = null;
@@ -155,15 +151,19 @@ export function useCurrencies({
     return (converted < 0.01) ? `<${formatCurrency(0.01)}` : formatCurrency(converted);
   }
 
-  if (!withoutPolling) {
+  if (!pollingDisabled) {
     initPollingWatcher(() => loadCurrencyRates());
   }
 
-  watch(() => protocolsInUse.value, (currentValue, oldValue) => {
-    if (difference(currentValue, oldValue).length && !isLoadingCurrencies.value) {
-      loadCurrencyRates();
-    }
-  });
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    watch(protocolsInUse, (currentValue, oldValue) => {
+      if (difference(currentValue, oldValue).length && !isLoadingCurrencies.value) {
+        loadCurrencyRates();
+      }
+    });
+  }
 
   return {
     CURRENCIES,

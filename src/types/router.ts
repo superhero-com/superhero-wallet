@@ -29,6 +29,7 @@ export interface WalletRouteMeta {
   isEdit?: boolean;
   /**
    * Decide if the route should be saved to browser's local storage
+   * See the `RouteLastUsedRoutes` for the reference.
    */
   notPersist?: boolean;
   /**

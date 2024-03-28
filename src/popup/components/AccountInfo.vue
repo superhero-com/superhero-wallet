@@ -5,10 +5,11 @@
   >
     <Avatar
       class="avatar"
-      :address="address"
+      :address="account.address"
       :name="name"
       :size="avatarSize"
       :borderless="avatarBorderless"
+      :is-placeholder="isPlaceholder"
     />
     <div
       class="account-details"
@@ -17,9 +18,8 @@
       <div
         v-if="isMultisig"
         class="account-name"
-      >
-        {{ $t('multisig.multisigVault') }}
-      </div>
+        v-text="$t('multisig.multisigVault')"
+      />
       <div
         v-else-if="name"
         class="account-name-truncated"
@@ -30,30 +30,28 @@
         v-else
         data-cy="account-name-number"
         class="account-name"
-      >
-        {{ getDefaultAccountLabel({ protocol: protocolName, protocolIdx: idx }) }}
-      </div>
-      <div
-        v-if="address && address.length"
-        class="account-address"
-      >
-        <IconWrapper
-          v-if="withProtocolIcon"
-          :protocol-icon="protocol"
-          class="protocol-icon"
-        />
-        <CopyText
-          data-cy="copy"
-          :value="address"
-          :disabled="!canCopyAddress"
+        v-text="getDefaultAccountLabel(account)"
+      />
+
+      <slot name="address">
+        <div
+          v-if="account.address?.length"
+          class="account-address"
         >
-          <AddressTruncated
-            :address="address"
-            :protocol="protocol"
-            class="ae-address"
-          />
-        </CopyText>
-      </div>
+          <CopyText
+            data-cy="copy"
+            :value="account.address"
+            :disabled="!canCopyAddress"
+          >
+            <AddressTruncated
+              :address="account.address"
+              :protocol="account.protocol"
+              :show-protocol-icon="showProtocolIcon"
+              class="ae-address"
+            />
+          </CopyText>
+        </div>
+      </slot>
     </div>
   </div>
 </template>
@@ -64,51 +62,50 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { Protocol } from '@/types';
+import type { IAccount } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
-import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   components: {
-    IconWrapper,
     AddressTruncated,
     Avatar,
     Truncate,
     CopyText,
   },
   props: {
-    address: { type: String, required: true },
-    name: { type: String, default: '' },
-    protocol: { type: String as PropType<Protocol>, required: true },
+    account: { type: Object as PropType<Partial<IAccount>>, required: true },
     avatarSize: { type: String, default: 'lg' },
-    idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
-    withProtocolIcon: Boolean,
+    isPlaceholder: Boolean,
+    showProtocolIcon: Boolean,
   },
   setup(props) {
-    const explorerUrl = computed(
-      () => ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .getExplorer()
-        .prepareUrlForAccount(props.address),
-    );
+    const { getName } = useAeNames();
 
-    const protocolName = computed(
-      () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
+    const name = computed(() => getName(props.account.address!).value);
+
+    const explorerUrl = computed(
+      () => (props.account.protocol)
+        ? ProtocolAdapterFactory
+          .getAdapter(props.account.protocol)
+          .getExplorer()
+          .prepareUrlForAccount(props.account.address!)
+        : '',
     );
 
     return {
+      name,
       explorerUrl,
-      protocolName,
       getDefaultAccountLabel,
     };
   },
@@ -128,7 +125,6 @@ export default defineComponent({
 
   .avatar {
     margin-right: 8px;
-    background-color: variables.$color-black;
   }
 
   .account-details {
@@ -156,7 +152,6 @@ export default defineComponent({
 
     .ae-address {
       color: rgba(variables.$color-white, 0.85);
-      opacity: 0.85;
       user-select: none;
 
       .icon {
@@ -179,6 +174,8 @@ export default defineComponent({
 
   &.can-copy-address {
     .ae-address {
+      opacity: 0.85;
+
       &:hover {
         opacity: 1;
       }

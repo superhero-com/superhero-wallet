@@ -5,45 +5,57 @@
     has-close-button
     @close="resolve"
   >
-    <div class="import-account">
-      <span class="header"> {{ $t('pages.index.importWallet') }} </span>
-      <p class="regular-text">
-        {{ $t('pages.index.enterSeedPhrase') }}
-      </p>
-
-      <FormTextarea
-        v-model="mnemonic"
-        size="xs"
-        :label="$t('pages.index.seedPhrase')"
-        :placeholder="$t('pages.index.seedPlaceHolder')"
-        :message="error"
-        :resizable="false"
-        enter-submit
-        @submit="importAccount"
-      >
-        <template #label-after>
-          <a
-            class="scan-button"
-            data-cy="scan-button"
-            @click="openScanQrModal"
-          >
-            <QrScanIcon />
-          </a>
-        </template>
-      </FormTextarea>
+    <div class="text-center">
+      <p
+        class="text-heading-2"
+        v-text="$t('pages.index.importWallet')"
+      />
+      <div v-if="discovering">
+        <AnimatedSpinnerIcon class="loader" />
+        <p class="text-description">
+          {{ $t('pages.index.restoringAccounts') }}<br>
+          {{ $t('common.actionMayTakeFewMoments') }}
+        </p>
+      </div>
+      <div v-else>
+        <p v-text="$t('pages.index.enterSeedPhrase')" />
+      </div>
     </div>
+
+    <FormTextarea
+      v-model="mnemonic"
+      size="xs"
+      :label="$t('pages.index.seedPhrase')"
+      :placeholder="$t('pages.index.seedPlaceHolder')"
+      :message="error"
+      :resizable="false"
+      :readonly="discovering"
+      data-cy="field-mnemonic"
+      enter-submit
+      @submit="importAccount"
+    >
+      <template #label-after>
+        <BtnPlain
+          data-cy="scan-button"
+          class="scan-button"
+          :class="{ disabled: discovering }"
+          @click="openScanQrModal"
+        >
+          <QrScanIcon />
+        </BtnPlain>
+      </template>
+    </FormTextarea>
 
     <template #footer>
       <BtnMain
-        :disabled="!mnemonic || !!error"
-        data-cy="import"
+        :disabled="!mnemonic || !!error || discovering"
+        :text="$t('pages.index.importAccount')"
+        data-cy="btn-import"
         class="import-button"
         extend
         center
-        @click="importAccount"
-      >
-        {{ $t('pages.index.importAccount') }}
-      </BtnMain>
+        @click.prevent="() => importAccount()"
+      />
     </template>
   </Modal>
 </template>
@@ -57,39 +69,44 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { MODAL_READ_QR_CODE } from '@/constants';
 import { isSeedLengthValid } from '@/utils';
 import {
+  useAccounts,
   useModals,
   useUi,
 } from '@/composables';
 
-import Modal from '../Modal.vue';
-import BtnMain from '../buttons/BtnMain.vue';
-import FormTextarea from '../form/FormTextarea.vue';
-import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
+import Modal from '@/popup/components/Modal.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import FormTextarea from '@/popup/components/form/FormTextarea.vue';
+import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
+import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   components: {
     BtnMain,
+    BtnPlain,
     Modal,
     FormTextarea,
     QrScanIcon,
+    AnimatedSpinnerIcon,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
+    const { discoverAccounts, setMnemonic } = useAccounts();
     const { openModal } = useModals();
-    const { loginTargetLocation } = useUi();
+    const { loginTargetLocation, setBackedUpSeed } = useUi();
 
+    const discovering = ref(false);
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
 
@@ -112,13 +129,14 @@ export default defineComponent({
         error.value = t('pages.index.accountNotFound');
         return;
       }
-      store.commit('setMnemonic', mnemonicParsed);
-      store.commit('setBackedUpSeed');
+
+      discovering.value = true;
+      setMnemonic(mnemonicParsed);
+      setBackedUpSeed(true);
+      await discoverAccounts();
       props.resolve();
-      setTimeout(async () => {
-        store.dispatch('accounts/hdWallet/discover');
-      }, 100);
       router.push(loginTargetLocation.value);
+      discovering.value = false;
     }
 
     async function openScanQrModal() {
@@ -133,6 +151,7 @@ export default defineComponent({
     }
 
     return {
+      discovering,
       mnemonic,
       error,
       importAccount,
@@ -149,21 +168,8 @@ export default defineComponent({
 .import-account-modal {
   text-align: center;
 
-  .import-account {
-    .header {
-      @extend %face-sans-18-medium;
-
-      color: variables.$color-white;
-    }
-
-    .regular-text {
-      @extend %face-sans-16-light;
-
-      color: variables.$color-white;
-      text-align: center;
-      margin-bottom: 24px;
-      margin-top: 8px;
-    }
+  .loader {
+    width: 56px;
   }
 
   .scan-button {
@@ -171,6 +177,11 @@ export default defineComponent({
     display: block;
     width: 32px;
     height: 24px;
+
+    &.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
   }
 }
 </style>

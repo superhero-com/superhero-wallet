@@ -4,12 +4,11 @@ import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
-import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import type {
-  IDefaultComposableOptions,
   IMultisigAccount,
   IMultisigConsensus,
   IMultisigAccountResponse,
+  AccountAddress,
 } from '@/types';
 import {
   fetchJson,
@@ -18,6 +17,8 @@ import {
   setLocalStorageItem,
   toShiftedBigNumber,
 } from '@/utils';
+
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 import {
   AE_COIN_PRECISION,
   MULTISIG_SUPPORTED_CONTRACT_VERSION,
@@ -28,17 +29,19 @@ import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
 import { useAccounts } from './accounts';
-import { createNetworkWatcher } from './networks';
+import { useNetworks } from './networks';
+
+export interface MultisigAccountsOptions {
+  pollOnce?: boolean;
+  pollingDisabled?: boolean;
+}
+
+let composableInitialized = false;
 
 const POLLING_INTERVAL = 7000;
 
 const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
 const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
-
-export interface MultisigAccountsOptions extends IDefaultComposableOptions {
-  pollOnce?: boolean;
-  pollingDisabled?: boolean;
-}
 
 function storeMultisigAccounts(
   multisigAccounts: IMultisigAccount[],
@@ -59,21 +62,20 @@ function getStoredMultisigAccounts(networkId: string, isPending = false): IMulti
 
 const multisigAccounts = ref<IMultisigAccount[]>([]);
 const pendingMultisigAccounts = ref<IMultisigAccount[]>([]);
-const activeMultisigAccountId = ref<Encoded.AccountAddress>();
+const activeMultisigAccountId = ref<AccountAddress>();
 const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
 export function useMultisigAccounts({
-  store,
   pollOnce = false,
   pollingDisabled = false,
-}: MultisigAccountsOptions) {
+}: MultisigAccountsOptions = {}) {
+  const { onNetworkChange } = useNetworks();
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { aeAccounts } = useAccounts({ store });
+  const { nodeNetworkId, getAeSdk } = useAeSdk();
+  const { aeAccounts } = useAccounts();
 
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
     ...multisigAccounts.value,
@@ -88,8 +90,17 @@ export function useMultisigAccounts({
   const activeMultisigAccountExplorerUrl = computed(
     () => (activeMultisigAccount.value)
       ? (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-        .prepareUrlByHash(activeMultisigAccount.value.contractId)
+        .prepareUrlForHash(activeMultisigAccount.value.contractId)
       : null,
+  );
+
+  const isActiveMultisigAccountPending = computed(
+    (): boolean => (
+      !!activeMultisigAccount.value?.gaAccountId
+      && !!pendingMultisigAccounts.value.find(
+        ({ gaAccountId }) => gaAccountId === activeMultisigAccount.value!.gaAccountId,
+      )
+    ),
   );
 
   // Get initial data for currently used network
@@ -116,7 +127,7 @@ export function useMultisigAccounts({
     }
   })();
 
-  function setActiveMultisigAccountId(gaAccountId: Encoded.AccountAddress) {
+  function setActiveMultisigAccountId(gaAccountId: AccountAddress) {
     if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
       activeMultisigNetworkId.value = nodeNetworkId.value!;
@@ -136,8 +147,8 @@ export function useMultisigAccounts({
 
   function addTransactionToPendingMultisigAccount(
     txHash: string,
-    gaAccountId: Encoded.AccountAddress,
-    proposedBy: Encoded.AccountAddress,
+    gaAccountId: AccountAddress,
+    proposedBy: AccountAddress,
   ) {
     pendingMultisigAccounts.value = pendingMultisigAccounts.value.map(
       (account) => account.gaAccountId === gaAccountId
@@ -232,7 +243,7 @@ export function useMultisigAccounts({
                 ? { decodedResult: currentAccount.signers }
                 : contractInstance.get_signers(),
               contractInstance.get_consensus_info(),
-              gaAccountId ? aeSdk.getBalance(gaAccountId) : 0,
+              gaAccountId ? aeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
             ]));
 
             const decodedConsensus = consensusResult.decodedResult;
@@ -325,12 +336,19 @@ export function useMultisigAccounts({
     }
   }
 
-  onNetworkChange(() => updateMultisigAccounts());
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    onNetworkChange(() => {
+      updateMultisigAccounts();
+    });
+  }
 
   return {
     multisigAccounts: allMultisigAccounts,
     pendingMultisigAccounts,
     isAdditionalInfoNeeded,
+    isActiveMultisigAccountPending,
     activeMultisigAccountId,
     activeMultisigAccount,
     activeMultisigAccountExplorerUrl,

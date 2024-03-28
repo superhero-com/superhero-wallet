@@ -20,14 +20,15 @@
       <div
         v-for="(signer, index) in signers"
         :key="`signer${index}`"
+        :data-signer-idx="`signer-address-${index}`"
       >
         <FormSelect
           v-if="index === 0"
           v-model.trim="signer.address"
           :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :label="getSignerLabel(index)"
-          item-title="address"
           :options="aeAccountsSelectOptions"
+          item-title="value"
           account-select
         />
         <Field
@@ -37,7 +38,7 @@
           :name="`signer-address-${index}`"
           :rules="{
             required: true,
-            account_address: true,
+            account_address: [PROTOCOLS.aeternity],
           }"
         >
           <FormTextarea
@@ -49,26 +50,27 @@
             :name="`signer-address-${index}`"
             :message="errorMessage || getErrorMessage(signer)"
             :class="{
-              error: checkIfSignerAddressDuplicated(signer)
+              error: checkIfSignerAddressDuplicated(signer),
             }"
           >
             <template #label-after>
-              <a
+              <BtnPlain
                 class="scan-button"
                 @click.prevent="openScanQrModal(index)"
               >
                 <QrScanIcon />
-              </a>
+              </BtnPlain>
             </template>
             <template #after>
-              <a
+              <BtnPlain
                 v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
+                class="btn-plain"
                 @click="removeSigner(index)"
               >
                 <PlusCircleIcon
                   class="btn-remove-signer"
                 />
-              </a>
+              </BtnPlain>
             </template>
           </FormTextarea>
         </Field>
@@ -78,12 +80,14 @@
         <BtnText
           :icon="PlusCircleIcon"
           :text="$t('modals.createMultisigAccount.addSigner')"
+          data-cy="add-signer-btn"
           @click="addNewSigner"
         />
 
         <BtnHelp
           :title="$t('multisig.authorizedSigners')"
           :msg="$t('modals.createMultisigAccount.addSignerHelpMsg')"
+          data-cy="add-signer-btn-help"
         />
       </div>
 
@@ -96,6 +100,7 @@
           <FormNumberSelect
             v-model="confirmationsRequired"
             :size="signers.length"
+            data-cy="multisig-num-of-signers-selector"
           />
 
           <i18n-t
@@ -110,6 +115,7 @@
           <BtnHelp
             :title="$t('modals.createMultisigAccount.consensusRequiredHelpTitle')"
             :msg="$t('modals.createMultisigAccount.consensusRequiredHelpMsg')"
+            data-cy="multisig-num-of-signers-selector-help"
           />
         </div>
       </div>
@@ -153,8 +159,10 @@
         <BtnMain
           :text="$t('modals.createMultisigAccount.btnTextShort')"
           wide
-          :disabled="multisigAccountCreationPhase != MULTISIG_CREATION_PHASES.signed
-            || notEnoughBalanceToCreateMultisig"
+          :disabled="(
+            multisigAccountCreationPhase !== MULTISIG_CREATION_PHASES.signed
+            || notEnoughBalanceToCreateMultisig
+          )"
           @click="createMultisigAccount"
         />
       </template>
@@ -177,7 +185,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -189,6 +196,7 @@ import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   MODAL_READ_QR_CODE,
+  PROTOCOLS,
 } from '@/constants';
 import {
   excludeFalsy,
@@ -198,7 +206,7 @@ import type {
   ICreateMultisigAccount,
   ObjectValues,
 } from '@/types';
-import { ROUTE_MULTISIG_DETAILS_INFO } from '@/popup/router/routeNames';
+import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useModals,
@@ -213,6 +221,7 @@ import {
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
+import BtnPlain from '../buttons/BtnPlain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import FormSelect from '../form/FormSelect.vue';
@@ -238,6 +247,7 @@ export default defineComponent({
     FormTextarea,
     Modal,
     BtnMain,
+    BtnPlain,
     BtnText,
     BtnHelp,
     MultisigVaultCreateProgress,
@@ -253,17 +263,16 @@ export default defineComponent({
     reject: { type: Function, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
 
-    const { aeAccountsSelectOptions } = useAccounts({ store });
+    const { aeAccountsSelectOptions } = useAccounts();
     const { openModal, openDefaultModal } = useModals();
     const errors = useFormErrors();
 
     const {
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store, pollOnce: true });
+    } = useMultisigAccounts({ pollOnce: true });
 
     const {
       multisigAccount,
@@ -275,7 +284,7 @@ export default defineComponent({
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store });
+    } = useMultisigAccountCreate();
 
     const currentStep = ref<Step>(STEPS.form);
 
@@ -390,11 +399,13 @@ export default defineComponent({
           confirmationsRequired.value,
           signersAddressList.value,
         );
-      } catch (error) {
+      } catch (error: any) {
         handleUnknownError(error);
         await openDefaultModal({
           title: t('multisig.multisigVaultCreationFailed'),
           icon: 'critical',
+          msg: error?.details?.reason,
+          textCenter: true,
         });
         currentStep.value = STEPS.form;
       }
@@ -404,14 +415,13 @@ export default defineComponent({
       if (multisigAccount.value) {
         await props.resolve();
         setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
-        router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
+        router.push({ name: ROUTE_MULTISIG_ACCOUNT });
       }
     }
 
     onMounted(() => {
       if (!signers.value.length) {
-        // eslint-disable-next-line no-plusplus
-        for (let n = 0; n < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS; n++) {
+        for (let n = 0; n < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS; n += 1) {
           addNewSigner();
         }
       }
@@ -430,6 +440,7 @@ export default defineComponent({
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
+      PROTOCOLS,
       STEPS,
       currentMultisigAccountId,
       aeAccountsSelectOptions,
@@ -469,6 +480,7 @@ export default defineComponent({
   padding-top: env(safe-area-inset-top);
 
   // Step 1
+
   &-form {
     .scan-button {
       color: variables.$color-white;
@@ -488,16 +500,20 @@ export default defineComponent({
       }
     }
 
-    .btn-remove-signer {
-      width: 20px !important;
-      margin: -4px -6px -4px 0;
-      transform: rotate(45deg);
-      cursor: pointer;
-      transition: variables.$transition-interactive;
-      color: variables.$color-grey-light;
+    .btn-plain {
+      display: flex;
 
-      &:hover {
-        opacity: 0.8;
+      .btn-remove-signer {
+        width: 20px !important;
+        margin: -4px -6px -4px 0;
+        transform: rotate(45deg);
+        cursor: pointer;
+        transition: variables.$transition-interactive;
+        color: variables.$color-grey-light;
+
+        &:hover {
+          opacity: 0.8;
+        }
       }
     }
 

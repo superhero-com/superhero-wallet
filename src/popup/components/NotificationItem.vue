@@ -32,7 +32,7 @@
       <AddressTruncated
         v-if="!chainName && address"
         :address="address"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         class="address"
       />
       <Truncate
@@ -71,15 +71,10 @@ import {
   IS_EXTENSION,
   IS_MOBILE_DEVICE,
   NOTIFICATION_STATUS_READ,
-  NOTIFICATION_TYPE_CLAIM_OF_RETIP,
-  NOTIFICATION_TYPE_CLAIM_OF_TIP,
-  NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
-  NOTIFICATION_TYPE_COMMENT_ON_TIP,
-  NOTIFICATION_TYPE_RETIP_ON_TIP,
-  NOTIFICATION_TYPE_TIP_ON_COMMENT,
-  NOTIFICATION_TYPE_WALLET,
-  PROTOCOL_AETERNITY,
+  NOTIFICATION_TYPES,
+  PROTOCOLS,
 } from '@/constants';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -105,36 +100,36 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { t } = useI18n();
+    const { getName } = useAeNames();
 
     function getNotificationText(notification: INotification) {
       switch (notification.type) {
-        case NOTIFICATION_TYPE_COMMENT_ON_COMMENT:
+        case NOTIFICATION_TYPES.commentOnComment:
           return t('pages.notifications.commentOnComment');
-        case NOTIFICATION_TYPE_COMMENT_ON_TIP:
+        case NOTIFICATION_TYPES.commentOnTip:
           return t('pages.notifications.commentOnTip');
-        case NOTIFICATION_TYPE_TIP_ON_COMMENT:
+        case NOTIFICATION_TYPES.tipOnComment:
           return t('pages.notifications.tipOnComment');
-        case NOTIFICATION_TYPE_RETIP_ON_TIP:
+        case NOTIFICATION_TYPES.retipOnTip:
           return t('pages.notifications.retipOnTip');
-        case NOTIFICATION_TYPE_CLAIM_OF_TIP:
+        case NOTIFICATION_TYPES.claimOfTip:
           return t('pages.notifications.claimOfTip');
-        case NOTIFICATION_TYPE_CLAIM_OF_RETIP:
+        case NOTIFICATION_TYPES.claimOfRetip:
           return t('pages.notifications.claimOfRetip');
-        case NOTIFICATION_TYPE_WALLET:
+        case NOTIFICATION_TYPES.wallet:
           return notification.text;
         default:
           throw new Error(`Unknown notification status: ${notification.type}`);
       }
     }
 
+    const chainName = getName(props.notification.sender || props.notification.receiver);
+
     const createdAt = computed(() => relativeTimeTo(props.notification.createdAt));
     const message = computed(() => getNotificationText(props.notification));
-    const chainName = computed(
-      () => props.notification.senderName || props.notification.receiverName,
-    );
     const address = computed(() => props.notification.sender || props.notification.receiver);
     const isSeedBackup = computed(() => props.notification.isSeedBackup);
-    const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
+    const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPES.wallet);
     const redirectInfo = computed(() => !isWallet.value ? t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
       ? props.notification.title || ''
@@ -160,7 +155,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       IS_MOBILE_DEVICE,
       createdAt,
       message,

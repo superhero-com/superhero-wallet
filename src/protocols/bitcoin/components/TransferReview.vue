@@ -4,7 +4,7 @@
     :transfer-data="transferData"
     :loading="loading"
     show-fiat
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOLS.bitcoin"
     class="transfer-review"
   >
     <template #total>
@@ -14,10 +14,10 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData.total"
+            :amount="+transferData.total!"
             :symbol="BTC_SYMBOL"
             high-precision
-            :protocol="PROTOCOL_BITCOIN"
+            :protocol="PROTOCOLS.bitcoin"
             data-cy="review-total"
           />
         </template>
@@ -32,18 +32,22 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAccounts, useModals, useUi } from '@/composables';
-import type { TransferFormModel } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import {
+  useAccounts,
+  useLatestTransactionList,
+  useModals,
+  useUi,
+} from '@/composables';
+import type { ITransaction, ITransferArgs, TransferFormModel } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
-import { BTC_SYMBOL, BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
+import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import BigNumber from 'bignumber.js';
 
 export default defineComponent({
@@ -63,15 +67,12 @@ export default defineComponent({
     const { t } = useI18n();
     const router = useRouter();
     const { homeRouteName } = useUi();
-
     const { openDefaultModal } = useModals();
-
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
 
     const loading = ref<boolean>(false);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function openTransactionFailedModal(msg: string) {
       openDefaultModal({
         title: t('modals.transaction-failed.msg'),
@@ -89,8 +90,8 @@ export default defineComponent({
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function transfer({ amount, recipient, selectedAsset }: any) {
-      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
+      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
       try {
         loading.value = true;
         const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
@@ -116,12 +117,32 @@ export default defineComponent({
       if (!amount || !recipient || !selectedAsset) {
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const hash = await transfer({
         amount,
         recipient,
         selectedAsset,
       });
+
+      if (hash) {
+        const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
+        const transaction: ITransaction = {
+          hash: hash as any,
+          pending: true,
+          transactionOwner: lastActiveBtcAccount?.address,
+          protocol: PROTOCOLS.bitcoin,
+          tx: {
+            amount: Number(amount),
+            callerId: lastActiveBtcAccount?.address!,
+            contractId: selectedAsset.contractId as any,
+            senderId: lastActiveBtcAccount?.address,
+            type: 'SpendTx',
+            recipientId: recipient,
+            arguments: [],
+            fee: props.transferData.fee?.toNumber() ?? 0,
+          },
+        };
+        addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+      }
 
       // TODO - redirect after transfer function will be ready
       router.push({ name: homeRouteName.value });
@@ -129,9 +150,8 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       BTC_SYMBOL,
-      BTC_CONTRACT_ID,
       loading,
       submit,
     };

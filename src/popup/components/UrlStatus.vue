@@ -1,38 +1,43 @@
 <template>
   <div
-    v-if="data"
+    v-if="statusData"
     class="url-status"
     :class="status"
   >
-    <span class="title">{{ $rt(data.content.title) }}</span>
-    <a
+    <span class="title">{{ statusData.title }}</span>
+    <BtnPlain
       class="icon-link"
       :class="status"
-      @click="showModal"
+      @click="showModal()"
     >
       <QuestionCircleIcon class="icon" />
-    </a>
+    </BtnPlain>
   </div>
   <Default v-else />
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent, PropType } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { StatusIconType, UrlStatus } from '@/types';
 import { MODAL_RECIPIENT_HELPER } from '@/constants';
 import { useModals } from '@/composables';
 
 import Default from '@/icons/badges/default.svg?vue-component';
 import QuestionCircleIcon from '@/icons/question-circle-border.svg?vue-component';
+import BtnPlain from './buttons/BtnPlain.vue';
 
-export default {
+export default defineComponent({
   components: {
     Default,
     QuestionCircleIcon,
+    BtnPlain,
   },
   props: {
     status: {
-      type: String,
+      type: String as PropType<UrlStatus>,
       required: true,
-      validator: (value) => [
+      validator: (value: UrlStatus) => [
         'verified',
         'blacklisted',
         'not-secure',
@@ -41,35 +46,57 @@ export default {
       ].includes(value),
     },
   },
-  computed: {
-    data() {
-      switch (this.status) {
+  setup(props) {
+    const { t } = useI18n();
+    const { openModal } = useModals();
+
+    const statusData = computed((): { icon: StatusIconType; title: string; msg: string } | null => {
+      switch (props.status) {
         case 'verified':
-          return { icon: 'success', content: this.$tm('modals.verified') };
+          return {
+            icon: 'success',
+            title: t('modals.verified.title'),
+            msg: t('modals.verified.msg'),
+          };
         case 'blacklisted':
-          return { icon: 'alert', content: this.$tm('modals.blacklisted') };
+          return {
+            icon: 'alert',
+            title: t('modals.blacklisted.title'),
+            msg: t('modals.blacklisted.msg'),
+          };
         case 'not-secure':
-          return { icon: 'not-secure', content: this.$tm('modals.not-secure') };
+          return {
+            icon: 'not-secure',
+            title: t('modals.not-secure.title'),
+            msg: t('modals.not-secure.msg'),
+          };
         case 'not-verified':
-          return { icon: 'warning', content: this.$tm('modals.not-verified') };
+          return {
+            icon: 'warning',
+            title: t('modals.not-verified.title'),
+            msg: t('modals.not-verified.msg'),
+          };
         case 'default':
           return null;
         default:
-          throw new Error(`Unknown url status: ${this.status}`);
+          throw new Error(`Unknown url status: ${props.status}`);
       }
-    },
-  },
-  methods: {
-    showModal() {
-      const { openModal } = useModals();
+    });
+
+    function showModal() {
       openModal(MODAL_RECIPIENT_HELPER, {
-        title: this.$rt(this.data.content.title),
-        msg: this.$rt(this.data.content.msg),
-        icon: this.data.icon,
+        title: statusData.value?.title,
+        msg: statusData.value?.msg,
+        icon: statusData.value?.icon,
       });
-    },
+    }
+
+    return {
+      statusData,
+      showModal,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -77,9 +104,11 @@ export default {
 @use '../../styles/typography';
 @use '../../styles/mixins';
 
-.url-status,
-.icon-link {
+.url-status {
   @extend %face-sans-14-regular;
+
+  display: flex;
+  align-items: center;
 
   &.blacklisted,
   &.alert,
@@ -104,14 +133,19 @@ export default {
   }
 
   .title {
-    padding-right: 10px;
+    margin-right: 8px;
   }
 
-  .icon {
-    width: 22px;
-    height: 22px;
-    vertical-align: text-bottom;
-    cursor: pointer;
+  .icon-link {
+    color: inherit;
+    display: inline-block;
+    line-height: 1;
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+    }
   }
 }
 </style>

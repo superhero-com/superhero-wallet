@@ -1,25 +1,15 @@
 import { mount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { i18n, tg } from '@/popup/plugins/i18n';
+import { useFungibleTokens } from '@/composables';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
-import { i18n, tg } from '../../src/store/plugins/languages';
 import {
-  // STUB_ACCOUNT,
   STUB_TOKEN_CONTRACT_ADDRESS,
   STUB_TRANSACTIONS,
 } from '../../src/constants/stubs';
 import {
   AENS,
+  PROTOCOLS,
 } from '../../src/constants';
-
-const store = new Vuex.Store({
-  state: {
-    fungibleTokens: {
-      availableTokens: {
-        [STUB_TOKEN_CONTRACT_ADDRESS]: {},
-      },
-    },
-  },
-});
 
 const transactionLabels = {
   payForGaAttach: [
@@ -115,9 +105,13 @@ describe('TransactionTagList', () => {
   ${props.transaction?.tx?.type ?? props.customTitle}/${props.transaction?.tx?.function}`,
     () => {
       const wrapper = mount(TransactionTagList, {
-        global: { plugins: [i18n, store] },
+        global: { plugins: [i18n] },
         props,
       });
+      const { tokensAvailable } = useFungibleTokens();
+      tokensAvailable.value[PROTOCOLS.aeternity] = {};
+      tokensAvailable.value[PROTOCOLS.aeternity][STUB_TOKEN_CONTRACT_ADDRESS] = {};
+
       wrapper.findAll('.transaction-tag').forEach((el, index) => {
         expect(el.text()).toEqual(labels[index] || '');
       });

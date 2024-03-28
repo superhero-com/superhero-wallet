@@ -5,30 +5,49 @@
         <template v-if="transaction && !transaction.incomplete">
           <TransactionDetailsBase
             :transaction="transaction"
-            :coin-symbol="AE_SYMBOL"
-            :transaction-fee="+aettosToAe(transactionFee)"
-            :is-swap="isSwap"
-            :is-pool="isPool"
-            :token-symbol="getTxSymbol(transaction)"
-            :total-amount="getTxAmountTotal(transaction, direction)"
+            :amount="amount"
+            :amount-total="amountTotal"
+            :fee="transactionFee"
             :is-error-transaction="isErrorTransaction"
-            :is-dex-allowance="isDexAllowance"
-            :is-dex="isDex"
-            :is-transaction-aex9="isTransactionAex9(transaction)"
-            :payload="getTransactionPayload(transaction)"
-            :is-multisig="isMultisig"
-            :direction="direction"
-            :explorer-url="explorerUrl || ''"
-            :is-local-account-address="isLocalAccountAddress"
-            :gas-price="gasPrice ? +aettosToAe(gasPrice) : 0"
-            :gas-used="gasUsed"
-            :contract-id="contractId"
-            :multisig-transaction-fee-paid-by="multisigTransactionFeePaidBy"
-            :multisig-contract-id="multisigContractId"
+            :payload="getTransactionPayload(transaction)!"
+            :show-header="!isDexAllowance"
+            :hide-amount-total="(
+              isDex
+              || isDexAllowance
+              || isMultisig
+              || isTransactionAex9(transaction)
+            )"
+            :hide-fiat="isTransactionAex9(transaction)"
             :hash="hash"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           >
-            <template #tip-url>
+            <template #tokens>
+              <TransactionAssetRows
+                :assets="transactionAssets"
+                :error="isErrorTransaction"
+                :is-reversed="isPool"
+                :protocol="PROTOCOLS.aeternity"
+                icon-size="rg"
+                multiple-rows
+              />
+            </template>
+
+            <template
+              v-if="isSwap"
+              #swap-data
+            >
+              <SwapRates :transaction="transaction" />
+              <SwapRoute :transaction="transaction" />
+            </template>
+
+            <template #additional-content>
+              <TransactionDetailsPoolTokens
+                v-if="(isPool || isDexAllowance)"
+                :transaction="transaction"
+                :tokens="transactionAssets"
+                :reversed="isPool"
+              />
+
               <DetailsItem
                 v-if="tipUrl"
                 :label="$t('pages.transactionDetails.tipUrl')"
@@ -47,6 +66,85 @@
                 </template>
               </DetailsItem>
             </template>
+
+            <template #multisig-content>
+              <DetailsItem
+                v-if="multisigTransactionFeePaidBy"
+                :label="$t('pages.transactionDetails.feePaidBy')"
+                small
+              >
+                <div class="row payer-id">
+                  <Avatar
+                    :address="multisigTransactionFeePaidBy"
+                    size="sm"
+                  />
+                  <div>
+                    <DialogBox
+                      v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                      class="dialog-box"
+                      dense
+                      position="bottom"
+                    >
+                      {{ $t('common.you') }}
+                    </DialogBox>
+                    <CopyText
+                      hide-icon
+                      :value="multisigTransactionFeePaidBy"
+                      :copied-text="$t('common.addressCopied')"
+                    >
+                      <span class="text-address">
+                        {{ splitAddress(multisigTransactionFeePaidBy) }}
+                      </span>
+                    </CopyText>
+                  </div>
+                </div>
+              </DetailsItem>
+
+              <DetailsItem
+                v-if="multisigContractId"
+                :label="$t('pages.transactionDetails.vaultContractId')"
+                small
+              >
+                <div class="row">
+                  <Avatar
+                    :address="multisigContractId"
+                    size="sm"
+                  />
+                  <CopyText
+                    hide-icon
+                    :value="multisigContractId"
+                    :copied-text="$t('common.addressCopied')"
+                  >
+                    <span class="text-address">
+                      {{ splitAddress(multisigContractId) }}
+                    </span>
+                  </CopyText>
+                </div>
+              </DetailsItem>
+            </template>
+
+            <template #gas>
+              <DetailsItem
+                v-if="gasPrice"
+                :label="$t('pages.transactionDetails.gasPrice')"
+                data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(gasPrice)"
+                    :symbol="AE_SYMBOL"
+                    :protocol="PROTOCOLS.aeternity"
+                    hide-fiat
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="gasUsed"
+                :value="gasUsed"
+                :label="$t('pages.transactionDetails.gasUsed')"
+                data-cy="gas"
+              />
+            </template>
           </TransactionDetailsBase>
         </template>
       </div>
@@ -62,27 +160,27 @@ import {
   onMounted,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
-import type { ITransaction, TxFunctionRaw } from '@/types';
-import {
-  useAccounts,
-  useMiddleware,
-  useMultisigAccounts,
-  useTransactionList,
-  useTransactionTx,
-  useUi,
-} from '@/composables';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import type { ITransaction, ITx, TxFunctionRaw } from '@/types';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
   splitAddress,
   watchUntilTruthy,
 } from '@/utils';
+import {
+  useAccounts,
+  useFungibleTokens,
+  useMultisigAccounts,
+  useTransactionData,
+  useTransactionList,
+  useUi,
+} from '@/composables';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -93,17 +191,30 @@ import {
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import LinkButton from '@/popup/components/LinkButton.vue';
 import Truncate from '@/popup/components/Truncate.vue';
 import CopyText from '@/popup/components/CopyText.vue';
+import SwapRates from '@/popup/components/SwapRates.vue';
+import SwapRoute from '@/popup/components/SwapRoute.vue';
+import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
+import DialogBox from '@/popup/components/DialogBox.vue';
+import Avatar from '@/popup/components/Avatar.vue';
+import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 export default defineComponent({
   components: {
+    TokenAmount,
+    Avatar,
+    DialogBox,
+    SwapRoute,
+    SwapRates,
     TransactionDetailsBase,
+    TransactionDetailsPoolTokens,
+    TransactionAssetRows,
     DetailsItem,
     CopyText,
     LinkButton,
@@ -112,18 +223,17 @@ export default defineComponent({
     IonPage,
   },
   props: {
-    multisigDashboard: { type: Boolean },
+    multisigDashboard: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
 
-    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-    const { getMiddleware } = useMiddleware();
-    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
-    const { activeAccount, isLocalAccountAddress } = useAccounts({ store });
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
+    const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
+    const { getTxAmountTotal } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -136,56 +246,50 @@ export default defineComponent({
           : activeAccount.value.address
       )));
 
+    const { transactionsLoaded } = useTransactionList({
+      accountAddress: externalAddress.value,
+      protocol: PROTOCOLS.aeternity,
+    });
+
     const {
       setExternalAddress,
-      setTransactionTx,
+      setActiveTransaction,
       direction,
       isErrorTransaction,
       isDex,
       isDexAllowance,
       isMultisig,
       outerTxTag,
-    } = useTransactionTx({
-      store,
+      transactionAssets,
+    } = useTransactionData({
       externalAddress: externalAddress.value,
+      showDetailedAllowanceInfo: true,
     });
-
-    const {
-      fetchAllPendingTransactions,
-      updateAccountTransaction,
-      getTransactionByHash,
-    } = useTransactionList({ store });
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
-    const getTxSymbol = computed(() => store.getters.getTxSymbol);
-    const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
-
+    const amount = computed((): number => transaction.value
+      ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
+      : 0);
+    const amountTotal = computed((): number => transaction.value
+      ? getTxAmountTotal(transaction.value, direction.value)
+      : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
-    const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
     const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-    const explorerUrl = computed(
-      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-        .prepareUrlByHash(hash),
-    );
 
-    const gasPrice = computed(() => {
-      if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
-        return transaction.value.tx.tx.tx.gasPrice;
-      }
-      return transaction.value?.tx?.gasPrice;
-    });
+    const gasPrice = computed(() => (
+      (transaction.value?.tx?.tx?.tx as ITx)?.gasPrice
+      || transaction.value?.tx?.gasPrice
+    ));
 
-    const gasUsed = computed(() => {
-      if (transaction.value?.tx?.tx?.tx && 'gasUsed' in transaction.value.tx.tx.tx) {
-        return transaction.value.tx.tx.tx.gasUsed;
-      }
-      return transaction.value?.tx?.gasUsed;
-    });
+    const gasUsed = computed(() => (
+      (transaction.value?.tx?.tx?.tx as ITx)?.gasUsed
+      || transaction.value?.tx?.gasUsed
+    ));
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
       if (outerTxTag.value !== Tag.PayingForTx) return null;
@@ -201,46 +305,53 @@ export default defineComponent({
       const { tx } = transaction.value ?? {};
       const fee = tx?.fee ?? 0;
       const extraFee = tx?.tx?.tx?.fee ?? 0;
-      return fee + extraFee;
+      return +aettosToAe(fee + extraFee);
     });
 
     onMounted(async () => {
-      let rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
+      let rawTransaction: ITransaction | undefined = transactionsLoaded.value
+        .find((tx) => tx.hash === hash) as ITransaction;
 
-      if (!rawTransaction || rawTransaction.incomplete) {
-        const middleware = await getMiddleware();
+      // Claim transactions have missing data that needs to be fetched from the middleware
+      if (!rawTransaction || rawTransaction.incomplete || rawTransaction.claim) {
+        const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+
         try {
-          rawTransaction = await middleware.getTx(hash);
+          rawTransaction = {
+            ...(rawTransaction || {}), // Claim transaction data
+            ...await adapter.fetchTransactionByHash(hash, externalAddress.value),
+            incomplete: false,
+          };
         } catch (e) {
-          // This case is for pending transaction
-          await fetchAllPendingTransactions();
+          // Pending transactions are not returned from the middleware.
+          const pendingTransactions = await adapter
+            .fetchPendingTransactions?.(externalAddress.value);
 
-          rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
+          rawTransaction = pendingTransactions?.find((val) => val.hash === hash);
 
           if (!rawTransaction) {
             router.push({ name: ROUTE_NOT_FOUND });
             return;
           }
+        } finally {
+          setLoaderVisible(false);
+        }
+      }
+
+      if (rawTransaction?.tx) {
+        if (props.multisigDashboard) {
+          await watchUntilTruthy(() => activeMultisigAccountId.value);
+        } else {
+          await watchUntilTruthy(() => activeAccount.value);
         }
 
-        if (rawTransaction?.tx) {
-          if (props.multisigDashboard) {
-            await watchUntilTruthy(() => activeMultisigAccountId.value);
-          } else {
-            await watchUntilTruthy(() => activeAccount.value);
-          }
-          setExternalAddress(externalAddress.value);
-          transaction.value = {
-            ...rawTransaction,
-            transactionOwner: externalAddress.value,
-          };
-          updateAccountTransaction(activeAccount.value.address, transaction.value!);
-        }
-      } else {
-        transaction.value = rawTransaction;
-      }
-      if (transaction.value?.tx) {
-        setTransactionTx(transaction.value.tx);
+        transaction.value = {
+          ...rawTransaction,
+          transactionOwner: externalAddress.value,
+        };
+
+        setExternalAddress(externalAddress.value);
+        setActiveTransaction(transaction.value);
       }
 
       if (outerTxTag.value === Tag.GaMetaTx) {
@@ -266,12 +377,13 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
+      TX_DIRECTION,
       transaction,
+      amount,
+      amountTotal,
       isSwap,
       isPool,
-      getTxSymbol,
-      getTxAmountTotal,
       isErrorTransaction,
       isDexAllowance,
       isDex,
@@ -281,23 +393,26 @@ export default defineComponent({
       tipUrl,
       tipLink,
       direction,
-      explorerUrl,
       hash,
       splitAddress,
       aettosToAe,
       isLocalAccountAddress,
       gasPrice,
       gasUsed,
-      contractId,
       multisigTransactionFeePaidBy,
       multisigContractId,
       transactionFee,
+      transactionAssets,
     };
   },
 });
 </script>
 
-<style lang="scss" scope>
+<style lang="scss" scoped>
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
+
 .transaction-details {
   .tip-url {
     width: 100%;
@@ -308,6 +423,24 @@ export default defineComponent({
 
     .link-button {
       display: block;
+    }
+  }
+
+  .row {
+    @include mixins.flex(flex-start, center, row);
+
+    gap: 8px;
+  }
+
+  .payer-id {
+    position: relative;
+
+    .dialog-box {
+      width: 30px;
+      height: 20px;
+      position: absolute;
+      right: 15px;
+      top: -28px;
     }
   }
 }

@@ -7,13 +7,12 @@
           class="spinner"
         />
         <template v-else>
-          <div
-            class="header"
-          >
-            <TransactionTokens
+          <div class="header">
+            <TransactionAssetRows
               v-if="multisigTx"
-              :transaction="{ tx: multisigTx }"
-              icon-size="md"
+              :assets="transactionAssets"
+              :protocol="PROTOCOLS.aeternity"
+              icon-size="rg"
             />
           </div>
           <div class="content">
@@ -22,11 +21,13 @@
               class="transaction-overview"
               :sender="{
                 label: $t('multisig.multisigVault'),
-                address: activeMultisigAccount.gaAccountId
+                address: activeMultisigAccount.gaAccountId,
+                url: protocolExplorer.prepareUrlForAccount(activeMultisigAccount.gaAccountId),
               }"
               :recipient="{
                 label: $t('common.smartContract'),
-                address: activeMultisigAccount.contractId
+                address: activeMultisigAccount.contractId,
+                url: activeMultisigAccountExplorerUrl,
               }"
               :transaction="{ tx: multisigTx }"
             />
@@ -74,7 +75,7 @@
                   <div class="row">
                     <AccountItem
                       :address="activeMultisigAccount.proposedBy"
-                      :protocol="PROTOCOL_AETERNITY"
+                      :protocol="PROTOCOLS.aeternity"
                     />
                     <DialogBox
                       v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
@@ -137,7 +138,7 @@
                 <template #value>
                   <TokenAmount
                     :amount="+(aettosToAe(multisigTx.gasPrice))"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     :symbol="AE_SYMBOL"
                     hide-fiat
                   />
@@ -151,7 +152,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(transaction.tx.gasPrice)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -169,7 +170,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(multisigTx.fee)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -182,7 +183,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(transaction.tx.fee)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -196,7 +197,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(totalSpent)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     high-precision
                   />
                 </template>
@@ -214,7 +215,7 @@
                   :disabled="isLoaderVisible"
                   @click="dispatchProposalAction(
                     TX_FUNCTIONS_MULTISIG.refuse,
-                    $t('pages.proposalDetails.refuse')
+                    $t('pages.proposalDetails.refuse'),
                   )"
                 >
                   {{ $t('pages.proposalDetails.refuse') }}
@@ -242,7 +243,7 @@
                   "
                   @click="dispatchProposalAction(
                     TX_FUNCTIONS_MULTISIG.confirm,
-                    $t('pages.proposalDetails.sign')
+                    $t('pages.proposalDetails.sign'),
                   )"
                 >
                   {{ $t('pages.proposalDetails.sign') }}
@@ -257,7 +258,7 @@
                 :disabled="isLoaderVisible"
                 @click="dispatchProposalAction(
                   TX_FUNCTIONS_MULTISIG.revoke,
-                  $t('pages.proposalDetails.revoke')
+                  $t('pages.proposalDetails.revoke'),
                 )"
               >
                 {{ $t('pages.proposalDetails.revokeTransaction') }}
@@ -278,9 +279,8 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { Tag } from '@aeternity/aepp-sdk';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
@@ -293,7 +293,7 @@ import type {
 } from '@/types';
 import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   blocksToRelativeTime,
@@ -303,20 +303,24 @@ import {
 } from '@/utils';
 import {
   useAccounts,
-  useMultisigAccounts,
-  usePendingMultisigTransaction,
-  useMultisigTransactions,
+  useAeSdk,
+  useFungibleTokens,
   useModals,
+  useMultisigAccounts,
+  useMultisigTransactions,
+  usePendingMultisigTransaction,
+  useTransactionData,
   useUi,
 } from '@/composables';
-import { useGetter } from '@/composables/vuex';
-import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   getTransactionPayload,
   isInsufficientBalanceError,
 } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -330,7 +334,7 @@ import PayloadDetails from '../components/PayloadDetails.vue';
 import DialogBox from '../components/DialogBox.vue';
 import MultisigProposalConsensus from '../components/MultisigProposalConsensus.vue';
 import Avatar from '../components/Avatar.vue';
-import TransactionTokens from '../components/TransactionTokenRows.vue';
+import TransactionAssetRows from '../components/TransactionAssetRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
@@ -338,7 +342,7 @@ import ExternalLink from '../../icons/external-link.svg?vue-component';
 export default defineComponent({
   components: {
     PayloadDetails,
-    TransactionTokens,
+    TransactionAssetRows,
     MultisigProposalConsensus,
     TransactionInfo,
     DialogBox,
@@ -355,18 +359,21 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const { openDefaultModal, openModal } = useModals();
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
 
+    const { openDefaultModal, openModal } = useModals();
+    const { isLoaderVisible, setLoaderVisible } = useUi();
+    const { activeAccount, isLocalAccountAddress } = useAccounts();
     const {
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       updateMultisigAccounts,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store });
+    } = useMultisigAccounts();
+
+    const { nodeNetworkId } = useAeSdk();
 
     const {
       pendingMultisigTxExpired,
@@ -374,30 +381,24 @@ export default defineComponent({
       pendingMultisigTxCanBeSent,
       pendingMultisigTxLocalSigners,
       pendingMultisigTxConfirmedByLocalSigners,
-    } = usePendingMultisigTransaction({ store });
+    } = usePendingMultisigTransaction();
 
     const {
       fetchActiveMultisigTx,
       fetchTransactionByHash,
       sendTx,
       callContractMethod,
-    } = useMultisigTransactions({
-      store,
-    });
+    } = useMultisigTransactions();
 
-    const {
-      isLocalAccountAddress,
-    } = useAccounts({
-      store,
-    });
+    const { getTxAssetSymbol } = useFungibleTokens();
 
-    const { isLoaderVisible, setLoaderVisible } = useUi();
-
-    const getTxSymbol = useGetter('getTxSymbol');
+    const protocolExplorer = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).getExplorer();
 
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);
     const proposalCompleted = ref<boolean>(false);
+
+    const { transactionAssets, setActiveTransaction } = useTransactionData();
 
     const totalSpent = computed(() => {
       if (!proposalCompleted.value || !transaction.value) {
@@ -433,11 +434,13 @@ export default defineComponent({
         tag: Tag.GaMetaTx,
       } as any;
       // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
+
+      setActiveTransaction({ tx: multisigTx.value } as ITransaction);
     }
 
     function handleInsufficientBalanceError(
       error: any,
-      isVault = false,
+      isVault: boolean,
       action?: string | TranslateResult,
     ) {
       if (error) {
@@ -473,23 +476,40 @@ export default defineComponent({
 
       setLoaderVisible(true);
       try {
-        await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
+        const chosenAddress = await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
           action,
           signers: pendingMultisigTxLocalSigners.value,
         });
 
         const { contractId, txHash } = activeMultisigAccount.value;
-        await callContractMethod(action, contractId, txHash as string);
+        const signingAccount = new AeAccountHdWallet(nodeNetworkId);
+        await callContractMethod(
+          action,
+          contractId,
+          txHash as string,
+          activeAccount.value.address !== chosenAddress
+            ? {
+              onAccount: {
+                address: chosenAddress,
+                signTransaction: signingAccount.signTransaction.bind({
+                  nodeNetworkId,
+                  sign: signingAccount.sign,
+                }),
+              },
+              fromAccount: chosenAddress,
+            }
+            : {},
+        );
         await updateMultisigAccounts();
 
         if (!activeMultisigAccount.value?.txHash) {
-          router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_MULTISIG_ACCOUNT });
         }
       } catch (error: any) {
         handleInsufficientBalanceError(error, false, actionName.toString().toLowerCase());
+      } finally {
+        setLoaderVisible(false);
       }
-
-      setLoaderVisible(false);
     }
 
     /**
@@ -507,7 +527,7 @@ export default defineComponent({
         if (!rawTx) {
           throw Error('failed to load a transaction');
         }
-        transaction.value = await sendTx(gaAccountId, rawTx.tx, nonce);
+        transaction.value = await sendTx(gaAccountId as Encoded.AccountAddress, rawTx.tx, nonce);
 
         await updateMultisigAccounts();
 
@@ -539,14 +559,15 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       multisigTx,
       transaction,
+      transactionAssets,
       totalSpent,
-      getTxSymbol,
+      getTxAssetSymbol,
       getTransactionPayload,
       splitAddress,
       aettosToAe,
@@ -556,6 +577,7 @@ export default defineComponent({
       isLoaderVisible,
       pendingMultisigTxCanBeSent,
       pendingMultisigTxExpired,
+      protocolExplorer,
       expirationHeightToRelativeTime,
       pendingMultisigTxConfirmedByLocalSigners,
       proposalCompleted,

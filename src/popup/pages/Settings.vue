@@ -13,7 +13,7 @@
           data-cy="networks-settings"
         />
         <PanelItem
-          :to="{ name: 'permissions-settings' }"
+          :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
           :title="$t('pages.titles.permissionsSettings')"
         />
         <PanelItem
@@ -46,10 +46,8 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { useState } from '@/composables/vuex';
-import { useCurrencies, useNetworks } from '@/composables';
-import { ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
+import { useCurrencies, useNetworks, useUi } from '@/composables';
+import { ROUTE_NETWORK_SETTINGS, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
 
@@ -61,11 +59,9 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
-    const { currentCurrencyInfo } = useCurrencies({ store });
-
+    const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
-    const saveErrorLog = useState('saveErrorLog');
+    const { saveErrorLog } = useUi();
 
     const activeCurrency = computed(
       () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,
@@ -73,6 +69,7 @@ export default defineComponent({
 
     return {
       ROUTE_NETWORK_SETTINGS,
+      ROUTE_PERMISSIONS_SETTINGS,
       activeNetwork,
       saveErrorLog,
       activeCurrency,

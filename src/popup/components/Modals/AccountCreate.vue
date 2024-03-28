@@ -17,7 +17,7 @@
       </p>
 
       <BtnSubheader
-        v-for="protocol in PROTOCOLS"
+        v-for="protocol in PROTOCOL_LIST"
         :key="protocol"
         :header="getProtocolName(protocol)"
         :subheader="$t(
@@ -31,15 +31,18 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, PropType } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol, ResolveCallback } from '@/types';
 import {
   MODAL_AE_ACCOUNT_CREATE,
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
   PROTOCOLS,
+  PROTOCOL_LIST,
 } from '@/constants';
-import { useConnection, useModals, useUi } from '@/composables';
+import {
+  useAccounts,
+  useConnection,
+  useModals,
+  useUi,
+} from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import BtnSubheader from '../buttons/BtnSubheader.vue';
@@ -54,28 +57,32 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
   setup(props) {
-    const store = useStore();
+    const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
     const { setLoaderVisible } = useUi();
 
     async function createAccount(protocol: Protocol) {
       setLoaderVisible(true);
+      let idx: number;
 
       // TODO each of the blocks of this switch should be moved to the specific adapter
       switch (protocol) {
-        case PROTOCOL_AETERNITY:
+        case PROTOCOLS.aeternity:
           await openModal(MODAL_AE_ACCOUNT_CREATE);
           break;
 
-        case PROTOCOL_BITCOIN:
-          await store.dispatch('accounts/hdWallet/create', {
+        case PROTOCOLS.bitcoin:
+        case PROTOCOLS.ethereum:
+          idx = addRawAccount({
             isRestored: false,
-            protocol: PROTOCOL_BITCOIN,
+            protocol,
           });
+          setActiveAccountByProtocolAndIdx(protocol, idx);
           break;
 
         default:
+          throw new Error(`createAccount not implemented for protocol: ${protocol}`);
       }
       setLoaderVisible(false);
       props.resolve();
@@ -90,9 +97,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOLS,
-      PROTOCOL_AETERNITY,
-      PROTOCOL_BITCOIN,
+      PROTOCOL_LIST,
       isOnline,
       createAccount,
       getProtocolName,

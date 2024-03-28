@@ -1,24 +1,13 @@
 import BigNumber from 'bignumber.js';
-import { toOutputScript } from 'bitcoinjs-lib/src/address';
-import { networks } from 'bitcoinjs-lib';
 import type { ITransaction } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
-import { BTC_COIN_PRECISION } from '../config';
+import { PROTOCOLS } from '@/constants';
+import { BTC_COIN_PRECISION, BTC_CONTRACT_ID } from '../config';
 
 export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
 }
 
-export function isBtcAddressValid(address: string, networkType: string) {
-  try {
-    const network = networks[networkType as keyof typeof networks];
-    toOutputScript(address, network);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
+// TODO Duplicate in fungibleTokens.ts composable
 export function getTxAmountTotal(transaction: ITransaction, isReceived: boolean): number {
   return new BigNumber(
     transaction.tx?.amount || 0,
@@ -40,9 +29,10 @@ export function normalizeTransactionStructure(
   } = transaction;
 
   return {
-    protocol: PROTOCOL_BITCOIN,
+    protocol: PROTOCOLS.bitcoin,
     transactionOwner: transactionOwner as any,
     hash: txid, // TODO: we can go with additional field
+    blockHeight: status.block_height,
     microTime: status.block_time * 1000,
     pending: !status.confirmed,
     tx: {
@@ -53,7 +43,7 @@ export function normalizeTransactionStructure(
       type: 'SpendTx', // TODO: create own types
       arguments: [],
       callerId: '' as any,
-      contractId: '' as any,
+      contractId: BTC_CONTRACT_ID as any,
     },
   };
 }

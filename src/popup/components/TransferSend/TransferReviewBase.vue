@@ -49,6 +49,7 @@
           :symbol="tokenSymbol"
           :protocol="protocol"
           :hide-fiat="!showFiat"
+          data-cy="review-amount"
         />
       </template>
     </DetailsItem>
@@ -74,6 +75,7 @@
 
     <PayloadDetails
       class="details-item"
+      data-cy="review-payload"
       :payload="transferData.payload"
     />
 
@@ -87,7 +89,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import {
   useAccounts,
 } from '@/composables';
@@ -95,7 +96,7 @@ import {
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import type { TransferFormModel, Protocol } from '@/types';
 
 import Loader from '@/popup/components/Loader.vue';
@@ -129,8 +130,7 @@ export default defineComponent({
     showFiat: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const isRecipientName = computed(
       () => props.recipientAddress && isAensNameValid(props.recipientAddress),

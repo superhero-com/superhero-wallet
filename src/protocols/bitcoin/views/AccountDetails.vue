@@ -1,13 +1,18 @@
 <template>
   <IonPage>
     <IonContent class="account-ion-content">
-      <AccountDetailsBase class="account-details" />
+      <AccountDetailsBase
+        v-if="pageDidEnter"
+        class="account-details"
+      />
     </IonContent>
   </IonPage>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import {
+  defineComponent,
+} from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
@@ -18,6 +23,9 @@ export default defineComponent({
     AccountDetailsBase,
     IonPage,
     IonContent,
+  },
+  props: {
+    pageDidEnter: Boolean,
   },
 });
 </script>

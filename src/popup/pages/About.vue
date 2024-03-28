@@ -2,7 +2,7 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
       <div class="about">
-        <div class="table">
+        <Panel>
           <div class="table-item">
             <div class="name">
               {{ $t('pages.about.name') }}
@@ -65,7 +65,7 @@
               </div>
             </LinkButton>
           </template>
-        </div>
+        </Panel>
 
         <div class="additional-links">
           <PanelItem
@@ -100,13 +100,14 @@ import {
 import { IonPage, IonContent } from '@ionic/vue';
 import type { IMiddlewareStatus } from '@/types';
 import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
-import { useMiddleware } from '@/composables';
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { fetchJson } from '@/utils';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
+import Panel from '@/popup/components/Panel.vue';
+
 import Terms from '@/icons/terms.svg?vue-component';
 import Github from '@/icons/github.svg?vue-component';
 import ExternalLink from '@/icons/external-link.svg?vue-component';
@@ -115,6 +116,7 @@ export default defineComponent({
   components: {
     LinkButton,
     PanelItem,
+    Panel,
     Terms,
     Github,
     ExternalLink,
@@ -123,7 +125,7 @@ export default defineComponent({
   },
   setup() {
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { fetchMiddlewareStatus } = useMiddleware();
+    const { fetchMiddlewareStatus } = useAeMiddleware();
 
     const middlewareStatus = ref<IMiddlewareStatus>();
     const nodeStatus = ref(null);
@@ -165,71 +167,72 @@ export default defineComponent({
   padding-top: 16px;
   padding-inline: var(--screen-padding-x);
 
-  .table {
-    border-radius: variables.$border-radius-interactive;
-    overflow: hidden;
+  .table-item {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 16px;
+    transition: variables.$transition-interactive;
 
-    .table-item {
-      width: 100%;
-      height: 48px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+    &:nth-child(even) {
+      background-color: rgba(variables.$color-black, 0.1);
+    }
+
+    .name,
+    .value,
+    .value .icon {
+      transition: inherit;
+    }
+
+    .name {
+      @extend %face-sans-15-regular;
+
+      color: rgba(variables.$color-white, 0.75);
+      font-weight: 400;
+    }
+
+    .value {
+      @extend %face-sans-14-light;
+
+      display: inline-flex;
       align-items: center;
-      padding: 4px 16px;
-      background: rgba(variables.$color-white, 0.08);
+      color: rgba(variables.$color-white, 1);
 
-      &:nth-child(even) {
-        background-color: rgba(variables.$color-white, 0.06);
+      .icon {
+        width: 24px;
+        height: 24px;
+        opacity: 0.5;
+        margin-left: 4px;
+        margin-right: -4px;
       }
+    }
 
-      .name {
-        @extend %face-sans-15-regular;
+    &.link {
+      position: relative;
+      text-decoration: none;
+      cursor: pointer;
 
-        color: rgba(variables.$color-white, 0.75);
-        font-weight: 400;
-      }
+      &:hover {
+        background-color: rgba(variables.$color-black, 0.16);
 
-      .value {
-        @extend %face-sans-14-light;
-
-        display: inline-flex;
-        align-items: center;
-        color: rgba(variables.$color-white, 1);
-
-        .icon {
-          width: 24px;
-          height: 24px;
-          opacity: 0.5;
-          margin-left: 4px;
-          margin-right: -4px;
+        .name {
+          color: variables.$color-white;
         }
-      }
 
-      &.link {
-        text-decoration: none;
-        cursor: pointer;
-        transition: variables.$transition-interactive;
+        .value {
+          text-decoration: underline;
 
-        &:hover {
-          background: rgba(variables.$color-white, 0.05);
-
-          .name {
-            color: variables.$color-white;
-          }
-
-          .value {
-            text-decoration: underline;
-
-            .icon {
-              opacity: 1;
-            }
+          .icon {
+            opacity: 1;
           }
         }
+      }
 
-        &:active {
-          background: rgba(variables.$color-white, 0.04);
-        }
+      &:active {
+        background-color: rgba(variables.$color-black, 0.4);
       }
     }
   }

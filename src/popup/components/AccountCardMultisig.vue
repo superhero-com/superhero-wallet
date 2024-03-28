@@ -1,27 +1,40 @@
 <template>
-  <AccountCardBase :selected="selected">
+  <AccountCardBase
+    class="account-card-multisig"
+    :selected="selected"
+    :pending="pending"
+    :address="account.gaAccountId"
+  >
     <template #top>
       <AccountInfo
-        :address="account.gaAccountId"
-        :protocol="PROTOCOL_AETERNITY"
+        :account="convertMultisigAccountToAccount(account)"
+        :is-placeholder="pending"
         is-multisig
         avatar-borderless
-        with-protocol-icon
-      />
+        show-protocol-icon
+      >
+        <template v-if="pending" #address>
+          <div class="pending">
+            <PendingIcon class="pending-icon" />
+            <span
+              class="pending-message"
+              v-text="$t('modals.creatingMultisigAccount.addingToWalletCard')"
+            />
+          </div>
+        </template>
+      </AccountInfo>
     </template>
 
     <template #middle>
       <BalanceInfo
         :balance="+account.balance"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
       />
     </template>
 
     <template #bottom>
-      <AccountCardSyncing v-if="isPendingAccount" />
-
       <AccountCardConsensus
-        v-else
+        v-if="!pending"
         :multisig-account="account"
       />
     </template>
@@ -30,49 +43,61 @@
 
 <script lang="ts">
 import {
-  computed,
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { useMultisigAccounts } from '@/composables';
+import type { IMultisigAccount } from '@/types';
+import { PROTOCOLS } from '@/constants';
+import { convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
 import AccountCardConsensus from './AccountCardConsensus.vue';
-import AccountCardBase from './AccountCardBase.vue';
-import AccountCardSyncing from './AccountCardSyncing.vue';
+import AccountCardBase, { accountCardBaseCommonProps } from './AccountCardBase.vue';
 
-import type { IMultisigAccount } from '../../types';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 export default defineComponent({
   components: {
-    AccountCardSyncing,
     AccountCardBase,
     AccountCardConsensus,
     AccountInfo,
     BalanceInfo,
+    PendingIcon,
   },
   props: {
     account: { type: Object as PropType<IMultisigAccount>, required: true },
-    selected: Boolean,
+    ...accountCardBaseCommonProps,
   },
-  setup(props) {
-    const store = useStore();
-
-    const { pendingMultisigAccounts } = useMultisigAccounts({ store });
-
-    const isPendingAccount = computed(
-      () => !!pendingMultisigAccounts.value.find(
-        ({ gaAccountId }) => gaAccountId === props.account.gaAccountId,
-      ),
-    );
-
+  setup() {
     return {
-      PROTOCOL_AETERNITY,
-      isPendingAccount,
+      PROTOCOLS,
+      convertMultisigAccountToAccount,
     };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+@use '../../styles/variables' as *;
+@use '../../styles/typography';
+
+.account-card-multisig {
+  .pending {
+    display: flex;
+    align-items: center;
+
+    .pending-icon {
+      height: 16px;
+      width: 16px;
+      margin-right: 4px;
+    }
+
+    .pending-message {
+      @extend %face-sans-14-medium;
+
+      opacity: 0.85;
+    }
+  }
+}
+</style>

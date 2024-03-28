@@ -23,8 +23,7 @@
           name="name"
           :rules="{
             required: true,
-            network_name: true,
-            network_exists: customNetworks,
+            network_exists: [customNetworks, savedNetworkName],
             max_len: NETWORK_NAME_MAX_LENGTH,
           }"
         >
@@ -56,7 +55,8 @@
             :name="`${protocol}-${input.key}`"
             :rules="{
               required: input.required === true,
-              invalid_hostname: true,
+              url: true,
+              ...input.validationRules,
             }"
           >
             <InputField
@@ -90,7 +90,7 @@
           />
           <BtnMain
             :icon="isEdit ? null : PlusCircleIcon"
-            :disabled="Object.keys(errors).length"
+            :disabled="!!Object.keys(errors).length"
             data-cy="btn-add-network"
             class="add-button"
             @click="addOrUpdateNetwork()"
@@ -120,7 +120,6 @@ import { IonPage, IonContent } from '@ionic/vue';
 import type {
   AdapterNetworkSettingList,
   INetwork,
-  INetworkProtocolSettings,
   NetworkProtocolSettingsRequired,
   NetworkProtocolsSettings,
   Protocol,
@@ -128,8 +127,8 @@ import type {
 import {
   NETWORK_NAME_MAX_LENGTH,
   NETWORK_TYPE_CUSTOM,
+  PROTOCOL_LIST,
   PROTOCOLS,
-  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
 import { useNetworks } from '@/composables';
@@ -163,7 +162,7 @@ export default defineComponent({
     /**
      * The form is divided to blocks, where each block has the settings for one protocol.
      */
-    const formStructure: IFormBlock[] = PROTOCOLS.map((protocol) => {
+    const formStructure: IFormBlock[] = PROTOCOL_LIST.map((protocol) => {
       const adapter = ProtocolAdapterFactory.getAdapter(protocol);
       return {
         protocol,
@@ -184,14 +183,14 @@ export default defineComponent({
     } = useNetworks();
 
     const isEdit = route.name === ROUTE_NETWORK_EDIT;
+    const savedNetworkName = route.params.name?.toString();
     const networkToEditIndex = (isEdit)
-      ? customNetworks.value.findIndex(({ name }) => name === route.params.name.toString())
+      ? customNetworks.value.findIndex(({ name }) => name === savedNetworkName)
       : null;
 
-    const emptyNetworkSettings = PROTOCOLS.reduce(
-      (result, protocol) => ({ ...result, [protocol]: {} }),
-      {},
-    );
+    const emptyNetworkSettings = Object.fromEntries(PROTOCOL_LIST.map(
+      (protocol) => [protocol, {}],
+    ));
     const newNetworkName = ref('');
     const newNetworkProtocols = ref<NetworkProtocolsSettings>(emptyNetworkSettings as any);
     const isNetworkPrefilled = ref(false);
@@ -222,16 +221,11 @@ export default defineComponent({
      * Every protocol has it's own default values for each of the setting.
      */
     function fillInFieldsWithDefaultValues() {
-      PROTOCOLS.forEach((protocol) => {
+      PROTOCOL_LIST.forEach((protocol) => {
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         const settings = adapter.getNetworkSettings();
-        newNetworkProtocols.value[protocol] = settings
-          .reduce((accumulator, { key, defaultValue }) => {
-            if (defaultValue) {
-              accumulator[key] = defaultValue; // eslint-disable-line no-param-reassign
-            }
-            return accumulator;
-          }, {} as INetworkProtocolSettings);
+        newNetworkProtocols.value[protocol] = Object.fromEntries(settings
+          .map(({ key, defaultValue }) => defaultValue ? [key, defaultValue] : []));
       });
     }
 
@@ -250,7 +244,7 @@ export default defineComponent({
           const val = route.query[key];
 
           if (val && typeof val === 'string') {
-            newNetworkProtocols.value[PROTOCOL_AETERNITY][key] = val;
+            newNetworkProtocols.value[PROTOCOLS.aeternity][key] = val;
             isNetworkPrefilled.value = true;
           }
         });
@@ -265,7 +259,7 @@ export default defineComponent({
       const veeValidateValues: Record<string, string> = {
         name: newNetworkName.value,
       };
-      PROTOCOLS.forEach((protocol) => {
+      PROTOCOL_LIST.forEach((protocol) => {
         const settings = newNetworkProtocols.value[protocol];
         Object.keys(settings).forEach((key) => {
           veeValidateValues[`${protocol}-${key}`] = settings[key];
@@ -276,7 +270,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isEdit) {
-        newNetworkName.value = route.params.name.toString();
+        newNetworkName.value = savedNetworkName;
         newNetworkProtocols.value = networks.value[newNetworkName.value].protocols;
       } else {
         fillInFieldsWithDefaultValues();
@@ -290,6 +284,7 @@ export default defineComponent({
       NETWORK_NAME_MAX_LENGTH,
       INFO_BOX_TYPES,
       PlusCircleIcon,
+      savedNetworkName,
       newNetworkProtocols,
       newNetworkName,
       networks,

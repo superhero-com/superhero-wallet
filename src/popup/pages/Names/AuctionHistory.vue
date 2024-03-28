@@ -9,8 +9,8 @@
         <div class="item">
           <AccountItem
             :address="highestBid.accountId"
-            :name="getPreferred(highestBid.accountId)"
-            :protocol="PROTOCOL_AETERNITY"
+            :name="getName(highestBid.accountId).value"
+            :protocol="protocol"
           />
           <AuctionOverview :name="name" />
         </div>
@@ -21,12 +21,12 @@
         >
           <TokenAmount
             :amount="+bid.nameFee"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="protocol"
           />
           <AccountItem
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="protocol"
             :address="bid.accountId"
-            :name="getPreferred(bid.accountId)"
+            :name="getName(bid.accountId).value"
           />
         </div>
       </div>
@@ -37,9 +37,10 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
-import type { IAuctionBid } from '@/types';
-import { useGetter } from '@/composables/vuex';
-import { PROTOCOL_AETERNITY } from '@/constants';
+
+import { PROTOCOLS } from '@/constants';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+
 import AccountItem from '../../components/AccountItem.vue';
 import AuctionOverview from '../../components/AuctionOverview.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -56,20 +57,17 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    const getHighestBid = useGetter('names/getHighestBid');
-    const getAuction = useGetter('names/getAuction');
-    const getPreferred = useGetter('names/getPreferred');
+    const { getNameAuctionHighestBid, getNameAuction, getName } = useAeNames();
 
-    const highestBid = computed(() => getHighestBid.value(props.name));
+    const highestBid = computed(() => getNameAuctionHighestBid(props.name));
 
     const previousBids = computed(
-      () => (getAuction.value(props.name).bids)
-        .filter((bid: IAuctionBid) => bid !== highestBid.value),
+      () => getNameAuction(props.name).bids.filter((bid) => bid !== highestBid.value),
     );
 
     return {
-      PROTOCOL_AETERNITY,
-      getPreferred,
+      protocol: PROTOCOLS.aeternity,
+      getName,
       highestBid,
       previousBids,
     };
