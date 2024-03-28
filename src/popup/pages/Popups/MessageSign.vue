@@ -29,6 +29,19 @@
       </template>
     </DetailsItem>
 
+    <DetailsItem
+      :label="$t('pages.popupMessageSign.type')"
+      data-cy="message"
+      class="message-text"
+    >
+      <span v-if="popupProps?.jwt">
+        {{ $t('pages.popupMessageSign.typeJwt') }}
+      </span>
+      <span v-else>
+        {{ $t('pages.popupMessageSign.typeAe') }}
+      </span>
+    </DetailsItem>
+
     <template #footer>
       <BtnMain
         variant="muted"

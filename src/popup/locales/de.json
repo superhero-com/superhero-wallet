@@ -482,9 +482,9 @@
       "error": "Ungültige AE-Adresse"
     },
     "popupMessageSign": {
-      "title": "Sign Nachricht",
-      "heading": "would like to sign message ",
-      "message": "Message"
+      "title": "Nachricht Signieren",
+      "heading": "würde folgende Nachricht signieren.",
+      "message": "Nachricht"
     },
     "network": {
       "url": "URL:",

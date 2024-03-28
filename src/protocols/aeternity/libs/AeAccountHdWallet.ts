@@ -10,6 +10,7 @@ import {
   buildTx,
   Tag,
   decode,
+  signJWT,
 } from '@aeternity/aepp-sdk';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
@@ -90,6 +91,36 @@ export class AeAccountHdWallet extends AccountBase {
       messageToHash(message),
       options, // Mainly to pass the `fromAccount` property
     );
+  }
+
+  override async signJWT(
+    message: object,
+    options: Parameters<AccountBase['signJWT']>[1] & InternalOptions,
+  ): Promise<`${string}.${string}`> {
+    if (options?.aeppOrigin) {
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signJWT,
+        options.aeppOrigin,
+        { message: JSON.stringify(message, null, 2), jwt: true },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError('Rejected by user');
+      }
+    }
+    const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
+    const account = (options?.fromAccount)
+      ? getAccountByAddress(options.fromAccount)
+      : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+
+    if (account && account.secretKey && account.protocol === PROTOCOLS.aeternity) {
+      return signJWT(
+        message,
+        account.secretKey,
+      );
+    }
+
+    throw new Error('Unsupported protocol');
   }
 
   /**
