@@ -21,6 +21,7 @@ import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
+import { AE_COIN_PRECISION } from '@/protocols/aeternity/config';
 import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 
 import { uniqBy } from 'lodash-es';
@@ -253,10 +254,11 @@ export function useFungibleTokens() {
 
     const tokenData = protocol
       && getProtocolAvailableTokens(protocol)[contractCallData?.assetContractId!];
+
     if (contractCallData && tokenData) {
       return +toShiftedBigNumber(
         contractCallData.amount || 0,
-        -tokenData.decimals!,
+        -(tokenData.decimals || AE_COIN_PRECISION), // TODO possibility of temporary wrong precision
       );
     }
 
