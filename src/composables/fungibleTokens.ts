@@ -289,6 +289,11 @@ export function useFungibleTokens() {
     watch(accounts, (val, oldVal) => {
       if (val.length !== oldVal.length) {
         loadTokenBalances();
+
+        // this is to check if the new account is the first for specified protocol
+        if (val.filter(({ protocol }) => protocol === val.at(-1)?.protocol).length === 1) {
+          loadAvailableTokens();
+        }
       }
     });
 
