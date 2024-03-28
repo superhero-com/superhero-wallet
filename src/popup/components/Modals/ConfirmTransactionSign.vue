@@ -415,7 +415,9 @@ export default defineComponent({
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(activeAccount!.address as Encoded.AccountAddress)
+          const balance = await sdk.getBalance(
+            (popupProps.value?.fromAccount || activeAccount!.address) as Encoded.AccountAddress,
+          )
             .catch((err) => {
               if (!isNotFoundError(err)) {
                 handleUnknownError(err);

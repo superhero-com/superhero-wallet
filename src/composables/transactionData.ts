@@ -212,7 +212,7 @@ export function useTransactionData({
 
       // Convert all unresolved transaction with non-token contractId to coin.
       // For example contract calls
-      if (!protocolTokens[innerTx.value.contractId] || innerTxTag.value === Tag.ContractCreateTx) {
+      if (!protocolTokens[innerTx.value?.contractId] || innerTxTag.value === Tag.ContractCreateTx) {
         convertToCoin = true;
       }
     }
