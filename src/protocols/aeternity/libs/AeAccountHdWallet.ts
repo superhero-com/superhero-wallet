@@ -93,14 +93,14 @@ export class AeAccountHdWallet extends AccountBase {
     );
   }
 
-  override async signMessageJWT(
+  override async signJWT(
     message: object,
-    options: Parameters<AccountBase['signMessageJWT']>[1] & InternalOptions,
-  ): Promise<string> {
+    options: Parameters<AccountBase['signJWT']>[1] & InternalOptions,
+  ): Promise<`${string}.${string}`> {
     if (options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
-        METHODS.signMessageJWT,
+        METHODS.signJWT,
         options.aeppOrigin,
         { message: JSON.stringify(message, null, 2), jwt: true },
       );
@@ -116,7 +116,6 @@ export class AeAccountHdWallet extends AccountBase {
     if (account && account.secretKey && account.protocol === PROTOCOLS.aeternity) {
       return signJWT(
         message,
-        options?.expireAt || new Date().getTime() + 30 * 60 * 1000,
         account.secretKey,
       );
     }

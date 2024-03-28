@@ -59,7 +59,7 @@ const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupT
     modal: MODAL_MESSAGE_SIGN,
     popup: POPUP_TYPE_MESSAGE_SIGN,
   },
-  [METHODS.signMessageJWT]: {
+  [METHODS.signJWT]: {
     modal: MODAL_MESSAGE_SIGN,
     popup: POPUP_TYPE_MESSAGE_SIGN,
   },

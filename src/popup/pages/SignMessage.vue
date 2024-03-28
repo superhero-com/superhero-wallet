@@ -54,8 +54,8 @@ export default defineComponent({
             },
           });
 
-          const signature = await aeSdk.signMessageJWT(messageObject);
-          openCallbackOrGoHome(true, { signature, address: aeSdk.address });
+          const signedPayload = await aeSdk.signJWT(messageObject);
+          openCallbackOrGoHome(true, { 'signed-payload': signedPayload, address: aeSdk.address });
         } else {
           await openModal(MODAL_MESSAGE_SIGN, {
             message: displayMessage,
