@@ -1,140 +1,147 @@
 <template>
   <div class="name-item">
-    <div class="collapsed">
-      <Pending
-        v-if="nameEntry.pending"
-        class="pending-icon"
-      />
-      <Avatar
-        v-else
-        :name="name"
-        :address="address"
-        borderless
-      />
+    <div class="name-item-header">
+      <AccountInfo
+        :account="activeAccount"
+        :custom-name="nameEntry.name"
+        avatar-size="rg"
+        avatar-borderless
+        dense
+      >
+        <template #avatar>
+          <Pending
+            v-if="nameEntry.pending"
+            class="pending-icon"
+          />
+        </template>
 
-      <div class="header">
-        <Truncate :str="name" />
-        <span
-          v-if="nameEntry.pending"
-          class="pending"
-        >
-          {{ $t('common.pending') }}
-        </span>
-        <div
-          v-else
-          class="buttons"
-        >
-          <BtnPlain
-            v-show="canBeDefault"
-            class="button-plain"
-            :class="{ set: isDefault }"
-            :disabled="isDefault"
-            @click="handleSetDefault"
+        <template #address>
+          <span
+            v-if="nameEntry.pending"
+            class="pending"
+            v-text="$t('common.pending')"
+          />
+          <div
+            v-else
+            class="buttons"
           >
-            {{
-              (isDefault)
+            <BtnPlain
+              v-show="canBeDefault"
+              class="button-plain"
+              :class="{ set: isDefault }"
+              :disabled="isDefault"
+              :text="(isDefault)
                 ? $t('pages.names.list.default')
                 : $t('pages.names.list.default-make')
-            }}
-          </BtnPlain>
-          <BtnPlain
-            v-show="expand"
-            class="button-plain"
-            :class="{ set: autoExtend }"
-            @click="toggleAutoExtend"
-          >
-            {{ $t('pages.names.auto-extend') }}
-          </BtnPlain>
-          <BtnPlain
-            v-show="expand || !canBeDefault"
-            class="button-plain"
-            :class="{ edit: showInput }"
-            @click="expandAndShowInput"
-          >
-            {{ $t('pages.names.details.set-pointer') }}
-          </BtnPlain>
-          <BtnHelp
-            v-if="expand && !hasPointer"
-            :title="$t('modals.name-pointers-help.title')"
-            :msg="$t('modals.name-pointers-help.msg')"
-            small
-          />
-        </div>
-      </div>
-      <BtnPlain @click="onExpandCollapse">
-        <ChevronDownIcon :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
-      </BtnPlain>
-    </div>
-    <span v-show="!expand && !nameEntry.pending && !!addressOrFirstPointer">
-      {{ addressOrFirstPointer }}
-    </span>
-    <div
-      v-show="expand"
-      class="expand"
-    >
-      <InputField
-        v-show="showInput"
-        ref="pointerInput"
-        v-model="newPointer"
-        class="input-address"
-        :placeholder="$t('pages.names.details.address-placeholder')"
-        :message="nameError ? $t('pages.names.list.valid-identifier-error') : null"
-        code
-      >
-        <template #after>
-          <BtnPlain
-            v-show="newPointer.length"
-            @click="setPointer"
-          >
-            <Save class="input-address-icon" />
-          </BtnPlain>
-          <BtnPlain
-            v-if="UNFINISHED_FEATURES"
-            v-show="!newPointer.length"
-            @click="insertValueFromClipboard"
-          >
-            <Paste class="input-address-icon" />
-          </BtnPlain>
-        </template>
-      </InputField>
-
-      <DetailsItem
-        :value="nameEntry.hash"
-        :label="nameEntry.hash && $t('pages.names.list.name-hash')"
-      />
-      <div class="heights">
-        <DetailsItem
-          :value="nameEntry.createdAtHeight"
-          :label="$t('pages.names.details.created-height')"
-        />
-        <DetailsItem
-          :value="nameEntry.expiresAt"
-          :label="$t('pages.names.details.expires-height')"
-          :secondary="`(≈${blocksToRelativeTime(nameEntry.expiresAt - topBlockHeight)})`"
-        />
-      </div>
-      <DetailsItem
-        v-if="Object.entries(nameEntry.pointers || {}).length"
-        :label="$t('pages.names.list.pointers')"
-      >
-        <template #label>
-          <BtnHelp
-            :title="$t('modals.name-pointers-help.title')"
-            :msg="$t('modals.name-pointers-help.msg')"
-          />
-        </template>
-        <template #value>
-          <div
-            v-for="(nameEntryPointer, key, idx) in nameEntry.pointers"
-            :key="key"
-            class="pointers"
-          >
-            <span>{{ `#${idx + 1}` }}</span>
-            {{ nameEntryPointer }}
+              "
+              @click="handleSetDefault"
+            />
+            <BtnPlain
+              v-show="expand"
+              class="button-plain"
+              :class="{ set: nameEntry.autoExtend }"
+              :text="$t('pages.names.auto-extend')"
+              @click="toggleAutoExtend"
+            />
+            <BtnPlain
+              v-show="expand || !canBeDefault"
+              class="button-plain"
+              :class="{ edit: showInput }"
+              :text="$t('pages.names.details.set-pointer')"
+              @click="expandAndShowInput"
+            />
+            <BtnHelp
+              v-if="expand && !hasPointer"
+              :title="$t('modals.name-pointers-help.title')"
+              :msg="$t('modals.name-pointers-help.msg')"
+              small
+            />
           </div>
         </template>
-      </DetailsItem>
+      </AccountInfo>
+
+      <BtnPlain
+        v-if="!nameEntry.pending"
+        class="btn-toggle"
+        @click="onExpandCollapse"
+      >
+        <ChevronDownIcon class="icon" :class="{ rotated: expand }" />
+      </BtnPlain>
     </div>
+
+    <span v-if="!expand && !nameEntry.pending && !!addressOrFirstPointer">
+      {{ addressOrFirstPointer }}
+    </span>
+
+    <Transition name="fade-transition">
+      <div
+        v-if="expand"
+        class="expand"
+      >
+        <InputField
+          v-show="showInput"
+          ref="pointerInput"
+          v-model="newPointer"
+          class="input-address"
+          :placeholder="$t('pages.names.details.address-placeholder')"
+          :message="nameError ? $t('pages.names.list.valid-identifier-error') : null"
+          code
+        >
+          <template #after>
+            <BtnPlain
+              v-show="newPointer.length"
+              @click="setPointer"
+            >
+              <Save class="input-address-icon" />
+            </BtnPlain>
+            <BtnPlain
+              v-if="UNFINISHED_FEATURES"
+              v-show="!newPointer.length"
+              @click="insertValueFromClipboard"
+            >
+              <Paste class="input-address-icon" />
+            </BtnPlain>
+          </template>
+        </InputField>
+
+        <DetailsItem
+          :value="nameEntry.hash"
+          :label="nameEntry.hash && $t('pages.names.list.name-hash')"
+        />
+        <div class="heights">
+          <DetailsItem
+            :value="nameEntry.createdAtHeight"
+            :label="$t('pages.names.details.created-height')"
+          />
+          <DetailsItem
+            :value="nameEntry.expiresAt"
+            :label="$t('pages.names.details.expires-height')"
+            :secondary="`(≈${blocksToRelativeTime(nameEntry.expiresAt - topBlockHeight)})`"
+          />
+        </div>
+        <DetailsItem
+          v-if="Object.entries(nameEntry.pointers || {}).length"
+          :label="$t('pages.names.list.pointers')"
+        >
+          <template #label>
+            <BtnHelp
+              :title="$t('modals.name-pointers-help.title')"
+              :msg="$t('modals.name-pointers-help.msg')"
+            />
+          </template>
+          <template #value>
+            <div
+              v-for="(nameEntryPointer, key, idx) in nameEntry.pointers"
+              :key="key"
+              class="pointers"
+            >
+              <span>#{{ idx + 1 }}</span>
+              {{ nameEntryPointer }}
+            </div>
+          </template>
+        </DetailsItem>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -148,7 +155,7 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChainName } from '@/types';
+import { IName } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
@@ -173,8 +180,7 @@ import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
-import Avatar from './Avatar.vue';
-import Truncate from './Truncate.vue';
+import AccountInfo from './AccountInfo.vue';
 import InputField from './InputField.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
@@ -187,9 +193,8 @@ import Paste from '../../icons/paste.svg?vue-component';
 
 export default defineComponent({
   components: {
+    AccountInfo,
     Pending,
-    Avatar,
-    Truncate,
     InputField,
     BtnPlain,
     BtnHelp,
@@ -199,9 +204,7 @@ export default defineComponent({
     Paste,
   },
   props: {
-    name: { type: String as PropType<ChainName>, default: '' },
-    address: { type: String, default: '' },
-    autoExtend: { type: Boolean },
+    nameEntry: { type: Object as PropType<IName>, required: true },
   },
   setup(props) {
     const { openModal } = useModals();
@@ -209,7 +212,6 @@ export default defineComponent({
     const { t } = useI18n();
     const { topBlockHeight } = useTopHeaderData();
     const {
-      ownedNames,
       setAutoExtend,
       updateNamePointer,
       getName,
@@ -224,18 +226,18 @@ export default defineComponent({
     const nameError = ref(false);
     const pointerInput = ref();
 
-    const nameEntry = computed(
-      () => ownedNames.value.find((ownedName) => ownedName.name === props.name),
+    const isDefault = computed(
+      () => getName(activeAccount.value.address).value === props.nameEntry.name,
     );
-
-    const isDefault = computed(() => getName(activeAccount.value.address).value === props.name);
-    const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
+    const hasPointer = computed(
+      (): boolean => !!props.nameEntry.pointers?.accountPubkey,
+    );
     const canBeDefault = computed(
-      (): boolean => nameEntry.value?.pointers?.accountPubkey === activeAccount.value.address,
+      (): boolean => props.nameEntry?.pointers?.accountPubkey === activeAccount.value.address,
     );
     const addressOrFirstPointer = computed((): string | null => (
-      nameEntry.value?.pointers?.accountPubkey
-      || Object.values(nameEntry.value?.pointers || {})[0]
+      props.nameEntry?.pointers?.accountPubkey
+      || Object.values(props.nameEntry?.pointers || {})[0]
     ));
 
     async function readValueFromClipboard(): Promise<string | undefined> {
@@ -283,7 +285,7 @@ export default defineComponent({
     async function handleSetDefault() {
       try {
         const { address } = activeAccount.value;
-        const { name } = props;
+        const { name } = props.nameEntry;
         const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
         const currentNetworkId = nodeNetworkId.value;
 
@@ -308,14 +310,14 @@ export default defineComponent({
     }
 
     async function toggleAutoExtend() {
-      if (!props.autoExtend) {
+      if (!props.nameEntry.autoExtend) {
         await openModal(MODAL_CONFIRM, {
           icon: 'info',
           title: t('modals.autoextend-help.title'),
           msg: t('modals.autoextend-help.msg'),
         });
       }
-      setAutoExtend(props.name);
+      setAutoExtend(props.nameEntry.name);
     }
 
     async function setPointer() {
@@ -324,7 +326,7 @@ export default defineComponent({
         return;
       }
       updateNamePointer({
-        name: props.name,
+        name: props.nameEntry.name,
         address: newPointer.value,
         type: UPDATE_POINTER_ACTION.update,
       });
@@ -345,7 +347,6 @@ export default defineComponent({
       expand,
       hasPointer,
       isDefault,
-      nameEntry,
       newPointer,
       pointerInput,
       showInput,
@@ -379,9 +380,9 @@ export default defineComponent({
     background-color: variables.$color-bg-4-hover;
   }
 
-  .collapsed {
+  .name-item-header {
     display: flex;
-    text-align: left;
+    align-items: flex-start;
     justify-content: space-between;
 
     .pending-icon {
@@ -389,70 +390,63 @@ export default defineComponent({
       width: 32px;
     }
 
-    .header {
-      flex: 2;
-      max-width: 260px;
+    .pending {
+      @extend %face-sans-12-regular;
 
-      .pending {
-        color: variables.$color-grey-dark;
+      color: variables.$color-grey-dark;
+    }
 
-        @extend %face-sans-12-regular;
-      }
+    .truncate {
+      @extend %face-sans-15-medium;
 
-      .truncate {
-        @extend %face-sans-15-medium;
+      line-height: 16px;
+    }
 
-        line-height: 16px;
-      }
+    .buttons {
+      display: flex;
+      margin-top: 2px;
+      user-select: none;
 
-      .buttons {
-        display: flex;
-        margin-top: 2px;
-        user-select: none;
+      .button-plain:not(.btn-help) {
+        @extend %face-sans-12-medium;
 
-        .button-plain:not(.btn-help) {
-          @extend %face-sans-12-medium;
+        padding: 2px 8px;
+        white-space: nowrap;
+        color: variables.$color-grey-light;
+        background: variables.$color-border-hover;
+        border-radius: 6px;
+        opacity: 1;
 
-          padding: 2px 8px;
-          white-space: nowrap;
-          color: variables.$color-grey-light;
-          background: variables.$color-border-hover;
-          border-radius: 6px;
-          opacity: 1;
+        @include mixins.mobile {
+          padding: 2px 6px;
+        }
 
-          @include mixins.mobile {
-            padding: 2px 6px;
-          }
+        &.set {
+          background: rgba(variables.$color-warning, 0.1);
+          color: variables.$color-warning;
+        }
 
-          &.set {
-            background: rgba(variables.$color-warning, 0.1);
-            color: variables.$color-warning;
-          }
+        &.edit {
+          background: rgba(variables.$color-primary, 0.15);
+          color: variables.$color-primary;
+        }
 
-          &.edit {
-            background: rgba(variables.$color-primary, 0.15);
-            color: variables.$color-primary;
-          }
-
-          &:not(:last-of-type) {
-            margin-right: 4px;
-          }
+        &:not(:last-of-type) {
+          margin-right: 4px;
         }
       }
     }
 
-    .button-plain {
-      align-self: flex-start;
-      flex-basis: 24px;
+    .btn-toggle {
+      margin-top: 4px;
+      width: 24px;
+      height: 24px;
 
       .icon {
         width: 14px;
         color: variables.$color-white;
         opacity: 0.44;
-
-        &.hidden {
-          display: none;
-        }
+        transition: all 0.2s;
 
         &.rotated {
           transform: rotate(180deg);

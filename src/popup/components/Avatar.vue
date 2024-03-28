@@ -7,12 +7,14 @@
     }]"
     :style="{ '--color': color }"
   >
-    <img
-      v-if="!isPlaceholder && srcUrl"
-      class="avatar-img"
-      :src="srcUrl"
-      alt="Avatar"
-    >
+    <slot>
+      <img
+        v-if="!isPlaceholder && srcUrl"
+        class="avatar-img"
+        :src="srcUrl"
+        alt="Avatar"
+      >
+    </slot>
   </div>
 </template>
 
@@ -86,7 +88,9 @@ $size-xl: 56px;
   height: $size-rg;
   border-radius: 50%;
   overflow: hidden;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   object-fit: cover;
   user-select: none;
   flex-shrink: 0;
