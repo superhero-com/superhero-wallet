@@ -2,7 +2,54 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.6](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.5...v2.1.6) (2024-02-26)
+
+
+### Features
+
+* support signing messages encoded as hex ([63e398c](https://github.com/Superhero-com/superhero-wallet/commit/63e398ca0f5f3df0806385f2ca101ce0a580aeed))
+
+### [2.1.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.4...v2.1.5) (2024-02-13)
+
+
+### Features
+
+* associated wallet domain ([cd89955](https://github.com/Superhero-com/superhero-wallet/commit/cd89955fefe2d5b4906c2585fbc5143ef8dc9699))
+* mnemonic migrator cordova to ionic ([b2b6dca](https://github.com/Superhero-com/superhero-wallet/commit/b2b6dcaa59f5bfb5cbe72d655a68b48afbe8a4cb))
+* show a loader on deeplink signing ([edc5f9c](https://github.com/Superhero-com/superhero-wallet/commit/edc5f9ccd8da4b1d337a276d716370de02596903))
+
+
+### Bug Fixes
+
+* open callback url on ios ([8c357dc](https://github.com/Superhero-com/superhero-wallet/commit/8c357dccedcf4f607440f5772d413cdfa133efb2))
+
 ### [2.1.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.2...v2.1.4) (2024-02-07)
+
+
+### Features
+
+* add meta description ([d0d83ea](https://github.com/Superhero-com/superhero-wallet/commit/d0d83ea0b98f63f4a6aac6422c7b03fc74832cc7))
+
+
+### Bug Fixes
+
+* be able to claim the invite link ([35951f7](https://github.com/Superhero-com/superhero-wallet/commit/35951f702e6daa376e44bb758466450d116a386c))
+* be able to open deeplinks on running device ([9e30363](https://github.com/Superhero-com/superhero-wallet/commit/9e30363aaf45200420f8df7ab4252028381cc187))
+* delegate http applinks to https ([07df746](https://github.com/Superhero-com/superhero-wallet/commit/07df7464583879ce380314d69564a039bfcedcec))
+* show auction bids ([6ad7aeb](https://github.com/Superhero-com/superhero-wallet/commit/6ad7aeb73c17f50f6c5e4655c0a157aceb33dacf))
+
+
+### Maintenance
+
+* change backend urls ([b2e387e](https://github.com/Superhero-com/superhero-wallet/commit/b2e387ed7ed70697b8cedaac76d6383a707ec64b))
+* use new multisig backend links ([428f008](https://github.com/Superhero-com/superhero-wallet/commit/428f0085ce86e148eb2f56d911f41f473fd1575c))
+
+
+### Performance
+
+* remove request for unused Inter fonts ([585ca5f](https://github.com/Superhero-com/superhero-wallet/commit/585ca5f5dee1517f6b7b5c049b35e00d4c37febd))
+
+### [2.1.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.0...v2.1.2) (2023-12-01)
 
 
 ### Features
