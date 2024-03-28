@@ -42,7 +42,7 @@ export class EthplorerService {
     // Without API key amount of calls are limited to two per every 1 second.
     // We're adding delays between calls to avoid getting empty results.
     // TODO: Use own node or paid version
-    if (!ETHPLORER_API_KEY) {
+    if (!ETHPLORER_API_KEY || ETHPLORER_API_KEY === 'freekey') {
       const currTime = new Date().getTime();
       const timeToWait = (lastCallTime) ? this.freeVersionTimeDelay - (currTime - lastCallTime) : 0;
       lastCallTime = currTime + ((timeToWait > 0) ? timeToWait : 0);

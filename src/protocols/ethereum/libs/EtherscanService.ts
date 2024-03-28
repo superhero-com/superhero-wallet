@@ -27,7 +27,8 @@ let lastCallTime: number;
 export class EtherscanService {
   apiUrl: string;
 
-  freeVersionTimeDelay = 5300;
+  // TODO - update delay if we use paid API key
+  freeVersionTimeDelay = ETHERSCAN_API_KEY ? 250 : 5300;
 
   constructor(apiUrl: string) {
     this.apiUrl = apiUrl;
@@ -40,15 +41,14 @@ export class EtherscanService {
     }).toString();
 
     // Without API key amount of calls are limited to one per every 5 seconds.
+    // With free API key we can make 5 calls per second.
     // We're adding delays between calls to avoid getting empty results.
     // TODO: Use own node or paid version
-    if (!ETHERSCAN_API_KEY) {
-      const currTime = new Date().getTime();
-      const timeToWait = (lastCallTime) ? this.freeVersionTimeDelay - (currTime - lastCallTime) : 0;
-      lastCallTime = currTime + ((timeToWait > 0) ? timeToWait : 0);
-      if (timeToWait > 0) {
-        await sleep(timeToWait);
-      }
+    const currTime = new Date().getTime();
+    const timeToWait = (lastCallTime) ? this.freeVersionTimeDelay - (currTime - lastCallTime) : 0;
+    lastCallTime = currTime + ((timeToWait > 0) ? timeToWait : 0);
+    if (timeToWait > 0) {
+      await sleep(timeToWait);
     }
 
     return fetchJson<T>(`${this.apiUrl}?${query}`);

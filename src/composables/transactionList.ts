@@ -71,22 +71,6 @@ export function useTransactionList({
   const { activeNetwork } = useNetworks();
   const { accountsTransactionsPending } = useLatestTransactionList();
 
-  if (
-    state.value.accountAddress !== accountAddress
-    || state.value.assetContractId !== assetContractId
-    || state.value.networkName !== activeNetwork.value.name
-  ) {
-    state.value = {
-      accountAddress,
-      assetContractId,
-      isEndReached: false,
-      isInitialLoadDone: false,
-      networkName: activeNetwork.value.name,
-      nextPagePaginationParams: {},
-      transactionsLoaded: [],
-    };
-  }
-
   const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
   const transactionsPending = computed(
@@ -98,6 +82,18 @@ export function useTransactionList({
     ...transactionsPending.value,
     ...transactionsLoaded.value,
   ]);
+
+  function resetState() {
+    state.value = {
+      accountAddress,
+      assetContractId,
+      isEndReached: false,
+      isInitialLoadDone: false,
+      networkName: activeNetwork.value.name,
+      nextPagePaginationParams: {},
+      transactionsLoaded: [],
+    };
+  }
 
   function fetchTransactions(paginationParams?: ITransactionApiPaginationParams) {
     return (assetContractId)
@@ -151,10 +147,15 @@ export function useTransactionList({
 
   async function initializeTransactionListPolling() {
     if (!state.value.isInitialLoadDone || !transactionsLoaded.value.length) {
+      if (state.value.isInitialLoadDone && !transactionsLoaded.value.length) {
+        resetState();
+      }
       await loadCurrentPageTransactions();
-      if (accountAddress !== state.value.accountAddress
+      if (
+        accountAddress !== state.value.accountAddress
         || assetContractId !== state.value.assetContractId
-        || activeNetwork.value.name !== state.value.networkName) {
+        || activeNetwork.value.name !== state.value.networkName
+      ) {
         isLoading.value = false;
         return;
       }
@@ -200,6 +201,14 @@ export function useTransactionList({
 
   function stopTransactionListPolling() {
     clearInterval(pollingIntervalId);
+  }
+
+  if (
+    state.value.accountAddress !== accountAddress
+    || state.value.assetContractId !== assetContractId
+    || state.value.networkName !== activeNetwork.value.name
+  ) {
+    resetState();
   }
 
   return {
