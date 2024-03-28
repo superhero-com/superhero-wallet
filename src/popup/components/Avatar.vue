@@ -49,7 +49,7 @@ export default defineComponent({
 
     const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
     const color = computed(() => props.address ? getAddressColor(props.address) : undefined);
-    const profileImageUrl = computed(() => (props.address || isContract(props.address))
+    const profileImageUrl = computed(() => (props.address === '' || isContract(props.address))
       ? null
       : `${aeActiveNetworkSettings.value.backendUrl}/profile/image/${props.address}`);
     const srcUrl = computed(() => hasProfileImage.value ? profileImageUrl.value : avatarUrl.value);
