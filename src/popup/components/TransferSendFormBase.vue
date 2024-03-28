@@ -29,6 +29,7 @@
           :amount="fee"
           :symbol="feeSymbol"
           :protocol="protocol"
+          blink-on-change
           data-cy="review-fee"
         />
       </template>

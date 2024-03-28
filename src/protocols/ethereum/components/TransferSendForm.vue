@@ -25,18 +25,20 @@
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         :protocol="PROTOCOLS.ethereum"
+        :blink-on-change="shouldUseMaxAmount"
         :validation-rules="{
           ...+balance.minus(fee) > 0
             ? { max_value: max }
             : {},
           enough_coin: [fee.toString(), ETH_COIN_SYMBOL],
         }"
+        @update:model-value="shouldUseMaxAmount = false"
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
           <BtnMaxAmount
-            :is-max="formModel?.amount?.toString() === max"
-            @click="setMaxAmount"
+            :is-max="shouldUseMaxAmount"
+            @click="toggleMaxAmount"
           />
         </template>
       </TransferSendAmount>
@@ -66,6 +68,7 @@ import {
   onMounted,
   onUnmounted,
   PropType,
+  ref,
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -161,6 +164,8 @@ export default defineComponent({
       getSelectedAssetValue,
     });
 
+    const shouldUseMaxAmount = ref(false);
+
     const maxFee = computed(() => maxFeePerGas.value!.multipliedBy(ETH_GAS_LIMIT));
 
     const { max } = useEthMaxAmount({ formModel, fee: maxFee });
@@ -191,8 +196,11 @@ export default defineComponent({
       }
     }
 
-    function setMaxAmount() {
-      formModel.value.amount = max.value;
+    function toggleMaxAmount() {
+      shouldUseMaxAmount.value = !shouldUseMaxAmount.value;
+      if (shouldUseMaxAmount.value) {
+        formModel.value.amount = max.value;
+      }
     }
 
     let polling: NodeJS.Timer | null = null;
@@ -214,6 +222,15 @@ export default defineComponent({
         clearInterval(polling);
       }
     });
+
+    watch(
+      max,
+      (newMax) => {
+        if (shouldUseMaxAmount.value) {
+          formModel.value.amount = newMax;
+        }
+      },
+    );
 
     watch(
       hasError,
@@ -244,10 +261,11 @@ export default defineComponent({
       errors,
       balance,
       max,
+      shouldUseMaxAmount,
       openScanQrModal,
       handleAssetChange,
       submit,
-      setMaxAmount,
+      toggleMaxAmount,
     };
   },
 });

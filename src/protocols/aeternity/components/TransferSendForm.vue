@@ -86,6 +86,7 @@
         :selected-asset="formModel.selectedAsset"
         :readonly="isMultisig"
         :protocol="PROTOCOLS.aeternity"
+        :blink-on-change="shouldUseMaxAmount"
         :validation-rules="{
           ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
           ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_coin: fee.toString() },
@@ -94,13 +95,14 @@
             : {},
           ae_min_tip_amount: isTipUrl,
         }"
+        @update:model-value="shouldUseMaxAmount = false"
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
           <BtnMaxAmount
             v-if="!isMultisig"
-            :is-max="isMaxValue"
-            @click="setMaxValue"
+            :is-max="shouldUseMaxAmount"
+            @click="toggleMaxAmount"
           />
         </template>
       </TransferSendAmount>
@@ -245,6 +247,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const route = useRoute();
 
+    const shouldUseMaxAmount = ref(false);
     const hasMultisigTokenWarning = ref(false);
     const isUrlTippingEnabled = ref(false);
     const amountField = ref<InstanceType<typeof Field> | null>(null);
@@ -310,11 +313,6 @@ export default defineComponent({
       && !isAensNameValid(formModel.value.address)
     ));
 
-    const isMaxValue = computed((): boolean => {
-      const amountInt = +(formModel.value?.amount || 0);
-      return amountInt > 0 && amountInt === +max.value;
-    });
-
     const mySignerAccounts = accounts.value.filter(
       ({ address }) => activeMultisigAccount.value?.signers.includes(address),
     );
@@ -348,17 +346,11 @@ export default defineComponent({
       }
     }
 
-    function setMaxValue() {
-      const _fee = fee.value;
-      formModel.value.amount = max.value;
-      setTimeout(
-        () => {
-          if (_fee !== fee.value) {
-            formModel.value.amount = max.value;
-          }
-        },
-        100,
-      );
+    function toggleMaxAmount() {
+      shouldUseMaxAmount.value = !shouldUseMaxAmount.value;
+      if (shouldUseMaxAmount.value) {
+        formModel.value.amount = max.value;
+      }
     }
 
     function emitCurrentFormModelState() {
@@ -396,6 +388,15 @@ export default defineComponent({
     );
 
     watch(
+      max,
+      (newMax) => {
+        if (shouldUseMaxAmount.value) {
+          formModel.value.amount = newMax;
+        }
+      },
+    );
+
+    watch(
       activeAccount,
       () => {
         if (
@@ -423,6 +424,7 @@ export default defineComponent({
       AE_SYMBOL,
       PROTOCOLS,
       isAe,
+      shouldUseMaxAmount,
       hasMultisigTokenWarning,
       multisigVaultAddress,
       activeMultisigAccount,
@@ -435,14 +437,13 @@ export default defineComponent({
       errors,
       balance,
       isTipUrl,
-      isMaxValue,
       activeAccount,
       editPayload,
       clearPayload,
       openScanQrModal,
       handleAssetChange,
+      toggleMaxAmount,
       selectAccount,
-      setMaxValue,
       submit,
       EditIcon,
       DeleteIcon,

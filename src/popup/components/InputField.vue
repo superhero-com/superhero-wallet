@@ -54,7 +54,9 @@
           <input
             v-bind="$attrs"
             :id="inputId"
+            ref="inputEl"
             class="input"
+            :class="{ 'blink-hidden': isBlinking, blink: blinkOnChange }"
             autocomplete="off"
             step="any"
             data-cy="input"
@@ -143,6 +145,7 @@ export default defineComponent({
     readonly: Boolean,
     showHelp: Boolean,
     showMessageHelp: Boolean,
+    blinkOnChange: Boolean,
     code: Boolean,
     thin: Boolean,
     textLimit: {
@@ -161,6 +164,8 @@ export default defineComponent({
     const inputId = `input-${uid}`;
 
     const focused = ref(false);
+    const inputEl = ref<HTMLInputElement | null>(null);
+    const isBlinking = ref(false);
 
     const inputMode = computed(() => props.type === 'number' ? 'decimal' : 'text');
     const messageAsObject = computed(
@@ -206,7 +211,21 @@ export default defineComponent({
       (val) => emit('focus-change', val),
     );
 
+    watch(
+      () => props.modelValue,
+      () => {
+        if (props.blinkOnChange) {
+          isBlinking.value = true;
+          setTimeout(() => {
+            isBlinking.value = false;
+          }, 500);
+        }
+      },
+    );
+
     return {
+      isBlinking,
+      inputEl,
       focused,
       uid,
       inputId,
