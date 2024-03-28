@@ -44,13 +44,13 @@ export default defineComponent({
         PROTOCOLS.aeternity,
       )?.address as Encoded.AccountAddress;
 
-      async function replaceCallerTx(tx: Encoded.Transaction) {
+      async function replaceCallerTx(tx: Encoded.Transaction, callerId: Encoded.AccountAddress) {
         const unpackedTx = unpackTx(tx) as ReturnType<typeof unpackTx>
-            & { callerId: Encoded.AccountAddress };
+          & { callerId: Encoded.AccountAddress };
 
         if (unpackedTx.tag === Tag.ContractCallTx || unpackedTx.tag === Tag.ContractCreateTx) {
-          unpackedTx.callerId = activeAccountAddress;
-          unpackedTx.nonce = (await aeSdk.api.getAccountByPubkey(activeAccountAddress)).nonce + 1;
+          unpackedTx.callerId = callerId;
+          unpackedTx.nonce = (await aeSdk.api.getAccountByPubkey(callerId)).nonce + 1;
         }
 
         return buildTx(unpackedTx);
@@ -73,7 +73,13 @@ export default defineComponent({
           return;
         }
 
-        const txToSign = replaceCaller === 'true' ? await replaceCallerTx(transaction as Encoded.Transaction) : transaction;
+        // replacing the caller might be chosen by an aepp if no wallet connection is available
+        // but a transaction should be proposed to the user anyway
+        // e.g. to reduce the number of steps necessary in a deep-link environment,
+        // from two round trips, aepp -> wallet -> aepp, to one
+        const txToSign = replaceCaller === 'true'
+          ? await replaceCallerTx(transaction as Encoded.Transaction, activeAccountAddress)
+          : transaction;
 
         const signedTransaction = await aeSdk.signTransaction(
           decodeURIComponent(txToSign as string) as Encoded.Transaction,
