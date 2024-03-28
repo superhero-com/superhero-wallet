@@ -1,7 +1,7 @@
 <template>
   <div
     class="account-info"
-    :class="{ 'can-copy-address': canCopyAddress }"
+    :class="{ 'can-copy-address': canCopyAddress, dense }"
   >
     <Avatar
       class="avatar"
@@ -10,7 +10,10 @@
       :size="avatarSize"
       :borderless="avatarBorderless"
       :is-placeholder="isPlaceholder"
-    />
+    >
+      <slot name="avatar" />
+    </Avatar>
+
     <div
       class="account-details"
       :class="{ 'list-name': isListName }"
@@ -22,7 +25,7 @@
       />
       <div
         v-else-if="name"
-        class="account-name-truncated"
+        class="account-name"
       >
         <Truncate :str="name" />
       </div>
@@ -82,17 +85,19 @@ export default defineComponent({
   props: {
     account: { type: Object as PropType<Partial<IAccount>>, required: true },
     avatarSize: { type: String, default: 'lg' },
+    customName: { type: String, default: null },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
     isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
+    dense: Boolean,
   },
   setup(props) {
     const { getName } = useAeNames();
 
-    const name = computed(() => getName(props.account.address!).value);
+    const name = computed(() => props.customName || getName(props.account.address!).value);
 
     const explorerUrl = computed(
       () => (props.account.protocol)
@@ -131,18 +136,17 @@ export default defineComponent({
     max-width: 250px;
     font-weight: 500;
 
-    .account-name-truncated,
     .account-name {
       @extend %face-sans-16-medium;
 
       margin: 4px 0;
+      line-height: 20px; // Avoid cutting off bottom part of some letters, e.g.: "g"
     }
 
     &.list-name {
       width: 100%;
       min-width: 0;
 
-      .account-name-truncated,
       .account-name {
         @extend %face-sans-15-bold;
 
@@ -166,6 +170,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    margin-top: -2px;
 
     .protocol-icon {
       margin-right: 6px;
@@ -179,6 +184,12 @@ export default defineComponent({
       &:hover {
         opacity: 1;
       }
+    }
+  }
+
+  &.dense {
+    .account-name {
+      font-size: 15px;
     }
   }
 }

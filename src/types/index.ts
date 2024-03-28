@@ -597,6 +597,7 @@ export interface IName {
   hash: string;
   name: AensName;
   owner: string;
+  pending: Boolean;
   pointers: Dictionary;
 }
 
