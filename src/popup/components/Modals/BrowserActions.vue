@@ -8,28 +8,29 @@
     @close="resolve"
   >
     <div class="info">
-      <BrowserActionItem
-        :title="$t('dappActionBrowser.refresh.title')"
-        :info="$t('dappActionBrowser.refresh.description')"
+      <BtnSubheader
+        :header="$t('dappActionBrowser.refresh.title')"
+        :subheader="$t('dappActionBrowser.refresh.description')"
         :icon="RefreshIcon"
         @click="refreshIframeContent"
       />
       <!--
-      <BrowserActionItem
+      <BtnSubheader
         v-if="UNFINISHED_FEATURES"
-        :title="$t('dappActionBrowser.bookmark.title')"
-        :info="$t('dappActionBrowser.bookmark.description')"
+        :header="$t('dappActionBrowser.bookmark.title')"
+        :subheader="$t('dappActionBrowser.bookmark.description')"
         :icon="FavoriteIcon"
       />
       -->
-      <BrowserActionItem
+      <BtnSubheader
         v-if="IS_MOBILE_DEVICE"
-        :title="$t('dappActionBrowser.share.title')"
-        :info="$t('dappActionBrowser.share.description')"
+        :header="$t('dappActionBrowser.share.title')"
+        :subheader="$t('dappActionBrowser.share.description')"
         :icon="ShareIcon"
         @click="shareIframeContent"
       />
     </div>
+
     <template #footer>
       <BtnMain
         variant="muted"
@@ -45,18 +46,20 @@ import { defineComponent, PropType } from 'vue';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { BROWSER_ACTIONS, IS_MOBILE_DEVICE } from '@/constants';
 import { invokeDeviceShare } from '@/utils';
+
 import RefreshIcon from '@/icons/dapp/dapp-refresh.svg?vue-component';
 import ShareIcon from '@/icons/dapp/dapp-share.svg?vue-component';
 import FavoriteIcon from '@/icons/dapp/dapp-favorite.svg?vue-component';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import BrowserActionItem from '../BrowserActionItem.vue';
+import BtnSubheader from '../buttons/BtnSubheader.vue';
 
 export default defineComponent({
   components: {
     Modal,
     BtnMain,
-    BrowserActionItem,
+    BtnSubheader,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
@@ -68,6 +71,7 @@ export default defineComponent({
     async function refreshIframeContent() {
       props.resolve({ action: BROWSER_ACTIONS.refresh });
     }
+
     async function shareIframeContent() {
       await invokeDeviceShare(props.selectedApp.url);
       props.resolve();
