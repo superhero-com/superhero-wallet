@@ -471,7 +471,7 @@
       "incoming": "Nouveau",
       "outgoing": "Sortant",
       "spendType": "type de Spend",
-      "spexdTx": "spend tx",
+      "spendTx": "spend tx",
       "namePreclaim": "nom preclaim tx",
       "nameClaim": "nom claim tx",
       "nameUpdate": "nom update tx",

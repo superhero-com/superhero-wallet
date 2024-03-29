@@ -468,7 +468,7 @@
       "incoming": "in arrivo",
       "outgoing": "Estroverso",
       "spendType": "Tipo spesa",
-      "spexdTx": "spend tx",
+      "spendTx": "spend tx",
       "namePreclaim": "nome preclaim tx",
       "nameClaim": "nome claim tx",
       "nameUpdate": "nome update tx",
