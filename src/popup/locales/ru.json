@@ -439,7 +439,7 @@
       "incoming": "Incoming",
       "outgoing": "Outgoing",
       "spendType": "Spend Type",
-      "spexdTx": "spend tx",
+      "spendTx": "spend tx",
       "namePreclaim": "name preclaim tx",
       "nameClaim": "name claim tx",
       "nameUpdate": "name update tx",
