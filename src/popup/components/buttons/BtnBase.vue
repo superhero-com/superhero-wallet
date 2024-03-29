@@ -118,7 +118,7 @@ export default defineComponent({
 
   // The background layer
   &::before {
-    background-color: var(--screen-bg-color);
+    background-color: $color-bg-app;
     opacity: 0;
   }
 
