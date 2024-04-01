@@ -138,7 +138,7 @@
       "titleAeternityAccount": "Add æternity account",
       "msg": "Please select blockchain to add an account address to.",
       "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "msgAeternity": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
+      "msgAeternity": "Generate new account address to store, send and receive crypto currency on the æternity blockchain.",
       "btnSubtitle": "Derive another account from your seed",
       "addProtocolAccount": "Add {name} account"
     },
@@ -557,7 +557,7 @@
       "urlNotExisting": "No tips for this URL at the moment.",
       "moreOracles": "There aren't enough active Oracles to verify your claim request. Please try again later.",
       "oracleFailed": "Oracle service check claim failed. Please try again later.",
-      "unknownError": "Error occured during claim request. Please try again later.",
+      "unknownError": "Error occurred during claim request. Please try again later.",
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
@@ -716,7 +716,7 @@
         "previous-bids": "Previous bids",
         "bidding": "Go for bidding",
         "bid-on": "Bid on",
-        "current-heighest-bid": "Current heighest bid",
+        "current-highest-bid": "Current highest bid",
         "remaining-time": "Remaining Time",
         "add-amount": "Enter amount",
         "min-bid": "Bid must be more than {minBid} AE",
@@ -1061,7 +1061,7 @@
       "incoming": "Incoming",
       "outgoing": "Outgoing",
       "spendType": "Spend Type",
-      "spexdTx": "spend tx",
+      "spendTx": "spend tx",
       "namePreclaim": "name preclaim tx",
       "nameClaim": "name claim tx",
       "nameUpdate": "name update tx",

@@ -466,7 +466,7 @@
       "incoming": "Eingehend",
       "outgoing": "Ausgehend",
       "spendType": "Ausgabenart",
-      "spexdTx": "tx ausgeben",
+      "spendTx": "tx ausgeben",
       "namePreclaim": "name preclaim tx",
       "nameClaim": "Namensanspruch tx",
       "nameUpdate": "Namensaktualisierung tx",

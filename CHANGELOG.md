@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.0...v2.2.1) (2024-04-01)
+
+
+### Features
+
+* refresh account latest transactions if pending found ([86d2ee8](https://github.com/Superhero-com/superhero-wallet/commit/86d2ee8f01238b081c71d8978c89cb67142a2745))
+
+
+### Bug Fixes
+
+* correct grammar ([de00164](https://github.com/Superhero-com/superhero-wallet/commit/de00164372d2839d8e3df7277f2030ba10bc98fa))
+
 ## [2.2.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.6...v2.2.0) (2024-03-28)
 
 
