@@ -3,8 +3,18 @@
     <div
       v-if="header"
       class="panel-header"
-      v-text="header"
-    />
+    >
+      <div
+        class="panel-header-text"
+        v-text="header"
+      />
+      <div
+        v-if="$slots['header-after']"
+        class="panel-header-after"
+      >
+        <slot name="header-after" />
+      </div>
+    </div>
 
     <div class="panel-body">
       <slot />
@@ -36,6 +46,8 @@ export default defineComponent({
   &-header {
     @extend %face-sans-16-semi-bold;
 
+    display: flex;
+    justify-content: space-between;
     color: $color-white;
     line-height: 24px;
     padding: 8px var(--card-padding);

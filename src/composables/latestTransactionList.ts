@@ -161,6 +161,16 @@ export function useLatestTransactionList() {
             }
           });
         });
+
+      /**
+       * Refresh account transactions lists if any of the transactions is pending.
+       */
+      Object.entries(accountsTransactionsLatest.value)
+        .forEach(([accountAddress, transactionList]) => {
+          if (transactionList.some(({ pending }) => !!pending)) {
+            loadAccountLatestTransactions(getAccountByAddress(accountAddress)!);
+          }
+        });
     }, 60000);
 
     /**

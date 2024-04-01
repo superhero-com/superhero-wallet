@@ -5,6 +5,19 @@
     class="latest-transaction-card"
     :header="$t('dashboard.latestTransactionCard.title')"
   >
+    <template
+      v-if="UNFINISHED_FEATURES"
+      #header-after
+    >
+      <BtnIcon
+        class="btn-refresh"
+        size="sm"
+        :icon="RefreshIcon"
+        :loading="areLatestTransactionsUpdating"
+        @click="loadAllLatestTransactions()"
+      />
+    </template>
+
     <Transition name="page-transition">
       <AnimatedSpinner
         v-if="isLoading"
@@ -38,10 +51,14 @@ import {
   useLatestTransactionList,
   useViewport,
 } from '@/composables';
+import { UNFINISHED_FEATURES } from '@/constants';
+
+import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
+import RefreshIcon from '@/icons/dapp/dapp-refresh.svg?vue-component';
 
 import Panel from './Panel.vue';
 import TransactionListItem from './TransactionListItem.vue';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import BtnIcon from './buttons/BtnIcon.vue';
 
 const DASHBOARD_TRANSACTION_LIMIT = 3;
 
@@ -51,6 +68,7 @@ export default defineComponent({
     Panel,
     TransactionListItem,
     AnimatedSpinner,
+    BtnIcon,
   },
   setup() {
     const route = useRoute();
@@ -61,6 +79,8 @@ export default defineComponent({
     const {
       allLatestTransactions,
       areLatestTransactionsUpdating,
+      accountsTransactionsPending,
+      loadAllLatestTransactions,
     } = useLatestTransactionList();
 
     const query = computed(() => route.query);
@@ -100,11 +120,16 @@ export default defineComponent({
     });
 
     return {
+      RefreshIcon,
       allLatestTransactions,
+      accountsTransactionsPending,
+      areLatestTransactionsUpdating,
       latestTransactionCardEl,
       latestTransactionsToDisplay,
       showWidget,
       isLoading,
+      loadAllLatestTransactions,
+      UNFINISHED_FEATURES,
     };
   },
 });
@@ -116,6 +141,11 @@ export default defineComponent({
     display: block;
     margin-inline: auto;
     height: 60px;
+  }
+
+  .btn-refresh {
+    margin-block: -2px;
+    margin-right: -6px;
   }
 
   .transaction-item {

@@ -9,17 +9,22 @@
       `icon-variant-${iconVariant}`,
       {
         dimmed,
+        loading,
       },
     ]"
+    :disabled="loading"
   >
     <Badge
       class="badge"
       :text="badgeText"
     >
       <slot>
+        <AnimatedPendingIcon
+          v-if="loading"
+        />
         <Component
           :is="icon"
-          v-if="icon"
+          v-else-if="icon"
           class="icon"
         />
       </slot>
@@ -28,6 +33,7 @@
 </template>
 
 <script>
+import AnimatedPendingIcon from '@/icons/animated-pending.svg?vue-component';
 import Badge from '../Badge.vue';
 import BtnBase from './BtnBase.vue';
 
@@ -38,6 +44,7 @@ export default {
   components: {
     BtnBase,
     Badge,
+    AnimatedPendingIcon,
   },
   props: {
     icon: { type: Object, default: null },
@@ -53,6 +60,7 @@ export default {
     },
     badgeText: { type: [String, Number], default: null },
     dimmed: Boolean,
+    loading: Boolean,
   },
 };
 </script>
