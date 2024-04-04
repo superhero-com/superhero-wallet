@@ -11,7 +11,7 @@
     >
       <Loader v-if="isLoaderVisible" />
       <button
-        v-if="qrScannerOpen"
+        v-if="isMobileQrScannerVisible"
         id="camera-close-btn"
         class="camera-close-button"
         type="button"
@@ -19,7 +19,7 @@
         <Close />
       </button>
       <div
-        v-show="!qrScannerOpen"
+        v-show="!isMobileQrScannerVisible"
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
@@ -123,7 +123,7 @@ export default defineComponent({
     const { watchConnectionStatus } = useConnection();
     const {
       isSeedBackedUp,
-      qrScannerOpen,
+      isMobileQrScannerVisible,
       isLoaderVisible,
       initVisibilityListeners,
     } = useUi();
@@ -132,7 +132,7 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications();
     const { loadCoinsData } = useCurrencies({ pollingDisabled: true });
     const { restoreLanguage } = useLanguages();
-    const { restore: restoreTransferSendForm } = useTransferSendHandler();
+    const { restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
@@ -277,12 +277,12 @@ export default defineComponent({
       IS_MOBILE_DEVICE,
       RUNNING_IN_TESTS,
       modalsOpen,
-      qrScannerOpen,
+      isLoaderVisible,
+      isMobileQrScannerVisible,
       showHeader,
       delayedShowHeader,
       showScrollbar,
       innerElement,
-      isLoaderVisible,
     };
   },
 });
