@@ -41,6 +41,7 @@ import {
   ROUTE_POPUP_SIGN_TX,
   ROUTE_POPUP_CONNECT,
   ROUTE_POPUP_RAW_SIGN,
+  ROUTE_POPUP_UNSAFE_SIGN,
   ROUTE_POPUP_MESSAGE_SIGN,
   ROUTE_PERMISSIONS_DETAILS,
   ROUTE_PERMISSIONS_SETTINGS,
@@ -103,6 +104,8 @@ import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
 import AppsBrowser from '../pages/AppsBrowser.vue';
 
 import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
+import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
+import JwtSign from '../pages/JwtSign.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -338,6 +341,15 @@ export const routes: WalletAppRouteConfig[] = [
     name: ROUTE_POPUP_RAW_SIGN,
     path: '/popup-raw-sign',
     component: ConfirmRawSign,
+    props: true,
+    meta: {
+      notPersist: true,
+    },
+  },
+  {
+    name: ROUTE_POPUP_UNSAFE_SIGN,
+    path: '/popup-unsafe-sign',
+    component: ConfirmUnsafeSign,
     props: true,
     meta: {
       notPersist: true,
@@ -728,6 +740,15 @@ export const routes: WalletAppRouteConfig[] = [
     component: SignTransaction,
     meta: {
       title: 'signTransaction',
+      notPersist: true,
+    },
+  },
+  {
+    name: 'jwt-sign',
+    path: '/jwt-sign',
+    component: JwtSign,
+    meta: {
+      title: 'signMessage',
       notPersist: true,
     },
   },

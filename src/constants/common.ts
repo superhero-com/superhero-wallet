@@ -297,6 +297,7 @@ export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_CONFIRM = 'confirm';
 export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
+export const MODAL_CONFIRM_UNSAFE_SIGN = 'confirm-unsafe-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
 export const MODAL_CONFIRM_ACCOUNT_LIST = 'confirm-account-list';
 export const MODAL_CONSENSUS_INFO = 'consensus-info';
@@ -324,6 +325,7 @@ export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
+export const POPUP_TYPE_UNSAFE_SIGN = 'unsafeSign';
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
@@ -331,6 +333,7 @@ export const POPUP_TYPES = [
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_UNSAFE_SIGN,
 ] as const;
 
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
@@ -422,3 +425,6 @@ export const ASSET_TYPES = {
 export const TRANSACTION_CERTAINLY_MINED_TIME = 600000;
 
 export const POLLING_INTERVAL_TRANSACTIONS = 15000;
+
+// toBase64Url(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' }))
+export const JWT_HEADER = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9';

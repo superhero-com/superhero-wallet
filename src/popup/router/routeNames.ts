@@ -45,4 +45,5 @@ export const ROUTE_POPUP_CONNECT = 'connect';
 export const ROUTE_POPUP_SIGN_TX = 'popup-sign-tx';
 export const ROUTE_POPUP_ACCOUNT_LIST = 'account-list';
 export const ROUTE_POPUP_RAW_SIGN = 'popup-raw-sign';
+export const ROUTE_POPUP_UNSAFE_SIGN = 'popup-unsafe-sign';
 export const ROUTE_POPUP_MESSAGE_SIGN = 'message-sign';

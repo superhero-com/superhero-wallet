@@ -115,7 +115,7 @@ export default defineComponent({
     @extend %face-sans-15-regular;
 
     letter-spacing: 0.05em;
-    color: $color-white;
+    color: rgba($color-white, 0.85);
     margin-bottom: 8px;
 
     .secondary {

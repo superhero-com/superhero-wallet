@@ -10,6 +10,7 @@ import {
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONSENSUS_INFO,
   MODAL_DEFAULT,
@@ -50,6 +51,7 @@ import ErrorLog from '../components/Modals/ErrorLog.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
+import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
@@ -105,6 +107,10 @@ export default () => {
   });
   registerModal(MODAL_CONFIRM_RAW_SIGN, {
     component: ConfirmRawSign,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_CONFIRM_UNSAFE_SIGN, {
+    component: ConfirmUnsafeSign,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {

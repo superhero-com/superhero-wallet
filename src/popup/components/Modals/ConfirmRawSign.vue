@@ -6,7 +6,7 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :custom-title="$t('modals.confirm-raw-sign.title')"
+      :custom-labels="[$t('modals.confirm-raw-sign.title')]"
       :sender="sender"
       :recipient="activeAccount"
     />

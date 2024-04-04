@@ -59,8 +59,9 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     return super.signTransaction(txBase64, {
       ...options, // Mainly to pass the `fromAccount` property
+      aeppOrigin: undefined,
       networkId: this.nodeNetworkId.value,
-    });
+    } as any);
   }
 
   override async signMessage(
@@ -81,7 +82,10 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     return super.signMessage(
       message,
-      options, // Mainly to pass the `fromAccount` property
+      {
+        ...options, // Mainly to pass the `fromAccount` property
+        aeppOrigin: undefined,
+      },
     );
   }
 
@@ -92,6 +96,17 @@ export class AeAccountHdWallet extends MemoryAccount {
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
+    if (options?.aeppOrigin) {
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.unsafeSign,
+        options?.aeppOrigin,
+        { ...options, data },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError('Rejected by user');
+      }
+    }
     const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
     const account = (options?.fromAccount)
       ? getAccountByAddress(options.fromAccount)
