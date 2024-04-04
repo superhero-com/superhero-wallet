@@ -23,6 +23,9 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
  * Class extends `AeSdkWallet` from aepp-sdk-js
  * provides flexibility to manage the accounts the way wallet would like to handle
  */
+
+let aeAccountHdWallet: AeAccountHdWallet;
+
 export class AeSdkSuperhero extends AeSdkWallet {
   nodeNetworkId: Ref<string | undefined>;
 
@@ -32,8 +35,11 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   _resolveAccount() {
-    // TODO cache the account instead of instantiating it whenever the library is asked for it
-    return new AeAccountHdWallet(this.nodeNetworkId);
+    if (!aeAccountHdWallet) {
+      aeAccountHdWallet = new AeAccountHdWallet(this.nodeNetworkId);
+    }
+
+    return aeAccountHdWallet;
   }
 
   getAccounts() {
