@@ -74,7 +74,7 @@ export function useMultisigAccounts({
 }: MultisigAccountsOptions = {}) {
   const { onNetworkChange } = useNetworks();
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getAeSdk } = useAeSdk();
+  const { nodeNetworkId, getAeSdk, getDryAeSdk } = useAeSdk();
   const { aeAccounts } = useAccounts();
 
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
@@ -179,7 +179,7 @@ export function useMultisigAccounts({
    * Refresh the list of the multisig accounts.
    */
   async function updateMultisigAccounts() {
-    const aeSdk = await getAeSdk();
+    const dryAeSdk = await getDryAeSdk();
 
     /**
      * Establish the list of multisig accounts used by the regular accounts
@@ -219,7 +219,7 @@ export function useMultisigAccounts({
           ...otherMultisigData
         }): Promise<IMultisigAccount> => {
           try {
-            const contractInstance = await aeSdk.initializeContract({
+            const contractInstance = await dryAeSdk.initializeContract({
               aci: SimpleGAMultiSigAci,
               address: contractId,
             });
@@ -243,7 +243,7 @@ export function useMultisigAccounts({
                 ? { decodedResult: currentAccount.signers }
                 : contractInstance.get_signers(),
               contractInstance.get_consensus_info(),
-              gaAccountId ? aeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
+              gaAccountId ? dryAeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
             ]));
 
             const decodedConsensus = consensusResult.decodedResult;
