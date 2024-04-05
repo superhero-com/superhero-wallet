@@ -175,7 +175,6 @@ export default defineComponent({
     box-shadow:
       0 0 0 1px variables.$color-border,
       2px 4px 12px rgba(variables.$color-black, 0.22);
-    will-change: transform;
 
     @include mixins.desktop {
       width: calc(#{variables.$extension-width} - 32px);
