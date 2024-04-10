@@ -44,7 +44,6 @@ type AeppInfoData = OnAeppConnectionParams & { origin: string };
 
 let composableInitialized = false;
 let aeSdk: AeSdkSuperhero;
-let storedNetworkName: string;
 
 const nodeNetworkId = ref<NetworkId>();
 
@@ -107,12 +106,20 @@ export function useAeSdk() {
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
     isAeSdkUpdating.value = true;
+    const nodeInstance = await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl);
     aeSdk.pool.delete(oldNetwork.name);
     aeSdk.addNode(
       newNetwork.name,
-      (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
+      nodeInstance!,
       true,
     );
+
+    if (dryAeSdk) {
+      dryAeSdk.pool.delete(oldNetwork.name);
+      // remove the new network if it exists to avoid errors
+      dryAeSdk.pool.delete(newNetwork.name);
+      dryAeSdk.addNode(newNetwork.name, nodeInstance!, true);
+    }
     isAeSdkUpdating.value = false;
   }
 
@@ -124,7 +131,6 @@ export function useAeSdk() {
       watchUntilTruthy(areNetworksRestored),
     ]);
 
-    storedNetworkName = activeNetworkName.value;
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
     aeSdk = new AeSdkSuperhero(
@@ -195,16 +201,9 @@ export function useAeSdk() {
           instance: nodeInstance,
         }],
       });
-      storedNetworkName = activeNetworkName.value;
-      return dryAeSdk;
     }
-
-    if (storedNetworkName !== activeNetworkName.value) {
-      const nodeInstance = new Node(aeActiveNetworkSettings.value.nodeUrl, { ignoreVersion: true });
-      dryAeSdk.pool.delete(storedNetworkName);
-      // remove the new network if it exists to avoid errors
-      dryAeSdk.pool.delete(activeNetworkName.value);
-      dryAeSdk.addNode(activeNetworkName.value, nodeInstance, true);
+    if (isAeSdkUpdating.value && aeSdk) {
+      await watchUntilTruthy(() => !isAeSdkUpdating.value);
     }
     return dryAeSdk;
   }
