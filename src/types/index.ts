@@ -685,6 +685,7 @@ export interface IPopupData {
 export interface IPopupProps extends IPopupActions, IPopupData {
   show?: boolean; // Decides if the modal window should be open
   fromAccount?: string;
+  isSenderReplaced?: boolean;
 }
 
 export interface IModalProps extends Partial<IPopupProps> {

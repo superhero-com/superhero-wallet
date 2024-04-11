@@ -86,7 +86,8 @@ export default defineComponent({
           {
             networkId,
             aeppOrigin: callbackOrigin.value?.toString(),
-          },
+            isSenderReplaced: replaceCaller === 'true',
+          } as any,
         );
 
         if (broadcast) {
