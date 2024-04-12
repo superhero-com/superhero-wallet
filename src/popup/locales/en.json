@@ -298,6 +298,7 @@
       "functionName": "Function name",
       "arguments": "Arguments",
       "superheroChat": "Superhero Chat",
+      "senderReplaced": "Your active wallet account will be the sender for the transaction.",
       "unableToExecute": "This transaction can not be executed.",
       "confirmSigning": "would like you to confirm a transaction."
     },
