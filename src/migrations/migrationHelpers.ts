@@ -12,7 +12,7 @@ export const collectVuexState = (() => {
   return async () => {
     if (window?.browser) {
       if (isCollecting.value) {
-        await watchUntilTruthy(isCollecting);
+        await watchUntilTruthy(() => !isCollecting.value);
       } else if (!vuexState && !IS_OFFSCREEN_TAB) {
         isCollecting.value = true;
         vuexState = (await window.browser.storage.local.get('state'))?.state as any;
