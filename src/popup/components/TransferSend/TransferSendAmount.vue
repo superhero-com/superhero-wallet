@@ -13,9 +13,9 @@
       :validate-on-mount="!!modelValue"
       :rules="{
         required: true,
+        ...validationRules,
         min_value_exclusive: 0,
         does_not_exceed_decimals: assetDecimals,
-        ...validationRules,
       }"
     >
       <InputAmount

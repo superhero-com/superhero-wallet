@@ -3,6 +3,7 @@
     v-bind="$attrs"
     :transfer-data="transferData"
     :fee="numericFee"
+    :max-fee="numericMaxFee"
     :fee-symbol="ETH_COIN_SYMBOL"
     :protocol="PROTOCOLS.ethereum"
     :custom-title="$t('modals.send.sendAsset', { name: ETH_COIN_NAME })"
@@ -27,10 +28,10 @@
         :protocol="PROTOCOLS.ethereum"
         :blink-on-change="shouldUseMaxAmount"
         :validation-rules="{
-          ...+balance.minus(fee) > 0
+          ...+balance.minus(maxFee) > 0
             ? { max_value: max }
             : {},
-          enough_coin: [fee.toString(), ETH_COIN_SYMBOL],
+          enough_coin: [maxFee.toString(), ETH_COIN_SYMBOL],
         }"
         @update:model-value="shouldUseMaxAmount = false"
         @asset-selected="handleAssetChange"
@@ -171,6 +172,7 @@ export default defineComponent({
     const { max } = useEthMaxAmount({ formModel, fee: maxFee });
 
     const numericFee = computed(() => +fee.value.toFixed());
+    const numericMaxFee = computed(() => +maxFee.value.toFixed());
 
     const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })} ${t('modals.send.recipientPlaceholderENS')}`;
 
@@ -253,11 +255,12 @@ export default defineComponent({
       NETWORK_TYPE_TESTNET,
       formModel,
       activeNetwork,
-      fee,
+      maxFee,
       feeList,
       recipientPlaceholderText,
       feeSelectedIndex,
       numericFee,
+      numericMaxFee,
       errors,
       balance,
       max,
