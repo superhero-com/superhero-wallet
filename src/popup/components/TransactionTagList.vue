@@ -37,7 +37,7 @@ export default defineComponent({
     TransactionTag,
   },
   props: {
-    customTitle: { type: String, default: null },
+    customLabels: { type: Array as PropType<string[]>, default: null },
     transaction: { type: Object as PropType<ITransaction>, default: null },
     additionalTag: { type: String, default: null },
     dense: Boolean,
@@ -64,8 +64,8 @@ export default defineComponent({
     const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const labels = computed((): string[] => {
-      if (props.customTitle) {
-        return [props.customTitle];
+      if (props.customLabels) {
+        return [...props.customLabels];
       }
       if (
         !props.transaction?.tx

@@ -676,6 +676,8 @@ export interface IPopupData {
   type?: PopupActionType;
   tx?: ITx;
   txBase64?: Encoded.Transaction;
+  aeppOrigin?: string;
+  data?: string | Uint8Array;
 }
 
 /**

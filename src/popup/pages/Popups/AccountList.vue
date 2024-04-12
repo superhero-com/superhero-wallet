@@ -6,7 +6,7 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :custom-title="$t('pages.connectConfirm.title')"
+      :custom-labels="[$t('pages.connectConfirm.title')]"
       :sender="sender"
       :recipient="recipient"
     />

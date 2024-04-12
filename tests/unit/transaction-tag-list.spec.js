@@ -90,8 +90,8 @@ const testCases = [
     labels: [],
   },
   {
-    props: { customTitle: 'customTitle' },
-    labels: ['customTitle'],
+    props: { customLabels: ['customLabels'] },
+    labels: ['customLabels'],
   },
   {
     props: {},
@@ -102,7 +102,7 @@ const testCases = [
 describe('TransactionTagList', () => {
   testCases.forEach(({ props, labels }) => it(
     `should have correct labels for each type of transaction: for \
-  ${props.transaction?.tx?.type ?? props.customTitle}/${props.transaction?.tx?.function}`,
+  ${props.transaction?.tx?.type ?? props.customLabels}/${props.transaction?.tx?.function}`,
     () => {
       const wrapper = mount(TransactionTagList, {
         global: { plugins: [i18n] },

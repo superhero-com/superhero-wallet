@@ -35,6 +35,7 @@
     "seconds": "{n} seconds | {n} second | {n} seconds",
     "secondsShort": "{n} s",
     "send": "Send",
+    "sign": "Sign",
     "smartContract": "Smart contract",
     "swap": "Swap",
     "browser": "Browser",
@@ -306,6 +307,15 @@
         "title": "Transaction Warning",
         "content": "Transaction data is either broken or Superhero wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
       }
+    },
+    "confirmUnsafeSign": {
+      "heading": "would like you to sign a data.",
+      "superheroChatJwtSign": "would like you to sign a message in order to login.",
+      "title": "Sign data",
+      "typeJwt": "JSON Web Token (JWT)",
+      "typeUnknown": "The data is of unknown type.",
+      "type": "Type",
+      "warning": "Sign the data only if you trust the dapp and it's owner."
     },
     "qrCodeReader": {
       "grantPermission": "Grant camera permission",

@@ -24,6 +24,7 @@ import {
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_UNSAFE_SIGN,
   POPUP_TYPE_SIGN,
   PROTOCOLS,
 } from './common';
@@ -87,6 +88,9 @@ export const STUB_POPUP_PROPS: Record<PopupType | 'base', IPopupData> = {
       callerId: STUB_ADDRESS,
       contractId: STUB_CONTRACT_ADDRESS,
     },
+  },
+  [POPUP_TYPE_UNSAFE_SIGN]: {
+
   },
   base: {
     app: STUB_APP_DATA,
