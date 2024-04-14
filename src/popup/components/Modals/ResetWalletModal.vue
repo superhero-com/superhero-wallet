@@ -77,6 +77,9 @@ export default defineComponent({
       disconnectDapps();
 
       await WalletStorage.clear();
+      // TODO: Rethink this approach
+      // It is removing the remaining vuex state
+      await browser.storage.local.clear();
       await router.push({ name: ROUTE_INDEX });
       window.location.reload();
     }
