@@ -39,20 +39,17 @@ import {
   computed,
   defineComponent,
   PropType,
+  toRef,
 } from 'vue';
-import { camelCase } from 'lodash-es';
 
 import type {
   ITransaction,
-  TxFunctionParsed,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
+import { useFungibleTokens, useTransactionData } from '@/composables';
 import {
   getTransactionTokenInfoResolver,
-  isTxFunctionDexSwap,
-  isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-import { useFungibleTokens } from '@/composables';
 
 import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
@@ -70,19 +67,16 @@ export default defineComponent({
   setup(props) {
     const { getProtocolAvailableTokens } = useFungibleTokens();
 
-    const isSwapTx = computed(() => (
-      isTxFunctionDexSwap(props.transaction.tx.function)
-      || isTxFunctionDexPool(props.transaction.tx.function)
-    ));
+    const { isDexSwap, txFunctionParsed } = useTransactionData({
+      transaction: toRef(() => props.transaction),
+    });
 
     const rates = computed(() => {
-      if (!isSwapTx.value) {
+      if (!isDexSwap.value) {
         return [];
       }
 
-      const resolver = getTransactionTokenInfoResolver(
-        camelCase(props.transaction.tx.function) as TxFunctionParsed,
-      );
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
 
       if (!resolver) return [];
 
@@ -117,7 +111,6 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
-      isSwapTx,
       rates,
     };
   },

@@ -205,6 +205,15 @@ export function getDefaultAccountLabel({ protocol, idx }: Partial<IAccount> = {}
     .join(' ');
 }
 
+/**
+ * Common way of establishing the transaction asset amount
+ */
+export function getCommonTxAmountTotal(transaction: ITransaction, isReceived: boolean): number {
+  return new BigNumber(transaction.tx?.amount || 0)
+    .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+    .toNumber();
+}
+
 export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
   const result = window.localStorage.getItem(prepareStorageKey(keys));
   return result ? JSON.parse(result) : undefined;
@@ -390,6 +399,10 @@ export function splitAddress(address: string | null): string {
   return address
     ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`)
     : '';
+}
+
+export function toHex(value: string) {
+  return `0x${parseInt(value, 10).toString(16)}`;
 }
 
 export function toShiftedBigNumber(value: number | string, precision: number): BigNumberPublic {

@@ -54,10 +54,10 @@
 
 <script lang="ts">
 import {
-  computed,
   defineComponent,
-  ref,
   onMounted,
+  ref,
+  toRef,
   watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -67,7 +67,6 @@ import type { AccountAddress, ICommonTransaction, ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
-  useFungibleTokens,
   useLatestTransactionList,
   useTransactionData,
   useTransactionList,
@@ -100,29 +99,26 @@ export default defineComponent({
     const transactionOwner = route.params.transactionOwner as AccountAddress;
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
+    const transaction = ref<ITransaction>();
+
     const { setLoaderVisible } = useUi();
     const { activeAccount } = useAccounts();
-    const { getTxAmountTotal } = useFungibleTokens();
     const { accountsTransactionsPending } = useLatestTransactionList();
     const {
+      amount,
+      amountTotal,
+      fee,
       direction,
       transactionAssets,
       isTransactionCoin,
-      setActiveTransaction,
-    } = useTransactionData({ externalAddress: transactionOwner });
+    } = useTransactionData({
+      transaction,
+      transactionCustomOwner: toRef(transactionOwner),
+    });
     const { transactionsLoaded } = useTransactionList({
       accountAddress: transactionOwner || activeAccount.value.address,
       protocol: PROTOCOLS.ethereum,
     });
-
-    const transaction = ref<ITransaction>();
-
-    // TODO move these calculations to base component after unifying ITransaction AE values
-    const fee = computed((): number => transaction.value?.tx?.fee || 0);
-    const amount = computed((): number => transaction.value?.tx?.amount || 0);
-    const amountTotal = computed(
-      (): number => transaction.value ? getTxAmountTotal(transaction.value, direction.value) : 0,
-    );
 
     watch(
       transaction,
@@ -163,7 +159,6 @@ export default defineComponent({
 
       if (rawTransaction) {
         transaction.value = rawTransaction;
-        setActiveTransaction(rawTransaction);
       }
     });
 

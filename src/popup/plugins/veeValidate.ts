@@ -1,5 +1,5 @@
 import { defineRule } from 'vee-validate';
-import { required } from '@vee-validate/rules';
+import { required, numeric } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
@@ -30,6 +30,11 @@ defineRule(
 defineRule(
   'url',
   (value: string) => !value || isUrlValid(value) || tg('validation.url'),
+);
+
+defineRule(
+  'numeric',
+  (value: string) => numeric(value) || tg('validation.numeric'),
 );
 
 defineRule(
@@ -107,18 +112,6 @@ defineRule(
     }
     return true;
   },
-);
-
-defineRule(
-  'is_hex_format',
-  (value: string) => (
-    (
-      value?.toString()?.startsWith('0x')
-      && value.length >= 3
-      && parseInt(value.slice(2), 16).toString(16) === value.slice(2).toLowerCase()
-    )
-    || tg('validation.hexFormat')
-  ),
 );
 
 export default () => {

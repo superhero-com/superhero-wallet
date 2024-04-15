@@ -395,10 +395,10 @@ export default defineComponent({
     const protocolExplorer = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).getExplorer();
 
     const multisigTx = ref<ITx | null>(null);
-    const transaction = ref<ITransaction | null>(null);
+    const transaction = ref<ITransaction>();
     const proposalCompleted = ref<boolean>(false);
 
-    const { transactionAssets, setActiveTransaction } = useTransactionData();
+    const { transactionAssets } = useTransactionData({ transaction });
 
     const totalSpent = computed(() => {
       if (!proposalCompleted.value || !transaction.value) {
@@ -435,7 +435,7 @@ export default defineComponent({
       } as any;
       // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
 
-      setActiveTransaction({ tx: multisigTx.value } as ITransaction);
+      transaction.value = { tx: multisigTx.value } as ITransaction;
     }
 
     function handleInsufficientBalanceError(

@@ -27,20 +27,21 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
-import { camelCase } from 'lodash-es';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRef,
+} from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
   ITokenResolved,
   ITransaction,
-  TxFunction,
-  TxFunctionParsed,
-  TxFunctionRaw,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useAeSdk, useFungibleTokens } from '@/composables';
+import { useAeSdk, useFungibleTokens, useTransactionData } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
 import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
 
@@ -60,39 +61,32 @@ export default defineComponent({
 
     const { nodeNetworkId } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { txFunctionParsed, txFunctionRaw } = useTransactionData({
+      transaction: toRef(() => props.transaction),
+    });
 
     const aeTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
 
-    function getTxFunction(
-      functionName: TxFunctionRaw | TxFunctionParsed | TxFunction,
-    ): TxFunctionParsed {
-      return camelCase(functionName) as TxFunctionParsed;
-    }
-
     // TODO replace with `transactionTokens` taken from `transactionData` composable
     const assetList = computed(() => {
-      const txFunction = getTxFunction(props.transaction.tx.function!);
-
-      if (
-        !isTxFunctionDexSwap(txFunction)
-        && !isTxFunctionDexSwap(props.transaction.tx.function!)
-      ) {
+      if (!isTxFunctionDexSwap(txFunctionRaw.value)) {
         return [];
       }
-      const resolver = getTransactionTokenInfoResolver(txFunction);
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
       if (!resolver) {
         return [];
       }
       let { tokens } = resolver(props.transaction, aeTokensAvailable.value);
-      const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
+      const args = props.transaction.tx.arguments || [];
+      const index = args.findIndex(({ type }) => type === 'list');
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
       const tokenLastIndex = tokens.length - 1;
 
-      if (index >= 0 && props.transaction.tx.arguments[index].value.length > tokens.length) {
+      if (index >= 0 && args[index].value.length > tokens.length) {
         tokens = [
           tokens[0],
-          ...props.transaction.tx.arguments[index].value
-            .slice(1, props.transaction.tx.arguments[index].value.length - 1)
+          ...args[index].value
+            .slice(1, args[index].value.length - 1)
             .map((element: any) => aeTokensAvailable.value[element.value]),
           tokens[1],
         ];

@@ -305,7 +305,7 @@ export default defineComponent({
 
   .input-wrapper {
     display: block;
-    padding: 8px 12px;
+    padding: 10px 12px; // Decides on the input size
     background-color: var(--color-bg);
     border: none;
     border-radius: variables.$border-radius-interactive;

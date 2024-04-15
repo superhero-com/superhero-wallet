@@ -14,7 +14,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRef,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 
@@ -55,8 +60,7 @@ export default defineComponent({
       isDex,
       isDexAllowance,
     } = useTransactionData({
-      transaction: props.transaction,
-      externalAddress: props.transaction?.transactionOwner,
+      transaction: toRef(() => props.transaction),
     });
 
     const { tippingContractAddresses } = useTippingContracts();

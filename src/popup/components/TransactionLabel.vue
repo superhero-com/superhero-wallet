@@ -73,6 +73,7 @@ import {
   computed,
   defineComponent,
   PropType,
+  toRef,
 } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
@@ -117,15 +118,14 @@ export default defineComponent({
       direction,
       innerTx,
       isDex,
-      isDexAddLiquidity,
       isDexAllowance,
-      isDexRemoveLiquidity,
+      isDexLiquidityAdd,
+      isDexLiquidityRemove,
       isErrorTransaction,
       isTip,
       txTypeListLabel,
     } = useTransactionData({
-      transaction: props.transaction,
-      externalAddress: props.transaction.transactionOwner,
+      transaction: toRef(() => props.transaction),
     });
 
     const { getProtocolAvailableTokens } = useFungibleTokens();
@@ -158,9 +158,9 @@ export default defineComponent({
           : t('transaction.type.transactionFeePaid');
       } else if (isDexAllowance.value) {
         text = t('transaction.dexType.allowToken');
-      } else if (isDexAddLiquidity.value) {
+      } else if (isDexLiquidityAdd.value) {
         text = t('transaction.dexType.provideLiquidity');
-      } else if (isDexRemoveLiquidity.value) {
+      } else if (isDexLiquidityRemove.value) {
         text = t('transaction.dexType.removeLiquidity');
       } else if (isDex.value) {
         text = t('common.swap');

@@ -41,7 +41,7 @@ import type {
   NetworkTypeDefault,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { getLastNotEmptyAccountIndex } from '@/utils';
+import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -100,7 +100,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       defaultValue: ETH_NETWORK_DEFAULT_ENV_SETTINGS.chainId,
       validationRules: {
         url: false,
-        is_hex_format: true,
+        numeric: true,
       },
       getPlaceholder: () => tg('pages.network.chainIdPlaceholder'),
       getLabel: () => tg('pages.network.chainIdLabel'),
@@ -296,7 +296,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
-      chainId,
+      chainId: toHex(chainId),
       nonce,
       to: contractId,
       data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
@@ -435,7 +435,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
-      chainId,
+      chainId: toHex(chainId),
       nonce,
       to: recipient,
       value: hexAmount,

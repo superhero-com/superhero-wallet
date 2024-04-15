@@ -125,8 +125,8 @@ export default defineComponent({
       isErrorTransaction,
       transactionAssets,
     } = useTransactionData({
-      transaction: currentTransaction.value,
-      externalAddress: transactionOwner.value,
+      transaction: currentTransaction,
+      transactionCustomOwner: transactionOwner,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {

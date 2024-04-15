@@ -1,12 +1,12 @@
-import { computed, ref } from 'vue';
+import { Ref, computed } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
-import { camelCase } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 import type {
   AccountAddress,
+  BigNumberPublic,
   ITokenResolved,
   ITransaction,
   ObjectValues,
-  TxFunctionParsed,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -25,19 +25,30 @@ import {
   TX_RETURN_TYPE_OK,
   TX_FUNCTIONS,
   TX_FUNCTIONS_MULTISIG,
+  AE_COIN_PRECISION,
+  DEX_TRANSACTION_TAGS,
+  DEX_PROVIDE_LIQUIDITY,
 } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
   getOwnershipStatus,
+  getTransactionTokenInfoResolver,
   getTxDirection,
   getTxOwnerAddress,
   getTxTag,
+  isTransactionAex9,
   isTxDex,
   isTxFunctionDexAddLiquidity,
   isTxFunctionDexAllowance,
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
-  getTransactionTokenInfoResolver,
+  aettosToAe,
+  categorizeContractCallTxObject,
+  isTxFunctionDexSwap,
+  isTxFunctionDexMaxSpent,
+  isTxFunctionDexMinReceived,
+  getTxFunctionRaw,
+  getTxFunctionParsed,
 } from '@/protocols/aeternity/helpers';
 import { useFungibleTokens } from '@/composables/fungibleTokens';
 import { useAccounts } from './accounts';
@@ -46,8 +57,8 @@ import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions {
-  transaction?: ITransaction;
-  externalAddress?: AccountAddress;
+  transaction: Ref<ITransaction | undefined>;
+  transactionCustomOwner?: Ref<AccountAddress | undefined>;
   showDetailedAllowanceInfo?: boolean;
 }
 
@@ -56,22 +67,30 @@ interface UseTransactionOptions {
  */
 export function useTransactionData({
   transaction,
-  externalAddress,
+  transactionCustomOwner,
   showDetailedAllowanceInfo = false,
-}: UseTransactionOptions = {}) {
+}: UseTransactionOptions) {
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
-  const { getProtocolAvailableTokens, getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
+  const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
 
-  const activeTransaction = ref(transaction);
-  const ownerAddress = ref<AccountAddress | undefined>(externalAddress);
-
-  const outerTx = computed(() => activeTransaction.value?.tx);
+  const outerTx = computed(() => transaction.value?.tx);
   const innerTx = computed(() => outerTx.value ? getInnerTransaction(outerTx.value) : undefined);
-  const outerTxTag = computed(() => outerTx.value ? getTxTag(outerTx.value) : null);
-  const innerTxTag = computed(() => innerTx.value ? getTxTag(innerTx.value) : null);
+  const outerTxTag = computed(() => getTxTag(outerTx.value));
+  const innerTxTag = computed(() => getTxTag(innerTx.value));
   const txType = computed(() => outerTxTag.value ? Tag[outerTxTag.value] as TxType : null);
+  const txFunctionRaw = computed(() => getTxFunctionRaw(innerTx.value?.function));
+  const txFunctionParsed = computed(() => getTxFunctionParsed(innerTx.value?.function));
+  const fee = computed((): number => outerTx.value?.fee || 0);
+  const protocol = computed(() => transaction.value?.protocol || PROTOCOLS.aeternity);
+  const transactionDefaultOwner = computed(() => getTxOwnerAddress(innerTx.value));
+  const transactionOwner = computed(() => (
+    transactionCustomOwner?.value
+    || transaction.value?.transactionOwner
+    || activeAccount.value.address
+  ));
+  const protocolTokens = computed(() => getProtocolAvailableTokens(protocol.value));
 
   /**
    * Transaction TX type value converted into human readable label
@@ -92,8 +111,8 @@ export function useTransactionData({
    * Transaction TX function value converted into human readable label
    */
   const txFunctionLabel = computed(
-    (): string => (outerTx.value?.function)
-      ? getTxFunctionLabel(outerTx.value.function as TxFunctionRaw)
+    (): string => (txFunctionRaw.value)
+      ? getTxFunctionLabel(txFunctionRaw.value)
       : '',
   );
 
@@ -101,25 +120,31 @@ export function useTransactionData({
     (): boolean => outerTx.value?.contractId ? isAssetCoin(outerTx.value.contractId) : true,
   );
 
-  const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
+  const isDex = computed((): boolean => (
+    (protocol.value === PROTOCOLS.aeternity && isTxDex(innerTx.value, dexContracts.value))
+    || (
+      protocol.value === PROTOCOLS.ethereum
+      && !!outerTx.value?.recipientId
+      && !!protocolTokens.value[outerTx.value.recipientId]
+    )
+  ));
 
   const isDexAllowance = computed((): boolean => (
     !!innerTx.value
-    && isTxFunctionDexAllowance(innerTx.value?.function)
+    && isTxFunctionDexAllowance(txFunctionRaw.value)
     && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
   ));
 
-  const isDexAddLiquidity = computed(
-    (): boolean => isTxFunctionDexAddLiquidity(innerTx.value?.function),
-  );
-
-  const isDexRemoveLiquidity = computed(
-    (): boolean => isTxFunctionDexRemoveLiquidity(innerTx.value?.function),
-  );
-
-  const isDexPool = computed(
-    (): boolean => isTxFunctionDexPool(innerTx.value?.function),
-  );
+  const isDexLiquidityAdd = computed(() => isTxFunctionDexAddLiquidity(txFunctionRaw.value));
+  const isDexLiquidityProvide = computed(() => (
+    txFunctionRaw.value
+    && DEX_TRANSACTION_TAGS[txFunctionRaw.value as TxFunctionRaw] === DEX_PROVIDE_LIQUIDITY
+  ));
+  const isDexLiquidityRemove = computed(() => isTxFunctionDexRemoveLiquidity(txFunctionRaw.value));
+  const isDexPool = computed(() => isTxFunctionDexPool(txFunctionRaw.value));
+  const isDexSwap = computed(() => isTxFunctionDexSwap(txFunctionRaw.value));
+  const isDexMaxSpent = computed(() => isTxFunctionDexMaxSpent(txFunctionRaw.value));
+  const isDexMinReceived = computed(() => isTxFunctionDexMinReceived(txFunctionRaw.value));
 
   const isMultisig = computed((): boolean => (
     !!outerTx.value?.function
@@ -149,7 +174,9 @@ export function useTransactionData({
     },
   );
 
-  const txOwnerAddress = computed(() => getTxOwnerAddress(innerTx.value));
+  const isAex9 = computed(
+    () => transaction.value && isTransactionAex9(transaction.value),
+  );
 
   const ownershipStatus = computed(() => getOwnershipStatus(
     activeAccount.value,
@@ -162,49 +189,93 @@ export function useTransactionData({
       ? TX_DIRECTION.received
       : getTxDirection(
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
-        externalAddress
-        || (
-          ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
-          && txOwnerAddress.value
-        )
-        || activeAccount.value.address,
+        transactionOwner.value,
       ),
   );
+
+  function getAeTxTotalAmount(isReceived: boolean = false): number {
+    if (isDexAllowance.value) {
+      return toShiftedBigNumber(fee.value, -AE_COIN_PRECISION).toNumber();
+    }
+
+    const contractCallData = transaction.value?.tx
+      && categorizeContractCallTxObject(transaction.value);
+
+    const tokenData = contractCallData
+      && getProtocolAvailableTokens(PROTOCOLS.aeternity)[contractCallData.assetContractId!];
+
+    if (contractCallData && tokenData) {
+      return +toShiftedBigNumber(
+        contractCallData.amount || 0,
+        -(tokenData.decimals || AE_COIN_PRECISION), // TODO possibility of wrong precision
+      );
+    }
+
+    const claimTipAmount = (outerTx.value?.function === 'claim') ? outerTx.value?.log?.[0]?.topics[2] : null;
+    const rawAmount = innerTx.value.amount || innerTx.value?.nameFee || claimTipAmount || 0;
+    const amount: BigNumberPublic = (typeof rawAmount === 'object')
+      ? rawAmount
+      : new BigNumber(Number(rawAmount));
+    const gasCost = (outerTx.value?.gasPrice && outerTx.value?.gasUsed)
+      ? new BigNumber(outerTx.value.gasPrice).multipliedBy(outerTx.value.gasUsed)
+      : 0;
+
+    return +aettosToAe(
+      amount
+        .plus(isReceived ? 0 : outerTx.value?.fee || 0)
+        .plus(isReceived ? 0 : innerTx.value?.fee || 0)
+        .plus(isReceived ? 0 : gasCost),
+    );
+  }
+
+  function getCommonTxTotalAmount(isReceived: boolean = false): number {
+    return new BigNumber(outerTx.value?.amount || 0)
+      .plus(isReceived ? 0 : fee.value)
+      .toNumber();
+  }
+
+  const amount = computed((): number => (protocol.value === PROTOCOLS.aeternity)
+    ? getAeTxTotalAmount()
+    : getCommonTxTotalAmount());
+
+  const amountTotal = computed((): number => {
+    const isReceived = direction.value === TX_DIRECTION.received;
+    return (protocol.value === PROTOCOLS.aeternity)
+      ? getAeTxTotalAmount(isReceived)
+      : getCommonTxTotalAmount(isReceived);
+  });
 
   /**
    * List of assets used within the transaction.
    * Contains more than one item if the transaction is for example a swapping event.
    */
   const transactionAssets = computed((): ITokenResolved[] => {
-    if (!activeTransaction.value?.tx) {
+    if (!transaction.value?.tx) {
       return [];
     }
 
     let convertToCoin = false;
 
-    const { protocol = PROTOCOLS.aeternity } = activeTransaction.value;
-    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
-    const protocolTokens = getProtocolAvailableTokens(protocol);
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol.value);
 
     // TODO move AE specific logic to adapter and store resolved data in the transactions
-    if (protocol === PROTOCOLS.aeternity) {
+    if (protocol.value === PROTOCOLS.aeternity) {
       // AE DEX and wrapped AE (WAE)
       if (
-        innerTx.value?.function
+        txFunctionParsed.value
         && (!isDexAllowance.value || showDetailedAllowanceInfo)
       ) {
-        const functionName = camelCase(innerTx.value.function) as TxFunctionParsed;
-        const functionResolver = getTransactionTokenInfoResolver(functionName);
+        const functionResolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
 
         if (functionResolver && isDex.value) {
-          return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens)
+          return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens.value)
             .tokens
             .map(({
-              amount,
+              amount: txAmount,
               decimals,
               ...otherAssetData
             }) => ({
-              amount: +toShiftedBigNumber(amount!, -decimals!),
+              amount: +toShiftedBigNumber(txAmount!, -decimals!),
               ...otherAssetData,
             }));
         }
@@ -212,48 +283,54 @@ export function useTransactionData({
 
       // Convert all unresolved transaction with non-token contractId to coin.
       // For example contract calls
-      if (!protocolTokens[innerTx.value?.contractId] || innerTxTag.value === Tag.ContractCreateTx) {
+      if (
+        !protocolTokens.value[innerTx.value?.contractId]
+        || innerTxTag.value === Tag.ContractCreateTx
+      ) {
         convertToCoin = true;
       }
     }
-
-    const amount = (isDexAllowance.value)
-      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision).toString()
-      : getTxAmountTotal(activeTransaction.value, direction.value);
     const isReceived = direction.value === TX_DIRECTION.received;
+    const coinAssetData: ITokenResolved = {
+      ...innerTx.value || {},
+      amount: amount.value,
+      assetType: ASSET_TYPES.coin,
+      contractId: adapter.coinContractId,
+      isReceived,
+      name: adapter.coinName,
+      protocol,
+      symbol: adapter.coinSymbol,
+    };
 
+    // When approving transaction created by ETH dapp connected to wallet
+    if (protocol.value === PROTOCOLS.ethereum && isDex.value) {
+      const tokenAssetData = {
+        ...protocolTokens.value[outerTx.value?.recipientId!] || {},
+        assetType: ASSET_TYPES.token,
+        isReceived: true,
+      };
+      if (outerTx.value?.contractId === adapter.coinContractId) {
+        return [coinAssetData, tokenAssetData];
+      }
+      return [tokenAssetData, coinAssetData];
+    }
     if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value || convertToCoin) {
-      return [{
-        ...innerTx.value || {},
-        ...adapter.getDefaultCoin(),
-        amount,
-        assetType: ASSET_TYPES.coin,
-        isReceived,
-      }];
+      return [coinAssetData];
     }
 
-    const token = protocolTokens[outerTx.value!.contractId];
+    const token = protocolTokens.value[outerTx.value!.contractId];
 
     return [{
       ...innerTx.value || {},
       ...token || {},
-      amount,
+      amount: amount.value,
       assetType: ASSET_TYPES.token,
       contractId: outerTx.value?.contractId,
       isReceived,
-      name: token?.name,
       protocol,
-      symbol: getTxAssetSymbol(activeTransaction.value),
+      symbol: getTxAssetSymbol(transaction.value),
     }];
   });
-
-  function setActiveTransaction(newTransaction: ITransaction) {
-    activeTransaction.value = newTransaction;
-  }
-
-  function setExternalAddress(address: AccountAddress) {
-    ownerAddress.value = address;
-  }
 
   function getOwnershipAddress(externalOwnerAddress?: AccountAddress): AccountAddress {
     const { current, subAccount } = AE_TRANSACTION_OWNERSHIP_STATUS;
@@ -266,31 +343,39 @@ export function useTransactionData({
           .find(({ address }) => [accountId, callerId].includes(address))?.address!;
       }
       default: {
-        return externalOwnerAddress || txOwnerAddress.value!;
+        return externalOwnerAddress || transactionDefaultOwner.value!;
       }
     }
   }
 
   return {
+    amountTotal,
+    amount,
+    fee,
     outerTxTag,
     innerTxTag,
     innerTx,
+    txFunctionLabel,
+    txFunctionRaw,
+    txFunctionParsed,
     txTypeLabel,
     txTypeListLabel,
-    txFunctionLabel,
+    isAex9,
     isErrorTransaction,
     isDex,
-    isDexAddLiquidity,
     isDexAllowance,
+    isDexLiquidityAdd,
+    isDexLiquidityRemove,
+    isDexLiquidityProvide,
+    isDexMaxSpent,
+    isDexMinReceived,
     isDexPool,
-    isDexRemoveLiquidity,
+    isDexSwap,
     isMultisig,
     isTip,
     isTransactionCoin,
     direction,
     transactionAssets,
     getOwnershipAddress,
-    setActiveTransaction,
-    setExternalAddress,
   };
 }

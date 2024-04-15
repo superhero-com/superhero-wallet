@@ -59,7 +59,7 @@ export type ObjectValues<T> = T[keyof T];
 /**
  * Generic that allows to pick only the public properties of a class.
  */
-type PublicPart<T> = { [K in keyof T]: T[K] };
+export type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
  * Makes the interface and all the child interfaces to be partial.
@@ -454,7 +454,7 @@ export interface ITx {
   accountId?: AccountAddress;
   aexnType?: 'aex9';
   amount: number;
-  arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
+  arguments?: TxArguments[];
   callData?: Encoded.ContractBytearray;
   call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId?: AccountAddress;
@@ -495,6 +495,8 @@ export interface ITx {
     tx: ITx | IGAAttachTx | IGAMetaTx;
   };
   VSN?: string;
+  /** ETH contract call arguments */
+  data?: string;
 }
 
 export interface ITransaction {
@@ -558,6 +560,7 @@ export type DexFunctionType =
   | 'pool'
   | 'addLiquidity'
   | 'removeLiquidity'
+  | 'provideLiquidity'
   | 'swap'
   | 'allowance'
   | 'maxSpent'
@@ -694,6 +697,7 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   show?: boolean; // Decides if the modal window should be open
   fromAccount?: string;
   isSenderReplaced?: boolean;
+  protocol?: Protocol;
 }
 
 export interface IModalProps extends Partial<IPopupProps> {

@@ -1,11 +1,16 @@
 <template>
   <div
     class="avatar"
-    :class="[size, {
-      borderless,
-      placeholder: isPlaceholder,
-    }]"
-    :style="{ '--color': color }"
+    :class="[
+      size,
+      (variant) ? `variant-${variant}` : null,
+      {
+        borderless,
+        placeholder: isPlaceholder,
+      },
+    ]"
+    :title="name"
+    :style="{ '--color': calculatedColor }"
   >
     <slot>
       <img
@@ -41,6 +46,7 @@ export default defineComponent({
       default: 'rg',
       validator: (val: string) => SIZES.includes(val),
     },
+    variant: { type: String, default: null },
     borderless: Boolean,
     isPlaceholder: Boolean,
   },
@@ -50,7 +56,9 @@ export default defineComponent({
     const hasProfileImage = ref(false);
 
     const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
-    const color = computed(() => props.address ? getAddressColor(props.address) : undefined);
+    const calculatedColor = computed(() => (props.address)
+      ? getAddressColor(props.address)
+      : undefined);
     const profileImageUrl = computed(() => (props.address === '' || isContract(props.address))
       ? null
       : `${aeActiveNetworkSettings.value.backendUrl}/profile/image/${props.address}`);
@@ -65,7 +73,7 @@ export default defineComponent({
 
     return {
       srcUrl,
-      color,
+      calculatedColor,
       hasProfileImage,
     };
   },
@@ -104,6 +112,16 @@ $size-xl: 56px;
 
   &.placeholder {
     background-color: rgba($color-white, 0.15);
+  }
+
+  &.variant {
+    &-primary {
+      --color: #{$color-primary};
+    }
+
+    &-grey {
+      --color: #{$color-grey-border};
+    }
   }
 
   &.sm {

@@ -14,8 +14,8 @@
           >
             <template #tokens>
               <TransactionAssetRows
-                :assets="assets"
-                :is-rounded="!!assets"
+                :assets="transactionAssets"
+                :is-rounded="!!transactionAssets"
                 :protocol="PROTOCOLS.bitcoin"
                 icon-size="rg"
                 multiple-rows
@@ -39,13 +39,11 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { IonContent, IonPage } from '@ionic/vue';
 
-import type { ITokenResolved, ITransaction } from '@/types';
+import type { ITransaction } from '@/types';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
-import { useUi } from '@/composables';
+import { useTransactionData, useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { BTC_PROTOCOL_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
@@ -68,22 +66,15 @@ export default defineComponent({
 
     const transaction = ref<ITransaction>();
 
+    const {
+      amount,
+      amountTotal,
+      transactionAssets,
+    } = useTransactionData({ transaction });
+
     const isReceived = computed(() => transaction.value?.tx?.senderId !== transactionOwner);
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
-    const amount = computed((): number => transaction.value?.tx?.amount || 0);
-    const amountTotal = computed((): number => transaction.value?.tx
-      ? getTxAmountTotal(transaction.value, isReceived.value)
-      : 0);
-
     const direction = computed(() => isReceived.value ? TX_DIRECTION.received : TX_DIRECTION.sent);
-
-    const assets = computed((): ITokenResolved[] => [{
-      amount: amount.value,
-      symbol: BTC_SYMBOL,
-      name: BTC_PROTOCOL_NAME,
-      isReceived: direction.value === TX_DIRECTION.received,
-      contractId: adapter.coinContractId,
-    }]);
 
     watch(
       transaction,
@@ -103,15 +94,14 @@ export default defineComponent({
     });
 
     return {
-      BTC_SYMBOL,
       PROTOCOLS,
       amount,
       amountTotal,
       direction,
       fee,
       hash,
-      assets,
       transaction,
+      transactionAssets,
     };
   },
 });

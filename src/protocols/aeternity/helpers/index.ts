@@ -1,4 +1,5 @@
 import nacl from 'tweetnacl';
+import { camelCase, snakeCase } from 'lodash-es';
 import {
   AE_AMOUNT_FORMATS,
   Encoded,
@@ -26,6 +27,7 @@ import type {
   ITransaction,
   ITx,
   TxFunction,
+  TxFunctionParsed,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -257,18 +259,18 @@ export function getTxDirection(tx?: ITx | IGAAttachTx, address?: AccountAddress)
     : TX_DIRECTION.received;
 }
 
-export function getTxTag(tx: ITx): Tag | null {
-  if (tx.tag) {
-    return tx.tag;
+export function getTxTag({ tag, type }: ITx = {} as any): Tag | null {
+  if (tag) {
+    return tag;
   }
-  if (compareCaseInsensitive(tx.type, 'GAAttachTx')) { // aeSdk: GaAttachTx, mdw: GAAttachTx
+  if (compareCaseInsensitive(type, 'GAAttachTx')) { // aeSdk: GaAttachTx, mdw: GAAttachTx
     return Tag.GaAttachTx;
   }
-  if (compareCaseInsensitive(tx.type, 'GAMetaTx')) { // aeSdk: GaMetaTx, mdw: GAMetaTx
+  if (compareCaseInsensitive(type, 'GAMetaTx')) { // aeSdk: GaMetaTx, mdw: GAMetaTx
     return Tag.GaMetaTx;
   }
-  if (tx.type in Tag) {
-    return Tag[tx.type as TxType];
+  if (type in Tag) {
+    return Tag[type as TxType];
   }
   return null;
 }
@@ -312,32 +314,36 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
   );
 }
 
-export function isTxFunctionDexAllowance(txFunction?: TxFunction) {
+export function isTxFunctionDexAllowance(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.allowance, txFunction);
 }
 
-export function isTxFunctionDexSwap(txFunction?: TxFunction) {
+export function isTxFunctionDexSwap(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunction);
 }
 
-export function isTxFunctionDexPool(txFunction?: TxFunction) {
+export function isTxFunctionDexPool(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunction);
 }
 
-export function isTxFunctionDexMaxSpent(txFunction?: TxFunction) {
+export function isTxFunctionDexMaxSpent(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunction);
 }
 
-export function isTxFunctionDexMinReceived(txFunction?: TxFunction) {
+export function isTxFunctionDexMinReceived(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunction);
 }
 
-export function isTxFunctionDexAddLiquidity(txFunction?: TxFunction) {
+export function isTxFunctionDexAddLiquidity(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunction);
 }
 
-export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
+export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunctionRaw) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunction);
+}
+
+export function isTxFunctionProvideLiquidity(txFunction?: TxFunctionRaw) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.provideLiquidity, txFunction);
 }
 
 export function validateHash(fullHash?: string) {
@@ -384,4 +390,18 @@ export function getAccountFromSecret(secretKey: Buffer) {
       ? nacl.sign.keyPair.fromSeed(Buffer.from(secretKey)).secretKey
       : Buffer.from(secretKey),
   );
+}
+
+/**
+ * Parse any type of function name to camelCase (parsed)
+ */
+export function getTxFunctionParsed(functionName?: TxFunction) {
+  return functionName ? camelCase(functionName) as TxFunctionParsed : undefined;
+}
+
+/**
+ * Parse any type of function name to snake_case (raw)
+ */
+export function getTxFunctionRaw(functionName?: TxFunction) {
+  return functionName ? snakeCase(functionName) as TxFunctionRaw : undefined;
 }

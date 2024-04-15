@@ -1,7 +1,10 @@
 <template>
   <div
     class="icon-boxed"
-    :class="[`variant-${variant}`]"
+    :class="[
+      `variant-${variant}`,
+      { 'icon-smaller': iconSmaller },
+    ]"
   >
     <slot>
       <Component
@@ -26,6 +29,7 @@ export type IconBoxedVariant = typeof ICON_BOXED_VARIANT[number];
 export default defineComponent({
   props: {
     icon: { type: Object, default: null },
+    iconSmaller: Boolean,
     variant: {
       type: String as PropType<IconBoxedVariant>,
       validator: (value: IconBoxedVariant) => ICON_BOXED_VARIANT.includes(value),
@@ -39,6 +43,8 @@ export default defineComponent({
 @use '../../styles/variables' as *;
 
 .icon-boxed {
+  --icon-size: 48px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -49,26 +55,32 @@ export default defineComponent({
   background-color: $color-bg-1;
   background-clip: content-box;
 
-  &.variant-muted {
-    border-color: rgba($color-white, 0.05);
-    background-color: $color-bg-1;
-  }
-
-  &.variant-danger {
-    color: $color-danger;
-    border-color:  rgba($color-danger, 0.1);
-    background-color: rgba($color-danger, 0.2);
-  }
-
-  &.variant-success {
-    color: $color-success-dark;
-    border-color:  rgba($color-success-dark, 0.1);
-    background-color: rgba($color-success-dark, 0.2);
-  }
-
   .icon {
-    width: 48px;
-    height: 48px;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  &.icon-smaller {
+    --icon-size: 38px;
+  }
+
+  &.variant {
+    &-muted {
+      border-color: rgba($color-white, 0.05);
+      background-color: $color-bg-1;
+    }
+
+    &-danger {
+      color: $color-danger;
+      border-color: rgba($color-danger, 0.1);
+      background-color: rgba($color-danger, 0.2);
+    }
+
+    &-success {
+      color: $color-success-dark;
+      border-color: rgba($color-success-dark, 0.1);
+      background-color: rgba($color-success-dark, 0.2);
+    }
   }
 }
 </style>
