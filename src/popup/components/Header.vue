@@ -164,6 +164,7 @@ export default defineComponent({
       networkEdit: () => t('pages.titles.networkEdit'),
       notFound: () => t('pages.titles.notFound'),
       multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
+      secureLogin: () => t('pages.titles.secureLogin'),
     };
 
     const currentHomeRouteName = computed(

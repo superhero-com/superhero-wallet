@@ -47,12 +47,16 @@ export default {
 
   &.disabled {
     opacity: 0.75;
+
+    .switch .slider {
+      cursor: not-allowed;
+    }
   }
 
   .label {
     color: rgba(variables.$color-white, 0.5);
 
-    @extend %face-sans-15-regular;
+    @extend %face-sans-15-medium;
   }
 
   .switch {

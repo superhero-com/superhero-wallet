@@ -3,6 +3,7 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  watch,
 } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { STORAGE_KEYS } from '@/constants';
@@ -14,6 +15,8 @@ import { useStorageRef } from './storageRef';
 export interface IOtherSettings {
   isSeedBackedUp?: boolean;
   saveErrorLog?: boolean;
+  isSecureLoginEnabled?: boolean;
+  secureLoginTimeout?: number;
 }
 
 const homeRouteName = ref(ROUTE_ACCOUNT);
@@ -21,6 +24,7 @@ const isAppActive = ref(false);
 const isLoaderVisible = ref(false);
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
 const qrScannerOpen = ref(false);
+const lastTimeAppWasActive = ref<number>();
 
 const hiddenCards = useStorageRef<string[]>(
   [],
@@ -43,6 +47,8 @@ const otherSettings = useStorageRef<IOtherSettings>(
 
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
+const isSecureLoginEnabled = computed(() => !!otherSettings.value.isSecureLoginEnabled);
+const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout ?? 0);
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -82,6 +88,14 @@ export function useUi() {
     otherSettings.value.saveErrorLog = val;
   }
 
+  function setSecureLoginEnabled(val: boolean) {
+    otherSettings.value.isSecureLoginEnabled = val;
+  }
+
+  function setSecureLoginTimeout(val: number) {
+    otherSettings.value.secureLoginTimeout = val;
+  }
+
   function initVisibilityListeners() {
     handleVisibilityChange();
     onMounted(() => {
@@ -92,6 +106,16 @@ export function useUi() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     });
   }
+
+  watch(
+    isAppActive,
+    async (isActive, wasActive) => {
+      // App went to background
+      if (wasActive && !isActive) {
+        lastTimeAppWasActive.value = Date.now();
+      }
+    },
+  );
 
   function resetUiSettings() {
     hiddenCards.value = [];
@@ -107,6 +131,9 @@ export function useUi() {
     isLoaderVisible,
     isSeedBackedUp,
     saveErrorLog,
+    isSecureLoginEnabled,
+    secureLoginTimeout,
+    lastTimeAppWasActive,
     initVisibilityListeners,
     setCardHidden,
     setBackedUpSeed,
@@ -116,5 +143,7 @@ export function useUi() {
     setQrScanner,
     setLoaderVisible,
     resetUiSettings,
+    setSecureLoginEnabled,
+    setSecureLoginTimeout,
   };
 }

@@ -13,6 +13,7 @@
         'has-header': showHeader,
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
+        transparent,
         dense,
         'semi-dense': semiDense,
         'blur-bg': !(IS_FIREFOX && IS_EXTENSION),
@@ -107,6 +108,7 @@ export default defineComponent({
     centered: Boolean,
     bodyWithoutPaddingBottom: Boolean,
     minHeight: Boolean,
+    transparent: Boolean,
     header: { type: String, default: null },
   },
   emits: ['close', 'open'],
@@ -254,6 +256,13 @@ export default defineComponent({
       position: sticky;
       z-index: 3;
       top: 0;
+    }
+  }
+
+  &.transparent {
+    .container {
+      box-shadow: none;
+      background: transparent;
     }
   }
 

@@ -45,6 +45,7 @@ import {
   ROUTE_POPUP_MESSAGE_SIGN,
   ROUTE_PERMISSIONS_DETAILS,
   ROUTE_PERMISSIONS_SETTINGS,
+  ROUTE_SECURE_LOGIN_SETTINGS,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -102,6 +103,7 @@ import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
 import AppsBrowser from '../pages/AppsBrowser.vue';
+import SecureLoginSettings from '../pages/SecureLoginSettings.vue';
 
 import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
@@ -451,6 +453,15 @@ export const routes: WalletAppRouteConfig[] = [
     component: SeedPhraseVerifySettings,
     meta: {
       title: 'seedPhrase',
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    path: '/more/settings/secure-login',
+    component: SecureLoginSettings,
+    name: ROUTE_SECURE_LOGIN_SETTINGS,
+    meta: {
+      title: 'secureLogin',
       showHeaderNavigation: true,
     },
   },
