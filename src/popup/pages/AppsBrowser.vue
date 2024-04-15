@@ -7,7 +7,7 @@
       >
         <AppsBrowserHeader
           :selected-app="selectedApp"
-          :iframe="iframeRef"
+          :iframe="iframeEl"
           @back="back()"
           @refresh="refresh()"
         />
@@ -67,7 +67,7 @@
 
         <iframe
           v-else
-          ref="iframeRef"
+          ref="iframeEl"
           title="selectedApp"
           class="apps-browser-iframe"
           :src="selectedApp.url"
@@ -155,7 +155,7 @@ export default defineComponent({
     const { addHistoryItem } = useAppsBrowserHistory();
 
     const selectedApp = ref<App>();
-    const iframeRef = ref();
+    const iframeEl = ref<HTMLIFrameElement>();
     const customAppURL = ref('');
     const currentClientId = ref('');
     let shareWalletInfoInterval: any;
@@ -177,13 +177,13 @@ export default defineComponent({
     }
 
     async function onAppLoaded() {
-      if (!iframeRef.value || !selectedApp.value) return;
+      if (!iframeEl.value || !selectedApp.value) return;
       // Don't recreate RpcClient in Safari desktop and iOS webview
       // because on these platforms `load` event triggers on anchor navigation
       if (IS_SAFARI && currentClientId.value) return;
       await removeRpcClientIfAny();
       const sdk = await getAeSdk();
-      const target = iframeRef.value.contentWindow;
+      const target = iframeEl.value.contentWindow;
       const connection = new BrowserWindowMessageConnection({ target });
       currentClientId.value = sdk.addRpcClient(connection);
       const app = selectedApp.value;
@@ -209,7 +209,7 @@ export default defineComponent({
     }
 
     function refresh() {
-      if (iframeRef.value && selectedApp.value) {
+      if (iframeEl.value && selectedApp.value) {
         setLocalStorageItem([LOCAL_STORAGE_ITEM], selectedApp.value);
         window.location.reload();
       }
@@ -259,7 +259,7 @@ export default defineComponent({
 
     return {
       refresh,
-      iframeRef,
+      iframeEl,
       customAppURL,
       DAPPS_LIST,
       selectedApp,
