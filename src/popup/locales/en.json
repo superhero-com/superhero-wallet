@@ -12,10 +12,16 @@
     "callData": "Call data",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "connect": "Connect",
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "connectionFailed": "Connection failed",
     "contractId": "Contract ID",
     "notNow": "Not now",
     "copy": "Copy",
     "days": "{n} days | {n} day | {n} days",
+    "disconnect": "Disconnect",
+    "disconnecting": "Disconnecting...",
     "edit": "Edit",
     "faucet": "Faucet",
     "fellowSuperhero": "Fellow Superhero",
@@ -38,6 +44,7 @@
     "send": "Send",
     "sign": "Sign",
     "smartContract": "Smart contract",
+    "status": "Status",
     "swap": "Swap",
     "browser": "Browser",
     "title": "Superhero wallet",
@@ -421,6 +428,7 @@
     "estimatedFee": "Estimated transaction fee",
     "maxFee": "Maximum transaction fee",
     "advancedDetails": "Advanced transaction details",
+    "data": "Transaction data",
     "type": {
       "spendTx": "Spend",
       "contractCreateTx": "Contract create",
@@ -1145,11 +1153,8 @@
       "networkMiddlewareLabel": "Network middleware",
       "backendUrlPlaceholder": "Enter tipping Backend URL",
       "backendUrlLabel": "Tipping backend",
-      "chainIdPlaceholder": "0x1",
-      "chainIdLabel": "Chain id (hex)",
-      "showTippingConfig": "Show Tipping Configuration",
-      "hideTippingConfig": "Hide Tipping Configuration",
-      "save": "Connect",
+      "chainIdPlaceholder": "1",
+      "chainIdLabel": "Chain id (number)",
       "error": {
         "networkExists": "Network with this name exist",
         "invalidHostname": "Invalid hostname",
@@ -1263,5 +1268,14 @@
     "fallbackTitle": "Use passcode",
     "title": "Secure login",
     "subtitle": "Log in using biometric authentication"
+  },
+  "walletConnect": {
+    "modalTitle": "Connect to Ethereum Dapp",
+    "modalSubtitle": "Scan WalletConnect QR Code or enter URI code to connect to the dapp.",
+    "uriInputLabel": "WalletConnect URI",
+    "dappName": "Name",
+    "dappDescription": "Description",
+    "dappUrl": "URL",
+    "dappRequestedDisconnect": "Dapp requested to disconnect"
   }
 }

@@ -31,7 +31,6 @@
         class="card-close"
       >
         <BtnIcon
-          icon-variant="light"
           :icon="CloseIcon"
           @click="setCardHidden(cardId)"
         />

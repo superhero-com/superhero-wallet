@@ -123,6 +123,7 @@ module.exports = {
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
       definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
       definitions['process.env.ETHERSCAN_API_KEY'] = JSON.stringify(process.env.ETHERSCAN_API_KEY);
+      definitions['process.env.WALLET_CONNECT_PROJECT_ID'] = JSON.stringify(process.env.WALLET_CONNECT_PROJECT_ID);
 
       return [definitions];
     }).end();

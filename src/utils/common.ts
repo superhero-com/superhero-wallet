@@ -205,6 +205,15 @@ export function getDefaultAccountLabel({ protocol, idx }: Partial<IAccount> = {}
     .join(' ');
 }
 
+/**
+ * Common way of establishing the transaction asset amount
+ */
+export function getCommonTxAmountTotal(transaction: ITransaction, isReceived: boolean): number {
+  return new BigNumber(transaction.tx?.amount || 0)
+    .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+    .toNumber();
+}
+
 export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
   const result = window.localStorage.getItem(prepareStorageKey(keys));
   return result ? JSON.parse(result) : undefined;

@@ -79,15 +79,16 @@ export default defineComponent({
       }
 
       let { tokens } = resolver(props.transaction, aeTokensAvailable.value);
-      const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
+      const args = props.transaction.tx.arguments || [];
+      const index = args.findIndex(({ type }) => type === 'list');
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
       const tokenLastIndex = tokens.length - 1;
 
-      if (index >= 0 && props.transaction.tx.arguments[index].value.length > tokens.length) {
+      if (index >= 0 && args[index].value.length > tokens.length) {
         tokens = [
           tokens[0],
-          ...props.transaction.tx.arguments[index].value
-            .slice(1, props.transaction.tx.arguments[index].value.length - 1)
+          ...args[index].value
+            .slice(1, args[index].value.length - 1)
             .map((element: any) => aeTokensAvailable.value[element.value]),
           tokens[1],
         ];

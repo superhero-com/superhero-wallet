@@ -1,5 +1,6 @@
 export * from './accounts';
 export * from './assetDetails';
+export * from './auth';
 export * from './balances';
 export * from './copy';
 export * from './connection';
@@ -32,3 +33,4 @@ export * from './languages';
 export * from './permissions';
 export * from './auth';
 export * from './appsBrowserHistory';
+export * from './walletConnect';

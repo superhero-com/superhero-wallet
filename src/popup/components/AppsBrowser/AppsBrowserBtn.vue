@@ -4,6 +4,7 @@
     data-cy="apps-browser-btn"
     :icon="GlobeSmallIcon"
     :to="{ name: ROUTE_APPS_BROWSER }"
+    dimmed
   />
 </template>
 

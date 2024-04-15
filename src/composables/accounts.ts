@@ -278,6 +278,7 @@ export function useAccounts() {
     aeAccounts,
     accountsAddressList,
     accountsSelectOptions,
+    accountsGroupedByProtocol,
     aeAccountsSelectOptions,
     accountsRaw,
     activeAccount,
