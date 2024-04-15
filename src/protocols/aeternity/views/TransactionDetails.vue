@@ -277,8 +277,8 @@ export default defineComponent({
       : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
-    const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
-    const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
+    const isSwap = computed(() => isDex.value && isTxFunctionDexSwap(txFunction.value));
+    const isPool = computed(() => isDex.value && isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
 
     const gasPrice = computed(() => (
