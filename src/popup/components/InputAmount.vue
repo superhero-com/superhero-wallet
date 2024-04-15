@@ -7,6 +7,7 @@
     :model-value="modelValue"
     :label="label"
     :message="$attrs.message"
+    :blink-on-change="blinkOnChange"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template
@@ -88,9 +89,10 @@ export default defineComponent({
     modelValue: { type: [String, Number], default: '' },
     label: { type: String, default: null },
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
+    protocol: { type: String as PropType<Protocol>, required: true },
     readonly: Boolean,
     showTokensWithBalance: Boolean,
-    protocol: { type: String as PropType<Protocol>, required: true },
+    blinkOnChange: Boolean,
   },
   emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {

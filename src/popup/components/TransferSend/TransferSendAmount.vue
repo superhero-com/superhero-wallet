@@ -13,9 +13,9 @@
       :validate-on-mount="!!modelValue"
       :rules="{
         required: true,
+        ...validationRules,
         min_value_exclusive: 0,
         does_not_exceed_decimals: assetDecimals,
-        ...validationRules,
       }"
     >
       <InputAmount
@@ -29,6 +29,7 @@
         :message="amountMessage"
         :protocol="protocol"
         :readonly="readonly"
+        :blink-on-change="blinkOnChange"
         :selected-asset="(selectedAsset as IAsset)"
         @update:modelValue="$emit('update:modelValue', $event)"
         @asset-selected="(asset) => $emit('asset-selected', asset)"
@@ -66,9 +67,10 @@ export default defineComponent({
     selectedAsset: { type: Object as PropType<IAsset>, default: () => {} },
     errors: { type: Object, required: true },
     customLabel: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, required: true },
     readonly: Boolean,
     withoutMargin: Boolean,
-    protocol: { type: String as PropType<Protocol>, required: true },
+    blinkOnChange: Boolean,
   },
   emits: ['update:modelValue', 'asset-selected'],
   setup(props) {
