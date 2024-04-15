@@ -172,7 +172,6 @@ import {
 } from '@/utils';
 import {
   useAccounts,
-  useFungibleTokens,
   useMultisigAccounts,
   useTransactionData,
   useTransactionList,
@@ -229,7 +228,6 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
-    const { getTxAmountTotal } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -251,6 +249,8 @@ export default defineComponent({
     const multisigContractId = ref<string>();
 
     const {
+      amount,
+      amountTotal,
       direction,
       isAex9,
       isErrorTransaction,
@@ -266,12 +266,6 @@ export default defineComponent({
       showDetailedAllowanceInfo: true,
     });
 
-    const amount = computed((): number => transaction.value
-      ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
-      : 0);
-    const amountTotal = computed((): number => transaction.value
-      ? getTxAmountTotal(transaction.value, direction.value)
-      : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
 

@@ -31,6 +31,7 @@ import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
   MODAL_DAPP_BROWSER_ACTIONS,
+  MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
   MODAL_SECURE_LOGIN,
   MODAL_ENABLE_SECURE_LOGIN,
@@ -70,6 +71,7 @@ import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
 import SecureLogin from '../components/Modals/SecureLogin.vue';
 import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
+import WalletConnect from '../components/Modals/WalletConnectModal.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -171,6 +173,9 @@ export default () => {
   });
   registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
     component: BrowserActions,
+  });
+  registerModal(MODAL_WALLET_CONNECT, {
+    component: WalletConnect,
   });
   registerModal(MODAL_WARNING_DAPP_BROWSER, {
     component: WarningDappBrowser,

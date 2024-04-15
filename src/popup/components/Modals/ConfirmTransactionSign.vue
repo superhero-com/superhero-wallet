@@ -13,12 +13,10 @@
     <template v-else>
       <TransactionOverview
         :transaction="transaction"
-        :additional-tag="isAeppChatSuperhero
-          ? $t('modals.confirmTransactionSign.superheroChat')
-          : null"
+        :additional-tag="appName"
       />
       <div
-        v-if="isAeppChatSuperhero || error"
+        v-if="appName || error"
         class="subtitle"
         :class="{ warning: !!error }"
       >
@@ -26,7 +24,7 @@
           {{ $t('modals.confirmTransactionSign.unableToExecute') }}
         </template>
         <template v-else>
-          <span class="app-name">{{ $t('modals.confirmTransactionSign.superheroChat') }}</span>
+          <span class="app-name">{{ appName }}</span>
           {{ $t('modals.confirmTransactionSign.confirmSigning') }}
         </template>
       </div>
@@ -50,16 +48,17 @@
         :value="decodedCallData.functionName"
       />
 
-      <template v-if="(isDex || isDexAllowance) && tokenList.length">
+      <template v-if="(isDex || isDexAllowance) && transactionAssets.length">
         <TransactionDetailsPoolTokenRow
-          v-for="(token, idx) in tokenList"
+          v-for="(token, idx) in transactionAssets"
           :key="token.contractId"
           :token="token"
-          :tokens="token.tokens"
+          :tokens="token.tokens || null"
           :label="getLabels(token, idx)"
           :hide-amount="isDexSwap"
         />
       </template>
+
       <DetailsItem
         v-if="nameAeFee"
         :label="$t('modals.confirmTransactionSign.nameFee')"
@@ -68,7 +67,7 @@
         <template #value>
           <TokenAmount
             :amount="nameAeFee"
-            :protocol="PROTOCOLS.aeternity"
+            :protocol="protocol"
           />
         </template>
       </DetailsItem>
@@ -82,15 +81,15 @@
             :amount="tokenAmount"
             :symbol="tokenSymbol"
             :hide-fiat="!swapTokenAmountData.isWrappedCoin || isAex9"
-            :protocol="PROTOCOLS.aeternity"
+            :protocol="protocol"
             data-cy="total"
           />
         </DetailsItem>
 
         <DetailsItem :label="$t('transaction.fee')">
           <TokenAmount
-            :amount="txAeFee"
-            :protocol="PROTOCOLS.aeternity"
+            :amount="fee"
+            :protocol="protocol"
             data-cy="fee"
           />
         </DetailsItem>
@@ -101,9 +100,9 @@
         >
           <TokenAmount
             :amount="executionCost || amountTotal"
-            :symbol="singleToken.symbol"
+            :symbol="tokenSymbol"
             :hide-fiat="isAex9"
-            :protocol="PROTOCOLS.aeternity"
+            :protocol="protocol"
             high-precision
             data-cy="total"
           />
@@ -119,11 +118,23 @@
           :label="$t('modals.confirmTransactionSign.functionName')"
           :value="decodedCallData.functionName"
         />
+
+        <!--
+          Display the ETH transaction raw data until we are able to decode it
+          into human readable arguments (e.g.: amount).
+        -->
+        <DetailsItem
+          v-if="transaction?.tx?.data"
+          :label="$t('transaction.data')"
+          :value="transaction.tx.data"
+        />
+
         <DetailsItem
           v-if="transactionArguments"
           :label="$t('modals.confirmTransactionSign.arguments')"
           :value="transactionArguments"
         />
+
         <DetailsItem
           v-for="key in filteredTxFields"
           :key="key"
@@ -164,7 +175,6 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
-import { camelCase } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import {
@@ -183,7 +193,6 @@ import type {
   ITokenResolved,
   ITransaction,
   ITx,
-  TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
 import { AeDecodedCallData } from '@/protocols/aeternity/types';
@@ -208,13 +217,11 @@ import {
   useTransactionData,
 } from '@/composables';
 import {
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
-import {
   getAeFee,
   getTransactionTokenInfoResolver,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -263,6 +270,8 @@ export default defineComponent({
     const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const activeAccount = getLastActiveProtocolAccount(protocol);
     const transaction = ref<ITransaction>({
       protocol,
       tx: popupProps.value?.tx,
@@ -280,24 +289,38 @@ export default defineComponent({
       isDexMinReceived,
       isDexPool,
       isDexSwap,
+      txFunctionParsed,
+      transactionAssets,
     } = useTransactionData({ transaction });
 
-    const tokenList = ref<ITokenResolved[]>([]);
+    const tokenList = ref<ITokenResolved[]>(transactionAssets.value);
     const executionCost = ref(0);
     const loading = ref(false);
     const error = ref('');
     const verifying = ref(false);
     const decodedCallData = ref<AeDecodedCallData | undefined>();
 
+    const app = computed(() => popupProps.value?.app);
     const isAeppChatSuperhero = computed(
       () => SUPERHERO_CHAT_URLS
-        .includes(`${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}`),
+        .includes(`${app.value?.protocol}//${app.value?.name}`),
     );
-
-    const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
+    const fee = computed(() => {
+      if (protocol === PROTOCOLS.aeternity) {
+        return getAeFee(popupProps.value?.tx?.fee!);
+      }
+      return popupProps.value?.tx?.fee!;
+    });
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
-
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+    const appName = computed(() => {
+      if (isAeppChatSuperhero.value) {
+        return t('modals.confirmTransactionSign.superheroChat');
+      }
+      if (protocol !== PROTOCOLS.aeternity && app.value?.name) {
+        return app.value?.name;
+      }
+      return undefined;
+    });
 
     const swapDirectionTranslation = computed(() => {
       if (isDexMaxSpent.value) {
@@ -337,7 +360,9 @@ export default defineComponent({
     ));
 
     const tokenSymbol = computed(
-      () => swapTokenAmountData.value.isWrappedCoin ? AE_SYMBOL : swapTokenAmountData.value.symbol,
+      () => (swapTokenAmountData.value.isWrappedCoin)
+        ? adapter.coinSymbol
+        : swapTokenAmountData.value.symbol,
     );
 
     const transactionArguments = computed(() => decodedCallData.value?.args?.length
@@ -348,8 +373,7 @@ export default defineComponent({
       if (!isDex.value && !isDexAllowance.value) {
         return [singleToken.value];
       }
-      const functionName = camelCase(txParams.function) as TxFunctionParsed;
-      const resolver = getTransactionTokenInfoResolver(functionName);
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
       if (!resolver) {
         return [];
       }
@@ -436,7 +460,11 @@ export default defineComponent({
     }
 
     async function loadAdditionalContractCallInfo() {
-      if (popupProps.value?.tx?.contractId && popupProps.value.tx.callData) {
+      if (
+        protocol === PROTOCOLS.aeternity
+        && popupProps.value?.tx?.contractId
+        && popupProps.value.tx.callData
+      ) {
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
@@ -467,6 +495,7 @@ export default defineComponent({
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
+            // TODO `tokens` is not part of `ITokenResolved`, replace logic of child tokens
             tokens: token.isPool && !isDexLiquidityAdd.value
               ? allTokens.filter((tkn) => !tkn.isPool).reverse()
               : [token],
@@ -500,9 +529,9 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOLS,
       AnimatedSpinner,
       PAYLOAD_FIELD,
+      appName,
       cancel,
       decodedCallData,
       decodedPayload,
@@ -523,16 +552,17 @@ export default defineComponent({
       loading,
       nameAeFee,
       popupProps,
+      protocol,
       singleToken,
       swapDirectionTranslation,
       swapTokenAmountData,
       tokenAmount,
-      tokenList,
       tokenSymbol,
       amountTotal,
       transaction,
       transactionArguments,
-      txAeFee,
+      transactionAssets,
+      fee,
       verifying,
     };
   },

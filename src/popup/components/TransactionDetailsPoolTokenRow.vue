@@ -50,7 +50,8 @@ export default defineComponent({
   props: {
     label: { type: String, default: '' },
     token: { type: Object as PropType<ITokenResolved>, required: true },
-    tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
+    // TODO having `token` and `tokens` prop is confusing, refactor to one `assets` prop
+    tokens: { type: Array as PropType<ITokenResolved[]>, default: null },
     hideAmount: Boolean,
   },
   setup(props) {
@@ -61,7 +62,7 @@ export default defineComponent({
     ));
 
     const assetsMapped = computed(
-      () => (props.token.isPool ? props.tokens : [props.token])
+      () => ((props.token.isPool && props.tokens) ? props.tokens : [props.token])
         .map((asset) => convertWrappedCoinTokenToCoin(asset)),
     );
 

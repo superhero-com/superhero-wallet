@@ -122,6 +122,7 @@ export const STORAGE_KEYS = {
   transactionsPending: 'transactions-pending',
   transferSendData: 'transfer-send-data',
   secureLogin: 'secure-login',
+  walletConnectSession: 'wallet-connect-session',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -322,6 +323,7 @@ export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
+export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';

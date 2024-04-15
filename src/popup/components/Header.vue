@@ -28,7 +28,7 @@
             :class="{ disabled: isLogoDisabled }"
             class="btn-home"
           >
-            <Logo class="home-icon" />
+            <AeternityLogo class="home-icon" />
           </Component>
         </div>
 
@@ -54,6 +54,15 @@
             <NetworkButton />
 
             <template v-if="isLoggedIn">
+              <BtnIcon
+                key="btn-wallet-connect"
+                data-cy="btn-wallet-connect"
+                :icon="WalletConnectLogo"
+                :icon-variant="(wcSession) ? 'success' : 'default'"
+                :dimmed="!wcSession"
+                @click="openWalletConnectModal()"
+              />
+
               <AppsBrowserBtn
                 v-if="IS_MOBILE_APP || UNFINISHED_FEATURES"
                 key="btn-browser"
@@ -90,16 +99,22 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
+import { IS_MOBILE_APP, UNFINISHED_FEATURES, MODAL_WALLET_CONNECT } from '@/constants';
 import type { WalletRouteMeta } from '@/types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '@/popup/router/routeNames';
-import { useAccounts, useUi } from '@/composables';
+import {
+  useAccounts,
+  useModals,
+  useUi,
+  useWalletConnect,
+} from '@/composables';
 
-import Logo from '@/icons/logo-small.svg?vue-component';
+import AeternityLogo from '@/icons/logo-small.svg?vue-component';
+import WalletConnectLogo from '@/icons/wallet-connect.svg?vue-component';
 import BackIcon from '@/icons/back.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
 
@@ -118,7 +133,7 @@ export default defineComponent({
     NotificationsIcon,
     BtnClose,
     BtnPlain,
-    Logo,
+    AeternityLogo,
     Truncate,
     BtnIcon,
     IonHeader,
@@ -131,6 +146,8 @@ export default defineComponent({
 
     const { homeRouteName } = useUi();
     const { isLoggedIn } = useAccounts();
+    const { openModal } = useModals();
+    const { wcSession } = useWalletConnect();
 
     const pageTitles: Record<string, () => string> = {
       settings: () => t('pages.titles.settings'),
@@ -207,6 +224,10 @@ export default defineComponent({
       ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
     }
 
+    function openWalletConnectModal() {
+      return openModal(MODAL_WALLET_CONNECT);
+    }
+
     useBackButton(1, back);
 
     return {
@@ -214,6 +235,7 @@ export default defineComponent({
       homeRouteName,
       BackIcon,
       ThreeDotsIcon,
+      WalletConnectLogo,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
       IS_MOBILE_APP,
@@ -221,8 +243,10 @@ export default defineComponent({
       showHeaderNavigation,
       isLogoDisabled,
       titleTruncated,
+      wcSession,
       back,
       close,
+      openWalletConnectModal,
     };
   },
 });

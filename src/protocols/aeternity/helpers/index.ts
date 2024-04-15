@@ -259,18 +259,18 @@ export function getTxDirection(tx?: ITx | IGAAttachTx, address?: AccountAddress)
     : TX_DIRECTION.received;
 }
 
-export function getTxTag(tx: ITx): Tag | null {
-  if (tx.tag) {
-    return tx.tag;
+export function getTxTag({ tag, type }: ITx = {} as any): Tag | null {
+  if (tag) {
+    return tag;
   }
-  if (compareCaseInsensitive(tx.type, 'GAAttachTx')) { // aeSdk: GaAttachTx, mdw: GAAttachTx
+  if (compareCaseInsensitive(type, 'GAAttachTx')) { // aeSdk: GaAttachTx, mdw: GAAttachTx
     return Tag.GaAttachTx;
   }
-  if (compareCaseInsensitive(tx.type, 'GAMetaTx')) { // aeSdk: GaMetaTx, mdw: GAMetaTx
+  if (compareCaseInsensitive(type, 'GAMetaTx')) { // aeSdk: GaMetaTx, mdw: GAMetaTx
     return Tag.GaMetaTx;
   }
-  if (tx.type in Tag) {
-    return Tag[tx.type as TxType];
+  if (type in Tag) {
+    return Tag[type as TxType];
   }
   return null;
 }
