@@ -289,8 +289,8 @@ export default defineComponent({
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as any }),
     );
 
-    const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
-    const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
+    const isSwap = computed(() => isDex.value && isTxFunctionDexSwap(txFunction.value));
+    const isPool = computed(() => isDex.value && isTxFunctionDexPool(txFunction.value));
     const isMaxSpent = computed(() => isTxFunctionDexMaxSpent(txFunction.value));
     const isMinReceived = computed(() => isTxFunctionDexMinReceived(txFunction.value));
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
