@@ -1,9 +1,13 @@
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
+import { FMT_BYTES, FMT_NUMBER } from 'web3-types';
 import { getBlock, getTransaction } from 'web3-eth';
+import { bigIntToHex } from 'web3-eth-accounts';
+import Contract from 'web3-eth-contract';
 import BigNumber from 'bignumber.js';
+
 import { AccountAddress, ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { ETH_CONTRACT_ID } from '../config';
+import { ERC20_ABI, ETH_CONTRACT_ID } from '../config';
 
 /**
  * Convert Gwei to Ether
@@ -58,4 +62,34 @@ export function normalizeWeb3EthTransactionStructure(
 export function toEthChecksumAddress(address: string) {
   if (!address) return address;
   return (address?.startsWith('0x')) ? toChecksumAddress(address) : address;
+}
+
+/**
+ * Estimate gas limit for ERC20 token transfer
+ * using the ERC20 ABI because fetching the contract ABI
+ * takes way too long and is not necessary for this operation
+ * TODO - use fetched contract ABI when we have our own node/middleware
+ */
+export async function getTokenTransferGasLimit(
+  contractId: string,
+  recipient: string,
+  fromAccount: string,
+  amount: BigNumber,
+  nodeUrl: string,
+) {
+  const contract = new Contract(
+    ERC20_ABI,
+    contractId,
+    { from: fromAccount },
+  );
+  contract.setProvider(nodeUrl);
+
+  const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(
+    Number(await contract.methods.decimals().call()),
+  ), 'ether')));
+
+  const gasEstimation = await contract.methods.transfer(recipient, hexAmount)
+    .estimateGas(undefined, { number: FMT_NUMBER.NUMBER, bytes: FMT_BYTES.HEX });
+  const roundedToNextThousand = Math.ceil(Number(gasEstimation / 1000)) * 1000;
+  return roundedToNextThousand;
 }

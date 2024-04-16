@@ -21,10 +21,12 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
+import BigNumber from 'bignumber.js';
 
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
+  AssetAmount,
   AssetContractId,
   ICoin,
   IFetchTransactionResult,
@@ -244,7 +246,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async transferToken(
-    amount: number,
+    amount: AssetAmount,
     recipient: AccountAddress,
     contractId: AssetContractId,
     options: {
@@ -281,7 +283,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
     contract.setProvider(nodeUrl);
 
-    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(
+    const amountBN = new BigNumber(amount);
+    const hexAmount = bigIntToHex(BigInt(toWei(amountBN.toFixed(
       Number(await contract.methods.decimals().call()),
     ), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));

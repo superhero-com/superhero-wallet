@@ -17,6 +17,7 @@ import type {
   NetworkTypeDefault,
   Protocol,
   IAmountDecimalPlaces,
+  AssetAmount,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -119,7 +120,7 @@ export abstract class BaseProtocolAdapter {
   fetchAccountTokenBalances?(address: AccountAddress): Promise<ITokenBalance[] | null>;
 
   transferToken?(
-    amount: number,
+    amount: AssetAmount,
     recipient: string,
     contractId: AssetContractId,
     options: Record<string, any>,

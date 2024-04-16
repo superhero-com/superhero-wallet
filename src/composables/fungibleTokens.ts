@@ -246,7 +246,7 @@ export function useFungibleTokens() {
     // it is better to have it here than in the protocol specific helper file
     if (protocol && protocol !== PROTOCOLS.aeternity) {
       return new BigNumber(tx?.amount || 0)
-        .plus(isReceived ? 0 : tx?.fee || 0)
+        .plus(isReceived || !isAssetCoin(tx.contractId) ? 0 : tx?.fee || 0)
         .toNumber();
     }
 

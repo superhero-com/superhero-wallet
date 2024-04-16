@@ -14,6 +14,7 @@ import camelCaseKeysDeep from 'camelcase-keys-deep';
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
+  AssetAmount,
   AssetContractId,
   IAmountDecimalPlaces,
   ICoin,
@@ -231,7 +232,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async transferToken(
-    amount: number,
+    amount: AssetAmount,
     recipient: string,
     contractId: string,
     options: ContractInitializeOptions,
@@ -242,7 +243,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       aci: FungibleTokenFullInterfaceACI,
       address: contractId as Encoded.ContractAddress,
     });
-    return tokenContract.transfer(recipient, amount.toFixed(), options);
+    return tokenContract.transfer(recipient, amount, options);
   }
 
   async fetchRegularTransactions(
