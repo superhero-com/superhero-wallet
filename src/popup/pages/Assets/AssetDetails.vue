@@ -30,6 +30,7 @@
             />
             <OpenTransferSendModalButton
               :is-multisig="isMultisig"
+              :disabled="isMultisig && !!pendingMultisigTransaction"
               :token-contract-id="fungibleToken?.contractId"
             />
             <BtnBox
@@ -133,6 +134,7 @@ import {
   useFungibleTokens,
   useMultisigAccounts,
   useUi,
+  usePendingMultisigTransaction,
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fadeAnimation } from '@/popup/animations';
@@ -193,6 +195,7 @@ export default defineComponent({
     } = useFungibleTokens();
 
     const { activeMultisigAccount } = useMultisigAccounts();
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     const currentActiveAddress = computed(
       () => isMultisig.value
@@ -404,6 +407,7 @@ export default defineComponent({
       isNodeTestnet,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
+      pendingMultisigTransaction,
       tabs,
       tokenPairs,
       tokens,
