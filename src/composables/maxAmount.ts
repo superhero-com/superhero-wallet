@@ -123,6 +123,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
             amount: 0,
             callData: calldata,
             nonce: nonce.value,
+            ttl: await aeSdk.getHeight({ cached: true }) + 3,
           }),
           Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
         ).fee).shiftedBy(-AE_COIN_PRECISION);
@@ -141,6 +142,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,
+          ttl: await aeSdk.getHeight({ cached: true }) + 3,
         }),
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION);

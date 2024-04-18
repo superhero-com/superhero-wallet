@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.2...v2.2.3) (2024-04-18)
+
+
+### Features
+
+* ability to sign payForTx, typed data, delegation ([9342082](https://github.com/Superhero-com/superhero-wallet/commit/934208261d6719eb3646b777383c471fa86521ac))
+* add support for biometric login on mobile apps ([4ef0219](https://github.com/Superhero-com/superhero-wallet/commit/4ef02190f7f51647f5d1043bb995a7e2585d7130))
+* allow to replace caller in sign transaction ([1e4aae3](https://github.com/Superhero-com/superhero-wallet/commit/1e4aae3ee9e88f31cea456b09d916b9522c2aced))
+* expose address for sign message in callback ([b445a5c](https://github.com/Superhero-com/superhero-wallet/commit/b445a5cf88a9a4a564189b78a026304f11de47d4))
+* show max fee for eth transactions ([f15c6ce](https://github.com/Superhero-com/superhero-wallet/commit/f15c6ce1cc51b3a9334736a6a2af1706998160ee))
+* support jwt signing ([90d55bf](https://github.com/Superhero-com/superhero-wallet/commit/90d55bf8b47cf294a0be13cf4d2cdbfc65a07daf))
+* warn user that sender has been replaced ([6291f65](https://github.com/Superhero-com/superhero-wallet/commit/6291f652e63e0814ee49d003512aa0a4b3a85453))
+
+
+### Bug Fixes
+
+* add gecko id to browser_specific_settings for ff ([976b06a](https://github.com/Superhero-com/superhero-wallet/commit/976b06a73b9316de94d5c081a140cb5b60b2d975))
+* **aeternity:** be able to send max amount ([69aeb71](https://github.com/Superhero-com/superhero-wallet/commit/69aeb7198a939edab46f8b461fae232a98fb1132))
+* allow to open index html via redirect ([a1a6193](https://github.com/Superhero-com/superhero-wallet/commit/a1a61936169636dd0e25efe91be550889a499129))
+* be able to migrate mnemonic from vuex ([fda76f7](https://github.com/Superhero-com/superhero-wallet/commit/fda76f79517a9a97a8490648c4ba1212db08c701))
+* blurred modal windows ([d9f42fb](https://github.com/Superhero-com/superhero-wallet/commit/d9f42fb07f1a14c2a65856ab56a5cf81a9bf6b80))
+* browser actions menu buttons appearance ([0713f4a](https://github.com/Superhero-com/superhero-wallet/commit/0713f4af7254d3b28ab3fe692b411346ae7f7103))
+* do not use sdk without node ([dfd0fff](https://github.com/Superhero-com/superhero-wallet/commit/dfd0fff0f943a94c554c6ecb74acd0dc25670ff3))
+* eth max button should stay on ([27c1fb8](https://github.com/Superhero-com/superhero-wallet/commit/27c1fb89abafc7bd27a9762ff0782723458082bd))
+* header add btn vue keys ([0b45ccf](https://github.com/Superhero-com/superhero-wallet/commit/0b45ccfcc73cc4c9f563600d4da235c1fd96a89c))
+* **multisig:** disable every propose button if propose pending ([6e6f987](https://github.com/Superhero-com/superhero-wallet/commit/6e6f987e2fc3965550f912d55a515f97b20ea342))
+* prevent cutting off parts of account name letters ([3313569](https://github.com/Superhero-com/superhero-wallet/commit/3313569628c0edd6b2f67b51d8b3c7f26cb1b3c1))
+* secure login modal should not appear when authenticated ([39300e3](https://github.com/Superhero-com/superhero-wallet/commit/39300e306586956ff23a280804838e8ce2a94391))
+* show dex related info only for dex transactions ([8faa670](https://github.com/Superhero-com/superhero-wallet/commit/8faa670ee689138c06d1f0410f82de30043637f6))
+* update dryRunSdk on network change correctly ([58b0389](https://github.com/Superhero-com/superhero-wallet/commit/58b038999ebcba31aa2dea1dc8a77a04fa4f9cef))
+
+
+### Maintenance
+
+* update eth node urls ([a9219c4](https://github.com/Superhero-com/superhero-wallet/commit/a9219c42fba541acb8516d63cfd8cb12a5c5db20))
+
+
+### Performance
+
+* use dryAeSdk to collect multisig info ([2789cf4](https://github.com/Superhero-com/superhero-wallet/commit/2789cf4bc220d7d856add79d6be80208e458dbd1))
+
 ### [2.2.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.1...v2.2.2) (2024-04-14)
 
 

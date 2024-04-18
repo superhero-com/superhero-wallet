@@ -25,7 +25,8 @@
             :is="isLogoDisabled ? 'div' : 'RouterLink'"
             v-else-if="isLoggedIn"
             :to="isLogoDisabled ? null : { name: homeRouteName }"
-            :class="['home-button', { disabled: isLogoDisabled }]"
+            :class="{ disabled: isLogoDisabled }"
+            class="btn-home"
           >
             <Logo class="home-icon" />
           </Component>
@@ -44,6 +45,7 @@
         <div class="right">
           <BtnClose
             v-if="showHeaderNavigation"
+            key="btn-close"
             data-cy="btn-close"
             class="btn-close"
             @click="close"
@@ -52,14 +54,20 @@
             <NetworkButton />
 
             <template v-if="isLoggedIn">
-              <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
+              <AppsBrowserBtn
+                v-if="IS_MOBILE_APP || UNFINISHED_FEATURES"
+                key="btn-browser"
+              />
 
-              <NotificationsIcon />
+              <NotificationsIcon
+                key="btn-notifications"
+              />
 
               <BtnIcon
+                key="btn-more"
+                data-cy="page-more"
                 :to="{ name: ROUTE_MORE }"
                 :icon="ThreeDotsIcon"
-                data-cy="page-more"
               />
             </template>
           </template>
@@ -156,6 +164,7 @@ export default defineComponent({
       networkEdit: () => t('pages.titles.networkEdit'),
       notFound: () => t('pages.titles.notFound'),
       multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
+      secureLogin: () => t('pages.titles.secureLogin'),
     };
 
     const currentHomeRouteName = computed(
@@ -255,7 +264,7 @@ export default defineComponent({
     .left {
       display: flex;
 
-      .home-button {
+      .btn-home {
         &.disabled {
           cursor: default;
         }
@@ -318,7 +327,7 @@ export default defineComponent({
       }
     }
 
-    .home-button + .back {
+    .btn-home + .back {
       margin-left: 22px;
     }
   }

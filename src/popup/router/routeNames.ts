@@ -37,6 +37,7 @@ export const ROUTE_AUCTION_HISTORY = 'auction-history';
 export const ROUTE_PERMISSIONS_ADD = 'permissions-add';
 export const ROUTE_PERMISSIONS_DETAILS = 'permissions-details';
 export const ROUTE_PERMISSIONS_SETTINGS = 'permissions-settings';
+export const ROUTE_SECURE_LOGIN_SETTINGS = 'secure-login-settings';
 
 /**
  * Popup pages
@@ -45,4 +46,5 @@ export const ROUTE_POPUP_CONNECT = 'connect';
 export const ROUTE_POPUP_SIGN_TX = 'popup-sign-tx';
 export const ROUTE_POPUP_ACCOUNT_LIST = 'account-list';
 export const ROUTE_POPUP_RAW_SIGN = 'popup-raw-sign';
+export const ROUTE_POPUP_UNSAFE_SIGN = 'popup-unsafe-sign';
 export const ROUTE_POPUP_MESSAGE_SIGN = 'message-sign';

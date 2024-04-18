@@ -74,6 +74,12 @@ module.exports = {
             manifest.background.page = '/offscreen.html';
             // eslint-disable-next-line no-param-reassign
             delete manifest.background.service_worker;
+            // eslint-disable-next-line no-param-reassign
+            manifest.browser_specific_settings = {
+              gecko: {
+                id: '{aee9e933-52b6-410a-8c3f-99c6be596b4e}',
+              },
+            };
           }
           return manifest;
         },

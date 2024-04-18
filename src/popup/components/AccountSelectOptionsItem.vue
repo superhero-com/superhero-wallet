@@ -96,10 +96,11 @@ export default defineComponent({
   padding: 2px 8px;
 
   .option-wrapper {
+    position: relative;
+    z-index: +1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: relative;
     padding: 6px 8px;
     border-radius: 10px;
     width: 100%;

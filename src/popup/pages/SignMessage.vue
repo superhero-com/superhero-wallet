@@ -51,7 +51,7 @@ export default defineComponent({
 
         const signature = await aeSdk.signMessage(message as string);
         const signatureHex = Buffer.from(signature).toString('hex');
-        openCallbackOrGoHome(true, { signature: signatureHex });
+        openCallbackOrGoHome(true, { signature: signatureHex, address: aeSdk.address });
       } catch (error: any) {
         openCallbackOrGoHome(false);
 

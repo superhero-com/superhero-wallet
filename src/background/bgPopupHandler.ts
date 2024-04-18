@@ -74,6 +74,7 @@ export const openPopup = async (
       message: params.message,
       tx: params.tx,
       txBase64: params.txBase64,
+      data: params.data,
     },
   };
   return popups[id];

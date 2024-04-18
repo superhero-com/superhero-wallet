@@ -9,13 +9,7 @@
     "storage",
     "unlimitedStorage",
     "activeTab",
-    "contextMenus",
-    "notifications",
     "tabs",
-    "webRequest",
-    "webNavigation",
-    "declarativeNetRequest",
-    "declarativeNetRequestFeedback",
     "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [

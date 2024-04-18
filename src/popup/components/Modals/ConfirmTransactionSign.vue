@@ -37,6 +37,12 @@
         class="reason"
         data-cy="reason"
       />
+      <span
+        v-if="popupProps?.isSenderReplaced"
+        class="sender-replaced"
+      >
+        {{ $t('modals.confirmTransactionSign.senderReplaced') }}
+      </span>
       <DetailsItem
         v-if="decodedCallData?.functionName"
         :label="$t('modals.confirmTransactionSign.functionName')"
@@ -283,8 +289,8 @@ export default defineComponent({
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as any }),
     );
 
-    const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
-    const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
+    const isSwap = computed(() => isDex.value && isTxFunctionDexSwap(txFunction.value));
+    const isPool = computed(() => isDex.value && isTxFunctionDexPool(txFunction.value));
     const isMaxSpent = computed(() => isTxFunctionDexMaxSpent(txFunction.value));
     const isMinReceived = computed(() => isTxFunctionDexMinReceived(txFunction.value));
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
@@ -601,6 +607,13 @@ export default defineComponent({
       word-break: break-all;
       color: variables.$color-warning;
     }
+  }
+
+  .sender-replaced {
+    @extend %face-sans-15-regular;
+
+    color: variables.$color-warning;
+    margin-top: 8px;
   }
 
   .details {

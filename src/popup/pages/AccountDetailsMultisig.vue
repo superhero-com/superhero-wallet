@@ -23,7 +23,10 @@
 
         <template #buttons>
           <OpenTransferReceiveModalButton is-multisig />
-          <OpenTransferSendModalButton is-multisig />
+          <OpenTransferSendModalButton
+            :disabled="!!pendingMultisigTransaction"
+            is-multisig
+          />
           <BtnBox
             v-if="UNFINISHED_FEATURES"
             :icon="CreditCardIcon"
@@ -55,7 +58,7 @@ import {
 } from '@ionic/vue';
 import { computed, defineComponent, ref } from 'vue';
 import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
-import { useMultisigAccounts } from '@/composables';
+import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import {
   ROUTE_MULTISIG_DETAILS,
   ROUTE_MULTISIG_DETAILS_ASSETS,
@@ -89,6 +92,7 @@ export default defineComponent({
     const isPageActive = ref(false);
 
     const { activeMultisigAccount } = useMultisigAccounts();
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     const simplexLink = computed(
       () => (activeMultisigAccount.value)
@@ -113,6 +117,7 @@ export default defineComponent({
       activeMultisigAccount,
       isPageActive,
       simplexLink,
+      pendingMultisigTransaction,
       CreditCardIcon,
       convertMultisigAccountToAccount,
     };

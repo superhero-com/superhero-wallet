@@ -10,6 +10,7 @@ import {
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONSENSUS_INFO,
   MODAL_DEFAULT,
@@ -31,6 +32,8 @@ import {
   PROTOCOL_VIEW_TRANSFER_SEND,
   MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WARNING_DAPP_BROWSER,
+  MODAL_SECURE_LOGIN,
+  MODAL_ENABLE_SECURE_LOGIN,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -50,6 +53,7 @@ import ErrorLog from '../components/Modals/ErrorLog.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
+import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
@@ -64,6 +68,8 @@ import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
+import SecureLogin from '../components/Modals/SecureLogin.vue';
+import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -105,6 +111,10 @@ export default () => {
   });
   registerModal(MODAL_CONFIRM_RAW_SIGN, {
     component: ConfirmRawSign,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_CONFIRM_UNSAFE_SIGN, {
+    component: ConfirmUnsafeSign,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
@@ -164,5 +174,11 @@ export default () => {
   });
   registerModal(MODAL_WARNING_DAPP_BROWSER, {
     component: WarningDappBrowser,
+  });
+  registerModal(MODAL_SECURE_LOGIN, {
+    component: SecureLogin,
+  });
+  registerModal(MODAL_ENABLE_SECURE_LOGIN, {
+    component: EnableSecureLogin,
   });
 };

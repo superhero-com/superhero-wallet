@@ -23,13 +23,28 @@
 
     <slot name="extra" />
 
-    <DetailsItem :label="$t('transaction.fee')">
+    <DetailsItem :label="maxFee ? $t('transaction.estimatedFee') : $t('transaction.fee')">
       <template #value>
         <TokenAmount
           :amount="fee"
           :symbol="feeSymbol"
           :protocol="protocol"
+          blink-on-change
           data-cy="review-fee"
+        />
+      </template>
+    </DetailsItem>
+    <DetailsItem
+      v-if="maxFee"
+      :label="$t('transaction.maxFee')"
+    >
+      <template #value>
+        <TokenAmount
+          :amount="maxFee"
+          :symbol="feeSymbol"
+          :protocol="protocol"
+          blink-on-change
+          data-cy="review-max-fee"
         />
       </template>
     </DetailsItem>
@@ -59,6 +74,7 @@ export default defineComponent({
   },
   props: {
     fee: { type: Number, default: 0 },
+    maxFee: { type: Number, default: undefined },
     feeSymbol: { type: String, required: true },
     customTitle: { type: String, default: '' },
     protocol: { type: String as PropType<Protocol>, required: true },

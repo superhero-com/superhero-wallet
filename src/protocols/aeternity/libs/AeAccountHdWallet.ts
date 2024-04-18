@@ -1,15 +1,13 @@
 /* eslint-disable class-methods-use-this */
 import {
   AccountBase,
+  MemoryAccount,
   sign,
-  messageToHash,
   RpcRejectedByUserError,
   unpackTx,
   Encoded,
   METHODS,
-  buildTx,
   Tag,
-  decode,
 } from '@aeternity/aepp-sdk';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
@@ -26,13 +24,13 @@ interface InternalOptions {
  */
 const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 
-export class AeAccountHdWallet extends AccountBase {
+export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
   nodeNetworkId: Ref<string | undefined>;
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
-    super();
+    super(Buffer.alloc(64));
     const { getLastActiveProtocolAccount } = useAccounts();
     this.address = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!
       .address as Encoded.AccountAddress;
@@ -59,15 +57,11 @@ export class AeAccountHdWallet extends AccountBase {
       }
     }
 
-    const encodedTx = decode(txBase64);
-    const signature = await this.sign(
-      Buffer.concat([
-        Buffer.from(this.nodeNetworkId.value),
-        Buffer.from(encodedTx),
-      ]),
-      options, // Mainly to pass the `fromAccount` property
-    );
-    return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
+    return super.signTransaction(txBase64, {
+      ...options, // Mainly to pass the `fromAccount` property
+      aeppOrigin: undefined,
+      networkId: this.nodeNetworkId.value,
+    } as any);
   }
 
   override async signMessage(
@@ -86,9 +80,12 @@ export class AeAccountHdWallet extends AccountBase {
       }
     }
 
-    return this.sign(
-      messageToHash(message),
-      options, // Mainly to pass the `fromAccount` property
+    return super.signMessage(
+      message,
+      {
+        ...options, // Mainly to pass the `fromAccount` property
+        aeppOrigin: undefined,
+      },
     );
   }
 
@@ -99,6 +96,17 @@ export class AeAccountHdWallet extends AccountBase {
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
+    if (options?.aeppOrigin) {
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.unsafeSign,
+        options?.aeppOrigin,
+        { ...options, data },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError('Rejected by user');
+      }
+    }
     const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
     const account = (options?.fromAccount)
       ? getAccountByAddress(options.fromAccount)

@@ -105,6 +105,7 @@ import {
 } from '@/constants';
 import {
   useAccounts,
+  useAuth,
   useModals,
   useUi,
 } from '@/composables';
@@ -137,6 +138,7 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
     } = useAccounts();
     const { openModal } = useModals();
+    const { openEnableSecureLoginModal } = useAuth();
     const { loginTargetLocation } = useUi();
 
     const termsAgreed = ref(false);
@@ -151,6 +153,7 @@ export default defineComponent({
         protocol: PROTOCOLS.aeternity,
       });
       router.push(loginTargetLocation.value);
+      openEnableSecureLoginModal();
     }
 
     async function importWallet() {

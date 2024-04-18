@@ -597,6 +597,7 @@ export interface IName {
   hash: string;
   name: AensName;
   owner: string;
+  pending: Boolean;
   pointers: Dictionary;
 }
 
@@ -675,6 +676,8 @@ export interface IPopupData {
   type?: PopupActionType;
   tx?: ITx;
   txBase64?: Encoded.Transaction;
+  aeppOrigin?: string;
+  data?: string | Uint8Array;
 }
 
 /**
@@ -684,6 +687,7 @@ export interface IPopupData {
 export interface IPopupProps extends IPopupActions, IPopupData {
   show?: boolean; // Decides if the modal window should be open
   fromAccount?: string;
+  isSenderReplaced?: boolean;
 }
 
 export interface IModalProps extends Partial<IPopupProps> {

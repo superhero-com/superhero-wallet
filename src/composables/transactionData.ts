@@ -196,7 +196,7 @@ export function useTransactionData({
         const functionName = camelCase(innerTx.value.function) as TxFunctionParsed;
         const functionResolver = getTransactionTokenInfoResolver(functionName);
 
-        if (functionResolver) {
+        if (functionResolver && isDex.value) {
           return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens)
             .tokens
             .map(({

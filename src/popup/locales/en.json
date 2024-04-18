@@ -13,6 +13,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "contractId": "Contract ID",
+    "notNow": "Not now",
     "copy": "Copy",
     "days": "{n} days | {n} day | {n} days",
     "edit": "Edit",
@@ -35,6 +36,7 @@
     "seconds": "{n} seconds | {n} second | {n} seconds",
     "secondsShort": "{n} s",
     "send": "Send",
+    "sign": "Sign",
     "smartContract": "Smart contract",
     "swap": "Swap",
     "browser": "Browser",
@@ -47,6 +49,8 @@
     "verifying": "Verifying",
     "max": "MAX",
     "tokens": "tokens",
+    "on": "On",
+    "off": "Off",
     "transferSpeed": {
       "fast": "Fast",
       "medium": "Medium",
@@ -297,6 +301,7 @@
       "functionName": "Function name",
       "arguments": "Arguments",
       "superheroChat": "Superhero Chat",
+      "senderReplaced": "Your active wallet account will be the sender for the transaction.",
       "unableToExecute": "This transaction can not be executed.",
       "confirmSigning": "would like you to confirm a transaction."
     },
@@ -306,6 +311,15 @@
         "title": "Transaction Warning",
         "content": "Transaction data is either broken or Superhero wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
       }
+    },
+    "confirmUnsafeSign": {
+      "heading": "would like you to sign a data.",
+      "superheroChatJwtSign": "would like you to sign a message in order to login.",
+      "title": "Sign data",
+      "typeJwt": "JSON Web Token (JWT)",
+      "typeUnknown": "The data is of unknown type.",
+      "type": "Type",
+      "warning": "Sign the data only if you trust the dapp and it's owner."
     },
     "qrCodeReader": {
       "grantPermission": "Grant camera permission",
@@ -400,6 +414,8 @@
   },
   "transaction": {
     "fee": "Transaction fee",
+    "estimatedFee": "Estimated transaction fee",
+    "maxFee": "Maximum transaction fee",
     "advancedDetails": "Advanced transaction details",
     "type": {
       "spendTx": "Spend",
@@ -499,6 +515,7 @@
       "saveErrorsLog": "Save error log",
       "resetWallet": "Reset wallet",
       "seedPhrase": "Seed phrase",
+      "secureLogin": "Secure login",
       "networkAdd": "Add custom network",
       "networkEdit": "Edit network",
       "notFound": "Feature not found",
@@ -507,6 +524,30 @@
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
+    },
+    "secureLogin": {
+      "description": "Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
+      "enableSecureLogin": "Enable secure login",
+      "enableDeviceSecureLogin": "Enable device secure authentication",
+      "autoLock": {
+        "title": "Auto-lock wallet",
+        "descriptionPart1": "Superhero wallet will be locked after the preset time interval of inactivity.",
+        "descriptionPart2": "You will be asked to authenticate in order to unlock the screen and continue using the wallet."
+      },
+      "authenticationTimeout": "Immediately | After {n} min inactivity | After {n} min inactivity",
+      "available": {
+        "part1":"Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
+        "part2": "You can enable this feature later in the Superhero wallet settings."
+      },
+      "unavailable": {
+        "part1":"Superhero Wallet  supports secure login with your mobile device authentication preferences.",
+        "part2":"Your mobile device does not have secure authentication enabled currently. Would you like to enable it now?"
+      },
+      "unsupportedDevice": "This feature is currently not supported by the Superhero Wallet browser extension. {'<'}br /{'>'} {'<'}br /{'>'} Secure login is available only to the users of Superhero Wallet mobile apps at the moment.",
+      "walletLocked": "Wallet locked",
+      "walletLockedSubtitle": "Tap on the screen to login!",
+      "authFailed": "Authentication failed",
+      "authFailedSubtitle": "Tap on the screen to try again!"
     },
     "about": {
       "systemName": "Superhero",
@@ -1185,7 +1226,7 @@
       "title": "Share",
       "description": "Share this page with your contacts"
     }
-},
+  },
   "validation": {
     "formInvalid": "One or more fields above are not valid. Please review the information you entered.",
     "required": "This field is required",
@@ -1199,7 +1240,7 @@
     "addressGeneric": "Invalid {protocol} address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
-    "enoughCoin": "Not enough {0} balance",
+    "enoughCoin": "Not enough {0} balance to pay transaction fee",
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxLength": "The value should be no longer than {0} characters",
     "maxValue": "This field must be {0} or less",
@@ -1210,5 +1251,11 @@
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",
     "invalidAddress": "Invalid account address",
     "doesNotExceedDecimals": "Amount should not exceed {0} decimals"
+  },
+  "biometricAuth": {
+    "reason": "Authenticate to access your wallet",
+    "fallbackTitle": "Use passcode",
+    "title": "Secure login",
+    "subtitle": "Log in using biometric authentication"
   }
 }

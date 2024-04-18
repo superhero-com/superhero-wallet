@@ -1,7 +1,14 @@
 <template>
   <span
+    ref="tokenAmountEl"
     class="token-amount"
-    :class="[{ large, small, vertical }]"
+    :class="[{
+      large,
+      small,
+      vertical,
+      'blink-hidden': isBlinking,
+      blink: blinkOnChange,
+    }]"
   >
     <span
       class="amount"
@@ -30,12 +37,12 @@ import {
   computed,
   defineComponent,
   PropType,
+  ref,
+  watch,
+  onMounted,
 } from 'vue';
 import type { Protocol } from '@/types';
-import {
-  calculateFontSize,
-  formatNumber,
-} from '@/utils';
+import { calculateFontSize, formatNumber } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -51,13 +58,21 @@ export default defineComponent({
     dynamicSizing: Boolean,
     large: Boolean,
     small: Boolean,
+    blinkOnChange: Boolean,
   },
   setup(props) {
+    const tokenAmountEl = ref<HTMLElement>();
+    const amountRounded = ref<string | number>(0);
+    const amountFiat = ref<string>('');
+    const isBlinking = ref(false);
+
     const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
 
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
-    const amountRounded = computed(() => {
+    const symbolComputed = computed(() => props.symbol || adapter.coinSymbol);
+
+    function getAmountRounded() {
       if (Number.isInteger(props.amount) || props.amount === 0) {
         return props.amount;
       }
@@ -71,15 +86,38 @@ export default defineComponent({
           }),
         },
       );
-    });
+    }
 
-    const amountFiat = computed(
-      (): string => (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
+    function getAmountFiat() {
+      return (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol);
+    }
+
+    function updateAmountValues() {
+      amountRounded.value = getAmountRounded();
+      amountFiat.value = getAmountFiat();
+    }
+
+    watch(
+      () => props.amount,
+      () => {
+        if (!props.blinkOnChange) {
+          updateAmountValues();
+        }
+        isBlinking.value = true;
+        setTimeout(() => {
+          updateAmountValues();
+          isBlinking.value = false;
+        }, 500);
+      },
     );
 
-    const symbolComputed = computed(() => props.symbol || adapter.coinSymbol);
+    onMounted(() => {
+      updateAmountValues();
+    });
 
     return {
+      isBlinking,
+      tokenAmountEl,
       amountRounded,
       amountFiat,
       symbolComputed,

@@ -4,11 +4,9 @@
       <div class="names-list">
         <template v-if="namesForAccount.length">
           <NameItem
-            v-for="({ name, owner, autoExtend }, index) in namesForAccount"
+            v-for="(entry, index) in namesForAccount"
             :key="index"
-            :name="name"
-            :address="owner"
-            :auto-extend="autoExtend"
+            :name-entry="entry"
           />
         </template>
         <AnimatedSpinner

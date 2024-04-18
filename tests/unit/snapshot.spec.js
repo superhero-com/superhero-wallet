@@ -35,6 +35,9 @@ jest.mock('../../src/composables', () => ({
   useUi: jest.fn(() => ({
     loginTargetLocation: jest.fn(),
   })),
+  useAuth: jest.fn(() => ({
+    openEnableSecureLoginModal: jest.fn(),
+  })),
 }));
 jest.mock('@/utils', () => ({
   fetchJson: jest.fn(() => ({})),

@@ -1,7 +1,5 @@
 import { App, URLOpenListenerEvent } from '@capacitor/app';
-import {
-  RouteRecordRaw,
-} from 'vue-router';
+import { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue-router';
 import { IPopupProps, WalletRouteMeta } from '@/types';
 import {
@@ -13,6 +11,7 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_UNSAFE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
   PROTOCOLS,
@@ -24,6 +23,7 @@ import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
+  useAuth,
   usePopupProps,
   useUi,
 } from '@/composables';
@@ -37,6 +37,7 @@ import {
   ROUTE_POPUP_CONNECT,
   ROUTE_POPUP_MESSAGE_SIGN,
   ROUTE_POPUP_RAW_SIGN,
+  ROUTE_POPUP_UNSAFE_SIGN,
   ROUTE_POPUP_SIGN_TX,
 } from './routeNames';
 
@@ -54,8 +55,8 @@ const {
   getLastActiveProtocolAccount,
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
-
 const { setLoginTargetLocation } = useUi();
+const { openSecureLoginModal } = useAuth();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
@@ -75,6 +76,8 @@ router.beforeEach(async (to, from, next) => {
     }
     return;
   }
+
+  await openSecureLoginModal();
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
@@ -99,6 +102,7 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_SIGN]: ROUTE_POPUP_SIGN_TX,
       [POPUP_TYPE_RAW_SIGN]: ROUTE_POPUP_RAW_SIGN,
       [POPUP_TYPE_MESSAGE_SIGN]: ROUTE_POPUP_MESSAGE_SIGN,
+      [POPUP_TYPE_UNSAFE_SIGN]: ROUTE_POPUP_UNSAFE_SIGN,
     }[POPUP_TYPE];
 
     let popupProps: IPopupProps | null = null;
