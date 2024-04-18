@@ -36,7 +36,12 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, PropType } from 'vue';
+import {
+  ref,
+  watch,
+  defineComponent,
+  PropType,
+} from 'vue';
 import type { ResolveCallback } from '@/types';
 import { useAuth } from '@/composables';
 
@@ -80,6 +85,12 @@ export default defineComponent({
         props.resolve();
       }
     }
+
+    watch(isAuthenticated, (value) => {
+      if (value) {
+        props.resolve();
+      }
+    }, { immediate: true });
 
     return {
       LockIcon,

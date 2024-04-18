@@ -88,8 +88,8 @@ export const useAuth = createCustomScopedComposable(() => {
     ) {
       isAuthenticating.value = true;
       await openModal(MODAL_SECURE_LOGIN);
-      // wait before closing the modal so that app doesn't register a false app resume event
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // wait before resetting isAuthenticated so that app doesn't register a false app resume event
+      await new Promise((resolve) => setTimeout(resolve, 500));
       isAuthenticating.value = false;
     }
   }
