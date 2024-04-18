@@ -77,12 +77,14 @@
           variant="muted"
           :text="$t('modals.claimGiftCard.redeemPartially')"
           :disabled="loading"
+          data-cy="redeem-secondary-btn"
           @click="step = STEPS.form"
         />
         <BtnMain
           :icon="loading ? AnimatedSpinner : null"
           :text="mainButtonText"
           :disabled="isDisabled || loading"
+          data-cy="redeem-main-btn"
           @click="handleMainButtonClick()"
         />
       </div>

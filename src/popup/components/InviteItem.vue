@@ -1,5 +1,8 @@
 <template>
-  <div class="invite-row">
+  <div
+    class="invite-item"
+    data-cy="invite-item"
+  >
     <div class="invite-info">
       <TokenAmount
         :amount="inviteLinkBalance"
@@ -11,7 +14,12 @@
       class="invite-link"
       :value="link.toString()"
     >
-      <span class="invite-link-url">{{ link }}</span>
+      <span
+        class="invite-link-url"
+        data-cy="invite-link-url"
+      >
+        {{ link }}
+      </span>
     </CopyText>
 
     <div
@@ -66,11 +74,13 @@
           <BtnMain
             variant="muted"
             :text="$t('pages.invite.collapse')"
+            data-cy="collapse"
             @click="resetTopUpChanges"
           />
           <BtnMain
             :disabled="!formModel.amount || !!errorMessage"
             :text="$t('pages.invite.top-up')"
+            data-cy="send-top-up"
             @click="sendTopUp"
           />
         </div>
@@ -254,7 +264,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 
-.invite-row {
+.invite-item {
   padding: 1rem var(--screen-padding-x);
   margin: -2px calc(-1 * var(--screen-padding-x)) 0;
   border-style: solid;
