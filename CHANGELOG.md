@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.1...v2.2.2) (2024-04-14)
+
+
+### Bug Fixes
+
+* allow to open index html via redirect ([8125f9b](https://github.com/Superhero-com/superhero-wallet/commit/8125f9bfb956c470211f2511a91520920483140b))
+* be able to migrate mnemonic from vuex ([e11f2e3](https://github.com/Superhero-com/superhero-wallet/commit/e11f2e3c035b843594cbeb48ea1680522c66335a))
+
 ### [2.2.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.0...v2.2.1) (2024-04-01)
 
 
