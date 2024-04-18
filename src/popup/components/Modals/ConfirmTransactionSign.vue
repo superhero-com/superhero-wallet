@@ -40,6 +40,7 @@
       <span
         v-if="popupProps?.isSenderReplaced"
         class="sender-replaced"
+        data-cy="sender-replaced-warning"
       >
         {{ $t('modals.confirmTransactionSign.senderReplaced') }}
       </span>

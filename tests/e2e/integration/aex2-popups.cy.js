@@ -108,11 +108,7 @@ describe('Tests cases for AEX-2 popups', () => {
         .should('contain', locale.transaction.type[lowerFirst(Tag[txTag])]);
 
       if (txTag !== Tag.ContractCreateTx) {
-        cy.get('[data-cy=recipient] [data-cy=address]')
-          .should('be.visible')
-          .then((recipient) => {
-            expect(recipient.text().replaceAll(' ', '')).to.equal(receiver);
-          });
+        cy.splittedStringToBeEqual('[data-cy=recipient] [data-cy=address]', receiver);
       } else {
         cy.get('[data-cy=recipient]').should('be.visible').should('contain', receiver);
       }

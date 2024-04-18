@@ -268,6 +268,14 @@ Cypress.Commands.add('openTransactions', () => {
     .should('be.visible');
 });
 
+Cypress.Commands.add('splittedStringToBeEqual', (component, string) => {
+  cy.get(component)
+    .should('be.visible')
+    .then((recipient) => {
+      expect(recipient.text().replaceAll(' ', '')).to.equal(string);
+    });
+});
+
 Cypress.Commands.add('truncateStringShouldContain', (elem, string) => {
   cy.get(elem)
     .should('be.visible')
