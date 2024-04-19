@@ -11,6 +11,7 @@
   <Modal
     v-if="!IS_MOBILE_APP || !cameraPermissionGranted"
     class="qr-code-reader"
+    :class="{ 'multifragment-qr-code': isMultiFragmentQr }"
     has-close-button
     centered
     from-bottom
@@ -27,13 +28,8 @@
     <div
       v-if="title"
       class="title"
-      v-text="title"
+      v-text="isMultiFragmentQr ? $t('modals.qrCodeReader.qrCodeHasMultipleFragments') : title"
     />
-
-    <InfoBox v-if="isMultiFragmentQr">
-      {{ $t('modals.qrCodeReader.qrCodeHasMultipleFragments') }}
-      <b>{{ scanProgress }}%</b>
-    </InfoBox>
 
     <div class="camera">
       <div class="camera-inner">
@@ -66,6 +62,15 @@
         </video>
       </div>
     </div>
+
+    <ProgressBar
+      v-if="isMultiFragmentQr"
+      class="qr-progress-bar"
+      :progress="scanProgress"
+      :text="$t('modals.qrCodeReader.scanningProgress')"
+      show-text
+      is-big
+    />
 
     <!--
       Allow user to open mobile device settings if no camera permission is granted.
@@ -106,7 +111,7 @@ import { useUi } from '@/composables';
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
-import InfoBox from '@/popup/components/InfoBox.vue';
+import ProgressBar from '@/popup/components/ProgressBar.vue';
 
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -115,9 +120,9 @@ import AlertIcon from '@/icons/alert.svg?vue-component';
 export default defineComponent({
   components: {
     Modal,
-    InfoBox,
     BtnMain,
     IconBoxed,
+    ProgressBar,
     AnimatedSpinnerIcon,
     AlertIcon,
   },
@@ -287,6 +292,12 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .qr-code-reader {
+  &.multifragment-qr-code{
+    .camera {
+      padding-top: calc(100% - 45px); // Progress bar height
+    }
+  }
+
   .top-icon-wrapper {
     margin: 0 auto 16px auto;
     text-align: center;
@@ -302,6 +313,7 @@ export default defineComponent({
     border-radius: $border-radius-interactive;
     background: rgba($color-white, 0.05);
     overflow: hidden;
+    transition: all 0.3s ease-in-out;
 
     .camera-inner {
       position: absolute;
@@ -332,6 +344,10 @@ export default defineComponent({
         transform: translateX(-50%) translateY(-50%);
       }
     }
+  }
+
+  .qr-progress-bar {
+    margin-top: 16px;
   }
 
   .heading {

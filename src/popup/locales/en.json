@@ -248,7 +248,7 @@
       "btnText": "Pair QR Wallet",
       "btnSubtitle": "Connect QR-based Hardware Wallet",
       "scanTitle": "Scan QR code",
-      "scanDescription": "Scan QR code from your AirGap vault in order to pair wallets and import accounts.",
+      "scanDescription": "Scan the QR code from your AirGap vault in order to pair wallets and import accounts.",
       "importConfirmDialog": {
         "title": "Import account from AirGap",
         "description": "Import æternity account from AirGap into your Superhero wallet in order to manage cryptocurrency funds signing transactions through QR-codes.",
@@ -264,7 +264,7 @@
     },
     "scanAirGapTx": {
       "heading": "Scan QR code",
-      "title": "Scan the QR code of the signed transaction from your AirGap vault in order to send it.",
+      "title": "Scan the QR code from your AirGap vault in order to sign the transaction.",
 
       "help": {
         "title": "Sign AirGap transaction",
@@ -369,7 +369,8 @@
       "noWebcamSubtitle": "Please enable your device camera and check again if it is functioning properly.",
       "subtitle": "Allow Superhero wallet to access your camera in order to scan QR codes.",
       "settings": "Settings",
-      "qrCodeHasMultipleFragments": "This transaction consists of multiple QR codes. Keep your camera on the changing QRs and wait until all codes are scanned:"
+      "qrCodeHasMultipleFragments": "In order to sign this transaction you need to scan multiple QR codes. Keep your camera focused on the changing QRs until all codes have been scanned.",
+      "scanningProgress": "scanned"
     },
     "name-pointers-help": {
       "title": "Name pointers",

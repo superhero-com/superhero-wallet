@@ -76,7 +76,7 @@ export default defineComponent({
     accounts: { type: Array as PropType<IAccount[]>, required: true },
   },
   setup(props) {
-    // TODO AIRGAP: need to add functionality for selecting the accounts
+    // TODO AIRGAP: implement multiple accounts selection
     const { aeAccounts } = useAccounts();
     function isAccountAlreadyImported(account: IAccount) {
       return aeAccounts.value.some((acc) => acc.address === account.address);
