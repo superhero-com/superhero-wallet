@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-calldata": "^1.7.0",
-    "@aeternity/aepp-sdk": "^13.3.0",
+    "@aeternity/aepp-sdk": "^13.3.1",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@aeternity/json-bigint": "^0.3.1",
