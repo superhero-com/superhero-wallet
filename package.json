@@ -182,6 +182,14 @@
         "section": "Maintenance"
       },
       {
+        "type": "build",
+        "section": "Maintenance"
+      },
+      {
+        "type": "ci",
+        "section": "Maintenance"
+      },
+      {
         "type": "perf",
         "section": "Performance"
       },
