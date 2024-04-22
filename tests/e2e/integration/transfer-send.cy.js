@@ -37,7 +37,7 @@ describe('Test cases for Send Modal', () => {
 
       // check on step2 if everything is OK
       .get('[data-cy=review-sender] > .value')
-      .should('contain', STUB_ACCOUNT.address)
+      .should('contain', STUB_ACCOUNT.addressAeternity)
       .get('[data-cy=review-recipient] > .value')
       .should('contain', recipientAddress)
       .get('[data-cy=review-total]')
@@ -54,7 +54,7 @@ describe('Test cases for Send Modal', () => {
       // edit, sending to your own account
       .get('[data-cy=edit]')
       .click()
-      .enterAddress(STUB_ACCOUNT.address)
+      .enterAddress(STUB_ACCOUNT.addressAeternity)
       .get('[data-cy=address]')
       .should('have.class', 'warning')
       .get('[data-cy=next-step-button]')

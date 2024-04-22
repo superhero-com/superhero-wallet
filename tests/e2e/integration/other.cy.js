@@ -5,11 +5,11 @@ const txs = [
   STUB_TRANSACTIONS.pendingTransfer,
   {
     ...STUB_TRANSACTIONS.pendingTipToken,
-    tx: { ...STUB_TRANSACTIONS.pendingTipToken.tx, callerId: STUB_ACCOUNT.address },
+    tx: { ...STUB_TRANSACTIONS.pendingTipToken.tx, callerId: STUB_ACCOUNT.addressAeternity },
   },
   {
     ...STUB_TRANSACTIONS.pendingTipAe,
-    tx: { ...STUB_TRANSACTIONS.pendingTipAe.tx, callerId: STUB_ACCOUNT.address },
+    tx: { ...STUB_TRANSACTIONS.pendingTipAe.tx, callerId: STUB_ACCOUNT.addressAeternity },
   },
 ];
 
@@ -34,7 +34,7 @@ describe('Tests cases not connected to specific page', () => {
         pendingTransaction: {
           ...pendingTransaction,
           hash: 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
-          transactionOwner: STUB_ACCOUNT.address,
+          transactionOwner: STUB_ACCOUNT.addressAeternity,
         },
       })
         .get('[data-cy=pending-txs]')
