@@ -162,7 +162,7 @@ export function usePendingMultisigTransaction() {
    */
   const isPendingMultisigTxCompletedAndRevoked = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && activeMultisigTransactionData.value?.tx.function === TX_FUNCTIONS_MULTISIG.revoke
+    && activeMultisigTransactionData.value?.tx?.function === TX_FUNCTIONS_MULTISIG.revoke
   ));
 
   /**
@@ -170,7 +170,7 @@ export function usePendingMultisigTransaction() {
    */
   const isPendingMultisigTxCompletedAndConfirmed = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && activeMultisigTransactionData.value?.tx.function === TX_FUNCTIONS_MULTISIG.confirm
+    && activeMultisigTransactionData.value?.tx?.function === TX_FUNCTIONS_MULTISIG.confirm
   ));
 
   /**

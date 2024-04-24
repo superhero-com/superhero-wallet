@@ -116,7 +116,7 @@ export default defineComponent({
         props.transaction.claim
         || (
           [tippingV1, tippingV2].includes(innerTx.value?.contractId)
-          && innerTx.value.function === TX_FUNCTIONS.claim
+          && innerTx.value?.function === TX_FUNCTIONS.claim
         )
       ) {
         arr.push(
@@ -154,7 +154,7 @@ export default defineComponent({
             ? t('transaction.spendType.out')
             : t('transaction.spendType.in'),
         );
-      } else if (props.transaction.tx.function) {
+      } else if (props.transaction?.tx?.function) {
         arr.push(
           txFunctionLabel.value,
           txTypeLabel.value,
