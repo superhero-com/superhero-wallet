@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.3...v2.2.4) (2024-04-22)
+
+
+### Bug Fixes
+
+* show build, ci commit types in the changelog ([36cefea](https://github.com/Superhero-com/superhero-wallet/commit/36cefea0bd1cba785c0f4f40185a1cb0e560f3a8))
+
+
+### Maintenance
+
+* update sdk to 13.3.1 ([d3cba80](https://github.com/Superhero-com/superhero-wallet/commit/d3cba8009e5fb13dc8321b75d85304e6f7222dfa))
+
 ### [2.2.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.2...v2.2.3) (2024-04-18)
 
 
