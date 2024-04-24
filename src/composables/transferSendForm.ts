@@ -45,7 +45,7 @@ export function useTransferSendForm({
   const { t } = useI18n();
   const { openModal, openDefaultModal } = useModals();
   const { errors, validate, validateField } = useForm();
-  const { save: saveFormData } = useTransferSendHandler();
+  const { saveTransferSendFormModel } = useTransferSendHandler();
   const { accountAssets } = useAccountAssetsList();
 
   const hasError = computed(
@@ -102,21 +102,21 @@ export function useTransferSendForm({
   }
 
   async function openScanQrModal() {
-    let scanResult: string | null = '';
-    scanResult = await openModal(MODAL_READ_QR_CODE, {
+    const scanResult = await openModal(MODAL_READ_QR_CODE, {
       title: t(
         'pages.send.scanAddress',
-        { assetName: (formModel.value.selectedAsset as IToken)?.name },
+        { assetName: formModel.value.selectedAsset?.name },
       ),
       icon: 'critical',
-    }).then(
-      (result: string) => result,
-    ).catch((error: Error) => {
-      if (error instanceof NoUserMediaPermissionError) {
-        saveFormData(formModel.value as TransferFormModel);
-      }
-      return null;
-    });
+    })
+      .then((result: string) => result)
+      .catch((error: Error) => {
+        if (error instanceof NoUserMediaPermissionError) {
+          saveTransferSendFormModel(formModel.value as TransferFormModel);
+        }
+        return null;
+      });
+
     if (scanResult?.trim().charAt(0) === '{') {
       let parsedScanResult: any = null;
       try {

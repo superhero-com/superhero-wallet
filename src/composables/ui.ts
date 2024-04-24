@@ -19,11 +19,19 @@ export interface IOtherSettings {
   secureLoginTimeout?: number;
 }
 
+/** Control the route that would be visible after opening the extension. */
 const homeRouteName = ref(ROUTE_ACCOUNT);
+
+/** Defines if user is using the app. Equals `false` when the app browser tab is inactive. */
 const isAppActive = ref(false);
+
+/** Control global loader animation put above all other layers. */
 const isLoaderVisible = ref(false);
+
+/** Control layer, that allows to close full-screen camera view on mobile devices. */
+const isMobileQrScannerVisible = ref(false);
+
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
-const qrScannerOpen = ref(false);
 const lastTimeAppWasActive = ref<number>();
 
 const hiddenCards = useStorageRef<string[]>(
@@ -68,8 +76,9 @@ export function useUi() {
     loginTargetLocation.value = location;
   }
 
-  function setQrScanner(open: boolean) {
-    qrScannerOpen.value = open;
+  function setMobileQrScannerVisible(open: boolean) {
+    document.querySelector('body')?.classList[(open) ? 'add' : 'remove']('scanner-active');
+    isMobileQrScannerVisible.value = open;
   }
 
   function handleVisibilityChange() {
@@ -127,7 +136,7 @@ export function useUi() {
     hiddenCards,
     isAppActive,
     loginTargetLocation,
-    qrScannerOpen,
+    isMobileQrScannerVisible,
     isLoaderVisible,
     isSeedBackedUp,
     saveErrorLog,
@@ -140,7 +149,7 @@ export function useUi() {
     setSaveErrorLog,
     setHomeRouteName,
     setLoginTargetLocation,
-    setQrScanner,
+    setMobileQrScannerVisible,
     setLoaderVisible,
     resetUiSettings,
     setSecureLoginEnabled,
