@@ -1,16 +1,17 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
-import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/constants/stubs';
+import {
+  APP_LINK_WEB,
+  NETWORK_NAME_TESTNET,
+  PROTOCOLS,
+  STORAGE_KEYS,
+} from '@/constants';
+import { STUB_CURRENCY, STUB_ACCOUNT } from '@/constants/stubs';
 import {
   formatDate,
   formatTime,
   prepareStorageKey,
-} from '../../../src/utils';
-import {
-  NETWORK_NAME_TESTNET,
-  PROTOCOLS,
-  STORAGE_KEYS,
-} from '../../../src/constants';
+} from '@/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
@@ -91,8 +92,9 @@ Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true)
         isSeedBackedUp,
       },
       [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
-        [STUB_ACCOUNT.address]: pendingTransaction || [],
+        [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
       },
+      [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: 0,
     };
 
     Object.entries(dataToBeStored).forEach(([key, data]) => {
@@ -268,6 +270,14 @@ Cypress.Commands.add('openTransactions', () => {
     .should('be.visible');
 });
 
+Cypress.Commands.add('splittedStringToBeEqual', (component, string) => {
+  cy.get(component)
+    .should('be.visible')
+    .then((splittedString) => {
+      expect(splittedString.text().replaceAll(' ', '')).to.equal(string);
+    });
+});
+
 Cypress.Commands.add('truncateStringShouldContain', (elem, string) => {
   cy.get(elem)
     .should('be.visible')
@@ -276,5 +286,45 @@ Cypress.Commands.add('truncateStringShouldContain', (elem, string) => {
       const before = win.getComputedStyle($els[0], 'before').getPropertyValue('content');
       const after = win.getComputedStyle($els[0], 'after').getPropertyValue('content');
       expect(string).to.eq(`${before.replace(/['"]+/g, '')}${after.replace(/['"]+/g, '')}`);
+    });
+});
+
+Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = null) => {
+  cy.get('[data-cy=receive]')
+    .click();
+
+  if (token) {
+    cy.get('[data-cy=select-asset]')
+      .click()
+      .get('[data-cy=loader]')
+      .should('be.visible')
+      .get('.modal .header [data-cy=input]')
+      .type(token.contractId)
+      .get('.tokens-list-item:first-child', { timeout: 8000 })
+      .click();
+  }
+  cy.splittedStringToBeEqual('[data-cy=qr-code-info]', address)
+    .get('[data-cy=input]')
+    .type(amount)
+    .get('.modal [data-cy=copy]')
+    .click();
+
+  cy.window()
+    .its('navigator.clipboard')
+    .invoke('readText')
+    .then(async (text) => {
+      const receiveUrl = await text;
+      cy.login({}, receiveUrl.replace(APP_LINK_WEB, ''))
+        .get('[data-cy=address] [data-cy=textarea]')
+        .should('have.value', address)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('have.value', amount);
+
+      if (token) {
+        cy.get('[data-cy=select-asset]')
+          .should('contain', token.name);
+      }
+      cy.get('[data-cy=btn-close]')
+        .click();
     });
 });

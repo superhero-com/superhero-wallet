@@ -27,6 +27,7 @@
     <slot name="msg">
       <TemplateRenderer
         :str="msg"
+        data-cy="message"
       />
     </slot>
 

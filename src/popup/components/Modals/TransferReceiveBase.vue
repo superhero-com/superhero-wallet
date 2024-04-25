@@ -40,6 +40,7 @@
         >
           <Scrollable class="address-scrollable-area">
             <AddressFormatted
+              data-cy="qr-code-info"
               :address="accountAddressToDisplay"
             />
           </Scrollable>

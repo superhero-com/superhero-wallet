@@ -5,6 +5,7 @@
     :icon="ArrowReceiveIcon"
     :is-big="isBig"
     :disabled="disabled"
+    data-cy="receive"
     @click="openTransferReceiveModal()"
   />
 </template>
