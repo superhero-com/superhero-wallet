@@ -2,6 +2,7 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
       <DashboardBase
+        v-if="isValidActiveIdx"
         class="dashboard-multisig"
         :active-idx="multisigAccountIdx"
         :balances-total="multisigBalancesTotal"
@@ -52,10 +53,8 @@
 import {
   IonPage,
   IonContent,
-  onIonViewWillEnter,
-  onIonViewDidLeave,
 } from '@ionic/vue';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 import BigNumber from 'bignumber.js';
 
 import type { IMultisigAccount } from '@/types';
@@ -85,8 +84,6 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const pageIsActive = ref(true);
-
     const { openModal } = useModals();
     const {
       multisigAccounts,
@@ -104,6 +101,8 @@ export default defineComponent({
         (acc) => acc.gaAccountId === activeMultisigAccountId.value,
       ),
     );
+
+    const isValidActiveIdx = computed(() => multisigAccountIdx.value >= 0);
 
     const multisigBalancesTotal = computed(
       () => multisigAccounts.value
@@ -131,18 +130,10 @@ export default defineComponent({
       );
     }
 
-    onIonViewWillEnter(() => {
-      pageIsActive.value = true;
-    });
-
-    onIonViewDidLeave(() => {
-      pageIsActive.value = false;
-    });
-
     return {
       isActiveMultisigAccountPending,
       pendingMultisigTransaction,
-      pageIsActive,
+      isValidActiveIdx,
       ROUTE_MULTISIG_DETAILS,
       ArrowSendIcon,
       addressList,
