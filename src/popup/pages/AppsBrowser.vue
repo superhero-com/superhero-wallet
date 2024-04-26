@@ -93,7 +93,7 @@ import {
   computed,
 } from 'vue';
 import { Field } from 'vee-validate';
-import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
+import { MODAL_WARNING_DAPP_BROWSER, IS_SAFARI } from '@/constants';
 import {
   getLocalStorageItem, setLocalStorageItem, handleUnknownError, executeAndSetInterval,
 } from '@/utils';
@@ -168,6 +168,9 @@ export default defineComponent({
 
     async function onAppLoaded() {
       if (!iframeRef.value || !selectedApp.value) return;
+      // Don't recreate RpcClient in Safari desktop and iOS webview
+      // because on these platforms `load` event triggers on anchor navigation
+      if (IS_SAFARI && currentClientId.value) return;
       await removeRpcClientIfAny();
       const sdk = await getAeSdk();
       const target = iframeRef.value.contentWindow;
