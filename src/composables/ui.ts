@@ -31,6 +31,9 @@ const isLoaderVisible = ref(false);
 /** Control layer, that allows to close full-screen camera view on mobile devices. */
 const isMobileQrScannerVisible = ref(false);
 
+/** Holds the progress of the current multipart QR code scan. If -1, QR is not multipart */
+const scanProgress = ref(-1);
+
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
 const lastTimeAppWasActive = ref<number>();
 
@@ -137,6 +140,7 @@ export function useUi() {
     isAppActive,
     loginTargetLocation,
     isMobileQrScannerVisible,
+    scanProgress,
     isLoaderVisible,
     isSeedBackedUp,
     saveErrorLog,
