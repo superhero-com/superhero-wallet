@@ -5,7 +5,10 @@ import { toURL } from './formatters';
 export function isUrlValid(urlAsString: string): boolean {
   try {
     const url = toURL(urlAsString);
-    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
+    return (
+      ['http:', 'https:'].includes(url.protocol)
+      && (isFQDN(url.hostname) || url.hostname === 'localhost')
+    );
   } catch (e) {
     return false;
   }
