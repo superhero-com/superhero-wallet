@@ -95,7 +95,11 @@ import {
 import { Field } from 'vee-validate';
 import { MODAL_WARNING_DAPP_BROWSER, IS_SAFARI } from '@/constants';
 import {
-  getLocalStorageItem, setLocalStorageItem, handleUnknownError, executeAndSetInterval,
+  getLocalStorageItem,
+  setLocalStorageItem,
+  handleUnknownError,
+  executeAndSetInterval,
+  toURL,
 } from '@/utils';
 import { useAeSdk, useModals } from '@/composables';
 import { useAppsBrowserHistory } from '@/composables/appsBrowserHistory';
@@ -127,6 +131,12 @@ const DAPPS_LIST = [
   },
 ];
 
+interface App {
+  title?: string;
+  url: string;
+  image?: string;
+}
+
 const LOCAL_STORAGE_ITEM = 'selected-app';
 
 export default defineComponent({
@@ -144,7 +154,7 @@ export default defineComponent({
   setup() {
     const { addHistoryItem } = useAppsBrowserHistory();
 
-    const selectedApp = ref();
+    const selectedApp = ref<App>();
     const iframeRef = ref();
     const customAppURL = ref('');
     const currentClientId = ref('');
@@ -176,15 +186,13 @@ export default defineComponent({
       const target = iframeRef.value.contentWindow;
       const connection = new BrowserWindowMessageConnection({ target });
       currentClientId.value = sdk.addRpcClient(connection);
+      const app = selectedApp.value;
       shareWalletInfoInterval = executeAndSetInterval(
         () => {
           const rpcClient = sdk._getClient(currentClientId.value);
-          if (
-            rpcClient.status === RPC_STATUS.CONNECTED
-            && lastUrlAddedToHistory !== selectedApp.value.url
-          ) {
-            lastUrlAddedToHistory = selectedApp.value.url;
-            addHistoryItem(selectedApp.value);
+          if (rpcClient.status === RPC_STATUS.CONNECTED && lastUrlAddedToHistory !== app.url) {
+            lastUrlAddedToHistory = app.url;
+            addHistoryItem(app);
           }
           try {
             if (rpcClient.status === RPC_STATUS.WAITING_FOR_CONNECTION_REQUEST) {
@@ -207,13 +215,9 @@ export default defineComponent({
       }
     }
 
-    function onSelectApp(app: any) {
+    function onSelectApp(app: App) {
       openModal(MODAL_WARNING_DAPP_BROWSER).then(() => {
-        const sanitizedUrl = app.url.startsWith('http://') || app.url.startsWith('https://')
-          ? app.url
-          : `https://${app.url}`;
-
-        selectedApp.value = { ...app, url: sanitizedUrl };
+        selectedApp.value = { ...app, url: toURL(app.url).toString() };
       }, () => { });
     }
 
@@ -232,7 +236,7 @@ export default defineComponent({
      * Clean up after the iframe is closed
      */
     async function onAppDisconnected() {
-      selectedApp.value = null;
+      selectedApp.value = undefined;
       customAppURL.value = '';
       await removeRpcClientIfAny();
     }
@@ -242,7 +246,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      const isAppSelected = getLocalStorageItem([LOCAL_STORAGE_ITEM]);
+      const isAppSelected = getLocalStorageItem<App>([LOCAL_STORAGE_ITEM]);
       if (isAppSelected) {
         selectedApp.value = isAppSelected;
         setLocalStorageItem([LOCAL_STORAGE_ITEM], null);
