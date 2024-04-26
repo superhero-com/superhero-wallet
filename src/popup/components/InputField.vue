@@ -64,6 +64,7 @@
             :disabled="readonly"
             :maxlength="textLimit"
             :inputmode="inputMode"
+            :autocapitalize="autoCapitalize"
             @input="handleInput"
             @keydown="checkIfNumber"
             @focusin="focused = true"
@@ -167,7 +168,12 @@ export default defineComponent({
     const inputEl = ref<HTMLInputElement | null>(null);
     const isBlinking = ref(false);
 
-    const inputMode = computed(() => props.type === 'number' ? 'decimal' : 'text');
+    const inputMode = computed(() => ({
+      number: 'decimal',
+      url: 'url',
+      text: 'text',
+    }[props.type]));
+    const autoCapitalize = computed(() => props.type === 'url' ? 'off' : undefined);
     const messageAsObject = computed(
       (): IInputMessage | null => (typeof props.message === 'object') ? props.message : { text: props.message },
     );
@@ -230,6 +236,7 @@ export default defineComponent({
       uid,
       inputId,
       inputMode,
+      autoCapitalize,
       messageAsObject,
       hasError,
       hasWarning,
