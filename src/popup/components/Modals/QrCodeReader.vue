@@ -5,7 +5,8 @@
 
     Mobile:
       Display the device settings button if user has no camera access.
-      The camera stream is placed as separate full screen layer above the app (see App.vue).
+      The camera stream is placed as separate full screen layer above the app.
+      (see QrCodeReaderMobileOverlay.vue)
   -->
   <Modal
     v-if="!IS_MOBILE_APP || !cameraPermissionGranted"
@@ -71,7 +72,7 @@ import {
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
 import { useI18n } from 'vue-i18n';
 
@@ -136,8 +137,8 @@ export default defineComponent({
     function stopReading() {
       if (IS_MOBILE_APP) {
         setMobileQrScannerVisible(false);
-        BarcodeScanner.showBackground();
         BarcodeScanner.stopScan();
+        BarcodeScanner.removeAllListeners();
       } else {
         browserReaderControls?.stop();
       }
@@ -145,14 +146,24 @@ export default defineComponent({
 
     async function scanMobile(): Promise<string | Error> {
       setMobileQrScannerVisible(true);
-      await BarcodeScanner.hideBackground();
       setTimeout(() => {
         document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
       }, 500);
-      const result = await BarcodeScanner.startScan();
-      return (result.hasContent)
-        ? result.content
-        : new Error('No content');
+
+      // eslint-disable-next-line no-async-promise-executor
+      return new Promise(async (resolve) => {
+        const listener = await BarcodeScanner.addListener(
+          'barcodeScanned',
+          async ({ barcode }) => {
+            if (barcode.displayValue) {
+              await listener.remove();
+              stopReading();
+              resolve(barcode.displayValue);
+            }
+          },
+        );
+        await BarcodeScanner.startScan();
+      });
     }
 
     function scanWeb() {
@@ -183,7 +194,7 @@ export default defineComponent({
     }
 
     function openSettings() {
-      BarcodeScanner.openAppSettings();
+      BarcodeScanner.openSettings();
     }
 
     watch(() => route.fullPath, () => {
@@ -208,7 +219,6 @@ export default defineComponent({
 
       if (IS_MOBILE_APP) {
         // TODO Research if the BarcodeScanner could be imported dynamically
-        await BarcodeScanner.prepare();
         isCameraReady.value = true;
         props.resolve(await scanMobile());
       } else {
