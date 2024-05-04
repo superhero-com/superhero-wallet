@@ -201,7 +201,7 @@ export default defineComponent({
     );
 
     async function share() {
-      const { address } = activeAccount.value;
+      const address = accountAddressToDisplay.value;
       const walletLink = getAccountLink(address);
       const { protocolName } = ProtocolAdapterFactory.getAdapter(props.protocol);
       const text = (amount.value && +amount.value > 0)
