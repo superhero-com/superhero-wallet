@@ -1,8 +1,6 @@
 import {
   AccountGeneralized,
-  hash,
   unpackTx,
-  decode,
   Tag,
   encode,
   Encoded,
@@ -35,9 +33,12 @@ interface InternalOptions {
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
+// TODO: calculate gas price based on node demand
+const GA_META_PARAMS = { fee: 1e14, gasPrice: 1e9 };
+
 export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk();
+  const { getDryAeSdk, getAeSdk } = useAeSdk();
   const { fetchCurrentTopBlockHeight } = useTopHeaderData();
 
   async function buildSpendTx(
@@ -107,9 +108,7 @@ export function useMultisigTransactions() {
     const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
 
-    const spendTxHash = new Uint8Array(hash(
-      Buffer.concat([Buffer.from(nodeNetworkId.value!), decode(spendTx)]),
-    ));
+    const spendTxHash = await aeSdk.buildAuthTxHash(spendTx, GA_META_PARAMS);
 
     const gaContractRpc = await aeSdk.initializeContract({
       aci: SimpleGAMultiSigAci,
@@ -166,6 +165,7 @@ export function useMultisigTransactions() {
     return dryAeSdk.sendTransaction(spendTx, {
       authData: {
         callData: gaContractRpc._calldata.encode(gaContractRpc._name, 'authorize', [nonce]),
+        ...GA_META_PARAMS,
       },
       onAccount: new AccountGeneralized(accountId),
     });

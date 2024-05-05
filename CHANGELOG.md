@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.4...v2.2.5) (2024-05-04)
+
+
+### Bug Fixes
+
+* calculate auth tx hash in Ceres ([59c578e](https://github.com/Superhero-com/superhero-wallet/commit/59c578eb3dd5f23bd113b090e2ab3ff7369ab784))
+
 ### [2.2.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.3...v2.2.4) (2024-04-22)
 
 
