@@ -51,6 +51,7 @@
 
         <TransactionAndTokenFilter
           :key="routeName!"
+          :show-all-filter-options="activeAccount.protocol === PROTOCOLS.aeternity"
           :show-filters="isScrollEnabled"
         />
       </div>
@@ -81,7 +82,7 @@ import {
   ref,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
+import { IS_MOBILE_APP, IS_FIREFOX, PROTOCOLS } from '@/constants';
 
 import {
   useAccounts,
@@ -185,6 +186,7 @@ export default defineComponent({
       fadeAnimation,
       IS_FIREFOX,
       INITIAL_TABS_HEIGHT,
+      PROTOCOLS,
     };
   },
 });

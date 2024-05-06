@@ -34,13 +34,13 @@
               :token-contract-id="fungibleToken?.contractId"
             />
             <BtnBox
-              v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
+              v-if="isAeCoin && isNodeMainnet && UNFINISHED_FEATURES"
               :text="$t('common.buy')"
               :icon="BuyIcon"
               :href="activeAccountSimplexLink"
             />
             <BtnBox
-              v-else-if="isAe && isNodeTestnet"
+              v-else-if="isAeCoin && isNodeTestnet"
               :text="$t('common.faucet')"
               :icon="FaucetIcon"
               :href="activeAccountFaucetUrl"
@@ -73,6 +73,7 @@
             <TransactionAndTokenFilter
               :key="routeName?.toString()"
               :show-filters="showFilterBar"
+              :show-all-filter-options="!isAeCoin && currentActiveProtocol === PROTOCOLS.aeternity"
             />
           </div>
         </div>
@@ -218,7 +219,7 @@ export default defineComponent({
       ].includes(name.toString()),
     );
     const contractId = route.params.id as AssetContractId;
-    const isAe = contractId === AE_CONTRACT_ID;
+    const isAeCoin = contractId === AE_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
     const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
@@ -253,10 +254,10 @@ export default defineComponent({
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
     const activeAccountFaucetUrl = computed(
-      () => (isAe) ? buildAeFaucetUrl(currentActiveAddress.value) : null,
+      () => (isAeCoin) ? buildAeFaucetUrl(currentActiveAddress.value) : null,
     );
     const activeAccountSimplexLink = computed(
-      () => (isAe) ? buildSimplexLink(currentActiveAddress.value) : null,
+      () => (isAeCoin) ? buildSimplexLink(currentActiveAddress.value) : null,
     );
 
     const assetData = computed((): IToken | undefined => {
@@ -356,7 +357,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      if (isContract(contractId) && !isAe) {
+      if (isContract(contractId) && !isAeCoin) {
         setLoaderVisible(true);
         await getAeSdk();
         tokenPairs.value = await getContractTokenPairs(contractId as Encoded.ContractAddress);
@@ -401,7 +402,7 @@ export default defineComponent({
       currentActiveProtocol,
       stickyTabsWrapperEl,
       fungibleToken,
-      isAe,
+      isAeCoin,
       isCoin,
       isNodeMainnet,
       isNodeTestnet,

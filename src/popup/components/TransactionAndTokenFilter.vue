@@ -25,7 +25,7 @@
           v-if="!hideFilterButton"
           v-model="displayMode"
           class="filters"
-          :filters="isActiveAccountAe ? filtersConfigAe : filtersConfig"
+          :filters="showAllFilterOptions ? filtersConfigAe : filtersConfig"
           :scroll-top-threshold="scrollTopThreshold"
         />
       </div>
@@ -60,6 +60,7 @@ export default defineComponent({
   },
   props: {
     showFilters: Boolean,
+    showAllFilterOptions: Boolean,
   },
   setup(props) {
     const route = useRoute();
