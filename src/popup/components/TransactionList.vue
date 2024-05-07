@@ -88,7 +88,7 @@ import { AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 
 import MessageOffline from '@/popup/components/MessageOffline.vue';
 import TransactionListItem from './TransactionListItem.vue';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 import InfiniteScroll from './InfiniteScroll.vue';
 import BackToTop from './BackToTop.vue';
 

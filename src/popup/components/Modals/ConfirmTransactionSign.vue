@@ -224,7 +224,7 @@ import TransactionOverview from '../TransactionOverview.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
 type ITxKey = keyof ITx;
 

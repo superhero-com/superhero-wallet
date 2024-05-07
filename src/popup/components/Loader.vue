@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 
 export default {
   components: { AnimatedSpinner },

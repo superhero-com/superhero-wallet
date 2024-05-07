@@ -336,7 +336,7 @@ import MultisigProposalConsensus from '../components/MultisigProposalConsensus.v
 import Avatar from '../components/Avatar.vue';
 import TransactionAssetRows from '../components/TransactionAssetRows.vue';
 
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({

@@ -80,7 +80,7 @@ import Filters from '@/popup/components/Filters.vue';
 import NameRow from '@/popup/components/NameRow.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import RegisterName from '@/popup/components/RegisterName.vue';
-import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 
 const SORT_MODE = {
   soonest: 'soonest',
