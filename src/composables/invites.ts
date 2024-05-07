@@ -1,8 +1,6 @@
 import {
   AE_AMOUNT_FORMATS,
-  AeSdk,
   Encoded,
-  Node,
 } from '@aeternity/aepp-sdk';
 import type { AccountAddress, IInvite } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
@@ -11,7 +9,7 @@ import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import migrateInvitesVuexToComposable from '@/migrations/006-invites-vuex-to-composable';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
-import { useNetworks } from './networks';
+import { useAeSdk } from './aeSdk';
 
 const invites = useStorageRef<IInvite[]>(
   [],
@@ -24,7 +22,7 @@ const invites = useStorageRef<IInvite[]>(
 );
 
 export function useInvites() {
-  const { activeNetwork } = useNetworks();
+  const { getDryAeSdk } = useAeSdk();
   const { openDefaultModal } = useModals();
 
   function addInvite(secretKey: Buffer) {
@@ -44,25 +42,21 @@ export function useInvites() {
     amount = '0',
     isMax = false,
   }: { secretKey: Buffer; recipientId: AccountAddress; amount?: string; isMax: boolean }) {
-    const aeSdk = new AeSdk({
-      nodes: [{
-        name: activeNetwork.value.name,
-        instance: new Node(activeNetwork.value.protocols.aeternity.nodeUrl),
-      }],
-      accounts: [getAccountFromSecret(secretKey)],
-    });
+    const dryAeSdk = await getDryAeSdk();
     if (!isMax) {
-      await aeSdk.spend(
+      await dryAeSdk.spend(
         amount,
         recipientId as Encoded.AccountAddress,
-        // @ts-ignore
-        { denomination: AE_AMOUNT_FORMATS.AE },
+        {
+          denomination: AE_AMOUNT_FORMATS.AE,
+          onAccount: getAccountFromSecret(secretKey),
+        },
       );
     } else {
-      await aeSdk.transferFunds(
+      await dryAeSdk.transferFunds(
         1, // Decimal percentage, 1 = 100%
         recipientId as Encoded.AccountAddress,
-        { verify: false },
+        { onAccount: getAccountFromSecret(secretKey) },
       );
     }
   }
