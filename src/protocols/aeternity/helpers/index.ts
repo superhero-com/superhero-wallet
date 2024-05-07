@@ -38,7 +38,6 @@ import {
 } from '@/utils';
 import {
   AE_AENS_DOMAIN,
-  AE_AENS_NAME_MAX_LENGTH,
   AE_CONTRACT_ID,
   AE_FAUCET_URL,
   AE_HASH_PREFIXES_ALLOWED,
@@ -292,13 +291,6 @@ export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
   } catch (e) {
     return false;
   }
-}
-
-export function isAensNameValid(value: string) {
-  return (
-    value.length <= AE_AENS_NAME_MAX_LENGTH
-    && /^[\p{L}\d]+\.chain$/gu.test(value)
-  );
 }
 
 /**

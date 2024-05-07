@@ -89,13 +89,9 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import {
-  useAccounts,
-} from '@/composables';
-import {
-  AE_CONTRACT_ID,
-} from '@/protocols/aeternity/config';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import { isNameValid } from '@aeternity/aepp-sdk';
+import { useAccounts } from '@/composables';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { tg } from '@/popup/plugins/i18n';
 import type { TransferFormModel, Protocol } from '@/types';
 
@@ -133,7 +129,7 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
 
     const isRecipientName = computed(
-      () => props.recipientAddress && isAensNameValid(props.recipientAddress),
+      () => props.recipientAddress && isNameValid(props.recipientAddress),
     );
 
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');

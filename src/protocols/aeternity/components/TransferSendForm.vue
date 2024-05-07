@@ -163,7 +163,7 @@ import {
 import { useRoute } from 'vue-router';
 import { Field } from 'vee-validate';
 import BigNumber from 'bignumber.js';
-import { Encoded } from '@aeternity/aepp-sdk';
+import { Encoded, isNameValid } from '@aeternity/aepp-sdk';
 
 import type {
   AssetContractId,
@@ -195,7 +195,6 @@ import {
 } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
 
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import ModalHeader from '@/popup/components/ModalHeader.vue';
@@ -310,7 +309,7 @@ export default defineComponent({
       !!formModel.value.address
       && isUrlTippingEnabled.value
       && isUrlValid(formModel.value.address)
-      && !isAensNameValid(formModel.value.address)
+      && !isNameValid(formModel.value.address)
     ));
 
     const mySignerAccounts = accounts.value.filter(
