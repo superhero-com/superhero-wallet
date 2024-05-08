@@ -110,7 +110,7 @@ export default defineComponent({
       transactionAssets,
       isTransactionCoin,
       setActiveTransaction,
-    } = useTransactionData();
+    } = useTransactionData({ externalAddress: transactionOwner });
     const { transactionsLoaded } = useTransactionList({
       accountAddress: transactionOwner || activeAccount.value.address,
       protocol: PROTOCOLS.ethereum,
