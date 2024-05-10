@@ -14,6 +14,7 @@ import {
   encode,
   Encoded,
   Encoding,
+  isNameValid,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -34,7 +35,6 @@ import {
   AE_COIN_PRECISION,
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 
 import { useAeSdk } from './aeSdk';
@@ -104,7 +104,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
       if (
         !isAssetAe
         || (
-          val.address && !isAensNameValid(val.address) && isUrlValid(val.address)
+          val.address && !isNameValid(val.address) && isUrlValid(val.address)
         )
       ) {
         let calldata: Encoded.ContractBytearray = STUB_CALLDATA;

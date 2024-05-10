@@ -82,6 +82,7 @@ import {
   commitmentHash,
   getExecutionCost,
   getMinimumNameFee,
+  isNameValid as isAensNameValid,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -99,7 +100,6 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import {
   AE_COIN_PRECISION,
   AE_AENS_DOMAIN,
