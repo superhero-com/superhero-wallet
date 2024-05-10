@@ -19,7 +19,6 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
-    '^.*\\.svg\\?skip-optimize$': '<rootDir>/config/jest/EmptySvg.vue',
     '\\.(css|scss)$': 'identity-obj-proxy',
   },
   setupFiles: [

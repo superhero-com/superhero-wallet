@@ -53,7 +53,7 @@ import {
 } from '@/composables';
 import { UNFINISHED_FEATURES } from '@/constants';
 
-import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 import RefreshIcon from '@/icons/dapp/dapp-refresh.svg?vue-component';
 
 import Panel from './Panel.vue';

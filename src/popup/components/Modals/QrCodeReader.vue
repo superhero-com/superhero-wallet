@@ -90,7 +90,7 @@ import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
 
-import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
 export default defineComponent({

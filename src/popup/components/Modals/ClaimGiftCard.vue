@@ -137,7 +137,7 @@ import BalanceInfo from '../BalanceInfo.vue';
 import Modal from '../Modal.vue';
 import TransferSendAmount from '../TransferSend/TransferSendAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
 const STEPS = {
   initial: 'initial',

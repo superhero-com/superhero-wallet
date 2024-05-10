@@ -31,7 +31,7 @@ import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import NameItem from '../../components/NameItem.vue';
 import RegisterName from '../../components/RegisterName.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
 const POLLING_INTERVAL = 10000;
 
