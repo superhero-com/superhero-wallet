@@ -23,6 +23,7 @@ import {
   executeAndSetInterval,
   handleUnknownError,
   isUrlValid,
+  watchUntilTruthy,
 } from '@/utils';
 import { PROTOCOLS } from '@/constants';
 import {
@@ -82,6 +83,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       const isAssetAe = val.selectedAsset.contractId === AE_CONTRACT_ID;
       const account = getAccount();
+      await watchUntilTruthy(nonce);
 
       if (!isAssetAe) {
         if (
@@ -169,7 +171,11 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
         nonce.value = (await aeSdk.api
           .getAccountNextNonce(getAccount().address)).nextNonce;
       } catch (error: any) {
-        if (!error.message.includes('Account not found')) handleUnknownError(error);
+        if (error.message.includes('Account not found')) {
+          nonce.value = 1;
+        } else {
+          handleUnknownError(error);
+        }
       }
     }, 5000);
   });
