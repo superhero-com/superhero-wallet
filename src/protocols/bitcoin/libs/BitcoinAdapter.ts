@@ -242,11 +242,14 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   /**
    * @param hash - transaction id
    */
-  override async fetchTransactionByHash(hash: string): Promise<ITransaction> {
+  override async fetchTransactionByHash(
+    hash: string,
+    transactionOwner?: string,
+  ): Promise<ITransaction> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const rawTransaction = await fetchJson(`${nodeUrl}/tx/${hash}`);
-    return normalizeTransactionStructure(rawTransaction);
+    return normalizeTransactionStructure(rawTransaction, transactionOwner);
   }
 
   /**
