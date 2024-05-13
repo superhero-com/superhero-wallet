@@ -147,7 +147,8 @@
       "addProtocolAccount": "Add {name} account"
     },
     "transaction-failed": {
-      "msg": "We cannot process this transaction. Please, try again later."
+      "title": "Transaction failed",
+      "dustError": "Transaction was rejected by the network due to dust UTXO error. {'<'}br /{'>'} {'<'}br /{'>'} Try to send funds using the MAX amount feature with a lower fee tier selected, or add more funds to your account before sending them all out."
     },
     "required": {
       "msg": "Please fill in all fields."
