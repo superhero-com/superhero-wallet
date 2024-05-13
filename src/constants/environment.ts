@@ -63,6 +63,8 @@ export const IS_CHROME_BASED = userAgentLowerCase.includes('chrome');
 
 export const IS_FIREFOX = userAgentLowerCase.includes('firefox');
 
+export const IS_SAFARI = /Mozilla\/5.0 \((Macintosh|iPad|iPhone|iPod); [\s\S]+?\) AppleWebKit\/\S+ \(KHTML, like Gecko\)( (Version|Safari|Mobile)\/\S+)+/.test(navigator.userAgent);
+
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 export const UNFINISHED_FEATURES = !!process.env.UNFINISHED_FEATURES;
