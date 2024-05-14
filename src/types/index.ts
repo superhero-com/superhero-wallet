@@ -560,7 +560,6 @@ export type DexFunctionType =
   | 'pool'
   | 'addLiquidity'
   | 'removeLiquidity'
-  | 'provideLiquidity'
   | 'swap'
   | 'allowance'
   | 'maxSpent'

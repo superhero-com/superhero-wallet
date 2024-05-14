@@ -99,13 +99,10 @@ export function useWalletConnect() {
         },
       );
       if (permitted) {
-        // TODO wrong data used here
-        const { hash } = await adapter.spend(
-          params.value as any,
-          params.to,
-          { maxFeePerGas: params.gas },
-        );
-        return hash;
+        if (adapter?.transferPreparedTransaction) {
+          const actionResult = await adapter.transferPreparedTransaction(params);
+          return actionResult?.hash ?? false;
+        }
       }
       return false;
     },
