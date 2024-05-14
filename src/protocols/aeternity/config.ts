@@ -103,8 +103,6 @@ export const TX_FUNCTIONS = {
   addLiquidityAe: 'add_liquidity_ae',
   removeLiquidity: 'remove_liquidity',
   removeLiquidityAe: 'remove_liquidity_ae',
-  provideLiquidity: 'provide_liquidity',
-  provideLiquidityAe: 'provide_liquidity_ae',
   swapExactTokensForTokens: 'swap_exact_tokens_for_tokens',
   swapTokensForExactTokens: 'swap_tokens_for_exact_tokens',
   swapExactAeForTokens: 'swap_exact_ae_for_tokens',
@@ -155,9 +153,6 @@ export const TX_FUNCTIONS_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
   ],
   addLiquidity: [
     'add_liquidity', 'add_liquidity_ae',
-  ],
-  provideLiquidity: [
-    'provide_liquidity', 'provide_liquidity_ae',
   ],
   swap: [
     'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
