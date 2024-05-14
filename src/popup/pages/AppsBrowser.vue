@@ -183,7 +183,7 @@ export default defineComponent({
       if (IS_SAFARI && currentClientId.value) return;
       await removeRpcClientIfAny();
       const sdk = await getAeSdk();
-      const target = iframeEl.value.contentWindow;
+      const target = iframeEl.value.contentWindow!;
       const connection = new BrowserWindowMessageConnection({ target });
       currentClientId.value = sdk.addRpcClient(connection);
       const app = selectedApp.value;
