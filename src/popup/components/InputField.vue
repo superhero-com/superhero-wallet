@@ -173,6 +173,7 @@ export default defineComponent({
       url: 'url',
       text: 'text',
     }[props.type]));
+    // don't start with a capital letter in URL keyboard on iOS
     const autoCapitalize = computed(() => props.type === 'url' ? 'off' : undefined);
     const messageAsObject = computed(
       (): IInputMessage | null => (typeof props.message === 'object') ? props.message : { text: props.message },
