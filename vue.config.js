@@ -221,6 +221,4 @@ module.exports = {
 
     return config;
   },
-
-  transpileDependencies: ['@aeternity/hd-wallet'],
 };
