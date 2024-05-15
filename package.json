@@ -34,7 +34,6 @@
     "@aeternity/aepp-calldata": "^1.7.0",
     "@aeternity/aepp-sdk": "^13.3.1",
     "@aeternity/bip39": "^0.1.0",
-    "@aeternity/hd-wallet": "^0.2.0",
     "@aeternity/json-bigint": "^0.3.1",
     "@aparajita/capacitor-biometric-auth": "^8.0.0",
     "@awesome-cordova-plugins/screen-orientation": "^6.4.0",

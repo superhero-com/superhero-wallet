@@ -1,6 +1,5 @@
 const packagesToTranspile = [
   'lodash-es',
-  '@aeternity/hd-wallet',
   'vee-validate',
   '@ionic/core',
   '@ionic/vue',
