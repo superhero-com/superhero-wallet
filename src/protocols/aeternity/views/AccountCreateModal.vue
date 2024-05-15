@@ -53,17 +53,14 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import {
-  MODAL_AIR_GAP_CONFIRM_IMPORT,
+  MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_MULTISIG_VAULT_CREATE,
-  MODAL_READ_QR_CODE,
   PROTOCOLS,
 } from '@/constants';
-import { tg } from '@/popup/plugins/i18n';
 import { IAirgapAccountRaw } from '@/types';
 import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
-  useAirGap,
   useConnection,
   useModals,
 } from '@/composables';
@@ -92,7 +89,6 @@ export default defineComponent({
     } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const { extractAccountShareResponseData, deserializeData } = useAirGap();
 
     async function createPlainAccount() {
       const idx = addRawAccount({
@@ -109,27 +105,8 @@ export default defineComponent({
     }
 
     async function connectHardwareWallet() {
-      const scanResult = await openModal(
-        MODAL_READ_QR_CODE,
-        {
-          heading: tg('modals.importAirGapAccount.scanTitle'),
-          title: tg('modals.importAirGapAccount.scanDescription'),
-          icon: 'critical',
-        },
-      ).catch(() => null); // Closing the modal does nothing
-
-      if (!scanResult) {
-        return;
-      }
-
-      const deserializedData = await deserializeData(scanResult);
-      const accounts = await extractAccountShareResponseData(deserializedData) || [];
-
       try {
-        const selectedAccounts = await openModal(
-          MODAL_AIR_GAP_CONFIRM_IMPORT,
-          { accounts },
-        );
+        const selectedAccounts = await openModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS);
         selectedAccounts.forEach((account: IAirgapAccountRaw) => {
           const globalIdx = addAirGapAccount(account);
           setActiveAccountByGlobalIdx(globalIdx);

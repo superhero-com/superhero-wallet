@@ -1,12 +1,24 @@
 <template>
   <div class="transfer-qr-code-generator">
-    <MultiFragmentsQrCode
+    <template
       v-if="fragments"
-      :value="fragments"
-      :size="280"
-      :type-number="0"
-      class="qrcode"
-    />
+    >
+      <QrCode
+        :value="fragments"
+        :size="290"
+        :type-number="0"
+        :external-copied="copied"
+        class="qrcode"
+      />
+      <BtnMain
+        class="btn-copy"
+        :icon="CopyOutlinedIcon"
+        :text="$t('pages.send.copy')"
+        variant="muted"
+        extend
+        @click="copy(fragments.join(''))"
+      />
+    </template>
     <Loader v-else />
   </div>
 </template>
@@ -33,15 +45,20 @@ import {
   useAccounts,
   useAirGap,
   useAeSdk,
+  useCopy,
 } from '@/composables';
 
-import MultiFragmentsQrCode from './MultiFragmentsQrCode.vue';
+import QrCode from './QrCode.vue';
 import Loader from './Loader.vue';
+import BtnMain from './buttons/BtnMain.vue';
+
+import CopyOutlinedIcon from '../../icons/copy-outlined.svg?vue-component';
 
 export default defineComponent({
   components: {
-    MultiFragmentsQrCode,
+    QrCode,
     Loader,
+    BtnMain,
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
@@ -52,6 +69,7 @@ export default defineComponent({
     const { nodeNetworkId, getAeSdk } = useAeSdk();
     const { activeAccount } = useAccounts();
     const { generateTransactionURDataFragments } = useAirGap();
+    const { copy, copied } = useCopy();
 
     onMounted(async () => {
       const aeSdk = await getAeSdk();
@@ -87,6 +105,9 @@ export default defineComponent({
 
     return {
       fragments,
+      CopyOutlinedIcon,
+      copy,
+      copied,
     };
   },
 });
@@ -104,6 +125,10 @@ export default defineComponent({
     padding: 8px;
     background-color: $color-white;
     border-radius: 12px;
+  }
+
+  .btn-copy {
+    margin-top: 16px;
   }
 }
 </style>

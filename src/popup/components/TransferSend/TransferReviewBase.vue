@@ -3,6 +3,7 @@
     <ModalHeader
       :title="title"
       :subtitle="withoutSubtitle ? null : subtitle"
+      :disable-padding="disablePadding"
     >
       <template #title>
         <div v-if="$slots.title">
@@ -128,6 +129,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
     recipientAddress: { type: String, default: null },
     avatarName: { type: String, default: null },
+    disablePadding: Boolean,
     withoutSubtitle: Boolean,
     loading: Boolean,
     showFiat: Boolean,

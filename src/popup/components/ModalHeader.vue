@@ -1,5 +1,8 @@
 <template>
-  <div class="modal-header">
+  <div
+    class="modal-header"
+    :class="{ 'no-padding': disablePadding }"
+  >
     <h2
       v-if="title || $slots.title"
       class="title text-heading-2"
@@ -27,6 +30,7 @@ export default {
     title: { type: String, default: '' },
     subtitle: { type: String, default: '' },
     disableSubtitleMargin: Boolean,
+    disablePadding: Boolean,
   },
 };
 </script>
@@ -39,6 +43,10 @@ export default {
   width: 100%;
   text-align: center;
   padding: 0 16px;
+
+  &.no-padding {
+    padding: 0;
+  }
 
   .subtitle {
     @extend %face-sans-16-regular;

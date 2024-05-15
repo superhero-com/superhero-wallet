@@ -1,27 +1,29 @@
 <template>
   <Modal
-    full-screen
+    from-bottom
     has-close-button
     dense
-    class="air-gap-confirm-import"
+    class="air-gap-import-accounts"
     @close="cancel()"
   >
     <div>
-      <div class="title">
-        {{ $t('modals.importAirGapAccount.importConfirmDialog.title') }}
-      </div>
-      <div
-        v-if="accounts.length"
-        class="description"
-      >
-        {{ $t('modals.importAirGapAccount.importConfirmDialog.description') }}
-      </div>
-      <div
-        v-else
-        class="message"
-      >
-        {{ $t('modals.importAirGapAccount.importConfirmDialog.noAccountsFound') }}
-      </div>
+      <ModalHeader
+        no-padding
+        :title="$t('modals.importAirGapAccount.importConfirmDialog.title')"
+        :subtitle="$t('modals.importAirGapAccount.importConfirmDialog.description')"
+      />
+
+      <FormInputWithQr
+        v-model="syncCode"
+        class="sync-code-input"
+        qr-icon="critical"
+        :label="$t('modals.airGapSyncCode.inputLabel')"
+        :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
+        :qr-heading="$t('modals.importAirGapAccount.scanTitle')"
+        :qr-title="$t('modals.importAirGapAccount.scanDescription')"
+        @update:model-value="throttledHandleInput"
+      />
+
       <div
         v-for="account in accounts"
         :key="account.address"
@@ -48,24 +50,28 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import {
+  computed, defineComponent, PropType, ref,
+} from 'vue';
+import { throttle } from 'lodash-es';
 
-import { useAccounts } from '@/composables';
+import { useAccounts, useAirGap } from '@/composables';
 import type { IAccount } from '@/types';
-<<<<<<< Updated upstream
-=======
 import { parseCodeToBytes } from '@/utils';
->>>>>>> Stashed changes
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountImportRow from '../AccountImportRow.vue';
+import FormInputWithQr from '../form/FormInputWithQr.vue';
+import ModalHeader from '../ModalHeader.vue';
 
 export default defineComponent({
   components: {
     Modal,
     BtnMain,
     AccountImportRow,
+    FormInputWithQr,
+    ModalHeader,
   },
   props: {
     resolve: {
@@ -73,22 +79,40 @@ export default defineComponent({
       required: true,
     },
     reject: { type: Function as PropType<() => void>, required: true },
-    accounts: { type: Array as PropType<IAccount[]>, required: true },
   },
   setup(props) {
     // TODO AIRGAP: implement multiple accounts selection
+    const syncCode = ref('');
+    const accounts = ref<IAccount[] | null>(null);
+
+    const { deserializeData, extractAccountShareResponseData } = useAirGap();
     const { aeAccounts } = useAccounts();
+
     function isAccountAlreadyImported(account: IAccount) {
       return aeAccounts.value.some((acc) => acc.address === account.address);
     }
 
     const selectedAccounts = computed(
-      () => props.accounts.filter((account) => !isAccountAlreadyImported(account)),
+      () => accounts.value?.filter((account) => !isAccountAlreadyImported(account)),
     );
-    const canImportAccounts = computed(() => selectedAccounts.value.length > 0);
+    const canImportAccounts = computed(() => selectedAccounts.value?.length);
+
+    async function handleInput() {
+      if (!syncCode.value) {
+        return;
+      }
+      try {
+        const deserializedData = await deserializeData(syncCode.value);
+        accounts.value = (
+          await extractAccountShareResponseData(deserializedData) || []
+        ) as IAccount[];
+      } catch (error) {} // eslint-disable-line no-empty
+    }
+
+    const throttledHandleInput = throttle(handleInput, 100);
 
     function confirm() {
-      props.resolve(selectedAccounts.value);
+      props.resolve(selectedAccounts.value!);
     }
 
     function cancel() {
@@ -96,21 +120,24 @@ export default defineComponent({
     }
 
     return {
+      syncCode,
+      canImportAccounts,
+      accounts,
+      throttledHandleInput,
       confirm,
       cancel,
       isAccountAlreadyImported,
-      canImportAccounts,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
-.air-gap-confirm-import {
+.air-gap-import-accounts {
   .title {
     @extend %face-sans-18-bold;
 
@@ -129,9 +156,14 @@ export default defineComponent({
     margin-bottom: 20px;
   }
 
+  .sync-code-input {
+    padding: 0 16px;
+    margin-bottom: 18px;
+  }
+
   .account-row {
     @include mixins.flex(flex-start, center, row);
-
+    padding: 0 8px;
     padding-bottom: 8px;
 
     .account-import-row {

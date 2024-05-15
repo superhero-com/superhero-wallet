@@ -13,15 +13,6 @@
     </div>
     <template #footer>
       <BtnMain
-        v-if="showCancelButton"
-        variant="muted"
-        text="Cancel"
-        class="button-action-secondary"
-        data-cy="cancel"
-        extra-padded
-        @click="$emit('cancel-transfer')"
-      />
-      <BtnMain
         v-if="showEditButton"
         variant="muted"
         :text="$t('common.edit')"
@@ -87,7 +78,6 @@ export default defineComponent({
     'close',
     'step-prev',
     'step-next',
-    'cancel-transfer',
   ],
   setup(props) {
     const { t } = useI18n();
@@ -96,18 +86,15 @@ export default defineComponent({
     const showEditButton = computed(() => [
       TRANSFER_SEND_STEPS.review,
       TRANSFER_SEND_STEPS.reviewTip,
-    ].includes(props.currentStep as any));
-
-    const showCancelButton = computed(() => [
-      TRANSFER_SEND_STEPS.reviewRawTx,
+      TRANSFER_SEND_STEPS.airGapSign,
     ].includes(props.currentStep as any));
 
     const showSendButton = computed(() => [
       TRANSFER_SEND_STEPS.review,
-      TRANSFER_SEND_STEPS.reviewRawTx,
+      TRANSFER_SEND_STEPS.airGapSign,
     ].includes(props.currentStep as any));
 
-    const showScanButton = computed(() => (
+    const showNextButton = computed(() => (
       [TRANSFER_SEND_STEPS.review].includes(props.currentStep as any)
       && props.isAirGap
     ));
@@ -123,8 +110,8 @@ export default defineComponent({
     });
 
     const primaryButtonIcon = computed(() => {
-      if (showScanButton.value) {
-        return QrScanIcon;
+      if (showNextButton.value) {
+        return null;
       }
       if (showSendButton.value && !props.hideArrowSendIcon) {
         return ArrowSendIcon;
@@ -137,7 +124,6 @@ export default defineComponent({
       primaryButtonText,
       primaryButtonIcon,
       showEditButton,
-      showCancelButton,
       showSendButton,
       ArrowSendIcon,
       QrScanIcon,

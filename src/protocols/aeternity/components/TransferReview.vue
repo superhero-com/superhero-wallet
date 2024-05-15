@@ -10,6 +10,7 @@
     :avatar-name="isAddressChain ? transferData.address : undefined"
     :show-fiat="!isSelectedAssetAex9"
     :protocol="PROTOCOLS.aeternity"
+    :disable-padding="isAirGap"
     class="transfer-review"
   >
     <template #title>
@@ -104,7 +105,7 @@ import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
-import { MODAL_READ_QR_CODE, PROTOCOLS } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
   handleUnknownError,
@@ -114,7 +115,6 @@ import { tg } from '@/popup/plugins/i18n';
 import {
   useAccounts,
   useAeSdk,
-  useAirGap,
   useDeepLinkApi,
   useFungibleTokens,
   useLatestTransactionList,
@@ -166,11 +166,10 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
-    const { openDefaultModal, openModal } = useModals();
+    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount } = useAccounts();
-    const { extractSignedTransactionResponseData, deserializeData } = useAirGap();
     const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
@@ -203,7 +202,7 @@ export default defineComponent({
 
     const headerSubtitle = computed(() => {
       if (props.isAirGap) {
-        return tg('modals.airGapSend.reviewSubTitle');
+        return tg('modals.airGapSend.reviewSubtitle');
       }
       return tg('pages.send.checkalert');
     });
@@ -395,29 +394,10 @@ export default defineComponent({
       }
     }
 
-    async function scanSignedTransaction() {
-      const scanResult: string = await openModal(MODAL_READ_QR_CODE, {
-        heading: tg('modals.scanAirGapTx.heading'),
-        title: tg('modals.scanAirGapTx.title'),
-        icon: 'critical',
-      }).catch(() => null); // Closing the modal does nothing
-
-      if (!scanResult) {
-        return;
-      }
-
-      const deserializedData = await deserializeData(scanResult);
-      const txRaw = await extractSignedTransactionResponseData(deserializedData);
-
-      if (!txRaw) {
-        return;
-      }
-      emit('success', txRaw);
-    }
-
     async function submit(): Promise<void> {
       if (props.isAirGap) {
-        return scanSignedTransaction();
+        emit('success');
+        return;
       }
 
       const {
@@ -428,7 +408,7 @@ export default defineComponent({
       } = props.transferData;
 
       if (!amountRaw || !recipient || !selectedAsset) {
-        return undefined;
+        return;
       }
 
       const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
@@ -452,7 +432,6 @@ export default defineComponent({
         });
         router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
       }
-      return undefined;
     }
 
     return {

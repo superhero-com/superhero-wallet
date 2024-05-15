@@ -2,35 +2,73 @@
   <Modal
     class="air-gap-sign-transaction"
     has-close-button
+    full-screen
     from-bottom
     no-padding
     @close="reject"
   >
-    <template #header>
-      <div class="title">
-        {{ $t('modals.signAirGapTx.heading') }}
-      </div>
-    </template>
-    <div class="qrcode-wrapper">
-      <MultiFragmentsQrCode
+    <ModalHeader
+      no-padding
+      :subtitle="subtitle"
+    >
+      <template #title>
+        <div class="custom-header-title">
+          {{ title }}
+          <BtnHelp
+            :title="$t('modals.scanAirGapTx.help.title')"
+            :msg="$t('modals.scanAirGapTx.help.msg')"
+            icon="qr-scan"
+            full-screen
+          />
+        </div>
+      </template>
+    </ModalHeader>
+    <!-- First Step -->
+    <div
+      v-if="currentStep === STEPS.initial"
+      class="qrcode-wrapper"
+    >
+      <QrCode
         v-if="fragments"
         class="qrcode"
         :value="fragments"
-        :size="280"
+        :size="290"
         :type-number="0"
+        :external-copied="copied"
+      />
+      <BtnMain
+        class="btn-copy"
+        :icon="CopyOutlinedIcon"
+        :text="$t('pages.send.copy')"
+        variant="muted"
+        extend
+        @click="copy(fragments.join(''))"
+      />
+    </div>
+    <!-- Second Step -->
+    <div v-else class="input-wrapper">
+      <FormInputWithQr
+        v-model="syncCode"
+        class="sync-code-input"
+        qr-icon="critical"
+        :label="$t('modals.airGapSyncCode.inputLabel')"
+        :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
+        :qr-heading="$t('modals.importAirGapAccount.scanTitle')"
+        :qr-title="$t('modals.importAirGapAccount.scanDescription')"
+        @update:model-value="throttledHandleInput"
       />
     </div>
     <template #footer>
       <BtnMain
         variant="muted"
-        :text="$t('common.cancel')"
-        @click="reject()"
+        :text="secondaryButtonText"
+        @click="secondaryButtonAction"
       />
       <BtnMain
         extra-padded
-        :icon="QrScanIcon"
-        :text="$t('common.scan')"
-        @click="scanSignedTransaction()"
+        :disabled="isMainButtonDisabled"
+        :text="mainButtonText"
+        @click="mainButtonAction()"
       />
     </template>
   </Modal>
@@ -38,34 +76,48 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   onMounted,
   PropType,
   ref,
 } from 'vue';
-import { IACMessageType } from 'airgap-coin-lib';
+import { throttle } from 'lodash-es';
+import { IACMessageType } from '@airgap/serializer/v3/interfaces';
 
 import { tg } from '@/popup/plugins/i18n';
-import { MODAL_READ_QR_CODE } from '@/constants';
+import { ObjectValues } from '@/types';
 import { isAirgapAccount } from '@/utils';
 import {
   useAccounts,
-  useModals,
   useAirGap,
   useAeSdk,
+  useCopy,
 } from '@/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import MultiFragmentsQrCode from '../MultiFragmentsQrCode.vue';
+import BtnHelp from '../buttons/BtnHelp.vue';
+import QrCode from '../QrCode.vue';
+import ModalHeader from '../ModalHeader.vue';
+import FormInputWithQr from '../form/FormInputWithQr.vue';
 
-import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
+import CopyOutlinedIcon from '../../../icons/copy-outlined.svg?vue-component';
+
+const STEPS = {
+  initial: 'initial',
+  confirm: 'confirm',
+} as const;
+type Step = ObjectValues<typeof STEPS>;
 
 export default defineComponent({
   components: {
     Modal,
     BtnMain,
-    MultiFragmentsQrCode,
+    BtnHelp,
+    QrCode,
+    ModalHeader,
+    FormInputWithQr,
   },
   props: {
     txRaw: { type: String, required: true },
@@ -73,11 +125,76 @@ export default defineComponent({
     reject: { type: Function as PropType<() => void>, required: true },
   },
   setup(props) {
+    const currentStep = ref<Step>(STEPS.initial);
     const fragments = ref();
-    const { openModal } = useModals();
+    const syncCode = ref('');
+    const signedTransaction = ref();
+
     const { activeAccount } = useAccounts();
     const { nodeNetworkId } = useAeSdk();
     const { generateTransactionURDataFragments, deserializeData } = useAirGap();
+    const { copy, copied } = useCopy();
+
+    const isFirstStep = computed(() => currentStep.value === STEPS.initial);
+    const title = computed(() => isFirstStep.value
+      ? tg('modals.airGapSend.reviewTitle')
+      : tg('modals.sendAirGapTx.title'));
+    const subtitle = computed(() => isFirstStep.value
+      ? tg('modals.airGapSend.reviewSubtitle')
+      : tg('modals.sendAirGapTx.subtitle'));
+    const mainButtonText = computed(() => isFirstStep.value
+      ? tg('common.next')
+      : tg('common.confirm'));
+    const secondaryButtonText = computed(() => isFirstStep.value
+      ? tg('common.cancel')
+      : tg('modals.sendAirGapTx.backToQr'));
+
+    const isMainButtonDisabled = computed(() => (
+      currentStep.value === STEPS.confirm
+      && !signedTransaction.value
+    ));
+
+    function mainButtonAction() {
+      if (isFirstStep.value) {
+        currentStep.value = STEPS.confirm;
+      } else if (signedTransaction.value) {
+        props.resolve(signedTransaction.value);
+      }
+    }
+
+    function secondaryButtonAction() {
+      if (currentStep.value === STEPS.confirm) {
+        currentStep.value = STEPS.initial;
+        signedTransaction.value = null;
+        syncCode.value = '';
+      } else {
+        props.reject();
+      }
+    }
+
+    async function handleInput() {
+      if (syncCode.value) {
+        try {
+          const deserializedData = await deserializeData(syncCode.value);
+
+          if (deserializedData?.length) {
+          // filter sign transaction type
+            const tx = deserializedData.find(
+              (item) => item.type === IACMessageType.TransactionSignResponse,
+            );
+            if (tx) {
+              signedTransaction.value = (tx.payload as any).transaction;
+            } else {
+              signedTransaction.value = null;
+            }
+          }
+        } catch (e) {
+          signedTransaction.value = null;
+        }
+      }
+    }
+
+    const throttledHandleInput = throttle(handleInput, 100);
 
     onMounted(async () => {
       if (isAirgapAccount(activeAccount.value)) {
@@ -89,36 +206,22 @@ export default defineComponent({
       }
     });
 
-    async function scanSignedTransaction() {
-      const scanResult: string = await openModal(MODAL_READ_QR_CODE, {
-        heading: tg('modals.scanAirGapTx.heading'),
-        title: tg('modals.scanAirGapTx.title'),
-        icon: 'critical',
-      }).catch(() => null); // Closing the modal does nothing
-
-      if (!scanResult) {
-        return;
-      }
-
-      const deserializedData = await deserializeData(scanResult);
-
-      if (deserializedData?.length) {
-        // filter sign transaction type
-        const tx = deserializedData.find(
-          (item) => item.type === IACMessageType.TransactionSignResponse,
-        );
-        if (tx) {
-          props.resolve((tx.payload as any).transaction);
-        } else {
-          props.reject();
-        }
-      }
-    }
-
     return {
       fragments,
-      scanSignedTransaction,
-      QrScanIcon,
+      copied,
+      title,
+      subtitle,
+      mainButtonText,
+      secondaryButtonText,
+      isMainButtonDisabled,
+      currentStep,
+      syncCode,
+      copy,
+      mainButtonAction,
+      secondaryButtonAction,
+      throttledHandleInput,
+      STEPS,
+      CopyOutlinedIcon,
     };
   },
 });
@@ -130,12 +233,11 @@ export default defineComponent({
 @use '@/styles/mixins';
 
 .air-gap-sign-transaction {
-  .title {
-    @extend %face-sans-15-medium;
-
-    color: rgba(variables.$color-white, 0.75);
-    text-align: left;
-    padding: 12px;
+  .custom-header-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 
   .qrcode-wrapper {
@@ -148,6 +250,15 @@ export default defineComponent({
       background-color: $color-white;
       border-radius: 12px;
     }
+
+    .btn-copy {
+      margin-top: 16px;
+    }
+  }
+
+  .input-wrapper,
+  .qrcode-wrapper{
+    padding: 0 24px;
   }
 }
 </style>

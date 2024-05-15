@@ -244,8 +244,6 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      decoder.value = new URDecoder();
-
       hasDeviceCamera.value = await checkDeviceHasCamera();
       if (!hasDeviceCamera.value) {
         return;

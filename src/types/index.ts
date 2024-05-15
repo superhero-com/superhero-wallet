@@ -778,7 +778,7 @@ export type TransferSendStepConfigRegistry = {
   [TRANSFER_SEND_STEPS.form]: TransferSendStepConfig;
   [TRANSFER_SEND_STEPS.review]: TransferSendStepConfig;
   [TRANSFER_SEND_STEPS.reviewTip]?: TransferSendStepConfig;
-  [TRANSFER_SEND_STEPS.reviewRawTx]?: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.airGapSign]?: TransferSendStepConfig;
 }
 
 export interface TransferFormModel extends IFormModel {

@@ -9,7 +9,6 @@
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
-    @cancel-transfer="cancelTransfer"
   >
     <template #content>
       <component
@@ -57,7 +56,7 @@ import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/compon
 import TransferSendForm from '../components/TransferSendForm.vue';
 import TransferReviewTip from '../components/TransferReviewTip.vue';
 import TransferReview from '../components/TransferReview.vue';
-import TransferRawTxReview from '../components/TransferRawTxReview.vue';
+import TransferSignedTxReview from '../components/TransferSignedTxReview.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_SEND,
@@ -96,13 +95,13 @@ export default defineComponent({
       && isUrlValid(transferData.value.address)
     ));
 
-    const showScanButton = computed(() => (
+    const showNextButton = computed(() => (
       currentStep.value === TRANSFER_SEND_STEPS.review
       && props.isAirGap
     ));
 
     const isSendingDisabled = computed(() => {
-      if (showScanButton.value) {
+      if (showNextButton.value) {
         return (error.value || !isAeNodeReady.value);
       }
       return error.value
@@ -115,8 +114,8 @@ export default defineComponent({
       if (props.isMultisig) {
         return t('modals.multisigTxProposal.proposeAndApprove');
       }
-      if (showScanButton.value) {
-        return t('common.scan');
+      if (showNextButton.value) {
+        return t('common.next');
       }
       return '';
     });
@@ -135,23 +134,21 @@ export default defineComponent({
       currentStep.value = TRANSFER_SEND_STEPS.review;
     }
 
-    function handleReviewSuccess(rawTx: string = '') {
-      if (props.isAirGap && rawTx) {
-        txRaw.value = rawTx;
-        currentStep.value = TRANSFER_SEND_STEPS.reviewRawTx;
+    function handleReviewSuccess() {
+      if (props.isAirGap) {
+        currentStep.value = TRANSFER_SEND_STEPS.airGapSign;
       } else {
         props.resolve();
       }
     }
 
+    function handleAirGapSignReviewSuccess() {
+      props.resolve();
+    }
+
     function editTransfer() {
       error.value = false;
       currentStep.value = TRANSFER_SEND_STEPS.form;
-    }
-
-    function cancelTransfer() {
-      error.value = false;
-      props.resolve();
     }
 
     const steps: TransferSendStepConfigRegistry = {
@@ -167,9 +164,9 @@ export default defineComponent({
         component: TransferReview,
         onSuccess: handleReviewSuccess,
       },
-      [TRANSFER_SEND_STEPS.reviewRawTx]: {
-        component: TransferRawTxReview,
-        onSuccess: handleReviewSuccess,
+      [TRANSFER_SEND_STEPS.airGapSign]: {
+        component: TransferSignedTxReview,
+        onSuccess: handleAirGapSignReviewSuccess,
       },
     };
 
@@ -191,7 +188,6 @@ export default defineComponent({
       customPrimaryButtonText,
       proceedToNextStep,
       editTransfer,
-      cancelTransfer,
     };
   },
 });

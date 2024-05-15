@@ -24,7 +24,7 @@
 
       <div class="qrcode-wrapper">
         <QrCode
-          :value="accountAddressToCopy"
+          :value="[accountAddressToCopy]"
           :size="180"
           class="qrcode"
         />
