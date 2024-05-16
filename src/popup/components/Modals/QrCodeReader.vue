@@ -73,16 +73,12 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
-import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
+import type QrScannerType from 'qr-scanner';
 import { useI18n } from 'vue-i18n';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
-import {
-  checkOrRequestDeviceCameraPermission,
-  checkDeviceHasCamera,
-  handleUnknownError,
-} from '@/utils';
+import { checkOrRequestDeviceCameraPermission, checkDeviceHasCamera } from '@/utils';
 import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
 import { useUi } from '@/composables';
 
@@ -115,8 +111,7 @@ export default defineComponent({
     const isCameraReady = ref(false);
     const cameraPermissionGranted = ref(true);
 
-    let browserReader: BrowserQRCodeReaderType | null = null;
-    let browserReaderControls: IScannerControls | null = null;
+    let browserReader: QrScannerType | null = null;
 
     const heading = computed((): string => {
       switch (true) {
@@ -140,7 +135,9 @@ export default defineComponent({
         BarcodeScanner.stopScan();
         BarcodeScanner.removeAllListeners();
       } else {
-        browserReaderControls?.stop();
+        browserReader?.stop();
+        browserReader?.destroy();
+        browserReader = null;
       }
     }
 
@@ -166,25 +163,20 @@ export default defineComponent({
       });
     }
 
-    function scanWeb() {
+    async function scanWeb() {
+      const { default: QrScanner } = await import('qr-scanner');
       return new Promise<string>((resolve) => {
-        browserReader?.decodeFromVideoDevice(
-          undefined,
-          qrCodeVideoEl.value,
-          (result, _, controls) => {
-            browserReaderControls = controls;
-            if (result) {
-              controls?.stop();
-              resolve(result.getText());
+        browserReader = new QrScanner(
+          qrCodeVideoEl.value!,
+          (result) => {
+            if (result.data) {
+              stopReading();
+              resolve(result.data);
             }
           },
-        ).catch((error) => {
-          if (error.name === 'NotAllowedError') {
-            cameraPermissionGranted.value = false;
-          } else {
-            handleUnknownError(error);
-          }
-        });
+          {},
+        );
+        browserReader.start();
       });
     }
 
@@ -217,16 +209,8 @@ export default defineComponent({
         return;
       }
 
-      if (IS_MOBILE_APP) {
-        // TODO Research if the BarcodeScanner could be imported dynamically
-        isCameraReady.value = true;
-        props.resolve(await scanMobile());
-      } else {
-        const { BrowserQRCodeReader } = await import('@zxing/browser');
-        browserReader = new BrowserQRCodeReader();
-        isCameraReady.value = true;
-        props.resolve(await scanWeb());
-      }
+      isCameraReady.value = true;
+      props.resolve((IS_MOBILE_APP) ? await scanMobile() : await scanWeb());
     });
 
     onBeforeUnmount(() => {
