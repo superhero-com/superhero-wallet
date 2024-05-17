@@ -9,7 +9,6 @@
             :amount-total="amountTotal"
             :fee="fee"
             :hash="hash"
-            :non-ae-assets="assets"
             :protocol="PROTOCOLS.bitcoin"
             show-header
           >

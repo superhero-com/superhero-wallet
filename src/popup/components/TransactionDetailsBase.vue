@@ -120,8 +120,8 @@
               :amount="amount"
               :symbol="assetSymbol"
               :hide-fiat="hideFiat"
-              :high-precision="!!nonAeAssets"
               :protocol="protocol"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -138,7 +138,7 @@
               :amount="fee"
               :symbol="coinSymbol"
               :protocol="protocol"
-              :high-precision="!!nonAeAssets"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -153,8 +153,8 @@
               :amount="amountTotal"
               :symbol="assetSymbol"
               :hide-fiat="hideFiat"
-              :high-precision="!!nonAeAssets"
               :protocol="protocol"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -166,7 +166,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
-import type { Protocol, ITransaction, ITokenResolved } from '@/types';
+import type { Protocol, ITransaction } from '@/types';
 import {
   formatDate,
   formatTime,
@@ -211,7 +211,6 @@ export default defineComponent({
     fee: { type: Number, default: 0 },
     payload: { type: String, default: '' },
     hash: { type: String, required: true },
-    nonAeAssets: { type: Array as PropType<ITokenResolved[]>, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     isErrorTransaction: Boolean,
     showHeader: Boolean,

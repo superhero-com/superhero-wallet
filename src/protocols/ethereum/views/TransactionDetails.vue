@@ -9,7 +9,6 @@
             :amount-total="amountTotal"
             :fee="fee"
             :hash="hash"
-            :non-ae-assets="transactionAssets"
             :protocol="PROTOCOLS.ethereum"
             :hide-amount-total="!isTransactionCoin"
             :hide-fiat="!isTransactionCoin"

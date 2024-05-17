@@ -104,6 +104,7 @@
             :symbol="singleToken.symbol"
             :hide-fiat="isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
             data-cy="total"
           />
         </DetailsItem>
