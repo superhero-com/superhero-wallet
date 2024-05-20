@@ -276,9 +276,15 @@ export function useFungibleTokens() {
       ? rawAmount
       : new BigNumber(Number(rawAmount));
 
+    let gasCost = new BigNumber(0);
+    if (tx?.gasPrice && tx?.gasUsed) {
+      gasCost = new BigNumber(tx.gasPrice).multipliedBy(tx.gasUsed);
+    }
+
     return +aettosToAe(amount
       .plus(isReceived ? 0 : tx?.fee || 0)
-      .plus(isReceived ? 0 : tx?.tx?.tx?.fee || 0));
+      .plus(isReceived ? 0 : tx?.tx?.tx?.fee || 0)
+      .plus(isReceived ? 0 : gasCost));
   }
 
   availableTokensPooling(() => loadAvailableTokens());
