@@ -8,7 +8,6 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import {
-  buildTx,
   Contract,
   ContractMethodsBase,
   encode,
@@ -20,21 +19,10 @@ import {
 } from '@aeternity/aepp-sdk';
 
 import type { IFormModel } from '@/types';
-import {
-  executeAndSetInterval,
-  handleUnknownError,
-  isUrlValid,
-  watchUntilTruthy,
-} from '@/utils';
+import { executeAndSetInterval, isUrlValid } from '@/utils';
 import { PROTOCOLS } from '@/constants';
-import {
-  STUB_CALLDATA,
-  STUB_CONTRACT_ADDRESS,
-} from '@/constants/stubs';
-import {
-  AE_COIN_PRECISION,
-  AE_CONTRACT_ID,
-} from '@/protocols/aeternity/config';
+import { STUB_CALL_DATA, STUB_CONTRACT_ADDRESS } from '@/constants/stubs';
+import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 
 import { useAeSdk } from './aeSdk';
@@ -55,11 +43,9 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
   const { getLastActiveProtocolAccount } = useAccounts();
 
   let updateTokenBalanceInterval: NodeJS.Timer;
-  let updateNonceInterval: NodeJS.Timer;
   const fee = ref<BigNumber>(new BigNumber(0));
   const selectedTokenBalance = ref(new BigNumber(0));
   let tokenInstance: Contract<ContractMethodsBase> | null;
-  const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
 
   const max = computed(() => {
@@ -83,7 +69,6 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       const isAssetAe = val.selectedAsset.contractId === AE_CONTRACT_ID;
       const account = getAccount();
-      await watchUntilTruthy(nonce);
 
       if (!isAssetAe) {
         if (
@@ -107,24 +92,23 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
           val.address && !isNameValid(val.address) && isUrlValid(val.address)
         )
       ) {
-        let calldata: Encoded.ContractBytearray = STUB_CALLDATA;
+        let callData: Encoded.ContractBytearray = STUB_CALL_DATA;
         if (tokenInstance) {
-          calldata = tokenInstance._calldata.encode(
+          callData = tokenInstance._calldata.encode(
             tokenInstance._name,
             'transfer',
             [account.address, amount.toFixed()],
           );
         }
         fee.value = BigNumber(unpackTx(
-          buildTx({
+          await aeSdk.buildTx({
             tag: Tag.ContractCallTx,
             callerId: account.address as Encoded.AccountAddress,
             contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
             amount: 0,
-            callData: calldata,
-            nonce: nonce.value,
+            callData,
             ttl: await aeSdk.getHeight({ cached: true }) + 3,
           }),
           Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
@@ -137,13 +121,12 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
       }
 
       const minFee = BigNumber(unpackTx(
-        buildTx({
+        await aeSdk.buildTx({
           tag: Tag.SpendTx,
           senderId: account.address as Encoded.AccountAddress,
           recipientId: account.address as Encoded.AccountAddress,
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
-          nonce: nonce.value,
           ttl: await aeSdk.getHeight({ cached: true }) + 3,
         }),
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
@@ -164,26 +147,9 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
         (await tokenInstance.balance(getAccount().address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
-
-    updateNonceInterval = executeAndSetInterval(async () => {
-      const aeSdk = await getAeSdk();
-      try {
-        nonce.value = (await aeSdk.api
-          .getAccountNextNonce(getAccount().address)).nextNonce;
-      } catch (error: any) {
-        if (error.message.includes('Account not found')) {
-          nonce.value = 1;
-        } else {
-          handleUnknownError(error);
-        }
-      }
-    }, 5000);
   });
 
-  onBeforeUnmount(() => {
-    clearInterval(updateTokenBalanceInterval);
-    clearInterval(updateNonceInterval);
-  });
+  onBeforeUnmount(() => clearInterval(updateTokenBalanceInterval));
 
   return {
     max,
