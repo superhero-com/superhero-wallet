@@ -74,7 +74,7 @@
             : {}),
           token_to_an_address: [!isAe],
         }"
-        @openQrModal="openScanQrModal"
+        @openQrModal="scanTransferQrCode()"
       />
     </template>
 
@@ -291,7 +291,7 @@ export default defineComponent({
       clearPayload,
       handleAssetChange,
       updateFormModelValues,
-      openScanQrModal,
+      scanTransferQrCode,
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
@@ -439,7 +439,7 @@ export default defineComponent({
       activeAccount,
       editPayload,
       clearPayload,
-      openScanQrModal,
+      scanTransferQrCode,
       handleAssetChange,
       toggleMaxAmount,
       selectAccount,
