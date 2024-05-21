@@ -14,30 +14,46 @@
     has-close-button
     centered
     from-bottom
-    @close="closeQrCodeReaderModal"
+    semi-dense
+    @close="closeQrCodeReaderModal()"
   >
     <div class="top-icon-wrapper">
       <IconBoxed :icon="QrScanIcon" />
     </div>
     <div
-      v-if="heading"
       class="heading"
-      v-text="heading"
+      v-text="$t('modals.qrCodeReader.scanQr')"
     />
     <div
-      class="subtitle"
-      v-text="subtitle"
+      v-if="title"
+      class="title"
+      v-text="title"
     />
 
     <div class="camera">
-      <span class="video-loader">
-        <AnimatedSpinnerIcon class="spinner" />
-      </span>
-      <div
-        v-show="isCameraReady"
-        class="video-wrapper"
-      >
+      <div class="camera-inner">
+        <div
+          v-if="!hasDeviceCamera"
+          class="camera-message"
+        >
+          <AlertIcon class="icon-alert color-warning" />
+          <p class="text-heading-1 color-warning">{{ $t('modals.qrCodeReader.noWebcam') }}</p>
+          <p class="color-warning-muted">{{ $t('modals.qrCodeReader.noWebcamSubtitle') }}</p>
+        </div>
+        <div
+          v-else-if="!cameraPermissionGranted"
+          class="camera-message"
+        >
+          <AlertIcon class="icon-alert color-warning" />
+          <p class="text-heading-1 color-warning">{{ $t('modals.qrCodeReader.grantPermission') }}</p>
+        </div>
+        <AnimatedSpinnerIcon
+          v-else
+          class="spinner"
+        />
+
         <video
+          v-show="isCameraReady"
           ref="qrCodeVideoEl"
           class="video"
         >
@@ -63,7 +79,6 @@
 
 <script lang="ts">
 import {
-  computed,
   defineComponent,
   onBeforeUnmount,
   onMounted,
@@ -74,7 +89,6 @@ import {
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import type QrScannerType from 'qr-scanner';
-import { useI18n } from 'vue-i18n';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
@@ -88,6 +102,7 @@ import IconBoxed from '@/popup/components/IconBoxed.vue';
 
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
+import AlertIcon from '@/icons/alert.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -95,6 +110,7 @@ export default defineComponent({
     BtnMain,
     IconBoxed,
     AnimatedSpinnerIcon,
+    AlertIcon,
   },
   props: {
     title: { type: String, required: true },
@@ -103,7 +119,6 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
-    const { t } = useI18n();
     const { setMobileQrScannerVisible } = useUi();
 
     const qrCodeVideoEl = ref<HTMLVideoElement>();
@@ -112,22 +127,6 @@ export default defineComponent({
     const cameraPermissionGranted = ref(true);
 
     let browserReader: QrScannerType | null = null;
-
-    const heading = computed((): string => {
-      switch (true) {
-        case !hasDeviceCamera.value: return t('modals.qrCodeReader.noWebcam');
-        case !cameraPermissionGranted.value: return t('modals.qrCodeReader.grantPermission');
-        default: return t('modals.qrCodeReader.scanQr');
-      }
-    });
-
-    const subtitle = computed((): string => {
-      switch (true) {
-        case !hasDeviceCamera.value: return t('modals.qrCodeReader.noWebcamSubtitle');
-        case isCameraReady.value: return props.title;
-        default: return t('modals.qrCodeReader.subtitle');
-      }
-    });
 
     function stopReading() {
       if (IS_MOBILE_APP) {
@@ -222,8 +221,6 @@ export default defineComponent({
       isCameraReady,
       hasDeviceCamera,
       cameraPermissionGranted,
-      heading,
-      subtitle,
       QrScanIcon,
       qrCodeVideoEl,
       closeQrCodeReaderModal,
@@ -234,7 +231,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '../../../styles/variables' as *;
 @use '../../../styles/mixins';
 @use '../../../styles/typography';
 
@@ -242,45 +239,46 @@ export default defineComponent({
   .top-icon-wrapper {
     margin: 0 auto 16px auto;
     text-align: center;
-    color: variables.$color-primary;
+    color: $color-primary;
   }
 
   .camera {
-    --camera-size: 312px;
-
-    margin: 20px auto 0;
-    width: var(--camera-size);
-    height: var(--camera-size);
+    position: relative;
+    padding-top: 100%; // Aspect ratio 1:1
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
-    background: rgba(variables.$color-white, 0.05);
+    border-radius: $border-radius-interactive;
+    background: rgba($color-white, 0.05);
     overflow: hidden;
 
-    .video {
-      height: var(--camera-size);
-
-      @include mixins.mobile {
-        height: unset;
-        width: var(--camera-size);
-      }
-    }
-
-    .video-wrapper {
-      z-index: 1;
-    }
-
-    .video-loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .camera-inner {
       position: absolute;
-      z-index: 0;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .camera-message {
+        padding-inline: 20px;
+
+        .icon-alert {
+          width: 48px;
+        }
+      }
+
+      .video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
 
       .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
         width: 56px;
-        height: 56px;
+        transform: translateX(-50%) translateY(-50%);
       }
     }
   }
@@ -288,17 +286,16 @@ export default defineComponent({
   .heading {
     @extend %face-sans-19-medium;
 
-    color: variables.$color-white;
+    color: $color-white;
   }
 
-  .subtitle,
   .title {
     @extend %face-sans-16-regular;
 
     margin-top: 4px;
     margin-bottom: 20px;
     line-height: 24px;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 }
 </style>
