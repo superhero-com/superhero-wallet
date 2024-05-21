@@ -392,6 +392,10 @@ export function splitAddress(address: string | null): string {
     : '';
 }
 
+export function toHex(value: string) {
+  return `0x${parseInt(value, 10).toString(16)}`;
+}
+
 export function toShiftedBigNumber(value: number | string, precision: number): BigNumberPublic {
   return new BigNumber(value).shiftedBy(precision);
 }

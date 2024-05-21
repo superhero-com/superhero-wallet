@@ -15,6 +15,7 @@ export const ETH_COIN_PRECISION = 18; // Amount of decimals
 
 export const ETH_COINGECKO_COIN_ID = 'ethereum';
 export const ETH_GAS_LIMIT = 21000;
+export const ETH_CHAIN_NAMESPACE = 'eip155';
 
 /**
  * Estimated time we need to wait for the middleware (etherscan) to sync it's state
@@ -71,11 +72,11 @@ export const ETH_SAFE_CONFIRMATION_COUNT = 12;
 export const ETH_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IEthNetworkSettings> = {
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: 'https://ethereum-rpc.publicnode.com', // TODO replace temp values - use our own node
-    chainId: '0x1',
+    chainId: '1',
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: 'https://ethereum-sepolia-rpc.publicnode.com', // TODO replace temp values - use our own node
-    chainId: '0xaa36a7',
+    chainId: '11155111',
   },
 };
 
