@@ -472,9 +472,15 @@
   "transaction": {
     "fee": "Transaction fee",
     "estimatedFee": "Estimated transaction fee",
+    "estimatedGasUsed": "Estimated gas used",
     "maxFee": "Maximum transaction fee",
     "advancedDetails": "Advanced transaction details",
     "data": "Transaction data",
+    "gasCost": "Gas cost",
+    "proposalEstimatedGasUsed": "Proposal estimated gas used",
+    "proposalGasCost": "Proposal gas cost",
+    "proposalTransactionFee": "Proposal transaction fee",
+    "proposalTotal": "Proposal total",
     "type": {
       "spendTx": "Spend",
       "contractCreateTx": "Contract create",

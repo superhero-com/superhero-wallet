@@ -778,6 +778,8 @@ export type TransferSendStepConfigRegistry = {
 }
 
 export interface TransferFormModel extends IFormModel {
+  gasPrice?: number;
+  gasUsed?: number;
   fee?: BigNumber;
   total?: number;
   invoiceContract?: any;

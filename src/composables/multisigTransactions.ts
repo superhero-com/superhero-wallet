@@ -104,7 +104,11 @@ export function useMultisigTransactions() {
     return postJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
   }
 
-  async function proposeTx(spendTx: Encoded.Transaction, contractId: Encoded.ContractAddress) {
+  async function proposeTx(
+    spendTx: Encoded.Transaction,
+    contractId: Encoded.ContractAddress,
+    options?: any,
+  ) {
     const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
 
@@ -115,11 +119,16 @@ export function useMultisigTransactions() {
       address: contractId,
     });
 
-    await gaContractRpc.propose(spendTxHash, {
-      FixedTTL: [expirationHeight],
-    });
+    const callResult = await gaContractRpc.propose(
+      spendTxHash,
+      { FixedTTL: [expirationHeight] },
+      options || {},
+    );
 
-    return Buffer.from(spendTxHash).toString('hex');
+    return {
+      proposeTxHash: Buffer.from(spendTxHash).toString('hex'),
+      callResult,
+    };
   }
 
   /**

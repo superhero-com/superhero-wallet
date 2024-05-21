@@ -65,7 +65,7 @@
 
     <DetailsItem
       class="details-item"
-      :label="$t('transaction.fee')"
+      :label="feeLabel"
     >
       <template #value>
         <TokenAmount
@@ -124,6 +124,7 @@ export default defineComponent({
     subtitle: { type: String, default: tg('pages.send.checkalert') },
     senderLabel: { type: String, default: tg('pages.send.sender') },
     amountLabel: { type: String, default: tg('common.amount') },
+    feeLabel: { type: String, default: tg('transaction.fee') },
     baseTokenSymbol: { type: String, required: true },
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     protocol: { type: String as PropType<Protocol>, required: true },

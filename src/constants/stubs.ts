@@ -37,6 +37,7 @@ export const STUB_NONCE = 10000;
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 export const STUB_TIPPING_CONTRACT_ID_V1 = 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd';
 export const STUB_TIPPING_CONTRACT_ID_V2 = 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu';
+export const STUB_TIP_NOTE = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vel interdum ligula, non consequat libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nullam congue, nibh non malesuada ornare, ante metus tempor dui, a ultrices ante ut.';
 
 export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
