@@ -15,7 +15,7 @@
         :errors="errors"
         :protocol="PROTOCOLS.bitcoin"
         :validation-rules="{ account_address: [PROTOCOLS.bitcoin, activeNetwork.type] }"
-        @openQrModal="openScanQrModal"
+        @openQrModal="scanTransferQrCode()"
       />
     </template>
 
@@ -150,8 +150,8 @@ export default defineComponent({
       invoiceId,
       invoiceContract,
       clearPayload,
-      openScanQrModal,
       handleAssetChange,
+      scanTransferQrCode,
       updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
@@ -289,7 +289,7 @@ export default defineComponent({
       balance,
       max,
       clearPayload,
-      openScanQrModal,
+      scanTransferQrCode,
       handleAssetChange,
       EditIcon,
       DeleteIcon,

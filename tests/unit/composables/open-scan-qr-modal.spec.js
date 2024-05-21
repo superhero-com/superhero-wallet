@@ -38,8 +38,7 @@ jest.mock('@/composables/accountAssetsList', () => ({
 
 jest.mock('@/composables/modals', () => ({
   useModals: jest.fn(() => ({
-    openModal: qrCodeSource,
-    openDefaultModal: () => {},
+    openScanQrModal: qrCodeSource,
   })),
 }));
 
@@ -59,24 +58,24 @@ describe('openScanQrModal', () => {
     formModel,
     invoiceId,
     invoiceContract,
-    openScanQrModal,
+    scanTransferQrCode,
   } = useTransferSendForm({ transferData, getSelectedAssetValue });
 
   it('parses address qr code', async () => {
-    await openScanQrModal();
+    await scanTransferQrCode();
     expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
   });
 
   it('parses ae amount qr code', async () => {
     numberOfTheTest = 1;
-    await openScanQrModal();
+    await scanTransferQrCode();
     expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
     expect(formModel.value.amount).toBe(testAmount);
   });
 
   it('parses contract amount qr code', async () => {
     numberOfTheTest = 2;
-    await openScanQrModal();
+    await scanTransferQrCode();
     expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
@@ -84,7 +83,7 @@ describe('openScanQrModal', () => {
 
   it('parses contract amount legacy qr code', async () => {
     numberOfTheTest = 3;
-    await openScanQrModal();
+    await scanTransferQrCode();
     expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
@@ -92,7 +91,7 @@ describe('openScanQrModal', () => {
 
   it('parses zeit contract qr code', async () => {
     numberOfTheTest = 4;
-    await openScanQrModal();
+    await scanTransferQrCode();
     expect(formModel.value.address).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset.contractId).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
@@ -102,7 +101,7 @@ describe('openScanQrModal', () => {
 
   it('handles user scan reject with existing data', async () => {
     numberOfTheTest = 5;
-    await openScanQrModal();
+    await scanTransferQrCode();
     expect(formModel.value.address).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset.contractId).toBe(STUB_TOKEN_CONTRACT_ADDRESS);

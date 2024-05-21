@@ -15,6 +15,7 @@ import {
   MODAL_CONFIRM,
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
+  MODAL_READ_QR_CODE,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
@@ -169,6 +170,12 @@ export function useModals() {
     return openModal(MODAL_ERROR_LOG, { entry }).catch(handleUnknownError);
   }
 
+  function openScanQrModal(options: {
+    title: string;
+  }) {
+    return openModal(MODAL_READ_QR_CODE, options);
+  }
+
   return {
     modalsOpen,
     registerModal,
@@ -176,6 +183,7 @@ export function useModals() {
     openDefaultModal,
     openConfirmModal,
     openErrorModal,
+    openScanQrModal,
     closeModalByKey,
   };
 }

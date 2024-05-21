@@ -16,7 +16,7 @@
         :errors="errors"
         :protocol="PROTOCOLS.ethereum"
         :validation-rules="{ account_address: [PROTOCOLS.ethereum] }"
-        @openQrModal="openScanQrModal"
+        @openQrModal="scanTransferQrCode()"
       />
     </template>
 
@@ -162,7 +162,7 @@ export default defineComponent({
       hasError,
       invoiceId,
       invoiceContract,
-      openScanQrModal,
+      scanTransferQrCode,
       handleAssetChange,
       updateFormModelValues,
     } = useTransferSendForm({
@@ -295,7 +295,7 @@ export default defineComponent({
       balance,
       max,
       shouldUseMaxAmount,
-      openScanQrModal,
+      scanTransferQrCode,
       handleAssetChange,
       submit,
       toggleMaxAmount,

@@ -56,7 +56,7 @@
             <template #label-after>
               <BtnPlain
                 class="scan-button"
-                @click.prevent="openScanQrModal(index)"
+                @click.prevent="scanSignerAccountQrCode(index)"
               >
                 <QrScanIcon />
               </BtnPlain>
@@ -195,7 +195,6 @@ import {
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
-  MODAL_READ_QR_CODE,
   PROTOCOLS,
 } from '@/constants';
 import {
@@ -267,7 +266,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { aeAccountsSelectOptions } = useAccounts();
-    const { openModal, openDefaultModal } = useModals();
+    const { openDefaultModal, openScanQrModal } = useModals();
     const errors = useFormErrors();
 
     const {
@@ -277,13 +276,13 @@ export default defineComponent({
     const {
       multisigAccount,
       multisigAccountCreationPhase,
-      pendingMultisigCreationTxs,
       multisigAccountCreationFee,
       isMultisigAccountAccessible,
       isMultisigAccountCreated,
+      notEnoughBalanceToCreateMultisig,
+      pendingMultisigCreationTxs,
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
-      notEnoughBalanceToCreateMultisig,
     } = useMultisigAccountCreate();
 
     const currentStep = ref<Step>(STEPS.form);
@@ -340,10 +339,9 @@ export default defineComponent({
      * Scans a QR code and add a signer address
      * @param {number} signerIndex - The index of the signer to update the address of
      */
-    async function openScanQrModal(signerIndex: number) {
-      const scanResult = await openModal(MODAL_READ_QR_CODE, {
+    async function scanSignerAccountQrCode(signerIndex: number) {
+      const scanResult = await openScanQrModal({
         title: t('multisig.scanAddress'),
-        icon: 'critical',
       });
 
       if (!scanResult) return;
@@ -459,7 +457,7 @@ export default defineComponent({
       getErrorMessage,
       openReviewStep,
       createMultisigAccount,
-      openScanQrModal,
+      scanSignerAccountQrCode,
       addNewSigner,
       removeSigner,
       getSignerLabel,
