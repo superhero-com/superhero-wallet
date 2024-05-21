@@ -248,7 +248,6 @@
     "importAirGapAccount": {
       "btnText": "Pair AirGap vault",
       "btnSubtitle": "Sync with your AirGap account",
-      "scanTitle": "Scan QR code",
       "scanDescription": "Scan the QR code from your AirGap vault in order to pair wallets and import accounts.",
       "importConfirmDialog": {
         "title": "Import account from AirGap",
@@ -268,13 +267,10 @@
       "backToQr": "Back to QR"
     },
     "airGapSyncCode": {
-      "title": "Sync with AirGap Vault",
-      "description": "Copy or scan the QR code from your AirGap vault",
       "inputLabel": "Code from AirGap vault",
       "inputPlaceholder": "e.g. airgap-wallet://?ur=HDIMC..."
     },
     "scanAirGapTx": {
-      "heading": "Scan QR code",
       "title": "Scan the QR code from your AirGap vault in order to sign the transaction.",
       "help": {
         "title": "Sign and send AirGap transaction",
@@ -964,7 +960,6 @@
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
       "success": "Success",
       "viewInExplorer": "View in explorer",
-      "scan": "Scan QR code",
       "copy": "Copy QR code",
       "review": "Review and send",
       "reviewtx": "Review transaction",

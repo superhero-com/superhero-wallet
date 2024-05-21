@@ -19,7 +19,6 @@
         qr-icon="critical"
         :label="$t('modals.airGapSyncCode.inputLabel')"
         :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
-        :qr-heading="$t('modals.importAirGapAccount.scanTitle')"
         :qr-title="$t('modals.importAirGapAccount.scanDescription')"
         @update:model-value="throttledHandleInput"
       />
@@ -101,8 +100,15 @@ export default defineComponent({
       if (!syncCode.value) {
         return;
       }
+      let parsedCode;
       try {
-        const deserializedData = await deserializeData(syncCode.value);
+        // Codes copied from AirGap need to be parsed
+        parsedCode = await parseCodeToBytes(syncCode.value);
+      } catch (e) {
+        parsedCode = syncCode.value;
+      }
+      try {
+        const deserializedData = await deserializeData(parsedCode!);
         accounts.value = (
           await extractAccountShareResponseData(deserializedData) || []
         ) as IAccount[];

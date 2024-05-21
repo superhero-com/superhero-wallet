@@ -35,6 +35,13 @@ interface InternalOptions {
  */
 const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 
+function getAccount(fromAccount?: Encoded.AccountAddress) {
+  const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
+  return fromAccount
+    ? getAccountByAddress(fromAccount)
+    : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+}
+
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
@@ -42,7 +49,7 @@ export class AeAccountHdWallet extends MemoryAccount {
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super(Buffer.alloc(64));
-    const aeAccount = this.getAccount();
+    const aeAccount = getAccount();
     this.address = aeAccount!.address as Encoded.AccountAddress;
     this.nodeNetworkId = nodeNetworkId;
   }
@@ -55,7 +62,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       throw new Error('Not connected to any network');
     }
 
-    const account = this.getAccount(options?.fromAccount);
+    const account = getAccount(options?.fromAccount);
     let signedTx: Promise<Encoded.Transaction> | undefined;
     if (isAirgapAccount(account!)) {
       // If the tab is offscreen, we need to listen for the signed transaction
@@ -104,7 +111,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     message: string,
     options: Parameters<AccountBase['signMessage']>[1] & InternalOptions,
   ): Promise<Uint8Array> {
-    const account = this.getAccount(options?.fromAccount);
+    const account = getAccount(options?.fromAccount);
     if (isAirgapAccount(account!)) {
       throw new Error('AirGap signMessage not implemented yet');
     }
@@ -226,7 +233,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
-    const account = this.getAccount(options?.fromAccount);
+    const account = getAccount(options?.fromAccount);
     if (isAirgapAccount(account!)) {
       throw new Error('AirGap sign not implemented yet');
     }
@@ -246,12 +253,5 @@ export class AeAccountHdWallet extends MemoryAccount {
     }
 
     throw new Error('Unsupported protocol');
-  }
-
-  getAccount(fromAccount?: Encoded.AccountAddress) {
-    const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
-    return fromAccount
-      ? getAccountByAddress(fromAccount)
-      : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
   }
 }

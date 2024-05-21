@@ -29,6 +29,7 @@ import { useCopy } from '@/composables';
 
 import SHLogo from '@/icons/logo-small-blue.webp';
 import CopyOutlinedIcon from '@/icons/copy-outlined.svg?vue-component';
+import { getURFromFragments } from '@/utils';
 
 export default defineComponent({
   name: 'QrCode',
@@ -78,7 +79,7 @@ export default defineComponent({
     }
 
     function copyData() {
-      copy(props.value.join(''));
+      copy(getURFromFragments(props.value));
     }
 
     watch(() => props.value, () => {

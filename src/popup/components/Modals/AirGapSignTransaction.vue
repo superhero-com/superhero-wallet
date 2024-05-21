@@ -42,7 +42,7 @@
         :text="$t('pages.send.copy')"
         variant="muted"
         extend
-        @click="copy(fragments.join(''))"
+        @click="copyAsSingleQR()"
       />
     </div>
     <!-- Second Step -->
@@ -53,8 +53,7 @@
         qr-icon="critical"
         :label="$t('modals.airGapSyncCode.inputLabel')"
         :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
-        :qr-heading="$t('modals.importAirGapAccount.scanTitle')"
-        :qr-title="$t('modals.importAirGapAccount.scanDescription')"
+        :qr-title="$t('modals.scanAirGapTx.title')"
         @update:model-value="throttledHandleInput"
       />
     </div>
@@ -62,7 +61,7 @@
       <BtnMain
         variant="muted"
         :text="secondaryButtonText"
-        @click="secondaryButtonAction"
+        @click="secondaryButtonAction()"
       />
       <BtnMain
         extra-padded
@@ -87,7 +86,7 @@ import { IACMessageType } from '@airgap/serializer/v3/interfaces';
 
 import { tg } from '@/popup/plugins/i18n';
 import { ObjectValues } from '@/types';
-import { isAirgapAccount } from '@/utils';
+import { getURFromFragments, isAirgapAccount, parseCodeToBytes } from '@/utils';
 import {
   useAccounts,
   useAirGap,
@@ -154,6 +153,10 @@ export default defineComponent({
       && !signedTransaction.value
     ));
 
+    function copyAsSingleQR(): void {
+      copy(getURFromFragments(fragments.value));
+    }
+
     function mainButtonAction() {
       if (isFirstStep.value) {
         currentStep.value = STEPS.confirm;
@@ -174,8 +177,16 @@ export default defineComponent({
 
     async function handleInput() {
       if (syncCode.value) {
+        let parsedCode;
         try {
-          const deserializedData = await deserializeData(syncCode.value);
+          // Codes copied from AirGap need to be parsed
+          parsedCode = await parseCodeToBytes(syncCode.value);
+        } catch (e) {
+          parsedCode = syncCode.value;
+        }
+
+        try {
+          const deserializedData = await deserializeData(parsedCode!);
 
           if (deserializedData?.length) {
           // filter sign transaction type
@@ -219,6 +230,7 @@ export default defineComponent({
       copy,
       mainButtonAction,
       secondaryButtonAction,
+      copyAsSingleQR,
       throttledHandleInput,
       STEPS,
       CopyOutlinedIcon,

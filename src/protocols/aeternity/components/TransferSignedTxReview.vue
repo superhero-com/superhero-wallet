@@ -22,7 +22,6 @@
       qr-icon="critical"
       :label="$t('modals.airGapSyncCode.inputLabel')"
       :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
-      :qr-heading="$t('modals.scanAirGapTx.heading')"
       :qr-title="$t('modals.scanAirGapTx.title')"
       @update:model-value="handleInput"
     />
@@ -107,11 +106,9 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { Encoded, unpackTx, Tag } from '@aeternity/aepp-sdk';
-import { URDecoder } from '@ngraveio/bc-ur';
-import bs58check from 'bs58check';
 import { TransferFormModel, ITransaction } from '@/types';
 import { MODAL_DEFAULT, PROTOCOLS } from '@/constants';
-import { toShiftedBigNumber } from '@/utils';
+import { parseCodeToBytes, toShiftedBigNumber } from '@/utils';
 import { AE_CONTRACT_ID, AE_SYMBOL, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import {
   useAeSdk,
@@ -171,46 +168,16 @@ export default defineComponent({
       };
     }
 
-    async function decodeUR(code: string) {
-      const decoder = new URDecoder();
-      try {
-        decoder.receivePart(code);
-        // should always be complete
-        if (decoder.isComplete()) {
-          const combinedData = decoder.resultUR().decodeCBOR();
-          const resultUr = bs58check.encode(combinedData);
-          return resultUr;
-        }
-      } catch (e) {
-        throw new Error('Failed to decode UR');
-      }
-      return null;
-    }
-
-    async function parseCodeToBytes(code: string) {
-      try {
-        const url = new URL(code);
-        const urBytes = url.searchParams.get('ur');
-        const prefix = 'UR:BYTES/';
-        if (urBytes) {
-          return decodeUR(prefix.concat(urBytes));
-        }
-      } catch (e) {
-        throw new Error('Failed to parse code');
-      }
-      return null;
-    }
-
     async function getRawTx() {
-      let formattedCode;
+      let parsedCode;
 
       try {
         // Codes copied from AirGap need to be parsed
-        formattedCode = await parseCodeToBytes(syncCode.value);
+        parsedCode = await parseCodeToBytes(syncCode.value);
       } catch (e) {
-        formattedCode = syncCode.value;
+        parsedCode = syncCode.value;
       }
-      const deserializedData = await deserializeData(formattedCode!);
+      const deserializedData = await deserializeData(parsedCode!);
 
       txRaw.value = await extractSignedTransactionResponseData(deserializedData);
       transferData.value = getTransferData(txRaw.value);

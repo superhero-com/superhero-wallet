@@ -14,7 +14,6 @@ import type {
   AssetContractId,
   BigNumberPublic,
   IAccount,
-  IAirgapAccountRaw,
   ICommonTransaction,
   IDashboardTransaction,
   IFormSelectOption,
@@ -522,13 +521,3 @@ export const toBase64Url = (data: Buffer | Uint8Array | string): string => Buffe
   .replace(/\//g, '_')
   .replace(/\+/g, '-')
   .replace(/=+$/, '');
-
-/**
- * Type guard for TypeScript.
- * Check if the account is an AirGap account and set the type accordingly.
- */
-export function isAirgapAccount(
-  account: IAccount | IAirgapAccountRaw,
-): account is IAirgapAccountRaw {
-  return (account as unknown as IAirgapAccountRaw).airGapPublicKey !== undefined;
-}

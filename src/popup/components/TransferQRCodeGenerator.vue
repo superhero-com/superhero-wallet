@@ -16,7 +16,7 @@
         :text="$t('pages.send.copy')"
         variant="muted"
         extend
-        @click="copy(fragments.join(''))"
+        @click="copyAsSingleQR()"
       />
     </template>
     <Loader v-else />
@@ -39,7 +39,7 @@ import {
 
 import type { TransferFormModel } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import { isAirgapAccount, toShiftedBigNumber } from '@/utils';
+import { getURFromFragments, isAirgapAccount, toShiftedBigNumber } from '@/utils';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
 import {
   useAccounts,
@@ -70,6 +70,10 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { generateTransactionURDataFragments } = useAirGap();
     const { copy, copied } = useCopy();
+
+    function copyAsSingleQR(): void {
+      copy(getURFromFragments(fragments.value));
+    }
 
     onMounted(async () => {
       const aeSdk = await getAeSdk();
@@ -106,8 +110,8 @@ export default defineComponent({
     return {
       fragments,
       CopyOutlinedIcon,
-      copy,
       copied,
+      copyAsSingleQR,
     };
   },
 });

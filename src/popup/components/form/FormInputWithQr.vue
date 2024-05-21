@@ -41,7 +41,6 @@ export default defineComponent({
     placeholder: { type: String, default: '' },
     label: { type: String, default: '' },
     qrIcon: { type: String, default: '' },
-    qrHeading: { type: String, default: '' },
     qrTitle: { type: String, default: '' },
   },
   emits: ['update:modelValue'],
@@ -50,7 +49,6 @@ export default defineComponent({
 
     async function scanQr() {
       const result = await openModal(MODAL_READ_QR_CODE, {
-        heading: props.qrHeading,
         title: props.qrTitle,
         icon: props.qrIcon,
       }).catch(() => null); // closing the modal rejects the promise
