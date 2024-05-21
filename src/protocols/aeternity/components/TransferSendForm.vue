@@ -74,6 +74,7 @@
             ? { address_not_same_as: [multisigVaultAddress, PROTOCOLS.aeternity] }
             : {}),
           token_to_an_address: [!isAe],
+          airgap_to_an_address: [isAirGap],
         }"
         @openQrModal="scanTransferQrCode()"
       />
