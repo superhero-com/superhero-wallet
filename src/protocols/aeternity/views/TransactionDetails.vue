@@ -14,7 +14,6 @@
             :hide-amount-total="(
               isDex
               || isDexAllowance
-              || isMultisig
               || isTransactionAex9(transaction)
             )"
             :hide-fiat="isTransactionAex9(transaction)"
@@ -258,7 +257,6 @@ export default defineComponent({
       isErrorTransaction,
       isDex,
       isDexAllowance,
-      isMultisig,
       outerTxTag,
       transactionAssets,
     } = useTransactionData({
@@ -389,7 +387,6 @@ export default defineComponent({
       isDex,
       isTransactionAex9,
       getTransactionPayload,
-      isMultisig,
       tipUrl,
       tipLink,
       direction,
