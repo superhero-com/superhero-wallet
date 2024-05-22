@@ -27,22 +27,23 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
-import { camelCase } from 'lodash-es';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRef,
+} from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
   ITokenResolved,
   ITransaction,
-  TxFunction,
-  TxFunctionParsed,
-  TxFunctionRaw,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useAeSdk, useFungibleTokens } from '@/composables';
+import { useAeSdk, useFungibleTokens, useTransactionData } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
-import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
+import { getTransactionTokenInfoResolver } from '@/protocols/aeternity/helpers';
 
 import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
@@ -60,29 +61,23 @@ export default defineComponent({
 
     const { nodeNetworkId } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { isDexSwap, txFunctionParsed } = useTransactionData({
+      transaction: toRef(() => props.transaction),
+    });
 
     const aeTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
 
-    function getTxFunction(
-      functionName: TxFunctionRaw | TxFunctionParsed | TxFunction,
-    ): TxFunctionParsed {
-      return camelCase(functionName) as TxFunctionParsed;
-    }
-
     // TODO replace with `transactionTokens` taken from `transactionData` composable
     const assetList = computed(() => {
-      const txFunction = getTxFunction(props.transaction.tx.function!);
-
-      if (
-        !isTxFunctionDexSwap(txFunction)
-        && !isTxFunctionDexSwap(props.transaction.tx.function!)
-      ) {
+      if (!isDexSwap.value || !txFunctionParsed.value) {
         return [];
       }
-      const resolver = getTransactionTokenInfoResolver(txFunction);
+
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
       if (!resolver) {
         return [];
       }
+
       let { tokens } = resolver(props.transaction, aeTokensAvailable.value);
       const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;

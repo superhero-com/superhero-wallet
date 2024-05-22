@@ -402,7 +402,7 @@ export type UrlStatus =
 export type CurrencyRates = Record<Protocol, Record<CurrencyCode, number>>;
 
 export interface TxArguments {
-  type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
+  type: 'any' | 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
   value: any; // TODO find type, this was not correct: (string | number | any[])
 }
 
@@ -694,6 +694,7 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   show?: boolean; // Decides if the modal window should be open
   fromAccount?: string;
   isSenderReplaced?: boolean;
+  protocol?: Protocol;
 }
 
 export interface IModalProps extends Partial<IPopupProps> {

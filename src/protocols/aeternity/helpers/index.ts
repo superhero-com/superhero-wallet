@@ -1,3 +1,4 @@
+import { camelCase, snakeCase } from 'lodash-es';
 import nacl from 'tweetnacl';
 import {
   AE_AMOUNT_FORMATS,
@@ -26,6 +27,7 @@ import type {
   ITransaction,
   ITx,
   TxFunction,
+  TxFunctionParsed,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -312,34 +314,6 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
   );
 }
 
-export function isTxFunctionDexAllowance(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.allowance, txFunction);
-}
-
-export function isTxFunctionDexSwap(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunction);
-}
-
-export function isTxFunctionDexPool(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunction);
-}
-
-export function isTxFunctionDexMaxSpent(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunction);
-}
-
-export function isTxFunctionDexMinReceived(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunction);
-}
-
-export function isTxFunctionDexAddLiquidity(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunction);
-}
-
-export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunction);
-}
-
 export function validateHash(fullHash?: string) {
   type HashPrefix = typeof AE_HASH_PREFIXES_ALLOWED[number];
   const isName = !!fullHash?.endsWith(AE_AENS_DOMAIN);
@@ -384,4 +358,18 @@ export function getAccountFromSecret(secretKey: Buffer) {
       ? nacl.sign.keyPair.fromSeed(Buffer.from(secretKey)).secretKey
       : Buffer.from(secretKey),
   );
+}
+
+/**
+ * Parse any type of transaction function name to camelCase (parsed)
+ */
+export function getTxFunctionParsed(functionName?: TxFunction) {
+  return functionName ? camelCase(functionName) as TxFunctionParsed : undefined;
+}
+
+/**
+ * Parse any type of transaction function name to snake_case (raw)
+ */
+export function getTxFunctionRaw(functionName?: TxFunction) {
+  return functionName ? snakeCase(functionName) as TxFunctionRaw : undefined;
 }

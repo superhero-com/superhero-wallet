@@ -14,7 +14,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRef,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 
@@ -28,7 +33,6 @@ import {
   TX_DIRECTION,
 } from '@/constants';
 import { TX_FUNCTIONS, TX_TAGS_AENS } from '@/protocols/aeternity/config';
-import { isTxFunctionDexPool } from '@/protocols/aeternity/helpers';
 
 import TransactionTag from './TransactionTag.vue';
 
@@ -53,10 +57,10 @@ export default defineComponent({
       txTypeLabel,
       txFunctionLabel,
       isDex,
+      isDexPool,
       isDexAllowance,
     } = useTransactionData({
-      transaction: props.transaction,
-      externalAddress: props.transaction?.transactionOwner,
+      transaction: toRef(() => props.transaction),
     });
 
     const { tippingContractAddresses } = useTippingContracts();
@@ -108,7 +112,7 @@ export default defineComponent({
       } else if (isDex.value) {
         arr.push(
           DEX,
-          isTxFunctionDexPool(innerTx.value.function)
+          (isDexPool.value)
             ? t('transaction.dexType.pool')
             : t('common.swap'),
         );
