@@ -18,6 +18,7 @@ import {
   onMounted,
   PropType,
   ref,
+  toRef,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
@@ -62,7 +63,7 @@ export default defineComponent({
     const { getMiddleware } = useAeMiddleware();
 
     const name = ref('');
-    const ownershipAccount = ref<IAccountOverview | {}>({});
+    const ownershipAccount = ref<IAccountOverview>({} as IAccountOverview);
 
     const adapter = ProtocolAdapterFactory.getAdapter(
       props.transaction.protocol
@@ -78,8 +79,7 @@ export default defineComponent({
       getOwnershipAddress,
       innerTx,
     } = useTransactionData({
-      transaction: props.transaction,
-      externalAddress: props.transaction?.transactionOwner,
+      transaction: toRef(() => props.transaction),
     });
 
     function getTransactionParty(address: AccountAddress): IAccountOverview {

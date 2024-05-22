@@ -91,7 +91,7 @@ export function useMultisigAccounts({
     () => (activeMultisigAccount.value)
       ? (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
         .prepareUrlForHash(activeMultisigAccount.value.contractId)
-      : null,
+      : undefined,
   );
 
   const isActiveMultisigAccountPending = computed(

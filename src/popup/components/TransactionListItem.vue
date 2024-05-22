@@ -115,7 +115,7 @@ export default defineComponent({
     // temp if protocol undefined assume it is aeternity
     const transactionProtocol = computed(() => props.transaction?.protocol ?? PROTOCOLS.aeternity);
 
-    const transactionOwner = computed(() => props.multisigTransaction
+    const transactionCustomOwner = computed(() => props.multisigTransaction
       ? props.multisigTransaction?.tx?.senderId
       : props.transaction?.transactionOwner);
 
@@ -125,8 +125,8 @@ export default defineComponent({
       isErrorTransaction,
       transactionAssets,
     } = useTransactionData({
-      transaction: currentTransaction.value,
-      externalAddress: transactionOwner.value,
+      transaction: currentTransaction,
+      transactionCustomOwner,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {
@@ -184,7 +184,6 @@ export default defineComponent({
       currentTransaction,
       transactionAssets,
       transactionProtocol,
-      transactionOwner,
       direction,
       formatDate,
       formatTime,

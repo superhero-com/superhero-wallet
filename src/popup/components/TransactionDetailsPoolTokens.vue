@@ -15,14 +15,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { ITokenResolved, ITransaction, TxFunctionRaw } from '@/types';
-import {
-  DEX_TRANSACTION_TAGS,
-  DEX_PROVIDE_LIQUIDITY,
-  DEX_ALLOW_TOKEN,
-} from '@/protocols/aeternity/config';
+import type { ITokenResolved, ITransaction } from '@/types';
+import { useTransactionData } from '@/composables';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 
 import TransactionDetailsPoolTokenRow from './TransactionDetailsPoolTokenRow.vue';
@@ -40,19 +36,20 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
 
-    function getLabel(isPool?: boolean): string {
-      const tag = DEX_TRANSACTION_TAGS[props.transaction.tx.function as TxFunctionRaw];
-      const provideLiquidity = tag === DEX_PROVIDE_LIQUIDITY;
+    const { isDexLiquidityAdd, isDexAllowance } = useTransactionData({
+      transaction: toRef(() => props.transaction),
+    });
 
-      if (tag === DEX_ALLOW_TOKEN) {
+    function getLabel(isPool?: boolean): string {
+      if (isDexAllowance.value) {
         return t('pages.transactionDetails.approveTokenUse');
       }
       if (isPool) {
-        return provideLiquidity
+        return isDexLiquidityAdd.value
           ? t('pages.transactionDetails.poolTokenReceived')
           : t('pages.transactionDetails.poolTokenSpent');
       }
-      return provideLiquidity
+      return isDexLiquidityAdd.value
         ? t('pages.transactionDetails.deposited')
         : t('pages.transactionDetails.withdrawn');
     }

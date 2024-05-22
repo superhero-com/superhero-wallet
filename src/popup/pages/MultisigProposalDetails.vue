@@ -29,11 +29,11 @@
                 address: activeMultisigAccount.contractId,
                 url: activeMultisigAccountExplorerUrl,
               }"
-              :transaction="{ tx: multisigTx }"
+              :transaction="transaction"
             />
             <div class="explorer">
               <LinkButton
-                :to="activeMultisigAccountExplorerUrl"
+                :to="activeMultisigAccountExplorerUrl!"
                 variant="muted"
                 underlined
               >
@@ -107,8 +107,8 @@
               </DetailsItem>
 
               <PayloadDetails
-                v-if="multisigTx"
-                :payload="getTransactionPayload(multisigTx)"
+                v-if="transaction"
+                :payload="getTransactionPayload(transaction)"
               />
 
               <div class="span-3-columns">
@@ -144,8 +144,9 @@
                   />
                 </template>
               </DetailsItem>
+
               <DetailsItem
-                v-if="transaction && transaction.tx"
+                v-if="transaction?.tx?.gasPrice"
                 :label="$t('pages.transactionDetails.gasPrice')"
               >
                 <template #value>
@@ -156,8 +157,9 @@
                   />
                 </template>
               </DetailsItem>
+
               <DetailsItem
-                v-if="transaction && transaction.tx"
+                v-if="transaction?.tx?.gas"
                 :value="transaction.tx.gas"
                 :label="$t('pages.transactionDetails.gasUsed')"
               />
@@ -365,6 +367,9 @@ export default defineComponent({
     const { openDefaultModal, openModal } = useModals();
     const { isLoaderVisible, setLoaderVisible } = useUi();
     const { activeAccount, isLocalAccountAddress } = useAccounts();
+    const { getTxAssetSymbol } = useFungibleTokens();
+    const { nodeNetworkId } = useAeSdk();
+
     const {
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
@@ -372,8 +377,6 @@ export default defineComponent({
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
     } = useMultisigAccounts();
-
-    const { nodeNetworkId } = useAeSdk();
 
     const {
       pendingMultisigTxExpired,
@@ -390,15 +393,13 @@ export default defineComponent({
       callContractMethod,
     } = useMultisigTransactions();
 
-    const { getTxAssetSymbol } = useFungibleTokens();
-
     const protocolExplorer = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).getExplorer();
 
     const multisigTx = ref<ITx | null>(null);
-    const transaction = ref<ITransaction | null>(null);
+    const transaction = ref<ITransaction>();
     const proposalCompleted = ref<boolean>(false);
 
-    const { transactionAssets, setActiveTransaction } = useTransactionData();
+    const { transactionAssets } = useTransactionData({ transaction });
 
     const totalSpent = computed(() => {
       if (!proposalCompleted.value || !transaction.value) {
@@ -418,7 +419,7 @@ export default defineComponent({
     const expirationHeightToRelativeTime = computed(() => (
       pendingMultisigTxExpiresAt.value > 0
         ? `(≈${blocksToRelativeTime(pendingMultisigTxExpiresAt.value)})`
-        : null
+        : undefined
     ));
 
     async function getTransactionDetails() {
@@ -435,7 +436,7 @@ export default defineComponent({
       } as any;
       // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
 
-      setActiveTransaction({ tx: multisigTx.value } as ITransaction);
+      transaction.value = { tx: multisigTx.value } as ITransaction;
     }
 
     function handleInsufficientBalanceError(
