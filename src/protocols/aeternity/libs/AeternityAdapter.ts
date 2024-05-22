@@ -154,11 +154,17 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchBalance(address: Encoded.AccountAddress): Promise<string> {
-    const { getAeSdk } = useAeSdk();
+    const { getAeSdk, setAeNodeError } = useAeSdk();
     const sdk = await getAeSdk();
 
-    const balanceInAettos = await sdk.getBalance(address);
-    return aettosToAe(balanceInAettos);
+    try {
+      const balanceInAettos = await sdk.getBalance(address);
+      setAeNodeError(false);
+      return aettosToAe(balanceInAettos);
+    } catch (e) {
+      setAeNodeError(true);
+      return '0';
+    }
   }
 
   override isAccountAddressValid(address: string) {

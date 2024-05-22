@@ -253,6 +253,10 @@ export function useAeSdk() {
     });
   }
 
+  function setAeNodeError(value: boolean) {
+    isAeNodeError.value = value;
+  }
+
   return {
     isAeNodeReady,
     isAeNodeConnecting,
@@ -266,6 +270,7 @@ export function useAeSdk() {
     getAeSdk,
     getDryAeSdk,
     resetNode,
+    setAeNodeError,
     fetchRespondChallenge,
     createNodeInstance,
     disconnectDapps,
