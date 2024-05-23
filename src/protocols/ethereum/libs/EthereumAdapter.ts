@@ -47,7 +47,6 @@ import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
   ERC20_ABI,
-  ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COIN_SYMBOL,
   ETH_COINGECKO_COIN_ID,
@@ -74,7 +73,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override protocolName = ETH_PROTOCOL_NAME;
 
-  override coinName = ETH_COIN_NAME;
+  override coinName = ETH_PROTOCOL_NAME;
 
   override coinSymbol = ETH_COIN_SYMBOL;
 
@@ -136,16 +135,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getDefaultCoin(
-    marketData: MarketData,
+    marketData?: MarketData,
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.ethereum] || {}),
+      ...(marketData?.[PROTOCOLS.ethereum]! || {} as MarketData),
       protocol: PROTOCOLS.ethereum,
       contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.coinPrecision,
-      name: ETH_COIN_NAME,
+      name: this.coinName,
       convertedBalance,
     };
   }

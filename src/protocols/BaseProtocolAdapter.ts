@@ -58,7 +58,7 @@ export abstract class BaseProtocolAdapter {
   abstract getCoinGeckoCoinId(): string;
 
   abstract getDefaultCoin(
-    marketData: MarketData,
+    marketData?: MarketData,
     convertedBalance?: number | BigNumber,
   ): ICoin;
 
