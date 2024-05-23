@@ -50,7 +50,6 @@ import type {
   ContractInitializeOptions,
 } from '@/protocols/aeternity/types';
 import {
-  AE_COIN_NAME,
   AE_COIN_PRECISION,
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
@@ -71,7 +70,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override protocolName = AE_PROTOCOL_NAME;
 
-  override coinName = AE_COIN_NAME;
+  override coinName = AE_PROTOCOL_NAME;
 
   override coinSymbol = AE_SYMBOL;
 
@@ -131,11 +130,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override getDefaultCoin(
-    marketData: MarketData,
+    marketData?: MarketData,
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.aeternity] || {} as MarketData),
+      ...(marketData?.[PROTOCOLS.aeternity]! || {} as MarketData),
       protocol: PROTOCOLS.aeternity,
       contractId: this.coinContractId,
       decimals: this.coinPrecision,

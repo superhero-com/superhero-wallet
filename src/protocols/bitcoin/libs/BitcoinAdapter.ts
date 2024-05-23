@@ -33,11 +33,11 @@ import {
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import {
-  BTC_COIN_NAME,
   BTC_COIN_PRECISION,
   BTC_NETWORK_DEFAULT_SETTINGS,
   BTC_COINGECKO_COIN_ID,
   BTC_CONTRACT_ID,
+  BTC_PROTOCOL_NAME,
   BTC_SYMBOL,
   DUST_AMOUNT,
 } from '@/protocols/bitcoin/config';
@@ -58,7 +58,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override protocolName = 'Bitcoin';
 
-  override coinName = BTC_COIN_NAME;
+  override coinName = BTC_PROTOCOL_NAME;
 
   override coinSymbol = BTC_SYMBOL;
 
@@ -117,16 +117,16 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   }
 
   override getDefaultCoin(
-    marketData: MarketData,
+    marketData?: MarketData,
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.bitcoin] || {}),
+      ...(marketData?.[PROTOCOLS.bitcoin]! || {} as MarketData),
       protocol: PROTOCOLS.bitcoin,
       contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.getAmountPrecision(),
-      name: BTC_COIN_NAME,
+      name: this.coinName,
       convertedBalance,
     };
   }

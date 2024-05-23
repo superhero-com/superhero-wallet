@@ -6,7 +6,7 @@
     :max-fee="numericMaxFee"
     :fee-symbol="ETH_COIN_SYMBOL"
     :protocol="PROTOCOLS.ethereum"
-    :custom-title="$t('modals.send.sendAsset', { name: ETH_COIN_NAME })"
+    :custom-title="$t('modals.send.sendAsset', { name: ETH_PROTOCOL_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -90,9 +90,9 @@ import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { executeAndSetInterval } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
-  ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COIN_SYMBOL,
+  ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
 import { useEthMaxAmount } from '@/protocols/ethereum/composables/ethMaxAmount';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
@@ -279,7 +279,7 @@ export default defineComponent({
     );
 
     return {
-      ETH_COIN_NAME,
+      ETH_PROTOCOL_NAME,
       ETH_COIN_SYMBOL,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,

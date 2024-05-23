@@ -5,7 +5,7 @@
     :fee="numericFee"
     :fee-symbol="BTC_SYMBOL"
     :protocol="PROTOCOLS.bitcoin"
-    :custom-title="$t('modals.send.sendAsset', { name: BTC_COIN_NAME })"
+    :custom-title="$t('modals.send.sendAsset', { name: BTC_PROTOCOL_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -93,7 +93,7 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Logger from '@/lib/logger';
 import {
-  BTC_COIN_NAME,
+  BTC_PROTOCOL_NAME,
   BTC_SYMBOL,
   DUST_AMOUNT,
 } from '@/protocols/bitcoin/config';
@@ -271,8 +271,8 @@ export default defineComponent({
 
     return {
       INFO_BOX_TYPES,
+      BTC_PROTOCOL_NAME,
       BTC_SYMBOL,
-      BTC_COIN_NAME,
       DUST_AMOUNT,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,
