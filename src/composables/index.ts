@@ -31,3 +31,4 @@ export * from './scrollTransactions';
 export * from './languages';
 export * from './permissions';
 export * from './auth';
+export * from './appsBrowserHistory';
