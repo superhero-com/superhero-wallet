@@ -8,7 +8,7 @@
               {{ $t('pages.about.name') }}
             </div>
             <div class="value">
-              Superhero Wallet
+              {{ APP_NAME }}
             </div>
           </div>
           <LinkButton
@@ -99,7 +99,7 @@ import {
 } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
 import type { IMiddlewareStatus } from '@/types';
-import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
+import { BUG_REPORT_URL, AGGREGATOR_URL, APP_NAME } from '@/constants';
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
 import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { fetchJson } from '@/utils';
@@ -141,6 +141,7 @@ export default defineComponent({
     });
 
     return {
+      APP_NAME,
       BUG_REPORT_URL,
       AGGREGATOR_URL,
       AE_COMMIT_URL,

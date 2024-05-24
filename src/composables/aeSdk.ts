@@ -12,28 +12,32 @@ import {
   Encoded,
 } from '@aeternity/aepp-sdk';
 import { WalletApi } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
+
 import type {
   INetwork,
   IResponseChallenge,
   IRespondChallenge,
   NetworkId,
 } from '@/types';
-import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
-import { FramesConnection } from '@/lib/FramesConnection';
-import { watchUntilTruthy } from '@/utils';
 import {
+  APP_NAME,
   IN_FRAME,
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
-  RUNNING_IN_TESTS,
   PROTOCOLS,
+  RUNNING_IN_TESTS,
 } from '@/constants';
+import { watchUntilTruthy } from '@/utils';
+import { FramesConnection } from '@/lib/FramesConnection';
+
+import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import {
   AE_NETWORK_MAINNET_ID,
   AE_NETWORK_TESTNET_ID,
   DEX_CONTRACTS,
 } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+
 import { useAccounts } from './accounts';
 import { usePermissions } from './permissions';
 import { useNetworks } from './networks';
@@ -140,7 +144,7 @@ export function useAeSdk() {
           name: activeNetworkName.value,
           instance: nodeInstance!,
         }],
-        id: 'Superhero Wallet',
+        id: APP_NAME,
         type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
         onConnection(aeppId: string, params: OnAeppConnectionParams, origin: string) {
           aeppInfo[aeppId] = { ...params, origin };
