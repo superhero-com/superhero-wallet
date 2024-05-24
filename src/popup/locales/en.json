@@ -256,6 +256,10 @@
         "noAccountsFound": "There are no accounts found."
       }
     },
+    "airGapSignMessageErrorModal": {
+      "title": "Failed to sign message",
+      "msg": "This action cannot be completed at the moment as it requires signing a message with your AirGap account.{'<'}br /{'>'}{'<'}br /{'>'}Signing messages is currently not supported for AirGap accounts"
+    },
     "airGapSend": {
       "sendTitle": "Send funds from AirGap account",
       "reviewTitle": "Sign transaction",

@@ -12,6 +12,7 @@ import {
   Tag,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
+import { tg } from '@/popup/plugins/i18n';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
 import { useModals } from '@/composables/modals';
@@ -113,7 +114,14 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Uint8Array> {
     const account = getAccount(options?.fromAccount);
     if (isAirgapAccount(account!)) {
-      throw new Error('AirGap signMessage not implemented yet');
+      const { openDefaultModal } = useModals();
+
+      openDefaultModal({
+        title: tg('modals.airGapSignMessageErrorModal.title'),
+        msg: tg('modals.airGapSignMessageErrorModal.msg'),
+        icon: 'critical',
+        textCenter: true,
+      });
     }
 
     if (options?.aeppOrigin) {
