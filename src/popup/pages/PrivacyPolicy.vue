@@ -15,9 +15,9 @@
                 &ldquo;us&rdquo;, &ldquo;our&rdquo; </strong>or<strong> &ldquo;the company&rdquo;
               </strong>) is a company with seat and registered
               address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
-              communication related to the <strong>Superhero Wallet</strong>:
+              communication related to the <strong>{{ APP_NAME }}</strong>:
               superherowallet@protonmail.com. <strong>Superhero</strong> is the company, which created
-              and developed <strong>Superhero Wallet</strong>.
+              and developed <strong>{{ APP_NAME }}</strong>.
             </p>
             <p>
               <strong>Superhero </strong>takes your privacy and the security of your information as a
@@ -26,9 +26,8 @@
             <p>
               This <strong>Privacy Policy</strong> (&ldquo;<strong>Policy</strong>&rdquo;) is applicable
               for the <strong>Superhero </strong>developed software program
-              <strong>Superhero Wallet (</strong>the
-              <strong>&ldquo;Wallet&rdquo; </strong>or the
-              <strong>&ldquo;application&rdquo;), </strong>designed for end users, which allows
+              <strong>{{ APP_NAME }}</strong> (the <strong>&ldquo;Wallet&rdquo;</strong> or the
+              <strong>&ldquo;application&rdquo;</strong>), designed for end users, which allows
               supporters to send value to content creators, causes, charities, groups or regular
               individuals online as a reward for contributing accurate information, relevant insights,
               quality content. The <strong>application</strong> can be downloaded or used from the
@@ -36,41 +35,30 @@
             </p>
             <p>
               1) downloaded as an add-on (extension) to Firefox:
-              <LinkButton
-                :to="APP_LINK_FIREFOX"
-              >
+              <LinkButton :to="APP_LINK_FIREFOX">
                 {{ APP_LINK_FIREFOX }}
               </LinkButton>
               ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton
-                :to="APP_LINK_CHROME"
-              >
+              <LinkButton :to="APP_LINK_CHROME">
                 {{ APP_LINK_CHROME }}
               </LinkButton>;
             </p>
             <p>
               2) accessed from any Browser at the address:
-              <LinkButton
-                :to="APP_LINK_WEB"
-              >
+              <LinkButton :to="APP_LINK_WEB">
                 {{ APP_LINK_WEB }}
-              </LinkButton>
-              ;
+              </LinkButton>;
             </p>
             <p>
               3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton
-                :to="APP_LINK_ANDROID"
-              >
+              <LinkButton :to="APP_LINK_ANDROID">
                 {{ APP_LINK_ANDROID }}
               </LinkButton>
               and
             </p>
             <p>
               from App Store:
-              <LinkButton
-                :to="APP_LINK_IOS"
-              >
+              <LinkButton :to="APP_LINK_IOS">
                 {{ APP_LINK_IOS }}
               </LinkButton>.
             </p>
@@ -361,7 +349,8 @@
   </IonPage>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 import {
   APP_LINK_WEB,
@@ -369,25 +358,29 @@ import {
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
+  APP_NAME,
 } from '@/constants';
 import LinkButton from '@/popup/components/LinkButton.vue';
 import BackToTop from '@/popup/components/BackToTop.vue';
 
-export default {
+export default defineComponent({
   components: {
     LinkButton,
     BackToTop,
     IonContent,
     IonPage,
   },
-  data: () => ({
-    APP_LINK_WEB,
-    APP_LINK_CHROME,
-    APP_LINK_FIREFOX,
-    APP_LINK_ANDROID,
-    APP_LINK_IOS,
-  }),
-};
+  setup() {
+    return {
+      APP_LINK_WEB,
+      APP_LINK_CHROME,
+      APP_LINK_FIREFOX,
+      APP_LINK_ANDROID,
+      APP_LINK_IOS,
+      APP_NAME,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

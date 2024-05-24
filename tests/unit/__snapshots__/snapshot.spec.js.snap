@@ -29,7 +29,7 @@ exports[`Pages About 1`] = `
             <div
               class="value"
             >
-               Superhero Wallet 
+              Superhero Wallet
             </div>
           </div>
           <a
@@ -675,17 +675,17 @@ exports[`Pages PrivacyPolicy 1`] = `
             </strong>
             developed software program 
             <strong>
-              Superhero Wallet (
+              Superhero Wallet
             </strong>
-            the 
+             (the 
             <strong>
-              “Wallet” 
+              “Wallet”
             </strong>
-            or the 
+             or the 
             <strong>
-              “application”), 
+              “application”
             </strong>
-            designed for end users, which allows supporters to send value to content creators, causes, charities, groups or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The 
+            ), designed for end users, which allows supporters to send value to content creators, causes, charities, groups or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The 
             <strong>
               application
             </strong>
@@ -731,7 +731,7 @@ exports[`Pages PrivacyPolicy 1`] = `
               
               <!--v-if-->
             </a>
-             ; 
+            ; 
           </p>
           <p>
              3) downloaded from Google Play:     
