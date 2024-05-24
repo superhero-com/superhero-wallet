@@ -468,6 +468,7 @@ export interface ITx {
   function?: TxFunction;
   gaId?: string; // Generalized Account ID
   gas?: number;
+  gasLimit?: number;
   gasPrice?: number;
   gasUsed?: number;
   log?: any[]; // TODO find source

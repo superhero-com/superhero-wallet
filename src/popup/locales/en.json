@@ -477,6 +477,7 @@
     "advancedDetails": "Advanced transaction details",
     "data": "Transaction data",
     "gasCost": "Gas cost",
+    "gasLimit": "Gas limit",
     "proposalEstimatedGasUsed": "Proposal estimated gas used",
     "proposalGasCost": "Proposal gas cost",
     "proposalTransactionFee": "Proposal transaction fee",
