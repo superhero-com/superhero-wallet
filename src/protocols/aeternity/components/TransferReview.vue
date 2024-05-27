@@ -60,10 +60,9 @@
         class="details-item additional-fee"
         :label="$t('transaction.fee')"
       >
-        <!-- This fee is currently constant-->
         <template #value>
           <TokenAmount
-            :amount="0.0001"
+            :amount="+aettosToAe(AE_GET_META_TX_FEE)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
             high-precision
@@ -177,8 +176,13 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
 
 import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
-import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { aeToAettos } from '@/protocols/aeternity/helpers';
+import {
+  AE_SYMBOL,
+  AE_CONTRACT_ID,
+  TX_FUNCTIONS,
+  AE_GET_META_TX_FEE,
+} from '@/protocols/aeternity/config';
+import { aeToAettos, aettosToAe } from '@/protocols/aeternity/helpers';
 import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
@@ -494,8 +498,10 @@ export default defineComponent({
       isActiveAccountAirGap,
       isSelectedAssetAex9,
       activeMultisigAccount,
+      aettosToAe,
       AE_SYMBOL,
       AE_CONTRACT_ID,
+      AE_GET_META_TX_FEE,
       loading,
       headerTitle,
       headerSubtitle,

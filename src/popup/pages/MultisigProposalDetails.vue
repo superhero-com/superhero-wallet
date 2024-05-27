@@ -170,7 +170,7 @@
               >
                 <template #value>
                   <TokenAmount
-                    :amount="+aettosToAe(multisigTx.fee)"
+                    :amount="+aettosToAe(AE_GET_META_TX_FEE)"
                     :symbol="AE_SYMBOL"
                     :protocol="PROTOCOLS.aeternity"
                   />
@@ -315,7 +315,7 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
-import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG, AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   getTransactionPayload,
@@ -560,6 +560,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
+      AE_GET_META_TX_FEE,
       PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
