@@ -7,8 +7,8 @@ android {
         applicationId "com.superhero.cordova"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20205
-        versionName "2.2.5"
+        versionCode 20206
+        versionName "2.2.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
