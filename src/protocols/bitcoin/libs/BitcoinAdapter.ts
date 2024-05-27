@@ -180,8 +180,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   ): IHdWalletAccount {
     const { activeNetwork } = useNetworks();
 
-    const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
-    const pathCoinType = activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 1 : 0;
+    const network = networks[activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 'bitcoin' : 'testnet'];
+    const pathCoinType = activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 0 : 1;
 
     const node = this.bip32.fromSeed(Buffer.from(seed));
     const path = `m/84'/${pathCoinType}'/${accountIndex}'/0/0`; // 84 for Native-SegWit and 44 for Legacy
