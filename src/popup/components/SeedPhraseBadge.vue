@@ -32,8 +32,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .seed-phrase-badge {
   @extend %face-sans-16-light;
@@ -41,13 +41,13 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   height: 30px;
-  border: 1px solid rgba(variables.$color-white, 0.44);
+  border: 1px solid rgba($color-white, 0.44);
   border-radius: 4px;
   padding: 4px 6px;
   margin-right: 4px;
   margin-bottom: 8px;
-  color: variables.$color-white;
-  background-color: variables.$color-black;
+  color: $color-white;
+  background-color: $color-black;
   cursor: pointer;
   letter-spacing: 0.1rem;
   line-height: 100%;
@@ -56,16 +56,16 @@ export default defineComponent({
     opacity: 0.44;
     cursor: unset;
     background: transparent;
-    border-color: variables.$color-grey-light;
-    color: variables.$color-white;
+    border-color: $color-grey-light;
+    color: $color-white;
   }
 
   &.editable {
-    background: rgba(variables.$color-black, 0.25);
+    background: rgba($color-black, 0.25);
     border: none;
 
     .close-icon {
-      color: rgba(variables.$color-white, 0.44);
+      color: rgba($color-white, 0.44);
       width: 24px;
       height: 24px;
     }

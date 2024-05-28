@@ -30,7 +30,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
+@use '@/styles/mixins';
 
 .platform-icon {
   height: 44px;

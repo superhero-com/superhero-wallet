@@ -57,9 +57,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .copy-text {
   position: relative;
@@ -90,7 +90,7 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     border-radius: 5px;
-    background-color: variables.$color-bg-4;
+    background-color: $color-bg-4;
     text-transform: uppercase;
   }
 

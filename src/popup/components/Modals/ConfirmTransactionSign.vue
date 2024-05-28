@@ -575,9 +575,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .confirm-transaction-sign {
   .loader {
@@ -589,14 +589,14 @@ export default defineComponent({
 
   .subtitle {
     margin: 8px 0;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
 
     &.warning {
-      color: variables.$color-warning;
+      color: $color-warning;
     }
 
     .app-name {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
@@ -607,14 +607,14 @@ export default defineComponent({
   .reason:deep() {
     .value {
       word-break: break-all;
-      color: variables.$color-warning;
+      color: $color-warning;
     }
   }
 
   .sender-replaced {
     @extend %face-sans-15-regular;
 
-    color: variables.$color-warning;
+    color: $color-warning;
     margin-top: 8px;
   }
 

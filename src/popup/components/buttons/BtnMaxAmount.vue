@@ -24,25 +24,25 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .max-button {
   @extend %face-sans-14-medium;
 
   padding: 2px 8px;
-  color: variables.$color-primary;
+  color: $color-primary;
   line-height: 20px;
   border: 2px solid transparent;
   border-radius: 12px;
 
   &:hover {
-    background: rgba(variables.$color-primary, 0.15);
+    background: rgba($color-primary, 0.15);
   }
 
   &.chosen {
-    background: rgba(variables.$color-primary, 0.15);
-    border-color: rgba(variables.$color-primary, 0.5);
+    background: rgba($color-primary, 0.15);
+    border-color: rgba($color-primary, 0.5);
   }
 }
 </style>

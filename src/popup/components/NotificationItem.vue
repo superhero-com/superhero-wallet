@@ -174,9 +174,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .notification-item {
   $left-column-width: 48px;
@@ -188,11 +188,11 @@ export default defineComponent({
   border: none;
   outline: none;
   text-decoration: none;
-  color: variables.$color-white;
+  color: $color-white;
   cursor: pointer;
 
   &:hover {
-    background-color: variables.$color-bg-1-hover;
+    background-color: $color-bg-1-hover;
   }
 
   .content {
@@ -211,11 +211,11 @@ export default defineComponent({
       width: $dot-size;
       height: $dot-size;
       border-radius: $dot-size;
-      background-color: variables.$color-danger;
+      background-color: $color-danger;
     }
 
     .date {
-      color: rgba(variables.$color-white, 0.5);
+      color: rgba($color-white, 0.5);
 
       @extend %face-sans-12-regular;
     }
@@ -246,7 +246,7 @@ export default defineComponent({
     @extend %face-sans-13-regular;
 
     line-height: 20px;
-    color: rgba(variables.$color-white, 0.85);
+    color: rgba($color-white, 0.85);
 
     &::first-letter {
       text-transform: uppercase;

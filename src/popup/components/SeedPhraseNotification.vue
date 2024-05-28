@@ -51,24 +51,24 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .seed-phrase-notification {
   @extend %face-sans-16-medium;
 
-  border: 2px solid variables.$color-success-dark;
-  border-radius: variables.$border-radius-card;
-  background: rgba(variables.$color-black, 0.85);
+  border: 2px solid $color-success-dark;
+  border-radius: $border-radius-card;
+  background: rgba($color-black, 0.85);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: variables.$color-success-dark;
+  color: $color-success-dark;
 
   &.error {
-    border-color: variables.$color-danger;
-    color: variables.$color-danger;
+    border-color: $color-danger;
+    color: $color-danger;
   }
 
   .text {

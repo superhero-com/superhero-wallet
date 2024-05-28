@@ -72,9 +72,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .filters {
   height: 36px;
@@ -97,12 +97,12 @@ export default defineComponent({
     gap: 2px;
     transition: all 0.08s ease-out;
     border-radius: 12px;
-    color: rgba(variables.$color-white, 0.5);
+    color: rgba($color-white, 0.5);
 
     svg {
       width: 14px;
       height: 14px;
-      color: rgba(variables.$color-white, 0.3);
+      color: rgba($color-white, 0.3);
 
       &.rotate {
         transform: rotate(180deg);
@@ -111,11 +111,11 @@ export default defineComponent({
 
     &:hover,
     &.active {
-      color: variables.$color-white;
-      background: rgba(variables.$color-white, 0.1);
+      color: $color-white;
+      background: rgba($color-white, 0.1);
 
       svg {
-        color: rgba(variables.$color-white, 0.5);
+        color: rgba($color-white, 0.5);
       }
     }
 

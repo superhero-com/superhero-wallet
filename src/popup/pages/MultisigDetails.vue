@@ -155,7 +155,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .multisig-details {
   padding: 0 12px;
@@ -170,7 +170,7 @@ export default defineComponent({
   }
 
   .text-address {
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   .row {
@@ -179,19 +179,19 @@ export default defineComponent({
   }
 
   .explorer-link {
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
     margin-block: 4px;
 
     .external-icon {
       opacity: 1;
-      color: rgba(variables.$color-white, 0.75);
+      color: rgba($color-white, 0.75);
       width: 24px;
       height: 24px;
     }
 
     &:active,
     &:hover {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 }

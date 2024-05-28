@@ -69,7 +69,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/typography';
+@use '@/styles/typography';
 
 .address-truncated {
   display: flex;

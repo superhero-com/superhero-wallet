@@ -93,8 +93,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .transaction-info {
   .parties {
@@ -108,18 +108,18 @@ export default defineComponent({
       flex-shrink: 0;
       width: 48px;
       height: 48px;
-      border: 2px solid variables.$color-grey-border;
+      border: 2px solid $color-grey-border;
       border-radius: 100px;
     }
 
     .icon {
       width: 36px;
       height: 36px;
-      color: variables.$color-white;
+      color: $color-white;
     }
 
     .logo {
-      color: variables.$color-primary;
+      color: $color-primary;
     }
 
     .mid {
@@ -133,12 +133,12 @@ export default defineComponent({
         transform: translate(-50%, -50%);
         width: 15px;
         height: 17px;
-        color: variables.$color-grey-border;
+        color: $color-grey-border;
       }
 
       .line {
         height: calc(50% + 1px);
-        border-bottom: 2px solid variables.$color-grey-border;
+        border-bottom: 2px solid $color-grey-border;
       }
     }
   }

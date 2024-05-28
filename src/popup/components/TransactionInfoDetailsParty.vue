@@ -69,7 +69,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .transaction-info-details-party {
@@ -96,7 +96,7 @@ export default defineComponent({
 
     display: block;
     margin-bottom: 8px;
-    color: variables.$color-white;
+    color: $color-white;
     text-decoration: none;
     white-space: nowrap;
     line-height: 16px;

@@ -9,7 +9,7 @@ import registerModals from './router/modals';
 import Logger from '../lib/logger';
 import App from './App.vue';
 
-import '../styles/fullscreen-message.scss';
+import '@/styles/fullscreen-message.scss';
 
 registerModals();
 const app = createApp(App);

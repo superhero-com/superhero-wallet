@@ -67,8 +67,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .link-button {
   @extend %face-sans-14-regular;
@@ -79,7 +79,7 @@ export default defineComponent({
   align-items: center;
 
   &.default {
-    color: variables.$color-success;
+    color: $color-success;
   }
 
   &.simple {
@@ -95,17 +95,17 @@ export default defineComponent({
       width: 24px;
       height: 24px;
       opacity: 0.44;
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
   &:hover {
-    color: variables.$color-success-hover;
+    color: $color-success-hover;
 
     .link-icon {
       svg {
         opacity: 1;
-        color: variables.$color-success;
+        color: $color-success;
       }
     }
   }
@@ -116,28 +116,28 @@ export default defineComponent({
     .link-icon {
       svg {
         opacity: 0.7;
-        color: variables.$color-success;
+        color: $color-success;
       }
     }
   }
 
   &.muted {
     text-decoration: none;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
 
     .link-icon {
       svg {
         opacity: 1;
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
     }
 
     &:hover {
-      color: variables.$color-white;
+      color: $color-white;
 
       .link-icon {
         svg {
-          color: variables.$color-white;
+          color: $color-white;
         }
       }
     }

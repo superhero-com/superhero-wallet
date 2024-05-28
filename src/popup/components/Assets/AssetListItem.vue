@@ -106,8 +106,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .tokens-list-item {
   .row {
@@ -123,7 +123,7 @@ export default defineComponent({
   .price {
     @extend %face-sans-12-regular;
 
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
     letter-spacing: -0.02em;
   }
 }

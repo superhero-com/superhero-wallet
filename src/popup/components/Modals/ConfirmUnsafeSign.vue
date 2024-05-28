@@ -153,8 +153,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .confirm-unsafe-sign {
   .warning {
@@ -162,7 +162,7 @@ export default defineComponent({
 
     margin-top: 8px;
     text-align: left;
-    color: variables.$color-warning;
+    color: $color-warning;
   }
 
   .details-item {
@@ -170,7 +170,7 @@ export default defineComponent({
     text-align: left;
 
     &.sender :deep(.label) {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 }

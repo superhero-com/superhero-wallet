@@ -61,9 +61,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/share-info';
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/share-info';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .msg,
 .help {
@@ -75,7 +75,7 @@ export default defineComponent({
   a {
     cursor: pointer;
     text-decoration: none;
-    color: variables.$color-primary;
+    color: $color-primary;
   }
 }
 

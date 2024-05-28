@@ -66,8 +66,8 @@ export default {
 </script>
 
 <style lang="scss">
-@use '../../../styles/variables' as *;
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .btn-icon {
   --size: 24px;

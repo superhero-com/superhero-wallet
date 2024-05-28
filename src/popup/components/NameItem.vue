@@ -364,9 +364,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .name-item {
   display: flex;
@@ -377,7 +377,7 @@ export default defineComponent({
   transition: 0.2s;
 
   &:hover {
-    background-color: variables.$color-bg-4-hover;
+    background-color: $color-bg-4-hover;
   }
 
   .name-item-header {
@@ -393,7 +393,7 @@ export default defineComponent({
     .pending {
       @extend %face-sans-12-regular;
 
-      color: variables.$color-grey-dark;
+      color: $color-grey-dark;
     }
 
     .truncate {
@@ -412,8 +412,8 @@ export default defineComponent({
 
         padding: 2px 8px;
         white-space: nowrap;
-        color: variables.$color-grey-light;
-        background: variables.$color-border-hover;
+        color: $color-grey-light;
+        background: $color-border-hover;
         border-radius: 6px;
         opacity: 1;
 
@@ -422,13 +422,13 @@ export default defineComponent({
         }
 
         &.set {
-          background: rgba(variables.$color-warning, 0.1);
-          color: variables.$color-warning;
+          background: rgba($color-warning, 0.1);
+          color: $color-warning;
         }
 
         &.edit {
-          background: rgba(variables.$color-primary, 0.15);
-          color: variables.$color-primary;
+          background: rgba($color-primary, 0.15);
+          color: $color-primary;
         }
 
         &:not(:last-of-type) {
@@ -444,7 +444,7 @@ export default defineComponent({
 
       .icon {
         width: 14px;
-        color: variables.$color-white;
+        color: $color-white;
         opacity: 0.44;
         transition: all 0.2s;
 
@@ -470,7 +470,7 @@ export default defineComponent({
     }
 
     .details-item :deep(.value) {
-      color: variables.$color-grey-light;
+      color: $color-grey-light;
     }
 
     > .details-item {
@@ -484,7 +484,7 @@ export default defineComponent({
 
           span {
             margin-right: 4px;
-            color: variables.$color-grey-dark;
+            color: $color-grey-dark;
 
             @extend %face-sans-12-medium;
           }
@@ -500,7 +500,7 @@ export default defineComponent({
         flex: 1;
 
         :deep(.value .secondary) {
-          color: variables.$color-grey-dark;
+          color: $color-grey-dark;
           margin-left: -2px;
         }
 
@@ -513,7 +513,7 @@ export default defineComponent({
 
   > span {
     margin-top: 4px;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
 
     @extend %face-mono-10-medium;
   }

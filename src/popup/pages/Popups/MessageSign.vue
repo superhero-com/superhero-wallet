@@ -91,7 +91,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .message-sign {
@@ -100,11 +100,11 @@ export default defineComponent({
 
     margin-top: 28px;
     margin-bottom: 16px;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     text-align: center;
 
     .app-name {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 

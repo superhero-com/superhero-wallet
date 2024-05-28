@@ -117,8 +117,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .seed-phrase-details {
   padding-inline: var(--screen-padding-x);

@@ -90,9 +90,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .account-card-consensus {
   @include mixins.flex(flex-start, flex-start, column);

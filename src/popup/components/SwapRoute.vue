@@ -162,9 +162,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .swap-route {
   .swap-steps {
@@ -189,8 +189,8 @@ export default defineComponent({
         gap: 2px;
         padding: 3px 5px;
         border-radius: 20px;
-        color: variables.$color-white;
-        background: variables.$color-bg-3;
+        color: $color-white;
+        background: $color-bg-3;
         white-space: nowrap;
       }
     }
@@ -212,7 +212,7 @@ export default defineComponent({
       top: calc(50% - 1px);
       width: 100%;
       height: 2px;
-      background-color: variables.$color-white;
+      background-color: $color-white;
       transform: scaleY(0.8); // Make the line thinner
     }
   }
@@ -229,7 +229,7 @@ export default defineComponent({
       width: 6px;
       height: 6px;
       border-style: solid;
-      border-color: variables.$color-white;
+      border-color: $color-white;
       border-width: 2px 2px 0 0;
       border-radius: 1px;
       transform: rotate(45deg);

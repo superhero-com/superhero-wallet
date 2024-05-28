@@ -73,8 +73,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 $size-xs: 18px;
 $size-sm: 24px;

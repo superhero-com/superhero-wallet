@@ -110,8 +110,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .confirm-raw-sign {
   .overview {
@@ -128,7 +128,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       margin-bottom: 4px;
-      color: variables.$color-warning;
+      color: $color-warning;
 
       .icon {
         width: 24px;
@@ -140,7 +140,7 @@ export default defineComponent({
     .content {
       @extend %face-sans-15-regular;
 
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 

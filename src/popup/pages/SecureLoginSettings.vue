@@ -125,9 +125,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/mixins';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .secure-login-settings {
   .top-wrapper {

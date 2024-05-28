@@ -55,9 +55,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .avatar-with-chain-name {
   @include mixins.flex(flex-start, flex-start);
@@ -67,7 +67,7 @@ export default {
 
   .avatar {
     margin-top: 8px;
-    background-color: variables.$color-black;
+    background-color: $color-black;
   }
 
   .chain-name {
@@ -82,7 +82,7 @@ export default {
 
     opacity: 1;
     text-align: center;
-    color: variables.$color-white;
+    color: $color-white;
     width: 100%;
   }
 

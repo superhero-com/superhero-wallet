@@ -18,7 +18,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .progress-bar {
   height: 12px;
