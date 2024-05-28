@@ -1247,7 +1247,7 @@
     "addressGeneric": "Invalid {protocol} address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
-    "enoughCoin": "Not enough {0} balance to pay transaction fee",
+    "enoughCoin": "{0} balance is not enough to pay for transaction fee",
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxLength": "The value should be no longer than {0} characters",
     "maxValue": "This field must be {0} or less",

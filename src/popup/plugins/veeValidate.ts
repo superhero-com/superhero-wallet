@@ -1,7 +1,7 @@
 import { defineRule } from 'vee-validate';
 import { numeric, required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
-import { debounce } from 'lodash-es';
+import { debounce, throttle } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
@@ -126,6 +126,8 @@ export default () => {
     NOT_SAME: Symbol('name state: not same as provided'),
   };
 
+  const updateBalancesThrottled = throttle(updateBalances, 1000, { trailing: false });
+
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
@@ -240,7 +242,7 @@ export default () => {
   defineRule(
     'enough_coin',
     async (value: string, [amount, coinSymbol]: [number, string]) => {
-      await updateBalances(); // TODO add debounce to avoid firing to often
+      await updateBalancesThrottled();
       return balance.value.isGreaterThanOrEqualTo(amount) || tg('validation.enoughCoin', [coinSymbol || AE_SYMBOL]);
     },
   );
@@ -248,7 +250,7 @@ export default () => {
   defineRule(
     'enough_ae_signer',
     async (value: string, [arg]: [number]) => {
-      await updateBalances(); // TODO add debounce to avoid firing to often
+      await updateBalancesThrottled();
       return balance.value.isGreaterThanOrEqualTo(arg) || tg('validation.enoughAeSigner');
     },
   );
