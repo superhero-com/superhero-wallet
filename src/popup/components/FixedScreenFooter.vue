@@ -4,6 +4,7 @@
     :class="{
       mobile: IS_MOBILE_DEVICE,
       'no-padding-top': noPaddingTop,
+      'position-fixed': positionFixed,
     }"
   >
     <slot />
@@ -17,6 +18,7 @@ import { IS_MOBILE_DEVICE } from '@/constants';
 export default defineComponent({
   props: {
     noPaddingTop: Boolean,
+    positionFixed: Boolean,
   },
   setup() {
     return {
@@ -40,6 +42,11 @@ export default defineComponent({
 
   &.no-padding-top {
     padding-top: 0;
+  }
+
+  &.position-fixed {
+    position: fixed;
+    width: 100%;
   }
 
   &.mobile {
