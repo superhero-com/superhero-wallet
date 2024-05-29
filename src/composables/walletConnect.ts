@@ -1,12 +1,12 @@
+import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
 import type { Web3Wallet as IWeb3Wallet } from '@walletconnect/web3wallet';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { fromWei, toChecksumAddress } from 'web3-utils';
-import { reactive } from 'vue';
-import { uniq } from 'lodash-es';
+import { computed, reactive, watch } from 'vue';
 import { METHODS, Tag } from '@aeternity/aepp-sdk';
 
-import type { AccountAddress } from '@/types';
+import type { IModalProps } from '@/types';
 import {
   APP_NAME,
   APP_URL,
@@ -18,8 +18,8 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { ETH_CHAIN_NAMESPACE, ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { IEthNetworkSettings } from '@/protocols/ethereum/types';
-import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 
+import { useAccounts } from './accounts';
 import { useModals } from './modals';
 import { usePermissions } from './permissions';
 import { useStorageRef } from './storageRef';
@@ -59,11 +59,14 @@ const wcState = reactive({
  * TODO add description
  */
 export function useWalletConnect() {
+  const { activeAccount, accountsGroupedByProtocol, getLastActiveProtocolAccount } = useAccounts();
+  const { activeNetwork, networks } = useNetworks();
   const { openDefaultModal } = useModals();
   const { checkOrAskPermission } = usePermissions();
-  const { networks } = useNetworks();
 
   const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+
+  const ethAccounts = computed(() => accountsGroupedByProtocol.value[PROTOCOLS.ethereum] || []);
 
   const sessionRequestMethodHandlers: Partial<{
     [key in SupportedRequestMethod]: (p: any) => Promise<string | false>
@@ -74,29 +77,25 @@ export function useWalletConnect() {
       const { url, name } = wcSession.value?.peer.metadata! || {};
       const isCoinTransfer = !!params.value; // `value` is present only when sending ETH
       const tag = (params.data) ? Tag.ContractCallTx : Tag.SpendTx;
-
-      console.log('[WC / eth_sendTransaction handler]', {
-        senderId, recipientId, params,
-      });
+      const modalProps: IModalProps = {
+        protocol: PROTOCOLS.ethereum,
+        app: { url, host: url ? new URL(url).hostname : '', name },
+        tx: {
+          amount: params.value ? +fromWei(params.value, 'ether') : 0,
+          fee: params.gas ? +fromWei(params.gas, 'ether') : 0,
+          contractId: (isCoinTransfer) ? ETH_CONTRACT_ID : recipientId,
+          type: Tag[tag],
+          tag,
+          senderId,
+          recipientId,
+          data: params.data, // TODO find out the way for decoding the data
+        },
+      };
 
       const permitted = await checkOrAskPermission(
         METHODS.sign,
         wcSession.value?.peer?.metadata?.url,
-        {
-          protocol: PROTOCOLS.ethereum,
-          app: { url, host: url ? new URL(url).hostname : '', name },
-          tx: {
-            amount: params.value ? +fromWei(params.value, 'ether') : 0,
-            fee: params.gas ? +fromWei(params.gas, 'ether') : 0,
-            contractId: (isCoinTransfer) ? ETH_CONTRACT_ID : recipientId,
-            type: Tag[tag],
-            tag,
-            function: TX_FUNCTIONS.swapExactTokensForTokens, // TODO
-            senderId,
-            recipientId,
-            data: params.data, // TODO find out the way for decoding the data
-          },
-        },
+        modalProps,
       );
       if (permitted) {
         if (adapter?.transferPreparedTransaction) {
@@ -120,7 +119,7 @@ export function useWalletConnect() {
 
     if (error.message) {
       openDefaultModal({
-        title: 'Connection failed', // TODO
+        title: 'Connection failed',
         msg: error.message,
         icon: 'alert',
         textCenter: true,
@@ -159,16 +158,52 @@ export function useWalletConnect() {
     });
   }
 
-  function monitorSessionEvents() {
+  /**
+   * Reset current state and announce session termination to connected dapp.
+   */
+  async function disconnect() {
+    wcState.disconnecting = true;
+    if (web3wallet && wcSession.value?.topic) {
+      try {
+        await web3wallet.disconnectSession({
+          topic: wcSession.value.topic,
+          reason: getSdkError('USER_DISCONNECTED'),
+        });
+      } catch { /* We don't care if session existed */ }
+    }
+    resetSessionAndState();
+    wcState.disconnecting = false;
+  }
+
+  function getFormattedAccountsAndChains() {
+    const lastActiveAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
+
+    // Chain IDs with the active network's chain ID as the first one
+    const availableChainIds = uniq(
+      Object.values(networks.value)
+        .sort(({ name }) => (name === activeNetwork.value.name) ? -1 : 1)
+        .map(({ protocols }) => (protocols[PROTOCOLS.ethereum] as IEthNetworkSettings).chainId),
+    );
+
+    // Supported chains (networks) in CAIP-2 format
+    const chains = availableChainIds.map((chainId) => `${ETH_CHAIN_NAMESPACE}:${chainId}`);
+
+    // User's accounts in CAIP-10 format. Active account first.
+    const accounts = chains.map(
+      (chain) => ethAccounts.value
+        .sort(({ address }) => (address === lastActiveAccount?.address) ? -1 : 1)
+        .map(({ address }) => `${chain}:${address}`),
+    ).flat();
+
+    return { chains, accounts };
+  }
+
+  function monitorActiveSessionEvents() {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
-      console.log('[WC / W3W event / session_request', { proposal });
-
       const method = proposal.request.method as SupportedRequestMethod;
       const methodHandler = sessionRequestMethodHandlers[method];
       const result = await methodHandler?.(proposal.request.params[0]);
-
-      console.log('[WC / W3W event / session_request RESPONSE', { result });
 
       web3wallet!.respondSessionRequest({
         topic,
@@ -184,21 +219,55 @@ export function useWalletConnect() {
     web3wallet?.on('session_delete', async () => {
       resetSessionAndState();
       wcState.peerDisconnected = true;
-      setTimeout(() => { wcState.peerDisconnected = false; }, 10000);
+      setTimeout(() => {
+        wcState.peerDisconnected = false;
+      }, 10000);
+    });
+  }
+
+  /**
+   * Notify the DAPP about the active wallet account change.
+   */
+  function monitorActiveAccountAndNetwork() {
+    const unwatch = watch([activeAccount, activeNetwork], async ([newAccount]) => {
+      if (newAccount.protocol !== PROTOCOLS.ethereum) {
+        return;
+      }
+      if (web3wallet && wcSession.value) {
+        const { accounts, chains } = getFormattedAccountsAndChains();
+
+        wcSession.value.namespaces[ETH_CHAIN_NAMESPACE].chains = chains;
+        wcSession.value.namespaces[ETH_CHAIN_NAMESPACE].accounts = accounts;
+
+        try {
+          const { acknowledged } = await web3wallet.updateSession({
+            topic: wcSession.value.topic,
+            namespaces: wcSession.value.namespaces,
+          });
+
+          // Even if the session update is acknowledged some DAPPS does not update the UI
+          // to match the change. For example Uniswap does not switch the account if user did it
+          // on the wallet side.
+          await acknowledged();
+        } catch (error) {
+          disconnect();
+        }
+      } else {
+        unwatch();
+        disconnect();
+      }
     });
   }
 
   /**
    * @param uri identifier copied or scanned from QR code
-   * @param addresses ETH address list
    */
-  async function connect(uri: WalletConnectUri, addresses: AccountAddress[]) {
+  async function connect(uri: WalletConnectUri) {
     wcState.connecting = true;
 
     try {
       if (!web3wallet) {
         web3wallet = await initWeb3wallet();
-        console.log('[WC / web3wallet initiated]', { web3wallet });
       }
 
       // Ask the DAPP to send `session_proposal` event.
@@ -207,18 +276,10 @@ export function useWalletConnect() {
       // After requesting pairing with the DAPP we receive session proposal
       // which we need to approve or reject.
       web3wallet.on('session_proposal', async ({ id, params: proposal }) => {
-        const availableChainIds = uniq(Object.values(networks.value)
-          .map(({ protocols }) => (protocols[PROTOCOLS.ethereum] as IEthNetworkSettings).chainId));
-
-        /** Supported chains (networks) in CAIP-2 format */
-        const chains = availableChainIds.map((chainId) => `${ETH_CHAIN_NAMESPACE}:${chainId}`);
-
-        /** User's accounts in CAIP-10 format */
-        const accounts = addresses.map((address) => chains.map((chain) => `${chain}:${address}`)).flat();
-
+        const { accounts, chains } = getFormattedAccountsAndChains();
         const methods: SupportedRequestMethod[] = ['personal_sign', 'eth_sendTransaction'];
 
-        monitorSessionEvents();
+        monitorActiveSessionEvents();
 
         try {
           wcSession.value = await web3wallet!.approveSession({
@@ -229,12 +290,14 @@ export function useWalletConnect() {
                 [ETH_CHAIN_NAMESPACE]: {
                   accounts,
                   chains,
+                  events: [], // TODO https://specs.walletconnect.com/2.0/specs/clients/sign/session-events
                   methods,
-                  events: ['accountsChanged', 'chainChanged'],
                 },
               },
             }),
           });
+
+          monitorActiveAccountAndNetwork();
         } catch (error: any) {
           web3wallet!.rejectSession({ id, reason: getSdkError('USER_REJECTED') });
           handleConnectionError(error);
@@ -245,25 +308,6 @@ export function useWalletConnect() {
     } catch (error: any) {
       handleConnectionError(error);
     }
-  }
-
-  /**
-   * Reset current state and announce session termination to connected dapp.
-   */
-  async function disconnect() {
-    console.log('[WC / disconnect...]');
-    wcState.disconnecting = true;
-    if (web3wallet && wcSession.value?.topic) {
-      try {
-        await web3wallet.disconnectSession({
-          topic: wcSession.value.topic,
-          reason: getSdkError('USER_DISCONNECTED'),
-        });
-      } catch { /* We don't care if session existed */ }
-    }
-    resetSessionAndState();
-    console.log('[WC / disconnected]');
-    wcState.disconnecting = false;
   }
 
   if (!composableInitialized) {
@@ -282,7 +326,8 @@ export function useWalletConnect() {
         if (wcSession.value?.topic !== restoredTopic) {
           disconnect();
         } else if (restoredTopic) {
-          monitorSessionEvents();
+          monitorActiveSessionEvents();
+          monitorActiveAccountAndNetwork();
         }
       }
     }, 1000);
@@ -293,5 +338,6 @@ export function useWalletConnect() {
     disconnect,
     wcSession,
     wcState,
+    ethAccounts,
   };
 }

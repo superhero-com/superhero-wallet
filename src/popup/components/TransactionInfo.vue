@@ -7,10 +7,10 @@
 
     <div class="parties">
       <Avatar
-        v-if="sender.address"
         :name="sender.name"
         :address="sender.address"
         size="lg"
+        :is-placeholder="!sender.address"
       />
 
       <div class="mid">
@@ -53,6 +53,7 @@
         :tx-party="recipient"
         data-cy="recipient"
         is-recipient
+        class="details-party-recipient"
       />
     </div>
   </div>
@@ -147,6 +148,10 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+
+    .details-party-recipient {
+      text-align: right;
+    }
   }
 }
 </style>

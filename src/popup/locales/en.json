@@ -1,5 +1,6 @@
 {
   "common": {
+    "activeAccount": "Active account",
     "address": "Address",
     "addressCopied": "Copied",
     "ae": "AE",
@@ -15,6 +16,7 @@
     "connect": "Connect",
     "connected": "Connected",
     "connecting": "Connecting...",
+    "connectingAs": "Connecting as",
     "connectionFailed": "Connection failed",
     "contractId": "Contract ID",
     "notNow": "Not now",
@@ -33,6 +35,7 @@
     "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
     "nonce": "Nonce",
+    "noProtocolAccountFound": "No {protocol} account found",
     "of": "of",
     "ok": "OK",
     "pending": "Pending",

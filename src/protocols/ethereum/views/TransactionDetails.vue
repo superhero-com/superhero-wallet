@@ -54,6 +54,7 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   onMounted,
   ref,
@@ -105,9 +106,7 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { accountsTransactionsPending } = useLatestTransactionList();
     const {
-      amount,
       amountTotal,
-      fee,
       transactionAssets,
       isTransactionCoin,
     } = useTransactionData({
@@ -119,6 +118,10 @@ export default defineComponent({
       accountAddress: transactionOwner || activeAccount.value.address,
       protocol: PROTOCOLS.ethereum,
     });
+
+    // TODO move these calculations to base component after unifying ITransaction AE values
+    const fee = computed((): number => transaction.value?.tx?.fee || 0);
+    const amount = computed((): number => transaction.value?.tx?.amount || 0);
 
     watch(
       transaction,

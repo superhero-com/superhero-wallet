@@ -20,4 +20,6 @@ module.exports = defineConfig({
       'tests/e2e/integration/networks.cy.js',
     ],
   },
+  viewportHeight: 660,
+  viewportWidth: 420,
 });

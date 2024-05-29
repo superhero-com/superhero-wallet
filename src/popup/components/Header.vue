@@ -28,7 +28,7 @@
             :class="{ disabled: isLogoDisabled }"
             class="btn-home"
           >
-            <AeternityLogo class="home-icon" />
+            <AppLogo class="home-icon" />
           </Component>
         </div>
 
@@ -113,7 +113,7 @@ import {
   useWalletConnect,
 } from '@/composables';
 
-import AeternityLogo from '@/icons/logo-small.svg?vue-component';
+import AppLogo from '@/icons/logo-small.svg?vue-component';
 import WalletConnectLogo from '@/icons/wallet-connect.svg?vue-component';
 import BackIcon from '@/icons/back.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
@@ -133,7 +133,7 @@ export default defineComponent({
     NotificationsIcon,
     BtnClose,
     BtnPlain,
-    AeternityLogo,
+    AppLogo,
     Truncate,
     BtnIcon,
     IonHeader,

@@ -3,7 +3,7 @@
   "description": "Superhero Wallet",
   "manifest_version": 3,
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; script-src 'self'; frame-src *; connect-src *; font-src * data:; img-src * data:; style-src-elem * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+    "extension_pages": "default-src 'self'; script-src 'self'; connect-src *; font-src * data:; img-src * data:; style-src-elem * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
   },
   "permissions": [
     "storage",
