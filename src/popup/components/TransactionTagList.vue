@@ -179,7 +179,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
+@use '@/styles/mixins';
 
 .transaction-tag-list {
   @include mixins.flex(center, center);

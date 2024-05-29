@@ -591,9 +591,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .multisig-proposal-details {
   display: flex;
@@ -617,7 +617,7 @@ export default defineComponent({
   .header {
     @include mixins.flex(center, center, column);
 
-    background-color: variables.$color-bg-app;
+    background-color: $color-bg-app;
     min-height: 42px;
     padding: 14px;
     position: sticky;
@@ -636,7 +636,7 @@ export default defineComponent({
   }
 
   .content {
-    background-color: variables.$color-bg-4;
+    background-color: $color-bg-4;
     padding-bottom: 120px;
 
     .transaction-overview {
@@ -685,7 +685,7 @@ export default defineComponent({
 
   .reason:deep() {
     .value {
-      color: variables.$color-warning;
+      color: $color-warning;
     }
   }
 
@@ -704,9 +704,9 @@ export default defineComponent({
     background:
       linear-gradient(
         180deg,
-        rgba(variables.$color-bg-4, 0) 0%,
-        rgba(variables.$color-bg-4, 0.8) 43.08%,
-        rgba(variables.$color-bg-4, 0.9) 90.79%
+        rgba($color-bg-4, 0) 0%,
+        rgba($color-bg-4, 0.8) 43.08%,
+        rgba($color-bg-4, 0.9) 90.79%
       );
 
     .row {

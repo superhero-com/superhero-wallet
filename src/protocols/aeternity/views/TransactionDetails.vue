@@ -400,7 +400,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
 @use '@/styles/typography';
 @use '@/styles/mixins';
 

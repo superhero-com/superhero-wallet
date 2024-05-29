@@ -71,8 +71,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .names-list {
   padding: 4px 12px 0 12px;

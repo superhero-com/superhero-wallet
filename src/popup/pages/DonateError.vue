@@ -88,7 +88,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .donate-error {
   h1 {
@@ -100,14 +100,14 @@ export default {
 
   .error-info-title {
     text-transform: uppercase;
-    color: variables.$color-grey-dark;
+    color: $color-grey-dark;
     text-align: left;
     font-size: 14px;
     margin: 0 0 15px;
   }
 
   .error-info-content {
-    color: variables.$color-white;
+    color: $color-white;
     font-size: 15px;
     margin: 0;
     text-align: left;

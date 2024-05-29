@@ -73,9 +73,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .node-connection-status {
   @extend %face-sans-15-medium;
@@ -85,8 +85,8 @@ export default defineComponent({
   justify-content: center;
   min-height: 40px;
   padding: 4px 10px;
-  color: variables.$color-white;
-  backdrop-filter: blur(variables.$bg-blur-radius);
+  color: $color-white;
+  backdrop-filter: blur($bg-blur-radius);
   text-align: center;
 
   &::before {
@@ -94,12 +94,12 @@ export default defineComponent({
     position: absolute;
     z-index: -1;
     inset: 0;
-    background: variables.$color-bg-3;
+    background: $color-bg-3;
     opacity: 0.8;
   }
 
   &.is-error {
-    color: variables.$color-warning;
+    color: $color-warning;
   }
 }
 </style>

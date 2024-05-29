@@ -118,15 +118,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .account-info {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   text-align: left;
-  color: variables.$color-white;
+  color: $color-white;
 
   .avatar {
     margin-right: 8px;
@@ -155,7 +155,7 @@ export default defineComponent({
     }
 
     .ae-address {
-      color: rgba(variables.$color-white, 0.85);
+      color: rgba($color-white, 0.85);
       user-select: none;
 
       .icon {

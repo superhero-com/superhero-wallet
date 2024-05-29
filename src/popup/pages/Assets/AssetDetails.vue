@@ -424,7 +424,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .token-container {

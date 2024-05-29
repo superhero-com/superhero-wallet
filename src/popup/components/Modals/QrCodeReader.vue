@@ -231,9 +231,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables' as *;
-@use '../../../styles/mixins';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .qr-code-reader {
   .top-icon-wrapper {

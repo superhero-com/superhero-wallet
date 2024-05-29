@@ -76,15 +76,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/typography';
-@use '../../styles/variables';
-@use '../../styles/mixins';
+@use '@/styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .pool-token-row {
   .contract-id {
     @extend %face-mono-12-medium;
 
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     letter-spacing: 0.07em;
     cursor: pointer;
 
@@ -110,11 +110,11 @@ export default defineComponent({
     .symbol {
       @extend %face-sans-15-medium;
 
-      color: variables.$color-white;
+      color: $color-white;
     }
 
     .separator {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 }

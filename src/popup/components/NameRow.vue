@@ -32,8 +32,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .name-row {
   @extend %face-sans-14-medium;
@@ -44,7 +44,7 @@ export default {
     display: flex;
     align-items: center;
     padding: 8px 0;
-    color: variables.$color-white;
+    color: $color-white;
     text-align: left;
     text-decoration: none;
     transition: 0.2s;

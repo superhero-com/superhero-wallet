@@ -55,26 +55,26 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .status-icon {
   &.alert,
   &.critical {
-    color: variables.$color-danger;
+    color: $color-danger;
   }
 
   &.warning,
   &.not-secure {
-    color: variables.$color-warning;
+    color: $color-warning;
   }
 
   &.help,
   &.info {
-    color: variables.$color-primary;
+    color: $color-primary;
   }
 
   &.success {
-    color: variables.$color-success-dark;
+    color: $color-success-dark;
   }
 }
 </style>

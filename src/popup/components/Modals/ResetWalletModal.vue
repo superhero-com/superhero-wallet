@@ -93,26 +93,26 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/mixins';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .reset-wallet {
   .icon-wrapper {
     margin: 8px auto 18px;
-    color: variables.$color-danger;
+    color: $color-danger;
   }
 
   .info {
     .title {
-      color: variables.$color-white;
+      color: $color-white;
       padding-bottom: 20px;
 
       @extend %face-sans-18-medium;
     }
 
     .text {
-      color: rgba(variables.$color-white, 0.85);
+      color: rgba($color-white, 0.85);
       line-height: 20px;
       gap: 10px;
 

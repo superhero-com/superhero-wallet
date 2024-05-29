@@ -59,7 +59,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@use '../../styles/typography';
+@use '@/styles/typography';
 
 .consensus-approved-label {
   @extend %face-sans-12-medium;

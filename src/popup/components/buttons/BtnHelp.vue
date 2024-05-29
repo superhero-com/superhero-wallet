@@ -49,7 +49,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '@/styles/variables' as *;
 
 .btn-help {
   display: inline-flex;
@@ -58,7 +58,7 @@ export default defineComponent({
     width: 24px;
     height: 24px;
     opacity: 0.5;
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   &.small svg {

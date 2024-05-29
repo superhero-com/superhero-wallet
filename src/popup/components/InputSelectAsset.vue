@@ -69,9 +69,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .select-asset {
   @include mixins.flex(center, center);
@@ -79,27 +79,27 @@ export default defineComponent({
   @extend %face-sans-14-medium;
 
   padding: 2px 12px;
-  background-color: rgba(variables.$color-black, 0.3);
+  background-color: rgba($color-black, 0.3);
   border-radius: 16px;
   gap: 6px;
-  color: variables.$color-primary;
+  color: $color-primary;
   white-space: nowrap;
   border: 2px solid transparent;
   transition: all 0.12s ease-out;
 
   .chevron-down {
     width: 8px !important;
-    color: variables.$color-white;
+    color: $color-white;
     opacity: 0.75;
   }
 
   &:not(.disabled) {
     &:hover {
-      border-color: rgba(variables.$color-white, 0.15);
+      border-color: rgba($color-white, 0.15);
     }
 
     &.focused {
-      background-color: rgba(variables.$color-white, 0.05);
+      background-color: rgba($color-white, 0.05);
     }
   }
 }

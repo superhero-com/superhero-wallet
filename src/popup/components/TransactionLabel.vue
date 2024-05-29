@@ -220,9 +220,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .transaction-label {
   @include mixins.flex(flex-start, center, row);
@@ -236,7 +236,7 @@ export default defineComponent({
   .label {
     @extend %face-sans-12-medium;
 
-    color: variables.$color-white;
+    color: $color-white;
 
     .type {
       display: flex;
@@ -250,23 +250,23 @@ export default defineComponent({
   .secondary {
     @extend %face-sans-12-regular;
 
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 
   .icon {
     min-width: 16px;
     height: 16px;
-    color: variables.$color-white;
+    color: $color-white;
     margin-left: 1px;
     margin-right: 2px;
   }
 
   .error {
     display: flex;
-    color: variables.$color-warning;
+    color: $color-warning;
 
     .icon {
-      color: variables.$color-warning;
+      color: $color-warning;
     }
   }
 

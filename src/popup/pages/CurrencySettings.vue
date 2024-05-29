@@ -65,8 +65,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .currency-settings {
   padding-inline: var(--screen-padding-x);
@@ -95,14 +95,14 @@ export default defineComponent({
         .symbol {
           text-transform: uppercase;
           padding-right: 2px;
-          color: rgba(variables.$color-white, 0.5);
+          color: rgba($color-white, 0.5);
 
           @extend %face-sans-15-regular;
         }
       }
 
       .name {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
 
         @extend %face-sans-14-regular;
       }
@@ -112,7 +112,7 @@ export default defineComponent({
       .name,
       .left .code,
       .left .symbol {
-        color: rgba(variables.$color-white, 1);
+        color: rgba($color-white, 1);
       }
     }
   }

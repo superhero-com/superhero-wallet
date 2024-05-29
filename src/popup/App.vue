@@ -284,9 +284,9 @@ export default defineComponent({
 <style lang="scss" src="../styles/global.scss"></style>
 
 <style lang="scss" scoped>
-@use '../styles/variables';
-@use '../styles/typography';
-@use '../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .app {
   position: relative;
@@ -299,7 +299,7 @@ export default defineComponent({
   .app-wrapper {
     --screen-padding-x: 16px;
     --screen-border-radius: 0;
-    --screen-bg-color: #{variables.$color-bg-app};
+    --screen-bg-color: #{$color-bg-app};
     --header-height: 0;
     --gap: 12px;
 
@@ -310,9 +310,9 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     border-radius: var(--screen-border-radius);
-    color: variables.$color-white;
+    color: $color-white;
     background-color: var(--screen-bg-color);
-    font-family: variables.$font-sans;
+    font-family: $font-sans;
     transition: background-color 200ms;
 
     .app-inner {
@@ -333,7 +333,7 @@ export default defineComponent({
 
     .connection-status {
       position: fixed;
-      z-index: variables.$z-index-header;
+      z-index: $z-index-header;
       bottom: 0;
       padding-bottom: env(safe-area-inset-bottom);
       left: 0;
@@ -342,17 +342,17 @@ export default defineComponent({
 
     &.is-extension,
     &.is-desktop-web {
-      width: variables.$extension-width;
-      height: variables.$extension-height;
+      width: $extension-width;
+      height: $extension-height;
     }
 
     // Imitate the appearance of the mobile/extension app in a desktop browser
 
     &.is-desktop-web {
-      --screen-border-radius: #{variables.$border-radius-app};
+      --screen-border-radius: #{$border-radius-app};
 
       overflow: hidden;
-      box-shadow: variables.$color-border 0 0 0 1px;
+      box-shadow: $color-border 0 0 0 1px;
       transform: translate(0, 0); // Create custom viewport for fixed elements
 
       @include mixins.mobile {

@@ -150,9 +150,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .input-amount {
   &-desc {
@@ -164,7 +164,7 @@ export default defineComponent({
       word-break: break-word;
 
       .focused & {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
     }
 
@@ -181,7 +181,7 @@ export default defineComponent({
     @extend %face-sans-15-medium;
 
     white-space: nowrap;
-    color: variables.$color-primary;
+    color: $color-primary;
     user-select: none;
   }
 }

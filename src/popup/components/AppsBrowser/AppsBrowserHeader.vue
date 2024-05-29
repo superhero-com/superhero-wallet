@@ -169,7 +169,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
 
@@ -181,7 +181,7 @@ export default defineComponent({
   align-items: center;
   justify-content: space-between;
   top: 0;
-  z-index: variables.$z-index-header;
+  z-index: $z-index-header;
   height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
   padding: env(safe-area-inset-top) 8px 0 8px;
@@ -223,7 +223,7 @@ export default defineComponent({
       justify-content: center;
       white-space: nowrap;
       line-height: 24px;
-      color: variables.$color-white;
+      color: $color-white;
     }
 
     .host {
@@ -232,7 +232,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       gap: 2px;
-      color: variables.$color-white;
+      color: $color-white;
 
       .secure-lock {
         height: 17px;

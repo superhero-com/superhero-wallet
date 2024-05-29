@@ -453,8 +453,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .transfer-send-form {
   .multisig-addresses-row {
@@ -477,13 +477,13 @@ export default defineComponent({
       outline: none;
 
       &:hover {
-        color: variables.$color-white;
+        color: $color-white;
       }
     }
   }
 
   .account-selector {
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 
   .payload-add-wrapper {

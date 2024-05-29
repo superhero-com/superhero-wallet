@@ -193,9 +193,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .transaction-item {
   .body {
@@ -207,7 +207,7 @@ export default defineComponent({
       @extend %face-sans-12-regular;
 
       width: 100%;
-      color: rgba(variables.$color-white, 0.75);
+      color: rgba($color-white, 0.75);
       gap: 3px;
 
       .date {

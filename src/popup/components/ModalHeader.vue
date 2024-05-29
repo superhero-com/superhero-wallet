@@ -32,8 +32,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .modal-header {
   width: 100%;
@@ -45,11 +45,11 @@ export default {
 
     margin-block: 0;
     line-height: 24px;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
 
     a {
       font-weight: 500;
-      color: variables.$color-primary;
+      color: $color-primary;
       text-decoration: none;
 
       &:hover {

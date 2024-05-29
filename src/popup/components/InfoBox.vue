@@ -34,8 +34,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .info-box {
   @extend %face-sans-15-regular;
@@ -47,23 +47,23 @@ export default defineComponent({
   line-height: 19px;
 
   &.default {
-    background-color: rgba(variables.$color-white, 0.08);
-    color: rgba(variables.$color-white, 0.75);
+    background-color: rgba($color-white, 0.08);
+    color: rgba($color-white, 0.75);
   }
 
   &.success {
-    background-color: rgba(variables.$color-success-dark, 0.15);
-    color: variables.$color-success-dark;
+    background-color: rgba($color-success-dark, 0.15);
+    color: $color-success-dark;
   }
 
   &.danger {
-    background-color: rgba(variables.$color-danger, 0.15);
-    color: variables.$color-danger;
+    background-color: rgba($color-danger, 0.15);
+    color: $color-danger;
   }
 
   &.warning {
-    background-color: rgba(variables.$color-warning, 0.15);
-    color: variables.$color-warning;
+    background-color: rgba($color-warning, 0.15);
+    color: $color-warning;
   }
 }
 </style>

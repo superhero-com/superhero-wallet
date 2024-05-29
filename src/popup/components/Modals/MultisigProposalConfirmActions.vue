@@ -188,9 +188,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .confirm {
   text-align: center;
@@ -222,14 +222,14 @@ export default defineComponent({
     margin: 10px 0;
     padding: 8px 12px;
     border-radius: 4px;
-    color: rgba(variables.$color-danger, 0.75);
+    color: rgba($color-danger, 0.75);
     line-height: 19px;
   }
 
   .msg {
     @extend %face-sans-15-regular;
 
-    color: rgba(variables.$color-white, 0.85);
+    color: rgba($color-white, 0.85);
     padding: 0 18px;
   }
 
@@ -240,7 +240,7 @@ export default defineComponent({
       margin: 8px;
 
       &.refuse {
-        color: variables.$color-warning;
+        color: $color-warning;
       }
     }
   }

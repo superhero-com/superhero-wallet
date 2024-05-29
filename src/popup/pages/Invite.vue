@@ -163,7 +163,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .invite-page {
   padding-inline: var(--screen-padding-x);
@@ -175,14 +175,14 @@ export default defineComponent({
     margin: 36px 0 16px;
     font-size: 16px;
     text-align: left;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     font-weight: 500;
 
     &-icon {
       width: 20px;
       height: 20px;
       margin-right: 4px;
-      color: variables.$color-white;
+      color: $color-white;
       opacity: 0.5;
     }
   }

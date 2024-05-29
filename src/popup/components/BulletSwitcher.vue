@@ -115,8 +115,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
-@use '../../styles/variables';
+@use '@/styles/mixins';
+@use '@/styles/variables' as *;
 
 .bullet-switcher {
   @include mixins.flex(flex-start, center);
@@ -129,12 +129,12 @@ export default defineComponent({
     height: 19px;
     margin-left: 8px;
     cursor: pointer;
-    color: rgba(variables.$color-white, 0.5);
+    color: rgba($color-white, 0.5);
     transition: all 0.25s ease-out;
 
     &.active,
     &:hover {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
@@ -179,7 +179,7 @@ export default defineComponent({
       }
 
       .bullet {
-        background-color: rgba(variables.$color-white, 0.2);
+        background-color: rgba($color-white, 0.2);
         min-width: 8px;
         min-height: 8px;
         border-radius: 50%;

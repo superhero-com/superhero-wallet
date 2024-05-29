@@ -229,12 +229,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .header {
-  z-index: variables.$z-index-header;
+  z-index: $z-index-header;
   height: var(--header-height);
 
   .toolbar {
@@ -275,11 +275,11 @@ export default defineComponent({
           }
 
           &:hover svg {
-            color: variables.$color-primary-hover;
+            color: $color-primary-hover;
           }
 
           &:active svg {
-            color: variables.$color-primary-hover;
+            color: $color-primary-hover;
             opacity: 0.9;
           }
         }
@@ -287,7 +287,7 @@ export default defineComponent({
         .home-icon {
           width: 32px;
           height: 32px;
-          color: variables.$color-primary;
+          color: $color-primary;
         }
       }
     }
@@ -307,7 +307,7 @@ export default defineComponent({
         justify-content: center;
         white-space: nowrap;
         line-height: 24px;
-        color: variables.$color-white;
+        color: $color-white;
       }
 
       &:only-child {

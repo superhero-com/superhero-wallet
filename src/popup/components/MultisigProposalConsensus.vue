@@ -199,9 +199,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .transaction-multisig-consensus {
   width: 100%;
@@ -216,11 +216,11 @@ export default defineComponent({
       align-items: center;
       margin-bottom: 4px;
       line-height: 16px;
-      color: rgba(variables.$color-white, 0.5);
+      color: rgba($color-white, 0.5);
 
       .confirmations-count {
         padding-left: 4px;
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
     }
 
@@ -246,13 +246,13 @@ export default defineComponent({
           opacity: 0.5;
 
           &.active {
-            color: variables.$color-success;
+            color: $color-success;
             opacity: 1;
           }
         }
 
         .close-icon {
-          color: variables.$color-danger;
+          color: $color-danger;
           opacity: 1;
         }
       }

@@ -160,7 +160,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
 
@@ -179,12 +179,12 @@ export default {
       line-height: 16px;
 
       .truncate {
-        color: variables.$color-white;
+        color: $color-white;
         margin-bottom: 5px;
       }
 
       .address-shortening {
-        color: variables.$color-white;
+        color: $color-white;
       }
     }
   }
@@ -200,7 +200,7 @@ export default {
 
     margin-block: 16px;
     gap: 4px;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
 
     :deep(.token-amount) {
       .symbol {
@@ -208,7 +208,7 @@ export default {
       }
 
       .fiat {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
     }
   }
@@ -225,11 +225,11 @@ export default {
   .counter {
     @extend %face-sans-15-medium;
 
-    color: variables.$color-white;
+    color: $color-white;
     opacity: 1;
 
     &.below-zero {
-      color: variables.$color-danger;
+      color: $color-danger;
     }
   }
 

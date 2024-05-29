@@ -264,20 +264,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/share-info';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/share-info';
+@use '@/styles/mixins';
 
 .transfer-receive-base {
   font-weight: 500;
-  color: variables.$color-white;
+  color: $color-white;
 
   .title {
     @extend %face-sans-18-medium;
 
     align-self: center;
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   .account-row {
@@ -292,7 +292,7 @@ export default defineComponent({
     .qrcode {
       display: inline-flex;
       padding: 8px;
-      background-color: variables.$color-white;
+      background-color: $color-white;
       border-radius: 12px;
     }
   }
@@ -310,7 +310,7 @@ export default defineComponent({
 
       width: 100%;
       height: 74px;
-      color: variables.$color-white;
+      color: $color-white;
       font-style: normal;
       text-align: left;
       line-height: 24px;
