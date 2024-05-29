@@ -124,6 +124,7 @@ export default defineComponent({
               label: t('transaction.overview.accountAddress'),
             },
           };
+
         case Tag.ContractCallTx: {
           const contract: IAccountOverview = {
             address: contractId,
@@ -132,6 +133,21 @@ export default defineComponent({
               ? t('transaction.overview.superheroDex')
               : t('common.smartContract'),
           };
+
+          if (protocol.value === PROTOCOLS.ethereum) {
+            return {
+              sender: {
+                address: senderId,
+                url: protocolExplorer.prepareUrlForAccount(senderId),
+                label: t('transaction.overview.accountAddress'),
+              },
+              recipient: {
+                address: recipientId,
+                url: protocolExplorer.prepareUrlForAccount(recipientId),
+                label: t('common.smartContract'),
+              },
+            };
+          }
 
           let transactionOwner;
           let transactionReceiver = contract;
@@ -159,6 +175,7 @@ export default defineComponent({
               : contract,
           };
         }
+
         case Tag.ContractCreateTx:
           return {
             sender: ownershipAccount.value,
@@ -166,6 +183,7 @@ export default defineComponent({
               label: t('transaction.overview.contractCreate'),
             },
           };
+
         case Tag.NamePreclaimTx:
         case Tag.NameClaimTx:
         case Tag.NameUpdateTx:
@@ -175,6 +193,7 @@ export default defineComponent({
               label: t('transaction.overview.aens'),
             },
           };
+
         default:
           throw new Error(`Unsupported transaction type ${outerTxTag.value}`);
       }

@@ -48,39 +48,43 @@
         :value="decodedCallData.functionName"
       />
 
-      <template v-if="(isDex || isDexAllowance) && transactionAssets.length">
+      <!-- Aeternity DEX transactions and any ETH transactions involving multiple assets -->
+      <template
+        v-if="(
+          isDex && tokenList.length
+          || protocol === PROTOCOLS.ethereum && tokenList.length > 1
+        )"
+      >
         <TransactionDetailsPoolTokenRow
-          v-for="(token, idx) in transactionAssets"
+          v-for="(token, idx) in tokenList"
           :key="token.contractId"
           :token="token"
           :tokens="token.tokens || null"
           :label="getLabels(token, idx)"
           :hide-amount="isDexSwap"
+          :protocol="protocol"
         />
       </template>
 
-      <DetailsItem
-        v-if="nameAeFee"
-        :label="$t('modals.confirmTransactionSign.nameFee')"
-        class="name-fee"
-      >
-        <template #value>
+      <div class="details">
+        <DetailsItem
+          v-if="nameAeFee"
+          :label="$t('modals.confirmTransactionSign.nameFee')"
+        >
           <TokenAmount
             :amount="nameAeFee"
             :protocol="protocol"
           />
-        </template>
-      </DetailsItem>
+        </DetailsItem>
 
-      <div class="details">
         <DetailsItem
           v-if="isDexSwap"
           :label="swapDirectionTranslation"
         >
           <TokenAmount
-            :amount="tokenAmount"
+            :amount="swapTokenAmount"
             :symbol="tokenSymbol"
-            :hide-fiat="!swapTokenAmountData.isWrappedCoin || isAex9"
+            :hide-fiat="!swapTokenData.isWrappedCoin || isAex9"
             :protocol="protocol"
             data-cy="total"
           />
@@ -301,22 +305,18 @@ export default defineComponent({
     const decodedCallData = ref<AeDecodedCallData | undefined>();
 
     const app = computed(() => popupProps.value?.app);
-    const isAeppChatSuperhero = computed(
-      () => SUPERHERO_CHAT_URLS
-        .includes(`${app.value?.protocol}//${app.value?.name}`),
-    );
-    const fee = computed(() => {
-      if (protocol === PROTOCOLS.aeternity) {
-        return getAeFee(popupProps.value?.tx?.fee!);
-      }
-      return popupProps.value?.tx?.fee!;
-    });
+
+    const fee = computed(() => (protocol === PROTOCOLS.aeternity)
+      ? getAeFee(popupProps.value?.tx?.fee!)
+      : popupProps.value?.tx?.fee!);
+
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
-    const appName = computed(() => {
-      if (isAeppChatSuperhero.value) {
+
+    const appName = computed((): string | undefined => {
+      if (SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)) {
         return t('modals.confirmTransactionSign.superheroChat');
       }
-      if (protocol !== PROTOCOLS.aeternity && app.value?.name) {
+      if (protocol !== PROTOCOLS.aeternity) {
         return app.value?.name;
       }
       return undefined;
@@ -335,7 +335,7 @@ export default defineComponent({
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
       amount: amountTotal.value,
-      symbol: getTxAssetSymbol(popupProps.value?.tx as any),
+      symbol: getTxAssetSymbol({ tx: popupProps.value?.tx!, protocol } as ITransaction),
     }));
 
     const decodedPayload = computed(() => popupProps.value?.tx?.payload
@@ -349,20 +349,20 @@ export default defineComponent({
           : !!popupProps.value?.tx?.[field]),
     );
 
-    const swapTokenAmountData = computed((): ITokenResolved => {
+    const swapTokenData = computed((): ITokenResolved => {
       const token = (isDexMaxSpent.value) ? tokenList.value[0] : tokenList.value[1];
       return token || {};
     });
 
-    const tokenAmount = computed((): number => +toShiftedBigNumber(
-      swapTokenAmountData.value.amount || 0,
-      -(swapTokenAmountData.value.decimals || 0),
+    const swapTokenAmount = computed((): number => +toShiftedBigNumber(
+      swapTokenData.value.amount || 0,
+      -(swapTokenData.value.decimals || 0),
     ));
 
     const tokenSymbol = computed(
-      () => (swapTokenAmountData.value.isWrappedCoin)
+      () => (swapTokenData.value.isWrappedCoin)
         ? adapter.coinSymbol
-        : swapTokenAmountData.value.symbol,
+        : swapTokenData.value.symbol,
     );
 
     const transactionArguments = computed(() => decodedCallData.value?.args?.length
@@ -399,9 +399,6 @@ export default defineComponent({
       if (isDexAllowance.value) {
         return t('pages.signTransaction.approveUseOfToken');
       }
-      if (isDexSwap.value) {
-        return !idx ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
-      }
       if (isDexLiquidityAdd.value) {
         return token.isPool ? '' : t('pages.signTransaction.maximumDeposited');
       }
@@ -410,7 +407,7 @@ export default defineComponent({
           ? t('pages.signTransaction.poolTokenSpent')
           : t('pages.signTransaction.minimumWithdrawn');
       }
-      return '';
+      return (idx === 0) ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
     }
 
     function cancel() {
@@ -531,17 +528,18 @@ export default defineComponent({
     return {
       AnimatedSpinner,
       PAYLOAD_FIELD,
+      PROTOCOLS,
       appName,
       cancel,
       decodedCallData,
       decodedPayload,
+      direction,
       error,
       executionCost,
       filteredTxFields,
       getLabels,
       getTxKeyLabel,
       getTxAssetSymbol,
-      isAeppChatSuperhero,
       isAex9,
       isDex,
       isDexAllowance,
@@ -555,13 +553,13 @@ export default defineComponent({
       protocol,
       singleToken,
       swapDirectionTranslation,
-      swapTokenAmountData,
-      tokenAmount,
+      swapTokenAmount,
+      swapTokenData,
       tokenSymbol,
+      tokenList,
       amountTotal,
       transaction,
       transactionArguments,
-      transactionAssets,
       fee,
       verifying,
     };
@@ -618,10 +616,6 @@ export default defineComponent({
 
     gap: 8px;
     padding: 8px 0;
-
-    .details-item {
-      margin-right: 24px;
-    }
   }
 
   .pool-token-row:deep() {

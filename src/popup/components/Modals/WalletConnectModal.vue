@@ -57,6 +57,19 @@
             <strong class="color-success">{{ $t('common.connected') }}</strong>
           </PanelTableItem>
 
+          <PanelTableItem :name="$t('common.activeAccount')">
+            <div class="connected-account">
+              <AddressTruncated
+                :address="activeAccount?.address!"
+                :protocol="PROTOCOLS.ethereum"
+              />
+              <Avatar
+                size="sm"
+                :address="activeAccount?.address!"
+              />
+            </div>
+          </PanelTableItem>
+
           <PanelTableItem :name="$t('walletConnect.dappName')">
             {{ peerMetadata?.name || '-' }}
           </PanelTableItem>
@@ -90,6 +103,15 @@
           :text="$t('walletConnect.dappRequestedDisconnect')"
         />
 
+        <DetailsItem
+          class="active-account"
+          :label="$t('common.connectingAs')"
+        >
+          <AccountInfo
+            :account="activeAccount!"
+          />
+        </DetailsItem>
+
         <FormTextarea
           v-model="connectionUri"
           :label="$t('walletConnect.uriInputLabel')"
@@ -113,7 +135,7 @@
     <InfoBox
       v-else
       type="danger"
-      text="No Ethereum account found"
+      :text="$t('common.noProtocolAccountFound', { protocol: PROTOCOLS.ethereum })"
     />
 
     <template #footer>
@@ -154,16 +176,18 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { RejectCallback, ResolveCallback } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useModals,
   useWalletConnect,
   type WalletConnectUri,
 } from '@/composables';
-import { PROTOCOLS } from '@/constants';
 
 import Avatar from '@/popup/components/Avatar.vue';
+import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 import Modal from '@/popup/components/Modal.vue';
+import AccountInfo from '@/popup/components/AccountInfo.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
@@ -171,6 +195,7 @@ import InfoBox from '@/popup/components//InfoBox.vue';
 import Panel from '@/popup/components/Panel.vue';
 import PanelTableItem from '@/popup/components/PanelTableItem.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
+import DetailsItem from '@/popup/components/DetailsItem.vue';
 
 import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 import AeternityLogo from '@/icons/logo-small.svg?vue-component';
@@ -181,11 +206,14 @@ import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   components: {
+    AccountInfo,
+    AddressTruncated,
     Avatar,
     BtnMain,
     BtnPlain,
-    InfoBox,
+    DetailsItem,
     FormTextarea,
+    InfoBox,
     Modal,
     Panel,
     PanelTableItem,
@@ -200,11 +228,12 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
-    const { accountsGroupedByProtocol } = useAccounts();
+    const { getLastActiveProtocolAccount } = useAccounts();
     const { openScanQrModal } = useModals();
     const {
       wcSession,
       wcState,
+      ethAccounts,
       connect,
       disconnect,
     } = useWalletConnect();
@@ -219,11 +248,11 @@ export default defineComponent({
     /** eg.: wc:1b3eda3f4... */
     const connectionUri = ref<WalletConnectUri>();
 
-    const ethAccounts = computed(() => accountsGroupedByProtocol.value[PROTOCOLS.ethereum] || []);
+    const activeAccount = computed(() => getLastActiveProtocolAccount(PROTOCOLS.ethereum));
     const peerMetadata = computed(() => wcSession.value?.peer?.metadata);
 
     async function connectToDapp() {
-      await connect(connectionUri.value!, ethAccounts.value?.map(({ address }) => address));
+      await connect(connectionUri.value!);
     }
 
     function disconnectFromDapp() {
@@ -236,7 +265,6 @@ export default defineComponent({
       if (result) {
         connectionUri.value = result;
       }
-      console.log('SCAN', result);
     }
 
     function cancel() {
@@ -267,6 +295,7 @@ export default defineComponent({
       error,
       peerDisconnected,
       peerMetadata,
+      activeAccount,
       connectToDapp,
       disconnectFromDapp,
       scanConnectionUriQr,
@@ -348,6 +377,16 @@ export default defineComponent({
         transition-delay: 1s;
       }
     }
+  }
+
+  .active-account {
+    margin-top: 20px;
+  }
+
+  .connected-account {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .scan-button {

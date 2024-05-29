@@ -28,6 +28,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  PropType,
   ref,
 } from 'vue';
 import { checkImageAvailability, getAddressColor } from '@/utils';
@@ -35,18 +36,26 @@ import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
-const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
+const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'] as const;
+type AvatarSize = typeof SIZES[number];
+
+const VARIANTS = ['primary', 'grey'] as const;
+type AvatarVariant = typeof VARIANTS[number];
 
 export default defineComponent({
   props: {
     address: { type: String, default: '' },
     name: { type: String, default: null },
     size: {
-      type: String,
+      type: String as PropType<AvatarSize>,
       default: 'rg',
-      validator: (val: string) => SIZES.includes(val),
+      validator: (val: AvatarSize) => SIZES.includes(val),
     },
-    variant: { type: String, default: null },
+    variant: {
+      type: String as PropType<AvatarVariant>,
+      default: null,
+      validator: (val: AvatarVariant) => VARIANTS.includes(val),
+    },
     borderless: Boolean,
     isPlaceholder: Boolean,
   },

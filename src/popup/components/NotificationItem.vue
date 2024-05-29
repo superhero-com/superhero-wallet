@@ -26,7 +26,6 @@
       :address="address || title"
       :name="chainName"
       class="notification-avatar"
-      with-border
     />
     <div class="content">
       <AddressTruncated
