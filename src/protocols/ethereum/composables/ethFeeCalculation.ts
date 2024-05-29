@@ -19,6 +19,7 @@ export function useEthFeeCalculation() {
   const { t } = useI18n();
 
   const feeSelectedIndex = ref(0);
+  const gasLimit = ref(ETH_GAS_LIMIT);
 
   // base fee per gas
   const defaultBaseFeePerGas = ref(new BigNumber(0));
@@ -44,7 +45,7 @@ export function useEthFeeCalculation() {
     {
       fee: defaultBaseFeePerGas.value
         .plus(maxPriorityFeePerGasSlow.value)
-        .multipliedBy(ETH_GAS_LIMIT),
+        .multipliedBy(gasLimit.value),
       time: 300,
       label: t('common.transferSpeed.slow'),
       maxPriorityFee: maxPriorityFeePerGasSlow.value,
@@ -53,7 +54,7 @@ export function useEthFeeCalculation() {
     {
       fee: defaultBaseFeePerGas.value
         .plus(maxPriorityFeePerGasMedium.value)
-        .multipliedBy(ETH_GAS_LIMIT),
+        .multipliedBy(gasLimit.value),
       time: 180,
       label: t('common.transferSpeed.medium'),
       maxPriorityFee: maxPriorityFeePerGasMedium.value,
@@ -62,7 +63,7 @@ export function useEthFeeCalculation() {
     {
       fee: defaultBaseFeePerGas.value
         .plus(maxPriorityFeePerGasFast.value)
-        .multipliedBy(ETH_GAS_LIMIT),
+        .multipliedBy(gasLimit.value),
       time: 30,
       label: t('common.transferSpeed.fast'),
       maxPriorityFee: maxPriorityFeePerGasFast.value,
@@ -75,8 +76,10 @@ export function useEthFeeCalculation() {
   const maxPriorityFeePerGas = computed(
     () => feeList.value[feeSelectedIndex.value].maxPriorityFee,
   );
+  const maxFee = computed(() => maxFeePerGas.value!.multipliedBy(gasLimit.value));
 
-  async function updateFeeList() {
+  async function updateFeeList(newGasLimit?: number) {
+    gasLimit.value = newGasLimit ?? ETH_GAS_LIMIT;
     const { nodeUrl } = ethActiveNetworkSettings.value;
     const web3Eth = new Web3Eth(nodeUrl);
     const feeData = await web3Eth.calculateFeeData();
@@ -92,6 +95,7 @@ export function useEthFeeCalculation() {
     feeSelectedIndex,
     maxFeePerGas,
     maxPriorityFeePerGas,
+    maxFee,
     updateFeeList,
   };
 }

@@ -123,7 +123,7 @@ import TokenAmount from './TokenAmount.vue';
 import ConsensusLabel from './ConsensusLabel.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 
-import LoadingIcon from '../../icons/animated-spinner.svg?skip-optimize';
+import LoadingIcon from '../../icons/animated-spinner.svg?vue-component';
 
 export default defineComponent({
   components: {

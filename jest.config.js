@@ -1,6 +1,5 @@
 const packagesToTranspile = [
   'lodash-es',
-  '@aeternity/hd-wallet',
   'vee-validate',
   '@ionic/core',
   '@ionic/vue',
@@ -19,7 +18,6 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
-    '^.*\\.svg\\?skip-optimize$': '<rootDir>/config/jest/EmptySvg.vue',
     '\\.(css|scss)$': 'identity-obj-proxy',
   },
   setupFiles: [

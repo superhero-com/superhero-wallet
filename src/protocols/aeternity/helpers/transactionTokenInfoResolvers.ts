@@ -9,7 +9,7 @@ import {
   AE_SYMBOL,
   AE_COIN_PRECISION,
   AE_CONTRACT_ID,
-  AE_COIN_NAME,
+  AE_PROTOCOL_NAME,
 } from '@/protocols/aeternity/config';
 
 interface TransactionResolverReturnData {
@@ -34,7 +34,7 @@ type TransactionResolvers = Partial<Record<TxFunctionParsed, TransactionResolver
 
 const defaultToken: ITokenResolved = {
   symbol: AE_SYMBOL,
-  name: AE_COIN_NAME,
+  name: AE_PROTOCOL_NAME,
   decimals: AE_COIN_PRECISION,
   contractId: AE_CONTRACT_ID,
 };

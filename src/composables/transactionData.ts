@@ -218,20 +218,17 @@ export function useTransactionData({
     }
 
     const amount = (isDexAllowance.value)
-      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision)
+      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision).toString()
       : getTxAmountTotal(activeTransaction.value, direction.value);
     const isReceived = direction.value === TX_DIRECTION.received;
 
     if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value || convertToCoin) {
       return [{
         ...innerTx.value || {},
+        ...adapter.getDefaultCoin(),
         amount,
         assetType: ASSET_TYPES.coin,
-        contractId: adapter.coinContractId,
         isReceived,
-        name: adapter.coinName,
-        protocol,
-        symbol: adapter.coinSymbol,
       }];
     }
 

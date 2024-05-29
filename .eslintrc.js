@@ -60,6 +60,7 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/no-v-model-argument': 'off',
     'vue/no-reserved-component-names': 'off',
+    'vue/singleline-html-element-content-newline': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     '@typescript-eslint/member-delimiter-style': ['error'],
 

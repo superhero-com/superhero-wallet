@@ -13,7 +13,6 @@ export * from './libs/multisig';
 export const AE_PROTOCOL_NAME = 'æternity';
 export const AE_CONTRACT_ID = 'aeternity';
 
-export const AE_COIN_NAME = 'Æ Coin';
 export const AE_SYMBOL = 'AE'; // TODO rename to `AE_COIN_SYMBOL`
 export const AE_COIN_PRECISION = 18; // Amount of decimals
 

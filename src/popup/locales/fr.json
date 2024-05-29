@@ -19,9 +19,6 @@
     "payloadForm": {
       "doneBtn": "Terminé"
     },
-    "transaction-failed": {
-      "msg": "We cannot process this transaction. Please, try again later."
-    },
     "required": {
       "msg": "Please fill in all fields."
     },

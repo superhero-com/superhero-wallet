@@ -102,11 +102,10 @@ export default defineComponent({
       loading.value = true;
       let actionResult;
       const lastActiveEthAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
-
       try {
         if (!isSelectedAssetEthCoin.value) {
           actionResult = await ethAdapter.transferToken?.(
-            Number(amount),
+            amount,
             recipient,
             selectedAsset.contractId,
             {

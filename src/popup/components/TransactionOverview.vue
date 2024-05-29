@@ -100,7 +100,27 @@ export default defineComponent({
         callerId,
       } = innerTx.value;
 
-      switch (outerTxTag.value) {
+      if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
+        return {
+          sender: {
+            address: innerTx.value.ownerId,
+            name: getName(innerTx.value.ownerId).value,
+            url: protocolExplorer.prepareUrlForAccount(innerTx.value.ownerId),
+            label: t('multisig.multisigVault'),
+          },
+          recipient: {
+            label: t('common.smartContract'),
+            address: innerTx.value.contractId,
+          },
+        };
+      }
+
+      const transactionTag = (
+        outerTxTag.value === Tag.PayingForTx
+        || outerTxTag.value === Tag.GaMetaTx
+      ) ? innerTxTag.value : outerTxTag.value;
+
+      switch (transactionTag) {
         case Tag.SpendTx:
           return {
             sender: {
@@ -172,40 +192,6 @@ export default defineComponent({
             },
             title: outerTxTag.value ? transactionTypes[outerTxTag.value] : undefined,
           };
-        case Tag.PayingForTx: {
-          return {
-            sender: {
-              address: innerTx.value.ownerId,
-              name: getName(innerTx.value.ownerId).value,
-              url: protocolExplorer.prepareUrlForAccount(innerTx.value.ownerId),
-              label: t('multisig.multisigVault'),
-            },
-            recipient: {
-              label: t('common.smartContract'),
-              address: innerTx.value.contractId,
-            },
-          };
-        }
-        case Tag.GaMetaTx: {
-          if (innerTxTag.value === Tag.SpendTx) {
-            return {
-              sender: {
-                address: senderId,
-                name: getName(senderId).value,
-                url: protocolExplorer.prepareUrlForAccount(senderId),
-                label: t('transaction.overview.accountAddress'),
-              },
-              recipient: {
-                address: recipientId,
-                name: name.value || getName(recipientId).value,
-                url: protocolExplorer.prepareUrlForAccount(recipientId),
-                label: t('transaction.overview.accountAddress'),
-              },
-              title: t('transaction.type.spendTx'),
-            };
-          }
-        }
-        // eslint-disable-next-line no-fallthrough
         default:
           throw new Error(`Unsupported transaction type ${outerTxTag.value}`);
       }

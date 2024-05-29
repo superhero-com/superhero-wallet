@@ -77,12 +77,14 @@
           variant="muted"
           :text="$t('modals.claimGiftCard.redeemPartially')"
           :disabled="loading"
+          data-cy="redeem-secondary-btn"
           @click="step = STEPS.form"
         />
         <BtnMain
           :icon="loading ? AnimatedSpinner : null"
           :text="mainButtonText"
           :disabled="isDisabled || loading"
+          data-cy="redeem-main-btn"
           @click="handleMainButtonClick()"
         />
       </div>
@@ -135,7 +137,7 @@ import BalanceInfo from '../BalanceInfo.vue';
 import Modal from '../Modal.vue';
 import TransferSendAmount from '../TransferSend/TransferSendAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
 const STEPS = {
   initial: 'initial',

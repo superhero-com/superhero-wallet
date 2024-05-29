@@ -40,6 +40,7 @@
       <span
         v-if="popupProps?.isSenderReplaced"
         class="sender-replaced"
+        data-cy="sender-replaced-warning"
       >
         {{ $t('modals.confirmTransactionSign.senderReplaced') }}
       </span>
@@ -103,6 +104,7 @@
             :symbol="singleToken.symbol"
             :hide-fiat="isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
             data-cy="total"
           />
         </DetailsItem>
@@ -223,7 +225,7 @@ import TransactionOverview from '../TransactionOverview.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
 type ITxKey = keyof ITx;
 

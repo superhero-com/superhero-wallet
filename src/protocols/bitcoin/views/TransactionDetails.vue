@@ -9,7 +9,6 @@
             :amount-total="amountTotal"
             :fee="fee"
             :hash="hash"
-            :non-ae-assets="assets"
             :protocol="PROTOCOLS.bitcoin"
             show-header
           >
@@ -45,7 +44,7 @@ import { TX_DIRECTION, PROTOCOLS } from '@/constants';
 import { useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { BTC_PROTOCOL_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
@@ -81,7 +80,7 @@ export default defineComponent({
     const assets = computed((): ITokenResolved[] => [{
       amount: amount.value,
       symbol: BTC_SYMBOL,
-      name: BTC_COIN_NAME,
+      name: BTC_PROTOCOL_NAME,
       isReceived: direction.value === TX_DIRECTION.received,
       contractId: adapter.coinContractId,
     }]);
@@ -96,10 +95,7 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        transaction.value = {
-          ...await adapter.fetchTransactionByHash(hash),
-          transactionOwner,
-        };
+        transaction.value = await adapter.fetchTransactionByHash(hash, transactionOwner);
       } catch (e) {
         setLoaderVisible(false);
         router.push({ name: ROUTE_NOT_FOUND });

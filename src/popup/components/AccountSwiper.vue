@@ -94,7 +94,7 @@ import {
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore from 'swiper';
 import { Virtual } from 'swiper/modules';
-import { getAddressColor } from '@/utils';
+import { getAddressColor, watchUntilTruthy } from '@/utils';
 import { IS_MOBILE_APP, PROTOCOLS } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
@@ -132,10 +132,15 @@ export default defineComponent({
 
     const swiper = computed(() => customSwiper.value?.$el.swiper);
 
-    async function setCurrentSlide(idx: number, slideParams?: number) {
+    async function setCurrentSlide(idx: number, slideSpeed?: number) {
       if (idx > -1 && currentIdx.value !== idx) {
         await nextTick();
-        swiper.value.slideTo(idx, slideParams);
+        await watchUntilTruthy(swiper);
+        const didSwipe = await swiper.value.slideTo(idx, slideSpeed);
+        if (!didSwipe) {
+          // Retry if slideTo fails
+          setTimeout(() => setCurrentSlide(idx, 0), 100);
+        }
       }
     }
 
@@ -157,13 +162,14 @@ export default defineComponent({
       if (props.activeIdx) {
         setCurrentSlide(props.activeIdx, 0);
       }
-      watch(
-        () => props.activeIdx,
-        (activeIdxValue) => {
-          setCurrentSlide(activeIdxValue, 0);
-        },
-      );
     });
+
+    watch(
+      () => props.activeIdx,
+      (activeIdxValue) => {
+        setCurrentSlide(activeIdxValue, 0);
+      },
+    );
 
     return {
       IS_MOBILE_APP,

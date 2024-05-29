@@ -14,6 +14,7 @@ import camelCaseKeysDeep from 'camelcase-keys-deep';
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
+  AssetAmount,
   AssetContractId,
   IAmountDecimalPlaces,
   ICoin,
@@ -49,7 +50,6 @@ import type {
   ContractInitializeOptions,
 } from '@/protocols/aeternity/types';
 import {
-  AE_COIN_NAME,
   AE_COIN_PRECISION,
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
@@ -70,7 +70,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override protocolName = AE_PROTOCOL_NAME;
 
-  override coinName = AE_COIN_NAME;
+  override coinName = AE_PROTOCOL_NAME;
 
   override coinSymbol = AE_SYMBOL;
 
@@ -130,11 +130,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override getDefaultCoin(
-    marketData: MarketData,
+    marketData?: MarketData,
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.aeternity] || {} as MarketData),
+      ...(marketData?.[PROTOCOLS.aeternity]! || {} as MarketData),
       protocol: PROTOCOLS.aeternity,
       contractId: this.coinContractId,
       decimals: this.coinPrecision,
@@ -153,11 +153,17 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchBalance(address: Encoded.AccountAddress): Promise<string> {
-    const { getAeSdk } = useAeSdk();
+    const { getAeSdk, setAeNodeError } = useAeSdk();
     const sdk = await getAeSdk();
 
-    const balanceInAettos = await sdk.getBalance(address);
-    return aettosToAe(balanceInAettos);
+    try {
+      const balanceInAettos = await sdk.getBalance(address);
+      setAeNodeError(false);
+      return aettosToAe(balanceInAettos);
+    } catch (e) {
+      setAeNodeError(true);
+      return '0';
+    }
   }
 
   override isAccountAddressValid(address: string) {
@@ -231,7 +237,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async transferToken(
-    amount: number,
+    amount: AssetAmount,
     recipient: string,
     contractId: string,
     options: ContractInitializeOptions,
@@ -242,7 +248,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       aci: FungibleTokenFullInterfaceACI,
       address: contractId as Encoded.ContractAddress,
     });
-    return tokenContract.transfer(recipient, amount.toFixed(), options);
+    return tokenContract.transfer(recipient, amount, options);
   }
 
   async fetchRegularTransactions(

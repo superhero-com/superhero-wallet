@@ -63,6 +63,7 @@
       <BtnMain
         third
         :text="$t('common.sign')"
+        data-cy="accept"
         @click="confirm"
       />
     </template>

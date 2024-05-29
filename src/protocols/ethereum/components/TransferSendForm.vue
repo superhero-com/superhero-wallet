@@ -6,7 +6,7 @@
     :max-fee="numericMaxFee"
     :fee-symbol="ETH_COIN_SYMBOL"
     :protocol="PROTOCOLS.ethereum"
-    :custom-title="$t('modals.send.sendAsset', { name: ETH_COIN_NAME })"
+    :custom-title="$t('modals.send.sendAsset', { name: ETH_PROTOCOL_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -16,7 +16,7 @@
         :errors="errors"
         :protocol="PROTOCOLS.ethereum"
         :validation-rules="{ account_address: [PROTOCOLS.ethereum] }"
-        @openQrModal="openScanQrModal"
+        @openQrModal="scanTransferQrCode()"
       />
     </template>
 
@@ -82,6 +82,7 @@ import {
   useBalances,
   useCurrencies,
   useNetworks,
+  useAccounts,
 } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useTransferSendForm } from '@/composables/transferSendForm';
@@ -89,12 +90,13 @@ import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { executeAndSetInterval } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
-  ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COIN_SYMBOL,
-  ETH_GAS_LIMIT,
+  ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
 import { useEthMaxAmount } from '@/protocols/ethereum/composables/ethMaxAmount';
+import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
+import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
@@ -130,8 +132,10 @@ export default defineComponent({
     const { activeNetwork } = useNetworks();
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
+    const { activeAccount } = useAccounts();
     const {
       fee,
+      maxFee,
       feeList,
       feeSelectedIndex,
       maxFeePerGas,
@@ -139,6 +143,7 @@ export default defineComponent({
       updateFeeList,
     } = useEthFeeCalculation();
     const { accountAssets } = useAccountAssetsList();
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       if (assetContractId) {
@@ -157,7 +162,7 @@ export default defineComponent({
       hasError,
       invoiceId,
       invoiceContract,
-      openScanQrModal,
+      scanTransferQrCode,
       handleAssetChange,
       updateFormModelValues,
     } = useTransferSendForm({
@@ -166,8 +171,6 @@ export default defineComponent({
     });
 
     const shouldUseMaxAmount = ref(false);
-
-    const maxFee = computed(() => maxFeePerGas.value!.multipliedBy(ETH_GAS_LIMIT));
 
     const { max } = useEthMaxAmount({ formModel, fee: maxFee });
 
@@ -205,11 +208,31 @@ export default defineComponent({
       }
     }
 
+    function getTransferGasLimit() {
+      const amount = new BigNumber(formModel.value.amount!);
+      if (
+        props.transferData.selectedAsset?.contractId !== 'ethereum'
+        && amount.gt(0)
+        && formModel.value.address
+      ) {
+        const { nodeUrl } = ethActiveNetworkSettings.value;
+
+        return getTokenTransferGasLimit(
+          formModel.value.selectedAsset?.contractId!,
+          formModel.value.address,
+          activeAccount.value?.address,
+          amount,
+          nodeUrl,
+        );
+      }
+      return undefined;
+    }
+
     let polling: NodeJS.Timer | null = null;
 
     onMounted(() => {
-      polling = executeAndSetInterval(() => {
-        updateFeeList();
+      polling = executeAndSetInterval(async () => {
+        updateFeeList(await getTransferGasLimit());
       }, 5000);
 
       const { query } = route;
@@ -224,6 +247,13 @@ export default defineComponent({
         clearInterval(polling);
       }
     });
+
+    watch(
+      () => formModel.value.selectedAsset,
+      async () => {
+        updateFeeList(await getTransferGasLimit());
+      },
+    );
 
     watch(
       max,
@@ -249,7 +279,7 @@ export default defineComponent({
     );
 
     return {
-      ETH_COIN_NAME,
+      ETH_PROTOCOL_NAME,
       ETH_COIN_SYMBOL,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,
@@ -265,7 +295,7 @@ export default defineComponent({
       balance,
       max,
       shouldUseMaxAmount,
-      openScanQrModal,
+      scanTransferQrCode,
       handleAssetChange,
       submit,
       toggleMaxAmount,

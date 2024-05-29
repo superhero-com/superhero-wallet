@@ -18,33 +18,31 @@ export function useTransferSendHandler() {
   const { meta } = useRoute();
   const { openModal } = useModals();
 
-  function save(formModel: TransferFormModel) {
+  function saveTransferSendFormModel(formModel: TransferFormModel) {
     setLocalStorageItem([STORAGE_KEYS.transferSendData], formModel);
   }
 
-  function restore() {
+  function restoreTransferSendForm() {
     const transferSendData = getLocalStorageItem<TransferFormModel>(
       [STORAGE_KEYS.transferSendData],
     );
 
-    if (!(IS_EXTENSION && transferSendData)) {
-      return;
+    if (IS_EXTENSION && transferSendData) {
+      // setTimeout is required because
+      // the modal will not open if called immediately
+      setTimeout(() => {
+        openModal(MODAL_TRANSFER_SEND, {
+          isMultisig: (meta.value as WalletRouteMeta)?.isMultisig,
+          tokenContractId: transferSendData?.selectedAsset?.contractId,
+          ...transferSendData,
+        });
+        removeLocalStorageItem([STORAGE_KEYS.transferSendData]);
+      }, 100);
     }
-
-    // setTimeout is required because
-    // the modal will not open if called immediately
-    setTimeout(() => {
-      openModal(MODAL_TRANSFER_SEND, {
-        isMultisig: (meta.value as WalletRouteMeta)?.isMultisig,
-        tokenContractId: transferSendData?.selectedAsset?.contractId,
-        ...transferSendData,
-      });
-      removeLocalStorageItem([STORAGE_KEYS.transferSendData]);
-    }, 100);
   }
 
   return {
-    restore,
-    save,
+    restoreTransferSendForm,
+    saveTransferSendFormModel,
   };
 }

@@ -21,10 +21,12 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
+import BigNumber from 'bignumber.js';
 
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
+  AssetAmount,
   AssetContractId,
   ICoin,
   IFetchTransactionResult,
@@ -45,7 +47,6 @@ import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
   ERC20_ABI,
-  ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COIN_SYMBOL,
   ETH_COINGECKO_COIN_ID,
@@ -72,7 +73,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override protocolName = ETH_PROTOCOL_NAME;
 
-  override coinName = ETH_COIN_NAME;
+  override coinName = ETH_PROTOCOL_NAME;
 
   override coinSymbol = ETH_COIN_SYMBOL;
 
@@ -134,16 +135,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getDefaultCoin(
-    marketData: MarketData,
+    marketData?: MarketData,
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.ethereum] || {}),
+      ...(marketData?.[PROTOCOLS.ethereum]! || {} as MarketData),
       protocol: PROTOCOLS.ethereum,
       contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.coinPrecision,
-      name: ETH_COIN_NAME,
+      name: this.coinName,
       convertedBalance,
     };
   }
@@ -244,7 +245,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async transferToken(
-    amount: number,
+    amount: AssetAmount,
     recipient: AccountAddress,
     contractId: AssetContractId,
     options: {
@@ -281,7 +282,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
     contract.setProvider(nodeUrl);
 
-    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(
+    const amountBN = new BigNumber(amount);
+    const hexAmount = bigIntToHex(BigInt(toWei(amountBN.toFixed(
       Number(await contract.methods.decimals().call()),
     ), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));

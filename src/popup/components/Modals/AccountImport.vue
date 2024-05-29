@@ -39,7 +39,7 @@
           data-cy="scan-button"
           class="scan-button"
           :class="{ disabled: discovering }"
-          @click="openScanQrModal"
+          @click="scanAccountQrCode()"
         >
           <QrScanIcon />
         </BtnPlain>
@@ -71,7 +71,6 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { MODAL_READ_QR_CODE } from '@/constants';
 import { isSeedLengthValid } from '@/utils';
 import {
   useAccounts,
@@ -84,7 +83,7 @@ import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
-import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
@@ -104,7 +103,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
     const { discoverAccounts, setMnemonic } = useAccounts();
-    const { openModal } = useModals();
+    const { openScanQrModal } = useModals();
     const { openEnableSecureLoginModal } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
@@ -142,10 +141,9 @@ export default defineComponent({
       discovering.value = false;
     }
 
-    async function openScanQrModal() {
-      const scanResult = await openModal(MODAL_READ_QR_CODE, {
+    async function scanAccountQrCode() {
+      const scanResult = await openScanQrModal({
         title: t('pages.index.scanSeedPhrase'),
-        icon: 'critical',
       });
 
       if (scanResult) {
@@ -158,7 +156,7 @@ export default defineComponent({
       mnemonic,
       error,
       importAccount,
-      openScanQrModal,
+      scanAccountQrCode,
     };
   },
 });

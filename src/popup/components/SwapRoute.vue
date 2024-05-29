@@ -107,7 +107,7 @@ export default defineComponent({
         tokens[0].isWrappedCoin = false;
         tokens.unshift({
           ...tokens[0],
-          ...adapter.getDefaultCoin({} as any),
+          ...adapter.getDefaultCoin(),
           isWrappedCoin: false,
         });
       } else if (
@@ -117,7 +117,7 @@ export default defineComponent({
         tokens[tokenLastIndex].isWrappedCoin = false;
         tokens.push({
           ...tokens[tokenLastIndex],
-          ...adapter.getDefaultCoin({} as any),
+          ...adapter.getDefaultCoin(),
           isWrappedCoin: true,
         });
       }

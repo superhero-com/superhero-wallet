@@ -1,5 +1,8 @@
 import type { ICurrency, IPermission } from '@/types';
 
+export const APP_NAME = 'Superhero Wallet';
+export const APP_URL = 'wallet.superhero.com';
+
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
 
@@ -274,7 +277,7 @@ export const CURRENCIES: ICurrency[] = [
   },
 ];
 
-export const APP_LINK_WEB = 'https://wallet.superhero.com';
+export const APP_LINK_WEB = `https://${APP_URL}`;
 export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';

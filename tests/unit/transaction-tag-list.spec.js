@@ -62,7 +62,7 @@ const testCases = [
   //   STUB_TRANSACTIONS.transfer,
   //   STUB_TRANSACTIONS.spend,
   // ].map((t) => ({
-  //   props: { transaction: { ...t, transactionOwner: STUB_ACCOUNT.address } },
+  //   props: { transaction: { ...t, transactionOwner: STUB_ACCOUNT.addressAeternity } },
   //   labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.in')],
   // })),
   // ...[

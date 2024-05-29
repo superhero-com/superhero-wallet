@@ -62,6 +62,7 @@ import {
 import type { IAccountOverview } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
 import {
+  APP_NAME,
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
 } from '@/constants';
@@ -100,7 +101,7 @@ export default defineComponent({
     const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
 
     const recipient: IAccountOverview = {
-      wallet: 'Superhero Wallet',
+      wallet: APP_NAME,
     };
 
     function confirm() {

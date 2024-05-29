@@ -13,11 +13,7 @@ import type {
   TransferFormModel,
 } from '@/types';
 import { useModals } from '@/composables/modals';
-import {
-  APP_LINK_WEB,
-  IS_PRODUCTION,
-  MODAL_READ_QR_CODE,
-} from '@/constants';
+import { APP_LINK_WEB, IS_PRODUCTION } from '@/constants';
 import { toShiftedBigNumber, getMessageByFieldName, isUrlValid } from '@/utils';
 import Logger from '@/lib/logger';
 import { NoUserMediaPermissionError } from '@/lib/errors';
@@ -43,9 +39,9 @@ export function useTransferSendForm({
   const invoiceContract = ref(null);
 
   const { t } = useI18n();
-  const { openModal, openDefaultModal } = useModals();
+  const { openDefaultModal, openScanQrModal } = useModals();
   const { errors, validate, validateField } = useForm();
-  const { save: saveFormData } = useTransferSendHandler();
+  const { saveTransferSendFormModel } = useTransferSendHandler();
   const { accountAssets } = useAccountAssetsList();
 
   const hasError = computed(
@@ -101,22 +97,21 @@ export function useTransferSendForm({
     Object.keys(updatedValues).forEach((field) => validateField(field));
   }
 
-  async function openScanQrModal() {
-    let scanResult: string | null = '';
-    scanResult = await openModal(MODAL_READ_QR_CODE, {
+  async function scanTransferQrCode() {
+    const scanResult = await openScanQrModal({
       title: t(
         'pages.send.scanAddress',
-        { assetName: (formModel.value.selectedAsset as IToken)?.name },
+        { assetName: formModel.value.selectedAsset?.name },
       ),
-      icon: 'critical',
-    }).then(
-      (result: string) => result,
-    ).catch((error: Error) => {
-      if (error instanceof NoUserMediaPermissionError) {
-        saveFormData(formModel.value as TransferFormModel);
-      }
-      return null;
-    });
+    })
+      .then((result: string) => result)
+      .catch((error: Error) => {
+        if (error instanceof NoUserMediaPermissionError) {
+          saveTransferSendFormModel(formModel.value as TransferFormModel);
+        }
+        return null;
+      });
+
     if (scanResult?.trim().charAt(0) === '{') {
       let parsedScanResult: any = null;
       try {
@@ -179,7 +174,7 @@ export function useTransferSendForm({
     hasError,
     invoiceId,
     invoiceContract,
-    openScanQrModal,
+    scanTransferQrCode,
     clearPayload,
     handleAssetChange,
     validate,

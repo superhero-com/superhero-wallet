@@ -205,16 +205,6 @@ module.exports = {
       })
       .end()
       .end()
-      .oneOf('skip-optimize')
-      .resourceQuery(/skip-optimize/)
-      .use('vue-loader')
-      .loader('vue-loader')
-      .end()
-      .use('custom-svg-loader')
-      .loader(path.resolve(__dirname, './custom-svg-loader.js'))
-      .options({ svgo: false })
-      .end()
-      .end()
       .oneOf('default')
       .use('svg-url-loader')
       .loader('svg-url-loader')
@@ -231,6 +221,4 @@ module.exports = {
 
     return config;
   },
-
-  transpileDependencies: ['@aeternity/hd-wallet'],
 };

@@ -9,17 +9,10 @@
         'is-extension': IS_EXTENSION,
       }"
     >
-      <Loader v-if="isLoaderVisible" />
-      <button
-        v-if="qrScannerOpen"
-        id="camera-close-btn"
-        class="camera-close-button"
-        type="button"
-      >
-        <Close />
-      </button>
+      <Loader v-if="isLoaderVisible && !isMobileQrScannerVisible" />
+      <QrCodeReaderMobileOverlay />
       <div
-        v-show="!qrScannerOpen"
+        v-show="!isMobileQrScannerVisible"
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
@@ -102,14 +95,14 @@ import { useTransferSendHandler } from '@/composables/transferSendHandler';
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
-import Close from '@/icons/close.svg?vue-component';
+import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
     Header,
     NodeConnectionStatus,
-    Close,
+    QrCodeReaderMobileOverlay,
     IonApp,
     IonRouterOutlet,
     IonPage,
@@ -123,7 +116,7 @@ export default defineComponent({
     const { watchConnectionStatus } = useConnection();
     const {
       isSeedBackedUp,
-      qrScannerOpen,
+      isMobileQrScannerVisible,
       isLoaderVisible,
       initVisibilityListeners,
     } = useUi();
@@ -132,7 +125,7 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications();
     const { loadCoinsData } = useCurrencies({ pollingDisabled: true });
     const { restoreLanguage } = useLanguages();
-    const { restore: restoreTransferSendForm } = useTransferSendHandler();
+    const { restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
@@ -277,12 +270,12 @@ export default defineComponent({
       IS_MOBILE_DEVICE,
       RUNNING_IN_TESTS,
       modalsOpen,
-      qrScannerOpen,
+      isLoaderVisible,
+      isMobileQrScannerVisible,
       showHeader,
       delayedShowHeader,
       showScrollbar,
       innerElement,
-      isLoaderVisible,
     };
   },
 });
@@ -321,15 +314,6 @@ export default defineComponent({
     background-color: var(--screen-bg-color);
     font-family: variables.$font-sans;
     transition: background-color 200ms;
-
-    .camera-close-button {
-      position: absolute;
-      top: calc(20px + env(safe-area-inset-top));
-      right: 20px;
-      width: 28px;
-      height: 28px;
-      z-index: 10;
-    }
 
     .app-inner {
       width: 100%;

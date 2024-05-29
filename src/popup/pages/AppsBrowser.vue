@@ -93,8 +93,14 @@ import {
   computed,
 } from 'vue';
 import { Field } from 'vee-validate';
-import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
-import { getLocalStorageItem, setLocalStorageItem, handleUnknownError } from '@/utils';
+import { MODAL_WARNING_DAPP_BROWSER, IS_SAFARI } from '@/constants';
+import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+  handleUnknownError,
+  executeAndSetInterval,
+  toURL,
+} from '@/utils';
 import { useAeSdk, useModals } from '@/composables';
 import { useAppsBrowserHistory } from '@/composables/appsBrowserHistory';
 import InputField from '@/popup/components/InputField.vue';
@@ -125,6 +131,12 @@ const DAPPS_LIST = [
   },
 ];
 
+interface App {
+  title?: string;
+  url: string;
+  image?: string;
+}
+
 const LOCAL_STORAGE_ITEM = 'selected-app';
 
 export default defineComponent({
@@ -142,11 +154,12 @@ export default defineComponent({
   setup() {
     const { addHistoryItem } = useAppsBrowserHistory();
 
-    const selectedApp = ref();
+    const selectedApp = ref<App>();
     const iframeRef = ref();
     const customAppURL = ref('');
     const currentClientId = ref('');
     let shareWalletInfoInterval: any;
+    let lastUrlAddedToHistory = '';
 
     const { getAeSdk } = useAeSdk();
     const { openModal, modalsOpen } = useModals();
@@ -155,43 +168,44 @@ export default defineComponent({
       () => !!modalsOpen.value.find((modal) => modal.name === MODAL_WARNING_DAPP_BROWSER),
     );
 
+    async function removeRpcClientIfAny() {
+      if (!currentClientId.value) return;
+      clearInterval(shareWalletInfoInterval);
+      const sdk = await getAeSdk();
+      sdk.removeRpcClient(currentClientId.value);
+      currentClientId.value = '';
+    }
+
     async function onAppLoaded() {
       if (!iframeRef.value || !selectedApp.value) return;
+      // Don't recreate RpcClient in Safari desktop and iOS webview
+      // because on these platforms `load` event triggers on anchor navigation
+      if (IS_SAFARI && currentClientId.value) return;
+      await removeRpcClientIfAny();
       const sdk = await getAeSdk();
-      let isAddedToHistory = false;
-
       const target = iframeRef.value.contentWindow;
-
-      try {
-        const connection = new BrowserWindowMessageConnection({
-          target,
-          origin: undefined,
-        });
-        currentClientId.value = sdk.addRpcClient(connection);
-
-        sdk.shareWalletInfo(currentClientId.value);
-
-        shareWalletInfoInterval = setInterval(
-          () => {
-            try {
-              const rpcClient = sdk._clients.get(currentClientId.value);
-              if (rpcClient) {
-                sdk.shareWalletInfo(currentClientId.value);
-
-                if (rpcClient.status === RPC_STATUS.CONNECTED && !isAddedToHistory) {
-                  isAddedToHistory = true;
-                  addHistoryItem(selectedApp.value);
-                }
-              }
-            } catch (e) {
-              handleUnknownError(e);
+      const connection = new BrowserWindowMessageConnection({ target });
+      currentClientId.value = sdk.addRpcClient(connection);
+      const app = selectedApp.value;
+      shareWalletInfoInterval = executeAndSetInterval(
+        () => {
+          const rpcClient = sdk._getClient(currentClientId.value);
+          if (rpcClient.status === RPC_STATUS.CONNECTED && lastUrlAddedToHistory !== app.url) {
+            lastUrlAddedToHistory = app.url;
+            addHistoryItem(app);
+          }
+          try {
+            if (rpcClient.status === RPC_STATUS.WAITING_FOR_CONNECTION_REQUEST) {
+              sdk.shareWalletInfo(currentClientId.value);
+            } else {
+              clearInterval(shareWalletInfoInterval);
             }
-          },
-          3000,
-        );
-      } catch (error) {
-        handleUnknownError(error);
-      }
+          } catch (e) {
+            handleUnknownError(e);
+          }
+        },
+        3000,
+      );
     }
 
     function refresh() {
@@ -201,13 +215,9 @@ export default defineComponent({
       }
     }
 
-    function onSelectApp(app: any) {
+    function onSelectApp(app: App) {
       openModal(MODAL_WARNING_DAPP_BROWSER).then(() => {
-        const sanitizedUrl = app.url.startsWith('http://') || app.url.startsWith('https://')
-          ? app.url
-          : `https://${app.url}`;
-
-        selectedApp.value = { ...app, url: sanitizedUrl };
+        selectedApp.value = { ...app, url: toURL(app.url).toString() };
       }, () => { });
     }
 
@@ -226,18 +236,9 @@ export default defineComponent({
      * Clean up after the iframe is closed
      */
     async function onAppDisconnected() {
-      selectedApp.value = null;
+      selectedApp.value = undefined;
       customAppURL.value = '';
-
-      if (shareWalletInfoInterval) {
-        clearInterval(shareWalletInfoInterval);
-      }
-      if (currentClientId.value) {
-        const sdk = await getAeSdk();
-        if (sdk._clients.get(currentClientId.value)) {
-          sdk.removeRpcClient(currentClientId.value);
-        }
-      }
+      await removeRpcClientIfAny();
     }
 
     function back() {
@@ -245,7 +246,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      const isAppSelected = getLocalStorageItem([LOCAL_STORAGE_ITEM]);
+      const isAppSelected = getLocalStorageItem<App>([LOCAL_STORAGE_ITEM]);
       if (isAppSelected) {
         selectedApp.value = isAppSelected;
         setLocalStorageItem([LOCAL_STORAGE_ITEM], null);

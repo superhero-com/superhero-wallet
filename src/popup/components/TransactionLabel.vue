@@ -152,6 +152,10 @@ export default defineComponent({
           : t('transaction.type.receivedTx');
       } else if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
         text = t('transaction.type.multisigVaultCreated');
+      } else if (outerTxTag.value === Tag.PayingForTx) {
+        text = props.showTransactionOwner
+          ? t('transaction.type.transactionFeePaidBy')
+          : t('transaction.type.transactionFeePaid');
       } else if (isDexAllowance.value) {
         text = t('transaction.dexType.allowToken');
       } else if (isDexAddLiquidity.value) {

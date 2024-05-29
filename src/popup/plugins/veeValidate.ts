@@ -2,7 +2,7 @@ import { defineRule } from 'vee-validate';
 import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { isAddressValid } from '@aeternity/aepp-sdk';
+import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
   INetwork,
@@ -19,7 +19,7 @@ import { isNotFoundError, isUrlValid } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
-import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
+import { getAddressByNameEntry } from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
 
 defineRule(
@@ -34,7 +34,7 @@ defineRule(
 
 defineRule(
   'account',
-  (value: string) => isAddressValid(value) || isAensNameValid(value) || tg('validation.address'),
+  (value: string) => isAddressValid(value) || isNameValid(value) || tg('validation.address'),
 );
 
 /**
@@ -191,7 +191,7 @@ export default () => {
 
   defineRule(
     'aens_name',
-    (value: string) => isAensNameValid(`${value}${AE_AENS_DOMAIN}`) || tg('validation.name'),
+    (value: string) => isNameValid(`${value}${AE_AENS_DOMAIN}`) || tg('validation.name'),
   );
 
   defineRule(
@@ -205,7 +205,7 @@ export default () => {
   defineRule(
     'aens_name_registered_or_address',
     async (value: string) => {
-      const isValid = isAensNameValid(value)
+      const isValid = isNameValid(value)
         ? await checkNameRegisteredAddress(value)
         : isAddressValid(value);
       return isValid || tg('validation.nameRegisteredAddress');
@@ -215,7 +215,7 @@ export default () => {
   defineRule(
     'aens_name_registered_or_address_or_url',
     async (value: string) => {
-      const isValid = isAensNameValid(value)
+      const isValid = isNameValid(value)
         ? await checkNameRegisteredAddress(value)
         : isAddressValid(value) || isUrlValid(value);
       return isValid || tg('validation.invalidAddressChainUrl');
@@ -228,8 +228,8 @@ export default () => {
   defineRule(
     'token_to_an_address',
     (value: string, [isToken]: [boolean]) => (
-      !isAensNameValid(value)
-      || (isAensNameValid(value) && !isToken)
+      !isNameValid(value)
+      || (isNameValid(value) && !isToken)
       || tg('validation.tokenToAnAddress')
     ),
   );

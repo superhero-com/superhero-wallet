@@ -75,9 +75,10 @@ export default defineComponent({
 
     function openTransactionFailedModal(msg: string) {
       openDefaultModal({
-        title: t('modals.transaction-failed.msg'),
+        title: t('modals.transaction-failed.title'),
         icon: 'critical',
         msg,
+        textCenter: true,
       });
     }
 
@@ -100,7 +101,12 @@ export default defineComponent({
         });
         return hash;
       } catch (error: any) {
-        openTransactionFailedModal(HtmlEncode(error.message));
+        const processedErrorMessage = HtmlEncode(error.message);
+        if (processedErrorMessage.includes('dust')) {
+          openTransactionFailedModal(t('modals.transaction-failed.dustError'));
+        } else {
+          openTransactionFailedModal(processedErrorMessage);
+        }
         throw error;
       } finally {
         loading.value = false;

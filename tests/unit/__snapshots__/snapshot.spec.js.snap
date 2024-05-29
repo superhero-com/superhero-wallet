@@ -19,7 +19,8 @@ exports[`Pages About 1`] = `
         >
           
           <div
-            class="table-item"
+            class="panel-table-item"
+            is-external="false"
           >
             <div
               class="name"
@@ -29,11 +30,13 @@ exports[`Pages About 1`] = `
             <div
               class="value"
             >
-               Superhero Wallet 
+              
+              Superhero Wallet
+              
             </div>
           </div>
           <a
-            class="link-button default table-item link"
+            class="link-button default clickable panel-table-item"
             href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
             rel="noopener noreferrer"
             target="_blank"
@@ -47,14 +50,19 @@ exports[`Pages About 1`] = `
             <div
               class="value"
             >
+              
               a1c1c5a 
-              <svg />
+              <svg
+                class="icon-github"
+              />
+              
             </div>
             
             <!--v-if-->
           </a>
           <div
-            class="table-item"
+            class="panel-table-item"
+            is-external="false"
           >
             <div
               class="name"
@@ -64,11 +72,14 @@ exports[`Pages About 1`] = `
             <div
               class="value"
             >
+              
                v.version-specific-text
+              
             </div>
           </div>
           <div
-            class="table-item"
+            class="panel-table-item"
+            is-external="false"
           >
             <div
               class="name"
@@ -78,7 +89,9 @@ exports[`Pages About 1`] = `
             <div
               class="value"
             >
+              
               13.0.0
+              
             </div>
           </div>
           <!--v-if-->
@@ -675,17 +688,17 @@ exports[`Pages PrivacyPolicy 1`] = `
             </strong>
             developed software program 
             <strong>
-              Superhero Wallet (
+              Superhero Wallet
             </strong>
-            the 
+             (the 
             <strong>
-              “Wallet” 
+              “Wallet”
             </strong>
-            or the 
+             or the 
             <strong>
-              “application”), 
+              “application”
             </strong>
-            designed for end users, which allows supporters to send value to content creators, causes, charities, groups or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The 
+            ), designed for end users, which allows supporters to send value to content creators, causes, charities, groups or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The 
             <strong>
               application
             </strong>
@@ -731,7 +744,7 @@ exports[`Pages PrivacyPolicy 1`] = `
               
               <!--v-if-->
             </a>
-             ; 
+            ; 
           </p>
           <p>
              3) downloaded from Google Play:     

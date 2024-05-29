@@ -25,7 +25,7 @@ import { usePendingMultisigTransaction } from '@/composables';
 
 import Panel from './Panel.vue';
 import TransactionListItem from './TransactionListItem.vue';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 
 export default defineComponent({
   components: {

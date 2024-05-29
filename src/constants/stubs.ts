@@ -31,7 +31,7 @@ import {
 
 export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
-export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+export const STUB_CALL_DATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
 export const STUB_TX_BASE_64 = 'tx_+FEMAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCKhAcqjxWnZkJOLBrcg4qrqLAGciiTZoXqyjoYXlSBGEywiC4YPJvVhyAAAE4ALeFGB';
 export const STUB_NONCE = 10000;
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
@@ -40,8 +40,9 @@ export const STUB_TIPPING_CONTRACT_ID_V2 = 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6
 
 export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
-  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
-  protocol: PROTOCOLS.aeternity,
+  addressAeternity: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
+  addressBitcoinTestnet: 'tb1qqhzkgwgjcyr5a7h3r5ayxxs3n6e620plpx58wv',
+  addressEthereum: '0x909C407d6FD235DE14db97e2234fCB71E99d6E1c',
 };
 
 export const recipientId: Encoded.AccountAddress = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
@@ -78,7 +79,7 @@ export const STUB_POPUP_PROPS: Record<PopupType | 'base', IPopupData> = {
     tx: {
       type: Tag[Tag.SpendTx],
       VSN: '1',
-      senderId: STUB_ACCOUNT.address,
+      senderId: STUB_ACCOUNT.addressAeternity,
       recipientId,
       amount: 1000000000000000,
       fee: 16820000000000,
@@ -132,23 +133,23 @@ const commonParams = {
   },
   ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
   abiVersion: AbiVersion.Sophia,
-  callData: STUB_CALLDATA,
+  callData: STUB_CALL_DATA,
 };
 
 export const STUB_TX_PARAMS = {
   [Tag[Tag.ContractCreateTx]]: {
-    ownerId: STUB_ACCOUNT.address,
+    ownerId: STUB_ACCOUNT.addressAeternity,
     code:
       'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=' as Encoded.ContractBytearray,
     ...commonParams,
   },
   [Tag[Tag.ContractCallTx]]: {
     contractId: contractCallAddress,
-    callerId: STUB_ACCOUNT.address,
+    callerId: STUB_ACCOUNT.addressAeternity,
     ...commonParams,
   },
   [Tag[Tag.SpendTx]]: {
-    senderId: STUB_ACCOUNT.address,
+    senderId: STUB_ACCOUNT.addressAeternity,
     recipientId,
     ...commonParams,
   },
@@ -167,7 +168,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       fee: 16780000000000,
       type: 'SpendTx',
       senderId: STUB_ADDRESS,
-      recipientId: STUB_ACCOUNT.address,
+      recipientId: STUB_ACCOUNT.addressAeternity,
     },
   },
   tip: {
@@ -295,7 +296,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       arguments: [
         {
           type: 'address',
-          value: STUB_ACCOUNT.address,
+          value: STUB_ACCOUNT.addressAeternity,
         },
         {
           type: 'int',
@@ -388,7 +389,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
       contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-      recipientId: STUB_ACCOUNT.address,
+      recipientId: STUB_ACCOUNT.addressAeternity,
       senderId: STUB_ADDRESS,
       function: 'transfer',
       type: 'ContractCallTx',
@@ -401,7 +402,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     tx: {
       amount: 743000000000000000,
       senderId: STUB_ADDRESS,
-      recipientId: STUB_ACCOUNT.address,
+      recipientId: STUB_ACCOUNT.addressAeternity,
       type: 'SpendTx',
     },
     microTime,
@@ -413,7 +414,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
       contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-      recipientId: STUB_ACCOUNT.address,
+      recipientId: STUB_ACCOUNT.addressAeternity,
       function: 'transfer',
       type: 'ContractCallTx',
     },

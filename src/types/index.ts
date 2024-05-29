@@ -240,6 +240,12 @@ export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
 export type IAsset = ICoin | IToken;
 
 /**
+ * Amount of the asset.
+ * Converting it to number can cause precision issues.
+ */
+export type AssetAmount = string;
+
+/**
  * Asset data with account related amounts and balances.
  * TODO should replace overused IToken in places where the amount and balance is needed.
  */

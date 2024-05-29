@@ -139,7 +139,7 @@ export default defineComponent({
     } = useAccounts();
     const { openModal } = useModals();
     const { openEnableSecureLoginModal } = useAuth();
-    const { loginTargetLocation } = useUi();
+    const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
 
@@ -168,11 +168,13 @@ export default defineComponent({
       if (IS_IOS && IS_MOBILE_APP) {
         await watchUntilTruthy(mnemonic);
         if (mnemonic.value && !isWalletNew) {
+          setLoaderVisible(true);
           await discoverAccounts();
           setActiveAccountByGlobalIdx(0);
           if (isLoggedIn.value) {
             router.push(loginTargetLocation.value);
           }
+          setLoaderVisible(false);
         }
       }
     });

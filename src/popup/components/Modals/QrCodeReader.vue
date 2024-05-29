@@ -1,31 +1,59 @@
 <template>
+  <!--
+    Web and extension:
+      Display the video stream inside of the modal box.
+
+    Mobile:
+      Display the device settings button if user has no camera access.
+      The camera stream is placed as separate full screen layer above the app.
+      (see QrCodeReaderMobileOverlay.vue)
+  -->
   <Modal
-    v-if="browserReader || !cameraAllowed"
+    v-if="!IS_MOBILE_APP || !cameraPermissionGranted"
     class="qr-code-reader"
     has-close-button
     centered
     from-bottom
-    @close="cancelReading"
+    semi-dense
+    @close="closeQrCodeReaderModal()"
   >
     <div class="top-icon-wrapper">
       <IconBoxed :icon="QrScanIcon" />
     </div>
     <div
-      v-if="heading"
       class="heading"
-      v-text="heading"
+      v-text="$t('modals.qrCodeReader.scanQr')"
     />
     <div
-      class="subtitle"
-      v-text="cameraAllowed ? title : $t('modals.qrCodeReader.subtitle')"
+      v-if="title"
+      class="title"
+      v-text="title"
     />
 
     <div class="camera">
-      <span class="video-loader">
-        <AnimatedSpinnerIcon class="spinner" />
-      </span>
-      <div v-show="cameraAllowed">
+      <div class="camera-inner">
+        <div
+          v-if="!hasDeviceCamera"
+          class="camera-message"
+        >
+          <AlertIcon class="icon-alert color-warning" />
+          <p class="text-heading-1 color-warning">{{ $t('modals.qrCodeReader.noWebcam') }}</p>
+          <p class="color-warning-muted">{{ $t('modals.qrCodeReader.noWebcamSubtitle') }}</p>
+        </div>
+        <div
+          v-else-if="!cameraPermissionGranted"
+          class="camera-message"
+        >
+          <AlertIcon class="icon-alert color-warning" />
+          <p class="text-heading-1 color-warning">{{ $t('modals.qrCodeReader.grantPermission') }}</p>
+        </div>
+        <AnimatedSpinnerIcon
+          v-else
+          class="spinner"
+        />
+
         <video
+          v-show="isCameraReady"
           ref="qrCodeVideoEl"
           class="video"
         >
@@ -33,6 +61,10 @@
         </video>
       </div>
     </div>
+
+    <!--
+      Allow user to open mobile device settings if no camera permission is granted.
+    -->
     <template
       v-if="IS_MOBILE_APP"
       #footer
@@ -47,21 +79,20 @@
 
 <script lang="ts">
 import {
-  computed,
+  defineComponent,
   onBeforeUnmount,
   onMounted,
+  PropType,
   ref,
   watch,
-  defineComponent,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { Camera } from '@capacitor/camera';
-import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
-import { useI18n } from 'vue-i18n';
+import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
+import type QrScannerType from 'qr-scanner';
 
+import type { RejectCallback, ResolveCallback } from '@/types';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
-import { handleUnknownError, openInNewWindow } from '@/utils';
+import { checkOrRequestDeviceCameraPermission, checkDeviceHasCamera } from '@/utils';
 import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
 import { useUi } from '@/composables';
 
@@ -69,10 +100,9 @@ import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
 
-import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-
-const SCANNER_ACTIVE_CLASS = 'scanner-active';
+import AlertIcon from '@/icons/alert.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -80,192 +110,106 @@ export default defineComponent({
     BtnMain,
     IconBoxed,
     AnimatedSpinnerIcon,
+    AlertIcon,
   },
   props: {
     title: { type: String, required: true },
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
-    // eslint-disable-next-line no-undef
-    const cameraStatus = ref<PermissionState>(
-      IS_MOBILE_APP ? 'granted' : 'denied',
-    );
-    const browserReader = ref<BrowserQRCodeReaderType>();
-    const browserReaderControls = ref<IScannerControls>();
-    const qrCodeVideoEl = ref<HTMLVideoElement>();
-
     const route = useRoute();
-    const { t } = useI18n();
-    const { setQrScanner } = useUi();
+    const { setMobileQrScannerVisible } = useUi();
 
-    const cameraAllowed = computed(() => cameraStatus.value === 'granted');
-    const heading = computed(() => {
-      if (cameraStatus.value === 'granted') return t('modals.qrCodeReader.scanQr');
-      return t('modals.qrCodeReader.grantPermission');
-    });
+    const qrCodeVideoEl = ref<HTMLVideoElement>();
+    const hasDeviceCamera = ref(false);
+    const isCameraReady = ref(false);
+    const cameraPermissionGranted = ref(true);
 
-    async function initBrowserReader() {
-      const { BrowserQRCodeReader } = await import('@zxing/browser');
-      browserReader.value = new BrowserQRCodeReader();
-    }
+    let browserReader: QrScannerType | null = null;
 
     function stopReading() {
       if (IS_MOBILE_APP) {
-        document.querySelector('body')?.classList.remove(SCANNER_ACTIVE_CLASS);
-        BarcodeScanner.showBackground();
-        setQrScanner(false);
+        setMobileQrScannerVisible(false);
         BarcodeScanner.stopScan();
+        BarcodeScanner.removeAllListeners();
       } else {
-        browserReaderControls.value?.stop();
+        browserReader?.stop();
+        browserReader?.destroy();
+        browserReader = null;
       }
     }
 
-    async function scan() {
-      if (IS_MOBILE_APP) {
-        setQrScanner(true);
+    async function scanMobile(): Promise<string | Error> {
+      setMobileQrScannerVisible(true);
+      setTimeout(() => {
+        document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
+      }, 500);
 
-        document.querySelector('body')?.classList.add(SCANNER_ACTIVE_CLASS);
-        await BarcodeScanner.hideBackground();
-        setTimeout(() => {
-          document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
-        }, 500);
-        const result = await BarcodeScanner.startScan();
-        if (result.hasContent) {
-          return result.content;
-        }
-        return new Error('No content');
-      }
-
-      return new Promise((resolve) => {
-        browserReader.value?.decodeFromVideoDevice(
-          undefined,
-          qrCodeVideoEl.value,
-          (result, _, controls) => {
-            browserReaderControls.value = controls;
-            if (result) {
-              controls?.stop();
-              resolve(result.getText());
+      // eslint-disable-next-line no-async-promise-executor
+      return new Promise(async (resolve) => {
+        const listener = await BarcodeScanner.addListener(
+          'barcodeScanned',
+          async ({ barcode }) => {
+            if (barcode.displayValue) {
+              await listener.remove();
+              stopReading();
+              resolve(barcode.displayValue);
             }
           },
-        ).catch((error) => {
-          if (error.name === 'NotAllowedError') {
-            cameraStatus.value = 'denied';
-            return;
-          }
-          handleUnknownError(error);
-        });
+        );
+        await BarcodeScanner.startScan();
       });
     }
 
-    async function hasPermission() {
-      // check if user already granted permission
-      const status = await Camera.checkPermissions();
-
-      if (status.camera === 'granted') {
-        return true;
-      }
-
-      const statusRequest = await Camera.requestPermissions({ permissions: ['camera'] });
-
-      if (statusRequest.camera === 'granted') {
-        return true;
-      }
-      return false;
+    async function scanWeb() {
+      const { default: QrScanner } = await import('qr-scanner');
+      return new Promise<string>((resolve) => {
+        browserReader = new QrScanner(
+          qrCodeVideoEl.value!,
+          (result) => {
+            if (result.data) {
+              stopReading();
+              resolve(result.data);
+            }
+          },
+          {},
+        );
+        browserReader.start();
+      });
     }
 
-    function cancelReading() {
+    function closeQrCodeReaderModal() {
       stopReading();
       props.reject(new RejectedByUserError());
     }
 
     function openSettings() {
-      BarcodeScanner.openAppSettings();
+      BarcodeScanner.openSettings();
     }
-
-    function getExtensionPermission() {
-      if (IS_EXTENSION) {
-        navigator.mediaDevices
-          .getUserMedia({ video: true })
-          .then(() => {
-            cameraStatus.value = 'granted';
-          }).catch(() => {
-            openInNewWindow(
-              browser.runtime.getURL('./CameraRequestPermission.html'),
-            );
-            props.reject(new NoUserMediaPermissionError());
-          });
-      }
-    }
-
-    watch(cameraStatus, async (value) => {
-      if (value === 'denied') {
-        stopReading();
-        return;
-      }
-      if (IS_EXTENSION && value === 'prompt') {
-        getExtensionPermission();
-      }
-
-      try {
-        props.resolve(await scan());
-      } catch (error: any) {
-        if (error.name === 'NotAllowedError') {
-          try {
-            await new Promise((resolve, reject) => {
-              if (IS_EXTENSION) {
-                getExtensionPermission();
-                reject();
-              }
-              if (navigator.mediaDevices?.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true }).then(resolve, reject);
-              } else reject(new Error('Sorry, your browser does not support getUserMedia'));
-            });
-          } catch {
-            cameraStatus.value = 'denied';
-          }
-          return;
-        }
-        handleUnknownError(error);
-      }
-    });
 
     watch(() => route.fullPath, () => {
       props.resolve();
     });
 
     onMounted(async () => {
-      if (IS_MOBILE_APP) {
-        if (await hasPermission()) {
-          cameraStatus.value = 'granted';
-          await BarcodeScanner.prepare();
-        } else {
-          cameraStatus.value = 'denied';
-          return;
-        }
-        props.resolve(await scan());
+      hasDeviceCamera.value = await checkDeviceHasCamera();
+      if (!hasDeviceCamera.value) {
         return;
       }
 
-      await initBrowserReader();
-      const status = navigator.permissions
-        // eslint-disable-next-line no-undef
-        && (await navigator.permissions.query({ name: 'camera' as PermissionName }).catch((error) => {
-          const firefoxExceptionMessage = "'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.";
-          if (error.message !== firefoxExceptionMessage) {
-            handleUnknownError(error);
-          }
-          return null;
-        }));
-      if (status) {
-        cameraStatus.value = status.state;
-        status.onchange = () => {
-          cameraStatus.value = status.state;
-        };
+      cameraPermissionGranted.value = await checkOrRequestDeviceCameraPermission();
+      if (!cameraPermissionGranted.value) {
+        if (IS_EXTENSION) {
+          // Lack of permission causes the extension window to close.
+          // Rejecting the modal allows to save the form data before this happens.
+          props.reject(new NoUserMediaPermissionError());
+        }
         return;
       }
-      cameraStatus.value = IS_EXTENSION ? 'prompt' : 'granted';
+
+      isCameraReady.value = true;
+      props.resolve((IS_MOBILE_APP) ? await scanMobile() : await scanWeb());
     });
 
     onBeforeUnmount(() => {
@@ -273,21 +217,21 @@ export default defineComponent({
     });
 
     return {
-      cameraAllowed,
-      browserReader,
       IS_MOBILE_APP,
-      heading,
+      isCameraReady,
+      hasDeviceCamera,
+      cameraPermissionGranted,
       QrScanIcon,
-      cancelReading,
-      openSettings,
       qrCodeVideoEl,
+      closeQrCodeReaderModal,
+      openSettings,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '../../../styles/variables' as *;
 @use '../../../styles/mixins';
 @use '../../../styles/typography';
 
@@ -295,41 +239,46 @@ export default defineComponent({
   .top-icon-wrapper {
     margin: 0 auto 16px auto;
     text-align: center;
-    color: variables.$color-primary;
+    color: $color-primary;
   }
 
   .camera {
-    --camera-size: 312px;
-
-    margin: 20px auto 0;
-    width: var(--camera-size);
-    height: var(--camera-size);
+    position: relative;
+    padding-top: 100%; // Aspect ratio 1:1
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
-    background: rgba(variables.$color-white, 0.05);
+    border-radius: $border-radius-interactive;
+    background: rgba($color-white, 0.05);
     overflow: hidden;
 
-    .video {
-      height: var(--camera-size);
-
-      @include mixins.mobile {
-        height: unset;
-        width: var(--camera-size);
-      }
-    }
-
-    .video-loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .camera-inner {
       position: absolute;
-      z-index: -1;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .camera-message {
+        padding-inline: 20px;
+
+        .icon-alert {
+          width: 48px;
+        }
+      }
+
+      .video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
 
       .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
         width: 56px;
-        height: 56px;
+        transform: translateX(-50%) translateY(-50%);
       }
     }
   }
@@ -337,17 +286,16 @@ export default defineComponent({
   .heading {
     @extend %face-sans-19-medium;
 
-    color: variables.$color-white;
+    color: $color-white;
   }
 
-  .subtitle,
   .title {
     @extend %face-sans-16-regular;
 
     margin-top: 4px;
     margin-bottom: 20px;
     line-height: 24px;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 }
 </style>

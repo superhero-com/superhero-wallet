@@ -9,7 +9,6 @@
             :amount-total="amountTotal"
             :fee="fee"
             :hash="hash"
-            :non-ae-assets="transactionAssets"
             :protocol="PROTOCOLS.ethereum"
             :hide-amount-total="!isTransactionCoin"
             :hide-fiat="!isTransactionCoin"
@@ -110,7 +109,7 @@ export default defineComponent({
       transactionAssets,
       isTransactionCoin,
       setActiveTransaction,
-    } = useTransactionData();
+    } = useTransactionData({ externalAddress: transactionOwner });
     const { transactionsLoaded } = useTransactionList({
       accountAddress: transactionOwner || activeAccount.value.address,
       protocol: PROTOCOLS.ethereum,

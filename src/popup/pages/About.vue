@@ -3,67 +3,43 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="about">
         <Panel>
-          <div class="table-item">
-            <div class="name">
-              {{ $t('pages.about.name') }}
-            </div>
-            <div class="value">
-              Superhero Wallet
-            </div>
-          </div>
-          <LinkButton
-            class="table-item link"
-            :to="`${AE_COMMIT_URL}${commitHash}`"
+          <PanelTableItem :name="$t('pages.about.name')">
+            {{ APP_NAME }}
+          </PanelTableItem>
+
+          <PanelTableItem
+            :name="$t('pages.about.commit')"
+            :href="`${AE_COMMIT_URL}${commitHash}`"
           >
-            <div class="name">
-              {{ $t('pages.about.commit') }}
-            </div>
-            <div class="value">
-              {{ commitHash?.slice(0, 7) }}
-              <Github />
-            </div>
-          </LinkButton>
-          <div class="table-item">
-            <div class="name">
-              {{ $t('pages.about.software-version') }}
-            </div>
-            <div class="value">
-              v.{{ extensionVersion }}
-            </div>
-          </div>
-          <div class="table-item">
-            <div class="name">
-              {{ $t('pages.about.sdk-version') }}
-            </div>
-            <div class="value">
-              {{ sdkVersion }}
-            </div>
-          </div>
+            {{ commitHash?.slice(0, 7) }}
+            <GithubIcon class="icon-github" />
+          </PanelTableItem>
+
+          <PanelTableItem :name="$t('pages.about.software-version')">
+            v.{{ extensionVersion }}
+          </PanelTableItem>
+
+          <PanelTableItem :name="$t('pages.about.sdk-version')">
+            {{ sdkVersion }}
+          </PanelTableItem>
+
           <template v-if="aeActiveNetworkSettings && middlewareStatus">
-            <LinkButton
-              class="table-item link"
-              :to="`${middlewareUrl}/status`"
+            <PanelTableItem
+              :name="$t('pages.about.middleware-version')"
+              :href="`${middlewareUrl}/status`"
+              is-external-link
             >
-              <div class="name">
-                {{ $t('pages.about.middleware-version') }}
-              </div>
-              <div class="value">
-                {{ middlewareStatus.mdwVersion }}
-                <ExternalLink class="compensate-icon-margin" />
-              </div>
-            </LinkButton>
-            <LinkButton
-              class="table-item link"
-              :to="`${nodeUrl}/v3/status`"
+              {{ middlewareStatus.mdwVersion }}
+            </PanelTableItem>
+
+            <PanelTableItem
+              v-if="nodeStatus"
+              :name="$t('pages.about.node-version')"
+              :href="`${nodeUrl}/v3/status`"
+              is-external-link
             >
-              <div class="name">
-                {{ $t('pages.about.node-version') }}
-              </div>
-              <div class="value">
-                {{ nodeStatus.node_version }}
-                <ExternalLink class="compensate-icon-margin" />
-              </div>
-            </LinkButton>
+              {{ nodeStatus.node_version }}
+            </PanelTableItem>
           </template>
         </Panel>
 
@@ -73,7 +49,7 @@
             :title="$t('pages.about.terms')"
           >
             <template #icon>
-              <Terms />
+              <TermsIcon />
             </template>
           </PanelItem>
           <PanelItem
@@ -81,7 +57,7 @@
             :title="$t('pages.about.privacyPolicy')"
           >
             <template #icon>
-              <Terms />
+              <TermsIcon />
             </template>
           </PanelItem>
         </div>
@@ -98,28 +74,28 @@ import {
   ref,
 } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
+
 import type { IMiddlewareStatus } from '@/types';
-import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
-import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
-import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { AGGREGATOR_URL, APP_NAME, BUG_REPORT_URL } from '@/constants';
 import { fetchJson } from '@/utils';
 
-import LinkButton from '@/popup/components/LinkButton.vue';
-import PanelItem from '@/popup/components/PanelItem.vue';
-import Panel from '@/popup/components/Panel.vue';
+import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
-import Terms from '@/icons/terms.svg?vue-component';
-import Github from '@/icons/github.svg?vue-component';
-import ExternalLink from '@/icons/external-link.svg?vue-component';
+import Panel from '@/popup/components/Panel.vue';
+import PanelItem from '@/popup/components/PanelItem.vue';
+import PanelTableItem from '@/popup/components/PanelTableItem.vue';
+
+import TermsIcon from '@/icons/terms.svg?vue-component';
+import GithubIcon from '@/icons/github.svg?vue-component';
 
 export default defineComponent({
   components: {
-    LinkButton,
-    PanelItem,
     Panel,
-    Terms,
-    Github,
-    ExternalLink,
+    PanelItem,
+    PanelTableItem,
+    TermsIcon,
+    GithubIcon,
     IonPage,
     IonContent,
   },
@@ -128,7 +104,7 @@ export default defineComponent({
     const { fetchMiddlewareStatus } = useAeMiddleware();
 
     const middlewareStatus = ref<IMiddlewareStatus>();
-    const nodeStatus = ref(null);
+    const nodeStatus = ref();
 
     const middlewareUrl = computed(() => aeActiveNetworkSettings.value.middlewareUrl);
     const nodeUrl = computed(() => aeActiveNetworkSettings.value.nodeUrl);
@@ -141,9 +117,10 @@ export default defineComponent({
     });
 
     return {
-      BUG_REPORT_URL,
+      APP_NAME,
       AGGREGATOR_URL,
       AE_COMMIT_URL,
+      BUG_REPORT_URL,
       aeActiveNetworkSettings,
       extensionVersion: process.env.npm_package_version,
       commitHash: process.env.COMMIT_HASH,
@@ -167,74 +144,12 @@ export default defineComponent({
   padding-top: 16px;
   padding-inline: var(--screen-padding-x);
 
-  .table-item {
-    width: 100%;
-    height: 48px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 16px;
-    transition: variables.$transition-interactive;
-
-    &:nth-child(even) {
-      background-color: rgba(variables.$color-black, 0.1);
-    }
-
-    .name,
-    .value,
-    .value .icon {
-      transition: inherit;
-    }
-
-    .name {
-      @extend %face-sans-15-regular;
-
-      color: rgba(variables.$color-white, 0.75);
-      font-weight: 400;
-    }
-
-    .value {
-      @extend %face-sans-14-light;
-
-      display: inline-flex;
-      align-items: center;
-      color: rgba(variables.$color-white, 1);
-
-      .icon {
-        width: 24px;
-        height: 24px;
-        opacity: 0.5;
-        margin-left: 4px;
-        margin-right: -4px;
-      }
-    }
-
-    &.link {
-      position: relative;
-      text-decoration: none;
-      cursor: pointer;
-
-      &:hover {
-        background-color: rgba(variables.$color-black, 0.16);
-
-        .name {
-          color: variables.$color-white;
-        }
-
-        .value {
-          text-decoration: underline;
-
-          .icon {
-            opacity: 1;
-          }
-        }
-      }
-
-      &:active {
-        background-color: rgba(variables.$color-black, 0.4);
-      }
-    }
+  .icon-github {
+    width: 24px;
+    height: 24px;
+    opacity: 0.5;
+    margin-left: 4px;
+    margin-right: -4px;
   }
 
   .additional-links {

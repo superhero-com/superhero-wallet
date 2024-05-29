@@ -112,7 +112,7 @@ export function convertWrappedCoinTokenToCoin(asset: ITokenResolved): ITokenReso
   return (asset.isWrappedCoin && asset.protocol)
     ? {
       ...asset,
-      ...ProtocolAdapterFactory.getAdapter(asset.protocol).getDefaultCoin({} as any),
+      ...ProtocolAdapterFactory.getAdapter(asset.protocol).getDefaultCoin(),
     }
     : asset;
 }

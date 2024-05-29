@@ -1,19 +1,24 @@
 /* eslint-disable class-methods-use-this */
 import {
   AccountBase,
+  DelegationTag,
   MemoryAccount,
   sign,
   RpcRejectedByUserError,
+  unpackDelegation,
   unpackTx,
   Encoded,
   METHODS,
   Tag,
 } from '@aeternity/aepp-sdk';
+import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
 import { useAccounts } from '@/composables/accounts';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
 import { PROTOCOLS } from '@/constants';
+import { handleUnknownError } from '@/utils';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -53,7 +58,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         { ...options, txBase64, tx },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
@@ -76,7 +81,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         { message },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
@@ -87,6 +92,95 @@ export class AeAccountHdWallet extends MemoryAccount {
         aeppOrigin: undefined,
       },
     );
+  }
+
+  override async signTypedData(
+    data: Encoded.ContractBytearray,
+    aci: Parameters<AccountBase['signTypedData']>[1],
+    options: Parameters<AccountBase['signTypedData']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const dataType = new TypeResolver().resolveType(aci);
+      const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
+      const {
+        name, version, networkId, contractAddress,
+      } = options;
+      const opt = {
+        name, version, networkId, contractAddress, aci, data, decodedData,
+      };
+      const bigintReplacer = (k: string, v: any) => (
+        typeof v === 'bigint' ? `${v} (as BigInt)` : v
+      );
+      const message = `sign typed data:\n${JSON.stringify(opt, bigintReplacer, 2)}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signTypedData,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signTypedData(
+      data,
+      aci,
+      {
+        ...options, // Mainly to pass the `fromAccount` property
+        aeppOrigin: undefined,
+      },
+    );
+  }
+
+  override async signDelegation(
+    delegation: Encoded.Bytearray,
+    options: Parameters<AccountBase['signDelegation']>[1] = {},
+  ): Promise<Encoded.Signature> {
+    let message;
+    let resolvedName;
+    const { getMiddleware } = useAeMiddleware();
+    if (options?.aeppOrigin) {
+      const params = unpackDelegation(delegation);
+      switch (params.tag) {
+        case DelegationTag.AensName:
+          try {
+            resolvedName = (await (await getMiddleware()).getName(params.nameId)).name;
+          } catch (e) {
+            handleUnknownError(e);
+          }
+          message = `sign delegation of ${resolvedName ?? params.nameId} to ${params.contractAddress}`;
+          break;
+        case DelegationTag.AensPreclaim:
+          message = `sign delegation of name preclaim to ${params.contractAddress}`;
+          break;
+        case DelegationTag.AensWildcard:
+          message = `sign delegation of all names management to ${params.contractAddress}`;
+          break;
+        case DelegationTag.Oracle:
+          message = `sign delegation to allow ${params.contractAddress} operate oracle binded to current account`;
+          break;
+        case DelegationTag.OracleResponse:
+          message = `sign delegation of ${params.queryId} to ${params.contractAddress}`;
+          break;
+        default:
+          message = 'failed to distinguish delegation type';
+      }
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signDelegation,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signDelegation(delegation, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
   }
 
   /**
