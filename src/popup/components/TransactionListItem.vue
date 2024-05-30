@@ -98,6 +98,7 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction>, default: null },
     multisigTransaction: { type: Object as PropType<IActiveMultisigTransaction>, default: null },
+    hideFeeFromAssets: Boolean,
     isMultisig: Boolean,
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
@@ -127,6 +128,7 @@ export default defineComponent({
     } = useTransactionData({
       transaction: currentTransaction,
       transactionCustomOwner,
+      hideFeeFromAssets: props.hideFeeFromAssets,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {

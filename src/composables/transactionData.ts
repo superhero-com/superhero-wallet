@@ -26,6 +26,7 @@ import {
   TX_FUNCTIONS_TYPE_DEX,
 } from '@/protocols/aeternity/config';
 import {
+  aettosToAe,
   getInnerTransaction,
   getOwnershipStatus,
   getTransactionTokenInfoResolver,
@@ -47,6 +48,7 @@ interface UseTransactionOptions {
   transaction: Ref<ITransaction | undefined>;
   transactionCustomOwner?: Ref<AccountAddress | undefined>;
   showDetailedAllowanceInfo?: boolean;
+  hideFeeFromAssets?: boolean;
 }
 
 /**
@@ -56,6 +58,7 @@ export function useTransactionData({
   transaction,
   transactionCustomOwner,
   showDetailedAllowanceInfo = false,
+  hideFeeFromAssets = false,
 }: UseTransactionOptions) {
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
@@ -202,6 +205,17 @@ export function useTransactionData({
     const adapter = ProtocolAdapterFactory.getAdapter(protocol.value);
     const protocolTokens = getProtocolAvailableTokens(protocol.value);
 
+    /**
+     * Fake token to represent the fee in the transaction.
+     * TODO: fee for Ethereum is in ETH and for aeternity it's in aettos. Need to unify this.
+     */
+    const feeToken: ITokenResolved = {
+      ...adapter.getDefaultCoin(),
+      amount: (protocol.value === PROTOCOLS.aeternity && outerTx.value?.fee)
+        ? aettosToAe(outerTx.value.fee) : outerTx.value?.fee,
+      assetType: ASSET_TYPES.coin,
+    };
+
     // TODO move AE specific logic to adapter and store resolved data in the transactions
     if (protocol.value === PROTOCOLS.aeternity) {
       // AE DEX and wrapped AE (WAE)
@@ -259,7 +273,7 @@ export function useTransactionData({
       name: token?.name,
       protocol,
       symbol: getTxAssetSymbol(transaction.value),
-    }];
+    }].concat(isReceived || hideFeeFromAssets ? [] : [feeToken]);
   });
 
   function getOwnershipAddress(externalOwnerAddress?: AccountAddress): AccountAddress {
