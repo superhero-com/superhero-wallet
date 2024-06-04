@@ -22,7 +22,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MODAL_READ_QR_CODE } from '@/constants';
 import { useModals } from '@/composables';
 
 import FormTextarea from './FormTextarea.vue';
@@ -40,17 +39,15 @@ export default defineComponent({
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
     label: { type: String, default: '' },
-    qrIcon: { type: String, default: '' },
     qrTitle: { type: String, default: '' },
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const { openModal } = useModals();
+    const { openScanQrModal } = useModals();
 
     async function scanQr() {
-      const result = await openModal(MODAL_READ_QR_CODE, {
+      const result = await openScanQrModal({
         title: props.qrTitle,
-        icon: props.qrIcon,
       }).catch(() => null); // closing the modal rejects the promise
       if (result) {
         emit('update:modelValue', result);
@@ -67,12 +64,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 
-.form-input-with-qr{
-  .scan-button {
-    color: $color-white;
-    display: block;
-    width: 32px;
-    height: 24px;
-  }
+.form-input-with-qr .scan-button {
+  color: $color-white;
+  display: block;
+  width: 32px;
+  height: 24px;
 }
 </style>

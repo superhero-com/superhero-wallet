@@ -1,18 +1,16 @@
 <template>
-  <div class="qr-code">
-    <div
-      ref="canvas"
-      class="canvas"
-      @click="copyData()"
-    />
-    <div
-      v-if="copied || externalCopied"
-      class="copied"
-    >
-      <CopyOutlinedIcon class="copy-icon" />
-      {{ $t('common.addressCopied') }}
+  <CopyText
+    :value="getURFromFragments(value)"
+    :copied="externalCopied"
+    hide-icon
+  >
+    <div class="qr-code">
+      <div
+        ref="canvas"
+        class="canvas"
+      />
     </div>
-  </div>
+  </CopyText>
 </template>
 
 <script lang="ts">
@@ -25,16 +23,17 @@ import {
   watch,
 } from 'vue';
 import QRCodeStyling, { TypeNumber } from 'qr-code-styling';
-import { useCopy } from '@/composables';
+
+import { getURFromFragments } from '@/utils';
+
+import CopyText from '@/popup/components/CopyText.vue';
 
 import SHLogo from '@/icons/logo-small-blue.webp';
-import CopyOutlinedIcon from '@/icons/copy-outlined.svg?vue-component';
-import { getURFromFragments } from '@/utils';
 
 export default defineComponent({
   name: 'QrCode',
   components: {
-    CopyOutlinedIcon,
+    CopyText,
   },
   props: {
     value: { type: Array as PropType<string[]>, required: true },
@@ -44,10 +43,8 @@ export default defineComponent({
   },
   setup(props) {
     const canvas = ref<HTMLElement>();
-    const updateQrCode = ref();
     const fragmentIndex = ref(0);
-
-    const { copy, copied } = useCopy();
+    let intervalTimer: NodeJS.Timeout;
 
     const qrCode = new QRCodeStyling({
       data: props.value[fragmentIndex.value],
@@ -69,22 +66,18 @@ export default defineComponent({
 
     function updateQrCodeData() {
       if (props.value.length > 1) {
-        updateQrCode.value = setInterval(() => {
+        intervalTimer = setInterval(() => {
           qrCode.update({ data: props.value[fragmentIndex.value] });
           fragmentIndex.value = (fragmentIndex.value + 1) % props.value.length;
-        }, 500);
+        }, 750);
       } else {
         qrCode.update({ data: props.value[fragmentIndex.value] });
       }
     }
 
-    function copyData() {
-      copy(getURFromFragments(props.value));
-    }
-
     watch(() => props.value, () => {
-      if (updateQrCode.value) {
-        clearInterval(updateQrCode.value);
+      if (intervalTimer) {
+        clearInterval(intervalTimer);
       }
     });
 
@@ -94,22 +87,21 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
-      clearInterval(updateQrCode.value);
+      clearInterval(intervalTimer);
     });
 
     return {
       canvas,
-      copied,
-      copyData,
+      getURFromFragments,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .qr-code {
   position: relative;

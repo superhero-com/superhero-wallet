@@ -9,7 +9,6 @@
         :account="account"
         avatar-borderless
         show-protocol-icon
-        :is-air-gap="isAirGapAccount"
       />
     </template>
 
@@ -25,7 +24,7 @@
         :account="account"
       />
       <AirGapIcon
-        v-if="isAirGapAccount"
+        v-if="isAccountAirGap"
         class="air-gap-icon"
       />
     </template>
@@ -40,7 +39,7 @@ import {
 } from 'vue';
 import type { IAccount } from '@/types';
 import { useBalances } from '@/composables';
-import { ACCOUNT_AIR_GAP_WALLET } from '@/constants';
+import { ACCOUNT_TYPES } from '@/constants';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
@@ -66,21 +65,19 @@ export default defineComponent({
 
     const numericBalance = computed(() => getAccountBalance(props.account.address).toNumber());
 
-    const isAirGapAccount = computed((): boolean => props.account.type === ACCOUNT_AIR_GAP_WALLET);
+    const isAccountAirGap = computed((): boolean => props.account.type === ACCOUNT_TYPES.airGap);
 
     return {
       numericBalance,
-      isAirGapAccount,
+      isAccountAirGap,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.account-card-base {
-  .air-gap-icon {
-    width: 24px;
-    height: 24px;
-  }
+.account-card-base .air-gap-icon {
+  width: 24px;
+  height: 24px;
 }
 </style>

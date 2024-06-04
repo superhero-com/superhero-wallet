@@ -42,7 +42,7 @@ import type { ResolveCallback, TransferSendStep } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 import { TRANSFER_SEND_STEPS } from '@/constants';
-import { useConnection } from '@/composables';
+import { useAccounts, useConnection } from '@/composables';
 
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -72,7 +72,6 @@ export default defineComponent({
     currentStep: { type: String as PropType<TransferSendStep>, required: true },
     sendingDisabled: Boolean,
     hideArrowSendIcon: Boolean,
-    isAirGap: Boolean,
   },
   emits: [
     'close',
@@ -82,6 +81,7 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
     const { isOnline } = useConnection();
+    const { isActiveAccountAirGap } = useAccounts();
 
     const showEditButton = computed(() => [
       TRANSFER_SEND_STEPS.review,
@@ -95,8 +95,7 @@ export default defineComponent({
     ].includes(props.currentStep as any));
 
     const showNextButton = computed(() => (
-      [TRANSFER_SEND_STEPS.review].includes(props.currentStep as any)
-      && props.isAirGap
+      props.currentStep === TRANSFER_SEND_STEPS.review && isActiveAccountAirGap.value
     ));
 
     const primaryButtonText = computed(() => {
@@ -110,10 +109,7 @@ export default defineComponent({
     });
 
     const primaryButtonIcon = computed(() => {
-      if (showNextButton.value) {
-        return null;
-      }
-      if (showSendButton.value && !props.hideArrowSendIcon) {
+      if (showSendButton.value && !showNextButton.value && !props.hideArrowSendIcon) {
         return ArrowSendIcon;
       }
       return null;

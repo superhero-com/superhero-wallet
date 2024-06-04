@@ -1,4 +1,3 @@
-import { ref } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { UR, UREncoder } from '@ngraveio/bc-ur';
 import bs58check from 'bs58check';
@@ -12,40 +11,38 @@ import {
 import { SerializerV3, IACMessageDefinitionObjectV3 } from '@airgap/serializer';
 
 import type { IAccountRaw } from '@/types';
-import { handleUnknownError, watchUntilTruthy } from '@/utils';
-import { ACCOUNT_AIR_GAP_WALLET, MOBILE_SCHEMA, PROTOCOLS } from '@/constants';
+import { handleUnknownError } from '@/utils';
+import { ACCOUNT_TYPES, MOBILE_SCHEMA, PROTOCOLS } from '@/constants';
 
-const isComposableInitialized = ref(false);
-const serializer = ref<SerializerV3>();
+// Set the chunk sizes for single-chunk and multi-chunk encoding.
+const SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE = 500;
+const SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE = 250;
+
+let serializer: SerializerV3;
 
 export function useAirGap() {
-  (async () => {
-    if (isComposableInitialized.value) {
-      return;
+  async function getSerializer(): Promise<SerializerV3> {
+    if (!serializer) {
+      const serializerV3Companion = await new AeternityModule().createV3SerializerCompanion();
+      serializerV3Companion.schemas.forEach((schema) => {
+        SerializerV3.addSchema(schema.type, schema.schema, MainProtocolSymbols.AE);
+      });
+      serializer = SerializerV3.getInstance();
     }
-    isComposableInitialized.value = true;
-
-    const serializerV3Companion = await new AeternityModule().createV3SerializerCompanion();
-    serializerV3Companion.schemas.forEach((schema) => {
-      SerializerV3.addSchema(schema.type, schema.schema, MainProtocolSymbols.AE);
-    });
-    serializer.value = SerializerV3.getInstance();
-  })();
-
+    return serializer;
+  }
   /**
    * Encodes an array of IACMessageDefinitionObjectV3 objects into a UR string.
    */
-  async function encodeIACMessageDefinitionObjects(data: IACMessageDefinitionObjectV3[]) {
-    await watchUntilTruthy(serializer);
+  async function encodeIACMessageDefinitionObjects(
+    data: IACMessageDefinitionObjectV3[],
+  ): Promise<string[]> {
     try {
-      const serializedData = await serializer.value?.serialize(data);
+      const localSerializer = await getSerializer();
+      const serializedData = await localSerializer.serialize(data);
 
       const dataUint8Array = bs58check.decode(serializedData!);
       const ur = UR.fromBuffer(Buffer.from(dataUint8Array));
-
-      // Set the chunk sizes for single-chunk and multi-chunk encoding.
-      const SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE = 500;
-      const SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE = 250;
 
       // Create a UR encoder for single-chunk encoding.
       const singleEncoder = new UREncoder(
@@ -59,17 +56,12 @@ export function useAirGap() {
           ur,
           SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE,
         );
-        const fragments: string[] = [];
 
-        [...Array(multiEncoder.fragmentsLength)].forEach(() => {
-          fragments.push(multiEncoder.nextPart());
-        });
-
-        return fragments;
+        return [...Array(multiEncoder.fragmentsLength)].map(() => multiEncoder.nextPart());
       }
 
       // Encode the UR and return the UR string in upper case.
-      return [(singleEncoder.nextPart()).toUpperCase()];
+      return [singleEncoder.nextPart().toUpperCase()];
     } catch (error) {
       handleUnknownError(error);
       return [];
@@ -77,8 +69,8 @@ export function useAirGap() {
   }
 
   async function deserializeData(data: string) {
-    await watchUntilTruthy(serializer);
-    return serializer.value?.deserialize(data);
+    const localSerializer = await getSerializer();
+    return localSerializer.deserialize(data);
   }
 
   /**
@@ -98,8 +90,8 @@ export function useAirGap() {
 
           return {
             address,
-            type: ACCOUNT_AIR_GAP_WALLET,
-            airGapPublicKey: (item.payload as AccountShareResponse).publicKey,
+            type: ACCOUNT_TYPES.airGap,
+            publicKey: (item.payload as AccountShareResponse).publicKey,
             protocol: PROTOCOLS.aeternity,
             isRestored: false,
           };
@@ -114,23 +106,21 @@ export function useAirGap() {
   async function extractSignedTransactionResponseData(
     data: IACMessageDefinitionObjectV3[] = [],
   ): Promise<string | null> {
-    const payload = data.find(
+    return (data.find(
       (item) => item.type === IACMessageType.TransactionSignResponse,
-    )?.payload as any;
-
-    return payload?.transaction || null;
+    )?.payload as any)?.transaction;
   }
 
   async function generateTransactionURDataFragments(
-    publicKey: string,
+    publicKey: Uint8Array,
     transaction: string,
     networkId: string,
   ): Promise<string[]> {
     const id = Math.floor(Math.random() * 90000000 + 10000000);
     const callbackURL = `${MOBILE_SCHEMA}?d=`;
-    const payload: any = {
+    const payload = {
       callbackURL,
-      publicKey,
+      publicKey: Buffer.from(publicKey).toString('hex'),
       transaction: {
         networkId,
         transaction,
@@ -147,7 +137,7 @@ export function useAirGap() {
   }
 
   return {
-    serializer,
+    getSerializer,
     deserializeData,
     encodeIACMessageDefinitionObjects,
     extractAccountShareResponseData,

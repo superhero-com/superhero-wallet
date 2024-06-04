@@ -59,7 +59,7 @@
 import { computed, defineComponent, onUnmounted } from 'vue';
 import {
   AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
-  MODAL_AIR_GAP_SIGN_TRANSACTION,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
   RUNNING_IN_POPUP,
 } from '@/constants';
@@ -95,7 +95,7 @@ export default defineComponent({
     async function confirm() {
       if (RUNNING_IN_POPUP && activeAccount?.type === 'airgap') {
         const signgedTransaction = await openModal(
-          MODAL_AIR_GAP_SIGN_TRANSACTION,
+          MODAL_SIGN_AIR_GAP_TRANSACTION,
           { txRaw: popupProps.value?.txBase64 },
         );
         if (signgedTransaction) {

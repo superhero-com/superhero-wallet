@@ -41,8 +41,8 @@
       />
       <BtnSubheader
         v-if="!isMultisig"
-        :header="$t('modals.importAirGapAccount.btnText')"
-        :subheader="$t('modals.importAirGapAccount.btnSubtitle')"
+        :header="$t('airGap.importAccount.btnText')"
+        :subheader="$t('airGap.importAccount.btnSubtitle')"
         :icon="QrScanIcon"
         @click="connectHardwareWallet()"
       />
@@ -52,12 +52,14 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+
 import {
+  ACCOUNT_TYPES,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_MULTISIG_VAULT_CREATE,
   PROTOCOLS,
 } from '@/constants';
-import { IAirgapAccountRaw } from '@/types';
+import type { IAccountRaw } from '@/types';
 import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
@@ -83,20 +85,23 @@ export default defineComponent({
   setup(props) {
     const {
       addRawAccount,
-      addAirGapAccount,
-      setActiveAccountByProtocolAndIdx,
       setActiveAccountByGlobalIdx,
     } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
 
+    function addRawAccountAndSetActive(account: IAccountRaw) {
+      const globalIdx = addRawAccount(account);
+      setActiveAccountByGlobalIdx(globalIdx);
+      props.resolve();
+    }
+
     async function createPlainAccount() {
-      const idx = addRawAccount({
+      addRawAccountAndSetActive({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
+        type: ACCOUNT_TYPES.hdWallet,
       });
-      setActiveAccountByProtocolAndIdx(PROTOCOLS.aeternity, idx);
-      props.resolve();
     }
 
     async function createMultisigAccount() {
@@ -107,10 +112,8 @@ export default defineComponent({
     async function connectHardwareWallet() {
       try {
         const selectedAccounts = await openModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS);
-        selectedAccounts.forEach((account: IAirgapAccountRaw) => {
-          const globalIdx = addAirGapAccount(account);
-          setActiveAccountByGlobalIdx(globalIdx);
-          props.resolve();
+        selectedAccounts.forEach((account: IAccountRaw) => {
+          addRawAccountAndSetActive(account);
         });
       } catch (error) {
         handleUnknownError(error);

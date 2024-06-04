@@ -29,7 +29,7 @@
 
         <template #buttons>
           <OpenTransferReceiveModalButton is-big />
-          <OpenTransferSendModalButton is-big :is-air-gap="isAirGap" />
+          <OpenTransferSendModalButton is-big />
         </template>
 
         <template #cards>
@@ -154,7 +154,6 @@ export default defineComponent({
       activeAccountGlobalIdx,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
-      isAirGap,
     } = useAccounts();
 
     const { accountsTotalBalance } = useBalances();
@@ -212,7 +211,6 @@ export default defineComponent({
       pageIsActive,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
-      isAirGap,
     };
   },
 });

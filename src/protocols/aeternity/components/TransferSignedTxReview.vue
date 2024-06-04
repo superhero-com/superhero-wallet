@@ -1,15 +1,15 @@
 <template>
   <div class="transfer-signed-tx-review">
     <ModalHeader
-      :subtitle="$t('modals.sendAirGapTx.subtitle')"
-      disable-padding
+      :subtitle="$t('airGap.broadcast.subtitle')"
+      no-padding
     >
       <template #title>
         <div class="custom-header-title">
-          {{ $t('modals.sendAirGapTx.title') }}
+          {{ $t('airGap.broadcast.title') }}
           <BtnHelp
-            :title="$t('modals.scanAirGapTx.help.title')"
-            :msg="$t('modals.scanAirGapTx.help.msg')"
+            :title="$t('airGap.scan.help.title')"
+            :msg="$t('airGap.scan.help.msg')"
             icon="qr-scan"
             full-screen
           />
@@ -17,12 +17,11 @@
       </template>
     </ModalHeader>
 
-    <FormInputWithQr
+    <FormScanQrResult
       v-model="syncCode"
-      qr-icon="critical"
-      :label="$t('modals.airGapSyncCode.inputLabel')"
-      :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
-      :qr-title="$t('modals.scanAirGapTx.title')"
+      :label="$t('airGap.syncCode.inputLabel')"
+      :placeholder="$t('airGap.syncCode.inputPlaceholder')"
+      :qr-title="$t('airGap.scan.title')"
       @update:model-value="handleInput"
     />
 
@@ -125,7 +124,7 @@ import TokenAmount from '@/popup/components/TokenAmount.vue';
 import AvatarWithChainName from '@/popup/components/AvatarWithChainName.vue';
 import ModalHeader from '@/popup/components/ModalHeader.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
-import FormInputWithQr from '@/popup/components/form/FormInputWithQr.vue';
+import FormScanQrResult from '@/popup/components/form/FormScanQrResult.vue';
 
 export default defineComponent({
   name: 'TransferSignedTxReview',
@@ -134,7 +133,7 @@ export default defineComponent({
     AvatarWithChainName,
     DetailsItem,
     TokenAmount,
-    FormInputWithQr,
+    FormScanQrResult,
     BtnHelp,
   },
   emits: ['success', 'error'],
@@ -147,7 +146,6 @@ export default defineComponent({
     const recipientId = ref();
     const senderId = ref();
     const txRaw = ref();
-
     const syncCode = ref('');
 
     function getTransferData(rawTx: Encoded.Transaction) {

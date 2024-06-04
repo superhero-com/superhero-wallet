@@ -26,6 +26,7 @@ import type {
   Truthy,
 } from '@/types';
 import {
+  ACCOUNT_TYPES,
   ADDRESS_GAP_LIMIT,
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
@@ -199,10 +200,15 @@ export async function fetchJson<T = any>(
 export function getDefaultAccountLabel(
   { protocol, idx, type }: Partial<IAccount> = {},
 ): string {
-  const isAirGap = type === 'airgap';
+  const accountTypeName = (() => {
+    switch (true) {
+      case type === ACCOUNT_TYPES.airGap: return tg('airGap.title');
+      default: return protocol ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null;
+    }
+  })();
+
   return [
-    (protocol && !isAirGap) ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null,
-    (isAirGap) ? tg('common.airGap') : null,
+    accountTypeName,
     tg('pages.account.heading'),
     (idx || 0) + 1,
   ]

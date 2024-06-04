@@ -3,21 +3,21 @@
     <template
       v-if="fragments"
     >
-      <QrCode
+      <WrappedQrCode
         :value="fragments"
         :size="290"
         :type-number="0"
         :external-copied="copied"
-        class="qrcode"
-      />
-      <BtnMain
-        class="btn-copy"
-        :icon="CopyOutlinedIcon"
-        :text="$t('pages.send.copy')"
-        variant="muted"
-        extend
-        @click="copyAsSingleQR()"
-      />
+      >
+        <BtnMain
+          class="btn-copy"
+          :icon="CopyOutlinedIcon"
+          :text="$t('pages.send.copy')"
+          variant="muted"
+          extend
+          @click="copyAsSingleQR()"
+        />
+      </WrappedQrCode>
     </template>
     <Loader v-else />
   </div>
@@ -39,7 +39,7 @@ import {
 
 import type { TransferFormModel } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import { getURFromFragments, isAirgapAccount, toShiftedBigNumber } from '@/utils';
+import { getURFromFragments, toShiftedBigNumber } from '@/utils';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
 import {
   useAccounts,
@@ -48,7 +48,7 @@ import {
   useCopy,
 } from '@/composables';
 
-import QrCode from './QrCode.vue';
+import WrappedQrCode from './WrappedQrCode.vue';
 import Loader from './Loader.vue';
 import BtnMain from './buttons/BtnMain.vue';
 
@@ -56,7 +56,7 @@ import CopyOutlinedIcon from '../../icons/copy-outlined.svg?vue-component';
 
 export default defineComponent({
   components: {
-    QrCode,
+    WrappedQrCode,
     Loader,
     BtnMain,
   },
@@ -67,7 +67,7 @@ export default defineComponent({
     const fragments = ref();
 
     const { nodeNetworkId, getAeSdk } = useAeSdk();
-    const { activeAccount } = useAccounts();
+    const { activeAccount, isActiveAccountAirGap } = useAccounts();
     const { generateTransactionURDataFragments } = useAirGap();
     const { copy, copied } = useCopy();
 
@@ -83,7 +83,7 @@ export default defineComponent({
         selectedAsset,
       } = props.transferData;
 
-      if (!amountRaw || !recipient || !selectedAsset || !isAirgapAccount(activeAccount.value)) {
+      if (!amountRaw || !recipient || !selectedAsset || !isActiveAccountAirGap.value) {
         return null;
       }
 
@@ -100,7 +100,7 @@ export default defineComponent({
       });
 
       fragments.value = await generateTransactionURDataFragments(
-        activeAccount.value.airGapPublicKey,
+        activeAccount.value?.publicKey!,
         txRaw,
         nodeNetworkId.value!,
       );
@@ -118,21 +118,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-
-.transfer-qr-code-generator {
-  margin-top: 10px;
-  text-align: center;
-
-  .qrcode {
-    display: inline-flex;
-    padding: 8px;
-    background-color: $color-white;
-    border-radius: 12px;
-  }
-
-  .btn-copy {
-    margin-top: 16px;
-  }
+.transfer-qr-code-generator .btn-copy {
+  margin-top: 16px;
 }
 </style>

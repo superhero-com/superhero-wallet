@@ -37,33 +37,3 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-@use '../../styles/variables' as *;
-
-ol {
-  text-align: left;
-  list-style-type: none;
-  counter-reset: list-number;
-
-  li {
-    margin-bottom: 18px;
-
-    &::before {
-      counter-increment: list-number;
-      content: counter(list-number);
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      padding: 2px;
-      width: 24px;
-      height: 24px;
-      position: absolute;
-      left: 24px;
-      background: rgba($color-white, 0.03);
-      border: 2px solid rgba($color-white, 0.15);
-      border-radius: 28px;
-    }
-  }
-}
-</style>

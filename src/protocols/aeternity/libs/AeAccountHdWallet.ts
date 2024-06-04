@@ -12,20 +12,22 @@ import {
   Tag,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
-import { tg } from '@/popup/plugins/i18n';
 import { Ref } from 'vue';
+
+import { tg } from '@/popup/plugins/i18n';
 import type { ITx } from '@/types';
+import {
+  AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  IS_OFFSCREEN_TAB,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
+  PROTOCOLS,
+} from '@/constants';
+import { handleUnknownError, isAccountAirGap } from '@/utils';
+
 import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
-import {
-  AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
-  IS_OFFSCREEN_TAB,
-  MODAL_AIR_GAP_SIGN_TRANSACTION,
-  PROTOCOLS,
-} from '@/constants';
-import { handleUnknownError, isAirgapAccount } from '@/utils';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -36,13 +38,6 @@ interface InternalOptions {
  */
 const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 
-function getAccount(fromAccount?: Encoded.AccountAddress) {
-  const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
-  return fromAccount
-    ? getAccountByAddress(fromAccount)
-    : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-}
-
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
@@ -50,9 +45,16 @@ export class AeAccountHdWallet extends MemoryAccount {
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super(Buffer.alloc(64));
-    const aeAccount = getAccount();
+    const aeAccount = AeAccountHdWallet.getAccount();
     this.address = aeAccount!.address as Encoded.AccountAddress;
     this.nodeNetworkId = nodeNetworkId;
+  }
+
+  static getAccount(fromAccount?: Encoded.AccountAddress) {
+    const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
+    return fromAccount
+      ? getAccountByAddress(fromAccount)
+      : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
   }
 
   override async signTransaction(
@@ -63,9 +65,9 @@ export class AeAccountHdWallet extends MemoryAccount {
       throw new Error('Not connected to any network');
     }
 
-    const account = getAccount(options?.fromAccount);
+    const account = AeAccountHdWallet.getAccount(options?.fromAccount);
     let signedTx: Promise<Encoded.Transaction> | undefined;
-    if (isAirgapAccount(account!)) {
+    if (account && isAccountAirGap(account)) {
       // If the tab is offscreen, we need to listen for the signed transaction
       // which will be sent from the confirmation modal
       if (IS_OFFSCREEN_TAB) {
@@ -80,7 +82,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         });
       } else {
         const { openModal } = useModals();
-        return openModal(MODAL_AIR_GAP_SIGN_TRANSACTION, { txRaw: txBase64 });
+        return openModal(MODAL_SIGN_AIR_GAP_TRANSACTION, { txRaw: txBase64 });
       }
     }
 
@@ -97,7 +99,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
-    if (isAirgapAccount(account!) && IS_OFFSCREEN_TAB && signedTx) {
+    if (account && isAccountAirGap(account) && IS_OFFSCREEN_TAB && signedTx) {
       return signedTx;
     }
 
@@ -112,13 +114,13 @@ export class AeAccountHdWallet extends MemoryAccount {
     message: string,
     options: Parameters<AccountBase['signMessage']>[1] & InternalOptions,
   ): Promise<Uint8Array> {
-    const account = getAccount(options?.fromAccount);
-    if (isAirgapAccount(account!)) {
+    const account = AeAccountHdWallet.getAccount(options?.fromAccount);
+    if (account && isAccountAirGap(account)) {
       const { openDefaultModal } = useModals();
 
       openDefaultModal({
-        title: tg('modals.airGapSignMessageErrorModal.title'),
-        msg: tg('modals.airGapSignMessageErrorModal.msg'),
+        title: tg('airGap.signMessageErrorModal.title'),
+        msg: tg('airGap.signMessageErrorModal.msg'),
         icon: 'critical',
         textCenter: true,
       });
@@ -241,8 +243,8 @@ export class AeAccountHdWallet extends MemoryAccount {
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
-    const account = getAccount(options?.fromAccount);
-    if (isAirgapAccount(account!)) {
+    const account = AeAccountHdWallet.getAccount(options?.fromAccount);
+    if (account && isAccountAirGap(account)) {
       throw new Error('AirGap sign not implemented yet');
     }
     if (options?.aeppOrigin) {

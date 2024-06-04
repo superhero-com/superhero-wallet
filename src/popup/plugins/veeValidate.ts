@@ -234,10 +234,9 @@ export default () => {
    */
   defineRule(
     'airgap_to_an_address',
-    (value: string, [isAirGap]: [boolean]) => (
+    (value: string) => (
       !isNameValid(value)
-      || (isNameValid(value) && !isAirGap)
-      || tg('validation.airGapToAnAddress')
+        || tg('validation.airGapToAnAddress')
     ),
   );
 

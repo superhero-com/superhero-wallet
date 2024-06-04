@@ -88,7 +88,6 @@ export default defineComponent({
     customName: { type: String, default: null },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
-    isAirGap: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
     isPlaceholder: Boolean,

@@ -10,16 +10,16 @@
     :avatar-name="isAddressChain ? transferData.address : undefined"
     :show-fiat="!isSelectedAssetAex9"
     :protocol="PROTOCOLS.aeternity"
-    :disable-padding="isAirGap"
+    :no-header-padding="isActiveAccountAirGap"
     class="transfer-review"
   >
     <template #title>
       <div class="custom-header-title">
         {{ headerTitle }}
         <BtnHelp
-          v-if="isAirGap"
-          :title="$t('modals.scanAirGapTx.help.title')"
-          :msg="$t('modals.scanAirGapTx.help.msg')"
+          v-if="isActiveAccountAirGap && !isMultisig"
+          :title="$t('airGap.scan.help.title')"
+          :msg="$t('airGap.scan.help.msg')"
           icon="qr-scan"
           full-screen
         />
@@ -36,7 +36,7 @@
         />
       </div>
       <TransferQRCodeGenerator
-        v-if="isAirGap"
+        v-if="isActiveAccountAirGap && !isMultisig"
         :transfer-data="transferData"
       />
     </template>
@@ -157,7 +157,6 @@ export default defineComponent({
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
     isMultisig: Boolean,
-    isAirGap: Boolean,
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
   },
@@ -169,7 +168,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
-    const { activeAccount } = useAccounts();
+    const { activeAccount, isActiveAccountAirGap } = useAccounts();
     const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
@@ -194,15 +193,15 @@ export default defineComponent({
       if (props.isMultisig) {
         return tg('modals.multisigTxProposal.title');
       }
-      if (props.isAirGap) {
-        return tg('modals.airGapSend.reviewTitle');
+      if (isActiveAccountAirGap.value) {
+        return tg('airGap.send.reviewTitle');
       }
       return tg('pages.send.reviewtx');
     });
 
     const headerSubtitle = computed(() => {
-      if (props.isAirGap) {
-        return tg('modals.airGapSend.reviewSubtitle');
+      if (isActiveAccountAirGap.value) {
+        return tg('airGap.send.reviewSubtitle');
       }
       return tg('pages.send.checkalert');
     });
@@ -395,7 +394,7 @@ export default defineComponent({
     }
 
     async function submit(): Promise<void> {
-      if (props.isAirGap) {
+      if (isActiveAccountAirGap.value && !props.isMultisig) {
         emit('success');
         return;
       }
@@ -436,6 +435,7 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
+      isActiveAccountAirGap,
       isSelectedAssetAex9,
       activeMultisigAccount,
       AE_SYMBOL,

@@ -11,7 +11,6 @@
     >
       <AccountInfo
         :account="account"
-        :is-air-gap="isAirGap"
         class="account-info"
         avatar-size="rg"
         avatar-borderless
@@ -58,7 +57,7 @@ export default defineComponent({
       type: Object as PropType<IFormSelectOption>,
       default: () => ({}),
     },
-    airGapAccount: {
+    customAccount: {
       type: Object as PropType<IAccount>,
       default: null,
     },
@@ -72,18 +71,18 @@ export default defineComponent({
     const { getAccountBalance } = useBalances();
     const { getAccountByAddress } = useAccounts();
 
-    const account = props.airGapAccount ?? getAccountByAddress(props.option.value as string);
-
-    const isAirGap = computed(() => account.type === 'airgap' || props.airGapAccount !== null);
+    const account = props.customAccount ?? getAccountByAddress(props.option.value as string);
 
     const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.option.value) }));
 
     const balance = computed(() => {
       switch (true) {
-        case !!props.outsideBalance: return props.outsideBalance;
+        case !!props.outsideBalance:
+          return props.outsideBalance;
         case !!props.option.value:
           return getAccountBalance(props.option.value.toString()).toNumber();
-        default: return 0;
+        default:
+          return 0;
       }
     });
 
@@ -96,7 +95,6 @@ export default defineComponent({
       balance,
       bgColorStyle,
       tokenSymbol,
-      isAirGap,
       AE_SYMBOL,
     };
   },

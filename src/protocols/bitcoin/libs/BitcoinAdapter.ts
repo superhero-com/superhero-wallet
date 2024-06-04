@@ -23,9 +23,12 @@ import type {
   MarketData,
   NetworkTypeDefault,
   ITransactionApiPaginationParams,
+  IAccountRaw,
+  IAccount,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
+  ACCOUNT_TYPES,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
   PROTOCOLS,
@@ -196,6 +199,26 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: child.publicKey,
       address: address!,
     };
+  }
+
+  override resolveAccountRaw(
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array,
+  ): IAccount | null {
+    if (rawAccount.type !== ACCOUNT_TYPES.hdWallet) {
+      return null;
+    }
+
+    const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
+
+    return {
+      globalIdx,
+      idx,
+      ...rawAccount,
+      ...hdWallet,
+    } as IAccount;
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

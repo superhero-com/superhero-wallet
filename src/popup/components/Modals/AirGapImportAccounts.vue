@@ -2,35 +2,31 @@
   <Modal
     from-bottom
     has-close-button
-    dense
     class="air-gap-import-accounts"
     @close="cancel()"
   >
-    <div>
-      <ModalHeader
-        no-padding
-        :title="$t('modals.importAirGapAccount.importConfirmDialog.title')"
-        :subtitle="$t('modals.importAirGapAccount.importConfirmDialog.description')"
-      />
+    <ModalHeader
+      no-padding
+      :title="$t('airGap.importAccount.importConfirmDialog.title')"
+      :subtitle="$t('airGap.importAccount.importConfirmDialog.description')"
+    />
 
-      <FormInputWithQr
-        v-model="syncCode"
-        class="sync-code-input"
-        qr-icon="critical"
-        :label="$t('modals.airGapSyncCode.inputLabel')"
-        :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
-        :qr-title="$t('modals.importAirGapAccount.scanDescription')"
-        @update:model-value="throttledHandleInput"
-      />
+    <FormScanQrResult
+      v-model="syncCode"
+      class="sync-code-input"
+      :label="$t('airGap.syncCode.inputLabel')"
+      :placeholder="$t('airGap.syncCode.inputPlaceholder')"
+      :qr-title="$t('airGap.importAccount.scanDescription')"
+      @update:model-value="throttledHandleInput"
+    />
 
-      <div
-        v-for="account in accounts"
-        :key="account.address"
-        class="account-row"
-        :class="{ disabled: isAccountAlreadyImported(account) }"
-      >
-        <AccountImportRow :account="account" />
-      </div>
+    <div
+      v-for="account in accounts"
+      :key="account.address"
+      class="account-row"
+      :class="{ disabled: isAccountAlreadyImported(account) }"
+    >
+      <AccountImportRow :account="account" />
     </div>
     <template #footer>
       <BtnMain
@@ -40,7 +36,7 @@
       />
       <BtnMain
         extra-padded
-        :text="$t('modals.importAirGapAccount.importConfirmDialog.importAccount')"
+        :text="$t('airGap.importAccount.importConfirmDialog.importAccount')"
         :disabled="!canImportAccounts"
         @click="confirm()"
       />
@@ -50,18 +46,21 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, PropType, ref,
+  computed,
+  defineComponent,
+  PropType,
+  ref,
 } from 'vue';
 import { throttle } from 'lodash-es';
 
 import { useAccounts, useAirGap } from '@/composables';
-import type { IAccount } from '@/types';
+import type { IAccount, RejectCallback } from '@/types';
 import { parseCodeToBytes } from '@/utils';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountImportRow from '../AccountImportRow.vue';
-import FormInputWithQr from '../form/FormInputWithQr.vue';
+import FormScanQrResult from '../form/FormScanQrResult.vue';
 import ModalHeader from '../ModalHeader.vue';
 
 export default defineComponent({
@@ -69,7 +68,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     AccountImportRow,
-    FormInputWithQr,
+    FormScanQrResult,
     ModalHeader,
   },
   props: {
@@ -77,7 +76,7 @@ export default defineComponent({
       type: Function as PropType<(selectedAccounts: IAccount[]) => void>,
       required: true,
     },
-    reject: { type: Function as PropType<() => void>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
     // TODO AIRGAP: implement multiple accounts selection
@@ -111,7 +110,7 @@ export default defineComponent({
         const deserializedData = await deserializeData(parsedCode!);
         accounts.value = (
           await extractAccountShareResponseData(deserializedData) || []
-        ) as IAccount[];
+        ) as unknown as IAccount[];
       } catch (error) {} // eslint-disable-line no-empty
     }
 
@@ -139,36 +138,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
-@use '@/styles/mixins';
 
 .air-gap-import-accounts {
-  .title {
-    @extend %face-sans-18-bold;
-
-    color: variables.$color-white;
-    text-align: center;
-    padding: 12px;
-  }
-
-  .description {
-    @extend %face-sans-16-regular;
-
-    color: variables.$color-white;
-    line-height: 24px;
-    text-align: center;
-    padding: 12px;
-    margin-bottom: 20px;
-  }
-
   .sync-code-input {
-    padding: 0 16px;
     margin-bottom: 18px;
   }
 
   .account-row {
-    @include mixins.flex(flex-start, center, row);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-flow: row;
     padding: 0 8px;
     padding-bottom: 8px;
 
@@ -179,14 +161,6 @@ export default defineComponent({
     &.disabled {
       opacity: 0.5;
     }
-  }
-
-  .message {
-    @extend %face-sans-15-medium;
-
-    color: variables.$color-grey-light;
-    text-align: center;
-    padding: 48px 64px 0;
   }
 }
 </style>

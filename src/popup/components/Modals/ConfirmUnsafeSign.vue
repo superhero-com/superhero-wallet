@@ -64,7 +64,7 @@
         third
         :text="$t('common.sign')"
         data-cy="accept"
-        @click="confirm"
+        @click="confirm()"
       />
     </template>
   </Modal>

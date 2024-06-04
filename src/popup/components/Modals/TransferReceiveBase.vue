@@ -22,13 +22,10 @@
         />
       </div>
 
-      <div class="qrcode-wrapper">
-        <QrCode
-          :value="[accountAddressToCopy]"
-          :size="180"
-          class="qrcode"
-        />
-      </div>
+      <WrappedQrCode
+        :value="[accountAddressToCopy]"
+        :size="180"
+      />
 
       <div class="address">
         <CopyText
@@ -124,7 +121,7 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import InputAmount from '../InputAmount.vue';
-import QrCode from '../QrCode.vue';
+import WrappedQrCode from '../WrappedQrCode.vue';
 import Scrollable from '../Scrollable.vue';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -139,7 +136,7 @@ export default defineComponent({
   components: {
     InputAmount,
     Modal,
-    QrCode,
+    WrappedQrCode,
     BtnMain,
     Scrollable,
     AddressFormatted,
@@ -283,18 +280,6 @@ export default defineComponent({
   .account-row {
     display: flex;
     justify-content: center;
-  }
-
-  .qrcode-wrapper {
-    margin-top: 10px;
-    text-align: center;
-
-    .qrcode {
-      display: inline-flex;
-      padding: 8px;
-      background-color: $color-white;
-      border-radius: 12px;
-    }
   }
 
   .address {

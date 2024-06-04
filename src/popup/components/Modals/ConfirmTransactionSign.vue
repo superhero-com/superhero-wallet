@@ -203,8 +203,9 @@ import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
+  ACCOUNT_TYPES,
   AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
-  MODAL_AIR_GAP_SIGN_TRANSACTION,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
   RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
@@ -416,9 +417,9 @@ export default defineComponent({
     }
 
     async function confirm() {
-      if (RUNNING_IN_POPUP && activeAccount?.type === 'airgap') {
+      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.airGap) {
         const signgedTransaction = await openModal(
-          MODAL_AIR_GAP_SIGN_TRANSACTION,
+          MODAL_SIGN_AIR_GAP_TRANSACTION,
           { txRaw: popupProps.value?.txBase64 },
         );
         if (signgedTransaction) {

@@ -5,7 +5,7 @@
     :fee="+fee.toFixed()"
     :fee-symbol="AE_SYMBOL"
     :protocol="PROTOCOLS.aeternity"
-    :custom-title="isAirGap ? $t('modals.airGapSend.sendTitle') : undefined"
+    :custom-title="isActiveAccountAirGap ? $t('airGap.send.title') : undefined"
     class="transfer-send-form"
   >
     <template
@@ -74,7 +74,7 @@
             ? { address_not_same_as: [multisigVaultAddress, PROTOCOLS.aeternity] }
             : {}),
           token_to_an_address: [!isAe],
-          airgap_to_an_address: [isAirGap],
+          airgap_to_an_address: isActiveAccountAirGap,
         }"
         @openQrModal="scanTransferQrCode()"
       />
@@ -239,7 +239,6 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
-    isAirGap: Boolean,
   },
   emits: [
     'update:transferData',
@@ -261,6 +260,7 @@ export default defineComponent({
     const {
       accounts,
       activeAccount,
+      isActiveAccountAirGap,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
     } = useAccounts();
@@ -440,6 +440,7 @@ export default defineComponent({
       balance,
       isTipUrl,
       activeAccount,
+      isActiveAccountAirGap,
       editPayload,
       clearPayload,
       scanTransferQrCode,

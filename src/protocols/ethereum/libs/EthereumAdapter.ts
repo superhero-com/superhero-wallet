@@ -28,6 +28,8 @@ import type {
   AdapterNetworkSettingList,
   AssetAmount,
   AssetContractId,
+  IAccount,
+  IAccountRaw,
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
@@ -40,7 +42,7 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -196,6 +198,26 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       publicKey: childWallet.publicKey,
       address,
     };
+  }
+
+  override resolveAccountRaw(
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array,
+  ): IAccount | null {
+    if (rawAccount.type !== ACCOUNT_TYPES.hdWallet) {
+      return null;
+    }
+
+    const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
+
+    return {
+      globalIdx,
+      idx,
+      ...rawAccount,
+      ...hdWallet,
+    } as IAccount;
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

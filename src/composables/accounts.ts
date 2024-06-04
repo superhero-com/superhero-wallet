@@ -1,27 +1,27 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
-import { Encoded, decode } from '@aeternity/aepp-sdk';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import type {
   AccountAddress,
+  AccountType,
   IAccount,
   IAccountRaw,
-  IAirgapAccountRaw,
   IFormSelectOption,
   Protocol,
   ProtocolRecord,
 } from '@/types';
 import {
-  ACCOUNT_HD_WALLET,
   PROTOCOLS,
   PROTOCOL_LIST,
   STORAGE_KEYS,
   IS_IOS,
   IS_MOBILE_APP,
-  ACCOUNT_AIR_GAP_WALLET,
+  ACCOUNT_TYPES_LIST,
+  ACCOUNT_TYPES,
 } from '@/constants';
 import {
   createCallbackRegistry,
+  excludeFalsy,
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
@@ -89,42 +89,39 @@ const accounts = computed((): IAccount[] => {
     return [];
   }
 
-  const idxList = Object.fromEntries(PROTOCOL_LIST.map(((protocol) => [protocol, 0])));
-  let airGapIdx = 0;
+  // Indexes for each protocol and account type
+  const idxList = PROTOCOL_LIST.reduce(
+    (acc, protocol) => ({
+      ...acc,
+      [protocol]: ACCOUNT_TYPES_LIST.reduce(
+        (acc2, type) => ({ ...acc2, [type]: 0 }),
+        {} as Record<AccountType, number>,
+      ),
+    }),
+    {} as Required<ProtocolRecord<Record<AccountType, number>>>,
+  );
 
   return accountsRaw.value
     .map((account, globalIdx) => {
-      if (account.type === ACCOUNT_AIR_GAP_WALLET) {
-        const airGapAccount = account as IAirgapAccountRaw;
-        const idx = airGapIdx;
-        airGapIdx += 1;
+      const idx = idxList[account.protocol][account.type];
 
-        return {
-          globalIdx,
-          idx,
-          publicKey: Buffer.from(decode(airGapAccount.address as Encoded.AccountAddress)),
-          ...airGapAccount,
-        } as unknown as IAccount;
+      const adapter = ProtocolAdapterFactory.getAdapter(account.protocol);
+      const resolvedAccount = adapter
+        .resolveAccountRaw(account, idx, globalIdx, mnemonicSeed.value);
+      if (resolvedAccount) {
+        idxList[account.protocol][account.type] += 1;
+      } else {
+        accountsRaw.value.splice(globalIdx, 1);
       }
-      const idx = idxList[account.protocol];
-      const hdWallet = ProtocolAdapterFactory
-        .getAdapter(account.protocol)
-        .getHdWalletAccountFromMnemonicSeed(mnemonicSeed.value, idx);
-
-      idxList[account.protocol] += 1;
-
-      return {
-        globalIdx,
-        idx,
-        ...account,
-        ...hdWallet,
-      };
-    });
+      return resolvedAccount;
+    }).filter(excludeFalsy) as IAccount[];
 });
 
 const activeAccount = computed((): IAccount => accounts.value[activeAccountGlobalIdx.value] || {});
 
-const isAirGap = computed((): boolean => activeAccount.value.type === ACCOUNT_AIR_GAP_WALLET);
+const isActiveAccountAirGap = computed(
+  (): boolean => activeAccount.value.type === ACCOUNT_TYPES.airGap,
+);
 
 const accountsGroupedByProtocol = computed(
   () => accounts.value.reduce(
@@ -240,24 +237,9 @@ export function useAccounts() {
     return accountsAddressList.value.includes(address);
   }
 
-  function addRawAccount({
-    isRestored,
-    protocol,
-  }: Omit<IAccountRaw, 'type'>): number {
-    accountsRaw.value.push({
-      protocol,
-      isRestored,
-      type: ACCOUNT_HD_WALLET,
-    });
-    return getLastProtocolAccount(protocol)?.idx || 0;
-  }
-
-  /**
-   * Note: idx returned for airGap accounts is global and not protocol specific.
-   */
-  function addAirGapAccount(airGapAccount: IAirgapAccountRaw) {
-    accountsRaw.value.push(airGapAccount);
-    return getLastProtocolAccount(PROTOCOLS.aeternity)?.globalIdx || 0;
+  function addRawAccount(account: IAccountRaw): number {
+    accountsRaw.value.push(account);
+    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
   }
 
   /**
@@ -275,7 +257,7 @@ export function useAccounts() {
 
     PROTOCOL_LIST.forEach((protocol, index) => {
       for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
-        addRawAccount({ isRestored: true, protocol });
+        addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       }
     });
   }
@@ -309,14 +291,13 @@ export function useAccounts() {
     activeAccountGlobalIdx,
     areAccountsRestored,
     isLoggedIn,
-    isAirGap,
+    isActiveAccountAirGap,
     mnemonic,
     mnemonicSeed,
     protocolsInUse,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
-    addAirGapAccount,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,

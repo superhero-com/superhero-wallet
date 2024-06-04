@@ -1,41 +1,36 @@
 <template>
   <Modal
-    class="air-gap-sign-transaction"
+    class="sign-air-gap-transaction"
     has-close-button
     full-screen
     from-bottom
-    no-padding
     @close="reject"
   >
     <ModalHeader
-      no-padding
       :subtitle="subtitle"
+      no-padding
     >
       <template #title>
         <div class="custom-header-title">
           {{ title }}
           <BtnHelp
-            :title="$t('modals.scanAirGapTx.help.title')"
-            :msg="$t('modals.scanAirGapTx.help.msg')"
+            :title="$t('airGap.scan.help.title')"
+            :msg="$t('airGap.scan.help.msg')"
             icon="qr-scan"
             full-screen
           />
         </div>
       </template>
     </ModalHeader>
+
     <!-- First Step -->
-    <div
+    <WrappedQrCode
       v-if="currentStep === STEPS.initial"
-      class="qrcode-wrapper"
+      :value="fragments"
+      :size="290"
+      :type-number="0"
+      :external-copied="copied"
     >
-      <QrCode
-        v-if="fragments"
-        class="qrcode"
-        :value="fragments"
-        :size="290"
-        :type-number="0"
-        :external-copied="copied"
-      />
       <BtnMain
         class="btn-copy"
         :icon="CopyOutlinedIcon"
@@ -44,17 +39,16 @@
         extend
         @click="copyAsSingleQR()"
       />
-    </div>
+    </WrappedQrCode>
+
     <!-- Second Step -->
     <div v-else class="input-wrapper">
-      <FormInputWithQr
+      <FormScanQrResult
         v-model="syncCode"
         class="sync-code-input"
-        qr-icon="critical"
-        :label="$t('modals.airGapSyncCode.inputLabel')"
-        :placeholder="$t('modals.airGapSyncCode.inputPlaceholder')"
-        :qr-title="$t('modals.scanAirGapTx.title')"
-        @update:model-value="throttledHandleInput"
+        :label="$t('airGap.syncCode.inputLabel')"
+        :placeholder="$t('airGap.syncCode.inputPlaceholder')"
+        :qr-title="$t('airGap.scan.title')"
       />
     </div>
     <template #footer>
@@ -80,13 +74,14 @@ import {
   onMounted,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { IACMessageType } from '@airgap/serializer/v3/interfaces';
 
 import { tg } from '@/popup/plugins/i18n';
-import { ObjectValues } from '@/types';
-import { getURFromFragments, isAirgapAccount, parseCodeToBytes } from '@/utils';
+import { ObjectValues, RejectCallback } from '@/types';
+import { getURFromFragments, parseCodeToBytes } from '@/utils';
 import {
   useAccounts,
   useAirGap,
@@ -94,14 +89,14 @@ import {
   useCopy,
 } from '@/composables';
 
-import Modal from '../Modal.vue';
-import BtnMain from '../buttons/BtnMain.vue';
-import BtnHelp from '../buttons/BtnHelp.vue';
-import QrCode from '../QrCode.vue';
-import ModalHeader from '../ModalHeader.vue';
-import FormInputWithQr from '../form/FormInputWithQr.vue';
+import Modal from '@/popup/components/Modal.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
+import WrappedQrCode from '@/popup/components/WrappedQrCode.vue';
+import ModalHeader from '@/popup/components/ModalHeader.vue';
+import FormScanQrResult from '@/popup/components/form/FormScanQrResult.vue';
 
-import CopyOutlinedIcon from '../../../icons/copy-outlined.svg?vue-component';
+import CopyOutlinedIcon from '@/icons/copy-outlined.svg?vue-component';
 
 const STEPS = {
   initial: 'initial',
@@ -114,14 +109,14 @@ export default defineComponent({
     Modal,
     BtnMain,
     BtnHelp,
-    QrCode,
+    WrappedQrCode,
     ModalHeader,
-    FormInputWithQr,
+    FormScanQrResult,
   },
   props: {
     txRaw: { type: String, required: true },
     resolve: { type: Function as PropType<(txRaw: string) => void>, required: true },
-    reject: { type: Function as PropType<() => void>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
     const currentStep = ref<Step>(STEPS.initial);
@@ -129,24 +124,24 @@ export default defineComponent({
     const syncCode = ref('');
     const signedTransaction = ref();
 
-    const { activeAccount } = useAccounts();
+    const { activeAccount, isActiveAccountAirGap } = useAccounts();
     const { nodeNetworkId } = useAeSdk();
     const { generateTransactionURDataFragments, deserializeData } = useAirGap();
     const { copy, copied } = useCopy();
 
     const isFirstStep = computed(() => currentStep.value === STEPS.initial);
     const title = computed(() => isFirstStep.value
-      ? tg('modals.airGapSend.reviewTitle')
-      : tg('modals.sendAirGapTx.title'));
+      ? tg('airGap.send.reviewTitle')
+      : tg('airGap.broadcast.title'));
     const subtitle = computed(() => isFirstStep.value
-      ? tg('modals.airGapSend.reviewSubtitle')
-      : tg('modals.sendAirGapTx.subtitle'));
+      ? tg('airGap.send.reviewSubtitle')
+      : tg('airGap.broadcast.subtitle'));
     const mainButtonText = computed(() => isFirstStep.value
       ? tg('common.next')
       : tg('common.confirm'));
     const secondaryButtonText = computed(() => isFirstStep.value
       ? tg('common.cancel')
-      : tg('modals.sendAirGapTx.backToQr'));
+      : tg('airGap.broadcast.backToQr'));
 
     const isMainButtonDisabled = computed(() => (
       currentStep.value === STEPS.confirm
@@ -207,10 +202,12 @@ export default defineComponent({
 
     const throttledHandleInput = throttle(handleInput, 100);
 
+    watch(syncCode, throttledHandleInput);
+
     onMounted(async () => {
-      if (isAirgapAccount(activeAccount.value)) {
+      if (isActiveAccountAirGap.value) {
         fragments.value = await generateTransactionURDataFragments(
-          activeAccount.value.airGapPublicKey,
+          activeAccount.value?.publicKey!,
           props.txRaw,
           nodeNetworkId?.value!,
         );
@@ -231,7 +228,6 @@ export default defineComponent({
       mainButtonAction,
       secondaryButtonAction,
       copyAsSingleQR,
-      throttledHandleInput,
       STEPS,
       CopyOutlinedIcon,
     };
@@ -240,11 +236,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-@use '@/styles/typography';
-@use '@/styles/mixins';
-
-.air-gap-sign-transaction {
+.sign-air-gap-transaction {
   .custom-header-title {
     display: flex;
     justify-content: center;
@@ -252,25 +244,8 @@ export default defineComponent({
     gap: 10px;
   }
 
-  .qrcode-wrapper {
-    margin-top: 10px;
-    text-align: center;
-
-    .qrcode {
-      display: inline-flex;
-      padding: 8px;
-      background-color: $color-white;
-      border-radius: 12px;
-    }
-
-    .btn-copy {
-      margin-top: 16px;
-    }
-  }
-
-  .input-wrapper,
-  .qrcode-wrapper{
-    padding: 0 24px;
+  .btn-copy {
+    margin-top: 16px;
   }
 }
 </style>

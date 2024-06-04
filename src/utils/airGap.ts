@@ -1,15 +1,10 @@
 import bs58check from 'bs58check';
 import { URDecoder, UR, UREncoder } from '@ngraveio/bc-ur';
-import { IAccount, IAirgapAccountRaw } from '@/types';
+import { IAccount } from '@/types';
+import { ACCOUNT_TYPES } from '@/constants';
 
-/**
- * Type guard for TypeScript.
- * Check if the account is an AirGap account and set the type accordingly.
- */
-export function isAirgapAccount(
-  account: IAccount | IAirgapAccountRaw,
-): account is IAirgapAccountRaw {
-  return (account as unknown as IAirgapAccountRaw).airGapPublicKey !== undefined;
+export function isAccountAirGap(account: IAccount) {
+  return account.type === ACCOUNT_TYPES.airGap;
 }
 
 /**
@@ -26,7 +21,7 @@ export function getURFromFragments(fragments: string[]): string {
   const combinedData = decoder.resultUR().decodeCBOR();
   const ur = UR.fromBuffer(combinedData);
   const singleEncoder = new UREncoder(ur, Number.POSITIVE_INFINITY);
-  return (singleEncoder.nextPart()).toUpperCase();
+  return singleEncoder.nextPart().toUpperCase();
 }
 
 export async function decodeUR(code: string) {

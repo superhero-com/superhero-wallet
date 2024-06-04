@@ -1,14 +1,13 @@
 <template>
   <AccountSelectOptionsItem
-    :air-gap-account="account"
-    :outside-balance="numericBalance"
+    :custom-account="account"
+    :outside-balance="balance"
   />
 </template>
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import {
-  computed,
   defineComponent,
   onMounted,
   ref,
@@ -29,17 +28,15 @@ export default defineComponent({
     account: { type: Object as PropType<IAccount>, required: true },
   },
   setup(props) {
-    const balance = ref(new BigNumber(0));
-
-    const numericBalance = computed<number>(() => balance.value.toNumber());
+    const balance = ref(0);
 
     onMounted(async () => {
       const adapter = ProtocolAdapterFactory.getAdapter(props.account.protocol);
-      balance.value = new BigNumber(await adapter.fetchBalance(props.account.address));
+      balance.value = new BigNumber(await adapter.fetchBalance(props.account.address)).toNumber();
     });
 
     return {
-      numericBalance,
+      balance,
       ROUTE_ACCOUNT_DETAILS,
     };
   },

@@ -102,6 +102,7 @@ import {
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
   PROTOCOLS,
+  ACCOUNT_TYPES,
 } from '@/constants';
 import {
   useAccounts,
@@ -151,6 +152,7 @@ export default defineComponent({
       addRawAccount({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
+        type: ACCOUNT_TYPES.hdWallet,
       });
       router.push(loginTargetLocation.value);
       openEnableSecureLoginModal();

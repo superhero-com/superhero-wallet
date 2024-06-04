@@ -140,8 +140,8 @@ export default defineComponent({
     const isCameraReady = ref(false);
     const cameraPermissionGranted = ref(true);
     const isMultiFragmentQr = ref(false);
-    const decoder = ref(new URDecoder());
 
+    const decoder = new URDecoder();
     let browserReader: QrScannerType | null = null;
 
     function stopReading() {
@@ -159,7 +159,7 @@ export default defineComponent({
     }
 
     async function getCombinedData() {
-      const combinedData = decoder.value.resultUR().decodeCBOR();
+      const combinedData = decoder.resultUR().decodeCBOR();
       const resultUr = bs58check.encode(combinedData);
       return resultUr;
     }
@@ -169,13 +169,13 @@ export default defineComponent({
      */
     async function handleReceivePart(text: string) {
       if (String(text).includes('BYTES/')) {
-        decoder.value.receivePart(text);
-        if (decoder.value.isComplete()) {
+        decoder.receivePart(text);
+        if (decoder.isComplete()) {
           browserReader?.stop();
           return getCombinedData();
         }
         isMultiFragmentQr.value = true;
-        scanProgress.value = Math.floor(decoder.value.getProgress() * 100);
+        scanProgress.value = Math.floor(decoder.getProgress() * 100);
       } else {
         browserReader?.stop();
         return text;
@@ -191,7 +191,7 @@ export default defineComponent({
 
       // eslint-disable-next-line no-async-promise-executor
       return new Promise(async (resolve) => {
-        let completeText: string | null = null;
+        let completeText: string | null;
 
         const listener = await BarcodeScanner.addListener(
           'barcodeScanned',
@@ -260,7 +260,6 @@ export default defineComponent({
       }
 
       isCameraReady.value = true;
-      decoder.value = new URDecoder();
       props.resolve((IS_MOBILE_APP) ? await scanMobile() : await scanWeb());
     });
 
@@ -290,7 +289,7 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .qr-code-reader {
-  &.multifragment-qr-code{
+  &.multifragment-qr-code {
     .camera {
       padding-top: calc(100% - 45px); // Progress bar height
     }

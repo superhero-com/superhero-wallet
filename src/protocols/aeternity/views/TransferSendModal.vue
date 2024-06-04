@@ -5,7 +5,6 @@
     :hide-arrow-send-icon="isMultisig"
     :custom-primary-button-text="customPrimaryButtonText"
     :sending-disabled="isSendingDisabled"
-    :is-air-gap="isAirGap"
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
@@ -15,9 +14,7 @@
         :is="currentStepConfig.component"
         ref="currentRenderedComponent"
         v-model:transferData="transferData"
-        :tx-raw="txRaw"
         :is-multisig="isMultisig"
-        :is-air-gap="isAirGap"
         :is-address-chain="isAddressChain"
         :is-address-url="isAddressUrl"
         @success="currentStepConfig.onSuccess"
@@ -49,7 +46,7 @@ import {
   TRANSFER_SEND_STEPS,
 } from '@/constants';
 import { isUrlValid } from '@/utils';
-import { useAeSdk, useFungibleTokens } from '@/composables';
+import { useAccounts, useAeSdk, useFungibleTokens } from '@/composables';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
 import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
@@ -67,17 +64,16 @@ export default defineComponent({
     ...transferSendModalRequiredProps,
     tokenContractId: { type: String as PropType<AssetContractId>, default: null },
     isMultisig: Boolean,
-    isAirGap: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
     const { isAeNodeReady } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { isActiveAccountAirGap } = useAccounts();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
-    const txRaw = ref();
     const transferData = ref<TransferFormModel>({
       address: props.address as any, // TODO change to string globally
       amount: props.amount,
@@ -97,18 +93,14 @@ export default defineComponent({
 
     const showNextButton = computed(() => (
       currentStep.value === TRANSFER_SEND_STEPS.review
-      && props.isAirGap
+      && isActiveAccountAirGap.value
     ));
 
-    const isSendingDisabled = computed(() => {
-      if (showNextButton.value) {
-        return (error.value || !isAeNodeReady.value);
-      }
-      return error.value
-        || !isAeNodeReady.value
-        || !transferData.value.address
-        || !transferData.value.amount;
-    });
+    const isSendingDisabled = computed(() => (
+      error.value
+      || !isAeNodeReady.value
+      || (!showNextButton.value && (!transferData.value.address || !transferData.value.amount))
+    ));
 
     const customPrimaryButtonText = computed(() => {
       if (props.isMultisig) {
@@ -135,7 +127,7 @@ export default defineComponent({
     }
 
     function handleReviewSuccess() {
-      if (props.isAirGap) {
+      if (isActiveAccountAirGap.value && !props.isMultisig) {
         currentStep.value = TRANSFER_SEND_STEPS.airGapSign;
       } else {
         props.resolve();
@@ -179,7 +171,6 @@ export default defineComponent({
       steps,
       currentStep,
       error,
-      txRaw,
       transferData,
       currentStepConfig,
       isAddressChain,
