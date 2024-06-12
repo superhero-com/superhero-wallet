@@ -555,7 +555,8 @@
       "noRecords": {
         "addressBook": "There are no records in your address book.",
         "blockchain": "Currently there are no address records for the blockchain selected.",
-        "bookmarked": "There are no address records added to your bookmarks list."
+        "bookmarked": "There are no address records added to your bookmarks list.",
+        "search": "No address records found for your search query."
       },
       "entry": {
         "delete": "Delete address record",

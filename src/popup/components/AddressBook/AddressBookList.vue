@@ -3,7 +3,7 @@
     <IonHeader class="address-book-header">
       <Transition name="fade-between">
         <InputSearch
-          v-if="isScrolled"
+          v-if="isScrolled || searchQuery"
           v-model="searchQuery"
           :placeholder="$t('pages.addressBook.searchPlaceholder')"
           class="search-field"
@@ -12,14 +12,13 @@
 
       <AddressBookFilters />
     </IonHeader>
-    <IonContent class="ion-padding ion-content-bg">
+    <IonContent ref="scrollWrapperEl" class="ion-padding ion-content-bg">
       <div
-        v-if="Object.keys(addressBookOrderedByName).length"
-        ref="listEl"
+        v-if="Object.keys(addressBookFiltered).length"
         class="list"
       >
         <AddressBookItem
-          v-for="(entry) in addressBookOrderedByName"
+          v-for="(entry) in addressBookFiltered"
           :key="entry.name"
           :item="entry"
         />
@@ -45,6 +44,8 @@ import { throttle } from 'lodash-es';
 import { IonHeader, IonContent } from '@ionic/vue';
 
 import { tg } from '@/popup/plugins/i18n';
+import { ComponentRef } from '@/types';
+import { ADDRESS_BOOK_FILTERS } from '@/constants';
 import { useAddressBook } from '@/composables';
 
 import InputSearch from '@/popup/components/InputSearch.vue';
@@ -66,28 +67,26 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(_, { emit }) {
-    // TODO pass to Filter component
-    const activeFilter = ref('all');
-    const listEl = ref<HTMLDivElement>();
+    const scrollWrapperEl = ref<ComponentRef>();
     const isScrolled = ref(false);
-    const searchQuery = ref('');
 
-    const { addressBookOrderedByName } = useAddressBook();
+    const { addressBookFiltered, activeFilter, searchQuery } = useAddressBook();
     const route = useRoute();
 
     const noRecordsMessage = computed(() => {
       switch (true) {
-        case activeFilter.value === 'all': return tg('pages.addressBook.noRecords.addressBook');
-        case activeFilter.value === 'favorites': return tg('pages.addressBook.noRecords.bookmarked');
+        case !!searchQuery.value: return tg('pages.addressBook.noRecords.search');
+        case activeFilter.value === ADDRESS_BOOK_FILTERS.all: return tg('pages.addressBook.noRecords.addressBook');
+        case activeFilter.value === ADDRESS_BOOK_FILTERS.bookmarked: return tg('pages.addressBook.noRecords.bookmarked');
         default: return tg('pages.addressBook.noRecords.blockchain');
       }
     });
-    const scrollWrapper = computed(() => listEl.value?.parentElement);
+    const scrollWrapper = computed(() => scrollWrapperEl.value?.$el);
 
     function handleScroll() {
       if (!scrollWrapper.value) return;
       isScrolled.value = (scrollWrapper.value as HTMLElement)?.scrollTop > 0;
-      emit('update:modelValue', isScrolled.value);
+      emit('update:modelValue', (isScrolled.value || !!searchQuery.value));
     }
     const throttledHandleScroll = throttle(handleScroll, 100);
 
@@ -105,10 +104,10 @@ export default defineComponent({
     }, { deep: true });
 
     return {
-      listEl,
+      scrollWrapperEl,
       isScrolled,
       searchQuery,
-      addressBookOrderedByName,
+      addressBookFiltered,
       noRecordsMessage,
     };
   },

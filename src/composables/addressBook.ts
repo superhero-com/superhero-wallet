@@ -1,19 +1,16 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
-import { PROTOCOLS, STORAGE_KEYS } from '@/constants';
-import { AccountAddress, Protocol } from '@/types';
+import {
+  AccountAddress,
+  IAddressBook,
+  IAddressBookEntry,
+  IAddressBookFilter,
+} from '@/types';
+import { ADDRESS_BOOK_FILTERS, PROTOCOLS, STORAGE_KEYS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { getProtocolByAddress } from '@/utils';
+import { getProtocolByAddress, pipe } from '@/utils';
+import { createCustomScopedComposable } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
-
-export interface IAddressBookEntry {
-  name: string;
-  address: AccountAddress;
-  isBookmarked: boolean;
-  protocol: Protocol;
-}
-
-export type IAddressBook = Record<AccountAddress, IAddressBookEntry>;
 
 interface IAddressBookOptions {
   name: string;
@@ -21,19 +18,60 @@ interface IAddressBookOptions {
   isBookmarked?: boolean;
 }
 
-const addressBook = useStorageRef<IAddressBook>({}, STORAGE_KEYS.addressBook);
+export const useAddressBook = createCustomScopedComposable(() => {
+  const addressBook = useStorageRef<IAddressBook>({}, STORAGE_KEYS.addressBook);
 
-export function useAddressBook() {
-  const addressBookOrderedByName = computed(
-    () => Object.values(addressBook.value).sort((a, b) => a.name.localeCompare(b.name)),
+  const activeFilter = ref<IAddressBookFilter>(ADDRESS_BOOK_FILTERS.all);
+  const searchQuery = ref<string>('');
+  const showBookmarked = ref(false);
+
+  function filterAddressBookByBookmarked(entries: IAddressBookEntry[]) {
+    return showBookmarked.value ? entries.filter((entry) => entry.isBookmarked) : entries;
+  }
+  function filterAddressBook(entries: IAddressBookEntry[]) {
+    switch (activeFilter.value) {
+      case ADDRESS_BOOK_FILTERS.all:
+        return entries;
+      case ADDRESS_BOOK_FILTERS.bookmarked:
+        return entries.filter((entry) => entry.isBookmarked);
+      default:
+        return activeFilter.value
+          ? entries.filter((entry) => entry.protocol === activeFilter.value)
+          : entries;
+    }
+  }
+  function filterAddressBookBySearchPhrase(entries: IAddressBookEntry[]) {
+    const searchQueryLower = searchQuery.value.toLowerCase();
+    return entries.filter((entry) => {
+      const nameLower = entry.name.toLowerCase();
+      const addressLower = entry.address.toLowerCase();
+      return nameLower.includes(searchQueryLower) || addressLower.includes(searchQueryLower);
+    });
+  }
+  function sortAddressBookByName(entries: IAddressBookEntry[]) {
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  const addressBookFiltered = computed(
+    () => pipe([
+      filterAddressBookByBookmarked,
+      filterAddressBook,
+      filterAddressBookBySearchPhrase,
+      sortAddressBookByName,
+    ])(Object.values(addressBook.value)),
   );
 
-  // Check if addressBook entry exists (string)
+  function setFilter(filter: IAddressBookFilter) {
+    activeFilter.value = filter;
+  }
+  function setShowBookmarked(value: boolean) {
+    showBookmarked.value = value;
+  }
+
   function addressBookEntryExists(address: AccountAddress) {
     return !!addressBook.value[address];
   }
 
-  // Add addressBook entry (name, address)
   function addAddressBookEntry(
     { name, address, isBookmarked }: IAddressBookOptions,
     isEdit = false,
@@ -54,7 +92,6 @@ export function useAddressBook() {
     };
   }
 
-  // Edit addressBook entry (name, address)
   function editAddressBookEntry({ name, address }: IAddressBookOptions) {
     if (!addressBookEntryExists(address)) {
       return;
@@ -70,7 +107,6 @@ export function useAddressBook() {
     };
   }
 
-  // Remove addressBook entry (address)
   function removeAddressBookEntry(address: AccountAddress) {
     if (addressBookEntryExists(address)) {
       delete addressBook.value[address];
@@ -90,21 +126,24 @@ export function useAddressBook() {
     }
   }
 
-  // Export addressBook as json
   function exportAddressBook() {
     // TODO: Implement exportAddressBook
     return JSON.stringify(addressBook.value);
   }
 
-  // Import addressBook from json
   function importAddressBook(json: string) {
     // TODO: Implement importAddressBook
     addressBook.value = JSON.parse(json);
   }
 
   return {
+    activeFilter,
     addressBook,
-    addressBookOrderedByName,
+    addressBookFiltered,
+    searchQuery,
+
+    setFilter,
+    setShowBookmarked,
 
     addressBookEntryExists,
     addAddressBookEntry,
@@ -116,4 +155,4 @@ export function useAddressBook() {
     exportAddressBook,
     importAddressBook,
   };
-}
+});

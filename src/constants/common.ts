@@ -437,3 +437,8 @@ export const POLLING_INTERVAL_TRANSACTIONS = 15000;
 
 // toBase64Url(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' }))
 export const JWT_HEADER = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9';
+
+export const ADDRESS_BOOK_FILTERS = {
+  all: 'all',
+  bookmarked: 'bookmarked',
+} as const;
