@@ -1,6 +1,6 @@
 <template>
   <div class="address-book-list">
-    <IonHeader>
+    <IonHeader class="address-book-header">
       <Transition name="fade-between">
         <InputSearch
           v-if="isScrolled"
@@ -14,12 +14,12 @@
     </IonHeader>
     <IonContent class="ion-padding ion-content-bg">
       <div
-        v-if="Object.keys(addressBook).length"
+        v-if="Object.keys(addressBookOrderedByName).length"
         ref="listEl"
         class="list"
       >
         <AddressBookItem
-          v-for="(entry) in addressBook"
+          v-for="(entry) in addressBookOrderedByName"
           :key="entry.name"
           :item="entry"
         />
@@ -72,7 +72,7 @@ export default defineComponent({
     const isScrolled = ref(false);
     const searchQuery = ref('');
 
-    const { addressBook } = useAddressBook();
+    const { addressBookOrderedByName } = useAddressBook();
     const route = useRoute();
 
     const noRecordsMessage = computed(() => {
@@ -108,7 +108,7 @@ export default defineComponent({
       listEl,
       isScrolled,
       searchQuery,
-      addressBook,
+      addressBookOrderedByName,
       noRecordsMessage,
     };
   },
@@ -126,6 +126,10 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   padding: 8px;
+
+  .address-book-header {
+    box-shadow: none;
+  }
 
   .search-field {
     margin-bottom: 16px;

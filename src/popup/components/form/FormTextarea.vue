@@ -4,6 +4,8 @@
     class="textarea"
     :class="[size, { 'auto-height': autoHeight }]"
     :readonly="readonly"
+    :text-limit="textLimit"
+    :model-value="modelValue"
     @update:modelValue="handleInput"
   >
     <template #default="{ inputId }">
@@ -18,9 +20,10 @@
         :value="modelValue"
         :rows="1"
         :disabled="readonly"
+        :maxlength="textLimit"
         @keydown.enter.prevent="handleEnterClick"
         @input="(payload) => handleInput(payload as InputEvent)"
-        @blur="(payload) => handleInput(payload as InputEvent)"
+        @blur="(payload) => handleInput(payload as unknown as InputEvent)"
       />
     </template>
 
@@ -53,13 +56,14 @@ export default defineComponent({
     type: { type: String, default: '' },
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
-    enterSubmit: Boolean,
+    textLimit: { type: Number, default: null },
     resizable: { type: Boolean, default: true },
     size: {
       type: String,
       default: null,
       validator: (val: string) => SIZES.includes(val),
     },
+    enterSubmit: Boolean,
     autoHeight: Boolean,
     readonly: Boolean,
   },

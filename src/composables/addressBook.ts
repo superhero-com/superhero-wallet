@@ -1,6 +1,9 @@
+import { computed } from 'vue';
+
 import { PROTOCOLS, STORAGE_KEYS } from '@/constants';
 import { AccountAddress, Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { getProtocolByAddress } from '@/utils';
 import { useStorageRef } from './storageRef';
 
 export interface IAddressBookEntry {
@@ -10,9 +13,7 @@ export interface IAddressBookEntry {
   protocol: Protocol;
 }
 
-export interface IAddressBook {
-  [address: AccountAddress]: IAddressBookEntry;
-}
+export type IAddressBook = Record<AccountAddress, IAddressBookEntry>;
 
 interface IAddressBookOptions {
   name: string;
@@ -23,6 +24,10 @@ interface IAddressBookOptions {
 const addressBook = useStorageRef<IAddressBook>({}, STORAGE_KEYS.addressBook);
 
 export function useAddressBook() {
+  const addressBookOrderedByName = computed(
+    () => Object.values(addressBook.value).sort((a, b) => a.name.localeCompare(b.name)),
+  );
+
   // Check if addressBook entry exists (string)
   function addressBookEntryExists(address: AccountAddress) {
     return !!addressBook.value[address];
@@ -33,19 +38,18 @@ export function useAddressBook() {
     { name, address, isBookmarked }: IAddressBookOptions,
     isEdit = false,
   ) {
-    const adapter = ProtocolAdapterFactory.getAdapterByAccountAddress(address);
-
     if (addressBookEntryExists(address) && !isEdit) {
       throw new Error('Address book entry already exists');
     }
 
+    const protocol = getProtocolByAddress(address);
     const defaultProtocol = isEdit ? addressBook.value[address].protocol : PROTOCOLS.aeternity;
     const defaultIsBookmarked = isEdit ? addressBook.value[address].isBookmarked : false;
 
     addressBook.value[address] = {
       name,
       address,
-      protocol: adapter?.protocol || defaultProtocol,
+      protocol: protocol || defaultProtocol,
       isBookmarked: isBookmarked || defaultIsBookmarked,
     };
   }
@@ -100,6 +104,7 @@ export function useAddressBook() {
 
   return {
     addressBook,
+    addressBookOrderedByName,
 
     addressBookEntryExists,
     addAddressBookEntry,
