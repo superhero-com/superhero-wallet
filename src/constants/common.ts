@@ -134,6 +134,7 @@ export const STORAGE_KEYS = {
   transferSendData: 'transfer-send-data',
   secureLogin: 'secure-login',
   walletConnectSession: 'wallet-connect-session',
+  addressBook: 'address-book',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [

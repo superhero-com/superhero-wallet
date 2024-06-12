@@ -50,6 +50,7 @@
               :address="account.address"
               :protocol="account.protocol"
               :show-protocol-icon="showProtocolIcon"
+              :show-explorer-link="showExplorerLink"
               class="ae-address"
             />
           </CopyText>
@@ -93,6 +94,7 @@ export default defineComponent({
     isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
     dense: Boolean,
+    showExplorerLink: Boolean,
   },
   setup(props) {
     const { getName } = useAeNames();
