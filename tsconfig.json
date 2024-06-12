@@ -14,7 +14,8 @@
     "strict": true,
     "strictFunctionTypes": false,
     "skipLibCheck": true,
-    "sourceMap": true,
+    // temporary workaround @see https://github.com/cypress-io/cypress/issues/26203#issuecomment-2152558848
+    "sourceMap": false,
     "typeRoots": [
       "node_modules/@types",
       "node_modules/@aeternity/aepp-sdk/src/typings",
