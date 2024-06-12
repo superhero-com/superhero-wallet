@@ -22,6 +22,7 @@ import {
   POPUP_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
+  ADDRESS_BOOK_FILTERS,
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
@@ -890,3 +891,14 @@ export interface IAmountDecimalPlaces {
   highPrecision?: boolean;
   amount?: number;
 }
+
+export interface IAddressBookEntry {
+  name: string;
+  address: AccountAddress;
+  isBookmarked: boolean;
+  protocol: Protocol;
+}
+
+export type IAddressBook = Record<AccountAddress, IAddressBookEntry>;
+
+export type IAddressBookFilter = ObjectValues<typeof ADDRESS_BOOK_FILTERS> | Protocol | undefined;
