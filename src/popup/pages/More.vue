@@ -12,6 +12,17 @@
           </template>
         </PanelItem>
 
+        <PanelItem
+          :to="{ name: 'address-book' }"
+          :title="$t('pages.titles.addressBook')"
+          :info="addressBookCount"
+          data-cy="address-book"
+        >
+          <template #icon>
+            <MenuCardIcon />
+          </template>
+        </PanelItem>
+
         <template v-if="isNodeMainnet || isNodeTestnet">
           <PanelItem
             :to="{ name: 'tips-claim' }"
@@ -90,11 +101,12 @@
 import { computed, defineComponent } from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
-import { useAccounts, useAeSdk } from '@/composables';
+import { useAccounts, useAddressBook, useAeSdk } from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
 
 import PanelItem from '../components/PanelItem.vue';
+
 import Invites from '../../icons/invites.svg?vue-component';
 import Settings from '../../icons/settings.svg?vue-component';
 import BugReport from '../../icons/bug-report.svg?vue-component';
@@ -103,30 +115,34 @@ import BuyIcon from '../../icons/credit-card.svg?vue-component';
 import Dex from '../../icons/dex.svg?vue-component';
 import ClaimTips from '../../icons/claim-tips.svg?vue-component';
 import FaucetIcon from '../../icons/faucet.svg?vue-component';
+import MenuCardIcon from '../../icons/menu-card-fill.svg?vue-component';
 
 export default defineComponent({
   name: 'More',
   components: {
     PanelItem,
+    IonPage,
+    IonContent,
     Invites,
     Settings,
     About,
-    BuyIcon,
     Dex,
     BugReport,
     ClaimTips,
+    BuyIcon,
     FaucetIcon,
-    IonPage,
-    IonContent,
+    MenuCardIcon,
   },
   setup() {
     const { activeAccount } = useAccounts();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
+    const { addressBook } = useAddressBook();
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
     const activeAccountFaucetUrl = computed(
       () => (isActiveAccountAe.value) ? buildAeFaucetUrl(activeAccount.value.address) : null,
     );
+    const addressBookCount = computed(() => Object.keys(addressBook.value).length.toString());
 
     return {
       AE_DEX_URL,
@@ -134,6 +150,7 @@ export default defineComponent({
       BUG_REPORT_URL,
       UNFINISHED_FEATURES,
       activeAccountFaucetUrl,
+      addressBookCount,
       isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
