@@ -19,8 +19,7 @@ import {
   defineComponent,
 } from 'vue';
 
-import { IAccount } from '@/types';
-import type { IAddressBookEntry } from '@/composables';
+import type { IAccount, IAddressBookEntry } from '@/types';
 import { ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
 
 import AccountInfo from '@/popup/components/AccountInfo.vue';

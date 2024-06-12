@@ -146,9 +146,9 @@ import { Field } from 'vee-validate';
 import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
+import type { IAddressBookEntry } from '@/types';
 import { ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
 import {
-  IAddressBookEntry,
   useAddressBook,
   useAddressBookEntryForm,
   useModals,

@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { useForm } from 'vee-validate';
 
-import { IAddressBookEntry } from './addressBook';
+import { IAddressBookEntry } from '@/types';
 
 interface UseAddressBookEntryForm {
   addressBookEntryData: Partial<Omit<IAddressBookEntry, 'protocol'>>;

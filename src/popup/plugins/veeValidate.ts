@@ -6,6 +6,7 @@ import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
   AccountAddress,
+  IAddressBook,
   INetwork,
   NetworkType,
   ObjectValues,
@@ -22,7 +23,6 @@ import {
   useBalances,
   useCurrencies,
   useAeSdk,
-  IAddressBook,
 } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
 import { getAddressByNameEntry } from '@/protocols/aeternity/helpers';
