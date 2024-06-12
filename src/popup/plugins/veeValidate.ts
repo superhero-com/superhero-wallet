@@ -5,6 +5,7 @@ import { debounce } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
+  AccountAddress,
   INetwork,
   NetworkType,
   ObjectValues,
@@ -15,9 +16,14 @@ import {
   NETWORK_NAME_TESTNET,
   PROTOCOLS,
 } from '@/constants';
-import { isNotFoundError, isUrlValid } from '@/utils';
+import { getProtocolByAddress, isNotFoundError, isUrlValid } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useBalances, useCurrencies, useAeSdk } from '@/composables';
+import {
+  useBalances,
+  useCurrencies,
+  useAeSdk,
+  IAddressBook,
+} from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
 import { getAddressByNameEntry } from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
@@ -112,6 +118,25 @@ defineRule(
     }
     return true;
   },
+);
+
+defineRule(
+  'address_book_entry_exists',
+  (value: string, [entries, savedKey, type]: [IAddressBook, string, 'name' | 'address']) => {
+    const key = (Object.keys(entries) as Array<AccountAddress>)
+      .find((k) => entries[k][type] === value);
+
+    const entryTypeText = type === 'name' ? tg('common.name') : tg('common.address');
+
+    return (key && key !== savedKey)
+      ? tg('validation.addressBookEntryExists', [entryTypeText.toLowerCase()])
+      : true;
+  },
+);
+
+defineRule(
+  'is_address_valid',
+  (value: string) => getProtocolByAddress(value) ? true : tg('validation.invalidAddress'),
 );
 
 export default () => {

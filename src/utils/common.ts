@@ -11,6 +11,7 @@ import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
+  AccountAddress,
   AssetContractId,
   BigNumberPublic,
   IAccount,
@@ -31,6 +32,8 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
+  NETWORK_TYPE_MAINNET,
+  NETWORK_TYPE_TESTNET,
   PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
@@ -516,3 +519,14 @@ export const toBase64Url = (data: Buffer | Uint8Array | string): string => Buffe
   .replace(/\//g, '_')
   .replace(/\+/g, '-')
   .replace(/=+$/, '');
+
+/**
+ * Get protocol by address regardless of the active network.
+ */
+export function getProtocolByAddress(address: AccountAddress) {
+  let adapter = ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_MAINNET);
+  if (!adapter) {
+    adapter = ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_TESTNET);
+  }
+  return adapter?.protocol;
+}
