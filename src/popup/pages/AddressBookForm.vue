@@ -10,23 +10,30 @@
               :is-placeholder="isPlaceholder"
               :avatar-borderless="isPlaceholder"
               :show-protocol-icon="!isPlaceholder"
+              :max-width="155"
               use-address-for-avatar
             />
-            <BtnPill
-              variant="dark"
-              @click="toggleBookmark()"
+            <Field
+              v-slot="{ field }"
+              name="isBookmarked"
+              :model-value="formModel.isBookmarked"
             >
-              <IconWrapper
-                :icon="FavoriteIcon"
-                icon-size="rg"
-                :class="{ yellow: entry.isBookmarked }"
-              />
-              {{
-                entry.isBookmarked
-                  ? $t('pages.addressBook.entry.bookmarked')
-                  : $t('pages.addressBook.entry.bookmark')
-              }}
-            </BtnPill>
+              <BtnPill
+                variant="dark"
+                @click="toggleBookmark()"
+              >
+                <IconWrapper
+                  :icon="FavoriteIcon"
+                  icon-size="rg"
+                  :class="{ yellow: field.value }"
+                />
+                {{
+                  field.value
+                    ? $t('pages.addressBook.entry.bookmarked')
+                    : $t('pages.addressBook.entry.bookmark')
+                }}
+              </BtnPill>
+            </Field>
           </div>
           <div class="qrcode-wrapper">
             <QrCode
@@ -39,37 +46,46 @@
         </div>
         <div class="inputs">
           <Field
-            v-slot="{ field }"
+            v-slot="{ field, errorMessage }"
             name="name"
-            :model-value="entry.name"
-            :validate-on-mount="!!entry.name"
-            :rules="{ required: true }"
+            :model-value="formModel.name"
+            :validate-on-mount="!!formModel.name"
+            :rules="{
+              required: true,
+              address_book_entry_exists: [addressBook, savedEntry?.address, 'name'],
+              max_len: 50,
+            }"
           >
-            <!-- TODO Add validation, name/address already on address book -->
             <FormTextarea
               v-bind="field"
-              v-model="entry.name"
+              v-model="formModel.name"
               name="name"
               data-cy="name"
               auto-height
+              :message="errorMessage"
               :label="$t('common.name')"
               :placeholder="$t('pages.addressBook.entry.namePlaceholder')"
             />
           </Field>
 
           <Field
-            v-slot="{ field }"
+            v-slot="{ field, errorMessage }"
             name="address"
-            :model-value="entry.address"
-            :validate-on-mount="!!entry.address"
-            :rules="{ required: true }"
+            :model-value="formModel.address"
+            :validate-on-mount="!!formModel.address"
+            :rules="{
+              required: true,
+              address_book_entry_exists: [addressBook, savedEntry?.address, 'address'],
+              is_address_valid: true,
+            }"
           >
             <FormTextarea
               v-bind="field"
-              v-model="entry.address"
+              v-model="formModel.address"
               name="address"
               data-cy="address"
               auto-height
+              :message="errorMessage"
               :label="$t('common.address')"
               :placeholder="$t('pages.addressBook.entry.addressPlaceholder')"
             >
@@ -128,7 +144,12 @@ import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
 import { ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
-import { IAddressBookEntry, useAddressBook, useModals } from '@/composables';
+import {
+  IAddressBookEntry,
+  useAddressBook,
+  useAddressBookEntryForm,
+  useModals,
+} from '@/composables';
 
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnPill from '@/popup/components/buttons/BtnPill.vue';
@@ -142,6 +163,7 @@ import FixedScreenFooter from '@/popup/components/FixedScreenFooter.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import FavoriteIcon from '@/icons/star-full.svg?vue-component';
 import TrashIcon from '@/icons/trash.svg?vue-component';
+import { getProtocolByAddress } from '@/utils';
 
 export default defineComponent({
   components: {
@@ -159,35 +181,38 @@ export default defineComponent({
     QrScanIcon,
   },
   setup() {
-    const defaultName = 'Custom Name';
+    const defaultName = tg('pages.addressBook.entry.customName');
     const defaultAddress = 'xx_AbCXyZ';
     const isPlaceholder = ref(true);
-    const entry = ref<Partial<IAddressBookEntry>>({
-      name: '',
-      address: '',
-      isBookmarked: false,
-    });
+    const savedEntry = ref<Partial<IAddressBookEntry>>({});
 
     const route = useRoute();
     const ionRouter = useIonRouter();
     const { openScanQrModal } = useModals();
     const {
+      addressBook,
       addAddressBookEntry,
       toggleBookmarkAddressBookEntry,
       getAddressBookEntryByAddress,
       removeAddressBookEntry,
     } = useAddressBook();
+    const { formModel, hasError, updateFormModelValues } = useAddressBookEntryForm(
+      { addressBookEntryData: {} },
+    );
 
     const isEdit = route.name === ROUTE_ADDRESS_BOOK_EDIT;
 
-    const accountName = computed(() => isPlaceholder.value ? defaultName : entry.value.name);
+    const accountName = computed(() => isPlaceholder.value ? defaultName : formModel.value.name);
     const accountAddress = computed(
-      () => isPlaceholder.value ? defaultAddress : entry.value.address,
+      () => isPlaceholder.value ? defaultAddress : formModel.value.address,
+    );
+    const protocol = computed(
+      () => formModel.value.address ? getProtocolByAddress(formModel.value.address) : undefined,
     );
     const account = computed(() => ({
       name: accountName.value,
       address: accountAddress.value,
-      protocol: entry.value.protocol,
+      protocol: protocol.value,
     }));
 
     function goBack() {
@@ -195,23 +220,23 @@ export default defineComponent({
     }
 
     function confirm() {
-      if (entry.value.name && entry.value.address) {
-        addAddressBookEntry(entry.value as IAddressBookEntry, isEdit);
+      if (!hasError.value) {
+        addAddressBookEntry(formModel.value as IAddressBookEntry, isEdit);
         goBack();
       }
     }
 
     function deleteEntry() {
-      if (entry.value.address) {
-        removeAddressBookEntry(entry.value.address);
+      if (savedEntry.value.address) {
+        removeAddressBookEntry(savedEntry.value.address);
         goBack();
       }
     }
 
     function toggleBookmark() {
-      if (entry.value.address) {
-        entry.value.isBookmarked = !entry.value.isBookmarked;
-        toggleBookmarkAddressBookEntry(entry.value.address);
+      if (formModel.value.address) {
+        formModel.value.isBookmarked = !formModel.value.isBookmarked;
+        toggleBookmarkAddressBookEntry(formModel.value.address);
       }
     }
 
@@ -221,20 +246,20 @@ export default defineComponent({
       });
 
       if (scanResult) {
-        entry.value.address = scanResult;
+        formModel.value.address = scanResult;
       }
     }
 
-    watch(entry, (newEntry) => {
-      // TODO validate Address, only if address is valid then set isPlaceholder to false
-      isPlaceholder.value = !(newEntry.name && newEntry.address);
+    watch([formModel, hasError], ([newEntry, newHasError]) => {
+      isPlaceholder.value = !(newEntry.name && newEntry.address) || newHasError;
     }, { deep: true });
 
     onMounted(() => {
       if (isEdit) {
         const addressBookEntry = getAddressBookEntryByAddress(route.params.id as string);
         if (addressBookEntry) {
-          entry.value = { ...toRaw(addressBookEntry) };
+          savedEntry.value = addressBookEntry;
+          updateFormModelValues({ ...toRaw(addressBookEntry) });
         }
       }
     });
@@ -242,9 +267,12 @@ export default defineComponent({
     return {
       account,
       accountName,
-      entry,
+      formModel,
       isPlaceholder,
       isEdit,
+      addressBook,
+      savedEntry,
+      hasError,
 
       scanQr,
       goBack,
@@ -315,6 +343,7 @@ export default defineComponent({
   .footer {
     display: flex;
     flex-flow: column;
+    background-color: $color-bg-app;
 
     .main-buttons {
       display: flex;
