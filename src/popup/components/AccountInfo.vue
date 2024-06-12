@@ -10,6 +10,7 @@
       :size="avatarSize"
       :borderless="avatarBorderless"
       :is-placeholder="isPlaceholder"
+      :use-address-for-avatar="useAddressForAvatar"
     >
       <slot name="avatar" />
     </Avatar>
@@ -93,6 +94,7 @@ export default defineComponent({
     isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
     dense: Boolean,
+    useAddressForAvatar: Boolean,
   },
   setup(props) {
     const { getName } = useAeNames();

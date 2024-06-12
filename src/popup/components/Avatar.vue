@@ -58,13 +58,19 @@ export default defineComponent({
     },
     borderless: Boolean,
     isPlaceholder: Boolean,
+    /**
+     * When using custom name we should use the address for the avatar
+     */
+    useAddressForAvatar: Boolean,
   },
   setup(props) {
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
     const hasProfileImage = ref(false);
 
-    const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
+    const avatarUrl = computed(
+      () => `${AE_AVATAR_URL}${props.useAddressForAvatar ? props.address : props.name || props.address}`,
+    );
     const calculatedColor = computed(() => (props.address)
       ? getAddressColor(props.address)
       : undefined);
