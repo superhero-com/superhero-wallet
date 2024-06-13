@@ -8,7 +8,6 @@ import type {
   AccountAddress,
   AssetContractId,
   AssetList,
-  BigNumberPublic,
   IToken,
   ITokenBalance,
   ITransaction,
@@ -17,12 +16,10 @@ import type {
   Dictionary,
   ITx,
 } from '@/types';
-import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, STORAGE_KEYS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
-import { AE_COIN_PRECISION } from '@/protocols/aeternity/config';
-import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 
 import { uniqBy } from 'lodash-es';
 import { useAccounts } from './accounts';
@@ -232,61 +229,6 @@ export function useFungibleTokens() {
       : protocolTokens[tx.contractId]?.symbol;
   }
 
-  /**
-   * TODO move this function to utilities and make it not dependant on token list
-   */
-  function getTxAmountTotal(
-    transaction: ITransaction,
-    direction: string = TX_DIRECTION.sent,
-  ) {
-    const isReceived = direction === TX_DIRECTION.received;
-    const { protocol, tx } = transaction || {};
-
-    // This is out of place but since we are treating new protocols as fungible tokens
-    // it is better to have it here than in the protocol specific helper file
-    if (protocol && protocol !== PROTOCOLS.aeternity) {
-      return new BigNumber(tx?.amount || 0)
-        .plus(isReceived || !isAssetCoin(tx.contractId) ? 0 : tx?.fee || 0)
-        .toNumber();
-    }
-
-    const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
-
-    const tokenData = protocol
-      && getProtocolAvailableTokens(protocol)[contractCallData?.assetContractId!];
-
-    if (contractCallData && tokenData) {
-      return +toShiftedBigNumber(
-        contractCallData.amount || 0,
-        -(tokenData.decimals || AE_COIN_PRECISION), // TODO possibility of temporary wrong precision
-      );
-    }
-
-    const claimTipAmount = (tx.function === 'claim') ? tx.log?.[0]?.topics[2] : null;
-
-    const rawAmount = (
-      tx?.amount
-      || (tx?.tx?.tx as any)?.amount
-      || tx?.nameFee
-      || claimTipAmount
-      || 0
-    );
-
-    const amount: BigNumberPublic = (typeof rawAmount === 'object')
-      ? rawAmount
-      : new BigNumber(Number(rawAmount));
-
-    let gasCost = new BigNumber(0);
-    if (tx?.gasPrice && tx?.gasUsed) {
-      gasCost = new BigNumber(tx.gasPrice).multipliedBy(tx.gasUsed);
-    }
-
-    return +aettosToAe(amount
-      .plus(isReceived ? 0 : tx?.fee || 0)
-      .plus(isReceived ? 0 : tx?.tx?.tx?.fee || 0)
-      .plus(isReceived ? 0 : gasCost));
-  }
-
   availableTokensPooling(() => loadAvailableTokens());
   tokenBalancesPooling(() => loadTokenBalances());
 
@@ -325,7 +267,6 @@ export function useFungibleTokens() {
     getAccountTokenBalances,
     getProtocolAvailableTokens,
     getTxAssetSymbol,
-    getTxAmountTotal,
     loadTokenBalances,
     loadAvailableTokens,
   };
