@@ -1,12 +1,12 @@
-import '@/lib/initPolyfills';
 import { PopupActionType } from '@/types';
 import { openPopup, removePopup, getPopup } from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
 
-async function setupOffscreenDocument(path: string) {
+(async () => {
   // Check all windows controlled by the service worker to see if one
   // of them is the offscreen document with the given path
-  const offscreenUrl = browser.runtime.getURL(path);
+  const offscreenUrl = browser.runtime.getURL('offscreen.html');
+
   // @ts-expect-error - browser type is not complete
   const existingContexts = await browser.runtime.getContexts({
     contextTypes: ['OFFSCREEN_DOCUMENT'],
@@ -19,13 +19,11 @@ async function setupOffscreenDocument(path: string) {
 
   // @ts-expect-error - browser type is not complete
   await browser.offscreen.createDocument({
-    url: path,
+    url: offscreenUrl,
     reasons: ['LOCAL_STORAGE'],
     justification: 'handle wallet-aepp communication',
   });
-}
-
-setupOffscreenDocument(browser.runtime.getURL('offscreen.html'));
+})();
 
 export type PopupMessageData = {
   target?: 'background' | 'offscreen';
@@ -37,7 +35,7 @@ export type PopupMessageData = {
 };
 
 /**
- *   @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
+ * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
 function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
