@@ -565,6 +565,14 @@
         "bookmarked": "Bookmarked",
         "namePlaceholder": "Enter custom name",
         "addressPlaceholder": "Enter public blockchain address"
+      },
+      "import": {
+        "title": "Importing records",
+        "subtitle": "into wallet address book",
+        "importing": "Importing",
+        "success": "Successfully imported",
+        "failed": "Failed to import",
+        "existing": "Already existing"
       }
     },
     "secureLogin": {

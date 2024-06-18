@@ -9,7 +9,7 @@ import {
   IAddressBookEntry,
   IAddressBookFilter,
 } from '@/types';
-import { ADDRESS_BOOK_FILTERS, STORAGE_KEYS } from '@/constants';
+import { ADDRESS_BOOK_FILTERS, STORAGE_KEYS, MODAL_ADDRESS_BOOK_IMPORT } from '@/constants';
 import { AddressBookEntryExists, AddressBookInvalidAddress, AddressBookRequiredFields } from '@/lib/errors';
 import {
   generateId,
@@ -30,7 +30,7 @@ interface IAddressBookOptions {
 
 export const useAddressBook = createCustomScopedComposable(() => {
   const addressBook = useStorageRef<IAddressBook>({}, STORAGE_KEYS.addressBook);
-  const { openDefaultModal } = useModals();
+  const { openModal, openDefaultModal } = useModals();
 
   const activeFilter = ref<IAddressBookFilter>(ADDRESS_BOOK_FILTERS.all);
   const searchQuery = ref<string>('');
@@ -149,12 +149,10 @@ export const useAddressBook = createCustomScopedComposable(() => {
         }
       });
 
-      // TODO Update to match new figma design
-      openDefaultModal({
-        title: `Importing ${totalEntries} address records`,
-        msg: `Successfully imported ${successfulEntriesCount} address records.
-          <br/> ${existingEntriesCount} address records already exist.
-          <br/> ${totalEntries - successfulEntriesCount - existingEntriesCount} address records failed to import.`,
+      openModal(MODAL_ADDRESS_BOOK_IMPORT, {
+        totalEntries,
+        successfulEntriesCount,
+        existingEntriesCount,
       });
     } catch (error) {
       handleUnknownError(error);

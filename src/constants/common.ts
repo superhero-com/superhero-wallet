@@ -328,6 +328,7 @@ export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
+export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
