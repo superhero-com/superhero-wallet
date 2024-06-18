@@ -284,7 +284,7 @@ export default defineComponent({
     const activeAccount = getLastActiveProtocolAccount(protocol);
     const transaction = ref<ITransaction>({
       protocol,
-      tx: popupProps.value?.tx,
+      tx: popupProps.value?.tx || {},
     } as ITransaction);
 
     const {

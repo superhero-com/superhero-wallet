@@ -46,6 +46,9 @@ let web3wallet: Awaited<ReturnType<typeof IWeb3Wallet.init>> | null;
 const wcSession = useStorageRef<null | SessionTypes.Struct>(
   null,
   STORAGE_KEYS.walletConnectSession,
+  {
+    backgroundSync: true,
+  },
 );
 
 const wcState = reactive({
@@ -58,7 +61,7 @@ const wcState = reactive({
 /**
  * TODO add description
  */
-export function useWalletConnect() {
+export function useWalletConnect({ offscreen } = { offscreen: false }) {
   const { activeAccount, accountsGroupedByProtocol, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks } = useNetworks();
   const { openDefaultModal } = useModals();
@@ -72,9 +75,9 @@ export function useWalletConnect() {
     [key in SupportedRequestMethod]: (p: any) => Promise<string | false>
   }> = {
     eth_sendTransaction: async (params: SendTransactionParams) => {
+      const { url, name } = wcSession.value?.peer.metadata! || {};
       const senderId = toChecksumAddress(params.from);
       const recipientId = toChecksumAddress(params.to);
-      const { url, name } = wcSession.value?.peer.metadata! || {};
       const isCoinTransfer = !!params.value; // `value` is present only when sending ETH
       const tag = (params.data) ? Tag.ContractCallTx : Tag.SpendTx;
       const modalProps: IModalProps = {
@@ -313,23 +316,32 @@ export function useWalletConnect() {
   if (!composableInitialized) {
     composableInitialized = true;
 
-    // Restore open WC session after refreshing the tab or extension.
     // As the session is not important immediately after opening the app we are delaying it
     // until other more important features are ready.
     setTimeout(async () => {
-      if (wcSession.value) {
-        web3wallet = await initWeb3wallet();
-        const sessions = web3wallet.getActiveSessions();
-        const restoredTopic = Object.values(sessions)?.[0]?.topic;
+      // Try to restore open WC session:
+      // - after refreshing the tab or extension (only once),
+      // - in the extension offscreen when the new session state is detected (constant monitoring).
+      watch(wcSession, async (session, oldSession) => {
+        if (session) {
+          if (!web3wallet) {
+            web3wallet = await initWeb3wallet();
+          }
 
-        // If restored session is different than the currently open we need to close session.
-        if (wcSession.value?.topic !== restoredTopic) {
-          disconnect();
-        } else if (restoredTopic) {
-          monitorActiveSessionEvents();
-          monitorActiveAccountAndNetwork();
+          const sessions = web3wallet.getActiveSessions();
+          const activeTopic = Object.values(sessions)?.[0]?.topic;
+
+          if (!oldSession && activeTopic && activeTopic === session.topic) {
+            monitorActiveSessionEvents();
+
+            if (!offscreen) {
+              monitorActiveAccountAndNetwork();
+            }
+          } else {
+            disconnect();
+          }
         }
-      }
+      }, { deep: true, immediate: true, once: !offscreen });
     }, 1000);
   }
 

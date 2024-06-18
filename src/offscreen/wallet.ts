@@ -2,8 +2,8 @@ import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
+import type { IPopupMessageData } from '@/types';
 import { CONNECTION_TYPES, POPUP_ACTIONS } from '@/constants';
-import { PopupMessageData } from '@/background';
 import { useAccounts, useAeSdk, useNetworks } from '@/composables';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
@@ -37,7 +37,7 @@ export async function init() {
     switch (detectConnectionType(port as Runtime.Port)) {
       case CONNECTION_TYPES.POPUP: {
         const id = new URL(port?.sender?.url!).searchParams.get('id');
-        port.onMessage.addListener(async (msg: PopupMessageData) => {
+        port.onMessage.addListener(async (msg: IPopupMessageData) => {
           const popup = getPopup(id!);
 
           if (msg.type === POPUP_ACTIONS.getProps) {
