@@ -1,6 +1,6 @@
 import { Camera } from '@capacitor/camera';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
-import { openInNewWindow } from './common';
+import { handleUnknownError, openInNewWindow } from './common';
 
 /**
  * Enumerating available devices with fallback methods.
@@ -26,6 +26,18 @@ export async function checkDeviceHasCamera(): Promise<boolean> {
   return new Promise((resolve) => enumerateDevices((devices) => {
     resolve(devices.some((device) => ['videoinput', 'video'].includes(device.kind)));
   }));
+}
+
+/**
+ * Different way of detecting camera permission. Mostly for Safari Browser
+ * which does not update `permissionStatus` when user allows to use camera.
+ * Also required for Firefox which does not support `navigator.permissions.query` for camera.
+ */
+function checkCameraPermissionFallback(resolve: (value: boolean) => void) {
+  navigator.mediaDevices
+    ?.getUserMedia({ video: true })
+    ?.then((mediaStream) => resolve(mediaStream.active))
+    ?.catch(() => resolve(false));
 }
 
 export async function checkOrRequestDeviceCameraPermission(): Promise<boolean> {
@@ -71,13 +83,15 @@ export async function checkOrRequestDeviceCameraPermission(): Promise<boolean> {
           resolve(permissionStatus.state === 'granted');
         });
 
-        // Different way of detecting camera permission. Mostly for Safari Browser
-        // which does not update `permissionStatus` when user allows to use camera.
-        navigator.mediaDevices
-          ?.getUserMedia({ video: true })
-          ?.then((mediaStream) => resolve(mediaStream.active))
-          ?.catch(() => resolve(false));
+        checkCameraPermissionFallback(resolve);
       })
-      .catch(() => resolve(false));
+      .catch((e) => {
+        const firefoxExceptionMessage = "'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.";
+        if (e.message === firefoxExceptionMessage) {
+          checkCameraPermissionFallback(resolve);
+          return;
+        }
+        handleUnknownError(e);
+      });
   });
 }
