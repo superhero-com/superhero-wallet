@@ -2,6 +2,74 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.6](https://github.com/superhero-com/superhero-wallet/compare/v2.2.5...v2.2.6) (2024-05-27)
+
+
+### Features
+
+* add placeholder when device has no camera ([433e869](https://github.com/superhero-com/superhero-wallet/commit/433e8695cf30bb708f40fe0b025bb02a64aaeb0d))
+* ask confirmation for delegation and typed data signing ([0bc3cb1](https://github.com/superhero-com/superhero-wallet/commit/0bc3cb15251f3adaf5481a9d8c1ce28b85b92c31))
+* **bitcoin:** improve dust error ([8e58952](https://github.com/superhero-com/superhero-wallet/commit/8e589528b28e82fd4f54b36c7368aa1fcb2e16ab))
+* custom panel table item component ([de18eef](https://github.com/superhero-com/superhero-wallet/commit/de18eeff74eb43fbedcded56690951668cd63f56))
+* open scan qr code modal method ([b1b72c3](https://github.com/superhero-com/superhero-wallet/commit/b1b72c3de9fb600f67965da96913a33ef2d0b7ab))
+* qr code scanner messages inside box ([953321e](https://github.com/superhero-com/superhero-wallet/commit/953321ef31ee7e1d3886d5b8f13778cd15ffe5f8))
+* show loader on account discovering after migration ([1520915](https://github.com/superhero-com/superhero-wallet/commit/1520915be30db95c28243c084992f75043a23e46))
+
+
+### Bug Fixes
+
+* adjust wording for failed transaction modal ([120b822](https://github.com/superhero-com/superhero-wallet/commit/120b8222a2ce505157c10fe0ff1445d9eeb7bf74))
+* **aeternity:** include gasUsed to the calculation of total ([fb0e456](https://github.com/superhero-com/superhero-wallet/commit/fb0e4565c054b42b131e1340417f1b45c6df2099))
+* **aeternity:** show correct fee in initialization of TransferSend modal ([9e02090](https://github.com/superhero-com/superhero-wallet/commit/9e02090d38740131b0ea76e3b5493e798037c177))
+* **aeternity:** show node connection error ([01c0503](https://github.com/superhero-com/superhero-wallet/commit/01c050323f5a7ede964c8eab28588224da317e6b))
+* **bitcoin:** show correct transaction info ([bf2fcf2](https://github.com/superhero-com/superhero-wallet/commit/bf2fcf2944a953dcc34531a55eeb34fc47f69ee8))
+* **browser:** accept urls starting with "Http://" ([f1c667d](https://github.com/superhero-com/superhero-wallet/commit/f1c667dbffea37bc6b653d846344b49916deb6f2))
+* **browser:** allow opening aepps on localhost ([ada5fbd](https://github.com/superhero-com/superhero-wallet/commit/ada5fbd4543aeeb142606e3e33da4a861a5716c0))
+* **browser:** use url keyboard instead general ([c25f723](https://github.com/superhero-com/superhero-wallet/commit/c25f7232e5ff9a44954e63f92e01924a4ce99dee))
+* calculate fee based on node load ([9de40f4](https://github.com/superhero-com/superhero-wallet/commit/9de40f4d67d567a0e276eb58cc787d9cf03f3a30))
+* estimate gas limit for erc20 transfers ([6e33f45](https://github.com/superhero-com/superhero-wallet/commit/6e33f45cd89dfbe8f80a3652294cd0ac7c8bb3ea))
+* **ethereum:** show token transfer info correctly ([2b9dabb](https://github.com/superhero-com/superhero-wallet/commit/2b9dabbcc3f6a5365596e2379daebf2a6aca1c16))
+* handle pay for tx correctly ([2ca3657](https://github.com/superhero-com/superhero-wallet/commit/2ca365719f5f9b6dc03994889dbe40d574fe0f56))
+* **ios:** don't recreate RpcClient on navigation inside page ([60b7d55](https://github.com/superhero-com/superhero-wallet/commit/60b7d550381e7b671ea5c2ea0d2187871d2c3c2c))
+* multisig transfer receive share correct address ([b9b5252](https://github.com/superhero-com/superhero-wallet/commit/b9b52523942692b2bd8ea2e8e3455e3f1c4af191))
+* **multisig:** do not fail if no function provided ([acd104a](https://github.com/superhero-com/superhero-wallet/commit/acd104a3f3749b47b4ea2ae6a56d83f3cf8c5ce0))
+* **multisig:** slide to active account ([361518e](https://github.com/superhero-com/superhero-wallet/commit/361518e2d9b1f4dc550919f9e57d04eca790d44f))
+* remove extra error message in RpcRejectedByUserError ([8f4d1bb](https://github.com/superhero-com/superhero-wallet/commit/8f4d1bbe83a5b1d3ddff1444b3fbc5323e238343))
+
+
+### Performance
+
+* do not create new sdk instance on invite claim ([1a314ef](https://github.com/superhero-com/superhero-wallet/commit/1a314ef8af2528e82f898ca3b486d2cafed2631b))
+* remove skip optimize flag on svg loading ([6ee6d0a](https://github.com/superhero-com/superhero-wallet/commit/6ee6d0a76fd44c1056eab11c765efbbdd82ed5d3))
+
+
+### Tests
+
+* add deeplinks e2e test ([5a6b219](https://github.com/superhero-com/superhero-wallet/commit/5a6b2190cd9476a935ebc8c80fab2feb8586a02c))
+* add invites e2e test ([69f27bc](https://github.com/superhero-com/superhero-wallet/commit/69f27bc8d30bc7890ed9f9e61781cf8e60894fa9))
+* add open-scan-qr-modal unit test ([b98e97e](https://github.com/superhero-com/superhero-wallet/commit/b98e97e47577c1f2a0dfc0b0ae8a56ce937aea33))
+* add receive e2e test ([320075a](https://github.com/superhero-com/superhero-wallet/commit/320075a7114ad7950cd9cd737d0c6b1cc0101999))
+* disable part of invite test ([393febd](https://github.com/superhero-com/superhero-wallet/commit/393febd90bd14bdee258f4df9ec815564bb5a3d8))
+* update deeplinks test page ([f2053de](https://github.com/superhero-com/superhero-wallet/commit/f2053de5d155154453eb8d9e4cfff7d0ea2dbb22))
+
+
+### Maintenance
+
+* app name as constant ([00f8ef6](https://github.com/superhero-com/superhero-wallet/commit/00f8ef6710dddfbd9e8a6e7b1b8aefd7123fd8a7))
+* **browser:** ensure one RpcClient per iframe, avoid extra polling ([be5ff43](https://github.com/superhero-com/superhero-wallet/commit/be5ff433e9612a2fb0ec536e50d4ed69862e48df))
+* comment on iOS fix in InputField ([23011f2](https://github.com/superhero-com/superhero-wallet/commit/23011f220a3a0b3e5470d10e6318ddf2fba0e577))
+* hide dex filter on AE asset page ([a0405e2](https://github.com/superhero-com/superhero-wallet/commit/a0405e2b6ef9d841502d5fe475ec4b854d3bc9a0))
+* qr scanner modal safari camera permissions ([ec90b95](https://github.com/superhero-com/superhero-wallet/commit/ec90b951b06957beb7ba3c50451b538e801c2053))
+* remove untranslated locale ([d2ed330](https://github.com/superhero-com/superhero-wallet/commit/d2ed330bd7729b793f71bde25667ee6656ed65fb))
+* remove unused dependency ([78942f0](https://github.com/superhero-com/superhero-wallet/commit/78942f0d2f158f3b89b7bc9dc8c44ee88841444d))
+* rename ae coin name to aeternity ([c9489d6](https://github.com/superhero-com/superhero-wallet/commit/c9489d63e822cd4190cd58b653c03292ddef4dcf))
+* replace browser qr code reader ([ad15090](https://github.com/superhero-com/superhero-wallet/commit/ad1509059c86174d5b063a2df440706ac5bdd8b1))
+* show total amount for multisig contract calls ([63ad6f4](https://github.com/superhero-com/superhero-wallet/commit/63ad6f42441b475313d8ad17e75323c7d093fa13))
+* show total amount with high precision ([f5b2e0d](https://github.com/superhero-com/superhero-wallet/commit/f5b2e0d55bfaebb0b4bdb9b450919fa7e503ce17))
+* update capacitor & plugins to v6 ([a63f77a](https://github.com/superhero-com/superhero-wallet/commit/a63f77afc861a78375e0d7091b2fc354b0b05769))
+* update github actions to the latest versions ([d645e6f](https://github.com/superhero-com/superhero-wallet/commit/d645e6ff075d6ccd6359226d3a17b4c42b29e0de))
+* use isNameValid from sdk instead of custom ([1ee963d](https://github.com/superhero-com/superhero-wallet/commit/1ee963df562e55d6fd3ff64cd0efcfe6417a6cf0))
+
 ### [2.2.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.4...v2.2.5) (2024-05-04)
 
 
