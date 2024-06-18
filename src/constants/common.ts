@@ -361,6 +361,15 @@ export const POPUP_ACTIONS = {
   reject: 'reject',
 } as const;
 
+export const POPUP_METHODS = {
+  openPopup: 'openPopup',
+  removePopup: 'removePopup',
+  getPopup: 'getPopup',
+  reload: 'reload',
+  paste: 'paste',
+  checkHasAccount: 'checkHasAccount', // TODO check if still used
+} as const;
+
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
 
 export const PERMISSION_DEFAULTS: IPermission = {

@@ -12,15 +12,16 @@ import {
 } from '@aeternity/aepp-sdk';
 import type { Animation } from '@ionic/vue';
 import {
+  ACCOUNT_TYPES,
   ALLOWED_ICON_STATUSES,
+  ASSET_TYPES,
   INPUT_MESSAGE_STATUSES,
   NOTIFICATION_TYPES,
   POPUP_ACTIONS,
+  POPUP_METHODS,
   POPUP_TYPES,
-  ASSET_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
-  ACCOUNT_TYPES,
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
@@ -670,6 +671,7 @@ export interface IMiddlewareStatus {
 }
 
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
+export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
 
 export interface IPopupActions {
   resolve: ResolveCallback;
@@ -704,6 +706,20 @@ export interface IPopupProps extends IPopupActions, IPopupData {
 
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
+}
+
+export interface IPopupMessageData {
+  target?: 'background' | 'offscreen';
+  method?: PopupMethod;
+  type?: PopupActionType;
+  uuid?: string;
+  params?: {
+    aepp?: string | object;
+    popupType?: PopupType;
+    popupProps?: Partial<IPopupProps>;
+    id?: string;
+  };
+  payload?: any;
 }
 
 export interface IResponseChallenge {

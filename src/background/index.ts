@@ -1,4 +1,4 @@
-import { PopupActionType } from '@/types';
+import { IPopupMessageData } from '@/types';
 import { openPopup, removePopup, getPopup } from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
 
@@ -25,32 +25,28 @@ import { updateDynamicRules } from './redirectRule';
   });
 })();
 
-export type PopupMessageData = {
-  target?: 'background' | 'offscreen';
-  method?: 'openPopup' | 'removePopup' | 'getPopup';
-  type?: PopupActionType;
-  uuid?: string;
-  params?: any;
-  payload?: any;
-};
-
 /**
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
-function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
+function handleMessage(msg: IPopupMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
-    const { popupType, aepp, params } = msg.params;
+    const {
+      aepp,
+      id,
+      popupProps,
+      popupType,
+    } = msg.params!;
     switch (msg.method) {
       case 'openPopup':
-        openPopup(popupType, aepp, params).then((popupConfig) => {
+        openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
           sendResponse(popupConfig);
         });
         return true;
       case 'removePopup':
-        sendResponse(removePopup(msg.params.id));
+        sendResponse(removePopup(id!));
         return false;
       case 'getPopup':
-        sendResponse(getPopup(msg.params.id));
+        sendResponse(getPopup(id!));
         return false;
       default:
         break;
@@ -58,7 +54,7 @@ function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
   }
 
   // forward messages to the offscreen page
-  browser.runtime.sendMessage<PopupMessageData>({
+  browser.runtime.sendMessage<IPopupMessageData>({
     ...msg,
     target: 'offscreen',
   });

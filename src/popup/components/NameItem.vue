@@ -155,12 +155,13 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IName } from '@/types';
+import { IName, IPopupMessageData } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
   IS_MOBILE_APP,
   MODAL_CONFIRM,
+  POPUP_METHODS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import Logger from '@/lib/logger';
@@ -252,7 +253,9 @@ export default defineComponent({
           text = value;
         }
       } else if (IS_EXTENSION) {
-        text = await browser!.runtime.sendMessage({ method: 'paste' });
+        text = await browser!.runtime.sendMessage<IPopupMessageData>({
+          method: POPUP_METHODS.paste,
+        });
       } else {
         try {
           text = await navigator.clipboard.readText();
