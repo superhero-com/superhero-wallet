@@ -1,7 +1,7 @@
 <template>
   <BtnPlain
     class="address-book-item"
-    :to="{ name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: item.address } }"
+    :to="{ name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: item.id } }"
   >
     <AccountInfo
       :account="account"

@@ -52,7 +52,7 @@
             :validate-on-mount="!!formModel.name"
             :rules="{
               required: true,
-              address_book_entry_exists: [addressBook, savedEntry?.address, 'name'],
+              address_book_entry_exists: [addressBook, savedEntry?.id, 'name'],
               max_len: 50,
             }"
           >
@@ -75,7 +75,7 @@
             :validate-on-mount="!!formModel.address"
             :rules="{
               required: true,
-              address_book_entry_exists: [addressBook, savedEntry?.address, 'address'],
+              address_book_entry_exists: [addressBook, savedEntry?.id, 'address'],
               is_address_valid: true,
             }"
           >
@@ -118,7 +118,7 @@
         />
       </div>
       <BtnMain
-        v-if="isEdit"
+        v-if="savedEntry?.id"
         variant="muted"
         :text="$t('pages.addressBook.entry.delete')"
         :icon="TrashIcon"
@@ -144,7 +144,7 @@ import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
 import type { IAddressBookEntry } from '@/types';
-import { ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
+import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
 import {
   useAddressBook,
   useAddressBookEntryForm,
@@ -193,14 +193,12 @@ export default defineComponent({
       addressBook,
       addAddressBookEntry,
       toggleBookmarkAddressBookEntry,
-      getAddressBookEntryByAddress,
+      getAddressBookEntryById,
       removeAddressBookEntry,
     } = useAddressBook();
     const { formModel, hasError, updateFormModelValues } = useAddressBookEntryForm(
       { addressBookEntryData: {} },
     );
-
-    const isEdit = route.name === ROUTE_ADDRESS_BOOK_EDIT;
 
     const accountName = computed(() => isPlaceholder.value ? defaultName : formModel.value.name);
     const accountAddress = computed(
@@ -221,22 +219,22 @@ export default defineComponent({
 
     function confirm() {
       if (!hasError.value) {
-        addAddressBookEntry(formModel.value as IAddressBookEntry, isEdit);
+        addAddressBookEntry(formModel.value as IAddressBookEntry, savedEntry.value.id);
         goBack();
       }
     }
 
     function deleteEntry() {
-      if (savedEntry.value.address) {
-        removeAddressBookEntry(savedEntry.value.address);
+      if (savedEntry.value.id) {
+        removeAddressBookEntry(savedEntry.value.id);
         goBack();
       }
     }
 
     function toggleBookmark() {
-      if (formModel.value.address) {
-        formModel.value.isBookmarked = !formModel.value.isBookmarked;
-        toggleBookmarkAddressBookEntry(formModel.value.address);
+      formModel.value.isBookmarked = !formModel.value.isBookmarked;
+      if (savedEntry.value.id) {
+        toggleBookmarkAddressBookEntry(savedEntry.value.id);
       }
     }
 
@@ -255,11 +253,13 @@ export default defineComponent({
     }, { deep: true });
 
     onMounted(() => {
-      if (isEdit) {
-        const addressBookEntry = getAddressBookEntryByAddress(route.params.id as string);
+      if (typeof route.params.id === 'string') {
+        const addressBookEntry = getAddressBookEntryById(route.params.id);
         if (addressBookEntry) {
           savedEntry.value = addressBookEntry;
           updateFormModelValues({ ...toRaw(addressBookEntry) });
+        } else {
+          ionRouter.navigate({ name: ROUTE_ADDRESS_BOOK }, 'back', 'replace');
         }
       }
     });
@@ -269,7 +269,6 @@ export default defineComponent({
       accountName,
       formModel,
       isPlaceholder,
-      isEdit,
       addressBook,
       savedEntry,
       hasError,

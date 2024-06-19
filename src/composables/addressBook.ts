@@ -10,9 +10,13 @@ import {
   IAddressBookFilter,
 } from '@/types';
 import { ADDRESS_BOOK_FILTERS, STORAGE_KEYS } from '@/constants';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AddressBookEntryExists, AddressBookInvalidAddress, AddressBookRequiredFields } from '@/lib/errors';
-import { getProtocolByAddress, handleUnknownError, pipe } from '@/utils';
+import {
+  generateId,
+  getProtocolByAddress,
+  handleUnknownError,
+  pipe,
+} from '@/utils';
 
 import { createCustomScopedComposable } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
@@ -75,19 +79,23 @@ export const useAddressBook = createCustomScopedComposable(() => {
     showBookmarked.value = value;
   }
 
-  function addressBookEntryExists(address: AccountAddress) {
-    return !!addressBook.value[address];
+  function addressBookAddressExists(address: AccountAddress) {
+    return Object.values(addressBook.value).some((entry) => entry.address === address);
   }
 
+  /**
+   * Add or edit an address book entry
+   * Passing a savedEntryId will update the entry instead of adding a new one
+   */
   function addAddressBookEntry(
     { name, address, isBookmarked }: IAddressBookOptions,
-    isEdit = false,
+    savedEntryId?: string,
   ) {
     if (!name || !address) {
       throw new AddressBookRequiredFields();
     }
 
-    if (addressBookEntryExists(address) && !isEdit) {
+    if (!savedEntryId && addressBookAddressExists(address)) {
       throw new AddressBookEntryExists();
     }
 
@@ -95,9 +103,12 @@ export const useAddressBook = createCustomScopedComposable(() => {
     if (!protocol) {
       throw new AddressBookInvalidAddress();
     }
-    const defaultIsBookmarked = isEdit ? addressBook.value[address].isBookmarked : false;
+    const defaultIsBookmarked = savedEntryId ? addressBook.value[savedEntryId].isBookmarked : false;
 
-    addressBook.value[address] = {
+    const entryId = savedEntryId || generateId();
+
+    addressBook.value[entryId] = {
+      id: entryId,
       name,
       address,
       protocol,
@@ -105,37 +116,17 @@ export const useAddressBook = createCustomScopedComposable(() => {
     };
   }
 
-  function editAddressBookEntry({ name, address }: IAddressBookOptions) {
-    if (!addressBookEntryExists(address)) {
-      return;
-    }
-    const adapter = ProtocolAdapterFactory.getAdapterByAccountAddress(address);
-    const protocol = adapter?.protocol || addressBook.value[address].protocol;
-
-    addressBook.value[address] = {
-      name,
-      address,
-      protocol,
-      isBookmarked: addressBook.value[address].isBookmarked,
-    };
+  function removeAddressBookEntry(id: string) {
+    delete addressBook.value?.[id];
   }
 
-  function removeAddressBookEntry(address: AccountAddress) {
-    if (addressBookEntryExists(address)) {
-      delete addressBook.value[address];
-    }
+  function getAddressBookEntryById(id: string) {
+    return addressBook.value?.[id];
   }
 
-  function getAddressBookEntryByAddress(address: AccountAddress) {
-    if (addressBookEntryExists(address)) {
-      return addressBook.value[address];
-    }
-    return null;
-  }
-
-  function toggleBookmarkAddressBookEntry(address: AccountAddress) {
-    if (addressBookEntryExists(address)) {
-      addressBook.value[address].isBookmarked = !addressBook.value[address].isBookmarked;
+  function toggleBookmarkAddressBookEntry(id: string) {
+    if (addressBook.value?.[id]) {
+      addressBook.value[id].isBookmarked = !addressBook.value[id].isBookmarked;
     }
   }
 
@@ -232,11 +223,9 @@ export const useAddressBook = createCustomScopedComposable(() => {
     setFilter,
     setShowBookmarked,
 
-    addressBookEntryExists,
     addAddressBookEntry,
-    editAddressBookEntry,
     removeAddressBookEntry,
-    getAddressBookEntryByAddress,
+    getAddressBookEntryById,
     toggleBookmarkAddressBookEntry,
 
     exportAddressBook,

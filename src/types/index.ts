@@ -870,12 +870,13 @@ export interface IAmountDecimalPlaces {
 }
 
 export interface IAddressBookEntry {
+  id: string;
   name: string;
   address: AccountAddress;
   isBookmarked: boolean;
   protocol: Protocol;
 }
 
-export type IAddressBook = Record<AccountAddress, IAddressBookEntry>;
+export type IAddressBook = Record<string, IAddressBookEntry>;
 
 export type IAddressBookFilter = ObjectValues<typeof ADDRESS_BOOK_FILTERS> | Protocol | undefined;

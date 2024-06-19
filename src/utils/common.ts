@@ -530,3 +530,9 @@ export function getProtocolByAddress(address: AccountAddress) {
   }
   return adapter?.protocol;
 }
+/**
+ * Generate a simple random string id.
+ */
+export function generateId() {
+  return Math.random().toString(36).substring(2, 11);
+}

@@ -19,6 +19,7 @@
       >
         <AddressBookItem
           v-for="(entry) in addressBookFiltered"
+          :id="entry.id"
           :key="entry.name"
           :item="entry"
         />
