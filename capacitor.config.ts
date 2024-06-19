@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.superhero.cordova',
-  appName: 'Superhero',
+  appName: 'Superhero Wallet',
   webDir: 'www',
   server: {
     androidScheme: 'https',
