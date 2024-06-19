@@ -7,6 +7,7 @@ import {
   Ref,
 } from 'vue';
 import BigNumber from 'bignumber.js';
+import { debounce } from 'lodash-es';
 import {
   Contract,
   ContractMethodsBase,
@@ -68,8 +69,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
     return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
   }
 
-  watch(
-    () => formModel.value,
+  const handleFormValueChangeDebounced = debounce(
     async (val) => {
       if (!val?.selectedAsset) {
         return;
@@ -172,6 +172,13 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
       total.value = new BigNumber(amount).shiftedBy(-AE_COIN_PRECISION).plus(fee.value);
     },
+    500,
+    { leading: true },
+  );
+
+  watch(
+    () => formModel.value,
+    (val) => handleFormValueChangeDebounced(val),
     {
       deep: true,
       immediate: true,
