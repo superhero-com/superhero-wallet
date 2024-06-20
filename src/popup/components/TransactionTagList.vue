@@ -59,6 +59,9 @@ export default defineComponent({
       isDex,
       isDexPool,
       isDexAllowance,
+      isTokenSwap,
+      isTokenSwapBuy,
+      isTokenSwapSell,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
@@ -115,6 +118,16 @@ export default defineComponent({
           (isDexPool.value)
             ? t('transaction.dexType.pool')
             : t('common.swap'),
+        );
+      } else if (isTokenSwap.value) {
+        arr.push(
+          t('transaction.tokenSwap.tag'),
+          (isTokenSwapBuy.value)
+            ? t('common.buy')
+            : '',
+          (isTokenSwapSell.value)
+            ? t('common.sell')
+            : '',
         );
       } else if (
         props.transaction.claim
