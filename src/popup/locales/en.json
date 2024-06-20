@@ -43,6 +43,7 @@
     "search": "Search",
     "seconds": "{n} seconds | {n} second | {n} seconds",
     "secondsShort": "{n} s",
+    "sell": "Sell",
     "send": "Send",
     "sign": "Sign",
     "smartContract": "Smart contract",
@@ -559,6 +560,10 @@
     "returnType": {
       "abort": "Failed",
       "revert": "Reverted"
+    },
+    "tokenSale": {
+      "bought": "Bought",
+      "sold": "Sold"
     }
   },
   "pages": {

@@ -100,6 +100,7 @@ export const NOTIFICATION_TYPES = {
 
 export const AENS = 'AENS';
 export const DEX = 'DEX';
+export const TOKEN_SALE = 'TOKEN SALE';
 
 /**
  * List of string keys used to save app data in user's device (local/browser storage).

@@ -569,6 +569,8 @@ export type DexFunctionType =
   | 'maxSpent'
   | 'minReceived';
 
+export type TokenSaleFunctionType = 'buy' | 'sell';
+
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 
 export interface IFeeItem {
@@ -909,3 +911,34 @@ export interface IOtherSettings {
 
 /** [iv] + [encrypted message] */
 export type IEncryptionResult = string;
+
+export interface ITokenSalePriceData {
+  usd: number;
+  eur: number;
+  aud: number;
+  brl: number;
+  cad: number;
+  chf: number;
+  gbp: number;
+  xau: number;
+}
+
+export interface ITokenSale {
+  id: number;
+  network_id: string;
+  factory_address: string;
+  sale_address: string;
+  owner_address: string;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  price: number;
+  price_data: ITokenSalePriceData;
+  sell_price: number;
+  sell_price_data: ITokenSalePriceData;
+  market_cap: number;
+  market_cap_data: ITokenSalePriceData;
+  total_supply: number;
+  created_at: string;
+}
