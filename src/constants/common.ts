@@ -358,6 +358,8 @@ export const POPUP_ACTIONS = {
   reject: 'reject',
 } as const;
 
+export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
+
 export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
   name: '',

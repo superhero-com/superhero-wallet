@@ -165,7 +165,7 @@
         :disabled="!!error || verifying"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
-        @click="popupProps?.resolve()"
+        @click="confirm()"
       />
     </template>
   </Modal>
@@ -203,7 +203,10 @@ import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
+  AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  MODAL_AIR_GAP_SIGN_TRANSACTION,
   PROTOCOLS,
+  RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
   TX_DIRECTION,
 } from '@/constants';
@@ -217,6 +220,7 @@ import {
   useAccounts,
   useAeSdk,
   useFungibleTokens,
+  useModals,
   usePopupProps,
   useTransactionData,
 } from '@/composables';
@@ -272,6 +276,7 @@ export default defineComponent({
     const { getLastActiveProtocolAccount } = useAccounts();
     const { popupProps, setPopupProps } = usePopupProps();
     const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
+    const { openModal } = useModals();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
@@ -410,6 +415,23 @@ export default defineComponent({
       return (idx === 0) ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
     }
 
+    async function confirm() {
+      if (RUNNING_IN_POPUP && activeAccount?.type === 'airgap') {
+        const signgedTransaction = await openModal(
+          MODAL_AIR_GAP_SIGN_TRANSACTION,
+          { txRaw: popupProps.value?.txBase64 },
+        );
+        if (signgedTransaction) {
+          browser.runtime.sendMessage({
+            type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+            payload: signgedTransaction,
+            target: 'offscreen',
+          });
+        }
+      }
+      popupProps.value?.resolve();
+    }
+
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
     }
@@ -530,6 +552,7 @@ export default defineComponent({
       PAYLOAD_FIELD,
       PROTOCOLS,
       appName,
+      confirm,
       cancel,
       decodedCallData,
       decodedPayload,

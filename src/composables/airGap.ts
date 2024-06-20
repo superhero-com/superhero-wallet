@@ -12,11 +12,11 @@ import {
 import { SerializerV3, IACMessageDefinitionObjectV3 } from '@airgap/serializer';
 
 import type { IAccountRaw } from '@/types';
-import { handleUnknownError } from '@/utils';
+import { handleUnknownError, watchUntilTruthy } from '@/utils';
 import { ACCOUNT_AIR_GAP_WALLET, MOBILE_SCHEMA, PROTOCOLS } from '@/constants';
 
 const isComposableInitialized = ref(false);
-let serializer: SerializerV3;
+const serializer = ref<SerializerV3>();
 
 export function useAirGap() {
   (async () => {
@@ -29,17 +29,18 @@ export function useAirGap() {
     serializerV3Companion.schemas.forEach((schema) => {
       SerializerV3.addSchema(schema.type, schema.schema, MainProtocolSymbols.AE);
     });
-    serializer = SerializerV3.getInstance();
+    serializer.value = SerializerV3.getInstance();
   })();
 
   /**
    * Encodes an array of IACMessageDefinitionObjectV3 objects into a UR string.
    */
   async function encodeIACMessageDefinitionObjects(data: IACMessageDefinitionObjectV3[]) {
+    await watchUntilTruthy(serializer);
     try {
-      const serializedData = await serializer.serialize(data);
+      const serializedData = await serializer.value?.serialize(data);
 
-      const dataUint8Array = bs58check.decode(serializedData);
+      const dataUint8Array = bs58check.decode(serializedData!);
       const ur = UR.fromBuffer(Buffer.from(dataUint8Array));
 
       // Set the chunk sizes for single-chunk and multi-chunk encoding.
@@ -76,7 +77,8 @@ export function useAirGap() {
   }
 
   async function deserializeData(data: string) {
-    return serializer.deserialize(data);
+    await watchUntilTruthy(serializer);
+    return serializer.value?.deserialize(data);
   }
 
   /**

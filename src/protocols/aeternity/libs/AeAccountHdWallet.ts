@@ -18,8 +18,13 @@ import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
-import { MODAL_AIR_GAP_SIGN_TRANSACTION, PROTOCOLS } from '@/constants';
-import { handleUnknownError } from '@/utils';
+import {
+  AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  IS_OFFSCREEN_TAB,
+  MODAL_AIR_GAP_SIGN_TRANSACTION,
+  PROTOCOLS,
+} from '@/constants';
+import { handleUnknownError, isAirgapAccount } from '@/utils';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -33,30 +38,42 @@ const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
-  readonly isAirgap: boolean = false;
-
   nodeNetworkId: Ref<string | undefined>;
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super(Buffer.alloc(64));
-    const { getLastActiveProtocolAccount } = useAccounts();
-    const aeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+    const aeAccount = this.getAccount();
     this.address = aeAccount!.address as Encoded.AccountAddress;
-    this.isAirgap = aeAccount?.type === 'airgap';
     this.nodeNetworkId = nodeNetworkId;
   }
 
   override async signTransaction(
     txBase64: Encoded.Transaction,
-    options: Parameters<AccountBase['signTransaction']>[1],
+    options: Parameters<AccountBase['signTransaction']>[1] & InternalOptions,
   ): Promise<Encoded.Transaction> {
     if (!this.nodeNetworkId.value) {
       throw new Error('Not connected to any network');
     }
 
-    if (this.isAirgap) {
-      const { openModal } = useModals();
-      return openModal(MODAL_AIR_GAP_SIGN_TRANSACTION, { txRaw: txBase64 });
+    const account = this.getAccount(options?.fromAccount);
+    let signedTx: Promise<Encoded.Transaction> | undefined;
+    if (isAirgapAccount(account!)) {
+      // If the tab is offscreen, we need to listen for the signed transaction
+      // which will be sent from the confirmation modal
+      if (IS_OFFSCREEN_TAB) {
+        signedTx = new Promise((resolve) => {
+          const handleMessage = async (msg: any) => {
+            if (msg.type === AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE) {
+              browser.runtime.onMessage.removeListener(handleMessage);
+              resolve(msg.payload);
+            }
+          };
+          browser.runtime.onMessage.addListener(handleMessage);
+        });
+      } else {
+        const { openModal } = useModals();
+        return openModal(MODAL_AIR_GAP_SIGN_TRANSACTION, { txRaw: txBase64 });
+      }
     }
 
     const tx = unpackTx(txBase64) as any as ITx;
@@ -72,6 +89,10 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
+    if (isAirgapAccount(account!) && IS_OFFSCREEN_TAB && signedTx) {
+      return signedTx;
+    }
+
     return super.signTransaction(txBase64, {
       ...options, // Mainly to pass the `fromAccount` property
       aeppOrigin: undefined,
@@ -81,9 +102,10 @@ export class AeAccountHdWallet extends MemoryAccount {
 
   override async signMessage(
     message: string,
-    options: Parameters<AccountBase['signMessage']>[1],
+    options: Parameters<AccountBase['signMessage']>[1] & InternalOptions,
   ): Promise<Uint8Array> {
-    if (this.isAirgap) {
+    const account = this.getAccount(options?.fromAccount);
+    if (isAirgapAccount(account!)) {
       throw new Error('AirGap signMessage not implemented yet');
     }
 
@@ -204,7 +226,8 @@ export class AeAccountHdWallet extends MemoryAccount {
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
-    if (this.isAirgap) {
+    const account = this.getAccount(options?.fromAccount);
+    if (isAirgapAccount(account!)) {
       throw new Error('AirGap sign not implemented yet');
     }
     if (options?.aeppOrigin) {
@@ -218,15 +241,17 @@ export class AeAccountHdWallet extends MemoryAccount {
         throw new RpcRejectedByUserError('Rejected by user');
       }
     }
-    const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
-    const account = (options?.fromAccount)
-      ? getAccountByAddress(options.fromAccount)
-      : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-
     if (account && account.secretKey && account.protocol === PROTOCOLS.aeternity) {
       return sign(data, account.secretKey);
     }
 
     throw new Error('Unsupported protocol');
+  }
+
+  getAccount(fromAccount?: Encoded.AccountAddress) {
+    const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
+    return fromAccount
+      ? getAccountByAddress(fromAccount)
+      : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
   }
 }
