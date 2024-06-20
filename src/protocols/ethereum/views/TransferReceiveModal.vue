@@ -1,8 +1,11 @@
 <template>
-  <TransferReceiveBase
+  <ShareAddressBase
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
     :protocol="protocol"
+    :token-contract-id="tokenContractId"
+    is-receive
+    @close="resolve()"
   />
 </template>
 
@@ -15,12 +18,15 @@ import {
 import { useAccounts } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
+import ShareAddressBase, { shareAddressRequiredProps } from '@/popup/components/Modals/ShareAddressBase.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_RECEIVE,
   components: {
-    TransferReceiveBase,
+    ShareAddressBase,
+  },
+  props: {
+    ...shareAddressRequiredProps,
   },
   setup() {
     const { activeAccount } = useAccounts();

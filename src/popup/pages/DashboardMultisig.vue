@@ -29,12 +29,12 @@
         </template>
 
         <template #buttons>
-          <OpenTransferReceiveModalButton
+          <OpenTransferReceiveModalBtn
             :disabled="isActiveMultisigAccountPending"
             is-multisig
             is-big
           />
-          <OpenTransferSendModalButton
+          <OpenTransferSendModalBtn
             :disabled="!!pendingMultisigTransaction || isActiveMultisigAccountPending"
             is-multisig
             is-big
@@ -66,8 +66,8 @@ import AccountCardMultisig from '@/popup/components/AccountCardMultisig.vue';
 import AccountSwiper from '@/popup/components/AccountSwiper.vue';
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
 import DashboardBase from '../components/DashboardBase.vue';
-import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
+import OpenTransferReceiveModalBtn from '../components/OpenTransferReceiveModalBtn.vue';
+import OpenTransferSendModalBtn from '../components/OpenTransferSendModalBtn.vue';
 
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 
@@ -76,8 +76,8 @@ export default defineComponent({
   components: {
     AccountCardMultisig,
     AccountSwiper,
-    OpenTransferSendModalButton,
-    OpenTransferReceiveModalButton,
+    OpenTransferSendModalBtn,
+    OpenTransferReceiveModalBtn,
     DashboardBase,
     PendingMultisigTransactionCard,
     IonPage,

@@ -63,6 +63,7 @@
     "tokens": "tokens",
     "on": "On",
     "off": "Off",
+    "share": "Share",
     "transferSpeed": {
       "fast": "Fast",
       "medium": "Medium",
@@ -363,7 +364,6 @@
       "title": "Receive {name} to public address",
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
-      "share": "Share",
       "shareTextNoAmount": "My {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}",
       "shareTextWithAmount": "{amount} {coinSymbol} has been requested. Send to {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}"
     },
@@ -678,7 +678,8 @@
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "Update available",
       "updateAvailableText": "There is a new wallet version available for download in the store",
-      "claim-name": "Claim your .chain name"
+      "claim-name": "Claim your .chain name",
+      "shareAddress": "Share your public address"
     },
     "accounts": {
       "addAccount": "Add account",

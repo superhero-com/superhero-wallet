@@ -37,7 +37,11 @@
               </BtnPill>
             </Field>
           </div>
-          <div class="qrcode-wrapper">
+          <BtnPlain
+            class="qrcode-wrapper"
+            :disabled="isPlaceholder"
+            @click="shareAddress()"
+          >
             <QrCode
               :value="[account.address ?? '']"
               :size="116"
@@ -45,7 +49,7 @@
               :class="{ hidden: isPlaceholder }"
               disable-click-to-copy
             />
-          </div>
+          </BtnPlain>
         </div>
         <div class="inputs">
           <Field
@@ -192,7 +196,7 @@ export default defineComponent({
 
     const route = useRoute();
     const ionRouter = useIonRouter();
-    const { openScanQrModal } = useModals();
+    const { openScanQrModal, openShareAddressModal } = useModals();
     const {
       addressBook,
       addAddressBookEntry,
@@ -252,6 +256,21 @@ export default defineComponent({
       }
     }
 
+    function shareAddress() {
+      if (
+        !isPlaceholder.value
+        && formModel.value.address
+        && formModel.value.name
+        && protocol.value
+      ) {
+        openShareAddressModal({
+          address: formModel.value.address,
+          protocol: protocol.value,
+          title: formModel.value.name,
+        });
+      }
+    }
+
     watch([formModel, hasError], ([newEntry, newHasError]) => {
       isPlaceholder.value = !(newEntry.name && newEntry.address) || newHasError;
     }, { deep: true });
@@ -282,6 +301,7 @@ export default defineComponent({
       confirm,
       deleteEntry,
       toggleBookmark,
+      shareAddress,
 
       FavoriteIcon,
       TrashIcon,
