@@ -74,6 +74,7 @@ export default defineComponent({
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
+    // TODO AIRGAP: implement multiple accounts selection
     const { openModal } = useModals();
 
     const currentText = computed(() => props.persistentDefaultText || !props.modelValue

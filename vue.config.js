@@ -94,6 +94,19 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
+    config
+      .plugin('node-polyfill')
+      .use(NodePolyfillPlugin)
+      .tap(() => [{
+        includeAliases: ['stream', 'Buffer', 'path', 'process'],
+      }]).end();
+
+    config.resolve.alias
+      .set('crypto', 'crypto-browserify')
+      .set('vm', false)
+      .set('core-js-pure', 'core-js')
+      .set('lodash', 'lodash-es');
+
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
 
@@ -127,13 +140,6 @@ module.exports = {
 
       return [definitions];
     }).end();
-
-    config
-      .plugin('node-polyfill')
-      .use(NodePolyfillPlugin)
-      .tap(() => [{
-        includeAliases: ['stream', 'Buffer'],
-      }]).end();
 
     if (PLATFORM === 'extension') {
       config.module.rule('i18nTest')
@@ -172,10 +178,6 @@ module.exports = {
       config.module.rules.delete('provide-webextension-polyfill');
       config.plugins.delete('extension-reloader');
     }
-
-    config.resolve.alias
-      .set('core-js-pure', 'core-js')
-      .set('lodash', 'lodash-es');
 
     config.module.rule('aes')
       .test(/\.aes$/)

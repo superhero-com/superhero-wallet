@@ -2,8 +2,15 @@
   <div class="transfer-review-base">
     <ModalHeader
       :title="title"
-      :subtitle="withoutSubtitle ? null : $t('pages.send.checkalert')"
-    />
+      :subtitle="withoutSubtitle ? null : subtitle"
+      :no-padding="noHeaderPadding"
+    >
+      <template #title>
+        <div v-if="$slots.title">
+          <slot name="title" />
+        </div>
+      </template>
+    </ModalHeader>
 
     <slot name="subheader" />
 
@@ -114,6 +121,7 @@ export default defineComponent({
   },
   props: {
     title: { type: String, default: tg('pages.send.reviewtx') },
+    subtitle: { type: String, default: tg('pages.send.checkalert') },
     senderLabel: { type: String, default: tg('pages.send.sender') },
     amountLabel: { type: String, default: tg('common.amount') },
     baseTokenSymbol: { type: String, required: true },
@@ -121,6 +129,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
     recipientAddress: { type: String, default: null },
     avatarName: { type: String, default: null },
+    noHeaderPadding: Boolean,
     withoutSubtitle: Boolean,
     loading: Boolean,
     showFiat: Boolean,

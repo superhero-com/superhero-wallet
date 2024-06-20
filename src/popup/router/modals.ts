@@ -35,6 +35,8 @@ import {
   MODAL_WARNING_DAPP_BROWSER,
   MODAL_SECURE_LOGIN,
   MODAL_ENABLE_SECURE_LOGIN,
+  MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -72,6 +74,8 @@ import BrowserActions from '../components/Modals/BrowserActions.vue';
 import SecureLogin from '../components/Modals/SecureLogin.vue';
 import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
 import WalletConnect from '../components/Modals/WalletConnectModal.vue';
+import AirGapImportAccounts from '../components/Modals/AirGapImportAccounts.vue';
+import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -84,6 +88,9 @@ export default () => {
   });
   registerModal(MODAL_ACCOUNT_IMPORT, {
     component: AccountImport,
+  });
+  registerModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS, {
+    component: AirGapImportAccounts,
   });
   registerModal(MODAL_CLAIM_SUCCESS, {
     component: ClaimSuccess,
@@ -185,5 +192,8 @@ export default () => {
   });
   registerModal(MODAL_ENABLE_SECURE_LOGIN, {
     component: EnableSecureLogin,
+  });
+  registerModal(MODAL_SIGN_AIR_GAP_TRANSACTION, {
+    component: SignAirGapTransaction,
   });
 };

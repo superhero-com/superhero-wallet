@@ -229,6 +229,17 @@ export default () => {
     ),
   );
 
+  /**
+   * AirGap accounts can only send funds to an address
+   */
+  defineRule(
+    'airgap_to_an_address',
+    (value: string) => (
+      !isNameValid(value)
+        || tg('validation.airGapToAnAddress')
+    ),
+  );
+
   defineRule(
     'address_not_same_as',
     (value: string, [comparedAddress, protocol]: [string, Protocol]) => (

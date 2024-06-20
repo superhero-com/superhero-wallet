@@ -20,6 +20,7 @@ import {
   ASSET_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
+  ACCOUNT_TYPES,
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
@@ -253,7 +254,7 @@ export type IAccountAsset = Partial<ITokenBalance> & IToken;
 
 export type AssetList = Record<AssetContractId, IToken>;
 
-export type AccountType = 'hd-wallet';
+export type AccountType = ObjectValues<typeof ACCOUNT_TYPES>;
 
 /**
  * Simplified account structure stored it in the local storage
@@ -263,12 +264,14 @@ export interface IAccountRaw {
   type: AccountType;
   isRestored: boolean;
   protocol: Protocol;
+  address?: AccountAddress;
+  publicKey?: string;
 }
 
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IHdWalletAccount, IAccountRaw {
+export interface IAccount extends IHdWalletAccount, Omit<IAccountRaw, 'publicKey'> {
   address: AccountAddress;
   globalIdx: number;
   idx: number;
@@ -771,6 +774,7 @@ export type TransferSendStepConfigRegistry = {
   [TRANSFER_SEND_STEPS.form]: TransferSendStepConfig;
   [TRANSFER_SEND_STEPS.review]: TransferSendStepConfig;
   [TRANSFER_SEND_STEPS.reviewTip]?: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.airGapSign]?: TransferSendStepConfig;
 }
 
 export interface TransferFormModel extends IFormModel {

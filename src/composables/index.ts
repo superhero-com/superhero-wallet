@@ -33,3 +33,4 @@ export * from './languages';
 export * from './permissions';
 export * from './appsBrowserHistory';
 export * from './walletConnect';
+export * from './airGap';

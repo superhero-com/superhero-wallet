@@ -295,8 +295,13 @@ export default defineComponent({
           },
         });
 
-        const respondChallenge = await fetchRespondChallenge(response);
-
+        let respondChallenge;
+        try {
+          respondChallenge = await fetchRespondChallenge(response);
+        } catch (error: any) {
+          handleUnknownError(error);
+          return;
+        }
         await postJson(url, { body: respondChallenge });
 
         if (currentNetworkId !== nodeNetworkId.value) {

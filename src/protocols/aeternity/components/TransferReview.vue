@@ -1,6 +1,7 @@
 <template>
   <TransferReviewBase
-    :title="isMultisig ? $t('modals.multisigTxProposal.title') : undefined"
+    :title="headerTitle"
+    :subtitle="headerSubtitle"
     :without-subtitle="isMultisig"
     :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : undefined"
     :base-token-symbol="AE_SYMBOL"
@@ -9,18 +10,35 @@
     :avatar-name="isAddressChain ? transferData.address : undefined"
     :show-fiat="!isSelectedAssetAex9"
     :protocol="PROTOCOLS.aeternity"
+    :no-header-padding="isActiveAccountAirGap"
     class="transfer-review"
   >
+    <template #title>
+      <div class="custom-header-title">
+        {{ headerTitle }}
+        <BtnHelp
+          v-if="isActiveAccountAirGap && !isMultisig"
+          :title="$t('airGap.scan.help.title')"
+          :msg="$t('airGap.scan.help.msg')"
+          icon="qr-scan"
+          full-screen
+        />
+      </div>
+    </template>
     <template #subheader>
       <div
         v-if="isMultisig"
         class="multisig-account"
       >
         <AccountItem
-          :address="activeMultisigAccount.gaAccountId"
+          :address="activeMultisigAccount?.gaAccountId!"
           :protocol="PROTOCOLS.aeternity"
         />
       </div>
+      <TransferQRCodeGenerator
+        v-if="isActiveAccountAirGap && !isMultisig"
+        :transfer-data="transferData"
+      />
     </template>
 
     <template
@@ -63,7 +81,7 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData.total"
+            :amount="+transferData?.total!"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
             high-precision
@@ -85,6 +103,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
+
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import {
@@ -92,6 +111,7 @@ import {
   handleUnknownError,
   toShiftedBigNumber,
 } from '@/utils';
+import { tg } from '@/popup/plugins/i18n';
 import {
   useAccounts,
   useAeSdk,
@@ -113,17 +133,21 @@ import { aeToAettos } from '@/protocols/aeternity/helpers';
 import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
+import TransferQRCodeGenerator from '@/popup/components/TransferQRCodeGenerator.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
 
 export default defineComponent({
   name: 'AeTransferReview',
   components: {
     TokenAmount,
     DetailsItem,
+    TransferQRCodeGenerator,
     TransferReviewBase,
     AccountItem,
+    BtnHelp,
   },
   model: {
     prop: 'transferData',
@@ -144,7 +168,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
-    const { activeAccount } = useAccounts();
+    const { activeAccount, isActiveAccountAirGap } = useAccounts();
     const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
@@ -164,6 +188,23 @@ export default defineComponent({
     const isSelectedAssetAex9 = computed(
       () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
     );
+
+    const headerTitle = computed(() => {
+      if (props.isMultisig) {
+        return tg('modals.multisigTxProposal.title');
+      }
+      if (isActiveAccountAirGap.value) {
+        return tg('airGap.send.reviewTitle');
+      }
+      return tg('pages.send.reviewtx');
+    });
+
+    const headerSubtitle = computed(() => {
+      if (isActiveAccountAirGap.value) {
+        return tg('airGap.send.reviewSubtitle');
+      }
+      return tg('pages.send.checkalert');
+    });
 
     function openTransactionFailedModal() {
       openDefaultModal({
@@ -353,6 +394,11 @@ export default defineComponent({
     }
 
     async function submit(): Promise<void> {
+      if (isActiveAccountAirGap.value && !props.isMultisig) {
+        emit('success');
+        return;
+      }
+
       const {
         amount: amountRaw,
         address: recipient,
@@ -389,12 +435,15 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
+      isActiveAccountAirGap,
       isSelectedAssetAex9,
       activeMultisigAccount,
       AE_SYMBOL,
       AE_CONTRACT_ID,
       PROPOSE_TRANSACTION_FEE,
       loading,
+      headerTitle,
+      headerSubtitle,
       submit,
     };
   },
@@ -405,6 +454,13 @@ export default defineComponent({
 .transfer-review {
   .details-item {
     margin-top: 16px;
+  }
+
+  .custom-header-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 
   .multisig-account {

@@ -18,6 +18,8 @@ import type {
   Protocol,
   IAmountDecimalPlaces,
   AssetAmount,
+  IAccountRaw,
+  IAccount,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -101,6 +103,13 @@ export abstract class BaseProtocolAdapter {
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount;
+
+  abstract resolveAccountRaw (
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array
+  ): IAccount | null;
 
   /**
    * Discover accounts that have been used in the past

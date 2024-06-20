@@ -169,23 +169,6 @@
       "exportKeypair": "Export keypair",
       "exportKeystore": "Export keystore"
     },
-    "airGapSetup": {
-      "heading": "AirGap Installer",
-      "step1heading": "Installez AirGap sur votre téléphone",
-      "step1info": "Recherchez des AirGap.it dans le magasin ou scannez ce code QR",
-      "step1buttonNext": "Prochain",
-      "setupSteps1heading": "Ouvrez Cheminement sur le 2ème dispositif",
-      "setupSteps2heading": "Créer clé secrète",
-      "setupSteps3heading": "Écrivez-le dans le bon ordre",
-      "setupSteps4heading": "Ajouter un portefeuille de aeternity",
-      "setupSteps5heading": "Associez votre portefeuille aeternity",
-      "setupSteps1": "Désactivez la connexion Internet avant l'ouverture Cheminement",
-      "setupSteps2": "Pas moyen de connexion Internet une sécurité maximale pour la clé",
-      "setupSteps3": "Vous en aurez besoin pour la récupération",
-      "setupSteps4": "porte-monnaie du robinet, ajouter portefeuille et choisir aeternity",
-      "setupSteps5": "Terminer en reliant votre coffre-fort à votre adresse aeternity",
-      "linkVault": "Link Vault"
-    },
     "auctionBid": {
       "backToAuctions": "Retour aux enchères",
       "bidding": "Enchère",

@@ -11,6 +11,7 @@
   <Modal
     v-if="!IS_MOBILE_APP || !cameraPermissionGranted"
     class="qr-code-reader"
+    :class="{ 'multifragment-qr-code': isMultiFragmentQr }"
     has-close-button
     centered
     from-bottom
@@ -27,7 +28,7 @@
     <div
       v-if="title"
       class="title"
-      v-text="title"
+      v-text="isMultiFragmentQr ? $t('modals.qrCodeReader.qrCodeHasMultipleFragments') : title"
     />
 
     <div class="camera">
@@ -62,6 +63,15 @@
       </div>
     </div>
 
+    <ProgressBar
+      v-if="isMultiFragmentQr"
+      class="qr-progress-bar"
+      :progress="scanProgress"
+      :text="$t('modals.qrCodeReader.scanningProgress')"
+      show-text
+      is-big
+    />
+
     <!--
       Allow user to open mobile device settings if no camera permission is granted.
     -->
@@ -89,6 +99,8 @@ import {
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import type QrScannerType from 'qr-scanner';
+import { URDecoder } from '@ngraveio/bc-ur';
+import bs58check from 'bs58check';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
@@ -99,6 +111,7 @@ import { useUi } from '@/composables';
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
+import ProgressBar from '@/popup/components/ProgressBar.vue';
 
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -109,6 +122,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     IconBoxed,
+    ProgressBar,
     AnimatedSpinnerIcon,
     AlertIcon,
   },
@@ -119,13 +133,15 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
-    const { setMobileQrScannerVisible } = useUi();
+    const { setMobileQrScannerVisible, scanProgress } = useUi();
 
     const qrCodeVideoEl = ref<HTMLVideoElement>();
     const hasDeviceCamera = ref(false);
     const isCameraReady = ref(false);
     const cameraPermissionGranted = ref(true);
+    const isMultiFragmentQr = ref(false);
 
+    const decoder = new URDecoder();
     let browserReader: QrScannerType | null = null;
 
     function stopReading() {
@@ -138,6 +154,33 @@ export default defineComponent({
         browserReader?.destroy();
         browserReader = null;
       }
+
+      scanProgress.value = -1;
+    }
+
+    async function getCombinedData() {
+      const combinedData = decoder.resultUR().decodeCBOR();
+      const resultUr = bs58check.encode(combinedData);
+      return resultUr;
+    }
+
+    /**
+     * Returns when the QR code is complete
+     */
+    async function handleReceivePart(text: string) {
+      if (String(text).includes('BYTES/')) {
+        decoder.receivePart(text);
+        if (decoder.isComplete()) {
+          browserReader?.stop();
+          return getCombinedData();
+        }
+        isMultiFragmentQr.value = true;
+        scanProgress.value = Math.floor(decoder.getProgress() * 100);
+      } else {
+        browserReader?.stop();
+        return text;
+      }
+      return null;
     }
 
     async function scanMobile(): Promise<string | Error> {
@@ -148,13 +191,18 @@ export default defineComponent({
 
       // eslint-disable-next-line no-async-promise-executor
       return new Promise(async (resolve) => {
+        let completeText: string | null;
+
         const listener = await BarcodeScanner.addListener(
           'barcodeScanned',
           async ({ barcode }) => {
             if (barcode.displayValue) {
-              await listener.remove();
-              stopReading();
-              resolve(barcode.displayValue);
+              completeText = await handleReceivePart(barcode.displayValue);
+              if (completeText) {
+                await listener.remove();
+                stopReading();
+                resolve(completeText);
+              }
             }
           },
         );
@@ -167,10 +215,13 @@ export default defineComponent({
       return new Promise<string>((resolve) => {
         browserReader = new QrScanner(
           qrCodeVideoEl.value!,
-          (result) => {
-            if (result.data) {
-              stopReading();
-              resolve(result.data);
+          async (result) => {
+            const text = result.data;
+            if (text) {
+              const completeText = await handleReceivePart(text);
+              if (completeText) {
+                resolve(completeText);
+              }
             }
           },
           {},
@@ -221,6 +272,8 @@ export default defineComponent({
       isCameraReady,
       hasDeviceCamera,
       cameraPermissionGranted,
+      isMultiFragmentQr,
+      scanProgress,
       QrScanIcon,
       qrCodeVideoEl,
       closeQrCodeReaderModal,
@@ -236,6 +289,12 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .qr-code-reader {
+  &.multifragment-qr-code {
+    .camera {
+      padding-top: calc(100% - 45px); // Progress bar height
+    }
+  }
+
   .top-icon-wrapper {
     margin: 0 auto 16px auto;
     text-align: center;
@@ -251,6 +310,7 @@ export default defineComponent({
     border-radius: $border-radius-interactive;
     background: rgba($color-white, 0.05);
     overflow: hidden;
+    transition: all 0.3s ease-in-out;
 
     .camera-inner {
       position: absolute;
@@ -283,6 +343,10 @@ export default defineComponent({
     }
   }
 
+  .qr-progress-bar {
+    margin-top: 16px;
+  }
+
   .heading {
     @extend %face-sans-19-medium;
 
@@ -296,6 +360,10 @@ export default defineComponent({
     margin-bottom: 20px;
     line-height: 24px;
     color: rgba($color-white, 0.75);
+  }
+
+  .info-box {
+    text-align: left;
   }
 }
 </style>

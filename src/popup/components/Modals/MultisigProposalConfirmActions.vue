@@ -54,20 +54,22 @@
     </div>
 
     <template #footer>
-      <BtnMain
-        variant="muted"
-        :text="$t('common.cancel')"
-        @click="closeModal"
-      />
-      <BtnMain
-        v-if="activeMultisigAccount"
-        :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger' : 'primary'"
-        data-cy="to-confirm"
-        extra-padded
-        :disabled="!!actionHasError"
-        :text="$rt(confirmActionContent.btnText)"
-        @click="resolve(chosenAccountAddress)"
-      />
+      <div class="footer">
+        <BtnMain
+          variant="muted"
+          :text="$t('common.cancel')"
+          @click="closeModal"
+        />
+        <BtnMain
+          v-if="activeMultisigAccount"
+          :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger' : 'primary'"
+          data-cy="to-confirm"
+          extra-padded
+          :disabled="!!actionHasError"
+          :text="$rt(confirmActionContent.btnText)"
+          @click="resolve(chosenAccountAddress)"
+        />
+      </div>
     </template>
   </Modal>
 </template>
@@ -87,11 +89,11 @@ import type {
   ResolveCallback,
   StatusIconType,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import { prepareAccountSelectOptions } from '@/utils';
 import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
-import { PROTOCOLS } from '@/constants';
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -243,6 +245,15 @@ export default defineComponent({
         color: $color-warning;
       }
     }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding-bottom: 24px;
+    padding-inline: 24px;
   }
 }
 </style>

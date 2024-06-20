@@ -43,7 +43,7 @@ import {
 } from 'vue';
 import InputField from '../InputField.vue';
 
-const SIZES = ['xs', 'sm', 'rg', 'md'];
+const SIZES = ['xxs', 'xs', 'sm', 'rg', 'md'];
 
 export default defineComponent({
   components: {
@@ -140,7 +140,7 @@ export default defineComponent({
     --size: 8;
   }
 
-  &.auto-height {
+  &.auto-height, &.xxs {
     --size: 1;
   }
 }

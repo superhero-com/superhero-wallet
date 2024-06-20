@@ -164,23 +164,6 @@
       "exportKeypair": "Export keypair",
       "exportKeystore": "Export keystore"
     },
-    "airGapSetup": {
-      "heading": "AirGap Einstellungen",
-      "step1heading": "Installieren Sie Airgap auf Ihrem Handy",
-      "step1info": "Suchen Sie nach AirGap.it im Laden oder QR-Code scannen",
-      "step1buttonNext": "Nächster",
-      "setupSteps1heading": "Öffnen Airgap auf der zweiten Gerät",
-      "setupSteps2heading": "Erstellen Sie geheime Schlüssel",
-      "setupSteps3heading": "Schreiben Sie es in der richtigen Reihenfolge nach unten",
-      "setupSteps4heading": "Fügen Sie ein aeternity Portemonnaie",
-      "setupSteps5heading": "Verknüpfen Sie Ihre aeternity Portemonnaie",
-      "setupSteps1": "Schalten Sie die Internetverbindung vor dem Öffnen Airgap",
-      "setupSteps2": "Keine Internetverbindung bedeutet maximale Sicherheit für den Schlüssel",
-      "setupSteps3": "Sie benötigen sie für die Wiederherstellung",
-      "setupSteps4": "Tippen Sie Brieftasche, fügen Brieftasche und wählen aeternity",
-      "setupSteps5": "Beenden Sie von Ihrem Tresor Ihre aeternity Adresse in Verbindung bringen",
-      "linkVault": "Link Vault"
-    },
     "auctionBid": {
       "backToAuctions": "Zurück zu den Auktionen",
       "bidding": "Bieten",

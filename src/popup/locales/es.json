@@ -218,23 +218,6 @@
       "exportKeypair": "Exportar par de llaves (Keypair)",
       "exportKeystore": "Exportar Keystore"
     },
-    "airGapSetup": {
-      "heading": "Configuración de AirGap",
-      "step1heading": "Instalar AirGap en su teléfono",
-      "step1info": "Buscar AirGap.it en la tienda o escanear este código QR",
-      "step1buttonNext": "Próximo",
-      "setupSteps1heading": "Abrir AirGap en el segundo dispositivo",
-      "setupSteps2heading": "Crear clave secreta",
-      "setupSteps3heading": "Escríbela en el orden correcto",
-      "setupSteps4heading": "Añadir una billetera aeternity",
-      "setupSteps5heading": "Vincular tu billetera aeternity",
-      "setupSteps1": "Por seguridad, desconecta el internet antes de abrir AirGap",
-      "setupSteps2": "No hay conexión a internet significa que hay una máxima seguridad para la llave",
-      "setupSteps3": "La necesitarás para la recuperación",
-      "setupSteps4": "Toque billetera, agrege billetera, y escoja aeternity",
-      "setupSteps5": "Finaliza vinculando tu bóveda con tu dirección aeternity",
-      "linkVault": "Vincular Bóveda"
-    },
     "auctionBid": {
       "backToAuctions": "Volver a subastas",
       "bidding": "Ofertas",

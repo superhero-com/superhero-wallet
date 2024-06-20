@@ -5,6 +5,7 @@ export const APP_URL = 'wallet.superhero.com';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
+export const MOBILE_SCHEMA = 'superhero://';
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
@@ -60,7 +61,12 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
-export const ACCOUNT_HD_WALLET = 'hd-wallet';
+export const ACCOUNT_TYPES = {
+  hdWallet: 'hd-wallet',
+  airGap: 'airgap',
+} as const;
+
+export const ACCOUNT_TYPES_LIST = Object.values(ACCOUNT_TYPES);
 
 export const NETWORK_TYPE_MAINNET = 'mainnet';
 export const NETWORK_TYPE_TESTNET = 'testnet';
@@ -327,6 +333,8 @@ export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
+export const MODAL_AIR_GAP_IMPORT_ACCOUNTS = 'air-gap-import-accounts';
+export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -352,6 +360,8 @@ export const POPUP_ACTIONS = {
   resolve: 'resolve',
   reject: 'reject',
 } as const;
+
+export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
 
 export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
@@ -388,6 +398,7 @@ export const ALLOWED_ICON_STATUSES = [
   'not-secure',
   'success',
   'warning',
+  'qr-scan',
 ] as const;
 
 /**
@@ -407,6 +418,7 @@ export const TRANSFER_SEND_STEPS = {
   form: 'form',
   review: 'review',
   reviewTip: 'tip',
+  airGapSign: 'airGapSign',
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';
