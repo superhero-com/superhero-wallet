@@ -15,6 +15,7 @@
               isDex
               || isDexAllowance
               || isAex9
+              || isTokenSwap
             )"
             :hide-fiat="isAex9"
             :hash="hash"
@@ -32,7 +33,7 @@
             </template>
 
             <template
-              v-if="isDexSwap"
+              v-if="isDexSwap || isTokenSwap"
               #swap-data
             >
               <SwapRates :transaction="transaction" />
@@ -272,6 +273,7 @@ export default defineComponent({
       isDexAllowance,
       isDexPool,
       isDexSwap,
+      isTokenSwap,
       outerTxTag,
       transactionAssets,
     } = useTransactionData({
@@ -400,6 +402,7 @@ export default defineComponent({
       isDexAllowance,
       isDexPool,
       isDexSwap,
+      isTokenSwap,
       getTransactionPayload,
       tipUrl,
       tipLink,
