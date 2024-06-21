@@ -67,6 +67,8 @@ import {
   useModals,
 } from '@/composables';
 
+import { type AirGapImportAccountsResolvedVal } from '@/popup/components/Modals/AirGapImportAccounts.vue';
+
 import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Modal from '@/popup/components/Modal.vue';
 
@@ -111,8 +113,10 @@ export default defineComponent({
 
     async function connectHardwareWallet() {
       try {
-        const selectedAccounts = await openModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS);
-        selectedAccounts.forEach((account: IAccountRaw) => {
+        const selectedAccounts = await openModal<AirGapImportAccountsResolvedVal>(
+          MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+        );
+        selectedAccounts.forEach((account) => {
           addRawAccountAndSetActive(account);
         });
       } catch (error) {

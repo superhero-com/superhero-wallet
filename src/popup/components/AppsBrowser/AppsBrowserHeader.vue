@@ -72,6 +72,9 @@ import {
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '@/popup/router/routeNames';
+
+import { type BrowserActionsResolvedVal } from '@/popup/components/Modals/BrowserActions.vue';
+
 import AccountSelector from '@/popup/components/AccountSelector.vue';
 import Truncate from '@/popup/components/Truncate.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
@@ -134,7 +137,7 @@ export default defineComponent({
     async function openActions() {
       // eslint-disable-next-line no-useless-catch
       try {
-        const value = await openModal(
+        const value = await openModal<BrowserActionsResolvedVal>(
           MODAL_DAPP_BROWSER_ACTIONS,
           {
             iframe: props.iframe,

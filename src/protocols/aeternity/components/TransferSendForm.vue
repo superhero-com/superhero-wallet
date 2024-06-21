@@ -198,6 +198,8 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 
+import { type PayloadFormResolvedVal } from '@/popup/components/Modals/PayloadForm.vue';
+
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import ModalHeader from '@/popup/components/ModalHeader.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
@@ -337,12 +339,13 @@ export default defineComponent({
       (): IFormSelectOption[] => prepareAccountSelectOptions(mySignerAccounts),
     );
 
-    function editPayload() {
-      openModal(MODAL_PAYLOAD_FORM, {
-        payload: formModel.value.payload,
-      }).then((text) => {
-        formModel.value.payload = text;
-      }).catch(() => null);
+    async function editPayload() {
+      try {
+        formModel.value.payload = await openModal<PayloadFormResolvedVal>(
+          MODAL_PAYLOAD_FORM,
+          { payload: formModel.value.payload },
+        );
+      } catch (error) { /* NOOP */ }
     }
 
     /**

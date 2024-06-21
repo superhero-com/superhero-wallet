@@ -367,7 +367,7 @@ export default defineComponent({
       }
 
       // Update the signer address
-      signers.value[signerIndex].address = scanResult;
+      signers.value[signerIndex].address = scanResult as Encoded.AccountAddress;
     }
 
     function getSignerLabel(index: number) {

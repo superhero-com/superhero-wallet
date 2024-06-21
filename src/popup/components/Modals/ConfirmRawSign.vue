@@ -66,6 +66,8 @@ import {
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, useModals, usePopupProps } from '@/composables';
 
+import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
+
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -94,14 +96,14 @@ export default defineComponent({
 
     async function confirm() {
       if (RUNNING_IN_POPUP && activeAccount?.type === 'airgap') {
-        const signgedTransaction = await openModal(
+        const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
           MODAL_SIGN_AIR_GAP_TRANSACTION,
           { txRaw: popupProps.value?.txBase64 },
         );
-        if (signgedTransaction) {
+        if (signedTransaction) {
           browser.runtime.sendMessage({
             type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
-            payload: signgedTransaction,
+            payload: signedTransaction,
             target: 'offscreen',
           });
         }

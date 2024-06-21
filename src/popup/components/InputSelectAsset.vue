@@ -13,11 +13,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import type { IToken } from '@/types';
-import { useModals } from '@/composables';
+import { computed, defineComponent, PropType } from 'vue';
+import type { IAsset, IToken } from '@/types';
 import { MODAL_ASSET_SELECTOR } from '@/constants';
-import ChevronDown from '../../icons/chevron-down.svg?vue-component';
+import { useModals } from '@/composables';
+
+import { AssetSelectorResolvedVal } from '@/popup/components/Modals/AssetSelector.vue';
+
+import ChevronDown from '@/icons/chevron-down.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
 
 export default defineComponent({
@@ -26,7 +29,7 @@ export default defineComponent({
     ChevronDown,
   },
   props: {
-    value: { type: Object, default: null },
+    value: { type: Object as PropType<IAsset>, default: null },
     disabled: Boolean,
     focused: Boolean,
     showTokensWithBalance: Boolean,
@@ -49,7 +52,7 @@ export default defineComponent({
 
     function openAssetSelector() {
       if (!props.disabled) {
-        openModal(MODAL_ASSET_SELECTOR, {
+        openModal<AssetSelectorResolvedVal>(MODAL_ASSET_SELECTOR, {
           selectedToken: props.value,
           showTokensWithBalance: props.showTokensWithBalance,
           resolve: (token) => token,

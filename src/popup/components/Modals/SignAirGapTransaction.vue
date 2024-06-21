@@ -80,7 +80,7 @@ import { throttle } from 'lodash-es';
 import { IACMessageType } from '@airgap/serializer/v3/interfaces';
 
 import { tg } from '@/popup/plugins/i18n';
-import { ObjectValues, RejectCallback } from '@/types';
+import { ObjectValues, RejectCallback, ResolveCallback } from '@/types';
 import { getURFromFragments, parseCodeToBytes } from '@/utils';
 import {
   useAccounts,
@@ -104,6 +104,8 @@ const STEPS = {
 } as const;
 type Step = ObjectValues<typeof STEPS>;
 
+export type SignAirGapTransactionResolvedVal = string;
+
 export default defineComponent({
   components: {
     Modal,
@@ -114,15 +116,18 @@ export default defineComponent({
     FormScanQrResult,
   },
   props: {
-    txRaw: { type: String, required: true },
-    resolve: { type: Function as PropType<(txRaw: string) => void>, required: true },
+    resolve: {
+      type: Function as PropType<ResolveCallback<SignAirGapTransactionResolvedVal>>,
+      required: true,
+    },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    txRaw: { type: String, required: true },
   },
   setup(props) {
     const currentStep = ref<Step>(STEPS.initial);
     const fragments = ref();
     const syncCode = ref('');
-    const signedTransaction = ref();
+    const signedTransaction = ref<string>();
 
     const { activeAccount, isActiveAccountAirGap } = useAccounts();
     const { nodeNetworkId } = useAeSdk();
@@ -163,7 +168,7 @@ export default defineComponent({
     function secondaryButtonAction() {
       if (currentStep.value === STEPS.confirm) {
         currentStep.value = STEPS.initial;
-        signedTransaction.value = null;
+        signedTransaction.value = undefined;
         syncCode.value = '';
       } else {
         props.reject();
@@ -191,11 +196,11 @@ export default defineComponent({
             if (tx) {
               signedTransaction.value = (tx.payload as any).transaction;
             } else {
-              signedTransaction.value = null;
+              signedTransaction.value = undefined;
             }
           }
         } catch (e) {
-          signedTransaction.value = null;
+          signedTransaction.value = undefined;
         }
       }
     }
