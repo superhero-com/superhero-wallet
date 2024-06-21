@@ -88,6 +88,7 @@ import type {
   RejectCallback,
   ResolveCallback,
   StatusIconType,
+  AccountAddress,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { prepareAccountSelectOptions } from '@/utils';
@@ -101,6 +102,8 @@ import AccountItem from '../AccountItem.vue';
 import StatusIcon from '../StatusIcon.vue';
 import IconBoxed from '../IconBoxed.vue';
 
+export type MultisigProposalConfirmActionVal = AccountAddress;
+
 export default defineComponent({
   components: {
     Modal,
@@ -113,7 +116,10 @@ export default defineComponent({
   props: {
     signers: { type: Array as PropType<string[]>, required: true },
     action: { type: String as PropType<TxFunctionMultisig>, required: true },
-    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    resolve: {
+      type: Function as PropType<ResolveCallback<MultisigProposalConfirmActionVal>>,
+      required: true,
+    },
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
@@ -126,7 +132,9 @@ export default defineComponent({
       pendingMultisigTxLocalSigners,
     } = usePendingMultisigTransaction();
 
-    const chosenAccountAddress = ref(pendingMultisigTxLocalSigners.value[0].address);
+    const chosenAccountAddress = ref<AccountAddress>(
+      pendingMultisigTxLocalSigners.value[0].address,
+    );
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),

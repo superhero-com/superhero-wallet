@@ -22,7 +22,7 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_NETWORK_SWITCHER,
   MODAL_PAYLOAD_FORM,
-  MODAL_READ_QR_CODE,
+  MODAL_SCAN_QR,
   MODAL_RECIPIENT_HELPER,
   MODAL_RECIPIENT_INFO,
   MODAL_RESET_WALLET,
@@ -57,7 +57,7 @@ import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
-import QrCodeReader from '../components/Modals/QrCodeReader.vue';
+import QrCodeScanner from '../components/Modals/QrCodeScanner.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
 import ResetWallet from '../components/Modals/ResetWalletModal.vue';
@@ -137,8 +137,8 @@ export default () => {
     component: MessageSign,
     showInPopupIfWebFrame: true,
   });
-  registerModal(MODAL_READ_QR_CODE, {
-    component: QrCodeReader,
+  registerModal(MODAL_SCAN_QR, {
+    component: QrCodeScanner,
   });
   registerModal(MODAL_TRANSFER_RECEIVE, {
     component: ProtocolSpecificView,

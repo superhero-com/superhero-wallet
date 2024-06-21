@@ -26,6 +26,7 @@
       class="account-row"
       :class="{ disabled: isAccountAlreadyImported(account) }"
     >
+      <!-- TODO: wrong account type -->
       <AccountImportRow :account="account" />
     </div>
     <template #footer>
@@ -53,15 +54,17 @@ import {
 } from 'vue';
 import { throttle } from 'lodash-es';
 
-import { useAccounts, useAirGap } from '@/composables';
-import type { IAccount, RejectCallback } from '@/types';
+import type { IAccountRaw, RejectCallback, ResolveCallback } from '@/types';
 import { parseCodeToBytes } from '@/utils';
+import { useAccounts, useAirGap } from '@/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountImportRow from '../AccountImportRow.vue';
 import FormScanQrResult from '../form/FormScanQrResult.vue';
 import ModalHeader from '../ModalHeader.vue';
+
+export type AirGapImportAccountsResolvedVal = IAccountRaw[];
 
 export default defineComponent({
   components: {
@@ -73,7 +76,7 @@ export default defineComponent({
   },
   props: {
     resolve: {
-      type: Function as PropType<(selectedAccounts: IAccount[]) => void>,
+      type: Function as PropType<ResolveCallback<AirGapImportAccountsResolvedVal>>,
       required: true,
     },
     reject: { type: Function as PropType<RejectCallback>, required: true },
@@ -81,12 +84,12 @@ export default defineComponent({
   setup(props) {
     // TODO AIRGAP: implement multiple accounts selection
     const syncCode = ref('');
-    const accounts = ref<IAccount[] | null>(null);
+    const accounts = ref<IAccountRaw[] | null>(null);
 
     const { deserializeData, extractAccountShareResponseData } = useAirGap();
     const { aeAccounts } = useAccounts();
 
-    function isAccountAlreadyImported(account: IAccount) {
+    function isAccountAlreadyImported(account: IAccountRaw) {
       return aeAccounts.value.some((acc) => acc.address === account.address);
     }
 
@@ -108,10 +111,8 @@ export default defineComponent({
       }
       try {
         const deserializedData = await deserializeData(parsedCode!);
-        accounts.value = (
-          await extractAccountShareResponseData(deserializedData) || []
-        ) as unknown as IAccount[];
-      } catch (error) {} // eslint-disable-line no-empty
+        accounts.value = (await extractAccountShareResponseData(deserializedData) || []);
+      } catch (error) { /* NOOP */ }
     }
 
     const throttledHandleInput = throttle(handleInput, 100);

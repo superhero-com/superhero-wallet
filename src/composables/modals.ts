@@ -15,10 +15,11 @@ import {
   MODAL_CONFIRM,
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
-  MODAL_READ_QR_CODE,
+  MODAL_SCAN_QR,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
+
 import { usePopupProps } from './popupProps';
 
 /**
@@ -86,7 +87,7 @@ export function useModals() {
     });
   }
 
-  function openModal(name: string, props: IModalProps = {}): Promise<any> {
+  function openModal<T = void>(name: string, props: IModalProps = {}): Promise<T> {
     const modalSettings = modalsRegistered.get(name);
 
     if (!modalSettings) {
@@ -97,7 +98,7 @@ export function useModals() {
     const key = currentIndex + 1;
     currentIndex += 1;
 
-    const modalPromise = new Promise((resolve, reject) => {
+    const modalPromise = new Promise<T>((resolve, reject) => {
       modalsOpenRaw.value.push({
         name,
         key,
@@ -173,7 +174,7 @@ export function useModals() {
   function openScanQrModal(options: {
     title: string;
   }) {
-    return openModal(MODAL_READ_QR_CODE, options);
+    return openModal<string>(MODAL_SCAN_QR, options);
   }
 
   return {

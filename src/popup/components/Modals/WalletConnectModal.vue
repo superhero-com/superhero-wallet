@@ -263,7 +263,7 @@ export default defineComponent({
     async function scanConnectionUriQr() {
       const result = await openScanQrModal({ title: t('walletConnect.uriInputLabel') });
       if (result) {
-        connectionUri.value = result;
+        connectionUri.value = result as WalletConnectUri;
       }
     }
 

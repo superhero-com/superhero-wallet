@@ -88,7 +88,7 @@ export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
 
 type GenericApiMethod<T = any, U extends unknown[] = any> = (...args: U) => Promise<T>;
 
-export type ResolveCallback = (...args: any) => void;
+export type ResolveCallback<T = any> = (returnValue?: T) => void;
 export type RejectCallback = (error?: RejectedByUserError) => void;
 
 /**

@@ -307,6 +307,8 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
+import { type MultisigProposalConfirmActionVal } from '@/popup/components/Modals/MultisigProposalConfirmActions.vue';
+
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
@@ -460,10 +462,13 @@ export default defineComponent({
 
       setLoaderVisible(true);
       try {
-        const chosenAddress = await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
-          action,
-          signers: pendingMultisigTxLocalSigners.value,
-        });
+        const chosenAddress = await openModal<MultisigProposalConfirmActionVal>(
+          MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+          {
+            action,
+            signers: pendingMultisigTxLocalSigners.value,
+          },
+        );
 
         const { contractId, txHash } = activeMultisigAccount.value;
         const signingAccount = new AeAccountHdWallet(nodeNetworkId);
@@ -471,7 +476,7 @@ export default defineComponent({
           action,
           contractId,
           txHash as string,
-          activeAccount.value.address !== chosenAddress
+          (activeAccount.value.address !== chosenAddress)
             ? {
               onAccount: {
                 address: chosenAddress,
@@ -480,7 +485,7 @@ export default defineComponent({
                   sign: signingAccount.sign,
                 }),
               },
-              fromAccount: chosenAddress,
+              fromAccount: chosenAddress as any,
             }
             : {},
         );

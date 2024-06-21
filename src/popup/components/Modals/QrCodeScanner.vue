@@ -10,13 +10,13 @@
   -->
   <Modal
     v-if="!IS_MOBILE_APP || !cameraPermissionGranted"
-    class="qr-code-reader"
+    class="qr-code-scanner"
     :class="{ 'multifragment-qr-code': isMultiFragmentQr }"
     has-close-button
     centered
     from-bottom
     semi-dense
-    @close="closeQrCodeReaderModal()"
+    @close="closeModal()"
   >
     <div class="top-icon-wrapper">
       <IconBoxed :icon="QrScanIcon" />
@@ -117,6 +117,8 @@ import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import AlertIcon from '@/icons/alert.svg?vue-component';
 
+export type ScanQrResolvedVal = string;
+
 export default defineComponent({
   components: {
     Modal,
@@ -128,7 +130,7 @@ export default defineComponent({
   },
   props: {
     title: { type: String, required: true },
-    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    resolve: { type: Function as PropType<ResolveCallback<ScanQrResolvedVal>>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
@@ -183,7 +185,7 @@ export default defineComponent({
       return null;
     }
 
-    async function scanMobile(): Promise<string | Error> {
+    async function scanMobile(): Promise<string> {
       setMobileQrScannerVisible(true);
       setTimeout(() => {
         document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
@@ -230,7 +232,7 @@ export default defineComponent({
       });
     }
 
-    function closeQrCodeReaderModal() {
+    function closeModal() {
       stopReading();
       props.reject(new RejectedByUserError());
     }
@@ -276,7 +278,7 @@ export default defineComponent({
       scanProgress,
       QrScanIcon,
       qrCodeVideoEl,
-      closeQrCodeReaderModal,
+      closeModal,
       openSettings,
     };
   },
@@ -288,7 +290,7 @@ export default defineComponent({
 @use '@/styles/mixins';
 @use '@/styles/typography';
 
-.qr-code-reader {
+.qr-code-scanner {
   &.multifragment-qr-code {
     .camera {
       padding-top: calc(100% - 45px); // Progress bar height
