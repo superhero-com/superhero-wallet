@@ -15,7 +15,8 @@ export type AeNetworkProtocolSettings =
  */
 export type AeNetworkProtocolPredefinedSettings =
   | 'explorerUrl'
-  | 'multisigBackendUrl';
+  | 'multisigBackendUrl'
+  | 'websocketUrl';
 
 export type IAeNetworkSettings = INetworkProtocolSettings<AeNetworkProtocolSettings>;
 

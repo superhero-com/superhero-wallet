@@ -90,7 +90,9 @@ import {
   useNotifications,
   useUi,
 } from '@/composables';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
+import WebSocketClient from '@/lib/WebSocketClient';
 
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
@@ -113,6 +115,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
+    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { watchConnectionStatus } = useConnection();
     const {
       isSeedBackedUp,
@@ -221,6 +224,12 @@ export default defineComponent({
       },
       { immediate: true },
     );
+
+    watch(aeActiveNetworkPredefinedSettings, (network, prevNetwork) => {
+      if (network?.websocketUrl !== prevNetwork?.websocketUrl) {
+        WebSocketClient.connect(network.websocketUrl);
+      }
+    }, { immediate: true });
 
     initVisibilityListeners();
 

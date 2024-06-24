@@ -51,10 +51,12 @@ export const AE_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://aescan.io',
     multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.service.aepps.com',
+    websocketUrl: 'wss://mainnet.aeternity.io/mdw/v2/websocket',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://testnet.aescan.io',
     multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.service.aepps.com',
+    websocketUrl: 'wss://testnet.aeternity.io/mdw/v2/websocket',
   },
 };
 
@@ -69,6 +71,24 @@ export const AE_AENS_DOMAIN = '.chain';
 export const AE_AENS_NAME_MAX_LENGTH = 63 + AE_AENS_DOMAIN.length;
 export const AE_AENS_NAME_AUCTION_MAX_LENGTH = 12 + AE_AENS_DOMAIN.length;
 export const AE_AENS_BID_MIN_RATIO = 1.05;
+
+export const WEB_SOCKET_CHANNELS = {
+  Transactions: 'Transactions',
+  MicroBlocks: 'MicroBlocks',
+  KeyBlocks: 'KeyBlocks',
+  Object: 'Object',
+};
+
+export const WEB_SOCKET_SOURCE = {
+  mdw: 'mdw',
+  node: 'node',
+};
+
+export const WEB_SOCKET_SUBSCRIBE = 'Subscribe';
+export const WEB_SOCKET_UNSUBSCRIBE = 'Unsubscribe';
+export const WEB_SOCKET_RECONNECT_TIMEOUT = 1000;
+
+export const PUSH_NOTIFICATION_AUTO_CLOSE_TIMEOUT = 10000;
 
 /**
  * Estimated time we need to wait for the middleware to sync it's state
