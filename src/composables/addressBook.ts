@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
 
@@ -41,7 +41,7 @@ export const useAddressBook = createCustomScopedComposable(() => {
     return showBookmarked.value ? entries.filter((entry) => entry.isBookmarked) : entries;
   }
   function filterAddressBook(entries: IAddressBookEntry[]) {
-    return protocolFilter.value && !showBookmarked.value
+    return protocolFilter.value
       ? entries.filter((entry) => entry.protocol === protocolFilter.value)
       : entries;
   }
@@ -64,19 +64,23 @@ export const useAddressBook = createCustomScopedComposable(() => {
     ])(Object.values(addressBook.value)),
   );
 
+  const addressBookFilteredByProtocol = computed(
+    () => filterAddressBook(Object.values(addressBook.value)),
+  );
+
   function setProtocolFilter(filter: Protocol | null) {
     showBookmarked.value = false;
     protocolFilter.value = filter;
   }
 
-  function setShowBookmarked(value: boolean) {
-    protocolFilter.value = null;
+  function setShowBookmarked(value: boolean, resetProtocolFilter = false) {
+    protocolFilter.value = resetProtocolFilter ? null : protocolFilter.value;
     showBookmarked.value = value;
   }
 
-  function clearFilters() {
+  function clearFilters(resetProtocolFilter = false) {
     showBookmarked.value = false;
-    protocolFilter.value = null;
+    protocolFilter.value = resetProtocolFilter ? null : protocolFilter.value;
   }
 
   function getAddressBookEntryByAddress(address?: AccountAddress) {
@@ -197,10 +201,18 @@ export const useAddressBook = createCustomScopedComposable(() => {
     }
   }
 
+  // If user is on bookmarked filter and tries to search, switch to all filter
+  watch(searchQuery, (newSearch) => {
+    if (newSearch && showBookmarked.value) {
+      clearFilters();
+    }
+  });
+
   return {
     protocolFilter,
     addressBook,
     addressBookFiltered,
+    addressBookFilteredByProtocol,
     showBookmarked,
     searchQuery,
 

@@ -3,16 +3,23 @@
     <IonHeader class="address-book-header">
       <Transition name="fade-between">
         <InputSearch
-          v-if="isScrolled || searchQuery"
+          v-if="isSearchVisible"
           v-model="searchQuery"
-          :placeholder="$t('pages.addressBook.searchPlaceholder')"
+          :placeholder="$t('pages.addressBook.searchPlaceholder', [`${protocolName} `])"
           class="search-field"
         />
       </Transition>
 
-      <AddressBookFilters />
+      <AddressBookFilters
+        v-if="!isSelector || hasBookmarkedEntries"
+        :is-selector="isSelector"
+      />
     </IonHeader>
-    <IonContent ref="scrollWrapperEl" class="ion-padding ion-content-bg">
+    <IonContent
+      ref="scrollWrapperEl"
+      class="ion-padding"
+      :class="{ 'ion-content-bg': !isSelector }"
+    >
       <div
         v-if="Object.keys(addressBookFiltered).length"
         class="list"
@@ -21,6 +28,7 @@
           v-for="(entry) in addressBookFiltered"
           :key="entry.name"
           :item="entry"
+          @click="handleAddressBookItemClick(entry)"
         />
       </div>
       <p
@@ -41,12 +49,13 @@ import {
   watch,
 } from 'vue';
 import { throttle } from 'lodash-es';
-import { IonHeader, IonContent } from '@ionic/vue';
+import { IonHeader, IonContent, useIonRouter } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
-import type { ComponentRef } from '@/types';
-import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
+import { ComponentRef, IAddressBookEntry } from '@/types';
+import { ROUTE_ADDRESS_BOOK, ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAddressBook } from '@/composables';
 
 import InputSearch from '@/popup/components/InputSearch.vue';
@@ -63,19 +72,24 @@ export default defineComponent({
   },
   props: {
     modelValue: Boolean,
+    /** Whether the list is being used in an account selector or not  */
+    isSelector: Boolean,
   },
-  emits: ['update:modelValue'],
+  emits: ['update:hide-buttons', 'selectAddress'],
   setup(props, { emit }) {
     const scrollWrapperEl = ref<ComponentRef>();
     const isScrolled = ref(false);
 
     const {
       addressBookFiltered,
+      addressBookFilteredByProtocol,
       protocolFilter,
       searchQuery,
       showBookmarked,
+      setShowBookmarked,
     } = useAddressBook();
     const route = useRoute();
+    const router = useIonRouter();
 
     const noRecordsMessage = computed(() => {
       switch (true) {
@@ -86,15 +100,41 @@ export default defineComponent({
       }
     });
     const scrollWrapper = computed(() => scrollWrapperEl.value?.$el);
+    const protocolName = computed(() => {
+      if (protocolFilter.value) {
+        return ProtocolAdapterFactory.getAdapter(protocolFilter.value)?.protocolName;
+      }
+      return '';
+    });
+    const hideOuterButtons = computed(() => isScrolled.value || !!searchQuery.value);
+    const isSearchVisible = computed(() => (
+      (!protocolFilter.value || props.isSelector || showBookmarked.value)
+      && Object.keys(addressBookFilteredByProtocol.value).length > 9
+    ) || hideOuterButtons.value);
+    const hasBookmarkedEntries = computed(
+      () => addressBookFilteredByProtocol.value.some((entry) => entry.isBookmarked),
+    );
+
+    function handleAddressBookItemClick(entry: IAddressBookEntry) {
+      if (!entry) {
+        return;
+      }
+      if (props.isSelector) {
+        emit('selectAddress', entry.address);
+      } else {
+        router.push({ name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: entry.address } });
+      }
+    }
 
     const handleScroll = throttle(() => {
       if (!scrollWrapper.value) return;
       isScrolled.value = scrollWrapper.value?.scrollTop > 0;
-      emit('update:modelValue', (isScrolled.value || !!searchQuery.value));
+      emit('update:hide-buttons', hideOuterButtons.value);
     }, 100);
 
     onMounted(() => {
       scrollWrapper.value?.addEventListener('scroll', handleScroll);
+      setShowBookmarked(props.isSelector && hasBookmarkedEntries.value, !props.isSelector);
     });
 
     // onBeforeUnmount will not be called when user navigates to add/edit page
@@ -108,10 +148,13 @@ export default defineComponent({
 
     return {
       scrollWrapperEl,
-      isScrolled,
+      isSearchVisible,
+      hasBookmarkedEntries,
       searchQuery,
       addressBookFiltered,
       noRecordsMessage,
+      protocolName,
+      handleAddressBookItemClick,
     };
   },
 });
