@@ -2,14 +2,14 @@
   <div class="address-book-filters">
     <!-- All/Bookmarked Filters -->
     <BtnFilter
-      :is-active="!showBookmarked && !protocolFilter"
+      :is-active="!showBookmarked && (!protocolFilter || isSelector)"
       :text="$t('common.all')"
-      @click="clearFilters()"
+      @click="clearFilters(!isSelector)"
     />
 
     <BtnFilter
       :is-active="showBookmarked"
-      @click="() => setShowBookmarked(true)"
+      @click="() => setShowBookmarked(true, !isSelector)"
     >
       <IconWrapper
         :icon="FavoritesIcon"
@@ -17,22 +17,24 @@
       />
     </BtnFilter>
 
-    <div class="divider" />
+    <template v-if="!isSelector">
+      <div class="divider" />
 
-    <!-- Protocol Filters -->
-    <!-- TODO add horizontal scroll -->
-    <BtnFilter
-      v-for="protocol in PROTOCOL_LIST"
-      :key="protocol"
-      class="filter-btn"
-      :class="{ active: protocol === protocolFilter }"
-      @click="setProtocolFilter(protocol)"
-    >
-      <IconWrapper
-        :protocol-icon="protocol"
-        icon-size="rg"
-      />
-    </BtnFilter>
+      <!-- Protocol Filters -->
+      <!-- TODO add horizontal scroll -->
+      <BtnFilter
+        v-for="protocol in PROTOCOL_LIST"
+        :key="protocol"
+        class="filter-btn"
+        :class="{ active: protocol === protocolFilter }"
+        @click="setProtocolFilter(protocol)"
+      >
+        <IconWrapper
+          :protocol-icon="protocol"
+          icon-size="rg"
+        />
+      </BtnFilter>
+    </template>
   </div>
 </template>
 
@@ -51,6 +53,9 @@ export default defineComponent({
   components: {
     BtnFilter,
     IconWrapper,
+  },
+  props: {
+    isSelector: Boolean,
   },
   setup() {
     const {

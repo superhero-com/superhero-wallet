@@ -1,15 +1,12 @@
 <template>
-  <BtnPlain
-    class="address-book-item"
-    :to="{ name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: item.address } }"
-  >
+  <div class="address-book-item">
     <AccountInfo
       :account="account"
       :custom-name="item.name"
       show-protocol-icon
     />
     <ArrowRight class="arrow" />
-  </BtnPlain>
+  </div>
 </template>
 
 <script lang="ts">
@@ -23,14 +20,12 @@ import type { IAccount, IAddressBookEntry } from '@/types';
 import { ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
 
 import AccountInfo from '@/popup/components/AccountInfo.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
 
 import ArrowRight from '@/icons/arrow-right.svg?vue-component';
 
 export default defineComponent({
   components: {
     AccountInfo,
-    BtnPlain,
     ArrowRight,
   },
   props: {
@@ -58,8 +53,14 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   border-radius: $border-radius-interactive;
-  background-color: rgba($color-white, 0.08);
   padding: 12px 8px;
+  background-color: rgba($color-white, 0.08);
+  cursor: pointer;
+  transition: $transition-interactive;
+
+  &:hover {
+    background-color: rgba($color-white, 0.06);
+  }
 
   .arrow {
     width: 24px;
