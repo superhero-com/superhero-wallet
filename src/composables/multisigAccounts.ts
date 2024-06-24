@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
-import { uniqBy } from 'lodash-es';
+import { chunk, uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
+
 import type {
   IMultisigAccount,
   IMultisigConsensus,
@@ -18,6 +18,7 @@ import {
   toShiftedBigNumber,
 } from '@/utils';
 
+// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 import {
   AE_COIN_PRECISION,
@@ -38,7 +39,7 @@ export interface MultisigAccountsOptions {
 
 let composableInitialized = false;
 
-const POLLING_INTERVAL = 7000;
+const POLLING_INTERVAL = 12000;
 
 const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
 const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
@@ -176,11 +177,101 @@ export function useMultisigAccounts({
   }
 
   /**
+   * Get extended data for a multisig account
+   */
+  async function getMultisigAccountInfo({
+    contractId,
+    gaAccountId,
+    ...otherMultisigData
+  }: IMultisigAccountResponse): Promise<IMultisigAccount> {
+    const dryAeSdk = await getDryAeSdk();
+    try {
+      const contractInstance = await dryAeSdk.initializeContract({
+        aci: SimpleGAMultiSigAci,
+        address: contractId,
+      });
+
+      const currentAccount = multisigAccounts.value
+        .find((account) => account.contractId === contractId);
+
+      const [
+        nonce,
+        signers,
+        consensusResult,
+        balance,
+      ] = (await Promise.all([
+        (
+          (isAdditionalInfoNeeded.value && gaAccountId === activeMultisigAccountId.value)
+          || currentAccount?.nonce == null
+        )
+          ? contractInstance.get_nonce()
+          : { decodedResult: currentAccount.nonce },
+        currentAccount?.signers
+          ? { decodedResult: currentAccount.signers }
+          : contractInstance.get_signers(),
+        contractInstance.get_consensus_info(),
+        gaAccountId ? dryAeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
+      ]));
+
+      const decodedConsensus = consensusResult.decodedResult;
+      const txHash = decodedConsensus.tx_hash as Uint8Array;
+      const consensus: IMultisigConsensus = camelCaseKeysDeep(decodedConsensus);
+
+      consensus.expirationHeight = Number(consensus.expirationHeight);
+      consensus.confirmationsRequired = Number(consensus.confirmationsRequired);
+
+      const hasPendingTransaction = !!txHash && !consensus.expired;
+
+      return {
+        ...consensus,
+        ...otherMultisigData,
+        contractId,
+        gaAccountId,
+        nonce: Number(nonce.decodedResult),
+        signers: signers.decodedResult,
+        balance: toShiftedBigNumber(balance, -AE_COIN_PRECISION),
+        hasPendingTransaction,
+        txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
+      };
+    } catch (error) {
+      /**
+       * Node might throw nonce mismatch error, skip the current account update
+       * return the existing data and account details will be updated in the next poll.
+       */
+      if (!(error instanceof DryRunError)) {
+        handleUnknownError(error);
+      }
+      return multisigAccounts.value.find(
+        (account) => account.contractId === contractId,
+      )!;
+    }
+  }
+
+  async function getAllMultisigAccountsInfo(rawMultisigData: IMultisigAccountResponse[]) {
+    /**
+     * Splitting the rawMultisigData is required to not overload the node
+     * with amount of parallel dry-runs
+     */
+    const splittedMultisig = chunk(rawMultisigData
+      .filter(({ version }) => version === MULTISIG_SUPPORTED_CONTRACT_VERSION), 5);
+    const results: IMultisigAccount[] = [];
+    /* eslint-disable-next-line no-restricted-syntax */
+    for (const nestedArray of splittedMultisig) {
+      // Process each nested array sequentially
+      const promises = nestedArray.map(
+        (rawData: IMultisigAccountResponse) => getMultisigAccountInfo(rawData),
+      );
+      /* eslint-disable no-await-in-loop */
+      const arrayResults = await Promise.all(promises) as IMultisigAccount[];
+      results.push(...arrayResults);
+    }
+    return results;
+  }
+
+  /**
    * Refresh the list of the multisig accounts.
    */
   async function updateMultisigAccounts() {
-    const dryAeSdk = await getDryAeSdk();
-
     /**
      * Establish the list of multisig accounts used by the regular accounts
      */
@@ -207,79 +298,9 @@ export function useMultisigAccounts({
       );
     }
 
-    /**
-     * Get extended data for all multisig accounts
-     */
-    const result: IMultisigAccount[] = (await Promise.all(
-      rawMultisigData
-        .filter(({ version }) => version === MULTISIG_SUPPORTED_CONTRACT_VERSION)
-        .map(async ({
-          contractId,
-          gaAccountId,
-          ...otherMultisigData
-        }): Promise<IMultisigAccount> => {
-          try {
-            const contractInstance = await dryAeSdk.initializeContract({
-              aci: SimpleGAMultiSigAci,
-              address: contractId,
-            });
+    const allMultisigAccountsInfo = await getAllMultisigAccountsInfo(rawMultisigData);
 
-            const currentAccount = multisigAccounts.value
-              .find((account) => account.contractId === contractId);
-
-            const [
-              nonce,
-              signers,
-              consensusResult,
-              balance,
-            ] = (await Promise.all([
-              (
-                (isAdditionalInfoNeeded.value && gaAccountId === activeMultisigAccountId.value)
-                || currentAccount?.nonce == null
-              )
-                ? contractInstance.get_nonce()
-                : { decodedResult: currentAccount.nonce },
-              currentAccount?.signers
-                ? { decodedResult: currentAccount.signers }
-                : contractInstance.get_signers(),
-              contractInstance.get_consensus_info(),
-              gaAccountId ? dryAeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
-            ]));
-
-            const decodedConsensus = consensusResult.decodedResult;
-            const txHash = decodedConsensus.tx_hash as Uint8Array;
-            const consensus: IMultisigConsensus = camelCaseKeysDeep(decodedConsensus);
-
-            consensus.expirationHeight = Number(consensus.expirationHeight);
-            consensus.confirmationsRequired = Number(consensus.confirmationsRequired);
-
-            const hasPendingTransaction = !!txHash && !consensus.expired;
-
-            return {
-              ...consensus,
-              ...otherMultisigData,
-              contractId,
-              gaAccountId,
-              nonce: Number(nonce.decodedResult),
-              signers: signers.decodedResult,
-              balance: toShiftedBigNumber(balance, -AE_COIN_PRECISION),
-              hasPendingTransaction,
-              txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
-            };
-          } catch (error) {
-            /**
-             * Node might throw nonce mismatch error, skip the current account update
-             * return the existing data and account details will be updated in the next poll.
-             */
-            if (!(error instanceof DryRunError)) {
-              handleUnknownError(error);
-            }
-            return multisigAccounts.value.find(
-              (account) => account.contractId === contractId,
-            ) as IMultisigAccount;
-          }
-        }),
-    ))
+    const result: IMultisigAccount[] = allMultisigAccountsInfo
       .filter(Boolean)
       .sort((a, b) => {
         if (a.hasPendingTransaction && !b.hasPendingTransaction) return -1;
