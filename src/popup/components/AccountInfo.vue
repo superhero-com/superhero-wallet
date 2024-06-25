@@ -70,7 +70,7 @@ import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
-import Avatar from './Avatar.vue';
+import Avatar, { type AvatarSize } from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -84,7 +84,7 @@ export default defineComponent({
   },
   props: {
     account: { type: Object as PropType<Partial<IAccount>>, required: true },
-    avatarSize: { type: String, default: 'lg' },
+    avatarSize: { type: String as PropType<AvatarSize>, default: 'lg' },
     customName: { type: String, default: null },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
@@ -133,13 +133,17 @@ export default defineComponent({
   }
 
   .account-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4px;
     max-width: 250px;
     font-weight: 500;
 
     .account-name {
       @extend %face-sans-16-medium;
 
-      margin: 4px 0;
       line-height: 20px; // Avoid cutting off bottom part of some letters, e.g.: "g"
     }
 

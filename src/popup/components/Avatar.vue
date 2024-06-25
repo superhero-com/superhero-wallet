@@ -37,7 +37,7 @@ import { isContract } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'] as const;
-type AvatarSize = typeof SIZES[number];
+export type AvatarSize = typeof SIZES[number];
 
 const VARIANTS = ['primary', 'grey'] as const;
 type AvatarVariant = typeof VARIANTS[number];
