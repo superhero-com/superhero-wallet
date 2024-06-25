@@ -80,7 +80,7 @@
         <template #value>
           <TokenAmount
             :amount="transferData.gasUsed"
-            :symbol="AE_SYMBOL"
+            symbol=" "
             :protocol="PROTOCOLS.aeternity"
             hide-fiat
           />
