@@ -300,7 +300,16 @@ export default defineComponent({
       getSelectedAssetValue,
     });
 
-    const { max, fee } = useMaxAmount({ formModel });
+    const {
+      gasPrice,
+      gasUsed,
+      max,
+      fee,
+      total,
+    } = useMaxAmount({
+      formModel,
+      multisigVault: props.isMultisig ? activeMultisigAccount.value : undefined,
+    });
 
     const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
@@ -358,8 +367,10 @@ export default defineComponent({
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
         ...formModel.value,
+        gasPrice: gasPrice.value,
+        gasUsed: gasUsed.value,
         fee: fee.value as BigNumber,
-        total: (isAe.value ? +fee.value.toFixed() : 0) + +(formModel.value?.amount || 0),
+        total: +total.value.toFixed(),
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };

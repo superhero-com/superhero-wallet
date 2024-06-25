@@ -124,6 +124,12 @@
 
             <template #gas>
               <DetailsItem
+                v-if="gasUsed"
+                :value="gasUsed"
+                :label="$t('pages.transactionDetails.gasUsed')"
+                data-cy="gas"
+              />
+              <DetailsItem
                 v-if="gasPrice"
                 :label="$t('pages.transactionDetails.gasPrice')"
                 data-cy="gas-price"
@@ -133,16 +139,22 @@
                     :amount="+aettosToAe(gasPrice)"
                     :symbol="AE_SYMBOL"
                     :protocol="PROTOCOLS.aeternity"
-                    hide-fiat
                   />
                 </template>
               </DetailsItem>
               <DetailsItem
-                v-if="gasUsed"
-                :value="gasUsed"
-                :label="$t('pages.transactionDetails.gasUsed')"
-                data-cy="gas"
-              />
+                v-if="gasCost"
+                :label="$t('transaction.gasCost')"
+                data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(gasCost)"
+                    :symbol="AE_SYMBOL"
+                    :protocol="PROTOCOLS.aeternity"
+                  />
+                </template>
+              </DetailsItem>
             </template>
           </TransactionDetailsBase>
         </template>
@@ -152,6 +164,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import {
   computed,
   defineComponent,
@@ -162,6 +175,7 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
+
 import type { ITransaction, ITx } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
@@ -285,6 +299,12 @@ export default defineComponent({
       || transaction.value?.tx?.gasUsed
     ));
 
+    const gasCost = computed(() => (
+      gasUsed.value && gasPrice.value
+        ? new BigNumber(gasUsed.value).multipliedBy(gasPrice.value)
+        : new BigNumber(0)
+    ));
+
     const multisigTransactionFeePaidBy = computed((): string | null => {
       if (outerTxTag.value !== Tag.PayingForTx) return null;
       return transaction.value?.tx?.payerId ?? null;
@@ -388,6 +408,7 @@ export default defineComponent({
       splitAddress,
       aettosToAe,
       isLocalAccountAddress,
+      gasCost,
       gasPrice,
       gasUsed,
       multisigTransactionFeePaidBy,

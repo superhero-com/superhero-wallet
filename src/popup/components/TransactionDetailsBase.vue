@@ -111,6 +111,12 @@
         </div>
 
         <DetailsItem
+          v-if="transaction.tx.function"
+          :label="$t('modals.confirmTransactionSign.functionName')"
+          :value="transaction.tx.function"
+        />
+
+        <DetailsItem
           v-if="amount"
           :label="$t('common.amount')"
           data-cy="amount"

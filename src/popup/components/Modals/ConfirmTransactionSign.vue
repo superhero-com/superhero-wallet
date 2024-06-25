@@ -90,6 +90,39 @@
           />
         </DetailsItem>
 
+        <DetailsItem
+          v-if="popupProps?.tx?.gasLimit"
+          :value="popupProps.tx.gasLimit"
+          :label="$t('transaction.gasLimit')"
+          data-cy="gas"
+        />
+        <DetailsItem
+          v-if="gasPrice"
+          :label="$t('pages.transactionDetails.gasPrice')"
+          data-cy="gas-price"
+        >
+          <template #value>
+            <TokenAmount
+              :amount="+aettosToAe(gasPrice)"
+              :symbol="AE_SYMBOL"
+              :protocol="PROTOCOLS.aeternity"
+            />
+          </template>
+        </DetailsItem>
+        <DetailsItem
+          v-if="gasCost"
+          :label="$t('transaction.gasCost')"
+          data-cy="gas-cost"
+        >
+          <template #value>
+            <TokenAmount
+              :amount="+aettosToAe(gasCost)"
+              :symbol="AE_SYMBOL"
+              :protocol="PROTOCOLS.aeternity"
+            />
+          </template>
+        </DetailsItem>
+
         <DetailsItem :label="$t('transaction.fee')">
           <TokenAmount
             :amount="fee"
@@ -225,7 +258,9 @@ import {
   usePopupProps,
   useTransactionData,
 } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
+  aettosToAe,
   getAeFee,
   getTransactionTokenInfoResolver,
 } from '@/protocols/aeternity/helpers';
@@ -308,6 +343,7 @@ export default defineComponent({
     const loading = ref(false);
     const error = ref('');
     const verifying = ref(false);
+    const gasPrice = ref(0);
     const decodedCallData = ref<AeDecodedCallData | undefined>();
 
     const app = computed(() => popupProps.value?.app);
@@ -317,6 +353,8 @@ export default defineComponent({
       : popupProps.value?.tx?.fee!);
 
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
+    const gasCost = computed(() => new BigNumber(popupProps.value?.tx?.gasLimit ?? 0)
+      .multipliedBy(gasPrice.value));
 
     const appName = computed((): string | undefined => {
       if (SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)) {
@@ -465,6 +503,9 @@ export default defineComponent({
             const accountAddress = getTransactionSignerAddress(popupProps.value.txBase64);
             txParams.nonce = (await sdk.api.getAccountByPubkey(accountAddress)).nonce + 1;
             const dryRunResult = await sdk.txDryRun(buildTx(txParams), accountAddress);
+            gasPrice.value = dryRunResult.callObj?.gasPrice
+              ? +dryRunResult.callObj.gasPrice.toString()
+              : 0;
             if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
               error.value = new ContractByteArrayEncoder().decode(
                 dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
@@ -549,6 +590,8 @@ export default defineComponent({
     });
 
     return {
+      AE_SYMBOL,
+      aettosToAe,
       AnimatedSpinner,
       PAYLOAD_FIELD,
       PROTOCOLS,
@@ -561,6 +604,8 @@ export default defineComponent({
       error,
       executionCost,
       filteredTxFields,
+      gasCost,
+      gasPrice,
       getLabels,
       getTxKeyLabel,
       getTxAssetSymbol,

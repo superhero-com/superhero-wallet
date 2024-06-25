@@ -4,6 +4,7 @@
     :subtitle="headerSubtitle"
     :without-subtitle="isMultisig"
     :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : undefined"
+    :fee-label="isMultisig ? $t('transaction.proposalTransactionFee') : undefined"
     :base-token-symbol="AE_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
@@ -56,18 +57,62 @@
     <template #additional-fee>
       <DetailsItem
         v-if="isMultisig"
-        class="details-item"
-        :label="$t('modals.multisigTxProposal.fee')"
+        class="details-item additional-fee"
+        :label="$t('transaction.fee')"
       >
         <template #value>
-          <!-- TODO provide correct fee for the multisig -->
           <TokenAmount
-            :amount="PROPOSE_TRANSACTION_FEE"
+            :amount="+aettosToAe(AE_GET_META_TX_FEE)"
+            :symbol="AE_SYMBOL"
+            :protocol="PROTOCOLS.aeternity"
+            high-precision
+            data-cy="multisig-review-fee"
+          />
+        </template>
+      </DetailsItem>
+      <DetailsItem
+        v-if="transferData.gasUsed"
+        :label="isMultisig
+          ? $t('transaction.proposalEstimatedGasUsed')
+          : $t('transaction.estimatedGasUsed')"
+        class="details-item"
+      >
+        <template #value>
+          <TokenAmount
+            :amount="transferData.gasUsed"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
             hide-fiat
-            high-precision
-            data-cy="multisig-review-fee"
+          />
+        </template>
+      </DetailsItem>
+
+      <DetailsItem
+        v-if="transferData.gasPrice"
+        :label="$t('pages.transactionDetails.gasPrice')"
+        class="details-item"
+      >
+        <template #value>
+          <TokenAmount
+            :amount="transferData.gasPrice"
+            :symbol="AE_SYMBOL"
+            :protocol="PROTOCOLS.aeternity"
+          />
+        </template>
+      </DetailsItem>
+
+      <DetailsItem
+        v-if="gasCost"
+        :label="isMultisig
+          ? $t('transaction.proposalGasCost')
+          : $t('transaction.gasCost')"
+        class="details-item"
+      >
+        <template #value>
+          <TokenAmount
+            :amount="+gasCost.toString()"
+            :symbol="AE_SYMBOL"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
       </DetailsItem>
@@ -76,7 +121,9 @@
     <template #total>
       <DetailsItem
         v-if="!isSelectedAssetAex9"
-        :label="$t('common.total')"
+        :label="isMultisig
+          ? $t('transaction.proposalTotal')
+          : $t('common.total')"
         class="details-item"
       >
         <template #value>
@@ -103,6 +150,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
+import BigNumber from 'bignumber.js';
 
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
 import { PROTOCOLS } from '@/constants';
@@ -128,8 +176,13 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
 
 import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
-import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { aeToAettos } from '@/protocols/aeternity/helpers';
+import {
+  AE_SYMBOL,
+  AE_CONTRACT_ID,
+  TX_FUNCTIONS,
+  AE_GET_META_TX_FEE,
+} from '@/protocols/aeternity/config';
+import { aeToAettos, aettosToAe } from '@/protocols/aeternity/helpers';
 import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
@@ -182,9 +235,6 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
 
-    // TODO provide correct fee for the multisig
-    const PROPOSE_TRANSACTION_FEE = 0.000182940;
-
     const isSelectedAssetAex9 = computed(
       () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
     );
@@ -205,6 +255,12 @@ export default defineComponent({
       }
       return tg('pages.send.checkalert');
     });
+
+    const gasCost = computed(
+      () => props.transferData.gasPrice && props.transferData.gasUsed
+        ? new BigNumber(props.transferData.gasPrice).multipliedBy(props.transferData.gasUsed)
+        : 0,
+    );
 
     function openTransactionFailedModal() {
       openDefaultModal({
@@ -371,17 +427,20 @@ export default defineComponent({
             props.transferData.payload || undefined,
           );
 
-          const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
+          const { proposeTxHash } = await proposeTx(
+            txToPropose,
+            activeMultisigAccount.value.contractId,
+          );
 
           if (activeMultisigAccount.value.pending) {
             addTransactionToPendingMultisigAccount(
-              txHash,
+              proposeTxHash,
               activeMultisigAccount.value.gaAccountId,
               activeAccount.value.address,
             );
           }
 
-          await postSpendTx(txToPropose, txHash);
+          await postSpendTx(txToPropose, proposeTxHash);
           await updateMultisigAccounts();
           router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
         }
@@ -435,12 +494,14 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
+      gasCost,
       isActiveAccountAirGap,
       isSelectedAssetAex9,
       activeMultisigAccount,
+      aettosToAe,
       AE_SYMBOL,
       AE_CONTRACT_ID,
-      PROPOSE_TRANSACTION_FEE,
+      AE_GET_META_TX_FEE,
       loading,
       headerTitle,
       headerSubtitle,
@@ -451,9 +512,15 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .transfer-review {
   .details-item {
     margin-top: 16px;
+
+    &.additional-fee {
+      border-bottom: 1px solid rgba($color-white, 0.15);
+    }
   }
 
   .custom-header-title {
