@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <FixedScreenFooter>
+        <FixedScreenFooter position-fixed>
           <BtnMain
             v-if="hasError || !showNotification"
             class="verify-button"
@@ -179,6 +179,7 @@ export default defineComponent({
 
   &-body {
     padding: var(--screen-padding-x);
+    padding-bottom: 80px;
   }
 
   .title {
