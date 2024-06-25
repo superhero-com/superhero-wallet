@@ -71,7 +71,6 @@ import {
   formatDate,
   formatTime,
   relativeTimeTo,
-  toShiftedBigNumber,
 } from '@/utils';
 import {
   useCurrencies,
@@ -153,13 +152,7 @@ export default defineComponent({
         return 0;
       }
       return getFormattedAndRoundedFiat(
-        +amountRounded(
-          (
-            protocolCoin.decimals
-              ? toShiftedBigNumber(protocolCoin.amount || 0, -protocolCoin.decimals)
-              : protocolCoin.amount
-          )!,
-        ),
+        +amountRounded(protocolCoin.amount || 0),
         protocolCoin.protocol,
       );
     });
