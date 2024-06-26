@@ -89,23 +89,6 @@
 
               <MultisigProposalConsensus :proposal-completed="proposalCompleted" />
 
-              <DetailsItem
-                v-if="transaction"
-                :label="$t('pages.transactionDetails.hash')"
-                data-cy="hash"
-                small
-              >
-                <template #value>
-                  <CopyText
-                    hide-icon
-                    :value="transaction.hash"
-                    :copied-text="$t('common.hashCopied')"
-                  >
-                    <span class="text-address">{{ splitAddress(transaction.hash) }}</span>
-                  </CopyText>
-                </template>
-              </DetailsItem>
-
               <PayloadDetails
                 v-if="transaction"
                 :payload="getTransactionPayload(transaction)"
