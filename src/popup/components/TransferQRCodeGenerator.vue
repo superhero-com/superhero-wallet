@@ -24,6 +24,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import {
   defineComponent,
   onMounted,
@@ -95,7 +96,7 @@ export default defineComponent({
         tag: Tag.SpendTx,
         senderId: activeAccount.value.address as Encoded.AccountAddress,
         recipientId: recipient,
-        amount: amount.toString(),
+        amount: new BigNumber(amount).toFixed().toString(),
         payload: encode(new TextEncoder().encode(props.transferData.payload), Encoding.Bytearray),
       });
 

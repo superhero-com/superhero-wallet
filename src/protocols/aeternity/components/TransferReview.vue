@@ -299,7 +299,7 @@ export default defineComponent({
         if (props.transferData.invoiceId !== null) {
           actionResult = await burnTriggerPoS(
             selectedAsset.contractId as Encoded.ContractAddress,
-            amount.toString(),
+            new BigNumber(amount).toFixed().toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
             { waitMined: false },
@@ -307,7 +307,7 @@ export default defineComponent({
         } else if (!isSelectedAssetAeCoin) {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
           actionResult = await aeternityAdapter.transferToken?.(
-            amount.toString(),
+            new BigNumber(amount).toFixed().toString(),
             recipient,
             selectedAsset.contractId as Encoded.ContractAddress,
             { waitMined: false },
