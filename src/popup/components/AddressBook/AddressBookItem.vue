@@ -44,7 +44,6 @@ export default defineComponent({
     }));
     return {
       account,
-
       ROUTE_ADDRESS_BOOK_EDIT,
     };
   },

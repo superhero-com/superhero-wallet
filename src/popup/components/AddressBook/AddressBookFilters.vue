@@ -1,70 +1,76 @@
 <template>
-  <!-- ! This should be the new look for all tabs/filters -->
   <div class="address-book-filters">
     <!-- All/Bookmarked Filters -->
-    <BtnPill
-      v-for="filter in filtersList"
-      :key="filter"
-      class="filter-btn"
-      :class="{ active: filter === activeFilter }"
-      :text="filter === 'all' ? $t('common.all') : ''"
-      @click="setFilter(filter)"
+    <BtnFilter
+      :is-active="!showBookmarked && !protocolFilter"
+      :text="$t('common.all')"
+      @click="clearFilters()"
+    />
+
+    <BtnFilter
+      :is-active="showBookmarked"
+      @click="() => setShowBookmarked(true)"
     >
       <IconWrapper
-        v-if="filter === ADDRESS_BOOK_FILTERS.bookmarked"
         :icon="FavoritesIcon"
         icon-size="rg"
       />
-    </BtnPill>
+    </BtnFilter>
 
     <div class="divider" />
 
     <!-- Protocol Filters -->
     <!-- TODO add horizontal scroll -->
-    <BtnPill
+    <BtnFilter
       v-for="protocol in PROTOCOL_LIST"
       :key="protocol"
       class="filter-btn"
-      :class="{ active: protocol === activeFilter }"
-      @click="setFilter(protocol)"
+      :class="{ active: protocol === protocolFilter }"
+      @click="setProtocolFilter(protocol)"
     >
       <IconWrapper
         :protocol-icon="protocol"
         icon-size="rg"
       />
-    </BtnPill>
+    </BtnFilter>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { ADDRESS_BOOK_FILTERS, PROTOCOL_LIST } from '@/constants';
+import { PROTOCOL_LIST } from '@/constants';
+import { useAddressBook } from '@/composables';
 
-import BtnPill from '@/popup/components/buttons/BtnPill.vue';
+import BtnFilter from '@/popup/components/buttons/BtnFilter.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
 
 import FavoritesIcon from '@/icons/star-full.svg?vue-component';
-import { useAddressBook } from '@/composables';
 
 export default defineComponent({
   components: {
-    BtnPill,
+    BtnFilter,
     IconWrapper,
   },
   setup() {
-    const { activeFilter, setFilter } = useAddressBook();
-    const filtersList = Object.values(ADDRESS_BOOK_FILTERS);
+    const {
+      protocolFilter,
+      showBookmarked,
+      setProtocolFilter,
+      setShowBookmarked,
+      clearFilters,
+    } = useAddressBook();
 
     return {
-      activeFilter,
-      filtersList,
+      protocolFilter,
+      showBookmarked,
 
-      setFilter,
+      setProtocolFilter,
+      setShowBookmarked,
+      clearFilters,
 
       FavoritesIcon,
       PROTOCOL_LIST,
-      ADDRESS_BOOK_FILTERS,
     };
   },
 });
@@ -82,19 +88,5 @@ export default defineComponent({
   .divider {
     border-left: 1px solid rgba($color-white, 0.15);
   }
-
-  .filter-btn {
-    @extend %face-sans-14-bold;
-    line-height: 20px;
-    padding: 3.5px 11.5px;
-    border: 1px solid transparent;
-  }
-
-  .active {
-    border-color: rgba($color-white, 0.15);
-    background-color: rgba($color-white, 0.15);
-    color: $color-white;
-  }
 }
-
 </style>

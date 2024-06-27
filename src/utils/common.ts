@@ -535,11 +535,19 @@ export const toBase64Url = (data: Buffer | Uint8Array | string): string => Buffe
  * Get protocol by address regardless of the active network.
  */
 export function getProtocolByAddress(address: AccountAddress) {
-  let adapter = ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_MAINNET);
-  if (!adapter) {
-    adapter = ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_TESTNET);
-  }
-  return adapter?.protocol;
+  return (
+    ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_MAINNET)
+    || ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_TESTNET)
+  )?.protocol;
+}
+
+export function convertBlobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
 }
 
 export function selectFiles(options: {

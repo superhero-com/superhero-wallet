@@ -5,8 +5,7 @@ import { debounce, throttle } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
-  AccountAddress,
-  IAddressBook,
+  IAddressBookEntry,
   INetwork,
   NetworkType,
   ObjectValues,
@@ -49,17 +48,23 @@ defineRule(
 );
 
 /**
+ * Validates whether the provided value is a valid account address.
+ * By providing the `protocol` parameter, the rule will validate the address based on the protocol.
  * `networkType` is required for the Bitcoin Address validation because same account has different
  * address on the mainnet and testnet.
  */
 defineRule(
   'account_address',
-  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => (
-    ProtocolAdapterFactory
-      .getAdapter(protocol)
-      .isAccountAddressValid(value, networkType)
-    || tg('validation.addressGeneric', { protocol })
-  ),
+  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => {
+    if (protocol) {
+      return (ProtocolAdapterFactory
+        .getAdapter(protocol)
+        .isAccountAddressValid(value, networkType)
+      || tg('validation.addressGeneric', { protocol })
+      );
+    }
+    return getProtocolByAddress(value) ? true : tg('validation.invalidAddress');
+  },
 );
 
 defineRule(
@@ -122,21 +127,18 @@ defineRule(
 
 defineRule(
   'address_book_entry_exists',
-  (value: string, [entries, savedKey, type]: [IAddressBook, string, 'name' | 'address']) => {
-    const key = (Object.keys(entries) as Array<AccountAddress>)
-      .find((k) => entries[k][type] === value);
+  (value: string, [entries, savedValue, type]: [IAddressBookEntry[], string, 'name' | 'address']) => {
+    const exists = Object.values(entries).some(
+      (entry) => entry[type] === value && value
+       !== savedValue,
+    );
 
     const entryTypeText = type === 'name' ? tg('common.name') : tg('common.address');
 
-    return (key && key !== savedKey)
+    return (exists)
       ? tg('validation.addressBookEntryExists', [entryTypeText.toLowerCase()])
       : true;
   },
-);
-
-defineRule(
-  'is_address_valid',
-  (value: string) => getProtocolByAddress(value) ? true : tg('validation.invalidAddress'),
 );
 
 export default () => {

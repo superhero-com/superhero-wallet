@@ -1,16 +1,16 @@
 <template>
-  <CopyText
+  <component
+    :is="disableClickToCopy ? 'div' : 'CopyText'"
     :value="getURFromFragments(value)"
     :copied="externalCopied"
+    class="qr-code"
     hide-icon
   >
-    <div class="qr-code">
-      <div
-        ref="canvas"
-        class="canvas"
-      />
-    </div>
-  </CopyText>
+    <div
+      ref="canvas"
+      class="canvas"
+    />
+  </component>
 </template>
 
 <script lang="ts">
@@ -40,6 +40,7 @@ export default defineComponent({
     size: { type: Number, required: true },
     typeNumber: { type: Number as PropType<TypeNumber>, default: 10 },
     externalCopied: Boolean,
+    disableClickToCopy: Boolean,
   },
   setup(props) {
     const canvas = ref<HTMLElement>();
