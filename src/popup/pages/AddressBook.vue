@@ -16,11 +16,13 @@
             data-cy="import-address-book"
             :text="$t('pages.addressBook.importAddressBook')"
             :icon="ImportIcon"
+            @click="importAddressBook()"
           />
           <BtnBox
             data-cy="export-address-book"
             :text="$t('pages.addressBook.exportAddressBook')"
             :icon="ExportIcon"
+            @click="exportAddressBook()"
           />
         </div>
       </Transition>
@@ -37,6 +39,7 @@ import {
 } from 'vue';
 
 import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
+import { useAddressBook } from '@/composables';
 
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
@@ -54,8 +57,13 @@ export default defineComponent({
   setup() {
     const hideButtons = ref(false);
 
+    const { exportAddressBook, importAddressBook } = useAddressBook();
+
     return {
       hideButtons,
+
+      exportAddressBook,
+      importAddressBook,
 
       AddIcon,
       ImportIcon,
