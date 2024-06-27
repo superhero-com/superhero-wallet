@@ -4,23 +4,23 @@ import type {
   CurrencyCode,
   CurrencyRates,
   ICurrency,
-  Protocol,
   MarketData,
+  Protocol,
 } from '@/types';
 import {
   CURRENCIES,
   DEFAULT_LOCALE,
+  STORAGE_KEYS,
 } from '@/constants';
 import {
-  getLocalStorageItem,
   handleUnknownError,
-  setLocalStorageItem,
   watchUntilTruthy,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAccounts } from '@/composables/accounts';
 import { CoinGecko } from '@/lib/CoinGecko';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import { useStorageRef } from './storageRef';
 
 export interface UseCurrenciesOptions {
   pollingDisabled?: boolean;
@@ -29,7 +29,6 @@ export interface UseCurrenciesOptions {
 let composableInitialized = false;
 
 const POLLING_INTERVAL = 3600000;
-const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
 const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
 
 /**
@@ -40,11 +39,15 @@ const marketData = ref<MarketData | null>(null);
 /**
  * Stores the list of currencies with the AE coin fiat exchange rate for each of them.
  */
-const currencyRates = ref<CurrencyRates>({} as any);
+const currencyRates = useStorageRef<CurrencyRates>(
+  {} as any,
+  STORAGE_KEYS.currencyRates,
+);
 const isLoadingCurrencies = ref(false);
 
-const currentCurrencyCode = ref<CurrencyCode>(
-  getLocalStorageItem<CurrencyCode>([LOCAL_STORAGE_CURRENCY_KEY]) || DEFAULT_CURRENCY_CODE,
+const currentCurrencyCode = useStorageRef<CurrencyCode>(
+  DEFAULT_CURRENCY_CODE,
+  STORAGE_KEYS.currency,
 );
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
@@ -91,7 +94,6 @@ export function useCurrencies({
   function setCurrentCurrency(currency: CurrencyCode) {
     currentCurrencyCode.value = currency;
     loadCoinsData();
-    setLocalStorageItem([LOCAL_STORAGE_CURRENCY_KEY], currency);
   }
 
   async function loadCurrencyRates() {
@@ -158,8 +160,13 @@ export function useCurrencies({
   if (!composableInitialized) {
     composableInitialized = true;
 
+    // Every time user adds account of new protocol we need to immediately fetch
+    // the rates for this protocol.
     watch(protocolsInUse, (currentValue, oldValue) => {
-      if (difference(currentValue, oldValue).length && !isLoadingCurrencies.value) {
+      if (
+        oldValue.length > 0 // Avoid fetching before establishing the accounts
+        && difference(currentValue, oldValue).length && !isLoadingCurrencies.value
+      ) {
         loadCurrencyRates();
       }
     });

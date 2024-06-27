@@ -109,6 +109,8 @@ export const STORAGE_KEYS = {
   activeAccountGlobalIdx: 'active-account-global-idx',
   protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',
   balances: 'balances',
+  currency: 'currency',
+  currencyRates: 'currency-rates',
   customNetworks: 'custom-networks',
   activeNetworkName: 'active-network-name',
   hiddenCards: 'hidden-cards',
