@@ -17,7 +17,6 @@
     <div
       class="account-details"
       :class="{ 'list-name': isListName }"
-      :style="{ '--maxWidth': `${maxWidth}px` }"
     >
       <div
         v-if="isMultisig"
@@ -88,8 +87,6 @@ export default defineComponent({
     account: { type: Object as PropType<Partial<IAccount>>, required: true },
     avatarSize: { type: String as PropType<AvatarSize>, default: 'lg' },
     customName: { type: String, default: null },
-    /** Used when we need to crop the name at a different width */
-    maxWidth: { type: Number, default: 250 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
@@ -127,6 +124,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .account-info {
+  --maxWidth: 250px;
+
   display: flex;
   align-items: center;
   justify-content: flex-start;

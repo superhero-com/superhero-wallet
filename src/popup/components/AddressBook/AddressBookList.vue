@@ -42,17 +42,16 @@ import {
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { IonHeader, IonContent } from '@ionic/vue';
+import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
-import { ComponentRef } from '@/types';
-import { ADDRESS_BOOK_FILTERS } from '@/constants';
+import type { ComponentRef } from '@/types';
+import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
 import { useAddressBook } from '@/composables';
 
 import InputSearch from '@/popup/components/InputSearch.vue';
 import AddressBookItem from '@/popup/components/AddressBook/AddressBookItem.vue';
 import AddressBookFilters from '@/popup/components/AddressBook/AddressBookFilters.vue';
-import { useRoute } from 'vue-router';
-import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
 
 export default defineComponent({
   components: {
@@ -66,40 +65,44 @@ export default defineComponent({
     modelValue: Boolean,
   },
   emits: ['update:modelValue'],
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const scrollWrapperEl = ref<ComponentRef>();
     const isScrolled = ref(false);
 
-    const { addressBookFiltered, activeFilter, searchQuery } = useAddressBook();
+    const {
+      addressBookFiltered,
+      protocolFilter,
+      searchQuery,
+      showBookmarked,
+    } = useAddressBook();
     const route = useRoute();
 
     const noRecordsMessage = computed(() => {
       switch (true) {
         case !!searchQuery.value: return tg('pages.addressBook.noRecords.search');
-        case activeFilter.value === ADDRESS_BOOK_FILTERS.all: return tg('pages.addressBook.noRecords.addressBook');
-        case activeFilter.value === ADDRESS_BOOK_FILTERS.bookmarked: return tg('pages.addressBook.noRecords.bookmarked');
+        case protocolFilter.value === null: return tg('pages.addressBook.noRecords.addressBook');
+        case showBookmarked.value: return tg('pages.addressBook.noRecords.bookmarked');
         default: return tg('pages.addressBook.noRecords.blockchain');
       }
     });
     const scrollWrapper = computed(() => scrollWrapperEl.value?.$el);
 
-    function handleScroll() {
+    const handleScroll = throttle(() => {
       if (!scrollWrapper.value) return;
-      isScrolled.value = (scrollWrapper.value as HTMLElement)?.scrollTop > 0;
+      isScrolled.value = scrollWrapper.value?.scrollTop > 0;
       emit('update:modelValue', (isScrolled.value || !!searchQuery.value));
-    }
-    const throttledHandleScroll = throttle(handleScroll, 100);
+    }, 100);
 
     onMounted(() => {
-      scrollWrapper.value?.addEventListener('scroll', throttledHandleScroll);
+      scrollWrapper.value?.addEventListener('scroll', handleScroll);
     });
 
     // onBeforeUnmount will not be called when user navigates to add/edit page
     watch(route, ({ name }) => {
       if (name === ROUTE_ADDRESS_BOOK) {
-        scrollWrapper.value?.addEventListener('scroll', throttledHandleScroll);
+        scrollWrapper.value?.addEventListener('scroll', handleScroll);
       } else {
-        scrollWrapper.value?.removeEventListener('scroll', throttledHandleScroll);
+        scrollWrapper.value?.removeEventListener('scroll', handleScroll);
       }
     }, { deep: true });
 
@@ -134,21 +137,21 @@ export default defineComponent({
     margin-bottom: 16px;
   }
 
-  .list{
+  .list {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
 
   .message {
-      @extend %face-sans-15-medium;
+    @extend %face-sans-15-medium;
 
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: $color-grey-light;
-      text-align: center;
-      padding: 40px 8px;
-    }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $color-grey-light;
+    text-align: center;
+    padding: 40px 8px;
+  }
 }
 </style>
