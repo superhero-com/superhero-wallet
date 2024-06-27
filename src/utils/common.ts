@@ -541,3 +541,29 @@ export function getProtocolByAddress(address: AccountAddress) {
   }
   return adapter?.protocol;
 }
+
+export function selectFiles(options: {
+  /** Allows to select more than one file */
+  multiple?: boolean;
+  /** @link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept */
+  accept?: string;
+} = { multiple: false, accept: '*' }) {
+  return new Promise<FileList>((resolve, reject) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.hidden = true;
+    input.multiple = options.multiple!;
+    input.accept = options.accept!;
+    document.body.appendChild(input);
+    input.onchange = (e) => {
+      const { files } = (e.target as HTMLInputElement);
+      if (files) {
+        resolve(files);
+      } else {
+        reject(new Error('No files selected'));
+      }
+      input.remove();
+    };
+    input.click();
+  });
+}
