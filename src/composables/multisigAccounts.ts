@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import { chunk, uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
+import { Contract, DryRunError, Encoded } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -9,6 +9,7 @@ import type {
   IMultisigConsensus,
   IMultisigAccountResponse,
   AccountAddress,
+  Dictionary,
 } from '@/types';
 import {
   fetchJson,
@@ -24,6 +25,7 @@ import {
   AE_COIN_PRECISION,
   MULTISIG_SUPPORTED_CONTRACT_VERSION,
 } from '@/protocols/aeternity/config';
+import { SimpleGAMultiSigContractApi } from '@/protocols/aeternity/types';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
@@ -37,6 +39,7 @@ export interface MultisigAccountsOptions {
   pollingDisabled?: boolean;
 }
 
+let multisigContractInstances: Dictionary<Contract<SimpleGAMultiSigContractApi>> = {};
 let composableInitialized = false;
 
 const POLLING_INTERVAL = 12000;
@@ -186,10 +189,15 @@ export function useMultisigAccounts({
   }: IMultisigAccountResponse): Promise<IMultisigAccount> {
     const dryAeSdk = await getDryAeSdk();
     try {
-      const contractInstance = await dryAeSdk.initializeContract({
-        aci: SimpleGAMultiSigAci,
-        address: contractId,
-      });
+      if (!multisigContractInstances[contractId]) {
+        multisigContractInstances[contractId] = await dryAeSdk
+          .initializeContract<SimpleGAMultiSigContractApi>({
+            aci: SimpleGAMultiSigAci,
+            address: contractId,
+          });
+      }
+
+      const contractInstance = multisigContractInstances[contractId];
 
       const currentAccount = multisigAccounts.value
         .find((account) => account.contractId === contractId);
@@ -362,6 +370,7 @@ export function useMultisigAccounts({
 
     onNetworkChange(() => {
       updateMultisigAccounts();
+      multisigContractInstances = {};
     });
   }
 
