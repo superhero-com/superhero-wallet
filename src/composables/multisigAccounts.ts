@@ -76,7 +76,7 @@ export function useMultisigAccounts({
   pollOnce = false,
   pollingDisabled = false,
 }: MultisigAccountsOptions = {}) {
-  const { onNetworkChange } = useNetworks();
+  const { activeNetwork, onNetworkChange } = useNetworks();
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk, getDryAeSdk } = useAeSdk();
   const { aeAccounts } = useAccounts();
@@ -256,6 +256,7 @@ export function useMultisigAccounts({
   }
 
   async function getAllMultisigAccountsInfo(rawMultisigData: IMultisigAccountResponse[]) {
+    const currentNetworkName = activeNetwork.value.name;
     /**
      * Splitting the rawMultisigData is required to not overload the node
      * with amount of parallel dry-runs
@@ -265,6 +266,9 @@ export function useMultisigAccounts({
     const results: IMultisigAccount[] = [];
     /* eslint-disable-next-line no-restricted-syntax */
     for (const nestedArray of splittedMultisig) {
+      if (currentNetworkName !== activeNetwork.value.name) {
+        return [];
+      }
       // Process each nested array sequentially
       const promises = nestedArray.map(
         (rawData: IMultisigAccountResponse) => getMultisigAccountInfo(rawData),
