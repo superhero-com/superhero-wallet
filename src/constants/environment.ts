@@ -67,6 +67,9 @@ export const IS_SAFARI = /Mozilla\/5.0 \((Macintosh|iPad|iPhone|iPod); [\s\S]+?\
 
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+/**
+ * Features visible only to developers as they are most probably still in development.
+ */
 export const UNFINISHED_FEATURES = !!process.env.UNFINISHED_FEATURES;
 
 export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY!;

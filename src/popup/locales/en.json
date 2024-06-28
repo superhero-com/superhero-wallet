@@ -353,7 +353,7 @@
       "title": "Auctions and bidding",
       "msg": "If your .chain name is {'<'}strong{'>'}12 characters or less{'<'}/strong{'>'} – you’ve got to bid for it in an auction. To win the bidding process, all you have to do is have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.{'<'}br /{'>'}{'<'}br /{'>'}Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
     },
-    "autoextend-help": {
+    "nameAutoExtendHelp": {
       "title": "Autoextend name",
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
@@ -800,7 +800,7 @@
         "soonest": "Soonest",
         "length": "Name length",
         "bid": "Bid",
-        "expires": "Ends",
+        "endsInApproxTime": "Ends in ≈ {time}",
         "no-auctions": "There are no .chain names for auction at the moment. Would you like to register one?",
         "not-found": "Not found",
         "current-bid": "Current bid",
