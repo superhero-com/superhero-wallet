@@ -95,7 +95,7 @@ export default defineComponent({
     letter-spacing: 0.07em;
 
     .dots {
-      @extend %face-mono-16-regular;
+      @extend %face-mono-16-medium;
 
       letter-spacing: -0.25em;
       text-align: center;

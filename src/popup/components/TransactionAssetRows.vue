@@ -120,7 +120,7 @@ export default defineComponent({
     }
 
     .symbol {
-      @extend %face-sans-16-regular;
+      @extend %text-body;
 
       letter-spacing: -2%;
     }

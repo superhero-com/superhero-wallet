@@ -1,7 +1,7 @@
 <template>
   <div class="platforms">
     <div class="heading">
-      <slot name="header" />
+      {{ $t('pages.index.platforms.heading') }}
     </div>
     <div
       v-if="IS_MOBILE_DEVICE"
@@ -70,7 +70,7 @@
       </div>
     </div>
     <div class="footer">
-      <slot name="footer" />
+      {{ $t('pages.index.webVersion') }}
     </div>
   </div>
 </template>
@@ -115,13 +115,13 @@ export default {
   word-break: break-word;
 
   .heading {
-    @extend %face-sans-17-medium;
+    @extend %face-sans-16-semi-bold;
 
     margin-bottom: 8px;
   }
 
   .footer {
-    @extend %face-sans-17-medium;
+    @extend %face-sans-16-semi-bold;
 
     margin-top: 28px;
     margin-bottom: 12px;

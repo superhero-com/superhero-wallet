@@ -57,7 +57,7 @@ export default defineComponent({
 .btn-main {
   --bg-color: #{$color-primary};
 
-  @extend %face-sans-16-regular;
+  @extend %text-body;
 
   display: flex;
   align-items: center;

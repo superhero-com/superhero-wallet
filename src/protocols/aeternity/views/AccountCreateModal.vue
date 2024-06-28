@@ -3,50 +3,47 @@
     class="account-create-modal"
     from-bottom
     has-close-button
-    no-padding
     centered
     @close="resolve"
   >
-    <div class="content-wrapper">
-      <h1 class="text-heading-1">
-        {{
-          isMultisig
-            ? $t('modals.createAccount.titleMultisig')
-            : $t('modals.createAccount.titleAeternityAccount')
-        }}
-      </h1>
+    <h1 class="text-heading-4 heading">
+      {{
+        isMultisig
+          ? $t('modals.createAccount.titleMultisig')
+          : $t('modals.createAccount.titleAeternityAccount')
+      }}
+    </h1>
 
-      <p class="message">
-        {{
-          isMultisig
-            ? $t('modals.createAccount.msgMultisig')
-            : $t('modals.createAccount.msgAeternity')
-        }}
-      </p>
+    <p class="text-caption caption">
+      {{
+        isMultisig
+          ? $t('modals.createAccount.msgMultisig')
+          : $t('modals.createAccount.msgAeternity')
+      }}
+    </p>
 
-      <BtnSubheader
-        v-if="!isMultisig"
-        :header="$t('pages.accounts.addAccount')"
-        :subheader="$t('modals.createAccount.btnSubtitle')"
-        :icon="PlusCircleIcon"
-        :disabled="!isOnline"
-        @click="createPlainAccount()"
-      />
-      <BtnSubheader
-        :header="$t('modals.createMultisigAccount.btnText')"
-        :subheader="$t('modals.createMultisigAccount.btnSubtitle')"
-        :icon="PlusCircleIcon"
-        :disabled="!isOnline"
-        @click="createMultisigAccount()"
-      />
-      <BtnSubheader
-        v-if="!isMultisig"
-        :header="$t('airGap.importAccount.btnText')"
-        :subheader="$t('airGap.importAccount.btnSubtitle')"
-        :icon="QrScanIcon"
-        @click="connectHardwareWallet()"
-      />
-    </div>
+    <BtnSubheader
+      v-if="!isMultisig"
+      :header="$t('pages.accounts.addAccount')"
+      :subheader="$t('modals.createAccount.btnSubtitle')"
+      :icon="PlusCircleIcon"
+      :disabled="!isOnline"
+      @click="createPlainAccount()"
+    />
+    <BtnSubheader
+      :header="$t('modals.createMultisigAccount.btnText')"
+      :subheader="$t('modals.createMultisigAccount.btnSubtitle')"
+      :icon="PlusCircleIcon"
+      :disabled="!isOnline"
+      @click="createMultisigAccount()"
+    />
+    <BtnSubheader
+      v-if="!isMultisig"
+      :header="$t('airGap.importAccount.btnText')"
+      :subheader="$t('airGap.importAccount.btnSubtitle')"
+      :icon="QrScanIcon"
+      @click="connectHardwareWallet()"
+    />
   </Modal>
 </template>
 
@@ -138,18 +135,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/typography';
-
 .account-create-modal {
-  .content-wrapper {
-    padding: 0 16px 32px;
+  .heading {
+    margin-bottom: 1em;
   }
 
-  .message {
-    @extend %face-sans-16-medium;
-
+  .caption {
     line-height: 24px;
-    margin: 0 auto 36px;
+    margin-bottom: 32px;
   }
 }
 </style>

@@ -1002,13 +1002,6 @@ export default defineComponent({
     font-weight: bold;
   }
 
-  h1 {
-    margin: 20px;
-    text-align: center;
-
-    @extend %face-sans-20-regular;
-  }
-
   ul {
     margin-bottom: 8px;
     padding-left: 20px;

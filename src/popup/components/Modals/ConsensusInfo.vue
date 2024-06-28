@@ -76,7 +76,7 @@ export default defineComponent({
     line-height: 22px;
 
     .subtitle {
-      @extend %face-sans-16-regular;
+      @extend %text-body;
 
       margin-top: -8px;
     }

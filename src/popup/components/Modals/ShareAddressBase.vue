@@ -9,7 +9,7 @@
   >
     <div data-cy="top-up-container">
       <h2
-        class="text-heading-2 text-center"
+        class="text-heading-4 text-center"
         v-text="heading"
       />
 
@@ -276,13 +276,6 @@ export default defineComponent({
 .share-address-base {
   font-weight: 500;
   color: $color-white;
-
-  .title {
-    @extend %face-sans-18-medium;
-
-    align-self: center;
-    color: $color-white;
-  }
 
   .account-row {
     display: flex;

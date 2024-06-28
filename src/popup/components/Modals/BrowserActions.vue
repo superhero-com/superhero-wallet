@@ -3,8 +3,6 @@
     class="browser-actions"
     from-bottom
     centered
-    body-without-padding-bottom
-    no-padding-top
     @close="resolve"
   >
     <div class="info">
@@ -31,13 +29,12 @@
       />
     </div>
 
-    <template #footer>
-      <BtnMain
-        variant="muted"
-        :text="$t('common.cancel')"
-        @click="reject"
-      />
-    </template>
+    <BtnMain
+      variant="muted"
+      extend
+      :text="$t('common.cancel')"
+      @click="reject"
+    />
   </Modal>
 </template>
 

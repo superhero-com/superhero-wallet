@@ -3,7 +3,7 @@
     class="transfer-send-base"
     has-close-button
     from-bottom
-    :body-without-padding-bottom="currentStep === TRANSFER_SEND_STEPS.form"
+    :no-padding-bottom="currentStep === TRANSFER_SEND_STEPS.form"
     @close="$emit('close')"
   >
     <div class="relative">

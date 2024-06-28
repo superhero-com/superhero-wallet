@@ -3,29 +3,27 @@
     class="account-create"
     from-bottom
     has-close-button
-    no-padding
     centered
     @close="resolve"
   >
-    <div class="content-wrapper ">
-      <h2 class="text-heading-1">
-        {{ $t('modals.createAccount.title') }}
-      </h2>
+    <h1
+      class="text-heading-4 heading"
+      v-text="$t('modals.createAccount.title')"
+    />
 
-      <p class="message">
-        {{ $t('modals.createAccount.msg') }}
-      </p>
+    <p class="text-caption caption">
+      {{ $t('modals.createAccount.msg') }}
+    </p>
 
-      <BtnSubheader
-        v-for="protocol in PROTOCOL_LIST"
-        :key="protocol"
-        :header="getProtocolName(protocol)"
-        :subheader="$t(
-          'modals.createAccount.addProtocolAccount', { name: getProtocolName(protocol) })"
-        :protocol-icon="protocol"
-        @click="createAccount(protocol)"
-      />
-    </div>
+    <BtnSubheader
+      v-for="protocol in PROTOCOL_LIST"
+      :key="protocol"
+      :header="getProtocolName(protocol)"
+      :subheader="$t(
+        'modals.createAccount.addProtocolAccount', { name: getProtocolName(protocol) })"
+      :protocol-icon="protocol"
+      @click="createAccount(protocol)"
+    />
   </Modal>
 </template>
 
@@ -109,19 +107,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/typography';
-
 .account-create {
-  .content-wrapper {
-    padding: 0 16px 32px;
+  .heading {
+    margin-bottom: 1em;
   }
 
-  .message {
-    @extend %face-sans-16-medium;
-
-    padding-inline: inherit;
+  .caption {
     line-height: 24px;
-    margin: 0 auto 36px;
+    margin-bottom: 32px;
   }
 }
 </style>

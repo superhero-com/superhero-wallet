@@ -89,7 +89,7 @@
         QR Scanner + connection URI input
       -->
       <div v-else>
-        <h2 class="text-heading-2" v-text="$t('walletConnect.modalTitle')" />
+        <h2 class="text-heading-4" v-text="$t('walletConnect.modalTitle')" />
         <p v-text="$t('walletConnect.modalSubtitle')" />
 
         <InfoBox

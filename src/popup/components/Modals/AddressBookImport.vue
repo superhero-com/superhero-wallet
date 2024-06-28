@@ -89,8 +89,6 @@ export default defineComponent({
 
 .address-book-import {
   .title {
-    @extend %face-sans-19-medium;
-
     margin-bottom: 4px;
   }
 

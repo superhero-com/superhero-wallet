@@ -22,27 +22,26 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
-@use '@/styles/typography';
 
 .badge {
   position: relative;
   display: inline-block;
 
   &-inner {
-    @extend %face-sans-11-regular;
-
-    color: $color-white;
     position: absolute;
     z-index: 1;
     right: -2px;
     top: 0;
     min-width: 14px;
     height: 14px;
+    padding: 0 3px;
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 14px;
+    color: $color-white;
     background: $color-secondary;
     border-radius: 7px;
     text-align: center;
-    line-height: 14px;
-    padding: 0 3px;
   }
 }
 </style>

@@ -6,18 +6,20 @@
     @click="openCreateAccountModal()"
   >
     <template #top>
-      <div class="title">
+      <div class="title text-heading-2">
         <PlusCircleIcon class="plus-icon" />
-        {{
-          isMultisig
-            ? $t('pages.vaults.addVault')
-            : $t('pages.accounts.addAccount')
-        }}
+        <strong>
+          {{
+            isMultisig
+              ? $t('pages.vaults.addVault')
+              : $t('pages.accounts.addAccount')
+          }}
+        </strong>
       </div>
     </template>
 
     <template #middle>
-      <div class="description">
+      <div class="text-caption caption">
         {{
           isMultisig
             ? $t('pages.vaults.addVaultDescription')
@@ -69,13 +71,10 @@ export default defineComponent({
 
 .account-card-add {
   .title {
-    @extend %face-sans-20-bold;
-
     display: flex;
     align-items: center;
     padding-bottom: 12px;
     color: $color-white;
-    font-weight: 500;
 
     .plus-icon {
       width: 48px;
@@ -84,12 +83,9 @@ export default defineComponent({
     }
   }
 
-  .description {
-    @extend %face-sans-16-medium;
-
+  .caption {
     padding-left: 12px;
     color: rgba($color-white, 0.85);
-    line-height: 22px;
   }
 }
 </style>

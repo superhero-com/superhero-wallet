@@ -174,7 +174,7 @@ export default {
     .name-address-wrapper {
       @include mixins.flex(flex-start, flex-start, column);
 
-      @extend %face-sans-16-bold;
+      @extend %face-sans-16-semi-bold;
 
       line-height: 16px;
 

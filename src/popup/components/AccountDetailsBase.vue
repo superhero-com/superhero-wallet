@@ -243,13 +243,6 @@ export default defineComponent({
         width: 24px;
       }
     }
-
-    :deep(.account-info .title) {
-      justify-content: flex-start;
-      word-break: normal;
-
-      @extend %face-sans-16-regular;
-    }
   }
 
   .buttons {

@@ -52,10 +52,13 @@ export default defineComponent({
   display: flex;
   align-items: center;
   width: 100%;
-  margin-bottom: 16px;
   padding: 20px 12px;
   border-radius: $border-radius-interactive;
   color: $color-white;
+
+  &:not(:last-of-type) {
+    margin-bottom: 16px;
+  }
 
   .box {
     @include mixins.flex(flex-start, center);
@@ -69,7 +72,7 @@ export default defineComponent({
     @include mixins.flex(flex-start, flex-start, column);
 
     .heading {
-      @extend %face-sans-16-medium;
+      @extend %face-sans-16-semi-bold;
 
       line-height: 150%;
     }
