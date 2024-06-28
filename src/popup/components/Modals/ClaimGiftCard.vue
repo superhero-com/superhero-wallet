@@ -1,13 +1,13 @@
 <template>
   <Modal
     from-bottom
-    body-without-padding-bottom
+    no-padding-bottom
     has-close-button
     min-height
     class="claim-gift-card"
     @close="reject"
   >
-    <div class="header text-heading-2">
+    <div class="header text-heading-3">
       {{ $t('modals.claimGiftCard.title') }}
     </div>
     <template v-if="step === STEPS.redeemPartially || (step === STEPS.redeemFull && !isCardEmpty)">
@@ -307,8 +307,6 @@ export default defineComponent({
 
 .claim-gift-card {
   .header {
-    @extend %face-sans-19-medium;
-
     text-align: center;
     margin-bottom: 4px;
   }

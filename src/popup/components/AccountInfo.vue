@@ -155,7 +155,7 @@ export default defineComponent({
       min-width: 0;
 
       .account-name {
-        @extend %face-sans-15-bold;
+        @extend %face-sans-15-semi-bold;
 
         margin: 0;
       }

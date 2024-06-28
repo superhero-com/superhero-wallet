@@ -128,7 +128,7 @@ export default defineComponent({
 
   .symbols {
     .symbol {
-      @extend %face-sans-16-regular;
+      @extend %text-body;
 
       white-space: nowrap;
       letter-spacing: -0.02em;

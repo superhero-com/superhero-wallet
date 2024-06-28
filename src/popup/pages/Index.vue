@@ -26,23 +26,16 @@
               class="tag"
               scope="global"
             >
-              <span class="receive">{{ $t('pages.index.heading.receive') }}</span>
-              <span class="store">{{ $t('pages.index.heading.store') }}</span>
-              <span class="send">{{ $t('pages.index.heading.send') }}</span>
+              <span class="emphasis">{{ $t('pages.index.heading.receive') }}</span>
+              <span class="emphasis">{{ $t('pages.index.heading.store') }}</span>
+              <span class="emphasis">{{ $t('pages.index.heading.send') }}</span>
               <span class="aeternity-name">
                 {{ $t('pages.index.heading.aeternityBlockchain') }}
               </span>
             </i18n-t>
           </div>
 
-          <Platforms v-if="IS_WEB">
-            <template #header>
-              {{ $t('pages.index.platforms.heading') }}
-            </template>
-            <template #footer>
-              {{ $t('pages.index.webVersion') }}
-            </template>
-          </Platforms>
+          <Platforms v-if="IS_WEB" />
         </div>
 
         <div :class="['terms-agreement', { mobile: !IS_WEB }]">
@@ -266,9 +259,7 @@ export default defineComponent({
       .tag {
         color: rgba($color-white, 0.75);
 
-        .receive,
-        .store,
-        .send {
+        .emphasis {
           color: $color-white;
         }
 
@@ -286,13 +277,6 @@ export default defineComponent({
       margin: 0 auto;
       min-height: 25vh;
       padding-top: 30px;
-    }
-
-    &.go {
-      @extend %face-sans-20-bold;
-
-      margin-top: -36px;
-      margin-bottom: 42px;
     }
 
     .spinner {

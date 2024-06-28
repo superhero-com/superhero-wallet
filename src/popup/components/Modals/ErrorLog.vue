@@ -3,7 +3,7 @@
     has-close-button
     @close="resolve"
   >
-    <h2 class="text-heading-2 text-center">
+    <h2 class="text-heading-4 text-center">
       {{ $t('modals.error-log.title') }}
     </h2>
 

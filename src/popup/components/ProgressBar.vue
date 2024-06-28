@@ -45,7 +45,7 @@ export default defineComponent({
   }
 
   .text {
-    @extend %face-sans-16-regular;
+    @extend %text-body;
     position: absolute;
     z-index: 1;
     left: 8px;

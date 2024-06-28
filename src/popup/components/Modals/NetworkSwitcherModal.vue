@@ -1,11 +1,12 @@
 <template>
   <Modal
+    class="network-switcher-modal"
     from-bottom
     has-close-button
     @close="reject()"
   >
     <p
-      class="text-heading-1 text-center"
+      class="text-heading-4 text-center heading"
       v-text="$t('pages.network.connectToNetwork')"
     />
     <BtnSubheader
@@ -89,3 +90,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.network-switcher-modal {
+  .heading {
+    margin-bottom: 20px;
+  }
+}
+</style>

@@ -117,13 +117,13 @@ export default defineComponent({
     margin-top: 8px;
 
     .title {
-      @extend %face-sans-18-semi-bold;
+      @extend %face-sans-18-medium;
       color: $color-white;
       margin-bottom: 4px;
     }
 
     .text {
-      @extend %face-sans-16-regular;
+      @extend %text-body;
       line-height: 24px;
       color: rgba($color-white, 0.85);
     }

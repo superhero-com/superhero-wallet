@@ -126,6 +126,7 @@ body,
 body,
 #app {
   --ion-text-color: $color-white;
+  --ion-font-family: $font-sans;
 
   margin: 0;
   background-color: $color-black;
@@ -239,6 +240,18 @@ hr {
   }
 
   &-heading-1 {
+    @extend %face-sans-22-semi-bold;
+
+    color: $color-white;
+  }
+
+  &-heading-2 {
+    @extend %face-sans-20-regular;
+
+    color: $color-white;
+  }
+
+  &-heading-3 {
     @extend %face-sans-19-regular;
 
     margin-bottom: 18px;
@@ -246,17 +259,28 @@ hr {
     text-align: center;
   }
 
-  &-heading-2 {
+  // E.g.: modal headers
+  &-heading-4 {
     @extend %face-sans-18-medium;
 
     margin-bottom: 0.45em;
     color: $color-white;
   }
 
-  &-heading-3 {
-    @extend %face-sans-15-bold;
+  &-heading-5 {
+    @extend %face-sans-15-semi-bold;
 
     color: $color-white;
+  }
+
+  &-heading-1,
+  &-heading-2,
+  &-heading-3,
+  &-heading-4,
+  &-heading-5 {
+    strong {
+      font-weight: 500;
+    }
   }
 
   &-muted {
@@ -282,6 +306,13 @@ hr {
       font-weight: 500;
       color: $color-white;
     }
+  }
+
+  &-caption {
+    @extend %face-sans-16-medium;
+
+    margin-bottom: 1em;
+    line-height: 24px;
   }
 }
 

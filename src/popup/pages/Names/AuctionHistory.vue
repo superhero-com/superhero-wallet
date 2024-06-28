@@ -85,12 +85,12 @@ export default defineComponent({
   background-repeat: repeat-x;
 
   .title {
+    @extend %face-sans-16-semi-bold;
+
     padding: 16px 0 8px 0;
     text-align: center;
     color: $color-grey-dark;
     display: block;
-
-    @extend %face-sans-17-medium;
 
     .name {
       color: $color-primary;

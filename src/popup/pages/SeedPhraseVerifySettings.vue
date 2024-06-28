@@ -4,7 +4,7 @@
       <div class="seed-phrase-verify-settings">
         <div class="seed-phrase-verify-settings-body">
           <div
-            class="text-heading-1"
+            class="text-heading-3"
             v-text="$t('pages.seed-phrase-settings.verifyYourSeedPhrase')"
           />
 

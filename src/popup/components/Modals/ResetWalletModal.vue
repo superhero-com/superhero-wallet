@@ -9,15 +9,17 @@
     <div class="icon-wrapper">
       <IconBoxed :icon="ResetWalletIcon" />
     </div>
+
     <div class="info">
-      <h3 class="title">
+      <h3 class="text-heading-4 heading">
         {{ $t('pages.resetWallet.title') }}?
       </h3>
-      <div class="text">
-        <span>{{ $t('pages.resetWallet.warning') }}</span>
-        <span>{{ $t('pages.resetWallet.warningConfirm') }}</span>
+      <div class="text-description">
+        <p>{{ $t('pages.resetWallet.warning') }}</p>
+        <p>{{ $t('pages.resetWallet.warningConfirm') }}</p>
       </div>
     </div>
+
     <template #footer>
       <BtnMain
         variant="muted"
@@ -103,23 +105,8 @@ export default defineComponent({
     color: $color-danger;
   }
 
-  .info {
-    .title {
-      color: $color-white;
-      padding-bottom: 20px;
-
-      @extend %face-sans-18-medium;
-    }
-
-    .text {
-      color: rgba($color-white, 0.85);
-      line-height: 20px;
-      gap: 10px;
-
-      @extend %face-sans-14-light;
-
-      @include mixins.flex(center, center, column);
-    }
+  .heading {
+    margin-bottom: 1em;
   }
 }
 </style>

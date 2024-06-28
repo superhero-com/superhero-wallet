@@ -14,7 +14,7 @@
       class="multisig-vault-create-form"
       @submit.prevent="openReviewStep"
     >
-      <h2 class="text-heading-1">
+      <h2 class="text-heading-3">
         {{ $t('modals.createMultisigAccount.title') }}
       </h2>
       <div

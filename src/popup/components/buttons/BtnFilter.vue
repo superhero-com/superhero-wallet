@@ -28,7 +28,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .btn-filter {
-  @extend %face-sans-14-bold;
+  @extend %face-sans-14-medium;
+
   line-height: 20px;
   padding: 4px 12px;
   border: 1px solid transparent;
