@@ -3,7 +3,7 @@
     class="notification-item"
     @click.stop="handleClick"
   >
-    <div class="status-and-date ">
+    <div class="status-and-date">
       <span
         v-if="isUnread"
         class="unread-dot"
@@ -214,9 +214,9 @@ export default defineComponent({
     }
 
     .date {
-      color: rgba($color-white, 0.5);
-
       @extend %face-sans-12-regular;
+
+      color: rgba($color-white, 0.5);
     }
   }
 
@@ -267,7 +267,7 @@ export default defineComponent({
 
     @extend %face-sans-13-medium;
 
-    color: white;
+    color: $color-white;
     margin-top: 6px;
 
     .external-link-icon {

@@ -743,7 +743,7 @@ export interface IAuction {
   expiration: number;
 }
 
-export interface IActiveAuctionBid {
+export interface INameAuctionBid {
   accountId: string;
   fee: number;
   name: string;
@@ -756,9 +756,9 @@ export interface IActiveAuctionBid {
   version: number;
 }
 
-export interface IActiveAuction {
+export interface INameAuction {
   expiration: number;
-  lastBid: IActiveAuctionBid;
+  lastBid: INameAuctionBid;
   name: string;
 }
 

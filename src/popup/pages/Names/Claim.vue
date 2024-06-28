@@ -36,8 +36,8 @@
           <div class="auto-extend-label">
             {{ $t('pages.names.claim.auto-extend') }}
             <BtnHelp
-              :title="$t('modals.autoextend-help.title')"
-              :msg="$t('modals.autoextend-help.msg')"
+              :title="$t('modals.nameAutoExtendHelp.title')"
+              :msg="$t('modals.nameAutoExtendHelp.msg')"
               :class="{ active: autoExtend }"
             />
           </div>

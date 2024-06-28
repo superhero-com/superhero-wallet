@@ -1,24 +1,29 @@
 <template>
   <div class="auction-card">
-    <BtnHelp
-      class="help-button"
-      :title="$t('modals.auctions-help.title')"
-      :msg="$t('modals.auctions-help.msg')"
-    />
-    <Avatar :name="name" />
-    <span class="name">{{ name }}</span>
-    <AuctionOverview :name="name" />
+    <div class="inner">
+      <div class="header">
+        <span class="name">{{ name }}</span>
+        <BtnHelp
+          class="help-button"
+          :title="$t('modals.auctions-help.title')"
+          :msg="$t('modals.auctions-help.msg')"
+        />
+      </div>
+
+      <AuctionOverview
+        :name="name"
+        class="overview"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import Avatar from './Avatar.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import AuctionOverview from './AuctionOverview.vue';
 
 export default {
   components: {
-    Avatar,
     BtnHelp,
     AuctionOverview,
   },
@@ -34,34 +39,39 @@ export default {
 
 .auction-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   height: 184px;
+  padding-inline: var(--screen-padding-x);
   background-image: url('../../icons/squares-bg.svg');
 
-  .avatar {
-    width: 48px;
-    height: 48px;
-    box-shadow: rgba($color-primary, 0.15) 0 0 0 8px;
-    margin-top: 36px;
+  .inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .name {
-    @extend %face-sans-14-bold;
+    @extend %face-sans-16-semi-bold;
 
     line-height: 16px;
     margin-top: 16px;
   }
 
-  .auction-overview {
+  .overview {
+    width: 100%;
     margin-top: 16px;
   }
 
   .help-button {
     align-self: flex-end;
     padding-top: 16px;
-    padding-right: 16px;
-    margin-bottom: -36px;
   }
 }
 </style>
