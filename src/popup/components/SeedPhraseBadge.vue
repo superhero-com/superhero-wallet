@@ -36,7 +36,7 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .seed-phrase-badge {
-  @extend %face-sans-16-light;
+  @extend %face-sans-16-regular;
 
   display: inline-flex;
   align-items: center;

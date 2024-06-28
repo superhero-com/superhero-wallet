@@ -117,7 +117,7 @@ export default defineComponent({
     margin-top: 8px;
 
     .title {
-      @extend %face-sans-18-semi-bold;
+      @extend %face-sans-18-medium;
       color: $color-white;
       margin-bottom: 4px;
     }

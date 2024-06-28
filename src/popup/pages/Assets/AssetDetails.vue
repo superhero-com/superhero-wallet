@@ -446,7 +446,7 @@ export default defineComponent({
   }
 
   .token-amount {
-    @extend %face-sans-22-medium;
+    @extend %face-sans-22-semi-bold;
 
     margin-top: 10px;
     margin-bottom: 20px;
