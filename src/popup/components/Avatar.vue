@@ -62,19 +62,24 @@ export default defineComponent({
   setup(props) {
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
-    const hasProfileImage = ref(false);
+    const profileImageAvailable = ref(false);
 
-    const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
+    const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.address}`);
+
     const calculatedColor = computed(() => (props.address)
       ? getAddressColor(props.address)
       : undefined);
+
     const profileImageUrl = computed(() => (props.address === '' || isContract(props.address))
       ? null
       : `${aeActiveNetworkSettings.value.backendUrl}/profile/image/${props.address}`);
-    const srcUrl = computed(() => hasProfileImage.value ? profileImageUrl.value : avatarUrl.value);
+
+    const srcUrl = computed(() => profileImageAvailable.value
+      ? profileImageUrl.value
+      : avatarUrl.value);
 
     onMounted(async () => {
-      hasProfileImage.value = (
+      profileImageAvailable.value = (
         !!profileImageUrl.value
         && await checkImageAvailability(profileImageUrl.value)
       );
@@ -83,7 +88,7 @@ export default defineComponent({
     return {
       srcUrl,
       calculatedColor,
-      hasProfileImage,
+      profileImageAvailable,
     };
   },
 });

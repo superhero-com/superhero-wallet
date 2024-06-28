@@ -1,6 +1,7 @@
 <template>
   <Default
     v-bind="{ ...$attrs, resolve }"
+    class="confirm-modal"
     :close="cancel"
   >
     <template #msg>
@@ -26,8 +27,9 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { RejectCallback, ResolveCallback } from '../../../types';
-import { RejectedByUserError } from '../../../lib/errors';
+import type { RejectCallback, ResolveCallback } from '@/types';
+import { RejectedByUserError } from '@/lib/errors';
+
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';

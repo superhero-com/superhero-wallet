@@ -136,7 +136,6 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
     gap: 4px;
     max-width: 250px;
     font-weight: 500;
