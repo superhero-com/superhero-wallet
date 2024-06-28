@@ -110,7 +110,7 @@
           </template>
         </DetailsItem>
         <DetailsItem
-          v-if="gasCost"
+          v-if="+gasCost"
           :label="$t('transaction.gasCost')"
           data-cy="gas-cost"
         >
@@ -478,7 +478,7 @@ export default defineComponent({
     }
 
     async function verifyTransaction() {
-      if (popupProps.value?.txBase64) {
+      if (popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity) {
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
