@@ -44,7 +44,7 @@ export default defineComponent({
   setup(props) {
     const canvas = ref<HTMLElement>();
     const fragmentIndex = ref(0);
-    let intervalTimer: NodeJS.Timeout;
+    let qrCodeRefreshTimer: NodeJS.Timeout;
 
     const qrCode = new QRCodeStyling({
       data: props.value[fragmentIndex.value],
@@ -64,10 +64,11 @@ export default defineComponent({
       image: SHLogo,
     });
 
-    function updateQrCodeData() {
+    async function updateQrCodeData() {
       if (props.value.length > 1) {
-        intervalTimer = setInterval(() => {
-          qrCode.update({ data: props.value[fragmentIndex.value] });
+        qrCode.update({ data: props.value[fragmentIndex.value] });
+        await qrCode._canvasDrawingPromise;
+        qrCodeRefreshTimer = setTimeout(() => {
           fragmentIndex.value = (fragmentIndex.value + 1) % props.value.length;
         }, 750);
       } else {
@@ -75,10 +76,11 @@ export default defineComponent({
       }
     }
 
-    watch(() => props.value, () => {
-      if (intervalTimer) {
-        clearInterval(intervalTimer);
+    watch([fragmentIndex, () => props.value], () => {
+      if (qrCodeRefreshTimer) {
+        clearInterval(qrCodeRefreshTimer);
       }
+      updateQrCodeData();
     });
 
     onMounted(() => {
@@ -87,7 +89,7 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
-      clearInterval(intervalTimer);
+      clearInterval(qrCodeRefreshTimer);
     });
 
     return {
