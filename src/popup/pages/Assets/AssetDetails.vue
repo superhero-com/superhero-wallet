@@ -24,11 +24,11 @@
           </div>
 
           <div class="token-actions">
-            <OpenTransferReceiveModalButton
+            <OpenTransferReceiveModalBtn
               :is-multisig="isMultisig"
               :token-contract-id="fungibleToken?.contractId"
             />
-            <OpenTransferSendModalButton
+            <OpenTransferSendModalBtn
               :is-multisig="isMultisig"
               :disabled="isMultisig && !!pendingMultisigTransaction"
               :token-contract-id="fungibleToken?.contractId"
@@ -151,8 +151,8 @@ import {
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import Tokens from '../../components/Tokens.vue';
-import OpenTransferReceiveModalButton from '../../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '../../components/OpenTransferSendModalButton.vue';
+import OpenTransferReceiveModalBtn from '../../components/OpenTransferReceiveModalBtn.vue';
+import OpenTransferSendModalBtn from '../../components/OpenTransferSendModalBtn.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
@@ -170,8 +170,8 @@ export default defineComponent({
     Tokens,
     Tabs,
     Tab,
-    OpenTransferReceiveModalButton,
-    OpenTransferSendModalButton,
+    OpenTransferReceiveModalBtn,
+    OpenTransferSendModalBtn,
     IonPage,
     IonContent,
     IonRouterOutlet,

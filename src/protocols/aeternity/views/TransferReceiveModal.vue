@@ -1,6 +1,5 @@
 <template>
-  <TransferReceiveBase
-    v-bind="$attrs"
+  <ShareAddressBase
     :heading="(isMultisig)
       ? $t('modals.receiveMultisig.title')
       : $t('modals.receive.title', { name: $t('modals.receive.funds') })
@@ -10,6 +9,9 @@
     :tokens="tokens"
     :disable-asset-selection="isMultisig"
     :protocol="PROTOCOLS.aeternity"
+    :token-contract-id="tokenContractId"
+    is-receive
+    @close="resolve()"
   />
 </template>
 
@@ -22,14 +24,15 @@ import {
 import { useAccounts, useFungibleTokens, useMultisigAccounts } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
-import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
+import ShareAddressBase, { shareAddressRequiredProps } from '@/popup/components/Modals/ShareAddressBase.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_RECEIVE,
   components: {
-    TransferReceiveBase,
+    ShareAddressBase,
   },
   props: {
+    ...shareAddressRequiredProps,
     isMultisig: Boolean,
   },
   setup(props) {

@@ -1,14 +1,13 @@
 <template>
   <Modal
-    class="transfer-receive-base"
+    class="share-address-base"
     has-close-button
     from-bottom
-    @close="resolve()"
+    full-screen
+    body-without-padding-bottom
+    @close="$emit('close')"
   >
-    <div
-      class="transfer-receive"
-      data-cy="top-up-container"
-    >
+    <div data-cy="top-up-container">
       <h2
         class="text-heading-2 text-center"
         v-text="heading"
@@ -24,7 +23,7 @@
 
       <WrappedQrCode
         :value="[accountAddressToCopy]"
-        :size="180"
+        :size="isReceive ? 180 : 290"
       />
 
       <div class="address">
@@ -44,7 +43,10 @@
         </CopyText>
       </div>
 
-      <div class="request-specific-amount">
+      <div
+        v-if="isReceive"
+        class="request-specific-amount"
+      >
         <Field
           v-slot="{ field, errorMessage }"
           v-model="amount"
@@ -84,7 +86,7 @@
         :icon="ShareIcon"
         @click="share"
       >
-        {{ $t('modals.receive.share') }}
+        {{ $t('common.share') }}
       </BtnMain>
     </template>
   </Modal>
@@ -131,8 +133,13 @@ import AccountItem from '../AccountItem.vue';
 
 import ShareIcon from '../../../icons/share.svg?vue-component';
 
+export const shareAddressRequiredProps = {
+  resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
+  tokenContractId: { type: String as PropType<AssetContractId>, default: null },
+};
+
 export default defineComponent({
-  name: 'TransferReceiveBase',
+  name: 'ShareAddressBase',
   components: {
     InputAmount,
     Modal,
@@ -145,14 +152,14 @@ export default defineComponent({
     Field,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
+    protocol: { type: String as PropType<Protocol>, required: true },
     tokenContractId: { type: String as PropType<AssetContractId>, default: null },
+    tokens: { type: Object as PropType<AssetList>, default: () => ({}) },
     heading: { type: String, default: '' },
     accountAddress: { type: String, default: null },
     accountName: { type: String, default: null },
-    tokens: { type: Object as PropType<AssetList>, default: () => ({}) },
     disableAssetSelection: Boolean,
-    protocol: { type: String as PropType<Protocol>, required: true },
+    isReceive: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
@@ -266,7 +273,7 @@ export default defineComponent({
 @use '@/styles/share-info';
 @use '@/styles/mixins';
 
-.transfer-receive-base {
+.share-address-base {
   font-weight: 500;
   color: $color-white;
 
