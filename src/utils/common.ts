@@ -11,6 +11,7 @@ import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
+  AccountAddress,
   AssetContractId,
   BigNumberPublic,
   IAccount,
@@ -32,6 +33,8 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
+  NETWORK_TYPE_MAINNET,
+  NETWORK_TYPE_TESTNET,
   PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
@@ -527,3 +530,48 @@ export const toBase64Url = (data: Buffer | Uint8Array | string): string => Buffe
   .replace(/\//g, '_')
   .replace(/\+/g, '-')
   .replace(/=+$/, '');
+
+/**
+ * Get protocol by address regardless of the active network.
+ */
+export function getProtocolByAddress(address: AccountAddress) {
+  return (
+    ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_MAINNET)
+    || ProtocolAdapterFactory.getAdapterByAccountAddress(address, NETWORK_TYPE_TESTNET)
+  )?.protocol;
+}
+
+export function convertBlobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+}
+
+export function selectFiles(options: {
+  /** Allows to select more than one file */
+  multiple?: boolean;
+  /** @link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept */
+  accept?: string;
+} = { multiple: false, accept: '*' }) {
+  return new Promise<FileList>((resolve, reject) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.hidden = true;
+    input.multiple = options.multiple!;
+    input.accept = options.accept!;
+    document.body.appendChild(input);
+    input.onchange = (e) => {
+      const { files } = (e.target as HTMLInputElement);
+      if (files) {
+        resolve(files);
+      } else {
+        reject(new Error('No files selected'));
+      }
+      input.remove();
+    };
+    input.click();
+  });
+}

@@ -54,7 +54,6 @@ export default defineComponent({
       [NOTIFICATION_TYPES.retipOnTip]: t('pages.notificationSettings.retipOnTip'),
       [NOTIFICATION_TYPES.claimOfTip]: t('pages.notificationSettings.claimOfTip'),
       [NOTIFICATION_TYPES.claimOfRetip]: t('pages.notificationSettings.claimOfRetip'),
-      [NOTIFICATION_TYPES.retipOnTip]: t('pages.notificationSettings.retipOnTip'),
       [NOTIFICATION_TYPES.tipOnComment]: t('pages.notificationSettings.tipOnComment'),
     };
 

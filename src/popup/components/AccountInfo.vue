@@ -10,6 +10,7 @@
       :size="avatarSize"
       :borderless="avatarBorderless"
       :is-placeholder="isPlaceholder"
+      :use-address-for-avatar="useAddressForAvatar"
     >
       <slot name="avatar" />
     </Avatar>
@@ -93,6 +94,7 @@ export default defineComponent({
     isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
     dense: Boolean,
+    useAddressForAvatar: Boolean,
   },
   setup(props) {
     const { getName } = useAeNames();
@@ -122,6 +124,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .account-info {
+  --maxWidth: 250px;
+
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -133,7 +137,7 @@ export default defineComponent({
   }
 
   .account-details {
-    max-width: 250px;
+    max-width: var(--maxWidth);
     font-weight: 500;
 
     .account-name {

@@ -15,16 +15,19 @@
     <ProtocolIcon
       v-else-if="protocolIcon"
       :protocol="protocolIcon"
+      :icon-size="iconSize"
     />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, PropType, defineComponent } from 'vue';
-import ProtocolIcon from '@/popup/components/ProtocolIcon.vue';
+import { Protocol } from '@/types';
 import { ICON_SIZES } from '@/constants';
 
-const ALLOWED_ICON_SIZES = [ICON_SIZES.lg, ICON_SIZES.xl] as const;
+import ProtocolIcon from '@/popup/components/ProtocolIcon.vue';
+
+const ALLOWED_ICON_SIZES = [ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xl] as const;
 
 type IconSize = typeof ALLOWED_ICON_SIZES[number];
 
@@ -35,7 +38,7 @@ export const iconSizeProp = {
 };
 
 export const protocolIconProp = {
-  type: String,
+  type: String as PropType<Protocol>,
   default: null,
 };
 
@@ -87,6 +90,10 @@ export default defineComponent({
   &.icon-size {
     &-xl {
       --icon-size: var(--icon-size-xl);
+    }
+
+    &-rg {
+      --icon-size: var(--icon-size-rg);
     }
   }
 }

@@ -46,6 +46,9 @@ import {
   ROUTE_PERMISSIONS_DETAILS,
   ROUTE_PERMISSIONS_SETTINGS,
   ROUTE_SECURE_LOGIN_SETTINGS,
+  ROUTE_ADDRESS_BOOK,
+  ROUTE_ADDRESS_BOOK_EDIT,
+  ROUTE_ADDRESS_BOOK_ADD,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -104,6 +107,8 @@ import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
 import AppsBrowser from '../pages/AppsBrowser.vue';
 import SecureLoginSettings from '../pages/SecureLoginSettings.vue';
+import AddressBook from '../pages/AddressBook.vue';
+import AddressBookForm from '../pages/AddressBookForm.vue';
 
 import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
@@ -600,6 +605,36 @@ export const routes: WalletAppRouteConfig[] = [
     component: NotificationSettings,
     meta: {
       title: 'notifications',
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    name: ROUTE_ADDRESS_BOOK,
+    path: '/more/address-book',
+    component: AddressBook,
+    meta: {
+      title: 'addressBook',
+      notPersist: true,
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    name: ROUTE_ADDRESS_BOOK_ADD,
+    path: '/more/address-book/add',
+    component: AddressBookForm,
+    props: true,
+    meta: {
+      title: 'addressBookAdd',
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    name: ROUTE_ADDRESS_BOOK_EDIT,
+    path: '/more/address-book/:id',
+    component: AddressBookForm,
+    meta: {
+      title: 'addressBookEdit',
+      notPersist: true,
       showHeaderNavigation: true,
     },
   },

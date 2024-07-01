@@ -22,10 +22,14 @@
         </template>
 
         <template #buttons>
-          <OpenTransferReceiveModalButton is-multisig />
-          <OpenTransferSendModalButton
+          <OpenTransferReceiveModalBtn is-multisig />
+          <OpenTransferSendModalBtn
             :disabled="!!pendingMultisigTransaction"
             is-multisig
+          />
+          <OpenShareAddressModalBtn
+            :address="convertMultisigAccountToAccount(activeMultisigAccount).address!"
+            :protocol="PROTOCOLS.aeternity"
           />
           <BtnBox
             v-if="UNFINISHED_FEATURES"
@@ -71,16 +75,18 @@ import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import AccountDetailsNavigation from '../components/AccountDetailsNavigation.vue';
-import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
+import OpenTransferReceiveModalBtn from '../components/OpenTransferReceiveModalBtn.vue';
+import OpenTransferSendModalBtn from '../components/OpenTransferSendModalBtn.vue';
+import OpenShareAddressModalBtn from '../components/OpenShareAddressModalBtn.vue';
 
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 
 export default defineComponent({
   components: {
-    OpenTransferSendModalButton,
+    OpenTransferSendModalBtn,
+    OpenTransferReceiveModalBtn,
+    OpenShareAddressModalBtn,
     BtnBox,
-    OpenTransferReceiveModalButton,
     AccountDetailsNavigation,
     BalanceInfo,
     AccountInfo,

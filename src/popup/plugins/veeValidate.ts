@@ -5,6 +5,7 @@ import { debounce, throttle } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
+  IAddressBookEntry,
   INetwork,
   NetworkType,
   ObjectValues,
@@ -15,9 +16,13 @@ import {
   NETWORK_NAME_TESTNET,
   PROTOCOLS,
 } from '@/constants';
-import { isNotFoundError, isUrlValid } from '@/utils';
+import { getProtocolByAddress, isNotFoundError, isUrlValid } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useBalances, useCurrencies, useAeSdk } from '@/composables';
+import {
+  useBalances,
+  useCurrencies,
+  useAeSdk,
+} from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
 import { getAddressByNameEntry } from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
@@ -43,17 +48,23 @@ defineRule(
 );
 
 /**
+ * Validates whether the provided value is a valid account address.
+ * By providing the `protocol` parameter, the rule will validate the address based on the protocol.
  * `networkType` is required for the Bitcoin Address validation because same account has different
  * address on the mainnet and testnet.
  */
 defineRule(
   'account_address',
-  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => (
-    ProtocolAdapterFactory
-      .getAdapter(protocol)
-      .isAccountAddressValid(value, networkType)
-    || tg('validation.addressGeneric', { protocol })
-  ),
+  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => {
+    if (protocol) {
+      return (ProtocolAdapterFactory
+        .getAdapter(protocol)
+        .isAccountAddressValid(value, networkType)
+      || tg('validation.addressGeneric', { protocol })
+      );
+    }
+    return getProtocolByAddress(value) ? true : tg('validation.invalidAddress');
+  },
 );
 
 defineRule(
@@ -111,6 +122,22 @@ defineRule(
       return tg('pages.network.error.networkExists');
     }
     return true;
+  },
+);
+
+defineRule(
+  'address_book_entry_exists',
+  (value: string, [entries, savedValue, type]: [IAddressBookEntry[], string, 'name' | 'address']) => {
+    const exists = Object.values(entries).some(
+      (entry) => entry[type] === value && value
+       !== savedValue,
+    );
+
+    const entryTypeText = type === 'name' ? tg('common.name') : tg('common.address');
+
+    return (exists)
+      ? tg('validation.addressBookEntryExists', [entryTypeText.toLowerCase()])
+      : true;
   },
 );
 

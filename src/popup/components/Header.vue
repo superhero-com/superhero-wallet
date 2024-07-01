@@ -182,6 +182,9 @@ export default defineComponent({
       notFound: () => t('pages.titles.notFound'),
       multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
       secureLogin: () => t('pages.titles.secureLogin'),
+      addressBook: () => t('pages.titles.addressBook'),
+      addressBookEdit: () => t('pages.titles.addressBookEdit'),
+      addressBookAdd: () => t('pages.titles.addressBookAdd'),
     };
 
     const currentHomeRouteName = computed(

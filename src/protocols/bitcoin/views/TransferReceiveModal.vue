@@ -1,10 +1,11 @@
 <template>
-  <TransferReceiveBase
-    v-bind="$attrs"
+  <ShareAddressBase
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
     :protocol="PROTOCOLS.bitcoin"
     disable-asset-selection
+    is-receive
+    @close="resolve()"
   />
 </template>
 
@@ -17,12 +18,15 @@ import {
 import { useAccounts } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
+import ShareAddressBase, { shareAddressRequiredProps } from '@/popup/components/Modals/ShareAddressBase.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_RECEIVE,
   components: {
-    TransferReceiveBase,
+    ShareAddressBase,
+  },
+  props: {
+    ...shareAddressRequiredProps,
   },
   setup() {
     const { activeAccount } = useAccounts();

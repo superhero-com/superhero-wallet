@@ -14,7 +14,7 @@
       v-if="isOnline && currentSubTabs.length"
       class="sub-tabs"
     >
-      <BtnPill
+      <BtnFilter
         v-for="subTab in currentSubTabs"
         :key="subTab.routeName"
         :to="{ name: subTab.routeName }"
@@ -43,7 +43,7 @@ import {
   ROUTE_MULTISIG_DETAILS_ASSETS,
 } from '../router/routeNames';
 
-import BtnPill from './buttons/BtnPill.vue';
+import BtnFilter from './buttons/BtnFilter.vue';
 import Tab from './tabs/Tab.vue';
 import Tabs from './tabs/Tabs.vue';
 
@@ -70,7 +70,7 @@ export default defineComponent({
   components: {
     Tabs,
     Tab,
-    BtnPill,
+    BtnFilter,
   },
   props: {
     routeNames: {
