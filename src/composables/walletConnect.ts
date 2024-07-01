@@ -18,6 +18,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { ETH_CHAIN_NAMESPACE, ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { IEthNetworkSettings } from '@/protocols/ethereum/types';
+import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
@@ -66,6 +67,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   const { activeNetwork, networks } = useNetworks();
   const { openDefaultModal } = useModals();
   const { checkOrAskPermission } = usePermissions();
+  const { updateFeeList, maxFeePerGas } = useEthFeeCalculation();
 
   const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
@@ -75,7 +77,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     [key in SupportedRequestMethod]: (p: any) => Promise<string | false>
   }> = {
     eth_sendTransaction: async (params: SendTransactionParams) => {
+      await updateFeeList();
+
       const { url, name } = wcSession.value?.peer.metadata! || {};
+      const gas = Number(params.gas);
       const senderId = toChecksumAddress(params.from);
       const recipientId = toChecksumAddress(params.to);
       const isCoinTransfer = !!params.value; // `value` is present only when sending ETH
@@ -85,7 +90,8 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         app: { url, host: url ? new URL(url).hostname : '', name },
         tx: {
           amount: params.value ? +fromWei(params.value, 'ether') : 0,
-          fee: params.gas ? +fromWei(params.gas, 'ether') : 0,
+          fee: gas * +(maxFeePerGas.value || 0),
+          gas,
           contractId: (isCoinTransfer) ? ETH_CONTRACT_ID : recipientId,
           type: Tag[tag],
           tag,
