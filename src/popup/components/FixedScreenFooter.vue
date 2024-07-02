@@ -1,7 +1,10 @@
 <template>
   <div
     class="fixed-screen-footer"
-    :class="[{ mobile: IS_MOBILE_DEVICE }, { noPaddingTop }]"
+    :class="{
+      mobile: IS_MOBILE_DEVICE,
+      'no-padding-top': noPaddingTop,
+    }"
   >
     <slot />
   </div>
@@ -32,9 +35,10 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   gap: 8px;
-  padding: 24px;
+  padding: var(--screen-padding-x);
+  padding-top: 24px;
 
-  &.noPaddingTop {
+  &.no-padding-top {
     padding-top: 0;
   }
 
@@ -43,7 +47,6 @@ export default defineComponent({
   }
 
   // Semi-transparent and gradient-like cover under the buttons
-
   &::before {
     content: '';
     position: absolute;
@@ -56,7 +59,6 @@ export default defineComponent({
   }
 
   // Make the footer bottom rounded corners the same as the container
-
   &,
   &::before {
     border-bottom-left-radius: inherit;

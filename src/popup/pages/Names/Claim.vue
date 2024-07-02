@@ -249,8 +249,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .claim {
   padding-inline: var(--screen-padding-x);
@@ -261,7 +261,7 @@ export default defineComponent({
     &-counter {
       @extend %face-sans-13-regular;
 
-      color: variables.$color-grey-dark;
+      color: $color-grey-dark;
     }
 
     .aens-domain {

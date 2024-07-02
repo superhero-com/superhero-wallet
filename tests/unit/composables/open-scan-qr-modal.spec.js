@@ -53,7 +53,7 @@ const transferData = {
   selectedAsset: undefined,
 };
 
-describe('openScanQrModal', () => {
+describe('scanTransferQrCode', () => {
   const {
     formModel,
     invoiceId,

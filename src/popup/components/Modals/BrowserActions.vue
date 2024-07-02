@@ -43,7 +43,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { RejectCallback, ResolveCallback } from '@/types';
+import type { ObjectValues, RejectCallback, ResolveCallback } from '@/types';
 import { BROWSER_ACTIONS, IS_MOBILE_DEVICE } from '@/constants';
 import { invokeDeviceShare } from '@/utils';
 
@@ -55,6 +55,10 @@ import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 
+export type BrowserActionsResolvedVal = {
+  action: ObjectValues<typeof BROWSER_ACTIONS>;
+}
+
 export default defineComponent({
   components: {
     Modal,
@@ -62,7 +66,10 @@ export default defineComponent({
     BtnSubheader,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    resolve: {
+      type: Function as PropType<ResolveCallback<BrowserActionsResolvedVal>>,
+      required: true,
+    },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     selectedApp: { type: Object, required: true },
     iframe: { type: Object, required: true },

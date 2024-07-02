@@ -24,8 +24,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .details-row {
   @extend %face-sans-15-medium;
@@ -39,11 +39,11 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: rgba(variables.$color-white, 0.5);
+    color: rgba($color-white, 0.5);
   }
 
   .text {
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 }
 </style>

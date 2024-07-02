@@ -27,9 +27,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/mixins';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .btn-pill {
   @extend %face-sans-14-regular;
@@ -39,8 +39,8 @@ export default defineComponent({
   padding: 2px 10px;
   gap: 4px;
   border-radius: 20px;
-  background-color: rgba(variables.$color-white, 0.08);
-  color: rgba(variables.$color-white, 0.5);
+  background-color: rgba($color-white, 0.08);
+  color: rgba($color-white, 0.5);
 
   &.dense {
     padding-block: 0;
@@ -52,19 +52,19 @@ export default defineComponent({
   }
 
   &.router-link-exact-active {
-    background-color: rgba(variables.$color-white, 0.15);
-    color: variables.$color-white;
+    background-color: rgba($color-white, 0.15);
+    color: $color-white;
   }
 
   &:not(.static) {
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
 
     &:hover {
-      color: rgba(variables.$color-white, 1);
+      color: rgba($color-white, 1);
     }
 
     &:active {
-      color: rgba(variables.$color-white, 0.75);
+      color: rgba($color-white, 0.75);
     }
   }
 }

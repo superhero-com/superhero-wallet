@@ -29,7 +29,7 @@ export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | object,
-  params: Partial<IPopupProps> = {},
+  popupProps: Partial<IPopupProps> = {},
 ) => {
   const id = uuid();
   const { href, protocol, host } = (typeof aepp === 'object') ? getAeppUrl(aepp) : new URL(aepp);
@@ -65,16 +65,13 @@ export const openPopup = async (
   popups[id] = {
     id,
     props: {
+      ...popupProps,
       app: {
         url: href,
         name,
         protocol,
         host,
       },
-      message: params.message,
-      tx: params.tx,
-      txBase64: params.txBase64,
-      data: params.data,
     },
   };
   return popups[id];

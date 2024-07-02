@@ -18,12 +18,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .loader {
   position: fixed;
-  z-index: variables.$z-index-loader;
+  z-index: $z-index-loader;
   top: 0;
   left: 0;
   display: flex;
@@ -40,8 +40,8 @@ export default {
     justify-content: center;
 
     @include mixins.desktop {
-      width: variables.$extension-width;
-      height: variables.$extension-height;
+      width: $extension-width;
+      height: $extension-height;
       border-radius: 10px;
       margin: auto;
     }

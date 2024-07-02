@@ -138,13 +138,13 @@ export class EtherscanService {
     hash: string,
     address: string,
     blockNumber: string,
-  ): Promise<ITransaction> {
+  ): Promise<ITransaction | undefined> {
     // Not the best solution, but it seems to be the only way to get token transaction details
     const blockTransactions = await this.fetchAccountTokenTransactions(address, {
       startblock: blockNumber,
       endblock: blockNumber,
     });
-    return blockTransactions.find((tx) => tx.hash === hash) as ITransaction;
+    return blockTransactions.find((tx) => tx.hash === hash);
   }
 
   static normalizeEtherscanTransactionStructure(

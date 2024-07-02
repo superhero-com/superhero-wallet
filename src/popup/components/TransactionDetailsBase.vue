@@ -111,6 +111,12 @@
         </div>
 
         <DetailsItem
+          v-if="transaction.tx.function"
+          :label="$t('modals.confirmTransactionSign.functionName')"
+          :value="transaction.tx.function"
+        />
+
+        <DetailsItem
           v-if="amount"
           :label="$t('common.amount')"
           data-cy="amount"
@@ -246,7 +252,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
 
@@ -277,7 +283,7 @@ export default defineComponent({
   }
 
   .content {
-    background-color: variables.$color-bg-4;
+    background-color: $color-bg-4;
 
     .transaction-overview {
       padding: 16px 12px 8px;
@@ -305,21 +311,21 @@ export default defineComponent({
         @extend %face-sans-14-medium;
 
         text-decoration: none;
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
 
         svg {
           opacity: 1;
-          color: rgba(variables.$color-white, 0.75);
+          color: rgba($color-white, 0.75);
           width: 24px;
           height: 24px;
         }
 
         &:hover {
-          color: variables.$color-white;
+          color: $color-white;
           text-decoration: underline;
 
           svg {
-            color: variables.$color-white;
+            color: $color-white;
           }
         }
       }
@@ -335,7 +341,7 @@ export default defineComponent({
   .reason:deep() {
     .value {
       word-break: break-all;
-      color: variables.$color-warning;
+      color: $color-warning;
     }
   }
 }

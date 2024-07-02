@@ -12,13 +12,11 @@
 
     <template v-else>
       <TransactionOverview
-        :transaction="completeTransaction"
-        :additional-tag="isAeppChatSuperhero
-          ? $t('modals.confirmTransactionSign.superheroChat')
-          : null"
+        :transaction="transaction"
+        :additional-tag="appName"
       />
       <div
-        v-if="isAeppChatSuperhero || error"
+        v-if="appName || error"
         class="subtitle"
         :class="{ warning: !!error }"
       >
@@ -26,7 +24,7 @@
           {{ $t('modals.confirmTransactionSign.unableToExecute') }}
         </template>
         <template v-else>
-          <span class="app-name">{{ $t('modals.confirmTransactionSign.superheroChat') }}</span>
+          <span class="app-name">{{ appName }}</span>
           {{ $t('modals.confirmTransactionSign.confirmSigning') }}
         </template>
       </div>
@@ -50,60 +48,98 @@
         :value="decodedCallData.functionName"
       />
 
-      <template v-if="(isDex || isDexAllowance) && tokenList.length">
+      <!-- Aeternity DEX transactions and any ETH transactions involving multiple assets -->
+      <template
+        v-if="(
+          isDex && tokenList.length
+          || protocol === PROTOCOLS.ethereum && tokenList.length > 1
+        )"
+      >
         <TransactionDetailsPoolTokenRow
           v-for="(token, idx) in tokenList"
           :key="token.contractId"
           :token="token"
-          :tokens="token.tokens"
+          :tokens="token.tokens || null"
           :label="getLabels(token, idx)"
-          :hide-amount="isSwap"
+          :hide-amount="isDexSwap"
+          :protocol="protocol"
         />
       </template>
-      <DetailsItem
-        v-if="nameAeFee"
-        :label="$t('modals.confirmTransactionSign.nameFee')"
-        class="name-fee"
-      >
-        <template #value>
-          <TokenAmount
-            :amount="nameAeFee"
-            :protocol="PROTOCOLS.aeternity"
-          />
-        </template>
-      </DetailsItem>
 
       <div class="details">
         <DetailsItem
-          v-if="isSwap"
+          v-if="nameAeFee"
+          :label="$t('modals.confirmTransactionSign.nameFee')"
+        >
+          <TokenAmount
+            :amount="nameAeFee"
+            :protocol="protocol"
+          />
+        </DetailsItem>
+
+        <DetailsItem
+          v-if="isDexSwap"
           :label="swapDirectionTranslation"
         >
           <TokenAmount
-            :amount="tokenAmount"
+            :amount="swapTokenAmount"
             :symbol="tokenSymbol"
-            :hide-fiat="!swapTokenAmountData.isWrappedCoin || isTransactionAex9(transactionWrapped)"
-            :protocol="PROTOCOLS.aeternity"
+            :hide-fiat="!swapTokenData.isWrappedCoin || isAex9"
+            :protocol="protocol"
             data-cy="total"
           />
         </DetailsItem>
 
+        <DetailsItem
+          v-if="popupProps?.tx?.gasLimit"
+          :value="popupProps.tx.gasLimit"
+          :label="$t('transaction.gasLimit')"
+          data-cy="gas"
+        />
+        <DetailsItem
+          v-if="gasPrice"
+          :label="$t('pages.transactionDetails.gasPrice')"
+          data-cy="gas-price"
+        >
+          <template #value>
+            <TokenAmount
+              :amount="+aettosToAe(gasPrice)"
+              :symbol="AE_SYMBOL"
+              :protocol="PROTOCOLS.aeternity"
+            />
+          </template>
+        </DetailsItem>
+        <DetailsItem
+          v-if="+gasCost"
+          :label="$t('transaction.gasCost')"
+          data-cy="gas-cost"
+        >
+          <template #value>
+            <TokenAmount
+              :amount="+aettosToAe(gasCost)"
+              :symbol="AE_SYMBOL"
+              :protocol="PROTOCOLS.aeternity"
+            />
+          </template>
+        </DetailsItem>
+
         <DetailsItem :label="$t('transaction.fee')">
           <TokenAmount
-            :amount="txAeFee"
-            :protocol="PROTOCOLS.aeternity"
+            :amount="fee"
+            :protocol="protocol"
             data-cy="fee"
           />
         </DetailsItem>
 
         <DetailsItem
-          v-if="swapDirection === 'total'"
+          v-if="!isDexMaxSpent && !isDexMinReceived"
           :label="$t('common.total')"
         >
           <TokenAmount
-            :amount="executionCost || totalAmount"
-            :symbol="singleToken.symbol"
-            :hide-fiat="isTransactionAex9(transactionWrapped)"
-            :protocol="PROTOCOLS.aeternity"
+            :amount="executionCost || amountTotal"
+            :symbol="tokenSymbol"
+            :hide-fiat="isAex9"
+            :protocol="protocol"
             high-precision
             data-cy="total"
           />
@@ -119,11 +155,23 @@
           :label="$t('modals.confirmTransactionSign.functionName')"
           :value="decodedCallData.functionName"
         />
+
+        <!--
+          Display the ETH transaction raw data until we are able to decode it
+          into human readable arguments (e.g.: amount).
+        -->
+        <DetailsItem
+          v-if="transaction?.tx?.data"
+          :label="$t('transaction.data')"
+          :value="transaction.tx.data"
+        />
+
         <DetailsItem
           v-if="transactionArguments"
           :label="$t('modals.confirmTransactionSign.arguments')"
           :value="transactionArguments"
         />
+
         <DetailsItem
           v-for="key in filteredTxFields"
           :key="key"
@@ -150,7 +198,7 @@
         :disabled="!!error || verifying"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
-        @click="popupProps?.resolve()"
+        @click="confirm()"
       />
     </template>
   </Modal>
@@ -164,11 +212,16 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
-import { camelCase } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import {
-  decode, Encoded, getExecutionCost, unpackTx, Tag, getTransactionSignerAddress, buildTx,
+  buildTx,
+  decode,
+  Encoded,
+  getExecutionCost,
+  getTransactionSignerAddress,
+  Tag,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
@@ -177,15 +230,17 @@ import type {
   ITokenResolved,
   ITransaction,
   ITx,
-  TxArguments,
-  TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
 import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
+  ACCOUNT_TYPES,
+  AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
+  RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
   TX_DIRECTION,
 } from '@/constants';
@@ -199,25 +254,20 @@ import {
   useAccounts,
   useAeSdk,
   useFungibleTokens,
+  useModals,
   usePopupProps,
   useTransactionData,
 } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
-  AE_SYMBOL,
-  DEX_TRANSACTION_TAGS,
-  DEX_PROVIDE_LIQUIDITY,
-  DEX_REMOVE_LIQUIDITY,
-} from '@/protocols/aeternity/config';
-import {
+  aettosToAe,
   getAeFee,
   getTransactionTokenInfoResolver,
-  isTransactionAex9,
-  isTxFunctionDexSwap,
-  isTxFunctionDexPool,
-  isTxFunctionDexMaxSpent,
-  isTxFunctionDexMinReceived,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
+import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -263,69 +313,75 @@ export default defineComponent({
     const { getAeSdk } = useAeSdk();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { popupProps, setPopupProps } = usePopupProps();
-    const { getProtocolAvailableTokens, getTxAssetSymbol, getTxAmountTotal } = useFungibleTokens();
+    const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
+    const { openModal } = useModals();
+
+    const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const activeAccount = getLastActiveProtocolAccount(protocol);
+    const transaction = ref<ITransaction>({
+      protocol,
+      tx: popupProps.value?.tx || {},
+    } as ITransaction);
 
     const {
+      amountTotal,
       direction,
-      isDexAllowance,
+      isAex9,
       isDex,
-      setActiveTransaction,
-    } = useTransactionData({
-      transaction: { tx: popupProps.value?.tx } as ITransaction,
-    });
+      isDexAllowance,
+      isDexLiquidityAdd,
+      isDexLiquidityRemove,
+      isDexMaxSpent,
+      isDexMinReceived,
+      isDexPool,
+      isDexSwap,
+      txFunctionParsed,
+      transactionAssets,
+    } = useTransactionData({ transaction });
 
-    const showAdvanced = ref(false);
-    const tokenList = ref<ITokenResolved[]>([]);
-    const txFunction = ref<TxFunctionRaw | undefined>();
+    const tokenList = ref<ITokenResolved[]>(transactionAssets.value);
     const executionCost = ref(0);
     const loading = ref(false);
     const error = ref('');
     const verifying = ref(false);
+    const gasPrice = ref(0);
     const decodedCallData = ref<AeDecodedCallData | undefined>();
 
-    const isAeppChatSuperhero = computed(
-      () => SUPERHERO_CHAT_URLS
-        .includes(`${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}`),
-    );
-    const transactionWrapped = computed(
-      (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as any }),
-    );
+    const app = computed(() => popupProps.value?.app);
 
-    const isSwap = computed(() => isDex.value && isTxFunctionDexSwap(txFunction.value));
-    const isPool = computed(() => isDex.value && isTxFunctionDexPool(txFunction.value));
-    const isMaxSpent = computed(() => isTxFunctionDexMaxSpent(txFunction.value));
-    const isMinReceived = computed(() => isTxFunctionDexMinReceived(txFunction.value));
-    const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
+    const fee = computed(() => (protocol === PROTOCOLS.aeternity)
+      ? getAeFee(popupProps.value?.tx?.fee!)
+      : popupProps.value?.tx?.fee!);
+
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
+    const gasCost = computed(() => new BigNumber(popupProps.value?.tx?.gasLimit ?? 0)
+      .multipliedBy(gasPrice.value));
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-
-    const swapDirection = computed(() => {
-      if (isMaxSpent.value) {
-        return 'maxSpent';
+    const appName = computed((): string | undefined => {
+      if (SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)) {
+        return t('modals.confirmTransactionSign.superheroChat');
       }
-      if (isMinReceived.value) {
-        return 'minReceived';
+      if (protocol !== PROTOCOLS.aeternity) {
+        return app.value?.name;
       }
-      return 'total';
+      return undefined;
     });
 
     const swapDirectionTranslation = computed(() => {
-      switch (swapDirection.value) {
-        case 'maxSpent': return t('pages.signTransaction.maxSpent');
-        case 'minReceived': return t('pages.signTransaction.minReceived');
-        default: return t('common.total');
+      if (isDexMaxSpent.value) {
+        return t('pages.signTransaction.maxSpent');
       }
+      if (isDexMinReceived.value) {
+        return t('pages.signTransaction.minReceived');
+      }
+      return t('common.total');
     });
-
-    const totalAmount = computed(
-      () => getTxAmountTotal(transactionWrapped.value as ITransaction, direction.value),
-    );
 
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
-      amount: totalAmount.value,
-      symbol: getTxAssetSymbol(popupProps.value?.tx as any),
+      amount: amountTotal.value,
+      symbol: getTxAssetSymbol({ tx: popupProps.value?.tx!, protocol } as ITransaction),
     }));
 
     const decodedPayload = computed(() => popupProps.value?.tx?.payload
@@ -339,26 +395,20 @@ export default defineComponent({
           : !!popupProps.value?.tx?.[field]),
     );
 
-    const swapTokenAmountData = computed((): ITokenResolved => {
-      const token = swapDirection.value === 'maxSpent' ? tokenList.value[0] : tokenList.value[1];
+    const swapTokenData = computed((): ITokenResolved => {
+      const token = (isDexMaxSpent.value) ? tokenList.value[0] : tokenList.value[1];
       return token || {};
     });
 
-    const tokenAmount = computed((): number => +toShiftedBigNumber(
-      swapTokenAmountData.value.amount || 0,
-      -(swapTokenAmountData.value.decimals || 0),
+    const swapTokenAmount = computed((): number => +toShiftedBigNumber(
+      swapTokenData.value.amount || 0,
+      -(swapTokenData.value.decimals || 0),
     ));
 
     const tokenSymbol = computed(
-      () => swapTokenAmountData.value.isWrappedCoin ? AE_SYMBOL : swapTokenAmountData.value.symbol,
-    );
-
-    const completeTransaction = computed(
-      () => ({ tx: { ...popupProps.value?.tx, function: txFunction.value } }),
-    );
-
-    const isProvideLiquidity = computed(
-      () => txFunction.value && DEX_TRANSACTION_TAGS[txFunction.value] === DEX_PROVIDE_LIQUIDITY,
+      () => (swapTokenData.value.isWrappedCoin)
+        ? adapter.coinSymbol
+        : swapTokenData.value.symbol,
     );
 
     const transactionArguments = computed(() => decodedCallData.value?.args?.length
@@ -369,8 +419,7 @@ export default defineComponent({
       if (!isDex.value && !isDexAllowance.value) {
         return [singleToken.value];
       }
-      const functionName = camelCase(txParams.function) as TxFunctionParsed;
-      const resolver = getTransactionTokenInfoResolver(functionName);
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
       if (!resolver) {
         return [];
       }
@@ -378,10 +427,10 @@ export default defineComponent({
         { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
         getProtocolAvailableTokens(PROTOCOLS.aeternity),
       )?.tokens;
-      if (!isPool.value) {
+      if (!isDexPool.value) {
         return tokens;
       }
-      if (isProvideLiquidity.value) {
+      if (isDexLiquidityAdd.value) {
         return tokens.filter((token) => !token.isPool);
       }
       return tokens.reverse();
@@ -396,22 +445,32 @@ export default defineComponent({
       if (isDexAllowance.value) {
         return t('pages.signTransaction.approveUseOfToken');
       }
-      if (isSwap.value) {
-        return !idx ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
-      }
-      if (isPool.value && isProvideLiquidity.value) {
+      if (isDexLiquidityAdd.value) {
         return token.isPool ? '' : t('pages.signTransaction.maximumDeposited');
       }
-      if (
-        isPool.value
-        && txFunction.value
-        && DEX_TRANSACTION_TAGS[txFunction.value] === DEX_REMOVE_LIQUIDITY
-      ) {
+      if (isDexLiquidityRemove.value) {
         return token.isPool
           ? t('pages.signTransaction.poolTokenSpent')
           : t('pages.signTransaction.minimumWithdrawn');
       }
-      return '';
+      return (idx === 0) ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
+    }
+
+    async function confirm() {
+      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.airGap) {
+        const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
+          MODAL_SIGN_AIR_GAP_TRANSACTION,
+          { txRaw: popupProps.value?.txBase64 },
+        );
+        if (signedTransaction) {
+          browser.runtime.sendMessage({
+            type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+            payload: signedTransaction,
+            target: 'offscreen',
+          });
+        }
+      }
+      popupProps.value?.resolve();
     }
 
     function cancel() {
@@ -419,7 +478,7 @@ export default defineComponent({
     }
 
     async function verifyTransaction() {
-      if (popupProps.value?.txBase64) {
+      if (popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity) {
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
@@ -446,6 +505,9 @@ export default defineComponent({
             const accountAddress = getTransactionSignerAddress(popupProps.value.txBase64);
             txParams.nonce = (await sdk.api.getAccountByPubkey(accountAddress)).nonce + 1;
             const dryRunResult = await sdk.txDryRun(buildTx(txParams), accountAddress);
+            gasPrice.value = dryRunResult.callObj?.gasPrice
+              ? +dryRunResult.callObj.gasPrice.toString()
+              : 0;
             if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
               error.value = new ContractByteArrayEncoder().decode(
                 dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
@@ -461,7 +523,11 @@ export default defineComponent({
     }
 
     async function loadAdditionalContractCallInfo() {
-      if (popupProps.value?.tx?.contractId && popupProps.value.tx.callData) {
+      if (
+        protocol === PROTOCOLS.aeternity
+        && popupProps.value?.tx?.contractId
+        && popupProps.value.tx.callData
+      ) {
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
@@ -482,31 +548,23 @@ export default defineComponent({
 
           if (!decodedCallData.value) return;
 
-          const txParams = {
-            function: decodedCallData.value.functionName as TxFunctionRaw,
-            arguments: decodedCallData.value.args.map((arg: any) => ({
-              type: Array.isArray(arg) ? 'list' : 'any',
-              value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
-            })) as TxArguments[],
-          };
-          const tx: ITx = { ...txParams, ...popupProps.value.tx };
+          transaction.value.tx.function = decodedCallData.value.functionName as TxFunctionRaw;
+          transaction.value.tx.arguments = decodedCallData.value.args.map((arg: any) => ({
+            type: Array.isArray(arg) ? 'list' : 'any',
+            value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
+          }));
 
-          txFunction.value = txParams.function;
-
-          // TODO temporary solution to create transaction boilerplate
-          setActiveTransaction({ tx } as ITransaction);
-
-          const allTokens = getTokens(tx);
+          const allTokens = getTokens(transaction.value.tx);
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
-            tokens: token.isPool && !isProvideLiquidity.value
+            // TODO `tokens` is not part of `ITokenResolved`, replace logic of child tokens
+            tokens: token.isPool && !isDexLiquidityAdd.value
               ? allTokens.filter((tkn) => !tkn.isPool).reverse()
               : [token],
           }));
         } catch (e) {
           tokenList.value = [];
-          txFunction.value = undefined;
         } finally {
           loading.value = false;
         }
@@ -534,40 +592,46 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOLS,
+      AE_SYMBOL,
+      aettosToAe,
       AnimatedSpinner,
       PAYLOAD_FIELD,
+      PROTOCOLS,
+      appName,
+      confirm,
       cancel,
-      completeTransaction,
       decodedCallData,
       decodedPayload,
+      direction,
       error,
       executionCost,
       filteredTxFields,
+      gasCost,
+      gasPrice,
       getLabels,
       getTxKeyLabel,
       getTxAssetSymbol,
-      isAeppChatSuperhero,
+      isAex9,
       isDex,
       isDexAllowance,
+      isDexMaxSpent,
+      isDexMinReceived,
+      isDexSwap,
       isHash,
-      isSwap,
-      isTransactionAex9,
       loading,
       nameAeFee,
       popupProps,
-      showAdvanced,
+      protocol,
       singleToken,
-      swapDirection,
       swapDirectionTranslation,
-      swapTokenAmountData,
-      tokenAmount,
-      tokenList,
+      swapTokenAmount,
+      swapTokenData,
       tokenSymbol,
-      totalAmount,
+      tokenList,
+      amountTotal,
+      transaction,
       transactionArguments,
-      transactionWrapped,
-      txAeFee,
+      fee,
       verifying,
     };
   },
@@ -575,9 +639,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .confirm-transaction-sign {
   .loader {
@@ -589,14 +653,14 @@ export default defineComponent({
 
   .subtitle {
     margin: 8px 0;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
 
     &.warning {
-      color: variables.$color-warning;
+      color: $color-warning;
     }
 
     .app-name {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
@@ -607,14 +671,14 @@ export default defineComponent({
   .reason:deep() {
     .value {
       word-break: break-all;
-      color: variables.$color-warning;
+      color: $color-warning;
     }
   }
 
   .sender-replaced {
     @extend %face-sans-15-regular;
 
-    color: variables.$color-warning;
+    color: $color-warning;
     margin-top: 8px;
   }
 
@@ -623,10 +687,6 @@ export default defineComponent({
 
     gap: 8px;
     padding: 8px 0;
-
-    .details-item {
-      margin-right: 24px;
-    }
   }
 
   .pool-token-row:deep() {

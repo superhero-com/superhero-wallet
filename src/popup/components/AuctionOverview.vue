@@ -57,7 +57,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .auction-overview {
   display: flex;
@@ -78,11 +78,11 @@ export default defineComponent({
 
     &.end-height {
       :deep(.value) {
-        color: variables.$color-grey-light;
+        color: $color-grey-light;
       }
 
       :deep(.secondary) {
-        color: variables.$color-grey-dark;
+        color: $color-grey-dark;
       }
     }
   }

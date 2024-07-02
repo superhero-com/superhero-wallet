@@ -100,9 +100,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .url-status {
   @extend %face-sans-14-regular;
@@ -113,23 +113,23 @@ export default defineComponent({
   &.blacklisted,
   &.alert,
   &.critical {
-    color: variables.$color-danger;
+    color: $color-danger;
   }
 
   &.warning,
   &.not-verified,
   &.not-secure {
-    color: variables.$color-warning;
+    color: $color-warning;
   }
 
   &.info,
   &.help {
-    color: variables.$color-primary;
+    color: $color-primary;
   }
 
   &.verified,
   &.success {
-    color: variables.$color-success-dark;
+    color: $color-success-dark;
   }
 
   .title {

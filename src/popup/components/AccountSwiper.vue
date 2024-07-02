@@ -190,8 +190,8 @@ export default defineComponent({
 </style>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .account-swiper {
   .account-swiper-bottom {

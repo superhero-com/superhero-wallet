@@ -1,6 +1,8 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
-import { IS_FIREFOX, UNFINISHED_FEATURES } from '@/constants/environment';
+import { IPopupMessageData } from '@/types';
+import { IS_FIREFOX, POPUP_METHODS, UNFINISHED_FEATURES } from '@/constants';
+import { useWalletConnect } from '@/composables';
 import * as wallet from './wallet';
 import { useAccounts } from '../composables/accounts';
 import { updateDynamicRules } from '../background/redirectRule';
@@ -11,21 +13,19 @@ if (IS_FIREFOX) {
   browser.runtime.onInstalled.addListener(updateDynamicRules);
 }
 
-browser.runtime.onMessage.addListener(async (msg: any) => {
-  const { method } = msg;
-
-  if (method === 'reload') {
+browser.runtime.onMessage.addListener(async ({ method }: IPopupMessageData) => {
+  if (method === POPUP_METHODS.reload) {
     wallet.disconnect();
     window.location.reload();
     return null;
   }
 
-  if (method === 'checkHasAccount') {
+  if (method === POPUP_METHODS.checkHasAccount) {
     const { isLoggedIn } = useAccounts();
     return isLoggedIn.value;
   }
 
-  if (UNFINISHED_FEATURES && method === 'paste') {
+  if (UNFINISHED_FEATURES && method === POPUP_METHODS.paste) {
     let result = '';
     const textarea = document.createElement('textarea');
     document.body.appendChild(textarea);
@@ -41,3 +41,6 @@ browser.runtime.onMessage.addListener(async (msg: any) => {
 });
 
 wallet.init();
+
+// Initialize the WalletConnect state monitoring to allow opening the confirmation popup windows.
+useWalletConnect({ offscreen: true });

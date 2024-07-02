@@ -33,7 +33,7 @@
         v-for="asset in accountAssetsToDisplay"
         :key="asset.contractId"
         :asset="asset"
-        :selected="isTokenSelected(asset)"
+        :selected="isAssetSelected(asset)"
         show-current-price
         prevent-navigation
         @click="resolve(asset)"
@@ -51,7 +51,7 @@ import {
   ref,
 } from 'vue';
 import type {
-  IToken,
+  IAsset,
   Protocol,
   RejectCallback,
   ResolveCallback,
@@ -63,6 +63,8 @@ import AssetListItem from '../Assets/AssetListItem.vue';
 import InputSearch from '../InputSearch.vue';
 import Loader from '../Loader.vue';
 
+export type AssetSelectorResolvedVal = IAsset;
+
 export default defineComponent({
   name: 'AssetSelector',
   components: {
@@ -72,11 +74,14 @@ export default defineComponent({
     Loader,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    resolve: {
+      type: Function as PropType<ResolveCallback<AssetSelectorResolvedVal>>,
+      required: true,
+    },
     reject: { type: Function as PropType<RejectCallback>, required: true },
-    selectedToken: { type: Object as PropType<IToken | null>, default: null },
+    selectedToken: { type: Object as PropType<IAsset>, default: null },
     protocol: { type: String as PropType<Protocol>, default: null },
-    showTokensWithBalance: Boolean,
+    withBalanceOnly: Boolean,
   },
   setup(props) {
     const loading = ref(true);
@@ -85,14 +90,14 @@ export default defineComponent({
 
     const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
-      withBalanceOnly: props.showTokensWithBalance,
+      withBalanceOnly: props.withBalanceOnly,
     });
 
     const accountAssetsToDisplay = computed(() => (props.protocol)
       ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
       : accountAssetsFiltered.value);
 
-    function isTokenSelected(token: IToken): boolean {
+    function isAssetSelected(token: IAsset): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
     }
 
@@ -113,7 +118,7 @@ export default defineComponent({
       searchTerm,
       isFullyOpen,
       accountAssetsToDisplay,
-      isTokenSelected,
+      isAssetSelected,
       onModalOpen,
     };
   },
@@ -121,9 +126,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .asset-selector {
   padding-top: env(safe-area-inset-top);

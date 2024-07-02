@@ -100,21 +100,21 @@ const genLiquiditySwapResolver: TransactionResolverGenerator = (
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
 const addLiquidity = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[4]?.value, // amount_a_min: int
     amount: _arguments[2]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[1]?.value,
     minAmount: _arguments[5]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
   }),
   // min_liquidity: int
-  ({ tx: { arguments: _arguments } }) => new BigNumber(_arguments[2]?.value)
-    .times(_arguments[3]?.value)
+  ({ tx: { arguments: _arguments } }) => new BigNumber(_arguments?.[2]?.value)
+    .times(_arguments?.[3]?.value)
     .sqrt()
-    .minus(_arguments[7]?.value[1]?.value),
+    .minus(_arguments?.[7]?.value[1]?.value),
   'add',
 );
 
@@ -124,22 +124,22 @@ const addLiquidity = genLiquiditySwapResolver(
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
 const addLiquidityAe = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[2]?.value, // amount_a_min: int
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments, contractId, amount } }) => ({
+  ({ tx: { arguments: _arguments = [], contractId, amount } }) => ({
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount, // amount_b_desired: int
     isWrappedCoin: true,
   }),
   // min_liquidity: int
-  ({ tx: { arguments: _arguments, amount } }) => new BigNumber(_arguments[1]?.value)
+  ({ tx: { arguments: args = [], amount } }) => new BigNumber(args?.[1]?.value)
     .times(amount)
     .sqrt()
-    .minus(_arguments[5]?.value[1]?.value),
+    .minus(args[5]?.value[1]?.value),
   'add',
 );
 
@@ -148,17 +148,17 @@ const addLiquidityAe = genLiquiditySwapResolver(
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
 const removeLiquidity = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[3]?.value, // amount_a_min: int
     amount: _arguments[3]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[1]?.value,
     minAmount: _arguments[4]?.value, // amount_b_min: int
     amount: _arguments[4]?.value, // amount_b_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => _arguments[2]?.value, // min_liquidity: int
+  ({ tx: { arguments: args = [] } }) => args[2]?.value, // min_liquidity: int
   'remove',
 );
 
@@ -167,18 +167,18 @@ const removeLiquidity = genLiquiditySwapResolver(
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
 const removeLiquidityAe = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[2]?.value, // amount_a_min: int
     amount: _arguments[2]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments, contractId } }) => ({
+  ({ tx: { arguments: _arguments = [], contractId } }) => ({
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
     isWrappedCoin: true,
   }),
-  ({ tx: { arguments: _arguments } }) => _arguments[1]?.value, // min_liquidity: int
+  ({ tx: { arguments: args = [] } }) => args[1]?.value, // min_liquidity: int
   'remove',
 );
 
@@ -187,11 +187,11 @@ const removeLiquidityAe = genLiquiditySwapResolver(
  * @returns {{ tokens: [fromToken, toToken] }}
  */
 const swapExactTokensForTokens = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     amount: _arguments[0]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.at(-1)?.value,
     minAmount: _arguments[1]?.value, // amount_b_min: int
     amount: _arguments[1]?.value, // amount_b_desired: int
@@ -203,12 +203,12 @@ const swapExactTokensForTokens = genLiquiditySwapResolver(
  * @returns {{ tokens: [fromToken, toToken] }}
  */
 const swapTokensForExactTokens = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     maxAmount: _arguments[1]?.value, // amount_a_max: int
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.at(-1)?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
@@ -219,12 +219,12 @@ const swapTokensForExactTokens = genLiquiditySwapResolver(
  * @returns {{ tokens: [fromToken, toToken] }}
  */
 const swapExactAeForTokens = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments, amount } }) => ({
+  ({ tx: { arguments: _arguments = [], amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
     isWrappedCoin: true,
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[1]?.value?.at(-1)?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
@@ -236,12 +236,12 @@ const swapExactAeForTokens = genLiquiditySwapResolver(
  * @returns {{ tokens: [fromToken, toToken] }}
  */
 const swapTokensForExactAe = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     maxAmount: _arguments[1]?.value,
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.at(-1)?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
@@ -254,12 +254,12 @@ const swapTokensForExactAe = genLiquiditySwapResolver(
  * @returns {{ tokens: [fromToken, toToken] }}
  */
 const swapExactTokensForAe = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_a_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[2]?.value?.at(-1)?.value,
     maxAmount: _arguments[1]?.value,
     amount: _arguments[1]?.value, // amount_b_desired: int
@@ -271,12 +271,12 @@ const swapExactTokensForAe = genLiquiditySwapResolver(
  * ref: AedexV2Router.swap_ae_for_exact_tokens
  */
 const swapAeForExactTokens = genLiquiditySwapResolver(
-  ({ tx: { arguments: _arguments, amount } }) => ({
+  ({ tx: { arguments: _arguments = [], amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
     isWrappedCoin: true,
   }),
-  ({ tx: { arguments: _arguments } }) => ({
+  ({ tx: { arguments: _arguments = [] } }) => ({
     contractId: _arguments[1]?.value?.at(-1)?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
@@ -299,7 +299,7 @@ const changeAllowance: TransactionResolver = (transaction, tokens = null) => ({
  * @returns {{ tokens: [token], sender, recipient }}
  */
 const transferAllowance: TransactionResolver = (transaction, tokens = null) => {
-  const [sender, recipient, amount] = transaction.tx.arguments;
+  const [sender, recipient, amount] = transaction.tx.arguments || [];
 
   // path: list(IAEX9Minimal)
   const token = {

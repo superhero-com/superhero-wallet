@@ -57,8 +57,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .balance-info {
   display: flex;
@@ -69,7 +69,7 @@ export default defineComponent({
   .display-value {
     @extend %face-sans-16-medium;
 
-    color: rgba(variables.$color-white, 1);
+    color: rgba($color-white, 1);
     line-height: 18px;
     margin-top: 4px;
     opacity: 0.75;

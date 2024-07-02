@@ -5,6 +5,7 @@ export const APP_URL = 'wallet.superhero.com';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
+export const MOBILE_SCHEMA = 'superhero://';
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
@@ -60,7 +61,12 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
-export const ACCOUNT_HD_WALLET = 'hd-wallet';
+export const ACCOUNT_TYPES = {
+  hdWallet: 'hd-wallet',
+  airGap: 'airgap',
+} as const;
+
+export const ACCOUNT_TYPES_LIST = Object.values(ACCOUNT_TYPES);
 
 export const NETWORK_TYPE_MAINNET = 'mainnet';
 export const NETWORK_TYPE_TESTNET = 'testnet';
@@ -103,6 +109,8 @@ export const STORAGE_KEYS = {
   activeAccountGlobalIdx: 'active-account-global-idx',
   protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',
   balances: 'balances',
+  currency: 'currency',
+  currencyRates: 'currency-rates',
   customNetworks: 'custom-networks',
   activeNetworkName: 'active-network-name',
   hiddenCards: 'hidden-cards',
@@ -122,6 +130,7 @@ export const STORAGE_KEYS = {
   transactionsPending: 'transactions-pending',
   transferSendData: 'transfer-send-data',
   secureLogin: 'secure-login',
+  walletConnectSession: 'wallet-connect-session',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -314,7 +323,7 @@ export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_NETWORK_SWITCHER = 'network-switcher';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
-export const MODAL_READ_QR_CODE = 'read-qr-code';
+export const MODAL_SCAN_QR = 'scan-qr';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_RESET_WALLET = 'reset-wallet';
@@ -322,9 +331,12 @@ export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
+export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
+export const MODAL_AIR_GAP_IMPORT_ACCOUNTS = 'air-gap-import-accounts';
+export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -350,6 +362,17 @@ export const POPUP_ACTIONS = {
   resolve: 'resolve',
   reject: 'reject',
 } as const;
+
+export const POPUP_METHODS = {
+  openPopup: 'openPopup',
+  removePopup: 'removePopup',
+  getPopup: 'getPopup',
+  reload: 'reload',
+  paste: 'paste',
+  checkHasAccount: 'checkHasAccount', // TODO check if still used
+} as const;
+
+export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
 
 export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
@@ -386,6 +409,7 @@ export const ALLOWED_ICON_STATUSES = [
   'not-secure',
   'success',
   'warning',
+  'qr-scan',
 ] as const;
 
 /**
@@ -405,6 +429,7 @@ export const TRANSFER_SEND_STEPS = {
   form: 'form',
   review: 'review',
   reviewTip: 'tip',
+  airGapSign: 'airGapSign',
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';

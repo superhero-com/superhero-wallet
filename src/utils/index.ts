@@ -5,3 +5,4 @@ export * from './i18nTranslations';
 export * from './validators';
 export * from './transferSend';
 export * from './userDevices';
+export * from './airGap';

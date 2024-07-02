@@ -35,7 +35,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { IFormSelectOption } from '@/types';
+import type { IAccount, IFormSelectOption } from '@/types';
 import { useAccounts, useBalances } from '@/composables';
 import { getAddressColor } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -57,21 +57,34 @@ export default defineComponent({
       type: Object as PropType<IFormSelectOption>,
       default: () => ({}),
     },
+    customAccount: {
+      type: Object as PropType<IAccount>,
+      default: null,
+    },
+    outsideBalance: {
+      type: Number,
+      default: 0,
+    },
     selected: Boolean,
   },
   setup(props) {
     const { getAccountBalance } = useBalances();
     const { getAccountByAddress } = useAccounts();
 
-    const account = getAccountByAddress(props.option.value as any);
+    const account = props.customAccount ?? getAccountByAddress(props.option.value as string);
 
     const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.option.value) }));
 
-    const balance = computed(
-      () => (props.option?.value)
-        ? getAccountBalance(props.option.value as string).toNumber()
-        : 0,
-    );
+    const balance = computed(() => {
+      switch (true) {
+        case !!props.outsideBalance:
+          return props.outsideBalance;
+        case !!props.option.value:
+          return getAccountBalance(props.option.value.toString()).toNumber();
+        default:
+          return 0;
+      }
+    });
 
     const tokenSymbol = computed(
       () => ProtocolAdapterFactory.getAdapter(account!.protocol).coinSymbol,

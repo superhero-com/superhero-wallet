@@ -1,6 +1,10 @@
 if (process.env.IS_EXTENSION) {
   import('webextension-polyfill').then((webExtensionPolyfill) => {
-    window.browser = webExtensionPolyfill;
+    try {
+      window.browser = webExtensionPolyfill;
+    } catch (error) {
+      browser = webExtensionPolyfill;
+    }
   });
 } else {
   window.browser = {

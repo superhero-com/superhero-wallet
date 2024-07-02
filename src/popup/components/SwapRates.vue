@@ -39,20 +39,13 @@ import {
   computed,
   defineComponent,
   PropType,
+  toRef,
 } from 'vue';
-import { camelCase } from 'lodash-es';
 
-import type {
-  ITransaction,
-  TxFunctionParsed,
-} from '@/types';
+import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import {
-  getTransactionTokenInfoResolver,
-  isTxFunctionDexSwap,
-  isTxFunctionDexPool,
-} from '@/protocols/aeternity/helpers';
-import { useFungibleTokens } from '@/composables';
+import { getTransactionTokenInfoResolver } from '@/protocols/aeternity/helpers';
+import { useFungibleTokens, useTransactionData } from '@/composables';
 
 import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
@@ -70,21 +63,19 @@ export default defineComponent({
   setup(props) {
     const { getProtocolAvailableTokens } = useFungibleTokens();
 
-    const isSwapTx = computed(() => (
-      isTxFunctionDexSwap(props.transaction.tx.function)
-      || isTxFunctionDexPool(props.transaction.tx.function)
-    ));
+    const { isDexSwap, txFunctionParsed } = useTransactionData({
+      transaction: toRef(() => props.transaction),
+    });
 
     const rates = computed(() => {
-      if (!isSwapTx.value) {
+      if (!isDexSwap.value || !txFunctionParsed.value) {
         return [];
       }
 
-      const resolver = getTransactionTokenInfoResolver(
-        camelCase(props.transaction.tx.function) as TxFunctionParsed,
-      );
-
-      if (!resolver) return [];
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
+      if (!resolver) {
+        return [];
+      }
 
       const { tokens } = resolver(
         props.transaction,
@@ -117,7 +108,6 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
-      isSwapTx,
       rates,
     };
   },
@@ -125,8 +115,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .swap-rates {
   width: 100%;

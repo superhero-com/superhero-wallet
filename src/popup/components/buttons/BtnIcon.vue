@@ -32,47 +32,50 @@
   </BtnBase>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, PropType, defineComponent } from 'vue';
+
+import Badge from '@/popup/components/Badge.vue';
+import BtnBase from '@/popup/components/buttons/BtnBase.vue';
 import AnimatedPendingIcon from '@/icons/animated-pending.svg?vue-component';
-import Badge from '../Badge.vue';
-import BtnBase from './BtnBase.vue';
 
-const SIZES = ['sm', 'rg'];
-const VARIANTS = ['default', 'light', 'dimmed', 'danger'];
+const SIZES = ['sm', 'rg'] as const;
+const VARIANTS = ['default', 'success', 'danger'] as const;
 
-export default {
+export default defineComponent({
   components: {
     BtnBase,
     Badge,
     AnimatedPendingIcon,
   },
   props: {
-    icon: { type: Object, default: null },
+    icon: { type: Object as PropType<Component>, default: null },
     iconVariant: {
-      type: String,
+      type: String as PropType<typeof VARIANTS[number]>,
       default: 'default',
-      validator: (val) => VARIANTS.includes(val),
+      validator: (val: any) => VARIANTS.includes(val),
     },
     size: {
-      type: String,
+      type: String as PropType<typeof SIZES[number]>,
       default: 'rg',
-      validator: (val) => SIZES.includes(val),
+      validator: (val: any) => SIZES.includes(val),
     },
     badgeText: { type: [String, Number], default: null },
     dimmed: Boolean,
     loading: Boolean,
   },
-};
+});
 </script>
 
 <style lang="scss">
-@use '../../../styles/variables' as *;
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .btn-icon {
   --size: 24px;
   --icon-opacity: 0.75;
   --icon-opacity-hover: 1;
+  --icon-color: #{$color-white};
   --icon-color-hover: #{$color-white};
 
   @include mixins.flex(center, center);
@@ -89,7 +92,7 @@ export default {
   }
 
   .icon {
-    color: $color-white;
+    color: var(--icon-color);
     width: var(--size);
     height: var(--size);
     opacity: var(--icon-opacity);
@@ -125,6 +128,11 @@ export default {
   }
 
   &.icon-variant {
+    &-success {
+      --icon-color: #{$color-success};
+      --icon-color-hover: #{$color-success};
+    }
+
     &-danger {
       --icon-color-hover: #{$color-danger};
     }

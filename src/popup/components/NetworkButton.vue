@@ -54,21 +54,21 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .network-button {
   .circle {
     width: 6px;
     height: 6px;
     border-radius: 100%;
-    background-color: variables.$color-warning;
+    background-color: $color-warning;
 
     &.connected {
-      background-color: variables.$color-success-dark;
+      background-color: $color-success-dark;
     }
 
     &.error {
-      background-color: variables.$color-danger;
+      background-color: $color-danger;
     }
   }
 }

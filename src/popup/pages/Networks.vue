@@ -73,7 +73,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/mixins';
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .networks {

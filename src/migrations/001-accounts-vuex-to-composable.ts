@@ -1,5 +1,5 @@
 import type { IAccountRaw, Migration } from '@/types';
-import { ACCOUNT_HD_WALLET, PROTOCOL_LIST } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOL_LIST } from '@/constants';
 import { collectVuexState } from './migrationHelpers';
 
 const migration: Migration<IAccountRaw[]> = async (restoredValue: IAccountRaw[]) => {
@@ -8,7 +8,7 @@ const migration: Migration<IAccountRaw[]> = async (restoredValue: IAccountRaw[])
     if (accounts?.length) {
       return accounts.reduce(
         (list: IAccountRaw[], { protocol, type }: IAccountRaw) => {
-          if (PROTOCOL_LIST.includes(protocol) && type === ACCOUNT_HD_WALLET) {
+          if (PROTOCOL_LIST.includes(protocol) && type === ACCOUNT_TYPES.hdWallet) {
             list.push({
               isRestored: true,
               protocol,

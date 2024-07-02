@@ -108,10 +108,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/share-info';
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/share-info';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .msg {
   @extend %face-sans-14-regular;
@@ -129,7 +129,7 @@ export default defineComponent({
   }
 
   .title {
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   .capitalize::first-letter {

@@ -27,22 +27,23 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
-import { camelCase } from 'lodash-es';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRef,
+} from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
   ITokenResolved,
   ITransaction,
-  TxFunction,
-  TxFunctionParsed,
-  TxFunctionRaw,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useAeSdk, useFungibleTokens } from '@/composables';
+import { useAeSdk, useFungibleTokens, useTransactionData } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
-import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
+import { getTransactionTokenInfoResolver } from '@/protocols/aeternity/helpers';
 
 import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
@@ -60,39 +61,34 @@ export default defineComponent({
 
     const { nodeNetworkId } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { isDexSwap, txFunctionParsed } = useTransactionData({
+      transaction: toRef(() => props.transaction),
+    });
 
     const aeTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
 
-    function getTxFunction(
-      functionName: TxFunctionRaw | TxFunctionParsed | TxFunction,
-    ): TxFunctionParsed {
-      return camelCase(functionName) as TxFunctionParsed;
-    }
-
     // TODO replace with `transactionTokens` taken from `transactionData` composable
     const assetList = computed(() => {
-      const txFunction = getTxFunction(props.transaction.tx.function!);
-
-      if (
-        !isTxFunctionDexSwap(txFunction)
-        && !isTxFunctionDexSwap(props.transaction.tx.function!)
-      ) {
+      if (!isDexSwap.value || !txFunctionParsed.value) {
         return [];
       }
-      const resolver = getTransactionTokenInfoResolver(txFunction);
+
+      const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
       if (!resolver) {
         return [];
       }
+
       let { tokens } = resolver(props.transaction, aeTokensAvailable.value);
-      const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
+      const args = props.transaction.tx.arguments || [];
+      const index = args.findIndex(({ type }) => type === 'list');
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
       const tokenLastIndex = tokens.length - 1;
 
-      if (index >= 0 && props.transaction.tx.arguments[index].value.length > tokens.length) {
+      if (index >= 0 && args[index].value.length > tokens.length) {
         tokens = [
           tokens[0],
-          ...props.transaction.tx.arguments[index].value
-            .slice(1, props.transaction.tx.arguments[index].value.length - 1)
+          ...args[index].value
+            .slice(1, args[index].value.length - 1)
             .map((element: any) => aeTokensAvailable.value[element.value]),
           tokens[1],
         ];
@@ -162,9 +158,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .swap-route {
   .swap-steps {
@@ -189,8 +185,8 @@ export default defineComponent({
         gap: 2px;
         padding: 3px 5px;
         border-radius: 20px;
-        color: variables.$color-white;
-        background: variables.$color-bg-3;
+        color: $color-white;
+        background: $color-bg-3;
         white-space: nowrap;
       }
     }
@@ -212,7 +208,7 @@ export default defineComponent({
       top: calc(50% - 1px);
       width: 100%;
       height: 2px;
-      background-color: variables.$color-white;
+      background-color: $color-white;
       transform: scaleY(0.8); // Make the line thinner
     }
   }
@@ -229,7 +225,7 @@ export default defineComponent({
       width: 6px;
       height: 6px;
       border-style: solid;
-      border-color: variables.$color-white;
+      border-color: $color-white;
       border-width: 2px 2px 0 0;
       border-radius: 1px;
       transform: rotate(45deg);

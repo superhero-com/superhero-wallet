@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-labels="[$t('modals.confirm-raw-sign.title')]"
       :sender="sender"
-      :recipient="activeAccount"
+      :recipient="activeAccount!"
     />
 
     <div
@@ -57,9 +57,16 @@
 
 <script lang="ts">
 import { computed, defineComponent, onUnmounted } from 'vue';
-import { PROTOCOLS } from '@/constants';
+import {
+  AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
+  PROTOCOLS,
+  RUNNING_IN_POPUP,
+} from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
-import { useAccounts, usePopupProps } from '@/composables';
+import { useAccounts, useModals, usePopupProps } from '@/composables';
+
+import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
@@ -81,12 +88,26 @@ export default defineComponent({
   setup() {
     const { popupProps, sender, setPopupProps } = usePopupProps();
     const { getLastActiveProtocolAccount } = useAccounts();
+    const { openModal } = useModals();
 
     const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     const dataAsString = computed((): string => popupProps.value?.txBase64?.toString() || '');
 
-    function confirm() {
+    async function confirm() {
+      if (RUNNING_IN_POPUP && activeAccount?.type === 'airgap') {
+        const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
+          MODAL_SIGN_AIR_GAP_TRANSACTION,
+          { txRaw: popupProps.value?.txBase64 },
+        );
+        if (signedTransaction) {
+          browser.runtime.sendMessage({
+            type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+            payload: signedTransaction,
+            target: 'offscreen',
+          });
+        }
+      }
       popupProps.value?.resolve();
     }
 
@@ -110,8 +131,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .confirm-raw-sign {
   .overview {
@@ -128,7 +149,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       margin-bottom: 4px;
-      color: variables.$color-warning;
+      color: $color-warning;
 
       .icon {
         width: 24px;
@@ -140,7 +161,7 @@ export default defineComponent({
     .content {
       @extend %face-sans-15-regular;
 
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 

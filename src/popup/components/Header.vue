@@ -28,7 +28,7 @@
             :class="{ disabled: isLogoDisabled }"
             class="btn-home"
           >
-            <Logo class="home-icon" />
+            <AppLogo class="home-icon" />
           </Component>
         </div>
 
@@ -54,6 +54,15 @@
             <NetworkButton />
 
             <template v-if="isLoggedIn">
+              <BtnIcon
+                key="btn-wallet-connect"
+                data-cy="btn-wallet-connect"
+                :icon="WalletConnectLogo"
+                :icon-variant="(wcSession) ? 'success' : 'default'"
+                :dimmed="!wcSession"
+                @click="openWalletConnectModal()"
+              />
+
               <AppsBrowserBtn
                 v-if="IS_MOBILE_APP || UNFINISHED_FEATURES"
                 key="btn-browser"
@@ -90,16 +99,22 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
+import { IS_MOBILE_APP, UNFINISHED_FEATURES, MODAL_WALLET_CONNECT } from '@/constants';
 import type { WalletRouteMeta } from '@/types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '@/popup/router/routeNames';
-import { useAccounts, useUi } from '@/composables';
+import {
+  useAccounts,
+  useModals,
+  useUi,
+  useWalletConnect,
+} from '@/composables';
 
-import Logo from '@/icons/logo-small.svg?vue-component';
+import AppLogo from '@/icons/logo-small.svg?vue-component';
+import WalletConnectLogo from '@/icons/wallet-connect.svg?vue-component';
 import BackIcon from '@/icons/back.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
 
@@ -118,7 +133,7 @@ export default defineComponent({
     NotificationsIcon,
     BtnClose,
     BtnPlain,
-    Logo,
+    AppLogo,
     Truncate,
     BtnIcon,
     IonHeader,
@@ -131,6 +146,8 @@ export default defineComponent({
 
     const { homeRouteName } = useUi();
     const { isLoggedIn } = useAccounts();
+    const { openModal } = useModals();
+    const { wcSession } = useWalletConnect();
 
     const pageTitles: Record<string, () => string> = {
       settings: () => t('pages.titles.settings'),
@@ -207,6 +224,10 @@ export default defineComponent({
       ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
     }
 
+    function openWalletConnectModal() {
+      return openModal(MODAL_WALLET_CONNECT);
+    }
+
     useBackButton(1, back);
 
     return {
@@ -214,6 +235,7 @@ export default defineComponent({
       homeRouteName,
       BackIcon,
       ThreeDotsIcon,
+      WalletConnectLogo,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
       IS_MOBILE_APP,
@@ -221,20 +243,22 @@ export default defineComponent({
       showHeaderNavigation,
       isLogoDisabled,
       titleTruncated,
+      wcSession,
       back,
       close,
+      openWalletConnectModal,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .header {
-  z-index: variables.$z-index-header;
+  z-index: $z-index-header;
   height: var(--header-height);
 
   .toolbar {
@@ -275,11 +299,11 @@ export default defineComponent({
           }
 
           &:hover svg {
-            color: variables.$color-primary-hover;
+            color: $color-primary-hover;
           }
 
           &:active svg {
-            color: variables.$color-primary-hover;
+            color: $color-primary-hover;
             opacity: 0.9;
           }
         }
@@ -287,7 +311,7 @@ export default defineComponent({
         .home-icon {
           width: 32px;
           height: 32px;
-          color: variables.$color-primary;
+          color: $color-primary;
         }
       }
     }
@@ -307,7 +331,7 @@ export default defineComponent({
         justify-content: center;
         white-space: nowrap;
         line-height: 24px;
-        color: variables.$color-white;
+        color: $color-white;
       }
 
       &:only-child {

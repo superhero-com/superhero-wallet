@@ -7,7 +7,7 @@
 </template>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .scrollable {
   position: relative;

@@ -80,24 +80,24 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/mixins';
 @use '@/styles/typography';
 
 .warning-dapp-browser {
   .icon-wrapper {
     margin: 8px auto 18px;
-    color: variables.$color-warning;
+    color: $color-warning;
   }
 
   .info {
     .title {
-      color: variables.$color-white;
+      color: $color-white;
       padding-bottom: 20px;
     }
 
     .text {
-      color: rgba(variables.$color-white, 0.85);
+      color: rgba($color-white, 0.85);
       line-height: 20px;
       gap: 10px;
 

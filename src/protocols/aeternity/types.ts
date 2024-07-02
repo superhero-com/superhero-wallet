@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
 import { Contract, ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk';
-import type { INetworkProtocolSettings } from '@/types';
+import type { AccountAddress, INetworkProtocolSettings } from '@/types';
 
 /**
  * Settings specific to this protocol.
@@ -57,3 +57,16 @@ export interface AeDecodedCallData {
 }
 
 export type ContractInitializeOptions = Omit<Parameters<typeof Contract.initialize>[0], 'onNode'>;
+
+export interface SimpleGAMultiSigContractApi extends ContractMethodsBase {
+  get_nonce: () => number;
+  get_signers: () => string[];
+  get_consensus_info: () => {
+    confirmations_required: number;
+    confirmed_by: AccountAddress[];
+    expiration_height: number;
+    expired: boolean;
+    proposed_by: AccountAddress;
+    tx_hash?: string;
+  };
+}

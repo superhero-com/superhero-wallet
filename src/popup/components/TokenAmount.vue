@@ -128,8 +128,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .token-amount {
   @extend %face-sans-15-medium;
@@ -137,7 +137,7 @@ export default defineComponent({
   display: inline-flex;
   gap: 8px;
   align-items: center;
-  color: variables.$color-white;
+  color: $color-white;
 
   .amount {
     font-size: var(--font-size);
@@ -146,13 +146,13 @@ export default defineComponent({
   }
 
   .symbol {
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 
   .fiat {
     @extend %face-sans-15-regular;
 
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
     white-space: nowrap;
   }
 

@@ -163,8 +163,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .import-account-modal {
   text-align: center;
@@ -174,7 +174,7 @@ export default defineComponent({
   }
 
   .scan-button {
-    color: variables.$color-white;
+    color: $color-white;
     display: block;
     width: 32px;
     height: 24px;

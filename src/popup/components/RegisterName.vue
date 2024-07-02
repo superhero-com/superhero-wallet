@@ -23,8 +23,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .register-name {
   .message {
@@ -32,7 +32,7 @@ export default {
 
     margin: 32px;
     text-align: center;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
   }
 
   .btn {

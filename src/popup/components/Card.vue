@@ -31,7 +31,6 @@
         class="card-close"
       >
         <BtnIcon
-          icon-variant="light"
           :icon="CloseIcon"
           @click="setCardHidden(cardId)"
         />
@@ -89,9 +88,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .card {
   z-index: 1;

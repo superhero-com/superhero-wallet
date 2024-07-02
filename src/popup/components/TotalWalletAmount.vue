@@ -34,15 +34,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/typography';
-@use '../../styles/variables';
+@use '@/styles/typography';
+@use '@/styles/variables' as *;
 
 .total-amount {
   @extend %face-sans-16-bold;
 
   display: flex;
   align-items: center;
-  color: variables.$color-white;
+  color: $color-white;
   line-height: 1;
 
   .label {

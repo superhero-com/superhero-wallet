@@ -296,6 +296,10 @@ hr {
 }
 
 .color {
+  &-success {
+    color: $color-success;
+  }
+
   &-warning {
     color: $color-warning;
   }

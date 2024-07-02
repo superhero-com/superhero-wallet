@@ -141,8 +141,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .connect {
   .transaction-info {
@@ -154,11 +154,11 @@ export default defineComponent({
 
     margin-top: 24px;
     margin-bottom: 16px;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     text-align: center;
 
     .app-name {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
@@ -171,12 +171,12 @@ export default defineComponent({
       display: flex;
       align-items: center;
       padding-bottom: 4px;
-      color: variables.$color-grey-dark;
+      color: $color-grey-dark;
 
       .icon {
         width: 24px;
         height: 24px;
-        color: variables.$color-success;
+        color: $color-success;
         padding-right: 4px;
       }
     }
@@ -186,7 +186,7 @@ export default defineComponent({
 
       display: block;
       padding-bottom: 16px;
-      color: variables.$color-white;
+      color: $color-white;
       text-align: left;
     }
   }

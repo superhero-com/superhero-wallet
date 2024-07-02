@@ -46,13 +46,14 @@ import {
   TRANSFER_SEND_STEPS,
 } from '@/constants';
 import { isUrlValid } from '@/utils';
-import { useAeSdk, useFungibleTokens } from '@/composables';
+import { useAccounts, useAeSdk, useFungibleTokens } from '@/composables';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
 import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
 import TransferSendForm from '../components/TransferSendForm.vue';
 import TransferReviewTip from '../components/TransferReviewTip.vue';
 import TransferReview from '../components/TransferReview.vue';
+import TransferSignedTxReview from '../components/TransferSignedTxReview.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_SEND,
@@ -68,6 +69,7 @@ export default defineComponent({
     const { t } = useI18n();
     const { isAeNodeReady } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { isActiveAccountAirGap } = useAccounts();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
@@ -89,16 +91,26 @@ export default defineComponent({
       && isUrlValid(transferData.value.address)
     ));
 
+    const showNextButton = computed(() => (
+      currentStep.value === TRANSFER_SEND_STEPS.review
+      && isActiveAccountAirGap.value
+    ));
+
     const isSendingDisabled = computed(() => (
       error.value
       || !isAeNodeReady.value
-      || !transferData.value.address
-      || !transferData.value.amount
+      || (!showNextButton.value && (!transferData.value.address || !transferData.value.amount))
     ));
 
-    const customPrimaryButtonText = computed(() => (props.isMultisig)
-      ? t('modals.multisigTxProposal.proposeAndApprove')
-      : '');
+    const customPrimaryButtonText = computed(() => {
+      if (props.isMultisig) {
+        return t('modals.multisigTxProposal.proposeAndApprove');
+      }
+      if (showNextButton.value) {
+        return t('common.next');
+      }
+      return '';
+    });
 
     function proceedToNextStep() {
       (currentRenderedComponent.value as any).submit();
@@ -112,6 +124,18 @@ export default defineComponent({
 
     function handleReviewTipSuccess() {
       currentStep.value = TRANSFER_SEND_STEPS.review;
+    }
+
+    function handleReviewSuccess() {
+      if (isActiveAccountAirGap.value && !props.isMultisig) {
+        currentStep.value = TRANSFER_SEND_STEPS.airGapSign;
+      } else {
+        props.resolve();
+      }
+    }
+
+    function handleAirGapSignReviewSuccess() {
+      props.resolve();
     }
 
     function editTransfer() {
@@ -130,7 +154,11 @@ export default defineComponent({
       },
       [TRANSFER_SEND_STEPS.review]: {
         component: TransferReview,
-        onSuccess: props.resolve,
+        onSuccess: handleReviewSuccess,
+      },
+      [TRANSFER_SEND_STEPS.airGapSign]: {
+        component: TransferSignedTxReview,
+        onSuccess: handleAirGapSignReviewSuccess,
       },
     };
 

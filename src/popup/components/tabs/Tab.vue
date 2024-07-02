@@ -24,9 +24,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .tab {
   @extend %face-sans-14-medium;
@@ -35,32 +35,32 @@ export default defineComponent({
 
   flex: 1 1 0;
   padding: 4px 10px;
-  border-radius: variables.$border-radius-interactive - 3px;
-  color: rgba(variables.$color-white, 0.75);
+  border-radius: $border-radius-interactive - 3px;
+  color: rgba($color-white, 0.75);
   transition: all 100ms;
 
   &:hover {
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   &.router-link-active {
     &.not-exact {
-      background-color: rgba(variables.$color-white, 0.15);
-      color: variables.$color-white;
+      background-color: rgba($color-white, 0.15);
+      color: $color-white;
     }
 
     &.exact {
       &.active {
         background-color: transparent;
-        color: variables.$color-white;
+        color: $color-white;
       }
     }
   }
 
   &.router-link-exact-active,
   &.active {
-    background-color: rgba(variables.$color-white, 0.15);
-    color: variables.$color-white;
+    background-color: rgba($color-white, 0.15);
+    color: $color-white;
     font-weight: 600;
   }
 }

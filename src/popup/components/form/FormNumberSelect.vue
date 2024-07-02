@@ -38,8 +38,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .number-select {
   position: relative;
@@ -52,8 +52,8 @@ export default defineComponent({
     appearance: none;
     outline: none;
     box-shadow: none;
-    color: rgba(variables.$color-white, 0.75);
-    background-color: rgba(variables.$color-white, 0.08);
+    color: rgba($color-white, 0.75);
+    background-color: rgba($color-white, 0.08);
     border: 2px solid transparent;
     border-radius: 10px;
     padding: 6px 22px 6px 10px;
@@ -61,16 +61,16 @@ export default defineComponent({
     cursor: pointer;
 
     &:hover {
-      color: variables.$color-white;
-      background-color: rgba(variables.$color-white, 0.05);
-      border-color: rgba(variables.$color-white, 0.15);
+      color: $color-white;
+      background-color: rgba($color-white, 0.05);
+      border-color: rgba($color-white, 0.15);
     }
 
     &:focus {
       font-weight: 500;
-      color: variables.$color-white;
-      background-color: rgba(variables.$color-black, 0.44);
-      border-color: variables.$color-primary;
+      color: $color-white;
+      background-color: rgba($color-black, 0.44);
+      border-color: $color-primary;
     }
   }
 
@@ -80,7 +80,7 @@ export default defineComponent({
     right: 8px;
     width: 8px;
     position: absolute;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
     pointer-events: none;
   }
 }

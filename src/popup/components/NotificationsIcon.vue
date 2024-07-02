@@ -5,6 +5,7 @@
     :icon="BellIcon"
     :to="{ name: ROUTE_NOTIFICATIONS }"
     :badge-text="notificationsCount"
+    dimmed
   />
 </template>
 

@@ -172,9 +172,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .auction-list {
   .toolbar {
@@ -210,7 +210,7 @@ export default defineComponent({
         .expiration {
           align-self: flex-end;
           user-select: none;
-          color: variables.$color-grey-dark;
+          color: $color-grey-dark;
         }
       }
     }

@@ -22,6 +22,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_SIGN,
   STORAGE_KEYS,
+  PROTOCOLS,
 } from '@/constants';
 import { getCleanModalOptions } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
@@ -190,6 +191,7 @@ export function usePermissions() {
       if (
         method === METHODS.sign
         && (!modalProps.txBase64 || !isTxOfASupportedType(modalProps.txBase64))
+        && modalProps.protocol !== PROTOCOLS.ethereum
       ) {
         modal = MODAL_CONFIRM_RAW_SIGN;
         popup = POPUP_TYPE_RAW_SIGN;

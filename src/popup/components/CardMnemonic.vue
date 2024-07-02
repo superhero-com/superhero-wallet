@@ -13,7 +13,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .card-mnemonic {
   background: rgba($color-white, 0.15);

@@ -7,6 +7,7 @@
       class="app-image-wrapper"
     >
       <img
+        v-if="imageUrl"
         :src="imageUrl"
         class="app-image"
         alt="Dapp favicon"

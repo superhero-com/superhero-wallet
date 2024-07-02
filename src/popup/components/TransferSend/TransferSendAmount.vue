@@ -24,7 +24,7 @@
         name="amount"
         data-cy="amount"
         class="amount-input"
-        show-tokens-with-balance
+        with-balance-only
         :label="customLabel || $t('common.amount')"
         :message="amountMessage"
         :protocol="protocol"

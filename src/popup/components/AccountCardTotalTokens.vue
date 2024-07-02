@@ -46,8 +46,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/typography';
-@use '../../styles/variables';
+@use '@/styles/typography';
+@use '@/styles/variables' as *;
 
 .account-card-total-tokens {
   width: 100%;
@@ -55,7 +55,7 @@ export default defineComponent({
   .total-tokens {
     @extend %face-sans-14-medium;
 
-    color: variables.$color-white;
+    color: $color-white;
     line-height: 16px;
 
     .digit {

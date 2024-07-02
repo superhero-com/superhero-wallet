@@ -21,7 +21,7 @@ import {
   handleUnknownError,
   postJson,
 } from '@/utils';
-import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
+import { MULTISIG_SIMPLE_GA_BYTECODE, AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
@@ -34,7 +34,7 @@ interface InternalOptions {
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 // TODO: calculate gas price based on node demand
-const GA_META_PARAMS = { fee: 1e14, gasPrice: 1e9 };
+const GA_META_PARAMS = { fee: AE_GET_META_TX_FEE, gasPrice: 1e9 };
 
 export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
@@ -104,7 +104,11 @@ export function useMultisigTransactions() {
     return postJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
   }
 
-  async function proposeTx(spendTx: Encoded.Transaction, contractId: Encoded.ContractAddress) {
+  async function proposeTx(
+    spendTx: Encoded.Transaction,
+    contractId: Encoded.ContractAddress,
+    options?: any,
+  ) {
     const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
 
@@ -115,11 +119,16 @@ export function useMultisigTransactions() {
       address: contractId,
     });
 
-    await gaContractRpc.propose(spendTxHash, {
-      FixedTTL: [expirationHeight],
-    });
+    const callResult = await gaContractRpc.propose(
+      spendTxHash,
+      { FixedTTL: [expirationHeight] },
+      options || {},
+    );
 
-    return Buffer.from(spendTxHash).toString('hex');
+    return {
+      proposeTxHash: Buffer.from(spendTxHash).toString('hex'),
+      callResult,
+    };
   }
 
   /**

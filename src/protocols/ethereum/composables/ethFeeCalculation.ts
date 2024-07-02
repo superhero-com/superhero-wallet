@@ -1,10 +1,10 @@
 import { Web3Eth } from 'web3-eth';
 import { fromWei } from 'web3-utils';
 import BigNumber from 'bignumber.js';
-import { useI18n } from 'vue-i18n';
 import { computed, ref } from 'vue';
 
 import type { IFeeItem } from '@/types';
+import { tg } from '@/popup/plugins/i18n';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { ETH_GAS_LIMIT } from '../config';
 
@@ -16,7 +16,6 @@ const MAX_PRIORITY_FEE_MULTIPLIERS = {
 
 export function useEthFeeCalculation() {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
-  const { t } = useI18n();
 
   const feeSelectedIndex = ref(0);
   const gasLimit = ref(ETH_GAS_LIMIT);
@@ -47,7 +46,7 @@ export function useEthFeeCalculation() {
         .plus(maxPriorityFeePerGasSlow.value)
         .multipliedBy(gasLimit.value),
       time: 300,
-      label: t('common.transferSpeed.slow'),
+      label: tg('common.transferSpeed.slow'),
       maxPriorityFee: maxPriorityFeePerGasSlow.value,
       maxFeePerGas: defaultMaxFeePerGas.value.plus(maxPriorityFeePerGasSlow.value),
     },
@@ -56,7 +55,7 @@ export function useEthFeeCalculation() {
         .plus(maxPriorityFeePerGasMedium.value)
         .multipliedBy(gasLimit.value),
       time: 180,
-      label: t('common.transferSpeed.medium'),
+      label: tg('common.transferSpeed.medium'),
       maxPriorityFee: maxPriorityFeePerGasMedium.value,
       maxFeePerGas: defaultMaxFeePerGas.value.plus(maxPriorityFeePerGasMedium.value),
     },
@@ -65,7 +64,7 @@ export function useEthFeeCalculation() {
         .plus(maxPriorityFeePerGasFast.value)
         .multipliedBy(gasLimit.value),
       time: 30,
-      label: t('common.transferSpeed.fast'),
+      label: tg('common.transferSpeed.fast'),
       maxPriorityFee: maxPriorityFeePerGasFast.value,
       maxFeePerGas: defaultMaxFeePerGas.value.plus(maxPriorityFeePerGasFast.value),
     },

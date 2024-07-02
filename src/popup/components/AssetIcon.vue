@@ -87,7 +87,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .asset-icon {
   --icon-size: var(--icon-size-md);

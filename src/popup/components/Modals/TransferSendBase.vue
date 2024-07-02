@@ -23,7 +23,7 @@
       <BtnMain
         class="button-action-primary"
         :disabled="!isOnline || sendingDisabled"
-        :icon="(showSendButton && !hideArrowSendIcon) ? ArrowSendIcon : null"
+        :icon="primaryButtonIcon"
         :text="primaryButtonText"
         data-cy="next-step-button"
         @click="$emit('step-next')"
@@ -42,9 +42,11 @@ import type { ResolveCallback, TransferSendStep } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 import { TRANSFER_SEND_STEPS } from '@/constants';
-import { useConnection } from '@/composables';
+import { useAccounts, useConnection } from '@/composables';
 
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
+import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -79,13 +81,22 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
     const { isOnline } = useConnection();
+    const { isActiveAccountAirGap } = useAccounts();
 
     const showEditButton = computed(() => [
       TRANSFER_SEND_STEPS.review,
       TRANSFER_SEND_STEPS.reviewTip,
+      TRANSFER_SEND_STEPS.airGapSign,
     ].includes(props.currentStep as any));
 
-    const showSendButton = computed(() => props.currentStep === TRANSFER_SEND_STEPS.review);
+    const showSendButton = computed(() => [
+      TRANSFER_SEND_STEPS.review,
+      TRANSFER_SEND_STEPS.airGapSign,
+    ].includes(props.currentStep as any));
+
+    const showNextButton = computed(() => (
+      props.currentStep === TRANSFER_SEND_STEPS.review && isActiveAccountAirGap.value
+    ));
 
     const primaryButtonText = computed(() => {
       if (props.customPrimaryButtonText) {
@@ -97,12 +108,21 @@ export default defineComponent({
       return t('common.send');
     });
 
+    const primaryButtonIcon = computed(() => {
+      if (showSendButton.value && !showNextButton.value && !props.hideArrowSendIcon) {
+        return ArrowSendIcon;
+      }
+      return null;
+    });
+
     return {
       isOnline,
       primaryButtonText,
+      primaryButtonIcon,
       showEditButton,
       showSendButton,
       ArrowSendIcon,
+      QrScanIcon,
       TRANSFER_SEND_STEPS,
     };
   },

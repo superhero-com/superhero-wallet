@@ -203,6 +203,7 @@ exports[`Pages Index 1`] = `
           data-cy="checkbox"
         >
           <input
+            checked=""
             name=""
             type="checkbox"
           />
@@ -352,6 +353,7 @@ exports[`Pages Index 2`] = `
           data-cy="checkbox"
         >
           <input
+            checked=""
             name=""
             type="checkbox"
           />
@@ -501,6 +503,7 @@ exports[`Pages Index 3`] = `
           data-cy="checkbox"
         >
           <input
+            checked=""
             name=""
             type="checkbox"
           />

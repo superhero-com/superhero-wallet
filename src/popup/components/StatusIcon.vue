@@ -25,6 +25,7 @@ import Warning from '../../icons/warning.svg?vue-component';
 import CheckCircle from '../../icons/check-circle.svg?vue-component';
 import NotSecure from '../../icons/not-secure.svg?vue-component';
 import Globe from '../../icons/globe.svg?vue-component';
+import QrScan from '../../icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   props: {
@@ -43,6 +44,7 @@ export default defineComponent({
       success: CheckCircle,
       'not-secure': NotSecure,
       help: Globe,
+      'qr-scan': QrScan,
     };
 
     const icon = computed(() => statusIcons[props.status]);
@@ -55,26 +57,27 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .status-icon {
   &.alert,
   &.critical {
-    color: variables.$color-danger;
+    color: $color-danger;
   }
 
   &.warning,
   &.not-secure {
-    color: variables.$color-warning;
+    color: $color-warning;
   }
 
   &.help,
-  &.info {
-    color: variables.$color-primary;
+  &.info,
+  &.qr-scan {
+    color: $color-primary;
   }
 
   &.success {
-    color: variables.$color-success-dark;
+    color: $color-success-dark;
   }
 }
 </style>

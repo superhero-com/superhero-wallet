@@ -22,7 +22,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .button-plain {
   padding: 0;

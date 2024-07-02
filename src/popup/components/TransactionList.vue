@@ -261,8 +261,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .transaction-list {
   .transactions {
@@ -286,7 +286,7 @@ export default defineComponent({
     .message {
       @extend %face-sans-15-medium;
 
-      color: variables.$color-grey-light;
+      color: $color-grey-light;
       text-align: center;
       padding: 48px 64px;
     }
@@ -296,7 +296,7 @@ export default defineComponent({
       min-height: 56px;
       margin: 0 auto;
       padding-bottom: 48px;
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 

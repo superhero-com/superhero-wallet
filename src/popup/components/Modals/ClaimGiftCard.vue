@@ -302,7 +302,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .claim-gift-card {
@@ -316,7 +316,7 @@ export default defineComponent({
   .check-circle-icon {
     width: 40px;
     height: 40px;
-    color: variables.$color-success-dark;
+    color: $color-success-dark;
     display: flex;
     align-self: center;
     margin: 8px auto 4px auto;
@@ -327,7 +327,7 @@ export default defineComponent({
 
     display: flex;
     justify-content: center;
-    color: variables.$color-white;
+    color: $color-white;
     line-height: 24px;
 
     .redeemed-by {
@@ -352,7 +352,7 @@ export default defineComponent({
 
       line-height: 24px;
       display: block;
-      color: variables.$color-white;
+      color: $color-white;
       opacity: 0.5;
       margin-bottom: 4px;
     }
@@ -374,7 +374,7 @@ export default defineComponent({
     display: block;
     text-align: center;
     margin-top: 24px;
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   .buttons {

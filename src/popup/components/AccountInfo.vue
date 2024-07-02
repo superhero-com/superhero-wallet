@@ -70,7 +70,7 @@ import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
-import Avatar from './Avatar.vue';
+import Avatar, { type AvatarSize } from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -84,7 +84,7 @@ export default defineComponent({
   },
   props: {
     account: { type: Object as PropType<Partial<IAccount>>, required: true },
-    avatarSize: { type: String, default: 'lg' },
+    avatarSize: { type: String as PropType<AvatarSize>, default: 'lg' },
     customName: { type: String, default: null },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
@@ -118,28 +118,31 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .account-info {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   text-align: left;
-  color: variables.$color-white;
+  color: $color-white;
 
   .avatar {
     margin-right: 8px;
   }
 
   .account-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
     max-width: 250px;
     font-weight: 500;
 
     .account-name {
       @extend %face-sans-16-medium;
 
-      margin: 4px 0;
       line-height: 20px; // Avoid cutting off bottom part of some letters, e.g.: "g"
     }
 
@@ -155,7 +158,7 @@ export default defineComponent({
     }
 
     .ae-address {
-      color: rgba(variables.$color-white, 0.85);
+      color: rgba($color-white, 0.85);
       user-select: none;
 
       .icon {

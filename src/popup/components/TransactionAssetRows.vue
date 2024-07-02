@@ -93,8 +93,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .transaction-asset-rows {
   @extend %face-sans-15-regular;
@@ -110,13 +110,13 @@ export default defineComponent({
     font-size: var(--font-size);
 
     .amount {
-      color: variables.$color-white;
+      color: $color-white;
       font-weight: 500;
       white-space: nowrap;
     }
 
     &.received .amount {
-      color: variables.$color-success-dark;
+      color: $color-success-dark;
     }
 
     .symbol {

@@ -61,6 +61,7 @@ export default defineComponent({
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
   },
   setup(props) {
+    // TODO AIRGAP: implement multiple accounts selection
     const { getName } = useAeNames();
 
     const searchPhrase = ref('');

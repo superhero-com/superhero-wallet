@@ -106,19 +106,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .tokens {
   @extend %face-sans-16-semi-bold;
 
   display: inline-flex;
   align-items: center;
-  color: rgba(variables.$color-white, 0.75);
+  color: rgba($color-white, 0.75);
   letter-spacing: -2%;
 
   &.bright {
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   .icon {
@@ -147,7 +147,7 @@ export default defineComponent({
       @extend %face-sans-18-medium;
 
       .separator {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
     }
 

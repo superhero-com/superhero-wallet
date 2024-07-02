@@ -22,7 +22,7 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_NETWORK_SWITCHER,
   MODAL_PAYLOAD_FORM,
-  MODAL_READ_QR_CODE,
+  MODAL_SCAN_QR,
   MODAL_RECIPIENT_HELPER,
   MODAL_RECIPIENT_INFO,
   MODAL_RESET_WALLET,
@@ -31,9 +31,12 @@ import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
   MODAL_DAPP_BROWSER_ACTIONS,
+  MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
   MODAL_SECURE_LOGIN,
   MODAL_ENABLE_SECURE_LOGIN,
+  MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+  MODAL_SIGN_AIR_GAP_TRANSACTION,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -54,7 +57,7 @@ import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
-import QrCodeReader from '../components/Modals/QrCodeReader.vue';
+import QrCodeScanner from '../components/Modals/QrCodeScanner.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
 import ResetWallet from '../components/Modals/ResetWalletModal.vue';
@@ -70,6 +73,9 @@ import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
 import SecureLogin from '../components/Modals/SecureLogin.vue';
 import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
+import WalletConnect from '../components/Modals/WalletConnectModal.vue';
+import AirGapImportAccounts from '../components/Modals/AirGapImportAccounts.vue';
+import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -82,6 +88,9 @@ export default () => {
   });
   registerModal(MODAL_ACCOUNT_IMPORT, {
     component: AccountImport,
+  });
+  registerModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS, {
+    component: AirGapImportAccounts,
   });
   registerModal(MODAL_CLAIM_SUCCESS, {
     component: ClaimSuccess,
@@ -128,8 +137,8 @@ export default () => {
     component: MessageSign,
     showInPopupIfWebFrame: true,
   });
-  registerModal(MODAL_READ_QR_CODE, {
-    component: QrCodeReader,
+  registerModal(MODAL_SCAN_QR, {
+    component: QrCodeScanner,
   });
   registerModal(MODAL_TRANSFER_RECEIVE, {
     component: ProtocolSpecificView,
@@ -172,6 +181,9 @@ export default () => {
   registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
     component: BrowserActions,
   });
+  registerModal(MODAL_WALLET_CONNECT, {
+    component: WalletConnect,
+  });
   registerModal(MODAL_WARNING_DAPP_BROWSER, {
     component: WarningDappBrowser,
   });
@@ -180,5 +192,8 @@ export default () => {
   });
   registerModal(MODAL_ENABLE_SECURE_LOGIN, {
     component: EnableSecureLogin,
+  });
+  registerModal(MODAL_SIGN_AIR_GAP_TRANSACTION, {
+    component: SignAirGapTransaction,
   });
 };

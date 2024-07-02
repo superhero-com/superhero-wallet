@@ -26,8 +26,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .payload {
   text-align: left;
@@ -42,7 +42,7 @@ export default {
   .payload-text {
     @extend %face-sans-15-regular;
 
-    color: variables.$color-white;
+    color: $color-white;
     opacity: 0.85;
   }
 }

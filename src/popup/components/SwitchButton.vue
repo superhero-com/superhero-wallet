@@ -36,8 +36,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables.scss';
-@use '../../styles/typography.scss';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .switch-button {
   width: 100%;
@@ -54,7 +54,7 @@ export default {
   }
 
   .label {
-    color: rgba(variables.$color-white, 0.5);
+    color: rgba($color-white, 0.5);
 
     @extend %face-sans-15-medium;
   }
@@ -71,7 +71,7 @@ export default {
       height: 0;
 
       &:checked + .slider {
-        background-color: variables.$color-primary;
+        background-color: $color-primary;
 
         &::before {
           -webkit-transform: translateX(16px);
@@ -88,7 +88,7 @@ export default {
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(variables.$color-white, 0.15);
+      background-color: rgba($color-white, 0.15);
       -webkit-transition: 0.4s;
       transition: 0.4s;
 
@@ -99,7 +99,7 @@ export default {
         width: 16px;
         left: 2px;
         bottom: 2px;
-        background-color: rgba(variables.$color-white, 0.75);
+        background-color: rgba($color-white, 0.75);
         -webkit-transition: 0.4s;
         transition: 0.4s;
       }
@@ -116,11 +116,11 @@ export default {
 
   &.active {
     .label {
-      color: rgba(variables.$color-white, 1);
+      color: rgba($color-white, 1);
     }
 
     .switch .slider::before {
-      background-color: rgba(variables.$color-white, 1);
+      background-color: rgba($color-white, 1);
     }
   }
 }

@@ -42,10 +42,13 @@
 
 <script lang="ts">
 import { ref, defineComponent, PropType } from 'vue';
-import type { RejectCallback, ResolveCallback } from '../../../types';
+import type { RejectCallback, ResolveCallback } from '@/types';
+
 import Modal from '../Modal.vue';
 import FormTextarea from '../form/FormTextarea.vue';
 import BtnMain from '../buttons/BtnMain.vue';
+
+export type PayloadFormResolvedVal = string;
 
 export default defineComponent({
   name: 'PayloadForm',
@@ -55,7 +58,10 @@ export default defineComponent({
     Modal,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    resolve: {
+      type: Function as PropType<ResolveCallback<PayloadFormResolvedVal>>,
+      required: true,
+    },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     payload: { type: String, default: '' },
   },

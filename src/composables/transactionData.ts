@@ -1,12 +1,10 @@
-import { computed, ref } from 'vue';
+import { computed, Ref } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
-import { camelCase } from 'lodash-es';
 import type {
   AccountAddress,
   ITokenResolved,
   ITransaction,
   ObjectValues,
-  TxFunctionParsed,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -25,19 +23,19 @@ import {
   TX_RETURN_TYPE_OK,
   TX_FUNCTIONS,
   TX_FUNCTIONS_MULTISIG,
+  TX_FUNCTIONS_TYPE_DEX,
 } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
   getOwnershipStatus,
+  getTransactionTokenInfoResolver,
   getTxDirection,
+  getTxFunctionParsed,
+  getTxFunctionRaw,
   getTxOwnerAddress,
   getTxTag,
+  isTransactionAex9,
   isTxDex,
-  isTxFunctionDexAddLiquidity,
-  isTxFunctionDexAllowance,
-  isTxFunctionDexRemoveLiquidity,
-  isTxFunctionDexPool,
-  getTransactionTokenInfoResolver,
 } from '@/protocols/aeternity/helpers';
 import { useFungibleTokens } from '@/composables/fungibleTokens';
 import { useAccounts } from './accounts';
@@ -46,8 +44,8 @@ import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions {
-  transaction?: ITransaction;
-  externalAddress?: AccountAddress;
+  transaction: Ref<ITransaction | undefined>;
+  transactionCustomOwner?: Ref<AccountAddress | undefined>;
   showDetailedAllowanceInfo?: boolean;
 }
 
@@ -56,22 +54,22 @@ interface UseTransactionOptions {
  */
 export function useTransactionData({
   transaction,
-  externalAddress,
+  transactionCustomOwner,
   showDetailedAllowanceInfo = false,
-}: UseTransactionOptions = {}) {
+}: UseTransactionOptions) {
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
   const { getProtocolAvailableTokens, getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
 
-  const activeTransaction = ref(transaction);
-  const ownerAddress = ref<AccountAddress | undefined>(externalAddress);
-
-  const outerTx = computed(() => activeTransaction.value?.tx);
+  const protocol = computed(() => transaction.value?.protocol || PROTOCOLS.aeternity);
+  const outerTx = computed(() => transaction.value?.tx);
   const innerTx = computed(() => outerTx.value ? getInnerTransaction(outerTx.value) : undefined);
   const outerTxTag = computed(() => outerTx.value ? getTxTag(outerTx.value) : null);
   const innerTxTag = computed(() => innerTx.value ? getTxTag(innerTx.value) : null);
   const txType = computed(() => outerTxTag.value ? Tag[outerTxTag.value] as TxType : null);
+  const txFunctionParsed = computed(() => getTxFunctionParsed(innerTx.value?.function));
+  const txFunctionRaw = computed(() => getTxFunctionRaw(innerTx.value?.function));
 
   /**
    * Transaction TX type value converted into human readable label
@@ -105,20 +103,27 @@ export function useTransactionData({
 
   const isDexAllowance = computed((): boolean => (
     !!innerTx.value
-    && isTxFunctionDexAllowance(innerTx.value?.function)
+    && includes(TX_FUNCTIONS_TYPE_DEX.allowance, txFunctionRaw.value)
     && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
   ));
 
-  const isDexAddLiquidity = computed(
-    (): boolean => isTxFunctionDexAddLiquidity(innerTx.value?.function),
+  const isDexLiquidityAdd = computed(
+    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunctionRaw.value),
   );
-
-  const isDexRemoveLiquidity = computed(
-    (): boolean => isTxFunctionDexRemoveLiquidity(innerTx.value?.function),
+  const isDexLiquidityRemove = computed(
+    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunctionRaw.value),
   );
-
   const isDexPool = computed(
-    (): boolean => isTxFunctionDexPool(innerTx.value?.function),
+    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunctionRaw.value),
+  );
+  const isDexSwap = computed(
+    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunctionRaw.value),
+  );
+  const isDexMaxSpent = computed(
+    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunctionRaw.value),
+  );
+  const isDexMinReceived = computed(
+    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunctionRaw.value),
   );
 
   const isMultisig = computed((): boolean => (
@@ -128,6 +133,10 @@ export function useTransactionData({
       || !!outerTx.value.payerId
     )
   ));
+
+  const isAex9 = computed(
+    () => transaction.value && isTransactionAex9(transaction.value),
+  );
 
   const isTip = computed((): boolean => !!(
     innerTx.value?.contractId
@@ -162,7 +171,8 @@ export function useTransactionData({
       ? TX_DIRECTION.received
       : getTxDirection(
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
-        externalAddress
+        transactionCustomOwner?.value
+        || transaction.value?.transactionOwner
         || (
           ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
@@ -172,31 +182,36 @@ export function useTransactionData({
   );
 
   /**
+   * Amount and fee calculated based on the direction.
+   */
+  const amountTotal = computed(
+    (): number => (transaction.value) ? getTxAmountTotal(transaction.value, direction.value) : 0,
+  );
+
+  /**
    * List of assets used within the transaction.
    * Contains more than one item if the transaction is for example a swapping event.
    */
   const transactionAssets = computed((): ITokenResolved[] => {
-    if (!activeTransaction.value?.tx) {
+    if (!transaction.value?.tx) {
       return [];
     }
 
     let convertToCoin = false;
 
-    const { protocol = PROTOCOLS.aeternity } = activeTransaction.value;
-    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
-    const protocolTokens = getProtocolAvailableTokens(protocol);
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol.value);
+    const protocolTokens = getProtocolAvailableTokens(protocol.value);
 
     // TODO move AE specific logic to adapter and store resolved data in the transactions
-    if (protocol === PROTOCOLS.aeternity) {
+    if (protocol.value === PROTOCOLS.aeternity) {
       // AE DEX and wrapped AE (WAE)
       if (
-        innerTx.value?.function
+        isDex.value
+        && txFunctionParsed.value
         && (!isDexAllowance.value || showDetailedAllowanceInfo)
       ) {
-        const functionName = camelCase(innerTx.value.function) as TxFunctionParsed;
-        const functionResolver = getTransactionTokenInfoResolver(functionName);
-
-        if (functionResolver && isDex.value) {
+        const functionResolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
+        if (functionResolver) {
           return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens)
             .tokens
             .map(({
@@ -218,8 +233,8 @@ export function useTransactionData({
     }
 
     const amount = (isDexAllowance.value)
-      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision).toString()
-      : getTxAmountTotal(activeTransaction.value, direction.value);
+      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision).toNumber()
+      : amountTotal.value;
     const isReceived = direction.value === TX_DIRECTION.received;
 
     if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value || convertToCoin) {
@@ -243,17 +258,9 @@ export function useTransactionData({
       isReceived,
       name: token?.name,
       protocol,
-      symbol: getTxAssetSymbol(activeTransaction.value),
+      symbol: getTxAssetSymbol(transaction.value),
     }];
   });
-
-  function setActiveTransaction(newTransaction: ITransaction) {
-    activeTransaction.value = newTransaction;
-  }
-
-  function setExternalAddress(address: AccountAddress) {
-    ownerAddress.value = address;
-  }
 
   function getOwnershipAddress(externalOwnerAddress?: AccountAddress): AccountAddress {
     const { current, subAccount } = AE_TRANSACTION_OWNERSHIP_STATUS;
@@ -272,25 +279,30 @@ export function useTransactionData({
   }
 
   return {
+    amountTotal,
     outerTxTag,
     innerTxTag,
     innerTx,
     txTypeLabel,
     txTypeListLabel,
     txFunctionLabel,
+    txFunctionParsed,
+    txFunctionRaw,
+    isAex9,
     isErrorTransaction,
     isDex,
-    isDexAddLiquidity,
     isDexAllowance,
+    isDexLiquidityAdd,
+    isDexLiquidityRemove,
+    isDexMaxSpent,
+    isDexMinReceived,
     isDexPool,
-    isDexRemoveLiquidity,
+    isDexSwap,
     isMultisig,
     isTip,
     isTransactionCoin,
     direction,
     transactionAssets,
     getOwnershipAddress,
-    setActiveTransaction,
-    setExternalAddress,
   };
 }

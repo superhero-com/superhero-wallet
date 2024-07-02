@@ -39,8 +39,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables.scss';
-@use '../../styles/mixins.scss';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .radio-button {
   @include mixins.flex(flex-start, center);
@@ -63,7 +63,7 @@ export default defineComponent({
   .radio-dot {
     position: relative;
     border-radius: 50%;
-    border: 1px solid rgba(variables.$color-white, 0.5);
+    border: 1px solid rgba($color-white, 0.5);
     width: 20px;
     height: 20px;
     background: var(--screen-bg-color);
@@ -79,7 +79,7 @@ export default defineComponent({
       height: 0;
       top: 50%;
       left: 50%;
-      background: variables.$color-primary;
+      background: $color-primary;
       transition: all 0.15s ease-in-out;
       transform: translate(-50%, -50%);
     }

@@ -32,13 +32,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/typography';
-@use '../../../styles/variables';
+@use '@/styles/typography';
+@use '@/styles/variables' as *;
 
 .btn-text {
   @extend %face-sans-14-medium;
 
-  color: variables.$color-primary;
+  color: $color-primary;
   display: flex;
   align-items: center;
   padding: 2px 4px 2px 0;
@@ -48,7 +48,7 @@ export default defineComponent({
 
   &:hover:not([disabled]) {
     border-radius: 8px;
-    background: rgba(variables.$color-primary, 0.15);
+    background: rgba($color-primary, 0.15);
   }
 
   &.has-icon {

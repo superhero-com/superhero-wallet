@@ -268,8 +268,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .retip {
   padding: 16px;
@@ -284,7 +284,7 @@ export default defineComponent({
       margin-bottom: 2px;
       overflow-wrap: anywhere;
       line-height: 1.4em;
-      color: variables.$color-white;
+      color: $color-white;
       text-decoration: none;
     }
   }

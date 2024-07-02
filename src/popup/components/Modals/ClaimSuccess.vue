@@ -58,11 +58,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '@/styles/variables' as *;
 
 .claim-success-modal {
   .claimed {
-    color: variables.$color-primary;
+    color: $color-primary;
   }
 
   .top-icon-wrapper {

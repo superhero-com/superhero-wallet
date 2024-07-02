@@ -102,6 +102,7 @@ import {
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
   PROTOCOLS,
+  ACCOUNT_TYPES,
 } from '@/constants';
 import {
   useAccounts,
@@ -151,6 +152,7 @@ export default defineComponent({
       addRawAccount({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
+        type: ACCOUNT_TYPES.hdWallet,
       });
       router.push(loginTargetLocation.value);
       openEnableSecureLoginModal();
@@ -195,9 +197,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .index {
   --padding-top: 44px;
@@ -225,12 +227,12 @@ export default defineComponent({
     .terms-of-use {
       @extend %face-sans-15-regular;
 
-      color: rgba(variables.$color-white, 0.75);
+      color: rgba($color-white, 0.75);
       text-decoration: none;
       margin-left: 4px;
 
       &:hover {
-        color: variables.$color-white;
+        color: $color-white;
         text-decoration: underline;
       }
 
@@ -258,20 +260,20 @@ export default defineComponent({
       @include mixins.flex(center);
 
       line-height: 125%;
-      color: variables.$color-white;
+      color: $color-white;
       margin: 4px 60px 24px;
 
       .tag {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
 
         .receive,
         .store,
         .send {
-          color: variables.$color-white;
+          color: $color-white;
         }
 
         .aeternity-name {
-          color: variables.$color-secondary;
+          color: $color-secondary;
         }
       }
     }
@@ -279,7 +281,7 @@ export default defineComponent({
     &.mobile {
       @extend %face-sans-20-regular;
 
-      color: variables.$color-white;
+      color: $color-white;
       max-width: 80%;
       margin: 0 auto;
       min-height: 25vh;
@@ -296,7 +298,7 @@ export default defineComponent({
     .spinner {
       width: 256px;
       height: 256px;
-      color: variables.$color-primary;
+      color: $color-primary;
     }
 
     .platforms {

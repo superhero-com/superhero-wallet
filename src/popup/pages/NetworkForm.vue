@@ -303,7 +303,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/mixins';
 @use '@/styles/typography';
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 
 .network-form {
   margin: 16px var(--screen-padding-x);

@@ -32,7 +32,7 @@ export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSett
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: AE_NETWORK_MAINNET_NODE_URL,
     middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-    backendUrl: 'https://superhero-backend-mainnet.prd.service.aepps.com',
+    backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: AE_NETWORK_TESTNET_NODE_URL,
@@ -69,6 +69,8 @@ export const AE_AENS_DOMAIN = '.chain';
 export const AE_AENS_NAME_MAX_LENGTH = 63 + AE_AENS_DOMAIN.length;
 export const AE_AENS_NAME_AUCTION_MAX_LENGTH = 12 + AE_AENS_DOMAIN.length;
 export const AE_AENS_BID_MIN_RATIO = 1.05;
+
+export const AE_GET_META_TX_FEE = 1e14;
 
 /**
  * Estimated time we need to wait for the middleware to sync it's state
@@ -132,6 +134,7 @@ export const TX_FUNCTIONS = {
 
 /**
  * ITx.function
+ * TODO: Check if all these values should exist in `TX_FUNCTIONS`
  */
 export const TX_FUNCTIONS_MULTISIG = {
   propose: 'propose',
@@ -140,6 +143,9 @@ export const TX_FUNCTIONS_MULTISIG = {
   revoke: 'revoke',
 } as const;
 
+/**
+ * TxFunctions grouped by their types
+ */
 export const TX_FUNCTIONS_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
   pool: [
     'remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae',
@@ -227,33 +233,6 @@ export const DEX_CONTRACTS: Record<string, IDexContracts> = {
     ],
   },
 };
-
-export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
-export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
-export const DEX_SWAP = 'swap';
-export const DEX_ALLOW_TOKEN = 'allow_token';
-
-export const DEX_TRANSACTION_TAGS: Partial<Record<TxFunctionRaw, string>> = {
-  add_liquidity: DEX_PROVIDE_LIQUIDITY,
-  add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,
-
-  remove_liquidity: DEX_REMOVE_LIQUIDITY,
-  remove_liquidity_ae: DEX_REMOVE_LIQUIDITY,
-
-  swap_exact_tokens_for_tokens: DEX_SWAP,
-  swap_exact_ae_for_tokens: DEX_SWAP,
-  swap_tokens_for_exact_tokens: DEX_SWAP,
-  swap_tokens_for_exact_ae: DEX_SWAP,
-  swap_exact_tokens_for_ae: DEX_SWAP,
-  swap_ae_for_exact_tokens: DEX_SWAP,
-
-  create_allowance: DEX_ALLOW_TOKEN,
-  change_allowance: DEX_ALLOW_TOKEN,
-  transfer_allowance: DEX_ALLOW_TOKEN,
-
-  deposit: DEX_SWAP,
-  withdraw: DEX_SWAP,
-} as const;
 
 export const AEX9_TRANSFER_EVENT = 'Aex9TransferEvent';
 

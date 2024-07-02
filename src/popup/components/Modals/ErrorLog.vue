@@ -78,10 +78,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '@/styles/variables' as *;
 
 .error-msg {
-  color: variables.$color-danger;
+  color: $color-danger;
   margin-bottom: 30px;
 }
 

@@ -146,23 +146,23 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .modal {
   --screen-padding-x: 24px; // Default spacing
-  --screen-bg-color: #{variables.$color-bg-modal};
+  --screen-bg-color: #{$color-bg-modal};
   --footer-padding-bottom: 36px;
 
   position: fixed;
-  z-index: variables.$z-index-modal;
+  z-index: $z-index-modal;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  min-width: variables.$extension-width;
-  background-color: rgba(variables.$color-black, 0.7);
+  min-width: $extension-width;
+  background-color: rgba($color-black, 0.7);
   display: flex;
   will-change: backdrop-filter;
 
@@ -173,19 +173,19 @@ export default defineComponent({
     width: 92%;
     margin: auto;
     background-color: var(--screen-bg-color);
-    border-radius: variables.$border-radius-modal;
+    border-radius: $border-radius-modal;
     box-shadow:
-      0 0 0 1px variables.$color-border,
-      2px 4px 12px rgba(variables.$color-black, 0.22);
+      0 0 0 1px $color-border,
+      2px 4px 12px rgba($color-black, 0.22);
 
     @include mixins.desktop {
-      width: calc(#{variables.$extension-width} - 32px);
+      width: calc(#{$extension-width} - 32px);
     }
 
     .header {
       flex-basis: 32px;
       flex-shrink: 0;
-      color: variables.$color-white;
+      color: $color-white;
       font-size: 19px;
       line-height: 24px;
       font-weight: 500;
@@ -213,7 +213,7 @@ export default defineComponent({
       display: flex;
       flex-direction: column;
       padding: var(--screen-padding-x);
-      color: variables.$color-grey-light;
+      color: $color-grey-light;
       word-break: break-word;
 
       &.without-padding-bottom {

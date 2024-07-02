@@ -18,6 +18,7 @@ import {
   PROTOCOLS,
   STORAGE_KEYS,
   NOTIFICATION_TYPES,
+  ACCOUNT_TYPES,
 } from '@/constants';
 import migrateNotificationsSettingsVuexToComposable from '@/migrations/007-notifications-settings-vuex-to-composable';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
@@ -91,7 +92,10 @@ export function useNotifications({
 
   async function fetchAllNotifications(): Promise<INotification[]> {
     // TODO: Remove this condition once global filter is ready
-    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
+    if (
+      activeAccount.value.protocol !== PROTOCOLS.aeternity
+      || activeAccount.value.type !== ACCOUNT_TYPES.hdWallet
+    ) {
       return [];
     }
 

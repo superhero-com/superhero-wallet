@@ -54,20 +54,22 @@
     </div>
 
     <template #footer>
-      <BtnMain
-        variant="muted"
-        :text="$t('common.cancel')"
-        @click="closeModal"
-      />
-      <BtnMain
-        v-if="activeMultisigAccount"
-        :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger' : 'primary'"
-        data-cy="to-confirm"
-        extra-padded
-        :disabled="!!actionHasError"
-        :text="$rt(confirmActionContent.btnText)"
-        @click="resolve(chosenAccountAddress)"
-      />
+      <div class="footer">
+        <BtnMain
+          variant="muted"
+          :text="$t('common.cancel')"
+          @click="closeModal"
+        />
+        <BtnMain
+          v-if="activeMultisigAccount"
+          :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger' : 'primary'"
+          data-cy="to-confirm"
+          extra-padded
+          :disabled="!!actionHasError"
+          :text="$rt(confirmActionContent.btnText)"
+          @click="resolve(chosenAccountAddress)"
+        />
+      </div>
     </template>
   </Modal>
 </template>
@@ -86,18 +88,21 @@ import type {
   RejectCallback,
   ResolveCallback,
   StatusIconType,
+  AccountAddress,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import { prepareAccountSelectOptions } from '@/utils';
 import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
-import { PROTOCOLS } from '@/constants';
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountItem from '../AccountItem.vue';
 import StatusIcon from '../StatusIcon.vue';
 import IconBoxed from '../IconBoxed.vue';
+
+export type MultisigProposalConfirmActionVal = AccountAddress;
 
 export default defineComponent({
   components: {
@@ -111,7 +116,10 @@ export default defineComponent({
   props: {
     signers: { type: Array as PropType<string[]>, required: true },
     action: { type: String as PropType<TxFunctionMultisig>, required: true },
-    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    resolve: {
+      type: Function as PropType<ResolveCallback<MultisigProposalConfirmActionVal>>,
+      required: true,
+    },
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
@@ -124,7 +132,9 @@ export default defineComponent({
       pendingMultisigTxLocalSigners,
     } = usePendingMultisigTransaction();
 
-    const chosenAccountAddress = ref(pendingMultisigTxLocalSigners.value[0].address);
+    const chosenAccountAddress = ref<AccountAddress>(
+      pendingMultisigTxLocalSigners.value[0].address,
+    );
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),
@@ -188,9 +198,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .confirm {
   text-align: center;
@@ -222,14 +232,14 @@ export default defineComponent({
     margin: 10px 0;
     padding: 8px 12px;
     border-radius: 4px;
-    color: rgba(variables.$color-danger, 0.75);
+    color: rgba($color-danger, 0.75);
     line-height: 19px;
   }
 
   .msg {
     @extend %face-sans-15-regular;
 
-    color: rgba(variables.$color-white, 0.85);
+    color: rgba($color-white, 0.85);
     padding: 0 18px;
   }
 
@@ -240,9 +250,18 @@ export default defineComponent({
       margin: 8px;
 
       &.refuse {
-        color: variables.$color-warning;
+        color: $color-warning;
       }
     }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding-bottom: 24px;
+    padding-inline: 24px;
   }
 }
 </style>

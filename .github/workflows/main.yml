@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_NAME: wallet
+      WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,6 +70,7 @@ jobs:
           REMOTE_USER: root
           REMOTE_PORT: 2022
           TARGET: ${{ format('/data/{0}/{1}', env.APP_NAME, env.GITHUB_REF_SLUG_URL) }}
+
       - uses: unsplash/comment-on-pr@a9bf050e744c8282dee4bb0dbcf063186d8316c4
         if: github.event_name == 'pull_request'
         env:

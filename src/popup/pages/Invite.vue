@@ -16,7 +16,7 @@
           {{ $t('pages.invite.generate-link') }}
         </p>
         <Field
-          v-slot="{ field, errorMessage }"
+          v-slot="{ field, errorMessage, resetField }"
           v-model="formModel.amount"
           name="amount"
           :rules="{
@@ -43,7 +43,7 @@
             :icon="PlusCircleFillIcon"
             :disabled="!formModel.amount || !!errorMessage"
             data-cy="invite-generate"
-            @click="generate"
+            @click="generate(resetField)"
           >
             {{ $t('pages.invite.generate') }}
           </BtnMain>
@@ -121,7 +121,7 @@ export default defineComponent({
 
     const { max, fee } = useMaxAmount({ formModel });
 
-    async function generate() {
+    async function generate(resetField: () => void) {
       setLoaderVisible(true);
       const { publicKey, secretKey } = generateKeyPair();
 
@@ -143,7 +143,8 @@ export default defineComponent({
       }
 
       addInvite(Buffer.from(secretKey, 'hex').slice(0, 32));
-      formModel.value.amount = '';
+      // Field is dirty after submit, so we need to reset it and not just clear the value
+      resetField();
     }
 
     return {
@@ -163,7 +164,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .invite-page {
   padding-inline: var(--screen-padding-x);
@@ -175,14 +176,14 @@ export default defineComponent({
     margin: 36px 0 16px;
     font-size: 16px;
     text-align: left;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     font-weight: 500;
 
     &-icon {
       width: 20px;
       height: 20px;
       margin-right: 4px;
-      color: variables.$color-white;
+      color: $color-white;
       opacity: 0.5;
     }
   }

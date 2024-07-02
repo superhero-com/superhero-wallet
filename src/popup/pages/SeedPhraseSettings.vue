@@ -52,14 +52,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .seed-phrase-settings {
   padding-inline: var(--screen-padding-x);
 
   .white-text {
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   .button {

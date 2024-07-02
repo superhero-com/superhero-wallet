@@ -103,9 +103,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .platforms {
   @extend %face-sans-15-regular;
@@ -138,7 +138,7 @@ export default {
     @include mixins.flex(center, center);
 
     text-align: center;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
   }
 
   .web-icons {
@@ -147,7 +147,7 @@ export default {
     }
 
     &:first-child {
-      border-right: 1px solid rgba(variables.$color-white, 0.2);
+      border-right: 1px solid rgba($color-white, 0.2);
     }
 
     .web-icons-platforms {

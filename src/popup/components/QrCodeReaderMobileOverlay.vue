@@ -45,7 +45,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .qr-code-reader-mobile-overlay {
   height: 100%;

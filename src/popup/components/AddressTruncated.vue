@@ -3,6 +3,7 @@
     <ProtocolIcon
       v-if="showProtocolIcon"
       :protocol="protocol"
+      icon-size="rg"
       class="protocol-icon"
     />
     <div class="address-truncated-chunks">
@@ -69,7 +70,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/typography';
+@use '@/styles/typography';
 
 .address-truncated {
   display: flex;

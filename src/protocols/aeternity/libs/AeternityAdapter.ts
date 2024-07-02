@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { uniqBy } from 'lodash-es';
 import {
+  decode,
   encode,
   Encoded,
   Encoding,
@@ -16,6 +17,8 @@ import type {
   AdapterNetworkSettingList,
   AssetAmount,
   AssetContractId,
+  IAccount,
+  IAccountRaw,
   IAmountDecimalPlaces,
   ICoin,
   IFetchTransactionResult,
@@ -31,7 +34,7 @@ import type {
 } from '@/types';
 import JsonBig from '@/lib/json-big';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
-import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -193,6 +196,26 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       secretKey: Buffer.from(account.secretKey, 'hex'),
       address: account.publicKey,
     };
+  }
+
+  override resolveAccountRaw(
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array,
+  ): IAccount {
+    const wallet = rawAccount.type === ACCOUNT_TYPES.hdWallet
+      ? this.getHdWalletAccountFromMnemonicSeed(seed, idx)
+      : {
+        publicKey: Buffer.from(decode(rawAccount.address as Encoded.AccountAddress)),
+      };
+
+    return {
+      globalIdx,
+      idx,
+      ...rawAccount,
+      ...wallet,
+    } as IAccount;
   }
 
   /**

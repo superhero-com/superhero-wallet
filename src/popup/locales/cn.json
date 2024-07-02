@@ -175,7 +175,6 @@
     },
     "about": {
       "heading": "关于",
-      "systemName": "超级英雄",
       "terms": "使用条款",
       "privacyPolicy": "隐私政策",
       "reportBug": "报告bug"
@@ -225,23 +224,6 @@
       "backToSettings": "设置",
       "exportKeypair": "导出keypair",
       "exportKeystore": "到处keystore"
-    },
-    "airGapSetup": {
-      "heading": "AirGap设置",
-      "step1heading": "在手机是安装AirGap",
-      "step1info": "在商店搜索AirGapor或扫描这个二维码",
-      "step1buttonNext": "下一步",
-      "setupSteps1heading": "在第二个设备上打开AirGap",
-      "setupSteps2heading": "创建秘钥",
-      "setupSteps3heading": "以正确的顺序写下来",
-      "setupSteps4heading": "添加一个aeternity钱包",
-      "setupSteps5heading": "连接你的aeternity钱包",
-      "setupSteps1": "为了安全起见,在打开AirGap前请断开网络连接",
-      "setupSteps2": "没有网络连接对于秘钥来说是最高的安全性",
-      "setupSteps3": "在恢复的时候你需要用到它",
-      "setupSteps4": "点击钱包，添加钱包，并选择aeternity",
-      "setupSteps5": "将你的保险库连接到aeternity地址以结束",
-      "linkVault": "连接Vault"
     },
     "auctionBid": {
       "backToAuctions": "返回拍卖",
