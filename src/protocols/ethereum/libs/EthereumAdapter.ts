@@ -408,7 +408,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         transactionOwner ?? transaction.from,
         transaction.blockNumber,
       );
-      return tokenTx;
+
+      if (tokenTx) {
+        return tokenTx;
+      }
     }
 
     const block = transaction?.blockHash
