@@ -2,6 +2,82 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.7](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.6...v2.2.7) (2024-07-02)
+
+
+### Features
+
+* add function name to transaction details ([749219d](https://github.com/Superhero-com/superhero-wallet/commit/749219df684adc7409900615e4fec5bf35e7de00))
+* add gas information to transaction details ([986cc0e](https://github.com/Superhero-com/superhero-wallet/commit/986cc0e0c917c8f664727f426ed743651440dc8b))
+* airgap accounts can only send to address ([b4f27bf](https://github.com/Superhero-com/superhero-wallet/commit/b4f27bf473aa91a1b45eaf7270d63e15eb3dbc4f))
+* **airgap:** account import ui improvements ([ab311b4](https://github.com/Superhero-com/superhero-wallet/commit/ab311b4eeaab631d02f43585aecd8dba64036162))
+* **airgap:** implement no qr flow & new design ([67c2636](https://github.com/Superhero-com/superhero-wallet/commit/67c26363ac72e1f3b574a94570c6b204892ccdbc))
+* **airgap:** send transaction flow ([33680e0](https://github.com/Superhero-com/superhero-wallet/commit/33680e0ae151f36f5a657f67ad9634a9995a5351))
+* **airgap:** sign transactions ([95e067f](https://github.com/Superhero-com/superhero-wallet/commit/95e067f912cb02bb77f2d76ec271357743373ec5))
+* **airgap:** update styling of input error and warning messages ([a460c1c](https://github.com/Superhero-com/superhero-wallet/commit/a460c1cd689acc8484cf7338a568ade6524622ab))
+* eth chain id numeric instead of hex ([07cb2e1](https://github.com/Superhero-com/superhero-wallet/commit/07cb2e1d8d5bb9b0bbc22dbe53863ebf9fe900d7))
+* eth wallet connect dapps support ([d16dffa](https://github.com/Superhero-com/superhero-wallet/commit/d16dffa9fc7636f805a2d35e44942241cf9822ec))
+* modal open return type ([58f0624](https://github.com/Superhero-com/superhero-wallet/commit/58f06248e4c9d872b99fab482c39998b452e2197))
+* show error modal when airGap account tries to signMessage ([de6b03b](https://github.com/Superhero-com/superhero-wallet/commit/de6b03bd411a4ecd7c46f036bbf1b7e3582fc10d))
+* the ability to connect qr based hardware wallet ([d32fa56](https://github.com/Superhero-com/superhero-wallet/commit/d32fa56dad5cf3339a7196f516d76364f9afd9f6))
+* wallet connect extension open tx confirm modal ([b00ec2a](https://github.com/Superhero-com/superhero-wallet/commit/b00ec2aac6e290dfad69e1f237051e43ab6e7912))
+* walletConnect transaction sign modal alignments ([20b1854](https://github.com/Superhero-com/superhero-wallet/commit/20b1854b6fef3d8802e134c80a7c0ed48a46c4c0))
+
+
+### Bug Fixes
+
+* airgap extension issues ([ebbdca3](https://github.com/Superhero-com/superhero-wallet/commit/ebbdca3d989043c68bcd34c693b66cb7937e3ec6))
+* alignment on AccountInfo ([001b00e](https://github.com/Superhero-com/superhero-wallet/commit/001b00e6f6568f3d66134249fa9c1ffcc7631cdf))
+* cache currency rates ([d8ee2ed](https://github.com/Superhero-com/superhero-wallet/commit/d8ee2edd7fa597cb9d68395d3955193755be2a91))
+* camera permission request on ff ([f13487a](https://github.com/Superhero-com/superhero-wallet/commit/f13487a34ab0733d1f40ace2fd12599e662aa37f))
+* copy multifragment qr code ([cd3ce29](https://github.com/Superhero-com/superhero-wallet/commit/cd3ce2909544b34c1ae2ed7483a24a50f6ce6755))
+* custom networks are testnet type ([1a377d5](https://github.com/Superhero-com/superhero-wallet/commit/1a377d5f715243836e1ebf3dec7ea4cc3db5ad9e))
+* do not overload node with dry-runs ([af537dc](https://github.com/Superhero-com/superhero-wallet/commit/af537dce78feb72f776c8c7a4969471f8650a70a))
+* do not show symbol for gasUsed ([227fa42](https://github.com/Superhero-com/superhero-wallet/commit/227fa42744e77c9cf94bedb916458ec8fb09e763))
+* **fungible-token:** be able to send big amount ([55b8053](https://github.com/Superhero-com/superhero-wallet/commit/55b805371daa48583ca0574c8be83b486ce152a3))
+* improve input error message & throttle balance updating ([2687b0e](https://github.com/Superhero-com/superhero-wallet/commit/2687b0e49e0c767a73f725d1f4dc5c16562cf099))
+* long names extend beyond container ([6536a70](https://github.com/Superhero-com/superhero-wallet/commit/6536a701fd233fa4840754f54ef776d3b4fa43ec))
+* multipart qr code progress bar ([6e8ed40](https://github.com/Superhero-com/superhero-wallet/commit/6e8ed40318f8886c1ccf3a6ff3869e06c8f6ead3))
+* remove window browser polyfill from ext background ([0181251](https://github.com/Superhero-com/superhero-wallet/commit/0181251ed50efcd1d1824d613b2cfad53c3f6f25))
+* reset input after generating gift card ([b69cb4a](https://github.com/Superhero-com/superhero-wallet/commit/b69cb4a7848dabb68e74791012efe22d316cc78d))
+* resolve several manifest issues ([b64911f](https://github.com/Superhero-com/superhero-wallet/commit/b64911fdf70dc713e903672592bb6bffb910a731))
+* scan qr code translation ([bcbc48f](https://github.com/Superhero-com/superhero-wallet/commit/bcbc48fce42b3f0588472b152978c979b76a0212))
+* show correct fee in the multisig proposal details ([e1ff7e1](https://github.com/Superhero-com/superhero-wallet/commit/e1ff7e17dd5f488f96ff8ddac65945aed1be0e83))
+* show correct prepared transaction info ([227e4a4](https://github.com/Superhero-com/superhero-wallet/commit/227e4a44a22f18c5d49ba455253da2e5e188e343))
+* show gasCost if exists ([6c7ae0a](https://github.com/Superhero-com/superhero-wallet/commit/6c7ae0a24157a5e834ce242d7818b8578f854699))
+* skip decimals calculation in transaction list item ([1f07a66](https://github.com/Superhero-com/superhero-wallet/commit/1f07a668c760bdb6fa974b34f334f73a179a8938))
+* update qr code when value changes ([edc16a4](https://github.com/Superhero-com/superhero-wallet/commit/edc16a4d972e1d785926e94cb5d15866f62298ea))
+* wallet connect confirm transaction fee calculation ([e6dc658](https://github.com/Superhero-com/superhero-wallet/commit/e6dc658a72d097c965c6663d765abad6a753fe05))
+* **wallet-connect:** be able to send transaction ([4de167c](https://github.com/Superhero-com/superhero-wallet/commit/4de167cef1fd86d1244191ab5f9f8d643b25b7aa))
+* weth transaction details ([f8d12cd](https://github.com/Superhero-com/superhero-wallet/commit/f8d12cd8fdcdae0092e2089aba2fa465c4242b5a))
+
+
+### Tests
+
+* update snapshots ([f2ae462](https://github.com/Superhero-com/superhero-wallet/commit/f2ae46263473087ed0f758c173cab1a14b7ae6d5))
+
+
+### Maintenance
+
+* apps browser types and composables update ([80fd11a](https://github.com/Superhero-com/superhero-wallet/commit/80fd11a49b50c788bab5a93f627d14fda8724cf5))
+* change backend url ([66acf44](https://github.com/Superhero-com/superhero-wallet/commit/66acf441ae90058fed20f8c0c731c344b1e68192))
+* css imports ([38ecb52](https://github.com/Superhero-com/superhero-wallet/commit/38ecb52162d62b259c8b65cd727002f6ad7273ca))
+* issues after rebase ([97269e6](https://github.com/Superhero-com/superhero-wallet/commit/97269e6b1d0cdda6a2725eb23cf75dbc01f2f29a))
+* **multisig:** remove wrong hash info ([6b440c7](https://github.com/Superhero-com/superhero-wallet/commit/6b440c713ccf00cb0a5696577e9f7431adfe223c))
+* restructure airgap integration ([becb6de](https://github.com/Superhero-com/superhero-wallet/commit/becb6de1f8612113b23259c43d4d94bd83e49ceb))
+* run npm update ([1029ada](https://github.com/Superhero-com/superhero-wallet/commit/1029adafcd80633f5f53e2c41dde0e3f863f1955))
+* transaction data composable arguments as refs ([b973c34](https://github.com/Superhero-com/superhero-wallet/commit/b973c34d8d893d101cd83521f0b55b62f51174e2))
+* transaction overview remove unused props ([f8edee5](https://github.com/Superhero-com/superhero-wallet/commit/f8edee5e3ac56ac48066e5d7e5494a9d6320e65c))
+* update sdk to 13.3.2 ([fdd7895](https://github.com/Superhero-com/superhero-wallet/commit/fdd789500ef9fa1e7e53e1949682c69ebef5aae9))
+* use Superhero Wallet as app name ([70a471a](https://github.com/Superhero-com/superhero-wallet/commit/70a471a1cc380dcd33a294ccdc5e045fae8ce6df))
+
+
+### Performance
+
+* debounce max amount calculation ([6aaeee4](https://github.com/Superhero-com/superhero-wallet/commit/6aaeee405f54ff91320965ad16cc24d418fe798c))
+* **multisig:** do not reinitialize contract instances ([deaa5d0](https://github.com/Superhero-com/superhero-wallet/commit/deaa5d02d83756c8287c3e6ab77ad562a8135686))
+* **multisig:** poll current network vaults info ([260a033](https://github.com/Superhero-com/superhero-wallet/commit/260a033628c508a5dd52dec7a3d3b2cdcbcb1aef))
+
 ### [2.2.6](https://github.com/superhero-com/superhero-wallet/compare/v2.2.5...v2.2.6) (2024-05-27)
 
 
