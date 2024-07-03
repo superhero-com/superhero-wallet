@@ -93,8 +93,7 @@ export function usePendingMultisigTransaction() {
    * Verify if the current proposal has been revoked.
    */
   const pendingMultisigTxRevoked = computed((): boolean => (
-    (pendingMultisigTxSigners.value.length - pendingMultisigTxRefusedBy.value.length)
-    < pendingMultisigTxRequiredConfirmations.value
+    pendingMultisigTxRequiredConfirmations.value === pendingMultisigTxRefusedBy.value.length
   ));
 
   /**
@@ -102,7 +101,8 @@ export function usePendingMultisigTransaction() {
    */
   const pendingMultisigTxProposingAccountRevoked = computed((): boolean => (
     !!activeMultisigAccount.value?.proposedBy
-    && pendingMultisigTxRefusedBy.value.includes(activeMultisigAccount.value.proposedBy)
+    && pendingMultisigTxRevoked.value
+    && activeMultisigTransactionData.value?.tx?.callerId === activeMultisigAccount.value.proposedBy
   ));
 
   /**
