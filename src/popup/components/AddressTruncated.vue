@@ -3,7 +3,6 @@
     <ProtocolIcon
       v-if="showProtocolIcon"
       :protocol="protocol"
-      icon-size="rg"
       class="protocol-icon"
     />
     <div class="address-truncated-chunks">
