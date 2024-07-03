@@ -72,6 +72,9 @@ import {
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '@/popup/router/routeNames';
+
+import { type BrowserActionsResolvedVal } from '@/popup/components/Modals/BrowserActions.vue';
+
 import AccountSelector from '@/popup/components/AccountSelector.vue';
 import Truncate from '@/popup/components/Truncate.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
@@ -134,7 +137,7 @@ export default defineComponent({
     async function openActions() {
       // eslint-disable-next-line no-useless-catch
       try {
-        const value = await openModal(
+        const value = await openModal<BrowserActionsResolvedVal>(
           MODAL_DAPP_BROWSER_ACTIONS,
           {
             iframe: props.iframe,
@@ -169,7 +172,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
 
@@ -181,7 +184,7 @@ export default defineComponent({
   align-items: center;
   justify-content: space-between;
   top: 0;
-  z-index: variables.$z-index-header;
+  z-index: $z-index-header;
   height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
   padding: env(safe-area-inset-top) 8px 0 8px;
@@ -223,7 +226,7 @@ export default defineComponent({
       justify-content: center;
       white-space: nowrap;
       line-height: 24px;
-      color: variables.$color-white;
+      color: $color-white;
     }
 
     .host {
@@ -232,7 +235,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       gap: 2px;
-      color: variables.$color-white;
+      color: $color-white;
 
       .secure-lock {
         height: 17px;

@@ -1,11 +1,16 @@
 <template>
   <div
     class="avatar"
-    :class="[size, {
-      borderless,
-      placeholder: isPlaceholder,
-    }]"
-    :style="{ '--color': color }"
+    :class="[
+      size,
+      (variant) ? `variant-${variant}` : null,
+      {
+        borderless,
+        placeholder: isPlaceholder,
+      },
+    ]"
+    :title="name"
+    :style="{ '--color': calculatedColor }"
   >
     <slot>
       <img
@@ -23,6 +28,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  PropType,
   ref,
 } from 'vue';
 import { checkImageAvailability, getAddressColor } from '@/utils';
@@ -30,16 +36,25 @@ import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
-const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
+const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'] as const;
+export type AvatarSize = typeof SIZES[number];
+
+const VARIANTS = ['primary', 'grey'] as const;
+type AvatarVariant = typeof VARIANTS[number];
 
 export default defineComponent({
   props: {
     address: { type: String, default: '' },
     name: { type: String, default: null },
     size: {
-      type: String,
+      type: String as PropType<AvatarSize>,
       default: 'rg',
-      validator: (val: string) => SIZES.includes(val),
+      validator: (val: AvatarSize) => SIZES.includes(val),
+    },
+    variant: {
+      type: String as PropType<AvatarVariant>,
+      default: null,
+      validator: (val: AvatarVariant) => VARIANTS.includes(val),
     },
     borderless: Boolean,
     isPlaceholder: Boolean,
@@ -50,7 +65,9 @@ export default defineComponent({
     const hasProfileImage = ref(false);
 
     const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
-    const color = computed(() => props.address ? getAddressColor(props.address) : undefined);
+    const calculatedColor = computed(() => (props.address)
+      ? getAddressColor(props.address)
+      : undefined);
     const profileImageUrl = computed(() => (props.address === '' || isContract(props.address))
       ? null
       : `${aeActiveNetworkSettings.value.backendUrl}/profile/image/${props.address}`);
@@ -65,7 +82,7 @@ export default defineComponent({
 
     return {
       srcUrl,
-      color,
+      calculatedColor,
       hasProfileImage,
     };
   },
@@ -73,8 +90,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 $size-xs: 18px;
 $size-sm: 24px;
@@ -104,6 +121,16 @@ $size-xl: 56px;
 
   &.placeholder {
     background-color: rgba($color-white, 0.15);
+  }
+
+  &.variant {
+    &-primary {
+      --color: #{$color-primary};
+    }
+
+    &-grey {
+      --color: #{$color-grey-border};
+    }
   }
 
   &.sm {

@@ -281,15 +281,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .permission-manager {
   --screen-padding-x: 14px;
 
   padding-inline: var(--screen-padding-x);
-  color: variables.$color-white;
+  color: $color-white;
 
   .inputs {
     margin-bottom: 32px;

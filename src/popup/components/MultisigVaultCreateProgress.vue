@@ -159,9 +159,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .multisig-vault-creation-progress {
   $phase-icon-size: 24px;
@@ -197,19 +197,19 @@ export default defineComponent({
         justify-content: center;
         align-items: center;
         padding: 2px;
-        border: 2px solid rgba(variables.$color-white, 0.15);
+        border: 2px solid rgba($color-white, 0.15);
         border-radius: 100%;
       }
 
       .phase-success-icon {
-        color: variables.$color-success-dark;
-        background-color: rgba(variables.$color-success-dark, 0.15);
+        color: $color-success-dark;
+        background-color: rgba($color-success-dark, 0.15);
         border-radius: 100%;
       }
 
       .phase-item-caption {
         font-weight: 400;
-        color: rgba(variables.$color-white, 0.5);
+        color: rgba($color-white, 0.5);
       }
     }
   }
@@ -223,14 +223,14 @@ export default defineComponent({
 
       max-width: 250px;
       padding-bottom: 16px;
-      color: variables.$color-white;
+      color: $color-white;
       line-height: 22px;
     }
 
     .sub-message {
       @extend %face-sans-15-regular;
 
-      color: rgba(variables.$color-white, 0.85);
+      color: rgba($color-white, 0.85);
       line-height: 20px;
     }
   }

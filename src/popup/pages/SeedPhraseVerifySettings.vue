@@ -171,8 +171,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .seed-phrase-verify-settings {
   position: relative;
@@ -184,7 +184,7 @@ export default defineComponent({
   .title {
     @extend %face-sans-18-regular;
 
-    color: rgba(variables.$color-white, 1);
+    color: rgba($color-white, 1);
     margin-bottom: 18px;
     text-align: center;
   }

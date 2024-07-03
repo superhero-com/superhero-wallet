@@ -251,32 +251,32 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .input-field {
   --color-border: transparent;
-  --color-bg: #{rgba(variables.$color-white, 0.08)};
-  --color-input-text: #{variables.$color-grey-light};
-  --color-placeholder: #{rgba(variables.$color-white, 0.75)};
-  --color-message: #{rgba(variables.$color-white, 0.75)};
+  --color-bg: #{rgba($color-white, 0.08)};
+  --color-input-text: #{$color-grey-light};
+  --color-placeholder: #{rgba($color-white, 0.75)};
+  --color-message: #{rgba($color-white, 0.75)};
 
   text-align: left;
 
   &:focus-within,
   &:hover {
-    --color-input-text: #{variables.$color-white};
+    --color-input-text: #{$color-white};
   }
 
   &:hover {
-    --color-border: #{rgba(variables.$color-white, 0.15)};
-    --color-bg: #{rgba(variables.$color-white, 0.05)};
+    --color-border: #{rgba($color-white, 0.15)};
+    --color-bg: #{rgba($color-white, 0.05)};
   }
 
   &:focus-within {
-    --color-border: #{variables.$color-primary};
-    --color-bg: #{rgba(variables.$color-black, 0.44)};
-    --color-placeholder: #{variables.$color-white};
+    --color-border: #{$color-primary};
+    --color-bg: #{rgba($color-black, 0.44)};
+    --color-placeholder: #{$color-white};
   }
 
   .label {
@@ -299,16 +299,16 @@ export default defineComponent({
 
       margin-left: auto;
       user-select: none;
-      color: variables.$color-grey-dark;
+      color: $color-grey-dark;
     }
   }
 
   .input-wrapper {
     display: block;
-    padding: 8px 12px;
+    padding: 10px 12px; // Decides on the input size
     background-color: var(--color-bg);
     border: none;
-    border-radius: variables.$border-radius-interactive;
+    border-radius: $border-radius-interactive;
     overflow: hidden;
     box-shadow: inset 0 0 0 2px var(--color-border);
     transition: 100ms ease-in-out;
@@ -360,7 +360,7 @@ export default defineComponent({
     .under {
       @extend %face-sans-14-regular;
 
-      color: rgba(variables.$color-white, 0.5);
+      color: rgba($color-white, 0.5);
     }
   }
 
@@ -379,18 +379,18 @@ export default defineComponent({
       width: 24px;
       height: 24px;
       padding-left: 5px;
-      color: rgba(variables.$color-black, 0.75);
+      color: rgba($color-black, 0.75);
     }
   }
 
   &.error {
-    --color-border: #{variables.$color-danger};
-    --color-message: #{variables.$color-danger};
+    --color-border: #{$color-danger};
+    --color-message: #{$color-danger};
   }
 
   &.warning {
-    --color-border: #{variables.$color-warning};
-    --color-message: #{variables.$color-warning};
+    --color-border: #{$color-warning};
+    --color-message: #{$color-warning};
   }
 
   &.readonly {

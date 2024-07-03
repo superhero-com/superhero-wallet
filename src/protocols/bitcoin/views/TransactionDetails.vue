@@ -103,11 +103,9 @@ export default defineComponent({
     });
 
     return {
-      BTC_SYMBOL,
       PROTOCOLS,
       amount,
       amountTotal,
-      direction,
       fee,
       hash,
       assets,

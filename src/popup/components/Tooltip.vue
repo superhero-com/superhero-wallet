@@ -33,7 +33,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 [data-tooltip] {
   $triangle: 0.3rem;

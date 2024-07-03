@@ -76,8 +76,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .auction-history {
   min-height: 184px;
@@ -87,13 +87,13 @@ export default defineComponent({
   .title {
     padding: 16px 0 8px 0;
     text-align: center;
-    color: variables.$color-grey-dark;
+    color: $color-grey-dark;
     display: block;
 
     @extend %face-sans-17-medium;
 
     .name {
-      color: variables.$color-primary;
+      color: $color-primary;
     }
   }
 
@@ -102,7 +102,7 @@ export default defineComponent({
     padding: 8px 0;
 
     &:not(:first-of-type) {
-      border-top: 1px solid rgba(variables.$color-primary, 0.44);
+      border-top: 1px solid rgba($color-primary, 0.44);
     }
 
     .account-item {

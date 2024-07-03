@@ -18,6 +18,8 @@ import type {
   Protocol,
   IAmountDecimalPlaces,
   AssetAmount,
+  IAccountRaw,
+  IAccount,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -102,6 +104,13 @@ export abstract class BaseProtocolAdapter {
     accountIndex: number,
   ): IHdWalletAccount;
 
+  abstract resolveAccountRaw (
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array
+  ): IAccount | null;
+
   /**
    * Discover accounts that have been used in the past
    * @param seed 12 word seed array buffer
@@ -125,6 +134,8 @@ export abstract class BaseProtocolAdapter {
     contractId: AssetContractId,
     options: Record<string, any>,
   ): Promise<ITransferResponse | undefined>;
+
+  transferPreparedTransaction?(transactionData: any): Promise<ITransferResponse | undefined>;
 
   fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
 

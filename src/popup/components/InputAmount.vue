@@ -23,7 +23,7 @@
         data-cy="select-asset"
         :value="currentAsset"
         :focused="focused"
-        :show-tokens-with-balance="showTokensWithBalance"
+        :with-balance-only="showTokensWithBalance"
         @select-asset="handleAssetSelected($event)"
       />
       <div
@@ -88,7 +88,7 @@ export default defineComponent({
   props: {
     modelValue: { type: [String, Number], default: '' },
     label: { type: String, default: null },
-    selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
+    selectedAsset: { type: Object as PropType<IAsset>, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     readonly: Boolean,
     showTokensWithBalance: Boolean,
@@ -150,9 +150,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .input-amount {
   &-desc {
@@ -164,7 +164,7 @@ export default defineComponent({
       word-break: break-word;
 
       .focused & {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
     }
 
@@ -181,7 +181,7 @@ export default defineComponent({
     @extend %face-sans-15-medium;
 
     white-space: nowrap;
-    color: variables.$color-primary;
+    color: $color-primary;
     user-select: none;
   }
 }

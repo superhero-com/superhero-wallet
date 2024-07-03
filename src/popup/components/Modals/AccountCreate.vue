@@ -33,6 +33,7 @@
 import { defineComponent, onMounted, PropType } from 'vue';
 import type { Protocol, ResolveCallback } from '@/types';
 import {
+  ACCOUNT_TYPES,
   MODAL_AE_ACCOUNT_CREATE,
   PROTOCOLS,
   PROTOCOL_LIST,
@@ -57,14 +58,14 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
   setup(props) {
-    const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
+    const { addRawAccount, setActiveAccountByGlobalIdx } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
     const { setLoaderVisible } = useUi();
 
     async function createAccount(protocol: Protocol) {
       setLoaderVisible(true);
-      let idx: number;
+      let globalIdx: number;
 
       // TODO each of the blocks of this switch should be moved to the specific adapter
       switch (protocol) {
@@ -74,11 +75,12 @@ export default defineComponent({
 
         case PROTOCOLS.bitcoin:
         case PROTOCOLS.ethereum:
-          idx = addRawAccount({
+          globalIdx = addRawAccount({
             isRestored: false,
             protocol,
+            type: ACCOUNT_TYPES.hdWallet,
           });
-          setActiveAccountByProtocolAndIdx(protocol, idx);
+          setActiveAccountByGlobalIdx(globalIdx);
           break;
 
         default:

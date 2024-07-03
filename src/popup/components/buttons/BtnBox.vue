@@ -50,9 +50,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables' as *;
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .btn-box {
   @extend %face-sans-14-medium;

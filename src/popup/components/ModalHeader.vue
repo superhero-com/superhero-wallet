@@ -1,5 +1,8 @@
 <template>
-  <div class="modal-header">
+  <div
+    class="modal-header"
+    :class="{ 'no-padding': noPadding }"
+  >
     <h2
       v-if="title || $slots.title"
       class="title text-heading-2"
@@ -12,7 +15,6 @@
     <h3
       v-if="subtitle || $slots.subtitle"
       class="subtitle"
-      :class="{ 'with-margin': !disableSubtitleMargin }"
     >
       <slot name="subtitle">
         {{ subtitle }}
@@ -26,30 +28,34 @@ export default {
   props: {
     title: { type: String, default: '' },
     subtitle: { type: String, default: '' },
-    disableSubtitleMargin: Boolean,
+    noPadding: Boolean,
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .modal-header {
   width: 100%;
   text-align: center;
   padding: 0 16px;
 
+  &.no-padding {
+    padding: 0;
+  }
+
   .subtitle {
     @extend %face-sans-16-regular;
 
     margin-block: 0;
     line-height: 24px;
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
 
     a {
       font-weight: 500;
-      color: variables.$color-primary;
+      color: $color-primary;
       text-decoration: none;
 
       &:hover {

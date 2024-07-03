@@ -155,12 +155,13 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IName } from '@/types';
+import { IName, IPopupMessageData } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
   IS_MOBILE_APP,
   MODAL_CONFIRM,
+  POPUP_METHODS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import Logger from '@/lib/logger';
@@ -252,7 +253,9 @@ export default defineComponent({
           text = value;
         }
       } else if (IS_EXTENSION) {
-        text = await browser!.runtime.sendMessage({ method: 'paste' });
+        text = await browser!.runtime.sendMessage<IPopupMessageData>({
+          method: POPUP_METHODS.paste,
+        });
       } else {
         try {
           text = await navigator.clipboard.readText();
@@ -295,8 +298,13 @@ export default defineComponent({
           },
         });
 
-        const respondChallenge = await fetchRespondChallenge(response);
-
+        let respondChallenge;
+        try {
+          respondChallenge = await fetchRespondChallenge(response);
+        } catch (error: any) {
+          handleUnknownError(error);
+          return;
+        }
         await postJson(url, { body: respondChallenge });
 
         if (currentNetworkId !== nodeNetworkId.value) {
@@ -364,9 +372,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .name-item {
   display: flex;
@@ -377,7 +385,7 @@ export default defineComponent({
   transition: 0.2s;
 
   &:hover {
-    background-color: variables.$color-bg-4-hover;
+    background-color: $color-bg-4-hover;
   }
 
   .name-item-header {
@@ -393,7 +401,7 @@ export default defineComponent({
     .pending {
       @extend %face-sans-12-regular;
 
-      color: variables.$color-grey-dark;
+      color: $color-grey-dark;
     }
 
     .truncate {
@@ -412,8 +420,8 @@ export default defineComponent({
 
         padding: 2px 8px;
         white-space: nowrap;
-        color: variables.$color-grey-light;
-        background: variables.$color-border-hover;
+        color: $color-grey-light;
+        background: $color-border-hover;
         border-radius: 6px;
         opacity: 1;
 
@@ -422,13 +430,13 @@ export default defineComponent({
         }
 
         &.set {
-          background: rgba(variables.$color-warning, 0.1);
-          color: variables.$color-warning;
+          background: rgba($color-warning, 0.1);
+          color: $color-warning;
         }
 
         &.edit {
-          background: rgba(variables.$color-primary, 0.15);
-          color: variables.$color-primary;
+          background: rgba($color-primary, 0.15);
+          color: $color-primary;
         }
 
         &:not(:last-of-type) {
@@ -444,7 +452,7 @@ export default defineComponent({
 
       .icon {
         width: 14px;
-        color: variables.$color-white;
+        color: $color-white;
         opacity: 0.44;
         transition: all 0.2s;
 
@@ -470,7 +478,7 @@ export default defineComponent({
     }
 
     .details-item :deep(.value) {
-      color: variables.$color-grey-light;
+      color: $color-grey-light;
     }
 
     > .details-item {
@@ -484,7 +492,7 @@ export default defineComponent({
 
           span {
             margin-right: 4px;
-            color: variables.$color-grey-dark;
+            color: $color-grey-dark;
 
             @extend %face-sans-12-medium;
           }
@@ -500,7 +508,7 @@ export default defineComponent({
         flex: 1;
 
         :deep(.value .secondary) {
-          color: variables.$color-grey-dark;
+          color: $color-grey-dark;
           margin-left: -2px;
         }
 
@@ -513,7 +521,7 @@ export default defineComponent({
 
   > span {
     margin-top: 4px;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
 
     @extend %face-mono-10-medium;
   }

@@ -262,16 +262,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .invite-item {
   padding: 1rem var(--screen-padding-x);
   margin: -2px calc(-1 * var(--screen-padding-x)) 0;
   border-style: solid;
-  border-color: variables.$color-border;
+  border-color: $color-border;
   border-width: 2px 0;
   text-align: left;
-  color: variables.$color-white;
+  color: $color-white;
   position: relative;
 
   .invite-link {
@@ -284,7 +284,7 @@ export default defineComponent({
       overflow: hidden;
       white-space: nowrap;
       font-size: 11px;
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
@@ -293,7 +293,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    color: variables.$color-grey-dark;
+    color: $color-grey-dark;
 
     .token-amount {
       flex-grow: 1;
@@ -301,7 +301,7 @@ export default defineComponent({
 
     .date {
       font-size: 11px;
-      color: variables.$color-white;
+      color: $color-white;
       opacity: 0.5;
     }
   }

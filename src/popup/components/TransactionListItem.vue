@@ -71,7 +71,6 @@ import {
   formatDate,
   formatTime,
   relativeTimeTo,
-  toShiftedBigNumber,
 } from '@/utils';
 import {
   useCurrencies,
@@ -115,7 +114,7 @@ export default defineComponent({
     // temp if protocol undefined assume it is aeternity
     const transactionProtocol = computed(() => props.transaction?.protocol ?? PROTOCOLS.aeternity);
 
-    const transactionOwner = computed(() => props.multisigTransaction
+    const transactionCustomOwner = computed(() => props.multisigTransaction
       ? props.multisigTransaction?.tx?.senderId
       : props.transaction?.transactionOwner);
 
@@ -125,8 +124,8 @@ export default defineComponent({
       isErrorTransaction,
       transactionAssets,
     } = useTransactionData({
-      transaction: currentTransaction.value,
-      externalAddress: transactionOwner.value,
+      transaction: currentTransaction,
+      transactionCustomOwner,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {
@@ -153,13 +152,7 @@ export default defineComponent({
         return 0;
       }
       return getFormattedAndRoundedFiat(
-        +amountRounded(
-          (
-            protocolCoin.decimals
-              ? toShiftedBigNumber(protocolCoin.amount || 0, -protocolCoin.decimals)
-              : protocolCoin.amount
-          )!,
-        ),
+        +amountRounded(protocolCoin.amount || 0),
         protocolCoin.protocol,
       );
     });
@@ -184,7 +177,6 @@ export default defineComponent({
       currentTransaction,
       transactionAssets,
       transactionProtocol,
-      transactionOwner,
       direction,
       formatDate,
       formatTime,
@@ -194,9 +186,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .transaction-item {
   .body {
@@ -208,7 +200,7 @@ export default defineComponent({
       @extend %face-sans-12-regular;
 
       width: 100%;
-      color: rgba(variables.$color-white, 0.75);
+      color: rgba($color-white, 0.75);
       gap: 3px;
 
       .date {

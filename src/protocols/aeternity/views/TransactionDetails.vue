@@ -14,9 +14,9 @@
             :hide-amount-total="(
               isDex
               || isDexAllowance
-              || isTransactionAex9(transaction)
+              || isAex9
             )"
-            :hide-fiat="isTransactionAex9(transaction)"
+            :hide-fiat="isAex9"
             :hash="hash"
             :protocol="PROTOCOLS.aeternity"
           >
@@ -24,7 +24,7 @@
               <TransactionAssetRows
                 :assets="transactionAssets"
                 :error="isErrorTransaction"
-                :is-reversed="isPool"
+                :is-reversed="isDexPool"
                 :protocol="PROTOCOLS.aeternity"
                 icon-size="rg"
                 multiple-rows
@@ -32,7 +32,7 @@
             </template>
 
             <template
-              v-if="isSwap"
+              v-if="isDexSwap"
               #swap-data
             >
               <SwapRates :transaction="transaction" />
@@ -41,10 +41,10 @@
 
             <template #additional-content>
               <TransactionDetailsPoolTokens
-                v-if="(isPool || isDexAllowance)"
+                v-if="(isDexPool || isDexAllowance)"
                 :transaction="transaction"
                 :tokens="transactionAssets"
-                :reversed="isPool"
+                :reversed="isDexPool"
               />
 
               <DetailsItem
@@ -124,6 +124,12 @@
 
             <template #gas>
               <DetailsItem
+                v-if="gasUsed"
+                :value="gasUsed"
+                :label="$t('pages.transactionDetails.gasUsed')"
+                data-cy="gas"
+              />
+              <DetailsItem
                 v-if="gasPrice"
                 :label="$t('pages.transactionDetails.gasPrice')"
                 data-cy="gas-price"
@@ -133,16 +139,22 @@
                     :amount="+aettosToAe(gasPrice)"
                     :symbol="AE_SYMBOL"
                     :protocol="PROTOCOLS.aeternity"
-                    hide-fiat
                   />
                 </template>
               </DetailsItem>
               <DetailsItem
-                v-if="gasUsed"
-                :value="gasUsed"
-                :label="$t('pages.transactionDetails.gasUsed')"
-                data-cy="gas"
-              />
+                v-if="gasCost"
+                :label="$t('transaction.gasCost')"
+                data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(gasCost)"
+                    :symbol="AE_SYMBOL"
+                    :protocol="PROTOCOLS.aeternity"
+                  />
+                </template>
+              </DetailsItem>
             </template>
           </TransactionDetailsBase>
         </template>
@@ -152,6 +164,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import {
   computed,
   defineComponent,
@@ -162,7 +175,8 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
-import type { ITransaction, ITx, TxFunctionRaw } from '@/types';
+
+import type { ITransaction, ITx } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
@@ -185,9 +199,6 @@ import {
   aettosToAe,
   getTransactionPayload,
   getTransactionTipUrl,
-  isTransactionAex9,
-  isTxFunctionDexSwap,
-  isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
@@ -237,7 +248,7 @@ export default defineComponent({
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
 
-    const externalAddress = computed((): Encoded.AccountAddress => (
+    const transactionCustomOwner = computed((): Encoded.AccountAddress => (
       transactionOwner
       || (
         props.multisigDashboard
@@ -246,26 +257,28 @@ export default defineComponent({
       )));
 
     const { transactionsLoaded } = useTransactionList({
-      accountAddress: externalAddress.value,
+      accountAddress: transactionCustomOwner.value,
       protocol: PROTOCOLS.aeternity,
-    });
-
-    const {
-      setExternalAddress,
-      setActiveTransaction,
-      direction,
-      isErrorTransaction,
-      isDex,
-      isDexAllowance,
-      outerTxTag,
-      transactionAssets,
-    } = useTransactionData({
-      externalAddress: externalAddress.value,
-      showDetailedAllowanceInfo: true,
     });
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
+
+    const {
+      direction,
+      isAex9,
+      isErrorTransaction,
+      isDex,
+      isDexAllowance,
+      isDexPool,
+      isDexSwap,
+      outerTxTag,
+      transactionAssets,
+    } = useTransactionData({
+      transaction,
+      transactionCustomOwner,
+      showDetailedAllowanceInfo: true,
+    });
 
     const amount = computed((): number => transaction.value
       ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
@@ -274,9 +287,6 @@ export default defineComponent({
       ? getTxAmountTotal(transaction.value, direction.value)
       : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
-    const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
-    const isSwap = computed(() => isDex.value && isTxFunctionDexSwap(txFunction.value));
-    const isPool = computed(() => isDex.value && isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
 
     const gasPrice = computed(() => (
@@ -289,6 +299,12 @@ export default defineComponent({
       || transaction.value?.tx?.gasUsed
     ));
 
+    const gasCost = computed(() => (
+      gasUsed.value && gasPrice.value
+        ? new BigNumber(gasUsed.value).multipliedBy(gasPrice.value)
+        : new BigNumber(0)
+    ));
+
     const multisigTransactionFeePaidBy = computed((): string | null => {
       if (outerTxTag.value !== Tag.PayingForTx) return null;
       return transaction.value?.tx?.payerId ?? null;
@@ -298,6 +314,7 @@ export default defineComponent({
      * Computes the total transaction fee, which is the sum of the fee of the main transaction
      * and any additional fee from nested transactions.
      * @returns {number} The total transaction fee.
+     * TODO move to `transactionData` composable
      */
     const transactionFee = computed((): number => {
       const { tx } = transaction.value ?? {};
@@ -317,13 +334,13 @@ export default defineComponent({
         try {
           rawTransaction = {
             ...(rawTransaction || {}), // Claim transaction data
-            ...await adapter.fetchTransactionByHash(hash, externalAddress.value),
+            ...await adapter.fetchTransactionByHash(hash, transactionCustomOwner.value),
             incomplete: false,
           };
         } catch (e) {
           // Pending transactions are not returned from the middleware.
           const pendingTransactions = await adapter
-            .fetchPendingTransactions?.(externalAddress.value);
+            .fetchPendingTransactions?.(transactionCustomOwner.value);
 
           rawTransaction = pendingTransactions?.find((val) => val.hash === hash);
 
@@ -345,11 +362,8 @@ export default defineComponent({
 
         transaction.value = {
           ...rawTransaction,
-          transactionOwner: externalAddress.value,
+          transactionOwner: transactionCustomOwner.value,
         };
-
-        setExternalAddress(externalAddress.value);
-        setActiveTransaction(transaction.value);
       }
 
       if (outerTxTag.value === Tag.GaMetaTx) {
@@ -380,12 +394,12 @@ export default defineComponent({
       transaction,
       amount,
       amountTotal,
-      isSwap,
-      isPool,
+      isAex9,
       isErrorTransaction,
-      isDexAllowance,
       isDex,
-      isTransactionAex9,
+      isDexAllowance,
+      isDexPool,
+      isDexSwap,
       getTransactionPayload,
       tipUrl,
       tipLink,
@@ -394,6 +408,7 @@ export default defineComponent({
       splitAddress,
       aettosToAe,
       isLocalAccountAddress,
+      gasCost,
       gasPrice,
       gasUsed,
       multisigTransactionFeePaidBy,
@@ -406,7 +421,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
 @use '@/styles/typography';
 @use '@/styles/mixins';
 

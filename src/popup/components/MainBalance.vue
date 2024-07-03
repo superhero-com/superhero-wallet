@@ -81,8 +81,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@use '../../styles/typography';
-@use '../../styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/variables' as *;
 
 .main-balance {
   --font-size-token: 30px;

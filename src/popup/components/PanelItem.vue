@@ -57,8 +57,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables' as *;
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .panel-item {
   @extend %face-sans-15-regular;

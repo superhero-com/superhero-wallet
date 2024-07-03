@@ -384,14 +384,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .privacy-policy {
   padding: 0 16px;
   word-break: break-word;
   line-height: 20px;
-  color: rgba(variables.$color-white, 0.85);
+  color: rgba($color-white, 0.85);
 
   @extend %face-sans-14-light;
 

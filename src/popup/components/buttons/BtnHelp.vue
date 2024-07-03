@@ -23,6 +23,7 @@ export default defineComponent({
     icon: { type: String, default: '' },
     option: { type: Object, default: null },
     small: Boolean,
+    fullScreen: Boolean,
   },
   setup(props, { emit }) {
     const { openModal } = useModals();
@@ -37,6 +38,7 @@ export default defineComponent({
           msg: props.msg,
           option: props.option,
           textCenter: true,
+          fullScreen: props.fullScreen,
         });
       }
     }
@@ -49,7 +51,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '@/styles/variables' as *;
 
 .btn-help {
   display: inline-flex;
@@ -58,7 +60,7 @@ export default defineComponent({
     width: 24px;
     height: 24px;
     opacity: 0.5;
-    color: variables.$color-white;
+    color: $color-white;
   }
 
   &.small svg {

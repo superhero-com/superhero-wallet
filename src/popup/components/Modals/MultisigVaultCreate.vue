@@ -367,7 +367,7 @@ export default defineComponent({
       }
 
       // Update the signer address
-      signers.value[signerIndex].address = scanResult;
+      signers.value[signerIndex].address = scanResult as Encoded.AccountAddress;
     }
 
     function getSignerLabel(index: number) {
@@ -470,9 +470,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .multisig-vault-create {
   padding-top: env(safe-area-inset-top);
@@ -481,7 +481,7 @@ export default defineComponent({
 
   &-form {
     .scan-button {
-      color: variables.$color-white;
+      color: $color-white;
       display: block;
       width: 32px;
       height: 24px;
@@ -506,8 +506,8 @@ export default defineComponent({
         margin: -4px -6px -4px 0;
         transform: rotate(45deg);
         cursor: pointer;
-        transition: variables.$transition-interactive;
-        color: variables.$color-grey-light;
+        transition: $transition-interactive;
+        color: $color-grey-light;
 
         &:hover {
           opacity: 0.8;
@@ -517,7 +517,7 @@ export default defineComponent({
 
     .description,
     .signers-count {
-      color: rgba(variables.$color-white, 0.5);
+      color: rgba($color-white, 0.5);
     }
 
     .signers-count {
@@ -526,7 +526,7 @@ export default defineComponent({
       padding: 6px 0;
 
       .text-emphasis {
-        color: rgba(variables.$color-white, 0.75);
+        color: rgba($color-white, 0.75);
       }
 
       .num-of-signers-selector {
@@ -537,13 +537,13 @@ export default defineComponent({
         margin-right: 10px;
         border-radius: 10px;
         text-align: center;
-        color: variables.$color-white;
-        border: 2px solid rgba(variables.$color-white, 0.08);
-        background-color: rgba(variables.$color-white, 0.08);
+        color: $color-white;
+        border: 2px solid rgba($color-white, 0.08);
+        background-color: rgba($color-white, 0.08);
 
         option {
-          color: variables.$color-white;
-          background-color: variables.$color-bg-6;
+          color: $color-white;
+          background-color: $color-bg-6;
         }
       }
 

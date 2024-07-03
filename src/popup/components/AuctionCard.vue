@@ -29,8 +29,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .auction-card {
   display: flex;
@@ -42,7 +42,7 @@ export default {
   .avatar {
     width: 48px;
     height: 48px;
-    box-shadow: rgba(variables.$color-primary, 0.15) 0 0 0 8px;
+    box-shadow: rgba($color-primary, 0.15) 0 0 0 8px;
     margin-top: 36px;
   }
 

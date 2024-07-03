@@ -43,7 +43,7 @@ import {
 } from 'vue';
 import InputField from '../InputField.vue';
 
-const SIZES = ['xs', 'sm', 'rg', 'md'];
+const SIZES = ['xxs', 'xs', 'sm', 'rg', 'md'];
 
 export default defineComponent({
   components: {
@@ -102,8 +102,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .textarea {
   --base-line-height: 1.4em;
@@ -117,7 +117,7 @@ export default defineComponent({
     background: transparent;
     border: none;
     padding: 0;
-    color: variables.$color-white;
+    color: $color-white;
     outline: none;
     word-break: break-word;
     line-height: var(--base-line-height);
@@ -140,7 +140,7 @@ export default defineComponent({
     --size: 8;
   }
 
-  &.auto-height {
+  &.auto-height, &.xxs {
     --size: 1;
   }
 }

@@ -44,7 +44,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
 
@@ -54,8 +54,8 @@ export default defineComponent({
   width: 100%;
   margin-bottom: 16px;
   padding: 20px 12px;
-  border-radius: variables.$border-radius-interactive;
-  color: variables.$color-white;
+  border-radius: $border-radius-interactive;
+  color: $color-white;
 
   .box {
     @include mixins.flex(flex-start, center);

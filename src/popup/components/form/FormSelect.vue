@@ -74,6 +74,7 @@ export default defineComponent({
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
+    // TODO AIRGAP: implement multiple accounts selection
     const { openModal } = useModals();
 
     const currentText = computed(() => props.persistentDefaultText || !props.modelValue
@@ -102,8 +103,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables' as *;
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .form-select {
   &.unstyled {

@@ -12,12 +12,14 @@ import {
 } from '@aeternity/aepp-sdk';
 import type { Animation } from '@ionic/vue';
 import {
+  ACCOUNT_TYPES,
   ALLOWED_ICON_STATUSES,
+  ASSET_TYPES,
   INPUT_MESSAGE_STATUSES,
   NOTIFICATION_TYPES,
   POPUP_ACTIONS,
+  POPUP_METHODS,
   POPUP_TYPES,
-  ASSET_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -59,7 +61,7 @@ export type ObjectValues<T> = T[keyof T];
 /**
  * Generic that allows to pick only the public properties of a class.
  */
-type PublicPart<T> = { [K in keyof T]: T[K] };
+export type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
  * Makes the interface and all the child interfaces to be partial.
@@ -86,7 +88,7 @@ export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
 
 type GenericApiMethod<T = any, U extends unknown[] = any> = (...args: U) => Promise<T>;
 
-export type ResolveCallback = (...args: any) => void;
+export type ResolveCallback<T = any> = (returnValue?: T) => void;
 export type RejectCallback = (error?: RejectedByUserError) => void;
 
 /**
@@ -253,7 +255,7 @@ export type IAccountAsset = Partial<ITokenBalance> & IToken;
 
 export type AssetList = Record<AssetContractId, IToken>;
 
-export type AccountType = 'hd-wallet';
+export type AccountType = ObjectValues<typeof ACCOUNT_TYPES>;
 
 /**
  * Simplified account structure stored it in the local storage
@@ -263,12 +265,14 @@ export interface IAccountRaw {
   type: AccountType;
   isRestored: boolean;
   protocol: Protocol;
+  address?: AccountAddress;
+  publicKey?: string;
 }
 
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IHdWalletAccount, IAccountRaw {
+export interface IAccount extends IHdWalletAccount, Omit<IAccountRaw, 'publicKey'> {
   address: AccountAddress;
   globalIdx: number;
   idx: number;
@@ -402,7 +406,7 @@ export type UrlStatus =
 export type CurrencyRates = Record<Protocol, Record<CurrencyCode, number>>;
 
 export interface TxArguments {
-  type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
+  type: 'any' | 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
   value: any; // TODO find type, this was not correct: (string | number | any[])
 }
 
@@ -454,7 +458,7 @@ export interface ITx {
   accountId?: AccountAddress;
   aexnType?: 'aex9';
   amount: number;
-  arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
+  arguments?: TxArguments[];
   callData?: Encoded.ContractBytearray;
   call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId?: AccountAddress;
@@ -465,6 +469,7 @@ export interface ITx {
   function?: TxFunction;
   gaId?: string; // Generalized Account ID
   gas?: number;
+  gasLimit?: number;
   gasPrice?: number;
   gasUsed?: number;
   log?: any[]; // TODO find source
@@ -495,6 +500,8 @@ export interface ITx {
     tx: ITx | IGAAttachTx | IGAMetaTx;
   };
   VSN?: string;
+  /** ETH contract call arguments */
+  data?: string;
 }
 
 export interface ITransaction {
@@ -665,6 +672,7 @@ export interface IMiddlewareStatus {
 }
 
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
+export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
 
 export interface IPopupActions {
   resolve: ResolveCallback;
@@ -694,10 +702,25 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   show?: boolean; // Decides if the modal window should be open
   fromAccount?: string;
   isSenderReplaced?: boolean;
+  protocol?: Protocol;
 }
 
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
+}
+
+export interface IPopupMessageData {
+  target?: 'background' | 'offscreen';
+  method?: PopupMethod;
+  type?: PopupActionType;
+  uuid?: string;
+  params?: {
+    aepp?: string | object;
+    popupType?: PopupType;
+    popupProps?: Partial<IPopupProps>;
+    id?: string;
+  };
+  payload?: any;
 }
 
 export interface IResponseChallenge {
@@ -768,9 +791,12 @@ export type TransferSendStepConfigRegistry = {
   [TRANSFER_SEND_STEPS.form]: TransferSendStepConfig;
   [TRANSFER_SEND_STEPS.review]: TransferSendStepConfig;
   [TRANSFER_SEND_STEPS.reviewTip]?: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.airGapSign]?: TransferSendStepConfig;
 }
 
 export interface TransferFormModel extends IFormModel {
+  gasPrice?: number;
+  gasUsed?: number;
   fee?: BigNumber;
   total?: number;
   invoiceContract?: any;

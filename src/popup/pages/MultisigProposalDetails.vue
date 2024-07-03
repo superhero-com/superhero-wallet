@@ -29,11 +29,11 @@
                 address: activeMultisigAccount.contractId,
                 url: activeMultisigAccountExplorerUrl,
               }"
-              :transaction="{ tx: multisigTx }"
+              :transaction="transaction"
             />
             <div class="explorer">
               <LinkButton
-                :to="activeMultisigAccountExplorerUrl"
+                :to="activeMultisigAccountExplorerUrl!"
                 variant="muted"
                 underlined
               >
@@ -89,26 +89,9 @@
 
               <MultisigProposalConsensus :proposal-completed="proposalCompleted" />
 
-              <DetailsItem
-                v-if="transaction"
-                :label="$t('pages.transactionDetails.hash')"
-                data-cy="hash"
-                small
-              >
-                <template #value>
-                  <CopyText
-                    hide-icon
-                    :value="transaction.hash"
-                    :copied-text="$t('common.hashCopied')"
-                  >
-                    <span class="text-address">{{ splitAddress(transaction.hash) }}</span>
-                  </CopyText>
-                </template>
-              </DetailsItem>
-
               <PayloadDetails
-                v-if="multisigTx"
-                :payload="getTransactionPayload(multisigTx)"
+                v-if="transaction"
+                :payload="getTransactionPayload(transaction)"
               />
 
               <div class="span-3-columns">
@@ -144,8 +127,9 @@
                   />
                 </template>
               </DetailsItem>
+
               <DetailsItem
-                v-if="transaction && transaction.tx"
+                v-if="transaction?.tx?.gasPrice"
                 :label="$t('pages.transactionDetails.gasPrice')"
               >
                 <template #value>
@@ -156,8 +140,9 @@
                   />
                 </template>
               </DetailsItem>
+
               <DetailsItem
-                v-if="transaction && transaction.tx"
+                v-if="transaction?.tx?.gas"
                 :value="transaction.tx.gas"
                 :label="$t('pages.transactionDetails.gasUsed')"
               />
@@ -168,7 +153,7 @@
               >
                 <template #value>
                   <TokenAmount
-                    :amount="+aettosToAe(multisigTx.fee)"
+                    :amount="+aettosToAe(AE_GET_META_TX_FEE)"
                     :symbol="AE_SYMBOL"
                     :protocol="PROTOCOLS.aeternity"
                   />
@@ -313,7 +298,7 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
-import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG, AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   getTransactionPayload,
@@ -321,6 +306,8 @@ import {
 } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
+
+import { type MultisigProposalConfirmActionVal } from '@/popup/components/Modals/MultisigProposalConfirmActions.vue';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -365,6 +352,9 @@ export default defineComponent({
     const { openDefaultModal, openModal } = useModals();
     const { isLoaderVisible, setLoaderVisible } = useUi();
     const { activeAccount, isLocalAccountAddress } = useAccounts();
+    const { getTxAssetSymbol } = useFungibleTokens();
+    const { nodeNetworkId } = useAeSdk();
+
     const {
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
@@ -372,8 +362,6 @@ export default defineComponent({
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
     } = useMultisigAccounts();
-
-    const { nodeNetworkId } = useAeSdk();
 
     const {
       pendingMultisigTxExpired,
@@ -390,15 +378,13 @@ export default defineComponent({
       callContractMethod,
     } = useMultisigTransactions();
 
-    const { getTxAssetSymbol } = useFungibleTokens();
-
     const protocolExplorer = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).getExplorer();
 
     const multisigTx = ref<ITx | null>(null);
-    const transaction = ref<ITransaction | null>(null);
+    const transaction = ref<ITransaction>();
     const proposalCompleted = ref<boolean>(false);
 
-    const { transactionAssets, setActiveTransaction } = useTransactionData();
+    const { transactionAssets } = useTransactionData({ transaction });
 
     const totalSpent = computed(() => {
       if (!proposalCompleted.value || !transaction.value) {
@@ -418,7 +404,7 @@ export default defineComponent({
     const expirationHeightToRelativeTime = computed(() => (
       pendingMultisigTxExpiresAt.value > 0
         ? `(≈${blocksToRelativeTime(pendingMultisigTxExpiresAt.value)})`
-        : null
+        : undefined
     ));
 
     async function getTransactionDetails() {
@@ -435,7 +421,7 @@ export default defineComponent({
       } as any;
       // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
 
-      setActiveTransaction({ tx: multisigTx.value } as ITransaction);
+      transaction.value = { tx: multisigTx.value } as ITransaction;
     }
 
     function handleInsufficientBalanceError(
@@ -476,10 +462,13 @@ export default defineComponent({
 
       setLoaderVisible(true);
       try {
-        const chosenAddress = await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
-          action,
-          signers: pendingMultisigTxLocalSigners.value,
-        });
+        const chosenAddress = await openModal<MultisigProposalConfirmActionVal>(
+          MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+          {
+            action,
+            signers: pendingMultisigTxLocalSigners.value,
+          },
+        );
 
         const { contractId, txHash } = activeMultisigAccount.value;
         const signingAccount = new AeAccountHdWallet(nodeNetworkId);
@@ -487,7 +476,7 @@ export default defineComponent({
           action,
           contractId,
           txHash as string,
-          activeAccount.value.address !== chosenAddress
+          (activeAccount.value.address !== chosenAddress)
             ? {
               onAccount: {
                 address: chosenAddress,
@@ -496,7 +485,7 @@ export default defineComponent({
                   sign: signingAccount.sign,
                 }),
               },
-              fromAccount: chosenAddress,
+              fromAccount: chosenAddress as any,
             }
             : {},
         );
@@ -559,6 +548,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
+      AE_GET_META_TX_FEE,
       PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
@@ -590,9 +580,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .multisig-proposal-details {
   display: flex;
@@ -616,7 +606,7 @@ export default defineComponent({
   .header {
     @include mixins.flex(center, center, column);
 
-    background-color: variables.$color-bg-app;
+    background-color: $color-bg-app;
     min-height: 42px;
     padding: 14px;
     position: sticky;
@@ -635,7 +625,7 @@ export default defineComponent({
   }
 
   .content {
-    background-color: variables.$color-bg-4;
+    background-color: $color-bg-4;
     padding-bottom: 120px;
 
     .transaction-overview {
@@ -684,7 +674,7 @@ export default defineComponent({
 
   .reason:deep() {
     .value {
-      color: variables.$color-warning;
+      color: $color-warning;
     }
   }
 
@@ -703,9 +693,9 @@ export default defineComponent({
     background:
       linear-gradient(
         180deg,
-        rgba(variables.$color-bg-4, 0) 0%,
-        rgba(variables.$color-bg-4, 0.8) 43.08%,
-        rgba(variables.$color-bg-4, 0.9) 90.79%
+        rgba($color-bg-4, 0) 0%,
+        rgba($color-bg-4, 0.8) 43.08%,
+        rgba($color-bg-4, 0.9) 90.79%
       );
 
     .row {

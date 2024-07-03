@@ -39,18 +39,40 @@
         :disabled="!isOnline"
         @click="createMultisigAccount()"
       />
+      <BtnSubheader
+        v-if="!isMultisig"
+        :header="$t('airGap.importAccount.btnText')"
+        :subheader="$t('airGap.importAccount.btnSubtitle')"
+        :icon="QrScanIcon"
+        @click="connectHardwareWallet()"
+      />
     </div>
   </Modal>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOLS } from '@/constants';
-import { useAccounts, useConnection, useModals } from '@/composables';
+
+import {
+  ACCOUNT_TYPES,
+  MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+  MODAL_MULTISIG_VAULT_CREATE,
+  PROTOCOLS,
+} from '@/constants';
+import type { IAccountRaw } from '@/types';
+import { handleUnknownError } from '@/utils';
+import {
+  useAccounts,
+  useConnection,
+  useModals,
+} from '@/composables';
+
+import { type AirGapImportAccountsResolvedVal } from '@/popup/components/Modals/AirGapImportAccounts.vue';
 
 import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Modal from '@/popup/components/Modal.vue';
 
+import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
@@ -63,17 +85,25 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
+    const {
+      addRawAccount,
+      setActiveAccountByGlobalIdx,
+    } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
 
+    function addRawAccountAndSetActive(account: IAccountRaw) {
+      const globalIdx = addRawAccount(account);
+      setActiveAccountByGlobalIdx(globalIdx);
+      props.resolve();
+    }
+
     async function createPlainAccount() {
-      const idx = addRawAccount({
+      addRawAccountAndSetActive({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
+        type: ACCOUNT_TYPES.hdWallet,
       });
-      setActiveAccountByProtocolAndIdx(PROTOCOLS.aeternity, idx);
-      props.resolve();
     }
 
     async function createMultisigAccount() {
@@ -81,11 +111,27 @@ export default defineComponent({
       props.resolve();
     }
 
+    async function connectHardwareWallet() {
+      try {
+        const selectedAccounts = await openModal<AirGapImportAccountsResolvedVal>(
+          MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+        );
+        selectedAccounts.forEach((account) => {
+          addRawAccountAndSetActive(account);
+        });
+      } catch (error) {
+        handleUnknownError(error);
+      }
+      props.resolve();
+    }
+
     return {
       PlusCircleIcon,
+      QrScanIcon,
       isOnline,
       createPlainAccount,
       createMultisigAccount,
+      connectHardwareWallet,
     };
   },
 });

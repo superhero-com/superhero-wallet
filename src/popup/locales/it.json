@@ -103,7 +103,6 @@
     },
     "about": {
       "heading": "Di",
-      "systemName": "Superhero",
       "terms": "Termini di servizio",
       "privacyPolicy": "politica sulla riservatezza",
       "reportBug": "Report a bug"
@@ -166,23 +165,6 @@
       "backToSettings": "impostazioni",
       "exportKeypair": "Export keypair",
       "exportKeystore": "Export keystore"
-    },
-    "airGapSetup": {
-      "heading": "Impostazione AirGap",
-      "step1heading": "Installare AirGap sul telefono",
-      "step1info": "Cerca AirGap.it in negozio o la scansione di questo codice QR",
-      "step1buttonNext": "Il prossimo",
-      "setupSteps1heading": "Aprire traferro al 2 ° dispositivo",
-      "setupSteps2heading": "Crea chiave segreta",
-      "setupSteps3heading": "Scriverlo nel giusto ordine",
-      "setupSteps4heading": "Aggiungere un portafoglio aeternity",
-      "setupSteps5heading": "Collega il tuo portafoglio aeternity",
-      "setupSteps1": "Spegnere la connessione internet prima dell'apertura AirGap",
-      "setupSteps2": "Nessun collegamento a Internet significa massima sicurezza per la chiave",
-      "setupSteps3": "Sarà necessario per il ripristino",
-      "setupSteps4": "Tap portafoglio, aggiungere portafoglio e scegliere aeternity",
-      "setupSteps5": "Terminate collegando il tuo Vault per il tuo indirizzo aeternity",
-      "linkVault": "Link Vault"
     },
     "auctionBid": {
       "backToAuctions": "Torna alle aste",

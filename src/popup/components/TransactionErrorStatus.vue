@@ -50,9 +50,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .transaction-reverted-status {
   width: 100%;
@@ -64,14 +64,14 @@ export default {
     @include mixins.flex(center, center);
 
     letter-spacing: 0.05em;
-    color: variables.$color-warning;
+    color: $color-warning;
 
     &::before,
     &::after {
       content: '';
       width: 100%;
       height: 1px;
-      background: rgba(variables.$color-warning, 0.44);
+      background: rgba($color-warning, 0.44);
     }
 
     .icon {
@@ -92,7 +92,7 @@ export default {
 
     line-height: 19px;
     margin-top: 10px;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     text-align: center;
   }
 }

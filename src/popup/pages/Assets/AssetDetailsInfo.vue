@@ -269,25 +269,25 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '@/styles/variables' as *;
 
 .token-details {
   margin-top: 10px;
 
   .price {
     .green {
-      color: variables.$color-success;
+      color: $color-success;
       font-weight: 400;
     }
 
     .red {
-      color: variables.$color-danger;
+      color: $color-danger;
       font-weight: 400;
     }
   }
 
   .link a {
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -299,10 +299,10 @@ export default defineComponent({
   }
 
   .address-shortening {
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
 
     &:hover {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 }

@@ -23,9 +23,12 @@ import type {
   MarketData,
   NetworkTypeDefault,
   ITransactionApiPaginationParams,
+  IAccountRaw,
+  IAccount,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
+  ACCOUNT_TYPES,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
   PROTOCOLS,
@@ -180,8 +183,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   ): IHdWalletAccount {
     const { activeNetwork } = useNetworks();
 
-    const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
-    const pathCoinType = activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 1 : 0;
+    const network = networks[activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 'bitcoin' : 'testnet'];
+    const pathCoinType = activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 0 : 1;
 
     const node = this.bip32.fromSeed(Buffer.from(seed));
     const path = `m/84'/${pathCoinType}'/${accountIndex}'/0/0`; // 84 for Native-SegWit and 44 for Legacy
@@ -196,6 +199,26 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: child.publicKey,
       address: address!,
     };
+  }
+
+  override resolveAccountRaw(
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array,
+  ): IAccount | null {
+    if (rawAccount.type !== ACCOUNT_TYPES.hdWallet) {
+      return null;
+    }
+
+    const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
+
+    return {
+      globalIdx,
+      idx,
+      ...rawAccount,
+      ...hdWallet,
+    } as IAccount;
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

@@ -193,25 +193,25 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/mixins';
-@use '../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .account-details {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
-  --screen-bg-color: #{variables.$color-bg-modal};
+  --screen-bg-color: #{$color-bg-modal};
   --header-height: 64px;
 
   position: relative;
   top: env(safe-area-inset-top);
-  background-color: variables.$color-bg-4;
-  border-radius: variables.$border-radius-app;
+  background-color: $color-bg-4;
+  border-radius: $border-radius-app;
   min-height: 100%;
   height: 100%;
   font-weight: 500;
-  color: variables.$color-white;
-  box-shadow: 0 0 0 1px variables.$color-border, 0 0 50px rgba(variables.$color-black, 0.6);
+  color: $color-white;
+  box-shadow: 0 0 0 1px $color-border, 0 0 50px rgba($color-black, 0.6);
 
   @include mixins.mobile {
     min-height: 100vh;
@@ -231,7 +231,7 @@ export default defineComponent({
       position: absolute;
       right: 7px;
       top: 7px;
-      color: variables.$color-white;
+      color: $color-white;
 
       svg {
         width: 24px;
@@ -257,7 +257,7 @@ export default defineComponent({
 
   .header {
     position: sticky;
-    z-index: variables.$z-index-header;
+    z-index: $z-index-header;
     top: calc(env(safe-area-inset-top) + var(--header-height));
     padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);

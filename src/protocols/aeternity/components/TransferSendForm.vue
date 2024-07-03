@@ -5,6 +5,7 @@
     :fee="+fee.toFixed()"
     :fee-symbol="AE_SYMBOL"
     :protocol="PROTOCOLS.aeternity"
+    :custom-title="isActiveAccountAirGap ? $t('airGap.send.title') : undefined"
     class="transfer-send-form"
   >
     <template
@@ -73,6 +74,7 @@
             ? { address_not_same_as: [multisigVaultAddress, PROTOCOLS.aeternity] }
             : {}),
           token_to_an_address: [!isAe],
+          airgap_to_an_address: isActiveAccountAirGap,
         }"
         @openQrModal="scanTransferQrCode()"
       />
@@ -196,6 +198,8 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 
+import { type PayloadFormResolvedVal } from '@/popup/components/Modals/PayloadForm.vue';
+
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import ModalHeader from '@/popup/components/ModalHeader.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
@@ -258,6 +262,7 @@ export default defineComponent({
     const {
       accounts,
       activeAccount,
+      isActiveAccountAirGap,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
     } = useAccounts();
@@ -297,7 +302,16 @@ export default defineComponent({
       getSelectedAssetValue,
     });
 
-    const { max, fee } = useMaxAmount({ formModel });
+    const {
+      gasPrice,
+      gasUsed,
+      max,
+      fee,
+      total,
+    } = useMaxAmount({
+      formModel,
+      multisigVault: props.isMultisig ? activeMultisigAccount.value : undefined,
+    });
 
     const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
@@ -325,12 +339,13 @@ export default defineComponent({
       (): IFormSelectOption[] => prepareAccountSelectOptions(mySignerAccounts),
     );
 
-    function editPayload() {
-      openModal(MODAL_PAYLOAD_FORM, {
-        payload: formModel.value.payload,
-      }).then((text) => {
-        formModel.value.payload = text;
-      }).catch(() => null);
+    async function editPayload() {
+      try {
+        formModel.value.payload = await openModal<PayloadFormResolvedVal>(
+          MODAL_PAYLOAD_FORM,
+          { payload: formModel.value.payload },
+        );
+      } catch (error) { /* NOOP */ }
     }
 
     /**
@@ -355,8 +370,10 @@ export default defineComponent({
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
         ...formModel.value,
+        gasPrice: gasPrice.value,
+        gasUsed: gasUsed.value,
         fee: fee.value as BigNumber,
-        total: (isAe.value ? +fee.value.toFixed() : 0) + +(formModel.value?.amount || 0),
+        total: +total.value.toFixed(),
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };
@@ -437,6 +454,7 @@ export default defineComponent({
       balance,
       isTipUrl,
       activeAccount,
+      isActiveAccountAirGap,
       editPayload,
       clearPayload,
       scanTransferQrCode,
@@ -453,8 +471,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .transfer-send-form {
   .multisig-addresses-row {
@@ -477,13 +495,13 @@ export default defineComponent({
       outline: none;
 
       &:hover {
-        color: variables.$color-white;
+        color: $color-white;
       }
     }
   }
 
   .account-selector {
-    color: rgba(variables.$color-white, 0.75);
+    color: rgba($color-white, 0.75);
   }
 
   .payload-add-wrapper {

@@ -28,6 +28,8 @@ import type {
   AdapterNetworkSettingList,
   AssetAmount,
   AssetContractId,
+  IAccount,
+  IAccountRaw,
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
@@ -40,8 +42,8 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import { PROTOCOLS } from '@/constants';
-import { getLastNotEmptyAccountIndex } from '@/utils';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
+import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -58,6 +60,7 @@ import {
   ETH_MDW_TO_NODE_APPROX_DELAY_TIME,
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
+import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
@@ -100,7 +103,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       defaultValue: ETH_NETWORK_DEFAULT_ENV_SETTINGS.chainId,
       validationRules: {
         url: false,
-        is_hex_format: true,
+        numeric: true,
       },
       getPlaceholder: () => tg('pages.network.chainIdPlaceholder'),
       getLabel: () => tg('pages.network.chainIdLabel'),
@@ -197,6 +200,26 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
+  override resolveAccountRaw(
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array,
+  ): IAccount | null {
+    if (rawAccount.type !== ACCOUNT_TYPES.hdWallet) {
+      return null;
+    }
+
+    const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
+
+    return {
+      globalIdx,
+      idx,
+      ...rawAccount,
+      ...hdWallet,
+    } as IAccount;
+  }
+
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
     return getLastNotEmptyAccountIndex(
       this.isAccountUsed.bind(this),
@@ -242,6 +265,59 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       Logger.write(error);
       return undefined;
     }
+  }
+
+  override async transferPreparedTransaction({
+    to,
+    from,
+    data,
+    value,
+    gas,
+  }: any = {}): Promise<ITransferResponse> {
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { getAccountByAddress } = useAccounts();
+    const { chainId } = ethActiveNetworkSettings.value;
+    const {
+      updateFeeList,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    } = useEthFeeCalculation();
+
+    const account = getAccountByAddress(toChecksumAddress(from));
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
+    const [nonce] = await Promise.all([
+      this.getTransactionCount(from),
+      updateFeeList(),
+    ]);
+
+    if (!maxPriorityFeePerGas.value || !maxFeePerGas.value) {
+      throw new Error('Failed to calculate the fee.');
+    }
+
+    const txData: FeeMarketEIP1559TxData = {
+      chainId: toHex(chainId),
+      nonce,
+      to,
+      data,
+      value,
+      gasLimit: gas,
+      maxPriorityFeePerGas: bigIntToHex(BigInt(toWei(maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
+      maxFeePerGas: bigIntToHex(BigInt(toWei(maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
+      type: '0x02',
+    };
+
+    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+
+    const signedTx = tx.sign(account.secretKey!);
+    const serializedTx = signedTx.serialize();
+    const web3Eth = this.getWeb3EthInstance();
+    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
+    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+
+    return { hash };
   }
 
   override async transferToken(
@@ -296,7 +372,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
-      chainId,
+      chainId: toHex(chainId),
       nonce,
       to: contractId,
       data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
@@ -332,7 +408,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         transactionOwner ?? transaction.from,
         transaction.blockNumber,
       );
-      return tokenTx;
+
+      if (tokenTx) {
+        return tokenTx;
+      }
     }
 
     const block = transaction?.blockHash
@@ -435,7 +514,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
-      chainId,
+      chainId: toHex(chainId),
       nonce,
       to: recipient,
       value: hexAmount,

@@ -1,7 +1,7 @@
 import { defineRule } from 'vee-validate';
-import { required } from '@vee-validate/rules';
+import { numeric, required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
-import { debounce } from 'lodash-es';
+import { debounce, throttle } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
@@ -30,6 +30,11 @@ defineRule(
 defineRule(
   'url',
   (value: string) => !value || isUrlValid(value) || tg('validation.url'),
+);
+
+defineRule(
+  'numeric',
+  (value: string) => numeric(value) || tg('validation.numeric'),
 );
 
 defineRule(
@@ -109,18 +114,6 @@ defineRule(
   },
 );
 
-defineRule(
-  'is_hex_format',
-  (value: string) => (
-    (
-      value?.toString()?.startsWith('0x')
-      && value.length >= 3
-      && parseInt(value.slice(2), 16).toString(16) === value.slice(2).toLowerCase()
-    )
-    || tg('validation.hexFormat')
-  ),
-);
-
 export default () => {
   const { balance, updateBalances } = useBalances();
   const { currencyRates } = useCurrencies({ pollingDisabled: true });
@@ -132,6 +125,8 @@ export default () => {
     UNREGISTERED: Symbol('name state: unregistered'),
     NOT_SAME: Symbol('name state: not same as provided'),
   };
+
+  const updateBalancesThrottled = throttle(updateBalances, 1000, { trailing: false });
 
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
@@ -234,6 +229,17 @@ export default () => {
     ),
   );
 
+  /**
+   * AirGap accounts can only send funds to an address
+   */
+  defineRule(
+    'airgap_to_an_address',
+    (value: string) => (
+      !isNameValid(value)
+        || tg('validation.airGapToAnAddress')
+    ),
+  );
+
   defineRule(
     'address_not_same_as',
     (value: string, [comparedAddress, protocol]: [string, Protocol]) => (
@@ -247,7 +253,7 @@ export default () => {
   defineRule(
     'enough_coin',
     async (value: string, [amount, coinSymbol]: [number, string]) => {
-      await updateBalances(); // TODO add debounce to avoid firing to often
+      await updateBalancesThrottled();
       return balance.value.isGreaterThanOrEqualTo(amount) || tg('validation.enoughCoin', [coinSymbol || AE_SYMBOL]);
     },
   );
@@ -255,7 +261,7 @@ export default () => {
   defineRule(
     'enough_ae_signer',
     async (value: string, [arg]: [number]) => {
-      await updateBalances(); // TODO add debounce to avoid firing to often
+      await updateBalancesThrottled();
       return balance.value.isGreaterThanOrEqualTo(arg) || tg('validation.enoughAeSigner');
     },
   );

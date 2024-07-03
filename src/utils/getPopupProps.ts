@@ -4,6 +4,7 @@ import type {
   Dictionary,
   IPopupActions,
   IPopupData,
+  IPopupMessageData,
   IPopupProps,
   TxType,
 } from '@/types';
@@ -15,7 +16,6 @@ import {
   POPUP_TYPE,
   RUNNING_IN_TESTS,
 } from '@/constants';
-import { PopupMessageData } from '@/background';
 
 export function buildTx(txType: TxType) {
   const params = {
@@ -30,7 +30,7 @@ const postMessage = (() => {
   const pendingRequests: Dictionary<IPopupActions> = {};
   let background: browser.runtime.Port;
 
-  return async ({ type, payload }: PopupMessageData): Promise<IPopupData | null> => {
+  return async ({ type, payload }: IPopupMessageData): Promise<IPopupData | null> => {
     if (!IS_EXTENSION || !browser) {
       throw new Error('Supported only in browser extension');
     }
@@ -54,7 +54,7 @@ const postMessage = (() => {
   };
 })();
 
-const postMessageTest = async ({ type }: PopupMessageData): Promise<IPopupData | null> => {
+const postMessageTest = async ({ type }: IPopupMessageData): Promise<IPopupData | null> => {
   switch (type) {
     case POPUP_ACTIONS.getProps: {
       const { txType } = await browser.storage.local.get('txType');

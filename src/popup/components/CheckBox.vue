@@ -39,7 +39,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .checkbox-container {
   display: flex;
@@ -58,12 +58,12 @@ export default defineComponent({
 
   &:hover {
     .checkmark {
-      border-color: rgba(variables.$color-white, 0.5);
-      background-color: variables.$color-bg-1-hover;
+      border-color: rgba($color-white, 0.5);
+      background-color: $color-bg-1-hover;
     }
 
     .label-text {
-      color: rgba(variables.$color-white, 0.75);
+      color: rgba($color-white, 0.75);
     }
   }
 
@@ -76,9 +76,9 @@ export default defineComponent({
   }
 
   .checkmark {
-    background-color: variables.$color-bg-1;
-    border: 1px solid rgba(variables.$color-white, 0.3);
-    box-shadow: inset 1 1 4px rgba(variables.$color-black, 0.25);
+    background-color: $color-bg-1;
+    border: 1px solid rgba($color-white, 0.3);
+    box-shadow: inset 1 1 4px rgba($color-black, 0.25);
     border-radius: 4px;
     height: 20px;
     width: 20px;
@@ -88,7 +88,7 @@ export default defineComponent({
     &.checked {
       border: none;
       box-shadow: none;
-      background-color: variables.$color-primary;
+      background-color: $color-primary;
       background-image: url('../../icons/checkbox-checked.svg');
 
       &.disabled {
@@ -98,10 +98,10 @@ export default defineComponent({
   }
 
   .label-text {
-    color: rgba(variables.$color-white, 0.5);
+    color: rgba($color-white, 0.5);
 
     &.checked {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 }
