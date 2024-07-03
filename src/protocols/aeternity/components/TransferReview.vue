@@ -228,6 +228,11 @@ export default defineComponent({
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
     } = useMultisigAccounts();
+    const {
+      buildSpendTx,
+      proposeTx,
+      postSpendTx,
+    } = useMultisigTransactions();
     const { getTippingContracts } = useTippingContracts();
     const {
       createOrChangeAllowance,
@@ -416,9 +421,6 @@ export default defineComponent({
     async function proposeMultisigTransaction() {
       loading.value = true;
       try {
-        const {
-          buildSpendTx, proposeTx, postSpendTx,
-        } = useMultisigTransactions();
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
             activeMultisigAccount.value.gaAccountId as Encoded.AccountAddress,
