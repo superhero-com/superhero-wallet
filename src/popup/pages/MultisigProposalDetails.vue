@@ -102,7 +102,7 @@
                   :secondary="expirationHeightToRelativeTime"
                 />
                 <DetailsItem
-                  v-else-if="transaction"
+                  v-else-if="transaction?.blockHeight"
                   :value="transaction.blockHeight"
                   :label="$t('pages.transactionDetails.blockHeight')"
                 />
