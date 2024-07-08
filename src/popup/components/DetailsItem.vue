@@ -8,7 +8,7 @@
   >
     <Component
       :is="expandable ? 'BtnPlain' : 'div'"
-      class="label"
+      class="text-label label"
       @click="toggleExpanded()"
     >
       {{ label }}
@@ -89,13 +89,9 @@ export default defineComponent({
   margin-top: 12px;
 
   .label {
-    @extend %face-sans-15-medium;
-
     display: flex;
     align-items: center;
     margin-bottom: 4px;
-    line-height: 16px;
-    color: rgba($color-white, 0.5);
 
     .indent {
       margin-left: 8px;
