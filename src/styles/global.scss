@@ -314,12 +314,13 @@ hr {
     margin-bottom: 1em;
     line-height: 24px;
   }
-}
 
-.label-text {
-  @extend %face-sans-15-medium;
+  &-label {
+    @extend %face-sans-15-medium;
 
-  color: $color-grey-dark;
+    line-height: 16px;
+    color: rgba($color-white, 0.5);
+  }
 }
 
 .relative {

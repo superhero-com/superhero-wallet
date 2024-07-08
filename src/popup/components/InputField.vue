@@ -16,7 +16,7 @@
     >
       <label
         :for="inputId"
-        class="label-text"
+        class="text-label"
         @click="$emit('click', $event)"
       >
         <slot name="label">{{ label }}</slot>
@@ -283,6 +283,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     margin-top: 16px;
+    margin-bottom: 2px;
 
     &-text {
       margin: 4px 0;

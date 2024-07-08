@@ -4,15 +4,17 @@
     class="payload"
   >
     <div class="payload-header">
-      <span class="label-text">
-        {{ $t('modals.send.payload') }}
-      </span>
+      <span
+        class="text-text"
+        v-text="$t('modals.send.payload')"
+      />
       <slot />
     </div>
 
-    <div class="payload-text">
-      {{ payload }}
-    </div>
+    <div
+      class="payload-text"
+      v-text="payload"
+    />
   </div>
 </template>
 
