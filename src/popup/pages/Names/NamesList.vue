@@ -26,7 +26,7 @@
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent, onUnmounted } from 'vue';
 import { executeAndSetInterval } from '@/utils';
-import { useAccounts, useUi } from '@/composables';
+import { useAccounts, useAeSdk, useUi } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import NameItem from '../../components/NameItem.vue';
@@ -46,10 +46,23 @@ export default defineComponent({
   setup() {
     const { isAppActive } = useUi();
     const { activeAccount } = useAccounts();
-    const { areNamesFetching, ownedNames, updateOwnedNames } = useAeNames();
+    const { nodeNetworkId } = useAeSdk();
+    const {
+      areNamesFetching, ownedNames, preclaimedNames, updateOwnedNames,
+    } = useAeNames();
 
     const namesForAccount = computed(
-      () => ownedNames.value.filter(({ owner }) => owner === activeAccount.value.address),
+      () => [
+        ...preclaimedNames.value[nodeNetworkId.value!]
+          ? Object.values(preclaimedNames.value[nodeNetworkId.value!])
+            .filter(({ address }) => address === activeAccount.value.address)
+            .map((preclaimedName) => ({
+              ...preclaimedName,
+              pending: true,
+            }))
+          : [],
+        ...ownedNames.value.filter(({ owner }) => owner === activeAccount.value.address),
+      ],
     );
 
     const id = executeAndSetInterval(() => {
