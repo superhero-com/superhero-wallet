@@ -1329,7 +1329,7 @@
     "minValueExclusive": "This field must be more than {0}",
     "enoughCoin": "{0} balance is not enough to pay for transaction fee",
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
-    "maxLength": "The value should be no longer than {0} characters",
+    "maxLength": "Maximum {0} characters are allowed in this field",
     "maxValue": "This field must be {0} or less",
     "maxRedeem": "Maximum redeemable amount is {0} AE.",
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",

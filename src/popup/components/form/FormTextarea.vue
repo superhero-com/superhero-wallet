@@ -20,7 +20,6 @@
         :value="modelValue"
         :rows="1"
         :disabled="readonly"
-        :maxlength="textLimit"
         @keydown.enter.prevent="handleEnterClick"
         @input="(payload) => handleInput(payload as InputEvent)"
         @blur="(payload) => handleInput(payload as unknown as InputEvent)"
