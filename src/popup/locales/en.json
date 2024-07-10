@@ -2,6 +2,7 @@
   "common": {
     "activeAccount": "Active account",
     "address": "Address",
+    "name": "Name",
     "addressCopied": "Copied",
     "ae": "AE",
     "all": "All",
@@ -62,6 +63,7 @@
     "tokens": "tokens",
     "on": "On",
     "off": "Off",
+    "share": "Share",
     "transferSpeed": {
       "fast": "Fast",
       "medium": "Medium",
@@ -262,7 +264,7 @@
           "msg": "{0} scan QR code or manually enter recipient’s account address."
         },
         "chain": {
-          "title":"Send to .chain name",
+          "title": "Send to .chain name",
           "linkTitle": "claim your own .chain name",
           "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses!"
         }
@@ -362,7 +364,6 @@
       "title": "Receive {name} to public address",
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
-      "share": "Share",
       "shareTextNoAmount": "My {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}",
       "shareTextWithAmount": "{amount} {coinSymbol} has been requested. Send to {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}"
     },
@@ -587,10 +588,47 @@
       "networkEdit": "Edit network",
       "notFound": "Feature not found",
       "multisigProposalDetails": "Multisig Tx proposal details",
-      "appsBrowser": "Browse the æcosystem"
+      "appsBrowser": "Browse the æcosystem",
+      "addressBook": "Address book",
+      "addressBookEdit": "Edit address record",
+      "addressBookAdd": "Add new address"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
+    },
+    "addressBook": {
+      "addAddress": "Add",
+      "importAddressBook": "Import",
+      "exportAddressBook": "Export",
+      "searchPlaceholder": "Search for name or {0}address",
+      "scanTitle": "Scan the address you want to add",
+      "selectAddress": "Select recipient’s address",
+      "noRecords": {
+        "addressBook": "There are no records in your address book.",
+        "blockchain": "Currently there are no address records for the blockchain selected.",
+        "bookmarked": "There are no bookmarked address records.",
+        "search": "No address records found for your search query."
+      },
+      "entry": {
+        "delete": "Delete address record",
+        "customName": "Custom name",
+        "bookmark": "Bookmark",
+        "bookmarked": "Bookmarked",
+        "namePlaceholder": "Enter custom name",
+        "addressPlaceholder": "Enter public blockchain address"
+      },
+      "import": {
+        "title": "Importing records",
+        "subtitle": "into wallet address book",
+        "importing": "Importing",
+        "success": "Successfully imported",
+        "failed": "Failed to import",
+        "existing": "Already existing"
+      },
+      "export": {
+        "title": "Exported Address Book",
+        "message": "Address book exported successfully. You can find the file at: "
+      }
     },
     "secureLogin": {
       "description": "Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
@@ -603,12 +641,12 @@
       },
       "authenticationTimeout": "Immediately | After {n} min inactivity | After {n} min inactivity",
       "available": {
-        "part1":"Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
+        "part1": "Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
         "part2": "You can enable this feature later in the Superhero wallet settings."
       },
       "unavailable": {
-        "part1":"Superhero Wallet  supports secure login with your mobile device authentication preferences.",
-        "part2":"Your mobile device does not have secure authentication enabled currently. Would you like to enable it now?"
+        "part1": "Superhero Wallet  supports secure login with your mobile device authentication preferences.",
+        "part2": "Your mobile device does not have secure authentication enabled currently. Would you like to enable it now?"
       },
       "unsupportedDevice": "This feature is currently not supported by the Superhero Wallet browser extension. {'<'}br /{'>'} {'<'}br /{'>'} Secure login is available only to the users of Superhero Wallet mobile apps at the moment.",
       "walletLocked": "Wallet locked",
@@ -641,7 +679,8 @@
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "Update available",
       "updateAvailableText": "There is a new wallet version available for download in the store",
-      "claim-name": "Claim your .chain name"
+      "claim-name": "Claim your .chain name",
+      "shareAddress": "Share your public address"
     },
     "accounts": {
       "addAccount": "Add account",
@@ -1297,7 +1336,8 @@
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",
     "invalidAddress": "Invalid account address",
-    "doesNotExceedDecimals": "Amount should not exceed {0} decimals"
+    "doesNotExceedDecimals": "Amount should not exceed {0} decimals",
+    "addressBookEntryExists": "This {0} already exists in your address book"
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

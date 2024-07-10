@@ -6,6 +6,7 @@ import {
 } from 'vue';
 import type {
   IModalProps,
+  Protocol,
   ProtocolView,
   StatusIconType,
 } from '@/types';
@@ -16,6 +17,7 @@ import {
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
   MODAL_SCAN_QR,
+  MODAL_SHARE_ADDRESS,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
@@ -179,6 +181,14 @@ export function useModals() {
     return openModal<string>(MODAL_SCAN_QR, options);
   }
 
+  function openShareAddressModal(options: {
+    address: string;
+    protocol: Protocol;
+    title?: string;
+  }) {
+    openModal(MODAL_SHARE_ADDRESS, options);
+  }
+
   return {
     modalsOpen,
     registerModal,
@@ -187,6 +197,7 @@ export function useModals() {
     openConfirmModal,
     openErrorModal,
     openScanQrModal,
+    openShareAddressModal,
     closeModalByKey,
   };
 }

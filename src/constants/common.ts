@@ -134,6 +134,7 @@ export const STORAGE_KEYS = {
   transferSendData: 'transfer-send-data',
   secureLogin: 'secure-login',
   walletConnectSession: 'wallet-connect-session',
+  addressBook: 'address-book',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -340,6 +341,9 @@ export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
 export const MODAL_AIR_GAP_IMPORT_ACCOUNTS = 'air-gap-import-accounts';
 export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
+export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
+export const MODAL_SHARE_ADDRESS = 'share-address';
+export const MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR = 'address-book-account-selector';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';

@@ -37,6 +37,9 @@ import {
   MODAL_ENABLE_SECURE_LOGIN,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
+  MODAL_ADDRESS_BOOK_IMPORT,
+  MODAL_SHARE_ADDRESS,
+  MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -76,6 +79,9 @@ import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
 import WalletConnect from '../components/Modals/WalletConnectModal.vue';
 import AirGapImportAccounts from '../components/Modals/AirGapImportAccounts.vue';
 import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vue';
+import AddressBookImport from '../components/Modals/AddressBookImport.vue';
+import ShareAddress from '../components/ShareAddress.vue';
+import AddressBookAccountSelector from '../components/Modals/AddressBookAccountSelector.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -195,5 +201,14 @@ export default () => {
   });
   registerModal(MODAL_SIGN_AIR_GAP_TRANSACTION, {
     component: SignAirGapTransaction,
+  });
+  registerModal(MODAL_ADDRESS_BOOK_IMPORT, {
+    component: AddressBookImport,
+  });
+  registerModal(MODAL_SHARE_ADDRESS, {
+    component: ShareAddress,
+  });
+  registerModal(MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, {
+    component: AddressBookAccountSelector,
   });
 };
