@@ -30,6 +30,7 @@
       <div
         v-if="$slots['label-after'] || textLimit"
         class="label-after"
+        :class="{ red: availableTextLimit < 0 && !$slots['label-after'] }"
       >
         <slot name="label-after">
           {{ availableTextLimit }}
@@ -62,7 +63,6 @@
             data-cy="input"
             :value="modelValue"
             :disabled="readonly"
-            :maxlength="textLimit"
             :inputmode="inputMode"
             :autocapitalize="autoCapitalize"
             @input="handleInput"
@@ -300,6 +300,10 @@ export default defineComponent({
       margin-left: auto;
       user-select: none;
       color: $color-grey-dark;
+
+      &.red {
+        color: $color-danger;
+      }
     }
   }
 
