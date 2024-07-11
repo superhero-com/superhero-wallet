@@ -10,6 +10,7 @@
             required: true,
             aens_name: true,
             aens_name_unregistered: true,
+            max_len: maxNameLength,
           }"
         >
           <InputField
@@ -20,9 +21,13 @@
             :label="$t('pages.names.claim.register-name')"
             :message="errorMessage"
             :placeholder="$t('pages.names.claim.name-placeholder')"
+            :text-limit="maxNameLength"
           >
             <template #label-after>
-              <span class="chain-name-counter">
+              <span
+                class="chain-name-counter"
+                :class="{ red: maxNameLength - name.length < 0 }"
+              >
                 {{ name.length }}/{{ maxNameLength }}
               </span>
             </template>
@@ -149,7 +154,7 @@ export default defineComponent({
     const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
     const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
 
-    const totalNameClaimAmount = computed(() => !name.value.length
+    const totalNameClaimAmount = computed(() => !isNameValid.value
       ? BigNumber(0)
       : BigNumber(unpackTx(
         buildTx({
@@ -262,6 +267,10 @@ export default defineComponent({
       @extend %face-sans-13-regular;
 
       color: $color-grey-dark;
+
+      &.red {
+        color: $color-danger;
+      }
     }
 
     .aens-domain {
