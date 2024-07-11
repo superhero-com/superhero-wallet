@@ -54,12 +54,20 @@
             }"
           >
             <template #label-after>
-              <BtnPlain
-                class="scan-button"
-                @click.prevent="scanSignerAccountQrCode(index)"
-              >
-                <QrScanIcon />
-              </BtnPlain>
+              <div class="buttons">
+                <BtnPlain
+                  class="address-book-button"
+                  @click="updateSignerFromAddressBook(index)"
+                >
+                  <AddressBookIcon />
+                </BtnPlain>
+                <BtnPlain
+                  class="scan-button"
+                  @click.prevent="scanSignerAccountQrCode(index)"
+                >
+                  <QrScanIcon />
+                </BtnPlain>
+              </div>
             </template>
             <template #after>
               <BtnPlain
@@ -195,6 +203,7 @@ import {
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
+  MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
   PROTOCOLS,
 } from '@/constants';
 import {
@@ -231,6 +240,7 @@ import MultisigVaultCreateProgress from '../MultisigVaultCreateProgress.vue';
 
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
+import AddressBookIcon from '../../../icons/menu-card-fill.svg?vue-component';
 
 const STEPS = {
   form: 'form',
@@ -250,12 +260,13 @@ export default defineComponent({
     BtnText,
     BtnHelp,
     MultisigVaultCreateProgress,
-    QrScanIcon,
-    PlusCircleIcon,
     MultisigVaultCreateReview,
     FormSelect,
     Field,
     Form,
+    QrScanIcon,
+    PlusCircleIcon,
+    AddressBookIcon,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -266,7 +277,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { aeAccountsSelectOptions } = useAccounts();
-    const { openDefaultModal, openScanQrModal } = useModals();
+    const { openDefaultModal, openScanQrModal, openModal } = useModals();
     const errors = useFormErrors();
 
     const {
@@ -329,6 +340,33 @@ export default defineComponent({
       signers.value.splice(index, 1);
     }
 
+    function updateSigner(index: number, address: Encoded.AccountAddress) {
+      // Check if signer address already added
+      if (
+        signers.value.find((signer) => signer.address === address)
+        && signers.value[index].address !== address
+      ) {
+        openDefaultModal({
+          title: t('modals.createMultisigAccount.errorDuplicatingSigner'),
+          icon: 'critical',
+        });
+        return;
+      }
+
+      // Update the signer address
+      signers.value[index].address = address;
+    }
+
+    async function updateSignerFromAddressBook(index: number) {
+      const address = await openModal<Encoded.AccountAddress>(
+        MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
+        { protocol: PROTOCOLS.aeternity },
+      );
+      if (address) {
+        updateSigner(index, address);
+      }
+    }
+
     function getErrorMessage(signer: ICreateMultisigAccount) {
       return checkIfSignerAddressDuplicated(signer)
         ? t('modals.createMultisigAccount.errorDuplicatingInputMessage')
@@ -357,17 +395,7 @@ export default defineComponent({
         return;
       }
 
-      // Check if signer address already added
-      if (signers.value.find((signer) => signer.address === scanResult)) {
-        openDefaultModal({
-          title: t('modals.createMultisigAccount.errorDuplicatingSigner'),
-          icon: 'critical',
-        });
-        return;
-      }
-
-      // Update the signer address
-      signers.value[signerIndex].address = scanResult as Encoded.AccountAddress;
+      updateSigner(signerIndex, scanResult as Encoded.AccountAddress);
     }
 
     function getSignerLabel(index: number) {
@@ -411,7 +439,7 @@ export default defineComponent({
 
     async function navigateToMultisigVault() {
       if (multisigAccount.value) {
-        await props.resolve();
+        props.resolve();
         setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
         router.push({ name: ROUTE_MULTISIG_ACCOUNT });
       }
@@ -463,6 +491,7 @@ export default defineComponent({
       getSignerLabel,
       navigateToMultisigVault,
       checkIfSignerAddressDuplicated,
+      updateSignerFromAddressBook,
       notEnoughBalanceToCreateMultisig,
     };
   },
@@ -512,6 +541,32 @@ export default defineComponent({
         &:hover {
           opacity: 0.8;
         }
+      }
+    }
+
+    .buttons {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      height: 20px;
+      color: $color-white;
+
+      > * {
+        opacity: 0.75;
+        transition: $transition-interactive;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+
+      .address-book-button {
+        width: 20px;
+      }
+
+      .scan-button {
+        width: 30px;
       }
     }
 

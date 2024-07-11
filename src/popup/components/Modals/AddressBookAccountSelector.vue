@@ -25,7 +25,7 @@ import {
 } from 'vue';
 import { IonPage } from '@ionic/vue';
 
-import type { ResolveCallback, RejectCallback } from '@/types';
+import type { ResolveCallback, RejectCallback, Protocol } from '@/types';
 import { useAccounts, useAddressBook } from '@/composables';
 
 import Modal from '@/popup/components/Modal.vue';
@@ -40,6 +40,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    protocol: { type: String as PropType<Protocol>, default: null },
   },
   setup(props) {
     const { activeAccount } = useAccounts();
@@ -50,7 +51,7 @@ export default defineComponent({
     }
 
     onBeforeMount(() => {
-      setProtocolFilter(activeAccount.value?.protocol);
+      setProtocolFilter(props.protocol ?? activeAccount.value?.protocol);
     });
 
     onUnmounted(() => {
