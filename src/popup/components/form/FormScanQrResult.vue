@@ -1,21 +1,20 @@
 <template>
   <FormTextarea
-    class="form-input-with-qr"
+    class="form-scan-qr-result"
     :model-value="modelValue"
     :label="label"
     :placeholder="placeholder"
+    :auto-height="autoHeight"
     size="xxs"
     resizable
     @input="$emit('update:modelValue', $event.target.value)"
   >
     <template #label-after>
-      <BtnPlain
-        class="scan-button"
+      <BtnIcon
+        :icon="QrScanIcon"
         data-cy="scan-button"
         @click="scanQr()"
-      >
-        <QrScanIcon />
-      </BtnPlain>
+      />
     </template>
   </FormTextarea>
 </template>
@@ -25,21 +24,21 @@ import { defineComponent } from 'vue';
 import { useModals } from '@/composables';
 
 import FormTextarea from './FormTextarea.vue';
-import BtnPlain from '../buttons/BtnPlain.vue';
+import BtnIcon from '../buttons/BtnIcon.vue';
 
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   components: {
     FormTextarea,
-    BtnPlain,
-    QrScanIcon,
+    BtnIcon,
   },
   props: {
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
     label: { type: String, default: '' },
     qrTitle: { type: String, default: '' },
+    autoHeight: Boolean,
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
@@ -55,19 +54,9 @@ export default defineComponent({
     }
 
     return {
+      QrScanIcon,
       scanQr,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '@/styles/variables' as *;
-
-.form-input-with-qr .scan-button {
-  color: $color-white;
-  display: block;
-  width: 32px;
-  height: 24px;
-}
-</style>

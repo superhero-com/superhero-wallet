@@ -37,7 +37,7 @@
               </BtnPill>
             </Field>
           </div>
-          <BtnPlain
+          <BtnIcon
             class="qrcode-wrapper"
             :disabled="isPlaceholder"
             @click="shareAddress()"
@@ -49,7 +49,7 @@
               :class="{ hidden: isPlaceholder }"
               disable-click-to-copy
             />
-          </BtnPlain>
+          </BtnIcon>
         </div>
         <div class="inputs">
           <Field
@@ -98,13 +98,11 @@
               :placeholder="$t('pages.addressBook.entry.addressPlaceholder')"
             >
               <template #label-after>
-                <BtnPlain
-                  class="scan-button"
+                <BtnIcon
+                  :icon="QrScanIcon"
                   data-cy="scan-button"
                   @click="scanQr()"
-                >
-                  <QrScanIcon />
-                </BtnPlain>
+                />
               </template>
             </FormTextarea>
           </Field>
@@ -162,7 +160,7 @@ import {
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnPill from '@/popup/components/buttons/BtnPill.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import QrCode from '@/popup/components/QrCode.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
@@ -181,12 +179,11 @@ export default defineComponent({
     FormTextarea,
     BtnMain,
     BtnPill,
-    BtnPlain,
+    BtnIcon,
     QrCode,
     IconWrapper,
     FixedScreenFooter,
     Field,
-    QrScanIcon,
   },
   setup() {
     const defaultName = tg('pages.addressBook.entry.customName');
@@ -304,6 +301,7 @@ export default defineComponent({
       shareAddress,
 
       FavoriteIcon,
+      QrScanIcon,
       TrashIcon,
     };
   },
@@ -374,15 +372,6 @@ export default defineComponent({
             opacity: 0;
           }
         }
-      }
-    }
-
-    .inputs {
-      .scan-button {
-        display: block;
-        width: 32px;
-        height: 24px;
-        color: $color-white;
       }
     }
   }
