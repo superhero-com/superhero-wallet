@@ -55,29 +55,23 @@
           >
             <template #label-after>
               <div class="buttons">
-                <BtnPlain
-                  class="address-book-button"
+                <BtnIcon
+                  :icon="AddressBookIcon"
                   @click="updateSignerFromAddressBook(index)"
-                >
-                  <AddressBookIcon />
-                </BtnPlain>
-                <BtnPlain
-                  class="scan-button"
+                />
+                <BtnIcon
+                  :icon="QrScanIcon"
                   @click.prevent="scanSignerAccountQrCode(index)"
-                >
-                  <QrScanIcon />
-                </BtnPlain>
+                />
               </div>
             </template>
             <template #after>
               <BtnPlain
                 v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
-                class="btn-plain"
+                class="btn-remove-signer"
                 @click="removeSigner(index)"
               >
-                <PlusCircleIcon
-                  class="btn-remove-signer"
-                />
+                <PlusCircleIcon class="remove-signer-icon" />
               </BtnPlain>
             </template>
           </FormTextarea>
@@ -230,6 +224,7 @@ import {
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnPlain from '../buttons/BtnPlain.vue';
+import BtnIcon from '../buttons/BtnIcon.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import FormSelect from '../form/FormSelect.vue';
@@ -257,6 +252,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     BtnPlain,
+    BtnIcon,
     BtnText,
     BtnHelp,
     MultisigVaultCreateProgress,
@@ -264,9 +260,7 @@ export default defineComponent({
     FormSelect,
     Field,
     Form,
-    QrScanIcon,
     PlusCircleIcon,
-    AddressBookIcon,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -463,6 +457,8 @@ export default defineComponent({
     );
 
     return {
+      QrScanIcon,
+      AddressBookIcon,
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
@@ -509,13 +505,6 @@ export default defineComponent({
   // Step 1
 
   &-form {
-    .scan-button {
-      color: $color-white;
-      display: block;
-      width: 32px;
-      height: 24px;
-    }
-
     .signers-add-wrapper {
       display: flex;
       align-items: center;
@@ -527,10 +516,10 @@ export default defineComponent({
       }
     }
 
-    .btn-plain {
+    .btn-remove-signer {
       display: flex;
 
-      .btn-remove-signer {
+      .remove-signer-icon {
         width: 20px !important;
         margin: -4px -6px -4px 0;
         transform: rotate(45deg);
@@ -549,25 +538,6 @@ export default defineComponent({
       align-items: center;
       justify-content: flex-end;
       gap: 4px;
-      height: 20px;
-      color: $color-white;
-
-      > * {
-        opacity: 0.75;
-        transition: $transition-interactive;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
-
-      .address-book-button {
-        width: 20px;
-      }
-
-      .scan-button {
-        width: 30px;
-      }
     }
 
     .description,

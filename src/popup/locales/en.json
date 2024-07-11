@@ -34,7 +34,7 @@
     "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
     "nonce": "Nonce",
-    "noProtocolAccountFound": "No {protocol} account found",
+    "noProtocolAccountFound": "No {protocolName} account found. You need to add an {protocolName} account to your wallet first.",
     "of": "of",
     "ok": "OK",
     "pending": "Pending",

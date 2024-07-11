@@ -19,7 +19,10 @@
     @close="closeModal()"
   >
     <div class="top-icon-wrapper">
-      <IconBoxed :icon="QrScanIcon" />
+      <IconBoxed
+        :icon="QrScanIcon"
+        icon-padded
+      />
     </div>
     <div
       class="heading text-heading-4"

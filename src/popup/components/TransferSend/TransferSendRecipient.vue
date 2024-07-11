@@ -27,20 +27,16 @@
       >
         <template #label-after>
           <div class="buttons">
-            <BtnPlain
-              class="address-book-button"
+            <BtnIcon
+              :icon="AddressBookIcon"
               data-cy="address-book-button"
               @click="selectFromAddressBook()"
-            >
-              <AddressBookIcon />
-            </BtnPlain>
-            <BtnPlain
-              class="scan-button"
+            />
+            <BtnIcon
+              :icon="QrScanIcon"
               data-cy="scan-button"
               @click="$emit('openQrModal')"
-            >
-              <QrScanIcon />
-            </BtnPlain>
+            />
           </div>
         </template>
       </FormTextarea>
@@ -73,7 +69,7 @@ import { useAeTippingUrls } from '@/protocols/aeternity/composables';
 
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
@@ -83,9 +79,7 @@ export default defineComponent({
     FormTextarea,
     UrlStatus,
     Field,
-    BtnPlain,
-    QrScanIcon,
-    AddressBookIcon,
+    BtnIcon,
   },
   props: {
     isTipUrl: Boolean,
@@ -134,6 +128,8 @@ export default defineComponent({
     }
 
     return {
+      QrScanIcon,
+      AddressBookIcon,
       urlStatus,
       activeAccount,
       addressMessage,
@@ -157,25 +153,6 @@ export default defineComponent({
     align-items: center;
     justify-content: flex-end;
     gap: 4px;
-    height: 20px;
-    color: $color-white;
-
-    > * {
-      opacity: 0.75;
-      transition: $transition-interactive;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-
-    .address-book-button {
-      width: 20px;
-    }
-
-    .scan-button {
-      width: 30px;
-    }
   }
 }
 </style>

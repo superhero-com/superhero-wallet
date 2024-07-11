@@ -339,6 +339,10 @@ hr {
   &-warning-muted {
     color: rgba($color-warning, 0.75);
   }
+
+  &-danger {
+    color: $color-danger;
+  }
 }
 
 .styled-scrollbar,

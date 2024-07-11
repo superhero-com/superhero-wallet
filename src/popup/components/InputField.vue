@@ -282,11 +282,10 @@ export default defineComponent({
   .label {
     display: flex;
     align-items: center;
-    margin-top: 16px;
-    margin-bottom: 2px;
+    margin-block: 16px 2px;
 
     &-text {
-      margin: 4px 0;
+      margin: 4px 0 2px 0;
       display: inline-block;
       user-select: none;
     }

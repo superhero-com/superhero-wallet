@@ -58,8 +58,8 @@
                 key="btn-wallet-connect"
                 data-cy="btn-wallet-connect"
                 :icon="WalletConnectLogo"
-                :icon-variant="(wcSession) ? 'success' : 'default'"
-                :dimmed="!wcSession"
+                :icon-variant="(isOnline && wcSession) ? 'success' : 'default'"
+                :dimmed="!isOnline || !wcSession"
                 @click="openWalletConnectModal()"
               />
 
@@ -108,6 +108,7 @@ import {
 } from '@/popup/router/routeNames';
 import {
   useAccounts,
+  useConnection,
   useModals,
   useUi,
   useWalletConnect,
@@ -145,6 +146,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
+    const { isOnline } = useConnection();
     const { isLoggedIn } = useAccounts();
     const { openModal } = useModals();
     const { wcSession } = useWalletConnect();
@@ -245,6 +247,7 @@ export default defineComponent({
       isLoggedIn,
       showHeaderNavigation,
       isLogoDisabled,
+      isOnline,
       titleTruncated,
       wcSession,
       back,
