@@ -32,7 +32,7 @@ export default defineComponent({
     value: { type: Object as PropType<IAsset>, default: null },
     disabled: Boolean,
     focused: Boolean,
-    showTokensWithBalance: Boolean,
+    withBalanceOnly: Boolean,
   },
   emits: ['select-asset'],
   setup(props, { emit }) {
@@ -54,7 +54,7 @@ export default defineComponent({
       if (!props.disabled) {
         openModal<AssetSelectorResolvedVal>(MODAL_ASSET_SELECTOR, {
           selectedToken: props.value,
-          showTokensWithBalance: props.showTokensWithBalance,
+          withBalanceOnly: props.withBalanceOnly,
           resolve: (token) => token,
         })
           .then((token) => handleChange(token))
