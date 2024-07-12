@@ -11,20 +11,12 @@
             v-for="{ code, name } in languageList"
             :key="code"
             :value="activeLanguage === code"
-            :disabled="false"
             class="language"
-            :class="[{ active: activeLanguage === code }]"
+            :class="{ active: activeLanguage === code }"
             @input="switchLanguage(code)"
           >
-            <div
-              class="row"
-              @click="switchLanguage(code)"
-            >
-              <div>
-                {{ name }}
-                <span>({{ code }})</span>
-              </div>
-            </div>
+            {{ name }}
+            <span class="language-code">({{ code }})</span>
           </RadioButton>
         </div>
       </div>
@@ -70,25 +62,10 @@ export default defineComponent({
   }
 
   .language {
-    @extend %face-sans-14-medium;
-
     padding: 6px 0;
-    opacity: 0.5;
-
-    &.active {
-      opacity: 1;
-    }
 
     .language-code {
       text-transform: uppercase;
-    }
-
-    .row {
-      width: 100%;
-      display: inline-flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 4px;
     }
   }
 }

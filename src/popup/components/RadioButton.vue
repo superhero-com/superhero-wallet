@@ -1,12 +1,12 @@
 <template>
   <label
     class="radio-button"
-    :class="{ disabled }"
+    :class="{
+      disabled,
+      checked: value,
+    }"
   >
-    <span
-      class="radio-dot"
-      :class="{ checked: value }"
-    >
+    <span class="radio-dot">
       <input
         class="input"
         :disabled="disabled"
@@ -16,22 +16,19 @@
       >
     </span>
 
-    <span
-      class="radio-holder"
-      :class="{ checked: value }"
-    >
+    <span class="radio-holder">
       <slot />
     </span>
   </label>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 export default defineComponent({
   props: {
     value: { type: [String, Number, Boolean], default: '' },
-    type: { type: String, default: 'checkbox' },
+    type: { type: String as PropType<'checkbox' | 'radio'>, default: 'checkbox' },
     name: { type: String, default: '' },
     disabled: Boolean,
   },
@@ -41,15 +38,27 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
+@use '@/styles/typography';
 
 .radio-button {
-  @include mixins.flex(flex-start, center);
+  --radio-dot-scale: 0;
 
+  @extend %face-sans-15-medium;
+
+  display: flex;
   cursor: pointer;
   user-select: none;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+
+  &.checked {
+    --radio-dot-scale: 1;
+
+    opacity: 1;
+  }
 
   &.disabled {
-    opacity: 50%;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
@@ -62,46 +71,31 @@ export default defineComponent({
 
   .radio-dot {
     position: relative;
-    border-radius: 50%;
-    border: 1px solid rgba($color-white, 0.5);
     width: 20px;
     height: 20px;
-    background: var(--screen-bg-color);
+    margin-top: 2px;
     margin-right: 6px;
-    opacity: 0.5;
+    border-radius: 50%;
+    background: var(--screen-bg-color);
+    box-shadow: inset 0 0 0 1px rgba($color-white, 0.5);
     flex-shrink: 0;
 
     &::after {
       content: '';
       position: absolute;
-      border-radius: 50%;
-      width: 0;
-      height: 0;
       top: 50%;
       left: 50%;
+      width: 70%;
+      height: 70%;
+      border-radius: inherit;
       background: $color-primary;
+      transform: translate(-50%, -50%) scale(var(--radio-dot-scale));
       transition: all 0.15s ease-in-out;
-      transform: translate(-50%, -50%);
-    }
-
-    &.checked {
-      opacity: 1;
-
-      &::after {
-        width: 14px;
-        height: 14px;
-        opacity: 1;
-      }
     }
   }
 
   .radio-holder {
     width: 100%;
-    opacity: 0.5;
-
-    &.checked {
-      opacity: 1;
-    }
   }
 }
 </style>
