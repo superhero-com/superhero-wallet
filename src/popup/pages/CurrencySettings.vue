@@ -15,10 +15,7 @@
             class="currency"
             @input="setCurrentCurrency(code)"
           >
-            <div
-              class="row"
-              @click="setCurrentCurrency(code)"
-            >
+            <div class="row">
               <div class="left">
                 <div class="code">
                   {{ code }}
@@ -83,36 +80,22 @@ export default defineComponent({
 
     .row {
       width: 100%;
-      display: inline-flex;
+      display: flex;
       align-items: center;
 
       .left {
-        display: inline-flex;
-        align-items: center;
         width: 95px;
+        display: flex;
 
         .code,
         .symbol {
           text-transform: uppercase;
           padding-right: 2px;
-          color: rgba($color-white, 0.5);
-
-          @extend %face-sans-15-regular;
         }
       }
 
       .name {
-        color: rgba($color-white, 0.75);
-
-        @extend %face-sans-14-regular;
-      }
-    }
-
-    &.active .row {
-      .name,
-      .left .code,
-      .left .symbol {
-        color: rgba($color-white, 1);
+        font-weight: 400;
       }
     }
   }
