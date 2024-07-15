@@ -35,7 +35,7 @@
             </template>
           </PanelItem>
           <PanelItem
-            :to="{ name: 'invite' }"
+            :to="{ name: ROUTE_INVITE }"
             :title="$t('pages.titles.giftCards')"
             :disabled="!isActiveAccountAe"
             data-cy="invite"
@@ -104,7 +104,7 @@ import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useAccounts, useAddressBook, useAeSdk } from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
-import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
+import { ROUTE_ADDRESS_BOOK, ROUTE_INVITE } from '@/popup/router/routeNames';
 
 import PanelItem from '../components/PanelItem.vue';
 
@@ -151,6 +151,7 @@ export default defineComponent({
       BUG_REPORT_URL,
       UNFINISHED_FEATURES,
       ROUTE_ADDRESS_BOOK,
+      ROUTE_INVITE,
       activeAccountFaucetUrl,
       addressBookCount,
       isActiveAccountAe,
