@@ -3,7 +3,6 @@
     class="wallet-connect-modal"
     from-bottom
     has-close-button
-    centered
     @close="reject()"
   >
     <div
@@ -94,8 +93,10 @@
       QR Scanner + connection URI input
     -->
     <div v-else>
-      <h2 class="text-heading-4" v-text="$t('walletConnect.modalTitle')" />
-      <p v-text="$t('walletConnect.modalSubtitle')" />
+      <div class="text-center">
+        <h2 class="text-heading-4" v-text="$t('walletConnect.modalTitle')" />
+        <p v-text="$t('walletConnect.modalSubtitle')" />
+      </div>
 
       <InfoBox
         v-if="error"
@@ -151,11 +152,11 @@
         @click="disconnectFromDapp()"
       />
       <BtnMain
-        v-else-if="ethAccounts.length"
+        v-else
         :text="(connecting) ? $t('common.connecting') : $t('common.connect')"
-        extend
         :icon="WalletConnectLogo"
-        :disabled="!connectionUri || connecting"
+        :disabled="!ethAccounts.length || !connectionUri || connecting"
+        extend
         @click="connectToDapp()"
       />
     </template>

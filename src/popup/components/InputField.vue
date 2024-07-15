@@ -284,8 +284,8 @@ export default defineComponent({
     align-items: center;
     margin-block: 16px 2px;
 
-    &-text {
-      margin: 4px 0 2px 0;
+    .text-label {
+      margin: 4px 0;
       display: inline-block;
       user-select: none;
     }
@@ -294,7 +294,7 @@ export default defineComponent({
       margin-left: 10px;
     }
 
-    &-after {
+    .label-after {
       @extend %face-sans-15-regular;
 
       margin-left: auto;

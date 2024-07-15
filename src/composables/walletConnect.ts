@@ -14,6 +14,7 @@ import {
   STORAGE_KEYS,
   WALLET_CONNECT_PROJECT_ID,
 } from '@/constants';
+import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { ETH_CHAIN_NAMESPACE, ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
@@ -128,9 +129,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
     if (error.message) {
       openDefaultModal({
-        title: 'Connection failed',
+        title: tg('common.connectionFailed'),
         msg: error.message,
-        icon: 'alert',
+        icon: 'critical',
         textCenter: true,
       });
     }

@@ -89,7 +89,7 @@
           data-cy="about"
         >
           <template #icon>
-            <About />
+            <AboutIcon />
           </template>
         </PanelItem>
       </div>
@@ -111,7 +111,7 @@ import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
 import Settings from '../../icons/settings.svg?vue-component';
 import BugReport from '../../icons/bug-report.svg?vue-component';
-import About from '../../icons/about.svg?vue-component';
+import AboutIcon from '../../icons/about.svg?vue-component';
 import BuyIcon from '../../icons/credit-card.svg?vue-component';
 import Dex from '../../icons/dex.svg?vue-component';
 import ClaimTips from '../../icons/claim-tips.svg?vue-component';
@@ -126,7 +126,7 @@ export default defineComponent({
     IonContent,
     Invites,
     Settings,
-    About,
+    AboutIcon,
     Dex,
     BugReport,
     ClaimTips,
