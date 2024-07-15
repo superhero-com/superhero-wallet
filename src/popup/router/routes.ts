@@ -32,6 +32,7 @@ import {
   ROUTE_TOKEN_DETAILS,
   ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
+  ROUTE_INVITE,
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
   ROUTE_AUCTION_BID,
@@ -592,7 +593,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/invite',
-    name: 'invite',
+    name: ROUTE_INVITE,
     component: Invite,
     meta: {
       title: 'giftCards',
