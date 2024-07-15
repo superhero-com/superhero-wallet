@@ -22,6 +22,7 @@
       <IconBoxed
         :icon="QrScanIcon"
         icon-padded
+        bg-colored
       />
     </div>
     <div

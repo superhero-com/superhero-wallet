@@ -86,7 +86,6 @@ export default defineComponent({
     .link-icon {
       svg {
         opacity: 1;
-        color: $color-white;
       }
     }
   }
@@ -97,7 +96,6 @@ export default defineComponent({
     .link-icon {
       svg {
         opacity: 0.7;
-        color: $color-success;
       }
     }
   }

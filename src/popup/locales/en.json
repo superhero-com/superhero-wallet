@@ -1143,7 +1143,7 @@
     "subtitle": "Log in using biometric authentication"
   },
   "walletConnect": {
-    "modalTitle": "Connect to Ethereum Dapp",
+    "modalTitle": "Connect to Ethereum dapp",
     "modalSubtitle": "Scan WalletConnect QR Code or enter URI code to connect to the dapp.",
     "uriInputLabel": "WalletConnect URI",
     "dappName": "Name",
