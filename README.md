@@ -4,6 +4,10 @@
 
 [![main action](https://github.com/superhero-com/superhero-wallet/actions/workflows/main.yml/badge.svg)](https://github.com/superhero-com/superhero-wallet/actions/workflows/main.yml) [![codeql](https://github.com/superhero-com/superhero-wallet/actions/workflows/codeql.yml/badge.svg)](https://github.com/superhero-com/superhero-wallet/actions/workflows/codeql.yml) [![test](https://github.com/superhero-com/superhero-wallet/actions/workflows/test.yml/badge.svg)](https://github.com/superhero-com/superhero-wallet/actions/workflows/test.yml)
 
+## Guides & Examples
+
+- [Deep link schema](docs/deep-link-schema.md)
+
 ## Build
 
 Clone the master branch of this repo.
