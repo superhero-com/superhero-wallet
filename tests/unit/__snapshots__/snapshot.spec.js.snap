@@ -36,10 +36,10 @@ exports[`Pages About 1`] = `
             </div>
           </div>
           <a
-            class="link-button default clickable panel-table-item"
-            href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
+            class="link-button variant-default clickable panel-table-item"
             rel="noopener noreferrer"
             target="_blank"
+            to="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
           >
             
             <div
@@ -710,7 +710,7 @@ exports[`Pages PrivacyPolicy 1`] = `
           <p>
              1) downloaded as an add-on (extension) to Firefox: 
             <a
-              class="link-button default"
+              class="link-button variant-default"
               href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
               rel="noopener noreferrer"
               target="_blank"
@@ -722,7 +722,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             </a>
              ; to Chrome, Brave and Opera:          
             <a
-              class="link-button default"
+              class="link-button variant-default"
               href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
               rel="noopener noreferrer"
               target="_blank"
@@ -737,7 +737,7 @@ exports[`Pages PrivacyPolicy 1`] = `
           <p>
              2) accessed from any Browser at the address: 
             <a
-              class="link-button default"
+              class="link-button variant-default"
               href="https://wallet.superhero.com"
               rel="noopener noreferrer"
               target="_blank"
@@ -752,7 +752,7 @@ exports[`Pages PrivacyPolicy 1`] = `
           <p>
              3) downloaded from Google Play:     
             <a
-              class="link-button default"
+              class="link-button variant-default"
               href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
               rel="noopener noreferrer"
               target="_blank"
@@ -767,7 +767,7 @@ exports[`Pages PrivacyPolicy 1`] = `
           <p>
              from App Store: 
             <a
-              class="link-button default"
+              class="link-button variant-default"
               href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
               rel="noopener noreferrer"
               target="_blank"
@@ -1529,7 +1529,7 @@ exports[`Pages PrivacyPolicy 1`] = `
             </strong>
             , please email us at  
             <a
-              class="link-button default"
+              class="link-button variant-default"
               href="mailto:superherowallet@protonmail.com"
               rel="noopener noreferrer"
               target="_blank"
@@ -1735,7 +1735,7 @@ exports[`Pages TermsOfService 1`] = `
         </b>
          via an email to 
         <a
-          class="link-button simple"
+          class="link-button variant-default"
           href="mailto:superherowallet@protonmail.com"
           rel="noopener noreferrer"
           target="_blank"

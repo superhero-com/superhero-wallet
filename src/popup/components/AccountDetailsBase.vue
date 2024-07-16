@@ -201,7 +201,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
-@use '@/styles/typography';
 
 .account-details {
   --account-info-height: 120px;
@@ -215,7 +214,6 @@ export default defineComponent({
   border-radius: $border-radius-app;
   min-height: 100%;
   height: 100%;
-  font-weight: 500;
   color: $color-white;
   box-shadow: 0 0 0 1px $color-border, 0 0 50px rgba($color-black, 0.6);
 

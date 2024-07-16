@@ -1,12 +1,20 @@
 <template>
   <a
-    :class="['link-button', variant, { underlined }]"
-    :href="IS_MOBILE_APP ? undefined : to"
+    class="link-button"
+    :class="[
+      `variant-${variant}`,
+      {
+        underlined,
+        'has-icon': isExternal || $slots.icon,
+      },
+    ]"
+    :href="IS_MOBILE_APP ? undefined : href"
     rel="noopener noreferrer"
     target="_blank"
     @click="onClick"
   >
-    <slot />
+    <slot>{{ text }}</slot>
+
     <span
       v-if="isExternal || $slots.icon"
       class="link-icon"
@@ -21,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 import { IS_MOBILE_APP } from '@/constants';
 
@@ -30,7 +38,6 @@ import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
 export const LINK_BUTTON_VARIANT = [
   'default',
   'muted',
-  'simple',
 ] as const;
 
 export type LinkButtonVariant = typeof LINK_BUTTON_VARIANT[number];
@@ -40,11 +47,12 @@ export default defineComponent({
     ExternalLinkIcon,
   },
   props: {
-    to: { type: String, required: true },
+    text: { type: String, default: null },
+    href: { type: String, required: true },
     underlined: Boolean,
     isExternal: Boolean,
     variant: {
-      type: String,
+      type: String as PropType<LinkButtonVariant>,
       validator: (value: LinkButtonVariant) => LINK_BUTTON_VARIANT.includes(value),
       default: LINK_BUTTON_VARIANT[0],
     },
@@ -53,12 +61,11 @@ export default defineComponent({
     async function onClick(event: any) {
       if (IS_MOBILE_APP) {
         event.preventDefault();
-        window.open(props.to, '_system');
+        window.open(props.href, '_system');
       }
     }
 
     return {
-      LINK_BUTTON_VARIANT,
       IS_MOBILE_APP,
       onClick,
     };
@@ -71,41 +78,15 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .link-button {
-  @extend %face-sans-14-regular;
-
-  padding: 0;
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-
-  &.default {
-    color: $color-success;
-  }
-
-  &.simple {
-    gap: 0;
-  }
-
-  .link-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    :deep(svg) {
-      width: 24px;
-      height: 24px;
-      opacity: 0.44;
-      color: $color-white;
-    }
-  }
+  color: $color-primary;
 
   &:hover {
-    color: $color-success-hover;
+    color: $color-primary-hover;
 
     .link-icon {
       svg {
         opacity: 1;
-        color: $color-success;
+        color: $color-white;
       }
     }
   }
@@ -121,26 +102,47 @@ export default defineComponent({
     }
   }
 
-  &.muted {
-    text-decoration: none;
-    color: rgba($color-white, 0.75);
+  .link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    .link-icon {
-      svg {
-        opacity: 1;
-        color: rgba($color-white, 0.75);
-      }
-    }
-
-    &:hover {
+    svg {
+      width: 24px;
+      height: 24px;
+      opacity: 0.44;
       color: $color-white;
+    }
+  }
+
+  &.variant {
+    &-muted {
+      text-decoration: none;
+      color: rgba($color-white, 0.75);
 
       .link-icon {
         svg {
-          color: $color-white;
+          opacity: 1;
+          color: rgba($color-white, 0.75);
+        }
+      }
+
+      &:hover {
+        color: $color-white;
+
+        .link-icon {
+          svg {
+            color: $color-white;
+          }
         }
       }
     }
+  }
+
+  &.has-icon {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
   }
 
   &.underlined {
