@@ -16,6 +16,14 @@ const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
 const IS_FIREFOX_EXT = parseBool(process.env.IS_FIREFOX_EXT);
 
 module.exports = {
+  configureWebpack: {
+    optimization: {
+      splitChunks: {
+        minSize: 200000,
+        maxSize: 500000,
+      },
+    },
+  },
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
   outputDir: {
     extension: IS_FIREFOX_EXT ? 'dist/extension/firefox' : 'dist/extension/chrome',
