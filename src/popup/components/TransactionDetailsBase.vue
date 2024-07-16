@@ -17,14 +17,14 @@
     >
       <TransactionOverview :transaction="transaction" />
 
-      <div class="explorer">
+      <div class="explorer-link">
         <LinkButton
-          is-external
-          :to="explorerUrl!"
+          :href="explorerUrl!"
+          :text="$t('pages.transactionDetails.explorer')"
           variant="muted"
-        >
-          {{ $t('pages.transactionDetails.explorer') }}
-        </LinkButton>
+          is-external
+          underlined
+        />
       </div>
       <div class="data-grid">
         <slot
@@ -301,34 +301,11 @@ export default defineComponent({
       padding: 8px 16px;
     }
 
-    .explorer {
-      height: 38px;
-      padding-inline: 16px;
-      display: flex;
-      align-items: center;
+    .explorer-link {
+      @extend %face-sans-14-medium;
 
-      .link-button {
-        @extend %face-sans-14-medium;
-
-        text-decoration: none;
-        color: rgba($color-white, 0.75);
-
-        svg {
-          opacity: 1;
-          color: rgba($color-white, 0.75);
-          width: 24px;
-          height: 24px;
-        }
-
-        &:hover {
-          color: $color-white;
-          text-decoration: underline;
-
-          svg {
-            color: $color-white;
-          }
-        }
-      }
+      margin-block: 8px;
+      padding-inline: 16px; // TODO wrap content and set inline padding once
     }
   }
 

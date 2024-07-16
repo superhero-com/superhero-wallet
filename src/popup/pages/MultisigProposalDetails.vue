@@ -33,15 +33,12 @@
             />
             <div class="explorer">
               <LinkButton
-                :to="activeMultisigAccountExplorerUrl!"
+                :text="$t('pages.transactionDetails.explorer')"
+                :href="activeMultisigAccountExplorerUrl!"
                 variant="muted"
+                is-external
                 underlined
-              >
-                {{ $t('pages.transactionDetails.explorer') }}
-                <template #icon>
-                  <ExternalLink />
-                </template>
-              </LinkButton>
+              />
             </div>
             <div class="data-grid">
               <DetailsItem
@@ -324,7 +321,6 @@ import Avatar from '../components/Avatar.vue';
 import TransactionAssetRows from '../components/TransactionAssetRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
-import ExternalLink from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -341,7 +337,6 @@ export default defineComponent({
     BtnMain,
     CopyText,
     AnimatedSpinner,
-    ExternalLink,
     IonPage,
     IonContent,
   },

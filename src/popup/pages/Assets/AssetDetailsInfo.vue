@@ -171,12 +171,11 @@
         >
           <template #text>
             <LinkButton
-              is-external
-              :to="coinGeckoLinkUrl"
+              :text="coinGeckoLinkLabel"
+              :href="coinGeckoLinkUrl"
               variant="muted"
-            >
-              {{ coinGeckoLinkLabel }}
-            </LinkButton>
+              is-external
+            />
           </template>
         </DetailsRow>
       </div>

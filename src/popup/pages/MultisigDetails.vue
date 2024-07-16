@@ -41,15 +41,15 @@
           </template>
         </DetailsItem>
 
-        <LinkButton
-          class="explorer-link"
-          :to="activeMultisigAccountExplorerUrl"
-        >
-          {{ $t('multisig.explorerLink') }}
-          <template #icon>
-            <ExternalLinkIcon class="external-icon" />
-          </template>
-        </LinkButton>
+        <div class="explorer-link">
+          <LinkButton
+            :text="$t('multisig.explorerLink')"
+            :href="activeMultisigAccountExplorerUrl!"
+            variant="muted"
+            is-external
+            underlined
+          />
+        </div>
 
         <div class="row">
           <DetailsItem
@@ -109,7 +109,6 @@ import AuthorizedAccounts from '../components/AuthorizedAccounts.vue';
 import LinkButton from '../components/LinkButton.vue';
 
 import ConsensusLabel from '../components/ConsensusLabel.vue';
-import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
 
 export default defineComponent({
@@ -122,7 +121,6 @@ export default defineComponent({
     Avatar,
     AddressFormatted,
     DetailsItem,
-    ExternalLinkIcon,
     IonContent,
     IonPage,
   },
@@ -156,6 +154,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/typography';
 
 .multisig-details {
   padding: 0 12px;
@@ -179,20 +178,9 @@ export default defineComponent({
   }
 
   .explorer-link {
-    color: rgba($color-white, 0.75);
+    @extend %face-sans-14-medium;
+
     margin-block: 4px;
-
-    .external-icon {
-      opacity: 1;
-      color: rgba($color-white, 0.75);
-      width: 24px;
-      height: 24px;
-    }
-
-    &:active,
-    &:hover {
-      color: $color-white;
-    }
   }
 }
 </style>

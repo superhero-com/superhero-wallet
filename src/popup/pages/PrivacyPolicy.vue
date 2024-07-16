@@ -35,32 +35,22 @@
             </p>
             <p>
               1) downloaded as an add-on (extension) to Firefox:
-              <LinkButton :to="APP_LINK_FIREFOX">
-                {{ APP_LINK_FIREFOX }}
-              </LinkButton>
+              <LinkButton :href="APP_LINK_FIREFOX">{{ APP_LINK_FIREFOX }}</LinkButton>
               ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton :to="APP_LINK_CHROME">
-                {{ APP_LINK_CHROME }}
-              </LinkButton>;
+              <LinkButton :href="APP_LINK_CHROME">{{ APP_LINK_CHROME }}</LinkButton>;
             </p>
             <p>
               2) accessed from any Browser at the address:
-              <LinkButton :to="APP_LINK_WEB">
-                {{ APP_LINK_WEB }}
-              </LinkButton>;
+              <LinkButton :href="APP_LINK_WEB">{{ APP_LINK_WEB }}</LinkButton>;
             </p>
             <p>
               3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton :to="APP_LINK_ANDROID">
-                {{ APP_LINK_ANDROID }}
-              </LinkButton>
+              <LinkButton :href="APP_LINK_ANDROID">{{ APP_LINK_ANDROID }}</LinkButton>
               and
             </p>
             <p>
               from App Store:
-              <LinkButton :to="APP_LINK_IOS">
-                {{ APP_LINK_IOS }}
-              </LinkButton>.
+              <LinkButton :href="APP_LINK_IOS">{{ APP_LINK_IOS }}</LinkButton>.
             </p>
             <p>
               If you have any questions regarding this <strong>Policy</strong>, please contact us at
@@ -337,7 +327,7 @@
             <p>
               To contact us with your questions or comments regarding this <strong>Policy</strong>,
               please email us at&nbsp;
-              <LinkButton to="mailto:superherowallet@protonmail.com">
+              <LinkButton href="mailto:superherowallet@protonmail.com">
                 superherowallet@protonmail.com
               </LinkButton>.
             </p>

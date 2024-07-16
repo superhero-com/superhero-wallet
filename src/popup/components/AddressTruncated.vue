@@ -15,13 +15,10 @@
 
     <LinkButton
       v-if="showExplorerLink"
-      :to="explorerUrl"
+      :href="explorerUrl"
+      is-external
       class="external-link"
-    >
-      <template #icon>
-        <ExternalLinkIcon class="external-link-icon" />
-      </template>
-    </LinkButton>
+    />
   </div>
 </template>
 
@@ -35,7 +32,6 @@ import type { Protocol } from '@/types';
 import { truncateAddress } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
 import ProtocolIcon from './ProtocolIcon.vue';
 import LinkButton from './LinkButton.vue';
 
@@ -43,7 +39,6 @@ export default defineComponent({
   components: {
     ProtocolIcon,
     LinkButton,
-    ExternalLinkIcon,
   },
   props: {
     address: { type: String, required: true },

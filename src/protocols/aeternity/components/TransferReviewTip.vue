@@ -9,11 +9,10 @@
           scope="global"
         >
           <LinkButton
+            :text="$t('pages.notifications.superhero')"
             :href="AGGREGATOR_URL"
             class="link"
-          >
-            {{ $t('pages.notifications.superhero') }}
-          </LinkButton>
+          />
         </i18n-t>
       </template>
     </ModalHeader>

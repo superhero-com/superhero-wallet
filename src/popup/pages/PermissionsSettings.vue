@@ -8,11 +8,7 @@
           class="text-description"
           scope="global"
         >
-          <LinkButton
-            to="https://superhero.com/"
-          >
-            superhero.com
-          </LinkButton>
+          <LinkButton href="https://superhero.com/">superhero.com</LinkButton>
         </i18n-t>
 
         <div class="hosts">

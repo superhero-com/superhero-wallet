@@ -1,6 +1,6 @@
 <template>
   <LinkButton
-    :to="explorerUrl"
+    :href="explorerUrl"
     class="account-item"
     variant="muted"
   >

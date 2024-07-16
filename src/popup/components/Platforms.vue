@@ -7,18 +7,14 @@
       v-if="IS_MOBILE_DEVICE"
       class="mobile-web-icons"
     >
-      <LinkButton
-        :to="APP_LINK_IOS"
-      >
+      <LinkButton :href="APP_LINK_IOS">
         <img
           :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/app-store-mobile.svg"
           alt="App Store"
         >
       </LinkButton>
-      <LinkButton
-        :to="APP_LINK_ANDROID"
-      >
+      <LinkButton :href="APP_LINK_ANDROID">
         <img
           :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/google-play-mobile.svg"
@@ -36,13 +32,13 @@
         </div>
         <div class="web-icons-platforms">
           <PlatformIcon
-            :to="APP_LINK_FIREFOX"
+            :href="APP_LINK_FIREFOX"
             :disabled="!IS_FIREFOX || IS_MOBILE_DEVICE"
             :src="require('../../icons/platforms/firefox.svg')"
             alt="Firefox"
           />
           <PlatformIcon
-            :to="APP_LINK_CHROME"
+            :href="APP_LINK_CHROME"
             :disabled="IS_FIREFOX || IS_MOBILE_DEVICE"
             :src="require('../../icons/platforms/chrome.svg')"
             alt="Chrome"
@@ -55,13 +51,13 @@
         </div>
         <div class="web-icons-platforms">
           <PlatformIcon
-            :to="APP_LINK_IOS"
+            :href="APP_LINK_IOS"
             :disabled="!IS_IOS || !IS_MOBILE_DEVICE"
             :src="require('../../icons/platforms/app-store.svg')"
             alt="App Store"
           />
           <PlatformIcon
-            :to="APP_LINK_ANDROID"
+            :href="APP_LINK_ANDROID"
             :disabled="IS_IOS || !IS_MOBILE_DEVICE"
             :src="require('../../icons/platforms/google-play.svg')"
             alt="Google Play"
