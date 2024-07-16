@@ -213,7 +213,7 @@ export default defineComponent({
     }
 
     async function scanWeb() {
-      const { default: QrScanner } = await import('qr-scanner');
+      const { default: QrScanner } = await import(/* webpackChunkName: "qr-scanner" */ 'qr-scanner');
       return new Promise<string>((resolve) => {
         browserReader = new QrScanner(
           qrCodeVideoEl.value!,

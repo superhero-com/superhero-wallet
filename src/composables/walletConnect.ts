@@ -146,8 +146,8 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       { Core },
       { Web3Wallet },
     ] = await Promise.all([
-      import('@walletconnect/core'),
-      import('@walletconnect/web3wallet'),
+      import(/* webpackChunkName: "walletconnect-core" */ '@walletconnect/core'),
+      import(/* webpackChunkName: "walletconnect-web3wallet */ '@walletconnect/web3wallet'),
     ]);
 
     const core = new Core({

@@ -5,8 +5,7 @@ import { AeternityModule } from '@airgap/aeternity';
 import {
   MainProtocolSymbols,
   IACMessageType,
-  AccountShareResponse,
-  AeternityProtocol,
+  type AccountShareResponse,
 } from 'airgap-coin-lib';
 import { SerializerV3, IACMessageDefinitionObjectV3 } from '@airgap/serializer';
 
@@ -79,11 +78,13 @@ export function useAirGap() {
   async function extractAccountShareResponseData(
     data: IACMessageDefinitionObjectV3[] = [],
   ): Promise<IAccountRaw[]> {
+    const { AeternityProtocol } = await import(/* webpackChunkName: "airgap-coin-lib" */ 'airgap-coin-lib');
+    const aeProtocol = new AeternityProtocol();
+
     return Promise.all(
       data
         .filter((item) => item.type === IACMessageType.AccountShareResponse)
         .map(async (item) => {
-          const aeProtocol = new AeternityProtocol();
           const address = await aeProtocol.getAddressFromPublicKey(
             (item.payload as AccountShareResponse).publicKey,
           ) as Encoded.AccountAddress;
