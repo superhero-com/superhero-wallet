@@ -56,7 +56,7 @@ export default defineComponent({
   border-radius: $border-radius-interactive;
   color: $color-white;
 
-  &:not(:last-of-type) {
+  &:not(:last-child) {
     margin-bottom: 16px;
   }
 
