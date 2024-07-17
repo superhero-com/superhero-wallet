@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.8](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.7...v2.2.8) (2024-07-17)
+
+
+### Maintenance
+
+* reduce size of the built chunks ([3f0bcaa](https://github.com/Superhero-com/superhero-wallet/commit/3f0bcaa18f200d59adfcdef7cbfd2a395db4b72e))
+
 ### [2.2.7](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.6...v2.2.7) (2024-07-02)
 
 
