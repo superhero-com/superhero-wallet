@@ -1,7 +1,6 @@
 {
   "common":{
     "address": "Dirección",
-    "ae": "AE",
     "all": "Todo",
     "amount": "Monto",
     "cancel": "Cancelar",
@@ -38,27 +37,11 @@
     "required": {
       "msg": "Por favor completa todos los campos."
     },
-    "only-chars": {
-      "msg": "Sólo se permiten letras y números."
-    },
     "name-exist": {
       "msg": "Este nombre ya está registrado."
     },
-    "name-length": {
-      "msg": "Los nombres en SUPERHERO deben tener mínimo 13 carácteres."
-    },
-    "incorrect-address": {
-      "msg": "Por favor asegúrate que has colocado una dirección pública válida."
-    },
-    "incorrect-amount": {
-      "msg": "Por favor asegúrate que has colocado un monto válido."
-    },
     "insufficient-balance": {
       "msg": "No tienes suficiente saldo para esta transacción."
-    },
-    "removeAccount": {
-      "title": "¿Estás seguro que quieres eliminar esta cuenta?",
-      "msg": "Esta acción eliminará tu cuenta de la billetera y borrará su extensión de almacenamiento. Asegúrate que has realizado un respaldo de tu frase semilla antes de proceder. !Esta acción no puede deshacerse!"
     },
     "verified": {
       "title": "¿Que es una URL \"Verified\" ?",
@@ -121,28 +104,6 @@
     }
   },
   "pages": {
-    "intro": {
-      "heading": "Introducción",
-      "skip": "Saltar",
-      "generateWallet": "Generar Billetera",
-      "receive": "Recibir",
-      "step1text": "por crear y curar gran contenido, atraer discusiones significativas, lanzar causas para la humanidad, y sólo por ser un maravilloso ser humano.",
-      "step2text": "para grandes creadores online, causas humanitarias y otros sorprendentes seres humanos cualquiera sea la razón.",
-      "step3text-1": "esta billetera no toma ni tomará comisiones de",
-      "step3text-2": "envias y recibes. Superhero fue creado específicamente para que nadie más excepto tú tengas el contro de tus fondos.",
-      "createdWallet": "¡Tu billetera ha sido creada!",
-      "step4text-0": "Bienvenido a la web libre.",
-      "step4text-1": "Trustless: no hay intervención de terceras partes. Las transacciones son totalemte P2P.",
-      "step4text-2": "Sin censura: no hay custodios que determinen qué puede y qué no puede ser monetizado.",
-      "step4text-3": "Immortaliza los mensajes en la blockchain: los comentarios y mensajes son marcados y grabados en la blockchain para siempre.",
-      "step4text-4": "Transacciones instantáneas, sin fronteras y con comisiones casi cero.",
-      "toHome": "Procede a tu billetera",
-      "ever": "Siempre.",
-      "welcome": "!Bienveniso abordo!",
-      "understand": "Yo entiendo que esta es una billetera de criptoactivos y yo soy el responsable por respaldar la frase de recuepración de mi cuenta.",
-      "extension": "Extensión del Navegador",
-      "mobileApp": "App Móvil"
-    },
     "titles": {
       "settings": "Configuración de la billetera",
       "language": "Idioma",
@@ -174,31 +135,24 @@
     "account": {
       "heading": "Cuenta",
       "activity": "Actividad",
-      "accountName": "Nombre de la cuenta",
       "claim": "Reclamar Propina",
       "receive": "Recibir",
       "latestTransactions": "Últimas transacciones",
       "noTransactionsFound": "¡No se encontraron transacciones!",
       "balance": "Saldo",
       "copied": "¡Copiado!",
-      "backup": "respaldar",
-      "updateExtension": "¡Nueva versión disponible! Por favor actualiza tu extensión.",
-      "claim-name": "Reclama tu nombre .chain"
+      "backup": "respaldar"
     },
     "claim": {
       "claim": "Reclamar Propinas",
       "noZeroClaim": "No hay propinas que reclamar para esta URL.",
-      "noAddress": "Dirección no encontrada",
-      "errorClaim": "Error.",
       "ae": "tokens AE",
       "claimed": " ¡Petición de reclamo enviada! ",
       "url": "URL",
       "tipsOnUrl": "Propinas en esta URL",
       "urlNotExisting": "No hay propinas para esta URL en este momento.",
       "moreOracles": "No hay suficientes Oráculos activos para verificar tu petición de reclamo. Por favor intenta más tarde.",
-      "oracleFailed": "El chequeo de reclamo del servicio del Orácula falló. Por favor intenta más tarde.",
-      "unknownError": "Un error ocurrió durante la solicitud de reclamo. Por favor intenta más tarde.",
-      "noMobileClaim": "Actualmente los reclamos solo están disponibles en el escritorio (desktop)."
+      "oracleFailed": "El chequeo de reclamo del servicio del Orácula falló. Por favor intenta más tarde."
     },
     "claimTips": {
       "title": "Reclamar Propinas",
@@ -212,32 +166,18 @@
       "recentActivity": "Actividad Reciente",
       "noTransactionsFound": "!No se encontraron transacciones!"
     },
-    "advancedSettings": {
-      "heading": "Avanzado",
-      "backToSettings": "Ajustes",
-      "exportKeypair": "Exportar par de llaves (Keypair)",
-      "exportKeystore": "Exportar Keystore"
-    },
     "auctionBid": {
-      "backToAuctions": "Volver a subastas",
-      "bidding": "Ofertas",
-      "bidOn": "Ofertar por",
       "requiredField": "Este campo es requerido",
-      "current-highest-bid": "Oferta más alta ahora",
-      "remaining-time": "Tiempo restante"
+      "current-highest-bid": "Oferta más alta ahora"
     },
     "connectConfirm": {
       "websiteRequestConnect": "le gustaría conectarse a su cuenta",
       "websiteRequest": "Este sitio web está solicitando acceso para ver tu dirección de cuenta actual. Siempre asegúrate que confías en el sitio web con el que interactúas. ",
       "cancelButton": "Denegar",
       "confirmButton": "Aceptar",
-      "addressLabel": "Dirección",
       "transactionLabel": "Transacción",
       "addressRequest": "Esta aepp está solicitando acceso para ver tu dirección de cuenta actual",
-      "transactionRequest": "Esta aepp preparará una transacción. tu estás a cargo de confirmarla.",
-      "websiteRequestAccounts": "le gustaría obtener direcciones de cuenta",
-      "addressesLabel": "Direcciones",
-      "addressesRequest": "Esta aepp está solicitando acceso para ver las direcciones de tu cuenta"
+      "transactionRequest": "Esta aepp preparará una transacción. tu estás a cargo de confirmarla."
     },
     "names": {
       "default": "por defecto",
@@ -283,7 +223,6 @@
       }
     },
     "languageSettings": {
-      "backToSettings": "Volver a ajustes",
       "heading": "Idioma",
       "switchLanguage": "Idioma",
       "currentLanguage": "Idioma actual"
@@ -296,31 +235,14 @@
       "heading": "Plataforma social sin una agenda oculta.",
       "webVersion": "O usa una versión web",
       "mobileVersion": "Más que una forma de recibir, almacenar y enviar monedas en la cadena de bloques de aeternity",
-      "securingAccount": "Asegurar tu cuenta",
       "generateWallet": "Generar Nueva Billetera",
       "importWallet": "Recuperar cuenta existente",
-      "passwordError": "La contraseña debe contener 4 símbolos por lo menos.",
-      "loginButton": "Entrar",
       "seedPhrase": "Frase semilla",
       "enterSeedPhrase": "introduce tu frase semilla. ",
-      "continueButton": "Continuar",
       "continue": "Continuar",
       "importAccount": "Importar Cuenta",
       "accountNotFound": "Cuenta no encontrada.",
       "checkSeed": "Por favor revisa tu frase semilla."
-    },
-    "ledgerSetup": {
-      "ledgerConnectSetup": "Cómo conectar desde Ledger",
-      "ledgerAccount": "Añadir cuenta Ledger",
-      "ledgerSteps": "Pasos",
-      "ledgerUsb": "Conecta tu Ledger a través del USB y desbloquéalo",
-      "ledgerLedger": "Abrir la aplicación aeternity en su Ledger",
-      "ledgerAccountCreate": "Crear una cuenta pulsando el botón de abajo"
-    },
-    "privacyPolicy": {
-      "backButton": "Atrás",
-      "heading": "Política de privacidad",
-      "content": "Tu privacidad es importante para nosotros. Es política de Superhero respetar tu privacidad concerniente a cualquier información que podamos recolectar de ti desde nuestro sitio web y de otros sitios que poseemos y operamos. Nosotros no solicitamos información personal para proveerte el servicio. No recolectamos ni retenemos ninguna información para proveerte los servicios solicitados. No compartimos ninguna información de identificación personal públicamente o con terceras partes. nuestro sitio web y la extensión del navegador pueden enlazarse con sitios externos que no son operados por nosotros. Por favor debes estar consciente que no tenemos control sobre el contenido y las prácticas de estos sitios, y no podemos aceptar responsabilidad por sus respectivas políticas de privacidad. Tu uso continuo de nuestro sitio web está ligado a la aceptación de nuestras prácticas sobre privacidad e información personal. Si tienes alguna pregunta acerca de cómo manejamos los datos de los usuarios y la información personal, siéntete libre de contactarnos. Esta política es efectiva a partir del 31 de enero del 2020."
     },
     "qrCodeReader": {
       "heading": "Scanner de Código Qr"
@@ -332,23 +254,8 @@
       "purchase": "Comprar tokens AE"
     },
     "seed-phrase-settings": {
-      "backToSettings": "Volver a ajustes",
-      "heading": "Seguridad y privacidad",
-      "privacyDataHeading": "Privacidad de datos",
-      "privacyDataSmall": "Borrar datos privados de tal forma que todos los sitios web deben solicitar nuevamente el acceso a la información sobre sus cuentas.",
-      "privacyDataClearBtn": "Borrar datos de privados",
-      "privateKeyHeading": "Revelar la clave privada",
-      "privateKeySmall": "Puede ver su clave privada después de que introduzca su contraseña",
-      "privateKeyRevealBtn": "Revelar la clave privada",
-      "privateKeyWarning": "No comparta su clave privada con nadie, ya que puede ser utilizado para robar todas sus cuentas",
-      "privateKey": "Tu clave privada",
-      "showPrivateKey": "Mostrar clave privada",
-      "incorrectPassword": "Contraseña incorrecta",
-      "decryptingPrivateKey": "Desencriptar la clave privada",
-      "seedRecoveryHeading": "Mostrar frase semilla",
       "seedRecoverySmall": "Tu frase semilla (conocida también como llave privada) sirve como la llave o contraseña para acceder a tu cuenta. No la reveles nunca a a nadie. Asegúrate de respaldarla en un pedazo de papel que nadie pueda ver pero que tu nunca vayas a perder. Perder esta llave significa perder el acceso a tu billetera y propinas",
       "seedRecoveryBtn": "Mostrar frase semilla",
-      "seedPhrase": "Tu frase semilla",
       "copy": "Copiar al portapapeles"
     },
     "seedPhrase": {
@@ -410,44 +317,16 @@
       "from": "De"
     },
     "termsOfService": {
-      "backButton": "Regresar",
-      "terms-of-use": "Términos de uso",
-      "terms-with-quotes": "(„TÉRMINOS“)",
-      "terms": "términos",
-      "sub-heading": "los presentes @:termsOfService.terms-of-use fueron creados el 3 de Abril de 2020.",
-      "section0Content": "@:termsOfService.superhero-com se reserva el derecho de modificar y a actualizar estos @:termsOfService.terms-of-use de acuerdo a  la política y práctica de la @:termsOfService.company. La nueva versión de @:termsOfService.terms-of-use se hace efectiva desde el día que es anunciada en @:termsOfService.our-superhero-wallet a menos que se establezca otra cosa.",
-      "superhero-com": "Superhero.com LVC",
-      "company": "compañia",
-      "our-superhero-wallet": "Nuestra Billetera Superhero",
-      "section01Content": "EL SOFTWARE PROVISTO POR SUPERHERO.COM LVC “ES TAL COMO ES” SIN NINGÚN TIPO DE GARANTÍA, EXPRESA O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A LAS GARANTÍAS DE MERCANTILIDAD, ADECUACIÓN PARA UN PROPÓSIYO PARTICULAR Y NO INFRINGENTE. LOS AUTORES EN NINGPUN CASO SERÁN RESPONSABLES DE CUALQUEIR RECLAMO, DAÑOS U OTRAS RESPONSABILIDAD, YA SEA EN UNA ACCIÓN CONTRACTUAL, TORT O DE OTRA MANERA, DERIVADA, FUERA DE O EN RELACIÓN CON EL SOFTWARE O EL USO U OTRAS OFERTAS EN EL SOFTWARE.",
-      "section02Content": "Estos @:termsOfService.terms-of-use @:termsOfService.terms-with-quotes aplican exclusivamente para la @:termsOfService.superHero-wallet (de acá en adelante se referirá a ella como la “@:termsOfService.wallet“ o la “@:termsOfService.application”) y todo el contenido disponible en la @:termsOfService.website-extension. Por favor asegúrate que haz leiodo cuidadosamente los @:termsOfService.terms antes de usar la @:termsOfService.application. Por otro lado, al usarla, nosotros consideramos que estas acciones implican una aceptación de los @:termsOfService.terms-of-use. Estos @:termsOfService.terms-of-use representan un acuerdo implícito entre tú, la entidad legal que representas y la entidad legal que te registró (colectivamente „@:termsOfService.you“) y Superhero.com LVC @:termsOfService.superhero-we-us-with-quotes o @:termsOfService.our-with-quotes en conexión a tu uso de la @:termsOfService.website-extension @:termsOfService.superHero-wallet .",
-      "superHero-wallet": "Billetera Superhero",
-      "wallet": "Billetera",
-      "application": "aplicación",
-      "website-extension": "Extensión del sitio web",
-      "you": "tú",
-      "superhero-we-us-with-quotes": "(“Superhero”, “nosotros”, “nos”",
-      "our-with-quotes": "“nuestra”)",
       "section1Title": "1. Definiciones",
-      "section1Content": "1.1. Superhero.com Establishment (“Superhero.com ”, “nos”, “nosotros”, “nuestra” o “la compañía”) ​es una compañía con correo electrónico para comunicaciones relacionadas con la billetera Superhero: superherowallet{'@'}protonmail.com. Superhero.com ​es la compañía que creó y desarrollo la  Billetera Superhero​. \n 1.2. El ​„USUARIO“ or ​„TÚ“ representa a una persona natural o legal que ha descargado y usa la ​extensión de sitio web Billetera Superhero . \n 1.3. „​Blockchain​“ representa la lista de archivos, también conocidos como ​bloques,​ los cuales estÁn enlazados con un método criptográfico. La tecnología permite que grandes grupos de personas se conecten y alcancen un consenso en la data, la cual posteriormente queda permanentemente grabada sin la presencia de una autoridad central. ​LOS USUARIOS pueden acceder, crear y guardar información en la blockchain aeternity. El registro digital descentralizado, distribuido y público es usado con el propósito de registrar transacciones en bloques de información con la ayuda de ​Validadores​, las cuales no pueden alterarse retroactivamente. \n 1.4. Billetera Superhero ​” (“​BILLETERA​” o “​la aplicación​”) es una extensión de sitio web, la cual permite a los seguidores enviar valor a los creadores de contenido, a causas, a caridades, a grupos o a individuos regulare en línea como recompensa por contribuir con información precisa, hechos relevantes, calidad de contenido. La extensión de sitio web es una pieza de software que actúa como una adiciÓn del navegador web Firefox y contribuye con la funcionalidad adicional del navegador. La aplicación esta disponible en: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . El resultado de donaciones y comentarios están publicados en el sitio web ​https://superhero.com/​ . \n 1.5. “​Validadores​” son entes o personas físicas independientes, que de ninguna manera no son parte de Superhero.com. ​Su información en el sistema incluye la responsabilidad en la ​constitución de bloques y la transmisión de estos ​bloques​ con la red aeternity ​. \n 1.6. “​Dirección de la Cuenta​” es la versión hasheada de la ​clave pública​ del ​USUARIO , y es usada para identificar USUARIOS​ en ​la aplicación​. \n 1.7. “​Llaves​” representan la relación única de las llaves criptográficas pública y privada con números al azar usados para la encriptación y desencriptación de información.",
       "section2Title": "2. PROVISIONES GENERALES",
-      "section2Content": "Superhero.com ​diseñó y construyó ​la aplicación como una billetera de criptoactivos a través de la cual los ​USUARIOS pueden almacenar y enviar tokens Superhero.com con el propósito de realizar donaciones a creadores, causas, caridades, grupos o individuos regulares en línea como una recompensa por contribuir con información precisa, hechos relevantes, contenido de calidad​. Los USUARIOS pueden donar a diferentes sitios web a través de la aplicación. La aplicación busca automaticamente la llave pública del sitio web con el propósito de la donación. Las donaciones pueden ser orientadas en dos flujos de la siguiente manera- ​los USUARIOS puedes dar propina al propietario de todo el sitio web o los ​USUARIOS pueden enviar tokens a creadores específicos o a autores en un sitio web que hayan escrito la noticia que quieren recompensar. \n Después de eso, el sitio web ​https://superhero.com/ reflejará la donación y comentarios del ​USUARIO y da la posibilidad para que otros ​USUARIOS puedan donar y comentar en las noticias disponibles en la cartelera del Sitio wen. \n Los USUARIOS ​pueden navegar por su historial de transacciones. ​La Billetera muestra los ​tokens del USUARIO​. Los ​USUARIOS​ están a cargo de la custodia, del envio y de la recepción segura de sus fondos. \n La aplicación está hecha para transacciones pequeñas. Un volumen alto de transacciones o su almacenamiento pueden realizarse a través de la aplicación bajo el propio riesgo del ​USUARIO​.",
       "section3Title": "3. IDENTIFICACIÓN DEL USUARIO",
-      "section3Content": "La aplicación usa la ​Dirección de la cuenta​ para la identificación del ​USUARIO​. \n Para que los ​USUARIOS envien tokens Superhero.com, deben compartir solamente la dirección de la cuenta. Ninguna otra información es compartida o recolectada por la aplicación. Una vez que el ​USUARIO haya descargado la aplicación, la ​Billetera ​genera una dirección de cuenta automáticamente. ​Para más información sobre el procesamiento de la dirección de la cuenta, por favor lee la Política de Privacidad de la aplicación.",
       "section4Title": "​4. OBLIGACIONES DEL USUARIO",
-      "section4Content": "Como ​USUARIO​, ​Tú​ aceptas la aplicación de las siguientes reglas para Superhero.com ​: \n ● Tú ​cumplirás el conjunto de reglas demtro de los presentes ​TÉRMINOS y llevarás a cabo acciones de buena fé y acordes a la legislación aplicable; \n ● Tú eres mayor de edad y ​TÚ no presentas ninguna discapacidad o limitación judicial (​Tienes capacidad legal completa); \n ● No intetarás obtener acceso  a información personal o identificable, incluyendo pero no limitante a recuperar la frase semilla de otros ​USUARIOS​, tampoco revelarás este tipo de información de ti mismo; \n ● No debes comprometer o explotar la aplicación o usarla para alguna actividad ilegal o por fuera del propósito de su creación; \n ● Tus acciones no deben engañar ni hacer pensar que ​Tú eres otra persona o compañía; ​No debes proporcionar información a propósito mediante el uso de frases de recuperación, direcciones de cuenta, etc. de otra persona con el propósito de representar a alguien más. Superhero.com ​tomará cualquier acción que crea conveniente contra los usurpadores de identidad y fraudes en caso de que ​la compañía​ sospeche de un ​USUARIO​; \n ● el dispositivo que ​tú uses no debe contener o instalar ningún virus, gusano, malware, Troyanos o cualquier otro tipo de contenido destructivo o dañino; \n Los USUARIOS​ serán responsables por cualquier acción tomada que viole el persente artículo.",
       "section5Title": "5. GARANTÍA y DESCARGO DE RESPONSABILIDAD",
-      "section5Content": "\n Descargo de responsabilidad General: La ​red Superhero.com es de códico abierto, blockchain pública y sin permisos, por lo tanto cualquiera puede descargar, participar, desarrollar, mejorar y validar transacciones en la blockchain. Superhero.com ​no puede y no controla de ninguna forma las transacciones conducidas por los USUARIOS​. Superhero.com ​no asegura la integridad y validez de la misma. Por favor ten en cuenta que cada ​USUARIO es individualmente responsable por las aciones que lleve a cabo en la aplicación y por la inforamción presentada por ellos. \n Descargo de responsabilidad de Contraseña y Seguridad: los ​USUARIOS toman la responsabilidad por su seguridad digital. La aplicación ​da la responsabilidad de configurar una frase de recuperación, que consiste en una combinación ´nica y aleatoria de palabras. El propósito de la frase de recuperación es el de restaurar el acceso a la cuenta, una vez que el ​USUARIO haya perdido el acceos a la ​Billetera​ original. Superhero.com no recoge las llaves privadas o las frases de recuperación por lo que bajo ninguna circunstacia sera tratado como un proveedor de billetera custodial. ​RECOMENDAMOS ENFÁTICAMENTE A TODOS LOS USUARIOS QUE CONFIGUREN UNA FRASE DE RECUPERACIÓN Y LA PROTEJAN. ​Por lo tanto, los USUARIOS deberían guardar su frase de recuperación de forma seguras fuera de línea (offline). Por favor ten en cuenta que si el USUARIO no ha configurado una frase de recuperación como respaldo o si ha olvidado la frase de recuperación con sus palabras exactas, el acceso a sus cuentas puede ser restringido permanentemente. La falta de acceso no significa que los tokens Superhero.com ​están perdidos de alguna manera. Los ​tokens ​permanecen disponibles, sin embargo, no pueden ser controlados, transferidos y no puede realizarse ningún otro tipo de acción con ellos. Superhero.com ​no será responsable de ninguna manera por la pérdida, olvido o error de escritura de la frase de recuperación. Adicionalmente, los ​USUARIOS ​no deben compartir su frase de recuperación con nadie. Superhero.com ​no debería ser responsable por cualquier reclamo, daño u otras responsabilidades, hechos u otros, derivados de o en conexión con la imposibilidad de tener nuevamente acceso por parte de los ​USUARIOS a sus cuentas​ em la ​Billetera​. \n Por favor ten en cuenta que la opción “¿Ya tiene una cuenta? Recupere una cuenta existente” sólo es aplicable en caso en el que el ​USUARIO​ posea su frase de recuperación. \n Descargo de Responsabilidad para Decentralización y Control: La tecnología ​Blockchain es descentralizada por naturaleza- por lo que los creadores de ​la Billetera no pueden acceder o congelar tu cuenta; recuperar o reponer tu frase de recuperación; revertir, cancelar o devolver transacciones. Sólo los ​USUARIOS están a cargo del resguardo seguro y del envio de sus fondos. Al aceptar los presentes ​TÉRMINOS​, los ​USUARIOS aceptan y garantizan que defenderán, indenmizarán y mantendrán ​sin daño a Superhero.com de y en contra de cualquier y todo reclamo, costo, gasto, incluyendo pero no limitando a costes legales, daños, etc., relacionados o como resultado del uso de ​la aplicación​. \n Descargo de responsabilidad de Acceso y Conectividad: ​La Billetera ​puede ser descargada desde https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/​. Por favor ten en cuenta que ese sitio web puede deslistar o eliminar ​la aplicación según lo considere, haciendo difícil recibir actualizacioes. Los dispositivos con la ​Billetera instalada puede sufrir daños por malware/spyware/virus/ataques cibernéticos, etc. o por fallas técnicas. El daño o la pérdia del dispositiv podría resultar en la pérdida de los fondos o ponerlos en riesgo. Por lo tanto, por favor revisa la sección Descargo de Responsabilidad para Contraseña y Seguridad para conocer sobre la frase de seguridad. Superhero.com ​no es responsable por nada de lo arriba mencionado sobre problemas de acceso y conectividad. Por lo tanto, ​NOSOTROS no seremos responsables por cualquier pérdida de datos en ​la aplicación ​debido a estos casos. \n Descargo de Responsabilidad para Guía de Criptoactivos: El contenido presentado en la aplicación no tiene la intención de ser usado como guía para inversiones en criptoactivos o para firmar otros acuerdos legales en conexión con criptoactivos. Superhero.com ​no ofrece consejos de negocios, que pudieran ser usados ccomo base legal em cualquier inversión o acuerdo en la esfera. Superhero.com ​no podrá ser responsabilizado en cualquier caso con consecuencias negativas por transacciones o por no cumplir con obligaciones de acuerdos legales firmados por ​TI​, incluyendo pero no limitando pérdidas, tort, ganancias, ingresos o pérdidas de beneficios derivados de contratos/transacciones/actos de inversión/acuerdos. \n  Descargo de Responsabilidad para Jurisdicción y Regulaciones: ​El acceso a ​la aplicación se ha concedito a todo el mundo. El uso de la aplicación puede ser técnicamente restringido o prohibido em ciertos territorios y paises dependiendo de sus diferentes actas legales. Por favor ten en cuenta que debes informarte de tales restricciones legales y que eres responsable individualmente en caso de infringir alguna norma legal. El acceso a nuestro sitio web está prohibido por el punto de acceso si esta en un territorio donde el contenido sea ilegal. Superhero.com ​no tiene la obligación para controlar la aplicabilidad legislativa de acuerdo a cada punto de acceso de los ​USUARIOS y no tendrá responsabilidad en estas circunstancias. \n  Los USUARIOS entienden y aceptan que la legislación a niveles nacionales, regionales e internacionales pueden introducir nuevas regulaciones con un objeto- la tecnología blockchain, tokens, aplicaciones basadas en tecnología blockchain, etc. Por lo tanto, en caso de restricciones regulatorias, sanciones y prohibiciones, el desarrollo de la ​red Superhero.com se vería inmensamente influenciada, causando probablemete su terminación. tomando en cuenta lo mencionado anteriormente, los ​USUARIOS entienden que no hay ninguna seguridad de que recibirán constantemente o por un periodo indefinido de tiempo cualquier funcionalidad a través de ​la aplicación ​o los ​tokens Superhero.com​ dentro de ella. \n  Riesgos​: Los USUARIOS entienden y aceptan los riesgos relacionados a la ​Contribucion con Superhero.com y/o con la colocación, uso y propiedad de los tokens Superhero.com ​y garantizar el relevo de responsabilidad de Superhero.com en estos casos. Los riesgos mencionados en los presentes ​TÉRMINOS​ no son comprensivos: \n ● Riesgo de debilidad del software​: los ​USUARIOS entienden y aceptan que debido al concepto de código abierto, descentralizado, público, y de nube sin permiso, el software, la tecnología blockchain, incorporando todos estos elementos, y ​la aplicación están en un proceso de desarrollo constante. No hay garantía que la recepción y la transferencia de los tokens Superhero.com ​sea ininterrumpida y libre de errores todas las veces. Los ​USUARIOS aceptan y garantizan liberar de responsabilidad a Superhero.com ​por cualquier debilidad en la tecnología o el software, mal funcionamiento, vulnerabilidades o bugs, las cuales pueden causar la pérdida completa o parcial de tokens Superhero.com. \n ● Riesgo de robo: los ​USUARIOS entienden y aceptan que debido al concepto de código abierto, descentralizado, publico, nube sin permiso, el software, la aplicación, la ​Red Superhero.com y otros elementos de tecnología blockchain relacionados pueden estar expuestos a ataques de hackers u otros individuos peligrosos. Estas acciones podrían resultar incluyendo pero no limitado a robo o pérdida de tokens Superhero.com. \n ● Riesgo de ataques de minería: los ​USUARIOS entienden y aceptan que debido al sistema basado en ​blockchain de Superhero.com, éste es susceptible a ataques de minería, incluyendo pero no limitado a ataques de doble gasto, ataques de poder de minería mayoritaria, ataques 'selfish-mining', y ataques de condición de carrera. Cualquiera de los ataques arriba mencionados podrían por ejemplo resultar en un disturbio de las transacciones en ​la aplicacion​. \n ● Riesgo de ataques de phishing y ​forks​: los ​USUARIOS entienden y aceptan que la aplicación puede ser objeto de ataque prishing. Es altamente posible que el resultado sea el robo de datos y credenciales. Los ataques prishing representan la suplantación por parte del atacante de una entidad auténtica y de confianza y la creación de una aplicación/sitio web con gran porcentaje de coincidencia con el original. Los ​USUARIOS deben tener cuidado cuando descargan y usan ​la ​aplicación​. Los ​USUARIOS pueden identificar la Billetera auténtica ​verificando que el desarrollador en el sitio de aplicaciones es Superhero.com / Superhero.com LVC. \n Debiso al hecho que la blockchain de Superhero.com es pública y sin permiso, cualquier persona puede crear una ​bifurcación o fork​. Cualquier desarrollador puede copiar y desarrollar el código fuente resultando en la formación de un software distinto y separado. Los ​USUARIOS​ entienden y aceptan que Superhero.com ​ no puede evitar la creación de tales ​bifurcaciones o forks y no es responsable por ellas. Superhero.com ​no será responsable por cualquier pérdida y/o daño resultante del uso de las ​bifurcaciones o forks​.",
       "section6Title": "6. IMPUESTOS Y COMISIONES",
-      "section6Content": "La Billetera no cobra ninguna comisión o impuesto por el uso de ​la aplicación​- ​es libre de cargos. Sin embargo, los impuestos y las comisiones son pagables por las transacciones en la blockchain de Superhero.com incluyendo pero no limitado a comisiones de minería, impuesto de gas, comisión de transacción. Los montos de los impuestos y las comisiones se fijan unilateralmente. \n Adicionalmente, dependiendo del territorio del punto de acceso, la transferencia y recepción de fondos a través de la aplicación pueden ser objeto de impuestos y comisiones por pagos por parte de la autoridad puública en diferentes paises dependiendo de las regulaciones legales. Los ​USUARIOS están obligados a informarse acerca de tales requerimientos y son responsables individualmente por sus donaciones.",
       "section7Title": "7. PLATAFORMAS DE TERCERAS PARTES",
-      "section7Content": "Para donar, los ​USUARIOS deben copiar y pegar en la Sección “Enviar propina a“ la URL del sitio web a la que les gustaría donar. Por favor ten en mente que las aplicación está creada para que la gente estimule la información precisa, transparente, útil y certera a nivel mundial. Por lo tanto, los ​USUARIOS son totalmente responsables por cualquier uso de la ​Billetera en violación con el propósito de la misma y los presentes Términos. Superhero.com ​no controla los sitios web a los que se envian las donaciones. Superhero.com ​no es responsable de ninguna manera del contenido en esos sitios web.",
       "section8Title": "8. LICENCIA",
-      "section8Content": "La aplicación está creada, desarrollada y operada por Superhero.com ​. Cada componente en la aplicación incluyendo pero no limitado logos, marcas comerciales y otra propiedad intelectual mostrada en al aplicación son considerados como propiedad de Superhero.com ​y están protegidos por la legislación de propiedad intelectual aplicable. Está prohibido el uso de cualquier propiedad intelectual de Superhero.com ​antes de tener el consentimiento explícito de este Superhero.com. \n Ninguno de los elementos mencionados arriba puede ser editado, descargado, reproducido y usado para propósitos comerciales, distribuido y transmitido de ninguna manera y/o medio ya sea, parcial o totalmente, sin el previo consentimiento explícito y por escrito de Superhero.com. \n Superhero.com ​se reserva el derecho para tomar cualquier acción legal necesaria contra infracciones a la propiedad intelectual.",
       "section9Title": "9. DERECHOS DE PROPIEDAD INTELECTUAL",
-      "section9Content": "Los USUARIOS entienden y aceptan que ​la aplicacion puede ser periódicamente modificada, actualizada, mantenida o sometida a soporte técnico, lo cual podría influir de alguna manera en el uso de la Billetera​, en la representación visual de ​la aplicaión ​o podría resultar en un mal funcionamiento. En este último caso, si ​tú como un ​USUARIO notas cualquier cambio en los fondos, ajustes, cuentas o en cualquier otra información en la aplicación, por favor escribe a superherowallet{'@'}protonmail.com​ solicitando asistencia.",
       "section10Title": "10. MODIFICACIONES",
-      "section10Content": "Se fija la legislación y jurisdicción de Liechtenstein para los temas relacionados a los presentes ​TÉRMINOS​. La  invalidez de una o más cláusulas/provisiones en los ​TÉRMINOS no conlleva a la invalidez de todo el acuerdo. \n La Política de Privacidad es una parte inseparable de los presentes ​TÉRMINOS y debería ser considerada como un documento complementario con carácter compulsorio. Al no ser declarado explícitamente en la Política de Privacidad, todas las reglas de los ​TÉRMINOS​ se aplican respectivamente.",
       "section11Title": "11. PROVISIONES FINALES"
     },
     "tipPage": {
@@ -493,27 +372,6 @@
       "received": "Recibido",
       "withdrawals": "Retiros",
       "topups": "Agregar saldo"
-    },
-    "transactions": {
-      "heading": "Historial de transacción",
-      "filters": "Filtros",
-      "loadMore": "Cargar Más",
-      "allLoaded": "Cargadas todas las transacciones.",
-      "newTransactions": "nuevas transacciones",
-      "noTransactions": "No se hallaron transacciones",
-      "type": "Tipo",
-      "incoming": "Entrante",
-      "outgoing": "Saliente",
-      "spendType": "Tipo de Gasto",
-      "spendTx": "spend tx",
-      "namePreclaim": "transacción preclamo de nombre",
-      "nameClaim": "transacción reclamo de nombre",
-      "nameUpdate": "transacción actualización de nombre",
-      "createTx": "crear transacción",
-      "clear": "Limpiar filtro",
-      "apply": "Aplicar filtro",
-      "sent": "Enviado",
-      "received": "Recibido"
     },
     "aeAddressInput": {
       "label": "Dirección Aeternity",

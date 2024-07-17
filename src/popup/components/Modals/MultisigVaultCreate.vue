@@ -165,7 +165,7 @@
           @click="openFormStep"
         />
         <BtnMain
-          :text="$t('modals.createMultisigAccount.btnTextShort')"
+          :text="$t('modals.createMultisigAccount.createMultisigVault')"
           wide
           :disabled="(
             multisigAccountCreationPhase !== MULTISIG_CREATION_PHASES.signed
