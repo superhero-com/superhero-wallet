@@ -1,7 +1,6 @@
 {
   "common": {
     "address": "Indirizzo",
-    "ae": "AE",
     "all": "Tutti",
     "amount": "Quantità",
     "cancel": "Annulla",
@@ -22,27 +21,11 @@
     "required": {
       "msg": "Please fill in all fields."
     },
-    "only-chars": {
-      "msg": "Only letters and numbers are allowed."
-    },
     "name-exist": {
       "msg": "This name is already registered."
     },
-    "name-length": {
-      "msg": "Only names longer than 13 characters are allowed."
-    },
-    "incorrect-address": {
-      "msg": "Please make sure that you have entered a valid public address."
-    },
-    "incorrect-amount": {
-      "msg": "Please make sure you entered a valid amount."
-    },
     "insufficient-balance": {
       "msg": "The requested amount cannot be spent."
-    },
-    "removeAccount": {
-      "title": "Are you sure you want to remove this account?",
-      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
     },
     "verified": {
       "title": "What is a \"Verified\" URL?",
@@ -79,25 +62,6 @@
     "fee": "Costo della transazione"
   },
   "pages": {
-    "intro": {
-      "heading": "Intro",
-      "skip": "Skip",
-      "generateWallet": "Generate Wallet",
-      "receive": "Receive",
-      "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
-      "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
-      "step3text-1": "This wallet does not—and will never take commissions off the",
-      "step3text-2": "you send or receive. Superhero was created specifically so that no one but you will have control over your funds.",
-      "createdWallet": "Your wallet has been created!",
-      "step4text-0": "Welcome to the free web.",
-      "step4text-1": "Trustless: no third-party intervention. Transactions are fully P2P.",
-      "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
-      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
-      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
-      "toHome": "Proceed to your Wallet",
-      "send": "Send",
-      "ever": "Ever."
-    },
     "titles": {
       "settings": "Impostazioni del portafoglio"
     },
@@ -110,31 +74,24 @@
     "account": {
       "heading": "Account",
       "activity": "Activity",
-      "accountName": "Nome utente",
       "claim": "Claim Tip",
       "receive": "Ricevere",
       "latestTransactions": "Ultimi transazioni",
       "noTransactionsFound": "Nessuna transazione trovato!",
       "balance": "Balance",
       "copied": "Copied!",
-      "backup": "backup",
-      "updateExtension": "New version available! Please update your extension.",
-      "claim-name": "Claim your .chain name"
+      "backup": "backup"
     },
     "claim": {
       "claim": "Claim tips",
       "noZeroClaim": "There are no tips to be claimed for this URL.",
-      "noAddress": "Address not found",
-      "errorClaim": "Error with claiming",
       "ae": "AE tokens",
       "claimed": " Claim request sent! ",
       "url": "URL",
       "tipsOnUrl": "Tips on this URL",
       "urlNotExisting": "No tips for this URL at the moment.",
       "moreOracles": "There aren't enough active Oracles to verify your claim request. Please try again later.",
-      "oracleFailed": "Oracle service check claim failed. Please try again later.",
-      "unknownError": "Error occured during claim request. Please try again later.",
-      "noMobileClaim": "Claiming is currently only available on desktop."
+      "oracleFailed": "Oracle service check claim failed. Please try again later."
     },
     "notFound": {
       "notFound": "Requested page can't be found",
@@ -160,19 +117,9 @@
       "customToken": "Token personalizzato",
       "tokenSearchLabel": "Cerca token"
     },
-    "advancedSettings": {
-      "heading": "Avanzate",
-      "backToSettings": "impostazioni",
-      "exportKeypair": "Export keypair",
-      "exportKeystore": "Export keystore"
-    },
     "auctionBid": {
-      "backToAuctions": "Torna alle aste",
-      "bidding": "offerta",
-      "bidOn": "Fai un'offerta",
       "requiredField": "Questo campo è obbligatorio",
-      "current-highest-bid": "Offerta più alta attuale",
-      "remaining-time": "Tempo rimanente"
+      "current-highest-bid": "Offerta più alta attuale"
     },
     "connectConfirm": {
       "websiteRequestConnect": "vorrebbe connettersi al proprio account",
@@ -181,10 +128,7 @@
       "confirmButton": "Confermare",
       "addressLabel": "Address",
       "transactionLabel": "Transaction",
-      "addressRequest": "This aepp is requesting access to view your current account address",
-      "websiteRequestAccounts": "would like to get account addresses",
-      "addressesLabel": "Addresses",
-      "addressesRequest": "This aepp is requesting access to view your account addresses"
+      "addressRequest": "This aepp is requesting access to view your current account address"
     },
     "createFungibleToken": {
       "backToFungibleTokens": "Torna fungibile Gettoni",
@@ -238,7 +182,6 @@
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
     "languageSettings": {
-      "backToSettings": "Torna alle impostazioni",
       "heading": "Generale",
       "switchLanguage": "linguaggio",
       "currentLanguage": "lingua corrente"
@@ -251,31 +194,14 @@
       "heading": "Benvenuti a waellet, per iniziare a interagire con aeternity blockchain: ",
       "webVersion": "Or use a web version",
       "mobileVersion": "Più di un semplice modo per ricevere, archiviare e inviare monete sulla blockchain di aeternity",
-      "securingAccount": "Protezione dell'account",
       "generateWallet": "genera portafoglio",
-      "passwordError": "La password deve essere al timore 4 simboli!",
-      "loginButton": "Accesso",
       "importWaellet": "Importa waellet",
       "seedPhrase": "frase Seed",
       "enterSeedPhrase": "Inserisci il tuo frase seme. L'uno si è preso durante la creazione dell'account.",
-      "continueButton": "Continua",
       "continue": "Continue",
       "importAccount": "Import Account",
       "accountNotFound": "Account not found.",
       "checkSeed": "Please check your seed phrase."
-    },
-    "ledgerSetup": {
-      "ledgerConnectSetup": "Come connettersi da Ledger",
-      "ledgerAccount": "Aggiungere Ledger account",
-      "ledgerSteps": "passi",
-      "ledgerUsb": "Collega il tuo Ledger via USB e sbloccarlo",
-      "ledgerLedger": "Apri l'applicazione aeternity sul Ledger",
-      "ledgerAccountCreate": "Creare un primo conto premendo il pulsante qui sotto"
-    },
-    "privacyPolicy": {
-      "backButton": "Indietro",
-      "heading": "politica sulla riservatezza",
-      "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "qrCodeReader": {
       "heading": "Qr Code Scanner"
@@ -287,23 +213,8 @@
       "purchase": "Buy AE tokens"
     },
     "seed-phrase-settings": {
-      "backToSettings": "Torna alle impostazioni",
-      "heading": "Sicurezza e privacy",
-      "privacyDataHeading": "Privacy dei dati",
-      "privacyDataSmall": "Cancella dati privacy in modo che tutti i siti web devono richiedere l'accesso alle informazioni di conto vista di nuovo.",
-      "privacyDataClearBtn": "Cancella Privacy dei dati",
-      "privateKeyHeading": "Rivela chiave privata",
-      "privateKeySmall": "È possibile visualizzare la propria chiave privata dopo aver inserito la password",
-      "privateKeyRevealBtn": "Rivela chiave privata",
-      "privateKeyWarning": "Non condividere la chiave privata con nessuno, può essere utilizzato per rubare tutti i tuoi account",
-      "privateKey": "La chiave privata",
-      "showPrivateKey": "Mostra chiave privata",
-      "incorrectPassword": "Password errata",
-      "decryptingPrivateKey": "Decifrare la chiave privata",
-      "seedRecoveryHeading": "Mostra la frase seme",
       "seedRecoverySmall": "Rivela le tue 12 parole usate per generare la tua chiave privata",
       "seedRecoveryBtn": "Mostra la frase seme",
-      "seedPhrase": "La tua frase iniziale",
       "copy": "Copia negli appunti"
     },
     "seedPhrase": {
@@ -435,27 +346,6 @@
       "received": "Received",
       "withdrawals": "Withdrawals",
       "topups": "Top ups"
-    },
-    "transactions": {
-      "heading": "Cronologia delle transazioni",
-      "filters": "filtri",
-      "loadMore": "Carica di più",
-      "allLoaded": "Tutte le transazioni caricate!",
-      "newTransactions": "nuove operazioni",
-      "noTransactions": "No transactions found",
-      "type": "genere",
-      "incoming": "in arrivo",
-      "outgoing": "Estroverso",
-      "spendType": "Tipo spesa",
-      "spendTx": "spend tx",
-      "namePreclaim": "nome preclaim tx",
-      "nameClaim": "nome claim tx",
-      "nameUpdate": "nome update tx",
-      "createTx": "creare tx",
-      "clear": "Filtro pulito",
-      "apply": "Applica il filtro",
-      "sent": "Sent",
-      "received": "Received"
     },
     "aeAddressInput": {
       "label": "Aeternity Indirizzo",
