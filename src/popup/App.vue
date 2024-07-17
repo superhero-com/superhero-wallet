@@ -89,8 +89,10 @@ import {
   useMultisigAccounts,
   useNotifications,
   useUi,
+  useTopHeaderData,
 } from '@/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
@@ -127,6 +129,8 @@ export default defineComponent({
     const { restoreLanguage } = useLanguages();
     const { restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
+    const { claimPreclaimedNames } = useAeNames({ pollingDisabled: true });
+    const { topBlockHeight } = useTopHeaderData();
 
     const innerElement = ref<HTMLDivElement>();
     const delayedShowHeader = ref(false);
@@ -202,6 +206,12 @@ export default defineComponent({
           router.push({ name: ROUTE_ACCOUNT });
         }
       },
+    );
+
+    watch(
+      topBlockHeight,
+      claimPreclaimedNames,
+      { immediate: true },
     );
 
     watch(

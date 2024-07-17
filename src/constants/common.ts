@@ -126,6 +126,7 @@ export const STORAGE_KEYS = {
   lastRoute: 'last-route',
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
+  preclaimedNames: 'preclaimed-names',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
   transactionsLatest: 'transactions-latest',

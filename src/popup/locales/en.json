@@ -182,7 +182,11 @@
       "msg": "Only letters and numbers are allowed."
     },
     "name-exist": {
+      "title": "Name registration error",
       "msg": "This name is already registered."
+    },
+    "name-already-preclaimed": {
+      "msg": "Claim process for this name is already started."
     },
     "name-length": {
       "msg": "Names on SUPERHERO have to be a minimum of 13 characters."

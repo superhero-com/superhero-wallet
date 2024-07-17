@@ -4,6 +4,9 @@ import {
   ref,
   watch,
 } from 'vue';
+import { AensName, Encoded, NAME_TTL } from '@aeternity/aepp-sdk';
+import { isEmpty } from 'lodash-es';
+
 import type {
   ChainName,
   IName,
@@ -14,12 +17,12 @@ import type {
   IAuctionBid,
   AccountAddress,
 } from '@/types';
+
 import {
   fetchAllPages,
   fetchJson,
   handleUnknownError,
 } from '@/utils';
-import { Encoded, NAME_TTL } from '@aeternity/aepp-sdk';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   PROTOCOLS,
@@ -32,13 +35,15 @@ import {
   useModals,
   useNetworks,
   useStorageRef,
+  useTopHeaderData,
 } from '@/composables';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-
-import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
+import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
+
 import { useAeNetworkSettings } from './aeNetworkSettings';
 import { useAeTippingBackend } from './aeTippingBackend';
 import { useAeMiddleware } from './aeMiddleware';
@@ -57,11 +62,27 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
+interface preclaimedName {
+  address: string;
+  name: AensName;
+  salt: number;
+  blockHeight: number;
+  autoExtend: boolean;
+}
+
+interface aeNamesOptions {
+  pollingDisabled?: boolean;
+}
+
 type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
 let composableInitialized = false;
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
+const preclaimedNames = useStorageRef<Record<NetworkId, Record<AensName, preclaimedName>>>(
+  {},
+  STORAGE_KEYS.preclaimedNames,
+);
 const pendingAutoExtendNames = ref<ChainName[]>([]);
 const areNamesFetching = ref(false);
 
@@ -82,13 +103,19 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
  * This composable allows for obtaining and storing the chain names for the current user addresses
  * and external addresses (for example when displaying transaction details).
  */
-export function useAeNames() {
-  const { aeAccounts, isLocalAccountAddress, getLastActiveProtocolAccount } = useAccounts();
+export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
+  const {
+    aeAccounts,
+    activeAccount,
+    isLocalAccountAddress,
+    getLastActiveProtocolAccount,
+  } = useAccounts();
   const { onNetworkChange } = useNetworks();
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
+  const { topBlockHeight } = useTopHeaderData();
 
   const {
     isMiddlewareReady,
@@ -246,6 +273,7 @@ export function useAeNames() {
       address,
       type = UPDATE_POINTER_ACTION.update,
     }: IUpdateNamePointerParams,
+    options = {},
   ) {
     const aeSdk = await getAeSdk();
     const nameEntry = await aeSdk.aensQuery(name);
@@ -253,7 +281,11 @@ export function useAeNames() {
       if (type === UPDATE_POINTER_ACTION.extend) {
         await nameEntry.extendTtl(NAME_TTL);
       } else if (type === UPDATE_POINTER_ACTION.update) {
-        await aeSdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
+        await aeSdk.aensUpdate(
+          name,
+          { account_pubkey: address },
+          { ...options, extendPointers: true },
+        );
       }
       openDefaultModal({
         msg: tg('pages.names.pointer-added', { type }),
@@ -268,6 +300,97 @@ export function useAeNames() {
             : error.message,
         });
       }
+    }
+  }
+
+  async function addNameToClaimQueue(name: AensName, address: string, autoExtend: boolean) {
+    const aeSdk = await getAeSdk();
+    const nameSalt = (await aeSdk.aensPreclaim(name)).salt;
+    if (!preclaimedNames.value[nodeNetworkId.value!]) {
+      preclaimedNames.value[nodeNetworkId.value!] = {};
+    }
+    preclaimedNames.value[nodeNetworkId.value!][name] = {
+      address,
+      name,
+      salt: nameSalt,
+      blockHeight: topBlockHeight.value,
+      autoExtend,
+    };
+  }
+
+  async function claimName({
+    name,
+    address,
+    autoExtend,
+    salt,
+    blockHeight,
+  }: preclaimedName) {
+    let claimTxHash;
+    const aeSdk = await getAeSdk();
+
+    /**
+     * The claim transaction is intended to be executed in the next block after preclaim.
+     * To claim the name instantly and not block other transactions on this account,
+     * the claim transaction will be included in the next block.
+     */
+    if (topBlockHeight.value < blockHeight + 1) {
+      return;
+    }
+
+    const signingAccount = new AeAccountHdWallet(nodeNetworkId);
+    const claimOptions = (activeAccount.value.address !== address)
+      ? {
+        onAccount: {
+          address,
+          signTransaction: signingAccount.signTransaction.bind({
+            nodeNetworkId,
+            sign: signingAccount.sign,
+          }),
+        },
+        fromAccount: address,
+      } as any
+      : {};
+
+    try {
+      claimTxHash = (await aeSdk.aensClaim(name, salt, claimOptions)).hash;
+      if (autoExtend) {
+        setPendingAutoExtendName(name);
+      }
+    } catch (error: any) {
+      let msg = error.message;
+      if (msg.includes('is not enough to execute') || error.statusCode === 404) {
+        msg = tg('pages.names.balance-error');
+      }
+      openDefaultModal({ icon: 'critical', msg });
+      return;
+    } finally {
+      delete preclaimedNames.value[nodeNetworkId.value!][name];
+    }
+
+    try {
+      await aeSdk.poll(claimTxHash);
+      if (AE_AENS_NAME_AUCTION_MAX_LENGTH < name.length) {
+        await updateNamePointer({ name, address }, claimOptions);
+      }
+    } catch (error: any) {
+      openDefaultModal({ msg: error.message });
+    } finally {
+      updateOwnedNames();
+    }
+  }
+
+  async function claimPreclaimedNames() {
+    // Ensure the `nodeNetworkId` is established
+    await getAeSdk();
+    if (isEmpty(preclaimedNames.value[nodeNetworkId.value!])) {
+      return;
+    }
+    const sortedPreclaimedNameArray = Object.values(preclaimedNames.value[nodeNetworkId.value!])
+      .sort((a, b) => a.blockHeight - b.blockHeight);
+    /* eslint-disable-next-line no-restricted-syntax */
+    for (const pendingName of sortedPreclaimedNameArray) {
+      // eslint-disable-next-line no-await-in-loop
+      await claimName(pendingName);
     }
   }
 
@@ -307,9 +430,9 @@ export function useAeNames() {
     }
   }
 
-  initPollingWatcher(() => {
-    updateDefaultNames();
-  });
+  if (!pollingDisabled) {
+    initPollingWatcher(() => updateDefaultNames());
+  }
 
   if (!composableInitialized) {
     composableInitialized = true;
@@ -339,7 +462,11 @@ export function useAeNames() {
 
   return {
     ownedNames,
+    preclaimedNames,
     areNamesFetching,
+    addNameToClaimQueue,
+    claimPreclaimedNames,
+    claimName,
     updateOwnedNames,
     getName,
     getNameAuction,
