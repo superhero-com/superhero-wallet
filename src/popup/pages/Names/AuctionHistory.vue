@@ -103,6 +103,8 @@ export default defineComponent({
 
     &:not(:first-of-type) {
       border-top: 1px solid rgba($color-primary, 0.44);
+      display: flex;
+      justify-content: space-between;
     }
 
     .account-item {
