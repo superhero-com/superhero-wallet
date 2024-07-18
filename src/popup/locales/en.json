@@ -843,6 +843,8 @@
       "claimOfRetip": "Someone claimed your retip."
     },
     "seed-phrase-settings": {
+      "verifyYourSeedPhrase": "Verify your seed phrase!",
+      "compose-your-seed-phrase": "Tap the words below {0} to compose your seed phrase.",
       "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as password to access and restore your wallet accounts.",
       "seedRecoverySmall-2": "Never disclose this to anyone.",
       "seedRecoverySmall-3": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
@@ -1013,6 +1015,7 @@
       "connectToNetwork": "Connect to network",
       "connectTo": "Connect to {name}",
       "connectedTo": "Connected to {name}",
+      "confirmDelete": "Are you sure you want to delete this custom network?",
       "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
       "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
       "thirdPartyDetails": "Network details below have been provided by a third party. Make sure you trust the network provider to avoid malicious behavior resulting in lose of funds.",
