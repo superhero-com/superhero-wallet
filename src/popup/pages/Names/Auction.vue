@@ -83,7 +83,8 @@ export default defineComponent({
           middleware.getAccountActivities(nameId, { limit: 100 }),
         ]);
 
-        const { auctionEnd } = auctionInfo.info;
+        // https://github.com/aeternity/ae_mdw/issues/509
+        const { auctionEnd } = auctionInfo.auction ?? auctionInfo.info;
 
         const bids = accountActivities.data
           .filter(({ type }: any) => type === 'NameClaimEvent')
