@@ -2,7 +2,7 @@
 
 import { computed, watch } from 'vue';
 import BigNumber from 'bignumber.js';
-import { Encoding } from '@aeternity/aepp-sdk';
+import { Encoding, Tag } from '@aeternity/aepp-sdk';
 import { isAssetCoin, toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
@@ -245,8 +245,11 @@ export function useFungibleTokens() {
     // This is out of place but since we are treating new protocols as fungible tokens
     // it is better to have it here than in the protocol specific helper file
     if (protocol && protocol !== PROTOCOLS.aeternity) {
+      const isNonTokenContract = !getProtocolAvailableTokens(protocol)[tx.contractId]
+        || tx.tag === Tag.ContractCreateTx;
+
       return new BigNumber(tx?.amount || 0)
-        .plus(isReceived || !isAssetCoin(tx.contractId) ? 0 : tx?.fee || 0)
+        .plus(isReceived || (!isAssetCoin(tx.contractId) && !isNonTokenContract) ? 0 : tx?.fee || 0)
         .toNumber();
     }
 

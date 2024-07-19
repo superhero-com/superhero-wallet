@@ -83,8 +83,8 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       const gas = Number(params.gas);
       const senderId = toChecksumAddress(params.from);
       const recipientId = toChecksumAddress(params.to);
-      const isCoinTransfer = !!params.value; // `value` is present only when sending ETH
-      const tag = (params.data) ? Tag.ContractCallTx : Tag.SpendTx;
+      const isCoinTransfer = !params.data;
+      const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
       const modalProps: IModalProps = {
         protocol: PROTOCOLS.ethereum,
         app: { url, host: url ? new URL(url).hostname : '', name },
