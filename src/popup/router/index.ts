@@ -155,6 +155,7 @@ if (IS_MOBILE_APP) {
       }
     });
 
+    // TODO establish if we still need this
     router.afterEach((to) => {
       if (to.path === '/') {
         document.body.classList.remove('color-bg-app');
