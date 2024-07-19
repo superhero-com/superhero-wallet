@@ -4,11 +4,13 @@
     <BtnFilter
       :is-active="!showBookmarked && (!protocolFilter || isSelector)"
       :text="$t('common.all')"
+      data-cy="all-filter"
       @click="clearFilters(!isSelector)"
     />
 
     <BtnFilter
       :is-active="showBookmarked"
+      data-cy="bookmarked-filter"
       @click="() => setShowBookmarked(true, !isSelector)"
     >
       <IconWrapper
@@ -25,6 +27,7 @@
       <BtnFilter
         v-for="protocol in PROTOCOL_LIST"
         :key="protocol"
+        :data-cy="`${protocol}-filter`"
         class="filter-btn"
         :class="{ active: protocol === protocolFilter }"
         @click="setProtocolFilter(protocol)"
