@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.9](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.8...v2.2.9) (2024-07-19)
+
+
+### Features
+
+* add addressBook selector to multisig creation form ([bc700d9](https://github.com/Superhero-com/superhero-wallet/commit/bc700d988abaae273c0b46e0e29475a1ca1da777))
+* **address-book:** add form validation ([0aea2b7](https://github.com/Superhero-com/superhero-wallet/commit/0aea2b7a9ad8d04e266868610199cc1c571114b3))
+* **address-book:** add page & form ([b2be9db](https://github.com/Superhero-com/superhero-wallet/commit/b2be9db60daa3e4b2eaf270fed8de7ed871df6cb))
+* **address-book:** add share address button ([69f08ac](https://github.com/Superhero-com/superhero-wallet/commit/69f08ac6bf4a8d9fe0f00d8245c7bd3c00829c73))
+* **address-book:** filters logic ([9197946](https://github.com/Superhero-com/superhero-wallet/commit/9197946952341cf57d7c42879204edc5faa63a59))
+* **address-book:** import export functionality ([08d1d21](https://github.com/Superhero-com/superhero-wallet/commit/08d1d21a544992f5752604af6294827e4f4d7751))
+* **address-book:** send to contact ([e617b2c](https://github.com/Superhero-com/superhero-wallet/commit/e617b2c206e79568c29f838c71c90cd85b0dc20c))
+* global font family definition ([812ba5e](https://github.com/Superhero-com/superhero-wallet/commit/812ba5e95e8d072e9dcbda4ec9af27b6cdbf1be3))
+* improve character counter ui ([840d86d](https://github.com/Superhero-com/superhero-wallet/commit/840d86dbacc7771babecdae20044363d505e0eec))
+* radio input styles unification ([fc8d3eb](https://github.com/Superhero-com/superhero-wallet/commit/fc8d3ebce916fa2a67dd42bb8afd610e0888f09e))
+* remove duplicated babel config files ([b95089a](https://github.com/Superhero-com/superhero-wallet/commit/b95089a78a08d9bb74b8a5406333dbe3138d2e96))
+* remove name avatar faces ([c06755c](https://github.com/Superhero-com/superhero-wallet/commit/c06755c15530b3928f3eb7066150ccf0b6440f7e))
+* show fee in transaction list for token transfers ([a67d5c5](https://github.com/Superhero-com/superhero-wallet/commit/a67d5c5a951924a9c056a80d845332a115b3d3bb))
+
+
+### Bug Fixes
+
+* add missing wording ([9ee8c2a](https://github.com/Superhero-com/superhero-wallet/commit/9ee8c2a6ee5a2e2e2d21c0dd65cfddca67f63a0d))
+* **aens:** show correct auction end info ([9ac1b19](https://github.com/Superhero-com/superhero-wallet/commit/9ac1b192c194efb0a1eeb366526f9e130d590870))
+* **aens:** validate name correctly ([38101a4](https://github.com/Superhero-com/superhero-wallet/commit/38101a42519afafa95e937443b9f6d66924c9267))
+* be able to select from account assets only ([47d46d5](https://github.com/Superhero-com/superhero-wallet/commit/47d46d57c9ff91da23bfffdf591a8b1a51cefa79))
+* link button colors ([fc0cadf](https://github.com/Superhero-com/superhero-wallet/commit/fc0cadfdf5746203baf6b793be5af1f05db19114))
+* **multisig:** show correct multisig proposal blockHeight ([69b80f7](https://github.com/Superhero-com/superhero-wallet/commit/69b80f707b30a723edfa2f42d4bcdb626a9fec7b))
+* **multisig:** show correct revoke info ([e10038b](https://github.com/Superhero-com/superhero-wallet/commit/e10038b666832fa6f385abaa91cbee53b7acdb4b))
+* network switcher options margin ([d1b9b73](https://github.com/Superhero-com/superhero-wallet/commit/d1b9b73e557d01f4b9b95ff0e29302f4d2328cec))
+* remove incorrect component prop ([0e0d63a](https://github.com/Superhero-com/superhero-wallet/commit/0e0d63a2a243b41d7439bfeaa0d3e82e48e836fc))
+* show bid history correctly ([9869205](https://github.com/Superhero-com/superhero-wallet/commit/9869205f0391c63265f7f2a0a20f516fb93f04e3))
+
+
+### Documentation
+
+* add a deep link schema ([7d5cdba](https://github.com/Superhero-com/superhero-wallet/commit/7d5cdba894d05197ce41d84cbb3001837a85cc41))
+
+
+### Maintenance
+
+* add data-cys to address-book filters ([56c3259](https://github.com/Superhero-com/superhero-wallet/commit/56c32596421c58cfa22d75a4c2cbc5f291f74430))
+* **address-book:** resolve comments ([279c322](https://github.com/Superhero-com/superhero-wallet/commit/279c322926284ee0884e79867d197a82e2dda084))
+* change mainnet backend url ([244b4ab](https://github.com/Superhero-com/superhero-wallet/commit/244b4ab9bcf017bc1efba4b7b2155fae26489ad1))
+* multisig accounts use storage ref ([79f5b3c](https://github.com/Superhero-com/superhero-wallet/commit/79f5b3c7ce1470143337a5de3a9ab68e4975d8f6))
+* remove unused wording ([341fc0e](https://github.com/Superhero-com/superhero-wallet/commit/341fc0e04300a7e4bd01f5b40fbb4d8691548a83))
+* unify label text styling ([833599d](https://github.com/Superhero-com/superhero-wallet/commit/833599d38471baf98c7333153b3d8fdda2be1ee3))
+* update ionic ([56a2897](https://github.com/Superhero-com/superhero-wallet/commit/56a2897c4a4066762c273c1dfdc9941c08c057f4))
+
 ### [2.2.8](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.7...v2.2.8) (2024-07-17)
 
 
