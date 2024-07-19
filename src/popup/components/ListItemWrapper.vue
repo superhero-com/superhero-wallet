@@ -38,7 +38,7 @@ export default defineComponent({
   &:hover {
     background-color: rgba($color-bg-4-hover, 0.5);
 
-    @include mixins.mobile {
+    @include mixins.env-mobile {
       background-color: transparent;
     }
   }
