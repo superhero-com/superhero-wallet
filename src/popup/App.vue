@@ -358,6 +358,7 @@ export default defineComponent({
   @include mixins.env-extension {
     min-width: $extension-width;
     min-height: $extension-height;
+    max-width: $phone-width;
   }
 
   @include mixins.env-web {
