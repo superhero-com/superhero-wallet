@@ -99,7 +99,9 @@ export default {
     }
 
     .text {
-      @extend %face-sans-16-bold;
+      @extend %face-sans-16-semi-bold;
+
+      line-height: 24px;
     }
   }
 }

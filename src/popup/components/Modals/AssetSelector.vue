@@ -10,7 +10,7 @@
   >
     <template #header>
       <span
-        class="text-heading-3 text-muted title"
+        class="text-heading-5 text-muted title"
         v-text="$t('pages.fungible-tokens.select-asset')"
       />
       <InputSearch

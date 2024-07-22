@@ -2,7 +2,7 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
       <div class="seed-phrase-details">
-        <div class="text-heading-1">
+        <div class="text-heading-3">
           {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
         </div>
 

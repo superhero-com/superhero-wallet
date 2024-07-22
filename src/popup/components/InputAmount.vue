@@ -23,7 +23,7 @@
         data-cy="select-asset"
         :value="currentAsset"
         :focused="focused"
-        :with-balance-only="showTokensWithBalance"
+        :with-balance-only="withBalanceOnly"
         @select-asset="handleAssetSelected($event)"
       />
       <div
@@ -91,7 +91,7 @@ export default defineComponent({
     selectedAsset: { type: Object as PropType<IAsset>, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     readonly: Boolean,
-    showTokensWithBalance: Boolean,
+    withBalanceOnly: Boolean,
     blinkOnChange: Boolean,
   },
   emits: ['update:modelValue', 'asset-selected'],

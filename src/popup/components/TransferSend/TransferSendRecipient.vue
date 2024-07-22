@@ -26,13 +26,22 @@
         @help="showRecipientHelp()"
       >
         <template #label-after>
-          <BtnPlain
-            class="scan-button"
-            data-cy="scan-button"
-            @click="$emit('openQrModal')"
-          >
-            <QrScanIcon />
-          </BtnPlain>
+          <div class="buttons">
+            <BtnPlain
+              class="address-book-button"
+              data-cy="address-book-button"
+              @click="selectFromAddressBook()"
+            >
+              <AddressBookIcon />
+            </BtnPlain>
+            <BtnPlain
+              class="scan-button"
+              data-cy="scan-button"
+              @click="$emit('openQrModal')"
+            >
+              <QrScanIcon />
+            </BtnPlain>
+          </div>
         </template>
       </FormTextarea>
     </Field>
@@ -55,7 +64,7 @@ import { Field } from 'vee-validate';
 
 import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
-import { MODAL_RECIPIENT_INFO, PROTOCOLS } from '@/constants';
+import { MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, MODAL_RECIPIENT_INFO, PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useModals,
@@ -64,16 +73,19 @@ import { useAeTippingUrls } from '@/protocols/aeternity/composables';
 
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
+import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-import BtnPlain from '../buttons/BtnPlain.vue';
+import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
     FormTextarea,
     UrlStatus,
     Field,
-    QrScanIcon,
     BtnPlain,
+    QrScanIcon,
+    AddressBookIcon,
   },
   props: {
     isTipUrl: Boolean,
@@ -84,7 +96,7 @@ export default defineComponent({
     errors: { type: Object, required: true },
   },
   emits: ['openQrModal', 'update:modelValue'],
-  setup(props) {
+  setup(props, { emit }) {
     const isAe = computed(() => props.protocol === PROTOCOLS.aeternity);
 
     const { openModal } = useModals();
@@ -114,11 +126,19 @@ export default defineComponent({
       openModal(MODAL_RECIPIENT_INFO, { protocol: props.protocol });
     }
 
+    async function selectFromAddressBook() {
+      const address = await openModal<string>(MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR);
+      if (address) {
+        emit('update:modelValue', address);
+      }
+    }
+
     return {
       urlStatus,
       activeAccount,
       addressMessage,
       showRecipientHelp,
+      selectFromAddressBook,
     };
   },
 });
@@ -128,15 +148,34 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .transfer-send-recipient {
-  .scan-button {
-    color: $color-white;
-    display: block;
-    width: 32px;
-    height: 24px;
-  }
-
   .status {
     margin-top: 9px;
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    height: 20px;
+    color: $color-white;
+
+    > * {
+      opacity: 0.75;
+      transition: $transition-interactive;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .address-book-button {
+      width: 20px;
+    }
+
+    .scan-button {
+      width: 30px;
+    }
   }
 }
 </style>

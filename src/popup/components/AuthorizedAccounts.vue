@@ -86,7 +86,7 @@ export default defineComponent({
   }
 
   .count-value {
-    @extend %face-sans-14-bold;
+    @extend %face-sans-14-medium;
 
     line-height: 19px;
   }

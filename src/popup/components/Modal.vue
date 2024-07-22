@@ -13,6 +13,7 @@
         'has-header': showHeader,
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
+        'no-padding-bottom': noPaddingBottom,
         transparent,
         dense,
         'semi-dense': semiDense,
@@ -36,9 +37,10 @@
           </div>
 
           <slot name="header">
-            <div class="header-default-text">
-              {{ header }}
-            </div>
+            <div
+              class="header-default-text"
+              v-text="header"
+            />
           </slot>
 
           <BtnClose
@@ -54,7 +56,6 @@
           class="body"
           :class="{
             'text-center': centered,
-            'without-padding-bottom': bodyWithoutPaddingBottom,
           }"
         >
           <slot />
@@ -64,7 +65,6 @@
 
         <FixedScreenFooter
           v-if="$slots.footer"
-          v-bind="$attrs"
         >
           <slot name="footer" />
         </FixedScreenFooter>
@@ -105,8 +105,8 @@ export default defineComponent({
     dense: Boolean,
     semiDense: Boolean,
     noPadding: Boolean,
+    noPaddingBottom: Boolean,
     centered: Boolean,
-    bodyWithoutPaddingBottom: Boolean,
     minHeight: Boolean,
     transparent: Boolean,
     header: { type: String, default: null },
@@ -215,10 +215,6 @@ export default defineComponent({
       padding: var(--screen-padding-x);
       color: $color-grey-light;
       word-break: break-word;
-
-      &.without-padding-bottom {
-        padding-bottom: 0;
-      }
     }
 
     .close-button {
@@ -308,8 +304,13 @@ export default defineComponent({
     --screen-padding-x: 0;
   }
 
-  // This is not working correctly in Firefox extension
+  &.no-padding-bottom {
+    .body {
+      padding-bottom: 0;
+    }
+  }
 
+  // This is not working correctly in Firefox extension
   &.blur-bg {
     backdrop-filter: blur(5px);
   }

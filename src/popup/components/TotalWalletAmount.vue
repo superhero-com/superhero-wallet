@@ -38,7 +38,7 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .total-amount {
-  @extend %face-sans-16-bold;
+  @extend %face-sans-16-semi-bold;
 
   display: flex;
   align-items: center;

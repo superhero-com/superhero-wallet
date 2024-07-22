@@ -1,9 +1,8 @@
 <template>
   <div class="address-truncated">
     <ProtocolIcon
-      v-if="showProtocolIcon"
+      v-if="showProtocolIcon && protocol"
       :protocol="protocol"
-      icon-size="rg"
       class="protocol-icon"
     />
     <div class="address-truncated-chunks">
@@ -16,13 +15,10 @@
 
     <LinkButton
       v-if="showExplorerLink"
-      :to="explorerUrl"
+      :href="explorerUrl"
+      is-external
       class="external-link"
-    >
-      <template #icon>
-        <ExternalLinkIcon class="external-link-icon" />
-      </template>
-    </LinkButton>
+    />
   </div>
 </template>
 
@@ -36,7 +32,6 @@ import type { Protocol } from '@/types';
 import { truncateAddress } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
 import ProtocolIcon from './ProtocolIcon.vue';
 import LinkButton from './LinkButton.vue';
 
@@ -44,21 +39,25 @@ export default defineComponent({
   components: {
     ProtocolIcon,
     LinkButton,
-    ExternalLinkIcon,
   },
   props: {
     address: { type: String, required: true },
-    protocol: { type: String as PropType<Protocol>, required: true },
+    protocol: { type: String as PropType<Protocol>, default: undefined },
     showExplorerLink: Boolean,
     showProtocolIcon: Boolean,
   },
   setup(props) {
     const truncatedAddress = computed(() => truncateAddress(props.address));
     const explorerUrl = computed(
-      () => ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .getExplorer()
-        .prepareUrlForAccount(props.address),
+      () => {
+        if (!props.protocol) {
+          return '';
+        }
+        return ProtocolAdapterFactory
+          .getAdapter(props.protocol)
+          .getExplorer()
+          .prepareUrlForAccount(props.address);
+      },
     );
 
     return {
@@ -91,7 +90,7 @@ export default defineComponent({
     letter-spacing: 0.07em;
 
     .dots {
-      @extend %face-mono-16-regular;
+      @extend %face-mono-16-medium;
 
       letter-spacing: -0.25em;
       text-align: center;

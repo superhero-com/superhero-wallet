@@ -55,7 +55,7 @@
               >
                 <template #value>
                   <CopyText :value="tipUrl">
-                    <LinkButton :to="tipLink">
+                    <LinkButton :href="tipLink">
                       <Truncate
                         :str="tipUrl"
                         fixed

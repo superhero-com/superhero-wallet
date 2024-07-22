@@ -163,15 +163,7 @@ export default defineComponent({
   }
 
   &.large {
-    @extend %face-sans-20-regular;
-
-    .symbol {
-      font: inherit;
-    }
-
-    .text {
-      @extend %face-sans-16-regular;
-    }
+    @extend %face-sans-22-semi-bold;
 
     .fiat {
       @extend %face-sans-18-regular;

@@ -7,12 +7,13 @@
           :src="NotFoundImage"
           alt="Feature not found"
         >
-        <div class="title">
+        <div class="text-heading-1 heading">
           {{ $t('pages.notFound.header') }}
         </div>
-        <div class="description">
+        <div class="text-description description">
           {{ $t('pages.notFound.description') }}
         </div>
+
         <div class="button-wrapper">
           <BtnMain
             v-if="!hideHomeButton"
@@ -80,33 +81,30 @@ export default defineComponent({
     width: 156px;
   }
 
-  .title {
-    @extend %face-sans-22-semi-bold;
-
+  .heading {
     margin-top: 16px;
   }
 
   .description {
-    @extend %face-sans-15-regular;
-
     margin-top: 8px;
-    margin-bottom: 32px;
-    opacity: 0.85;
   }
 
   .button-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 32px;
     width: 100%;
-  }
 
-  .button {
-    width: 100%;
-    margin-bottom: 16px;
-  }
+    .button {
+      width: 100%;
+    }
 
-  .icon {
-    margin-right: 4px;
-    width: 20px;
-    height: 20px;
+    .icon {
+      margin-right: 4px;
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 </style>

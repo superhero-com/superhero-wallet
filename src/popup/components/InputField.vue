@@ -16,7 +16,7 @@
     >
       <label
         :for="inputId"
-        class="label-text"
+        class="text-label"
         @click="$emit('click', $event)"
       >
         <slot name="label">{{ label }}</slot>
@@ -30,6 +30,7 @@
       <div
         v-if="$slots['label-after'] || textLimit"
         class="label-after"
+        :class="{ red: availableTextLimit < 0 && !$slots['label-after'] }"
       >
         <slot name="label-after">
           {{ availableTextLimit }}
@@ -62,7 +63,6 @@
             data-cy="input"
             :value="modelValue"
             :disabled="readonly"
-            :maxlength="textLimit"
             :inputmode="inputMode"
             :autocapitalize="autoCapitalize"
             @input="handleInput"
@@ -283,6 +283,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     margin-top: 16px;
+    margin-bottom: 2px;
 
     &-text {
       margin: 4px 0;
@@ -300,6 +301,10 @@ export default defineComponent({
       margin-left: auto;
       user-select: none;
       color: $color-grey-dark;
+
+      &.red {
+        color: $color-danger;
+      }
     }
   }
 

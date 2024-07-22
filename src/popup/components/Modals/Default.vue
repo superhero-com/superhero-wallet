@@ -20,7 +20,7 @@
       </IconBoxed>
     </div>
 
-    <h2 class="text-heading-2 text-center title">
+    <h2 class="text-heading-4 text-center title">
       {{ title }}
     </h2>
 

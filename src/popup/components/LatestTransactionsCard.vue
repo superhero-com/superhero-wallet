@@ -30,6 +30,7 @@
           class="transaction-item"
           :transaction="transaction"
           show-transaction-owner
+          hide-fee-from-assets
         />
       </div>
     </Transition>

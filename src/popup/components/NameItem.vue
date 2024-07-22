@@ -1,64 +1,56 @@
 <template>
   <div class="name-item">
     <div class="name-item-header">
-      <AccountInfo
-        :account="activeAccount"
-        :custom-name="nameEntry.name"
-        avatar-size="rg"
-        avatar-borderless
-        dense
-      >
-        <template #avatar>
-          <Pending
-            v-if="nameEntry.pending"
-            class="pending-icon"
-          />
-        </template>
+      <div class="title">
+        <Truncate
+          :str="nameEntry.name"
+          class="name"
+        />
 
-        <template #address>
-          <span
-            v-if="nameEntry.pending"
-            class="pending"
-            v-text="$t('common.pending')"
+        <div
+          v-if="nameEntry.pending"
+          class="pending"
+        >
+          <PendingIcon class="pending-icon" />
+          {{ $t('common.pending') }}...
+        </div>
+        <div
+          v-else
+          class="buttons"
+        >
+          <BtnPlain
+            v-show="canBeDefault"
+            class="button-plain"
+            :class="{ set: isDefault }"
+            :disabled="isDefault"
+            :text="(isDefault)
+              ? $t('pages.names.list.default')
+              : $t('pages.names.list.default-make')
+            "
+            @click="handleSetDefault"
           />
-          <div
-            v-else
-            class="buttons"
-          >
-            <BtnPlain
-              v-show="canBeDefault"
-              class="button-plain"
-              :class="{ set: isDefault }"
-              :disabled="isDefault"
-              :text="(isDefault)
-                ? $t('pages.names.list.default')
-                : $t('pages.names.list.default-make')
-              "
-              @click="handleSetDefault"
-            />
-            <BtnPlain
-              v-show="expand"
-              class="button-plain"
-              :class="{ set: nameEntry.autoExtend }"
-              :text="$t('pages.names.auto-extend')"
-              @click="toggleAutoExtend"
-            />
-            <BtnPlain
-              v-show="expand || !canBeDefault"
-              class="button-plain"
-              :class="{ edit: showInput }"
-              :text="$t('pages.names.details.set-pointer')"
-              @click="expandAndShowInput"
-            />
-            <BtnHelp
-              v-if="expand && !hasPointer"
-              :title="$t('modals.name-pointers-help.title')"
-              :msg="$t('modals.name-pointers-help.msg')"
-              small
-            />
-          </div>
-        </template>
-      </AccountInfo>
+          <BtnPlain
+            v-show="expand"
+            class="button-plain"
+            :class="{ set: nameEntry.autoExtend }"
+            :text="$t('pages.names.auto-extend')"
+            @click="toggleAutoExtend"
+          />
+          <BtnPlain
+            v-show="expand || !canBeDefault"
+            class="button-plain"
+            :class="{ edit: showInput }"
+            :text="$t('pages.names.details.set-pointer')"
+            @click="expandAndShowInput"
+          />
+          <BtnHelp
+            v-if="expand && !hasPointer"
+            :title="$t('modals.name-pointers-help.title')"
+            :msg="$t('modals.name-pointers-help.msg')"
+            small
+          />
+        </div>
+      </div>
 
       <BtnPlain
         v-if="!nameEntry.pending"
@@ -104,10 +96,10 @@
           </template>
         </InputField>
 
-        <DetailsItem
-          :value="nameEntry.hash"
-          :label="nameEntry.hash && $t('pages.names.list.name-hash')"
-        />
+        <DetailsItem :label="$t('pages.names.list.name-hash')">
+          <span class="address-small">{{ nameEntry.hash }}</span>
+        </DetailsItem>
+
         <div class="heights">
           <DetailsItem
             :value="nameEntry.createdAtHeight"
@@ -119,6 +111,7 @@
             :secondary="`(≈${blocksToRelativeTime(nameEntry.expiresAt - topBlockHeight)})`"
           />
         </div>
+
         <DetailsItem
           v-if="Object.entries(nameEntry.pointers || {}).length"
           :label="$t('pages.names.list.pointers')"
@@ -135,8 +128,8 @@
               :key="key"
               class="pointers"
             >
-              <span>#{{ idx + 1 }}</span>
-              {{ nameEntryPointer }}
+              <span class="pointers-number">#{{ idx + 1 }}</span>
+              <span class="address-small">{{ nameEntryPointer }}</span>
             </div>
           </template>
         </DetailsItem>
@@ -160,7 +153,6 @@ import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
   IS_MOBILE_APP,
-  MODAL_CONFIRM,
   POPUP_METHODS,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -181,25 +173,25 @@ import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
-import AccountInfo from './AccountInfo.vue';
 import InputField from './InputField.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
+import Truncate from './Truncate.vue';
 
-import Pending from '../../icons/animated-pending.svg?vue-component';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
 import Save from '../../icons/account-card/btn-save.svg?vue-component';
 import Paste from '../../icons/paste.svg?vue-component';
 
 export default defineComponent({
   components: {
-    AccountInfo,
-    Pending,
+    PendingIcon,
     InputField,
     BtnPlain,
     BtnHelp,
     DetailsItem,
+    Truncate,
     ChevronDownIcon,
     Save,
     Paste,
@@ -208,7 +200,7 @@ export default defineComponent({
     nameEntry: { type: Object as PropType<IName>, required: true },
   },
   setup(props) {
-    const { openModal } = useModals();
+    const { openConfirmModal } = useModals();
     const { activeAccount } = useAccounts();
     const { t } = useI18n();
     const { topBlockHeight } = useTopHeaderData();
@@ -319,10 +311,10 @@ export default defineComponent({
 
     async function toggleAutoExtend() {
       if (!props.nameEntry.autoExtend) {
-        await openModal(MODAL_CONFIRM, {
+        await openConfirmModal({
           icon: 'info',
-          title: t('modals.autoextend-help.title'),
-          msg: t('modals.autoextend-help.msg'),
+          title: t('modals.nameAutoExtendHelp.title'),
+          msg: t('modals.nameAutoExtendHelp.msg'),
         });
       }
       setAutoExtend(props.nameEntry.name);
@@ -393,21 +385,28 @@ export default defineComponent({
     align-items: flex-start;
     justify-content: space-between;
 
-    .pending-icon {
-      height: 32px;
-      width: 32px;
+    .title {
+      width: calc(100% - 30px);
+
+      .name {
+        @extend %face-sans-15-medium;
+
+        margin-bottom: 6px;
+      }
     }
 
     .pending {
-      @extend %face-sans-12-regular;
+      @extend %face-sans-12-medium;
 
+      display: flex;
+      align-items: center;
+      gap: 4px;
       color: $color-grey-dark;
-    }
 
-    .truncate {
-      @extend %face-sans-15-medium;
-
-      line-height: 16px;
+      &-icon {
+        height: 16px;
+        width: 16px;
+      }
     }
 
     .buttons {
@@ -415,7 +414,7 @@ export default defineComponent({
       margin-top: 2px;
       user-select: none;
 
-      .button-plain:not(.btn-help) {
+      .button-plain {
         @extend %face-sans-12-medium;
 
         padding: 2px 8px;
@@ -477,26 +476,21 @@ export default defineComponent({
       }
     }
 
-    .details-item :deep(.value) {
-      color: $color-grey-light;
+    .address-small {
+      @extend %face-mono-10-medium;
+
+      letter-spacing: 0;
     }
 
-    > .details-item {
-      :deep(.value) {
-        @extend %face-mono-10-medium;
+    .pointers {
+      display: flex;
+      align-items: center;
+      gap: 4px;
 
-        letter-spacing: 0;
+      .pointers-number {
+        @extend %face-sans-12-medium;
 
-        .pointers {
-          display: flex;
-
-          span {
-            margin-right: 4px;
-            color: $color-grey-dark;
-
-            @extend %face-sans-12-medium;
-          }
-        }
+        color: $color-grey-dark;
       }
     }
 

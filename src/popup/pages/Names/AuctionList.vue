@@ -8,37 +8,21 @@
         sticky
       />
     </IonToolbar>
+
     <IonContent class="ion-padding ion-content-bg--lighter">
       <div class="auction-list-content">
-        <ul
+        <div
           v-if="activeAuctions.length || auctions.length"
           class="list"
         >
-          <NameRow
-            v-for="({ name, expiration, lastBid }, key) in auctions"
+          <NameAuctionListItem
+            v-for="(auction, key) in auctions"
             :key="key"
-            :to="{ name: 'auction-bid', params: { name } }"
-            :name="name"
-            :address="lastBid.accountId"
-          >
-            <div class="name-wrapper">
-              <div class="name">
-                {{ name }}
-                <TokenAmount
-                  :amount="getAeFee(lastBid.nameFee)"
-                  :protocol="PROTOCOLS.aeternity"
-                />
-              </div>
-              <div
-                v-if="topBlockHeight"
-                class="expiration"
-              >
-                {{ $t('pages.names.auctions.expires') }}
-                in ≈ {{ blocksToRelativeTime(expiration - topBlockHeight) }}
-              </div>
-            </div>
-          </NameRow>
-        </ul>
+            :to="{ name: 'auction-bid', params: { name: auction.name } }"
+            :auction="auction"
+            :top-block-height="topBlockHeight"
+          />
+        </div>
         <AnimatedSpinner
           v-else-if="loading"
           class="spinner"
@@ -62,23 +46,18 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
-  IActiveAuction,
-  ObjectValues,
   IFilters,
   IFilterInputPayload,
+  INameAuction,
+  ObjectValues,
 } from '@/types';
-import {
-  blocksToRelativeTime,
-  fetchAllPages,
-} from '@/utils';
-import { PROTOCOLS } from '@/constants';
+import { fetchAllPages } from '@/utils';
 import { useTopHeaderData } from '@/composables';
 import { getAeFee } from '@/protocols/aeternity/helpers';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 
 import Filters from '@/popup/components/Filters.vue';
-import NameRow from '@/popup/components/NameRow.vue';
-import TokenAmount from '@/popup/components/TokenAmount.vue';
+import NameAuctionListItem from '@/popup/components/NameAuctionListItem.vue';
 import RegisterName from '@/popup/components/RegisterName.vue';
 import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 
@@ -98,8 +77,7 @@ const SORT_DESC = -1;
 export default defineComponent({
   components: {
     Filters,
-    NameRow,
-    TokenAmount,
+    NameAuctionListItem,
     AnimatedSpinner,
     RegisterName,
     IonPage,
@@ -113,7 +91,7 @@ export default defineComponent({
     const { getMiddleware, fetchFromMiddlewareCamelCased } = useAeMiddleware();
 
     const loading = ref(false);
-    const activeAuctions = ref<IActiveAuction[]>([]);
+    const activeAuctions = ref<INameAuction[]>([]);
     const displayMode = ref<AuctionsFilterPayload>({ key: 'soonest', rotated: false });
     const filters = ref<AuctionsFilters>({
       soonest: { rotated: false, name: t('filters.soonest') },
@@ -157,8 +135,6 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOLS,
-      blocksToRelativeTime,
       loading,
       displayMode,
       activeAuctions,
@@ -191,28 +167,8 @@ export default defineComponent({
     flex-direction: column;
 
     .list {
-      padding: 0 12px;
+      padding-inline: var(--screen-padding-x);
       margin-inline: calc(-1 * var(--screen-padding-x));
-
-      .name-wrapper {
-        @extend %face-sans-14-regular;
-
-        display: flex;
-        justify-content: space-between;
-        line-height: 16px;
-
-        .name {
-          display: flex;
-          flex-direction: column;
-          font-weight: bold;
-        }
-
-        .expiration {
-          align-self: flex-end;
-          user-select: none;
-          color: $color-grey-dark;
-        }
-      }
     }
 
     .spinner {

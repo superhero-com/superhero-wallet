@@ -303,7 +303,7 @@ export default defineComponent({
     --header-height: 0;
     --gap: 12px;
 
-    @extend %face-sans-16-regular;
+    @extend %text-body;
 
     position: relative;
     margin: 0 auto;

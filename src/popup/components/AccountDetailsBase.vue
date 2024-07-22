@@ -34,8 +34,12 @@
 
       <div class="buttons">
         <template v-if="!withoutDefaultButtons">
-          <OpenTransferReceiveModalButton />
-          <OpenTransferSendModalButton />
+          <OpenTransferReceiveModalBtn />
+          <OpenTransferSendModalBtn />
+          <OpenShareAddressModalBtn
+            :address="activeAccount.address"
+            :protocol="activeAccount.protocol"
+          />
         </template>
         <slot
           v-if="$slots.buttons"
@@ -92,12 +96,13 @@ import {
 } from '@/composables';
 import { popOutAnimation, fadeAnimation } from '@/popup/animations';
 
-import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
+import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
+import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
+import OpenShareAddressModalBtn from '@/popup/components/OpenShareAddressModalBtn.vue';
 
 const INITIAL_TABS_HEIGHT = 330;
 
@@ -106,8 +111,9 @@ export default defineComponent({
   components: {
     AccountInfo,
     BalanceInfo,
-    OpenTransferSendModalButton,
-    OpenTransferReceiveModalButton,
+    OpenTransferSendModalBtn,
+    OpenShareAddressModalBtn,
+    OpenTransferReceiveModalBtn,
     TransactionAndTokenFilter,
     BtnClose,
     IonRouterOutlet,
@@ -195,7 +201,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
-@use '@/styles/typography';
 
 .account-details {
   --account-info-height: 120px;
@@ -209,7 +214,6 @@ export default defineComponent({
   border-radius: $border-radius-app;
   min-height: 100%;
   height: 100%;
-  font-weight: 500;
   color: $color-white;
   box-shadow: 0 0 0 1px $color-border, 0 0 50px rgba($color-black, 0.6);
 
@@ -237,13 +241,6 @@ export default defineComponent({
         width: 24px;
       }
     }
-
-    :deep(.account-info .title) {
-      justify-content: flex-start;
-      word-break: normal;
-
-      @extend %face-sans-16-regular;
-    }
   }
 
   .buttons {
@@ -253,6 +250,16 @@ export default defineComponent({
     width: 100%;
     margin-top: 20px;
     padding-inline: var(--screen-padding-x);
+
+    &:has(> :nth-child(5)) { // 5 or more buttons
+      overflow: auto;
+      white-space: nowrap;
+
+      > * {
+        min-width: 84px;
+      }
+    }
+
   }
 
   .header {

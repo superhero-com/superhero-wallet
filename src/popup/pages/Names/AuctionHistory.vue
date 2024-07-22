@@ -85,12 +85,12 @@ export default defineComponent({
   background-repeat: repeat-x;
 
   .title {
+    @extend %face-sans-16-semi-bold;
+
     padding: 16px 0 8px 0;
     text-align: center;
     color: $color-grey-dark;
     display: block;
-
-    @extend %face-sans-17-medium;
 
     .name {
       color: $color-primary;
@@ -103,6 +103,8 @@ export default defineComponent({
 
     &:not(:first-of-type) {
       border-top: 1px solid rgba($color-primary, 0.44);
+      display: flex;
+      justify-content: space-between;
     }
 
     .account-item {

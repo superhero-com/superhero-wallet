@@ -16,12 +16,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/typography';
 @use '@/styles/variables' as *;
 
 .transaction-tag {
-  @extend %face-sans-11-medium;
-
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16px;
   padding: 2px 5px;
   color: $color-grey-dark;
   border: 1px solid $color-grey-dark;

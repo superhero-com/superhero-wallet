@@ -5,7 +5,7 @@
   >
     <LinkButton
       v-if="txParty.url || !isRecipient"
-      :to="txParty.url"
+      :href="txParty.url"
       class="name"
     >
       <Truncate

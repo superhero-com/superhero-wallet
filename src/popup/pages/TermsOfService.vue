@@ -49,12 +49,7 @@
           <b>TERMS</b>, <b>YOU</b> are agreeing to be bound by the modifications. If you don’t agree to
           be bound by the modified <b>TERMS</b>, then you should discontinue any use of the
           <b>Wallet</b>. Please contact <b>Superhero</b> via an email to
-          <LinkButton
-            :to="`mailto:${CONTACT_EMAIL}`"
-            variant="simple"
-          >
-            {{ CONTACT_EMAIL }}
-          </LinkButton>
+          <LinkButton :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</LinkButton>
           for the provision of information about the steps for termination of your use. Please check the
           Effective Date above to determine if there have been any changes since <b>YOU</b> have last
           reviewed these <b>TERMS</b>.
@@ -73,12 +68,7 @@
               </strong>) is a company with seat and registered
               address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
               communication related to the <strong>Superhero Wallet</strong>:
-              <LinkButton
-                :to="`mailto:${CONTACT_EMAIL}`"
-                variant="simple"
-              >
-                {{ CONTACT_EMAIL }}
-              </LinkButton>.
+              <LinkButton :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</LinkButton>.
               <strong>Superhero</strong> is the company, which created and developed <strong>Superhero Wallet</strong>.
             </p>
             <p>
@@ -109,55 +99,23 @@
               1) the <strong>application</strong> can act &nbsp;as an add-on to the web browsers
               Firefox, Chrome, Brave and Opera and contributes to the browsers&rsquo; additional
               functionalities. For Firefox:
-              <LinkButton
-                :to="APP_LINK_FIREFOX"
-                variant="simple"
-              >
-                {{ APP_LINK_FIREFOX }}
-              </LinkButton>
-              ; for Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton
-                :to="APP_LINK_CHROME"
-                variant="simple"
-              >
-                {{ APP_LINK_CHROME }}
-              </LinkButton>;
+              <LinkButton :href="APP_LINK_FIREFOX">{{ APP_LINK_FIREFOX }}</LinkButton>; for Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <LinkButton :href="APP_LINK_CHROME">{{ APP_LINK_CHROME }}</LinkButton>;
             </p>
             <p>
               2) the <strong>application</strong> can be accessed and used from any Browser at the
-              address:
-              <LinkButton
-                :to="APP_LINK_WEB"
-                variant="simple"
-              >
-                {{ APP_LINK_WEB }}
-              </LinkButton>;
+              address: <LinkButton :href="APP_LINK_WEB">{{ APP_LINK_WEB }}</LinkButton>;
             </p>
             <p>
               3) the <strong>application</strong> can be downloaded from Google Play and/or App Store.
               For Google Play:
-              <LinkButton
-                :to="APP_LINK_ANDROID"
-                variant="simple"
-              >
-                {{ APP_LINK_ANDROID }}
-              </LinkButton>
+              <LinkButton :href="APP_LINK_ANDROID">{{ APP_LINK_ANDROID }}</LinkButton>
               and for App Store:
-              <LinkButton
-                :to="APP_LINK_IOS"
-                variant="simple"
-              >
-                {{ APP_LINK_IOS }}
-              </LinkButton>;
+              <LinkButton :href="APP_LINK_IOS">{{ APP_LINK_IOS }}</LinkButton>;
             </p>
             <p>
               The results of the donations and comments are published on the website
-              <LinkButton
-                :to="AGGREGATOR_URL"
-                variant="simple"
-              >
-                superhero.com
-              </LinkButton> .
+              <LinkButton :href="AGGREGATOR_URL">superhero.com</LinkButton>.
             </p>
             <p>
               1.5<strong>. &ldquo;&AElig;id&ldquo;, &ldquo;&AElig;ternity token&rdquo;</strong> or
@@ -276,12 +234,7 @@
             </p>
             <p>
               After that, the website -
-              <LinkButton
-                :to="AGGREGATOR_URL"
-                variant="simple"
-              >
-                superhero.com
-              </LinkButton>, reflects the
+              <LinkButton :href="AGGREGATOR_URL">superhero.com</LinkButton>, reflects the
               <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
               <strong>USERS</strong> to actively donate and comment on the newsfeed of the Website.
             </p>
@@ -305,12 +258,7 @@
               or fiat currencies with <strong>&AElig; tokens</strong> through partnering third-party
               platforms. A full list of these platforms, you can see in our Superhero Tutorial. Our team
               is also ready to provide detailed information when contacted through email at
-              <LinkButton
-                :to="`mailto:${CONTACT_EMAIL}`"
-                variant="simple"
-              >
-                {{ CONTACT_EMAIL }}
-              </LinkButton>.
+              <LinkButton :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</LinkButton>.
             </p>
             <p>
               Please bear in mind that the third-party platforms may collect fees. They are unilaterally
@@ -477,12 +425,7 @@
             </p>
             <p>
               The <strong>name</strong> can also be used as your profile name on the Superhero website
-              <LinkButton
-                :to="AGGREGATOR_URL"
-                variant="simple"
-              >
-                superhero.com
-              </LinkButton>.
+              <LinkButton :href="AGGREGATOR_URL">superhero.com</LinkButton>.
             </p>
           </div>
         </AccordionItem>
@@ -605,48 +548,22 @@
             </p>
             <p>
               1) downloaded as an add-on (extension) to Firefox:
-              <LinkButton
-                :to="APP_LINK_FIREFOX"
-                variant="simple"
-              >
-                {{ APP_LINK_FIREFOX }}
-              </LinkButton>
+              <LinkButton :href="APP_LINK_FIREFOX">{{ APP_LINK_FIREFOX }}</LinkButton>
               ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton
-                :to="APP_LINK_CHROME"
-                variant="simple"
-              >
-                {{ APP_LINK_CHROME }}
-              </LinkButton>;
+              <LinkButton :href="APP_LINK_CHROME">{{ APP_LINK_CHROME }}</LinkButton>;
             </p>
             <p>
               2) accessed from any Browser at the address:
-              <LinkButton
-                :to="APP_LINK_WEB"
-                variant="simple"
-              >
-                {{ APP_LINK_WEB }}
-              </LinkButton>
-              ;
+              <LinkButton :href="APP_LINK_WEB">{{ APP_LINK_WEB }}</LinkButton>;
             </p>
             <p>
               3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-              <LinkButton
-                :to="APP_LINK_ANDROID"
-                variant="simple"
-              >
-                {{ APP_LINK_ANDROID }}
-              </LinkButton>
+              <LinkButton :href="APP_LINK_ANDROID">{{ APP_LINK_ANDROID }}</LinkButton>
               and
             </p>
             <p>
               from App Store:
-              <LinkButton
-                :to="APP_LINK_IOS"
-                variant="simple"
-              >
-                {{ APP_LINK_IOS }}
-              </LinkButton>.
+              <LinkButton :href="APP_LINK_IOS">{{ APP_LINK_IOS }}</LinkButton>.
             </p>
             <p>
               Please bear in mind that the marketplaces for downloading are third-party owned and
@@ -891,12 +808,7 @@
               <strong>YOU</strong> as a <strong>USER</strong> notice any change in the
               <strong>tokens</strong>, settings, accounts or any other information on the application,
               please contact
-              <LinkButton
-                :to="`mailto:${CONTACT_EMAIL}`"
-                variant="simple"
-              >
-                {{ CONTACT_EMAIL }}
-              </LinkButton> for assistance.
+              <LinkButton :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</LinkButton> for assistance.
             </p>
           </div>
         </AccordionItem>
@@ -925,12 +837,7 @@
             <p>
               For more information regarding our Services and the present <strong>TERMS</strong>, please
               do not hesitate to contact the <strong>Superhero</strong> team at:
-              <LinkButton
-                :to="`mailto:${CONTACT_EMAIL}`"
-                variant="simple"
-              >
-                {{ CONTACT_EMAIL }}
-              </LinkButton>.
+              <LinkButton :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</LinkButton>.
             </p>
           </div>
         </AccordionItem>
@@ -1002,20 +909,9 @@ export default defineComponent({
     font-weight: bold;
   }
 
-  h1 {
-    margin: 20px;
-    text-align: center;
-
-    @extend %face-sans-20-regular;
-  }
-
   ul {
     margin-bottom: 8px;
     padding-left: 20px;
-  }
-
-  .link-button {
-    display: inline;
   }
 }
 </style>

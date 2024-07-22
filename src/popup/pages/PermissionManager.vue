@@ -14,7 +14,10 @@
             <Field
               v-slot="{ field, errorMessage }"
               name="name"
-              rules="required"
+              :rules="{
+                required: true,
+                max_len: 32,
+              }"
             >
               <InputField
                 v-bind="field"

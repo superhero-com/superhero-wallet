@@ -38,6 +38,9 @@ export const ROUTE_PERMISSIONS_ADD = 'permissions-add';
 export const ROUTE_PERMISSIONS_DETAILS = 'permissions-details';
 export const ROUTE_PERMISSIONS_SETTINGS = 'permissions-settings';
 export const ROUTE_SECURE_LOGIN_SETTINGS = 'secure-login-settings';
+export const ROUTE_ADDRESS_BOOK = 'address-book';
+export const ROUTE_ADDRESS_BOOK_EDIT = 'address-book-edit';
+export const ROUTE_ADDRESS_BOOK_ADD = 'address-book-add';
 
 /**
  * Popup pages

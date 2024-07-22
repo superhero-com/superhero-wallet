@@ -1,7 +1,6 @@
 {
   "common": {
     "address": "Adresse",
-    "ae": "AE",
     "all": "Tout",
     "amount": "Montant",
     "cancel": "Annuler",
@@ -22,27 +21,11 @@
     "required": {
       "msg": "Please fill in all fields."
     },
-    "only-chars": {
-      "msg": "Only letters and numbers are allowed."
-    },
     "name-exist": {
       "msg": "This name is already registered."
     },
-    "name-length": {
-      "msg": "Only names longer than 13 characters are allowed."
-    },
-    "incorrect-address": {
-      "msg": "Please make sure that you have entered a valid public address."
-    },
-    "incorrect-amount": {
-      "msg": "Please make sure you entered a valid amount."
-    },
     "insufficient-balance": {
       "msg": "The requested amount cannot be spent."
-    },
-    "removeAccount": {
-      "title": "Are you sure you want to remove this account?",
-      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
     },
     "verified": {
       "title": "What is a \"Verified\" URL?",
@@ -79,25 +62,6 @@
     "fee": "Frais de transaction"
   },
   "pages": {
-    "intro": {
-      "heading": "Intro",
-      "skip": "Skip",
-      "generateWallet": "Generate Wallet",
-      "receive": "Receive",
-      "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
-      "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
-      "step3text-1": "This wallet does not—and will never take commissions off the",
-      "step3text-2": "you send or receive. Superhero was created specifically so that no one but you will have control over your funds.",
-      "createdWallet": "Your wallet has been created!",
-      "step4text-0": "Welcome to the free web.",
-      "step4text-1": "Trustless: no third-party intervention. Transactions are fully P2P.",
-      "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
-      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
-      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
-      "toHome": "Proceed to your Wallet",
-      "send": "Send",
-      "ever": "Ever."
-    },
     "titles": {
       "settings": "Paramètres du portefeuille"
     },
@@ -110,31 +74,24 @@
     "account": {
       "heading": "Compte",
       "activity": "Activity",
-      "accountName": "Nom du compte",
       "claim": "Claim Tip",
       "receive": "Recevoir",
       "latestTransactions": "Les dernières transactions",
       "noTransactionsFound": "Aucune transaction trouvée!",
       "balance": "Balance",
       "copied": "Copied!",
-      "backup": "backup",
-      "updateExtension": "New version available! Please update your extension.",
-      "claim-name": "Claim your .chain name"
+      "backup": "backup"
     },
     "claim": {
       "claim": "Claim tips",
       "noZeroClaim": "There are no tips to be claimed for this URL.",
-      "noAddress": "Address not found",
-      "errorClaim": "Error with claiming",
       "ae": "AE tokens",
       "claimed": " Claim request sent! ",
       "url": "URL",
       "tipsOnUrl": "Tips on this URL",
       "urlNotExisting": "No tips for this URL at the moment.",
       "moreOracles": "There aren't enough active Oracles to verify your claim request. Please try again later.",
-      "oracleFailed": "Oracle service check claim failed. Please try again later.",
-      "unknownError": "Error occured during claim request. Please try again later.",
-      "noMobileClaim": "Claiming is currently only available on desktop."
+      "oracleFailed": "Oracle service check claim failed. Please try again later."
     },
     "claimTips": {
       "urlToClaim": "URL to claim tips for"
@@ -163,31 +120,18 @@
       "customToken": "Personnalisé Token",
       "tokenSearchLabel": "Chercher Token"
     },
-    "advancedSettings": {
-      "heading": "Avancée",
-      "backToSettings": "Paramètres",
-      "exportKeypair": "Export keypair",
-      "exportKeystore": "Export keystore"
-    },
     "auctionBid": {
-      "backToAuctions": "Retour aux enchères",
-      "bidding": "Enchère",
-      "bidOn": "Parier sur",
       "requiredField": "Ce champ est requis",
-      "current-highest-bid": "Offre la plus élevée actuelle",
-      "remaining-time": "Temps restant"
+      "current-highest-bid": "Offre la plus élevée actuelle"
     },
     "connectConfirm": {
       "websiteRequestConnect": "souhaite se connecter à votre compte",
       "websiteRequest": "Ce site demande l'accès pour afficher votre adresse de compte courant. Assurez-vous toujours confiance au site Web vous interagissez avec. ",
       "cancelButton": "Annuler",
       "confirmButton": "Confirmer",
-      "addressLabel": "Address",
       "transactionLabel": "Transaction",
       "addressRequest": "This aepp is requesting access to view your current account address",
-      "websiteRequestAccounts": "would like to get account addresses",
-      "addressesLabel": "Addresses",
-      "addressesRequest": "This aepp is requesting access to view your account addresses"
+      "websiteRequestAccounts": "would like to get account addresses"
     },
     "createFungibleToken": {
       "backToFungibleTokens": "Retour à fongibles Tokens",
@@ -241,7 +185,6 @@
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
     "languageSettings": {
-      "backToSettings": "Retour aux paramètres",
       "heading": "Général",
       "switchLanguage": "La langue",
       "currentLanguage": "Langue courante"
@@ -254,30 +197,14 @@
       "heading": "Bienvenue à waellet, pour commencer à interagir avec aeternity blockchain: ",
       "webVersion": "Or use a web version",
       "mobileVersion": "Plus qu'un simple moyen de recevoir, stocker et envoyer des pièces sur la blockchain d'éternité",
-      "securingAccount": "Sécuriser votre compte",
       "generateWallet": "Générer portefeuille",
-      "passwordError": "Mot de passe doit être au 4 symboles de peur!",
-      "loginButton": "S'identifier",
       "importWallet": "Importation waellet",
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Entrez votre mot de graines. Celui que vous avez écrit lors de la création de compte.",
-      "continueButton": "Continuer",
       "continue": "Continue",
       "importAccount": "Import Account",
       "accountNotFound": "Account not found.",
       "checkSeed": "Please check your seed phrase."
-    },
-    "ledgerSetup": {
-      "ledgerConnectSetup": "Comment se connecter à partir Ledger",
-      "ledgerAccount": "Ajouter Ledger compte",
-      "ledgerSteps": "Pas",
-      "ledgerUsb": "Connectez votre grand livre via USB et déverrouiller",
-      "ledgerLedger": "Ouvrez l'application aeternity sur votre grand livre",
-      "ledgerAccountCreate": "Créer un premier compte en appuyant sur le bouton ci-dessous"
-    },
-    "privacyPolicy": {
-      "backButton": "Retour",
-      "heading": "Politique de confidentialité"
     },
     "qrCodeReader": {
       "heading": "Qr Code Scanner",
@@ -290,23 +217,8 @@
       "purchase": "Buy AE tokens"
     },
     "seed-phrase-settings": {
-      "backToSettings": "Retour aux paramètres",
-      "heading": "Sécurité et confidentialité",
-      "privacyDataHeading": "Données de confidentialité",
-      "privacyDataSmall": "la confidentialité des données claires de sorte que tous les sites Web doivent demander l'accès à afficher les informations de compte à nouveau.",
-      "privacyDataClearBtn": "Effacer la protection des données",
-      "privateKeyHeading": "Révéler clé privée",
-      "privateKeySmall": "Vous pouvez afficher votre clé privée après avoir entré votre mot de passe",
-      "privateKeyRevealBtn": "Révéler clé privée",
-      "privateKeyWarning": "Ne partagez pas votre clé privée avec quelqu'un, il peut être utilisé pour voler tous vos comptes",
-      "privateKey": "Votre clé privée",
-      "showPrivateKey": "Afficher une clé privée",
-      "incorrectPassword": "Mot de passe incorrect",
-      "decryptingPrivateKey": "Décryptage clé privée",
-      "seedRecoveryHeading": "Afficher la phrase de départ",
       "seedRecoverySmall": "Révèle vos 12 mots utilisés pour générer votre clé privée",
       "seedRecoveryBtn": "Afficher la phrase de départ",
-      "seedPhrase": "Votre phrase de graine",
       "copy": "Copier dans le presse-papier"
     },
     "seedPhrase": {
@@ -438,27 +350,6 @@
       "received": "Received",
       "withdrawals": "Withdrawals",
       "topups": "Top ups"
-    },
-    "transactions": {
-      "heading": "Historique des transactions",
-      "filters": "Filtres",
-      "loadMore": "Charger plus",
-      "allLoaded": "Toutes les transactions chargées!",
-      "newTransactions": "nouvelles transactions",
-      "noTransactions": "No transactions found",
-      "type": "Type",
-      "incoming": "Nouveau",
-      "outgoing": "Sortant",
-      "spendType": "type de Spend",
-      "spendTx": "spend tx",
-      "namePreclaim": "nom preclaim tx",
-      "nameClaim": "nom claim tx",
-      "nameUpdate": "nom update tx",
-      "createTx": "créer tx",
-      "clear": "Supprimer les filtres",
-      "apply": "Appliquer le filtre",
-      "sent": "Sent",
-      "received": "Received"
     },
     "aeAddressInput": {
       "label": "Aeternity Adresse",

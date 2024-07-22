@@ -50,6 +50,7 @@
               :address="account.address"
               :protocol="account.protocol"
               :show-protocol-icon="showProtocolIcon"
+              :show-explorer-link="showExplorerLink"
               class="ae-address"
             />
           </CopyText>
@@ -93,6 +94,7 @@ export default defineComponent({
     isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
     dense: Boolean,
+    showExplorerLink: Boolean,
   },
   setup(props) {
     const { getName } = useAeNames();
@@ -122,6 +124,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .account-info {
+  --maxWidth: 250px;
+
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -137,7 +141,7 @@ export default defineComponent({
     flex-direction: column;
     justify-content: center;
     gap: 4px;
-    max-width: 250px;
+    max-width: var(--maxWidth);
     font-weight: 500;
 
     .account-name {
@@ -151,7 +155,7 @@ export default defineComponent({
       min-width: 0;
 
       .account-name {
-        @extend %face-sans-15-bold;
+        @extend %face-sans-15-semi-bold;
 
         margin: 0;
       }

@@ -1,17 +1,18 @@
 <template>
   <Modal
     from-bottom
-    body-without-padding-bottom
+    no-padding-bottom
     has-close-button
     class="payload-form"
     @close="reject()"
   >
-    <div class="header text-heading-2">
+    <div class="header text-heading-4">
       {{ $t('modals.payloadForm.title') }}
     </div>
     <div class="description text-description">
       {{ $t('modals.payloadForm.desc') }}
     </div>
+
     <div class="wrapper">
       <FormTextarea
         v-model="value"
@@ -23,6 +24,7 @@
         </template>
       </FormTextarea>
     </div>
+
     <template #footer>
       <BtnMain
         class="btn-cancel"

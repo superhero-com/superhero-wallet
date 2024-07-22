@@ -34,3 +34,5 @@ export * from './permissions';
 export * from './appsBrowserHistory';
 export * from './walletConnect';
 export * from './airGap';
+export * from './addressBook';
+export * from './addressBookEntryForm';

@@ -1,6 +1,6 @@
 <template>
   <LinkButton
-    :to="to"
+    :href="href"
     class="platform-icon"
   >
     <img
@@ -21,7 +21,7 @@ export default defineComponent({
     LinkButton,
   },
   props: {
-    to: { type: String, required: true },
+    href: { type: String, required: true },
     src: { type: String, required: true },
     alt: { type: String, required: true },
     disabled: Boolean,

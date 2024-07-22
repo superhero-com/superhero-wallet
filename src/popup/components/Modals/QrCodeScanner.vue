@@ -22,7 +22,7 @@
       <IconBoxed :icon="QrScanIcon" />
     </div>
     <div
-      class="heading"
+      class="heading text-heading-4"
       v-text="$t('modals.qrCodeReader.scanQr')"
     />
     <div
@@ -38,7 +38,7 @@
           class="camera-message"
         >
           <AlertIcon class="icon-alert color-warning" />
-          <p class="text-heading-1 color-warning">{{ $t('modals.qrCodeReader.noWebcam') }}</p>
+          <p class="text-heading-3 color-warning">{{ $t('modals.qrCodeReader.noWebcam') }}</p>
           <p class="color-warning-muted">{{ $t('modals.qrCodeReader.noWebcamSubtitle') }}</p>
         </div>
         <div
@@ -46,7 +46,7 @@
           class="camera-message"
         >
           <AlertIcon class="icon-alert color-warning" />
-          <p class="text-heading-1 color-warning">{{ $t('modals.qrCodeReader.grantPermission') }}</p>
+          <p class="text-heading-3 color-warning">{{ $t('modals.qrCodeReader.grantPermission') }}</p>
         </div>
         <AnimatedSpinnerIcon
           v-else
@@ -350,13 +350,11 @@ export default defineComponent({
   }
 
   .heading {
-    @extend %face-sans-19-medium;
-
-    color: $color-white;
+    margin-bottom: 0;
   }
 
   .title {
-    @extend %face-sans-16-regular;
+    @extend %text-body;
 
     margin-top: 4px;
     margin-bottom: 20px;

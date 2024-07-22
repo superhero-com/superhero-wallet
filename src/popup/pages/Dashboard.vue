@@ -28,8 +28,8 @@
         </template>
 
         <template #buttons>
-          <OpenTransferReceiveModalButton is-big />
-          <OpenTransferSendModalButton is-big />
+          <OpenTransferReceiveModalBtn is-big />
+          <OpenTransferSendModalBtn is-big />
         </template>
 
         <template #cards>
@@ -65,7 +65,7 @@
             :description="$t('dashboard.nameCard.description')"
             :btn-text="$t('dashboard.nameCard.button')"
             :background="chainNameBackground"
-            :icon="MenuCardIcon"
+            :icon="ActionIcon"
             :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
             :card-id="DASHBOARD_CARD_ID.claimName"
             variant="purple"
@@ -115,18 +115,18 @@ import AccountSwiper from '@/popup/components/AccountSwiper.vue';
 import DashboardBase from '@/popup/components/DashboardBase.vue';
 import DashboardCard from '@/popup/components/DashboardCard.vue';
 import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
-import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
+import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 
 import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import CardIcon from '@/icons/credit-card.svg?vue-component';
 import GlobeIcon from '@/icons/globe-small.svg?vue-component';
-import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
+import ActionIcon from '@/icons/action.svg?vue-component';
 
 import buyBackground from '@/image/dashboard/buy-ae.webp';
 import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
+import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -138,8 +138,8 @@ export default defineComponent({
     IonPage,
     IonContent,
     LatestTransactionsCard,
-    OpenTransferReceiveModalButton,
-    OpenTransferSendModalButton,
+    OpenTransferReceiveModalBtn,
+    OpenTransferSendModalBtn,
   },
   setup() {
     const pageIsActive = ref(true);
@@ -193,7 +193,7 @@ export default defineComponent({
       ArrowReceiveIcon,
       CardIcon,
       GlobeIcon,
-      MenuCardIcon,
+      ActionIcon,
 
       accounts,
       accountsAddressList,

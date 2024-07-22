@@ -9,11 +9,10 @@
           scope="global"
         >
           <LinkButton
+            :text="$t('pages.notifications.superhero')"
             :href="AGGREGATOR_URL"
             class="link"
-          >
-            {{ $t('pages.notifications.superhero') }}
-          </LinkButton>
+          />
         </i18n-t>
       </template>
     </ModalHeader>
@@ -174,7 +173,7 @@ export default {
     .name-address-wrapper {
       @include mixins.flex(flex-start, flex-start, column);
 
-      @extend %face-sans-16-bold;
+      @extend %face-sans-16-semi-bold;
 
       line-height: 16px;
 

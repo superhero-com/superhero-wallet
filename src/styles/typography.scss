@@ -3,222 +3,122 @@
 @import '~@fontsource/ibm-plex-sans/400-italic.css';
 @import '~@fontsource/ibm-plex-sans/500.css';
 @import '~@fontsource/ibm-plex-sans/600.css';
-@import '~@fontsource/ibm-plex-sans/700.css';
-@import '~@fontsource/ibm-plex-sans/700-italic.css';
+
 @import '~@fontsource/ibm-plex-mono/500.css';
+
 @import 'variables';
 
 /**
  * Sans Serif
  */
 
-%face-sans-22-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 22px;
-  line-height: 24px;
+// Default text styling for the app. No need to use it on component level as it's set globally.
+%text-body {
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 1em;
 }
 
+// Heading 1
 %face-sans-22-semi-bold {
-  font-family: $font-sans;
   font-weight: 600;
   font-size: 22px;
   line-height: 32px;
 }
 
-%face-sans-20-bold {
-  font-family: $font-sans;
-  font-weight: bold;
-  font-size: 20px;
-  line-height: 24px;
-}
-
+// Heading 2
 %face-sans-20-regular {
-  font-family: $font-sans;
   font-weight: 400;
   font-size: 20px;
   line-height: 24px;
 }
 
-%face-sans-19-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 19px;
-  line-height: 24px;
-}
-
-%face-sans-19-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 19px;
-  line-height: 24px;
-}
-
+// Heading 3
 %face-sans-19-regular {
-  font-family: $font-sans;
   font-weight: 400;
   font-size: 19px;
   line-height: 24px;
 }
 
-%face-sans-18-semi-bold {
-  font-family: $font-sans;
-  font-weight: 600;
-  font-size: 18px;
-  line-height: 24px;
-}
-
-%face-sans-18-bold {
-  font-family: $font-sans;
-  font-weight: bold;
-  font-size: 18px;
-  line-height: 24px;
-}
-
+// Heading 4
 %face-sans-18-medium {
-  font-family: $font-sans;
   font-weight: 500;
   font-size: 18px;
-  line-height: 20px;
+  line-height: 1em;
 }
-
 %face-sans-18-regular {
-  font-family: $font-sans;
   font-weight: 400;
   font-size: 18px;
-  line-height: 18px;
-}
-
-%face-sans-17-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 17px;
-  line-height: 24px;
-}
-
-%face-sans-16-bold {
-  font-family: $font-sans;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 24px;
+  line-height: 1em;
 }
 
 %face-sans-16-semi-bold {
-  font-family: $font-sans;
   font-weight: 600;
   font-size: 16px;
-  line-height: 16px;
+  line-height: 1em;
 }
-
 %face-sans-16-medium {
-  font-family: $font-sans;
   font-weight: 500;
   font-size: 16px;
-  line-height: 16px;
+  line-height: 1em;
 }
 
-%face-sans-16-regular {
-  font-family: $font-sans;
-  font-weight: normal;
-  font-size: 16px;
-  line-height: 16px;
-}
-
-%face-sans-16-light {
-  font-family: $font-sans;
-  font-weight: 300;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-%face-sans-15-bold {
-  font-family: $font-sans;
+// Heading 5
+%face-sans-15-semi-bold {
   font-weight: 600;
   font-size: 15px;
   line-height: 24px;
 }
 
+// Labels
 %face-sans-15-medium {
-  font-family: $font-sans;
   font-weight: 500;
   font-size: 15px;
   line-height: 24px;
 }
 
+// Descriptions
 %face-sans-15-regular {
-  font-family: $font-sans;
   font-weight: normal;
   font-size: 15px;
   line-height: 22px;
 }
 
-%face-sans-14-bold {
-  font-family: $font-sans;
-  font-weight: bold;
-  font-size: 14px;
-  line-height: 24px;
-}
-
 %face-sans-14-medium {
-  font-family: $font-sans;
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
 }
-
 %face-sans-14-regular {
-  font-family: $font-sans;
   font-weight: normal;
   font-size: 14px;
   line-height: 24px;
 }
-
 %face-sans-14-light {
-  font-family: $font-sans;
   font-weight: 300;
   font-size: 14px;
   line-height: 24px;
 }
 
 %face-sans-13-medium {
-  font-family: $font-sans;
   font-weight: 500;
   font-size: 13px;
   line-height: 16px;
 }
-
 %face-sans-13-regular {
-  font-family: $font-sans;
   font-weight: normal;
   font-size: 13px;
-  line-height: 16px;
-}
-
-%face-sans-12-regular {
-  font-family: $font-sans;
-  font-weight: normal;
-  font-size: 12px;
   line-height: 16px;
 }
 
 %face-sans-12-medium {
-  font-family: $font-sans;
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
 }
-
-%face-sans-11-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 11px;
-  line-height: 16px;
-}
-
-%face-sans-11-regular {
-  font-family: $font-sans;
+%face-sans-12-regular {
   font-weight: normal;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
 }
 
@@ -226,9 +126,9 @@
  * Monotype
  */
 
-%face-mono-16-regular {
+%face-mono-16-medium {
   font-family: $font-mono;
-  font-weight: normal;
+  font-weight: 500;
   font-size: 16px;
   line-height: 20px;
 }

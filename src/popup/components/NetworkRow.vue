@@ -1,43 +1,38 @@
 <template>
-  <div
+  <RadioButton
+    :value="isActive"
     class="network-row"
-    :class="{ inactive: !isActive }"
+    type="radio"
+    name="activeNetwork"
+    @input="$emit('selectNetwork', network.name)"
   >
-    <RadioButton
-      :value="isActive"
-      type="radio"
-      name="activeNetwork"
-      @input="$emit('selectNetwork', network.name)"
-    >
-      <div class="name-and-actions">
-        <p
-          class="name"
-          data-cy="network-name"
-        >
-          {{ network.name }}
-        </p>
-        <div
-          v-if="network.type === NETWORK_TYPE_CUSTOM"
-          class="actions"
-        >
-          <BtnIcon
-            size="sm"
-            data-cy="network-edit"
-            dimmed
-            :to="{ name: ROUTE_NETWORK_EDIT, params: { name: network.name } }"
-            :icon="PencilIcon"
-          />
-          <BtnIcon
-            size="sm"
-            data-cy="network-delete"
-            icon-variant="danger"
-            dimmed
-            :icon="TrashIcon"
-            @click="$emit('deleteNetwork', network.name);"
-          />
-        </div>
+    <div class="name-and-actions">
+      <p
+        class="name"
+        data-cy="network-name"
+        v-text="network.name"
+      />
+      <div
+        v-if="network.type === NETWORK_TYPE_CUSTOM"
+        class="actions"
+      >
+        <BtnIcon
+          size="sm"
+          data-cy="network-edit"
+          dimmed
+          :to="{ name: ROUTE_NETWORK_EDIT, params: { name: network.name } }"
+          :icon="PencilIcon"
+        />
+        <BtnIcon
+          size="sm"
+          data-cy="network-delete"
+          icon-variant="danger"
+          dimmed
+          :icon="TrashIcon"
+          @click="$emit('deleteNetwork', network.name);"
+        />
       </div>
-    </RadioButton>
+    </div>
 
     <table class="network-details">
       <tbody>
@@ -46,17 +41,12 @@
           :key="protocol"
           class="url"
         >
-          <td
-            class="url-label"
-            v-text="getProtocolName(protocol)"
-          />
-          <td>
-            {{ protocolSettings.nodeUrl?.replace('https://', '') }}
-          </td>
+          <td class="url-label" v-text="getProtocolName(protocol)" />
+          <td class="url-address" v-text="protocolSettings.nodeUrl?.replace('https://', '')" />
         </tr>
       </tbody>
     </table>
-  </div>
+  </RadioButton>
 </template>
 
 <script lang="ts">
@@ -119,19 +109,9 @@ export default defineComponent({
 .network-row {
   margin-bottom: 12px;
 
-  &.inactive {
-    opacity: 0.5;
-  }
-
   .name-and-actions {
     display: flex;
     justify-content: space-between;
-
-    .name {
-      @extend %face-sans-15-medium;
-
-      margin: 0;
-    }
 
     .actions {
       @include mixins.flex(flex-end, center);
@@ -144,20 +124,23 @@ export default defineComponent({
   .network-details {
     @extend %face-sans-14-regular;
 
-    margin: 0 0 0 26px;
+    width: 100%;
     border-spacing: 0;
 
-    td {
-      padding: 0;
+    .url-label,
+    .url-address {
+      padding-block: 3px;
+      line-height: 1.2em;
+      vertical-align: top;
     }
 
     .url-label {
-      @extend %face-sans-14-medium;
-
+      width: 0;
       padding-right: 8px;
       opacity: 0.6;
       text-transform: capitalize;
       user-select: none;
+      font-weight: 500;
     }
   }
 }

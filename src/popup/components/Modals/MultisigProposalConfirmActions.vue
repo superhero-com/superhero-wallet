@@ -17,7 +17,7 @@
         </IconBoxed>
       </div>
 
-      <h2 class="text-heading-2 text-center">
+      <h2 class="text-heading-4 text-center">
         {{ $rt(confirmActionContent.title) }}
       </h2>
 
@@ -209,7 +209,7 @@ export default defineComponent({
     padding: 8px 24px;
   }
 
-  .text-heading-2 {
+  .text-heading-4 {
     margin-bottom: 16px;
   }
 

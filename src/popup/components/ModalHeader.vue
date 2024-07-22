@@ -5,21 +5,21 @@
   >
     <h2
       v-if="title || $slots.title"
-      class="title text-heading-2"
+      class="title text-heading-4"
     >
       <slot name="title">
         {{ title }}
       </slot>
     </h2>
 
-    <h3
+    <p
       v-if="subtitle || $slots.subtitle"
       class="subtitle"
     >
       <slot name="subtitle">
         {{ subtitle }}
       </slot>
-    </h3>
+    </p>
   </div>
 </template>
 
@@ -47,8 +47,6 @@ export default {
   }
 
   .subtitle {
-    @extend %face-sans-16-regular;
-
     margin-block: 0;
     line-height: 24px;
     color: rgba($color-white, 0.75);

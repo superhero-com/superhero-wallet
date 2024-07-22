@@ -45,7 +45,7 @@
         >
           <hr>
           <h3
-            class="text-heading-3"
+            class="text-heading-5"
             v-text="name"
           />
           <Field

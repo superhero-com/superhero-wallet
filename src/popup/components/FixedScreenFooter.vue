@@ -3,7 +3,6 @@
     class="fixed-screen-footer"
     :class="{
       mobile: IS_MOBILE_DEVICE,
-      'no-padding-top': noPaddingTop,
     }"
   >
     <slot />
@@ -15,9 +14,6 @@ import { defineComponent } from 'vue';
 import { IS_MOBILE_DEVICE } from '@/constants';
 
 export default defineComponent({
-  props: {
-    noPaddingTop: Boolean,
-  },
   setup() {
     return {
       IS_MOBILE_DEVICE,
@@ -37,10 +33,6 @@ export default defineComponent({
   gap: 8px;
   padding: var(--screen-padding-x);
   padding-top: 24px;
-
-  &.no-padding-top {
-    padding-top: 0;
-  }
 
   &.mobile {
     margin-bottom: 20px;

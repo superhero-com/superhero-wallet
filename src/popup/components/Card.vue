@@ -127,7 +127,7 @@ export default defineComponent({
   }
 
   .text {
-    @extend %face-sans-16-bold;
+    @extend %face-sans-16-semi-bold;
 
     color: $color-white;
   }

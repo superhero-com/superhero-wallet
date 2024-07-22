@@ -7,7 +7,7 @@
   >
     <div class="text-center">
       <p
-        class="text-heading-2"
+        class="text-heading-4"
         v-text="$t('pages.index.importWallet')"
       />
       <div v-if="discovering">

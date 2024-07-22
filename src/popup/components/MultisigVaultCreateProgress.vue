@@ -1,7 +1,7 @@
 <template>
   <div class="multisig-vault-creation-progress">
     <h2
-      class="text-heading-1"
+      class="text-heading-3"
       v-text="$t('modals.creatingMultisigAccount.title')"
     />
 
