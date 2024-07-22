@@ -295,7 +295,6 @@ export default defineComponent({
 
 .app {
   --screen-padding-x: 16px;
-  --screen-border-radius: 0;
   --screen-bg-color: #{$color-bg-app};
   --header-height: 0;
   --gap: 12px;
@@ -314,7 +313,6 @@ export default defineComponent({
     margin: 0 auto;
     width: 100%;
     height: 100%;
-    border-radius: var(--screen-border-radius);
     color: $color-white;
     background-color: var(--screen-bg-color);
     font-family: $font-sans;
@@ -362,17 +360,11 @@ export default defineComponent({
   }
 
   @include mixins.env-web {
-    // Imitate the appearance of the mobile/extension app by displaying it in a box
-    // TODO consider full-screen
+    max-width: $phone-width;
+
     @include mixins.desktop {
-      --screen-border-radius: #{$border-radius-app};
-
-      width: $extension-width;
-      height: $extension-height;
-
       .app-wrapper {
         overflow: hidden;
-        box-shadow: $color-border 0 0 0 1px;
         transform: translate(0, 0); // Create custom viewport for fixed elements
       }
     }

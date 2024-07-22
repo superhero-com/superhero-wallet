@@ -279,11 +279,6 @@ export default defineComponent({
   &.from-bottom {
     position: absolute;
     align-items: end;
-
-    .container {
-      border-bottom-left-radius: var(--screen-border-radius);
-      border-bottom-right-radius: var(--screen-border-radius);
-    }
   }
 
   &.has-header {
