@@ -154,7 +154,7 @@ export default defineComponent({
 
 .auction-list {
   .toolbar {
-    --background: var(--screen-bg-color);
+    --background: var(--screen-bg-color); // Ionic related variable
     --min-height: 0;
 
     padding-inline: var(--screen-padding-x);
