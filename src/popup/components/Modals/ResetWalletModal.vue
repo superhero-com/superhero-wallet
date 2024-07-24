@@ -7,7 +7,10 @@
     @close="resolve"
   >
     <div class="icon-wrapper">
-      <IconBoxed :icon="ResetWalletIcon" />
+      <IconBoxed
+        :icon="ResetWalletIcon"
+        bg-colored
+      />
     </div>
 
     <div class="info">
@@ -15,8 +18,10 @@
         {{ $t('pages.resetWallet.title') }}?
       </h3>
       <div class="text-description">
-        <p>{{ $t('pages.resetWallet.warning') }}</p>
-        <p>{{ $t('pages.resetWallet.warningConfirm') }}</p>
+        <p>{{ $t('pages.resetWallet.warning1') }}</p>
+        <p>{{ $t('pages.resetWallet.warning2') }}</p>
+        <p>{{ $t('pages.resetWallet.warning3') }}</p>
+        <strong>{{ $t('pages.resetWallet.warningConfirm') }}</strong>
       </div>
     </div>
 
@@ -29,6 +34,7 @@
       <BtnMain
         variant="danger"
         :text="$t('pages.resetWallet.reset')"
+        wide
         @click="onReset"
       />
     </template>
@@ -103,6 +109,10 @@ export default defineComponent({
   .icon-wrapper {
     margin: 8px auto 18px;
     color: $color-danger;
+  }
+
+  .info .text-description p {
+    margin-bottom: 8px;
   }
 
   .heading {

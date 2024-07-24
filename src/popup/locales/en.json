@@ -1077,9 +1077,11 @@
     },
     "resetWallet": {
       "title": "Reset wallet",
-      "description": "This action will remove all accounts from your wallet and delete the extension storage.",
+      "description": "This action will remove all accounts from your wallet and delete the local storage.",
       "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
-      "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
+      "warning1": "This action will remove all accounts from your wallet and delete the local storage.",
+      "warning2": "Please back up your seed phrase and export your address book records before proceeding.",
+      "warning3": "This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
     },
