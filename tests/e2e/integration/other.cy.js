@@ -43,6 +43,6 @@ describe('Tests cases not connected to specific page', () => {
   });
 
   it('Connection message disappear', () => {
-    cy.login().get('[data-cy=connect-node]').should('not.exist');
+    cy.login().get('[data-cy=connection-status]').should('not.exist');
   });
 });
