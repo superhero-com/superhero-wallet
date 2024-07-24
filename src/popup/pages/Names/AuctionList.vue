@@ -88,7 +88,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { topBlockHeight } = useTopHeaderData();
-    const { getMiddleware, fetchFromMiddlewareCamelCased } = useAeMiddleware();
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
 
     const loading = ref(false);
     const activeAuctions = ref<INameAuction[]>([]);
@@ -117,18 +117,16 @@ export default defineComponent({
     onMounted(async () => {
       loading.value = true;
 
-      const middleware = await getMiddleware();
-
       // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/ae_mdw/issues/666
       activeAuctions.value = (
         await fetchAllPages(
-          () => middleware.getNamesAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
+          () => fetchFromMiddlewareCamelCased('/v3/names/auctions?limit=100&direction=forward'),
           fetchFromMiddlewareCamelCased,
         )
-      ).map(({ name, info }) => ({
+      ).map(({ name, lastBid, auctionEnd }) => ({
         name,
-        expiration: info.auctionEnd,
-        lastBid: info.lastBid.tx,
+        expiration: auctionEnd,
+        lastBid: lastBid.tx,
       }));
 
       loading.value = false;
