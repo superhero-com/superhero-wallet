@@ -32,7 +32,10 @@
         horizontal-offline-message
       />
 
-      <div class="buttons">
+      <div
+        ref="buttonsScrollContainer"
+        class="buttons"
+      >
         <template v-if="!withoutDefaultButtons">
           <OpenTransferReceiveModalBtn />
           <OpenTransferSendModalBtn />
@@ -132,6 +135,7 @@ export default defineComponent({
 
     const routerHeight = ref<string>();
     const headerEl = ref<HTMLDivElement>();
+    const buttonsScrollContainer = ref<HTMLDivElement>();
     const resizeObserver = ref<ResizeObserver>();
 
     const balanceNumeric = computed(() => balance.value.toNumber());
@@ -157,6 +161,12 @@ export default defineComponent({
       resizeObserver.value.observe(headerEl.value!);
     }
 
+    function onScroll(event: WheelEvent) {
+      if (buttonsScrollContainer.value && event.deltaX === 0) {
+        buttonsScrollContainer.value.scrollLeft += event.deltaY;
+      }
+    }
+
     onMounted(() => {
       observeTabsHeight();
       // The timeout ensures that the height is calculated correctly in some edge cases
@@ -169,10 +179,14 @@ export default defineComponent({
           color: '#191919',
         });
       }
+
+      // Allow buttons to scroll horizontally with mouse wheel
+      buttonsScrollContainer.value?.addEventListener('wheel', onScroll, { passive: true });
     });
 
     onBeforeUnmount(() => {
       resizeObserver.value?.disconnect();
+      buttonsScrollContainer.value?.removeEventListener('wheel', onScroll);
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#141414',
@@ -189,6 +203,7 @@ export default defineComponent({
       activeAccount,
       routerHeight,
       isScrollEnabled,
+      buttonsScrollContainer,
       fadeAnimation,
       IS_FIREFOX,
       INITIAL_TABS_HEIGHT,
