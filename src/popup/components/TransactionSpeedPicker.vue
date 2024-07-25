@@ -5,10 +5,10 @@
         v-for="(feeItem, index) in feeList"
         :key="index"
         :value="modelValue === index"
+        :label="feeItem.label"
+        has-label-effect
         @input="handleInput(index)"
-      >
-        <p v-text="feeItem.label" />
-      </RadioButton>
+      />
     </div>
     <p
       v-if="UNFINISHED_FEATURES"

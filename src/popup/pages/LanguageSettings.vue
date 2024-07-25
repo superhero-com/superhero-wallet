@@ -11,8 +11,9 @@
             v-for="{ code, name } in languageList"
             :key="code"
             :value="activeLanguage === code"
-            class="language"
             :class="{ active: activeLanguage === code }"
+            class="language"
+            has-label-effect
             @input="switchLanguage(code)"
           >
             {{ name }}
@@ -27,19 +28,23 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
-import { languages } from '@/popup/plugins/i18n';
+import { languages, SupportedLanguage } from '@/popup/plugins/i18n';
 import { useLanguages } from '@/composables';
 
 import RadioButton from '../components/RadioButton.vue';
 
-const languageList = Object.entries(languages)
-  .map(([code, { name }]) => ({ code, name }))
-  .sort();
-
 export default defineComponent({
-  components: { RadioButton, IonPage, IonContent },
+  components: {
+    RadioButton,
+    IonPage,
+    IonContent,
+  },
   setup() {
     const { activeLanguage, switchLanguage } = useLanguages();
+
+    const languageList = Object.entries(languages)
+      .map(([code, { name }]) => ({ code, name } as { code: SupportedLanguage; name: string }))
+      .sort();
 
     return {
       languageList,
