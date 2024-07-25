@@ -15,8 +15,8 @@
             :key="network.name"
             :network="network"
             :is-active="network.name === activeNetwork.name"
-            @selectNetwork="switchNetwork"
-            @deleteNetwork="deleteCustomNetwork"
+            @network-select="switchNetwork"
+            @network-delete="deleteCustomNetwork"
           />
         </div>
 

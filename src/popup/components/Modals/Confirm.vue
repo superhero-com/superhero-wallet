@@ -2,6 +2,9 @@
   <Default
     v-bind="{ ...$attrs, resolve }"
     class="confirm-modal"
+    icon="info"
+    :msg="msg"
+    :title="title"
     :close="cancel"
   >
     <template #msg>
@@ -43,6 +46,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    title: { type: String, default: '' },
     msg: { type: String, default: '' },
   },
   setup(props) {

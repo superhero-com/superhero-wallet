@@ -5,7 +5,7 @@
     class="network-row"
     type="radio"
     name="activeNetwork"
-    @input="$emit('selectNetwork', network.name)"
+    @input="$emit('network-select', network.name)"
   >
     <div class="name-and-actions">
       <p
@@ -30,7 +30,7 @@
           data-cy="network-delete"
           dimmed
           :icon="TrashIcon"
-          @click="$emit('deleteNetwork', network.name);"
+          @click="$emit('network-delete', network.name);"
         />
       </div>
     </div>
@@ -76,9 +76,9 @@ export default defineComponent({
   },
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    selectNetwork: (name: string) => true,
+    'network-select': (name: string) => true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    deleteNetwork: (name: string) => true,
+    'network-delete': (name: string) => true,
   },
   setup(props) {
     // Filter out the network protocol settings that has no `nodeUrl` default property
