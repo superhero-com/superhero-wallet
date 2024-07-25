@@ -312,7 +312,6 @@ export default defineComponent({
     async function toggleAutoExtend() {
       if (!props.nameEntry.autoExtend) {
         await openConfirmModal({
-          icon: 'info',
           title: t('modals.nameAutoExtendHelp.title'),
           msg: t('modals.nameAutoExtendHelp.msg'),
         });

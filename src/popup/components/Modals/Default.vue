@@ -20,9 +20,11 @@
       </IconBoxed>
     </div>
 
-    <h2 class="text-heading-4 text-center title">
-      {{ title }}
-    </h2>
+    <h2
+      v-if="title"
+      class="text-heading-4 text-center title"
+      v-text="title"
+    />
 
     <slot name="msg">
       <TemplateRenderer
