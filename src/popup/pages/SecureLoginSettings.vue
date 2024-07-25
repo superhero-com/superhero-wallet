@@ -42,6 +42,7 @@
               :disabled="!isSecureLoginEnabled"
               :class="{ active: secureLoginTimeout === ms }"
               class="timeout"
+              has-label-effect
               @input="setSecureLoginTimeout(ms)"
             >
               <div class="row">

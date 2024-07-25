@@ -4,6 +4,7 @@
     :class="{
       disabled,
       checked: value,
+      'has-label-effect': hasLabelEffect,
     }"
   >
     <span class="radio-dot">
@@ -17,7 +18,7 @@
     </span>
 
     <span class="radio-holder">
-      <slot />
+      <slot :checked="value">{{ label }}</slot>
     </span>
   </label>
 </template>
@@ -30,6 +31,9 @@ export default defineComponent({
     value: { type: [String, Number, Boolean], default: '' },
     type: { type: String as PropType<'checkbox' | 'radio'>, default: 'checkbox' },
     name: { type: String, default: '' },
+    label: { type: String, default: '' },
+    /** Makes the unchecked input's label semi transparent */
+    hasLabelEffect: Boolean,
     disabled: Boolean,
   },
 });
@@ -48,8 +52,11 @@ export default defineComponent({
   display: flex;
   cursor: pointer;
   user-select: none;
-  opacity: 0.5;
   transition: opacity 0.15s;
+
+  &.has-label-effect {
+    opacity: 0.5;
+  }
 
   &.checked {
     --radio-dot-scale: 1;
