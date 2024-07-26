@@ -151,20 +151,51 @@
         :label="$t('transaction.advancedDetails')"
       >
         <DetailsItem
-          v-if="decodedCallData?.functionName"
-          :label="$t('modals.confirmTransactionSign.functionName')"
-          :value="decodedCallData.functionName"
-        />
-
-        <!--
-          Display the ETH transaction raw data until we are able to decode it
-          into human readable arguments (e.g.: amount).
-        -->
-        <DetailsItem
           v-if="transaction?.tx?.data"
           :label="$t('transaction.data')"
-          :value="transaction.tx.data"
-        />
+        >
+          <Tabs class="tabs">
+            <Tab
+              v-for="({ name, text }) in dataTabs"
+              :key="name"
+              :data-cy="name"
+              :name="name"
+              :text="text"
+              :active="activeTab === name"
+              @click="setActiveTab(name)"
+            />
+          </Tabs>
+          <div class="tabs-content">
+            <!-- Decoded Data -->
+            <DetailsItem v-if="activeTab === dataTabs[0].name">
+              <Panel v-if="decodedCallData?.args">
+                <PanelTableItem
+                  v-for="([key, value]) in Object.entries(decodedCallData?.args as any) || []"
+                  :key="key"
+                  :name="key"
+                >
+                  <div class="scrollable">
+                    {{ value }}
+                  </div>
+                </PanelTableItem>
+              </Panel>
+              <InfoBox
+                v-else
+                type="warning"
+                :text="$t('transaction.decodingDataFailed')"
+              />
+            </DetailsItem>
+            <!--
+              Raw Data
+              Display the ETH transaction raw data until we are able to decode it
+              into human readable arguments (e.g.: amount).
+            -->
+            <DetailsItem
+              v-if="activeTab === dataTabs[1].name"
+              :value="transaction.tx.data"
+            />
+          </div>
+        </DetailsItem>
 
         <DetailsItem
           v-if="transactionArguments"
@@ -265,8 +296,10 @@ import {
   getTransactionTokenInfoResolver,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { decodeTxData } from '@/protocols/ethereum/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import type { EthDecodedCallData } from '@/protocols/ethereum/types';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
@@ -275,6 +308,12 @@ import TransactionOverview from '../TransactionOverview.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
+import Panel from '../Panel.vue';
+import PanelTableItem from '../PanelTableItem.vue';
+import Tabs from '../tabs/Tabs.vue';
+import Tab from '../tabs/Tab.vue';
+import InfoBox from '../InfoBox.vue';
+
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
 type ITxKey = keyof ITx;
@@ -304,6 +343,11 @@ export default defineComponent({
     DetailsItem,
     TokenAmount,
     TransactionDetailsPoolTokenRow,
+    PanelTableItem,
+    Panel,
+    Tabs,
+    Tab,
+    InfoBox,
     AnimatedSpinner,
   },
   setup() {
@@ -324,6 +368,17 @@ export default defineComponent({
       tx: popupProps.value?.tx || {},
     } as ITransaction);
 
+    const dataTabs = [
+      {
+        name: 'decoded',
+        text: t('transaction.decoded'),
+      },
+      {
+        name: 'raw',
+        text: t('transaction.rawData'),
+      },
+    ];
+
     const {
       amountTotal,
       direction,
@@ -338,7 +393,10 @@ export default defineComponent({
       isDexSwap,
       txFunctionParsed,
       transactionAssets,
-    } = useTransactionData({ transaction });
+    } = useTransactionData({
+      transaction,
+      hideFeeFromAssets: true,
+    });
 
     const tokenList = ref<ITokenResolved[]>(transactionAssets.value);
     const executionCost = ref(0);
@@ -346,7 +404,8 @@ export default defineComponent({
     const error = ref('');
     const verifying = ref(false);
     const gasPrice = ref(0);
-    const decodedCallData = ref<AeDecodedCallData | undefined>();
+    const decodedCallData = ref<AeDecodedCallData | EthDecodedCallData | undefined>();
+    const activeTab = ref(dataTabs[0].name);
 
     const app = computed(() => popupProps.value?.app);
 
@@ -477,6 +536,9 @@ export default defineComponent({
       popupProps.value?.reject(new RejectedByUserError());
     }
 
+    /**
+     * Verifies aeternity transactions
+     */
     async function verifyTransaction() {
       if (popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity) {
         try {
@@ -568,12 +630,27 @@ export default defineComponent({
         } finally {
           loading.value = false;
         }
+      } else if (
+        protocol === PROTOCOLS.ethereum
+        && activeAccount
+        && popupProps.value?.tx?.data
+        && popupProps.value?.tx?.contractId
+      ) {
+        decodedCallData.value = await decodeTxData(
+          popupProps.value.tx.data,
+          popupProps.value.tx.contractId,
+          activeAccount.address,
+        );
       }
     }
 
     function getTxKeyLabel(txKey: ITxKey) {
       const translateFunc = TX_FIELDS_TO_DISPLAY[txKey];
       return translateFunc ? translateFunc() : '';
+    }
+
+    function setActiveTab(tabName: string) {
+      activeTab.value = tabName;
     }
 
     onMounted(async () => {
@@ -633,6 +710,9 @@ export default defineComponent({
       transactionArguments,
       fee,
       verifying,
+      dataTabs,
+      activeTab,
+      setActiveTab,
     };
   },
 });
@@ -649,6 +729,10 @@ export default defineComponent({
     margin: 0 auto;
     width: 56px;
     height: 56px;
+  }
+
+  .scrollable {
+    word-break: keep-all;
   }
 
   .subtitle {
@@ -687,6 +771,10 @@ export default defineComponent({
 
     gap: 8px;
     padding: 8px 0;
+  }
+
+  .tabs {
+    margin-top: 8px;
   }
 
   .pool-token-row:deep() {

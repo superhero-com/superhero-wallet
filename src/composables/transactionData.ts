@@ -102,6 +102,13 @@ export function useTransactionData({
     (): boolean => outerTx.value?.contractId ? isAssetCoin(outerTx.value.contractId) : true,
   );
 
+  const isNonTokenContract = computed(
+    (): boolean => (
+      !getProtocolAvailableTokens(protocol.value)[innerTx.value?.contractId]
+      || innerTxTag.value === Tag.ContractCreateTx
+    ),
+  );
+
   const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
 
   const isDexAllowance = computed((): boolean => (
@@ -188,7 +195,9 @@ export function useTransactionData({
    * Amount and fee calculated based on the direction.
    */
   const amountTotal = computed(
-    (): number => (transaction.value) ? getTxAmountTotal(transaction.value, direction.value) : 0,
+    (): number => (transaction.value)
+      ? getTxAmountTotal(transaction.value, direction.value)
+      : 0,
   );
 
   /**
@@ -199,8 +208,6 @@ export function useTransactionData({
     if (!transaction.value?.tx) {
       return [];
     }
-
-    let convertToCoin = false;
 
     const adapter = ProtocolAdapterFactory.getAdapter(protocol.value);
     const protocolTokens = getProtocolAvailableTokens(protocol.value);
@@ -238,12 +245,6 @@ export function useTransactionData({
             }));
         }
       }
-
-      // Convert all unresolved transaction with non-token contractId to coin.
-      // For example contract calls
-      if (!protocolTokens[innerTx.value?.contractId] || innerTxTag.value === Tag.ContractCreateTx) {
-        convertToCoin = true;
-      }
     }
 
     const amount = (isDexAllowance.value)
@@ -251,7 +252,12 @@ export function useTransactionData({
       : amountTotal.value;
     const isReceived = direction.value === TX_DIRECTION.received;
 
-    if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value || convertToCoin) {
+    if (
+      isTransactionCoin.value
+      || isDexAllowance.value
+      || isMultisig.value
+      || isNonTokenContract.value
+    ) {
       return [{
         ...innerTx.value || {},
         ...adapter.getDefaultCoin(),

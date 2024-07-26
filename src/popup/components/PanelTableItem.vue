@@ -44,6 +44,7 @@ export default defineComponent({
   min-height: 48px;
   display: flex;
   flex-direction: row;
+  gap: 10px;
   align-items: center;
   padding: 4px 16px;
   transition: $transition-interactive;
@@ -73,9 +74,9 @@ export default defineComponent({
 
     display: inline-flex;
     align-items: center;
-    padding-left: 10px;
     text-align: right;
     color: rgba($color-white, 1);
+    overflow-x: auto;
 
     .icon {
       width: 24px;

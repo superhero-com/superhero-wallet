@@ -5,9 +5,13 @@ import { bigIntToHex } from 'web3-eth-accounts';
 import Contract from 'web3-eth-contract';
 import BigNumber from 'bignumber.js';
 
-import { AccountAddress, ITransaction } from '@/types';
+import { AccountAddress, Dictionary, ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
+import { handleUnknownError } from '@/utils';
 import { ERC20_ABI, ETH_CONTRACT_ID } from '../config';
+import { EthDecodedCallData } from '../types';
+import { EtherscanService } from '../libs/EtherscanService';
+import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 
 /**
  * Convert Gwei to Ether
@@ -30,10 +34,13 @@ export function normalizeWeb3EthTransactionStructure(
     to,
     value,
     type,
+    input,
   } = transaction || {};
   const { timestamp } = block || {};
   const isLegacy = (Number(type) === 0); // e.g.: faucet
   const transactionOwnerChecksumAddress: any = toChecksumAddress(transactionOwner!);
+  const isEthTransfer = input !== '0x';
+  const contractId = isEthTransfer && to ? toChecksumAddress(to) : ETH_CONTRACT_ID;
 
   return {
     transactionOwner: transactionOwnerChecksumAddress,
@@ -45,12 +52,12 @@ export function normalizeWeb3EthTransactionStructure(
     tx: {
       amount: Number(fromWei(value || 0, 'ether')),
       fee: (!isLegacy) ? +fromWei(Number(gas || 0) * Number(gasPrice || 0), 'ether') : 0,
-      senderId: from ? toChecksumAddress(from) as any : undefined,
-      recipientId: to ? toChecksumAddress(to) as any : undefined,
-      type: 'SpendTx', // TODO: create own types
+      senderId: from ? toChecksumAddress(from) : undefined,
+      recipientId: to ? toChecksumAddress(to) : undefined,
+      type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
       arguments: [],
-      callerId: '' as any,
-      contractId: ETH_CONTRACT_ID as any,
+      callerId: '',
+      contractId,
     },
   };
 }
@@ -92,4 +99,50 @@ export async function getTokenTransferGasLimit(
     .estimateGas(undefined, { number: FMT_NUMBER.NUMBER, bytes: FMT_BYTES.HEX });
   const roundedToNextThousand = Math.ceil(Number(gasEstimation / 1000)) * 1000;
   return roundedToNextThousand;
+}
+
+export async function decodeTxData(
+  txData: string,
+  contractId: string,
+  fromAccount: string,
+): Promise<EthDecodedCallData| undefined> {
+  const {
+    ethActiveNetworkPredefinedSettings,
+  } = useEthNetworkSettings();
+  const { middlewareUrl: apiUrl } = ethActiveNetworkPredefinedSettings.value;
+
+  const contractAbi = await new EtherscanService(apiUrl)
+    .fetchFromApi({
+      module: 'contract',
+      action: 'getabi',
+      address: contractId,
+    });
+
+  if (contractAbi?.message !== 'OK') {
+    return undefined;
+  }
+  const parsedAbi = JSON.parse(contractAbi.result);
+
+  const contractInstance = new Contract(
+    parsedAbi,
+    contractId,
+    { from: fromAccount },
+  );
+
+  try {
+    // Decode the method and parameters from the input data
+    const methodSignature = txData.slice(0, 10);
+    const method = contractInstance.options.jsonInterface
+      .find((m) => m.signature === methodSignature);
+
+    const params = contractInstance.decodeMethodData(txData);
+
+    return {
+      functionName: (method as any).name,
+      args: params[0] as Dictionary,
+    };
+  } catch (e) {
+    handleUnknownError(e);
+  }
+  return undefined;
 }

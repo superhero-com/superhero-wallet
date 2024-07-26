@@ -61,13 +61,13 @@
           <slot />
         </div>
 
-        <BackToTop sticky />
-
         <FixedScreenFooter
           v-if="$slots.footer"
         >
           <slot name="footer" />
         </FixedScreenFooter>
+
+        <BackToTop sticky />
       </div>
 
       <div
