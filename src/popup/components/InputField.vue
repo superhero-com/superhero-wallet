@@ -7,7 +7,7 @@
       warning: hasWarning,
       readonly,
       code,
-      thin,
+      focused,
     }"
   >
     <div
@@ -94,9 +94,8 @@
         class="message-text"
         data-cy="input-field-message"
         :for="inputId"
-      >
-        {{ messageAsObject ? messageAsObject.text : null }}
-      </label>
+        v-text="(messageAsObject) ? messageAsObject.text : null"
+      />
     </div>
   </div>
 </template>
@@ -148,7 +147,6 @@ export default defineComponent({
     showMessageHelp: Boolean,
     blinkOnChange: Boolean,
     code: Boolean,
-    thin: Boolean,
     textLimit: {
       type: Number,
       default: null,
@@ -263,20 +261,24 @@ export default defineComponent({
 
   text-align: left;
 
-  &:focus-within,
-  &:hover {
+  &:where(:has(label:hover)) {
+    --color-border: #{rgba($color-white, 0.15)};
+    --color-bg: #{rgba($color-white, 0.05)};
     --color-input-text: #{$color-white};
   }
 
-  &:hover {
-    --color-border: #{rgba($color-white, 0.15)};
-    --color-bg: #{rgba($color-white, 0.05)};
-  }
-
-  &:focus-within {
+  // If any child input (or slot input member) is focused set following values with 0 specificity.
+  // Using `:focus-within` was causing the input to highlight when clicking on icon buttons
+  // placed within the label.
+  &:where(
+    &:has(input:focus),
+    &:has(textarea:focus),
+    &:has(label:active)
+  ) {
     --color-border: #{$color-primary};
     --color-bg: #{rgba($color-black, 0.44)};
     --color-placeholder: #{$color-white};
+    --color-input-text: #{$color-white};
   }
 
   .label {
@@ -285,7 +287,7 @@ export default defineComponent({
     margin-block: 16px 2px;
 
     .text-label {
-      margin: 4px 0;
+      padding: 4px 0;
       display: inline-block;
       user-select: none;
     }
@@ -400,22 +402,14 @@ export default defineComponent({
   &.readonly {
     --color-border: transparent;
 
-    .input-wrapper {
-      .input {
-        opacity: 0.5;
-      }
-    }
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
   }
 
   &.code {
     .input {
       @extend %face-mono-10-medium;
-    }
-  }
-
-  &.thin {
-    .input {
-      @extend %face-sans-14-regular;
     }
   }
 }

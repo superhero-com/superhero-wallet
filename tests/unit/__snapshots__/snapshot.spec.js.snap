@@ -103,6 +103,7 @@ exports[`Pages About 1`] = `
       >
         <a
           class="panel-item variant-dark btn-base panel-item"
+          type="button"
         >
           
           <div
@@ -133,6 +134,7 @@ exports[`Pages About 1`] = `
         </a>
         <a
           class="panel-item variant-dark btn-base panel-item"
+          type="button"
         >
           
           <div
@@ -244,6 +246,7 @@ exports[`Pages Index 1`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -281,6 +284,7 @@ exports[`Pages Index 1`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -394,6 +398,7 @@ exports[`Pages Index 2`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -431,6 +436,7 @@ exports[`Pages Index 2`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -544,6 +550,7 @@ exports[`Pages Index 3`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -581,6 +588,7 @@ exports[`Pages Index 3`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
