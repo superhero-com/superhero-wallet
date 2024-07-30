@@ -5,6 +5,7 @@
     class="button-plain"
     :class="{ extend, avatar }"
     :to="to"
+    :type="(to) ? null : 'button'"
   >
     <slot>{{ text }}</slot>
   </Component>

@@ -2,7 +2,6 @@
   <InputField
     class="input-search"
     v-bind="$attrs"
-    thin
     @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template #after>
