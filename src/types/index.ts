@@ -499,7 +499,6 @@ export interface ITx {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
   };
-  VSN?: string;
   /** ETH contract call arguments */
   data?: string;
 }

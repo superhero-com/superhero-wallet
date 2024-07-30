@@ -79,7 +79,6 @@ export const STUB_POPUP_PROPS: Record<PopupType | 'base', IPopupData> = {
     app: STUB_APP_DATA,
     tx: {
       type: Tag[Tag.SpendTx],
-      VSN: '1',
       senderId: STUB_ACCOUNT.addressAeternity,
       recipientId,
       amount: 1000000000000000,
