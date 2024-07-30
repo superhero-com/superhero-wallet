@@ -454,7 +454,6 @@ export interface IGAMetaTx {
 }
 
 export interface ITx {
-  abiVersion?: number;
   accountId?: AccountAddress;
   aexnType?: 'aex9';
   amount: number;

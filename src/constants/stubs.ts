@@ -1,7 +1,5 @@
 import {
   Tag,
-  AbiVersion,
-  VmVersion,
   Encoded,
   AE_AMOUNT_FORMATS,
 } from '@aeternity/aepp-sdk';
@@ -132,8 +130,6 @@ const commonParams = {
     type: 'delta',
     value: 10,
   },
-  ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
-  abiVersion: AbiVersion.Sophia,
   callData: STUB_CALL_DATA,
 };
 
