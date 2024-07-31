@@ -15,7 +15,7 @@ import { useStorageRef } from './storageRef';
 export interface IOtherSettings {
   isSeedBackedUp?: boolean;
   saveErrorLog?: boolean;
-  isSecureLoginEnabled?: boolean;
+  isBiometricLoginEnabled?: boolean;
   secureLoginTimeout?: number;
 }
 
@@ -58,7 +58,7 @@ const otherSettings = useStorageRef<IOtherSettings>(
 
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
-const isSecureLoginEnabled = computed(() => !!otherSettings.value.isSecureLoginEnabled);
+const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
 const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout ?? 0);
 
 export function useUi() {
@@ -100,8 +100,8 @@ export function useUi() {
     otherSettings.value.saveErrorLog = val;
   }
 
-  function setSecureLoginEnabled(val: boolean) {
-    otherSettings.value.isSecureLoginEnabled = val;
+  function setBiometricLoginEnabled(val: boolean) {
+    otherSettings.value.isBiometricLoginEnabled = val;
   }
 
   function setSecureLoginTimeout(val: number) {
@@ -144,7 +144,7 @@ export function useUi() {
     isLoaderVisible,
     isSeedBackedUp,
     saveErrorLog,
-    isSecureLoginEnabled,
+    isBiometricLoginEnabled,
     secureLoginTimeout,
     lastTimeAppWasActive,
     initVisibilityListeners,
@@ -156,7 +156,7 @@ export function useUi() {
     setMobileQrScannerVisible,
     setLoaderVisible,
     resetUiSettings,
-    setSecureLoginEnabled,
+    setBiometricLoginEnabled,
     setSecureLoginTimeout,
   };
 }

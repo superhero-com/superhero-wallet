@@ -7,41 +7,47 @@ import {
 
 import { tg as t } from '@/popup/plugins/i18n';
 import { IS_MOBILE_APP, MODAL_ENABLE_SECURE_LOGIN, MODAL_SECURE_LOGIN } from '@/constants';
-import { watchUntilTruthy } from '@/utils';
+import { authenticateWithPassword, watchUntilTruthy } from '@/utils';
 import { useUi } from './ui';
 import { useModals } from './modals';
+import { useAccounts } from './accounts';
 import { createCustomScopedComposable } from './composablesHelpers';
 
 export const useAuth = createCustomScopedComposable(() => {
   let composableInitialized = false;
-  let isSecureLoginAvailable = false;
+  let isBiometricAuthAvailable = false;
   const isBiometryAvailabilityUpdating = ref(false);
   const isBiometryAvailabilityChecked = ref(false);
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
 
   const {
-    setSecureLoginEnabled,
-    isSecureLoginEnabled,
+    isBiometricLoginEnabled,
     lastTimeAppWasActive,
     secureLoginTimeout,
     isAppActive,
   } = useUi();
   const { openModal } = useModals();
+  const {
+    isLoggedIn,
+    passwordKey,
+    setPasswordKey,
+    openLoginModal,
+  } = useAccounts();
 
-  async function checkSecureLoginAvailability({ forceUpdate = false } = {}) {
+  /**
+   * Checks if biometric authentication is available on the device.
+   */
+  async function checkBiometricLoginAvailability({ forceUpdate = false } = {}) {
     if (isBiometryAvailabilityUpdating.value) {
       await watchUntilTruthy(() => !isBiometryAvailabilityUpdating.value);
     } else if (!isBiometryAvailabilityChecked.value || forceUpdate) {
       isBiometryAvailabilityUpdating.value = true;
-      isSecureLoginAvailable = (await BiometricAuth.checkBiometry()).isAvailable;
+      isBiometricAuthAvailable = (await BiometricAuth.checkBiometry()).isAvailable;
       isBiometryAvailabilityChecked.value = true;
       isBiometryAvailabilityUpdating.value = false;
     }
-    if (!isSecureLoginAvailable) {
-      setSecureLoginEnabled(false);
-    }
-    return isSecureLoginAvailable;
+    return isBiometricAuthAvailable;
   }
 
   /**
@@ -49,53 +55,56 @@ export const useAuth = createCustomScopedComposable(() => {
    * Returns a promise that resolves when the user is authenticated
    * or if biometric authentication is not available.
    */
-  async function authenticate(): Promise<void> {
-    if (
-      !await checkSecureLoginAvailability()
-      || !isSecureLoginEnabled.value
-      || isAuthenticated.value
-    ) {
+  async function authenticate(password?: string): Promise<void> {
+    if (isAuthenticated.value) {
       return Promise.resolve();
     }
 
-    try {
-      return BiometricAuth.authenticate({
-        reason: t('biometricAuth.reason'),
-        cancelTitle: t('common.cancel'),
-        allowDeviceCredential: true,
-        iosFallbackTitle: t('biometricAuth.fallbackTitle'),
-        androidTitle: t('biometricAuth.title'),
-        androidSubtitle: t('biometricAuth.subtitle'),
-        androidConfirmationRequired: false,
-      }).then(() => {
+    if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+      try {
+        return BiometricAuth.authenticate({
+          reason: t('biometricAuth.reason'),
+          cancelTitle: t('common.cancel'),
+          allowDeviceCredential: true,
+          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
+          androidTitle: t('biometricAuth.title'),
+          androidSubtitle: t('biometricAuth.subtitle'),
+          androidConfirmationRequired: false,
+        }).then(() => {
+          isAuthenticated.value = true;
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    } else {
+      return authenticateWithPassword(password!).then((key) => {
+        setPasswordKey(key);
         isAuthenticated.value = true;
       });
-    } catch (error) {
-      return Promise.reject(error);
     }
   }
 
   function logout() {
+    setPasswordKey(null);
     isAuthenticated.value = false;
   }
 
   async function openSecureLoginModal() {
-    if (
-      !isAuthenticating.value
-      && await checkSecureLoginAvailability()
-      && isSecureLoginEnabled.value
-      && !isAuthenticated.value
-    ) {
+    if (!isAuthenticating.value && !isAuthenticated.value && isLoggedIn.value) {
       isAuthenticating.value = true;
-      await openModal(MODAL_SECURE_LOGIN);
+      if (isBiometricLoginEnabled.value) {
+        await openModal(MODAL_SECURE_LOGIN);
+      } else if (!IS_MOBILE_APP && !passwordKey.value) {
+        await openLoginModal();
+      }
       // wait before resetting isAuthenticated so that app doesn't register a false app resume event
       await new Promise((resolve) => setTimeout(resolve, 500));
       isAuthenticating.value = false;
     }
   }
 
-  async function openEnableSecureLoginModal() {
-    if (IS_MOBILE_APP) {
+  async function openEnableBiometricLoginModal() {
+    if (await checkBiometricLoginAvailability()) {
       openModal(MODAL_ENABLE_SECURE_LOGIN);
     }
   }
@@ -105,7 +114,7 @@ export const useAuth = createCustomScopedComposable(() => {
       return;
     }
     composableInitialized = true;
-    await checkSecureLoginAvailability();
+    await checkBiometricLoginAvailability();
   })();
 
   watch(
@@ -113,13 +122,11 @@ export const useAuth = createCustomScopedComposable(() => {
     async (isActive, wasActive) => {
       // App resumed from background
       // Check if biometric auth is still available
-      await checkSecureLoginAvailability({ forceUpdate: true });
+      await checkBiometricLoginAvailability({ forceUpdate: true });
       if (
         !isAuthenticating.value
-        && isSecureLoginEnabled.value
         && isActive
         && !wasActive
-        && IS_MOBILE_APP
       ) {
         if (isAuthenticated.value && lastTimeAppWasActive.value) {
           const elapsedTime = Date.now() - lastTimeAppWasActive.value;
@@ -136,10 +143,10 @@ export const useAuth = createCustomScopedComposable(() => {
 
   return {
     isAuthenticated: readonly(isAuthenticated),
-    checkSecureLoginAvailability,
+    checkBiometricLoginAvailability,
     authenticate,
     logout,
     openSecureLoginModal,
-    openEnableSecureLoginModal,
+    openEnableBiometricLoginModal,
   };
 });

@@ -1,40 +1,28 @@
 <template>
   <Modal
-    class="secure-login"
+    class="password-login"
     from-bottom
-    full-screen
-    no-padding
     centered
-    transparent
-    @close="handleClose"
-    @click="initAuthenticate"
   >
     <div class="content-wrapper">
       <div class="icon-wrapper">
         <IconBoxed
-          :icon="isAuthCanceled ? FingerprintIcon : LockIcon"
-          :class="isAuthCanceled ? 'color-danger' : 'color-success'"
+          :icon="LockIcon"
           bg-colored
-          outline-colored
-          transparent
-          :icon-padded="!isAuthCanceled"
+          bg-more-transparent
+          icon-padded
         />
       </div>
       <div class="info">
         <h3 class="title">
-          {{ !isAuthCanceled
-            ? $t('pages.secureLogin.walletLocked')
-            : $t('pages.secureLogin.authFailed')
-          }}
+          {{ $t('pages.secureLogin.walletLocked') }}
         </h3>
 
         <div class="text">
-          {{ !isAuthCanceled
-            ? $t('pages.secureLogin.walletLockedSubtitle')
-            : $t('pages.secureLogin.authFailedSubtitle')
-          }}
+          {{ $t('pages.secureLogin.walletLockedSubtitle') }}
         </div>
       </div>
+      <Login @unlock="login" />
     </div>
   </Modal>
 </template>
@@ -42,66 +30,56 @@
 <script lang="ts">
 import {
   ref,
-  watch,
   defineComponent,
   PropType,
 } from 'vue';
+
 import type { ResolveCallback } from '@/types';
 import { useAuth } from '@/composables';
 
-import Modal from '../Modal.vue';
-import IconBoxed from '../IconBoxed.vue';
+import Modal from '@/popup/components/Modal.vue';
+import IconBoxed from '@/popup/components/IconBoxed.vue';
+import Login from '@/popup/components/Login.vue';
 
-import FingerprintIcon from '../../../icons/fingerprint.svg?vue-component';
-import LockIcon from '../../../icons/lock.svg?vue-component';
+import FingerprintIcon from '@/icons/fingerprint.svg?vue-component';
+import LockIcon from '@/icons/lock.svg?vue-component';
 
 export default defineComponent({
   components: {
     Modal,
+    Login,
     IconBoxed,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
   setup(props) {
-    const isAuthCanceled = ref(false);
+    // TODO pin: do something with this
+    const isAuthFailed = ref(false);
     const isAuthenticating = ref(false);
 
     const { authenticate, isAuthenticated } = useAuth();
 
-    async function initAuthenticate() {
+    async function login(password?: string) {
       if (isAuthenticating.value || isAuthenticated.value) {
         return;
       }
       isAuthenticating.value = true;
       try {
-        await authenticate();
-        props.resolve();
+        await authenticate(password);
+        props.resolve(password);
       } catch (error) {
-        isAuthCanceled.value = true;
+        isAuthFailed.value = true;
       } finally {
         isAuthenticating.value = false;
       }
     }
 
-    function handleClose() {
-      if (isAuthenticated.value) {
-        props.resolve();
-      }
-    }
-
-    watch(isAuthenticated, (value) => {
-      if (value) {
-        props.resolve();
-      }
-    }, { immediate: true });
-
     return {
       LockIcon,
       FingerprintIcon,
-      isAuthCanceled,
-      handleClose,
-      initAuthenticate,
+      isAuthFailed,
+      login,
     };
   },
 });

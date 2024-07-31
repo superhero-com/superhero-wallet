@@ -101,7 +101,7 @@ export default defineComponent({
     const { t } = useI18n();
     const { discoverAccounts, setMnemonic } = useAccounts();
     const { openScanQrModal } = useModals();
-    const { openEnableSecureLoginModal } = useAuth();
+    const { openEnableBiometricLoginModal } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
     const discovering = ref(false);
@@ -129,12 +129,12 @@ export default defineComponent({
       }
 
       discovering.value = true;
-      setMnemonic(mnemonicParsed);
+      await setMnemonic(mnemonicParsed);
       setBackedUpSeed(true);
       await discoverAccounts();
       props.resolve();
       router.push(loginTargetLocation.value);
-      openEnableSecureLoginModal();
+      openEnableBiometricLoginModal();
       discovering.value = false;
     }
 

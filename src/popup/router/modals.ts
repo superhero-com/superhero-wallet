@@ -40,6 +40,8 @@ import {
   MODAL_ADDRESS_BOOK_IMPORT,
   MODAL_SHARE_ADDRESS,
   MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
+  MODAL_SET_PASSWORD,
+  MODAL_PASSWORD_LOGIN,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -82,6 +84,8 @@ import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vu
 import AddressBookImport from '../components/Modals/AddressBookImport.vue';
 import ShareAddress from '../components/ShareAddress.vue';
 import AddressBookAccountSelector from '../components/Modals/AddressBookAccountSelector.vue';
+import SetPassword from '../components/Modals/SetPassword.vue';
+import PasswordLogin from '../components/Modals/PasswordLogin.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -210,5 +214,11 @@ export default () => {
   });
   registerModal(MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, {
     component: AddressBookAccountSelector,
+  });
+  registerModal(MODAL_SET_PASSWORD, {
+    component: SetPassword,
+  });
+  registerModal(MODAL_PASSWORD_LOGIN, {
+    component: PasswordLogin,
   });
 };

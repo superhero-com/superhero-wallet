@@ -895,3 +895,9 @@ export interface IAddressBookEntry {
   isBookmarked: boolean;
   protocol: Protocol;
 }
+
+export interface IKey {
+  key: CryptoKey;
+  salt: Uint8Array;
+  iv: Uint8Array;
+}
