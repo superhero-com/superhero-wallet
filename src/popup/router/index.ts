@@ -17,6 +17,7 @@ import {
   RUNNING_IN_POPUP,
   PROTOCOLS,
   UNFINISHED_FEATURES,
+  STORAGE_KEYS,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
@@ -30,6 +31,7 @@ import {
   useUi,
   useWalletConnect,
 } from '@/composables';
+import { WalletStorage } from '@/lib/WalletStorage';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
@@ -53,6 +55,7 @@ const router = createRouter({
 const {
   isLoggedIn,
   activeAccount,
+  isMnemonicRestored,
   areAccountsRestored,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
@@ -65,6 +68,13 @@ RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
+  // Wait until the mnemonic is restored (decrypted), if it exists
+  if (
+    (!isMnemonicRestored.value && await WalletStorage.get(STORAGE_KEYS.mnemonic))
+    || IS_MOBILE_APP
+  ) {
+    await watchUntilTruthy(isMnemonicRestored);
+  }
   // Wait until we are sure that the user login state is correct
   await watchUntilTruthy(areAccountsRestored);
 

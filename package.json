@@ -39,6 +39,7 @@
     "@airgap/aeternity": "^0.13.31",
     "@airgap/serializer": "^0.13.31",
     "@aparajita/capacitor-biometric-auth": "^8.0.2",
+    "@aparajita/capacitor-secure-storage": "^6.0.1",
     "@awesome-cordova-plugins/screen-orientation": "^6.8.0",
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@capacitor-mlkit/barcode-scanning": "^6.1.0",

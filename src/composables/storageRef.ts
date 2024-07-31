@@ -1,9 +1,14 @@
 import { Ref, ref, watch } from 'vue';
 import type { Migration, StorageKey } from '@/types';
-import { asyncPipe } from '@/utils';
+import { asyncPipe, watchUntilTruthy } from '@/utils';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { useSecureStorage } from './secureStorage';
 
 interface ICreateStorageRefOptions<T> {
+  /**
+   * Enable secure storage for the data.
+   */
+  isSecure?: boolean;
   /**
    * Enable state synchronization between the extension and the background.
    */
@@ -34,13 +39,16 @@ export function useStorageRef<T = string | object | any[]>(
 ) {
   const {
     serializer,
+    isSecure = false,
     backgroundSync = false,
     migrations,
     onRestored,
   } = options;
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
-  const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136
+  const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
+  // Select storage type
+  let storage = isSecure ? null : WalletStorage;
 
   function setLocalState(val: T | null) {
     if (val !== null) {
@@ -51,20 +59,46 @@ export function useStorageRef<T = string | object | any[]>(
   }
 
   function setStorageState(val: T | null) {
-    WalletStorage.set(storageKey, (val && serializer?.write) ? serializer.write(val) : val);
+    storage?.set(storageKey, (val && serializer?.write) ? serializer.write(val) : val);
   }
 
   // Restore state and run watchers
   (async () => {
-    let restoredValue = WalletStorage.get<T | null>(storageKey);
+    if (isSecure) {
+      const { secureStorage, isLoggedIn } = useSecureStorage();
+      await watchUntilTruthy(secureStorage);
+      storage = secureStorage.value!;
+
+      // TODO pin: Check how we can not break the app
+      // ? Clear the state when the user logs out
+      // ? This ensures that the state is not leaked if someone removes the modal from the DOM
+      // ? But breaks the app while waiting for the user to log in
+      watch(isLoggedIn, async (val) => {
+        if (!val) {
+          state.value = initialState;
+        } else {
+          const restoredValue = storage?.get<T | null>(storageKey);
+          onRestored?.(restoredValue!);
+          setLocalState(restoredValue!);
+        }
+      }, { immediate: true });
+
+      watch(secureStorage, (newSecureStorage) => {
+        if (newSecureStorage) {
+          storage = newSecureStorage;
+        }
+      });
+    }
+
+    let restoredValue = storage?.get<T | null>(storageKey);
     if (migrations?.length) {
-      restoredValue = await asyncPipe<T | null>(migrations)(restoredValue);
+      restoredValue = await asyncPipe<T | null>(migrations)(restoredValue!);
       if (restoredValue !== null) {
         setStorageState(restoredValue);
       }
     }
-    onRestored?.(restoredValue);
-    setLocalState(restoredValue);
+    onRestored?.(restoredValue!);
+    setLocalState(restoredValue!);
 
     /**
      * Synchronize the state value with the storage.
@@ -81,7 +115,7 @@ export function useStorageRef<T = string | object | any[]>(
      * and the offscreen tab pick this and synchronize their own state with the change.
      */
     if (backgroundSync) {
-      WalletStorage.watch?.(storageKey, (val) => setLocalState(val));
+      storage?.watch?.(storageKey, (val) => setLocalState(val));
     }
   })();
 

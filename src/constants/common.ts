@@ -344,6 +344,8 @@ export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
 export const MODAL_SHARE_ADDRESS = 'share-address';
 export const MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR = 'address-book-account-selector';
+export const MODAL_SET_PASSWORD = 'set-password';
+export const MODAL_PASSWORD_LOGIN = 'password-login';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -466,3 +468,5 @@ export const POLLING_INTERVAL_TRANSACTIONS = 15000;
 
 // toBase64Url(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' }))
 export const JWT_HEADER = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9';
+
+export const PASSWORD_ENCRYPTION_ALGO = 'AES-GCM';

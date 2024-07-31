@@ -3,7 +3,7 @@ import type { StorageKeysInput } from '@/types';
 import { IS_OFFSCREEN_TAB } from '@/constants';
 import { composeStorageKeys } from '@/utils';
 
-interface IWalletStorage {
+export interface IWalletStorage {
   set: (keys: StorageKeysInput, value: any) => void;
   get: <T = Record<string, any>>(keys: StorageKeysInput) => T | null;
   remove: (keys: StorageKeysInput) => void;

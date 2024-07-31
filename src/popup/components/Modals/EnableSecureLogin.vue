@@ -15,11 +15,11 @@
       </h3>
 
       <div class="text">
-        <span>{{ isSecureLoginAvailable
+        <span>{{ isBiometricLoginAvailable
           ? $t('pages.secureLogin.available.part1')
           : $t('pages.secureLogin.unavailable.part1')
         }}</span>
-        <span>{{ isSecureLoginAvailable
+        <span>{{ isBiometricLoginAvailable
           ? $t('pages.secureLogin.available.part2')
           : $t('pages.secureLogin.unavailable.part2')
         }}</span>
@@ -29,7 +29,7 @@
         <BtnMain
           variant="primary"
           extend
-          :text="isSecureLoginAvailable
+          :text="isBiometricLoginAvailable
             ? $t('pages.secureLogin.enableSecureLogin')
             : $t('pages.secureLogin.enableDeviceSecureLogin')
           "
@@ -74,12 +74,12 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const isSecureLoginAvailable = ref(false);
-    const { checkSecureLoginAvailability, openSecureLoginModal } = useAuth();
-    const { setSecureLoginEnabled } = useUi();
+    const isBiometricLoginAvailable = ref(false);
+    const { checkBiometricLoginAvailability, openSecureLoginModal } = useAuth();
+    const { setBiometricLoginEnabled } = useUi();
 
     function onEnable() {
-      if (!isSecureLoginAvailable.value) {
+      if (!isBiometricLoginAvailable.value) {
         NativeSettings.open({
           optionAndroid: AndroidSettings.Security,
           optionIOS: IOSSettings.TouchIdPasscode,
@@ -88,18 +88,18 @@ export default defineComponent({
         return;
       }
 
-      setSecureLoginEnabled(true);
+      setBiometricLoginEnabled(true);
       openSecureLoginModal();
       props.resolve();
     }
 
     onBeforeMount(async () => {
-      isSecureLoginAvailable.value = await checkSecureLoginAvailability();
+      isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
     });
 
     return {
       FingerprintIcon,
-      isSecureLoginAvailable,
+      isBiometricLoginAvailable,
       onEnable,
     };
   },
