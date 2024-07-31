@@ -658,7 +658,26 @@
       "walletLocked": "Wallet locked",
       "walletLockedSubtitle": "Tap on the screen to login!",
       "authFailed": "Authentication failed",
-      "authFailedSubtitle": "Tap on the screen to try again!"
+      "authFailedSubtitle": "Tap on the screen to try again!",
+      "setPassword": {
+        "title": "Set a password",
+        "text": "You will use it to unlock your wallet.",
+        "text2": "Choose a strong password and make sure you remember it or securely back it up.",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter strong password",
+        "confirmLabel": "Confirm password",
+        "confirmPlaceholder": "Repeat the password you chose",
+        "confirm": "Continue to wallet",
+        "help": {
+          "title": "Remember your password",
+          "text": "in order to not lose access to your wallet {'<'}br /{'>'} {'<'}br /{'>'} If you forget your password the only way to access Superhero Wallet on this device will be to reset the extension and use your seed phrase to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} It is important to remember your password and back up the secret seed phrase you will be provided."
+        }
+      },
+      "login": {
+        "placeholder": "Enter your password",
+        "label": "Password",
+        "login": "Login"
+      }
     },
     "about": {
       "terms": "Terms",
@@ -1173,7 +1192,9 @@
     "invalidAddressChainUrl": "Invalid address, .chain name or URL.",
     "invalidAddress": "Invalid account address.",
     "doesNotExceedDecimals": "Amount should not exceed {0} decimals.",
-    "addressBookEntryExists": "This {0} already exists in your address book."
+    "addressBookEntryExists": "This {0} already exists in your address book.",
+    "passwordMinLength": "Password must be at least {0} characters long.",
+    "passwordsMatch": "Passwords do not match."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

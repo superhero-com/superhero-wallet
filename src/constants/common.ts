@@ -344,6 +344,9 @@ export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
 export const MODAL_SHARE_ADDRESS = 'share-address';
 export const MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR = 'address-book-account-selector';
+export const MODAL_SET_PASSWORD = 'set-password';
+export const MODAL_SET_PASSWORD_HELP = 'set-password-help';
+export const MODAL_PASSWORD_LOGIN = 'password-login';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';

@@ -6,7 +6,11 @@
       'icon-padded': iconPadded,
       'outline-colored': outlineColored,
       'outline-solid': outlineSolid,
+      'bg-outline-color': bgOutlineColor,
       transparent,
+    }"
+    :style="{
+      '--bg-outline-color': bgOutlineColor,
     }"
   >
     <div class="icon-boxed-inner">
@@ -26,6 +30,8 @@ import { defineComponent } from 'vue';
 export default defineComponent({
   props: {
     icon: { type: Object, default: null },
+    /** Color bg and outline with specific color */
+    bgOutlineColor: { type: String, default: '' },
     /** Makes the icon background to use the same color as the icon */
     bgColored: Boolean,
     /** Makes the icon outline to use the same color as the icon */
@@ -116,6 +122,11 @@ export default defineComponent({
 
   &.bg-colored {
     --icon-bg-color: currentColor;
+  }
+
+  &.bg-outline-color {
+    --outline-color: var(--bg-outline-color);
+    --icon-bg-color: var(--bg-outline-color)
   }
 
   &.transparent {

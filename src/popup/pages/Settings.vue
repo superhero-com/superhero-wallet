@@ -7,9 +7,8 @@
           :title="$t('pages.index.seedPhrase')"
         />
         <PanelItem
-          v-if="IS_MOBILE_APP"
           :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
-          :info="isSecureLoginEnabled ? $t('common.on') : $t('common.off')"
+          :info="secureLoginSettingsInfo"
           :title="$t('pages.titles.secureLogin')"
         />
         <PanelItem
@@ -52,6 +51,8 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import { IS_MOBILE_APP } from '@/constants';
 import {
   useCurrencies,
@@ -74,13 +75,21 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const { t } = useI18n();
     const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
-    const { saveErrorLog, isSecureLoginEnabled } = useUi();
+    const { saveErrorLog, isBiometricLoginEnabled } = useUi();
 
     const activeCurrency = computed(
       () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,
     );
+
+    const secureLoginSettingsInfo = computed(() => {
+      if (IS_MOBILE_APP) {
+        return isBiometricLoginEnabled.value ? t('common.on') : t('common.off');
+      }
+      return null;
+    });
 
     return {
       IS_MOBILE_APP,
@@ -89,7 +98,8 @@ export default defineComponent({
       ROUTE_SECURE_LOGIN_SETTINGS,
       activeNetwork,
       saveErrorLog,
-      isSecureLoginEnabled,
+      secureLoginSettingsInfo,
+      isBiometricLoginEnabled,
       activeCurrency,
     };
   },

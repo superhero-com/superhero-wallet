@@ -23,8 +23,10 @@
       </label>
 
       <BtnHelp
-        v-if="showHelp"
+        v-if="help || showHelp"
         class="btn-help"
+        :title="help.title"
+        :msg="help.msg"
         @help="$emit('help')"
       />
       <div
@@ -64,6 +66,7 @@
             :value="modelValue"
             :disabled="readonly"
             :inputmode="inputMode"
+            :type="type"
             :autocapitalize="autoCapitalize"
             @input="handleInput"
             @keydown="checkIfNumber"
@@ -113,7 +116,7 @@ import type { IInputMessage, IInputMessageRaw } from '@/types';
 import { INPUT_MESSAGE_STATUSES } from '@/constants';
 import BtnHelp from './buttons/BtnHelp.vue';
 
-type InputFieldType = 'text' | 'number' | 'url';
+type InputFieldType = 'text' | 'number' | 'url' | 'password';
 
 export default defineComponent({
   name: 'InputField',
@@ -130,6 +133,7 @@ export default defineComponent({
         'text',
         'number',
         'url',
+        'password',
       ].includes(value),
     },
     message: {
@@ -142,9 +146,12 @@ export default defineComponent({
       },
       default: null,
     },
+    help: {
+      type: Object as PropType<{ title: string; msg: string }>,
+      default: null,
+    },
     readonly: Boolean,
     showHelp: Boolean,
-    showMessageHelp: Boolean,
     blinkOnChange: Boolean,
     code: Boolean,
     textLimit: {
@@ -170,6 +177,7 @@ export default defineComponent({
       number: 'decimal',
       url: 'url',
       text: 'text',
+      password: 'password',
     }[props.type]));
     // don't start with a capital letter in URL keyboard on iOS
     const autoCapitalize = computed(() => props.type === 'url' ? 'off' : undefined);

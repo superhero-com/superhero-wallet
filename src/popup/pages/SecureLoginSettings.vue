@@ -1,20 +1,18 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-      <div
-        v-if="IS_MOBILE_APP"
-        class="secure-login-settings"
-      >
+      <div class="secure-login-settings">
         <div class="top-wrapper">
           <p class="text-description">
             {{ $t('pages.secureLogin.description') }}
           </p>
 
           <SwitchButton
+            v-if="IS_MOBILE_APP"
             :label="$t('pages.secureLogin.enableSecureLogin')"
-            :model-value="isSecureLoginEnabled"
-            :disabled="!isSecureLoginAvailable"
-            @update:modelValue="setSecureLoginEnabled"
+            :model-value="isBiometricLoginEnabled"
+            :disabled="!isBiometricLoginAvailable"
+            @update:modelValue="setBiometricLoginEnabled"
           />
         </div>
         <hr>
@@ -22,7 +20,7 @@
           <div class="options">
             <div
               class="options-info"
-              :class="{ dimmed: !isSecureLoginEnabled }"
+              :class="{ dimmed: IS_MOBILE_APP && !isBiometricLoginEnabled }"
             >
               <span class="options-label">
                 {{ $t('pages.secureLogin.autoLock.title') }}
@@ -39,7 +37,6 @@
               v-for="(ms, minutes) in AUTHENTICATION_TIMEOUTS"
               :key="`timeout-${minutes}`"
               :value="secureLoginTimeout === ms"
-              :disabled="!isSecureLoginEnabled"
               :class="{ active: secureLoginTimeout === ms }"
               class="timeout"
               has-label-effect
@@ -52,14 +49,6 @@
           </div>
         </div>
       </div>
-
-      <InfoBox
-        v-else
-        class="warning-box"
-        type="warning"
-      >
-        <TemplateRenderer :str="$t('pages.secureLogin.unsupportedDevice')" />
-      </InfoBox>
     </IonContent>
   </IonPage>
 </template>
@@ -73,8 +62,6 @@ import { useAuth, useUi } from '@/composables';
 
 import RadioButton from '../components/RadioButton.vue';
 import SwitchButton from '../components/SwitchButton.vue';
-import InfoBox from '../components/InfoBox.vue';
-import TemplateRenderer from '../components/TemplateRenderer.vue';
 
 const AUTHENTICATION_TIMEOUTS = {
   0: 0,
@@ -89,35 +76,36 @@ export default defineComponent({
   components: {
     RadioButton,
     SwitchButton,
-    TemplateRenderer,
-    InfoBox,
     IonPage,
     IonContent,
   },
   setup() {
-    const isSecureLoginAvailable = ref(false);
+    const isBiometricLoginAvailable = ref(false);
 
-    const { checkSecureLoginAvailability, openEnableSecureLoginModal } = useAuth();
     const {
-      isSecureLoginEnabled,
+      checkBiometricLoginAvailability,
+      openEnableBiometricLoginModal,
+    } = useAuth();
+    const {
+      isBiometricLoginEnabled,
       secureLoginTimeout,
-      setSecureLoginEnabled,
+      setBiometricLoginEnabled,
       setSecureLoginTimeout,
     } = useUi();
 
     onMounted(async () => {
-      isSecureLoginAvailable.value = await checkSecureLoginAvailability();
-      if (!isSecureLoginAvailable.value && IS_MOBILE_APP) {
-        openEnableSecureLoginModal();
+      isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
+      if (!isBiometricLoginAvailable.value && IS_MOBILE_APP) {
+        openEnableBiometricLoginModal();
       }
     });
 
     return {
       IS_MOBILE_APP,
-      isSecureLoginAvailable,
-      isSecureLoginEnabled,
+      isBiometricLoginEnabled,
+      isBiometricLoginAvailable,
       secureLoginTimeout,
-      setSecureLoginEnabled,
+      setBiometricLoginEnabled,
       setSecureLoginTimeout,
       AUTHENTICATION_TIMEOUTS,
     };

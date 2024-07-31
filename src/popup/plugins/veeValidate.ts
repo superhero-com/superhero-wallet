@@ -113,6 +113,16 @@ defineRule(
 );
 
 defineRule(
+  'password_min_len',
+  (value: string, [arg]: [number]) => (value && value.length >= arg) || tg('validation.passwordMinLength', [arg]),
+);
+
+defineRule(
+  'passwords_match',
+  (value: string, [arg]: [string]) => (value === arg) || tg('validation.passwordsMatch'),
+);
+
+defineRule(
   'network_exists',
   (value: string, [customNetworks, savedNetworkName]: [INetwork[], string]) => {
     if (
