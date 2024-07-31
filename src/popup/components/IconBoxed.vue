@@ -6,6 +6,7 @@
       'icon-padded': iconPadded,
       'outline-colored': outlineColored,
       'outline-solid': outlineSolid,
+      'bg-more-transparent': bgMoreTransparent,
       transparent,
     }"
   >
@@ -26,6 +27,8 @@ import { defineComponent } from 'vue';
 export default defineComponent({
   props: {
     icon: { type: Object, default: null },
+    /** Makes the icon background even more transparent */
+    bgMoreTransparent: Boolean,
     /** Makes the icon background to use the same color as the icon */
     bgColored: Boolean,
     /** Makes the icon outline to use the same color as the icon */
@@ -100,6 +103,10 @@ export default defineComponent({
       height: 100%;
       padding: var(--icon-padding);
     }
+  }
+
+  &.bg-more-transparent .icon-boxed-inner::before {
+    opacity: 0.1;
   }
 
   &.icon-padded {

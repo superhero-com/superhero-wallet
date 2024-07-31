@@ -1,11 +1,13 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+
 import type {
   AccountAddress,
   AccountType,
   IAccount,
   IAccountRaw,
+  IKey,
   IFormSelectOption,
   Protocol,
   ProtocolRecord,
@@ -18,10 +20,14 @@ import {
   IS_MOBILE_APP,
   ACCOUNT_TYPES_LIST,
   ACCOUNT_TYPES,
+  MODAL_SET_PASSWORD,
+  MODAL_PASSWORD_LOGIN,
 } from '@/constants';
 import {
   createCallbackRegistry,
+  encrypt,
   excludeFalsy,
+  generateKey,
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
@@ -29,7 +35,9 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
+import { WalletStorage } from '@/lib/WalletStorage';
 import { useStorageRef } from './storageRef';
+import { useModals } from './modals';
 
 let composableInitialized = false;
 
@@ -39,20 +47,24 @@ const {
 } = createCallbackRegistry<(newAccount: IAccount, oldAccount: IAccount) => any>();
 
 const areAccountsRestored = ref(false);
+const isMnemonicRestored = ref(false);
+const passwordKey = ref<IKey | null>(null);
 
-/**
- * TODO Implement more safe way of storing mnemonic
- * For example by encrypting it with password or pin code.
- */
 const mnemonic = useStorageRef<string>(
   '',
   STORAGE_KEYS.mnemonic,
   {
+    isSecure: true,
     backgroundSync: true,
     migrations: [
       ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
       migrateMnemonicVuexToComposable,
+      // TODO pin: implement this migration
+      // migrateMnemonicToSecureStorage,
     ],
+    onRestored: () => {
+      isMnemonicRestored.value = true;
+    },
   },
 );
 
@@ -85,7 +97,7 @@ const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>(
 const mnemonicSeed = computed(() => mnemonic.value ? mnemonicToSeed(mnemonic.value) : null);
 
 const accounts = computed((): IAccount[] => {
-  if (!mnemonic.value || !accountsRaw.value?.length) {
+  if (!isMnemonicRestored.value || !mnemonic.value || !accountsRaw.value?.length) {
     return [];
   }
 
@@ -222,12 +234,50 @@ export function useAccounts() {
     setActiveAccountByProtocolAndIdx(protocol, account?.idx || 0);
   }
 
-  function setMnemonic(newMnemonic: string) {
+  /**
+   * Basically logs in the user
+   */
+  function setPasswordKey(key: IKey | null) {
+    passwordKey.value = key;
+  }
+
+  async function openLoginModal() {
+    const { openModal } = useModals();
+
+    await openModal<string>(MODAL_PASSWORD_LOGIN);
+    if (!passwordKey.value) {
+      throw new Error('passwordKey was not set after login.');
+    }
+  }
+
+  async function setPassword(newMnemonic: string, password: string) {
+    const key = await generateKey(password);
+    const encryptedMnemonic = await encrypt(key, newMnemonic);
+    WalletStorage.set(STORAGE_KEYS.mnemonic, encryptedMnemonic);
+
+    // Saved key needs to be generated from the password and the encrypted mnemonic
+    setPasswordKey(await generateKey(password, encryptedMnemonic));
+  }
+
+  async function openSetPasswordModal(newMnemonic: string, isRestored = false) {
+    const { openModal } = useModals();
+
+    const password = await openModal<string>(MODAL_SET_PASSWORD, {
+      isRestoredWallet: isRestored,
+    });
+
+    await setPassword(newMnemonic, password);
+  }
+
+  async function setMnemonic(newMnemonic: string, isRestored = false) {
+    if (!IS_MOBILE_APP) {
+      await openSetPasswordModal(newMnemonic, isRestored);
+    }
     mnemonic.value = newMnemonic;
   }
 
-  function setGeneratedMnemonic() {
-    setMnemonic(generateMnemonic());
+  async function setGeneratedMnemonic() {
+    await setMnemonic(generateMnemonic());
   }
 
   /**
@@ -272,6 +322,10 @@ export function useAccounts() {
     if (!composableInitialized) {
       composableInitialized = true;
 
+      if (!passwordKey.value && !IS_MOBILE_APP && await WalletStorage.get(STORAGE_KEYS.mnemonic)) {
+        await openLoginModal();
+      }
+
       await watchUntilTruthy(isLoggedIn);
 
       protocolLastActiveGlobalIdx
@@ -290,11 +344,14 @@ export function useAccounts() {
     activeAccount,
     activeAccountGlobalIdx,
     areAccountsRestored,
+    isMnemonicRestored,
     isLoggedIn,
     isActiveAccountAirGap,
     mnemonic,
+    passwordKey,
     mnemonicSeed,
     protocolsInUse,
+    openLoginModal,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
@@ -307,6 +364,7 @@ export function useAccounts() {
     setActiveAccountByProtocolAndIdx,
     setActiveAccountByProtocol,
     setMnemonic,
+    setPasswordKey,
     setGeneratedMnemonic,
     resetAccounts,
   };

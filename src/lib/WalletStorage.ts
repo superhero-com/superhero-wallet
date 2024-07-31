@@ -7,7 +7,7 @@ import {
 } from '@/constants';
 import { composeStorageKeys } from '@/utils';
 
-interface IWalletStorage {
+export interface IWalletStorage {
   set: (keys: StorageKeysInput, value: any) => Promise<void>;
   get: <T = Record<string, any>>(keys: StorageKeysInput) => Promise<T | null>;
   remove: (keys: StorageKeysInput) => Promise<void>;
