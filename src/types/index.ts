@@ -527,7 +527,6 @@ export interface ITransaction {
    */
   transactionOwner?: AccountAddress;
   tx: ITx;
-  type?: string;
   url?: string;
   isMultisig?: false; // TODO Consider merging the ITransaction with IActiveMultisigTransaction
 }
