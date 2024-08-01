@@ -51,7 +51,6 @@
             :to="{ name: 'about-terms' }"
             data-cy="terms"
             class="terms-of-use"
-            :class="{ agreed: termsAgreed }"
           >
             {{ $t('pages.index.termsAndConditions') }}
           </RouterLink>
@@ -213,24 +212,17 @@ export default defineComponent({
   }
 
   .terms-agreement {
+    @extend %face-sans-15-medium;
     @include mixins.flex(center, center);
 
     margin-bottom: 16px;
 
     .terms-of-use {
-      @extend %face-sans-15-regular;
-
-      color: rgba($color-white, 0.75);
       text-decoration: none;
       margin-left: 4px;
 
       &:hover {
-        color: $color-white;
         text-decoration: underline;
-      }
-
-      &.agreed {
-        color: white;
       }
     }
 

@@ -12,7 +12,10 @@
           scope="global"
         >
           <RouterLink :to="{ name: 'settings-seed-phrase' }">
-            seed phrase
+            {{ $t('pages.resetWallet.seedPhrase') }}
+          </RouterLink>
+          <RouterLink :to="{ name: ROUTE_ADDRESS_BOOK }">
+            {{ $t('pages.resetWallet.addressBook') }}
           </RouterLink>
         </i18n-t>
 
@@ -32,10 +35,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
+
 import { MODAL_RESET_WALLET } from '@/constants';
+import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
 import { useModals } from '@/composables';
-import BtnMain from '../components/buttons/BtnMain.vue';
-import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';
+
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+
+import ResetWalletIcon from '@/icons/reset-wallet.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -53,6 +60,7 @@ export default defineComponent({
     return {
       ResetWalletIcon,
       onResetWallet,
+      ROUTE_ADDRESS_BOOK,
     };
   },
 });
