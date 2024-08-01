@@ -27,6 +27,7 @@
         class="btn-help"
         :title="help.title"
         :msg="help.msg"
+        :full-screen="!!help.fullscreen"
         @help="$emit('help')"
       />
       <div
@@ -147,7 +148,7 @@ export default defineComponent({
       default: null,
     },
     help: {
-      type: Object as PropType<{ title: string; msg: string }>,
+      type: Object as PropType<{ title: string; msg: string; fullscreen: Boolean }>,
       default: null,
     },
     readonly: Boolean,

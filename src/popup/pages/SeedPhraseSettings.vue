@@ -19,17 +19,22 @@
           tag="p"
           class="text-description"
           scope="global"
-        >
-          <strong>
-            {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
-          </strong>
-        </i18n-t>
+        />
         <i18n-t
           keypath="pages.seed-phrase-settings.seedRecoverySmall-4"
           tag="p"
           class="text-description"
           scope="global"
-        />
+        >
+          <strong>
+            {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
+          </strong>
+        </i18n-t>
+        <p class="text-description">
+          <strong>
+            {{ $t('pages.seed-phrase-settings.seedRecoverySmall-5') }}
+          </strong>
+        </p>
         <BtnMain
           class="button"
           extend

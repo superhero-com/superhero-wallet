@@ -14,14 +14,28 @@
     </div>
 
     <div class="info">
-      <h3 class="text-heading-4 heading">
-        {{ $t('pages.resetWallet.title') }}?
-      </h3>
+      <h3
+        class="text-heading-4"
+        v-text="$t('pages.resetWallet.title')"
+      />
+      <p
+        class="text-description subtitle"
+        v-text="isResetPassword
+          ? $t('pages.resetWallet.subtitleResetPassword')
+          : $t('pages.resetWallet.subtitleResetWallet')"
+      />
       <div class="text-description">
-        <p>{{ $t('pages.resetWallet.warning1') }}</p>
-        <p>{{ $t('pages.resetWallet.warning2') }}</p>
-        <p>{{ $t('pages.resetWallet.warning3') }}</p>
-        <strong>{{ $t('pages.resetWallet.warningConfirm') }}</strong>
+        <p v-text="$t('pages.resetWallet.warning-1')" />
+        <p
+          v-text="isResetPassword
+            ? $t('pages.resetWallet.warning-2ResetPassword')
+            : $t('pages.resetWallet.warning-2ResetWallet')"
+        />
+        <p v-text="$t('pages.resetWallet.warning-3')" />
+        <p v-text="$t('pages.resetWallet.warning-4')" />
+        <p>
+          <strong v-text="$t('pages.resetWallet.warningConfirm')" />
+        </p>
       </div>
     </div>
 
@@ -54,11 +68,11 @@ import {
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 import { WalletStorage } from '@/lib/WalletStorage';
 
-import Modal from '../Modal.vue';
-import BtnMain from '../buttons/BtnMain.vue';
-import IconBoxed from '../IconBoxed.vue';
+import Modal from '@/popup/components/Modal.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import IconBoxed from '@/popup/components/IconBoxed.vue';
 
-import ResetWalletIcon from '../../../icons/reset-wallet.svg?vue-component';
+import ResetWalletIcon from '@/icons/reset-wallet.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -69,6 +83,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    isResetPassword: Boolean,
   },
   setup(props) {
     const router = useRouter();
@@ -78,7 +93,6 @@ export default defineComponent({
     const { disconnectDapps } = useAeSdk();
 
     async function onReset() {
-      props.resolve();
       resetAccounts();
       resetNetworks();
       resetUiSettings();
@@ -89,6 +103,7 @@ export default defineComponent({
       // It is removing the remaining vuex state
       await browser.storage.local.clear();
       await router.push({ name: ROUTE_INDEX });
+      props.resolve();
       window.location.reload();
     }
 
@@ -111,12 +126,8 @@ export default defineComponent({
     color: $color-danger;
   }
 
-  .info .text-description p {
-    margin-bottom: 8px;
-  }
-
-  .heading {
-    margin-bottom: 1em;
+  .subtitle {
+    margin-bottom: 20px;
   }
 }
 </style>
