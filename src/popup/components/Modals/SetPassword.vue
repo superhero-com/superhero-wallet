@@ -17,12 +17,20 @@
     </div>
 
     <div class="info">
-      <h3 class="text-heading-4 heading">
-        {{ $t('pages.secureLogin.setPassword.title') }}
-      </h3>
+      <h3
+        class="text-heading-4"
+        v-text="$t('pages.secureLogin.setPassword.title')"
+      />
       <div class="text-description">
-        <p>{{ $t('pages.secureLogin.setPassword.text') }}</p>
-        <p>{{ $t('pages.secureLogin.setPassword.text2') }}</p>
+        <p v-text="$t('pages.secureLogin.setPassword.text')" />
+        <p>
+          <TemplateRenderer
+            :str="isRestoredWallet
+              ? $t('pages.secureLogin.setPassword.textRestoredWallet')
+              : $t('pages.secureLogin.setPassword.text2')
+            "
+          />
+        </p>
       </div>
     </div>
 
@@ -35,7 +43,6 @@
           :validate-on-model-update="false || !!errors.password"
           name="password"
           :rules="{
-            required: true,
             password_min_len: 8,
           }"
         >
@@ -46,10 +53,11 @@
             class="password-input"
             :placeholder="$t('pages.secureLogin.setPassword.passwordPlaceholder')"
             :label="$t('pages.secureLogin.setPassword.passwordLabel')"
-            :message="errorMessage"
+            :message="errorMessage ?? errors.confirmPassword"
             :help="{
               title: $t('pages.secureLogin.setPassword.help.title'),
               msg: $t('pages.secureLogin.setPassword.help.text'),
+              fullscreen: true,
             }"
             show-password-strength
           />
@@ -59,7 +67,6 @@
           key="confirmPassword"
           name="confirmPassword"
           :rules="{
-            required: true,
             passwords_match: password,
           }"
         >
@@ -95,7 +102,6 @@
 </template>
 
 <script lang="ts">
-// TODO pin: update according to design
 import { defineComponent, PropType, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 import type { RejectCallback, ResolveCallback } from '@/types';
@@ -104,6 +110,7 @@ import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 
 import LockIcon from '@/icons/lock.svg?vue-component';
 
@@ -111,6 +118,7 @@ export default defineComponent({
   components: {
     Modal,
     IconBoxed,
+    TemplateRenderer,
     InputPassword,
     BtnMain,
     Form,
@@ -124,6 +132,9 @@ export default defineComponent({
     const password = ref('');
     const confirmPassword = ref('');
 
+    // TODO pin: get dynamically
+    const isRestoredWallet = false;
+
     function onSubmit() {
       props.resolve(password.value);
     }
@@ -131,6 +142,7 @@ export default defineComponent({
     return {
       password,
       confirmPassword,
+      isRestoredWallet,
       onSubmit,
       LockIcon,
     };
@@ -143,15 +155,17 @@ export default defineComponent({
 
 .set-password {
   .info {
+    margin-top: 8px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
   }
 
   .inputs {
     width: 100%;
 
     .btn-main {
-      // TODO pin: update according to design
-      margin-top: 20px;
+      margin-top: 48px;
     }
   }
 }
