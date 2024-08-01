@@ -654,29 +654,33 @@
         "part1": "Superhero Wallet supports secure login with your mobile device authentication preferences.",
         "part2": "Your mobile device does not have secure authentication enabled currently. Would you like to enable it now?"
       },
-      "unsupportedDevice": "This feature is currently not supported by the Superhero Wallet browser extension. {'<'}br /{'>'} {'<'}br /{'>'} Secure login is available only to the users of Superhero Wallet mobile apps at the moment.",
       "walletLocked": "Wallet locked",
       "walletLockedSubtitle": "Tap on the screen to login!",
+      "enterPassword": "Enter password",
+      "toUnlock": "to unlock your wallet",
       "authFailed": "Authentication failed",
       "authFailedSubtitle": "Tap on the screen to try again!",
       "setPassword": {
         "title": "Set a password",
-        "text": "You will use it to unlock your wallet.",
-        "text2": "Choose a strong password and make sure you remember it or securely back it up.",
+        "text": "to securely access your wallet",
+        "text2": "Choose a strong password and make sure you remember it or back it up safely.",
+        "textRestoredWallet": "Superhero Wallet has been updated to v.2.3.0 introducing increased level of security. {'<'}br /{'>'} {'<'}br /{'>'} You need to set a password to continue using your wallet. Chose a strong one and make sure you remember it or back it up safely.",
         "passwordLabel": "Password",
         "passwordPlaceholder": "Enter strong password",
         "confirmLabel": "Confirm password",
         "confirmPlaceholder": "Repeat the password you chose",
         "confirm": "Continue to wallet",
         "help": {
-          "title": "Remember your password",
-          "text": "in order to not lose access to your wallet {'<'}br /{'>'} {'<'}br /{'>'} If you forget your password the only way to access Superhero Wallet on this device will be to reset the extension and use your seed phrase to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} It is important to remember your password and back up the secret seed phrase you will be provided."
+          "title": "Set a password",
+          "text": "to securely access Superhero Wallet {'<'}br /{'>'} {'<'}br /{'>'} Superhero Wallet stores your seed phrase securely encrypted in the local storage. {'<'}br /{'>'} That’s why you need to set a password that will be used to unlock your wallet. {'<'}br /{'>'} {'<'}br /{'>'} If you forget the password the only way to access your wallet and funds will be to use the seed phrase (a mnemonic consisting of 12 words) in order to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} That is the reason why it is very important to remember your password and even more important to back up the seed phrase as soon as your wallet is created."
         }
       },
       "login": {
+        "error": "The password you entered is incorrect.",
         "placeholder": "Enter your password",
         "label": "Password",
-        "login": "Login"
+        "unlock": "Unlock",
+        "forgot": "Forgot password?"
       }
     },
     "about": {
@@ -901,10 +905,11 @@
     "seed-phrase-settings": {
       "verifyYourSeedPhrase": "Verify your seed phrase!",
       "compose-your-seed-phrase": "Tap the words below {0} to compose your seed phrase.",
-      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as password to access and restore your wallet accounts.",
-      "seedRecoverySmall-2": "Never disclose this to anyone.",
-      "seedRecoverySmall-3": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
-      "seedRecoverySmall-4": "Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
+      "seedRecoverySmall": "Your secret recovery phrase (seed phrase) is a mnemonic consisting of 12 words that allows you to restore and access your wallet accounts on any device.",
+      "seedRecoverySmall-2": "Superhero Wallet stores your seed phrase securely encrypted in the local storage.",
+      "seedRecoverySmall-3": "Never disclose the seed phrase to anyone!",
+      "seedRecoverySmall-4": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
+      "seedRecoverySmall-5": "Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
       "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "copy": "Copy to clipboard",
@@ -1134,10 +1139,16 @@
     "resetWallet": {
       "title": "Reset wallet",
       "description": "This action will remove all accounts from your wallet and delete the local storage.",
-      "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
-      "warning1": "This action will remove all accounts from your wallet and delete the local storage.",
-      "warning2": "Please back up your seed phrase and export your address book records before proceeding.",
-      "warning3": "This action cannot be undone!",
+      "description2": "Make sure you have backed up your {0} and {1} records before proceeding. This action cannot be undone!",
+      "seedPhrase": "seed phrase",
+      "addressBook": "address book",
+      "subtitleResetPassword": "to set a new password",
+      "subtitleResetWallet": "Back it up before proceeding.",
+      "warning-1": "This action will remove all accounts from your wallet and will delete the local storage.",
+      "warning-2ResetPassword": "If you have forgotten your password the only way to restore your accounts will be to use the seed phrase.",
+      "warning-2ResetWallet": "The only way to restore your accounts will be to use the seed phrase or the encrypted private key and your password.",
+      "warning-3": "Make sure you backup your seed phrase and address book records before proceeding.",
+      "warning-4": "This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
     },
