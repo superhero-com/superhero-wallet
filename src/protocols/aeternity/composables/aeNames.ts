@@ -6,12 +6,9 @@ import {
 } from 'vue';
 import type {
   ChainName,
-  IName,
   ITransaction,
   NetworkId,
   IAddressNamePair,
-  IAuction,
-  IAuctionBid,
   AccountAddress,
 } from '@/types';
 import {
@@ -37,6 +34,7 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import type { IAuction, IAuctionBid, IName } from '@/protocols/aeternity/types';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from './aeNetworkSettings';

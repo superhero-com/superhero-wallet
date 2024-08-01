@@ -1,7 +1,17 @@
 /* eslint-disable camelcase */
 
-import { Contract, ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk';
-import type { AccountAddress, INetworkProtocolSettings } from '@/types';
+import BigNumber from 'bignumber.js';
+import {
+  AensName,
+  Contract,
+  ContractMethodsBase,
+  Encoded,
+} from '@aeternity/aepp-sdk';
+import type {
+  AccountAddress,
+  INetworkProtocolSettings,
+  TxArguments,
+} from '@/types';
 
 /**
  * Settings specific to this protocol.
@@ -20,6 +30,64 @@ export type AeNetworkProtocolPredefinedSettings =
 export type IAeNetworkSettings = INetworkProtocolSettings<AeNetworkProtocolSettings>;
 
 export type IAeNetworkPredefinedSettings = Record<AeNetworkProtocolPredefinedSettings, string>;
+
+export type NamePointers = Record<string, string>;
+
+export interface IAETx {
+  aexnType?: 'aex9';
+  arguments?: TxArguments[];
+  callData?: Encoded.ContractBytearray;
+  call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
+  code?: Encoded.ContractBytearray;
+  gaId?: string; // Generalized Account ID
+  log?: any[]; // TODO find source
+  name?: any;
+  nameFee?: number;
+  nameId?: any;
+  nameSalt?: string;
+  pointers?: NamePointers;
+  VSN?: string;
+}
+
+export interface IName {
+  autoExtend: boolean;
+  createdAtHeight: number;
+  expiresAt: number;
+  hash: string;
+  name: AensName;
+  owner: string;
+  pending: Boolean;
+  pointers: NamePointers;
+}
+
+export interface IAuctionBid {
+  accountId: string;
+  nameFee: BigNumber;
+}
+
+export interface IAuction {
+  bids: IAuctionBid[];
+  expiration: number;
+}
+
+export interface INameAuctionBid {
+  accountId: string;
+  fee: number;
+  name: string;
+  nameFee: string;
+  nameId: string;
+  nameSalt: number;
+  nonce: number;
+  ttl: number;
+  type: string;
+  version: number;
+}
+
+export interface INameAuction {
+  expiration: number;
+  lastBid: INameAuctionBid;
+  name: string;
+}
 
 export interface AeTippingV1ContractApi extends ContractMethodsBase {
   unclaimed_for_url: (url: string) => string;

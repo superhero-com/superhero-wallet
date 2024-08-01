@@ -48,11 +48,12 @@ import { useI18n } from 'vue-i18n';
 import type {
   IFilters,
   IFilterInputPayload,
-  INameAuction,
   ObjectValues,
 } from '@/types';
 import { fetchAllPages } from '@/utils';
 import { useTopHeaderData } from '@/composables';
+
+import type { INameAuction } from '@/protocols/aeternity/types';
 import { getAeFee } from '@/protocols/aeternity/helpers';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 

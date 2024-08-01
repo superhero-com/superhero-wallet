@@ -28,9 +28,9 @@
 import { defineComponent, PropType } from 'vue';
 import { RouteLocationNamedRaw } from 'vue-router';
 
-import type { INameAuction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { blocksToRelativeTime } from '@/utils';
+import type { INameAuction } from '@/protocols/aeternity/types';
 import { getAeFee } from '@/protocols/aeternity/helpers';
 
 import TokenAmount from '@/popup/components/TokenAmount.vue';

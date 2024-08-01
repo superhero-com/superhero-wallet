@@ -148,7 +148,7 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IName, IPopupMessageData } from '@/types';
+import { IPopupMessageData } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
@@ -168,10 +168,12 @@ import {
   useModals,
   useTopHeaderData,
 } from '@/composables';
+
+import type { IName } from '@/protocols/aeternity/types';
+import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
 import InputField from './InputField.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
