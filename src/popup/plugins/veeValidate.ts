@@ -119,7 +119,7 @@ defineRule(
 
 defineRule(
   'passwords_match',
-  (value: string, [arg]: [string]) => (value === arg) || tg('validation.passwordsMatch'),
+  (value: string, [arg]: [string]) => (!arg || value === arg) || tg('validation.passwordsMatch'),
 );
 
 defineRule(

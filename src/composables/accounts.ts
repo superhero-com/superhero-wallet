@@ -25,6 +25,7 @@ import {
 } from '@/constants';
 import {
   createCallbackRegistry,
+  decrypt,
   encrypt,
   excludeFalsy,
   generateKey,
@@ -235,7 +236,7 @@ export function useAccounts() {
   }
 
   /**
-   * Basically logs in the user
+   * Setting/Resetting the password key logs the user in/out.
    */
   function setPasswordKey(key: IKey | null) {
     passwordKey.value = key;
@@ -257,6 +258,17 @@ export function useAccounts() {
 
     // Saved key needs to be generated from the password and the encrypted mnemonic
     setPasswordKey(await generateKey(password, encryptedMnemonic));
+  }
+
+  async function updatePassword(currentPassword: string, newPassword: string) {
+    const encryptedMnemonic = await WalletStorage.get<string>(STORAGE_KEYS.mnemonic) || undefined;
+    const key = await generateKey(currentPassword, encryptedMnemonic);
+    const decryptedMnemonic = await decrypt(key, encryptedMnemonic!);
+    if (decryptedMnemonic) {
+      await setPassword(decryptedMnemonic, newPassword);
+    } else {
+      throw new Error('Incorrect password.');
+    }
   }
 
   async function openSetPasswordModal(newMnemonic: string, isRestored = false) {
@@ -365,6 +377,7 @@ export function useAccounts() {
     setActiveAccountByProtocol,
     setMnemonic,
     setPasswordKey,
+    updatePassword,
     setGeneratedMnemonic,
     resetAccounts,
   };
