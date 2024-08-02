@@ -42,91 +42,93 @@
             </RadioButton>
           </div>
         </div>
-        <hr v-if="!IS_MOBILE_APP">
-        <div class="options">
-          <div class="options-info">
-            <span class="options-label" v-text="$t('pages.secureLogin.changePassword.title')" />
-            <span class="options-description" v-text="$t('pages.secureLogin.changePassword.description')" />
-          </div>
-          <div class="inputs">
-            <div class="current-password">
-              <InputPassword
-                v-model="currentPassword"
-                data-cy="currentPassword"
-                :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
-                :label="$t('pages.secureLogin.changePassword.currentPassword')"
-                :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
-                @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
+        <template v-if="!IS_MOBILE_APP">
+          <hr>
+          <div class="options">
+            <div class="options-info">
+              <span class="options-label" v-text="$t('pages.secureLogin.changePassword.title')" />
+              <span class="options-description" v-text="$t('pages.secureLogin.changePassword.description')" />
+            </div>
+            <div class="inputs">
+              <div class="current-password">
+                <InputPassword
+                  v-model="currentPassword"
+                  data-cy="currentPassword"
+                  :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
+                  :label="$t('pages.secureLogin.changePassword.currentPassword')"
+                  :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
+                  @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
+                />
+              </div>
+
+              <Form
+                v-slot="{ errors, handleSubmit, resetForm }"
+                class="new-password"
+              >
+                <Field
+                  v-slot="{ field, errorMessage }"
+                  key="newPassword"
+                  name="newPassword"
+                  :validate-on-blur="true"
+                  :validate-on-model-update="!!errors.password"
+                  :rules="{
+                    password_min_len: 8,
+                  }"
+                >
+                  <InputPassword
+                    v-bind="field"
+                    v-model="newPassword"
+                    data-cy="newPassword"
+                    :placeholder="$t('pages.secureLogin.changePassword.newPasswordPlaceholder')"
+                    :label="$t('pages.secureLogin.changePassword.newPassword')"
+                    :message="errorMessage ?? errors.confirmNewPassword"
+                    show-password-strength
+                  />
+                </Field>
+                <Field
+                  v-slot="{ field, errorMessage }"
+                  key="confirmNewPassword"
+                  name="confirmNewPassword"
+                  :rules="{
+                    passwords_match: newPassword,
+                  }"
+                >
+                  <InputPassword
+                    v-bind="field"
+                    v-model="confirmNewPassword"
+                    data-cy="confirmNewPassword"
+                    :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
+                    :label="$t('pages.secureLogin.changePassword.confirmNewPassword')"
+                    :message="errorMessage"
+                    hide-eye-icon
+                  />
+                </Field>
+
+                <BtnMain
+                  class="btn-main"
+                  variant="primary"
+                  extend
+                  :disabled="(
+                    !newPassword
+                    || !currentPassword
+                    || !confirmNewPassword
+                    || !!errors.newPassword
+                    || !!errors.confirmNewPassword
+                  )"
+                  :text="$t('pages.secureLogin.changePassword.reset')"
+                  @click="handleSubmit($event, setNewPassword).then(resetForm)"
+                />
+              </Form>
+              <InfoBox
+                v-if="isPasswordChangedSuccessfully"
+                ref="infoBoxEl"
+                class="info-box"
+                type="success"
+                :text="$t('pages.secureLogin.changePassword.success')"
               />
             </div>
-
-            <Form
-              v-slot="{ errors, handleSubmit, resetForm }"
-              class="new-password"
-            >
-              <Field
-                v-slot="{ field, errorMessage }"
-                key="newPassword"
-                name="newPassword"
-                :validate-on-blur="true"
-                :validate-on-model-update="!!errors.password"
-                :rules="{
-                  password_min_len: 8,
-                }"
-              >
-                <InputPassword
-                  v-bind="field"
-                  v-model="newPassword"
-                  data-cy="newPassword"
-                  :placeholder="$t('pages.secureLogin.changePassword.newPasswordPlaceholder')"
-                  :label="$t('pages.secureLogin.changePassword.newPassword')"
-                  :message="errorMessage ?? errors.confirmNewPassword"
-                  show-password-strength
-                />
-              </Field>
-              <Field
-                v-slot="{ field, errorMessage }"
-                key="confirmNewPassword"
-                name="confirmNewPassword"
-                :rules="{
-                  passwords_match: newPassword,
-                }"
-              >
-                <InputPassword
-                  v-bind="field"
-                  v-model="confirmNewPassword"
-                  data-cy="confirmNewPassword"
-                  :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
-                  :label="$t('pages.secureLogin.changePassword.confirmNewPassword')"
-                  :message="errorMessage"
-                  hide-eye-icon
-                />
-              </Field>
-
-              <BtnMain
-                class="btn-main"
-                variant="primary"
-                extend
-                :disabled="(
-                  !newPassword
-                  || !currentPassword
-                  || !confirmNewPassword
-                  || !!errors.newPassword
-                  || !!errors.confirmNewPassword
-                )"
-                :text="$t('pages.secureLogin.changePassword.reset')"
-                @click="handleSubmit($event, setNewPassword).then(resetForm)"
-              />
-            </Form>
-            <InfoBox
-              v-if="isPasswordChangedSuccessfully"
-              ref="infoBoxEl"
-              class="info-box"
-              type="success"
-              :text="$t('pages.secureLogin.changePassword.success')"
-            />
           </div>
-        </div>
+        </template>
       </div>
     </IonContent>
   </IonPage>

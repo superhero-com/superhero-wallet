@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 
 import type {
   AccountAddress,
@@ -60,8 +60,6 @@ const mnemonic = useStorageRef<string>(
     migrations: [
       ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
       migrateMnemonicVuexToComposable,
-      // TODO pin: implement this migration
-      // migrateMnemonicToSecureStorage,
     ],
     onRestored: () => {
       isMnemonicRestored.value = true;
@@ -283,13 +281,17 @@ export function useAccounts() {
 
   async function setMnemonic(newMnemonic: string, isRestored = false) {
     if (!IS_MOBILE_APP) {
-      await openSetPasswordModal(newMnemonic, isRestored);
+      await openSetPasswordModal(newMnemonic, isRestored).catch(() => {
+        throw new Error('Password was not set.');
+      });
     }
     mnemonic.value = newMnemonic;
   }
 
   async function setGeneratedMnemonic() {
-    await setMnemonic(generateMnemonic());
+    await setMnemonic(generateMnemonic()).catch(() => {
+      throw new Error('Mnemonic was not set.');
+    });
   }
 
   /**
@@ -333,8 +335,14 @@ export function useAccounts() {
   (async () => {
     if (!composableInitialized) {
       composableInitialized = true;
-
-      if (!passwordKey.value && !IS_MOBILE_APP && await WalletStorage.get(STORAGE_KEYS.mnemonic)) {
+      const storedMnemonic = await WalletStorage.get(STORAGE_KEYS.mnemonic);
+      if (
+        !passwordKey.value
+        && !IS_MOBILE_APP
+        // If the mnemonic is stored but is not valid as plaintext
+        // it means that user is trying to access an existing & encrypted wallet
+        && storedMnemonic && !validateMnemonic(storedMnemonic)
+      ) {
         await openLoginModal();
       }
 

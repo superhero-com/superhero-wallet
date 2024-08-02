@@ -129,13 +129,18 @@ export default defineComponent({
       }
 
       discovering.value = true;
-      await setMnemonic(mnemonicParsed);
-      setBackedUpSeed(true);
-      await discoverAccounts();
-      props.resolve();
-      router.push(loginTargetLocation.value);
-      openEnableBiometricLoginModal();
-      discovering.value = false;
+      try {
+        await setMnemonic(mnemonicParsed);
+        setBackedUpSeed(true);
+        await discoverAccounts();
+        props.resolve();
+        router.push(loginTargetLocation.value);
+        openEnableBiometricLoginModal();
+        discovering.value = false;
+      } catch {
+        error.value = t('pages.index.passwordWasNotSet');
+        discovering.value = false;
+      }
     }
 
     async function scanAccountQrCode() {

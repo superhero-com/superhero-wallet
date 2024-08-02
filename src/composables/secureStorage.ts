@@ -15,7 +15,7 @@ export const useSecureStorage = createCustomScopedComposable(() => {
 
   const { passwordKey } = useAccounts();
 
-  const isLoggedIn = computed(() => passwordKey.value || IS_MOBILE_APP);
+  const isLoggedIn = computed(() => !!passwordKey.value || IS_MOBILE_APP);
 
   async function init(newPasswordKey: IKey | null) {
     if (IS_MOBILE_APP) {

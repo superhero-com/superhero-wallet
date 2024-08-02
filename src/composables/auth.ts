@@ -76,12 +76,13 @@ export const useAuth = createCustomScopedComposable(() => {
       } catch (error) {
         return Promise.reject(error);
       }
-    } else {
+    } else if (!IS_MOBILE_APP) {
       return authenticateWithPassword(password!).then((key) => {
         setPasswordKey(key);
         isAuthenticated.value = true;
       });
     }
+    return Promise.resolve();
   }
 
   function logout() {
@@ -92,7 +93,7 @@ export const useAuth = createCustomScopedComposable(() => {
   async function openSecureLoginModal() {
     if (!isAuthenticating.value && !isAuthenticated.value && isLoggedIn.value) {
       isAuthenticating.value = true;
-      if (isBiometricLoginEnabled.value) {
+      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
         await openModal(MODAL_SECURE_LOGIN);
       } else if (!IS_MOBILE_APP && !passwordKey.value) {
         await openLoginModal();

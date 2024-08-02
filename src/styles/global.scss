@@ -271,6 +271,13 @@ hr {
     }
   }
 
+  &-subheading {
+    @extend %face-sans-16-medium;
+    color: rgba($color-white, 0.75);
+    white-space: pre-line;
+    margin-bottom: 12px;
+  }
+
   &-muted {
     color: rgba($color-white, 0.75);
   }
