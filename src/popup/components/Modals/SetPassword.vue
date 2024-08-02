@@ -20,16 +20,17 @@
         class="text-heading-4"
         v-text="$t('pages.secureLogin.setPassword.title')"
       />
+      <p class="text-subheading" v-text="$t('pages.secureLogin.setPassword.text')" />
       <div class="text-description">
-        <p v-text="$t('pages.secureLogin.setPassword.text')" />
-        <p>
-          <TemplateRenderer
-            :str="isRestoredWallet
-              ? $t('pages.secureLogin.setPassword.textRestoredWallet')
-              : $t('pages.secureLogin.setPassword.text2')
-            "
-          />
-        </p>
+        <p
+          v-text="isRestoredWallet
+            ? $t('pages.secureLogin.setPassword.textRestoredWallet-1', [extensionVersion])
+            : $t('pages.secureLogin.setPassword.text-2')"
+        />
+        <p
+          v-if="isRestoredWallet"
+          v-text="$t('pages.secureLogin.setPassword.textRestoredWallet-2')"
+        />
       </div>
     </div>
 
@@ -108,7 +109,6 @@ import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
-import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 
 import LockIcon from '@/icons/lock.svg?vue-component';
 
@@ -116,7 +116,6 @@ export default defineComponent({
   components: {
     Modal,
     IconBoxed,
-    TemplateRenderer,
     InputPassword,
     BtnMain,
     Form,
@@ -125,13 +124,11 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    isRestoredWallet: Boolean,
   },
   setup(props) {
     const password = ref('');
     const confirmPassword = ref('');
-
-    // TODO pin: get dynamically
-    const isRestoredWallet = false;
 
     function onSubmit() {
       props.resolve(password.value);
@@ -140,7 +137,7 @@ export default defineComponent({
     return {
       password,
       confirmPassword,
-      isRestoredWallet,
+      extensionVersion: process.env.npm_package_version,
       onSubmit,
       LockIcon,
     };

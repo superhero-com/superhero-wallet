@@ -66,7 +66,7 @@ RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
   // Wait until the mnemonic is restored (decrypted), if it exists
-  if (await WalletStorage.get(STORAGE_KEYS.mnemonic)) {
+  if (await WalletStorage.get(STORAGE_KEYS.mnemonic) || IS_MOBILE_APP) {
     console.log('[beforeEach] waiting for isMnemonicRestored');
     await watchUntilTruthy(isMnemonicRestored);
     console.log('[beforeEach] isMnemonicRestored true');

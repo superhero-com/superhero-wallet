@@ -1,7 +1,10 @@
 import { Ref, ref, watch } from 'vue';
 import type { Migration, StorageKey } from '@/types';
 import { asyncPipe, watchUntilTruthy } from '@/utils';
+import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
+import migrateMnemonicToSecureStorage from '@/migrations/009-mnemonic-to-secure-storage';
+
 import { useSecureStorage } from './secureStorage';
 
 interface ICreateStorageRefOptions<T> {
@@ -65,17 +68,37 @@ export function useStorageRef<T = string | object | any[]>(
   // Restore state and run watchers
   (async () => {
     if (isSecure) {
+      // Check if value exists in insecure storage and migrate it to secure storage
+      let unencryptedValue = await WalletStorage.get<T | null>(storageKey);
+      if (storageKey === STORAGE_KEYS.mnemonic) {
+        unencryptedValue = await migrateMnemonicToSecureStorage(unencryptedValue!);
+      }
+      if (unencryptedValue !== null) {
+        onRestored?.(unencryptedValue);
+        setLocalState(unencryptedValue);
+      }
+
+      // Create secure storage after we've migrated the mnemonic and set the password
       const { secureStorage, isLoggedIn } = useSecureStorage();
       await watchUntilTruthy(secureStorage);
       storage = secureStorage.value!;
 
-      // TODO pin: Check how we can not break the app
-      // ? Clear the state when the user logs out
-      // ? This ensures that the state is not leaked if someone removes the modal from the DOM
-      // ? But breaks the app while waiting for the user to log in
+      // Move the unencrypted value to secure storage and remove it from insecure storage
+      if (IS_MOBILE_APP && unencryptedValue !== null) {
+        setStorageState(unencryptedValue);
+        WalletStorage.remove(storageKey);
+      }
+
+      /**
+       * Clear the state when the user logs out.
+       * This ensures that the state is not leaked if someone removes the modal from the DOM.
+       *
+       * TODO This breaks the UI behind the modal while user is logged out
+       * because the state is not restored yet.
+       */
       watch(isLoggedIn, async (val) => {
         if (!val) {
-          state.value = initialState;
+          setLocalState(initialState);
         } else {
           const restoredValue = await storage?.get<T | null>(storageKey);
           onRestored?.(restoredValue!);

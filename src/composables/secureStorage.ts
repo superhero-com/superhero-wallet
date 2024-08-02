@@ -12,7 +12,7 @@ export const useSecureStorage = createCustomScopedComposable(() => {
 
   const { passwordKey } = useAccounts();
 
-  const isLoggedIn = computed(() => passwordKey.value || IS_MOBILE_APP);
+  const isLoggedIn = computed(() => !!passwordKey.value || IS_MOBILE_APP);
 
   async function init() {
     if (IS_MOBILE_APP) {

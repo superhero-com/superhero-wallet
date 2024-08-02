@@ -4,7 +4,7 @@ import {
   ref,
 } from 'vue';
 import { uniq } from 'lodash-es';
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 import CryptoJS from 'crypto-js';
 
 import type {
@@ -65,10 +65,9 @@ const mnemonic = useStorageRef<string>(
     migrations: [
       ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
       migrateMnemonicVuexToComposable,
-      // TODO pin: implement this migration
-      // migrateMnemonicToSecureStorage,
     ],
-    onRestored: () => {
+    onRestored: (val) => {
+      console.log('Mnemonic restored:', val);
       isMnemonicRestored.value = true;
     },
   },
@@ -279,15 +278,19 @@ export function useAccounts() {
     }
   }
 
-  async function openSetPasswordModal(newMnemonic: string) {
+  async function openSetPasswordModal(newMnemonic: string, isRestored = false) {
     const { openModal } = useModals();
-    const password = await openModal<string>(MODAL_SET_PASSWORD);
+    const password = await openModal<string>(MODAL_SET_PASSWORD, {
+      isRestoredWallet: isRestored,
+    });
 
     setPassword(newMnemonic, password);
   }
 
-  async function setMnemonic(newMnemonic: string) {
-    await openSetPasswordModal(newMnemonic);
+  async function setMnemonic(newMnemonic: string, isRestored = false) {
+    if (!IS_MOBILE_APP) {
+      await openSetPasswordModal(newMnemonic, isRestored);
+    }
     mnemonic.value = newMnemonic;
   }
 
@@ -336,8 +339,14 @@ export function useAccounts() {
   (async () => {
     if (!composableInitialized) {
       composableInitialized = true;
-
-      if (!passwordKey.value && !IS_MOBILE_APP && await WalletStorage.get(STORAGE_KEYS.mnemonic)) {
+      const storedMnemonic = await WalletStorage.get(STORAGE_KEYS.mnemonic);
+      if (
+        !passwordKey.value
+        && !IS_MOBILE_APP
+        // If the mnemonic is stored but is not valid as plaintext
+        // it means that user is trying to access an existing & encrypted wallet
+        && storedMnemonic && !validateMnemonic(storedMnemonic)
+      ) {
         await openLoginModal();
       }
 
