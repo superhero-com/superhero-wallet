@@ -1,8 +1,13 @@
 import { Ref, ref, watch } from 'vue';
+import { validateMnemonic } from '@aeternity/bip39';
+
 import type { Migration, StorageKey } from '@/types';
 import { asyncPipe, watchUntilTruthy } from '@/utils';
+import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
+
 import { useSecureStorage } from './secureStorage';
+import { useAccounts } from './accounts';
 
 interface ICreateStorageRefOptions<T> {
   /**
@@ -62,20 +67,56 @@ export function useStorageRef<T = string | object | any[]>(
     storage?.set(storageKey, (val && serializer?.write) ? serializer.write(val) : val);
   }
 
+  /**
+   * Move mnemonic from insecure storage to secure storage.
+   * This is an exception for the mnemonic because it's a key part of the password feature.
+   */
+  async function moveMnemonicToSecureStorage(mnemonic: T) {
+    if (mnemonic) {
+      if (validateMnemonic(mnemonic)) {
+        const { setMnemonic } = useAccounts();
+
+        await setMnemonic(mnemonic as string, true);
+        return mnemonic;
+      }
+    }
+    return null;
+  }
+
   // Restore state and run watchers
   (async () => {
     if (isSecure) {
+      // Check if value exists in insecure storage and migrate it to secure storage
+      let unencryptedValue = await WalletStorage.get<T | null>(storageKey);
+      if (storageKey === STORAGE_KEYS.mnemonic) {
+        unencryptedValue = await moveMnemonicToSecureStorage(unencryptedValue!);
+      }
+      if (unencryptedValue !== null) {
+        onRestored?.(unencryptedValue);
+        setLocalState(unencryptedValue);
+      }
+
+      // Create secure storage after we've migrated the mnemonic and set the password
       const { secureStorage, isLoggedIn } = useSecureStorage();
       await watchUntilTruthy(secureStorage);
       storage = secureStorage.value!;
 
-      // TODO pin: Check how we can not break the app
-      // ? Clear the state when the user logs out
-      // ? This ensures that the state is not leaked if someone removes the modal from the DOM
-      // ? But breaks the app while waiting for the user to log in
+      // Move the unencrypted value to secure storage and remove it from insecure storage
+      if (IS_MOBILE_APP && unencryptedValue !== null) {
+        setStorageState(unencryptedValue);
+        WalletStorage.remove(storageKey);
+      }
+
+      /**
+       * Clear the state when the user logs out.
+       * This ensures that the state is not leaked if someone removes the modal from the DOM.
+       *
+       * TODO This breaks the UI behind the modal while user is logged out
+       * because the state is not restored yet.
+       */
       watch(isLoggedIn, async (val) => {
         if (!val) {
-          state.value = initialState;
+          setLocalState(initialState);
         } else {
           const restoredValue = storage?.get<T | null>(storageKey);
           onRestored?.(restoredValue!);

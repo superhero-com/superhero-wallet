@@ -2,9 +2,9 @@
   <Modal
     class="set-password"
     from-bottom
-    has-close-button
+    :has-close-button="!isRestoredWallet"
     centered
-    @close="resolve"
+    @close="handleClose()"
   >
     <div class="icon-wrapper">
       <IconBoxed
@@ -21,21 +21,22 @@
         class="text-heading-4"
         v-text="$t('pages.secureLogin.setPassword.title')"
       />
+      <p class="text-subheading" v-text="$t('pages.secureLogin.setPassword.text')" />
       <div class="text-description">
-        <p v-text="$t('pages.secureLogin.setPassword.text')" />
-        <p>
-          <TemplateRenderer
-            :str="isRestoredWallet
-              ? $t('pages.secureLogin.setPassword.textRestoredWallet')
-              : $t('pages.secureLogin.setPassword.text2')
-            "
-          />
-        </p>
+        <p
+          v-text="isRestoredWallet
+            ? $t('pages.secureLogin.setPassword.textRestoredWallet-1', [extensionVersion])
+            : $t('pages.secureLogin.setPassword.text-2')"
+        />
+        <p
+          v-if="isRestoredWallet"
+          v-text="$t('pages.secureLogin.setPassword.textRestoredWallet-2')"
+        />
       </div>
     </div>
 
     <div class="inputs">
-      <Form v-slot="{ errors, handleSubmit }">
+      <Form v-slot="{ errors, handleSubmit }" class="inputs-form">
         <Field
           v-slot="{ field, errorMessage }"
           key="password"
@@ -110,7 +111,6 @@ import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
-import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 
 import LockIcon from '@/icons/lock.svg?vue-component';
 
@@ -118,7 +118,6 @@ export default defineComponent({
   components: {
     Modal,
     IconBoxed,
-    TemplateRenderer,
     InputPassword,
     BtnMain,
     Form,
@@ -127,23 +126,28 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    isRestoredWallet: Boolean,
   },
   setup(props) {
     const password = ref('');
     const confirmPassword = ref('');
 
-    // TODO pin: get dynamically
-    const isRestoredWallet = false;
-
     function onSubmit() {
       props.resolve(password.value);
+    }
+
+    function handleClose() {
+      if (!props.isRestoredWallet) {
+        props.reject();
+      }
     }
 
     return {
       password,
       confirmPassword,
-      isRestoredWallet,
+      extensionVersion: process.env.npm_package_version,
       onSubmit,
+      handleClose,
       LockIcon,
     };
   },
@@ -163,9 +167,16 @@ export default defineComponent({
 
   .inputs {
     width: 100%;
+    margin-top: 4px;
+
+    .inputs-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
     .btn-main {
-      margin-top: 48px;
+      margin-top: 40px;
     }
   }
 }
