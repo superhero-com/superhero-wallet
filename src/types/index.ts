@@ -477,7 +477,6 @@ export type ITx<T extends Record<string, any> = IAETx> = T & {
   ownerId?: AccountAddress;
   payerId?: string;
   payload?: Encoded.Bytearray;
-  result?: string;
   return?: TxArguments;
   returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string;
