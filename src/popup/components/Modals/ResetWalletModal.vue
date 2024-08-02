@@ -19,7 +19,7 @@
         v-text="$t('pages.resetWallet.title')"
       />
       <p
-        class="text-description subtitle"
+        class="text-subheading"
         v-text="isResetPassword
           ? $t('pages.resetWallet.subtitleResetPassword')
           : $t('pages.resetWallet.subtitleResetWallet')"
