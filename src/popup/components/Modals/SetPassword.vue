@@ -35,13 +35,13 @@
     </div>
 
     <div class="inputs">
-      <Form v-slot="{ errors, handleSubmit }" @submit="null">
+      <Form v-slot="{ errors, handleSubmit }">
         <Field
           v-slot="{ field, errorMessage }"
           key="password"
-          :validate-on-blur="true"
-          :validate-on-model-update="false || !!errors.password"
           name="password"
+          :validate-on-blur="true"
+          :validate-on-model-update="!!errors.password"
           :rules="{
             password_min_len: 8,
           }"

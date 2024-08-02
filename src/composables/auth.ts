@@ -6,7 +6,7 @@ import {
 } from 'vue';
 
 import { tg as t } from '@/popup/plugins/i18n';
-import { IS_MOBILE_APP, MODAL_ENABLE_SECURE_LOGIN, MODAL_SECURE_LOGIN } from '@/constants';
+import { IS_MOBILE_APP, MODAL_ENABLE_BIOMETRIC_LOGIN, MODAL_SECURE_LOGIN } from '@/constants';
 import { authenticateWithPassword, watchUntilTruthy } from '@/utils';
 import { useUi } from './ui';
 import { useModals } from './modals';
@@ -105,7 +105,7 @@ export const useAuth = createCustomScopedComposable(() => {
 
   async function openEnableBiometricLoginModal() {
     if (await checkBiometricLoginAvailability()) {
-      openModal(MODAL_ENABLE_SECURE_LOGIN);
+      openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
     }
   }
 
