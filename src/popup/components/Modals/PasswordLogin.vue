@@ -149,6 +149,7 @@ export default defineComponent({
   }
 
   .forgot-password {
+    @extend %face-sans-15-medium;
     align-self: flex-start;
   }
 

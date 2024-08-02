@@ -43,7 +43,7 @@
       <BtnMain
         variant="muted"
         :text="$t('common.cancel')"
-        @click="reject"
+        @click="resolve"
       />
       <BtnMain
         variant="danger"

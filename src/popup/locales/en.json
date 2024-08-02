@@ -645,6 +645,17 @@
         "descriptionPart1": "Superhero Wallet will be locked after the preset time interval of inactivity.",
         "descriptionPart2": "You will be asked to authenticate in order to unlock the screen and continue using the wallet."
       },
+      "changePassword": {
+        "title": "Change Password",
+        "description": "You must provide your current password in order to reset it.",
+        "currentPassword": "Current password",
+        "currentPasswordPlaceholder": "Enter your current password",
+        "newPassword": "New password",
+        "newPasswordPlaceholder": "Enter strong new password",
+        "confirmNewPassword": "Confirm new password",
+        "reset": "Reset password",
+        "success": "Your password has been successfully reset. Please remember your new password."
+      },
       "authenticationTimeout": "Immediately | After {n} min inactivity | After {n} min inactivity",
       "available": {
         "part1": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",

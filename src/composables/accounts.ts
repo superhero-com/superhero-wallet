@@ -1,4 +1,8 @@
-import { computed, readonly, ref } from 'vue';
+import {
+  computed,
+  readonly,
+  ref,
+} from 'vue';
 import { uniq } from 'lodash-es';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import CryptoJS from 'crypto-js';
@@ -25,6 +29,7 @@ import {
 } from '@/constants';
 import {
   createCallbackRegistry,
+  decrypt,
   encrypt,
   excludeFalsy,
   generateKey,
@@ -236,7 +241,7 @@ export function useAccounts() {
   }
 
   /**
-   * Basically logs in the user
+   * Setting/Resetting the password key logs the user in/out.
    */
   function setPasswordKey(key: IKey | null) {
     passwordKey.value = key;
@@ -251,16 +256,34 @@ export function useAccounts() {
     }
   }
 
-  async function openSetPasswordModal(newMnemonic: string) {
-    const { openModal } = useModals();
-    const password = await openModal<string>(MODAL_SET_PASSWORD);
-
+  async function setPassword(newMnemonic: string, password: string) {
     const key = generateKey(password);
     const encryptedMnemonic = encrypt(key, newMnemonic);
     WalletStorage.set(STORAGE_KEYS.mnemonic, encryptedMnemonic);
 
+    // Saved key needs to be generated from the password and the data
     const data = CryptoJS.enc.Base64.parse(encryptedMnemonic);
     setPasswordKey(generateKey(password, data));
+  }
+
+  async function updatePassword(currentPassword: string, newPassword: string) {
+    const encryptedMnemonic = await WalletStorage.get<string>(STORAGE_KEYS.mnemonic);
+    const data = CryptoJS.enc.Base64.parse(encryptedMnemonic);
+    const key = generateKey(currentPassword, data);
+    const decryptedMnemonic = decrypt(key, encryptedMnemonic!);
+    if (decryptedMnemonic) {
+      setPasswordKey(null);
+      setPassword(decryptedMnemonic, newPassword);
+    } else {
+      throw new Error('Incorrect password.');
+    }
+  }
+
+  async function openSetPasswordModal(newMnemonic: string) {
+    const { openModal } = useModals();
+    const password = await openModal<string>(MODAL_SET_PASSWORD);
+
+    setPassword(newMnemonic, password);
   }
 
   async function setMnemonic(newMnemonic: string) {
@@ -357,6 +380,7 @@ export function useAccounts() {
     setActiveAccountByProtocol,
     setMnemonic,
     setPasswordKey,
+    updatePassword,
     setGeneratedMnemonic,
     resetAccounts,
   };
