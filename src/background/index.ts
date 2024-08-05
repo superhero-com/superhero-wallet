@@ -30,6 +30,12 @@ import { updateDynamicRules } from './redirectRule';
  */
 function handleMessage(msg: IPopupMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
+    // Handle session expiration independently because params are not set
+    if (msg.method === 'setSessionExpires') {
+      // @ts-expect-error session storage is not defined
+      browser.storage.session.set({ sessionExpires: msg.payload });
+      return false;
+    }
     const {
       aepp,
       id,

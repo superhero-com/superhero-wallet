@@ -896,6 +896,13 @@ export interface IAddressBookEntry {
   protocol: Protocol;
 }
 
+export interface IOtherSettings {
+  isSeedBackedUp?: boolean;
+  saveErrorLog?: boolean;
+  isBiometricLoginEnabled?: boolean;
+  secureLoginTimeout: number;
+}
+
 export interface IKey {
   key: CryptoKey;
   salt: Uint8Array;

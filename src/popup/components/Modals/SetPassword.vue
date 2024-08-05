@@ -25,7 +25,7 @@
       <div class="text-description">
         <p
           v-text="isRestoredWallet
-            ? $t('pages.secureLogin.setPassword.textRestoredWallet-1', [extensionVersion])
+            ? $t('pages.secureLogin.setPassword.textRestoredWallet-1')
             : $t('pages.secureLogin.setPassword.text-2')"
         />
         <p
@@ -44,7 +44,7 @@
           :validate-on-blur="true"
           :validate-on-model-update="!!errors.password"
           :rules="{
-            password_min_len: 8,
+            password_min_len: 4,
           }"
         >
           <InputPassword
@@ -74,7 +74,7 @@
           <InputPassword
             v-bind="field"
             v-model="confirmPassword"
-            data-cy="confirmPassword"
+            data-cy="confirm-password"
             class="password-input"
             :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
             :label="$t('pages.secureLogin.setPassword.confirmLabel')"
@@ -155,8 +155,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-
 .set-password {
   .info {
     margin-top: 8px;

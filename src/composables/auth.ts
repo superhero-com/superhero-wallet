@@ -6,8 +6,13 @@ import {
 } from 'vue';
 
 import { tg as t } from '@/popup/plugins/i18n';
-import { IS_MOBILE_APP, MODAL_ENABLE_BIOMETRIC_LOGIN, MODAL_SECURE_LOGIN } from '@/constants';
-import { authenticateWithPassword, watchUntilTruthy } from '@/utils';
+import {
+  IS_EXTENSION,
+  IS_MOBILE_APP,
+  MODAL_ENABLE_BIOMETRIC_LOGIN,
+  MODAL_SECURE_LOGIN,
+} from '@/constants';
+import { authenticateWithPassword, getSessionKey, watchUntilTruthy } from '@/utils';
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { useAccounts } from './accounts';
@@ -85,7 +90,13 @@ export const useAuth = createCustomScopedComposable(() => {
     return Promise.resolve();
   }
 
-  function logout() {
+  async function logout() {
+    if (IS_EXTENSION) {
+      const sessionKey = await getSessionKey();
+      if (sessionKey) {
+        return;
+      }
+    }
     setPasswordKey(null);
     isAuthenticated.value = false;
   }
@@ -136,6 +147,7 @@ export const useAuth = createCustomScopedComposable(() => {
             await openSecureLoginModal();
           }
         } else if (!isAuthenticated.value) {
+          logout();
           await openSecureLoginModal();
         }
       }

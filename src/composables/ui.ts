@@ -7,17 +7,12 @@ import {
 } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
+import { endSession } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
+import { IOtherSettings } from '@/types';
 import { useStorageRef } from './storageRef';
-
-export interface IOtherSettings {
-  isSeedBackedUp?: boolean;
-  saveErrorLog?: boolean;
-  isBiometricLoginEnabled?: boolean;
-  secureLoginTimeout?: number;
-}
 
 /** Control the route that would be visible after opening the extension. */
 const homeRouteName = ref(ROUTE_ACCOUNT);
@@ -47,7 +42,9 @@ const hiddenCards = useStorageRef<string[]>(
   },
 );
 const otherSettings = useStorageRef<IOtherSettings>(
-  {},
+  {
+    secureLoginTimeout: IS_MOBILE_APP ? AUTHENTICATION_TIMEOUTS[0] : AUTHENTICATION_TIMEOUTS[5],
+  },
   STORAGE_KEYS.otherSettings,
   {
     migrations: [
@@ -59,11 +56,7 @@ const otherSettings = useStorageRef<IOtherSettings>(
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
 const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
-const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout
-  ?? ((IS_MOBILE_APP)
-    ? AUTHENTICATION_TIMEOUTS[0]
-    : AUTHENTICATION_TIMEOUTS[5]
-  ));
+const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout);
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -109,6 +102,9 @@ export function useUi() {
   }
 
   function setSecureLoginTimeout(ms: number) {
+    if (ms === 0) {
+      endSession();
+    }
     otherSettings.value.secureLoginTimeout = ms;
   }
 
@@ -135,7 +131,9 @@ export function useUi() {
 
   function resetUiSettings() {
     hiddenCards.value = [];
-    otherSettings.value = {};
+    otherSettings.value = {
+      secureLoginTimeout: IS_MOBILE_APP ? AUTHENTICATION_TIMEOUTS[0] : AUTHENTICATION_TIMEOUTS[5],
+    };
   }
 
   return {
