@@ -46,14 +46,20 @@
           <hr>
           <div class="options">
             <div class="options-info">
-              <span class="options-label" v-text="$t('pages.secureLogin.changePassword.title')" />
-              <span class="options-description" v-text="$t('pages.secureLogin.changePassword.description')" />
+              <span
+                class="options-label"
+                v-text="$t('pages.secureLogin.changePassword.title')"
+              />
+              <span
+                class="options-description"
+                v-text="$t('pages.secureLogin.changePassword.description')"
+              />
             </div>
             <div class="inputs">
               <div class="current-password">
                 <InputPassword
                   v-model="currentPassword"
-                  data-cy="currentPassword"
+                  data-cy="current-password"
                   :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
                   :label="$t('pages.secureLogin.changePassword.currentPassword')"
                   :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
@@ -72,13 +78,13 @@
                   :validate-on-blur="true"
                   :validate-on-model-update="!!errors.password"
                   :rules="{
-                    password_min_len: 8,
+                    password_min_len: 4,
                   }"
                 >
                   <InputPassword
                     v-bind="field"
                     v-model="newPassword"
-                    data-cy="newPassword"
+                    data-cy="new-password"
                     :placeholder="$t('pages.secureLogin.changePassword.newPasswordPlaceholder')"
                     :label="$t('pages.secureLogin.changePassword.newPassword')"
                     :message="errorMessage ?? errors.confirmNewPassword"
@@ -96,7 +102,7 @@
                   <InputPassword
                     v-bind="field"
                     v-model="confirmNewPassword"
-                    data-cy="confirmNewPassword"
+                    data-cy="confirm-new-password"
                     :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
                     :label="$t('pages.secureLogin.changePassword.confirmNewPassword')"
                     :message="errorMessage"

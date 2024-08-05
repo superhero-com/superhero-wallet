@@ -16,7 +16,11 @@ import {
   NETWORK_NAME_TESTNET,
   PROTOCOLS,
 } from '@/constants';
-import { getProtocolByAddress, isNotFoundError, isUrlValid } from '@/utils';
+import {
+  getProtocolByAddress,
+  isNotFoundError,
+  isUrlValid,
+} from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useBalances,

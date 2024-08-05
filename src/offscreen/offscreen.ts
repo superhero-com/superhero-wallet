@@ -1,7 +1,14 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
-import { IPopupMessageData } from '@/types';
-import { IS_FIREFOX, POPUP_METHODS, UNFINISHED_FEATURES } from '@/constants';
+import { IOtherSettings, IPopupMessageData } from '@/types';
+import {
+  CONNECTION_TYPES,
+  IS_FIREFOX,
+  POPUP_METHODS,
+  STORAGE_KEYS,
+  UNFINISHED_FEATURES,
+} from '@/constants';
+import { WalletStorage } from '@/lib/WalletStorage';
 import { useWalletConnect } from '@/composables';
 import * as wallet from './wallet';
 import { useAccounts } from '../composables/accounts';
@@ -12,6 +19,22 @@ import { updateDynamicRules } from '../background/redirectRule';
 if (IS_FIREFOX) {
   browser.runtime.onInstalled.addListener(updateDynamicRules);
 }
+
+browser.runtime.onConnect.addListener((port) => {
+  if (port.name === CONNECTION_TYPES.SESSION) {
+    port.onDisconnect.addListener(async () => {
+      const settings: IOtherSettings | null = await WalletStorage.get(STORAGE_KEYS.otherSettings);
+      const sessionExpires = Date.now() + (settings?.secureLoginTimeout ?? 0);
+
+      // browser.storage is not available in offscreen tab
+      browser.runtime.sendMessage<IPopupMessageData>({
+        target: 'background',
+        method: POPUP_METHODS.setSessionExpires,
+        payload: sessionExpires,
+      });
+    });
+  }
+});
 
 browser.runtime.onMessage.addListener(async ({ method }: IPopupMessageData) => {
   if (method === POPUP_METHODS.reload) {

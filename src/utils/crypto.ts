@@ -1,7 +1,13 @@
 import type { IKey } from '@/types';
-import { STORAGE_KEYS, PASSWORD_ENCRYPTION_ALGO } from '@/constants';
+import { STORAGE_KEYS, PASSWORD_ENCRYPTION_ALGO, IS_EXTENSION } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { toRaw } from 'vue';
+
+/**
+ * If the application is running as an extension, the key should be extractable.
+ * So that we can save it in the session storage.
+ */
+const IS_EXTRACTABLE = !!IS_EXTENSION;
 
 // Utility Functions for Base64 Encoding and Decoding
 const encodeBase64 = (data: Uint8Array) => Buffer.from(data).toString('base64');
@@ -41,7 +47,7 @@ export async function generateKey(password: string, encryptedMnemonic?: string):
     },
     keyMaterial,
     { name: PASSWORD_ENCRYPTION_ALGO, length: 256 },
-    false,
+    IS_EXTRACTABLE,
     ['encrypt', 'decrypt'],
   );
 
@@ -108,4 +114,22 @@ export async function authenticateWithPassword(password: string): Promise<IKey> 
     }
   }
   return Promise.reject(new Error('No encrypted mnemonic found.'));
+}
+
+export async function exportPasswordKey({ key, salt, iv }: IKey) {
+  const exported = await window.crypto.subtle.exportKey('raw', key);
+  const exportedKeyBuffer = new Uint8Array(exported);
+  return { key: exportedKeyBuffer, salt, iv };
+}
+
+export async function importPasswordKey({ key, salt, iv }: any): Promise<IKey> {
+  const subtleCrypto = globalThis.crypto.subtle;
+  const importedKey = await subtleCrypto.importKey(
+    'raw',
+    key,
+    { name: PASSWORD_ENCRYPTION_ALGO, length: 256 },
+    IS_EXTRACTABLE,
+    ['encrypt', 'decrypt'],
+  );
+  return { key: importedKey, salt, iv };
 }
