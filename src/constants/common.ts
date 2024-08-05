@@ -55,6 +55,7 @@ export const TX_DIRECTION = {
 } as const;
 
 export const CONNECTION_TYPES = {
+  SESSION: 'SESSION',
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };
@@ -379,6 +380,7 @@ export const POPUP_METHODS = {
   reload: 'reload',
   paste: 'paste',
   checkHasAccount: 'checkHasAccount', // TODO check if still used
+  setSessionExpires: 'setSessionExpires',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
@@ -477,4 +479,10 @@ export const AUTHENTICATION_TIMEOUTS = {
   5: 300000,
   15: 900000,
   30: 1800000,
+} as const;
+
+export const PASSWORD_STRENGTH = {
+  weak: 'Weak',
+  medium: 'Medium',
+  strong: 'Strong',
 } as const;

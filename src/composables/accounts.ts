@@ -22,14 +22,18 @@ import {
   ACCOUNT_TYPES,
   MODAL_SET_PASSWORD,
   MODAL_PASSWORD_LOGIN,
+  IS_EXTENSION,
 } from '@/constants';
 import {
   createCallbackRegistry,
   decrypt,
   encrypt,
+  endSession,
   excludeFalsy,
   generateKey,
+  getSessionKey,
   prepareAccountSelectOptions,
+  startSession,
   watchUntilTruthy,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -39,6 +43,7 @@ import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-
 import { WalletStorage } from '@/lib/WalletStorage';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
+import { useUi } from './ui';
 
 let composableInitialized = false;
 
@@ -174,6 +179,8 @@ const protocolsInUse = computed(
  * The wallets's data is created in fly with the use of computed properties.
  */
 export function useAccounts() {
+  const { secureLoginTimeout, setLoaderVisible } = useUi();
+
   function getAccountByAddress(address: AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
@@ -238,12 +245,28 @@ export function useAccounts() {
    */
   function setPasswordKey(key: IKey | null) {
     passwordKey.value = key;
+    if (IS_EXTENSION) {
+      if (key) {
+        startSession(key, secureLoginTimeout.value);
+      } else {
+        endSession();
+      }
+    }
   }
 
   async function openLoginModal() {
+    setLoaderVisible(true);
+    const sessionKey = await getSessionKey();
+    if (sessionKey) {
+      setPasswordKey(sessionKey);
+      setLoaderVisible(false);
+      return;
+    }
+    setLoaderVisible(false);
+
     const { openModal } = useModals();
 
-    await openModal<string>(MODAL_PASSWORD_LOGIN);
+    await openModal(MODAL_PASSWORD_LOGIN);
     if (!passwordKey.value) {
       throw new Error('passwordKey was not set after login.');
     }

@@ -23,6 +23,7 @@ import type {
   IRequestInitBodyParsed,
   ITokenResolved,
   ITransaction,
+  ObjectValues,
   StorageKeysInput,
   Truthy,
 } from '@/types';
@@ -35,6 +36,7 @@ import {
   LOCAL_STORAGE_PREFIX,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
+  PASSWORD_STRENGTH,
   PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
@@ -574,4 +576,29 @@ export function selectFiles(options: {
     };
     input.click();
   });
+}
+
+export function checkPasswordStrength(password: string): ObjectValues<typeof PASSWORD_STRENGTH> {
+  if (!password) {
+    return PASSWORD_STRENGTH.weak;
+  }
+  let strength = 0;
+
+  // Length check
+  if (password.length >= 8) strength += 1;
+  if (password.length >= 12) strength += 1;
+
+  // Character variety checks
+  if (/[a-z]/.test(password)) strength += 1;
+  if (/[A-Z]/.test(password)) strength += 1;
+  if (/[0-9]/.test(password)) strength += 1;
+  if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+
+  // Determine the strength level
+  if (strength <= 3) {
+    return PASSWORD_STRENGTH.weak;
+  } if (strength <= 4) {
+    return PASSWORD_STRENGTH.medium;
+  }
+  return PASSWORD_STRENGTH.strong;
 }

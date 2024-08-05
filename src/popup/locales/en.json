@@ -675,7 +675,7 @@
         "title": "Set a password",
         "text": "to securely access your wallet",
         "text-2": "Choose a strong password and make sure you remember it or back it up safely.",
-        "textRestoredWallet-1": "Superhero Wallet has been updated to v.{0} introducing increased level of security.",
+        "textRestoredWallet-1": "Superhero Wallet has been updated introducing increased level of security.",
         "textRestoredWallet-2": "You need to set a password to continue using your wallet. Chose a strong one and make sure you remember it or back it up safely.",
         "passwordLabel": "Password",
         "passwordPlaceholder": "Enter strong password",
