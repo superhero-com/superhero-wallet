@@ -80,6 +80,7 @@
                   :validate-on-model-update="!!errors.password"
                   :rules="{
                     password_min_len: 8,
+                    passwords_is_not_weak: true,
                   }"
                 >
                   <InputPassword

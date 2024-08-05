@@ -26,6 +26,9 @@
 
 <script>
 import { computed, defineComponent, ref } from 'vue';
+
+import { checkPasswordStrength } from '@/utils';
+
 import InputField from './InputField.vue';
 
 import EyeIcon from '../../icons/eye-open.svg?vue-component';
@@ -43,17 +46,7 @@ export default defineComponent({
   setup(props) {
     const isPasswordVisible = ref(false);
 
-    // TODO pin: password strength calculation
-    const passwordStrength = computed(() => {
-      switch (true) {
-        case props.modelValue.length < 8:
-          return 'Weak';
-        case props.modelValue.length < 12:
-          return 'Medium';
-        default:
-          return 'Strong';
-      }
-    });
+    const passwordStrength = computed(() => checkPasswordStrength(props.modelValue));
 
     function toggleVisibility() {
       isPasswordVisible.value = !isPasswordVisible.value;

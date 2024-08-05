@@ -477,3 +477,9 @@ export const AUTHENTICATION_TIMEOUTS = {
   15: 900000,
   30: 1800000,
 } as const;
+
+export const PASSWORD_STRENGTH = {
+  weak: 'Weak',
+  medium: 'Medium',
+  strong: 'Strong',
+} as const;

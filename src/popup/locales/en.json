@@ -1217,7 +1217,8 @@
     "doesNotExceedDecimals": "Amount should not exceed {0} decimals.",
     "addressBookEntryExists": "This {0} already exists in your address book.",
     "passwordMinLength": "Password must be at least {0} characters long.",
-    "passwordsMatch": "Passwords do not match."
+    "passwordsMatch": "Passwords do not match.",
+    "passwordIsWeak": "Password should not be weak."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",
