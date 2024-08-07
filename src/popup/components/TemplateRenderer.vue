@@ -10,6 +10,7 @@ const renderNodeContent = (createElement, node, option = null) => (!node.childNo
         case 'strong':
         case 'ol':
         case 'li':
+        case 'p':
           return createElement(n.tagName, renderNodeContent(createElement, n));
         case 'a':
           return createElement('a', { ...option }, renderNodeContent(createElement, n));

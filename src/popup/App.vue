@@ -24,7 +24,7 @@
           class="main"
         />
 
-        <NodeConnectionStatus
+        <ConnectionStatus
           v-if="!modalsOpen.length"
           class="connection-status"
         />
@@ -91,7 +91,7 @@ import {
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
 
 import Header from '@/popup/components/Header.vue';
-import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
+import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
 import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
 
@@ -99,7 +99,7 @@ export default defineComponent({
   name: 'App',
   components: {
     Header,
-    NodeConnectionStatus,
+    ConnectionStatus,
     QrCodeReaderMobileOverlay,
     IonApp,
     IonRouterOutlet,

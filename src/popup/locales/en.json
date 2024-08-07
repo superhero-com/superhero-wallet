@@ -71,11 +71,45 @@
     "scan": "Scan"
   },
   "connectionStatus": {
-    "offline": "You are offline. Go online to get real time data.",
+    "offline": {
+      "statusMessage": "Offline. Go online to get real time data.",
+      "title": "Offline",
+      "description": "You are offline. Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment. <p> Please go online to get real time data! </p>"
+    },
     "node": {
-      "error": "Unable to connect to the chosen node.",
+      "error": {
+        "statusMessage": "Unable to connect to the chosen node.",
+        "title": "Unable to fetch network ID",
+        "description": "Superhero Wallet is unable to fetch this network ID at the moment. <p> Please try adding the network again later. </p>"
+      },
       "connecting": "Connecting to the node...",
       "connected": "Connected!"
+    },
+    "middleware": {
+      "error": {
+        "title": "Middleware is offline.",
+        "description": "Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment."
+      },
+      "syncing": {
+        "statusMessage": "Middleware is syncing...",
+        "title": "Middleware is syncing",
+        "description": "Superhero Wallet middleware is syncing.<p> All wallet features are accessible but some data such as balances might be outdated and transactions might appear pending for longer than usual. </p><p> Updated data will be available shortly. </p>"
+      }
+    },
+    "multisig": {
+      "statusMessage": "Temporary multisig backend failure.",
+      "title": "Multisig backend failure",
+      "description": "Multisig vaults may not be accessible at the moment due to temporary backend failure. <p> If you are trying to access your multisig vaults please try again later. </p>"
+    },
+    "backend": {
+      "statusMessage": "Temporary backend failure.",
+      "title": "Backend failure",
+      "description": "Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment due to temporary backend failure."
+    },
+    "aeternityBackend": {
+      "statusMessage": "Temporary aeternity backend failure.",
+      "title": "aeternity backend failure",
+      "description": "Some features such as setting default name, tipping related functionality may not be accessible at the moment due to temporary aeternity backend failure."
     }
   },
   "dashboard": {

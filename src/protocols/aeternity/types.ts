@@ -70,3 +70,11 @@ export interface SimpleGAMultiSigContractApi extends ContractMethodsBase {
     tx_hash?: string;
   };
 }
+
+export interface BackendHealth {
+  dbHealth: boolean;
+  ipfsHealth: boolean;
+  redisHealth: boolean;
+  aeHealth: boolean;
+  allHealthy: boolean;
+}
