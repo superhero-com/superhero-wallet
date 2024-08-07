@@ -69,6 +69,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override coinPrecision = BTC_COIN_PRECISION;
 
+  override coinGeckoCoinId = BTC_COINGECKO_COIN_ID;
+
   override hasTokensSupport = false;
 
   override mdwToNodeApproxDelayTime = 0;
@@ -113,10 +115,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
     return BTC_NETWORK_DEFAULT_SETTINGS[networkType];
-  }
-
-  override getCoinGeckoCoinId() {
-    return BTC_COINGECKO_COIN_ID;
   }
 
   override getDefaultCoin(

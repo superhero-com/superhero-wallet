@@ -58,7 +58,7 @@ export default defineComponent({
   setup(props) {
     const { addRawAccount, setActiveAccountByGlobalIdx } = useAccounts();
     const { isOnline } = useConnection();
-    const { openModal } = useModals();
+    const { openModal, openDefaultModal } = useModals();
     const { setLoaderVisible } = useUi();
 
     async function createAccount(protocol: Protocol) {
@@ -82,7 +82,7 @@ export default defineComponent({
           break;
 
         default:
-          throw new Error(`createAccount not implemented for protocol: ${protocol}`);
+          openDefaultModal({ icon: 'alert', msg: `Account creation not possible for protocol: ${protocol}` });
       }
       setLoaderVisible(false);
       props.resolve();

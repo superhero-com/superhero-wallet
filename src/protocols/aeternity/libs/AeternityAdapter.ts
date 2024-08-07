@@ -81,6 +81,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override coinPrecision = AE_COIN_PRECISION;
 
+  override coinGeckoCoinId = AE_COINGECKO_COIN_ID;
+
   override hasTokensSupport = true;
 
   override mdwToNodeApproxDelayTime = AE_MDW_TO_NODE_APPROX_DELAY_TIME;
@@ -126,10 +128,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override getUrlTokenKey(): string {
     return AE_SYMBOL;
-  }
-
-  override getCoinGeckoCoinId() {
-    return AE_COINGECKO_COIN_ID;
   }
 
   override getDefaultCoin(
