@@ -300,7 +300,8 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
                 [ETH_CHAIN_NAMESPACE]: {
                   accounts,
                   chains,
-                  events: [], // TODO https://specs.walletconnect.com/2.0/specs/clients/sign/session-events
+                  // approving all the required events
+                  events: proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.events || [],
                   methods,
                 },
               },
