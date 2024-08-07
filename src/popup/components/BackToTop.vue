@@ -93,8 +93,8 @@ export default defineComponent({
     left: 0;
     width: 100%;
     padding: 12px 4px 4px 0;
-    background: $color-bg-4;
     /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
+    background: $color-bg-4;
     background:
       linear-gradient(
         180deg,
