@@ -1,15 +1,8 @@
 <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g clip-path="url(#a)">
-    <path d="M15.759 9.935a7.998 7.998 0 1 1-15.52-3.87 7.998 7.998 0 0 1 15.52 3.87Z" fill="#fff"/>
-    <path opacity=".6" d="M7.998 6.09 3.5 8.137l4.498 2.659 4.5-2.66-4.5-2.044Z" fill="#000"/>
-    <path opacity=".45" d="M3.502 8.136 8 10.795V.671L3.502 8.137Z" fill="#000"/>
-    <path opacity=".8" d="M8 .672v10.123l4.498-2.66L8 .673Z" fill="#000"/>
-    <path opacity=".45" d="m3.5 8.99 4.498 6.338v-3.681L3.5 8.989Z" fill="#000"/>
-    <path opacity=".8" d="M7.998 11.647v3.681L12.5 8.99l-4.502 2.658Z" fill="#000"/>
-  </g>
-  <defs>
-    <clipPath id="a">
-      <rect width="16" height="16" rx="8" fill="#fff"/>
-    </clipPath>
-  </defs>
+  <circle cx="8" cy="8" r="8" fill="#fff"/>
+  <path opacity=".6" d="M7.998 6.09 3.5 8.137l4.498 2.659 4.5-2.66-4.5-2.044Z" fill="#000"/>
+  <path opacity=".45" d="M3.502 8.136 8 10.795V.671L3.502 8.137Z" fill="#000"/>
+  <path opacity=".8" d="M8 .672v10.123l4.498-2.66L8 .673Z" fill="#000"/>
+  <path opacity=".45" d="m3.5 8.99 4.498 6.338v-3.681L3.5 8.989Z" fill="#000"/>
+  <path opacity=".8" d="M7.998 11.647v3.681L12.5 8.99l-4.502 2.658Z" fill="#000"/>
 </svg>

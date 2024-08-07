@@ -66,7 +66,7 @@ export function useCurrencies({
 
   function getCoinGeckoCoinIdList() {
     return protocolsInUse.value.map(
-      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).getCoinGeckoCoinId(),
+      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).coinGeckoCoinId,
     ).join(',');
   }
 
