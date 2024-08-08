@@ -13,7 +13,6 @@ const getTransactions = (hasError) => ({
       microIndex: 23,
       microTime: 1656518730553,
       tx: {
-        abiVersion: 3,
         amount: 0,
         contractId: 'ct_MLXQEP12MBn99HL6WDaiTqDbG4bJQ3Q9Bzr57oLfvEkghvpFb',
         fee: 185260000000000,
