@@ -7,6 +7,12 @@
       >
         <template #buttons>
           <BtnBox
+            v-if="IS_MOBILE_APP && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
+            :icon="GlobeSmallIcon"
+            :text="$t('common.browser')"
+            :to="{ name: ROUTE_APPS_BROWSER }"
+          />
+          <BtnBox
             v-if="isNodeMainnet && UNFINISHED_FEATURES"
             :icon="CreditCardIcon"
             :text="$t('common.buy')"
@@ -18,12 +24,6 @@
             :icon="FaucetIcon"
             :text="$t('common.faucet')"
             :href="activeAccountFaucetUrl"
-          />
-          <BtnBox
-            v-if="IS_MOBILE_APP && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
-            :icon="GlobeSmallIcon"
-            :text="$t('common.browser')"
-            :to="{ name: ROUTE_APPS_BROWSER }"
           />
         </template>
 
