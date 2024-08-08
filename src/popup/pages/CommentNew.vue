@@ -28,8 +28,8 @@
           </BtnMain>
         </FixedScreenFooter>
       </div>
-    </ioncontent>
-  </ionpage>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
