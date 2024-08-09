@@ -55,6 +55,7 @@ export const TX_DIRECTION = {
 } as const;
 
 export const CONNECTION_TYPES = {
+  SESSION: 'SESSION',
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };
@@ -338,12 +339,15 @@ export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
-export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
+export const MODAL_ENABLE_BIOMETRIC_LOGIN = 'enable-biometric-login';
 export const MODAL_AIR_GAP_IMPORT_ACCOUNTS = 'air-gap-import-accounts';
 export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
 export const MODAL_SHARE_ADDRESS = 'share-address';
 export const MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR = 'address-book-account-selector';
+export const MODAL_SET_PASSWORD = 'set-password';
+export const MODAL_SET_PASSWORD_HELP = 'set-password-help';
+export const MODAL_PASSWORD_LOGIN = 'password-login';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -377,6 +381,7 @@ export const POPUP_METHODS = {
   reload: 'reload',
   paste: 'paste',
   checkHasAccount: 'checkHasAccount', // TODO check if still used
+  setSessionExpires: 'setSessionExpires',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
@@ -466,3 +471,17 @@ export const POLLING_INTERVAL_TRANSACTIONS = 15000;
 
 // toBase64Url(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' }))
 export const JWT_HEADER = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9';
+
+export const AUTHENTICATION_TIMEOUTS = {
+  0: 0,
+  1: 60000,
+  5: 300000,
+  15: 900000,
+  30: 1800000,
+} as const;
+
+export const PASSWORD_STRENGTH = {
+  weak: 'Weak',
+  medium: 'Medium',
+  strong: 'Strong',
+} as const;

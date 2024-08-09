@@ -1,6 +1,7 @@
 <template>
   <BtnPlain
     class="btn-help"
+    type="button"
     :class="{ small, warning }"
     @click="showHelpModal"
   >

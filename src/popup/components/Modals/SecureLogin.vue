@@ -12,11 +12,12 @@
     <div class="content-wrapper">
       <div class="icon-wrapper">
         <IconBoxed
-          :icon="isAuthCanceled ? LockIcon : FingerprintIcon"
-          :class="!isAuthCanceled ? 'color-danger' : 'color-success'"
+          :icon="isAuthCanceled ? FingerprintIcon : LockIcon"
+          :class="isAuthCanceled ? 'color-danger' : 'color-success'"
           bg-colored
+          outline-colored
           transparent
-          :icon-padded="isAuthCanceled"
+          :icon-padded="!isAuthCanceled"
         />
       </div>
       <div class="info">

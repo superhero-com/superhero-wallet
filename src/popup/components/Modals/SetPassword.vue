@@ -1,0 +1,168 @@
+<template>
+  <Modal
+    class="set-password"
+    from-bottom
+    has-close-button
+    centered
+    @close="resolve"
+  >
+    <div class="icon-wrapper">
+      <IconBoxed
+        :icon="LockIcon"
+        class="icon"
+        bg-outline-color="#373737"
+        icon-padded
+      />
+    </div>
+
+    <div class="info">
+      <h3
+        class="text-heading-4"
+        v-text="$t('pages.secureLogin.setPassword.title')"
+      />
+      <p class="text-subheading" v-text="$t('pages.secureLogin.setPassword.text')" />
+      <div class="text-description">
+        <p
+          v-text="isRestoredWallet
+            ? $t('pages.secureLogin.setPassword.textRestoredWallet-1', [extensionVersion])
+            : $t('pages.secureLogin.setPassword.text-2')"
+        />
+        <p
+          v-if="isRestoredWallet"
+          v-text="$t('pages.secureLogin.setPassword.textRestoredWallet-2')"
+        />
+      </div>
+    </div>
+
+    <div class="inputs">
+      <Form v-slot="{ errors, handleSubmit }">
+        <Field
+          v-slot="{ field, errorMessage }"
+          key="password"
+          name="password"
+          :validate-on-blur="true"
+          :validate-on-model-update="!!errors.password"
+          :rules="{
+            password_min_len: 8,
+            passwords_is_not_weak: true,
+          }"
+        >
+          <InputPassword
+            v-bind="field"
+            v-model="password"
+            data-cy="password"
+            class="password-input"
+            :placeholder="$t('pages.secureLogin.setPassword.passwordPlaceholder')"
+            :label="$t('pages.secureLogin.setPassword.passwordLabel')"
+            :message="errorMessage ?? errors.confirmPassword"
+            :help="{
+              title: $t('pages.secureLogin.setPassword.help.title'),
+              msg: $t('pages.secureLogin.setPassword.help.text'),
+              fullscreen: true,
+            }"
+            show-password-strength
+          />
+        </Field>
+        <Field
+          v-slot="{ field, errorMessage }"
+          key="confirmPassword"
+          name="confirmPassword"
+          :rules="{
+            passwords_match: password,
+          }"
+        >
+          <InputPassword
+            v-bind="field"
+            v-model="confirmPassword"
+            data-cy="confirmPassword"
+            class="password-input"
+            :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
+            :label="$t('pages.secureLogin.setPassword.confirmLabel')"
+            :message="errorMessage"
+            hide-eye-icon
+          />
+        </Field>
+
+        <BtnMain
+          class="btn-main"
+          variant="primary"
+          extend
+          :disabled="(
+            !password
+            || !confirmPassword
+            || !!errors.password
+            || !!errors.confirmPassword
+          )"
+          :text="$t('pages.secureLogin.setPassword.confirm')"
+          @click="handleSubmit($event, onSubmit)"
+        />
+      </Form>
+    </div>
+  </Modal>
+</template>
+
+<script lang="ts">
+import { defineComponent, PropType, ref } from 'vue';
+import { Form, Field } from 'vee-validate';
+import type { RejectCallback, ResolveCallback } from '@/types';
+
+import Modal from '@/popup/components/Modal.vue';
+import IconBoxed from '@/popup/components/IconBoxed.vue';
+import InputPassword from '@/popup/components/InputPassword.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+
+import LockIcon from '@/icons/lock.svg?vue-component';
+
+export default defineComponent({
+  components: {
+    Modal,
+    IconBoxed,
+    InputPassword,
+    BtnMain,
+    Form,
+    Field,
+  },
+  props: {
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
+    isRestoredWallet: Boolean,
+  },
+  setup(props) {
+    const password = ref('');
+    const confirmPassword = ref('');
+
+    function onSubmit() {
+      props.resolve(password.value);
+    }
+
+    return {
+      password,
+      confirmPassword,
+      extensionVersion: process.env.npm_package_version,
+      onSubmit,
+      LockIcon,
+    };
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+@use '@/styles/variables' as *;
+
+.set-password {
+  .info {
+    margin-top: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inputs {
+    width: 100%;
+
+    .btn-main {
+      margin-top: 48px;
+    }
+  }
+}
+</style>

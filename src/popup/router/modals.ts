@@ -34,12 +34,14 @@ import {
   MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
   MODAL_SECURE_LOGIN,
-  MODAL_ENABLE_SECURE_LOGIN,
+  MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   MODAL_ADDRESS_BOOK_IMPORT,
   MODAL_SHARE_ADDRESS,
   MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
+  MODAL_SET_PASSWORD,
+  MODAL_PASSWORD_LOGIN,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -82,6 +84,8 @@ import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vu
 import AddressBookImport from '../components/Modals/AddressBookImport.vue';
 import ShareAddress from '../components/ShareAddress.vue';
 import AddressBookAccountSelector from '../components/Modals/AddressBookAccountSelector.vue';
+import SetPassword from '../components/Modals/SetPassword.vue';
+import PasswordLogin from '../components/Modals/PasswordLogin.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -196,7 +200,7 @@ export default () => {
   registerModal(MODAL_SECURE_LOGIN, {
     component: SecureLogin,
   });
-  registerModal(MODAL_ENABLE_SECURE_LOGIN, {
+  registerModal(MODAL_ENABLE_BIOMETRIC_LOGIN, {
     component: EnableSecureLogin,
   });
   registerModal(MODAL_SIGN_AIR_GAP_TRANSACTION, {
@@ -210,5 +214,11 @@ export default () => {
   });
   registerModal(MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, {
     component: AddressBookAccountSelector,
+  });
+  registerModal(MODAL_SET_PASSWORD, {
+    component: SetPassword,
+  });
+  registerModal(MODAL_PASSWORD_LOGIN, {
+    component: PasswordLogin,
   });
 };

@@ -14,9 +14,15 @@ import {
 import {
   NETWORK_NAME_MAINNET,
   NETWORK_NAME_TESTNET,
+  PASSWORD_STRENGTH,
   PROTOCOLS,
 } from '@/constants';
-import { getProtocolByAddress, isNotFoundError, isUrlValid } from '@/utils';
+import {
+  checkPasswordStrength,
+  getProtocolByAddress,
+  isNotFoundError,
+  isUrlValid,
+} from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useBalances,
@@ -110,6 +116,21 @@ defineRule(
 defineRule(
   'max_len',
   (value: string, [arg]: [number]) => (value && value.length <= arg) || tg('validation.maxLength', [arg]),
+);
+
+defineRule(
+  'password_min_len',
+  (value: string, [arg]: [number]) => (value && value.length >= arg) || tg('validation.passwordMinLength', [arg]),
+);
+
+defineRule(
+  'passwords_match',
+  (value: string, [arg]: [string]) => (!arg || value === arg) || tg('validation.passwordsMatch'),
+);
+
+defineRule(
+  'passwords_is_not_weak',
+  (value: string) => (checkPasswordStrength(value) !== PASSWORD_STRENGTH.weak) || tg('validation.passwordIsWeak'),
 );
 
 defineRule(

@@ -6,18 +6,13 @@ import {
   watch,
 } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
-import { STORAGE_KEYS } from '@/constants';
+import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
+import { endSession } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
+import { IOtherSettings } from '@/types';
 import { useStorageRef } from './storageRef';
-
-export interface IOtherSettings {
-  isSeedBackedUp?: boolean;
-  saveErrorLog?: boolean;
-  isSecureLoginEnabled?: boolean;
-  secureLoginTimeout?: number;
-}
 
 /** Control the route that would be visible after opening the extension. */
 const homeRouteName = ref(ROUTE_ACCOUNT);
@@ -58,8 +53,12 @@ const otherSettings = useStorageRef<IOtherSettings>(
 
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
-const isSecureLoginEnabled = computed(() => !!otherSettings.value.isSecureLoginEnabled);
-const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout ?? 0);
+const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
+const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout
+  ?? ((IS_MOBILE_APP)
+    ? AUTHENTICATION_TIMEOUTS[0]
+    : AUTHENTICATION_TIMEOUTS[5]
+  ));
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -100,12 +99,15 @@ export function useUi() {
     otherSettings.value.saveErrorLog = val;
   }
 
-  function setSecureLoginEnabled(val: boolean) {
-    otherSettings.value.isSecureLoginEnabled = val;
+  function setBiometricLoginEnabled(val: boolean) {
+    otherSettings.value.isBiometricLoginEnabled = val;
   }
 
-  function setSecureLoginTimeout(val: number) {
-    otherSettings.value.secureLoginTimeout = val;
+  function setSecureLoginTimeout(ms: number) {
+    if (ms === 0) {
+      endSession();
+    }
+    otherSettings.value.secureLoginTimeout = ms;
   }
 
   function initVisibilityListeners() {
@@ -144,7 +146,7 @@ export function useUi() {
     isLoaderVisible,
     isSeedBackedUp,
     saveErrorLog,
-    isSecureLoginEnabled,
+    isBiometricLoginEnabled,
     secureLoginTimeout,
     lastTimeAppWasActive,
     initVisibilityListeners,
@@ -156,7 +158,7 @@ export function useUi() {
     setMobileQrScannerVisible,
     setLoaderVisible,
     resetUiSettings,
-    setSecureLoginEnabled,
+    setBiometricLoginEnabled,
     setSecureLoginTimeout,
   };
 }

@@ -36,7 +36,7 @@ jest.mock('../../src/composables', () => ({
     loginTargetLocation: jest.fn(),
   })),
   useAuth: jest.fn(() => ({
-    openEnableSecureLoginModal: jest.fn(),
+    openEnableBiometricLoginModal: jest.fn(),
   })),
 }));
 jest.mock('@/utils', () => ({

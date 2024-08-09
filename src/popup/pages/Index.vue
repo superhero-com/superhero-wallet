@@ -51,7 +51,6 @@
             :to="{ name: 'about-terms' }"
             data-cy="terms"
             class="terms-of-use"
-            :class="{ agreed: termsAgreed }"
           >
             {{ $t('pages.index.termsAndConditions') }}
           </RouterLink>
@@ -132,7 +131,7 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
     } = useAccounts();
     const { openModal } = useModals();
-    const { openEnableSecureLoginModal } = useAuth();
+    const { openEnableBiometricLoginModal } = useAuth();
     const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
@@ -141,14 +140,14 @@ export default defineComponent({
 
     async function createWallet() {
       isWalletNew = true;
-      setGeneratedMnemonic();
+      await setGeneratedMnemonic();
       addRawAccount({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
         type: ACCOUNT_TYPES.hdWallet,
       });
       router.push(loginTargetLocation.value);
-      openEnableSecureLoginModal();
+      openEnableBiometricLoginModal();
     }
 
     async function importWallet() {
@@ -213,24 +212,17 @@ export default defineComponent({
   }
 
   .terms-agreement {
+    @extend %face-sans-15-medium;
     @include mixins.flex(center, center);
 
     margin-bottom: 16px;
 
     .terms-of-use {
-      @extend %face-sans-15-regular;
-
-      color: rgba($color-white, 0.75);
       text-decoration: none;
       margin-left: 4px;
 
       &:hover {
-        color: $color-white;
         text-decoration: underline;
-      }
-
-      &.agreed {
-        color: white;
       }
     }
 
