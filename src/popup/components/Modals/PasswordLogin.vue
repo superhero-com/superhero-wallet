@@ -112,7 +112,7 @@ export default defineComponent({
       isAuthenticating.value = true;
       try {
         await authenticate(password.value);
-        props.resolve(password.value);
+        props.resolve();
       } catch (error) {
         isAuthFailed.value = true;
       } finally {

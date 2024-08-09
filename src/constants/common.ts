@@ -55,6 +55,7 @@ export const TX_DIRECTION = {
 } as const;
 
 export const CONNECTION_TYPES = {
+  SESSION: 'SESSION',
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };
@@ -380,6 +381,7 @@ export const POPUP_METHODS = {
   reload: 'reload',
   paste: 'paste',
   checkHasAccount: 'checkHasAccount', // TODO check if still used
+  setSessionExpires: 'setSessionExpires',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';

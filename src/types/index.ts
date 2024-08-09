@@ -896,3 +896,10 @@ export interface IAddressBookEntry {
   isBookmarked: boolean;
   protocol: Protocol;
 }
+
+export interface IOtherSettings {
+  isSeedBackedUp?: boolean;
+  saveErrorLog?: boolean;
+  isBiometricLoginEnabled?: boolean;
+  secureLoginTimeout?: number;
+}
