@@ -73,6 +73,7 @@ export default defineComponent({
 
         case PROTOCOLS.bitcoin:
         case PROTOCOLS.ethereum:
+        case PROTOCOLS.solana:
           globalIdx = addRawAccount({
             isRestored: false,
             protocol,

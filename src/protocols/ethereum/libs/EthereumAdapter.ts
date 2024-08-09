@@ -186,8 +186,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     accountIndex: number,
   ): IHdWalletAccount {
     const hdNodeWallet = this.bip32.fromSeed(Buffer.from(seed));
-    const path = `m/44'/60'/${accountIndex}'/0/0`;
-    const childWallet = hdNodeWallet.derivePath(path);
+    const derivationPath = `m/44'/60'/${accountIndex}'/0/0`;
+    const childWallet = hdNodeWallet.derivePath(derivationPath);
 
     const address = toChecksumAddress(privateKeyToAddress(childWallet.privateKey!).toString());
 
@@ -215,7 +215,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       idx,
       ...rawAccount,
       ...hdWallet,
-    } as IAccount;
+    };
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

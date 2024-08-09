@@ -1,9 +1,11 @@
 /* eslint-disable class-methods-use-this */
 
-import { PROTOCOLS } from '@/constants';
+import { Keypair } from '@solana/web3.js';
+import { derivePath } from 'ed25519-hd-key';
 import type {
   AdapterNetworkSettingList,
   IAccount,
+  IAccountRaw,
   ICoin,
   IFetchTransactionResult,
   INetworkProtocolSettings,
@@ -13,6 +15,7 @@ import type {
   ITransferResponse,
   MarketData,
 } from '@/types';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import {
   SOL_COIN_PRECISION,
@@ -50,7 +53,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
   }
 
   override getAmountPrecision(): number {
-    return 0; // TODO
+    return 9; // TODO
   }
 
   override getExplorer() {
@@ -104,12 +107,33 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     return {} as any; // TODO
   }
 
-  override resolveAccountRaw(): IAccount | null {
-    return null; // TODO
+  override resolveAccountRaw(
+    rawAccount: IAccountRaw,
+    idx: number,
+    globalIdx: number,
+    seed: Uint8Array,
+  ): IAccount | null {
+    if (rawAccount.type === ACCOUNT_TYPES.hdWallet) {
+      const seedBuffer = Buffer.from(seed).toString('hex');
+      const derivationPath = `m/44'/501'/${idx}'/0'`;
+      const { key } = derivePath(derivationPath, seedBuffer);
+      const { publicKey, secretKey } = Keypair.fromSeed(key);
+      const address = publicKey.toString();
+
+      return {
+        ...rawAccount,
+        globalIdx,
+        idx,
+        secretKey,
+        publicKey: publicKey.toBuffer(),
+        address,
+      };
+    }
+    return null;
   }
 
   override async discoverLastUsedAccountIndex(): Promise<number> {
-    return 0; // TODO
+    return -1; // TODO
   }
 
   override async fetchAvailableTokens(): Promise<IToken[] | null> {
