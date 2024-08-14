@@ -1,8 +1,9 @@
 /* eslint-disable class-methods-use-this */
 
-import { Keypair } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { derivePath } from 'ed25519-hd-key';
 import type {
+  AccountAddress,
   AdapterNetworkSettingList,
   IAccount,
   IAccountRaw,
@@ -14,14 +15,20 @@ import type {
   ITransaction,
   ITransferResponse,
   MarketData,
+  NetworkTypeDefault,
 } from '@/types';
 import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
+import { toShiftedBigNumber } from '@/utils';
+import { useNetworks } from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import {
   SOL_COIN_PRECISION,
   SOL_COIN_SYMBOL,
   SOL_COINGECKO_COIN_ID,
   SOL_CONTRACT_ID,
+  SOL_NETWORK_DEFAULT_ENV_SETTINGS,
+  SOL_NETWORK_DEFAULT_SETTINGS,
   SOL_PROTOCOL_NAME,
 } from '@/protocols/solana/config';
 
@@ -44,8 +51,16 @@ export class SolanaAdapter extends BaseProtocolAdapter {
 
   override mdwToNodeApproxDelayTime = 0; // TODO
 
+  private connection: Connection | null = null;
+
   private networkSettings: AdapterNetworkSettingList = [
-    // TODO
+    {
+      key: 'nodeUrl',
+      testId: 'url',
+      defaultValue: SOL_NETWORK_DEFAULT_ENV_SETTINGS.nodeUrl,
+      getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
+      getLabel: () => tg('pages.network.networkUrlLabel'),
+    },
   ];
 
   override getAccountPrefix() {
@@ -83,12 +98,15 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     return this.networkSettings;
   }
 
-  override getNetworkTypeDefaultValues(): INetworkProtocolSettings {
-    return {} as any; // TODO
+  override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
+    return SOL_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
-  override async fetchBalance(): Promise<string> {
-    return '0'; // TODO
+  override async fetchBalance(address: AccountAddress): Promise<string> {
+    const connection = this.getConnection();
+    const publicKey = new PublicKey(address);
+    const balance = await connection.getBalance(publicKey!);
+    return toShiftedBigNumber(balance, -this.getAmountPrecision()).toString();
   }
 
   override isAccountAddressValid() {
@@ -184,5 +202,14 @@ export class SolanaAdapter extends BaseProtocolAdapter {
 
   override async waitTransactionMined(): Promise<any> {
     return null; // TODO
+  }
+
+  private getConnection() {
+    const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols.solana;
+    if (!this.connection || this.connection.rpcEndpoint !== nodeUrl) {
+      this.connection = new Connection(nodeUrl);
+    }
+    return this.connection;
   }
 }
