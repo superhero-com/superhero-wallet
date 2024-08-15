@@ -37,9 +37,9 @@ exports[`Pages About 1`] = `
           </div>
           <a
             class="link-button variant-default clickable panel-table-item"
+            href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
             rel="noopener noreferrer"
             target="_blank"
-            to="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
           >
             
             <div

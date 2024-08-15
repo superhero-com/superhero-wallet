@@ -1,7 +1,7 @@
 <template>
   <Component
     :is="(href) ? 'LinkButton' : 'div'"
-    :to="href"
+    :href="href"
     :is-external="isExternalLink"
     :class="{
       clickable: !!href,
