@@ -27,6 +27,7 @@
             :protocol="protocol"
             :address="bid.accountId"
             :name="getName(bid.accountId).value"
+            class="account-item"
           />
         </div>
       </div>
@@ -107,8 +108,8 @@ export default defineComponent({
       justify-content: space-between;
     }
 
-    .account-item {
-      margin-top: 4px;
+    .account-item :deep(.name) {
+      max-width: 150px;
     }
 
     .auction-overview {
