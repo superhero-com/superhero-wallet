@@ -86,7 +86,7 @@
               <AnimatedPending
                 class="pending-icon"
               />
-              {{ $t('common.pending') }}...
+              {{ $t('common.pending') }}
             </template>
           </DetailsItem>
           <DetailsItem

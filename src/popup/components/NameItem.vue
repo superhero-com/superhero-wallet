@@ -12,7 +12,7 @@
           class="pending"
         >
           <PendingIcon class="pending-icon" />
-          {{ $t('common.pending') }}...
+          {{ $t('common.pending') }}
         </div>
         <div
           v-else
