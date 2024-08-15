@@ -13,12 +13,13 @@ import type {
   IToken,
   ITokenBalance,
   ITransaction,
+  ITransactionApiPaginationParams,
   ITransferResponse,
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
 import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
-import { toShiftedBigNumber } from '@/utils';
+import { excludeFalsy, toShiftedBigNumber } from '@/utils';
 import { useNetworks } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -178,10 +179,43 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     return {} as any; // TODO
   }
 
-  override async fetchAccountTransactions(): Promise<IFetchTransactionResult> {
+  override async fetchAccountTransactions(
+    address: AccountAddress,
+    { lastTxId }: ITransactionApiPaginationParams = {},
+  ): Promise<IFetchTransactionResult> {
+    const connection = this.getConnection();
+    const publicKey = new PublicKey(address);
+    const rawTransactions = await connection.getSignaturesForAddress(publicKey, {
+      before: lastTxId,
+    });
+    const signatures = rawTransactions.map(({ signature }) => signature);
+    const transactions = await connection.getParsedTransactions(signatures, {
+      maxSupportedTransactionVersion: 0,
+    });
+
     return {
-      regularTransactions: [], // TODO
-      paginationParams: {}, // TODO
+      regularTransactions: transactions
+        .filter(excludeFalsy)
+        .map(({ blockTime, meta, transaction }) => ({
+          hash: transaction.signatures[0] as any,
+          microTime: (blockTime || 0) * 1000,
+          pending: false,
+          protocol: this.protocol,
+          transactionOwner: address,
+          tx: {
+            contractId: this.coinContractId, // TODO update for token transfers
+            type: 'SpendTx', // TODO
+            amount: +toShiftedBigNumber(
+              (meta?.preBalances[0] || 0) - (meta?.postBalances[0] || 0),
+              -this.getAmountPrecision(),
+            ),
+            fee: meta?.fee || 0,
+            log: meta?.logMessages || undefined,
+          },
+        })),
+      paginationParams: {
+        lastTxId: rawTransactions.at(-1)?.signature,
+      },
     };
   }
 

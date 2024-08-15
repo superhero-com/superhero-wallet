@@ -12,7 +12,7 @@ export const SOL_COINGECKO_COIN_ID = 'solana';
 
 export const SOL_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData = {
   [NETWORK_TYPE_MAINNET]: {
-    nodeUrl: 'https://api.mainnet-beta.solana.com', // TODO find working node API
+    nodeUrl: 'https://go.getblock.io/a9583f344e9e41e8a178738568430238', // TODO find working node API
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: 'https://api.testnet.solana.com', // TODO replace temp values - use our own node
@@ -22,5 +22,3 @@ export const SOL_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData = {
 export const SOL_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
   ? SOL_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET]
   : SOL_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET];
-
-console.log({ SOL_NETWORK_DEFAULT_ENV_SETTINGS });
