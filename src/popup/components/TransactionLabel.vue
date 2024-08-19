@@ -48,7 +48,7 @@
         v-if="transaction.pending"
         :class="{ secondary: !label.customPending || showTransactionOwner }"
       >
-        {{ `${label.customPending}...` || $t('common.pending') }}
+        {{ label.customPending ? `${label.customPending}...` : $t('common.pending') }}
       </span>
       <span
         v-else-if="!showTransactionOwner"
