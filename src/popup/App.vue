@@ -155,6 +155,14 @@ export default defineComponent({
       }
     }
 
+    function setHtmlBrowserClass() {
+      if (IS_FIREFOX) {
+        document.documentElement.classList.add('is-firefox');
+      } else if (IS_CHROME_BASED) {
+        document.documentElement.classList.add('is-chrome');
+      }
+    }
+
     async function checkExtensionUpdates() {
       // `requestUpdateCheck` does not exist in the `runtime` type
       // because this feature is available only for selected browsers.
@@ -230,6 +238,9 @@ export default defineComponent({
     initVisibilityListeners();
 
     onBeforeMount(async () => {
+      setHtmlEnvironmentClasses();
+      setHtmlBrowserClass();
+
       if (IS_MOBILE_APP) {
         StatusBar.setStyle({ style: Style.Dark });
         StatusBar.setBackgroundColor({
@@ -240,7 +251,6 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      setHtmlEnvironmentClasses();
       checkExtensionUpdates();
       restoreLanguage();
       restoreTransferSendForm();
@@ -359,6 +369,13 @@ export default defineComponent({
     min-width: $extension-width;
     min-height: $extension-height;
     max-width: $phone-width;
+  }
+
+  // Temporary fix for the issue that was introduced by Firefox v129.0.1.
+  // FF was not able to use the `min-height` property to establish the app size.
+  // @TODO maybe future versions of FF will fix this so this block can be removed.
+  @at-root html.is-extension.is-firefox & {
+    height: $extension-height;
   }
 
   @include mixins.env-web {
