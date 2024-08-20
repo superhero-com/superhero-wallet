@@ -25,9 +25,9 @@
       <BtnHelp
         v-if="help || showHelp"
         class="btn-help"
-        :title="help.title"
-        :msg="help.msg"
-        :full-screen="!!help.fullscreen"
+        :title="help?.title"
+        :msg="help?.msg"
+        :full-screen="!!help?.fullscreen"
         @help="$emit('help')"
       />
       <div

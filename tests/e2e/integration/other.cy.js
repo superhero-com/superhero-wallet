@@ -23,6 +23,7 @@ describe('Tests cases not connected to specific page', () => {
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)
         .visit('')
+        .loginUsingPassword()
         .urlEquals(redirect ? path : '/account');
     });
   });
