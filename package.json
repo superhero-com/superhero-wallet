@@ -64,6 +64,7 @@
     "@ionic/vue": "^8.2.6",
     "@ionic/vue-router": "^8.2.6",
     "@ngraveio/bc-ur": "^1.1.13",
+    "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.95.2",
     "@trapezedev/configure": "^7.0.10",
     "@vee-validate/i18n": "^4.13.2",

@@ -5,7 +5,10 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "sol-account-details" */
     './AccountDetails.vue'
   ),
-  AccountDetailsTokens: null,
+  AccountDetailsTokens: () => import(
+    /* webpackChunkName: "sol-account-details" */
+    './AccountDetailsTokens.vue'
+  ),
   AccountDetailsNames: null,
   TransactionDetails: null,
   TransferReceiveModal: null,

@@ -1,7 +1,13 @@
 /* eslint-disable class-methods-use-this */
 
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import {
+  Connection,
+  Keypair,
+  ParsedAccountData,
+  PublicKey,
+} from '@solana/web3.js';
 import { derivePath } from 'ed25519-hd-key';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
@@ -19,7 +25,7 @@ import type {
   NetworkTypeDefault,
 } from '@/types';
 import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
-import { excludeFalsy, toShiftedBigNumber } from '@/utils';
+import { excludeFalsy, handleUnknownError, toShiftedBigNumber } from '@/utils';
 import { useNetworks } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -159,8 +165,35 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     return []; // TODO
   }
 
-  override async fetchAccountTokenBalances(): Promise<ITokenBalance[] | null> {
-    return []; // TODO
+  override async fetchAccountTokenBalances(
+    address: AccountAddress,
+  ): Promise<ITokenBalance[] | null> {
+    try {
+      const connection = this.getConnection();
+      const accounts = await connection.getParsedProgramAccounts(
+        TOKEN_PROGRAM_ID,
+        {
+          filters: [
+            { dataSize: 165 },
+            { memcmp: { offset: 32, bytes: address } },
+          ],
+        },
+      );
+
+      return (accounts || []).map(({ account, pubkey }) => {
+        const { tokenAmount } = (account.data as ParsedAccountData)?.parsed?.info || {};
+        return {
+          address,
+          protocol: this.protocol,
+          contractId: pubkey.toString(),
+          amount: tokenAmount.amount || 0,
+          decimals: tokenAmount.decimals || this.coinPrecision,
+        };
+      });
+    } catch (error) {
+      handleUnknownError(error);
+      return null;
+    }
   }
 
   override async fetchTokenInfo(): Promise<IToken | undefined> {
@@ -185,38 +218,46 @@ export class SolanaAdapter extends BaseProtocolAdapter {
   ): Promise<IFetchTransactionResult> {
     const connection = this.getConnection();
     const publicKey = new PublicKey(address);
-    const rawTransactions = await connection.getSignaturesForAddress(publicKey, {
-      before: lastTxId,
-    });
-    const signatures = rawTransactions.map(({ signature }) => signature);
-    const transactions = await connection.getParsedTransactions(signatures, {
-      maxSupportedTransactionVersion: 0,
-    });
+    try {
+      const rawTransactions = await connection.getSignaturesForAddress(publicKey, {
+        before: lastTxId,
+      });
+      const signatures = rawTransactions.map(({ signature }) => signature);
+      const transactions = await connection.getParsedTransactions(signatures, {
+        maxSupportedTransactionVersion: 0,
+      });
 
-    return {
-      regularTransactions: transactions
-        .filter(excludeFalsy)
-        .map(({ blockTime, meta, transaction }) => ({
-          hash: transaction.signatures[0] as any,
-          microTime: (blockTime || 0) * 1000,
-          pending: false,
-          protocol: this.protocol,
-          transactionOwner: address,
-          tx: {
-            contractId: this.coinContractId, // TODO update for token transfers
-            type: 'SpendTx', // TODO
-            amount: +toShiftedBigNumber(
-              (meta?.preBalances[0] || 0) - (meta?.postBalances[0] || 0),
-              -this.getAmountPrecision(),
-            ),
-            fee: meta?.fee || 0,
-            log: meta?.logMessages || undefined,
-          },
-        })),
-      paginationParams: {
-        lastTxId: rawTransactions.at(-1)?.signature,
-      },
-    };
+      return {
+        regularTransactions: transactions
+          .filter(excludeFalsy)
+          .map(({ blockTime, meta, transaction }) => ({
+            hash: transaction.signatures[0] as any,
+            microTime: (blockTime || 0) * 1000,
+            pending: false,
+            protocol: this.protocol,
+            transactionOwner: address,
+            tx: {
+              contractId: this.coinContractId, // TODO update for token transfers
+              type: 'SpendTx', // TODO
+              amount: +toShiftedBigNumber(
+                (meta?.preBalances[0] || 0) - (meta?.postBalances[0] || 0),
+                -this.getAmountPrecision(),
+              ),
+              fee: meta?.fee || 0,
+              log: meta?.logMessages || undefined,
+            },
+          })),
+        paginationParams: {
+          lastTxId: rawTransactions.at(-1)?.signature,
+        },
+      };
+    } catch (error: any) {
+      handleUnknownError(error);
+      return {
+        regularTransactions: [],
+        paginationParams: {},
+      };
+    }
   }
 
   override async fetchAccountAssetTransactions(): Promise<IFetchTransactionResult> {
