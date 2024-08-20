@@ -41,6 +41,7 @@ export const STUB_TIP_NOTE = 'Lorem ipsum dolor sit amet, consectetur adipiscing
 
 export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
+  password: 'testPassword123',
   addressAeternity: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
   addressBitcoinTestnet: 'tb1qqhzkgwgjcyr5a7h3r5ayxxs3n6e620plpx58wv',
   addressEthereum: '0x909C407d6FD235DE14db97e2234fCB71E99d6E1c',

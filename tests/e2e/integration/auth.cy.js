@@ -4,8 +4,8 @@ describe('Test cases for login functionality', () => {
       .get('[data-cy=balance-info]')
       .should('be.visible')
 
-      .shouldRedirect('/', '/account')
-      .shouldRedirect('/more/about/terms', '/more/about/terms')
+      .shouldRedirect('/', '/account', true)
+      .shouldRedirect('/more/about/terms', '/more/about/terms', true)
 
       .logout()
       .shouldRedirect('/account', '/')
