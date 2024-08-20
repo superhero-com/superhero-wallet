@@ -44,6 +44,7 @@
 
       <BtnMain
         class="login-btn"
+        data-cy="login-btn"
         variant="primary"
         :disabled="!password.length || isAuthenticating || isAuthFailed"
         :text="$t('pages.secureLogin.login.unlock')"

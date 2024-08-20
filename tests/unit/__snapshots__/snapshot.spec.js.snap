@@ -223,7 +223,7 @@ exports[`Pages Index 1`] = `
           </div>
         </label>
         <a
-          class="terms-of-use agreed"
+          class="terms-of-use"
           data-cy="terms"
         >
           locale-specific-text
@@ -375,7 +375,7 @@ exports[`Pages Index 2`] = `
           </div>
         </label>
         <a
-          class="terms-of-use agreed"
+          class="terms-of-use"
           data-cy="terms"
         >
           locale-specific-text
@@ -527,7 +527,7 @@ exports[`Pages Index 3`] = `
           </div>
         </label>
         <a
-          class="terms-of-use agreed"
+          class="terms-of-use"
           data-cy="terms"
         >
           locale-specific-text
