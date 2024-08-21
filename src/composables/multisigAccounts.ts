@@ -333,6 +333,8 @@ export function useMultisigAccounts({
     composableInitialized = true;
 
     onNetworkChange(() => {
+      multisigAccounts.value = [];
+      activeMultisigAccountId.value = '';
       updateMultisigAccounts();
       multisigContractInstances = {};
     });
