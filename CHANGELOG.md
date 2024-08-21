@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.11](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.9...v2.2.11) (2024-08-21)
+
+
+### Features
+
+* add new connection statuses ([2d1bda6](https://github.com/Superhero-com/superhero-wallet/commit/2d1bda6809d6510d246cafce8e50c2bfade24bef))
+* extension as side panel ([fe4a103](https://github.com/Superhero-com/superhero-wallet/commit/fe4a1037693f777175beb645d27a11d3d948b404))
+* invite page route name constant ([696d1b5](https://github.com/Superhero-com/superhero-wallet/commit/696d1b5cf226029b5e53720d36b12133d8550597))
+* replace terms and privacy policy icons ([e605c3d](https://github.com/Superhero-com/superhero-wallet/commit/e605c3d77f3ba2496ceca5accbf0a6871662712d))
+* show decoded data for ethereum transactions ([72dca02](https://github.com/Superhero-com/superhero-wallet/commit/72dca024e0c60745fdecf7bfe1e64c88953dbbff))
+* wallet connect modal styling updates ([e25a0df](https://github.com/Superhero-com/superhero-wallet/commit/e25a0df223e2ae9f2de7b16b1ec878a49ec731cb))
+
+
+### Bug Fixes
+
+* **aens:** show name bid history correctly ([78257af](https://github.com/Superhero-com/superhero-wallet/commit/78257af761fc3a62846cf2d1c9cfa3f080d4090c))
+* align revoke icon correctly ([4a215c3](https://github.com/Superhero-com/superhero-wallet/commit/4a215c3b873fca8575f618f74aaddd16732740eb))
+* firefox extension popup content too small ([8da2abd](https://github.com/Superhero-com/superhero-wallet/commit/8da2abd256f73f508de9c5840e5b148b1cb938e0))
+* input field disabled state ([59fb7a1](https://github.com/Superhero-com/superhero-wallet/commit/59fb7a1b8661607ffc4c6fa06d186caf675db8a0))
+* manifest side panel warnings ([2291516](https://github.com/Superhero-com/superhero-wallet/commit/229151623c5928bf1d75c5892403c785ef77354b))
+* **multisig:** show correct info on network switch ([3598bd7](https://github.com/Superhero-com/superhero-wallet/commit/3598bd7f92bd90f5d419a257081c0f64bc292f72))
+* network list action buttons opacity ([4b89dd7](https://github.com/Superhero-com/superhero-wallet/commit/4b89dd7756199e45f202ced793c94176430e057c))
+* **panel-table-item:** be able to click link ([390845f](https://github.com/Superhero-com/superhero-wallet/commit/390845f2dddda82ddbc67404a47c283c64abce36))
+* show correct pending item status ([89e7b3a](https://github.com/Superhero-com/superhero-wallet/commit/89e7b3a69d961e849767987f9bfb19f0ad741d92))
+* transaction label for pending transactions ([2070bc5](https://github.com/Superhero-com/superhero-wallet/commit/2070bc5fda4c4bdfac3a2acd5136794a5e9bde66))
+* **wallet-connect:** approve all required events ([a034cfb](https://github.com/Superhero-com/superhero-wallet/commit/a034cfb2fb97906ff5d6aae285df6570bc1b2085))
+
+
+### Maintenance
+
+* active scanner html class ([db78d96](https://github.com/Superhero-com/superhero-wallet/commit/db78d960abef6c130abaca67941df25dd2dd31f9))
+* **aens:** use v3 endpoint in auctions ([87f49a8](https://github.com/Superhero-com/superhero-wallet/commit/87f49a82b3262a4f36aa44a76c37b77a4dd0edd1))
+* remove raw tx from transaction interface ([faa305a](https://github.com/Superhero-com/superhero-wallet/commit/faa305a0bab1f239ff725ca8290119501b57e82a))
+* remove transaction type property ([44a5856](https://github.com/Superhero-com/superhero-wallet/commit/44a58566219998b60d111eb2a3389e86d31dc3e0))
+* remove unused dependency ([05e2bf8](https://github.com/Superhero-com/superhero-wallet/commit/05e2bf88074883d739565ea2bb2de47f2ede3894))
+* rename network row event names ([f1d5c61](https://github.com/Superhero-com/superhero-wallet/commit/f1d5c61bfa70ee5a63a36c954b5de3c1f86006ad))
+* update dependencies ([271a383](https://github.com/Superhero-com/superhero-wallet/commit/271a38380e0ae1f1e121f339e29fad7e81b8c4e8))
+* update reset wallet modal ([5f17894](https://github.com/Superhero-com/superhero-wallet/commit/5f17894118828467a2decbca574e5bfb6627a6e4))
+* update validation wording ([0ee6b8c](https://github.com/Superhero-com/superhero-wallet/commit/0ee6b8cc87c82c7976c3cd4f66980a1ca118d359))
+
 ### [2.2.9](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.8...v2.2.9) (2024-07-19)
 
 
