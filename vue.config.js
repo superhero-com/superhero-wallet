@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
@@ -10,6 +12,15 @@ const { version: sdkVersion } = require('./node_modules/@aeternity/aepp-sdk/pack
 const { npm_package_version, PLATFORM, NODE_ENV } = process.env;
 
 const parseBool = (val) => (val ? JSON.parse(val) : false);
+
+/**
+ * Remove string entries from array by modifying the initial array.
+ * @param {string[]} arr
+ * @param {string[]} values
+ */
+const removeArrEntries = (arr, values) => values.forEach(
+  (val) => arr.splice(arr.findIndex((arrElem) => arrElem === val), 1),
+);
 
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
@@ -76,19 +87,25 @@ module.exports = {
         },
         manifestTransformer: (manifest) => {
           manifest.permissions.push(...UNFINISHED_FEATURES ? ['clipboardRead'] : []);
-          manifest.permissions.push(...!IS_FIREFOX_EXT ? ['offscreen'] : []);
+
           if (IS_FIREFOX_EXT) {
-            // eslint-disable-next-line no-param-reassign
             manifest.background.page = '/offscreen.html';
-            // eslint-disable-next-line no-param-reassign
             delete manifest.background.service_worker;
-            // eslint-disable-next-line no-param-reassign
+
             manifest.browser_specific_settings = {
               gecko: {
                 id: '{aee9e933-52b6-410a-8c3f-99c6be596b4e}',
               },
             };
+
+            // sidePanel is a chrome specific feature - these settings causes warnings in FF
+            delete manifest.side_panel;
+            removeArrEntries(manifest.permissions, ['sidePanel']);
+          } else {
+            manifest.permissions.push('offscreen');
+            delete manifest.sidebar_action;
           }
+
           return manifest;
         },
       },

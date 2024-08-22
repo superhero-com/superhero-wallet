@@ -127,7 +127,7 @@ export default defineComponent({
     resize: none;
 
     &.resizable {
-      resize: both;
+      resize: vertical;
     }
   }
 

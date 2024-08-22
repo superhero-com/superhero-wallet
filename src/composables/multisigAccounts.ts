@@ -41,6 +41,7 @@ export interface MultisigAccountsOptions {
 
 let multisigContractInstances: Dictionary<Contract<SimpleGAMultiSigContractApi>> = {};
 let composableInitialized = false;
+const isMultisigBackendUnavailable = ref(false);
 
 const POLLING_INTERVAL = 12000;
 
@@ -257,10 +258,9 @@ export function useMultisigAccounts({
       await Promise.all(aeAccounts.value.map(async ({ address }) => rawMultisigData.push(
         ...(await fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/${address}`)),
       )));
+      isMultisigBackendUnavailable.value = false;
     } catch {
-      // TODO: handle failure in multisig loading
-      // eslint-disable-next-line no-console
-      console.log('failed to fetch multisigAccounts');
+      isMultisigBackendUnavailable.value = true;
     }
 
     rawMultisigData = uniqBy(rawMultisigData, 'contractId');
@@ -333,25 +333,28 @@ export function useMultisigAccounts({
     composableInitialized = true;
 
     onNetworkChange(() => {
+      multisigAccounts.value = [];
+      activeMultisigAccountId.value = '';
       updateMultisigAccounts();
       multisigContractInstances = {};
     });
   }
 
   return {
-    multisigAccounts: allMultisigAccounts,
-    pendingMultisigAccounts,
-    isAdditionalInfoNeeded,
-    isActiveMultisigAccountPending,
     activeMultisigAccountId,
     activeMultisigAccount,
     activeMultisigAccountExplorerUrl,
+    isAdditionalInfoNeeded,
+    isActiveMultisigAccountPending,
+    isMultisigBackendUnavailable,
+    multisigAccounts: allMultisigAccounts,
+    pendingMultisigAccounts,
+    addPendingMultisigAccount,
     addTransactionToPendingMultisigAccount,
     fetchAdditionalInfo,
+    getMultisigAccountByContractId,
     setActiveMultisigAccountId,
     stopFetchingAdditionalInfo,
     updateMultisigAccounts,
-    getMultisigAccountByContractId,
-    addPendingMultisigAccount,
   };
 }

@@ -12,6 +12,34 @@
   }
 }
 
+// Based on class added to html element by App.vue component
+@mixin env-mobile {
+  @at-root html.is-mobile & {
+    @content;
+  }
+}
+
+// Based on class added to html element by App.vue component
+@mixin env-mobile-ios {
+  @at-root html.is-mobile-ios & {
+    @content;
+  }
+}
+
+// Running in extension popup or extension side panel
+@mixin env-extension {
+  @at-root html.is-extension & {
+    @content;
+  }
+}
+
+// Running in regular browser window
+@mixin env-web {
+  @at-root html.is-web & {
+    @content;
+  }
+}
+
 @mixin collapsed {
   @media screen and (max-height: 250px) {
     @content;

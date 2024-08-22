@@ -8,9 +8,8 @@
     <div class="top-icon-wrapper">
       <IconBoxed
         :icon="ImportIcon"
-        class="icon"
-        icon-smaller
-        is-boxed
+        icon-padded
+        bg-colored
       />
     </div>
 
@@ -102,13 +101,7 @@ export default defineComponent({
   .top-icon-wrapper {
     margin-bottom: 20px;
     text-align: center;
-
-    .icon {
-      color: $color-primary;
-      border-color: $color-bg-1;
-      outline: 4px solid rgba($color-white, 0.05);
-      background-color: rgba($color-primary, 0.2);
-    }
+    color: $color-primary;
   }
 }
 </style>

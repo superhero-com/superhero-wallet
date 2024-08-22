@@ -1,14 +1,16 @@
 <template>
   <RadioButton
+    v-slot="{ checked }"
     :value="isActive"
     class="network-row"
     type="radio"
     name="activeNetwork"
-    @input="$emit('selectNetwork', network.name)"
+    @input="$emit('network-select', network.name)"
   >
     <div class="name-and-actions">
       <p
         class="name"
+        :class="{ 'label-part-unchecked': !checked }"
         data-cy="network-name"
         v-text="network.name"
       />
@@ -26,15 +28,17 @@
         <BtnIcon
           size="sm"
           data-cy="network-delete"
-          icon-variant="danger"
           dimmed
           :icon="TrashIcon"
-          @click="$emit('deleteNetwork', network.name);"
+          @click="$emit('network-delete', network.name);"
         />
       </div>
     </div>
 
-    <table class="network-details">
+    <table
+      class="network-details"
+      :class="{ 'label-part-unchecked': !checked }"
+    >
       <tbody>
         <tr
           v-for="(protocolSettings, protocol) in networkSettingsToDisplay"
@@ -51,7 +55,7 @@
 
 <script lang="ts">
 import { PropType, computed, defineComponent } from 'vue';
-import type { INetwork, Protocol } from '@/types';
+import type { INetwork, NetworkProtocolsSettings, Protocol } from '@/types';
 import { NETWORK_TYPE_CUSTOM } from '@/constants';
 import { ROUTE_NETWORK_EDIT } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -72,18 +76,20 @@ export default defineComponent({
   },
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    selectNetwork: (name: string) => true,
+    'network-select': (name: string) => true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    deleteNetwork: (name: string) => true,
+    'network-delete': (name: string) => true,
   },
   setup(props) {
     // Filter out the network protocol settings that has no `nodeUrl` default property
     const networkSettingsToDisplay = computed(
-      () => Object.fromEntries((Object.keys(props.network.protocols) as Protocol[])
-        .map((protocol) => {
-          const settings = props.network.protocols[protocol];
-          return settings.nodeUrl ? [protocol, settings] : [];
-        })),
+      (): NetworkProtocolsSettings => Object.fromEntries(
+        (Object.keys(props.network.protocols) as (keyof typeof props.network.protocols)[])
+          .map((protocol) => {
+            const settings = props.network.protocols[protocol];
+            return settings.nodeUrl ? [protocol, settings] : [];
+          }),
+      ),
     );
 
     function getProtocolName(protocol: Protocol) {
@@ -108,6 +114,10 @@ export default defineComponent({
 
 .network-row {
   margin-bottom: 12px;
+
+  .label-part-unchecked {
+    opacity: 0.5;
+  }
 
   .name-and-actions {
     display: flex;

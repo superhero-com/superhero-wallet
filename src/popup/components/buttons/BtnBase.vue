@@ -7,7 +7,7 @@
     :target="href ? '_blank' : null"
     :aria-disabled="disabled ? 'true' : null"
     :style="bgColorStyle"
-    :type="submit ? 'submit' : null"
+    :type="submit ? 'submit' : 'button'"
     :class="[
       `variant-${variant}`,
       {

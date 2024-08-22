@@ -1,4 +1,4 @@
-import { INetworkProtocolSettings } from '@/types';
+import { Dictionary, INetworkProtocolSettings } from '@/types';
 
 /**
  * Settings specific to this protocol.
@@ -17,3 +17,8 @@ export type EthNetworkProtocolPredefinedSettings =
 export type IEthNetworkSettings = INetworkProtocolSettings<EthNetworkProtocolSettings>;
 
 export type IEthNetworkPredefinedSettings = Record<EthNetworkProtocolPredefinedSettings, string>;
+
+export interface EthDecodedCallData {
+  functionName: string;
+  args: Dictionary;
+}

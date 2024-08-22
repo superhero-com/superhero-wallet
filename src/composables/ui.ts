@@ -80,7 +80,7 @@ export function useUi() {
   }
 
   function setMobileQrScannerVisible(open: boolean) {
-    document.querySelector('body')?.classList[(open) ? 'add' : 'remove']('scanner-active');
+    document.documentElement?.classList[(open) ? 'add' : 'remove']('scanner-active');
     isMobileQrScannerVisible.value = open;
   }
 

@@ -17,7 +17,7 @@
     "connected": "Connected",
     "connecting": "Connecting...",
     "connectingAs": "Connecting as",
-    "connectionFailed": "Connection failed",
+    "connectionFailed": "Connection failed.",
     "contractId": "Contract ID",
     "notNow": "Not now",
     "copy": "Copy",
@@ -34,10 +34,10 @@
     "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
     "nonce": "Nonce",
-    "noProtocolAccountFound": "No {protocol} account found",
+    "noProtocolAccountFound": "No {protocolName} account found. You need to add an {protocolName} account to your wallet first.",
     "of": "of",
     "ok": "OK",
-    "pending": "Pending",
+    "pending": "Pending...",
     "priceNotAvailable": "price: n/a",
     "receive": "Receive",
     "search": "Search",
@@ -49,13 +49,13 @@
     "status": "Status",
     "swap": "Swap",
     "browser": "Browser",
-    "title": "Superhero wallet",
+    "title": "Superhero Wallet",
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
     "unrecognized": "Unrecognized",
     "you": "You",
-    "verifying": "Verifying",
+    "verifying": "Verifying...",
     "max": "MAX",
     "tokens": "tokens",
     "on": "On",
@@ -71,11 +71,45 @@
     "scan": "Scan"
   },
   "connectionStatus": {
-    "offline": "You are offline. Go online to get real time data.",
+    "offline": {
+      "statusMessage": "Offline. Go online to get real time data.",
+      "title": "Offline",
+      "description": "You are offline. Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment. <p> Please go online to get real time data! </p>"
+    },
     "node": {
-      "error": "Unable to connect to the chosen node.",
+      "error": {
+        "statusMessage": "Unable to connect to the chosen node.",
+        "title": "Unable to fetch network ID",
+        "description": "Superhero Wallet is unable to fetch this network ID at the moment. <p> Please try adding the network again later. </p>"
+      },
       "connecting": "Connecting to the node...",
-      "connected": "Connected"
+      "connected": "Connected!"
+    },
+    "middleware": {
+      "error": {
+        "title": "Middleware is offline.",
+        "description": "Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment."
+      },
+      "syncing": {
+        "statusMessage": "Middleware is syncing...",
+        "title": "Middleware is syncing",
+        "description": "Superhero Wallet middleware is syncing.<p> All wallet features are accessible but some data such as balances might be outdated and transactions might appear pending for longer than usual. </p><p> Updated data will be available shortly. </p>"
+      }
+    },
+    "multisig": {
+      "statusMessage": "Temporary multisig backend failure.",
+      "title": "Multisig backend failure",
+      "description": "Multisig vaults may not be accessible at the moment due to temporary backend failure. <p> If you are trying to access your multisig vaults please try again later. </p>"
+    },
+    "backend": {
+      "statusMessage": "Temporary backend failure.",
+      "title": "Backend failure",
+      "description": "Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment due to temporary backend failure."
+    },
+    "aeternityBackend": {
+      "statusMessage": "Temporary aeternity backend failure.",
+      "title": "aeternity backend failure",
+      "description": "Some features such as setting default name, tipping related functionality may not be accessible at the moment due to temporary aeternity backend failure."
     }
   },
   "dashboard": {
@@ -93,7 +127,7 @@
     },
     "backUpCard": {
       "title": "Back up your seed phrase",
-      "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
+      "description": "Make a copy of the seed phrase to be able to recover your wallet and avoid losing funds.",
       "button": "Back up now"
     },
     "daeppBrowserCard": {
@@ -102,8 +136,8 @@
       "button": "Browse"
     },
     "buyCard": {
-      "title": "Buy AE coin",
-      "description": "Use Simplex to buy AE coins with your credit card or bank account.",
+      "title": "Buy AE",
+      "description": "Use Simplex to buy æternity coins with your credit card or bank account.",
       "button": "Buy AE"
     },
     "nameCard": {
@@ -124,7 +158,7 @@
     "consensus": "Consensus",
     "signatureRequested": "Your signature is requested.",
     "transactionSigned": "You have signed the transaction.",
-    "transactionReady": "Transaction is ready to be sent",
+    "transactionReady": "Transaction is ready to be sent.",
     "multisigVault": "Multisig vault",
     "address": "Multisig vault address",
     "version": "Contract version",
@@ -145,7 +179,7 @@
       "titleAeternityAccount": "Add æternity account",
       "msg": "Please select blockchain to add an account address to.",
       "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "msgAeternity": "Generate new account address to store, send and receive crypto currency on the æternity blockchain.",
+      "msgAeternity": "Generate new account address to store, send and receive cryptocurrency on the æternity blockchain.",
       "btnSubtitle": "Derive another account from your seed",
       "addProtocolAccount": "Add {name} account"
     },
@@ -179,7 +213,7 @@
     },
     "accountLowBalance": {
       "title": "Insufficient funds",
-      "msg": "You don’t have enough AE on your signing account to {action} this transaction."
+      "msg": "You do not have enough AE on your signing account to {action} this transaction."
     },
     "createMultisigAccount": {
       "title": "Create new multisig vault",
@@ -224,7 +258,7 @@
     },
     "verify": {
       "title": "Verify your URL",
-      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for."
+      "msg": "Make sure that the public address of your Superhero Wallet account, or your .chain name, is added somewhere on the website you want to claim tips from."
     },
     "recipient": {
       "title": "Send cryptocurrency",
@@ -238,7 +272,7 @@
         "chain": {
           "title": "Send to .chain name",
           "linkTitle": "claim your own .chain name",
-          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses!"
+          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses."
         }
       }
     },
@@ -248,7 +282,7 @@
     },
     "verified": {
       "title": "Verified URL",
-      "msg": "The Superhero wallet identifies this URL as verified. This means that æternity blockchain account address has been found on the webpage and tips can be successfully claimed by its owner."
+      "msg": "The Superhero Wallet identifies this URL as verified. This means that æternity blockchain account address has been found on the web page and tips can be claimed by its owner."
     },
     "not-verified": {
       "title": "Not verified URL",
@@ -256,7 +290,7 @@
     },
     "blacklisted": {
       "title": "Inaccessible URL",
-      "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
+      "msg": "The Superhero Wallet can tip any public URL. Currently, web pages that require logging in to view information can not be tipped."
     },
     "not-secure": {
       "title": "Not secure URL",
@@ -269,11 +303,11 @@
       "create-report": "Create report"
     },
     "donate-errors": {
-      "title": "Your Error Report Has Been Sent",
+      "title": "Your error report has been sent",
       "msg": "Thank you for being such a helpful Superhero!"
     },
     "donate-errors-error": {
-      "title": "Your Error Report Was not send",
+      "title": "Your error report was not sent",
       "msg": "There was problem sending your error report."
     },
     "invalid-qr-code": {
@@ -296,25 +330,25 @@
     "confirm-raw-sign": {
       "title": "Sign raw transaction",
       "warning": {
-        "title": "Transaction Warning",
-        "content": "Transaction data is either broken or Superhero wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
+        "title": "Transaction warning",
+        "content": "Transaction data is either broken or Superhero Wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
       }
     },
     "confirmUnsafeSign": {
-      "heading": "would like you to sign a data.",
+      "heading": "would like you to sign data.",
       "superheroChatJwtSign": "would like you to sign a message in order to login.",
       "title": "Sign data",
       "typeJwt": "JSON Web Token (JWT)",
       "typeUnknown": "The data is of unknown type.",
       "type": "Type",
-      "warning": "Sign the data only if you trust the dapp and it's owner."
+      "warning": "Sign the data only if you trust the dapp and its owner."
     },
     "qrCodeReader": {
       "grantPermission": "Grant camera permission",
       "scanQr": "Scan QR code",
       "noWebcam": "No camera detected",
       "noWebcamSubtitle": "Please enable your device camera and check again if it is functioning properly.",
-      "subtitle": "Allow Superhero wallet to access your camera in order to scan QR codes.",
+      "subtitle": "Allow Superhero Wallet to access your camera in order to scan QR codes.",
       "settings": "Settings",
       "qrCodeHasMultipleFragments": "In order to sign this transaction you need to scan multiple QR codes. Keep your camera focused on the changing QRs until all codes have been scanned.",
       "scanningProgress": "scanned"
@@ -325,11 +359,11 @@
     },
     "auctions-help": {
       "title": "Auctions and bidding",
-      "msg": "If your .chain name is {'<'}strong{'>'}12 characters or less{'<'}/strong{'>'} – you’ve got to bid for it in an auction. To win the bidding process, all you have to do is have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.{'<'}br /{'>'}{'<'}br /{'>'}Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
+      "msg": "If your .chain name is {'<'}strong{'>'}12 characters or less{'<'}/strong{'>'} – you have to bid for it in an auction. To win the bidding process, all you should do is to have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.{'<'}br /{'>'}{'<'}br /{'>'}Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
     },
     "nameAutoExtendHelp": {
       "title": "Autoextend name",
-      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
+      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)."
     },
     "receive": {
       "funds": "funds",
@@ -405,7 +439,7 @@
     },
     "signMessageErrorModal": {
       "title": "Failed to sign message",
-      "msg": "This action cannot be completed at the moment as it requires signing a message with your AirGap account.{'<'}br /{'>'}{'<'}br /{'>'}Signing messages is currently not supported for AirGap accounts"
+      "msg": "This action cannot be completed at the moment as it requires signing a message with your AirGap account.{'<'}br /{'>'}{'<'}br /{'>'}Signing messages is currently not supported for AirGap accounts."
     },
     "send": {
       "title": "Send funds from AirGap account",
@@ -425,7 +459,7 @@
       "title": "Scan the QR code from your AirGap vault in order to sign the transaction.",
       "help": {
         "title": "Sign and send AirGap transaction",
-        "msg": "In  order to sign an AirGap transaction and broadcast it from Superhero wallet you need to follow 3 simple steps: {'<'}br /{'>'}{'<'}br /{'>'}{'<'}ol{'>'}{'<'}li {'>'}Scan the QR code generated by Superhero wallet with your AirGap vault.{'<'}br /{'>'}{'<'}br /{'>'}Alternatively you may copy the code in Superhero wallet and paste it in your AirGap vault. {'<'}/li {'>'}{'<'}li {'>'}Sign the transaction in your AirGap vault. Another QR code will be generated by AirGap vault.{'<'}br /{'>'}{'<'}br /{'>'}Make sure you set AirGap to use QR code V3.{'<'}/li {'>'}{'<'}li {'>'}Scan the QR code generated by AirGap vault with Superhero wallet and confirm broadcasting the transaction.{'<'}br /{'>'}{'<'}br /{'>'}Alternatively you may copy the code from the AirGap vault, paste it in your Superhero wallet and then broadcast the transaction.{'<'}/li {'>'}{'<'}/ol{'>'}"
+        "msg": "In  order to sign an AirGap transaction and broadcast it from Superhero Wallet you need to follow 3 simple steps: {'<'}br /{'>'}{'<'}br /{'>'}{'<'}ol{'>'}{'<'}li {'>'}Scan the QR code generated by Superhero Wallet with your AirGap vault.{'<'}br /{'>'}{'<'}br /{'>'}Alternatively you may copy the code in Superhero Wallet and paste it in your AirGap vault. {'<'}/li {'>'}{'<'}li {'>'}Sign the transaction in your AirGap vault. Another QR code will be generated by AirGap vault.{'<'}br /{'>'}{'<'}br /{'>'}Make sure you set AirGap to use QR code V3.{'<'}/li {'>'}{'<'}li {'>'}Scan the QR code generated by AirGap vault with Superhero Wallet and confirm broadcasting the transaction.{'<'}br /{'>'}{'<'}br /{'>'}Alternatively you may copy the code from the AirGap vault, paste it in your Superhero Wallet and then broadcast the transaction.{'<'}/li {'>'}{'<'}/ol{'>'}"
       }
     }
   },
@@ -445,6 +479,9 @@
     "estimatedGasUsed": "Estimated gas used",
     "maxFee": "Maximum transaction fee",
     "advancedDetails": "Advanced transaction details",
+    "rawData": "Raw",
+    "decoded": "Decoded",
+    "decodingDataFailed": "Transaction data could not be decoded.",
     "data": "Transaction data",
     "gasCost": "Gas cost",
     "gasLimit": "Gas limit",
@@ -472,13 +509,13 @@
       "payingForTx": "Pay For Tx",
       "gaMetaTx": "GA Meta Tx",
       "gaAttachTx": "GA Attach Tx",
-      "multisigProposal": "Multisig Proposal",
+      "multisigProposal": "Multisig proposal",
       "sentTx": "Sending",
       "receivedTx": "Receiving",
       "multisigVaultCreated": "Multisig vault created",
       "transactionFeePaidBy": "Transaction paid by",
       "transactionFeePaid": "Transaction fee paid",
-      "createMultisigVault": "Create Multisig Vault"
+      "createMultisigVault": "Create multisig vault"
     },
     "listType": {
       "sentTx": "Sent",
@@ -541,10 +578,10 @@
       "permissionsEdit": "Edit permissions",
       "permissionsAdd": "Add permissions",
       "commentNew": "Add comment",
-      "donateError": "Donate Data",
-      "address": "Send Address",
-      "signMessage": "Sign Message",
-      "signTransaction": "Sign Transaction",
+      "donateError": "Donate data",
+      "address": "Send address",
+      "signMessage": "Sign message",
+      "signTransaction": "Sign transaction",
       "giftCards": "Gift cards",
       "txDetails": "Transaction details",
       "tokenDetails": "Token details",
@@ -595,26 +632,26 @@
         "existing": "Already existing"
       },
       "export": {
-        "title": "Exported Address Book",
-        "message": "Address book exported successfully. You can find the file at: "
+        "title": "Address book exported",
+        "message": "Address book has been successfully exported. You can find the file at: "
       }
     },
     "secureLogin": {
-      "description": "Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
+      "description": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",
       "enableSecureLogin": "Enable secure login",
       "enableDeviceSecureLogin": "Enable device secure authentication",
       "autoLock": {
         "title": "Auto-lock wallet",
-        "descriptionPart1": "Superhero wallet will be locked after the preset time interval of inactivity.",
+        "descriptionPart1": "Superhero Wallet will be locked after the preset time interval of inactivity.",
         "descriptionPart2": "You will be asked to authenticate in order to unlock the screen and continue using the wallet."
       },
       "authenticationTimeout": "Immediately | After {n} min inactivity | After {n} min inactivity",
       "available": {
-        "part1": "Enabling secure login will let you access Superhero wallet app using your mobile device authentication preferences.",
-        "part2": "You can enable this feature later in the Superhero wallet settings."
+        "part1": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",
+        "part2": "You can enable this feature later in the Superhero Wallet settings."
       },
       "unavailable": {
-        "part1": "Superhero Wallet  supports secure login with your mobile device authentication preferences.",
+        "part1": "Superhero Wallet supports secure login with your mobile device authentication preferences.",
         "part2": "Your mobile device does not have secure authentication enabled currently. Would you like to enable it now?"
       },
       "unsupportedDevice": "This feature is currently not supported by the Superhero Wallet browser extension. {'<'}br /{'>'} {'<'}br /{'>'} Secure login is available only to the users of Superhero Wallet mobile apps at the moment.",
@@ -639,7 +676,7 @@
       "balance": "Balance",
       "secureYourAccount": "Secure your account",
       "backupNow": "Back up now",
-      "seedNotification": "Welcome to Superhero wallet! Please backup your seed phrase!",
+      "seedNotification": "Welcome to Superhero Wallet! Please backup your seed phrase!",
       "backup": "backup",
       "updateAvailable": "Update available",
       "updateAvailableText": "There is a new wallet version available for download in the store",
@@ -657,7 +694,7 @@
     "claim": {
       "claim": "Claim tips",
       "noZeroClaim": "There are no tips to be claimed for this URL.",
-      "ae": "AE tokens",
+      "ae": "AE coins",
       "claimed": " Claim request sent! ",
       "url": "URL",
       "tipsOnUrl": "Tips on this URL",
@@ -686,7 +723,7 @@
       "ending-height": "Ending height"
     },
     "accountListConfirm": {
-      "websiteRequestConnect": "would like to connect to your Superhero wallet.",
+      "websiteRequestConnect": "would like to connect to your Superhero Wallet.",
       "addressesRequest": "This aepp is requesting access to view all of your account addresses.",
       "message": "Make sure you trust the aepp provider before accepting the request."
     },
@@ -747,7 +784,7 @@
       "list": {
         "default": "Default",
         "default-make": "Make default",
-        "valid-identifier-error": "Enter valid ae blockchain identifier",
+        "valid-identifier-error": "Enter valid aeternity blockchain identifier",
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",
         "register-name": "Register .chain name",
         "name-hash": "Name code",
@@ -774,7 +811,7 @@
         "length": "Name length",
         "bid": "Bid",
         "endsInApproxTime": "Ends in ≈ {time}",
-        "no-auctions": "There are no .chain names for auction at the moment. Would you like to register one?",
+        "no-auctions": "There are no .chain names at auction at the moment. Would you like to register one?",
         "min-bid": "Bid must be more than {minBid} AE",
         "bid-added": "Bid added successfully",
         "place-bid": "Place bid",
@@ -783,10 +820,10 @@
       }
     },
     "languageSettings": {
-      "chooseLanguage": "Choose Superhero wallet UI language."
+      "chooseLanguage": "Choose Superhero Wallet UI language."
     },
     "currencySettings": {
-      "chooseLanguage": "Choose Superhero wallet fiat currency conversion. Conversion to XAU (gold) is also an available option."
+      "chooseLanguage": "Choose Superhero Wallet fiat currency conversion. Conversion to XAU (gold) is also an available option."
     },
     "index": {
       "term1": "I agree to the Superhero ",
@@ -811,10 +848,10 @@
       "importWallet": "Restore existing wallet",
       "enterSeed": "Enter seed phrase",
       "seedPhrase": "Seed phrase",
-      "enterSeedPhrase": "Please enter the 12 words or more of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
+      "enterSeedPhrase": "Please enter the 12 words or more of your seed phrase (separated by spaces) in the correct order to restore your Superhero Wallet.",
       "importAccount": "Restore wallet",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
-      "invalidSeed": "Your seed phrase should consist of 12 words or more separated by spaces.",
+      "invalidSeed": "Your seed phrase should consist of 12 or more words separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here",
       "scanSeedPhrase": "Scan Seed Phrase",
       "restoringAccounts": "Restoring accounts..."
@@ -823,7 +860,7 @@
       "superhero": "Superhero.com",
       "commentOnComment": "replied to your comment.",
       "commentOnTip": "commented on your tip.",
-      "tipOnComment": "tipped on your comment",
+      "tipOnComment": "tipped your comment.",
       "retipOnTip": "retipped your tip.",
       "claimOfTip": "claimed your tip.",
       "claimOfRetip": "claimed your retip.",
@@ -836,9 +873,9 @@
       "description2": "You can choose below which notifications to receive from social platform Superhero.com.",
       "commentOnTip": "Someone commented on your tip or post.",
       "commentOnComment": "Someone replied to your comment.",
-      "retipOnTip": "Someone retipped to your tip.",
+      "retipOnTip": "Someone retipped your tip.",
       "wallet": "Wallet notifications (always on).",
-      "tipOnComment": "Someone tipped to your comment.",
+      "tipOnComment": "Someone tipped your comment.",
       "claimOfTip": "Someone claimed your tip.",
       "claimOfRetip": "Someone claimed your retip."
     },
@@ -865,7 +902,7 @@
       "verifySeed": "Verify your seed phrase",
       "doneThis": "I have verified seed phrase before",
       "verify": "Verify seed phrase",
-      "toDashboard": "Back to Dashboard",
+      "toDashboard": "Back to dashboard",
       "backUpYourSeedPhrase": "Back up your seed phrase {0} on a piece of paper or file that no one but you will ever see. Make multiple copies. Make sure you keep your seed phrase in a safe place!",
       "inCorrectOrder": "in the correct order of 12 words",
       "toBeSureYouGotItRight": "To be sure you got it right, you should {0} clicking on the button below!",
@@ -913,9 +950,9 @@
     },
     "tipPage": {
       "url": "Send tip to",
-      "claimingExplanation": "With Superhero wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page.",
+      "claimingExplanation": "With Superhero Wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens."
+      "minAmountError": "Tips should be over 0.01 USD in AE."
     },
     "transactionDetails": {
       "poolFee": "pool fee",
@@ -947,7 +984,7 @@
       "hash": "Hash",
       "status": "Status",
       "revert": "Reverted",
-      "revertInfo": "Transaction has been reverted. All states returned to the state before the transaction.",
+      "revertInfo": "Transaction has been reverted. All states have been returned to the state before the transaction.",
       "failed": "Failed",
       "reason": "Reason",
       "tipUrl": "Tipped URL",
@@ -973,7 +1010,7 @@
       "infoBox": {
         "signatures": "signatures",
         "signature": "signature",
-        "expired": "Transaction proposal has been expired!!",
+        "expired": "Transaction proposal has expired!",
         "pending": "Pending consensus: {0} more {1} is required to approve the transaction proposal.",
         "approved": "Transaction proposal has been approved by the required number of authorized signers. Transaction can be sent by any of the authorized signers.",
         "revoked": "Transaction proposal has been disapproved by {0} out of {1} required authorized signers. ",
@@ -1028,12 +1065,12 @@
       "networkUrlLabel": "Network URL",
       "networkMiddlewarePlaceholder": "Enter network middleware URL",
       "networkMiddlewareLabel": "Network middleware",
-      "backendUrlPlaceholder": "Enter tipping Backend URL",
+      "backendUrlPlaceholder": "Enter tipping backend URL",
       "backendUrlLabel": "Tipping backend",
       "chainIdPlaceholder": "1",
       "chainIdLabel": "Chain id (number)",
       "error": {
-        "networkExists": "Network with this name exist"
+        "networkExists": "Network with this name exists."
       },
       "moreNetworks": "More",
       "viewAndManage": "View and manage all networks"
@@ -1052,9 +1089,9 @@
       "created-links": "Gift cards",
       "top-up": "Top up",
       "collapse": "Collapse",
-      "claim": "Claim Back",
+      "claim": "Claim back",
       "insufficient-balance": "Insufficient balance",
-      "insufficient-invite-balance": "This invite Link expired and the Tokens are already claimed.",
+      "insufficient-invite-balance": "This invite link expired and the AE coins are already claimed.",
       "tip-attached": "Gift card amount",
       "top-up-with": "Top up with",
       "delete": "Delete"
@@ -1077,9 +1114,11 @@
     },
     "resetWallet": {
       "title": "Reset wallet",
-      "description": "This action will remove all accounts from your wallet and delete the extension storage.",
+      "description": "This action will remove all accounts from your wallet and delete the local storage.",
       "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
-      "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
+      "warning1": "This action will remove all accounts from your wallet and delete the local storage.",
+      "warning2": "Please back up your seed phrase and export your address book records before proceeding.",
+      "warning3": "This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
     },
@@ -1090,7 +1129,7 @@
     },
     "warningDappBrowser": {
       "title": "You are going to visit a \n third-party website",
-      "warning": "Superhero Wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
+      "warning": "Superhero Wallet is not liable for failures in this or any other third-party website as stated in the Superhero Wallet {0}.",
       "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
       "decline": "Decline"
     }
@@ -1111,30 +1150,30 @@
   },
   "validation": {
     "formInvalid": "One or more fields above are not valid. Please review the information you entered.",
-    "required": "This field is required",
+    "required": "This field is required.",
     "url": "Invalid URL",
-    "address": "Enter valid blockchain address or .chain name",
-    "numeric": "The value should be a number",
-    "name": "Enter valid .chain name",
-    "nameRegisteredAddress": "Invalid address or .chain name",
+    "address": "Enter valid blockchain address or .chain name.",
+    "numeric": "Field value should be a number.",
+    "name": "Enter valid .chain name.",
+    "nameRegisteredAddress": "Invalid address or .chain name.",
     "nameUnregistered": "This name has already been registered.",
-    "addressNotSameAs": "Sender and receiver address are the same. You will send {0} to your own account.",
-    "tokenToAnAddress": "Unfortunately you can only send AEX-9 tokens to an address",
-    "airGapToAnAddress": "Sending to .chain names is not supported by AirGap accounts",
-    "addressGeneric": "Invalid {protocol} address",
-    "minValue": "This field must be {0} or more",
-    "minValueExclusive": "This field must be more than {0}",
-    "enoughCoin": "{0} balance is not enough to pay for transaction fee",
-    "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
-    "maxLength": "Maximum {0} characters are allowed in this field",
-    "maxValue": "This field must be {0} or less",
+    "addressNotSameAs": "Sender's and recipient's addresses are the same. You are about to send {0} to your own account.",
+    "tokenToAnAddress": "Currently you can send AEX-9 tokens to an address only.",
+    "airGapToAnAddress": "Sending to .chain names is not supported by AirGap accounts.",
+    "addressGeneric": "Invalid {protocol} address.",
+    "minValue": "Amount must be {0} or more.",
+    "minValueExclusive": "Amount must be more than {0}.",
+    "enoughCoin": "{0} balance is not enough to pay for transaction fee.",
+    "enoughAeSigner": "Insufficient balance in your signing account to propose a transaction.",
+    "maxLength": "Maximum {0} characters are allowed in this field.",
+    "maxValue": "Amount exceeds maximum available: {0}.",
     "maxRedeem": "Maximum redeemable amount is {0} AE.",
-    "maxValueVault": "Amount is exceeding the vault's balance: {0}",
-    "notToken": "Tokens are currently not allowed, please switch to AE",
-    "invalidAddressChainUrl": "Invalid address, .chain name or URL",
-    "invalidAddress": "Invalid account address",
-    "doesNotExceedDecimals": "Amount should not exceed {0} decimals",
-    "addressBookEntryExists": "This {0} already exists in your address book"
+    "maxValueVault": "Amount exceeds vault balance: {0}.",
+    "notToken": "Tokens are currently not allowed, please switch to AE.",
+    "invalidAddressChainUrl": "Invalid address, .chain name or URL.",
+    "invalidAddress": "Invalid account address.",
+    "doesNotExceedDecimals": "Amount should not exceed {0} decimals.",
+    "addressBookEntryExists": "This {0} already exists in your address book."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",
@@ -1143,12 +1182,12 @@
     "subtitle": "Log in using biometric authentication"
   },
   "walletConnect": {
-    "modalTitle": "Connect to Ethereum Dapp",
+    "modalTitle": "Connect to Ethereum dapp",
     "modalSubtitle": "Scan WalletConnect QR Code or enter URI code to connect to the dapp.",
     "uriInputLabel": "WalletConnect URI",
     "dappName": "Name",
     "dappDescription": "Description",
     "dappUrl": "URL",
-    "dappRequestedDisconnect": "Dapp requested to disconnect"
+    "dappRequestedDisconnect": "Dapp requested to disconnect."
   }
 }

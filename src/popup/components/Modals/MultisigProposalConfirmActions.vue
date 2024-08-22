@@ -246,12 +246,8 @@ export default defineComponent({
   .icon-wrapper {
     margin-bottom: 20px;
 
-    .status-icon {
-      margin: 8px;
-
-      &.refuse {
-        color: $color-warning;
-      }
+    .status-icon.refuse {
+      color: $color-warning;
     }
   }
 

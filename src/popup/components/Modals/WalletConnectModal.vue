@@ -3,140 +3,138 @@
     class="wallet-connect-modal"
     from-bottom
     has-close-button
-    centered
     @close="reject()"
   >
-    <template v-if="ethAccounts.length">
-      <div
-        class="parties"
-        :class="{ connected: wcSession }"
+    <div
+      class="parties"
+      :class="{ connected: wcSession }"
+    >
+      <Avatar
+        class="parties-avatar"
+        size="lg"
+        variant="grey"
       >
-        <Avatar
-          class="parties-avatar"
-          size="xl"
-          variant="grey"
-        >
-          <AeternityLogo class="parties-logo-ae" />
-        </Avatar>
+        <AeternityLogo class="parties-logo-ae" />
+      </Avatar>
 
-        <TriangleRightIcon class="parties-arrow" />
+      <TriangleRightIcon class="parties-arrow" />
 
-        <IconBoxed
-          :icon="connecting ? AnimatedSpinner : WalletConnectLogo"
-          class="parties-logo-wc"
-          icon-smaller
-          is-boxed
-        />
+      <IconBoxed
+        :icon="connecting ? AnimatedSpinner : WalletConnectLogo"
+        class="parties-logo-wc"
+        :outline-solid="!!wcSession"
+        bg-colored
+        icon-padded
+      />
 
-        <TriangleRightIcon class="parties-arrow" />
+      <TriangleRightIcon class="parties-arrow" />
 
-        <Avatar
-          :name="peerMetadata?.name"
-          class="parties-avatar"
-          variant="grey"
-          size="xl"
-        >
-          <img
-            v-if="peerMetadata?.icons.length"
-            :src="peerMetadata.icons[0]"
-            :alt="peerMetadata?.name"
-          >
-        </Avatar>
-      </div>
-
-      <!--
-        USER CONNECTED
-        Connection summary
-      -->
-      <div
-        v-if="wcSession"
-        class="text-center"
+      <Avatar
+        :name="peerMetadata?.name"
+        class="parties-avatar"
+        variant="grey"
+        size="lg"
       >
-        <Panel>
-          <PanelTableItem :name="$t('common.status')">
-            <strong class="color-success">{{ $t('common.connected') }}</strong>
-          </PanelTableItem>
+        <img
+          v-if="peerMetadata?.icons.length"
+          :src="peerMetadata.icons[0]"
+          :alt="peerMetadata?.name"
+        >
+      </Avatar>
+    </div>
 
-          <PanelTableItem :name="$t('common.activeAccount')">
-            <div class="connected-account">
-              <AddressTruncated
-                :address="activeAccount?.address!"
-                :protocol="PROTOCOLS.ethereum"
-              />
-              <Avatar
-                size="sm"
-                :address="activeAccount?.address!"
-              />
-            </div>
-          </PanelTableItem>
+    <!--
+      USER CONNECTED
+      Connection summary
+    -->
+    <div
+      v-if="wcSession"
+      class="text-center"
+    >
+      <Panel>
+        <PanelTableItem :name="$t('common.status')">
+          <strong class="color-success">{{ $t('common.connected') }}</strong>
+        </PanelTableItem>
 
-          <PanelTableItem :name="$t('walletConnect.dappName')">
-            {{ peerMetadata?.name || '-' }}
-          </PanelTableItem>
+        <PanelTableItem :name="$t('common.activeAccount')">
+          <div class="connected-account">
+            <AddressTruncated
+              :address="activeAccount?.address!"
+              :protocol="PROTOCOLS.ethereum"
+            />
+            <Avatar
+              size="sm"
+              :address="activeAccount?.address!"
+            />
+          </div>
+        </PanelTableItem>
 
-          <PanelTableItem :name="$t('walletConnect.dappDescription')">
-            {{ peerMetadata?.description || '-' }}
-          </PanelTableItem>
+        <PanelTableItem :name="$t('walletConnect.dappName')">
+          {{ peerMetadata?.name || '-' }}
+        </PanelTableItem>
 
-          <PanelTableItem :name="$t('walletConnect.dappUrl')">
-            {{ peerMetadata?.url || '-' }}
-          </PanelTableItem>
-        </Panel>
-      </div>
+        <PanelTableItem :name="$t('walletConnect.dappDescription')">
+          {{ peerMetadata?.description || '-' }}
+        </PanelTableItem>
 
-      <!--
-        USER NOT CONNECTED
-        QR Scanner + connection URI input
-      -->
-      <div v-else>
+        <PanelTableItem
+          v-if="peerMetadata?.url"
+          :href="peerMetadata.url"
+          :name="$t('walletConnect.dappUrl')"
+          is-external-link
+        >
+          {{ peerMetadata.url }}
+        </PanelTableItem>
+      </Panel>
+    </div>
+
+    <!--
+      USER NOT CONNECTED
+      QR Scanner + connection URI input
+    -->
+    <div v-else>
+      <div class="text-center">
         <h2 class="text-heading-4" v-text="$t('walletConnect.modalTitle')" />
         <p v-text="$t('walletConnect.modalSubtitle')" />
-
-        <InfoBox
-          v-if="error"
-          type="danger"
-          :text="$t('common.connectionFailed')"
-        />
-        <InfoBox
-          v-else-if="peerDisconnected"
-          type="warning"
-          :text="$t('walletConnect.dappRequestedDisconnect')"
-        />
-
-        <DetailsItem
-          class="active-account"
-          :label="$t('common.connectingAs')"
-        >
-          <AccountInfo
-            :account="activeAccount!"
-          />
-        </DetailsItem>
-
-        <FormTextarea
-          v-model="connectionUri"
-          :label="$t('walletConnect.uriInputLabel')"
-          :disabled="connecting"
-          placeholder="wc:a2813545345bb3e4..."
-          auto-height
-        >
-          <template #label-after>
-            <BtnPlain
-              class="scan-button"
-              data-cy="scan-button"
-              @click="scanConnectionUriQr()"
-            >
-              <QrScanIcon />
-            </BtnPlain>
-          </template>
-        </FormTextarea>
       </div>
-    </template>
 
-    <InfoBox
-      v-else
-      type="danger"
-      :text="$t('common.noProtocolAccountFound', { protocol: PROTOCOLS.ethereum })"
-    />
+      <InfoBox
+        v-if="error"
+        type="danger"
+        :text="$t('common.connectionFailed')"
+      />
+      <InfoBox
+        v-else-if="peerDisconnected"
+        type="warning"
+        :text="$t('walletConnect.dappRequestedDisconnect')"
+      />
+
+      <DetailsItem
+        v-if="ethAccounts.length"
+        class="active-account"
+        :label="$t('common.connectingAs')"
+      >
+        <AccountInfo
+          :account="activeAccount!"
+          show-protocol-icon
+          show-explorer-link
+        />
+      </DetailsItem>
+      <InfoBox
+        v-else
+        type="danger"
+        :text="$t('common.noProtocolAccountFound', { protocolName })"
+      />
+
+      <FormScanQrResult
+        v-model="connectionUri"
+        :label="$t('walletConnect.uriInputLabel')"
+        :readonly="!ethAccounts.length || connecting"
+        :qr-title="$t('walletConnect.uriInputLabel')"
+        placeholder="wc:a2813545345bb3e4..."
+        auto-height
+      />
+    </div>
 
     <template #footer>
       <BtnMain
@@ -154,11 +152,11 @@
         @click="disconnectFromDapp()"
       />
       <BtnMain
-        v-else-if="ethAccounts.length"
+        v-else
         :text="(connecting) ? $t('common.connecting') : $t('common.connect')"
-        extend
         :icon="WalletConnectLogo"
-        :disabled="!connectionUri || connecting"
+        :disabled="!ethAccounts.length || !connectionUri || connecting"
+        extend
         @click="connectToDapp()"
       />
     </template>
@@ -174,12 +172,12 @@ import {
   toRefs,
   watch,
 } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { PROTOCOLS } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAccounts,
-  useModals,
+  useConnection,
   useWalletConnect,
   type WalletConnectUri,
 } from '@/composables';
@@ -188,9 +186,8 @@ import Avatar from '@/popup/components/Avatar.vue';
 import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 import Modal from '@/popup/components/Modal.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
-import FormTextarea from '@/popup/components/form/FormTextarea.vue';
+import FormScanQrResult from '@/popup/components/form/FormScanQrResult.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
 import InfoBox from '@/popup/components//InfoBox.vue';
 import Panel from '@/popup/components/Panel.vue';
 import PanelTableItem from '@/popup/components/PanelTableItem.vue';
@@ -210,9 +207,8 @@ export default defineComponent({
     AddressTruncated,
     Avatar,
     BtnMain,
-    BtnPlain,
     DetailsItem,
-    FormTextarea,
+    FormScanQrResult,
     InfoBox,
     Modal,
     Panel,
@@ -220,16 +216,17 @@ export default defineComponent({
     IconBoxed,
     AeternityLogo,
     TriangleRightIcon,
-    QrScanIcon,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const { t } = useI18n();
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    const { protocolName } = adapter;
+
+    const { isOnline } = useConnection();
     const { getLastActiveProtocolAccount } = useAccounts();
-    const { openScanQrModal } = useModals();
     const {
       wcSession,
       wcState,
@@ -260,13 +257,6 @@ export default defineComponent({
       connectionUri.value = undefined;
     }
 
-    async function scanConnectionUriQr() {
-      const result = await openScanQrModal({ title: t('walletConnect.uriInputLabel') });
-      if (result) {
-        connectionUri.value = result as WalletConnectUri;
-      }
-    }
-
     function cancel() {
       props.reject();
       connectionUri.value = undefined;
@@ -285,8 +275,12 @@ export default defineComponent({
     return {
       AnimatedSpinner,
       CloseCircleIcon,
+      QrScanIcon,
       WalletConnectLogo,
+
       PROTOCOLS,
+      protocolName,
+      isOnline,
       connectionUri,
       ethAccounts,
       wcSession,
@@ -296,9 +290,9 @@ export default defineComponent({
       peerDisconnected,
       peerMetadata,
       activeAccount,
+
       connectToDapp,
       disconnectFromDapp,
-      scanConnectionUriQr,
       cancel,
     };
   },
@@ -387,13 +381,6 @@ export default defineComponent({
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  .scan-button {
-    color: $color-white;
-    display: block;
-    width: 32px;
-    height: 24px;
   }
 }
 </style>

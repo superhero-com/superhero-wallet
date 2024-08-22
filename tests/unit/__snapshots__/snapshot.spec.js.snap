@@ -37,9 +37,9 @@ exports[`Pages About 1`] = `
           </div>
           <a
             class="link-button variant-default clickable panel-table-item"
+            href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
             rel="noopener noreferrer"
             target="_blank"
-            to="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
           >
             
             <div
@@ -103,6 +103,7 @@ exports[`Pages About 1`] = `
       >
         <a
           class="panel-item variant-dark btn-base panel-item"
+          type="button"
         >
           
           <div
@@ -133,6 +134,7 @@ exports[`Pages About 1`] = `
         </a>
         <a
           class="panel-item variant-dark btn-base panel-item"
+          type="button"
         >
           
           <div
@@ -244,6 +246,7 @@ exports[`Pages Index 1`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -281,6 +284,7 @@ exports[`Pages Index 1`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -394,6 +398,7 @@ exports[`Pages Index 2`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -431,6 +436,7 @@ exports[`Pages Index 2`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -544,6 +550,7 @@ exports[`Pages Index 3`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div
@@ -581,6 +588,7 @@ exports[`Pages Index 3`] = `
             icon="[object Object]"
             iconsize="lg"
             subheader="locale-specific-text"
+            type="button"
           >
             
             <div

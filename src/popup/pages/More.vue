@@ -35,7 +35,7 @@
             </template>
           </PanelItem>
           <PanelItem
-            :to="{ name: 'invite' }"
+            :to="{ name: ROUTE_INVITE }"
             :title="$t('pages.titles.giftCards')"
             :disabled="!isActiveAccountAe"
             data-cy="invite"
@@ -89,7 +89,7 @@
           data-cy="about"
         >
           <template #icon>
-            <About />
+            <AboutIcon />
           </template>
         </PanelItem>
       </div>
@@ -104,14 +104,14 @@ import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useAccounts, useAddressBook, useAeSdk } from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
-import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
+import { ROUTE_ADDRESS_BOOK, ROUTE_INVITE } from '@/popup/router/routeNames';
 
 import PanelItem from '../components/PanelItem.vue';
 
 import Invites from '../../icons/invites.svg?vue-component';
 import Settings from '../../icons/settings.svg?vue-component';
 import BugReport from '../../icons/bug-report.svg?vue-component';
-import About from '../../icons/about.svg?vue-component';
+import AboutIcon from '../../icons/about.svg?vue-component';
 import BuyIcon from '../../icons/credit-card.svg?vue-component';
 import Dex from '../../icons/dex.svg?vue-component';
 import ClaimTips from '../../icons/claim-tips.svg?vue-component';
@@ -126,7 +126,7 @@ export default defineComponent({
     IonContent,
     Invites,
     Settings,
-    About,
+    AboutIcon,
     Dex,
     BugReport,
     ClaimTips,
@@ -151,6 +151,7 @@ export default defineComponent({
       BUG_REPORT_URL,
       UNFINISHED_FEATURES,
       ROUTE_ADDRESS_BOOK,
+      ROUTE_INVITE,
       activeAccountFaucetUrl,
       addressBookCount,
       isActiveAccountAe,

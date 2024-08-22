@@ -1,11 +1,36 @@
+import { ref } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
+
 import type { ChainName } from '@/types';
+import type { BackendHealth } from '@/protocols/aeternity/types';
 import { fetchJson, postJson } from '@/utils';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
+import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
+
+const POLLING_INTERVAL = 15000;
+
+const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+
+const isBackendUnavailable = ref(false);
 
 export function useAeTippingBackend() {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { backendUrl } = aeActiveNetworkSettings.value;
+
+  async function checkBackendStatus() {
+    try {
+      const backendStatus = await Promise.race(
+        [fetchJson(`${backendUrl}/health/backend`),
+          new Promise((_r, reject) => setTimeout(reject, POLLING_INTERVAL)),
+        ],
+      ) as BackendHealth;
+      isBackendUnavailable.value = !(
+        backendStatus.dbHealth && backendStatus.aeHealth && backendStatus.redisHealth
+      );
+    } catch (e) {
+      isBackendUnavailable.value = true;
+    }
+  }
 
   function claimTips(url: string, address: string) {
     return postJson(`${backendUrl}/claim/submit`, { body: { url, address } });
@@ -31,7 +56,10 @@ export function useAeTippingBackend() {
     return fetchJson(`${backendUrl}/tips/single/${id}`);
   }
 
+  initPollingWatcher(() => checkBackendStatus());
+
   return {
+    isBackendUnavailable,
     claimTips,
     cacheInvalidateOracle,
     cacheInvalidateTips,

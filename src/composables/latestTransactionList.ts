@@ -89,7 +89,7 @@ export function useLatestTransactionList() {
     }
 
     if (
-      regularTransactions.length
+      regularTransactions?.length
       || pendingTransactions?.length
       || tipWithdrawnTransactions?.length
     ) {

@@ -13,6 +13,7 @@
             :value="currentCurrencyCode === code"
             :class="{ active: currentCurrencyCode === code }"
             class="currency"
+            has-label-effect
             @input="setCurrentCurrency(code)"
           >
             <div class="row">

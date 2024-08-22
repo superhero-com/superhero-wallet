@@ -10,6 +10,7 @@
     "unlimitedStorage",
     "activeTab",
     "tabs",
+    "sidePanel",
     "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [
@@ -55,5 +56,14 @@
       ],
       "matches": ["*://*/*"]
     }
-  ]
+  ],
+  "side_panel": {
+    "default_title": "Superhero Wallet",
+    "default_path": "index.html"
+  },
+  "sidebar_action": {
+    "default_title": "Superhero Wallet",
+    "default_panel": "index.html",
+    "default_icon": "icons/icon_128.png"
+  }
 }

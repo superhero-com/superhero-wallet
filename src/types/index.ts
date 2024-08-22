@@ -513,7 +513,6 @@ export interface ITransaction {
   microTime?: number;
   pending: boolean;
   protocol: Protocol;
-  rawTx?: any; // TODO find type
   tipUrl?: string;
   /**
    * TODO "sent" field is used for removing local pending transaction - remove or rename it
@@ -527,7 +526,6 @@ export interface ITransaction {
    */
   transactionOwner?: AccountAddress;
   tx: ITx;
-  type?: string;
   url?: string;
   isMultisig?: false; // TODO Consider merging the ITransaction with IActiveMultisigTransaction
 }

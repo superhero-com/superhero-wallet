@@ -1,6 +1,6 @@
 <template>
   <Modal
-    class="import-account-modal"
+    class="account-import-modal"
     from-bottom
     has-close-button
     @close="resolve"
@@ -35,14 +35,12 @@
       @submit="importAccount"
     >
       <template #label-after>
-        <BtnPlain
+        <BtnIcon
+          :icon="QrScanIcon"
+          :disabled="discovering"
           data-cy="scan-button"
-          class="scan-button"
-          :class="{ disabled: discovering }"
           @click="scanAccountQrCode()"
-        >
-          <QrScanIcon />
-        </BtnPlain>
+        />
       </template>
     </FormTextarea>
 
@@ -81,7 +79,7 @@ import {
 
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -89,10 +87,9 @@ import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 export default defineComponent({
   components: {
     BtnMain,
-    BtnPlain,
+    BtnIcon,
     Modal,
     FormTextarea,
-    QrScanIcon,
     AnimatedSpinnerIcon,
   },
   props: {
@@ -152,6 +149,7 @@ export default defineComponent({
     }
 
     return {
+      QrScanIcon,
       discovering,
       mnemonic,
       error,
@@ -166,23 +164,11 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
 
-.import-account-modal {
+.account-import-modal {
   text-align: center;
 
   .loader {
     width: 56px;
-  }
-
-  .scan-button {
-    color: $color-white;
-    display: block;
-    width: 32px;
-    height: 24px;
-
-    &.disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
   }
 }
 </style>

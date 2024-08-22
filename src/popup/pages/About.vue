@@ -49,7 +49,7 @@
             :title="$t('pages.about.terms')"
           >
             <template #icon>
-              <TermsIcon />
+              <AboutIcon />
             </template>
           </PanelItem>
           <PanelItem
@@ -57,7 +57,7 @@
             :title="$t('pages.about.privacyPolicy')"
           >
             <template #icon>
-              <TermsIcon />
+              <AboutIcon />
             </template>
           </PanelItem>
         </div>
@@ -86,7 +86,7 @@ import Panel from '@/popup/components/Panel.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
 import PanelTableItem from '@/popup/components/PanelTableItem.vue';
 
-import TermsIcon from '@/icons/terms.svg?vue-component';
+import AboutIcon from '@/icons/about.svg?vue-component';
 import GithubIcon from '@/icons/github.svg?vue-component';
 
 export default defineComponent({
@@ -94,7 +94,7 @@ export default defineComponent({
     Panel,
     PanelItem,
     PanelTableItem,
-    TermsIcon,
+    AboutIcon,
     GithubIcon,
     IonPage,
     IonContent,

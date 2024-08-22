@@ -5,8 +5,6 @@
       class="app-wrapper"
       :class="{
         'show-header': delayedShowHeader,
-        'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
-        'is-extension': IS_EXTENSION,
       }"
     >
       <Loader v-if="isLoaderVisible && !isMobileQrScannerVisible" />
@@ -26,7 +24,7 @@
           class="main"
         />
 
-        <NodeConnectionStatus
+        <ConnectionStatus
           v-if="!modalsOpen.length"
           class="connection-status"
         />
@@ -93,7 +91,7 @@ import {
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
 
 import Header from '@/popup/components/Header.vue';
-import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
+import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
 import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
 
@@ -101,7 +99,7 @@ export default defineComponent({
   name: 'App',
   components: {
     Header,
-    NodeConnectionStatus,
+    ConnectionStatus,
     QrCodeReaderMobileOverlay,
     IonApp,
     IonRouterOutlet,
@@ -140,13 +138,28 @@ export default defineComponent({
       || routeMeta.value?.hideHeader
     ));
 
-    function setDocumentHeight() {
-      document.documentElement.style.setProperty(
-        '--height',
-        IS_MOBILE_APP && IS_IOS ? '100vh' : '100%',
-      );
-      if (IS_EXTENSION) {
+    /**
+     * Set classes on <html> element to allow CSS to behave differently based on the environment.
+     * Used mostly by `env-*` mixins set in `mixins.scss` file.
+     */
+    function setHtmlEnvironmentClasses() {
+      if (IS_MOBILE_APP) {
+        document.documentElement.classList.add(
+          'is-mobile',
+          (IS_IOS) ? 'is-mobile-ios' : 'is-mobile-android',
+        );
+      } else if (IS_EXTENSION) {
         document.documentElement.classList.add('is-extension');
+      } else if (IS_WEB) {
+        document.documentElement.classList.add('is-web');
+      }
+    }
+
+    function setHtmlBrowserClass() {
+      if (IS_FIREFOX) {
+        document.documentElement.classList.add('is-firefox');
+      } else if (IS_CHROME_BASED) {
+        document.documentElement.classList.add('is-chrome');
       }
     }
 
@@ -225,6 +238,9 @@ export default defineComponent({
     initVisibilityListeners();
 
     onBeforeMount(async () => {
+      setHtmlEnvironmentClasses();
+      setHtmlBrowserClass();
+
       if (IS_MOBILE_APP) {
         StatusBar.setStyle({ style: Style.Dark });
         StatusBar.setBackgroundColor({
@@ -235,7 +251,6 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      setDocumentHeight();
       checkExtensionUpdates();
       restoreLanguage();
       restoreTransferSendForm();
@@ -289,6 +304,12 @@ export default defineComponent({
 @use '@/styles/mixins';
 
 .app {
+  --screen-padding-x: 16px;
+  --screen-border-radius: 0;
+  --screen-bg-color: #{$color-bg-app};
+  --header-height: 0;
+  --gap: 12px;
+
   position: relative;
   display: flex;
   justify-content: center;
@@ -297,12 +318,6 @@ export default defineComponent({
   height: 100%;
 
   .app-wrapper {
-    --screen-padding-x: 16px;
-    --screen-border-radius: 0;
-    --screen-bg-color: #{$color-bg-app};
-    --header-height: 0;
-    --gap: 12px;
-
     @extend %text-body;
 
     position: relative;
@@ -340,33 +355,43 @@ export default defineComponent({
       width: 100%;
     }
 
-    &.is-extension,
-    &.is-desktop-web {
-      width: $extension-width;
-      height: $extension-height;
-    }
-
-    // Imitate the appearance of the mobile/extension app in a desktop browser
-
-    &.is-desktop-web {
-      --screen-border-radius: #{$border-radius-app};
-
-      overflow: hidden;
-      box-shadow: $color-border 0 0 0 1px;
-      transform: translate(0, 0); // Create custom viewport for fixed elements
-
-      @include mixins.mobile {
-        --screen-border-radius: 0;
-
-        width: 100%;
-        height: 100%;
-        overflow: visible;
-        box-shadow: none;
-      }
-    }
-
     &.show-header {
       --header-height: 40px;
+    }
+  }
+
+  @include mixins.env-mobile-ios {
+    height: 100vh;
+  }
+
+  // Setting the extension popup window size
+  @include mixins.env-extension {
+    min-width: $extension-width;
+    min-height: $extension-height;
+    max-width: $phone-width;
+  }
+
+  // Temporary fix for the issue that was introduced by Firefox v129.0.1.
+  // FF was not able to use the `min-height` property to establish the app size.
+  // @TODO maybe future versions of FF will fix this so this block can be removed.
+  @at-root html.is-extension.is-firefox & {
+    height: $extension-height;
+  }
+
+  @include mixins.env-web {
+    // Imitate the appearance of the mobile/extension app by displaying it in a box
+    // TODO consider full-screen
+    @include mixins.desktop {
+      --screen-border-radius: #{$border-radius-app};
+
+      width: $extension-width;
+      height: $extension-height;
+
+      .app-wrapper {
+        overflow: hidden;
+        box-shadow: $color-border 0 0 0 1px;
+        transform: translate(0, 0); // Create custom viewport for fixed elements
+      }
     }
   }
 }

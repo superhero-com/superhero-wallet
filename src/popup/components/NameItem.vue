@@ -12,7 +12,7 @@
           class="pending"
         >
           <PendingIcon class="pending-icon" />
-          {{ $t('common.pending') }}...
+          {{ $t('common.pending') }}
         </div>
         <div
           v-else
@@ -312,7 +312,6 @@ export default defineComponent({
     async function toggleAutoExtend() {
       if (!props.nameEntry.autoExtend) {
         await openConfirmModal({
-          icon: 'info',
           title: t('modals.nameAutoExtendHelp.title'),
           msg: t('modals.nameAutoExtendHelp.msg'),
         });

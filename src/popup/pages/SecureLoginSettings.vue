@@ -42,6 +42,7 @@
               :disabled="!isSecureLoginEnabled"
               :class="{ active: secureLoginTimeout === ms }"
               class="timeout"
+              has-label-effect
               @input="setSecureLoginTimeout(ms)"
             >
               <div class="row">
@@ -144,7 +145,6 @@ export default defineComponent({
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-
     gap: 8px;
 
     &.dimmed {
@@ -172,7 +172,6 @@ export default defineComponent({
       @extend %face-sans-15-medium;
     }
   }
-
 }
 
 .warning-box {

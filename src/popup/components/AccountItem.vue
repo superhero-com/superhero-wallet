@@ -122,6 +122,7 @@ export default defineComponent({
   .address {
     text-align: left;
     word-break: break-all;
+    line-height: 20px;
 
     &.rg {
       @extend %face-mono-10-medium;

@@ -30,62 +30,74 @@
   --icon-size-xxl: 44px;
 }
 
-html.is-extension {
-  // Fixes issue with extension not rendering properly
-  // .tabs-inner & .ion-page classes are added by Ionic
+html {
+  &.is-extension {
+    // Fixes issue with extension not rendering properly
+    // .tabs-inner & .ion-page classes are added by Ionic
+    ion-tabs,
+    .tabs-inner,
+    ion-router-outlet,
+    .ion-page {
+      contain: layout style !important;
+    }
 
-  ion-tabs,
-  .tabs-inner,
-  ion-router-outlet,
-  .ion-page {
-    contain: layout style !important;
+    body {
+      position: unset;
+    }
   }
 
-  body {
-    position: unset;
-  }
+  // When scanner is active we need to hide everything else
+  // because the scanner will show-up behind the webview
+  &.scanner-active {
+    --background: transparent; // Ionic related variable
+    --ion-background-color: transparent;
 
-  .app {
-    width: $extension-width;
-    height: $extension-height;
+    body,
+    #app,
+    .app .app-wrapper,
+    ion-content,
+    .ionic-wrapper,
+    .ion-content-bg,
+    .ion-content-bg--lighter,
+    .account-ion-content {
+      --background: transparent; // Ionic related variable
+
+      background: transparent !important;
+    }
+
+    .app {
+      --screen-bg-color: transparent;
+    }
+
+    #app {
+      position: absolute;
+      z-index: 2;
+      width: 100%;
+    }
   }
 }
 
-// When scanner is active we need to hide everything else
-// because the scanner will show-up behind the webview
+body {
+  height: 100%;
+  margin: 0;
+  background-color: $color-bg-body;
 
-body.scanner-active {
-  background-color: transparent;
-
-  --background: transparent;
-  --ion-background-color: transparent;
-  --screen-bg-color: transparent;
-
-  .app .app-wrapper {
-    --screen-bg-color: transparent;
-
-    background: transparent;
-  }
-
-  .ionic-wrapper,
   &.color-bg-app {
-    background-color: transparent;
+    background-color: $color-bg-app;
   }
+}
 
-  #app {
-    background: transparent;
-    position: absolute;
-    z-index: 2;
-    width: 100%;
-  }
+#app {
+  --ion-text-color: $color-white;
+  --ion-font-family: $font-sans;
 
-  ion-content,
-  .ion-content-bg,
-  .ion-content-bg--lighter,
-  .account-ion-content {
-    --background: transparent;
+  height: 100%;
 
-    background: transparent;
+  @include mixins.desktop {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -109,37 +121,10 @@ ion-content {
   }
 
   /** remove left-right padding **/
-
   &::part(scroll) {
     --padding-end: 0;
     --padding-start: 0;
     --padding-top: 0;
-  }
-}
-
-html,
-body,
-#app {
-  height: var(--height);
-}
-
-body,
-#app {
-  --ion-text-color: $color-white;
-  --ion-font-family: $font-sans;
-
-  margin: 0;
-  background-color: $color-black;
-
-  &.color-bg-app {
-    background-color: $color-bg-app;
-  }
-
-  @include mixins.desktop {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
   }
 }
 
@@ -303,7 +288,7 @@ hr {
     }
 
     strong {
-      font-weight: 500;
+      font-weight: 600;
       color: $color-white;
     }
   }
@@ -338,6 +323,10 @@ hr {
 
   &-warning-muted {
     color: rgba($color-warning, 0.75);
+  }
+
+  &-danger {
+    color: $color-danger;
   }
 }
 

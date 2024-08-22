@@ -1,7 +1,7 @@
 <template>
   <BtnPlain
     class="btn-help"
-    :class="{ small }"
+    :class="{ small, warning }"
     @click="showHelpModal"
   >
     <QuestionCircle class="icon" />
@@ -23,6 +23,7 @@ export default defineComponent({
     icon: { type: String, default: '' },
     option: { type: Object, default: null },
     small: Boolean,
+    warning: Boolean,
     fullScreen: Boolean,
   },
   setup(props, { emit }) {
@@ -66,6 +67,11 @@ export default defineComponent({
   &.small svg {
     width: 20px;
     height: 20px;
+  }
+
+  &.warning svg {
+    color: $color-warning;
+    opacity: 0.75;
   }
 
   &:hover svg {
