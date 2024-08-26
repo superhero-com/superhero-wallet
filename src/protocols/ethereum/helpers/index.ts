@@ -118,7 +118,7 @@ export async function decodeTxData(
       address: contractId,
     });
 
-  if (contractAbi?.message !== 'OK') {
+  if (!contractAbi?.message?.startsWith('OK')) {
     return undefined;
   }
   const parsedAbi = JSON.parse(contractAbi.result);
@@ -139,7 +139,7 @@ export async function decodeTxData(
 
     return {
       functionName: (method as any).name,
-      args: params[0] as Dictionary,
+      args: params as Dictionary,
     };
   } catch (e) {
     handleUnknownError(e);

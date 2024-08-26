@@ -44,6 +44,17 @@
                 :label="$t('pages.transactionDetails.gasUsed')"
                 data-cy="gas"
               />
+              <DetailsItem
+                expandable
+                class="advanced-transaction-details"
+                :label="$t('transaction.advancedDetails')"
+              >
+                <TransactionCallDataDetails
+                  :call-data="transaction.tx.callData"
+                  :call-data-decoded="decodedCallData"
+                  :loading="decodingCallData"
+                />
+              </DetailsItem>
             </template>
           </TransactionDetailsBase>
         </template>
@@ -77,11 +88,13 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 
 import { ETH_COIN_SYMBOL } from '@/protocols/ethereum/config';
+import { decodeTxData } from '@/protocols/ethereum/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import TransactionCallDataDetails from '@/popup/components/TransactionCallDataDetails.vue';
 
 export default defineComponent({
   components: {
@@ -91,6 +104,7 @@ export default defineComponent({
     TokenAmount,
     IonContent,
     IonPage,
+    TransactionCallDataDetails,
   },
   setup() {
     const router = useRouter();
@@ -101,6 +115,8 @@ export default defineComponent({
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
     const transaction = ref<ITransaction>();
+    const decodedCallData = ref();
+    const decodingCallData = ref(false);
 
     const { setLoaderVisible } = useUi();
     const { activeAccount } = useAccounts();
@@ -109,6 +125,7 @@ export default defineComponent({
       amountTotal,
       transactionAssets,
       isTransactionCoin,
+      innerTx,
     } = useTransactionData({
       transaction,
       transactionCustomOwner: toRef(() => transactionOwner),
@@ -123,10 +140,24 @@ export default defineComponent({
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
     const amount = computed((): number => transaction.value?.tx?.amount || 0);
 
+    async function getDecodedCallData() {
+      if (innerTx.value?.callData && innerTx.value?.recipientId) {
+        return decodeTxData(
+          innerTx.value.callData,
+          innerTx.value.recipientId,
+          activeAccount.value.address,
+        );
+      }
+      return null;
+    }
+
     watch(
       transaction,
-      (value) => {
+      async (value) => {
         setLoaderVisible(!value);
+        decodingCallData.value = true;
+        decodedCallData.value = await getDecodedCallData();
+        decodingCallData.value = false;
       },
       { immediate: true },
     );
@@ -170,6 +201,8 @@ export default defineComponent({
       PROTOCOLS,
       amount,
       amountTotal,
+      decodedCallData,
+      decodingCallData,
       isTransactionCoin,
       hash,
       fee,
@@ -179,3 +212,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.transaction-details {
+  .advanced-transaction-details {
+    width:100%;
+  }
+}
+</style>

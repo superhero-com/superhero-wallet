@@ -164,6 +164,7 @@ export class EtherscanService {
       timeStamp,
       to,
       value,
+      input,
     } = transaction;
 
     const senderId = toEthChecksumAddress(from) as any;
@@ -178,7 +179,7 @@ export class EtherscanService {
     const amount = Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
-    const isEthTransfer = !contractAddress;
+    const isEthTransfer = !contractAddress && !input;
 
     return {
       protocol: PROTOCOLS.ethereum,
@@ -194,6 +195,7 @@ export class EtherscanService {
         type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
         arguments: [],
         callerId: isEthTransfer ? '' as any : senderId,
+        callData: isEthTransfer ? null : input,
         contractId,
         function: functionName,
         nonce,

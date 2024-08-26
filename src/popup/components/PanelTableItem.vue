@@ -3,10 +3,13 @@
     :is="(href) ? 'LinkButton' : 'div'"
     :href="href"
     :is-external="isExternalLink"
-    :class="{
-      clickable: !!href,
-      'is-external': isExternalLink,
-    }"
+    :class="[
+      `variant-${variant}`,
+      {
+        clickable: !!href,
+        'is-external': isExternalLink,
+      },
+    ]"
     class="panel-table-item"
   >
     <div class="name">
@@ -19,9 +22,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
+
+export const PANEL_TABLE_VARIANT = [
+  'default',
+  'left-aligned-name-bolder',
+] as const;
+
+export type LinkButtonVariant = typeof PANEL_TABLE_VARIANT[number];
 
 export default defineComponent({
   components: {
@@ -31,6 +41,11 @@ export default defineComponent({
     name: { type: String, required: true },
     href: { type: String, default: null },
     isExternalLink: Boolean,
+    variant: {
+      type: String as PropType<LinkButtonVariant>,
+      validator: (value: LinkButtonVariant) => PANEL_TABLE_VARIANT.includes(value),
+      default: PANEL_TABLE_VARIANT[0],
+    },
   },
 });
 </script>
@@ -85,6 +100,11 @@ export default defineComponent({
       margin-left: 4px;
       margin-right: -4px;
     }
+  }
+
+  &.variant-left-aligned-name-bolder .name {
+    font-weight: 500;
+    margin-right: 0;
   }
 
   &.clickable {
