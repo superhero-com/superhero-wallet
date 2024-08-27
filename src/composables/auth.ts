@@ -31,6 +31,7 @@ export const useAuth = createCustomScopedComposable(() => {
     lastTimeAppWasActive,
     secureLoginTimeout,
     isAppActive,
+    setBiometricLoginEnabled,
   } = useUi();
   const { openModal } = useModals();
   const {
@@ -51,6 +52,9 @@ export const useAuth = createCustomScopedComposable(() => {
       isBiometricAuthAvailable = (await BiometricAuth.checkBiometry()).isAvailable;
       isBiometryAvailabilityChecked.value = true;
       isBiometryAvailabilityUpdating.value = false;
+    }
+    if (!isBiometricAuthAvailable && isBiometricLoginEnabled.value) {
+      setBiometricLoginEnabled(false);
     }
     return isBiometricAuthAvailable;
   }
