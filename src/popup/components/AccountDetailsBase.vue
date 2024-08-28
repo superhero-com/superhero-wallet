@@ -32,7 +32,7 @@
         horizontal-offline-message
       />
 
-      <div
+      <HorizontalScroll
         ref="buttonsScrollContainer"
         class="buttons"
       >
@@ -48,7 +48,7 @@
           v-if="$slots.buttons"
           name="buttons"
         />
-      </div>
+      </HorizontalScroll>
 
       <div
         ref="headerEl"
@@ -106,6 +106,7 @@ import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
 import OpenShareAddressModalBtn from '@/popup/components/OpenShareAddressModalBtn.vue';
+import HorizontalScroll from './HorizontalScroll.vue';
 
 const INITIAL_TABS_HEIGHT = 330;
 
@@ -120,6 +121,7 @@ export default defineComponent({
     TransactionAndTokenFilter,
     BtnClose,
     IonRouterOutlet,
+    HorizontalScroll,
   },
   props: {
     withoutDefaultButtons: Boolean,
@@ -135,7 +137,6 @@ export default defineComponent({
 
     const routerHeight = ref<string>();
     const headerEl = ref<HTMLDivElement>();
-    const buttonsScrollContainer = ref<HTMLDivElement>();
     const resizeObserver = ref<ResizeObserver>();
 
     const balanceNumeric = computed(() => balance.value.toNumber());
@@ -161,12 +162,6 @@ export default defineComponent({
       resizeObserver.value.observe(headerEl.value!);
     }
 
-    function onScroll(event: WheelEvent) {
-      if (buttonsScrollContainer.value && event.deltaX === 0) {
-        buttonsScrollContainer.value.scrollLeft += event.deltaY;
-      }
-    }
-
     onMounted(() => {
       observeTabsHeight();
       // The timeout ensures that the height is calculated correctly in some edge cases
@@ -179,14 +174,10 @@ export default defineComponent({
           color: '#191919',
         });
       }
-
-      // Allow buttons to scroll horizontally with mouse wheel
-      buttonsScrollContainer.value?.addEventListener('wheel', onScroll, { passive: true });
     });
 
     onBeforeUnmount(() => {
       resizeObserver.value?.disconnect();
-      buttonsScrollContainer.value?.removeEventListener('wheel', onScroll);
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#141414',
@@ -195,7 +186,6 @@ export default defineComponent({
     });
 
     return {
-      close,
       headerEl,
       homeRouteName,
       routeName,
@@ -203,7 +193,7 @@ export default defineComponent({
       activeAccount,
       routerHeight,
       isScrollEnabled,
-      buttonsScrollContainer,
+      close,
       fadeAnimation,
       IS_FIREFOX,
       INITIAL_TABS_HEIGHT,

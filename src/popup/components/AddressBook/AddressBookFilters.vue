@@ -23,20 +23,21 @@
       <div class="divider" />
 
       <!-- Protocol Filters -->
-      <!-- TODO add horizontal scroll -->
-      <BtnFilter
-        v-for="protocol in PROTOCOL_LIST"
-        :key="protocol"
-        :data-cy="`${protocol}-filter`"
-        class="filter-btn"
-        :class="{ active: protocol === protocolFilter }"
-        @click="setProtocolFilter(protocol)"
-      >
-        <IconWrapper
-          :protocol-icon="protocol"
-          icon-size="rg"
-        />
-      </BtnFilter>
+      <HorizontalScroll class="protocol-filters">
+        <BtnFilter
+          v-for="protocol in PROTOCOL_LIST"
+          :key="protocol"
+          :data-cy="`${protocol}-filter`"
+          class="filter-btn"
+          :class="{ active: protocol === protocolFilter }"
+          @click="setProtocolFilter(protocol)"
+        >
+          <IconWrapper
+            :protocol-icon="protocol"
+            icon-size="rg"
+          />
+        </BtnFilter>
+      </HorizontalScroll>
     </template>
   </div>
 </template>
@@ -51,11 +52,13 @@ import BtnFilter from '@/popup/components/buttons/BtnFilter.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
 
 import FavoritesIcon from '@/icons/star-full.svg?vue-component';
+import HorizontalScroll from '../HorizontalScroll.vue';
 
 export default defineComponent({
   components: {
     BtnFilter,
     IconWrapper,
+    HorizontalScroll,
   },
   props: {
     isSelector: Boolean,
@@ -95,6 +98,12 @@ export default defineComponent({
 
   .divider {
     border-left: 1px solid rgba($color-white, 0.15);
+  }
+
+  .protocol-filters {
+    display: flex;
+    gap: 8px;
+    overflow-y: scroll;
   }
 }
 </style>
