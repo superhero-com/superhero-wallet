@@ -427,8 +427,8 @@
   "airGap": {
     "title": "AirGap",
     "importAccount": {
-      "btnText": "Pair AirGap vault",
-      "btnSubtitle": "Sync with your AirGap account",
+      "btnText": "Import AirGap accounts",
+      "btnSubtitle": "Sync with your AirGap vault",
       "scanDescription": "Scan the QR code from your AirGap vault in order to pair wallets and import accounts.",
       "importConfirmDialog": {
         "title": "Import account from AirGap",
