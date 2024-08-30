@@ -12,6 +12,7 @@
         :icon-size="iconSize"
         :protocol-icon="protocolIcon"
         is-boxed
+        class="icon-wrapper"
       />
 
       <div class="message">
@@ -66,6 +67,10 @@ export default defineComponent({
     gap: 16px;
     margin-right: auto;
     text-align: left;
+
+    .icon-wrapper {
+      color: rgba($color-white, 0.85);
+    }
   }
 
   .message {
