@@ -32,7 +32,10 @@
         horizontal-offline-message
       />
 
-      <div class="buttons">
+      <HorizontalScroll
+        ref="buttonsScrollContainer"
+        class="buttons"
+      >
         <template v-if="!withoutDefaultButtons">
           <OpenTransferReceiveModalBtn />
           <OpenTransferSendModalBtn />
@@ -45,7 +48,7 @@
           v-if="$slots.buttons"
           name="buttons"
         />
-      </div>
+      </HorizontalScroll>
 
       <div
         ref="headerEl"
@@ -103,6 +106,7 @@ import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
 import OpenShareAddressModalBtn from '@/popup/components/OpenShareAddressModalBtn.vue';
+import HorizontalScroll from './HorizontalScroll.vue';
 
 const INITIAL_TABS_HEIGHT = 330;
 
@@ -117,6 +121,7 @@ export default defineComponent({
     TransactionAndTokenFilter,
     BtnClose,
     IonRouterOutlet,
+    HorizontalScroll,
   },
   props: {
     withoutDefaultButtons: Boolean,
@@ -181,7 +186,6 @@ export default defineComponent({
     });
 
     return {
-      close,
       headerEl,
       homeRouteName,
       routeName,
@@ -189,6 +193,7 @@ export default defineComponent({
       activeAccount,
       routerHeight,
       isScrollEnabled,
+      close,
       fadeAnimation,
       IS_FIREFOX,
       INITIAL_TABS_HEIGHT,
