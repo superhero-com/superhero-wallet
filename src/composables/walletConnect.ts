@@ -3,7 +3,13 @@ import type { SessionTypes } from '@walletconnect/types';
 import type { Web3Wallet as IWeb3Wallet } from '@walletconnect/web3wallet';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { fromWei, toChecksumAddress } from 'web3-utils';
-import { computed, reactive, watch } from 'vue';
+import {
+  computed,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
+import { App } from '@capacitor/app';
 import { METHODS, Tag } from '@aeternity/aepp-sdk';
 
 import type { IModalProps } from '@/types';
@@ -42,6 +48,7 @@ interface SendTransactionParams {
   value: string;
 }
 
+const isOpenUsingDeeplink = ref(false);
 let composableInitialized = false;
 let web3wallet: Awaited<ReturnType<typeof IWeb3Wallet.init>> | null;
 
@@ -73,6 +80,13 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
   const ethAccounts = computed(() => accountsGroupedByProtocol.value[PROTOCOLS.ethereum] || []);
+
+  function closeAppIfOpenUsingDeeplink() {
+    if (isOpenUsingDeeplink.value) {
+      isOpenUsingDeeplink.value = false;
+      setTimeout(() => App.exitApp(), 3000);
+    }
+  }
 
   const sessionRequestMethodHandlers: Partial<{
     [key in SupportedRequestMethod]: (p: any) => Promise<string | false>
@@ -110,6 +124,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       if (permitted) {
         if (adapter?.transferPreparedTransaction) {
           const actionResult = await adapter.transferPreparedTransaction(params);
+          closeAppIfOpenUsingDeeplink();
           return actionResult?.hash ?? false;
         }
       }
@@ -309,6 +324,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           });
 
           monitorActiveAccountAndNetwork();
+          closeAppIfOpenUsingDeeplink();
         } catch (error: any) {
           web3wallet!.rejectSession({ id, reason: getSdkError('USER_REJECTED') });
           handleConnectionError(error);
@@ -319,6 +335,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     } catch (error: any) {
       handleConnectionError(error);
     }
+  }
+
+  function setIsOpenUsingDeeplink(value: boolean) {
+    isOpenUsingDeeplink.value = value;
   }
 
   if (!composableInitialized) {
@@ -356,6 +376,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   return {
     connect,
     disconnect,
+    setIsOpenUsingDeeplink,
     wcSession,
     wcState,
     ethAccounts,
