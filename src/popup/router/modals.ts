@@ -1,6 +1,5 @@
 import {
   MODAL_ACCOUNT_CREATE,
-  MODAL_AE_ACCOUNT_CREATE,
   MODAL_ACCOUNT_IMPORT,
   MODAL_ACCOUNT_SELECT_OPTIONS,
   MODAL_ASSET_SELECTOR,
@@ -22,6 +21,8 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_NETWORK_SWITCHER,
   MODAL_PAYLOAD_FORM,
+  MODAL_PRIVATE_KEY_IMPORT,
+  MODAL_PROTOCOL_SELECT,
   MODAL_SCAN_QR,
   MODAL_RECIPIENT_HELPER,
   MODAL_RECIPIENT_INFO,
@@ -45,12 +46,12 @@ import {
 } from '@/constants';
 import { useModals } from '@/composables';
 
-import AeternityAccountCreate from '@/protocols/aeternity/views/AccountCreateModal.vue';
 import NetworkSwitcherModal from '@/popup/components/Modals/NetworkSwitcherModal.vue';
 
+import AccountCreate from '../components/Modals/AccountCreate.vue';
 import Default from '../components/Modals/Default.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
-import AccountCreate from '../components/Modals/AccountCreate.vue';
+import ProtocolSelect from '../components/Modals/ProtocolSelect.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
@@ -86,6 +87,7 @@ import ShareAddress from '../components/ShareAddress.vue';
 import AddressBookAccountSelector from '../components/Modals/AddressBookAccountSelector.vue';
 import SetPassword from '../components/Modals/SetPassword.vue';
 import PasswordLogin from '../components/Modals/PasswordLogin.vue';
+import PrivateKeyImport from '../components/Modals/PrivateKeyImport.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -98,6 +100,9 @@ export default () => {
   });
   registerModal(MODAL_ACCOUNT_IMPORT, {
     component: AccountImport,
+  });
+  registerModal(MODAL_PRIVATE_KEY_IMPORT, {
+    component: PrivateKeyImport,
   });
   registerModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS, {
     component: AirGapImportAccounts,
@@ -150,6 +155,9 @@ export default () => {
   registerModal(MODAL_SCAN_QR, {
     component: QrCodeScanner,
   });
+  registerModal(MODAL_PROTOCOL_SELECT, {
+    component: ProtocolSelect,
+  });
   registerModal(MODAL_TRANSFER_RECEIVE, {
     component: ProtocolSpecificView,
     viewComponentName: PROTOCOL_VIEW_TRANSFER_RECEIVE,
@@ -184,9 +192,6 @@ export default () => {
   });
   registerModal(MODAL_NETWORK_SWITCHER, {
     component: NetworkSwitcherModal,
-  });
-  registerModal(MODAL_AE_ACCOUNT_CREATE, {
-    component: AeternityAccountCreate,
   });
   registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
     component: BrowserActions,

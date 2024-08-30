@@ -268,6 +268,7 @@ export interface IAccountRaw {
   protocol: Protocol;
   address?: AccountAddress;
   publicKey?: string;
+  privateKey?: Uint8Array; // This is used for the imported private key accounts
 }
 
 /**

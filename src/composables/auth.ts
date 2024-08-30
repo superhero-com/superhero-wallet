@@ -267,7 +267,7 @@ export const useAuth = createCustomScopedComposable(() => {
    * or `authenticateWithBiometry` methods.
    */
   async function checkUserAuth(): Promise<any> {
-    watchUntilTruthy(isMnemonicRestored);
+    await watchUntilTruthy(isMnemonicRestored);
 
     if (!mnemonic.value || isAuthenticated.value) {
       return;

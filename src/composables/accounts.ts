@@ -20,6 +20,7 @@ import {
 import {
   createCallbackRegistry,
   createCustomScopedComposable,
+  decryptedComputed,
   excludeFalsy,
   prepareAccountSelectOptions,
   watchUntilTruthy,
@@ -42,9 +43,16 @@ const {
  * The wallets's data is created in fly with the use of computed properties.
  */
 export const useAccounts = createCustomScopedComposable(() => {
-  const { mnemonic, mnemonicSeed, isMnemonicRestored } = useAuth();
+  const {
+    mnemonic,
+    mnemonicSeed,
+    isMnemonicRestored,
+    encryptionKey,
+  } = useAuth();
 
   const areAccountsRestored = ref(false);
+  const arePrivateKeysAccountsDecrypted = ref(false);
+  const arePrivateKeysAccountsEncryptedRestored = ref(false);
 
   const accountsRaw = useStorageRef<IAccountRaw[]>(
     [],
@@ -60,6 +68,33 @@ export const useAccounts = createCustomScopedComposable(() => {
     },
   );
 
+  const accountsPrivateKeysEncrypted = useStorageRef<string | null>(
+    null,
+    STORAGE_KEYS.privateKeyAccountsRaw,
+    {
+      backgroundSync: true,
+      enableSecureStorage: true,
+      onRestored: () => {
+        arePrivateKeysAccountsEncryptedRestored.value = true;
+      },
+    },
+  );
+
+  /**
+   * `accountsPrivateKeysDecrypted` stores the JSON version
+   * of the array of imported account private keys
+   */
+  const accountsPrivateKeysDecrypted = decryptedComputed(
+    encryptionKey,
+    accountsPrivateKeysEncrypted,
+    '[]',
+    {
+      onDecrypted: () => {
+        arePrivateKeysAccountsDecrypted.value = true;
+      },
+    },
+  );
+
   const activeAccountGlobalIdx = useStorageRef<number>(
     0,
     STORAGE_KEYS.activeAccountGlobalIdx,
@@ -71,6 +106,17 @@ export const useAccounts = createCustomScopedComposable(() => {
     STORAGE_KEYS.protocolLastActiveAccountIdx,
     { backgroundSync: true },
   );
+
+  const arePrivateKeysAccountsRestored = computed(() => (
+    (arePrivateKeysAccountsEncryptedRestored.value && !accountsPrivateKeysEncrypted.value)
+    || (arePrivateKeysAccountsEncryptedRestored.value && arePrivateKeysAccountsDecrypted.value)
+  ));
+
+  const privateKeyAccountsRaw = computed<IAccountRaw[]>(() => JSON.parse(accountsPrivateKeysDecrypted.value || '[]'));
+
+  const areAccountsReady = computed(() => (
+    areAccountsRestored.value && arePrivateKeysAccountsRestored.value
+  ));
 
   const accounts = computed((): IAccount[] => {
     if (!isMnemonicRestored.value || !mnemonicSeed.value || !accountsRaw.value?.length) {
@@ -89,7 +135,7 @@ export const useAccounts = createCustomScopedComposable(() => {
       {} as Required<ProtocolRecord<Record<AccountType, number>>>,
     );
 
-    return accountsRaw.value
+    return [...accountsRaw.value, ...privateKeyAccountsRaw.value]
       .map((account, globalIdx) => {
         const idx = idxList[account.protocol][account.type];
 
@@ -218,6 +264,17 @@ export const useAccounts = createCustomScopedComposable(() => {
     return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
   }
 
+  async function addPrivateKeyAccount(account: IAccountRaw): Promise<number> {
+    const length = privateKeyAccountsRaw.value.length || 0;
+    accountsPrivateKeysDecrypted.value = JSON.stringify([
+      ...privateKeyAccountsRaw.value,
+      account,
+    ]);
+
+    await watchUntilTruthy(() => privateKeyAccountsRaw.value.length === length + 1);
+    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+  }
+
   /**
    * Establish the last used account index under the actual seed phrase for each of the protocols
    * and collect the raw accounts so they can be stored in the browser storage.
@@ -261,13 +318,16 @@ export const useAccounts = createCustomScopedComposable(() => {
     accountsRaw,
     activeAccount,
     activeAccountGlobalIdx,
+    areAccountsReady,
     areAccountsRestored,
+    arePrivateKeysAccountsRestored,
     isLoggedIn,
     isActiveAccountAirGap,
     protocolsInUse,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
+    addPrivateKeyAccount,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,

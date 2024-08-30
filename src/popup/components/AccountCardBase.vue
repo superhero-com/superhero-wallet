@@ -17,7 +17,12 @@
     </div>
 
     <div class="bottom">
-      <slot name="bottom" />
+      <div class="bottom-left">
+        <slot name="bottom-left" />
+      </div>
+      <div class="bottom-right">
+        <slot name="bottom-right" />
+      </div>
     </div>
   </BtnBase>
 </template>
@@ -89,6 +94,8 @@ export default defineComponent({
     flex: 1;
     display: flex;
     align-items: flex-end;
+    justify-content: space-between;
+    line-height: 0;
   }
 }
 </style>

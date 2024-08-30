@@ -217,6 +217,10 @@ export function getDefaultAccountLabel(
   const accountTypeName = (() => {
     switch (true) {
       case type === ACCOUNT_TYPES.airGap: return tg('airGap.title');
+      case type === ACCOUNT_TYPES.privateKey: return tg(
+        'pages.account.privateKey',
+        { protocol: ProtocolAdapterFactory.getAdapter(protocol!).protocolName },
+      );
       default: return protocol ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null;
     }
   })();
@@ -627,6 +631,10 @@ export function createCustomScopedComposable<T>(composableBody: () => T) {
   };
 }
 
+interface decryptedComputedOptions {
+  onDecrypted?: (val: string | null) => any;
+}
+
 /**
  * Creates computed property that serves as encryption layer for any Vue state.
  * It takes the encrypted state, the key and returns decrypted state.
@@ -635,6 +643,7 @@ export function decryptedComputed(
   key: Ref<CryptoKey | undefined>,
   encryptedState: Ref<string | null>,
   defaultVal?: any,
+  options: decryptedComputedOptions = {},
 ) {
   let updating = false;
   const decrypted = ref(defaultVal);
@@ -642,7 +651,12 @@ export function decryptedComputed(
   watch([key, encryptedState], async ([newKey, newState]) => {
     if (!updating) {
       try {
-        decrypted.value = (newKey && newState) ? await decrypt(newKey, newState) : defaultVal;
+        if (newKey && newState) {
+          decrypted.value = await decrypt(newKey, newState);
+          options.onDecrypted?.(decrypted.value);
+        } else {
+          decrypted.value = defaultVal;
+        }
       } catch (e) {
         decrypted.value = defaultVal;
       }

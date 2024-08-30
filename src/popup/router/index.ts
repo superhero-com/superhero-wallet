@@ -53,14 +53,13 @@ const router = createRouter({
 const {
   isLoggedIn,
   activeAccount,
-  areAccountsRestored,
+  areAccountsReady,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
 const {
-  isMnemonicRestored,
   checkUserAuth,
 } = useAuth();
 
@@ -68,13 +67,9 @@ RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
-  // Wait until we are sure that the user login state is correct
-  await Promise.all([
-    watchUntilTruthy(isMnemonicRestored),
-    watchUntilTruthy(areAccountsRestored),
-  ]);
-
   await checkUserAuth();
+
+  await watchUntilTruthy(areAccountsReady);
 
   const meta = to.meta as WalletRouteMeta;
 

@@ -66,6 +66,7 @@ export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 export const ACCOUNT_TYPES = {
   hdWallet: 'hd-wallet',
   airGap: 'airgap',
+  privateKey: 'private-key',
 } as const;
 
 export const ACCOUNT_TYPES_LIST = Object.values(ACCOUNT_TYPES);
@@ -108,6 +109,7 @@ export const DEX = 'DEX';
 export const STORAGE_KEYS = {
   mnemonic: 'mnemonic',
   accountsRaw: 'accounts-raw',
+  privateKeyAccountsRaw: 'accounts-private-keys',
   activeAccountGlobalIdx: 'active-account-global-idx',
   protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',
   balances: 'balances',
@@ -310,8 +312,8 @@ export const SUPERHERO_CHAT_URLS = [
 export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const MODAL_ACCOUNT_CREATE = 'account-create';
-export const MODAL_AE_ACCOUNT_CREATE = 'account-ae-create';
-export const MODAL_ACCOUNT_IMPORT = 'import-account';
+export const MODAL_ACCOUNT_IMPORT = 'account-import';
+export const MODAL_PRIVATE_KEY_IMPORT = 'private-key-import';
 export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
@@ -331,6 +333,7 @@ export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_NETWORK_SWITCHER = 'network-switcher';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
+export const MODAL_PROTOCOL_SELECT = 'protocol-select';
 export const MODAL_SCAN_QR = 'scan-qr';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';

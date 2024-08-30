@@ -6,6 +6,7 @@ import {
   encode,
   Encoded,
   Encoding,
+  getAddressFromPriv,
   getHdWalletAccountFromSeed,
   isAddressValid,
   Tag,
@@ -202,20 +203,37 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     rawAccount: IAccountRaw,
     idx: number,
     globalIdx: number,
-    seed: Uint8Array,
-  ): IAccount {
-    const wallet = rawAccount.type === ACCOUNT_TYPES.hdWallet
-      ? this.getHdWalletAccountFromMnemonicSeed(seed, idx)
-      : {
-        publicKey: Buffer.from(decode(rawAccount.address as Encoded.AccountAddress)),
+    seed?: Uint8Array,
+  ): IAccount | null {
+    if (rawAccount.type === ACCOUNT_TYPES.privateKey && rawAccount.privateKey) {
+      const address = getAddressFromPriv(Buffer.from(rawAccount.privateKey));
+      return {
+        idx,
+        globalIdx,
+        secretKey: Buffer.from(rawAccount.privateKey!),
+        ...rawAccount,
+        privateKey: undefined,
+        address,
+        publicKey: Buffer.from(decode(address)),
       };
-
-    return {
-      globalIdx,
-      idx,
-      ...rawAccount,
-      ...wallet,
-    } as IAccount;
+    }
+    if (rawAccount.type === ACCOUNT_TYPES.hdWallet && seed) {
+      return {
+        globalIdx,
+        idx,
+        ...rawAccount,
+        ...this.getHdWalletAccountFromMnemonicSeed(seed, idx),
+      };
+    }
+    if (rawAccount.type === ACCOUNT_TYPES.airGap) {
+      return {
+        globalIdx,
+        idx,
+        ...rawAccount,
+        publicKey: Buffer.from(decode(rawAccount.address as Encoded.AccountAddress)),
+      } as any as IAccount; // https://github.com/superhero-com/superhero-wallet/issues/3312
+    }
+    return null;
   }
 
   /**

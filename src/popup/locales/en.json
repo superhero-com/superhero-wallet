@@ -176,12 +176,12 @@
     "createAccount": {
       "title": "Add account",
       "titleMultisig": "Add multisig vault",
-      "titleAeternityAccount": "Add æternity account",
-      "msg": "Please select blockchain to add an account address to.",
       "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "msgAeternity": "Generate new account address to store, send and receive cryptocurrency on the æternity blockchain.",
+      "generateOrImport": "Generate new account address or import accounts.",
       "btnSubtitle": "Derive another account from your seed",
-      "addProtocolAccount": "Add {name} account"
+      "addProtocolAccount": "Add {name} account",
+      "privateKeyTitle": "Import with private key",
+      "privateKeySubtitle": "Import account with its private key"
     },
     "transaction-failed": {
       "title": "Transaction failed",
@@ -200,6 +200,17 @@
       "desc": "Send a public message with your transaction for approx. 0.00000002 AE per character.",
       "label": "Payload message",
       "doneBtn": "Done"
+    },
+    "privateKeyImport": {
+      "title": "Import {protocol} account",
+      "subtitle": "Please enter your private key below to import account into Superhero Wallet.",
+      "privateKey": "Private key",
+      "placeholder": "Enter or paste your private key here",
+      "invalidPrivateKey": "This is not a valid {protocol} account private key.",
+      "privateKeyExist": "This account is already in your wallet.",
+      "helpTitle": "Account private key",
+      "helpMsg": "An account imported into your wallet with private key cannot be restored with your seed phrase but with this private key only. Make sure you back up such accounts storing securely their private keys. <p> Never share your private key with anyone else as it provides full control over your account and funds! </p>",
+      "btnText": "Import Account"
     },
     "name-exist": {
       "msg": "This name is already registered."
@@ -714,6 +725,7 @@
     },
     "account": {
       "heading": "account",
+      "privateKey": "PK {protocol}",
       "balance": "Balance",
       "secureYourAccount": "Secure your account",
       "backupNow": "Back up now",
