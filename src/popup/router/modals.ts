@@ -21,6 +21,7 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_NETWORK_SWITCHER,
   MODAL_PAYLOAD_FORM,
+  MODAL_PRIVATE_KEY_EXPORT,
   MODAL_PRIVATE_KEY_IMPORT,
   MODAL_PROTOCOL_SELECT,
   MODAL_SCAN_QR,
@@ -59,6 +60,7 @@ import Confirm from '../components/Modals/Confirm.vue';
 import ConfirmConnect from '../pages/Popups/Connect.vue';
 
 import ErrorLog from '../components/Modals/ErrorLog.vue';
+import PrivateKeyExport from '../components/Modals/PrivateKeyExport.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
@@ -147,6 +149,9 @@ export default () => {
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
     showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_PRIVATE_KEY_EXPORT, {
+    component: PrivateKeyExport,
   });
   registerModal(MODAL_MESSAGE_SIGN, {
     component: MessageSign,

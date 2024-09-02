@@ -313,6 +313,7 @@ export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const MODAL_ACCOUNT_CREATE = 'account-create';
 export const MODAL_ACCOUNT_IMPORT = 'account-import';
+export const MODAL_PRIVATE_KEY_EXPORT = 'private-key-export';
 export const MODAL_PRIVATE_KEY_IMPORT = 'private-key-import';
 export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';

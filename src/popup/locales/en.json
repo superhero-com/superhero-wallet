@@ -30,6 +30,7 @@
     "hashCopied": "Hash copied",
     "hours": "{n} hours | {n} hour | {n} hours",
     "hoursShort": "{n} h",
+    "key": "Key",
     "minutes": "{n} minutes | {n} minute | {n} minutes",
     "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
@@ -200,6 +201,13 @@
       "desc": "Send a public message with your transaction for approx. 0.00000002 AE per character.",
       "label": "Payload message",
       "doneBtn": "Done"
+    },
+    "privateKeyExport": {
+      "title": "Show account private key",
+      "warning": "Never share your account private key with anyone else as they will be able to gain full control over your account and funds!",
+      "helpMsg": "Your account private key can be exported in order to import this specific account into another wallet supporting the same feature.<p> An account imported into your wallet with private key cannot be restored with your seed phrase but with this private key only. Make sure you back up such accounts storing securely their private keys.</p><p> Never share your private key with anyone else as it provides full control over your account and funds!</p>",
+      "mainBtnText": "Show private key",
+      "copyBtnText": "Copy private key"
     },
     "privateKeyImport": {
       "title": "Import {protocol} account",

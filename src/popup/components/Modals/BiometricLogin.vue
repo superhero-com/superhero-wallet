@@ -62,6 +62,7 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    force: Boolean,
   },
   setup(props) {
     const isAuthCanceled = ref(false);
@@ -70,12 +71,12 @@ export default defineComponent({
     const { authenticateWithBiometry, isAuthenticated } = useAuth();
 
     async function initAuthenticate() {
-      if (isAuthenticating.value || isAuthenticated.value) {
+      if (isAuthenticating.value || (isAuthenticated.value && !props.force)) {
         return;
       }
       isAuthenticating.value = true;
       try {
-        await authenticateWithBiometry();
+        await authenticateWithBiometry(props.force);
         props.resolve();
       } catch (error) {
         isAuthCanceled.value = true;
@@ -91,7 +92,7 @@ export default defineComponent({
     }
 
     watch(isAuthenticated, (value) => {
-      if (value) {
+      if (value && !props.force) {
         props.resolve();
       }
     }, { immediate: true });

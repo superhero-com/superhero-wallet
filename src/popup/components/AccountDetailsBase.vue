@@ -43,6 +43,12 @@
             :address="activeAccount.address"
             :protocol="activeAccount.protocol"
           />
+          <BtnBox
+            :text="$t('common.key')"
+            :icon="PrivateKeyIcon"
+            data-cy="export-private-key"
+            @click="exportPrivateKey()"
+          />
         </template>
         <slot
           v-if="$slots.buttons"
@@ -89,11 +95,17 @@ import {
   ref,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { IS_MOBILE_APP, IS_FIREFOX, PROTOCOLS } from '@/constants';
+import {
+  IS_MOBILE_APP,
+  IS_FIREFOX,
+  MODAL_PRIVATE_KEY_EXPORT,
+  PROTOCOLS,
+} from '@/constants';
 
 import {
   useAccounts,
   useBalances,
+  useModals,
   useUi,
   useScrollConfig,
 } from '@/composables';
@@ -103,10 +115,13 @@ import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBt
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
+import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
 import OpenShareAddressModalBtn from '@/popup/components/OpenShareAddressModalBtn.vue';
-import HorizontalScroll from './HorizontalScroll.vue';
+import HorizontalScroll from '@/popup/components/HorizontalScroll.vue';
+
+import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
 
 const INITIAL_TABS_HEIGHT = 330;
 
@@ -115,6 +130,7 @@ export default defineComponent({
   components: {
     AccountInfo,
     BalanceInfo,
+    BtnBox,
     OpenTransferSendModalBtn,
     OpenShareAddressModalBtn,
     OpenTransferReceiveModalBtn,
@@ -130,6 +146,7 @@ export default defineComponent({
     const route = useRoute();
     const ionRouter = useIonRouter();
 
+    const { openModal } = useModals();
     const { activeAccount } = useAccounts();
     const { isScrollEnabled } = useScrollConfig();
     const { homeRouteName } = useUi();
@@ -147,6 +164,10 @@ export default defineComponent({
       const headerElementBottom = headerEl.value?.getBoundingClientRect()?.bottom;
       const routerContent = Math.ceil(ionicWrapperBottom! - headerElementBottom!);
       routerHeight.value = `${routerContent}px`;
+    }
+
+    function exportPrivateKey() {
+      openModal(MODAL_PRIVATE_KEY_EXPORT);
     }
 
     function close() {
@@ -186,6 +207,7 @@ export default defineComponent({
     });
 
     return {
+      PrivateKeyIcon,
       headerEl,
       homeRouteName,
       routeName,
@@ -195,6 +217,7 @@ export default defineComponent({
       isScrollEnabled,
       close,
       fadeAnimation,
+      exportPrivateKey,
       IS_FIREFOX,
       INITIAL_TABS_HEIGHT,
       PROTOCOLS,
