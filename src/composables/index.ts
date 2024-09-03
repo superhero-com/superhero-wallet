@@ -36,4 +36,4 @@ export * from './walletConnect';
 export * from './airGap';
 export * from './addressBook';
 export * from './addressBookEntryForm';
-export * from './secureStorage';
+export * from './secureStorageRef';

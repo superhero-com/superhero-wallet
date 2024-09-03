@@ -65,8 +65,10 @@ import {
   useNetworks,
   useUi,
 } from '@/composables';
+import { IS_MOBILE_APP } from '@/constants';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
@@ -99,6 +101,9 @@ export default defineComponent({
       disconnectDapps();
 
       WalletStorage.clear();
+      if (IS_MOBILE_APP) {
+        SecureMobileStorage.clear();
+      }
       // TODO: Rethink this approach
       // It is removing the remaining vuex state
       await browser.storage.local.clear();
