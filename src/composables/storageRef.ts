@@ -1,17 +1,14 @@
 import { Ref, ref, watch } from 'vue';
-import { validateMnemonic } from '@aeternity/bip39';
-
 import type { Migration, StorageKey } from '@/types';
-import { asyncPipe, watchUntilTruthy } from '@/utils';
-import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { asyncPipe } from '@/utils';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
+import { IS_MOBILE_APP } from '@/constants';
 
-import { useSecureStorage } from './secureStorage';
-import { useAccounts } from './accounts';
-
-interface ICreateStorageRefOptions<T> {
+export interface ICreateStorageRefOptions<T> {
   /**
    * Enable secure storage for the data.
+   * Mobile app only.
    */
   isSecure?: boolean;
   /**
@@ -43,8 +40,8 @@ export function useStorageRef<T = string | object | any[]>(
   options: ICreateStorageRefOptions<T> = {},
 ) {
   const {
-    serializer,
     isSecure = false,
+    serializer,
     backgroundSync = false,
     migrations,
     onRestored,
@@ -52,94 +49,31 @@ export function useStorageRef<T = string | object | any[]>(
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
-  // Select storage type
-  let storage = isSecure ? null : WalletStorage;
+  const storage = isSecure && IS_MOBILE_APP ? SecureMobileStorage : WalletStorage;
 
-  function setLocalState(val: T | null) {
+  async function setLocalState(val: T | null) {
     if (val !== null) {
       watcherDisabled = true;
-      state.value = (serializer?.read) ? serializer.read(val) : val;
+      state.value = (serializer?.read) ? await serializer.read(val) : val;
       setTimeout(() => { watcherDisabled = false; }, 0);
     }
   }
 
-  function setStorageState(val: T | null) {
-    storage?.set(storageKey, (val && serializer?.write) ? serializer.write(val) : val);
-  }
-
-  /**
-   * Move mnemonic from insecure storage to secure storage.
-   * This is an exception for the mnemonic because it's a key part of the password feature.
-   */
-  async function moveMnemonicToSecureStorage(mnemonic: T) {
-    if (mnemonic) {
-      if (validateMnemonic(mnemonic)) {
-        const { setMnemonic } = useAccounts();
-
-        await setMnemonic(mnemonic as string, true);
-        return mnemonic;
-      }
-    }
-    return null;
+  async function setStorageState(val: T | null) {
+    storage.set(storageKey, (val && serializer?.write) ? await serializer.write(val) : val);
   }
 
   // Restore state and run watchers
   (async () => {
-    if (isSecure) {
-      // Check if value exists in insecure storage and migrate it to secure storage
-      let unencryptedValue = await WalletStorage.get<T | null>(storageKey);
-      if (storageKey === STORAGE_KEYS.mnemonic) {
-        unencryptedValue = await moveMnemonicToSecureStorage(unencryptedValue!);
-      }
-      if (unencryptedValue !== null) {
-        onRestored?.(unencryptedValue);
-        setLocalState(unencryptedValue);
-      }
-
-      // Create secure storage after we've migrated the mnemonic and set the password
-      const { secureStorage, isLoggedIn } = useSecureStorage();
-      await watchUntilTruthy(secureStorage);
-      storage = secureStorage.value!;
-
-      // Move the unencrypted value to secure storage and remove it from insecure storage
-      if (IS_MOBILE_APP && unencryptedValue !== null) {
-        setStorageState(unencryptedValue);
-        WalletStorage.remove(storageKey);
-      }
-
-      /**
-       * Clear the state when the user logs out.
-       * This ensures that the state is not leaked if someone removes the modal from the DOM.
-       *
-       * TODO This breaks the UI behind the modal while user is logged out
-       * because the state is not restored yet.
-       */
-      watch(isLoggedIn, async (val) => {
-        if (!val) {
-          setLocalState(initialState);
-        } else {
-          const restoredValue = await storage?.get<T | null>(storageKey);
-          onRestored?.(restoredValue!);
-          setLocalState(restoredValue!);
-        }
-      }, { immediate: true });
-
-      watch(secureStorage, (newSecureStorage) => {
-        if (newSecureStorage) {
-          storage = newSecureStorage;
-        }
-      });
-    }
-
-    let restoredValue = await storage?.get<T | null>(storageKey);
+    let restoredValue = await storage.get<T | null>(storageKey);
     if (migrations?.length) {
       restoredValue = await asyncPipe<T | null>(migrations)(restoredValue!);
       if (restoredValue !== null) {
-        setStorageState(restoredValue);
+        await setStorageState(restoredValue);
       }
     }
-    onRestored?.(restoredValue!);
-    setLocalState(restoredValue!);
+    onRestored?.(restoredValue);
+    await setLocalState(restoredValue);
 
     /**
      * Synchronize the state value with the storage.
@@ -156,7 +90,7 @@ export function useStorageRef<T = string | object | any[]>(
      * and the offscreen tab pick this and synchronize their own state with the change.
      */
     if (backgroundSync) {
-      storage?.watch?.(storageKey, (val) => setLocalState(val));
+      storage.watch?.(storageKey, (val) => setLocalState(val));
     }
   })();
 

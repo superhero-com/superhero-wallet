@@ -41,9 +41,11 @@ import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-c
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
 import { useUi } from './ui';
+import { useSecureStorageRef } from './secureStorageRef';
 
 let composableInitialized = false;
 
@@ -56,18 +58,21 @@ const areAccountsRestored = ref(false);
 const isMnemonicRestored = ref(false);
 const passwordKey = ref<IKey | null>(null);
 
-const mnemonic = useStorageRef<string>(
+const mnemonic = useSecureStorageRef<string>(
   '',
   STORAGE_KEYS.mnemonic,
   {
-    isSecure: true,
     backgroundSync: true,
     migrations: [
       ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
       migrateMnemonicVuexToComposable,
     ],
-    onRestored: () => {
-      isMnemonicRestored.value = true;
+    onRestored: async (val) => {
+      const hasStoredMnemonic = (
+        await WalletStorage.get(STORAGE_KEYS.mnemonic)
+        || await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)
+      );
+      isMnemonicRestored.value = !!val || !hasStoredMnemonic;
     },
   },
 );
