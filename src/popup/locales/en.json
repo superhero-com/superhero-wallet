@@ -104,12 +104,12 @@
     "backend": {
       "statusMessage": "Temporary backend failure.",
       "title": "Backend failure",
-      "description": "Some features such as sending assets, fetching balances, transaction history, multisig vaults and .chain names may not be accessible at the moment due to temporary backend failure."
+      "description": "Some features such as setting default name, tipping related functionality and multisig vaults may not be accessible at the moment due to temporary backend failure. <p> Transaction history is still accessible except the claim tip transactions that cannot be currently fetched and displayed. </p>"
     },
     "aeternityBackend": {
       "statusMessage": "Temporary aeternity backend failure.",
       "title": "aeternity backend failure",
-      "description": "Some features such as setting default name, tipping related functionality may not be accessible at the moment due to temporary aeternity backend failure."
+      "description": "Some features such as setting default name and tipping related functionality may not be accessible at the moment due to temporary aeternity backend failure. <p> Transaction history is still accessible except the claim tip transactions that cannot be currently fetched and displayed. </p>"
     }
   },
   "dashboard": {
