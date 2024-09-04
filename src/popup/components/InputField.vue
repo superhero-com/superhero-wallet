@@ -310,6 +310,7 @@ export default defineComponent({
       padding: 4px 0;
       display: inline-block;
       user-select: none;
+      line-height: 24px;
     }
 
     .btn-help {
