@@ -406,11 +406,11 @@
     },
     "accountDetails": {
       "assets": "Assets",
-      "assetsNotAvailable": "Assets list is not available offline.",
+      "assetsNotAvailable": "Assets are not available offline.",
       "transactions": "Transactions",
-      "transactionsNotAvailable": "Transactions history is not available offline.",
+      "transactionsNotAvailable": "Transactions are not available offline.",
       "names": "Names",
-      "namesNotAvailable": "Names list is not available offline.",
+      "namesNotAvailable": "Names are not available offline.",
       "details": "Details"
     },
     "claimGiftCard": {
