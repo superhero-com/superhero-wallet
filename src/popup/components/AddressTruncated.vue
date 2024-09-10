@@ -1,25 +1,22 @@
 <template>
-  <div class="address-truncated">
+  <Component
+    :is="(showExplorerLink) ? 'LinkButton' : 'div'"
+    :is-external="(showExplorerLink) ? true : null"
+    :href="(showExplorerLink) ? explorerUrl : null"
+    :class="{ 'is-link': showExplorerLink }"
+    class="address-truncated"
+  >
     <ProtocolIcon
       v-if="showProtocolIcon && protocol"
       :protocol="protocol"
-      class="protocol-icon"
+      class="address-truncated-protocol"
     />
     <div class="address-truncated-chunks">
       <span class="address-chunk">{{ truncatedAddress[0] }}</span>
-      <span class="dots">
-        &middot;&middot;&middot;
-      </span>
+      <span class="dots">&middot;&middot;&middot;</span>
       <span class="address-chunk">{{ truncatedAddress[1] }}</span>
     </div>
-
-    <LinkButton
-      v-if="showExplorerLink"
-      :href="explorerUrl"
-      is-external
-      class="external-link"
-    />
-  </div>
+  </Component>
 </template>
 
 <script lang="ts">
@@ -70,13 +67,29 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/typography';
+@use '@/styles/variables' as *;
 
 .address-truncated {
+  $this: &;
+
   display: flex;
   align-items: center;
   user-select: none;
+  color: inherit;
 
-  .protocol-icon {
+  &.is-link {
+    #{$this}-chunks {
+      color: rgba($color-white, 0.85);
+    }
+
+    &:hover {
+      #{$this}-chunks {
+        color: $color-white;
+      }
+    }
+  }
+
+  &-protocol {
     margin-right: 4px;
   }
 
@@ -88,12 +101,11 @@ export default defineComponent({
     align-items: center;
     gap: 2px;
     letter-spacing: 0.07em;
+    transition: inherit;
 
     .dots {
-      @extend %face-mono-16-medium;
-
+      font-size: 16px;
       letter-spacing: -0.25em;
-      text-align: center;
       margin-left: -1px;
       margin-right: 3px;
     }
@@ -101,17 +113,6 @@ export default defineComponent({
     .address-chunk,
     .dots {
       white-space: nowrap;
-    }
-  }
-
-  .external-link {
-    margin-top: -1px; // Compensate alignment with text
-    flex-shrink: 0;
-    color: inherit;
-
-    .external-link-icon {
-      width: 22px;
-      height: 22px;
     }
   }
 }
