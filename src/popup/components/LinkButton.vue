@@ -19,7 +19,10 @@
       v-if="isExternal || $slots.icon"
       class="link-icon"
     >
-      <ExternalLinkIcon v-if="isExternal" />
+      <ExternalLinkIcon
+        v-if="isExternal"
+        class="external-link-icon"
+      />
       <slot
         v-else
         name="icon"
@@ -106,10 +109,17 @@ export default defineComponent({
     justify-content: center;
 
     svg {
+      flex-shrink: 0;
       width: 24px;
       height: 24px;
       opacity: 0.44;
       color: $color-white;
+      transition: opacity 0.1s;
+    }
+
+    .external-link-icon {
+      margin-top: -2px;
+      margin-left: -2px;
     }
   }
 
