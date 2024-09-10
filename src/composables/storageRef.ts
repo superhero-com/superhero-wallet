@@ -27,6 +27,10 @@ export interface ICreateStorageRefOptions<T> {
    * Allows to ensure the state is already synced with browser storage and migrated.
    */
   onRestored?: (val: T | null) => any;
+  /**
+   * Allows to run a callback whenever the state is synced with the background.
+   */
+  onBackgroundSync?: (val: T) => any;
 }
 
 /**
@@ -45,6 +49,7 @@ export function useStorageRef<T = string | object | any[]>(
     backgroundSync = false,
     migrations,
     onRestored,
+    onBackgroundSync,
   } = options;
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
@@ -90,7 +95,10 @@ export function useStorageRef<T = string | object | any[]>(
      * and the offscreen tab pick this and synchronize their own state with the change.
      */
     if (backgroundSync) {
-      storage.watch?.(storageKey, (val) => setLocalState(val));
+      storage.watch?.(storageKey, (val) => {
+        setLocalState(val);
+        onBackgroundSync?.(val);
+      });
     }
   })();
 

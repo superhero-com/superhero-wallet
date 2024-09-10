@@ -1,10 +1,11 @@
-import '@/lib/initPolyfills';
+import '../lib/initPolyfills';
 import type {
   Dictionary,
+  IExportedKey,
   IPopupProps,
   PopupType,
 } from '@/types';
-import { POPUP_METHODS } from '@/constants';
+import { POPUP_METHODS, SESSION_METHODS } from '@/constants';
 import { executeOrSendMessageToBackground } from './utils';
 
 interface IPopupConfig {
@@ -45,3 +46,8 @@ export const removePopup = async (id: string) => {
 };
 
 export const getPopup = (id: string) => popups[id];
+
+export const getSession = async (): Promise<IExportedKey | null> => (
+  executeOrSendMessageToBackground(SESSION_METHODS.getSessionKey)
+    .then((sessionKey) => sessionKey)
+);
