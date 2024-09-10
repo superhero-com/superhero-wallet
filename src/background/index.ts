@@ -1,5 +1,11 @@
-import { IPopupMessageData } from '@/types';
-import { openPopup, removePopup, getPopup } from './bgPopupHandler';
+import { IBackgroundMessageData } from '@/types';
+import {
+  openPopup,
+  removePopup,
+  getPopup,
+  getSession,
+  setSessionExpiration,
+} from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
 
 (async () => {
@@ -28,12 +34,17 @@ import { updateDynamicRules } from './redirectRule';
 /**
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
-function handleMessage(msg: IPopupMessageData, _: any, sendResponse: Function) {
+function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
-    // Handle session expiration independently because params are not set
-    if (msg.method === 'setSessionExpires') {
-      // @ts-expect-error session storage is not defined
-      browser.storage.session.set({ sessionExpires: msg.payload });
+    // Handle session methods independently because params are not set
+    if (msg.method === 'getSessionKey') {
+      getSession().then((sessionKey) => {
+        sendResponse(sessionKey);
+      });
+      return true;
+    }
+    if (msg.method === 'setSessionExpiration') {
+      sendResponse(setSessionExpiration(msg.payload));
       return false;
     }
     const {
@@ -60,7 +71,7 @@ function handleMessage(msg: IPopupMessageData, _: any, sendResponse: Function) {
   }
 
   // forward messages to the offscreen page
-  browser.runtime.sendMessage<IPopupMessageData>({
+  browser.runtime.sendMessage<IBackgroundMessageData>({
     ...msg,
     target: 'offscreen',
   });

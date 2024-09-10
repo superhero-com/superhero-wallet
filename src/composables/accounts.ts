@@ -23,6 +23,7 @@ import {
   MODAL_SET_PASSWORD,
   MODAL_PASSWORD_LOGIN,
   IS_EXTENSION,
+  IS_OFFSCREEN_TAB,
 } from '@/constants';
 import {
   createCallbackRegistry,
@@ -46,6 +47,9 @@ import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
 import { useUi } from './ui';
 import { useSecureStorageRef } from './secureStorageRef';
+import { useAeSdk } from './aeSdk';
+
+const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 
 let composableInitialized = false;
 
@@ -264,6 +268,8 @@ export function useAccounts() {
     const sessionKey = await getSessionKey();
     if (sessionKey) {
       setPasswordKey(sessionKey);
+      const { getAeSdk } = useAeSdk();
+      await getAeSdk();
       setLoaderVisible(false);
       return;
     }
@@ -360,6 +366,19 @@ export function useAccounts() {
     activeAccountGlobalIdx.value = 0;
   }
 
+  async function waitForSessionKey() {
+    await new Promise<void>((resolve) => {
+      const interval = setInterval(async () => {
+        const key = await getSessionKey();
+        if (key) {
+          setPasswordKey(key);
+          clearInterval(interval);
+          resolve();
+        }
+      }, CHECK_FOR_SESSION_KEY_INTERVAL);
+    });
+  }
+
   (async () => {
     if (!composableInitialized) {
       composableInitialized = true;
@@ -372,6 +391,11 @@ export function useAccounts() {
         && storedMnemonic && !validateMnemonic(storedMnemonic)
       ) {
         await openLoginModal();
+      }
+
+      if (IS_OFFSCREEN_TAB && !passwordKey.value) {
+        await waitForSessionKey();
+        return;
       }
 
       await watchUntilTruthy(isLoggedIn);

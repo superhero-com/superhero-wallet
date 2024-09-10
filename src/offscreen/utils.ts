@@ -1,7 +1,17 @@
 import type { Runtime } from 'webextension-polyfill';
-import type { IPopupMessageData, PopupMethod } from '@/types';
-import { CONNECTION_TYPES, IS_FIREFOX, POPUP_METHODS } from '@/constants';
-import { openPopup, removePopup, getPopup } from '@/background/bgPopupHandler';
+import type { IBackgroundMessageData, BackgroundMethod } from '@/types';
+import {
+  CONNECTION_TYPES,
+  IS_FIREFOX,
+  POPUP_METHODS,
+  SESSION_METHODS,
+} from '@/constants';
+import {
+  openPopup,
+  removePopup,
+  getPopup,
+  getSession,
+} from '@/background/bgPopupHandler';
 import { getCleanModalOptions } from '@/utils';
 
 export const detectConnectionType = (port: Runtime.Port) => {
@@ -13,6 +23,8 @@ export const detectConnectionType = (port: Runtime.Port) => {
   );
   if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;
+  } if (CONNECTION_TYPES.SESSION === port.name) {
+    return CONNECTION_TYPES.SESSION;
   }
   return CONNECTION_TYPES.OTHER;
 };
@@ -23,23 +35,25 @@ export const detectConnectionType = (port: Runtime.Port) => {
  * instead call the function directly from bgPopupHandler.ts
  */
 export async function executeOrSendMessageToBackground(
-  method: PopupMethod,
-  params: Required<IPopupMessageData>['params'],
+  method: BackgroundMethod,
+  params?: Required<IBackgroundMessageData>['params'],
 ) {
   if (IS_FIREFOX) {
     switch (method) {
       case POPUP_METHODS.openPopup:
-        return openPopup(params.popupType!, params.aepp!, params.popupProps);
+        return openPopup(params?.popupType!, params?.aepp!, params?.popupProps);
       case POPUP_METHODS.removePopup:
-        return removePopup(params.id!);
+        return removePopup(params?.id!);
       case POPUP_METHODS.getPopup:
-        return getPopup(params.id!);
+        return getPopup(params?.id!);
+      case SESSION_METHODS.getSessionKey:
+        return getSession();
       default:
         return null;
     }
   }
   const cleanParams = getCleanModalOptions<typeof params>(params);
-  return browser.runtime.sendMessage<IPopupMessageData>({
+  return browser.runtime.sendMessage<IBackgroundMessageData>({
     target: 'background',
     method,
     params: cleanParams,
