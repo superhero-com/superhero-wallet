@@ -15,7 +15,10 @@ import { type ICreateStorageRefOptions, useStorageRef } from './storageRef';
 export function useSecureStorageRef<T = string | object | any[]>(
   initialState: T,
   storageKey: StorageKey,
-  options: Omit<ICreateStorageRefOptions<T>, 'serializer' | 'isSecure' > = {},
+  options: Omit<
+    ICreateStorageRefOptions<T>,
+    'serializer' | 'isSecure' | 'onBackgroundSync'
+  > = {},
 ) {
   const isWriting = ref(false);
 
@@ -77,6 +80,9 @@ export function useSecureStorageRef<T = string | object | any[]>(
         decryptedState.value = decryptedValue;
         options.onRestored?.(decryptedValue);
       }
+    },
+    onBackgroundSync: async (val: T) => {
+      decryptedState.value = await getDecryptedValue(val);
     },
   });
 

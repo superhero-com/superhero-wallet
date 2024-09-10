@@ -3,6 +3,7 @@ import type {
   Dictionary,
   IPopupProps,
   PopupType,
+  IExportedKey,
 } from '@/types';
 
 interface IPopupConfigNoActions {
@@ -23,6 +24,8 @@ const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 const POPUP_TYPE_CONNECT = 'connectConfirm';
 
 const popups: Dictionary<IPopupConfigNoActions> = {};
+
+const storageSession = (browser.storage as any)?.session;
 
 export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 
@@ -80,3 +83,28 @@ export const openPopup = async (
 export const removePopup = (id: string) => delete popups[id];
 
 export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
+
+export const setSessionExpiration = async (expires: number) => {
+  await storageSession.set({ sessionExpires: expires });
+};
+
+export const getSession = async (): Promise<IExportedKey | null> => {
+  try {
+    const { sessionExpires } = await storageSession.get('sessionExpires');
+    if (sessionExpires < Date.now() || !sessionExpires) {
+      await storageSession.remove('sessionKey');
+      return null;
+    }
+
+    const { sessionKey } = await storageSession.get('sessionKey');
+    if (sessionKey) {
+      return {
+        key: Buffer.from(sessionKey.key).toString('base64'),
+        salt: Buffer.from(sessionKey.salt).toString('base64'),
+        iv: Buffer.from(sessionKey.iv).toString('base64'),
+      };
+    }
+  } catch (error) { /** NOOP */ }
+
+  return null;
+};

@@ -380,7 +380,11 @@ export const POPUP_METHODS = {
   reload: 'reload',
   paste: 'paste',
   checkHasAccount: 'checkHasAccount', // TODO check if still used
-  setSessionExpires: 'setSessionExpires',
+} as const;
+
+export const SESSION_METHODS = {
+  setSessionExpiration: 'setSessionExpiration',
+  getSessionKey: 'getSessionKey',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';

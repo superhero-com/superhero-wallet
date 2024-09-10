@@ -148,7 +148,7 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IName, IPopupMessageData } from '@/types';
+import { IName, IBackgroundMessageData } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
@@ -245,7 +245,7 @@ export default defineComponent({
           text = value;
         }
       } else if (IS_EXTENSION) {
-        text = await browser!.runtime.sendMessage<IPopupMessageData>({
+        text = await browser!.runtime.sendMessage<IBackgroundMessageData>({
           method: POPUP_METHODS.paste,
         });
       } else {

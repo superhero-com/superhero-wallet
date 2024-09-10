@@ -2,9 +2,17 @@ import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
-import type { IPopupMessageData } from '@/types';
-import { CONNECTION_TYPES, POPUP_ACTIONS } from '@/constants';
+import type { IBackgroundMessageData, IOtherSettings } from '@/types';
+import {
+  CONNECTION_TYPES,
+  IS_FIREFOX,
+  POPUP_ACTIONS,
+  SESSION_METHODS,
+  STORAGE_KEYS,
+} from '@/constants';
 import { useAccounts, useAeSdk, useNetworks } from '@/composables';
+import { WalletStorage } from '@/lib/WalletStorage';
+import { setSessionExpiration } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 
@@ -37,7 +45,7 @@ export async function init() {
     switch (detectConnectionType(port as Runtime.Port)) {
       case CONNECTION_TYPES.POPUP: {
         const id = new URL(port?.sender?.url!).searchParams.get('id');
-        port.onMessage.addListener(async (msg: IPopupMessageData) => {
+        port.onMessage.addListener(async (msg: IBackgroundMessageData) => {
           const popup = getPopup(id!);
 
           if (msg.type === POPUP_ACTIONS.getProps) {
@@ -64,6 +72,23 @@ export async function init() {
 
         await addAeppConnection(port as Runtime.Port);
         break;
+      }
+      case CONNECTION_TYPES.SESSION: {
+        port.onDisconnect.addListener(async () => {
+          const settings = await WalletStorage.get<IOtherSettings>(STORAGE_KEYS.otherSettings);
+          const sessionExpires = Date.now() + (settings?.secureLoginTimeout ?? 0);
+
+          if (IS_FIREFOX) {
+            setSessionExpiration(sessionExpires);
+          } else {
+            browser.runtime.sendMessage<IBackgroundMessageData>({
+              target: 'background',
+              method: SESSION_METHODS.setSessionExpiration,
+              payload: sessionExpires,
+            });
+          }
+        });
+        return;
       }
       default:
         throw new Error('Unknown connection type');

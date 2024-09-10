@@ -1,16 +1,19 @@
-import { CONNECTION_TYPES, IS_EXTENSION } from '@/constants';
-import { exportPasswordKey, IKey, importPasswordKey } from './crypto';
+import type { IKey } from '@/types';
+import { CONNECTION_TYPES, IS_EXTENSION, IS_OFFSCREEN_TAB } from '@/constants';
+import { getSession } from '@/offscreen/popupHandler';
+import { exportPasswordKey, importPasswordKey } from './crypto';
+
+const storageSession = (browser.storage as any)?.session;
 
 /**
  * Stores the session key in the session storage.
  * Extension only.
  */
 export async function startSession(sessionKey: IKey, timeout: number) {
-  if (IS_EXTENSION) {
+  if (IS_EXTENSION && !IS_OFFSCREEN_TAB) {
     browser.runtime.connect({ name: CONNECTION_TYPES.SESSION });
     const sessionExpires = Date.now() + timeout;
-    // @ts-expect-error session storage is not defined
-    await browser.storage.session.set(
+    await storageSession.set(
       {
         sessionKey: await exportPasswordKey(sessionKey),
         sessionExpires,
@@ -23,9 +26,8 @@ export async function startSession(sessionKey: IKey, timeout: number) {
  * Extension only.
  */
 export async function endSession() {
-  if (IS_EXTENSION) {
-    // @ts-expect-error session storage is not defined
-    await browser.storage.session.remove('sessionKey');
+  if (IS_EXTENSION && !IS_OFFSCREEN_TAB) {
+    await storageSession.remove('sessionKey');
   }
 }
 
@@ -33,17 +35,27 @@ export async function endSession() {
  * Extension only.
  */
 export async function getSessionKey() {
+  if (IS_OFFSCREEN_TAB) {
+    const sessionKey = await getSession();
+    if (sessionKey) {
+      const decodedKey = {
+        key: Buffer.from(sessionKey.key, 'base64'),
+        salt: Buffer.from(sessionKey.salt, 'base64'),
+        iv: Buffer.from(sessionKey.iv, 'base64'),
+      };
+      return importPasswordKey(decodedKey);
+    }
+    return null;
+  }
   if (IS_EXTENSION) {
-    // @ts-expect-error session storage is not defined
-    const expires = await browser.storage.session.get('sessionExpires');
+    const expires = await storageSession.get('sessionExpires');
     const { sessionExpires } = expires;
-    if (sessionExpires < Date.now()) {
+    if (sessionExpires < Date.now() || !sessionExpires) {
       await endSession();
       return null;
     }
 
-    // @ts-expect-error session storage is not defined
-    const keyResult = await browser.storage.session.get('sessionKey');
+    const keyResult = await storageSession.get('sessionKey');
     if (keyResult.sessionKey) {
       return importPasswordKey(keyResult.sessionKey);
     }

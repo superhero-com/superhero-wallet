@@ -6,9 +6,9 @@ import {
   watch,
 } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
-import { IOtherSettings } from '@/types';
+
+import type { IOtherSettings } from '@/types';
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
-import { endSession } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
@@ -106,9 +106,6 @@ export function useUi() {
   }
 
   function setSecureLoginTimeout(ms: number) {
-    if (ms === 0) {
-      endSession();
-    }
     otherSettings.value.secureLoginTimeout = ms;
   }
 
