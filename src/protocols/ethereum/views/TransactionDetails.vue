@@ -87,7 +87,7 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 
-import { ETH_COIN_SYMBOL } from '@/protocols/ethereum/config';
+import { ETH_COIN_SYMBOL, ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { decodeTxData } from '@/protocols/ethereum/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
@@ -141,10 +141,12 @@ export default defineComponent({
     const amount = computed((): number => transaction.value?.tx?.amount || 0);
 
     async function getDecodedCallData() {
-      if (innerTx.value?.callData && innerTx.value?.recipientId) {
+      if (innerTx.value?.callData && innerTx.value?.contractId) {
         return decodeTxData(
           innerTx.value.callData,
-          innerTx.value.recipientId,
+          (innerTx.value.contractId !== ETH_CONTRACT_ID)
+            ? innerTx.value.contractId
+            : innerTx.value.recipientId,
           activeAccount.value.address,
         );
       }
@@ -166,7 +168,13 @@ export default defineComponent({
       const rawTransaction = await (async (): Promise<ICommonTransaction | null> => {
         // First try to pick the cached transaction.
         const loadedTransaction = transactionsLoaded.value.find((tx) => tx.hash === hash);
-        if (loadedTransaction) {
+
+        const isCallDataDeprecated = (
+          loadedTransaction?.tx?.type === 'ContractCallTx'
+          && (loadedTransaction?.tx?.callData as string) === 'deprecated'
+        );
+
+        if (loadedTransaction && !isCallDataDeprecated) {
           return loadedTransaction;
         }
 
