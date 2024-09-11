@@ -40,12 +40,21 @@ export function normalizeTransactionStructure(
    */
 
   const amountInSatochi = (
-    transactionOwner === vout[0].scriptpubkey_address
-    || vout.length === 1
+    vout.length === 1
+    // in case transactions are made from our wallet (address remains the same)
+    || vin[0].prevout.scriptpubkey === vout[1].scriptpubkey
+    /**
+     * In case transactions are made from wallets with different send schema
+     * sending the rest of the remain balance to
+     * a NEXT address for this account (next ADDRESS_INDEX)
+     * derivation path m/purpose’/coin_type’/account’/change/ADDRESS_INDEX
+     */
+    || transactionOwner === vout[0].scriptpubkey_address
   ) ? vout[0].value : vout[1].value;
   const recipientId = (
-    transactionOwner === vout[0].scriptpubkey_address
-    || vout.length === 1
+    vout.length === 1
+    || vin[0].prevout.scriptpubkey === vout[1].scriptpubkey
+    || transactionOwner === vout[0].scriptpubkey_address
   )
     ? vout[0].scriptpubkey_address
     : vout[1].scriptpubkey_address;
