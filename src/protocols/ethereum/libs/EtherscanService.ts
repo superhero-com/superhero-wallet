@@ -138,13 +138,25 @@ export class EtherscanService {
     hash: string,
     address: string,
     blockNumber: string,
+    input?: string,
   ): Promise<ITransaction | undefined> {
     // Not the best solution, but it seems to be the only way to get token transaction details
     const blockTransactions = await this.fetchAccountTokenTransactions(address, {
       startblock: blockNumber,
       endblock: blockNumber,
     });
-    return blockTransactions.find((tx) => tx.hash === hash);
+
+    // The token transaction API doesn't always return input data, so we are adding it manually
+    // if we have it from the previous call
+    const transaction = blockTransactions.find((tx) => tx.hash === hash);
+    if (
+      transaction
+      && input
+      && (!transaction?.tx?.callData || (transaction?.tx?.callData as any) === 'deprecated')
+    ) {
+      transaction.tx.callData = input as any;
+    }
+    return transaction;
   }
 
   static normalizeEtherscanTransactionStructure(

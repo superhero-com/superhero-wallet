@@ -131,6 +131,8 @@ export async function decodeTxData(
 
   try {
     // Decode the method and parameters from the input data
+    // TODO contractInstance doesn't always have the method signatures
+    // then we are not able to decode the method name and get the parameters
     const methodSignature = txData.slice(0, 10);
     const method = contractInstance.options.jsonInterface
       .find((m) => m.signature === methodSignature);
