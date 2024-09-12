@@ -3,7 +3,7 @@ import {
   openPopup,
   removePopup,
   getPopup,
-  getSession,
+  getSessionEncryptionData,
   setSessionExpiration,
 } from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
@@ -37,9 +37,9 @@ import { updateDynamicRules } from './redirectRule';
 function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
     // Handle session methods independently because params are not set
-    if (msg.method === 'getSessionKey') {
-      getSession().then((sessionKey) => {
-        sendResponse(sessionKey);
+    if (msg.method === 'getSessionEncryptionData') {
+      getSessionEncryptionData().then((encryptionData) => {
+        sendResponse(encryptionData);
       });
       return true;
     }

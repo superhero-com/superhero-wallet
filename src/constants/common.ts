@@ -384,7 +384,7 @@ export const POPUP_METHODS = {
 
 export const SESSION_METHODS = {
   setSessionExpiration: 'setSessionExpiration',
-  getSessionKey: 'getSessionKey',
+  getSessionEncryptionData: 'getSessionEncryptionData',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';

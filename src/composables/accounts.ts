@@ -7,7 +7,7 @@ import type {
   AccountType,
   IAccount,
   IAccountRaw,
-  IKey,
+  IEncryptionData,
   IFormSelectOption,
   Protocol,
   ProtocolRecord,
@@ -31,8 +31,9 @@ import {
   encrypt,
   endSession,
   excludeFalsy,
-  generateKey,
-  getSessionKey,
+  restoreEncryptionData,
+  initializeEncryptionData,
+  getSessionEncryptionData,
   prepareAccountSelectOptions,
   startSession,
   watchUntilTruthy,
@@ -60,7 +61,7 @@ const {
 
 const areAccountsRestored = ref(false);
 const isMnemonicRestored = ref(false);
-const passwordKey = ref<IKey | null>(null);
+const encryptionData = ref<IEncryptionData | null>();
 
 const mnemonic = useSecureStorageRef<string>(
   '',
@@ -73,7 +74,7 @@ const mnemonic = useSecureStorageRef<string>(
     ],
     onRestored: async (val) => {
       const hasStoredMnemonic = (
-        await WalletStorage.get(STORAGE_KEYS.mnemonic)
+        WalletStorage.get(STORAGE_KEYS.mnemonic)
         || await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)
       );
       isMnemonicRestored.value = !!val || !hasStoredMnemonic;
@@ -252,22 +253,27 @@ export function useAccounts() {
   /**
    * Setting/Resetting the password key logs the user in/out.
    */
-  function setPasswordKey(key: IKey | null) {
-    passwordKey.value = key;
+  function setEncryptionData(newEncryptionData: IEncryptionData | null) {
+    encryptionData.value = newEncryptionData;
     if (IS_EXTENSION) {
-      if (key) {
-        startSession(key, secureLoginTimeout.value);
+      if (newEncryptionData) {
+        startSession(newEncryptionData, secureLoginTimeout.value);
       } else {
         endSession();
       }
     }
   }
 
+  async function getEncryptionData() {
+    await watchUntilTruthy(encryptionData);
+    return encryptionData.value;
+  }
+
   async function openLoginModal() {
     setLoaderVisible(true);
-    const sessionKey = await getSessionKey();
-    if (sessionKey) {
-      setPasswordKey(sessionKey);
+    const sessionEncryptionData = await getSessionEncryptionData();
+    if (sessionEncryptionData) {
+      setEncryptionData(sessionEncryptionData);
       const { getAeSdk } = useAeSdk();
       await getAeSdk();
       setLoaderVisible(false);
@@ -278,26 +284,27 @@ export function useAccounts() {
     const { openModal } = useModals();
 
     await openModal(MODAL_PASSWORD_LOGIN);
-    if (!passwordKey.value) {
-      throw new Error('passwordKey was not set after login.');
+    if (!encryptionData.value) {
+      throw new Error('encryptionData was not set after login.');
     }
   }
 
-  async function setPassword(newMnemonic: string, password: string) {
-    const key = await generateKey(password);
-    const encryptedMnemonic = await encrypt(key, newMnemonic);
+  async function setPasswordAndEncryptMnemonic(newMnemonic: string, password: string) {
+    const newEncryptionData = await initializeEncryptionData(password);
+    const encryptedMnemonic = await encrypt(newEncryptionData, newMnemonic);
     WalletStorage.set(STORAGE_KEYS.mnemonic, encryptedMnemonic);
-
-    // Saved key needs to be generated from the password and the encrypted mnemonic
-    setPasswordKey(await generateKey(password, encryptedMnemonic));
+    setEncryptionData(newEncryptionData);
   }
 
   async function updatePassword(currentPassword: string, newPassword: string) {
-    const encryptedMnemonic = await WalletStorage.get<string>(STORAGE_KEYS.mnemonic) || undefined;
-    const key = await generateKey(currentPassword, encryptedMnemonic);
-    const decryptedMnemonic = await decrypt(key, encryptedMnemonic!);
+    const encryptedMnemonic = WalletStorage.get<string>(STORAGE_KEYS.mnemonic);
+    if (!encryptedMnemonic) {
+      throw new Error('Mnemonic not found.');
+    }
+    const restoredEncryptionData = await restoreEncryptionData(currentPassword, encryptedMnemonic);
+    const decryptedMnemonic = await decrypt(restoredEncryptionData, encryptedMnemonic);
     if (decryptedMnemonic) {
-      await setPassword(decryptedMnemonic, newPassword);
+      await setPasswordAndEncryptMnemonic(decryptedMnemonic, newPassword);
     } else {
       throw new Error('Incorrect password.');
     }
@@ -310,10 +317,10 @@ export function useAccounts() {
       isRestoredWallet: isRestored,
     });
 
-    await setPassword(newMnemonic, password);
+    await setPasswordAndEncryptMnemonic(newMnemonic, password);
   }
 
-  async function setMnemonic(newMnemonic: string, isRestored = false) {
+  async function setMnemonicAndInitializePassword(newMnemonic: string, isRestored = false) {
     if (!IS_MOBILE_APP) {
       await openSetPasswordModal(newMnemonic, isRestored).catch(() => {
         throw new Error('Password was not set.');
@@ -323,7 +330,7 @@ export function useAccounts() {
   }
 
   async function setGeneratedMnemonic() {
-    await setMnemonic(generateMnemonic()).catch(() => {
+    await setMnemonicAndInitializePassword(generateMnemonic()).catch(() => {
       throw new Error('Mnemonic was not set.');
     });
   }
@@ -366,12 +373,12 @@ export function useAccounts() {
     activeAccountGlobalIdx.value = 0;
   }
 
-  async function waitForSessionKey() {
+  async function waitForSessionEncryptionData() {
     await new Promise<void>((resolve) => {
       const interval = setInterval(async () => {
-        const key = await getSessionKey();
-        if (key) {
-          setPasswordKey(key);
+        const sessionEncryptionData = await getSessionEncryptionData();
+        if (sessionEncryptionData) {
+          setEncryptionData(sessionEncryptionData);
           clearInterval(interval);
           resolve();
         }
@@ -382,9 +389,9 @@ export function useAccounts() {
   (async () => {
     if (!composableInitialized) {
       composableInitialized = true;
-      const storedMnemonic = await WalletStorage.get(STORAGE_KEYS.mnemonic);
+      const storedMnemonic = WalletStorage.get(STORAGE_KEYS.mnemonic);
       if (
-        !passwordKey.value
+        !encryptionData.value
         && !IS_MOBILE_APP
         // If the mnemonic is stored but is not valid as plaintext
         // it means that user is trying to access an existing & encrypted wallet
@@ -393,8 +400,8 @@ export function useAccounts() {
         await openLoginModal();
       }
 
-      if (IS_OFFSCREEN_TAB && !passwordKey.value) {
-        await waitForSessionKey();
+      if (IS_OFFSCREEN_TAB && !encryptionData.value) {
+        await waitForSessionEncryptionData();
         return;
       }
 
@@ -420,13 +427,14 @@ export function useAccounts() {
     isLoggedIn,
     isActiveAccountAirGap,
     mnemonic,
-    passwordKey,
+    encryptionData,
     mnemonicSeed,
     protocolsInUse,
     openLoginModal,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
+    getEncryptionData,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
@@ -435,8 +443,8 @@ export function useAccounts() {
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,
     setActiveAccountByProtocol,
-    setMnemonic,
-    setPasswordKey,
+    setMnemonicAndInitializePassword,
+    setEncryptionData,
     updatePassword,
     setGeneratedMnemonic,
     resetAccounts,

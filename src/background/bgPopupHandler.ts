@@ -3,7 +3,7 @@ import type {
   Dictionary,
   IPopupProps,
   PopupType,
-  IExportedKey,
+  IExportedEncryptionData,
 } from '@/types';
 
 interface IPopupConfigNoActions {
@@ -20,6 +20,11 @@ interface IPopupConfigNoActions {
 const PLATFORM = process.env.PLATFORM as 'web' | 'extension' | 'ionic';
 const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
 const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
+
+const SESSION_STORAGE_KEYS = {
+  encryptionData: 'encryptionData',
+  sessionExpires: 'sessionExpires',
+};
 
 const POPUP_TYPE_CONNECT = 'connectConfirm';
 
@@ -84,24 +89,24 @@ export const removePopup = (id: string) => delete popups[id];
 
 export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
 
-export const setSessionExpiration = async (expires: number) => {
-  await storageSession.set({ sessionExpires: expires });
+export const setSessionExpiration = async (sessionExpires: number) => {
+  await storageSession.set({ sessionExpires });
 };
 
-export const getSession = async (): Promise<IExportedKey | null> => {
+export const getSessionEncryptionData = async (): Promise<IExportedEncryptionData | null> => {
   try {
-    const { sessionExpires } = await storageSession.get('sessionExpires');
-    if (sessionExpires < Date.now() || !sessionExpires) {
-      await storageSession.remove('sessionKey');
+    const { sessionExpires } = await storageSession.get(SESSION_STORAGE_KEYS.sessionExpires);
+    if (!sessionExpires || sessionExpires < Date.now()) {
+      await storageSession.remove(SESSION_STORAGE_KEYS.encryptionData);
       return null;
     }
 
-    const { sessionKey } = await storageSession.get('sessionKey');
-    if (sessionKey) {
+    const { encryptionData } = await storageSession.get(SESSION_STORAGE_KEYS.encryptionData);
+    if (encryptionData) {
       return {
-        key: Buffer.from(sessionKey.key).toString('base64'),
-        salt: Buffer.from(sessionKey.salt).toString('base64'),
-        iv: Buffer.from(sessionKey.iv).toString('base64'),
+        key: Buffer.from(encryptionData.key).toString('base64'),
+        salt: Buffer.from(encryptionData.salt).toString('base64'),
+        iv: Buffer.from(encryptionData.iv).toString('base64'),
       };
     }
   } catch (error) { /** NOOP */ }

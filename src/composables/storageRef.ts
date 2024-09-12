@@ -10,7 +10,7 @@ export interface ICreateStorageRefOptions<T> {
    * Enable secure storage for the data.
    * Mobile app only.
    */
-  isSecure?: boolean;
+  enableSecureStorage?: boolean;
   /**
    * Enable state synchronization between the extension and the background.
    */
@@ -44,7 +44,7 @@ export function useStorageRef<T = string | object | any[]>(
   options: ICreateStorageRefOptions<T> = {},
 ) {
   const {
-    isSecure = false,
+    enableSecureStorage = false,
     serializer,
     backgroundSync = false,
     migrations,
@@ -54,7 +54,7 @@ export function useStorageRef<T = string | object | any[]>(
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
-  const storage = isSecure && IS_MOBILE_APP ? SecureMobileStorage : WalletStorage;
+  const storage = enableSecureStorage && IS_MOBILE_APP ? SecureMobileStorage : WalletStorage;
 
   async function setLocalState(val: T | null) {
     if (val !== null) {
@@ -70,7 +70,7 @@ export function useStorageRef<T = string | object | any[]>(
 
   // Restore state and run watchers
   (async () => {
-    let restoredValue = storage.get<T | null>(storageKey);
+    let restoredValue = await storage.get<T | null>(storageKey);
     if (migrations?.length) {
       restoredValue = await asyncPipe<T | null>(migrations)(restoredValue!);
       if (restoredValue !== null) {
