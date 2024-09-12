@@ -2,7 +2,7 @@ import { Ref, ref, watch } from 'vue';
 import { validateMnemonic } from '@aeternity/bip39';
 
 import type { StorageKey } from '@/types';
-import { decrypt, encrypt, watchUntilTruthy } from '@/utils';
+import { decrypt, encrypt } from '@/utils';
 import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { useAccounts } from './accounts';
@@ -17,21 +17,18 @@ export function useSecureStorageRef<T = string | object | any[]>(
   storageKey: StorageKey,
   options: Omit<
     ICreateStorageRefOptions<T>,
-    'serializer' | 'isSecure' | 'onBackgroundSync'
+    'serializer' | 'enableSecureStorage' | 'onBackgroundSync'
   > = {},
 ) {
-  const isWriting = ref(false);
-
   async function getDecryptedValue(encryptedValue: any) {
     if (IS_MOBILE_APP || !encryptedValue) {
       return encryptedValue;
     }
-    watchUntilTruthy(() => !isWriting.value);
-    const { passwordKey } = useAccounts();
-    await watchUntilTruthy(passwordKey);
-    if (passwordKey.value) {
+    const { getEncryptionData } = useAccounts();
+    const encryptionData = await getEncryptionData();
+    if (encryptionData) {
       try {
-        const decryptedValue = await decrypt(passwordKey.value, encryptedValue);
+        const decryptedValue = await decrypt(encryptionData, encryptedValue);
         try {
           return JSON.parse(decryptedValue);
         } catch (e) {
@@ -48,14 +45,11 @@ export function useSecureStorageRef<T = string | object | any[]>(
     if (IS_MOBILE_APP || !val) {
       return val;
     }
-    isWriting.value = true;
-    const { passwordKey } = useAccounts();
-    await watchUntilTruthy(passwordKey);
-    if (passwordKey.value) {
-      isWriting.value = false;
-      return encrypt(passwordKey.value, val) as T;
+    const { getEncryptionData } = useAccounts();
+    const encryptionData = await getEncryptionData();
+    if (encryptionData) {
+      return encrypt(encryptionData, val) as T;
     }
-    isWriting.value = false;
     throw new Error('Failed to write the value');
   }
 
@@ -64,7 +58,7 @@ export function useSecureStorageRef<T = string | object | any[]>(
   /** Should always hold encrypted values (both on storage and state) */
   const innerState = useStorageRef<T>(null as T, storageKey, {
     ...options,
-    isSecure: true,
+    enableSecureStorage: true,
     // Handle write operation within the composable but read from storageRef
     serializer: {
       read: getDecryptedValue,
@@ -72,10 +66,6 @@ export function useSecureStorageRef<T = string | object | any[]>(
     },
     onRestored: async (val: T) => {
       if (val) {
-        if (!IS_MOBILE_APP) {
-          const { passwordKey } = useAccounts();
-          await watchUntilTruthy(passwordKey);
-        }
         const decryptedValue = await getDecryptedValue(val);
         decryptedState.value = decryptedValue;
         options.onRestored?.(decryptedValue);
@@ -88,11 +78,12 @@ export function useSecureStorageRef<T = string | object | any[]>(
 
   /**
    * This is an exception for the mnemonic because it's a key part of the password feature.
+   * It restores the mnemonic from the insecure storage and sets it on the accounts composable.
    */
   async function setMnemonicOnAccounts(mnemonic: T) {
     if (mnemonic && validateMnemonic(mnemonic)) {
-      const { setMnemonic } = useAccounts();
-      await setMnemonic(mnemonic as string, true);
+      const { setMnemonicAndInitializePassword } = useAccounts();
+      await setMnemonicAndInitializePassword(mnemonic as string, true);
       options.onRestored?.(mnemonic);
     }
   }
@@ -118,8 +109,8 @@ export function useSecureStorageRef<T = string | object | any[]>(
      * Clear the state when the user logs out.
      * This ensures that the state is not leaked if someone removes the modal from the DOM.
      */
-    const { passwordKey } = useAccounts();
-    watch(passwordKey, async (val) => {
+    const { encryptionData } = useAccounts();
+    watch(encryptionData, async (val) => {
       if (IS_MOBILE_APP) {
         return;
       }

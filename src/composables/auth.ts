@@ -12,7 +12,7 @@ import {
   MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_SECURE_LOGIN,
 } from '@/constants';
-import { authenticateWithPassword, getSessionKey, watchUntilTruthy } from '@/utils';
+import { authenticateWithPassword, getSessionEncryptionData, watchUntilTruthy } from '@/utils';
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { useAccounts } from './accounts';
@@ -36,8 +36,8 @@ export const useAuth = createCustomScopedComposable(() => {
   const { openModal } = useModals();
   const {
     isLoggedIn,
-    passwordKey,
-    setPasswordKey,
+    encryptionData,
+    setEncryptionData,
     openLoginModal,
   } = useAccounts();
 
@@ -87,7 +87,7 @@ export const useAuth = createCustomScopedComposable(() => {
       }
     } else if (!IS_MOBILE_APP) {
       return authenticateWithPassword(password!).then((key) => {
-        setPasswordKey(key);
+        setEncryptionData(key);
         isAuthenticated.value = true;
       });
     }
@@ -96,12 +96,12 @@ export const useAuth = createCustomScopedComposable(() => {
 
   async function logout() {
     if (IS_EXTENSION) {
-      const sessionKey = await getSessionKey();
-      if (sessionKey) {
+      const sessionEncryptionData = await getSessionEncryptionData();
+      if (sessionEncryptionData) {
         return;
       }
     }
-    setPasswordKey(null);
+    setEncryptionData(null);
     isAuthenticated.value = false;
   }
 
@@ -110,7 +110,7 @@ export const useAuth = createCustomScopedComposable(() => {
       isAuthenticating.value = true;
       if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
         await openModal(MODAL_SECURE_LOGIN);
-      } else if (!IS_MOBILE_APP && !passwordKey.value) {
+      } else if (!IS_MOBILE_APP && !encryptionData.value) {
         await openLoginModal();
       }
       // wait before resetting isAuthenticated so that app doesn't register a false app resume event

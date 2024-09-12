@@ -11,7 +11,7 @@ import {
   formatDate,
   formatTime,
   prepareStorageKey,
-  generateKey,
+  initializeEncryptionData,
   encrypt,
 } from '@/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
@@ -87,8 +87,8 @@ Cypress.Commands.add('loginUsingPassword', () => {
 
 Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
   cy.then(async () => {
-    const passwordKey = await generateKey(STUB_ACCOUNT.password);
-    const encryptedMnemonic = await encrypt(passwordKey, STUB_ACCOUNT.mnemonic);
+    const encryptionData = await initializeEncryptionData(STUB_ACCOUNT.password);
+    const encryptedMnemonic = await encrypt(encryptionData, STUB_ACCOUNT.mnemonic);
     return encryptedMnemonic;
   }).then((encryptedMnemonic) => {
     if (isMockingExternalRequests) cy.mockExternalRequests();

@@ -99,7 +99,7 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { t } = useI18n();
-    const { discoverAccounts, setMnemonic } = useAccounts();
+    const { discoverAccounts, setMnemonicAndInitializePassword } = useAccounts();
     const { openScanQrModal } = useModals();
     const { openEnableBiometricLoginModal } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
@@ -130,7 +130,7 @@ export default defineComponent({
 
       discovering.value = true;
       try {
-        await setMnemonic(mnemonicParsed);
+        await setMnemonicAndInitializePassword(mnemonicParsed);
         setBackedUpSeed(true);
         await discoverAccounts();
         props.resolve();

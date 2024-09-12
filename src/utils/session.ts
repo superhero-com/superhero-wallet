@@ -1,21 +1,26 @@
-import type { IKey } from '@/types';
+import type { IEncryptionData } from '@/types';
 import { CONNECTION_TYPES, IS_EXTENSION, IS_OFFSCREEN_TAB } from '@/constants';
-import { getSession } from '@/offscreen/popupHandler';
-import { exportPasswordKey, importPasswordKey } from './crypto';
+import { getSessionEncryptionData as getSessionEncryptionDataOffscreen } from '@/offscreen/popupHandler';
+import { exportEncryptionData, importEncryptionData } from './crypto';
+
+const SESSION_STORAGE_KEYS = {
+  encryptionData: 'encryptionData',
+  sessionExpires: 'sessionExpires',
+};
 
 const storageSession = (browser.storage as any)?.session;
 
 /**
- * Stores the session key in the session storage.
+ * Stores the password key in the session storage.
  * Extension only.
  */
-export async function startSession(sessionKey: IKey, timeout: number) {
+export async function startSession(encryptionData: IEncryptionData, timeout: number) {
   if (IS_EXTENSION && !IS_OFFSCREEN_TAB) {
     browser.runtime.connect({ name: CONNECTION_TYPES.SESSION });
     const sessionExpires = Date.now() + timeout;
     await storageSession.set(
       {
-        sessionKey: await exportPasswordKey(sessionKey),
+        encryptionData: await exportEncryptionData(encryptionData),
         sessionExpires,
       },
     );
@@ -27,37 +32,36 @@ export async function startSession(sessionKey: IKey, timeout: number) {
  */
 export async function endSession() {
   if (IS_EXTENSION && !IS_OFFSCREEN_TAB) {
-    await storageSession.remove('sessionKey');
+    await storageSession.remove(SESSION_STORAGE_KEYS.encryptionData);
   }
 }
 
 /**
  * Extension only.
  */
-export async function getSessionKey() {
+export async function getSessionEncryptionData() {
   if (IS_OFFSCREEN_TAB) {
-    const sessionKey = await getSession();
-    if (sessionKey) {
-      const decodedKey = {
-        key: Buffer.from(sessionKey.key, 'base64'),
-        salt: Buffer.from(sessionKey.salt, 'base64'),
-        iv: Buffer.from(sessionKey.iv, 'base64'),
+    const sessionEncryptionData = await getSessionEncryptionDataOffscreen();
+    if (sessionEncryptionData) {
+      const decodedEncryptionData = {
+        key: Buffer.from(sessionEncryptionData.key, 'base64'),
+        salt: Buffer.from(sessionEncryptionData.salt, 'base64'),
+        iv: Buffer.from(sessionEncryptionData.iv, 'base64'),
       };
-      return importPasswordKey(decodedKey);
+      return importEncryptionData(decodedEncryptionData);
     }
     return null;
   }
+
   if (IS_EXTENSION) {
-    const expires = await storageSession.get('sessionExpires');
-    const { sessionExpires } = expires;
-    if (sessionExpires < Date.now() || !sessionExpires) {
+    const { sessionExpires } = await storageSession.get(SESSION_STORAGE_KEYS.sessionExpires);
+    if (!sessionExpires || sessionExpires < Date.now()) {
       await endSession();
       return null;
     }
-
-    const keyResult = await storageSession.get('sessionKey');
-    if (keyResult.sessionKey) {
-      return importPasswordKey(keyResult.sessionKey);
+    const { encryptionData } = await storageSession.get(SESSION_STORAGE_KEYS.encryptionData);
+    if (encryptionData) {
+      return importEncryptionData(encryptionData);
     }
   }
   return null;
