@@ -1,4 +1,4 @@
-import type { IKey } from '@/types';
+import type { IEncryptionData } from '@/types';
 import { STORAGE_KEYS, PASSWORD_ENCRYPTION_ALGO, IS_EXTENSION } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { toRaw } from 'vue';
@@ -13,17 +13,8 @@ const IS_EXTRACTABLE = !!IS_EXTENSION;
 const encodeBase64 = (data: Uint8Array) => Buffer.from(data).toString('base64');
 const decodeBase64 = (data: string) => Buffer.from(data, 'base64');
 
-export async function generateKey(password: string, encryptedMnemonic?: string): Promise<IKey> {
+async function generateCryptoKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
   const subtleCrypto = globalThis.crypto.subtle;
-  const data = encryptedMnemonic
-    ? new Uint8Array(decodeBase64(encryptedMnemonic))
-    : null;
-
-  // Generate a random salt or extract it from the data
-  const salt = data ? data.slice(0, 16) : globalThis.crypto.getRandomValues(new Uint8Array(16));
-
-  // Generate a random IV or extract it from the data
-  const iv = data ? data.slice(16, 32) : globalThis.crypto.getRandomValues(new Uint8Array(16));
 
   // Encode password to ArrayBuffer
   const enc = new TextEncoder();
@@ -51,11 +42,30 @@ export async function generateKey(password: string, encryptedMnemonic?: string):
     ['encrypt', 'decrypt'],
   );
 
+  return key;
+}
+
+export async function restoreEncryptionData(
+  password:string,
+  encryptedMnemonic: string,
+): Promise<IEncryptionData> {
+  const data = new Uint8Array(decodeBase64(encryptedMnemonic));
+  // Extract salt and iv from the data
+  const salt = data.slice(0, 16);
+  const iv = data.slice(16, 32);
+  const key = await generateCryptoKey(password, salt);
   return { key, salt, iv };
 }
 
-export async function encrypt(passwordKey: IKey, plaintext: string): Promise<string> {
-  const { key, salt, iv } = toRaw(passwordKey);
+export async function initializeEncryptionData(password: string): Promise<IEncryptionData> {
+  const salt = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  const iv = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  const key = await generateCryptoKey(password, salt);
+  return { key, salt, iv };
+}
+
+export async function encrypt(encryptionData: IEncryptionData, plaintext: string): Promise<string> {
+  const { key, salt, iv } = toRaw(encryptionData);
   const subtleCrypto = globalThis.crypto.subtle;
 
   // Encrypt the plaintext
@@ -66,7 +76,7 @@ export async function encrypt(passwordKey: IKey, plaintext: string): Promise<str
       iv,
     },
     key,
-    enc.encode(JSON.stringify({ value: plaintext })),
+    enc.encode(plaintext),
   );
 
   // Concatenate salt, iv, and cipher-text
@@ -76,8 +86,11 @@ export async function encrypt(passwordKey: IKey, plaintext: string): Promise<str
   return encodeBase64(encryptedArray);
 }
 
-export async function decrypt(passwordKey: IKey, encryptedMessage: string): Promise<string> {
-  const { key, iv } = toRaw(passwordKey);
+export async function decrypt(
+  encryptionData: IEncryptionData,
+  encryptedMessage: string,
+): Promise<string> {
+  const { key, iv } = toRaw(encryptionData);
   const subtleCrypto = globalThis.crypto.subtle;
 
   // Decode from base64
@@ -95,18 +108,18 @@ export async function decrypt(passwordKey: IKey, encryptedMessage: string): Prom
 
   // Unwrap the plaintext
   const dec = new TextDecoder();
-  const decryptedText = JSON.parse(dec.decode(decryptedBuffer)).value;
+  const decryptedText = dec.decode(decryptedBuffer);
   return decryptedText;
 }
 
-export async function authenticateWithPassword(password: string): Promise<IKey> {
+export async function authenticateWithPassword(password: string): Promise<IEncryptionData> {
   const encryptedMnemonic = await WalletStorage.get<string>(STORAGE_KEYS.mnemonic);
   if (encryptedMnemonic) {
     try {
-      const key = await generateKey(password, encryptedMnemonic);
-      const decryptedMnemonic = await decrypt(key, encryptedMnemonic);
+      const encryptionData = await restoreEncryptionData(password, encryptedMnemonic);
+      const decryptedMnemonic = await decrypt(encryptionData, encryptedMnemonic);
       if (decryptedMnemonic) {
-        return Promise.resolve(key);
+        return Promise.resolve(encryptionData);
       }
       return Promise.reject(new Error('Incorrect password.'));
     } catch (error) {
@@ -116,13 +129,13 @@ export async function authenticateWithPassword(password: string): Promise<IKey> 
   return Promise.reject(new Error('No encrypted mnemonic found.'));
 }
 
-export async function exportPasswordKey({ key, salt, iv }: IKey) {
+export async function exportEncryptionData({ key, salt, iv }: IEncryptionData) {
   const exported = await window.crypto.subtle.exportKey('raw', key);
   const exportedKeyBuffer = new Uint8Array(exported);
   return { key: exportedKeyBuffer, salt, iv };
 }
 
-export async function importPasswordKey({ key, salt, iv }: any): Promise<IKey> {
+export async function importEncryptionData({ key, salt, iv }: any): Promise<IEncryptionData> {
   const subtleCrypto = globalThis.crypto.subtle;
   const importedKey = await subtleCrypto.importKey(
     'raw',

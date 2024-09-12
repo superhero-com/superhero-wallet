@@ -75,7 +75,7 @@ export async function init() {
       }
       case CONNECTION_TYPES.SESSION: {
         port.onDisconnect.addListener(async () => {
-          const settings = await WalletStorage.get<IOtherSettings>(STORAGE_KEYS.otherSettings);
+          const settings = WalletStorage.get<IOtherSettings>(STORAGE_KEYS.otherSettings);
           const sessionExpires = Date.now() + (settings?.secureLoginTimeout ?? 0);
 
           if (IS_FIREFOX) {
