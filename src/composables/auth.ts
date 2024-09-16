@@ -6,13 +6,8 @@ import {
 } from 'vue';
 
 import { tg as t } from '@/popup/plugins/i18n';
-import {
-  IS_EXTENSION,
-  IS_MOBILE_APP,
-  MODAL_ENABLE_BIOMETRIC_LOGIN,
-  MODAL_SECURE_LOGIN,
-} from '@/constants';
-import { authenticateWithPassword, getSessionEncryptionData, watchUntilTruthy } from '@/utils';
+import { IS_MOBILE_APP, MODAL_ENABLE_BIOMETRIC_LOGIN, MODAL_SECURE_LOGIN } from '@/constants';
+import { authenticateWithPassword, getSessionEncryptionKey, watchUntilTruthy } from '@/utils';
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { useAccounts } from './accounts';
@@ -36,8 +31,8 @@ export const useAuth = createCustomScopedComposable(() => {
   const { openModal } = useModals();
   const {
     isLoggedIn,
-    encryptionData,
-    setEncryptionData,
+    encryptionKey,
+    setEncryptionKey,
     openLoginModal,
   } = useAccounts();
 
@@ -70,38 +65,35 @@ export const useAuth = createCustomScopedComposable(() => {
     }
 
     if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-      try {
-        return BiometricAuth.authenticate({
-          reason: t('biometricAuth.reason'),
-          cancelTitle: t('common.cancel'),
-          allowDeviceCredential: true,
-          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
-          androidTitle: t('biometricAuth.title'),
-          androidSubtitle: t('biometricAuth.subtitle'),
-          androidConfirmationRequired: false,
-        }).then(() => {
-          isAuthenticated.value = true;
-        });
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    } else if (!IS_MOBILE_APP) {
-      return authenticateWithPassword(password!).then((key) => {
-        setEncryptionData(key);
+      return BiometricAuth.authenticate({
+        reason: t('biometricAuth.reason'),
+        cancelTitle: t('common.cancel'),
+        allowDeviceCredential: true,
+        iosFallbackTitle: t('biometricAuth.fallbackTitle'),
+        androidTitle: t('biometricAuth.title'),
+        androidSubtitle: t('biometricAuth.subtitle'),
+        androidConfirmationRequired: false,
+      }).then(() => {
+        isAuthenticated.value = true;
+      });
+    } if (!IS_MOBILE_APP) {
+      return authenticateWithPassword(password!).then(({ encryptionKey: newEncryptionKey }) => {
+        setEncryptionKey(newEncryptionKey);
         isAuthenticated.value = true;
       });
     }
     return Promise.resolve();
   }
 
+  /**
+   * Checks if the user should be kept logged in based on the current session.
+   */
+  async function shouldKeepExtensionLoggedIn() {
+    return !!getSessionEncryptionKey();
+  }
+
   async function logout() {
-    if (IS_EXTENSION) {
-      const sessionEncryptionData = await getSessionEncryptionData();
-      if (sessionEncryptionData) {
-        return;
-      }
-    }
-    setEncryptionData(null);
+    setEncryptionKey(null);
     isAuthenticated.value = false;
   }
 
@@ -110,7 +102,7 @@ export const useAuth = createCustomScopedComposable(() => {
       isAuthenticating.value = true;
       if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
         await openModal(MODAL_SECURE_LOGIN);
-      } else if (!IS_MOBILE_APP && !encryptionData.value) {
+      } else if (!IS_MOBILE_APP && !encryptionKey.value) {
         await openLoginModal();
       }
       // wait before resetting isAuthenticated so that app doesn't register a false app resume event
@@ -144,13 +136,14 @@ export const useAuth = createCustomScopedComposable(() => {
         && isActive
         && !wasActive
       ) {
+        const keepExtensionLoggedIn = await shouldKeepExtensionLoggedIn();
         if (isAuthenticated.value && lastTimeAppWasActive.value) {
           const elapsedTime = Date.now() - lastTimeAppWasActive.value;
-          if (elapsedTime > secureLoginTimeout.value) {
+          if (elapsedTime > secureLoginTimeout.value && !keepExtensionLoggedIn) {
             logout();
             await openSecureLoginModal();
           }
-        } else if (!isAuthenticated.value) {
+        } else if (!isAuthenticated.value && !keepExtensionLoggedIn) {
           logout();
           await openSecureLoginModal();
         }

@@ -136,9 +136,9 @@ export default defineComponent({
         props.resolve();
         router.push(loginTargetLocation.value);
         openEnableBiometricLoginModal();
-        discovering.value = false;
       } catch {
         error.value = t('pages.index.passwordWasNotSet');
+      } finally {
         discovering.value = false;
       }
     }
