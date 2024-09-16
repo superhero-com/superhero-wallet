@@ -16,8 +16,9 @@
             :disabled="!isBiometricLoginAvailable"
             @update:modelValue="setBiometricLoginEnabled"
           />
+
+          <hr>
         </div>
-        <hr v-if="IS_MOBILE_APP">
         <div class="options-wrapper">
           <div class="options">
             <div

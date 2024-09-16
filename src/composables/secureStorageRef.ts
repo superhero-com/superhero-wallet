@@ -24,11 +24,11 @@ export function useSecureStorageRef<T = string | object | any[]>(
     if (IS_MOBILE_APP || !encryptedValue) {
       return encryptedValue;
     }
-    const { getEncryptionData } = useAccounts();
-    const encryptionData = await getEncryptionData();
-    if (encryptionData) {
+    const { getEncryptionKey } = useAccounts();
+    const encryptionKey = await getEncryptionKey();
+    if (encryptionKey) {
       try {
-        const decryptedValue = await decrypt(encryptionData, encryptedValue);
+        const decryptedValue = await decrypt(encryptionKey, encryptedValue);
         try {
           return JSON.parse(decryptedValue);
         } catch (e) {
@@ -45,10 +45,10 @@ export function useSecureStorageRef<T = string | object | any[]>(
     if (IS_MOBILE_APP || !val) {
       return val;
     }
-    const { getEncryptionData } = useAccounts();
-    const encryptionData = await getEncryptionData();
-    if (encryptionData) {
-      return encrypt(encryptionData, val) as T;
+    const { getEncryptionKey } = useAccounts();
+    const encryptionKey = await getEncryptionKey();
+    if (encryptionKey) {
+      return encrypt(encryptionKey, val) as T;
     }
     throw new Error('Failed to write the value');
   }
@@ -56,7 +56,7 @@ export function useSecureStorageRef<T = string | object | any[]>(
   const decryptedState = ref(initialState) as Ref<T>;
 
   /** Should always hold encrypted values (both on storage and state) */
-  const innerState = useStorageRef<T>(null as T, storageKey, {
+  const encryptedState = useStorageRef<T>(null as T, storageKey, {
     ...options,
     enableSecureStorage: true,
     // Handle write operation within the composable but read from storageRef
@@ -107,19 +107,20 @@ export function useSecureStorageRef<T = string | object | any[]>(
 
     /**
      * Clear the state when the user logs out.
-     * This ensures that the state is not leaked if someone removes the modal from the DOM.
+     * Ensures that the state is not leaked if an attacker removes the login modal from the DOM.
+     * TODO Remove useAccounts check when the accounts is refactored
+     * TODO and encryptedKey is moved to auth composable
      */
-    const { encryptionData } = useAccounts();
-    watch(encryptionData, async (val) => {
-      if (IS_MOBILE_APP) {
-        return;
-      }
-      if (!val) {
-        decryptedState.value = initialState;
-      } else {
-        decryptedState.value = await getDecryptedValue(innerState.value);
-      }
-    }, { immediate: true, deep: true });
+    if (!IS_MOBILE_APP && useAccounts) {
+      const { encryptionKey } = useAccounts();
+      watch(encryptionKey, async (key) => {
+        if (!key) {
+          decryptedState.value = initialState;
+        } else {
+          decryptedState.value = await getDecryptedValue(encryptedState.value);
+        }
+      }, { immediate: true, deep: true });
+    }
 
     /**
      * Synchronize the inner state with the decrypted state.
@@ -128,10 +129,10 @@ export function useSecureStorageRef<T = string | object | any[]>(
       options.onRestored?.(val);
       // Do not write null values to the mnemonic storage
       if (val || (storageKey !== STORAGE_KEYS.mnemonic)) {
-        innerState.value = await getEncryptedValue(val);
+        encryptedState.value = await getEncryptedValue(val);
       }
     }, { immediate: true, deep: true });
   })();
 
-  return decryptedState;
+  return [encryptedState, decryptedState];
 }
