@@ -30,16 +30,15 @@
             </div>
 
             <RadioButton
-              v-for="(ms, minutes) in AUTHENTICATION_TIMEOUTS"
-              :key="`timeout-${minutes}`"
+              v-for="(ms) in AUTHENTICATION_TIMEOUTS"
+              :key="`timeout-${ms}`"
               :value="secureLoginTimeout === ms"
               :class="{ active: secureLoginTimeout === ms }"
+              :label="$t('pages.secureLogin.authenticationTimeout', msToMinutes(ms))"
               class="timeout"
               has-label-effect
               @input="setSecureLoginTimeout(ms)"
-            >
-              <div class="row" v-text="$t('pages.secureLogin.authenticationTimeout', Number(minutes))" />
-            </RadioButton>
+            />
           </div>
         </div>
         <template v-if="!IS_MOBILE_APP">
@@ -218,6 +217,10 @@ export default defineComponent({
       }
     }
 
+    function msToMinutes(ms: number) {
+      return Math.floor(ms / 60000);
+    }
+
     onMounted(async () => {
       isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
       if (!isBiometricLoginAvailable.value && IS_MOBILE_APP) {
@@ -238,6 +241,7 @@ export default defineComponent({
       setNewPassword,
       setBiometricLoginEnabled,
       setSecureLoginTimeout,
+      msToMinutes,
       IS_MOBILE_APP,
       AUTHENTICATION_TIMEOUTS,
     };
@@ -287,10 +291,6 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     gap: 15px;
-
-    .row {
-      @extend %face-sans-15-medium;
-    }
   }
 
   .inputs {

@@ -1,4 +1,5 @@
 import type { ICurrency, IPermission } from '@/types';
+import { IS_MOBILE_APP } from './environment';
 
 export const APP_NAME = 'Superhero Wallet';
 export const APP_URL = 'wallet.superhero.com';
@@ -477,16 +478,21 @@ export const JWT_HEADER = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9';
 
 export const PASSWORD_ENCRYPTION_ALGO = 'AES-GCM';
 
-export const AUTHENTICATION_TIMEOUTS = {
-  0: 0,
-  1: 60000,
-  5: 300000,
-  15: 900000,
-  30: 1800000,
-} as const;
+/** Authentication timeouts in milliseconds */
+export const AUTHENTICATION_TIMEOUTS = [
+  0,
+  60000,
+  300000,
+  900000,
+  1800000,
+] as const;
+
+export const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
+  ? AUTHENTICATION_TIMEOUTS[0]
+  : AUTHENTICATION_TIMEOUTS[2];
 
 export const PASSWORD_STRENGTH = {
-  weak: 'Weak',
-  medium: 'Medium',
-  strong: 'Strong',
+  weak: 'weak',
+  medium: 'medium',
+  strong: 'strong',
 } as const;
