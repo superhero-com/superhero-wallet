@@ -3,7 +3,7 @@ import type { StorageKeysInput } from '@/types';
 import { composeStorageKeys } from '@/utils';
 import type { IWalletStorage } from './WalletStorage';
 
-SecureStorage.setDefaultKeychainAccess(KeychainAccess.whenUnlockedThisDeviceOnly);
+SecureStorage.setDefaultKeychainAccess(KeychainAccess.whenUnlocked);
 
 interface ISecureWalletStorage extends Omit<IWalletStorage, 'get'> {
   get: <T = Record<string, any>>(keys: StorageKeysInput) => Promise<T | null>;
@@ -16,5 +16,5 @@ export const SecureMobileStorage: ISecureWalletStorage = {
     return (result ? JSON.parse(result) : null);
   },
   remove: (keys) => SecureStorage.removeItem(composeStorageKeys(keys)),
-  clear: async () => SecureStorage.clear(),
+  clear: () => SecureStorage.clear(),
 };

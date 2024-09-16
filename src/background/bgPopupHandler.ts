@@ -3,7 +3,6 @@ import type {
   Dictionary,
   IPopupProps,
   PopupType,
-  IExportedEncryptionData,
 } from '@/types';
 
 interface IPopupConfigNoActions {
@@ -22,7 +21,7 @@ const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
 const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 const SESSION_STORAGE_KEYS = {
-  encryptionData: 'encryptionData',
+  exportedEncryptionKey: 'exportedEncryptionKey',
   sessionExpires: 'sessionExpires',
 };
 
@@ -93,21 +92,19 @@ export const setSessionExpiration = async (sessionExpires: number) => {
   await storageSession.set({ sessionExpires });
 };
 
-export const getSessionEncryptionData = async (): Promise<IExportedEncryptionData | null> => {
+export const getSessionEncryptionKey = async (): Promise<string | null> => {
   try {
     const { sessionExpires } = await storageSession.get(SESSION_STORAGE_KEYS.sessionExpires);
     if (!sessionExpires || sessionExpires < Date.now()) {
-      await storageSession.remove(SESSION_STORAGE_KEYS.encryptionData);
+      await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
       return null;
     }
 
-    const { encryptionData } = await storageSession.get(SESSION_STORAGE_KEYS.encryptionData);
-    if (encryptionData) {
-      return {
-        key: Buffer.from(encryptionData.key).toString('base64'),
-        salt: Buffer.from(encryptionData.salt).toString('base64'),
-        iv: Buffer.from(encryptionData.iv).toString('base64'),
-      };
+    const { exportedEncryptionKey } = await storageSession.get(
+      SESSION_STORAGE_KEYS.exportedEncryptionKey,
+    );
+    if (exportedEncryptionKey) {
+      return Buffer.from(exportedEncryptionKey).toString('base64');
     }
   } catch (error) { /** NOOP */ }
 

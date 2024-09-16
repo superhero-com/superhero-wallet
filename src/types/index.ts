@@ -907,17 +907,5 @@ export interface IOtherSettings {
   secureLoginTimeout?: number;
 }
 
-export interface IEncryptionData {
-  key: CryptoKey;
-  salt: Uint8Array;
-  iv: Uint8Array;
-}
-
-/**
- * Exported encryption data to be saved in the session storage.
- */
-export interface IExportedEncryptionData {
-  key: string;
-  salt: string;
-  iv: string;
-}
+/** [iv] + [encrypted message] */
+export type IEncryptionResult = string;

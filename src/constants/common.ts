@@ -137,6 +137,7 @@ export const STORAGE_KEYS = {
   secureLogin: 'secure-login',
   walletConnectSession: 'wallet-connect-session',
   addressBook: 'address-book',
+  encryptionSalt: 'encryption-salt',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -385,7 +386,7 @@ export const POPUP_METHODS = {
 
 export const SESSION_METHODS = {
   setSessionExpiration: 'setSessionExpiration',
-  getSessionEncryptionData: 'getSessionEncryptionData',
+  getSessionEncryptionKey: 'getSessionEncryptionKey',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
