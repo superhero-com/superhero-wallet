@@ -8,7 +8,7 @@ import {
 import { RouteLocationRaw } from 'vue-router';
 
 import type { IOtherSettings } from '@/types';
-import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
+import { AUTHENTICATION_TIMEOUT_DEFAULT, STORAGE_KEYS } from '@/constants';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
@@ -45,7 +45,7 @@ const hiddenCards = useStorageRef<string[]>(
 );
 const otherSettings = useStorageRef<IOtherSettings>(
   {
-    secureLoginTimeout: IS_MOBILE_APP ? AUTHENTICATION_TIMEOUTS[0] : AUTHENTICATION_TIMEOUTS[5],
+    secureLoginTimeout: AUTHENTICATION_TIMEOUT_DEFAULT,
   },
   STORAGE_KEYS.otherSettings,
   {
@@ -133,7 +133,7 @@ export function useUi() {
   function resetUiSettings() {
     hiddenCards.value = [];
     otherSettings.value = {
-      secureLoginTimeout: IS_MOBILE_APP ? AUTHENTICATION_TIMEOUTS[0] : AUTHENTICATION_TIMEOUTS[5],
+      secureLoginTimeout: AUTHENTICATION_TIMEOUT_DEFAULT,
     };
   }
 
