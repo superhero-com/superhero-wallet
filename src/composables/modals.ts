@@ -17,6 +17,7 @@ import {
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
   MODAL_SCAN_QR,
+  MODAL_SET_PASSWORD,
   MODAL_SHARE_ADDRESS,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
@@ -188,6 +189,12 @@ export function useModals() {
     openModal(MODAL_SHARE_ADDRESS, options);
   }
 
+  async function openSetPasswordModal(isRestoredWallet = false) {
+    return openModal<string>(MODAL_SET_PASSWORD, {
+      isRestoredWallet,
+    });
+  }
+
   return {
     modalsOpen,
     registerModal,
@@ -197,6 +204,7 @@ export function useModals() {
     openErrorModal,
     openScanQrModal,
     openShareAddressModal,
+    openSetPasswordModal,
     closeModalByKey,
   };
 }

@@ -33,7 +33,7 @@ import {
   MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
-  MODAL_SECURE_LOGIN,
+  MODAL_BIOMETRIC_LOGIN,
   MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
@@ -76,8 +76,8 @@ import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
-import SecureLogin from '../components/Modals/SecureLogin.vue';
-import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
+import BiometricLogin from '../components/Modals/BiometricLogin.vue';
+import EnableBiometricLogin from '../components/Modals/EnableBiometricLogin.vue';
 import WalletConnect from '../components/Modals/WalletConnectModal.vue';
 import AirGapImportAccounts from '../components/Modals/AirGapImportAccounts.vue';
 import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vue';
@@ -197,11 +197,11 @@ export default () => {
   registerModal(MODAL_WARNING_DAPP_BROWSER, {
     component: WarningDappBrowser,
   });
-  registerModal(MODAL_SECURE_LOGIN, {
-    component: SecureLogin,
+  registerModal(MODAL_BIOMETRIC_LOGIN, {
+    component: BiometricLogin,
   });
   registerModal(MODAL_ENABLE_BIOMETRIC_LOGIN, {
-    component: EnableSecureLogin,
+    component: EnableBiometricLogin,
   });
   registerModal(MODAL_SIGN_AIR_GAP_TRANSACTION, {
     component: SignAirGapTransaction,
