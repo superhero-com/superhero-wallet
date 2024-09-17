@@ -80,7 +80,7 @@ import Truncate from '@/popup/components/Truncate.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 
-import SecureIcon from '@/icons/secure-lock.svg?vue-component';
+import SecureIcon from '@/icons/lock.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
 import BackIcon from '@/icons/chevron.svg?vue-component';
 

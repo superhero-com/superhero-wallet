@@ -1,13 +1,18 @@
 import { BiometricAuth } from '@aparajita/capacitor-biometric-auth';
 import {
-  ref,
   readonly,
+  ref,
   watch,
 } from 'vue';
 
 import { tg as t } from '@/popup/plugins/i18n';
-import { IS_MOBILE_APP, MODAL_ENABLE_BIOMETRIC_LOGIN, MODAL_SECURE_LOGIN } from '@/constants';
-import { authenticateWithPassword, getSessionEncryptionKey, watchUntilTruthy } from '@/utils';
+import { IS_MOBILE_APP, MODAL_ENABLE_BIOMETRIC_LOGIN, MODAL_BIOMETRIC_LOGIN } from '@/constants';
+import {
+  authenticateWithPassword,
+  getSessionEncryptionKey,
+  sleep,
+  watchUntilTruthy,
+} from '@/utils';
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { useAccounts } from './accounts';
@@ -15,9 +20,14 @@ import { createCustomScopedComposable } from './composablesHelpers';
 
 export const useAuth = createCustomScopedComposable(() => {
   let composableInitialized = false;
-  let isBiometricAuthAvailable = false;
-  const isBiometryAvailabilityUpdating = ref(false);
-  const isBiometryAvailabilityChecked = ref(false);
+
+  const biometricAuth = {
+    available: false,
+    updating: false,
+    checked: false,
+  };
+
+  /** Common state for both biometric or password protection */
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
 
@@ -37,21 +47,28 @@ export const useAuth = createCustomScopedComposable(() => {
   } = useAccounts();
 
   /**
+   * TODO: Updating the authentication status from outside of the composable should be not allowed
+   */
+  function setAuthenticated(val: boolean) {
+    isAuthenticated.value = val;
+  }
+
+  /**
    * Checks if biometric authentication is available on the device.
    */
   async function checkBiometricLoginAvailability({ forceUpdate = false } = {}) {
-    if (isBiometryAvailabilityUpdating.value) {
-      await watchUntilTruthy(() => !isBiometryAvailabilityUpdating.value);
-    } else if (!isBiometryAvailabilityChecked.value || forceUpdate) {
-      isBiometryAvailabilityUpdating.value = true;
-      isBiometricAuthAvailable = (await BiometricAuth.checkBiometry()).isAvailable;
-      isBiometryAvailabilityChecked.value = true;
-      isBiometryAvailabilityUpdating.value = false;
+    if (biometricAuth.updating) {
+      await watchUntilTruthy(() => !biometricAuth.updating);
+    } else if (!biometricAuth.checked || forceUpdate) {
+      biometricAuth.updating = true;
+      biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
+      biometricAuth.checked = true;
+      biometricAuth.updating = false;
     }
-    if (!isBiometricAuthAvailable && isBiometricLoginEnabled.value) {
+    if (!biometricAuth.available && isBiometricLoginEnabled.value) {
       setBiometricLoginEnabled(false);
     }
-    return isBiometricAuthAvailable;
+    return biometricAuth.available;
   }
 
   /**
@@ -99,20 +116,30 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticated.value = false;
   }
 
-  async function checkUserAuth() {
+  /**
+   * Open biometric login or password login modal depending on the environment settings.
+   */
+  async function checkUserAuth(): Promise<any> {
     if (!isAuthenticating.value && !isAuthenticated.value && isLoggedIn.value) {
       isAuthenticating.value = true;
       if (IS_MOBILE_APP) {
         if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-          await openModal(MODAL_SECURE_LOGIN);
+          await openModal(MODAL_BIOMETRIC_LOGIN);
         }
       } else if (!encryptionKey.value) {
         await openPasswordLoginModal();
       }
-      // wait before resetting isAuthenticated so that app doesn't register a false app resume event
-      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Wait before resetting isAuthenticated so that app doesn't register a false app resume event
+      await sleep(500);
+
       isAuthenticating.value = false;
     }
+  }
+
+  async function lockWallet() {
+    logout();
+    checkUserAuth();
   }
 
   async function openEnableBiometricLoginModal() {
@@ -144,12 +171,10 @@ export const useAuth = createCustomScopedComposable(() => {
         if (isAuthenticated.value && lastTimeAppWasActive.value) {
           const elapsedTime = Date.now() - lastTimeAppWasActive.value;
           if (elapsedTime > secureLoginTimeout.value && !keepExtensionLoggedIn) {
-            logout();
-            await checkUserAuth();
+            lockWallet();
           }
         } else if (!isAuthenticated.value && !keepExtensionLoggedIn) {
-          logout();
-          await checkUserAuth();
+          lockWallet();
         }
       }
     },
@@ -157,8 +182,10 @@ export const useAuth = createCustomScopedComposable(() => {
 
   return {
     isAuthenticated: readonly(isAuthenticated),
+    setAuthenticated,
     checkBiometricLoginAvailability,
     authenticate,
+    lockWallet,
     logout,
     checkUserAuth,
     openEnableBiometricLoginModal,
