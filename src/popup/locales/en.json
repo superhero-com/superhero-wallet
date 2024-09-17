@@ -687,6 +687,11 @@
           "text": "to securely access Superhero Wallet {'<'}br /{'>'} {'<'}br /{'>'} Superhero Wallet stores your seed phrase securely encrypted in the local storage. {'<'}br /{'>'} That’s why you need to set a password that will be used to unlock your wallet. {'<'}br /{'>'} {'<'}br /{'>'} If you forget the password the only way to access your wallet and funds will be to use the seed phrase (a mnemonic consisting of 12 words) in order to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} That is the reason why it is very important to remember your password and even more important to back up the seed phrase as soon as your wallet is created."
         }
       },
+      "passwordStrength": {
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong"
+      },
       "login": {
         "error": "The password you entered is incorrect.",
         "placeholder": "Enter your password",

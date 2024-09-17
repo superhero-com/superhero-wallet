@@ -17,8 +17,9 @@
     <template #label-after>
       <span
         v-if="showPasswordStrength && modelValue"
-        :class="['password-strength', passwordStrength.toLowerCase()]"
-        v-text="passwordStrength"
+        class="password-strength"
+        :class="[`strength-${passwordStrength}`]"
+        v-text="passwordStrengthText"
       />
     </template>
   </InputField>
@@ -26,7 +27,9 @@
 
 <script>
 import { computed, defineComponent, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import { PASSWORD_STRENGTH } from '@/constants';
 import { checkPasswordStrength } from '@/utils';
 
 import InputField from './InputField.vue';
@@ -44,9 +47,23 @@ export default defineComponent({
     hideEyeIcon: Boolean,
   },
   setup(props) {
+    const { t } = useI18n();
     const isPasswordVisible = ref(false);
 
     const passwordStrength = computed(() => checkPasswordStrength(props.modelValue));
+
+    const passwordStrengthText = computed(() => {
+      switch (passwordStrength.value) {
+        case PASSWORD_STRENGTH.weak:
+          return t('pages.secureLogin.passwordStrength.weak');
+        case PASSWORD_STRENGTH.medium:
+          return t('pages.secureLogin.passwordStrength.medium');
+        case PASSWORD_STRENGTH.strong:
+          return t('pages.secureLogin.passwordStrength.strong');
+        default:
+          return '';
+      }
+    });
 
     function toggleVisibility() {
       isPasswordVisible.value = !isPasswordVisible.value;
@@ -54,6 +71,7 @@ export default defineComponent({
 
     return {
       passwordStrength,
+      passwordStrengthText,
       isPasswordVisible,
       toggleVisibility,
       EyeIcon,
@@ -80,16 +98,18 @@ export default defineComponent({
   .password-strength {
     font-weight: 500;
 
-    &.weak {
-      color: $color-danger;
-    }
+    &.strength {
+      &-weak {
+        color: $color-danger;
+      }
 
-    &.medium {
-      color: $color-warning;
-    }
+      &-medium {
+        color: $color-warning;
+      }
 
-    &.strong {
-      color: $color-success;
+      &-strong {
+        color: $color-success;
+      }
     }
   }
 }
