@@ -3,7 +3,7 @@ import {
   openPopup,
   removePopup,
   getPopup,
-  getSessionEncryptionData,
+  getSessionEncryptionKey,
   setSessionExpiration,
 } from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
@@ -36,23 +36,12 @@ import { updateDynamicRules } from './redirectRule';
  */
 function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
-    // Handle session methods independently because params are not set
-    if (msg.method === 'getSessionEncryptionData') {
-      getSessionEncryptionData().then((encryptionData) => {
-        sendResponse(encryptionData);
-      });
-      return true;
-    }
-    if (msg.method === 'setSessionExpiration') {
-      sendResponse(setSessionExpiration(msg.payload));
-      return false;
-    }
     const {
       aepp,
       id,
       popupProps,
       popupType,
-    } = msg.params!;
+    } = msg.params ?? {};
     switch (msg.method) {
       case 'openPopup':
         openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
@@ -64,6 +53,14 @@ function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Functi
         return false;
       case 'getPopup':
         sendResponse(getPopup(id!));
+        return false;
+      case 'getSessionEncryptionKey':
+        getSessionEncryptionKey().then((encryptionKey) => {
+          sendResponse(encryptionKey);
+        });
+        return true;
+      case 'setSessionExpiration':
+        sendResponse(setSessionExpiration(msg.payload));
         return false;
       default:
         break;

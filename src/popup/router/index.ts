@@ -63,9 +63,11 @@ RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
-  await watchUntilTruthy(isMnemonicRestored);
   // Wait until we are sure that the user login state is correct
-  await watchUntilTruthy(areAccountsRestored);
+  await Promise.all([
+    watchUntilTruthy(isMnemonicRestored),
+    watchUntilTruthy(areAccountsRestored),
+  ]);
 
   const meta = to.meta as WalletRouteMeta;
 

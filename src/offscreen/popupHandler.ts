@@ -1,7 +1,6 @@
 import '../lib/initPolyfills';
 import type {
   Dictionary,
-  IExportedEncryptionData,
   IPopupProps,
   PopupType,
 } from '@/types';
@@ -47,7 +46,6 @@ export const removePopup = async (id: string) => {
 
 export const getPopup = (id: string) => popups[id];
 
-export const getSessionEncryptionData = async (): Promise<IExportedEncryptionData | null> => (
-  executeOrSendMessageToBackground(SESSION_METHODS.getSessionEncryptionData)
-    .then((encryptionData) => encryptionData)
+export const getSessionEncryptionKey = async (): Promise<string | null> => (
+  executeOrSendMessageToBackground(SESSION_METHODS.getSessionEncryptionKey)
 );
