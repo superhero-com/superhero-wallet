@@ -904,7 +904,7 @@ export interface IOtherSettings {
   isSeedBackedUp?: boolean;
   saveErrorLog?: boolean;
   isBiometricLoginEnabled?: boolean;
-  secureLoginTimeout: number;
+  secureLoginTimeout?: number;
 }
 
 export interface IEncryptionData {
