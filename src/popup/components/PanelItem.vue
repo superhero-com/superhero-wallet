@@ -4,6 +4,7 @@
     class="panel-item"
     variant="dark"
     :to="to"
+    :href="href"
   >
     <div class="panel-item-left">
       <slot name="icon" />
@@ -29,7 +30,7 @@
           class="icon-indicator"
         />
         <ExternalLink
-          v-else
+          v-else-if="href"
           class="icon-indicator"
         />
       </slot>
@@ -37,12 +38,16 @@
   </BtnBase>
 </template>
 
-<script>
-import ArrowRight from '../../icons/arrow-right.svg?vue-component';
-import ExternalLink from '../../icons/external-link.svg?vue-component';
-import BtnBase from './buttons/BtnBase.vue';
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import { RouteLocationNamedRaw } from 'vue-router';
 
-export default {
+import BtnBase from '@/popup/components/buttons/BtnBase.vue';
+
+import ArrowRight from '@/icons/arrow-right.svg?vue-component';
+import ExternalLink from '@/icons/external-link.svg?vue-component';
+
+export default defineComponent({
   components: {
     ArrowRight,
     ExternalLink,
@@ -51,9 +56,10 @@ export default {
   props: {
     title: { type: String, required: true },
     info: { type: String, default: '' },
-    to: { type: Object, default: null },
+    to: { type: Object as PropType<RouteLocationNamedRaw>, default: null },
+    href: { type: String, default: null },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

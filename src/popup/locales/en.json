@@ -667,6 +667,7 @@
       },
       "walletLocked": "Wallet locked",
       "walletLockedSubtitle": "Tap on the screen to login!",
+      "lockWallet": "Lock Wallet",
       "enterPassword": "Enter password",
       "toUnlock": "to unlock your wallet",
       "authFailed": "Authentication failed",

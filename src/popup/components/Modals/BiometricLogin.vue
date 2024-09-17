@@ -53,7 +53,7 @@ import Modal from '../Modal.vue';
 import IconBoxed from '../IconBoxed.vue';
 
 import FingerprintIcon from '../../../icons/fingerprint.svg?vue-component';
-import LockIcon from '../../../icons/lock.svg?vue-component';
+import LockIcon from '../../../icons/secure-lock.svg?vue-component';
 
 export default defineComponent({
   components: {

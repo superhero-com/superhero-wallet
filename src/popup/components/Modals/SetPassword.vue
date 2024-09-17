@@ -112,7 +112,7 @@ import IconBoxed from '@/popup/components/IconBoxed.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 
-import LockIcon from '@/icons/lock.svg?vue-component';
+import LockIcon from '@/icons/secure-lock.svg?vue-component';
 
 export default defineComponent({
   components: {

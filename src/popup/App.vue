@@ -14,11 +14,22 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header v-if="showHeader" />
+        <Header v-if="isAuthenticated && showHeader" />
 
-        <!-- We are disabling animations on FF because of a bug that causes flickering
-          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <!--
+          Layer displayed under the password protection modal when content is not visible.
+        -->
+        <div
+          class="app-unauthenticated-placeholder"
+          :class="{ visible: hideRouter }"
+        />
+
+        <!--
+          We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620
+        -->
         <IonRouterOutlet
+          v-show="!hideRouter"
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
           :class="{ 'show-header': showHeader, ios: IS_IOS }"
           class="main"
@@ -80,6 +91,7 @@ import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
+  useAuth,
   useConnection,
   useCurrencies,
   useLanguages,
@@ -95,6 +107,8 @@ import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
 import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
 
+import AppLogo from '@/icons/logo-small.svg?vue-component';
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -105,12 +119,14 @@ export default defineComponent({
     IonRouterOutlet,
     IonPage,
     Loader,
+    AppLogo,
   },
   setup() {
     const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
 
+    const { isAuthenticated } = useAuth();
     const { watchConnectionStatus } = useConnection();
     const {
       isSeedBackedUp,
@@ -131,6 +147,7 @@ export default defineComponent({
 
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
+    const hideRouter = computed(() => !isAuthenticated.value && !routeMeta.value?.ifNotAuthOnly);
 
     const showHeader = computed(() => (
       !RUNNING_IN_POPUP
@@ -275,9 +292,11 @@ export default defineComponent({
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
       RUNNING_IN_TESTS,
-      modalsOpen,
+      isAuthenticated,
       isLoaderVisible,
       isMobileQrScannerVisible,
+      modalsOpen,
+      hideRouter,
       showHeader,
       showScrollbar,
       innerElement,
@@ -333,6 +352,25 @@ export default defineComponent({
 
       &.ios {
         top: 10px;
+      }
+    }
+
+    .app-unauthenticated-placeholder {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      visibility: hidden;
+      opacity: 0;
+      background: $color-black url('../image/wallet-locked-bg.svg');
+      background-size: cover;
+      transition: all 0.5s ease-in-out;
+      transform: scale(1.2);
+      will-change: opacity, transform;
+
+      &.visible {
+        visibility: visible;
+        opacity: 1;
+        transform: scale(1);
       }
     }
 

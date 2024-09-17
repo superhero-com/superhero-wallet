@@ -131,7 +131,7 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
     } = useAccounts();
     const { openModal } = useModals();
-    const { openEnableBiometricLoginModal } = useAuth();
+    const { openEnableBiometricLoginModal, setAuthenticated } = useAuth();
     const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
@@ -147,7 +147,8 @@ export default defineComponent({
         type: ACCOUNT_TYPES.hdWallet,
       });
       router.push(loginTargetLocation.value);
-      openEnableBiometricLoginModal();
+      await openEnableBiometricLoginModal();
+      setAuthenticated(true);
     }
 
     async function importWallet() {

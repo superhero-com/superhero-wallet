@@ -19,7 +19,6 @@ import {
   IS_MOBILE_APP,
   ACCOUNT_TYPES_LIST,
   ACCOUNT_TYPES,
-  MODAL_SET_PASSWORD,
   MODAL_PASSWORD_LOGIN,
   IS_EXTENSION,
   IS_OFFSCREEN_TAB,
@@ -300,21 +299,16 @@ export function useAccounts() {
     }
   }
 
-  async function openSetPasswordModal(newMnemonic: string, isRestored = false) {
-    const { openModal } = useModals();
-
-    const password = await openModal<string>(MODAL_SET_PASSWORD, {
-      isRestoredWallet: isRestored,
-    });
-
-    await setPasswordAndEncryptMnemonic(newMnemonic, password);
-  }
-
   async function setMnemonicAndInitializePassword(newMnemonic: string, isRestored = false) {
+    // TODO move the logic related to authentication to `auth` composable
     if (!IS_MOBILE_APP) {
-      await openSetPasswordModal(newMnemonic, isRestored).catch(() => {
+      const { openSetPasswordModal } = useModals();
+
+      const password = await openSetPasswordModal(isRestored).catch(() => {
         throw new Error('Password was not set.');
       });
+
+      await setPasswordAndEncryptMnemonic(newMnemonic, password);
     }
     mnemonic.value = newMnemonic;
   }
