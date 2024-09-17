@@ -10,10 +10,11 @@ import { RouteLocationRaw } from 'vue-router';
 import type { IOtherSettings } from '@/types';
 import { AUTHENTICATION_TIMEOUT_DEFAULT, STORAGE_KEYS } from '@/constants';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
 import migrateSecureLoginEnabledToBiometric from '@/migrations/009-secure-login-enabled-to-biometric';
-import migrateSecureLoginTimeout from '@/migrations/010-secure-login-timeout';
+
 import { useStorageRef } from './storageRef';
 
 /** Control the route that would be visible after opening the extension. */
@@ -44,15 +45,13 @@ const hiddenCards = useStorageRef<string[]>(
   },
 );
 const otherSettings = useStorageRef<IOtherSettings>(
-  {
-    secureLoginTimeout: AUTHENTICATION_TIMEOUT_DEFAULT,
-  },
+  {},
   STORAGE_KEYS.otherSettings,
   {
+    backgroundSync: true,
     migrations: [
       migrateOtherSettingsVuexToComposable,
       migrateSecureLoginEnabledToBiometric,
-      migrateSecureLoginTimeout,
     ],
   },
 );
@@ -60,7 +59,9 @@ const otherSettings = useStorageRef<IOtherSettings>(
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
 const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
-const secureLoginTimeout = computed(() => otherSettings.value.secureLoginTimeout);
+const secureLoginTimeout = computed(
+  () => otherSettings.value.secureLoginTimeout ?? AUTHENTICATION_TIMEOUT_DEFAULT,
+);
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -132,9 +133,7 @@ export function useUi() {
 
   function resetUiSettings() {
     hiddenCards.value = [];
-    otherSettings.value = {
-      secureLoginTimeout: AUTHENTICATION_TIMEOUT_DEFAULT,
-    };
+    otherSettings.value = {};
   }
 
   return {

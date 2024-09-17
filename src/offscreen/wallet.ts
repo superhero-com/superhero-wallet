@@ -2,16 +2,19 @@ import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
-import type { IBackgroundMessageData, IOtherSettings } from '@/types';
+import type { IBackgroundMessageData } from '@/types';
 import {
   CONNECTION_TYPES,
   IS_FIREFOX,
   POPUP_ACTIONS,
   SESSION_METHODS,
-  STORAGE_KEYS,
 } from '@/constants';
-import { useAccounts, useAeSdk, useNetworks } from '@/composables';
-import { WalletStorage } from '@/lib/WalletStorage';
+import {
+  useAccounts,
+  useAeSdk,
+  useNetworks,
+  useUi,
+} from '@/composables';
 import { setSessionExpiration } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
@@ -37,6 +40,7 @@ const addAeppConnection = async (port: Runtime.Port) => {
 export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
+  const { secureLoginTimeout } = useUi();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
@@ -75,8 +79,7 @@ export async function init() {
       }
       case CONNECTION_TYPES.SESSION: {
         port.onDisconnect.addListener(async () => {
-          const settings = await WalletStorage.get<IOtherSettings>(STORAGE_KEYS.otherSettings);
-          const sessionExpires = Date.now() + (settings?.secureLoginTimeout ?? 0);
+          const sessionExpires = Date.now() + secureLoginTimeout.value;
 
           if (IS_FIREFOX) {
             setSessionExpiration(sessionExpires);
