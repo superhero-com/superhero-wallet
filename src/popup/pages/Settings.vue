@@ -3,7 +3,7 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="settings">
         <PanelItem
-          :to="{ name: 'settings-seed-phrase' }"
+          :to="{ name: ROUTE_SEED_PHRASE_SETTINGS }"
           :title="$t('pages.index.seedPhrase')"
         />
         <PanelItem
@@ -63,6 +63,7 @@ import {
   ROUTE_NETWORK_SETTINGS,
   ROUTE_PERMISSIONS_SETTINGS,
   ROUTE_SECURE_LOGIN_SETTINGS,
+  ROUTE_SEED_PHRASE_SETTINGS,
 } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
@@ -96,6 +97,7 @@ export default defineComponent({
       ROUTE_NETWORK_SETTINGS,
       ROUTE_PERMISSIONS_SETTINGS,
       ROUTE_SECURE_LOGIN_SETTINGS,
+      ROUTE_SEED_PHRASE_SETTINGS,
       activeNetwork,
       saveErrorLog,
       secureLoginSettingsInfo,

@@ -50,6 +50,9 @@ import {
   ROUTE_ADDRESS_BOOK,
   ROUTE_ADDRESS_BOOK_EDIT,
   ROUTE_ADDRESS_BOOK_ADD,
+  ROUTE_SEED_PHRASE_SETTINGS,
+  ROUTE_SEED_PHRASE_DETAILS,
+  ROUTE_SEED_PHRASE_VERIFY,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -437,7 +440,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/seed-phrase',
-    name: 'settings-seed-phrase',
+    name: ROUTE_SEED_PHRASE_SETTINGS,
     component: SeedPhraseSettings,
     meta: {
       title: 'seedPhrase',
@@ -446,7 +449,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/seed-phrase/details',
-    name: 'settings-seed-phrase-details',
+    name: ROUTE_SEED_PHRASE_DETAILS,
     component: SeedPhraseDetailsSettings,
     meta: {
       title: 'seedPhrase',
@@ -455,7 +458,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/seed-phrase/details/verify',
-    name: 'settings-seed-phrase-verify',
+    name: ROUTE_SEED_PHRASE_VERIFY,
     component: SeedPhraseVerifySettings,
     meta: {
       title: 'seedPhrase',

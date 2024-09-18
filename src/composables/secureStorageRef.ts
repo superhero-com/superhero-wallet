@@ -8,41 +8,56 @@ import { WalletStorage } from '@/lib/WalletStorage';
 import { useAccounts } from './accounts';
 import { type ICreateStorageRefOptions, useStorageRef } from './storageRef';
 
+interface ICreateSecureStorageRefOptions<T> extends
+    Omit<ICreateStorageRefOptions<T>, 'serializer' | 'enableSecureStorage' | 'onBackgroundSync'> {
+  encryptionDisabled?: boolean;
+}
+
 /**
  * Create a secure storage ref that encrypts and decrypts the value using the password.
  * Is a wrapper around the useStorageRef composable.
+ * On mobile, the encryption and decryption are handled by the storageRef composable
+ * because we are using the SecureMobileStorage.
  */
 export function useSecureStorageRef<T = string | object | any[]>(
   initialState: T,
   storageKey: StorageKey,
-  options: Omit<
-    ICreateStorageRefOptions<T>,
-    'serializer' | 'enableSecureStorage' | 'onBackgroundSync'
-  > = {},
+  options: ICreateSecureStorageRefOptions<T> = {
+    encryptionDisabled: IS_MOBILE_APP,
+  },
 ) {
-  async function getDecryptedValue(encryptedValue: any) {
-    if (IS_MOBILE_APP || !encryptedValue) {
-      return encryptedValue;
+  /**
+   * Checks if the value needs to be decrypted and decrypts it using the encryption key.
+   * On mobile, the value is already decrypted by the storageRef composable.
+   */
+  async function getDecryptedValue(val: any): Promise<T> {
+    if (options.encryptionDisabled || !val) {
+      return val;
     }
     const { getEncryptionKey } = useAccounts();
     const encryptionKey = await getEncryptionKey();
     if (encryptionKey) {
+      let decryptedValue;
       try {
-        const decryptedValue = await decrypt(encryptionKey, encryptedValue);
-        try {
-          return JSON.parse(decryptedValue);
-        } catch (e) {
-          return decryptedValue;
-        }
-      } catch (e) {
+        decryptedValue = await decrypt(encryptionKey, val);
+      } catch {
         throw new Error('Failed to decrypt the value');
       }
+      try {
+        return JSON.parse(decryptedValue);
+      } catch {
+        return decryptedValue as T;
+      }
     }
-    throw new Error('Failed to read the value, probably the password is not set');
+    throw new Error('Failed to read the value');
   }
 
+  /**
+   * Checks if the value needs to be encrypted and encrypts it using the encryption key.
+   * On mobile, the value is already encrypted by the storageRef composable.
+   */
   async function getEncryptedValue(val: any): Promise<T> {
-    if (IS_MOBILE_APP || !val) {
+    if (options.encryptionDisabled || !val) {
       return val;
     }
     const { getEncryptionKey } = useAccounts();

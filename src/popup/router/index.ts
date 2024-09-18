@@ -60,7 +60,7 @@ const {
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
-const { openSecureLoginModal } = useAuth();
+const { checkUserAuth } = useAuth();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
@@ -84,7 +84,7 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  await openSecureLoginModal();
+  await checkUserAuth();
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only

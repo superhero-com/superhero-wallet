@@ -75,7 +75,7 @@ export default defineComponent({
   },
   setup(props) {
     const isBiometricLoginAvailable = ref(false);
-    const { checkBiometricLoginAvailability, openSecureLoginModal } = useAuth();
+    const { checkBiometricLoginAvailability, checkUserAuth } = useAuth();
     const { setBiometricLoginEnabled } = useUi();
 
     function onEnable() {
@@ -89,7 +89,7 @@ export default defineComponent({
       }
 
       setBiometricLoginEnabled(true);
-      openSecureLoginModal();
+      checkUserAuth();
       props.resolve();
     }
 

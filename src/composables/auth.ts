@@ -33,7 +33,7 @@ export const useAuth = createCustomScopedComposable(() => {
     isLoggedIn,
     encryptionKey,
     setEncryptionKey,
-    openLoginModal,
+    openPasswordLoginModal,
   } = useAccounts();
 
   /**
@@ -64,19 +64,21 @@ export const useAuth = createCustomScopedComposable(() => {
       return Promise.resolve();
     }
 
-    if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-      return BiometricAuth.authenticate({
-        reason: t('biometricAuth.reason'),
-        cancelTitle: t('common.cancel'),
-        allowDeviceCredential: true,
-        iosFallbackTitle: t('biometricAuth.fallbackTitle'),
-        androidTitle: t('biometricAuth.title'),
-        androidSubtitle: t('biometricAuth.subtitle'),
-        androidConfirmationRequired: false,
-      }).then(() => {
-        isAuthenticated.value = true;
-      });
-    } if (!IS_MOBILE_APP) {
+    if (IS_MOBILE_APP) {
+      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+        return BiometricAuth.authenticate({
+          reason: t('biometricAuth.reason'),
+          cancelTitle: t('common.cancel'),
+          allowDeviceCredential: true,
+          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
+          androidTitle: t('biometricAuth.title'),
+          androidSubtitle: t('biometricAuth.subtitle'),
+          androidConfirmationRequired: false,
+        }).then(() => {
+          isAuthenticated.value = true;
+        });
+      }
+    } else {
       return authenticateWithPassword(password!).then(({ encryptionKey: newEncryptionKey }) => {
         setEncryptionKey(newEncryptionKey);
         isAuthenticated.value = true;
@@ -97,13 +99,15 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticated.value = false;
   }
 
-  async function openSecureLoginModal() {
+  async function checkUserAuth() {
     if (!isAuthenticating.value && !isAuthenticated.value && isLoggedIn.value) {
       isAuthenticating.value = true;
-      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-        await openModal(MODAL_SECURE_LOGIN);
-      } else if (!IS_MOBILE_APP && !encryptionKey.value) {
-        await openLoginModal();
+      if (IS_MOBILE_APP) {
+        if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+          await openModal(MODAL_SECURE_LOGIN);
+        }
+      } else if (!encryptionKey.value) {
+        await openPasswordLoginModal();
       }
       // wait before resetting isAuthenticated so that app doesn't register a false app resume event
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -141,11 +145,11 @@ export const useAuth = createCustomScopedComposable(() => {
           const elapsedTime = Date.now() - lastTimeAppWasActive.value;
           if (elapsedTime > secureLoginTimeout.value && !keepExtensionLoggedIn) {
             logout();
-            await openSecureLoginModal();
+            await checkUserAuth();
           }
         } else if (!isAuthenticated.value && !keepExtensionLoggedIn) {
           logout();
-          await openSecureLoginModal();
+          await checkUserAuth();
         }
       }
     },
@@ -156,7 +160,7 @@ export const useAuth = createCustomScopedComposable(() => {
     checkBiometricLoginAvailability,
     authenticate,
     logout,
-    openSecureLoginModal,
+    checkUserAuth,
     openEnableBiometricLoginModal,
   };
 });

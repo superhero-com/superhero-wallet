@@ -684,7 +684,7 @@
         "confirm": "Continue to wallet",
         "help": {
           "title": "Set a password",
-          "text": "to securely access Superhero Wallet {'<'}br /{'>'} {'<'}br /{'>'} Superhero Wallet stores your seed phrase securely encrypted in the local storage. {'<'}br /{'>'} That’s why you need to set a password that will be used to unlock your wallet. {'<'}br /{'>'} {'<'}br /{'>'} If you forget the password the only way to access your wallet and funds will be to use the seed phrase (a mnemonic consisting of 12 words) in order to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} That is the reason why it is very important to remember your password and even more important to back up the seed phrase as soon as your wallet is created."
+          "text": "to securely access Superhero Wallet {'<'}br /{'>'} {'<'}br /{'>'} Superhero Wallet stores your seed phrase securely encrypted in the local storage. {'<'}br /{'>'} That’s why you need to set a password that will be used to unlock your wallet. {'<'}br /{'>'} {'<'}br /{'>'} If you forget the password the only way to access your wallet and funds will be to use the seed phrase (a mnemonic consisting of 12 or more words) in order to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} That is the reason why it is very important to remember your password and even more important to back up the seed phrase as soon as your wallet is created."
         }
       },
       "passwordStrength": {
@@ -888,7 +888,7 @@
       "importWallet": "Restore existing wallet",
       "enterSeed": "Enter seed phrase",
       "seedPhrase": "Seed phrase",
-      "enterSeedPhrase": "Please enter the 12 words or more of your seed phrase (separated by spaces) in the correct order to restore your Superhero Wallet.",
+      "enterSeedPhrase": "Please enter the words of your seed phrase (separated by spaces) in the correct order to restore your Superhero Wallet.",
       "importAccount": "Restore wallet",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
       "passwordWasNotSet": "Password was not set. Please set a password to continue.",
@@ -923,7 +923,7 @@
     "seed-phrase-settings": {
       "verifyYourSeedPhrase": "Verify your seed phrase!",
       "compose-your-seed-phrase": "Tap the words below {0} to compose your seed phrase.",
-      "seedRecoverySmall": "Your secret recovery phrase (seed phrase) is a mnemonic consisting of 12 words that allows you to restore and access your wallet accounts on any device.",
+      "seedRecoverySmall": "Your secret recovery phrase (seed phrase) is a mnemonic consisting of 12 or more words that allows you to restore and access your wallet accounts on any device.",
       "seedRecoverySmall-2": "Superhero Wallet stores your seed phrase securely encrypted in the local storage.",
       "seedRecoverySmall-3": "Never disclose the seed phrase to anyone!",
       "seedRecoverySmall-4": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
@@ -946,7 +946,7 @@
       "verify": "Verify seed phrase",
       "toDashboard": "Back to dashboard",
       "backUpYourSeedPhrase": "Back up your seed phrase {0} on a piece of paper or file that no one but you will ever see. Make multiple copies. Make sure you keep your seed phrase in a safe place!",
-      "inCorrectOrder": "in the correct order of 12 words",
+      "inCorrectOrder": "in the correct order of 12 or more words",
       "toBeSureYouGotItRight": "To be sure you got it right, you should {0} clicking on the button below!",
       "verifyYourSeedPhrase": "verify your seed phrase"
     },

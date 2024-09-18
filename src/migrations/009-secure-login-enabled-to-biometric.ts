@@ -5,11 +5,12 @@ const migration: Migration<IOtherSettings> = async (restoredValue: IOtherSetting
     return restoredValue;
   }
   if ((restoredValue as any).isSecureLoginEnabled !== undefined) {
-    return {
+    const newValue = {
       ...restoredValue,
-      isSecureLoginEnabled: undefined,
       isBiometricLoginEnabled: (restoredValue as any).isSecureLoginEnabled,
     };
+    delete (newValue as any).isSecureLoginEnabled;
+    return newValue;
   }
   return restoredValue;
 };
