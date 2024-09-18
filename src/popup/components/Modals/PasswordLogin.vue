@@ -9,48 +9,54 @@
         <IconBoxed
           :icon="LockIcon"
           bg-colored
-          bg-more-transparent
+          bg-dimmed
           icon-padded
         />
       </div>
       <div class="info">
-        <h3 class="text-heading-4 heading">
-          {{ $t('pages.secureLogin.enterPassword') }}
-        </h3>
+        <h3
+          class="text-heading-4 heading"
+          v-text="$t('pages.secureLogin.enterPassword')"
+        />
 
-        <div class="text-description">
-          {{ $t('pages.secureLogin.toUnlock') }}
-        </div>
+        <div
+          class="text-description"
+          v-text="$t('pages.secureLogin.toUnlock')"
+        />
       </div>
-      <InputPassword
-        v-model="password"
-        data-cy="password"
-        autofocus
-        class="password-input"
-        :placeholder="$t('pages.secureLogin.login.placeholder')"
-        :label="$t('pages.secureLogin.login.label')"
-        :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
-        @keydown.enter="login"
-        @input="isAuthFailed = false"
-      />
+      <form
+        class="password-login-form"
+        @submit.prevent="login"
+      >
+        <InputPassword
+          v-model="password"
+          data-cy="password"
+          autofocus
+          class="password-input"
+          :placeholder="$t('pages.secureLogin.login.placeholder')"
+          :label="$t('pages.secureLogin.login.label')"
+          :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
+          @input="isAuthFailed = false"
+        />
 
-      <LinkButton
-        class="forgot-password"
-        href="#"
-        :text="$t('pages.secureLogin.login.forgot')"
-        underlined
-        @click.prevent="openForgotPasswordModal()"
-      />
+        <LinkButton
+          class="forgot-password"
+          href="#"
+          :text="$t('pages.secureLogin.login.forgot')"
+          underlined
+          @click.capture.stop.prevent="openForgotPasswordModal()"
+        />
 
-      <BtnMain
-        class="login-btn"
-        data-cy="login-btn"
-        variant="primary"
-        :disabled="!password.length || isAuthenticating || isAuthFailed"
-        :text="$t('pages.secureLogin.login.unlock')"
-        extend
-        @click="login"
-      />
+        <BtnMain
+          class="login-btn"
+          data-cy="login-btn"
+          variant="primary"
+          type="submit"
+          :disabled="!password.length || isAuthenticating || isAuthFailed"
+          :text="$t('pages.secureLogin.login.unlock')"
+          extend
+        />
+      </form>
     </div>
   </Modal>
 </template>
@@ -138,7 +144,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .password-login {
-  .content-wrapper {
+  .content-wrapper,
+  .password-login-form {
     display: flex;
     flex-direction: column;
     gap: 8px;

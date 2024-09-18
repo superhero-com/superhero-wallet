@@ -49,7 +49,7 @@
             class="button"
             extend
             :text="$t('pages.seedPhrase.verifySeed')"
-            :to="{ name: 'settings-seed-phrase-verify' }"
+            :to="{ name: ROUTE_SEED_PHRASE_VERIFY }"
           />
           <BtnMain
             variant="muted"
@@ -73,7 +73,7 @@ import {
   useNotifications,
   useUi,
 } from '@/composables';
-import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { ROUTE_ACCOUNT, ROUTE_SEED_PHRASE_VERIFY } from '@/popup/router/routeNames';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CardMnemonic from '../components/CardMnemonic.vue';
@@ -107,10 +107,11 @@ export default defineComponent({
     return {
       CopyOutlined,
       CheckSuccessCircle,
-      copy,
       copied,
       mnemonic,
+      copy,
       markSeedPhraseAsBackedUp,
+      ROUTE_SEED_PHRASE_VERIFY,
     };
   },
 });

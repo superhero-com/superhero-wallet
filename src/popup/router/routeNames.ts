@@ -42,6 +42,9 @@ export const ROUTE_SECURE_LOGIN_SETTINGS = 'secure-login-settings';
 export const ROUTE_ADDRESS_BOOK = 'address-book';
 export const ROUTE_ADDRESS_BOOK_EDIT = 'address-book-edit';
 export const ROUTE_ADDRESS_BOOK_ADD = 'address-book-add';
+export const ROUTE_SEED_PHRASE_SETTINGS = 'settings-seed-phrase';
+export const ROUTE_SEED_PHRASE_VERIFY = 'settings-seed-phrase-verify';
+export const ROUTE_SEED_PHRASE_DETAILS = 'settings-seed-phrase-details';
 
 /**
  * Popup pages

@@ -11,7 +11,7 @@
         :icon="LockIcon"
         class="icon"
         bg-colored
-        bg-more-transparent
+        bg-dimmed
         icon-padded
       />
     </div>

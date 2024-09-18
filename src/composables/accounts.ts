@@ -266,7 +266,7 @@ export function useAccounts() {
     return watchUntilTruthy(encryptionKey);
   }
 
-  async function openLoginModal() {
+  async function openPasswordLoginModal() {
     setLoaderVisible(true);
     const sessionEncryptionKey = await getSessionEncryptionKey();
     if (sessionEncryptionKey) {
@@ -387,7 +387,7 @@ export function useAccounts() {
         // it means that user is trying to access an existing & encrypted wallet
         && storedMnemonic && !validateMnemonic(storedMnemonic)
       ) {
-        await openLoginModal();
+        await openPasswordLoginModal();
       }
 
       if (IS_OFFSCREEN_TAB && !encryptionKey.value) {
@@ -420,7 +420,7 @@ export function useAccounts() {
     encryptionKey,
     mnemonicSeed,
     protocolsInUse,
-    openLoginModal,
+    openPasswordLoginModal,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
