@@ -6,7 +6,7 @@
       'icon-padded': iconPadded,
       'outline-colored': outlineColored,
       'outline-solid': outlineSolid,
-      'bg-more-transparent': bgMoreTransparent,
+      'bg-dimmed': bgDimmed,
       transparent,
     }"
   >
@@ -28,7 +28,7 @@ export default defineComponent({
   props: {
     icon: { type: Object, default: null },
     /** Makes the icon background even more transparent */
-    bgMoreTransparent: Boolean,
+    bgDimmed: Boolean,
     /** Makes the icon background to use the same color as the icon */
     bgColored: Boolean,
     /** Makes the icon outline to use the same color as the icon */
@@ -105,7 +105,7 @@ export default defineComponent({
     }
   }
 
-  &.bg-more-transparent .icon-boxed-inner::before {
+  &.bg-dimmed .icon-boxed-inner::before {
     opacity: 0.1;
   }
 

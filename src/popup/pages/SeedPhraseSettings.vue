@@ -38,7 +38,7 @@
         <BtnMain
           class="button"
           extend
-          :to="{ name: 'settings-seed-phrase-details' }"
+          :to="{ name: ROUTE_SEED_PHRASE_DETAILS }"
         >
           {{ $t('pages.seed-phrase-settings.seedRecoveryBtn') }}
         </BtnMain>
@@ -48,12 +48,24 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
+import { ROUTE_SEED_PHRASE_DETAILS } from '@/popup/router/routeNames';
+
 import BtnMain from '../components/buttons/BtnMain.vue';
 
-export default {
-  components: { BtnMain, IonPage, IonContent },
-};
+export default defineComponent({
+  components: {
+    BtnMain,
+    IonPage,
+    IonContent,
+  },
+  setup() {
+    return {
+      ROUTE_SEED_PHRASE_DETAILS,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
