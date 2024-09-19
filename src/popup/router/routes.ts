@@ -694,6 +694,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'address',
       notPersist: true,
+      hideHeader: true,
     },
   },
   {
@@ -779,6 +780,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'signMessage',
       notPersist: true,
+      hideHeader: true,
     },
   },
   {
@@ -788,6 +790,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'signTransaction',
       notPersist: true,
+      hideHeader: true,
     },
   },
   {
@@ -797,6 +800,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'signMessage',
       notPersist: true,
+      hideHeader: true,
     },
   },
   {
