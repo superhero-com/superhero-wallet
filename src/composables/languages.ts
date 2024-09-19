@@ -24,8 +24,8 @@ export function useLanguages() {
     WalletStorage.set(ACTIVE_LANGUAGE_KEY, languageCode);
   }
 
-  async function restoreLanguage() {
-    const storedLanguage = await WalletStorage.get<SupportedLanguage>(ACTIVE_LANGUAGE_KEY);
+  function restoreLanguage() {
+    const storedLanguage = WalletStorage.get<SupportedLanguage>(ACTIVE_LANGUAGE_KEY);
     if (storedLanguage) {
       switchLanguage(storedLanguage);
     } else {

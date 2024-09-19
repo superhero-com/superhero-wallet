@@ -66,7 +66,7 @@ export default class Logger {
       }
 
       try {
-        await Logger.write({
+        Logger.write({
           message: typeof reason === 'string' ? reason : message,
           stack,
           type: 'unhandledrejection',
@@ -86,11 +86,11 @@ export default class Logger {
     };
   }
 
-  static async write({ modal = !IS_PRODUCTION, ...error }: ILoggerInput) {
+  static write({ modal = !IS_PRODUCTION, ...error }: ILoggerInput) {
     if (!Logger.saveErrorLog.value) {
       return;
     }
-    const errorLog = await Logger.get();
+    const errorLog = Logger.get();
     const logEntry: ILoggerEntry = {
       error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
@@ -105,12 +105,12 @@ export default class Logger {
     }
   }
 
-  static async get(): Promise<ILoggerEntry[]> {
-    return (await WalletStorage.get(STORAGE_KEYS.errorLog)) || [];
+  static get(): ILoggerEntry[] {
+    return WalletStorage.get(STORAGE_KEYS.errorLog) || [];
   }
 
-  static async sendLog() {
-    const errorLog = await Logger.get();
+  static sendLog() {
+    const errorLog = Logger.get();
     if (errorLog) {
       // TODO: make call to backend here
     }
