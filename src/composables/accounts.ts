@@ -239,7 +239,6 @@ export const useAccounts = createCustomScopedComposable(() => {
   }
 
   function resetAccounts() {
-    mnemonic.value = '';
     accountsRaw.value = [];
     activeAccountGlobalIdx.value = 0;
   }

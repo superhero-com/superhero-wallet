@@ -56,16 +56,18 @@
               />
             </div>
             <div class="inputs">
-              <div class="current-password">
-                <InputPassword
-                  v-model="currentPassword"
-                  data-cy="current-password"
-                  :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
-                  :label="$t('pages.secureLogin.changePassword.currentPassword')"
-                  :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
-                  @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
-                />
-              </div>
+              <form @submit.prevent>
+                <div class="current-password">
+                  <InputPassword
+                    v-model="currentPassword"
+                    data-cy="current-password"
+                    :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
+                    :label="$t('pages.secureLogin.changePassword.currentPassword')"
+                    :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
+                    @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
+                  />
+                </div>
+              </form>
 
               <Form
                 v-slot="{ errors, handleSubmit, resetForm }"
@@ -187,12 +189,12 @@ export default defineComponent({
       checkBiometricLoginAvailability,
       openEnableBiometricLoginModal,
       updatePassword,
+      secureLoginTimeout,
+      setSecureLoginTimeout,
     } = useAuth();
     const {
       isBiometricLoginEnabled,
-      secureLoginTimeout,
       setBiometricLoginEnabled,
-      setSecureLoginTimeout,
     } = useUi();
 
     async function setNewPassword() {

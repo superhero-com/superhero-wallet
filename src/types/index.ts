@@ -861,7 +861,7 @@ export interface IFormSelectOption {
   value: string | number;
 }
 
-export type Migration<T = any> = (restoredValue: T | any) => Promise<T>;
+export type Migration<T = any> = (restoredValue: T | any) => T | Promise<T>;
 
 export interface IInvite {
   secretKey: object;
@@ -904,7 +904,6 @@ export interface IOtherSettings {
   isSeedBackedUp?: boolean;
   saveErrorLog?: boolean;
   isBiometricLoginEnabled?: boolean;
-  secureLoginTimeout?: number;
 }
 
 /** [iv] + [encrypted message] */

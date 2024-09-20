@@ -12,8 +12,8 @@ import {
 import {
   useAccounts,
   useAeSdk,
+  useAuth,
   useNetworks,
-  useUi,
 } from '@/composables';
 import { setSessionExpiration } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
@@ -39,8 +39,8 @@ const addAeppConnection = async (port: Runtime.Port) => {
 
 export async function init() {
   const { activeNetwork } = useNetworks();
+  const { secureLoginTimeout } = useAuth();
   const { activeAccount } = useAccounts();
-  const { secureLoginTimeout } = useUi();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {

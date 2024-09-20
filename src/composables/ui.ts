@@ -8,12 +8,13 @@ import {
 import { RouteLocationRaw } from 'vue-router';
 
 import type { IOtherSettings } from '@/types';
-import { AUTHENTICATION_TIMEOUT_DEFAULT, STORAGE_KEYS } from '@/constants';
+import { STORAGE_KEYS } from '@/constants';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
 import migrateSecureLoginEnabledToBiometric from '@/migrations/009-secure-login-enabled-to-biometric';
+import migrateRemoveSecureLoginTimeout from '@/migrations/010-remove-secure-login-timeout';
 
 import { useStorageRef } from './storageRef';
 import { createCustomScopedComposable } from './composablesHelpers';
@@ -54,6 +55,7 @@ export const useUi = createCustomScopedComposable(() => {
       migrations: [
         migrateOtherSettingsVuexToComposable,
         migrateSecureLoginEnabledToBiometric,
+        migrateRemoveSecureLoginTimeout,
       ],
     },
   );
@@ -61,9 +63,6 @@ export const useUi = createCustomScopedComposable(() => {
   const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
   const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
   const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
-  const secureLoginTimeout = computed(
-    () => otherSettings.value.secureLoginTimeout ?? AUTHENTICATION_TIMEOUT_DEFAULT,
-  );
 
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
     if (homeRouteName.value !== routeName) {
@@ -107,10 +106,6 @@ export const useUi = createCustomScopedComposable(() => {
     otherSettings.value.isBiometricLoginEnabled = val;
   }
 
-  function setSecureLoginTimeout(ms: number) {
-    otherSettings.value.secureLoginTimeout = ms;
-  }
-
   function initVisibilityListeners() {
     handleVisibilityChange();
     onMounted(() => {
@@ -148,7 +143,6 @@ export const useUi = createCustomScopedComposable(() => {
     isSeedBackedUp,
     saveErrorLog,
     isBiometricLoginEnabled,
-    secureLoginTimeout,
     lastTimeAppWasActive,
     initVisibilityListeners,
     setCardHidden,
@@ -160,6 +154,5 @@ export const useUi = createCustomScopedComposable(() => {
     setLoaderVisible,
     resetUiSettings,
     setBiometricLoginEnabled,
-    setSecureLoginTimeout,
   };
 });

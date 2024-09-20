@@ -5,10 +5,11 @@ import {
   ref,
   watch,
 } from 'vue';
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import {
+  AUTHENTICATION_TIMEOUT_DEFAULT,
   IS_EXTENSION,
   IS_IOS,
   IS_MOBILE_APP,
@@ -40,6 +41,7 @@ import { useModals } from './modals';
 import { createCustomScopedComposable } from './composablesHelpers';
 import { useSecureStorageRef } from './secureStorageRef';
 import { useAeSdk } from './aeSdk';
+import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 
@@ -47,7 +49,6 @@ export const useAuth = createCustomScopedComposable(() => {
   const {
     isBiometricLoginEnabled,
     lastTimeAppWasActive,
-    secureLoginTimeout,
     isAppActive,
     setBiometricLoginEnabled,
     setLoaderVisible,
@@ -59,25 +60,48 @@ export const useAuth = createCustomScopedComposable(() => {
   const isAuthenticating = ref(false);
   const isMnemonicRestored = ref(false);
   const encryptionKey = ref<CryptoKey>();
+  const isMnemonicMigrationCheckDone = ref(false);
 
-  const [mnemonicEncrypted, mnemonic] = useSecureStorageRef<string>(
+  /**
+   * Deprecated storage key for the mnemonic.
+   * Used for migration from the old storage key to the new one.
+   */
+  const oldMnemonic = useStorageRef<string>(
+    '',
+    STORAGE_KEYS.deprecatedMnemonic,
+    {
+      migrations: [
+        ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
+        migrateMnemonicVuexToComposable,
+      ],
+      onRestored: () => {
+        isMnemonicMigrationCheckDone.value = true;
+      },
+    },
+  );
+
+  const [mnemonic, mnemonicEncrypted] = useSecureStorageRef<string>(
     '',
     STORAGE_KEYS.mnemonic,
     encryptionKey,
     {
       backgroundSync: true,
-      migrations: [
-        ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
-        migrateMnemonicVuexToComposable,
-      ],
       onRestored: async (val) => {
-        const hasStoredMnemonic = (
+        const hasStoredMnemonic = !!(
           WalletStorage.get(STORAGE_KEYS.mnemonic)
+          || WalletStorage.get(STORAGE_KEYS.deprecatedMnemonic)
           || await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)
         );
         isMnemonicRestored.value = !!val || !hasStoredMnemonic;
       },
     },
+  );
+
+  const [secureLoginTimeout] = useSecureStorageRef<number>(
+    AUTHENTICATION_TIMEOUT_DEFAULT,
+    STORAGE_KEYS.secureLoginTimeout,
+    encryptionKey,
+    { backgroundSync: true },
   );
 
   const mnemonicSeed = computed(() => mnemonic.value ? mnemonicToSeed(mnemonic.value) : null);
@@ -111,6 +135,10 @@ export const useAuth = createCustomScopedComposable(() => {
 
   async function getEncryptionKey() {
     return watchUntilTruthy(encryptionKey);
+  }
+
+  function setSecureLoginTimeout(ms: number) {
+    secureLoginTimeout.value = ms;
   }
 
   async function setPasswordAndEncryptMnemonic(newMnemonic: string, password: string) {
@@ -262,11 +290,24 @@ export const useAuth = createCustomScopedComposable(() => {
 
   async function lockWallet() {
     logout();
-    checkUserAuth();
+    if (mnemonicEncrypted.value) {
+      checkUserAuth();
+    }
+  }
+
+  async function migrateMnemonicFromPreviousStorageKey() {
+    // TODO check this on mobile
+    await watchUntilTruthy(isMnemonicMigrationCheckDone);
+    if (oldMnemonic.value && validateMnemonic(oldMnemonic.value)) {
+      await setMnemonicAndInitializePassword(oldMnemonic.value, true);
+      WalletStorage.remove(STORAGE_KEYS.deprecatedMnemonic);
+    }
   }
 
   (async () => {
     checkBiometricLoginAvailability();
+
+    await migrateMnemonicFromPreviousStorageKey();
 
     const encryptedMnemonicExists = !!(WalletStorage.get<string>(STORAGE_KEYS.mnemonic));
     if (
@@ -314,9 +355,11 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonicEncrypted,
     mnemonicSeed,
     encryptionKey,
+    secureLoginTimeout,
     getEncryptionKey,
     setAuthenticated,
     setGeneratedMnemonic,
+    setSecureLoginTimeout,
     setMnemonicAndInitializePassword,
     checkBiometricLoginAvailability,
     updatePassword,

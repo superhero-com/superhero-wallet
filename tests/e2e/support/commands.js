@@ -8,13 +8,27 @@ import {
 } from '@/constants';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '@/constants/stubs';
 import {
+  encrypt,
   formatDate,
   formatTime,
   prepareStorageKey,
-  generateEncryptionKey,
-  encrypt,
+  restoreEncryptionKey,
 } from '@/utils';
-import { CoinGecko } from '../../../src/lib/CoinGecko';
+import { CoinGecko } from '@/lib/CoinGecko';
+import { WalletStorage } from '@/lib/WalletStorage';
+
+let mnemonicEncryptionResult;
+
+async function getEncryptedMnemonic() {
+  const { password, mnemonic, salt } = STUB_ACCOUNT;
+  WalletStorage.set(STORAGE_KEYS.encryptionSalt, salt);
+  if (mnemonicEncryptionResult) {
+    return mnemonicEncryptionResult;
+  }
+  const encryptionKey = await restoreEncryptionKey(password, Buffer.from(salt, 'base64'));
+  mnemonicEncryptionResult = encrypt(encryptionKey, mnemonic);
+  return mnemonicEncryptionResult;
+}
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
   const { address } = STUB_ACCOUNT;
@@ -86,11 +100,7 @@ Cypress.Commands.add('loginUsingPassword', () => {
 });
 
 Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
-  cy.then(async () => {
-    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password);
-    const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
-    return mnemonicEncryptionResult;
-  }).then((mnemonicEncryptionResult) => {
+  cy.then(getEncryptedMnemonic).then((mnemonicEncryptionRes) => {
     if (isMockingExternalRequests) cy.mockExternalRequests();
 
     const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
@@ -98,7 +108,7 @@ Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true)
     cy.openPopup(async (contentWindow) => {
       const dataToBeStored = {
         [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
-        [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionResult,
+        [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionRes,
         [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
           idx: 0,
           protocol: PROTOCOLS.aeternity,
