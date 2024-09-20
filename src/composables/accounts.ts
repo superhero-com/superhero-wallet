@@ -61,7 +61,7 @@ const areAccountsRestored = ref(false);
 const isMnemonicRestored = ref(false);
 const encryptionKey = ref<CryptoKey | null>();
 
-const [encryptedMnemonic, mnemonic] = useSecureStorageRef<string>(
+const [mnemonic, encryptedMnemonic] = useSecureStorageRef<string>(
   '',
   STORAGE_KEYS.mnemonic,
   {
@@ -379,7 +379,7 @@ export function useAccounts() {
   (async () => {
     if (!composableInitialized) {
       composableInitialized = true;
-      const storedMnemonic = WalletStorage.get(STORAGE_KEYS.mnemonic);
+      const storedMnemonic = WalletStorage.get<string>(STORAGE_KEYS.mnemonic);
       if (
         !encryptionKey.value
         && !IS_MOBILE_APP

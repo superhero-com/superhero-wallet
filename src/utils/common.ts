@@ -300,7 +300,7 @@ export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
 /**
  * Run asynchronous callbacks one by one and pass previous returned value to the next one.
  */
-export function asyncPipe<T = any[]>(fns: ((data: T) => PromiseLike<T>)[]) {
+export function asyncPipe<T = any[]>(fns: ((data: T) => T | PromiseLike<T>)[]) {
   return (data: T): Promise<T> => fns.reduce(
     async (currData, func) => func(await currData),
     Promise.resolve(data),

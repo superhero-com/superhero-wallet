@@ -134,7 +134,7 @@ export const STORAGE_KEYS = {
   transactionsLoaded: 'transactions-loaded',
   transactionsPending: 'transactions-pending',
   transferSendData: 'transfer-send-data',
-  secureLogin: 'secure-login',
+  secureLoginTimeout: 'secure-login-timeout',
   walletConnectSession: 'wallet-connect-session',
   addressBook: 'address-book',
   encryptionSalt: 'encryption-salt',

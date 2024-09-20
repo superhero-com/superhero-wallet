@@ -1,8 +1,6 @@
 import { Ref, ref, watch } from 'vue';
-import { validateMnemonic } from '@aeternity/bip39';
-
-import type { StorageKey } from '@/types';
-import { decrypt, encrypt } from '@/utils';
+import type { IEncryptionResult, StorageKey } from '@/types';
+import { decrypt, encrypt, watchUntilTruthy } from '@/utils';
 import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { useAccounts } from './accounts';
@@ -12,6 +10,11 @@ interface ICreateSecureStorageRefOptions<T> extends
     Omit<ICreateStorageRefOptions<T>, 'serializer' | 'enableSecureStorage' | 'onBackgroundSync'> {
   encryptionDisabled?: boolean;
 }
+
+type SecureStorageReturn<T> = [
+  decryptedState: Ref<T>,
+  encryptedState: Ref<IEncryptionResult | null>,
+];
 
 /**
  * Create a secure storage ref that encrypts and decrypts the value using the password.
@@ -25,13 +28,13 @@ export function useSecureStorageRef<T = string | object | any[]>(
   options: ICreateSecureStorageRefOptions<T> = {
     encryptionDisabled: IS_MOBILE_APP,
   },
-) {
+): SecureStorageReturn<T> {
   /**
    * Checks if the value needs to be decrypted and decrypts it using the encryption key.
    * On mobile, the value is already decrypted by the storageRef composable.
    */
   async function getDecryptedValue(val: any): Promise<T> {
-    if (options.encryptionDisabled || !val) {
+    if (options.encryptionDisabled || val === null || val === undefined) {
       return val;
     }
     const { getEncryptionKey } = useAccounts();
@@ -56,66 +59,67 @@ export function useSecureStorageRef<T = string | object | any[]>(
    * Checks if the value needs to be encrypted and encrypts it using the encryption key.
    * On mobile, the value is already encrypted by the storageRef composable.
    */
-  async function getEncryptedValue(val: any): Promise<T> {
-    if (options.encryptionDisabled || !val) {
+  async function getEncryptedValue(val: any): Promise<IEncryptionResult> {
+    if (options.encryptionDisabled) {
       return val;
     }
     const { getEncryptionKey } = useAccounts();
     const encryptionKey = await getEncryptionKey();
     if (encryptionKey) {
-      return encrypt(encryptionKey, val) as T;
+      return encrypt(encryptionKey, val);
     }
     throw new Error('Failed to write the value');
   }
 
   const decryptedState = ref(initialState) as Ref<T>;
+  /**
+   * Do not sync encryptedState with decryptedState while logged out
+   * because decryptedState is reset during logout.
+  */
+  const isLoggedIn = ref(false);
+  const isUpdatingEncryptedState = ref(false);
 
   /** Should always hold encrypted values (both on storage and state) */
-  const encryptedState = useStorageRef<T>(null as T, storageKey, {
+  const encryptedState = useStorageRef<IEncryptionResult | null>(null, storageKey, {
     ...options,
+    migrations: options.migrations as any,
     enableSecureStorage: true,
     // Handle write operation within the composable but read from storageRef
     serializer: {
       read: getDecryptedValue,
       write: (val) => val,
     },
-    onRestored: async (val: T) => {
+    onRestored: async (val: IEncryptionResult) => {
       if (val) {
         const decryptedValue = await getDecryptedValue(val);
         decryptedState.value = decryptedValue;
         options.onRestored?.(decryptedValue);
       }
     },
-    onBackgroundSync: async (val: T) => {
+    onBackgroundSync: async (val: IEncryptionResult) => {
       decryptedState.value = await getDecryptedValue(val);
     },
   });
 
-  /**
-   * This is an exception for the mnemonic because it's a key part of the password feature.
-   * It restores the mnemonic from the insecure storage and sets it on the accounts composable.
-   */
-  async function setMnemonicOnAccounts(mnemonic: T) {
-    if (mnemonic && validateMnemonic(mnemonic)) {
-      const { setMnemonicAndInitializePassword } = useAccounts();
-      await setMnemonicAndInitializePassword(mnemonic as string, true);
-      options.onRestored?.(mnemonic);
-    }
+  async function setEncryptedState(val: T) {
+    isUpdatingEncryptedState.value = true;
+    encryptedState.value = await getEncryptedValue(val);
+    isUpdatingEncryptedState.value = false;
   }
 
   // Restore state and run watchers
   (async () => {
-    // Check if value exists in insecure storage and migrate it to secure storage
-    const decryptedValue = WalletStorage.get<T | null>(storageKey);
-    if (decryptedValue && storageKey === STORAGE_KEYS.mnemonic) {
-      await setMnemonicOnAccounts(decryptedValue);
+    const restoredValue = WalletStorage.get<T | null>(storageKey);
+
+    if (initialState && !restoredValue) {
+      await setEncryptedState(initialState);
     }
 
     if (IS_MOBILE_APP) {
       // TODO Needs to be tested
       // Move the unencrypted value to secure storage and remove it from insecure storage
-      if (decryptedValue !== null) {
-        decryptedState.value = decryptedValue;
+      if (restoredValue !== null) {
+        decryptedState.value = restoredValue;
         WalletStorage.remove(storageKey);
       }
     }
@@ -130,8 +134,11 @@ export function useSecureStorageRef<T = string | object | any[]>(
       const { encryptionKey } = useAccounts();
       watch(encryptionKey, async (key) => {
         if (!key) {
-          decryptedState.value = initialState;
+          isLoggedIn.value = false;
+          decryptedState.value = null as T;
         } else {
+          isLoggedIn.value = true;
+          await watchUntilTruthy(() => !isUpdatingEncryptedState.value);
           decryptedState.value = await getDecryptedValue(encryptedState.value);
         }
       }, { immediate: true, deep: true });
@@ -143,11 +150,15 @@ export function useSecureStorageRef<T = string | object | any[]>(
     watch(decryptedState, async (val) => {
       options.onRestored?.(val);
       // Do not write null values to the mnemonic storage
-      if (val || (storageKey !== STORAGE_KEYS.mnemonic)) {
-        encryptedState.value = await getEncryptedValue(val);
+      if (
+        !isUpdatingEncryptedState.value
+        && isLoggedIn.value
+        && (val || (storageKey !== STORAGE_KEYS.mnemonic))
+      ) {
+        await setEncryptedState(val);
       }
     }, { immediate: true, deep: true });
   })();
 
-  return [encryptedState, decryptedState];
+  return [decryptedState, encryptedState];
 }

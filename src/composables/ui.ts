@@ -14,8 +14,10 @@ import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
 import migrateSecureLoginEnabledToBiometric from '@/migrations/009-secure-login-enabled-to-biometric';
+import migrateRemoveSecureLoginTimeout from '@/migrations/010-remove-secure-login-timeout';
 
 import { useStorageRef } from './storageRef';
+import { useSecureStorageRef } from './secureStorageRef';
 
 /** Control the route that would be visible after opening the extension. */
 const homeRouteName = ref(ROUTE_ACCOUNT);
@@ -35,6 +37,12 @@ const scanProgress = ref(-1);
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
 const lastTimeAppWasActive = ref<number>();
 
+const [secureLoginTimeout] = useSecureStorageRef<number>(
+  AUTHENTICATION_TIMEOUT_DEFAULT,
+  STORAGE_KEYS.secureLoginTimeout,
+  { backgroundSync: true },
+);
+
 const hiddenCards = useStorageRef<string[]>(
   [],
   STORAGE_KEYS.hiddenCards,
@@ -52,6 +60,7 @@ const otherSettings = useStorageRef<IOtherSettings>(
     migrations: [
       migrateOtherSettingsVuexToComposable,
       migrateSecureLoginEnabledToBiometric,
+      migrateRemoveSecureLoginTimeout,
     ],
   },
 );
@@ -59,9 +68,6 @@ const otherSettings = useStorageRef<IOtherSettings>(
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
 const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
-const secureLoginTimeout = computed(
-  () => otherSettings.value.secureLoginTimeout ?? AUTHENTICATION_TIMEOUT_DEFAULT,
-);
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -107,7 +113,7 @@ export function useUi() {
   }
 
   function setSecureLoginTimeout(ms: number) {
-    otherSettings.value.secureLoginTimeout = ms;
+    secureLoginTimeout.value = ms;
   }
 
   function initVisibilityListeners() {
