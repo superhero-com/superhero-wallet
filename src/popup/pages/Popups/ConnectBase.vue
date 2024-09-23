@@ -18,7 +18,7 @@
 
     <div class="connect-parties">
       <p
-        v-if="isUnknown"
+        v-if="isUnknownDapp"
         class="warning-message color-warning"
         v-text="$t('pages.connectConfirm.unknownOriginWarning')"
       />
@@ -26,7 +26,7 @@
       <!-- DAPP CARD -->
       <Card
         data-cy="aepp"
-        :variant="(isUnknown) ? 'warning' : undefined"
+        :variant="(isUnknownDapp) ? 'warning' : undefined"
         icon-centered
         dense
       >
@@ -40,7 +40,7 @@
         <div class="aepp-data">
           <p
             class="text-heading-5"
-            v-text="(isUnknown) ? $t('pages.connectConfirm.unknownSource') : dappNameToDisplay"
+            v-text="(isUnknownDapp) ? $t('pages.connectConfirm.unknownSource') : dappNameToDisplay"
           />
           <Truncate :str="dappUrlToDisplay || $t('pages.connectConfirm.unknownUrl')" />
         </div>
@@ -194,7 +194,12 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { getLastActiveProtocolAccount } = useAccounts();
-    const { popupProps, sender, setPopupProps } = usePopupProps();
+    const {
+      isUnknownDapp,
+      popupProps,
+      sender,
+      setPopupProps,
+    } = usePopupProps();
     const { permissions, addPermission } = usePermissions();
 
     const accessLabels: Record<ConnectPermission, any> = {
@@ -230,7 +235,7 @@ export default defineComponent({
     });
 
     const trustedDapp = computed(() => {
-      const urlWithNoProtocol = prepareUrlToDisplay(popupProps.value?.app?.url);
+      const urlWithNoProtocol = prepareUrlToDisplay(popupProps.value?.app?.href);
       return (urlWithNoProtocol)
         ? TRUSTED_DAPPS.find(({ url }) => urlWithNoProtocol.startsWith(prepareUrlToDisplay(url)!))
         : undefined;
@@ -241,7 +246,7 @@ export default defineComponent({
     );
 
     const dappUrlToDisplay = computed(
-      () => prepareUrlToDisplay(popupProps.value?.app?.url),
+      () => prepareUrlToDisplay(popupProps.value?.app?.href),
     );
 
     const dappIcon = computed(
@@ -250,12 +255,6 @@ export default defineComponent({
         ? require(`@/icons/dapp/${trustedDapp.value.image}`)
         : null,
     );
-
-    /**
-     * In case we don't have the access to dapp url and name we need to inform user
-     * about possible danger.
-     */
-    const isUnknown = computed(() => !popupProps.value?.app?.url && !popupProps.value?.app?.name);
 
     const protocolName = computed(
       () => ProtocolAdapterFactory.getAdapter(protocol.value).protocolName,
@@ -291,7 +290,7 @@ export default defineComponent({
       dappNameToDisplay,
       dappUrlToDisplay,
       accessLabels,
-      isUnknown,
+      isUnknownDapp,
       protocolName,
       confirm,
       cancel,

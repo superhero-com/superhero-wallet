@@ -1,7 +1,7 @@
 <template>
   <div
     class="transaction-tag-list"
-    :class="{ dense }"
+    :class="{ dense, 'first-label-warning': firstLabelWarning }"
   >
     <TransactionTag
       v-for="label in labels"
@@ -45,6 +45,7 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, default: null },
     additionalTag: { type: String, default: null },
     dense: Boolean,
+    firstLabelWarning: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
@@ -193,6 +194,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/mixins';
+@use '@/styles/variables' as *;
 
 .transaction-tag-list {
   @include mixins.flex(center, center);
@@ -203,6 +205,11 @@ export default defineComponent({
   &.dense {
     gap: 4px;
     margin-bottom: 0;
+  }
+
+  &.first-label-warning .title-tag:first-of-type {
+    color: rgba($color-warning, 0.5);
+    border-color: rgba($color-warning, 0.5);
   }
 }
 </style>

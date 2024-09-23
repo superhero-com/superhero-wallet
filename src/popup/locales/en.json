@@ -2,6 +2,7 @@
   "common": {
     "activeAccount": "Active account",
     "address": "Address",
+    "allow": "Allow",
     "name": "Name",
     "addressCopied": "Copied",
     "all": "All",
@@ -56,6 +57,7 @@
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
+    "unknown": "Unknown",
     "unrecognized": "Unrecognized",
     "you": "You",
     "verifying": "Verifying...",
@@ -1240,6 +1242,18 @@
       "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
       "decline": "Decline"
     }
+  },
+  "unknownDapp": {
+    "request": "Unknown URL would like you to {action}.",
+    "warning": "Kindly ensure that you are aware of the request origin. {warning} might cause undesired results, including loss of your funds.",
+    "signMessageAction": "sign a message",
+    "signMessageWarning": "Signing this message",
+    "allowAccessAction": "access your account",
+    "allowAccessWarning": "Allowing access",
+    "confirmTransactionAction": "confirm a transaction",
+    "confirmTransactionWarning": "Confirming this transaction",
+    "signDataAction": "sign data",
+    "signDataWarning": "Signing this data"
   },
   "dappActionBrowser": {
     "refresh": {

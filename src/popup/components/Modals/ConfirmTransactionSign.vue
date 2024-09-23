@@ -13,7 +13,13 @@
     <template v-else>
       <TransactionOverview
         :transaction="transaction"
-        :additional-tag="appName"
+        :additional-tag="isUnknownDapp ? $t('common.unknown') : appName"
+        :first-label-warning="isUnknownDapp"
+      />
+      <NoOriginWarning
+        v-if="isUnknownDapp"
+        :action="$t('unknownDapp.confirmTransactionAction')"
+        :warning="$t('unknownDapp.confirmTransactionWarning')"
       />
       <div
         v-if="appName || error"
@@ -268,6 +274,7 @@ import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import TransactionCallDataDetails from '../TransactionCallDataDetails.vue';
+import NoOriginWarning from '../NoOriginWarning.vue';
 
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
@@ -299,6 +306,7 @@ export default defineComponent({
     TokenAmount,
     TransactionDetailsPoolTokenRow,
     TransactionCallDataDetails,
+    NoOriginWarning,
     AnimatedSpinner,
   },
   setup() {
@@ -307,7 +315,7 @@ export default defineComponent({
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk();
     const { getLastActiveProtocolAccount } = useAccounts();
-    const { popupProps, setPopupProps } = usePopupProps();
+    const { isUnknownDapp, popupProps, setPopupProps } = usePopupProps();
     const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
     const { openModal } = useModals();
     const { areTokenSalesReady, tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
@@ -658,6 +666,7 @@ export default defineComponent({
       isDexSwap,
       isTokenSale,
       isHash,
+      isUnknownDapp,
       loading,
       nameAeFee,
       popupProps,

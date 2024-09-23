@@ -34,7 +34,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
+      const { callbackOrigin, openCallbackOrGoHome, setIsDeepLinkUsed } = useDeepLinkApi();
       const { nodeNetworkId, getAeSdk } = useAeSdk();
       const { openDefaultModal } = useModals();
       const { setLoaderVisible } = useUi();
@@ -58,6 +58,7 @@ export default defineComponent({
       }
 
       try {
+        setIsDeepLinkUsed(true);
         setLoaderVisible(true);
         const {
           transaction, networkId, broadcast, 'replace-caller': replaceCaller,
@@ -86,7 +87,7 @@ export default defineComponent({
           decodeURIComponent(txToSign as string) as Encoded.Transaction,
           {
             networkId,
-            aeppOrigin: callbackOrigin.value?.toString(),
+            aeppOrigin: callbackOrigin.value?.toString() || undefined,
             isSenderReplaced: replaceCaller === 'true',
           } as any,
         );
@@ -111,6 +112,7 @@ export default defineComponent({
         }
         openCallbackOrGoHome(false);
       } finally {
+        setIsDeepLinkUsed(false);
         setLoaderVisible(false);
       }
     });

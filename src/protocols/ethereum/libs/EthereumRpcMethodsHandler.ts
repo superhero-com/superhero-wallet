@@ -151,7 +151,7 @@ export async function handleEthereumRpcMethod(
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol: PROTOCOLS.ethereum,
-      app: { url, host: url ? new URL(url).hostname : '', name: name || url },
+      app: { href: url, host: url ? new URL(url).hostname : '', name: name || url },
       tx: {
         amount: params.value ? +fromWei(params.value, 'ether') : 0,
         fee: gas * +(maxFeePerGas.value || 0),
