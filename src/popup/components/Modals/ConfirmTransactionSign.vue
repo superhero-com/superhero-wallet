@@ -13,7 +13,13 @@
     <template v-else>
       <TransactionOverview
         :transaction="transaction"
-        :additional-tag="appName"
+        :additional-tag="appName || $t('common.unknown')"
+        :first-label-warning="isUnknownDapp"
+      />
+      <NoOriginWarning
+        v-if="isUnknownDapp"
+        :action="$t('unknownDapp.confirmTransactionAction')"
+        :warning="$t('unknownDapp.confirmTransactionWarning')"
       />
       <div
         v-if="appName || error"
@@ -274,6 +280,7 @@ import {
   RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
   TX_DIRECTION,
+  UNKNOWN_SOURCE,
 } from '@/constants';
 import {
   fetchJson,
@@ -313,6 +320,7 @@ import PanelTableItem from '../PanelTableItem.vue';
 import Tabs from '../tabs/Tabs.vue';
 import Tab from '../tabs/Tab.vue';
 import InfoBox from '../InfoBox.vue';
+import NoOriginWarning from '../NoOriginWarning.vue';
 
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
@@ -348,6 +356,7 @@ export default defineComponent({
     Tabs,
     Tab,
     InfoBox,
+    NoOriginWarning,
     AnimatedSpinner,
   },
   setup() {
@@ -408,6 +417,10 @@ export default defineComponent({
     const activeTab = ref(dataTabs[0].name);
 
     const app = computed(() => popupProps.value?.app);
+
+    const isUnknownDapp = computed(() => (
+      !popupProps.value?.app || popupProps.value.app.name === UNKNOWN_SOURCE
+    ));
 
     const fee = computed(() => (protocol === PROTOCOLS.aeternity)
       ? getAeFee(popupProps.value?.tx?.fee!)
@@ -695,6 +708,7 @@ export default defineComponent({
       isDexMinReceived,
       isDexSwap,
       isHash,
+      isUnknownDapp,
       loading,
       nameAeFee,
       popupProps,

@@ -6,12 +6,23 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :custom-labels="[$t('pages.connectConfirm.title')]"
+      :custom-labels="[
+        ...(isUnknownDapp ? [$t('common.unknown')] : []),
+        $t('pages.connectConfirm.title'),
+      ]"
       :sender="sender"
       :recipient="activeAccount"
+      :first-label-warning="isUnknownDapp"
+    />
+
+    <NoOriginWarning
+      v-if="isUnknownDapp"
+      :action="$t('unknownDapp.allowAccessAction')"
+      :warning="$t('unknownDapp.allowAccessWarning')"
     />
 
     <div
+      v-else
       class="subtitle"
       data-cy="aepp"
     >
@@ -20,22 +31,24 @@
     </div>
 
     <div class="permissions">
-      <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
-        <span class="title">
-          <CheckMark class="icon" /> {{ $t('common.address') }}
-        </span>
-        <span class="description">
-          {{ $t('pages.connectConfirm.addressRequest') }}
-        </span>
-      </template>
-      <template v-if="access.includes(POPUP_CONNECT_TRANSACTIONS_PERMISSION)">
-        <span class="title">
-          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.transactionLabel') }}
-        </span>
-        <span class="description">
-          {{ $t('pages.connectConfirm.transactionRequest') }}
-        </span>
-      </template>
+      <DetailsItem
+        v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)"
+        :label="$t('pages.connectConfirm.addressLabel')"
+        :value="$t('pages.connectConfirm.addressRequest')"
+      >
+        <template #before-label>
+          <CheckSuccessCircle class="icon" />
+        </template>
+      </DetailsItem>
+      <DetailsItem
+        v-if="access.includes(POPUP_CONNECT_TRANSACTIONS_PERMISSION)"
+        :label="$t('pages.connectConfirm.transactionLabel')"
+        :value="$t('pages.connectConfirm.transactionRequest')"
+      >
+        <template #before-label>
+          <CheckSuccessCircle class="icon" />
+        </template>
+      </DetailsItem>
     </div>
 
     <template #footer>
@@ -48,7 +61,7 @@
       />
       <BtnMain
         data-cy="accept"
-        :text="$t('pages.connectConfirm.confirmButton')"
+        :text="$t('common.allow')"
         @click="confirm()"
       />
     </template>
@@ -59,7 +72,6 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   onUnmounted,
 } from 'vue';
 import { RejectedByUserError } from '@/lib/errors';
@@ -68,21 +80,27 @@ import {
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
   PROTOCOLS,
+  UNKNOWN_SOURCE,
 } from '@/constants';
 import { useAccounts, usePopupProps } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
 
+import DetailsItem from '@/popup/components/DetailsItem.vue';
+import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
-import CheckMark from '../../../icons/check-mark.svg?vue-component';
+
+import CheckSuccessCircle from '../../../icons/check-success-circle.svg?vue-component';
 
 export default defineComponent({
   components: {
+    DetailsItem,
     Modal,
     BtnMain,
     TransactionInfo,
-    CheckMark,
+    NoOriginWarning,
+    CheckSuccessCircle,
   },
   props: {
     access: {
@@ -100,18 +118,20 @@ export default defineComponent({
 
     const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
+    const isUnknownDapp = computed(() => (
+      !popupProps.value?.app || popupProps.value.app.name === UNKNOWN_SOURCE
+    ));
+
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;
       return (host) ? permissions.value[host] : undefined;
     });
 
-    const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
-
     function confirm() {
       addPermission({
         ...PERMISSION_DEFAULTS,
-        ...popupProps.value?.app,
-        ...permission.value,
+        ...(popupProps.value?.app || {}),
+        ...(permission.value || {}),
       });
       popupProps.value?.resolve();
     }
@@ -119,10 +139,6 @@ export default defineComponent({
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
     }
-
-    onMounted(() => {
-      sender.value.name = appName.value;
-    });
 
     onUnmounted(() => {
       setPopupProps(null);
@@ -132,6 +148,7 @@ export default defineComponent({
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       activeAccount,
+      isUnknownDapp,
       sender,
       confirm,
       cancel,
@@ -162,33 +179,15 @@ export default defineComponent({
     }
   }
 
+  .icon {
+    width: 24px;
+    height: 24px;
+    padding-right: 4px;
+    color: $color-success-dark;
+  }
+
   .permissions {
     margin: 16px 0;
-
-    .title {
-      @extend %face-sans-15-medium;
-
-      display: flex;
-      align-items: center;
-      padding-bottom: 4px;
-      color: $color-grey-dark;
-
-      .icon {
-        width: 24px;
-        height: 24px;
-        color: $color-success;
-        padding-right: 4px;
-      }
-    }
-
-    .description {
-      @extend %face-sans-15-regular;
-
-      display: block;
-      padding-bottom: 16px;
-      color: $color-white;
-      text-align: left;
-    }
   }
 }
 </style>
