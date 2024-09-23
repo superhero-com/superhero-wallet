@@ -1,4 +1,9 @@
-import type { ICurrency, IPermission, ObjectValues } from '@/types';
+import type {
+  IAppData,
+  ICurrency,
+  IPermission,
+  ObjectValues,
+} from '@/types';
 import { IS_MOBILE_APP } from './environment';
 
 export const APP_NAME = 'Superhero Wallet';
@@ -379,6 +384,16 @@ export const CONNECT_PERMISSIONS = {
   addressList: 'addressList',
   transactions: 'transactions',
 } as const;
+
+export const UNKNOWN_SOURCE = 'Unknown source';
+export const UNKNOWN_URL = 'Unknown url';
+export const UNKNOWN_APP_DETAILS: IAppData = {
+  url: UNKNOWN_URL,
+  href: UNKNOWN_URL,
+  protocol: '',
+  host: '',
+  name: UNKNOWN_SOURCE,
+};
 
 export const POPUP_ACTIONS = {
   getProps: 'getProps',

@@ -7,12 +7,15 @@ import { checkIfSuperheroCallbackUrl } from '@/utils';
 import { IS_IOS, IS_MOBILE_APP, MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables/modals';
 
-export function useDeepLinkApi() {
-  const router = useIonRouter();
+let isDeepLinkUsed = false;
+
+export function useDeepLinkApi(doNotInitializeRouter?: boolean) {
+  // `useIonRouter` breaks if it is not run in `IonPage` context
+  const router = doNotInitializeRouter ? null : useIonRouter();
   const route = useRoute();
 
   const callbackOrigin = ref<URL | null>(
-    route.query['x-success']
+    route?.query['x-success']
       ? (new URL(decodeURIComponent(route.query['x-success'] as string)))
       : null,
   );
@@ -37,14 +40,14 @@ export function useDeepLinkApi() {
   ) {
     const callbackUrlTemplate = route.query[isSuccess ? 'x-success' : 'x-cancel'];
     if (!callbackUrlTemplate) {
-      router.replace({ name: ROUTE_ACCOUNT });
+      router?.replace({ name: ROUTE_ACCOUNT });
       return;
     }
     const callbackUrl = Object.entries(templateParams).reduce(
       (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
       decodeURIComponent(String(route.query[isSuccess ? 'x-success' : 'x-cancel'])),
     ) as string;
-    router.replace({ name: ROUTE_ACCOUNT });
+    router?.replace({ name: ROUTE_ACCOUNT });
     if (IS_MOBILE_APP && !IS_IOS) {
       window.open(callbackUrl, '_system');
     } else {
@@ -52,9 +55,15 @@ export function useDeepLinkApi() {
     }
   }
 
+  function setIsDeepLinkUsed(value: boolean) {
+    isDeepLinkUsed = value;
+  }
+
   return {
     checkIfOpenTransferSendModal,
     callbackOrigin,
     openCallbackOrGoHome,
+    setIsDeepLinkUsed,
+    isDeepLinkUsed,
   };
 }

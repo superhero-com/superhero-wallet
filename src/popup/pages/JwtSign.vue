@@ -9,7 +9,12 @@ import { useRoute } from 'vue-router';
 import { Encoded, decode, signJwt } from '@aeternity/aepp-sdk';
 
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
-import { JWT_HEADER, MODAL_CONFIRM_UNSAFE_SIGN, PROTOCOLS } from '@/constants';
+import {
+  JWT_HEADER,
+  MODAL_CONFIRM_UNSAFE_SIGN,
+  PROTOCOLS,
+  UNKNOWN_APP_DETAILS,
+} from '@/constants';
 import { handleUnknownError, toBase64Url } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import {
@@ -39,6 +44,13 @@ export default defineComponent({
         setLoaderVisible(true);
         const payload = route.query.payload?.toString();
         const { host, href, protocol } = callbackOrigin.value || {} as any;
+        const app = host && href
+          ? {
+            host,
+            name: host,
+            url: href,
+            protocol,
+          } : UNKNOWN_APP_DETAILS;
 
         const signerAddress = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address;
 
@@ -62,12 +74,7 @@ export default defineComponent({
 
         await openModal(MODAL_CONFIRM_UNSAFE_SIGN, {
           data: messageToConfirm,
-          app: {
-            host,
-            protocol,
-            name: host,
-            url: href,
-          },
+          app,
         });
 
         const dataToSign = JSON.parse(payload);
