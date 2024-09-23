@@ -14,7 +14,11 @@ import {
 } from '@/composables';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
-import { MODAL_CONFIRM_CONNECT, POPUP_CONNECT_ADDRESS_PERMISSION } from '@/constants';
+import {
+  MODAL_CONFIRM_CONNECT,
+  POPUP_CONNECT_ADDRESS_PERMISSION,
+  UNKNOWN_APP_DETAILS,
+} from '@/constants';
 
 export default defineComponent({
   name: 'Address',
@@ -23,18 +27,19 @@ export default defineComponent({
   },
   setup() {
     const { nodeNetworkId } = useAeSdk();
-    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
+    const { openCallbackOrGoHome, callbackOrigin, setIsDeepLinkUsed } = useDeepLinkApi();
     const { activeAccount } = useAccounts();
     const { openModal } = useModals();
 
-    const app = computed((): IAppData => callbackOrigin.value ? {
+    const app = computed((): IAppData => callbackOrigin.value?.toString() ? {
       name: callbackOrigin.value.hostname,
       url: callbackOrigin.value.origin,
       host: callbackOrigin.value.host,
-    } : {} as IAppData);
+    } : UNKNOWN_APP_DETAILS);
 
     onMounted(async () => {
       try {
+        setIsDeepLinkUsed(true);
         await openModal(MODAL_CONFIRM_CONNECT, {
           access: [POPUP_CONNECT_ADDRESS_PERMISSION],
           app: app.value,
@@ -48,6 +53,8 @@ export default defineComponent({
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
         }
+      } finally {
+        setIsDeepLinkUsed(false);
       }
     });
   },
