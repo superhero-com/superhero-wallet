@@ -59,20 +59,36 @@ const {
 
 const areAccountsRestored = ref(false);
 const isMnemonicRestored = ref(false);
+const isMnemonicMigrationCheckDone = ref(false);
 const encryptionKey = ref<CryptoKey | null>();
+
+/**
+ * Deprecated storage key for the mnemonic.
+ * Used for migration from the old storage key to the new one.
+ */
+const oldMnemonic = useStorageRef<string>(
+  '',
+  STORAGE_KEYS.deprecatedMnemonic,
+  {
+    migrations: [
+      ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
+      migrateMnemonicVuexToComposable,
+    ],
+    onRestored: () => {
+      isMnemonicMigrationCheckDone.value = true;
+    },
+  },
+);
 
 const [mnemonic, encryptedMnemonic] = useSecureStorageRef<string>(
   '',
   STORAGE_KEYS.mnemonic,
   {
     backgroundSync: true,
-    migrations: [
-      ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
-      migrateMnemonicVuexToComposable,
-    ],
     onRestored: async (val) => {
-      const hasStoredMnemonic = (
+      const hasStoredMnemonic = !!(
         WalletStorage.get(STORAGE_KEYS.mnemonic)
+        || WalletStorage.get(STORAGE_KEYS.deprecatedMnemonic)
         || await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)
       );
       isMnemonicRestored.value = !!val || !hasStoredMnemonic;
@@ -376,16 +392,25 @@ export function useAccounts() {
     });
   }
 
+  async function migrateMnemonicFromPreviousStorageKey() {
+    // TODO check this on mobile
+    await watchUntilTruthy(isMnemonicMigrationCheckDone);
+    if (oldMnemonic.value && validateMnemonic(oldMnemonic.value)) {
+      await setMnemonicAndInitializePassword(oldMnemonic.value, true);
+      await WalletStorage.remove(STORAGE_KEYS.deprecatedMnemonic);
+    }
+  }
+
   (async () => {
     if (!composableInitialized) {
       composableInitialized = true;
-      const storedMnemonic = WalletStorage.get<string>(STORAGE_KEYS.mnemonic);
+      await migrateMnemonicFromPreviousStorageKey();
+
+      const encryptedMnemonicExists = !!(WalletStorage.get<string>(STORAGE_KEYS.mnemonic));
       if (
         !encryptionKey.value
         && !IS_MOBILE_APP
-        // If the mnemonic is stored but is not valid as plaintext
-        // it means that user is trying to access an existing & encrypted wallet
-        && storedMnemonic && !validateMnemonic(storedMnemonic)
+        && encryptedMnemonicExists
       ) {
         await openPasswordLoginModal();
       }

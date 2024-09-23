@@ -106,7 +106,8 @@ export const DEX = 'DEX';
  * Doing any change to the existing values would require creating migration.
  */
 export const STORAGE_KEYS = {
-  mnemonic: 'mnemonic',
+  mnemonic: 'encrypted-mnemonic',
+  deprecatedMnemonic: 'mnemonic',
   accountsRaw: 'accounts-raw',
   activeAccountGlobalIdx: 'active-account-global-idx',
   protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',

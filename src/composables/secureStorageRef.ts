@@ -1,7 +1,7 @@
 import { Ref, ref, watch } from 'vue';
 import type { IEncryptionResult, StorageKey } from '@/types';
+import { IS_MOBILE_APP } from '@/constants';
 import { decrypt, encrypt, watchUntilTruthy } from '@/utils';
-import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { useAccounts } from './accounts';
 import { type ICreateStorageRefOptions, useStorageRef } from './storageRef';
@@ -139,7 +139,16 @@ export function useSecureStorageRef<T = string | object | any[]>(
         } else {
           isLoggedIn.value = true;
           await watchUntilTruthy(() => !isUpdatingEncryptedState.value);
-          decryptedState.value = await getDecryptedValue(encryptedState.value);
+
+          // We need to update the encrypted state so that it is decrypted with the new key.
+          // If decryptedState is set then it means that the password changed.
+          if (decryptedState.value) {
+            // Password changed, re-encrypt state
+            setEncryptedState(decryptedState.value);
+          } else {
+            // Resumed from being inactive, decrypt state
+            decryptedState.value = await getDecryptedValue(encryptedState.value);
+          }
         }
       }, { immediate: true, deep: true });
     }
@@ -149,11 +158,9 @@ export function useSecureStorageRef<T = string | object | any[]>(
      */
     watch(decryptedState, async (val) => {
       options.onRestored?.(val);
-      // Do not write null values to the mnemonic storage
       if (
         !isUpdatingEncryptedState.value
         && isLoggedIn.value
-        && (val || (storageKey !== STORAGE_KEYS.mnemonic))
       ) {
         await setEncryptedState(val);
       }
