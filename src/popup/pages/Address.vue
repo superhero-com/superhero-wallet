@@ -15,7 +15,11 @@ import {
 } from '@/composables';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
-import { MODAL_CONFIRM_CONNECT, POPUP_CONNECT_ADDRESS_PERMISSION } from '@/constants';
+import {
+  MODAL_CONFIRM_CONNECT,
+  POPUP_CONNECT_ADDRESS_PERMISSION,
+  UNKNOWN_APP_DETAILS,
+} from '@/constants';
 
 export default defineComponent({
   name: 'Address',
@@ -29,11 +33,11 @@ export default defineComponent({
     const { openModal } = useModals();
     const { setLoaderVisible } = useUi();
 
-    const app = computed((): IAppData => callbackOrigin.value ? {
+    const app = computed((): IAppData => callbackOrigin.value?.toString() ? {
       name: callbackOrigin.value.hostname,
       url: callbackOrigin.value.origin,
       host: callbackOrigin.value.host,
-    } : {} as IAppData);
+    } : UNKNOWN_APP_DETAILS);
 
     onMounted(async () => {
       try {
