@@ -84,7 +84,7 @@ export default defineComponent({
       resetUiSettings();
       disconnectDapps();
 
-      await WalletStorage.clear();
+      WalletStorage.clear();
       // TODO: Rethink this approach
       // It is removing the remaining vuex state
       await browser.storage.local.clear();

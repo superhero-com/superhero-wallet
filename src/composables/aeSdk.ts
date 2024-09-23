@@ -23,7 +23,7 @@ import {
   APP_NAME,
   IN_FRAME,
   IS_EXTENSION,
-  IS_EXTENSION_BACKGROUND,
+  IS_OFFSCREEN_TAB,
   PROTOCOLS,
   RUNNING_IN_TESTS,
 } from '@/constants';
@@ -154,7 +154,7 @@ export function useAeSdk() {
         },
         async onSubscription(aeppId: string, params: any, origin: string) {
           const aepp = aeppInfo[aeppId];
-          const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
+          const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
             return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
           }
@@ -162,7 +162,7 @@ export function useAeSdk() {
         },
         async onAskAccounts(aeppId: string, params: any, origin: string) {
           const aepp = aeppInfo[aeppId];
-          const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
+          const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.address, host)) {
             return accountsAddressList.value;
           }

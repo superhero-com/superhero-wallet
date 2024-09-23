@@ -56,7 +56,7 @@ export function useStorageRef<T = string | object | any[]>(
 
   // Restore state and run watchers
   (async () => {
-    let restoredValue = await WalletStorage.get<T | null>(storageKey);
+    let restoredValue = WalletStorage.get<T | null>(storageKey);
     if (migrations?.length) {
       restoredValue = await asyncPipe<T | null>(migrations)(restoredValue);
       if (restoredValue !== null) {
