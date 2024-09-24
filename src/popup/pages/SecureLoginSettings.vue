@@ -152,7 +152,7 @@ import { Form, Field } from 'vee-validate';
 
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
 import { ComponentRef } from '@/types';
-import { useAccounts, useAuth, useUi } from '@/composables';
+import { useAuth, useUi } from '@/composables';
 
 import RadioButton from '@/popup/components/RadioButton.vue';
 import SwitchButton from '@/popup/components/SwitchButton.vue';
@@ -183,10 +183,10 @@ export default defineComponent({
     const newPassword = ref('');
     const confirmNewPassword = ref('');
 
-    const { updatePassword } = useAccounts();
     const {
       checkBiometricLoginAvailability,
       openEnableBiometricLoginModal,
+      updatePassword,
     } = useAuth();
     const {
       isBiometricLoginEnabled,

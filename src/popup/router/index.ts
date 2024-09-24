@@ -53,14 +53,16 @@ const router = createRouter({
 const {
   isLoggedIn,
   activeAccount,
-  isMnemonicRestored,
   areAccountsRestored,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
-const { checkUserAuth } = useAuth();
+const {
+  isMnemonicRestored,
+  checkUserAuth,
+} = useAuth();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);

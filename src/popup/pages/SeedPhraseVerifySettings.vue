@@ -87,7 +87,7 @@ import { shuffle } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent, onIonViewWillLeave } from '@ionic/vue';
 
-import { useAccounts, useNotifications, useUi } from '@/composables';
+import { useAuth, useNotifications, useUi } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -110,7 +110,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { setBackedUpSeed } = useUi();
-    const { mnemonic } = useAccounts();
+    const { mnemonic } = useAuth();
     const { removeIsSeedBackedUpNotification } = useNotifications({ requirePolling: false });
 
     const selectedWordIds = ref<number[]>([]);
@@ -118,7 +118,7 @@ export default defineComponent({
     const hasError = ref(false);
     const examplePhrase = ref([t('pages.seedPhrase.first'), t('pages.seedPhrase.second'), '...']);
 
-    const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value.split(' ')));
+    const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value!.split(' ')));
     const isVerifyButtonDisabled = computed(() => (
       !selectedWordIds.value.length
       || selectedWordIds.value.length !== mnemonicShuffled.value.length
