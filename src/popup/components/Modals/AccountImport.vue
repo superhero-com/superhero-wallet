@@ -99,9 +99,13 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { t } = useI18n();
-    const { discoverAccounts, setMnemonicAndInitializePassword } = useAccounts();
+    const { discoverAccounts } = useAccounts();
     const { openScanQrModal } = useModals();
-    const { openEnableBiometricLoginModal, setAuthenticated } = useAuth();
+    const {
+      openEnableBiometricLoginModal,
+      setAuthenticated,
+      setMnemonicAndInitializePassword,
+    } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
     const discovering = ref(false);

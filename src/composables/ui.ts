@@ -16,54 +16,55 @@ import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-setting
 import migrateSecureLoginEnabledToBiometric from '@/migrations/009-secure-login-enabled-to-biometric';
 
 import { useStorageRef } from './storageRef';
+import { createCustomScopedComposable } from './composablesHelpers';
 
-/** Control the route that would be visible after opening the extension. */
-const homeRouteName = ref(ROUTE_ACCOUNT);
+export const useUi = createCustomScopedComposable(() => {
+  /** Control the route that would be visible after opening the extension. */
+  const homeRouteName = ref(ROUTE_ACCOUNT);
 
-/** Defines if user is using the app. Equals `false` when the app browser tab is inactive. */
-const isAppActive = ref(false);
+  /** Defines if user is using the app. Equals `false` when the app browser tab is inactive. */
+  const isAppActive = ref(false);
 
-/** Control global loader animation put above all other layers. */
-const isLoaderVisible = ref(false);
+  /** Control global loader animation put above all other layers. */
+  const isLoaderVisible = ref(false);
 
-/** Control layer, that allows to close full-screen camera view on mobile devices. */
-const isMobileQrScannerVisible = ref(false);
+  /** Control layer, that allows to close full-screen camera view on mobile devices. */
+  const isMobileQrScannerVisible = ref(false);
 
-/** Holds the progress of the current multipart QR code scan. If -1, QR is not multipart */
-const scanProgress = ref(-1);
+  /** Holds the progress of the current multipart QR code scan. If -1, QR is not multipart */
+  const scanProgress = ref(-1);
 
-const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
-const lastTimeAppWasActive = ref<number>();
+  const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
+  const lastTimeAppWasActive = ref<number>();
 
-const hiddenCards = useStorageRef<string[]>(
-  [],
-  STORAGE_KEYS.hiddenCards,
-  {
-    migrations: [
-      migrateHiddenCardsVuexToComposable,
-    ],
-  },
-);
-const otherSettings = useStorageRef<IOtherSettings>(
-  {},
-  STORAGE_KEYS.otherSettings,
-  {
-    backgroundSync: true,
-    migrations: [
-      migrateOtherSettingsVuexToComposable,
-      migrateSecureLoginEnabledToBiometric,
-    ],
-  },
-);
+  const hiddenCards = useStorageRef<string[]>(
+    [],
+    STORAGE_KEYS.hiddenCards,
+    {
+      migrations: [
+        migrateHiddenCardsVuexToComposable,
+      ],
+    },
+  );
+  const otherSettings = useStorageRef<IOtherSettings>(
+    {},
+    STORAGE_KEYS.otherSettings,
+    {
+      backgroundSync: true,
+      migrations: [
+        migrateOtherSettingsVuexToComposable,
+        migrateSecureLoginEnabledToBiometric,
+      ],
+    },
+  );
 
-const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
-const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
-const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
-const secureLoginTimeout = computed(
-  () => otherSettings.value.secureLoginTimeout ?? AUTHENTICATION_TIMEOUT_DEFAULT,
-);
+  const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
+  const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
+  const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
+  const secureLoginTimeout = computed(
+    () => otherSettings.value.secureLoginTimeout ?? AUTHENTICATION_TIMEOUT_DEFAULT,
+  );
 
-export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
     if (homeRouteName.value !== routeName) {
       homeRouteName.value = routeName;
@@ -121,6 +122,11 @@ export function useUi() {
     });
   }
 
+  function resetUiSettings() {
+    hiddenCards.value = [];
+    otherSettings.value = {};
+  }
+
   watch(
     isAppActive,
     async (isActive, wasActive) => {
@@ -130,11 +136,6 @@ export function useUi() {
       }
     },
   );
-
-  function resetUiSettings() {
-    hiddenCards.value = [];
-    otherSettings.value = {};
-  }
 
   return {
     homeRouteName,
@@ -161,4 +162,4 @@ export function useUi() {
     setBiometricLoginEnabled,
     setSecureLoginTimeout,
   };
-}
+});

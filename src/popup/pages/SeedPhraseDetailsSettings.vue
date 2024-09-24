@@ -68,7 +68,7 @@ import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
-  useAccounts,
+  useAuth,
   useCopy,
   useNotifications,
   useUi,
@@ -93,7 +93,7 @@ export default defineComponent({
 
     const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
-    const { mnemonic } = useAccounts();
+    const { mnemonic } = useAuth();
     const { removeIsSeedBackedUpNotification } = useNotifications({
       requirePolling: false,
     });
