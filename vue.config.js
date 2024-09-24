@@ -4,6 +4,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
+const branchName = require('child_process').execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
 const { version: sdkVersion } = require('./node_modules/@aeternity/aepp-sdk/package.json');
@@ -158,6 +159,7 @@ module.exports = {
       definitions['process.env.IS_EXTENSION'] = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
       definitions['process.env.RUNNING_IN_TESTS'] = RUNNING_IN_TESTS;
       definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
+      definitions['process.env.BRANCH_NAME'] = JSON.stringify(branchName);
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
       definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
       definitions['process.env.ETHERSCAN_API_KEY'] = JSON.stringify(process.env.ETHERSCAN_API_KEY);

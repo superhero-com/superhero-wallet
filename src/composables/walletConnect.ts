@@ -16,6 +16,7 @@ import type { IModalProps } from '@/types';
 import {
   APP_NAME,
   APP_URL,
+  BRANCH_DEPLOYMENT_HOST,
   PROTOCOLS,
   STORAGE_KEYS,
   WALLET_CONNECT_PROJECT_ID,
@@ -177,7 +178,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       metadata: {
         name: APP_NAME,
         description: 'Superhero Wallet App Description', // TODO
-        url: `https://${APP_URL}`,
+        url: process.env.BRANCH_NAME === 'master'
+          ? APP_URL
+          : `${process.env.BRANCH_NAME?.replace(/\//g, '-')}.${BRANCH_DEPLOYMENT_HOST}`,
         icons: ['https://superhero.com/assets/favicon-48x48.png'],
       },
     });
