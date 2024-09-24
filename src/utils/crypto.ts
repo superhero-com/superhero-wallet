@@ -62,7 +62,7 @@ export async function restoreEncryptionKey(
 /**
  * Returns a base64 encoded string of the encrypted message prepended with the iv.
  */
-export async function encrypt(key: CryptoKey, plaintext: string): Promise<IEncryptionResult> {
+export async function encrypt(key: CryptoKey, input: string): Promise<IEncryptionResult> {
   // Generate a random initialization vector every time a message is encrypted
   const iv = globalThis.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 
@@ -73,7 +73,7 @@ export async function encrypt(key: CryptoKey, plaintext: string): Promise<IEncry
       iv,
     },
     key,
-    new TextEncoder().encode(plaintext),
+    new TextEncoder().encode(input),
   );
 
   // Concatenate iv, and cipher-text

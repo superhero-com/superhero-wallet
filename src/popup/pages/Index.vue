@@ -125,13 +125,16 @@ export default defineComponent({
     const {
       isLoggedIn,
       addRawAccount,
-      setGeneratedMnemonic,
-      mnemonic,
       discoverAccounts,
       setActiveAccountByGlobalIdx,
     } = useAccounts();
+    const {
+      mnemonic,
+      openEnableBiometricLoginModal,
+      setAuthenticated,
+      setGeneratedMnemonic,
+    } = useAuth();
     const { openModal } = useModals();
-    const { openEnableBiometricLoginModal, setAuthenticated } = useAuth();
     const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
