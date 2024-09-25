@@ -24,7 +24,6 @@ export const useAuth = createCustomScopedComposable(() => {
   const {
     isBiometricLoginEnabled,
     lastTimeAppWasActive,
-    secureLoginTimeout,
     isAppActive,
     setBiometricLoginEnabled,
   } = useUi();
@@ -32,6 +31,7 @@ export const useAuth = createCustomScopedComposable(() => {
   const {
     isLoggedIn,
     encryptionKey,
+    secureLoginTimeout,
     setEncryptionKey,
     openPasswordLoginModal,
   } = useAccounts();

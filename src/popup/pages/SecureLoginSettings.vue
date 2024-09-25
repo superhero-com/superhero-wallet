@@ -185,16 +185,18 @@ export default defineComponent({
     const newPassword = ref('');
     const confirmNewPassword = ref('');
 
-    const { updatePassword } = useAccounts();
+    const {
+      secureLoginTimeout,
+      setSecureLoginTimeout,
+      updatePassword,
+    } = useAccounts();
     const {
       checkBiometricLoginAvailability,
       openEnableBiometricLoginModal,
     } = useAuth();
     const {
       isBiometricLoginEnabled,
-      secureLoginTimeout,
       setBiometricLoginEnabled,
-      setSecureLoginTimeout,
     } = useUi();
 
     async function setNewPassword() {

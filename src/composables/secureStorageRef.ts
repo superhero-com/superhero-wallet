@@ -3,7 +3,6 @@ import type { IEncryptionResult, StorageKey } from '@/types';
 import { IS_MOBILE_APP } from '@/constants';
 import { decrypt, encrypt, watchUntilTruthy } from '@/utils';
 import { WalletStorage } from '@/lib/WalletStorage';
-import { useAccounts } from './accounts';
 import { type ICreateStorageRefOptions, useStorageRef } from './storageRef';
 
 interface ICreateSecureStorageRefOptions<T> extends
@@ -25,6 +24,7 @@ type SecureStorageReturn<T> = [
 export function useSecureStorageRef<T = string | object | any[]>(
   initialState: T,
   storageKey: StorageKey,
+  encryptionKey: Ref<CryptoKey | null | undefined>,
   options: ICreateSecureStorageRefOptions<T> = {
     encryptionDisabled: IS_MOBILE_APP,
   },
@@ -37,12 +37,11 @@ export function useSecureStorageRef<T = string | object | any[]>(
     if (options.encryptionDisabled || val === null || val === undefined) {
       return val;
     }
-    const { getEncryptionKey } = useAccounts();
-    const encryptionKey = await getEncryptionKey();
-    if (encryptionKey) {
+    await watchUntilTruthy(encryptionKey);
+    if (encryptionKey.value) {
       let decryptedValue;
       try {
-        decryptedValue = await decrypt(encryptionKey, val);
+        decryptedValue = await decrypt(encryptionKey.value, val);
       } catch {
         throw new Error('Failed to decrypt the value');
       }
@@ -63,10 +62,10 @@ export function useSecureStorageRef<T = string | object | any[]>(
     if (options.encryptionDisabled) {
       return val;
     }
-    const { getEncryptionKey } = useAccounts();
-    const encryptionKey = await getEncryptionKey();
-    if (encryptionKey) {
-      return encrypt(encryptionKey, val);
+
+    await watchUntilTruthy(encryptionKey);
+    if (encryptionKey.value) {
+      return encrypt(encryptionKey.value, val);
     }
     throw new Error('Failed to write the value');
   }
@@ -127,11 +126,8 @@ export function useSecureStorageRef<T = string | object | any[]>(
     /**
      * Clear the state when the user logs out.
      * Ensures that the state is not leaked if an attacker removes the login modal from the DOM.
-     * TODO Remove useAccounts check when the accounts is refactored
-     * TODO and encryptedKey is moved to auth composable
      */
-    if (!IS_MOBILE_APP && useAccounts) {
-      const { encryptionKey } = useAccounts();
+    if (!IS_MOBILE_APP) {
       watch(encryptionKey, async (key) => {
         if (!key) {
           isLoggedIn.value = false;
@@ -142,7 +138,7 @@ export function useSecureStorageRef<T = string | object | any[]>(
 
           // We need to update the encrypted state so that it is decrypted with the new key.
           // If decryptedState is set then it means that the password changed.
-          if (decryptedState.value) {
+          if (decryptedState.value !== null) {
             // Password changed, re-encrypt state
             setEncryptedState(decryptedState.value);
           } else {

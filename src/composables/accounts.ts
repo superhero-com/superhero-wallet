@@ -23,6 +23,7 @@ import {
   MODAL_PASSWORD_LOGIN,
   IS_EXTENSION,
   IS_OFFSCREEN_TAB,
+  AUTHENTICATION_TIMEOUT_DEFAULT,
 } from '@/constants';
 import {
   authenticateWithPassword,
@@ -83,6 +84,7 @@ const oldMnemonic = useStorageRef<string>(
 const [mnemonic, encryptedMnemonic] = useSecureStorageRef<string>(
   '',
   STORAGE_KEYS.mnemonic,
+  encryptionKey,
   {
     backgroundSync: true,
     onRestored: async (val) => {
@@ -94,6 +96,13 @@ const [mnemonic, encryptedMnemonic] = useSecureStorageRef<string>(
       isMnemonicRestored.value = !!val || !hasStoredMnemonic;
     },
   },
+);
+
+const [secureLoginTimeout] = useSecureStorageRef<number>(
+  AUTHENTICATION_TIMEOUT_DEFAULT,
+  STORAGE_KEYS.secureLoginTimeout,
+  encryptionKey,
+  { backgroundSync: true },
 );
 
 const accountsRaw = useStorageRef<IAccountRaw[]>(
@@ -203,7 +212,7 @@ const protocolsInUse = computed(
  * The wallets's data is created in fly with the use of computed properties.
  */
 export function useAccounts() {
-  const { secureLoginTimeout, setLoaderVisible } = useUi();
+  const { setLoaderVisible } = useUi();
 
   function getAccountByAddress(address: AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
@@ -278,8 +287,8 @@ export function useAccounts() {
     }
   }
 
-  async function getEncryptionKey() {
-    return watchUntilTruthy(encryptionKey);
+  function setSecureLoginTimeout(ms: number) {
+    secureLoginTimeout.value = ms;
   }
 
   async function openPasswordLoginModal() {
@@ -445,11 +454,11 @@ export function useAccounts() {
     encryptionKey,
     mnemonicSeed,
     protocolsInUse,
+    secureLoginTimeout,
     openPasswordLoginModal,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
-    getEncryptionKey,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
@@ -460,6 +469,7 @@ export function useAccounts() {
     setActiveAccountByProtocol,
     setMnemonicAndInitializePassword,
     setEncryptionKey,
+    setSecureLoginTimeout,
     updatePassword,
     setGeneratedMnemonic,
     resetAccounts,

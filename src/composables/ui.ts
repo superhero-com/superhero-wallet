@@ -8,7 +8,7 @@ import {
 import { RouteLocationRaw } from 'vue-router';
 
 import type { IOtherSettings } from '@/types';
-import { AUTHENTICATION_TIMEOUT_DEFAULT, STORAGE_KEYS } from '@/constants';
+import { STORAGE_KEYS } from '@/constants';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
@@ -17,7 +17,6 @@ import migrateSecureLoginEnabledToBiometric from '@/migrations/009-secure-login-
 import migrateRemoveSecureLoginTimeout from '@/migrations/010-remove-secure-login-timeout';
 
 import { useStorageRef } from './storageRef';
-import { useSecureStorageRef } from './secureStorageRef';
 
 /** Control the route that would be visible after opening the extension. */
 const homeRouteName = ref(ROUTE_ACCOUNT);
@@ -36,12 +35,6 @@ const scanProgress = ref(-1);
 
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
 const lastTimeAppWasActive = ref<number>();
-
-const [secureLoginTimeout] = useSecureStorageRef<number>(
-  AUTHENTICATION_TIMEOUT_DEFAULT,
-  STORAGE_KEYS.secureLoginTimeout,
-  { backgroundSync: true },
-);
 
 const hiddenCards = useStorageRef<string[]>(
   [],
@@ -112,10 +105,6 @@ export function useUi() {
     otherSettings.value.isBiometricLoginEnabled = val;
   }
 
-  function setSecureLoginTimeout(ms: number) {
-    secureLoginTimeout.value = ms;
-  }
-
   function initVisibilityListeners() {
     handleVisibilityChange();
     onMounted(() => {
@@ -153,7 +142,6 @@ export function useUi() {
     isSeedBackedUp,
     saveErrorLog,
     isBiometricLoginEnabled,
-    secureLoginTimeout,
     lastTimeAppWasActive,
     initVisibilityListeners,
     setCardHidden,
@@ -165,6 +153,5 @@ export function useUi() {
     setLoaderVisible,
     resetUiSettings,
     setBiometricLoginEnabled,
-    setSecureLoginTimeout,
   };
 }
