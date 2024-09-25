@@ -9,7 +9,6 @@ import {
   unpackTx,
   Encoded,
   METHODS,
-  Tag,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import { Ref } from 'vue';
@@ -36,7 +35,6 @@ interface InternalOptions {
 /**
  * Tags that don't need permission if they are not called from an aepp
  */
-const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
@@ -87,7 +85,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     }
 
     const tx = unpackTx(txBase64) as any as ITx;
-    if (!TAGS_TO_SIGN_WITHOUT_PERMISSION.includes(tx.tag!) || options?.aeppOrigin) {
+    if (options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.sign,
