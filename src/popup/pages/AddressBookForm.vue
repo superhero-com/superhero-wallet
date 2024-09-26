@@ -364,6 +364,7 @@ export default defineComponent({
           display: inline-flex;
           border-radius: 12px;
           height: 116px;
+          width: 116px;
           padding: 8px;
           background-color: $color-white;
           object-fit: contain;
