@@ -3,26 +3,21 @@ import { isEqual } from 'lodash-es';
 import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
 import type { IBackgroundMessageData } from '@/types';
-import {
-  CONNECTION_TYPES,
-  IS_FIREFOX,
-  POPUP_ACTIONS,
-  SESSION_METHODS,
-} from '@/constants';
+import { CONNECTION_TYPES, POPUP_ACTIONS, SESSION_METHODS } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
   useAuth,
   useNetworks,
 } from '@/composables';
-import { setSessionExpiration } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
-import { detectConnectionType } from './utils';
+import { detectConnectionType, executeOrSendMessageToBackground } from './utils';
 
 window.browser = require('webextension-polyfill');
 
 let isAeSdkBlocked = false;
 let connectionsQueue: Runtime.Port[] = [];
+let sessionTimeoutId: NodeJS.Timeout | null = null;
 
 const addAeppConnection = async (port: Runtime.Port) => {
   const { getAeSdk } = useAeSdk();
@@ -78,18 +73,24 @@ export async function init() {
         break;
       }
       case CONNECTION_TYPES.SESSION: {
+        // Clear the timeout if session is refreshed
+        if (sessionTimeoutId) {
+          clearTimeout(sessionTimeoutId);
+          sessionTimeoutId = null;
+        }
+
         port.onDisconnect.addListener(async () => {
           const sessionExpires = Date.now() + secureLoginTimeout.value;
 
-          if (IS_FIREFOX) {
-            setSessionExpiration(sessionExpires);
-          } else {
-            browser.runtime.sendMessage<IBackgroundMessageData>({
-              target: 'background',
-              method: SESSION_METHODS.setSessionExpiration,
-              payload: sessionExpires,
-            });
-          }
+          // Schedule automatic session end after the timeout period
+          sessionTimeoutId = setTimeout(async () => {
+            executeOrSendMessageToBackground(SESSION_METHODS.endSession);
+          }, secureLoginTimeout.value);
+
+          executeOrSendMessageToBackground(
+            SESSION_METHODS.setSessionExpiration,
+            { sessionExpires },
+          );
         });
         return;
       }

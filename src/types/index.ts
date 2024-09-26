@@ -721,6 +721,7 @@ export interface IBackgroundMessageData {
     popupType?: PopupType;
     popupProps?: Partial<IPopupProps>;
     id?: string;
+    sessionExpires?: number;
   };
   payload?: any;
 }

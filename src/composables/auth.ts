@@ -122,10 +122,11 @@ export const useAuth = createCustomScopedComposable(() => {
   /**
    * Setting/Resetting the password key logs the user in/out.
    */
-  function setEncryptionKey(newEncryptionKey?: CryptoKey) {
+  async function setEncryptionKey(newEncryptionKey?: CryptoKey) {
     encryptionKey.value = newEncryptionKey;
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
+        await watchUntilTruthy(secureLoginTimeout);
         startSession(newEncryptionKey, secureLoginTimeout.value);
       } else {
         endSession();
@@ -153,6 +154,7 @@ export const useAuth = createCustomScopedComposable(() => {
     const sessionEncryptionKey = await getSessionEncryptionKey();
     if (sessionEncryptionKey) {
       setEncryptionKey(sessionEncryptionKey);
+      isAuthenticated.value = true;
       const { getAeSdk } = useAeSdk();
       await getAeSdk();
       setLoaderVisible(false);
@@ -160,9 +162,11 @@ export const useAuth = createCustomScopedComposable(() => {
     }
     setLoaderVisible(false);
 
-    await openModal(MODAL_PASSWORD_LOGIN);
-    if (!encryptionKey.value) {
-      throw new Error('encryptionKey was not set after login.');
+    if (!IS_OFFSCREEN_TAB) {
+      await openModal(MODAL_PASSWORD_LOGIN);
+      if (!encryptionKey.value) {
+        throw new Error('encryptionKey was not set after login.');
+      }
     }
   }
 

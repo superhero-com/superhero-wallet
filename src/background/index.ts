@@ -5,6 +5,7 @@ import {
   getPopup,
   getSessionEncryptionKey,
   setSessionExpiration,
+  endSession,
 } from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
 
@@ -61,6 +62,9 @@ function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Functi
         return true;
       case 'setSessionExpiration':
         sendResponse(setSessionExpiration(msg.payload));
+        return false;
+      case 'endSession':
+        sendResponse(endSession());
         return false;
       default:
         break;

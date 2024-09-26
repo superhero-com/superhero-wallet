@@ -23,6 +23,7 @@ const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 const SESSION_STORAGE_KEYS = {
   exportedEncryptionKey: 'exportedEncryptionKey',
   sessionExpires: 'sessionExpires',
+  sessionStart: 'sessionStart',
 };
 
 const POPUP_TYPE_CONNECT = 'connectConfirm';
@@ -92,21 +93,35 @@ export const setSessionExpiration = async (sessionExpires: number) => {
   await storageSession.set({ sessionExpires });
 };
 
-export const getSessionEncryptionKey = async (): Promise<string | null> => {
-  try {
-    const { sessionExpires } = await storageSession.get(SESSION_STORAGE_KEYS.sessionExpires);
-    if (!sessionExpires || sessionExpires < Date.now()) {
-      await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
-      return null;
-    }
+export const endSession = async () => {
+  await storageSession.remove([
+    SESSION_STORAGE_KEYS.exportedEncryptionKey,
+    SESSION_STORAGE_KEYS.sessionExpires,
+    SESSION_STORAGE_KEYS.sessionStart,
+  ]);
+};
 
-    const { exportedEncryptionKey } = await storageSession.get(
-      SESSION_STORAGE_KEYS.exportedEncryptionKey,
-    );
-    if (exportedEncryptionKey) {
-      return Buffer.from(exportedEncryptionKey).toString('base64');
-    }
-  } catch (error) { /** NOOP */ }
+export const getSessionEncryptionKey = async (): Promise<string | null> => {
+  const { sessionExpires, sessionStart } = await storageSession.get([
+    SESSION_STORAGE_KEYS.sessionExpires,
+    SESSION_STORAGE_KEYS.sessionStart,
+  ]);
+  if (
+    !sessionExpires
+    || !sessionStart
+    || sessionExpires < Date.now()
+    || Date.now() < sessionStart
+  ) {
+    await endSession();
+    return null;
+  }
+
+  const { exportedEncryptionKey } = await storageSession.get(
+    SESSION_STORAGE_KEYS.exportedEncryptionKey,
+  );
+  if (exportedEncryptionKey) {
+    return Buffer.from(exportedEncryptionKey).toString('base64');
+  }
 
   return null;
 };

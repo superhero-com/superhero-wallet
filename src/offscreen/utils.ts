@@ -11,6 +11,8 @@ import {
   removePopup,
   getPopup,
   getSessionEncryptionKey,
+  endSession,
+  setSessionExpiration,
 } from '@/background/bgPopupHandler';
 import { getCleanModalOptions } from '@/utils';
 
@@ -48,6 +50,10 @@ export async function executeOrSendMessageToBackground(
         return getPopup(params?.id!);
       case SESSION_METHODS.getSessionEncryptionKey:
         return getSessionEncryptionKey();
+      case SESSION_METHODS.endSession:
+        return endSession();
+      case SESSION_METHODS.setSessionExpiration:
+        return setSessionExpiration(params?.sessionExpires!);
       default:
         return null;
     }
