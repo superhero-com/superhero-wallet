@@ -17,7 +17,9 @@ import {
   MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_PASSWORD_LOGIN,
   STORAGE_KEYS,
+  UNFINISHED_FEATURES,
 } from '@/constants';
+import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
   authenticateWithPassword,
   encrypt,
@@ -120,7 +122,58 @@ export const useAuth = createCustomScopedComposable(() => {
     setEncryptionKey(newEncryptionKey);
   }
 
-  async function openPasswordLoginModal() {
+  /**
+   * Checks if biometric authentication is available on the device.
+   */
+  async function checkBiometricLoginAvailability({ forceUpdate = false } = {}) {
+    if (biometricAuth.updating) {
+      await watchUntilTruthy(() => !biometricAuth.updating);
+    } else if (!biometricAuth.checked || forceUpdate) {
+      biometricAuth.updating = true;
+      biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
+      biometricAuth.checked = true;
+      biometricAuth.updating = false;
+    }
+    if (!biometricAuth.available && isBiometricLoginEnabled.value) {
+      setBiometricLoginEnabled(false);
+    }
+    return biometricAuth.available;
+  }
+
+  /**
+   * Prompts the user to authenticate using biometric authentication.
+   * Returns a promise that resolves when the user is authenticated
+   * or if biometric authentication is not available.
+   */
+  async function authenticate(password?: string): Promise<void> {
+    if (isAuthenticated.value) {
+      return Promise.resolve();
+    }
+
+    if (IS_MOBILE_APP) {
+      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+        return BiometricAuth.authenticate({
+          reason: t('biometricAuth.reason'),
+          cancelTitle: t('common.cancel'),
+          allowDeviceCredential: true,
+          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
+          androidTitle: t('biometricAuth.title'),
+          androidSubtitle: t('biometricAuth.subtitle'),
+          androidConfirmationRequired: false,
+        }).then(() => {
+          isAuthenticated.value = true;
+        });
+      }
+    } else {
+      return authenticateWithPassword(password!).then(({ encryptionKey: newEncryptionKey }) => {
+        setEncryptionKey(newEncryptionKey);
+        isAuthenticated.value = true;
+      });
+    }
+    return Promise.resolve();
+  }
+
+  async function requestUserPassword() {
     setLoaderVisible(true);
     const sessionEncryptionKey = await getSessionEncryptionKey();
     if (sessionEncryptionKey) {
@@ -132,9 +185,19 @@ export const useAuth = createCustomScopedComposable(() => {
     }
     setLoaderVisible(false);
 
-    await openModal(MODAL_PASSWORD_LOGIN);
-    if (!encryptionKey.value) {
-      throw new Error('encryptionKey was not set after login.');
+    if (!IS_OFFSCREEN_TAB) {
+      // In development mode try to authenticate with default password
+      // If developer is not using default password, he can still login with the new password
+      if (UNFINISHED_FEATURES) {
+        await authenticate(STUB_ACCOUNT.password).catch(async () => {
+          await openModal(MODAL_PASSWORD_LOGIN);
+        });
+      } else {
+        await openModal(MODAL_PASSWORD_LOGIN);
+      }
+      if (!encryptionKey.value) {
+        throw new Error('encryptionKey was not set after login.');
+      }
     }
   }
 
@@ -177,61 +240,10 @@ export const useAuth = createCustomScopedComposable(() => {
     });
   }
 
-  /**
-   * Checks if biometric authentication is available on the device.
-   */
-  async function checkBiometricLoginAvailability({ forceUpdate = false } = {}) {
-    if (biometricAuth.updating) {
-      await watchUntilTruthy(() => !biometricAuth.updating);
-    } else if (!biometricAuth.checked || forceUpdate) {
-      biometricAuth.updating = true;
-      biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
-      biometricAuth.checked = true;
-      biometricAuth.updating = false;
-    }
-    if (!biometricAuth.available && isBiometricLoginEnabled.value) {
-      setBiometricLoginEnabled(false);
-    }
-    return biometricAuth.available;
-  }
-
   async function openEnableBiometricLoginModal() {
     if (await checkBiometricLoginAvailability()) {
       openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
     }
-  }
-
-  /**
-   * Prompts the user to authenticate using biometric authentication.
-   * Returns a promise that resolves when the user is authenticated
-   * or if biometric authentication is not available.
-   */
-  async function authenticate(password?: string): Promise<void> {
-    if (isAuthenticated.value) {
-      return Promise.resolve();
-    }
-
-    if (IS_MOBILE_APP) {
-      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-        return BiometricAuth.authenticate({
-          reason: t('biometricAuth.reason'),
-          cancelTitle: t('common.cancel'),
-          allowDeviceCredential: true,
-          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
-          androidTitle: t('biometricAuth.title'),
-          androidSubtitle: t('biometricAuth.subtitle'),
-          androidConfirmationRequired: false,
-        }).then(() => {
-          isAuthenticated.value = true;
-        });
-      }
-    } else {
-      return authenticateWithPassword(password!).then(({ encryptionKey: newEncryptionKey }) => {
-        setEncryptionKey(newEncryptionKey);
-        isAuthenticated.value = true;
-      });
-    }
-    return Promise.resolve();
   }
 
   /**
@@ -245,7 +257,7 @@ export const useAuth = createCustomScopedComposable(() => {
           await openModal(MODAL_BIOMETRIC_LOGIN);
         }
       } else if (!encryptionKey.value) {
-        await openPasswordLoginModal();
+        await requestUserPassword();
       }
 
       // Wait before resetting isAuthenticated so that app doesn't register a false app resume event
