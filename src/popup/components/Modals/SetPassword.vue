@@ -84,19 +84,31 @@
           />
         </Field>
 
-        <BtnMain
-          class="btn-main"
-          variant="primary"
-          extend
-          :disabled="(
-            !password
-            || !confirmPassword
-            || !!errors.password
-            || !!errors.confirmPassword
-          )"
-          :text="$t('pages.secureLogin.setPassword.confirm')"
-          @click="handleSubmit($event, onSubmit)"
-        />
+        <div class="buttons">
+          <BtnMain
+            class="btn-main"
+            variant="primary"
+            extend
+            nowrap
+            :disabled="(
+              !password
+              || !confirmPassword
+              || !!errors.password
+              || !!errors.confirmPassword
+            )"
+            :text="$t('pages.secureLogin.setPassword.confirm')"
+            @click="handleSubmit($event, onSubmit)"
+          />
+          <BtnMain
+            v-if="UNFINISHED_FEATURES"
+            class="default-password"
+            title="Use default password"
+            variant="muted"
+            text="skip"
+            nowrap
+            @click="useDefaultPassword"
+          />
+        </div>
       </Form>
     </div>
   </Modal>
@@ -105,7 +117,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
+
 import type { RejectCallback, ResolveCallback } from '@/types';
+import { UNFINISHED_FEATURES } from '@/constants';
+import { STUB_ACCOUNT } from '@/constants/stubs';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -142,13 +157,21 @@ export default defineComponent({
       }
     }
 
+    function useDefaultPassword() {
+      if (UNFINISHED_FEATURES) {
+        props.resolve(STUB_ACCOUNT.password);
+      }
+    }
+
     return {
       password,
       confirmPassword,
       extensionVersion: process.env.npm_package_version,
       onSubmit,
       handleClose,
+      useDefaultPassword,
       LockIcon,
+      UNFINISHED_FEATURES,
     };
   },
 });
@@ -173,8 +196,18 @@ export default defineComponent({
       gap: 8px;
     }
 
-    .btn-main {
+    .buttons {
+      display: flex;
       margin-top: 40px;
+      gap: 8px;
+
+      .btn-main {
+        width: 100%;
+      }
+
+      .default-password {
+        width: 20%;
+      }
     }
   }
 }
