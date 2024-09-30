@@ -5,7 +5,7 @@ import {
   ref,
   watch,
 } from 'vue';
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import {
@@ -16,13 +16,13 @@ import {
   MODAL_BIOMETRIC_LOGIN,
   MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_PASSWORD_LOGIN,
+  MODAL_SET_PASSWORD,
   STORAGE_KEYS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
   authenticateWithPassword,
-  encrypt,
   endSession,
   generateEncryptionKey,
   getSessionEncryptionKey,
@@ -54,29 +54,43 @@ export const useAuth = createCustomScopedComposable(() => {
     setBiometricLoginEnabled,
     setLoaderVisible,
   } = useUi();
-  const { openModal } = useModals();
+  const { openModal, modalsOpen } = useModals();
 
   /** Common state for both biometric or password protection */
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
   const isMnemonicRestored = ref(false);
   const encryptionKey = ref<CryptoKey>();
+  const isStoredUnencrypted = ref(false);
 
-  const [mnemonicEncrypted, mnemonic] = useSecureStorageRef<string>(
+  const mnemonic = useSecureStorageRef<string>(
     '',
     STORAGE_KEYS.mnemonic,
     encryptionKey,
     {
       backgroundSync: true,
+      encryptionDisabled: IS_MOBILE_APP,
       migrations: [
         ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
         migrateMnemonicVuexToComposable,
       ],
-      onRestored: async (val) => {
+      isStoredUnencrypted: (val: any) => val && validateMnemonic(val),
+      onStoredUnencrypted: () => { isStoredUnencrypted.value = true; },
+      onRestored: async (val: any) => {
         const hasStoredMnemonic = (
           WalletStorage.get(STORAGE_KEYS.mnemonic)
           || await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)
         );
+        /**
+          * If mnemonic is stored raw it means that it is an old state and
+          * wallet needs to initiate the password
+          */
+        if (isStoredUnencrypted.value && !IS_MOBILE_APP) {
+          isStoredUnencrypted.value = false;
+          // eslint-disable-next-line no-use-before-define
+          await initializePassword();
+          isAuthenticated.value = true;
+        }
         isMnemonicRestored.value = !!val || !hasStoredMnemonic;
       },
     },
@@ -115,10 +129,8 @@ export const useAuth = createCustomScopedComposable(() => {
     return watchUntilTruthy(encryptionKey);
   }
 
-  async function setPasswordAndEncryptMnemonic(newMnemonic: string, password: string) {
+  async function setPassword(password: string) {
     const newEncryptionKey = await generateEncryptionKey(password);
-    const mnemonicEncryptionResult = await encrypt(newEncryptionKey, newMnemonic);
-    mnemonicEncrypted.value = mnemonicEncryptionResult;
     setEncryptionKey(newEncryptionKey);
   }
 
@@ -181,6 +193,7 @@ export const useAuth = createCustomScopedComposable(() => {
       const { getAeSdk } = useAeSdk();
       await getAeSdk();
       setLoaderVisible(false);
+      isAuthenticated.value = true;
       return;
     }
     setLoaderVisible(false);
@@ -204,11 +217,11 @@ export const useAuth = createCustomScopedComposable(() => {
   async function updatePassword(currentPassword: string, newPassword: string) {
     const { decryptedMnemonic } = await authenticateWithPassword(currentPassword);
     if (decryptedMnemonic) {
-      await setPasswordAndEncryptMnemonic(decryptedMnemonic, newPassword);
+      await setPassword(newPassword);
     }
   }
 
-  async function setMnemonicAndInitializePassword(newMnemonic: string, isRestored = false) {
+  async function initializePassword(isRestored = false) {
     if (!IS_MOBILE_APP) {
       const { openSetPasswordModal } = useModals();
 
@@ -216,8 +229,12 @@ export const useAuth = createCustomScopedComposable(() => {
         throw new Error('Password was not set.');
       });
 
-      await setPasswordAndEncryptMnemonic(newMnemonic, password);
+      await setPassword(password);
     }
+  }
+
+  async function setMnemonicAndInitializePassword(newMnemonic: string, isRestored = false) {
+    initializePassword(isRestored);
     mnemonic.value = newMnemonic;
   }
 
@@ -256,7 +273,11 @@ export const useAuth = createCustomScopedComposable(() => {
         if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
           await openModal(MODAL_BIOMETRIC_LOGIN);
         }
-      } else if (!encryptionKey.value) {
+      } else if (
+        !encryptionKey.value
+        && mnemonic.value
+        // Do not show `openPasswordLoginModal` if user currently initiating password
+        && !modalsOpen.value.find(({ name }) => name === MODAL_SET_PASSWORD)) {
         await requestUserPassword();
       }
 
@@ -320,10 +341,10 @@ export const useAuth = createCustomScopedComposable(() => {
   );
 
   return {
+    initializePassword,
     isAuthenticated: readonly(isAuthenticated),
     isMnemonicRestored,
     mnemonic,
-    mnemonicEncrypted,
     mnemonicSeed,
     encryptionKey,
     getEncryptionKey,

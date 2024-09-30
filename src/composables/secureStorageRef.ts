@@ -1,4 +1,5 @@
 import { Ref, ref, watch } from 'vue';
+
 import type { IEncryptionResult, StorageKey } from '@/types';
 import { IS_MOBILE_APP } from '@/constants';
 import { decrypt, encrypt, watchUntilTruthy } from '@/utils';
@@ -8,12 +9,9 @@ import { type ICreateStorageRefOptions, useStorageRef } from './storageRef';
 interface ICreateSecureStorageRefOptions<T> extends
     Omit<ICreateStorageRefOptions<T>, 'serializer' | 'enableSecureStorage' | 'onBackgroundSync'> {
   encryptionDisabled?: boolean;
+  isStoredUnencrypted?: (val: T | null) => boolean;
+  onStoredUnencrypted?: (val: T | null) => any;
 }
-
-type SecureStorageReturn<T> = [
-  decryptedState: Ref<T>,
-  encryptedState: Ref<IEncryptionResult | null>,
-];
 
 /**
  * Create a secure storage ref that encrypts and decrypts the value using the password.
@@ -28,13 +26,18 @@ export function useSecureStorageRef<T = string | object | any[]>(
   options: ICreateSecureStorageRefOptions<T> = {
     encryptionDisabled: IS_MOBILE_APP,
   },
-): SecureStorageReturn<T> {
+): Ref<T> {
   /**
    * Checks if the value needs to be decrypted and decrypts it using the encryption key.
    * On mobile, the value is already decrypted by the storageRef composable.
    */
   async function getDecryptedValue(val: any): Promise<T> {
-    if (options.encryptionDisabled || val === null || val === undefined) {
+    if (
+      options.encryptionDisabled
+      || val === null
+      || val === undefined
+      || options.isStoredUnencrypted?.(val)
+    ) {
       return val;
     }
     await watchUntilTruthy(encryptionKey);
@@ -114,11 +117,12 @@ export function useSecureStorageRef<T = string | object | any[]>(
       await setEncryptedState(initialState);
     }
 
-    if (IS_MOBILE_APP) {
-      // TODO Needs to be tested
-      // Move the unencrypted value to secure storage and remove it from insecure storage
-      if (restoredValue !== null) {
-        decryptedState.value = restoredValue;
+    if (restoredValue !== null) {
+      decryptedState.value = restoredValue;
+      if (options.isStoredUnencrypted?.(restoredValue)) {
+        options.onStoredUnencrypted?.(restoredValue);
+      }
+      if (options.isStoredUnencrypted?.(restoredValue) || IS_MOBILE_APP) {
         WalletStorage.remove(storageKey);
       }
     }
@@ -146,7 +150,7 @@ export function useSecureStorageRef<T = string | object | any[]>(
             decryptedState.value = await getDecryptedValue(encryptedState.value);
           }
         }
-      }, { immediate: true, deep: true });
+      }, { deep: true });
     }
 
     /**
@@ -156,12 +160,12 @@ export function useSecureStorageRef<T = string | object | any[]>(
       options.onRestored?.(val);
       if (
         !isUpdatingEncryptedState.value
-        && sessionExists.value
+        && (sessionExists.value || IS_MOBILE_APP)
       ) {
         await setEncryptedState(val);
       }
     }, { immediate: true, deep: true });
   })();
 
-  return [decryptedState, encryptedState];
+  return decryptedState;
 }
