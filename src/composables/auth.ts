@@ -1,11 +1,12 @@
 import { BiometricAuth } from '@aparajita/capacitor-biometric-auth';
 import {
   computed,
+  reactive,
   readonly,
   ref,
   watch,
 } from 'vue';
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import {
@@ -13,26 +14,22 @@ import {
   IS_IOS,
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
-  MODAL_BIOMETRIC_LOGIN,
-  MODAL_ENABLE_BIOMETRIC_LOGIN,
-  MODAL_PASSWORD_LOGIN,
   STORAGE_KEYS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
-  authenticateWithPassword,
+  decodeBase64,
+  decrypt,
+  encodeBase64,
   encrypt,
-  endSession,
   generateEncryptionKey,
+  generateSalt,
   getSessionEncryptionKey,
-  sleep,
-  startSession,
+  sessionEnd,
+  sessionStart,
   watchUntilTruthy,
 } from '@/utils';
-
-import { WalletStorage } from '@/lib/WalletStorage';
-import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
@@ -40,11 +37,16 @@ import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { createCustomScopedComposable } from './composablesHelpers';
-import { useSecureStorageRef } from './secureStorageRef';
-import { useAeSdk } from './aeSdk';
+import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 
+/**
+ * Top level composable that controls if user is allowed to interact with the wallet.
+ * It uses two different ways of authentication:
+ *   1. Biometric (fingerprint scanner/face recognition) for mobile devices (Ionic).
+ *   2. Password protection (encrypting the mnemonic) for web and extension.
+ */
 export const useAuth = createCustomScopedComposable(() => {
   const {
     isBiometricLoginEnabled,
@@ -54,7 +56,11 @@ export const useAuth = createCustomScopedComposable(() => {
     setBiometricLoginEnabled,
     setLoaderVisible,
   } = useUi();
-  const { openModal } = useModals();
+  const {
+    openBiometricLoginModal,
+    openPasswordLoginModal,
+    openEnableBiometricLoginModal,
+  } = useModals();
 
   /** Common state for both biometric or password protection */
   const isAuthenticated = ref(false);
@@ -62,70 +68,64 @@ export const useAuth = createCustomScopedComposable(() => {
   const isMnemonicRestored = ref(false);
   const encryptionKey = ref<CryptoKey>();
 
-  const [mnemonicEncrypted, mnemonic] = useSecureStorageRef<string>(
+  /**
+   * Depending on environment and app version this value
+   * can be both encrypted (web & extension since v2.3) or decrypted (mobile).
+   */
+  const mnemonic = useStorageRef<string>(
     '',
     STORAGE_KEYS.mnemonic,
-    encryptionKey,
     {
       backgroundSync: true,
+      enableSecureStorage: true,
       migrations: [
         ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
         migrateMnemonicVuexToComposable,
       ],
-      onRestored: async (val) => {
-        const hasStoredMnemonic = (
-          WalletStorage.get(STORAGE_KEYS.mnemonic)
-          || await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)
-        );
-        isMnemonicRestored.value = !!val || !hasStoredMnemonic;
+      onRestored() {
+        isMnemonicRestored.value = true;
       },
     },
   );
 
-  const mnemonicSeed = computed(() => mnemonic.value ? mnemonicToSeed(mnemonic.value) : null);
+  /** Part of the `encryptionKey` that is used to encrypt/decrypt protected data */
+  const encryptionSalt = useStorageRef<Uint8Array | null>(
+    null,
+    STORAGE_KEYS.encryptionSalt,
+    {
+      backgroundSync: true,
+      enableSecureStorage: true,
+      serializer: {
+        write: (val) => encodeBase64(val!),
+        read: (val) => val ? decodeBase64(val as any) : null,
+      },
+    },
+  );
 
-  const biometricAuth = {
+  /** If mnemonic is invalid, it is most likely encrypted */
+  const isMnemonicEncrypted = computed(
+    () => !IS_MOBILE_APP && mnemonic.value && !validateMnemonic(mnemonic.value),
+  );
+  const mnemonicEncrypted = computed(() => isMnemonicEncrypted.value ? mnemonic.value : null);
+  const mnemonicDecrypted = ref('');
+
+  const mnemonicSeed = computed(
+    () => mnemonicDecrypted.value ? mnemonicToSeed(mnemonicDecrypted.value) : null,
+  );
+
+  const biometricAuth = reactive({
     available: false,
     updating: false,
     checked: false,
-  };
-
-  /**
-   * TODO: Updating the authentication status from outside of the composable should be not allowed
-   */
-  function setAuthenticated(val: boolean) {
-    isAuthenticated.value = val;
-  }
-
-  /**
-   * Setting/Resetting the password key logs the user in/out.
-   */
-  function setEncryptionKey(newEncryptionKey?: CryptoKey) {
-    encryptionKey.value = newEncryptionKey;
-    if (IS_EXTENSION) {
-      if (newEncryptionKey) {
-        startSession(newEncryptionKey, secureLoginTimeout.value);
-      } else {
-        endSession();
-      }
-    }
-  }
-
-  async function getEncryptionKey() {
-    return watchUntilTruthy(encryptionKey);
-  }
-
-  async function setPasswordAndEncryptMnemonic(newMnemonic: string, password: string) {
-    const newEncryptionKey = await generateEncryptionKey(password);
-    const mnemonicEncryptionResult = await encrypt(newEncryptionKey, newMnemonic);
-    mnemonicEncrypted.value = mnemonicEncryptionResult;
-    setEncryptionKey(newEncryptionKey);
-  }
+  });
 
   /**
    * Checks if biometric authentication is available on the device.
    */
   async function checkBiometricLoginAvailability({ forceUpdate = false } = {}) {
+    if (!IS_MOBILE_APP) {
+      return false;
+    }
     if (biometricAuth.updating) {
       await watchUntilTruthy(() => !biometricAuth.updating);
     } else if (!biometricAuth.checked || forceUpdate) {
@@ -141,92 +141,59 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
-   * Prompts the user to authenticate using biometric authentication.
-   * Returns a promise that resolves when the user is authenticated
-   * or if biometric authentication is not available.
+   * TODO: Updating the authentication status from outside of the composable should be not allowed
    */
-  async function authenticate(password?: string): Promise<void> {
-    if (isAuthenticated.value) {
-      return Promise.resolve();
-    }
+  function setAuthenticated(val: boolean) {
+    isAuthenticated.value = val;
+  }
 
+  /**
+   * Setting/Resetting the password key logs the user in/out.
+   */
+  function setEncryptionKey(newEncryptionKey?: CryptoKey) {
+    encryptionKey.value = newEncryptionKey;
+    if (IS_EXTENSION) {
+      if (newEncryptionKey) {
+        sessionStart(newEncryptionKey, secureLoginTimeout.value);
+      } else {
+        sessionEnd();
+      }
+    }
+  }
+
+  async function getEncryptionKey() {
+    const key = await watchUntilTruthy(encryptionKey);
+    return key;
+  }
+
+  async function setPassword(password: string) {
+    encryptionSalt.value = generateSalt();
+    const newEncryptionKey = await generateEncryptionKey(password, encryptionSalt.value);
+    setEncryptionKey(newEncryptionKey);
+    isAuthenticated.value = true;
+  }
+
+  async function setMnemonicAndInitializeAuthentication(newMnemonic: string, isRestored = false) {
     if (IS_MOBILE_APP) {
-      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-        return BiometricAuth.authenticate({
-          reason: t('biometricAuth.reason'),
-          cancelTitle: t('common.cancel'),
-          allowDeviceCredential: true,
-          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
-          androidTitle: t('biometricAuth.title'),
-          androidSubtitle: t('biometricAuth.subtitle'),
-          androidConfirmationRequired: false,
-        }).then(() => {
-          isAuthenticated.value = true;
-        });
+      mnemonic.value = newMnemonic;
+      if (await checkBiometricLoginAvailability()) {
+        await openEnableBiometricLoginModal();
       }
     } else {
-      return authenticateWithPassword(password!).then(({ encryptionKey: newEncryptionKey }) => {
-        setEncryptionKey(newEncryptionKey);
-        isAuthenticated.value = true;
-      });
-    }
-    return Promise.resolve();
-  }
-
-  async function requestUserPassword() {
-    setLoaderVisible(true);
-    const sessionEncryptionKey = await getSessionEncryptionKey();
-    if (sessionEncryptionKey) {
-      setEncryptionKey(sessionEncryptionKey);
-      const { getAeSdk } = useAeSdk();
-      await getAeSdk();
-      setLoaderVisible(false);
-      return;
-    }
-    setLoaderVisible(false);
-
-    if (!IS_OFFSCREEN_TAB) {
-      // In development mode try to authenticate with default password
-      // If developer is not using default password, he can still login with the new password
-      if (UNFINISHED_FEATURES) {
-        await authenticate(STUB_ACCOUNT.password).catch(async () => {
-          await openModal(MODAL_PASSWORD_LOGIN);
-        });
-      } else {
-        await openModal(MODAL_PASSWORD_LOGIN);
-      }
-      if (!encryptionKey.value) {
-        throw new Error('encryptionKey was not set after login.');
-      }
-    }
-  }
-
-  async function updatePassword(currentPassword: string, newPassword: string) {
-    const { decryptedMnemonic } = await authenticateWithPassword(currentPassword);
-    if (decryptedMnemonic) {
-      await setPasswordAndEncryptMnemonic(decryptedMnemonic, newPassword);
-    }
-  }
-
-  async function setMnemonicAndInitializePassword(newMnemonic: string, isRestored = false) {
-    if (!IS_MOBILE_APP) {
       const { openSetPasswordModal } = useModals();
-
       const password = await openSetPasswordModal(isRestored).catch(() => {
         throw new Error('Password was not set.');
       });
-
-      await setPasswordAndEncryptMnemonic(newMnemonic, password);
+      await setPassword(password);
+      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
     }
-    mnemonic.value = newMnemonic;
+
+    mnemonicDecrypted.value = newMnemonic;
   }
 
-  async function setGeneratedMnemonic() {
-    await setMnemonicAndInitializePassword(generateMnemonic()).catch(() => {
-      throw new Error('Mnemonic was not set.');
-    });
-  }
-
+  /**
+   * Try to obtain the encryption key from extension's background process.
+   */
   async function syncBackgroundEncryptionKey() {
     await new Promise<void>((resolve) => {
       const interval = setInterval(async () => {
@@ -240,31 +207,97 @@ export const useAuth = createCustomScopedComposable(() => {
     });
   }
 
-  async function openEnableBiometricLoginModal() {
-    if (await checkBiometricLoginAvailability()) {
-      openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
+  async function authenticateWithPassword(password: string): Promise<boolean> {
+    if (!isAuthenticated.value && isMnemonicEncrypted.value) {
+      const key = await generateEncryptionKey(password, encryptionSalt.value!);
+      setEncryptionKey(key);
+      const decryptionResult = await decrypt(key, mnemonicEncrypted.value!);
+
+      if (!decryptionResult) {
+        return false;
+      }
+
+      mnemonicDecrypted.value = decryptionResult;
+      isAuthenticated.value = true;
     }
+    return true;
+  }
+
+  async function authenticateWithBiometry(): Promise<boolean> {
+    if (
+      !isAuthenticated.value
+      && isBiometricLoginEnabled.value
+      && await checkBiometricLoginAvailability()
+    ) {
+      return BiometricAuth.authenticate({
+        reason: t('biometricAuth.reason'),
+        cancelTitle: t('common.cancel'),
+        allowDeviceCredential: true,
+        iosFallbackTitle: t('biometricAuth.fallbackTitle'),
+        androidTitle: t('biometricAuth.title'),
+        androidSubtitle: t('biometricAuth.subtitle'),
+        androidConfirmationRequired: false,
+      }).then(() => {
+        isAuthenticated.value = true;
+        return true;
+      });
+    }
+    return true;
   }
 
   /**
    * Open biometric login or password login modal depending on the environment settings.
+   * The modals then uses one of the `authenticateWithPassword`
+   * or `authenticateWithBiometry` methods.
    */
   async function checkUserAuth(): Promise<any> {
-    if (!isAuthenticating.value && !isAuthenticated.value) {
-      isAuthenticating.value = true;
-      if (IS_MOBILE_APP) {
-        if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-          await openModal(MODAL_BIOMETRIC_LOGIN);
+    watchUntilTruthy(isMnemonicRestored);
+
+    if (!mnemonic.value || isAuthenticated.value) {
+      return;
+    }
+    if (isAuthenticating.value) {
+      await watchUntilTruthy(isAuthenticated);
+      return;
+    }
+
+    isAuthenticating.value = true;
+
+    if (IS_MOBILE_APP) {
+      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+        await openBiometricLoginModal();
+      } else {
+        isAuthenticated.value = true;
+      }
+    } else if (isMnemonicEncrypted.value) {
+      // Check if extension can be restored without requiring password
+      if (!encryptionKey.value && IS_EXTENSION && !IS_OFFSCREEN_TAB) {
+        setLoaderVisible(true);
+        const sessionEncryptionKey = await getSessionEncryptionKey();
+        if (sessionEncryptionKey) {
+          setEncryptionKey(sessionEncryptionKey);
+          mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonic.value);
+          isAuthenticated.value = true;
         }
-      } else if (!encryptionKey.value) {
-        await requestUserPassword();
+        setLoaderVisible(false);
       }
 
-      // Wait before resetting isAuthenticated so that app doesn't register a false app resume event
-      await sleep(500);
+      // If restoring from background failed try to use the dev mode password set
+      // when using "Skip" when setting password.
+      if (!encryptionKey.value && UNFINISHED_FEATURES && !IS_OFFSCREEN_TAB) {
+        await authenticateWithPassword(STUB_ACCOUNT.password).catch(() => openPasswordLoginModal());
+      }
 
-      isAuthenticating.value = false;
+      // Finally if other attempts failed ask user for the password
+      if (!encryptionKey.value) {
+        await openPasswordLoginModal();
+      }
+    } else if (!isMnemonicEncrypted.value) {
+      // Migrate the unprotected mnemonic by forcing user to set the password and encrypt it
+      await setMnemonicAndInitializeAuthentication(mnemonic.value, true);
     }
+
+    isAuthenticating.value = false;
   }
 
   async function logout() {
@@ -277,20 +310,31 @@ export const useAuth = createCustomScopedComposable(() => {
     checkUserAuth();
   }
 
+  /**
+   * Check if password provided by user is correct and if true update it to new one.
+   */
+  async function updatePassword(currentPassword: string, newPassword: string) {
+    if (await authenticateWithPassword(currentPassword)) {
+      await setPassword(newPassword);
+    }
+  }
+
   (async () => {
     checkBiometricLoginAvailability();
 
-    const encryptedMnemonicExists = !!(WalletStorage.get<string>(STORAGE_KEYS.mnemonic));
-    if (
-      !encryptionKey.value
-        && !IS_MOBILE_APP
-        && encryptedMnemonicExists
-    ) {
-      await checkUserAuth();
+    await watchUntilTruthy(() => mnemonic.value);
+
+    if (!isMnemonicEncrypted.value) {
+      mnemonicDecrypted.value = mnemonic.value;
     }
 
-    if (IS_OFFSCREEN_TAB && !encryptionKey.value) {
-      await syncBackgroundEncryptionKey();
+    if (!IS_MOBILE_APP && !encryptionKey.value) {
+      if (IS_EXTENSION) {
+        await checkUserAuth(); // Check auth when opening again the extension
+      }
+      if (IS_OFFSCREEN_TAB) {
+        syncBackgroundEncryptionKey();
+      }
     }
   })();
 
@@ -323,19 +367,20 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticated: readonly(isAuthenticated),
     isMnemonicRestored,
     mnemonic,
+    mnemonicDecrypted,
     mnemonicEncrypted,
     mnemonicSeed,
     encryptionKey,
-    getEncryptionKey,
-    setAuthenticated,
-    setGeneratedMnemonic,
-    setMnemonicAndInitializePassword,
+    generateMnemonic,
+    authenticateWithBiometry,
+    authenticateWithPassword,
     checkBiometricLoginAvailability,
-    updatePassword,
-    authenticate,
+    checkUserAuth,
+    getEncryptionKey,
     lockWallet,
     logout,
-    checkUserAuth,
-    openEnableBiometricLoginModal,
+    setAuthenticated,
+    setMnemonicAndInitializeAuthentication,
+    updatePassword,
   };
 });
