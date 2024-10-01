@@ -73,7 +73,7 @@ export const useAccounts = createCustomScopedComposable(() => {
   );
 
   const accounts = computed((): IAccount[] => {
-    if (!isMnemonicRestored.value || !mnemonic.value || !accountsRaw.value?.length) {
+    if (!isMnemonicRestored.value || !mnemonicSeed.value || !accountsRaw.value?.length) {
       return [];
     }
 

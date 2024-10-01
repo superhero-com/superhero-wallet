@@ -54,7 +54,7 @@ export function useStorageRef<T = string | object | any[]>(
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
-  const storage = enableSecureStorage && IS_MOBILE_APP ? SecureMobileStorage : WalletStorage;
+  const storage = (enableSecureStorage && IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
 
   async function setLocalState(val: T | null) {
     if (val !== null) {

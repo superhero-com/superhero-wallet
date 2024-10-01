@@ -67,7 +67,7 @@ export default defineComponent({
     const isAuthCanceled = ref(false);
     const isAuthenticating = ref(false);
 
-    const { authenticate, isAuthenticated } = useAuth();
+    const { authenticateWithBiometry, isAuthenticated } = useAuth();
 
     async function initAuthenticate() {
       if (isAuthenticating.value || isAuthenticated.value) {
@@ -75,7 +75,7 @@ export default defineComponent({
       }
       isAuthenticating.value = true;
       try {
-        await authenticate();
+        await authenticateWithBiometry();
         props.resolve();
       } catch (error) {
         isAuthCanceled.value = true;
