@@ -8,11 +8,12 @@ import {
 } from '@/constants';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '@/constants/stubs';
 import {
-  formatDate,
-  formatTime,
-  prepareStorageKey,
   generateEncryptionKey,
   encrypt,
+  formatDate,
+  formatTime,
+  generateSalt,
+  prepareStorageKey,
 } from '@/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 
@@ -87,7 +88,7 @@ Cypress.Commands.add('loginUsingPassword', () => {
 
 Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
   cy.then(async () => {
-    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password);
+    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, generateSalt());
     const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
     return mnemonicEncryptionResult;
   }).then((mnemonicEncryptionResult) => {

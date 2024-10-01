@@ -74,6 +74,8 @@ router.beforeEach(async (to, from, next) => {
     watchUntilTruthy(areAccountsRestored),
   ]);
 
+  await checkUserAuth();
+
   const meta = to.meta as WalletRouteMeta;
 
   if (!isLoggedIn.value) {
@@ -85,8 +87,6 @@ router.beforeEach(async (to, from, next) => {
     }
     return;
   }
-
-  await checkUserAuth();
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
