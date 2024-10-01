@@ -20,6 +20,7 @@
           Layer displayed under the password protection modal when content is not visible.
         -->
         <div
+          v-if="!IS_MOBILE_APP"
           class="app-unauthenticated-placeholder"
           :class="{ visible: hideRouter }"
         />
@@ -290,6 +291,7 @@ export default defineComponent({
       IS_IOS,
       IS_WEB,
       IS_EXTENSION,
+      IS_MOBILE_APP,
       IS_MOBILE_DEVICE,
       RUNNING_IN_TESTS,
       isAuthenticated,

@@ -1,6 +1,5 @@
 import type { IEncryptionResult } from '@/types';
-import { STORAGE_KEYS, PASSWORD_ENCRYPTION_ALGO, IS_EXTENSION } from '@/constants';
-import { WalletStorage } from '@/lib/WalletStorage';
+import { PASSWORD_ENCRYPTION_ALGO, IS_EXTENSION } from '@/constants';
 
 /**
  * If the application is running as an extension, the key should be extractable.
@@ -13,18 +12,16 @@ const IV_LENGTH = 16;
 const subtleCrypto = globalThis?.crypto?.subtle;
 
 // Utility Functions for Base64 Encoding and Decoding
-const encodeBase64 = (data: Uint8Array) => Buffer.from(data).toString('base64');
-const decodeBase64 = (data: string) => Buffer.from(data, 'base64');
+export const encodeBase64 = (data: Uint8Array) => Buffer.from(data).toString('base64');
+export const decodeBase64 = (data: string) => Buffer.from(data, 'base64');
 
-export function generateAndStoreSalt(): Uint8Array {
-  const salt = globalThis.crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
-  WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(salt));
-  return salt;
+export function generateSalt(): Uint8Array {
+  return globalThis.crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
 }
 
 export async function generateEncryptionKey(
   password: string,
-  salt: Uint8Array = generateAndStoreSalt(),
+  salt: Uint8Array,
 ): Promise<CryptoKey> {
   // Encode password to ArrayBuffer
   const passwordBuffer = new TextEncoder().encode(password);
@@ -50,13 +47,6 @@ export async function generateEncryptionKey(
     IS_EXTRACTABLE,
     ['encrypt', 'decrypt'],
   );
-}
-
-export async function restoreEncryptionKey(
-  password: string,
-  salt: Uint8Array,
-): Promise<CryptoKey> {
-  return generateEncryptionKey(password, salt);
 }
 
 /**
@@ -89,6 +79,7 @@ export async function decrypt(
 ): Promise<string> {
   // Decode from base64
   const encryptedArray = new Uint8Array(decodeBase64(encryptionResult));
+  // Every encrypted data has its own IV
   const iv = encryptedArray.slice(0, IV_LENGTH);
   const ciphertext = encryptedArray.slice(IV_LENGTH);
   // Decrypt the ciphertext
@@ -103,31 +94,6 @@ export async function decrypt(
 
   // Unwrap the plaintext
   return new TextDecoder().decode(decryptedBuffer);
-}
-
-export async function authenticateWithPassword(
-  password: string,
-): Promise<{
-  encryptionKey: CryptoKey;
-  decryptedMnemonic: string;
-}> {
-  const [mnemonicEncryptionResult, salt] = await Promise.all([
-    WalletStorage.get<string>(STORAGE_KEYS.mnemonic),
-    WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt),
-  ]);
-  if (mnemonicEncryptionResult && salt) {
-    const encryptionKey = await restoreEncryptionKey(password, decodeBase64(salt));
-
-    const decryptedMnemonic = await decrypt(encryptionKey, mnemonicEncryptionResult);
-    if (decryptedMnemonic) {
-      return {
-        encryptionKey,
-        decryptedMnemonic,
-      };
-    }
-    throw new Error('Incorrect password.');
-  }
-  throw new Error('No encrypted mnemonic found.');
 }
 
 export async function exportEncryptionKey(encryptionKey: CryptoKey) {

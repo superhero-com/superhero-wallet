@@ -130,9 +130,8 @@ export default defineComponent({
     } = useAccounts();
     const {
       mnemonic,
-      openEnableBiometricLoginModal,
-      setAuthenticated,
-      setGeneratedMnemonic,
+      generateMnemonic,
+      setMnemonicAndInitializeAuthentication,
     } = useAuth();
     const { openModal } = useModals();
     const { loginTargetLocation, setLoaderVisible } = useUi();
@@ -143,15 +142,13 @@ export default defineComponent({
 
     async function createWallet() {
       isWalletNew = true;
-      await setGeneratedMnemonic();
+      await setMnemonicAndInitializeAuthentication(generateMnemonic());
       addRawAccount({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
         type: ACCOUNT_TYPES.hdWallet,
       });
       router.push(loginTargetLocation.value);
-      await openEnableBiometricLoginModal();
-      setAuthenticated(true);
     }
 
     async function importWallet() {
