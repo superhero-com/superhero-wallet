@@ -100,11 +100,11 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
     const { discoverAccounts } = useAccounts();
-    const { openScanQrModal } = useModals();
+    const { openEnableBiometricLoginModal, openScanQrModal } = useModals();
     const {
-      openEnableBiometricLoginModal,
+      checkBiometricLoginAvailability,
       setAuthenticated,
-      setMnemonicAndInitializePassword,
+      setMnemonicAndInitializeAuthentication,
     } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
@@ -133,13 +133,17 @@ export default defineComponent({
       }
 
       try {
-        await setMnemonicAndInitializePassword(mnemonicParsed);
+        await setMnemonicAndInitializeAuthentication(mnemonicParsed);
         discovering.value = true;
         setBackedUpSeed(true);
         await discoverAccounts();
         props.resolve();
         router.push(loginTargetLocation.value);
-        await openEnableBiometricLoginModal();
+
+        if (await checkBiometricLoginAvailability()) {
+          await openEnableBiometricLoginModal();
+        }
+
         setAuthenticated(true);
       } catch {
         error.value = t('pages.index.passwordWasNotSet');

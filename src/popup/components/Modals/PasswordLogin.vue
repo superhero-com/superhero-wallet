@@ -98,7 +98,7 @@ export default defineComponent({
     const isAuthenticating = ref(false);
     const password = ref('');
 
-    const { authenticate, isAuthenticated } = useAuth();
+    const { authenticateWithPassword, isAuthenticated } = useAuth();
     const { accountsRaw } = useAccounts();
     const { openModal } = useModals();
 
@@ -119,7 +119,7 @@ export default defineComponent({
       isAuthFailed.value = false;
       isAuthenticating.value = true;
       try {
-        await authenticate(password.value);
+        await authenticateWithPassword(password.value);
         props.resolve();
       } catch (error) {
         isAuthFailed.value = true;
