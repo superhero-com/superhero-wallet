@@ -19,6 +19,7 @@ import {
 } from '@/constants';
 import {
   createCallbackRegistry,
+  createCustomScopedComposable,
   excludeFalsy,
   prepareAccountSelectOptions,
   watchUntilTruthy,
@@ -28,7 +29,6 @@ import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-c
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { useStorageRef } from './storageRef';
-import { createCustomScopedComposable } from './composablesHelpers';
 import { useAuth } from './auth';
 
 const {

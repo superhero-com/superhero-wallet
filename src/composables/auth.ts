@@ -19,6 +19,7 @@ import {
 } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
+  createCustomScopedComposable,
   decodeBase64,
   decrypt,
   encodeBase64,
@@ -36,7 +37,6 @@ import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-
 
 import { useUi } from './ui';
 import { useModals } from './modals';
-import { createCustomScopedComposable } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
