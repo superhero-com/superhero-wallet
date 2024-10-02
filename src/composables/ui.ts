@@ -10,13 +10,13 @@ import { RouteLocationRaw } from 'vue-router';
 import type { IOtherSettings } from '@/types';
 import { AUTHENTICATION_TIMEOUT_DEFAULT, STORAGE_KEYS } from '@/constants';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { createCustomScopedComposable } from '@/utils';
 
 import migrateHiddenCardsVuexToComposable from '@/migrations/004-hidden-cards-vuex-to-composables';
 import migrateOtherSettingsVuexToComposable from '@/migrations/005-other-settings-vuex-to-composables';
 import migrateSecureLoginEnabledToBiometric from '@/migrations/009-secure-login-enabled-to-biometric';
 
 import { useStorageRef } from './storageRef';
-import { createCustomScopedComposable } from './composablesHelpers';
 
 export const useUi = createCustomScopedComposable(() => {
   /** Control the route that would be visible after opening the extension. */

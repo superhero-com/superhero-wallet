@@ -1,26 +1,10 @@
 import {
-  effectScope,
   getCurrentInstance,
   onBeforeUnmount,
   onMounted,
 } from 'vue';
 import { useConnection } from './connection';
 import { useUi } from './ui';
-
-/**
- * Creates a custom effect scope for a composable to avoid disposing watchers
- * and computed properties when a Vue component is unmounted. The effect scope
- * is only created the first time you run the composable and is reused from that point on.
- */
-export function createCustomScopedComposable<T>(composableBody: () => T) {
-  let activeScope: T;
-  return () => {
-    if (!activeScope) {
-      activeScope = effectScope(true).run(composableBody) || composableBody();
-    }
-    return activeScope;
-  };
-}
 
 /**
  * Creates a function, that will monitor how many components is actually using the composable

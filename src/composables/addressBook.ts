@@ -11,6 +11,7 @@ import { STORAGE_KEYS, MODAL_ADDRESS_BOOK_IMPORT } from '@/constants';
 import { AddressBookEntryExists, AddressBookInvalidAddress, AddressBookRequiredFields } from '@/lib/errors';
 import {
   convertBlobToBase64,
+  createCustomScopedComposable,
   getProtocolByAddress,
   handleUnknownError,
   selectFiles,
@@ -18,7 +19,6 @@ import {
 } from '@/utils';
 import { tg as t } from '@/popup/plugins/i18n';
 
-import { createCustomScopedComposable } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
 
