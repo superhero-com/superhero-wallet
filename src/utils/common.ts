@@ -4,7 +4,14 @@
 
 /* eslint-disable no-use-before-define */
 
-import { effectScope, WatchSource, watch } from 'vue';
+import {
+  effectScope,
+  WatchSource,
+  watch,
+  Ref,
+  ref,
+  computed,
+} from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
@@ -33,6 +40,7 @@ import {
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
+  IS_MOBILE_APP,
   LOCAL_STORAGE_PREFIX,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
@@ -42,6 +50,7 @@ import {
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { decrypt, encrypt } from './crypto';
 
 /**
  * Round the number to calculated amount of decimals.
@@ -616,4 +625,41 @@ export function createCustomScopedComposable<T>(composableBody: () => T) {
     }
     return activeScope;
   };
+}
+
+/**
+ * Creates computed property that serves as encryption layer for any Vue state.
+ * It takes the encrypted state, the key and returns decrypted state.
+ */
+export function decryptedComputed(
+  key: Ref<CryptoKey | undefined>,
+  encryptedState: Ref<string | null>,
+  defaultVal?: any,
+) {
+  let updating = false;
+  const decrypted = ref(defaultVal);
+
+  watch([key, encryptedState], async ([newKey, newState]) => {
+    if (!updating) {
+      try {
+        decrypted.value = (newKey && newState) ? await decrypt(newKey, newState) : defaultVal;
+      } catch (e) {
+        decrypted.value = defaultVal;
+      }
+    }
+  }, { immediate: true });
+
+  return (IS_MOBILE_APP)
+    ? encryptedState // On mobile devices we are not encrypting states
+    : computed<string>({
+      get: () => decrypted.value,
+      set: async (val) => {
+        updating = true;
+        try {
+          // eslint-disable-next-line no-param-reassign
+          encryptedState.value = await encrypt(key.value!, val);
+        } catch (e) { /* NOOP */ }
+        updating = false;
+      },
+    });
 }
