@@ -10,6 +10,7 @@ import { STUB_CURRENCY, STUB_ACCOUNT } from '@/constants/stubs';
 import {
   generateEncryptionKey,
   encrypt,
+  encodeBase64,
   formatDate,
   formatTime,
   generateSalt,
@@ -88,10 +89,11 @@ Cypress.Commands.add('loginUsingPassword', () => {
 
 Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
   cy.then(async () => {
-    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, generateSalt());
+    const salt = generateSalt();
+    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, salt);
     const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
-    return mnemonicEncryptionResult;
-  }).then((mnemonicEncryptionResult) => {
+    return [mnemonicEncryptionResult, salt];
+  }).then(([mnemonicEncryptionResult, salt]) => {
     if (isMockingExternalRequests) cy.mockExternalRequests();
 
     const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
@@ -100,6 +102,7 @@ Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true)
       const dataToBeStored = {
         [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
         [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionResult,
+        [prepareStorageKey([STORAGE_KEYS.encryptionSalt])]: encodeBase64(salt),
         [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
           idx: 0,
           protocol: PROTOCOLS.aeternity,
