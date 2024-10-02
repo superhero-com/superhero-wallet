@@ -4,7 +4,7 @@
 
 /* eslint-disable no-use-before-define */
 
-import { WatchSource, watch } from 'vue';
+import { effectScope, WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
@@ -601,4 +601,19 @@ export function checkPasswordStrength(password: string): ObjectValues<typeof PAS
     return PASSWORD_STRENGTH.medium;
   }
   return PASSWORD_STRENGTH.strong;
+}
+
+/**
+ * Creates a custom effect scope for a composable to avoid disposing watchers
+ * and computed properties when a Vue component is unmounted. The effect scope
+ * is only created the first time you run the composable and is reused from that point on.
+ */
+export function createCustomScopedComposable<T>(composableBody: () => T) {
+  let activeScope: T;
+  return () => {
+    if (!activeScope) {
+      activeScope = effectScope(true).run(composableBody) || composableBody();
+    }
+    return activeScope;
+  };
 }
