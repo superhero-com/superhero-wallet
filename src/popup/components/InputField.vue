@@ -112,6 +112,7 @@ import {
   getCurrentInstance,
   PropType,
   ref,
+  onMounted,
 } from 'vue';
 import type { IInputMessage, IInputMessageRaw } from '@/types';
 import { INPUT_MESSAGE_STATUSES } from '@/constants';
@@ -155,6 +156,8 @@ export default defineComponent({
     showHelp: Boolean,
     blinkOnChange: Boolean,
     code: Boolean,
+    /** Override native input's property which was breaking modal animations */
+    autofocus: Boolean,
     textLimit: {
       type: Number,
       default: null,
@@ -236,6 +239,14 @@ export default defineComponent({
         }
       },
     );
+
+    onMounted(() => {
+      if (props.autofocus) {
+        // Delaying the focus on input because in some cases the modal with an autofocus input
+        // was breaking the animation
+        setTimeout(() => inputEl.value?.focus(), 400);
+      }
+    });
 
     return {
       isBlinking,
