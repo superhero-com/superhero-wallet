@@ -33,12 +33,12 @@
             <RadioButton
               v-for="(ms) in AUTHENTICATION_TIMEOUTS"
               :key="`timeout-${ms}`"
-              :value="secureLoginTimeout === ms"
-              :class="{ active: secureLoginTimeout === ms }"
+              :value="+secureLoginTimeoutDecrypted === ms"
+              :class="{ active: +secureLoginTimeoutDecrypted === ms }"
               :label="$t('pages.secureLogin.authenticationTimeout', msToMinutes(ms))"
               class="timeout"
               has-label-effect
-              @input="setSecureLoginTimeout(ms)"
+              @input="secureLoginTimeoutDecrypted = ms.toString()"
             />
           </div>
         </div>
@@ -186,12 +186,11 @@ export default defineComponent({
     const {
       checkBiometricLoginAvailability,
       updatePassword,
+      secureLoginTimeoutDecrypted,
     } = useAuth();
     const {
       isBiometricLoginEnabled,
-      secureLoginTimeout,
       setBiometricLoginEnabled,
-      setSecureLoginTimeout,
     } = useUi();
     const { openEnableBiometricLoginModal } = useModals();
 
@@ -235,13 +234,12 @@ export default defineComponent({
       isBiometricLoginAvailable,
       isPasswordChangedSuccessfully,
       isAuthFailed,
-      secureLoginTimeout,
+      secureLoginTimeoutDecrypted,
       currentPassword,
       newPassword,
       confirmNewPassword,
       setNewPassword,
       setBiometricLoginEnabled,
-      setSecureLoginTimeout,
       msToMinutes,
       IS_MOBILE_APP,
       AUTHENTICATION_TIMEOUTS,

@@ -10,6 +10,7 @@ import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/b
 
 import { tg as t } from '@/popup/plugins/i18n';
 import {
+  AUTHENTICATION_TIMEOUT_DEFAULT,
   IS_EXTENSION,
   IS_IOS,
   IS_MOBILE_APP,
@@ -22,6 +23,7 @@ import {
   createCustomScopedComposable,
   decodeBase64,
   decrypt,
+  decryptedComputed,
   encodeBase64,
   encrypt,
   generateEncryptionKey,
@@ -51,7 +53,6 @@ export const useAuth = createCustomScopedComposable(() => {
   const {
     isBiometricLoginEnabled,
     lastTimeAppWasActive,
-    secureLoginTimeout,
     isAppActive,
     setBiometricLoginEnabled,
     setLoaderVisible,
@@ -100,6 +101,21 @@ export const useAuth = createCustomScopedComposable(() => {
         read: (val) => val ? decodeBase64(val as any) : null,
       },
     },
+  );
+
+  const secureLoginTimeout = useStorageRef<string | null>(
+    null,
+    STORAGE_KEYS.secureLoginTimeout,
+    {
+      backgroundSync: true,
+      enableSecureStorage: true,
+    },
+  );
+
+  const secureLoginTimeoutDecrypted = decryptedComputed(
+    encryptionKey,
+    secureLoginTimeout,
+    AUTHENTICATION_TIMEOUT_DEFAULT,
   );
 
   /** If mnemonic is invalid, it is most likely encrypted */
@@ -154,7 +170,7 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionKey.value = newEncryptionKey;
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
-        sessionStart(newEncryptionKey, secureLoginTimeout.value);
+        sessionStart(newEncryptionKey, +secureLoginTimeoutDecrypted.value!);
       } else {
         sessionEnd();
       }
@@ -343,7 +359,8 @@ export const useAuth = createCustomScopedComposable(() => {
     async (isActive, wasActive) => {
       // App resumed from background
       // Check if biometric auth is still available
-      await checkBiometricLoginAvailability({ forceUpdate: true });
+      checkBiometricLoginAvailability({ forceUpdate: true });
+
       if (
         !isAuthenticating.value
         && isActive
@@ -353,7 +370,7 @@ export const useAuth = createCustomScopedComposable(() => {
         const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
         if (isAuthenticated.value && lastTimeAppWasActive.value) {
           const elapsedTime = Date.now() - lastTimeAppWasActive.value;
-          if (elapsedTime > secureLoginTimeout.value && !keepExtensionLoggedIn) {
+          if (elapsedTime > +secureLoginTimeoutDecrypted.value! && !keepExtensionLoggedIn) {
             lockWallet();
           }
         } else if (!isAuthenticated.value && !keepExtensionLoggedIn) {
@@ -372,6 +389,7 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonicSeed,
     encryptionKey,
     generateMnemonic,
+    secureLoginTimeoutDecrypted,
     authenticateWithBiometry,
     authenticateWithPassword,
     checkBiometricLoginAvailability,

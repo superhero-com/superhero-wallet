@@ -12,8 +12,8 @@ import {
 import {
   useAccounts,
   useAeSdk,
+  useAuth,
   useNetworks,
-  useUi,
 } from '@/composables';
 import { setSessionExpiration } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
@@ -40,7 +40,7 @@ const addAeppConnection = async (port: Runtime.Port) => {
 export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
-  const { secureLoginTimeout } = useUi();
+  const { secureLoginTimeoutDecrypted } = useAuth();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
@@ -79,7 +79,7 @@ export async function init() {
       }
       case CONNECTION_TYPES.SESSION: {
         port.onDisconnect.addListener(async () => {
-          const sessionExpires = Date.now() + secureLoginTimeout.value;
+          const sessionExpires = Date.now() + +secureLoginTimeoutDecrypted.value!;
 
           if (IS_FIREFOX) {
             setSessionExpiration(sessionExpires);
