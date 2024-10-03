@@ -24,6 +24,7 @@ import {
   decrypt,
   encodeBase64,
   encrypt,
+  excludeFalsy,
   generateEncryptionKey,
   generateSalt,
   getSessionEncryptionKey,
@@ -34,6 +35,7 @@ import {
 
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
+import migrateMnemonicMobileToSecureStorage from '@/migrations/010-mnemonic-mobile-to-secure-storage';
 
 import { useUi } from './ui';
 import { useModals } from './modals';
@@ -79,9 +81,10 @@ export const useAuth = createCustomScopedComposable(() => {
       backgroundSync: true,
       enableSecureStorage: true,
       migrations: [
-        ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
+        (IS_MOBILE_APP && IS_IOS) ? migrateMnemonicCordovaToIonic : null,
         migrateMnemonicVuexToComposable,
-      ],
+        (IS_MOBILE_APP) ? migrateMnemonicMobileToSecureStorage : null,
+      ].filter(excludeFalsy),
       onRestored() {
         isMnemonicRestored.value = true;
       },
