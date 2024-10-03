@@ -6,9 +6,10 @@
           v-if="IS_MOBILE_APP"
           class="top-wrapper"
         >
-          <p class="text-description">
-            {{ $t('pages.secureLogin.description') }}
-          </p>
+          <p
+            class="text-description"
+            v-text="$t('pages.secureLogin.description')"
+          />
 
           <SwitchButton
             :label="$t('pages.secureLogin.enableSecureLogin')"
@@ -19,6 +20,7 @@
 
           <hr>
         </div>
+
         <div class="options-wrapper">
           <div class="options">
             <div
@@ -42,6 +44,7 @@
             />
           </div>
         </div>
+
         <template v-if="!IS_MOBILE_APP">
           <hr>
           <div class="options">
@@ -56,7 +59,11 @@
               />
             </div>
             <div class="inputs">
-              <div class="current-password">
+              <Form
+                v-slot="{ errors }"
+                class="new-password"
+                @submit="setNewPassword()"
+              >
                 <InputPassword
                   v-model="currentPassword"
                   data-cy="current-password"
@@ -65,12 +72,6 @@
                   :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
                   @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
                 />
-              </div>
-
-              <Form
-                v-slot="{ errors, handleSubmit, resetForm }"
-                class="new-password"
-              >
                 <Field
                   v-slot="{ field, errorMessage }"
                   key="newPassword"
@@ -113,6 +114,7 @@
                 <BtnMain
                   class="btn-main"
                   variant="primary"
+                  type="submit"
                   extend
                   :disabled="(
                     !newPassword
@@ -122,9 +124,9 @@
                     || !!errors.confirmNewPassword
                   )"
                   :text="$t('pages.secureLogin.changePassword.reset')"
-                  @click="handleSubmit($event, setNewPassword).then(resetForm)"
                 />
               </Form>
+
               <InfoBox
                 v-if="isPasswordChangedSuccessfully"
                 ref="infoBoxEl"
@@ -296,11 +298,6 @@ export default defineComponent({
 
   .inputs {
     width: 100%;
-
-    .current-password {
-      display: flex;
-      flex-direction: column;
-    }
 
     .new-password {
       margin-top: 4px;
