@@ -54,7 +54,6 @@ const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 export const useAuth = createCustomScopedComposable(() => {
   const {
     isBiometricLoginEnabled,
-    lastTimeAppWasActive,
     isAppActive,
     setBiometricLoginEnabled,
     setLoaderVisible,
@@ -371,12 +370,7 @@ export const useAuth = createCustomScopedComposable(() => {
       ) {
         // If session exists user needs to stay logged in
         const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
-        if (isAuthenticated.value && lastTimeAppWasActive.value) {
-          const elapsedTime = Date.now() - lastTimeAppWasActive.value;
-          if (elapsedTime > +secureLoginTimeoutDecrypted.value! && !keepExtensionLoggedIn) {
-            lockWallet();
-          }
-        } else if (!isAuthenticated.value && !keepExtensionLoggedIn) {
+        if (!isAuthenticated.value && !keepExtensionLoggedIn) {
           lockWallet();
         }
       }
