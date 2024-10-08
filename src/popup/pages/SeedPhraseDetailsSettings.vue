@@ -8,14 +8,14 @@
 
         <CardMnemonic class="mnemonics">
           <p class="mnemonics-text">
-            {{ mnemonic }}
+            {{ mnemonicDecrypted }}
           </p>
           <BtnMain
             variant="dark"
             class="copy-btn"
             big-icon
             :icon="copied ? CheckSuccessCircle : CopyOutlined"
-            @click="copy(mnemonic)"
+            @click="copy(mnemonicDecrypted)"
           >
             <template v-if="!copied">
               {{ $t('pages.seed-phrase-settings.copy') }}
@@ -93,7 +93,7 @@ export default defineComponent({
 
     const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
-    const { mnemonic } = useAuth();
+    const { mnemonicDecrypted } = useAuth();
     const { removeIsSeedBackedUpNotification } = useNotifications({
       requirePolling: false,
     });
@@ -108,7 +108,7 @@ export default defineComponent({
       CopyOutlined,
       CheckSuccessCircle,
       copied,
-      mnemonic,
+      mnemonicDecrypted,
       copy,
       markSeedPhraseAsBackedUp,
       ROUTE_SEED_PHRASE_VERIFY,
