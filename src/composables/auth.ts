@@ -54,7 +54,6 @@ const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 export const useAuth = createCustomScopedComposable(() => {
   const {
     isBiometricLoginEnabled,
-    lastTimeAppWasActive,
     isAppActive,
     setBiometricLoginEnabled,
     setLoaderVisible,
@@ -173,7 +172,7 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionKey.value = newEncryptionKey;
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
-        sessionStart(newEncryptionKey, +secureLoginTimeoutDecrypted.value!);
+        sessionStart(newEncryptionKey);
       } else {
         sessionEnd();
       }
@@ -189,6 +188,7 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionSalt.value = generateSalt();
     const newEncryptionKey = await generateEncryptionKey(password, encryptionSalt.value);
     setEncryptionKey(newEncryptionKey);
+    mnemonic.value = await encrypt(newEncryptionKey, mnemonicDecrypted.value);
     isAuthenticated.value = true;
   }
 
@@ -333,9 +333,9 @@ export const useAuth = createCustomScopedComposable(() => {
    * Check if password provided by user is correct and if true update it to new one.
    */
   async function updatePassword(currentPassword: string, newPassword: string) {
-    if (await authenticateWithPassword(currentPassword)) {
-      await setPassword(newPassword);
-    }
+    const key = await generateEncryptionKey(currentPassword, encryptionSalt.value!);
+    await decrypt(key, mnemonicEncrypted.value!);
+    await setPassword(newPassword);
   }
 
   (async () => {
@@ -357,6 +357,13 @@ export const useAuth = createCustomScopedComposable(() => {
     }
   })();
 
+  if (IS_OFFSCREEN_TAB) {
+    watch(
+      encryptionSalt,
+      () => syncBackgroundEncryptionKey(),
+    );
+  }
+
   watch(
     isAppActive,
     async (isActive, wasActive) => {
@@ -371,12 +378,7 @@ export const useAuth = createCustomScopedComposable(() => {
       ) {
         // If session exists user needs to stay logged in
         const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
-        if (isAuthenticated.value && lastTimeAppWasActive.value) {
-          const elapsedTime = Date.now() - lastTimeAppWasActive.value;
-          if (elapsedTime > +secureLoginTimeoutDecrypted.value! && !keepExtensionLoggedIn) {
-            lockWallet();
-          }
-        } else if (!isAuthenticated.value && !keepExtensionLoggedIn) {
+        if (!isAuthenticated.value && !keepExtensionLoggedIn) {
           lockWallet();
         }
       }

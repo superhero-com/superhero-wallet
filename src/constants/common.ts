@@ -386,7 +386,7 @@ export const POPUP_METHODS = {
 } as const;
 
 export const SESSION_METHODS = {
-  setSessionExpiration: 'setSessionExpiration',
+  setSessionTimeout: 'setSessionTimeout',
   getSessionEncryptionKey: 'getSessionEncryptionKey',
 } as const;
 

@@ -15,7 +15,7 @@ import {
   useAuth,
   useNetworks,
 } from '@/composables';
-import { setSessionExpiration } from '@/background/bgPopupHandler';
+import { setSessionTimeout } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 
@@ -79,15 +79,13 @@ export async function init() {
       }
       case CONNECTION_TYPES.SESSION: {
         port.onDisconnect.addListener(async () => {
-          const sessionExpires = Date.now() + +secureLoginTimeoutDecrypted.value!;
-
           if (IS_FIREFOX) {
-            setSessionExpiration(sessionExpires);
+            setSessionTimeout(+secureLoginTimeoutDecrypted.value!);
           } else {
             browser.runtime.sendMessage<IBackgroundMessageData>({
               target: 'background',
-              method: SESSION_METHODS.setSessionExpiration,
-              payload: sessionExpires,
+              method: SESSION_METHODS.setSessionTimeout,
+              payload: +secureLoginTimeoutDecrypted.value!,
             });
           }
         });

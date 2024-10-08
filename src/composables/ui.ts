@@ -3,7 +3,6 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
-  watch,
 } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 
@@ -35,7 +34,6 @@ export const useUi = createCustomScopedComposable(() => {
   const scanProgress = ref(-1);
 
   const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
-  const lastTimeAppWasActive = ref<number>();
 
   const hiddenCards = useStorageRef<string[]>(
     [],
@@ -120,16 +118,6 @@ export const useUi = createCustomScopedComposable(() => {
     otherSettings.value = {};
   }
 
-  watch(
-    isAppActive,
-    async (isActive, wasActive) => {
-      // App went to background
-      if (wasActive && !isActive) {
-        lastTimeAppWasActive.value = Date.now();
-      }
-    },
-  );
-
   return {
     homeRouteName,
     hiddenCards,
@@ -141,7 +129,6 @@ export const useUi = createCustomScopedComposable(() => {
     isSeedBackedUp,
     saveErrorLog,
     isBiometricLoginEnabled,
-    lastTimeAppWasActive,
     initVisibilityListeners,
     setCardHidden,
     setBackedUpSeed,
