@@ -333,9 +333,9 @@ export const useAuth = createCustomScopedComposable(() => {
    * Check if password provided by user is correct and if true update it to new one.
    */
   async function updatePassword(currentPassword: string, newPassword: string) {
-    if (await authenticateWithPassword(currentPassword)) {
-      await setPassword(newPassword);
-    }
+    const key = await generateEncryptionKey(currentPassword, encryptionSalt.value!);
+    await decrypt(key, mnemonicEncrypted.value!);
+    await setPassword(newPassword);
   }
 
   (async () => {
