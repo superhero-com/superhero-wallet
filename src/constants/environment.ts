@@ -38,15 +38,15 @@ export const IS_WEB = PLATFORM === 'web';
 export const IS_MOBILE_APP = PLATFORM === 'ionic';
 
 /**
- * Running as a browser extension
- */
-export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
-
-/**
  * The Offscreen API allows the extension to use DOM APIs in a hidden document.
  * The runtime API is the only extensions API supported by offscreen documents.
  */
 export const IS_OFFSCREEN_TAB = window.location.pathname === '/offscreen.html';
+
+/**
+ * Running as a browser extension
+ */
+export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS && !IS_OFFSCREEN_TAB;
 
 export const IS_IOS = isPlatform('ios');
 
