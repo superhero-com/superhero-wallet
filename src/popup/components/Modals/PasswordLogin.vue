@@ -80,7 +80,7 @@ import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import LinkButton from '@/popup/components/LinkButton.vue';
 
 import FingerprintIcon from '@/icons/fingerprint.svg?vue-component';
-import LockIcon from '@/icons/secure-lock.svg?vue-component';
+import LockIcon from '@/icons/secure-lock-outline.svg?vue-component';
 
 export default defineComponent({
   components: {
