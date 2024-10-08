@@ -188,6 +188,7 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionSalt.value = generateSalt();
     const newEncryptionKey = await generateEncryptionKey(password, encryptionSalt.value);
     setEncryptionKey(newEncryptionKey);
+    mnemonic.value = await encrypt(newEncryptionKey, mnemonicDecrypted.value);
     isAuthenticated.value = true;
   }
 
@@ -355,6 +356,13 @@ export const useAuth = createCustomScopedComposable(() => {
       }
     }
   })();
+
+  if (IS_OFFSCREEN_TAB) {
+    watch(
+      encryptionSalt,
+      () => syncBackgroundEncryptionKey(),
+    );
+  }
 
   watch(
     isAppActive,
