@@ -4,7 +4,6 @@ import { exportEncryptionKey, importEncryptionKey } from './crypto';
 
 const SESSION_STORAGE_KEYS = {
   exportedEncryptionKey: 'exportedEncryptionKey',
-  sessionExpires: 'sessionExpires',
 };
 
 const storageSession = (browser.storage as any)?.session;
@@ -13,13 +12,11 @@ const storageSession = (browser.storage as any)?.session;
  * Stores the password key in the session storage.
  * Extension only.
  */
-export async function sessionStart(encryptionKey: CryptoKey, timeout: number) {
+export async function sessionStart(encryptionKey: CryptoKey) {
   if (IS_EXTENSION && !IS_OFFSCREEN_TAB) {
     browser.runtime.connect({ name: CONNECTION_TYPES.SESSION });
-    const sessionExpires = Date.now() + timeout;
     await storageSession.set({
-      exportedEncryptionKey: await exportEncryptionKey(encryptionKey),
-      sessionExpires,
+      [SESSION_STORAGE_KEYS.exportedEncryptionKey]: await exportEncryptionKey(encryptionKey),
     });
   }
 }
@@ -43,11 +40,6 @@ export async function getSessionEncryptionKey() {
       return importEncryptionKey(Buffer.from(sessionEncryptionKey, 'base64'));
     }
   } else if (IS_EXTENSION) {
-    const { sessionExpires } = await storageSession.get(SESSION_STORAGE_KEYS.sessionExpires);
-    if (!sessionExpires || sessionExpires < Date.now()) {
-      await sessionEnd();
-      return null;
-    }
     const { exportedEncryptionKey } = await storageSession.get(
       SESSION_STORAGE_KEYS.exportedEncryptionKey,
     );

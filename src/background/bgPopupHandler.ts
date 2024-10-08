@@ -22,7 +22,6 @@ const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 const SESSION_STORAGE_KEYS = {
   exportedEncryptionKey: 'exportedEncryptionKey',
-  sessionExpires: 'sessionExpires',
 };
 
 const POPUP_TYPE_CONNECT = 'connectConfirm';
@@ -88,18 +87,20 @@ export const removePopup = (id: string) => delete popups[id];
 
 export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
 
-export const setSessionExpiration = async (sessionExpires: number) => {
-  await storageSession.set({ sessionExpires });
+let expirationTimeout: NodeJS.Timeout;
+
+export const setSessionTimeout = async (sessionTimeout: number) => {
+  if (expirationTimeout) {
+    clearTimeout(expirationTimeout);
+  }
+  expirationTimeout = setTimeout(
+    () => storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey),
+    sessionTimeout,
+  );
 };
 
 export const getSessionEncryptionKey = async (): Promise<string | null> => {
   try {
-    const { sessionExpires } = await storageSession.get(SESSION_STORAGE_KEYS.sessionExpires);
-    if (!sessionExpires || sessionExpires < Date.now()) {
-      await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
-      return null;
-    }
-
     const { exportedEncryptionKey } = await storageSession.get(
       SESSION_STORAGE_KEYS.exportedEncryptionKey,
     );
