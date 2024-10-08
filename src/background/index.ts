@@ -4,7 +4,7 @@ import {
   removePopup,
   getPopup,
   getSessionEncryptionKey,
-  setSessionExpiration,
+  setSessionTimeout,
 } from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
 
@@ -59,8 +59,8 @@ function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Functi
           sendResponse(encryptionKey);
         });
         return true;
-      case 'setSessionExpiration':
-        sendResponse(setSessionExpiration(msg.payload));
+      case 'setSessionTimeout':
+        sendResponse(setSessionTimeout(msg.payload));
         return false;
       default:
         break;

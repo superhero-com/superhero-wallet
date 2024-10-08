@@ -173,7 +173,7 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionKey.value = newEncryptionKey;
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
-        sessionStart(newEncryptionKey, +secureLoginTimeoutDecrypted.value!);
+        sessionStart(newEncryptionKey);
       } else {
         sessionEnd();
       }
