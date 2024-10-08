@@ -60,7 +60,7 @@
 
     <template #recipient>
       <TransferSendRecipient
-        v-model.trim="formModel.address"
+        v-model="formModel.address"
         :errors="errors"
         :is-tip-url="isTipUrl"
         :protocol="PROTOCOLS.aeternity"
