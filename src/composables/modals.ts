@@ -16,6 +16,7 @@ import {
   MODAL_BIOMETRIC_LOGIN,
   MODAL_CONFIRM,
   MODAL_DEFAULT,
+  MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_ERROR_LOG,
   MODAL_PASSWORD_LOGIN,
   MODAL_SCAN_QR,
@@ -206,7 +207,7 @@ export function useModals() {
   }
 
   async function openEnableBiometricLoginModal() {
-    openModal(MODAL_BIOMETRIC_LOGIN);
+    openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
   }
 
   return {
