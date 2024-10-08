@@ -100,9 +100,8 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
     const { discoverAccounts } = useAccounts();
-    const { openEnableBiometricLoginModal, openScanQrModal } = useModals();
+    const { openScanQrModal } = useModals();
     const {
-      checkBiometricLoginAvailability,
       setAuthenticated,
       setMnemonicAndInitializeAuthentication,
     } = useAuth();
@@ -139,11 +138,6 @@ export default defineComponent({
         await discoverAccounts();
         props.resolve();
         router.push(loginTargetLocation.value);
-
-        if (await checkBiometricLoginAvailability()) {
-          await openEnableBiometricLoginModal();
-        }
-
         setAuthenticated(true);
       } catch {
         error.value = t('pages.index.passwordWasNotSet');
