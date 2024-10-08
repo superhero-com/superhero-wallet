@@ -1,6 +1,9 @@
 <template>
   <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
+    <IonContent
+      ref="infoBoxEl"
+      class="ion-padding ion-content-bg"
+    >
       <div class="secure-login-settings">
         <div
           v-if="IS_MOBILE_APP"
@@ -129,7 +132,6 @@
 
               <InfoBox
                 v-if="isPasswordChangedSuccessfully"
-                ref="infoBoxEl"
                 class="info-box"
                 type="success"
                 :text="$t('pages.secureLogin.changePassword.success')"
@@ -207,7 +209,7 @@ export default defineComponent({
         await updatePassword(currentPassword.value, newPassword.value);
         isPasswordChangedSuccessfully.value = true;
         await nextTick();
-        infoBoxEl.value?.$el?.scrollIntoView();
+        infoBoxEl.value?.$el?.scrollBy(0, infoBoxEl.value?.$el?.scrollWidth);
       } catch (error) {
         isAuthFailed.value = true;
         isPasswordChangedSuccessfully.value = false;
