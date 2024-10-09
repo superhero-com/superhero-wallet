@@ -14,7 +14,7 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header v-if="isAuthenticated && showHeader" />
+        <Header v-if="showHeader" />
 
         <!--
           Layer displayed under the password protection modal when content is not visible.
@@ -148,7 +148,11 @@ export default defineComponent({
 
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
-    const hideRouter = computed(() => !isAuthenticated.value && !routeMeta.value?.ifNotAuthOnly);
+    const hideRouter = computed(() => (
+      !isAuthenticated.value
+      && !routeMeta.value?.ifNotAuthOnly
+      && !routeMeta.value?.ifNotAuth
+    ));
 
     const showHeader = computed(() => (
       !RUNNING_IN_POPUP
