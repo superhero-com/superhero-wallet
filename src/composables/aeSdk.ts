@@ -145,7 +145,7 @@ export function useAeSdk() {
           instance: nodeInstance!,
         }],
         id: APP_NAME,
-        type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
+        type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
         onConnection(aeppId: string, params: OnAeppConnectionParams, origin: string) {
           aeppInfo[aeppId] = { ...params, origin };
         },

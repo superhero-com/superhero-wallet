@@ -218,6 +218,7 @@ export const useAuth = createCustomScopedComposable(() => {
       const interval = setInterval(async () => {
         const sessionEncryptionKey = await getSessionEncryptionKey();
         if (sessionEncryptionKey) {
+          mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonicEncrypted.value!);
           setEncryptionKey(sessionEncryptionKey);
           clearInterval(interval);
           resolve();
