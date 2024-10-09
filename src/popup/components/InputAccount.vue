@@ -3,8 +3,8 @@
   <div
     class="input-field"
     :class="{
-      error: hasError && !isDropdownOpen,
-      warning: hasWarning && !isDropdownOpen,
+      error: hasError && (!isDropdownOpen || !focused),
+      warning: hasWarning && (!isDropdownOpen || !focused),
       readonly,
       code,
       focused,
@@ -46,8 +46,8 @@
       @focusout="focused = false"
     >
       <div
-        v-show="isDropdownOpen"
         class="dropdown-wrapper styled-scrollbar"
+        :class="{ open: isDropdownOpen }"
       >
         <div
           v-for="option in filteredOptions"
@@ -99,7 +99,7 @@
 
     <div
       v-if="showMessage"
-      :style="{ visibility: isDropdownOpen ? 'hidden' : undefined }"
+      :style="{ visibility: (isDropdownOpen && focused) ? 'hidden' : undefined }"
       class="message"
       data-cy="input-message"
     >
@@ -253,7 +253,7 @@ export default defineComponent({
     );
 
     watch(
-      () => [props.modelValue, focused.value],
+      () => [props.modelValue],
       () => {
         if (props.blinkOnChange) {
           isBlinking.value = true;
@@ -261,18 +261,11 @@ export default defineComponent({
             isBlinking.value = false;
           }, 500);
         }
-        let shouldBeOpen = props.modelValue.toString().length >= 4
-          && filteredOptions.value.length > 0
-          && focused.value;
+        isDropdownOpen.value = props.modelValue.toString().length >= 4
+          && filteredOptions.value.length > 0;
         if (props.addresses?.find((entry) => (entry.address === props.modelValue.toString()))) {
-          shouldBeOpen = false;
+          isDropdownOpen.value = false;
         }
-
-        // Required because on focus out the dropdown closes,
-        // and the click of the dropdown item is not called if I click an item
-        setTimeout(() => {
-          isDropdownOpen.value = shouldBeOpen;
-        }, 100);
       },
     );
 
@@ -485,7 +478,7 @@ export default defineComponent({
     &:has(input:focus),
     &:has(textarea:focus),
     &:has(label:active)
-  ) .dropdown-wrapper {
+  ) .dropdown-wrapper.open {
     display: block;
     top: calc(100% + 4px);
     opacity: 1;
