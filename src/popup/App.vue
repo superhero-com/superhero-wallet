@@ -22,7 +22,7 @@
         <div
           v-if="!IS_MOBILE_APP"
           class="app-unauthenticated-placeholder"
-          :class="{ visible: hideRouter }"
+          :class="{ visible: !showRouter }"
         />
 
         <!--
@@ -30,7 +30,7 @@
           see: https://github.com/ionic-team/ionic-framework/issues/26620
         -->
         <IonRouterOutlet
-          v-show="!hideRouter"
+          v-show="showRouter"
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
           :class="{ 'show-header': showHeader, ios: IS_IOS }"
           class="main"
@@ -147,11 +147,13 @@ export default defineComponent({
     const isRouterReady = ref(false);
 
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
+
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
-    const hideRouter = computed(() => (
-      !isAuthenticated.value
-      && !routeMeta.value?.ifNotAuthOnly
-      && !routeMeta.value?.ifNotAuth
+
+    const showRouter = computed(() => (
+      isAuthenticated.value
+      || routeMeta.value?.ifNotAuthOnly
+      || routeMeta.value?.ifNotAuth
     ));
 
     const showHeader = computed(() => (
@@ -302,7 +304,7 @@ export default defineComponent({
       isLoaderVisible,
       isMobileQrScannerVisible,
       modalsOpen,
-      hideRouter,
+      showRouter,
       showHeader,
       showScrollbar,
       innerElement,
@@ -370,7 +372,7 @@ export default defineComponent({
       background: $color-black url('../image/wallet-locked-bg.svg');
       background-size: cover;
       transition: all 0.5s ease-in-out;
-      transform: scale(1.2);
+      transform: scale(1.1);
       will-change: opacity, transform;
 
       &.visible {
