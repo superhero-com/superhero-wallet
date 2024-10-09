@@ -28,7 +28,7 @@ export const POPUP_TYPE = url.searchParams.get('type') as PopupType || null;
 export const IN_FRAME = window.parent !== window;
 
 /**
- * Running in a desktop or mobile browser
+ * Running in a desktop or mobile browser, but not as an extension.
  */
 export const IS_WEB = PLATFORM === 'web';
 
