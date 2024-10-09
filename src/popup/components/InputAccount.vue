@@ -271,7 +271,7 @@ export default defineComponent({
         // Required because on focus out the dropdown closes,
         // and the click of the dropdown item is not called if I click an item
         setTimeout(() => {
-          isDropdownOpen.value = shouldBeOpen || true;
+          isDropdownOpen.value = shouldBeOpen;
         }, 100);
       },
     );
@@ -454,7 +454,7 @@ export default defineComponent({
     background-color: $color-black;
     border: none;
     border-radius: $border-radius-interactive;
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15), 2px 2px 8px 0px rgba(0, 0, 0, 0.33);
     transition: 100ms ease-in-out;
     max-height: 200px;
     overflow: scroll;
