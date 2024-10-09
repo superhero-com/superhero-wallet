@@ -334,14 +334,6 @@ export default defineComponent({
     --color-bg: #{rgba($color-black, 0.44)};
     --color-placeholder: #{$color-white};
     --color-input-text: #{$color-white};
-
-    .dropdown-wrapper {
-      display: block;
-      top: calc(100% + 4px);
-      opacity: 1;
-      user-select: all;
-      pointer-events: all;
-    }
   }
 
   .label {
@@ -487,6 +479,18 @@ export default defineComponent({
     .dropdown-item:not(:last-child) {
       border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
+  }
+
+  &:where(
+    &:has(input:focus),
+    &:has(textarea:focus),
+    &:has(label:active)
+  ) .dropdown-wrapper {
+    display: block;
+    top: calc(100% + 4px);
+    opacity: 1;
+    user-select: all;
+    pointer-events: all;
   }
 
   &.error {
