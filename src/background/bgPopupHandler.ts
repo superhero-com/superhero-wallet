@@ -88,13 +88,27 @@ export const removePopup = (id: string) => delete popups[id];
 export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
 
 let expirationTimeout: NodeJS.Timeout;
+let keepAliveInterval: NodeJS.Timeout;
 
 export const setSessionTimeout = async (sessionTimeout: number) => {
   if (expirationTimeout) {
     clearTimeout(expirationTimeout);
   }
+  if (keepAliveInterval) {
+    clearInterval(keepAliveInterval);
+  }
+
+  /**
+   * This interval is set in order to keep service worker alive.
+   * By default service worker would be terminated in 30 seconds of inactivity.
+   * https://stackoverflow.com/a/66618269
+   */
+  keepAliveInterval = setInterval(browser.runtime.getPlatformInfo, 20000);
   expirationTimeout = setTimeout(
-    () => storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey),
+    async () => {
+      await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
+      clearInterval(keepAliveInterval);
+    },
     sessionTimeout,
   );
 };
