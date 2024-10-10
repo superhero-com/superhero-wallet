@@ -64,6 +64,9 @@ export const useAuth = createCustomScopedComposable(() => {
     openEnableBiometricLoginModal,
   } = useModals();
 
+  let isSessionExpired = false;
+  let expirationTimeout: NodeJS.Timeout;
+
   /** Common state for both biometric or password protection */
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
@@ -365,6 +368,20 @@ export const useAuth = createCustomScopedComposable(() => {
     );
   }
 
+  /**
+   * `isSessionExpired` is set to `false` whenever user is authenticated.
+   * `isSessionExpired` is a web only feature that is in control of locking the
+   * wallet after the tab was not active for a `secureLoginTimeout` amount of time.
+   */
+  watch(
+    isAuthenticated,
+    (val) => {
+      if (val) {
+        isSessionExpired = false;
+      }
+    },
+  );
+
   watch(
     isAppActive,
     async (isActive, wasActive) => {
@@ -372,16 +389,23 @@ export const useAuth = createCustomScopedComposable(() => {
       // Check if biometric auth is still available
       checkBiometricLoginAvailability({ forceUpdate: true });
 
-      if (
-        !isAuthenticating.value
-        && isActive
-        && !wasActive
-      ) {
+      if (isActive && !wasActive) {
+        clearInterval(expirationTimeout);
+
         // If session exists user needs to stay logged in
-        const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
-        if (!isAuthenticated.value && !keepExtensionLoggedIn) {
-          lockWallet();
+        if (!isAuthenticating.value) {
+          const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
+          if (isSessionExpired || (!keepExtensionLoggedIn && IS_EXTENSION)) {
+            lockWallet();
+          }
         }
+      } else if (wasActive && !isActive) {
+        expirationTimeout = setTimeout(
+          () => {
+            isSessionExpired = true;
+          },
+          +secureLoginTimeoutDecrypted.value!,
+        );
       }
     },
   );

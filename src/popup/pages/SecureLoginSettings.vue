@@ -32,10 +32,7 @@
         <!--
           Auto-lock wallet time options
         -->
-        <div
-          v-if="!IS_WEB"
-          class="form-group"
-        >
+        <div class="form-group">
           <div :class="{ dimmed: IS_MOBILE_APP && !isBiometricLoginEnabled }">
             <p class="text-heading-5" v-text="$t('pages.secureLogin.autoLock.title')" />
             <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart1')" />
@@ -167,7 +164,7 @@ import {
 import { IonPage, IonContent } from '@ionic/vue';
 import { Form, Field } from 'vee-validate';
 
-import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP, IS_WEB } from '@/constants';
+import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
 import { ComponentRef } from '@/types';
 import { useAuth, useModals, useUi } from '@/composables';
 
@@ -247,7 +244,6 @@ export default defineComponent({
 
     return {
       AUTHENTICATION_TIMEOUTS,
-      IS_WEB,
       IS_MOBILE_APP,
       infoBoxEl,
       isBiometricLoginEnabled,
