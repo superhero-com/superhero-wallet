@@ -457,7 +457,7 @@ export default defineComponent({
     padding: 5px 2px;
     overflow-x: hidden;
     overflow-y: auto;
-    z-index: 2;
+    z-index: -1;
 
     .dropdown-item {
       padding: 8px;
@@ -484,6 +484,7 @@ export default defineComponent({
     opacity: 1;
     user-select: all;
     pointer-events: all;
+    z-index: 2;
   }
 
   &.error {
