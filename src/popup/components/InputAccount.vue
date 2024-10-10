@@ -261,7 +261,7 @@ export default defineComponent({
             isBlinking.value = false;
           }, 500);
         }
-        isDropdownOpen.value = props.modelValue.toString().length >= 4
+        isDropdownOpen.value = props.modelValue.toString().length >= 1
           && filteredOptions.value.length > 0;
         if (props.addresses?.find((entry) => (entry.address === props.modelValue.toString()))) {
           isDropdownOpen.value = false;
@@ -449,7 +449,7 @@ export default defineComponent({
     border-radius: $border-radius-interactive;
     box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15), 2px 2px 8px 0px rgba(0, 0, 0, 0.33);
     transition: 100ms ease-in-out;
-    max-height: 200px;
+    max-height: 240px;
     overflow: scroll;
     opacity: 0;
     user-select: none;
@@ -457,7 +457,7 @@ export default defineComponent({
     padding: 5px 2px;
     overflow-x: hidden;
     overflow-y: auto;
-    z-index: 1;
+    z-index: 2;
 
     .dropdown-item {
       padding: 8px;
