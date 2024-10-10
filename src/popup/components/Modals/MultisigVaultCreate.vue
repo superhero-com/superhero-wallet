@@ -68,7 +68,7 @@
             </template>
             <template #after>
               <BtnIcon
-                v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
+                v-if="signers.length > MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
                   && (!signer.address || signer.address.length === 0)"
                 :icon="TrashIcon"
                 data-cy="clear-address-button"
