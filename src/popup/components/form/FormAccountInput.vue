@@ -38,6 +38,7 @@
           :protocol="protocol"
         />
         <BtnIcon
+          v-if="!hideClearIcon"
           :icon="CircleCloseIcon"
           data-cy="clear-address-button"
           class="close-icon"
@@ -102,6 +103,7 @@ export default defineComponent({
     enterSubmit: Boolean,
     autoHeight: Boolean,
     readonly: Boolean,
+    hideClearIcon: { type: Boolean, default: false },
     protocol: { type: String as PropType<Protocol>, default: null },
   },
   emits: ['update:modelValue', 'submit'],
@@ -152,6 +154,9 @@ export default defineComponent({
           ?.find((entry: IAddressBookEntry) => (entry.address === props.modelValue));
         if (searchAddress) {
           selectedAddress.value = searchAddress;
+        }
+        if (!props.modelValue) { // If it's cleared externally
+          selectedAddress.value = undefined;
         }
 
         if (props.autoHeight && textarea.value) {
