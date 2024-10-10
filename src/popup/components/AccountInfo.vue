@@ -144,6 +144,7 @@ export default defineComponent({
       @extend %face-sans-16-medium;
 
       line-height: 20px; // Avoid cutting off bottom part of some letters, e.g.: "g"
+      max-width: 100%;
     }
 
     &.list-name {
