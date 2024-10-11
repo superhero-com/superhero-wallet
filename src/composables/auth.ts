@@ -162,13 +162,6 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
-   * TODO: Updating the authentication status from outside of the composable should be not allowed
-   */
-  function setAuthenticated(val: boolean) {
-    isAuthenticated.value = val;
-  }
-
-  /**
    * Setting/Resetting the password key logs the user in/out.
    */
   function setEncryptionKey(newEncryptionKey?: CryptoKey) {
@@ -427,7 +420,6 @@ export const useAuth = createCustomScopedComposable(() => {
     getEncryptionKey,
     lockWallet,
     logout,
-    setAuthenticated,
     setMnemonicAndInitializeAuthentication,
     updatePassword,
   };
