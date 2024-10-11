@@ -71,6 +71,8 @@ export const useAuth = createCustomScopedComposable(() => {
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
   const isMnemonicRestored = ref(false);
+  /** User skipped setting password so the test one was used */
+  const isUsingDefaultPassword = ref(false);
   const encryptionKey = ref<CryptoKey>();
 
   /**
@@ -277,6 +279,7 @@ export const useAuth = createCustomScopedComposable(() => {
       return;
     }
 
+    isUsingDefaultPassword.value = false;
     isAuthenticating.value = true;
 
     if (IS_MOBILE_APP) {
@@ -301,7 +304,11 @@ export const useAuth = createCustomScopedComposable(() => {
       // If restoring from background failed try to use the dev mode password set
       // when using "Skip" when setting password.
       if (!encryptionKey.value && UNFINISHED_FEATURES && !IS_OFFSCREEN_TAB) {
-        await authenticateWithPassword(STUB_ACCOUNT.password).catch(() => openPasswordLoginModal());
+        await authenticateWithPassword(STUB_ACCOUNT.password)
+          .then(() => {
+            isUsingDefaultPassword.value = true;
+          })
+          .catch(() => openPasswordLoginModal());
       }
 
       // Finally if other attempts failed ask user for the password
@@ -406,6 +413,8 @@ export const useAuth = createCustomScopedComposable(() => {
   return {
     isAuthenticated: readonly(isAuthenticated),
     isMnemonicRestored,
+    isMnemonicEncrypted,
+    isUsingDefaultPassword,
     mnemonic,
     mnemonicDecrypted,
     mnemonicEncrypted,

@@ -128,6 +128,7 @@ import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 
 import LockIcon from '@/icons/secure-lock-outline.svg?vue-component';
+import { useAuth } from '@/composables';
 
 export default defineComponent({
   components: {
@@ -144,6 +145,8 @@ export default defineComponent({
     isRestoredWallet: Boolean,
   },
   setup(props) {
+    const { isUsingDefaultPassword } = useAuth();
+
     const password = ref('');
     const confirmPassword = ref('');
 
@@ -160,6 +163,7 @@ export default defineComponent({
     function useDefaultPassword() {
       if (UNFINISHED_FEATURES) {
         props.resolve(STUB_ACCOUNT.password);
+        isUsingDefaultPassword.value = true;
       }
     }
 
