@@ -97,7 +97,9 @@
         </PanelItem>
 
         <PanelItem
+          v-if="isMnemonicEncrypted || isBiometricLoginEnabled"
           :title="$t('pages.secureLogin.lockWallet')"
+          :disabled="isUsingDefaultPassword || (!isMnemonicEncrypted && !isBiometricLoginEnabled)"
           data-cy="lock-wallet"
           @click="lockWallet()"
         >
@@ -120,6 +122,7 @@ import {
   useAddressBook,
   useAeSdk,
   useAuth,
+  useUi,
 } from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
@@ -159,7 +162,8 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
     const { addressBook } = useAddressBook();
-    const { lockWallet } = useAuth();
+    const { isMnemonicEncrypted, isUsingDefaultPassword, lockWallet } = useAuth();
+    const { isBiometricLoginEnabled } = useUi();
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
     const activeAccountFaucetUrl = computed(
@@ -180,6 +184,9 @@ export default defineComponent({
       isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
+      isMnemonicEncrypted,
+      isBiometricLoginEnabled,
+      isUsingDefaultPassword,
     };
   },
 });
