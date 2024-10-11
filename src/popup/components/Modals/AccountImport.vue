@@ -101,10 +101,7 @@ export default defineComponent({
     const { t } = useI18n();
     const { discoverAccounts } = useAccounts();
     const { openScanQrModal } = useModals();
-    const {
-      setAuthenticated,
-      setMnemonicAndInitializeAuthentication,
-    } = useAuth();
+    const { setMnemonicAndInitializeAuthentication } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
     const discovering = ref(false);
@@ -138,7 +135,6 @@ export default defineComponent({
         await discoverAccounts();
         props.resolve();
         router.push(loginTargetLocation.value);
-        setAuthenticated(true);
       } catch {
         error.value = t('pages.index.passwordWasNotSet');
       } finally {
