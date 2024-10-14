@@ -124,7 +124,7 @@ describe('Test cases for deeplinks', () => {
   it.skip('JWT signing and verifying signature', () => {
     cy.login(
       {},
-      `/jwt-sign?payload=${encodedJWTPayload}`
+      `/sign-jwt?payload=${encodedJWTPayload}`
       + `&x-success=${encodedTestDeploymentUrl}%2Faccount%3F%7Bsigned-payload%7D`
       + `&x-cancel=${encodedTestDeploymentUrl}`,
     )
@@ -147,7 +147,7 @@ describe('Test cases for deeplinks', () => {
   });
 
   it('JWT signing from superhero', () => {
-    cy.login({}, '/jwt-sign?payload=%7B%22a%22%3A1%2C%22b%22%3A2%7D&x-success=https%3A%2F%2Fchat.superhero.com&x-cancel=https%3A%2F%2Fchat.superhero.com')
+    cy.login({}, '/sign-jwt?payload=%7B%22a%22%3A1%2C%22b%22%3A2%7D&x-success=https%3A%2F%2Fchat.superhero.com&x-cancel=https%3A%2F%2Fchat.superhero.com')
       .get('[data-cy=label]')
       .eq(0)
       .should('be.visible')

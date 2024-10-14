@@ -797,8 +797,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'jwt-sign',
-    path: '/jwt-sign',
+    name: 'sign-jwt',
+    path: '/sign-jwt',
     component: JwtSign,
     meta: {
       title: 'signMessage',

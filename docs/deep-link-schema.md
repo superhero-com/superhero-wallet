@@ -90,7 +90,7 @@ https://wallet.superhero.com/sign-message?message=test&x-success=https%3A%2F%2Fe
 ## Sign a JWT
 
 ```bash
-https://wallet.superhero.com/jwt-sign
+https://wallet.superhero.com/sign-jwt
   ? payload=<payload>
   & x-success=<success-url>
   & x-cancel=<cancel-url>
@@ -105,5 +105,5 @@ https://wallet.superhero.com/jwt-sign
 ### Example
 
 ```
-https://wallet.superhero.com/jwt-sign?payload=%7B%22test%22%3A1%7D&x-success=https%3A%2F%2Fexample.com%3Fsigned-payload%3D%7Bsigned-payload%7D&x-cancel=https%3A%2F%2Fexample.com%2Ffail-jwt-sign
+https://wallet.superhero.com/sign-jwt?payload=%7B%22test%22%3A1%7D&x-success=https%3A%2F%2Fexample.com%3Fsigned-payload%3D%7Bsigned-payload%7D&x-cancel=https%3A%2F%2Fexample.com%2Ffail-sign-jwt
 ```
