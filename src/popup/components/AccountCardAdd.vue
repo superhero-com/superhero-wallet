@@ -32,7 +32,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MODAL_ACCOUNT_CREATE, MODAL_AE_ACCOUNT_CREATE } from '@/constants';
+import { useI18n } from 'vue-i18n';
+
+import type { Protocol } from '@/types';
+import { MODAL_PROTOCOL_SELECT, MODAL_ACCOUNT_CREATE, PROTOCOLS } from '@/constants';
 import { useModals } from '@/composables';
 
 import AccountCardBase, { accountCardBaseCommonProps } from '@/popup/components/AccountCardBase.vue';
@@ -49,12 +52,21 @@ export default defineComponent({
   },
   setup(props) {
     const { openModal } = useModals();
+    const { t } = useI18n();
 
-    function openCreateAccountModal() {
+    async function openCreateAccountModal() {
       if (props.isMultisig) {
-        openModal(MODAL_AE_ACCOUNT_CREATE, { isMultisig: props.isMultisig });
+        openModal(MODAL_ACCOUNT_CREATE, {
+          protocol: PROTOCOLS.aeternity,
+          isMultisig: props.isMultisig,
+        });
       } else {
-        openModal(MODAL_ACCOUNT_CREATE);
+        const selectedProtocol = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
+          title: t('modals.createAccount.title'),
+          subtitle: t('modals.createAccount.generateOrImport'),
+          resolve: (protocol: Protocol) => protocol,
+        });
+        openModal(MODAL_ACCOUNT_CREATE, { protocol: selectedProtocol });
       }
     }
 

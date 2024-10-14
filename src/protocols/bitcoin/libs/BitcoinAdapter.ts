@@ -10,6 +10,7 @@ import {
 } from 'bitcoinjs-lib';
 import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
+import ECPairFactory from 'ecpair';
 
 import type {
   AccountAddress,
@@ -205,20 +206,41 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     rawAccount: IAccountRaw,
     idx: number,
     globalIdx: number,
-    seed: Uint8Array,
+    seed?: Uint8Array,
   ): IAccount | null {
-    if (rawAccount.type !== ACCOUNT_TYPES.hdWallet) {
-      return null;
+    const { activeNetwork } = useNetworks();
+
+    if (rawAccount.type === ACCOUNT_TYPES.privateKey && rawAccount.privateKey) {
+      const ECPair = ECPairFactory(ecc);
+      const account = ECPair.fromPrivateKey(Buffer.from(rawAccount.privateKey));
+
+      const network = networks[activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 'bitcoin' : 'testnet'];
+      const { address } = payments.p2wpkh({ // p2wpkh for Native-Segwit and p2pkh for Legacy
+        pubkey: account.publicKey,
+        network,
+      });
+      return {
+        idx,
+        globalIdx,
+        secretKey: Buffer.from(rawAccount.privateKey!),
+        ...rawAccount,
+        publicKey: account.publicKey,
+        privateKey: undefined,
+        address: address!,
+      };
     }
 
-    const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
+    if (rawAccount.type === ACCOUNT_TYPES.hdWallet && seed) {
+      const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
 
-    return {
-      globalIdx,
-      idx,
-      ...rawAccount,
-      ...hdWallet,
-    } as IAccount;
+      return {
+        globalIdx,
+        idx,
+        ...rawAccount,
+        ...hdWallet,
+      };
+    }
+    return null;
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

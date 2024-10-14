@@ -30,6 +30,8 @@ describe('Test cases for receive modal', () => {
       .get('.button-subheader ')
       .eq(1)
       .click()
+      .get('[data-cy=create-plain-account]')
+      .click()
       .generateReceiveLinkAndVisit(STUB_ACCOUNT.addressBitcoinTestnet, testAmount);
 
     // ethereum
@@ -40,6 +42,8 @@ describe('Test cases for receive modal', () => {
       .click()
       .get('.button-subheader ')
       .eq(2)
+      .click()
+      .get('[data-cy=create-plain-account]')
       .click()
       .generateReceiveLinkAndVisit(STUB_ACCOUNT.addressEthereum, testAmount);
   });

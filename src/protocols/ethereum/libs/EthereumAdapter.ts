@@ -9,6 +9,7 @@ import {
   FeeMarketEIP1559Transaction,
   FeeMarketEIP1559TxData,
   bigIntToHex,
+  privateKeyToPublicKey,
 } from 'web3-eth-accounts';
 import Web3Eth, {
   NUMBER_DATA_FORMAT,
@@ -204,20 +205,35 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     rawAccount: IAccountRaw,
     idx: number,
     globalIdx: number,
-    seed: Uint8Array,
+    seed?: Uint8Array,
   ): IAccount | null {
-    if (rawAccount.type !== ACCOUNT_TYPES.hdWallet) {
-      return null;
+    if (rawAccount.type === ACCOUNT_TYPES.privateKey && rawAccount.privateKey) {
+      const address = toChecksumAddress(
+        privateKeyToAddress(Buffer.from(rawAccount.privateKey)).toString(),
+      );
+      return {
+        idx,
+        globalIdx,
+        secretKey: Buffer.from(rawAccount.privateKey!),
+        ...rawAccount,
+        privateKey: undefined,
+        address,
+        publicKey: Buffer.from(privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), false)),
+      };
     }
 
-    const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
+    if (rawAccount.type === ACCOUNT_TYPES.hdWallet && seed) {
+      const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
 
-    return {
-      globalIdx,
-      idx,
-      ...rawAccount,
-      ...hdWallet,
-    } as IAccount;
+      return {
+        globalIdx,
+        idx,
+        ...rawAccount,
+        ...hdWallet,
+      };
+    }
+
+    return null;
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

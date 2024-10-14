@@ -72,7 +72,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/mixins';
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
 

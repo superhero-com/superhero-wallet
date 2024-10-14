@@ -198,8 +198,10 @@ export function useModals() {
     });
   }
 
-  function openBiometricLoginModal() {
-    return openModal(MODAL_BIOMETRIC_LOGIN);
+  function openBiometricLoginModal(options?: {
+    force: boolean;
+  }) {
+    return openModal(MODAL_BIOMETRIC_LOGIN, options);
   }
 
   function openPasswordLoginModal() {

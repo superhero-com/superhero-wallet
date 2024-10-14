@@ -241,9 +241,12 @@ export const useAuth = createCustomScopedComposable(() => {
     return true;
   }
 
-  async function authenticateWithBiometry(): Promise<boolean> {
+  async function authenticateWithBiometry(force = false): Promise<boolean> {
     if (
-      !isAuthenticated.value
+      (
+        !isAuthenticated.value
+        || force
+      )
       && isBiometricLoginEnabled.value
       && await checkBiometricLoginAvailability()
     ) {
@@ -269,7 +272,7 @@ export const useAuth = createCustomScopedComposable(() => {
    * or `authenticateWithBiometry` methods.
    */
   async function checkUserAuth(): Promise<any> {
-    watchUntilTruthy(isMnemonicRestored);
+    await watchUntilTruthy(isMnemonicRestored);
 
     if (!mnemonic.value || isAuthenticated.value) {
       return;
@@ -420,6 +423,7 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonicEncrypted,
     mnemonicSeed,
     encryptionKey,
+    encryptionSalt,
     generateMnemonic,
     secureLoginTimeoutDecrypted,
     authenticateWithBiometry,

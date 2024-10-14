@@ -108,7 +108,7 @@ export abstract class BaseProtocolAdapter {
     rawAccount: IAccountRaw,
     idx: number,
     globalIdx: number,
-    seed: Uint8Array
+    seed?: Uint8Array
   ): IAccount | null;
 
   /**
