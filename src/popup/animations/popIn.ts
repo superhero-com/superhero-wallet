@@ -2,6 +2,7 @@ import { createAnimation } from '@ionic/vue';
 import type { IonAnimationBuilder } from '@/types';
 import { PAGE_TRANSITION_DURATION } from '@/constants';
 
+// TODO update according to Tsvetan's opinion
 export const popInAnimation: IonAnimationBuilder = (
   baseEl: Element,
   opts: { enteringEl: Element; leavingEl: Element },
