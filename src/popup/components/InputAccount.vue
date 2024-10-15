@@ -261,7 +261,7 @@ export default defineComponent({
             isBlinking.value = false;
           }, 500);
         }
-        isDropdownOpen.value = props.modelValue.toString().length >= 1
+        isDropdownOpen.value = props.modelValue.toString().length >= 2
           && filteredOptions.value.length > 0;
         if (props.addresses?.find((entry) => (entry.address === props.modelValue.toString()))) {
           isDropdownOpen.value = false;
