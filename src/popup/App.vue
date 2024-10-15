@@ -16,7 +16,7 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header v-if="showHeader" />
+        <Header class="header" />
 
         <!--
           Layer displayed under the password protection modal when content is not visible.
@@ -34,8 +34,8 @@
         <IonRouterOutlet
           v-show="showRouter"
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-          :class="{ 'show-header': showHeader, ios: IS_IOS }"
-          class="main"
+          :class="{ 'has-header': showHeader, ios: IS_IOS }"
+          class="router-outlet"
         />
 
         <ConnectionStatus
@@ -349,7 +349,7 @@ export default defineComponent({
   --screen-padding-x: 16px;
   --screen-border-radius: 0;
   --screen-bg-color: #{$color-bg-app};
-  --header-height: 0;
+  --header-height: 40px;
   --gap: 12px;
 
   &.disable-transitions * {
@@ -382,14 +382,20 @@ export default defineComponent({
       overflow-y: auto;
     }
 
-    .main {
-      margin-top: calc(var(--header-height) + env(safe-area-inset-top));
+    .router-outlet {
       padding-bottom: env(safe-area-inset-bottom);
       background-color: var(--screen-bg-color);
 
       &.ios {
         top: 10px;
       }
+    }
+
+    .header {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 1s;
+      will-change: opacity visibility;
     }
 
     .app-unauthenticated-placeholder {
@@ -420,7 +426,10 @@ export default defineComponent({
     }
 
     &.show-header {
-      --header-height: 40px;
+      .header {
+        visibility: visible;
+        opacity: 1;
+      }
     }
   }
 
