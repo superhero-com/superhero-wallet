@@ -147,6 +147,14 @@ export const routes: WalletAppRouteConfig[] = [
         props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
         children: [
           {
+            path: '',
+            name: ROUTE_ACCOUNT_DETAILS,
+            component: AccountDetailsTransactions,
+            meta: {
+              showFilterBar: true,
+            },
+          },
+          {
             path: 'assets',
             name: ROUTE_ACCOUNT_DETAILS_ASSETS,
             component: ProtocolSpecificView,
@@ -156,15 +164,6 @@ export const routes: WalletAppRouteConfig[] = [
               showFilterBar: true,
               hideHeader: true,
               hideFilterButton: true,
-            },
-          },
-          {
-            path: '',
-            name: ROUTE_ACCOUNT_DETAILS,
-            component: AccountDetailsTransactions,
-            meta: {
-              hideHeader: true,
-              showFilterBar: true,
             },
           },
           {
