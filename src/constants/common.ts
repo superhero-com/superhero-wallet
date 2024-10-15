@@ -11,9 +11,9 @@ export const MOBILE_SCHEMA = 'superhero://';
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
 export const PROTOCOLS = {
-  aeternity: 'aeternity',
   bitcoin: 'bitcoin',
   ethereum: 'ethereum',
+  aeternity: 'aeternity',
 } as const;
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
