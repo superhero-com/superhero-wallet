@@ -55,6 +55,11 @@
           :id="uid"
           :input-id="inputId"
         >
+          <!--
+            Remove `type` attribute check logic after
+            issue is resolved
+            https://github.com/logaretm/vee-validate/issues/4699
+          -->
           <input
             v-bind="$attrs"
             :id="inputId"
@@ -67,7 +72,7 @@
             :value="modelValue"
             :disabled="readonly"
             :inputmode="inputMode"
-            :type="type"
+            :type="type === 'password' ? 'password' : undefined"
             :autocapitalize="autoCapitalize"
             @input="handleInput"
             @keydown="checkIfNumber"
