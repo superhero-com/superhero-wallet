@@ -112,22 +112,33 @@ body {
   }
 }
 
-ion-content {
-  /** hide scrollbar **/
-  --offset-bottom: auto !important;
-  --overflow: hidden;
+ion-router-outlet {
+  ion-content {
+    /** hide scrollbar **/
+    --offset-bottom: auto !important;
+    --overflow: hidden;
 
-  overflow: auto;
+    overflow: auto;
+    transition: padding-top 10s;
 
-  &::-webkit-scrollbar {
-    display: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    /** remove left-right padding **/
+    &::part(scroll) {
+      --padding-end: 0;
+      --padding-start: 0;
+      --padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+    }
   }
 
-  /** remove left-right padding **/
-  &::part(scroll) {
-    --padding-end: 0;
-    --padding-start: 0;
-    --padding-top: 0;
+  &.has-header {
+    ion-content {
+      &::part(scroll) {
+        --padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+      }
+    }
   }
 }
 

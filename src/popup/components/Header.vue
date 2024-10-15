@@ -265,7 +265,8 @@ export default defineComponent({
 
 .header {
   z-index: $z-index-header;
-  height: var(--header-height);
+  height: 40px;
+  transition: height 10s;
 
   .toolbar {
     --opacity: 0;
@@ -280,10 +281,11 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: var(--screen-bg-color);
-    padding: 0 8px;
     width: 100%;
-    height: var(--header-height);
+    height: 100%;
+    padding: 0 8px;
+    background-color: rgba($color-bg-1, 0.8); // var(--screen-bg-color);
+    backdrop-filter: blur($bg-blur-radius);
 
     @include mixins.mobile {
       display: flex;

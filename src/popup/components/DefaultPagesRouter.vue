@@ -5,7 +5,6 @@
 
     <IonRouterOutlet
       :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-      :animation="popInAnimation"
     />
   </IonPage>
 </template>

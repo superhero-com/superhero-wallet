@@ -1,6 +1,6 @@
 <template>
   <div
-    class="account-details"
+    class="account-details-base"
     :data-account-address="activeAccount.address"
   >
     <div class="account-info-wrapper">
@@ -230,7 +230,7 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
 
-.account-details {
+.account-details-base {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
   --screen-bg-color: #{$color-bg-modal};

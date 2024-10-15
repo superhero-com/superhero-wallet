@@ -56,7 +56,7 @@ export default defineComponent({
   min-height: 40px;
   padding: 4px 10px;
   color: $color-white;
-  backdrop-filter: blur($bg-blur-radius);
+  // backdrop-filter: blur($bg-blur-radius);
   text-align: center;
 
   &::before {
