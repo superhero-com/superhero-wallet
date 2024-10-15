@@ -102,7 +102,8 @@ export default defineComponent({
 
         if (
           accounts.value.find(({ protocol, secretKey }) => (
-            Buffer.from(secretKey).toString('hex') === Buffer.from(account.secretKey).toString('hex')
+            secretKey
+            && Buffer.from(secretKey).toString('hex') === Buffer.from(account.secretKey).toString('hex')
             && protocol === props.protocol
           ))
         ) {
