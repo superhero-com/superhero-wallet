@@ -228,8 +228,8 @@ export const useAuth = createCustomScopedComposable(() => {
   async function authenticateWithPassword(password: string): Promise<boolean> {
     if (!isAuthenticated.value && isMnemonicEncrypted.value) {
       const key = await generateEncryptionKey(password, encryptionSalt.value!);
-      setEncryptionKey(key);
       const decryptionResult = await decrypt(key, mnemonicEncrypted.value!);
+      setEncryptionKey(key);
 
       if (!decryptionResult) {
         return false;
