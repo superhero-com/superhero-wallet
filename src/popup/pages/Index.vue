@@ -26,12 +26,14 @@
               class="tag"
               scope="global"
             >
-              <span class="emphasis">{{ $t('pages.index.heading.receive') }}</span>
-              <span class="emphasis">{{ $t('pages.index.heading.store') }}</span>
-              <span class="emphasis">{{ $t('pages.index.heading.send') }}</span>
-              <span class="aeternity-name">
-                {{ $t('pages.index.heading.aeternityBlockchain') }}
-              </span>
+              <span
+                class="emphasis"
+                v-text="$t('pages.index.heading.web3')"
+              />
+              <span
+                class="emphasis"
+                v-text="$t('pages.index.heading.deFi')"
+              />
             </i18n-t>
           </div>
 

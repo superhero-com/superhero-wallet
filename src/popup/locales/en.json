@@ -890,11 +890,9 @@
       "term1": "I agree to the Superhero ",
       "termsAndConditions": "Terms of Use",
       "heading": {
-        "message": "More than just a way to {0}, {1} & {2} on the {3}",
-        "receive": "receive",
-        "store": "store",
-        "send": "send tokens",
-        "aeternityBlockchain": "æternity blockchain"
+        "message": "The multi-blockchain wallet to manage crypto assets and navigate {0} & {1} space.",
+        "web3": "web3",
+        "deFi": "DeFi"
       },
       "ready": "Ready to go?",
       "go": "Go!",
