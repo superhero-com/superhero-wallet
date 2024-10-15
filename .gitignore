@@ -9,8 +9,9 @@
 /.idea
 /.nyc_output
 .DS_Store
-/tests/e2e/videos
-/tests/e2e/screenshots
+/tests/e2e/videos/
+/tests/e2e/screenshots/
+/coverage
 
 # local env files
 .env.local
