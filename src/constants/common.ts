@@ -10,10 +10,15 @@ export const MOBILE_SCHEMA = 'superhero://';
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
+/**
+ * List of supported protocols.
+ * The order of the properties is important as it determines the order of the protocols
+ * in the displayed lists.
+ */
 export const PROTOCOLS = {
-  aeternity: 'aeternity',
   bitcoin: 'bitcoin',
   ethereum: 'ethereum',
+  aeternity: 'aeternity',
 } as const;
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
