@@ -12,7 +12,7 @@ import {
   ref,
   computed,
 } from 'vue';
-import { defer, uniqWith } from 'lodash-es';
+import { defer, isEqual, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
@@ -648,17 +648,28 @@ export function decryptedComputed(
   let updating = false;
   const decrypted = ref(defaultVal);
 
-  watch([key, encryptedState], async ([newKey, newState]) => {
+  async function setEncryptedState(val: string) {
+    updating = true;
+    try {
+      // eslint-disable-next-line no-param-reassign
+      encryptedState.value = await encrypt(key.value!, val);
+    } catch (e) { /* NOOP */ }
+    updating = false;
+  }
+
+  watch([key, encryptedState], async ([newKey, newState], [oldKey]) => {
     if (!updating) {
       try {
-        if (newKey && newState) {
+        if (newKey && oldKey && !isEqual(newKey, oldKey) && newState) {
+          await setEncryptedState(decrypted.value);
+        } else if (newKey && newState) {
           decrypted.value = await decrypt(newKey, newState);
           options.onDecrypted?.(decrypted.value);
-        } else {
+        } else if (newKey) {
           decrypted.value = defaultVal;
         }
       } catch (e) {
-        decrypted.value = defaultVal;
+        handleUnknownError(e);
       }
     }
   }, { immediate: true });
@@ -667,13 +678,6 @@ export function decryptedComputed(
     ? encryptedState // On mobile devices we are not encrypting states
     : computed<string>({
       get: () => decrypted.value,
-      set: async (val) => {
-        updating = true;
-        try {
-          // eslint-disable-next-line no-param-reassign
-          encryptedState.value = await encrypt(key.value!, val);
-        } catch (e) { /* NOOP */ }
-        updating = false;
-      },
+      set: setEncryptedState,
     });
 }
