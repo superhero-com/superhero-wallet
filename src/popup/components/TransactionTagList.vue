@@ -30,6 +30,7 @@ import {
   AENS,
   DEX,
   PROTOCOLS,
+  TOKEN_SALE,
   TX_DIRECTION,
 } from '@/constants';
 import { TX_FUNCTIONS, TX_TAGS_AENS } from '@/protocols/aeternity/config';
@@ -59,6 +60,9 @@ export default defineComponent({
       isDex,
       isDexPool,
       isDexAllowance,
+      isTokenSale,
+      isTokenSaleBuy,
+      isTokenSaleSell,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
@@ -115,6 +119,16 @@ export default defineComponent({
           (isDexPool.value)
             ? t('transaction.dexType.pool')
             : t('common.swap'),
+        );
+      } else if (isTokenSale.value) {
+        arr.push(
+          TOKEN_SALE,
+          (isTokenSaleBuy.value)
+            ? t('common.buy')
+            : '',
+          (isTokenSaleSell.value)
+            ? t('common.sell')
+            : '',
         );
       } else if (
         props.transaction.claim
