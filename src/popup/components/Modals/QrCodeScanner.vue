@@ -102,17 +102,13 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
-import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
+import type QrScannerType from 'qr-scanner';
 import { URDecoder } from '@ngraveio/bc-ur';
 import bs58check from 'bs58check';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
-import {
-  checkOrRequestDeviceCameraPermission,
-  checkDeviceHasCamera,
-  handleUnknownError,
-} from '@/utils';
+import { checkOrRequestDeviceCameraPermission, checkDeviceHasCamera } from '@/utils';
 import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
 import { useUi } from '@/composables';
 
@@ -152,8 +148,7 @@ export default defineComponent({
     const isMultiFragmentQr = ref(false);
 
     const decoder = new URDecoder();
-    let browserReader: BrowserQRCodeReaderType | null = null;
-    let browserReaderControls: IScannerControls | null = null;
+    let browserReader: QrScannerType | null = null;
 
     function stopReading() {
       if (IS_MOBILE_APP) {
@@ -161,7 +156,8 @@ export default defineComponent({
         BarcodeScanner.stopScan();
         BarcodeScanner.removeAllListeners();
       } else {
-        browserReaderControls?.stop();
+        browserReader?.stop();
+        browserReader?.destroy();
         browserReader = null;
       }
 
@@ -181,13 +177,13 @@ export default defineComponent({
       if (String(text).includes('BYTES/')) {
         decoder.receivePart(text);
         if (decoder.isComplete()) {
-          browserReaderControls?.stop();
+          browserReader?.stop();
           return getCombinedData();
         }
         isMultiFragmentQr.value = true;
         scanProgress.value = Math.floor(decoder.getProgress() * 100);
       } else {
-        browserReaderControls?.stop();
+        browserReader?.stop();
         return text;
       }
       return null;
@@ -221,27 +217,22 @@ export default defineComponent({
     }
 
     async function scanWeb() {
+      const { default: QrScanner } = await import('qr-scanner');
       return new Promise<string>((resolve) => {
-        browserReader?.decodeFromVideoDevice(
-          undefined,
-          qrCodeVideoEl.value,
-          async (result, _, controls) => {
-            browserReaderControls = controls;
-            if (result) {
-              controls?.stop();
-              const completeText = await handleReceivePart(result.getText());
+        browserReader = new QrScanner(
+          qrCodeVideoEl.value!,
+          async (result) => {
+            const text = result.data;
+            if (text) {
+              const completeText = await handleReceivePart(text);
               if (completeText) {
                 resolve(completeText);
               }
             }
           },
-        ).catch((error) => {
-          if (error.name === 'NotAllowedError') {
-            cameraPermissionGranted.value = false;
-          } else {
-            handleUnknownError(error);
-          }
-        });
+          {},
+        );
+        browserReader.start();
       });
     }
 
@@ -274,10 +265,6 @@ export default defineComponent({
         return;
       }
 
-      if (!IS_MOBILE_APP) {
-        const { BrowserQRCodeReader } = await import('@zxing/browser');
-        browserReader = new BrowserQRCodeReader();
-      }
       isCameraReady.value = true;
       props.resolve((IS_MOBILE_APP) ? await scanMobile() : await scanWeb());
     });
@@ -347,7 +334,6 @@ export default defineComponent({
       }
 
       .video {
-        z-index: 1;
         width: 100%;
         height: 100%;
         object-fit: cover;
