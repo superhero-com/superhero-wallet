@@ -138,13 +138,25 @@ export class EtherscanService {
     hash: string,
     address: string,
     blockNumber: string,
+    input?: string,
   ): Promise<ITransaction | undefined> {
     // Not the best solution, but it seems to be the only way to get token transaction details
     const blockTransactions = await this.fetchAccountTokenTransactions(address, {
       startblock: blockNumber,
       endblock: blockNumber,
     });
-    return blockTransactions.find((tx) => tx.hash === hash);
+
+    // The token transaction API doesn't always return input data, so we are adding it manually
+    // if we have it from the previous call
+    const transaction = blockTransactions.find((tx) => tx.hash === hash);
+    if (
+      transaction
+      && input
+      && (!transaction?.tx?.callData || (transaction?.tx?.callData as any) === 'deprecated')
+    ) {
+      transaction.tx.callData = input as any;
+    }
+    return transaction;
   }
 
   static normalizeEtherscanTransactionStructure(
@@ -164,6 +176,7 @@ export class EtherscanService {
       timeStamp,
       to,
       value,
+      input,
     } = transaction;
 
     const senderId = toEthChecksumAddress(from) as any;
@@ -178,7 +191,7 @@ export class EtherscanService {
     const amount = Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
-    const isEthTransfer = !contractAddress;
+    const isEthTransfer = !contractAddress && !input;
 
     return {
       protocol: PROTOCOLS.ethereum,
@@ -194,6 +207,7 @@ export class EtherscanService {
         type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
         arguments: [],
         callerId: isEthTransfer ? '' as any : senderId,
+        callData: isEthTransfer ? null : input,
         contractId,
         function: functionName,
         nonce,
