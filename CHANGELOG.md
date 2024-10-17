@@ -2,6 +2,114 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.11...v2.3.0) (2024-10-16)
+
+
+### Features
+
+* [#3318](https://github.com/Superhero-com/superhero-wallet/issues/3318) change wording to remove aeternity ([65c57bc](https://github.com/Superhero-com/superhero-wallet/commit/65c57bcad1626c4bc44c6ead75730b64a1549c4b))
+* add change password functionality ([54b344e](https://github.com/Superhero-com/superhero-wallet/commit/54b344e1015ea3cec00459ff483e8f3e9031019e))
+* add forgot password ([101d49a](https://github.com/Superhero-com/superhero-wallet/commit/101d49a6f1870b8d51e97a092b6928291e6cf6e3))
+* add password login & secure storage ([eb5a944](https://github.com/Superhero-com/superhero-wallet/commit/eb5a944a81ea3542f835154d3d5eaee6de7ac5cc))
+* **aeternity:** skip confirm modal for transactions created by wallet ([1380bea](https://github.com/Superhero-com/superhero-wallet/commit/1380beafc046cffc8cedcfe800e67134d6d10bb8))
+* allow developer to skip password login ([ab69711](https://github.com/Superhero-com/superhero-wallet/commit/ab697118b4b7a9712bfba9811426a7f325bb3562))
+* calculate password strength ([3c738e2](https://github.com/Superhero-com/superhero-wallet/commit/3c738e2d0832de3888c60a5fb4ec487e2bc13753))
+* create password for existing wallet ([657802a](https://github.com/Superhero-com/superhero-wallet/commit/657802aa8183ff1ec0d9b89731f122072bb4f92f))
+* disable logout time options on web ([7555cad](https://github.com/Superhero-com/superhero-wallet/commit/7555cadc4eea77c8204957950f41dd980eb054a6))
+* disable or hide lock wallet button if not usable ([a9406fe](https://github.com/Superhero-com/superhero-wallet/commit/a9406fe46a39c3c9d3714ab3fd99b9e530eb823f))
+* do not allow to extend session with local time manipulation ([d87caad](https://github.com/Superhero-com/superhero-wallet/commit/d87caada368fcf0b25ce2dbb1eff59622e7ff9c3))
+* do not keep salt and iv with encryption key ([e147614](https://github.com/Superhero-com/superhero-wallet/commit/e1476144c4a3e04bc654a65bfff6a50a621a69dd))
+* encrypt login timeout ([5607f66](https://github.com/Superhero-com/superhero-wallet/commit/5607f66ab7a0f1613cce90fc5c163efb3c56483f))
+* horizontal scroll component ([fc00632](https://github.com/Superhero-com/superhero-wallet/commit/fc00632e52952e33f8710ec7a131423c73b84bf8))
+* migrate mobile mnemonic to secure storage ([859b7a5](https://github.com/Superhero-com/superhero-wallet/commit/859b7a5e380d2b39f7eed2ba2cd7e6386195e70e))
+* move browser button before faucet & buy ([9107ed8](https://github.com/Superhero-com/superhero-wallet/commit/9107ed810e42da627172891dfaddc143ac2a2702))
+* remove aeternity wording from manifest file ([c5b16fa](https://github.com/Superhero-com/superhero-wallet/commit/c5b16fa8f2f286fce298a10b91294e87f6a2222d))
+* secure storage logout action ([a0c3514](https://github.com/Superhero-com/superhero-wallet/commit/a0c3514d22beb812aa33d60996039e2fec8f5bf9))
+* support private key export ([0495fff](https://github.com/Superhero-com/superhero-wallet/commit/0495fff9be56b36106058bf8c7050a67ae83f36f))
+* support private key import ([91ee00e](https://github.com/Superhero-com/superhero-wallet/commit/91ee00e076cd41d2ff090ca353e6204854a33c7a))
+* use default value for secureLoginTimeout ([1666681](https://github.com/Superhero-com/superhero-wallet/commit/1666681839fbd8b4ecf70c16376deb9797c6cbeb))
+* **wallet-connect:** support deeplinks ([e9998bd](https://github.com/Superhero-com/superhero-wallet/commit/e9998bd71cf54f74a27b41921c58853ab4c378f2))
+
+
+### Bug Fixes
+
+* [#3319](https://github.com/Superhero-com/superhero-wallet/issues/3319) change order of protocols ([770151e](https://github.com/Superhero-com/superhero-wallet/commit/770151ecfe23f284d32b22b0d4a7a142992d661d))
+* airgap import text ([8b1eec7](https://github.com/Superhero-com/superhero-wallet/commit/8b1eec759081b951f728870e3cfbd99bc53b8280))
+* allow displaying terms when not authenticated ([a2aa0e5](https://github.com/Superhero-com/superhero-wallet/commit/a2aa0e56d6efcea58c64e2cbc6f89d8fbdbf14cb))
+* apply correct color to BtnSubheader ([182ae07](https://github.com/Superhero-com/superhero-wallet/commit/182ae07f1a2290dbbfa9f192a5794ba32579d9ba))
+* be able to connect to dapp ([238a51a](https://github.com/Superhero-com/superhero-wallet/commit/238a51a58c8dda6784f11c0bfbd8df22e0b0701f))
+* be able to import private key account if airGap account imported ([a9dfde0](https://github.com/Superhero-com/superhero-wallet/commit/a9dfde00666561009ce0c222f37c7a6601daa7c9))
+* be able to open page that are not requiring logging in ([c19da7d](https://github.com/Superhero-com/superhero-wallet/commit/c19da7d4a44e010336e81b0200f82e5f03f3989d))
+* be able to remove session key from session storage ([512b94f](https://github.com/Superhero-com/superhero-wallet/commit/512b94f42785dac5190189a12f6db12519662b22))
+* be able to scan complex airGap qr codes ([e67d7b2](https://github.com/Superhero-com/superhero-wallet/commit/e67d7b23ecacce14c0d4b4cfd05f2da383c71cbe))
+* be able to verify seed phrase ([938e798](https://github.com/Superhero-com/superhero-wallet/commit/938e7983aeeef5870c7eff5c56ba3fcbd75a90c4))
+* **bitcoin:** show correct amount for send transactions ([82c6fed](https://github.com/Superhero-com/superhero-wallet/commit/82c6fed3d822f83c339276ba53708cf1a73c42fd))
+* check current password before setting new one ([3fde3eb](https://github.com/Superhero-com/superhero-wallet/commit/3fde3ebdc251155fa0f89917c76b7fde97965bba))
+* do not hide header on changing password ([0d15d09](https://github.com/Superhero-com/superhero-wallet/commit/0d15d09746e87e5a9f1825db5d2513bb71dd6f59))
+* do not set ecnription key if password incorrect ([56a6848](https://github.com/Superhero-com/superhero-wallet/commit/56a684806c8e3be5496e8303ee4b0da0c15de9c1))
+* extension can connect to dapps ([1efa6ac](https://github.com/Superhero-com/superhero-wallet/commit/1efa6ac76cbe8ff26b128a548d3569ccbb18deb5))
+* **extension:** be able to scan qr code in extension ([4094713](https://github.com/Superhero-com/superhero-wallet/commit/4094713ea4b1535434c298d93b1ac71ba7b1f275))
+* **extension:** check existing session correctly ([45c628f](https://github.com/Superhero-com/superhero-wallet/commit/45c628f69922a7645084c150eba91b3cfbfc146d))
+* **firefox:** show qr code for addrees book item correctly ([131c422](https://github.com/Superhero-com/superhero-wallet/commit/131c4228a94957799d394d521c941046849176e4))
+* input autofocus breaking the modal animation ([713138a](https://github.com/Superhero-com/superhero-wallet/commit/713138ae4ee43bac92b3350cc46ef9dbf528b2fc))
+* long account names not truncating ([358af4e](https://github.com/Superhero-com/superhero-wallet/commit/358af4e81c54df737e045d554845129e3d006d3c))
+* migrate Secure Login settings ([00ee7af](https://github.com/Superhero-com/superhero-wallet/commit/00ee7af7841f1b1527314fc4475d0e58231bf3e0))
+* **mobile:** show enable biometric login modal on setting mnemonic ([80c019e](https://github.com/Superhero-com/superhero-wallet/commit/80c019e6a44b9c2cb954b28bb6e0b5804057a82e))
+* secure login settings wrap fields with form ([c722326](https://github.com/Superhero-com/superhero-wallet/commit/c722326e7407740f987062b6a7c31adeb697f8f1))
+* show correct mnemonic phrase ([ed00448](https://github.com/Superhero-com/superhero-wallet/commit/ed00448ce203ea6b4c5c5f671b85a0f68a951929))
+* update encrypted states on password update ([90870b3](https://github.com/Superhero-com/superhero-wallet/commit/90870b36308645e2248252c9e7f0af2f20724d79))
+* update mnemonic encryption on password update ([033bc5f](https://github.com/Superhero-com/superhero-wallet/commit/033bc5ff7d0ccd2724929880878710f9c8b61706))
+* use solid lock wallet icon in more page ([90f32a5](https://github.com/Superhero-com/superhero-wallet/commit/90f32a55de66f3894c87ba37b3c2ecb3df36f5b1))
+
+
+### Performance
+
+* **deep-link:** do not load a Header that is not shown ([62a3c74](https://github.com/Superhero-com/superhero-wallet/commit/62a3c74e35a885644c4d0e3560e6156b4220ae01))
+* do not load Header, if hideHeader is enabled ([90325bb](https://github.com/Superhero-com/superhero-wallet/commit/90325bb9117e7ea4c7f344d43d5e894a2401f9bc))
+
+
+### Tests
+
+* set salt upon login correctly ([3cf175e](https://github.com/Superhero-com/superhero-wallet/commit/3cf175ec1c55c09209eb401c788497b1835872cf))
+* update tests to work with password login ([5f7b1a1](https://github.com/Superhero-com/superhero-wallet/commit/5f7b1a1badcb0f49bf0929be090180640affbfe2))
+
+
+### Documentation
+
+* add missing JWT sign schema ([d05aa96](https://github.com/Superhero-com/superhero-wallet/commit/d05aa9670ddd67a1ffc3ab632b1f17a9847648a8))
+
+
+### Style
+
+* apply correct label line-height in InputField ([c0c84f0](https://github.com/Superhero-com/superhero-wallet/commit/c0c84f0894b256ebc664262b989dd9f408c8a2fc))
+
+
+### Maintenance
+
+* add labels to new bug reports ([13a19e0](https://github.com/Superhero-com/superhero-wallet/commit/13a19e07237714c8689f2bce105d60113d989a3b))
+* address truncated clickable area ([4979029](https://github.com/Superhero-com/superhero-wallet/commit/497902919b3469e4a65e0984fe02dff0f17f9598))
+* disable backend health check ([6b37a14](https://github.com/Superhero-com/superhero-wallet/commit/6b37a1459b663ed805640aa410706ad8996b0a27))
+* do not set isAuthenticated outside auth composable ([7569eaa](https://github.com/Superhero-com/superhero-wallet/commit/7569eaaf9de5c5662c671b7221877190e05423bc))
+* fix sass-loader warnings ([2e452a2](https://github.com/Superhero-com/superhero-wallet/commit/2e452a239cad3c8b40acc9edf9716bff318e8722))
+* improve offline mode tabs wording ([9c278d5](https://github.com/Superhero-com/superhero-wallet/commit/9c278d5664f8d307c11d902ca7d57a8777e8e995))
+* lock wallet on login timeout ([709d7fc](https://github.com/Superhero-com/superhero-wallet/commit/709d7fca455ade5b250b3790fd22757e77b7a832))
+* remove remnants of migration to manifest v3 ([f4065d2](https://github.com/Superhero-com/superhero-wallet/commit/f4065d2c8961780a9a03078771672da879338400))
+* remove ui composableHelpers circular dependency ([cd18848](https://github.com/Superhero-com/superhero-wallet/commit/cd18848f9d7e810af49cd2b3cc117f670c3269b5))
+* remove unnecessary lastTimeAppWasActive variable ([bf1a32a](https://github.com/Superhero-com/superhero-wallet/commit/bf1a32acd7b414d60f68d22d4b6e3adc0a56040c))
+* remove unused locales ([828aac0](https://github.com/Superhero-com/superhero-wallet/commit/828aac020adb81a283266c0326dbc6dc8a3ae6a0))
+* rename passwordKey to encryptedData ([05924a0](https://github.com/Superhero-com/superhero-wallet/commit/05924a0cc5428e203e086ff13de45bcb5b6d3112))
+* rename sign JWT deep link ([fc44dbe](https://github.com/Superhero-com/superhero-wallet/commit/fc44dbe23b83b84061b666c1054bce966fb3432d))
+* reorganize auth composable ([42b8129](https://github.com/Superhero-com/superhero-wallet/commit/42b8129d29eac0b54caa565481e10a42d1721a9d))
+* run npm audit fix ([8fc5545](https://github.com/Superhero-com/superhero-wallet/commit/8fc5545223f7f07ec958b91c706ee1df6fbea12f))
+* secure storage move auth logic from accounts composable ([9ba882d](https://github.com/Superhero-com/superhero-wallet/commit/9ba882d4dad69aeacd1978c8f2d8835c05e3fb95))
+* set input type only for password field ([11aaf1a](https://github.com/Superhero-com/superhero-wallet/commit/11aaf1a0de269a22844c74b24e6f6ae19812245a))
+* simplify secure storage implementation ([a6b3642](https://github.com/Superhero-com/superhero-wallet/commit/a6b36422789dde0e76ef0059baac8bba79b64bc2))
+* translate password strength value & simplify AUTHENTICATION_TIMEOUTS const ([0cf47b1](https://github.com/Superhero-com/superhero-wallet/commit/0cf47b13934b6ede4b883861d92f2748a7c02607))
+* update backend failure modals wording ([4260570](https://github.com/Superhero-com/superhero-wallet/commit/42605700641a8b6e90fc51d02346a3a9411b4141))
+* update Index page wording ([7b410a5](https://github.com/Superhero-com/superhero-wallet/commit/7b410a53d0bbde47e9d94c8d49661f226c146684))
+* update project web version description ([b0d97ff](https://github.com/Superhero-com/superhero-wallet/commit/b0d97ff94117cf77182fdf6d7e6af4507b2d51ff))
+* use route constants ([0dcb4be](https://github.com/Superhero-com/superhero-wallet/commit/0dcb4be308e23af070c7a20dc6e7a216ee759863))
+
 ### [2.2.11](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.9...v2.2.11) (2024-08-21)
 
 
