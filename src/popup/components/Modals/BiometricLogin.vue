@@ -12,11 +12,12 @@
     <div class="content-wrapper">
       <div class="icon-wrapper">
         <IconBoxed
-          :icon="isAuthCanceled ? LockIcon : FingerprintIcon"
-          :class="!isAuthCanceled ? 'color-danger' : 'color-success'"
+          :icon="isAuthCanceled ? FingerprintIcon : LockIcon"
+          :class="isAuthCanceled ? 'color-danger' : 'color-success'"
           bg-colored
+          outline-colored
           transparent
-          :icon-padded="isAuthCanceled"
+          :icon-padded="!isAuthCanceled"
         />
       </div>
       <div class="info">
@@ -52,7 +53,7 @@ import Modal from '../Modal.vue';
 import IconBoxed from '../IconBoxed.vue';
 
 import FingerprintIcon from '../../../icons/fingerprint.svg?vue-component';
-import LockIcon from '../../../icons/lock.svg?vue-component';
+import LockIcon from '../../../icons/secure-lock-outline.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -61,20 +62,21 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    force: Boolean,
   },
   setup(props) {
     const isAuthCanceled = ref(false);
     const isAuthenticating = ref(false);
 
-    const { authenticate, isAuthenticated } = useAuth();
+    const { authenticateWithBiometry, isAuthenticated } = useAuth();
 
     async function initAuthenticate() {
-      if (isAuthenticating.value || isAuthenticated.value) {
+      if (isAuthenticating.value || (isAuthenticated.value && !props.force)) {
         return;
       }
       isAuthenticating.value = true;
       try {
-        await authenticate();
+        await authenticateWithBiometry(props.force);
         props.resolve();
       } catch (error) {
         isAuthCanceled.value = true;
@@ -90,7 +92,7 @@ export default defineComponent({
     }
 
     watch(isAuthenticated, (value) => {
-      if (value) {
+      if (value && !props.force) {
         props.resolve();
       }
     }, { immediate: true });

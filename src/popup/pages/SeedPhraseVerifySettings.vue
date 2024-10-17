@@ -87,7 +87,7 @@ import { shuffle } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent, onIonViewWillLeave } from '@ionic/vue';
 
-import { useAccounts, useNotifications, useUi } from '@/composables';
+import { useAuth, useNotifications, useUi } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -110,7 +110,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { setBackedUpSeed } = useUi();
-    const { mnemonic } = useAccounts();
+    const { mnemonicDecrypted } = useAuth();
     const { removeIsSeedBackedUpNotification } = useNotifications({ requirePolling: false });
 
     const selectedWordIds = ref<number[]>([]);
@@ -118,7 +118,7 @@ export default defineComponent({
     const hasError = ref(false);
     const examplePhrase = ref([t('pages.seedPhrase.first'), t('pages.seedPhrase.second'), '...']);
 
-    const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value.split(' ')));
+    const mnemonicShuffled = computed((): string[] => shuffle(mnemonicDecrypted.value!.split(' ')));
     const isVerifyButtonDisabled = computed(() => (
       !selectedWordIds.value.length
       || selectedWordIds.value.length !== mnemonicShuffled.value.length
@@ -130,7 +130,7 @@ export default defineComponent({
         .map((idx) => mnemonicShuffled.value[idx])
         .join(' ');
       showNotification.value = true;
-      hasError.value = mnemonic.value !== mnemonicSelected;
+      hasError.value = mnemonicDecrypted.value !== mnemonicSelected;
 
       if (!hasError.value) {
         setBackedUpSeed(true);
@@ -160,7 +160,6 @@ export default defineComponent({
       showNotification,
       hasError,
       examplePhrase,
-      mnemonic,
       mnemonicShuffled,
       isVerifyButtonDisabled,
       verifyLastStep,

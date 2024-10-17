@@ -2,9 +2,20 @@ import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
-import type { IPopupMessageData } from '@/types';
-import { CONNECTION_TYPES, POPUP_ACTIONS } from '@/constants';
-import { useAccounts, useAeSdk, useNetworks } from '@/composables';
+import type { IBackgroundMessageData } from '@/types';
+import {
+  CONNECTION_TYPES,
+  IS_FIREFOX,
+  POPUP_ACTIONS,
+  SESSION_METHODS,
+} from '@/constants';
+import {
+  useAccounts,
+  useAeSdk,
+  useAuth,
+  useNetworks,
+} from '@/composables';
+import { setSessionTimeout } from '@/background/bgPopupHandler';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 
@@ -29,6 +40,7 @@ const addAeppConnection = async (port: Runtime.Port) => {
 export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
+  const { secureLoginTimeoutDecrypted } = useAuth();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
@@ -37,7 +49,7 @@ export async function init() {
     switch (detectConnectionType(port as Runtime.Port)) {
       case CONNECTION_TYPES.POPUP: {
         const id = new URL(port?.sender?.url!).searchParams.get('id');
-        port.onMessage.addListener(async (msg: IPopupMessageData) => {
+        port.onMessage.addListener(async (msg: IBackgroundMessageData) => {
           const popup = getPopup(id!);
 
           if (msg.type === POPUP_ACTIONS.getProps) {
@@ -64,6 +76,20 @@ export async function init() {
 
         await addAeppConnection(port as Runtime.Port);
         break;
+      }
+      case CONNECTION_TYPES.SESSION: {
+        port.onDisconnect.addListener(async () => {
+          if (IS_FIREFOX) {
+            setSessionTimeout(+secureLoginTimeoutDecrypted.value!);
+          } else {
+            browser.runtime.sendMessage<IBackgroundMessageData>({
+              target: 'background',
+              method: SESSION_METHODS.setSessionTimeout,
+              payload: +secureLoginTimeoutDecrypted.value!,
+            });
+          }
+        });
+        return;
       }
       default:
         throw new Error('Unknown connection type');

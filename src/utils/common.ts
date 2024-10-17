@@ -4,8 +4,15 @@
 
 /* eslint-disable no-use-before-define */
 
-import { WatchSource, watch } from 'vue';
-import { defer, uniqWith } from 'lodash-es';
+import {
+  effectScope,
+  WatchSource,
+  watch,
+  Ref,
+  ref,
+  computed,
+} from 'vue';
+import { defer, isEqual, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
@@ -23,6 +30,7 @@ import type {
   IRequestInitBodyParsed,
   ITokenResolved,
   ITransaction,
+  ObjectValues,
   StorageKeysInput,
   Truthy,
 } from '@/types';
@@ -32,14 +40,17 @@ import {
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
+  IS_MOBILE_APP,
   LOCAL_STORAGE_PREFIX,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
+  PASSWORD_STRENGTH,
   PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { decrypt, encrypt } from './crypto';
 
 /**
  * Round the number to calculated amount of decimals.
@@ -206,6 +217,10 @@ export function getDefaultAccountLabel(
   const accountTypeName = (() => {
     switch (true) {
       case type === ACCOUNT_TYPES.airGap: return tg('airGap.title');
+      case type === ACCOUNT_TYPES.privateKey: return tg(
+        'pages.account.privateKey',
+        { protocol: ProtocolAdapterFactory.getAdapter(protocol!).protocolName },
+      );
       default: return protocol ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null;
     }
   })();
@@ -574,4 +589,95 @@ export function selectFiles(options: {
     };
     input.click();
   });
+}
+
+export function checkPasswordStrength(password: string): ObjectValues<typeof PASSWORD_STRENGTH> {
+  if (!password) {
+    return PASSWORD_STRENGTH.weak;
+  }
+  let strength = 0;
+
+  // Length check
+  if (password.length >= 8) strength += 1;
+  if (password.length >= 12) strength += 1;
+
+  // Character variety checks
+  if (/[a-z]/.test(password)) strength += 1;
+  if (/[A-Z]/.test(password)) strength += 1;
+  if (/[0-9]/.test(password)) strength += 1;
+  if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+
+  // Determine the strength level
+  if (strength <= 3) {
+    return PASSWORD_STRENGTH.weak;
+  } if (strength <= 4) {
+    return PASSWORD_STRENGTH.medium;
+  }
+  return PASSWORD_STRENGTH.strong;
+}
+
+/**
+ * Creates a custom effect scope for a composable to avoid disposing watchers
+ * and computed properties when a Vue component is unmounted. The effect scope
+ * is only created the first time you run the composable and is reused from that point on.
+ */
+export function createCustomScopedComposable<T>(composableBody: () => T) {
+  let activeScope: T;
+  return () => {
+    if (!activeScope) {
+      activeScope = effectScope(true).run(composableBody) || composableBody();
+    }
+    return activeScope;
+  };
+}
+
+interface decryptedComputedOptions {
+  onDecrypted?: (val: string | null) => any;
+}
+
+/**
+ * Creates computed property that serves as encryption layer for any Vue state.
+ * It takes the encrypted state, the key and returns decrypted state.
+ */
+export function decryptedComputed(
+  key: Ref<CryptoKey | undefined>,
+  encryptedState: Ref<string | null>,
+  defaultVal?: any,
+  options: decryptedComputedOptions = {},
+) {
+  let updating = false;
+  const decrypted = ref(defaultVal);
+
+  async function setEncryptedState(val: string) {
+    updating = true;
+    try {
+      // eslint-disable-next-line no-param-reassign
+      encryptedState.value = await encrypt(key.value!, val);
+    } catch (e) { /* NOOP */ }
+    updating = false;
+  }
+
+  watch([key, encryptedState], async ([newKey, newState], [oldKey]) => {
+    if (!updating) {
+      try {
+        if (newKey && oldKey && !isEqual(newKey, oldKey) && newState) {
+          await setEncryptedState(decrypted.value);
+        } else if (newKey && newState) {
+          decrypted.value = await decrypt(newKey, newState);
+          options.onDecrypted?.(decrypted.value);
+        } else if (newKey) {
+          decrypted.value = defaultVal;
+        }
+      } catch (e) {
+        handleUnknownError(e);
+      }
+    }
+  }, { immediate: true });
+
+  return (IS_MOBILE_APP)
+    ? encryptedState // On mobile devices we are not encrypting states
+    : computed<string>({
+      get: () => decrypted.value,
+      set: setEncryptedState,
+    });
 }

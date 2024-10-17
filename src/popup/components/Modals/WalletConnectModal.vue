@@ -220,6 +220,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
+    deeplinkUri: { type: String as PropType<WalletConnectUri>, default: '' },
   },
   setup(props) {
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
@@ -243,7 +244,7 @@ export default defineComponent({
     } = toRefs(wcState);
 
     /** eg.: wc:1b3eda3f4... */
-    const connectionUri = ref<WalletConnectUri>();
+    const connectionUri = ref<WalletConnectUri | undefined>(props.deeplinkUri);
 
     const activeAccount = computed(() => getLastActiveProtocolAccount(PROTOCOLS.ethereum));
     const peerMetadata = computed(() => wcSession.value?.peer?.metadata);

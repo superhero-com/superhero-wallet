@@ -21,13 +21,16 @@
   }
 
   // Icon sizes used with the ICON_SIZES constant
-  --icon-size-xs: 12px;
-  --icon-size-sm: 16px;
-  --icon-size-rg: 18px;
-  --icon-size-md: 20px;
-  --icon-size-lg: 24px;
-  --icon-size-xl: 28px;
-  --icon-size-xxl: 44px;
+  /* stylelint-disable-next-line scss/selector-no-redundant-nesting-selector */
+  & {
+    --icon-size-xs: 12px;
+    --icon-size-sm: 16px;
+    --icon-size-rg: 18px;
+    --icon-size-md: 20px;
+    --icon-size-lg: 24px;
+    --icon-size-xl: 28px;
+    --icon-size-xxl: 44px;
+  }
 }
 
 html {
@@ -266,6 +269,14 @@ hr {
     strong {
       font-weight: 500;
     }
+  }
+
+  &-subheading {
+    @extend %face-sans-16-medium;
+
+    color: rgba($color-white, 0.75);
+    white-space: pre-line;
+    margin-bottom: 12px;
   }
 
   &-muted {

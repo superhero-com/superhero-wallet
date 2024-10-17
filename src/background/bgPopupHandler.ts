@@ -20,9 +20,15 @@ const PLATFORM = process.env.PLATFORM as 'web' | 'extension' | 'ionic';
 const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
 const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
+const SESSION_STORAGE_KEYS = {
+  exportedEncryptionKey: 'exportedEncryptionKey',
+};
+
 const POPUP_TYPE_CONNECT = 'connectConfirm';
 
 const popups: Dictionary<IPopupConfigNoActions> = {};
+
+const storageSession = (browser.storage as any)?.session;
 
 export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 
@@ -80,3 +86,42 @@ export const openPopup = async (
 export const removePopup = (id: string) => delete popups[id];
 
 export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
+
+let expirationTimeout: NodeJS.Timeout;
+let keepAliveInterval: NodeJS.Timeout;
+
+export const setSessionTimeout = async (sessionTimeout: number) => {
+  if (expirationTimeout) {
+    clearTimeout(expirationTimeout);
+  }
+  if (keepAliveInterval) {
+    clearInterval(keepAliveInterval);
+  }
+
+  /**
+   * This interval is set in order to keep service worker alive.
+   * By default service worker would be terminated in 30 seconds of inactivity.
+   * https://stackoverflow.com/a/66618269
+   */
+  keepAliveInterval = setInterval(browser.runtime.getPlatformInfo, 20000);
+  expirationTimeout = setTimeout(
+    async () => {
+      await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
+      clearInterval(keepAliveInterval);
+    },
+    sessionTimeout,
+  );
+};
+
+export const getSessionEncryptionKey = async (): Promise<string | null> => {
+  try {
+    const { exportedEncryptionKey } = await storageSession.get(
+      SESSION_STORAGE_KEYS.exportedEncryptionKey,
+    );
+    if (exportedEncryptionKey) {
+      return Buffer.from(exportedEncryptionKey).toString('base64');
+    }
+  } catch (error) { /** NOOP */ }
+
+  return null;
+};

@@ -1,125 +1,262 @@
 <template>
   <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div
-        v-if="IS_MOBILE_APP"
-        class="secure-login-settings"
-      >
-        <div class="top-wrapper">
-          <p class="text-description">
-            {{ $t('pages.secureLogin.description') }}
-          </p>
-
-          <SwitchButton
-            :label="$t('pages.secureLogin.enableSecureLogin')"
-            :model-value="isSecureLoginEnabled"
-            :disabled="!isSecureLoginAvailable"
-            @update:modelValue="setSecureLoginEnabled"
+    <IonContent
+      ref="infoBoxEl"
+      class="ion-padding ion-content-bg"
+    >
+      <div class="secure-login-settings">
+        <!--
+          Enable secure login option
+        -->
+        <div
+          v-if="IS_MOBILE_APP"
+          class="form-group"
+        >
+          <p
+            class="text-description"
+            v-text="$t('pages.secureLogin.description')"
           />
-        </div>
-        <hr>
-        <div class="options-wrapper">
-          <div class="options">
-            <div
-              class="options-info"
-              :class="{ dimmed: !isSecureLoginEnabled }"
-            >
-              <span class="options-label">
-                {{ $t('pages.secureLogin.autoLock.title') }}
-              </span>
-              <span class="options-description">
-                {{ $t('pages.secureLogin.autoLock.descriptionPart1') }}
-              </span>
-              <span class="options-description">
-                {{ $t('pages.secureLogin.autoLock.descriptionPart2') }}
-              </span>
-            </div>
 
+          <div class="form-group-fields">
+            <SwitchButton
+              :label="$t('pages.secureLogin.enableSecureLogin')"
+              :model-value="isBiometricLoginEnabled"
+              :disabled="!isBiometricLoginAvailable"
+              @update:modelValue="setBiometricLoginEnabled"
+            />
+          </div>
+
+          <hr>
+        </div>
+
+        <!--
+          Auto-lock wallet time options
+        -->
+        <div class="form-group">
+          <div :class="{ dimmed: IS_MOBILE_APP && !isBiometricLoginEnabled }">
+            <p class="text-heading-5" v-text="$t('pages.secureLogin.autoLock.title')" />
+            <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart1')" />
+            <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart2')" />
+          </div>
+
+          <div class="form-group-fields">
             <RadioButton
-              v-for="(ms, minutes) in AUTHENTICATION_TIMEOUTS"
-              :key="`timeout-${minutes}`"
-              :value="secureLoginTimeout === ms"
-              :disabled="!isSecureLoginEnabled"
-              :class="{ active: secureLoginTimeout === ms }"
+              v-for="(ms) in AUTHENTICATION_TIMEOUTS"
+              :key="`timeout-${ms}`"
+              :value="+secureLoginTimeoutDecrypted === ms"
+              :class="{ active: +secureLoginTimeoutDecrypted === ms }"
+              :label="$t('pages.secureLogin.authenticationTimeout', msToMinutes(ms))"
               class="timeout"
               has-label-effect
-              @input="setSecureLoginTimeout(ms)"
-            >
-              <div class="row">
-                {{ $t('pages.secureLogin.authenticationTimeout', Number(minutes)) }}
-              </div>
-            </RadioButton>
+              @input="secureLoginTimeoutDecrypted = ms.toString()"
+            />
           </div>
+
+          <hr>
+        </div>
+
+        <!--
+          Change password options
+        -->
+        <div
+          v-if="!IS_MOBILE_APP"
+          class="form-group"
+        >
+          <div>
+            <p
+              class="text-heading-5"
+              v-text="$t('pages.secureLogin.changePassword.title')"
+            />
+            <p
+              class="text-description"
+              v-text="$t('pages.secureLogin.changePassword.description')"
+            />
+          </div>
+
+          <Form
+            v-slot="{ errors }"
+            @submit="setNewPassword()"
+          >
+            <InputPassword
+              v-model="currentPassword"
+              data-cy="current-password"
+              :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
+              :label="$t('pages.secureLogin.changePassword.currentPassword')"
+              :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
+              @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
+            />
+            <Field
+              v-slot="{ field, errorMessage }"
+              key="newPassword"
+              name="newPassword"
+              :validate-on-blur="true"
+              :validate-on-model-update="!!errors.password"
+              :rules="{
+                password_min_len: 4,
+              }"
+            >
+              <InputPassword
+                v-bind="field"
+                v-model="newPassword"
+                data-cy="new-password"
+                :placeholder="$t('pages.secureLogin.changePassword.newPasswordPlaceholder')"
+                :label="$t('pages.secureLogin.changePassword.newPassword')"
+                :message="errorMessage ?? errors.confirmNewPassword"
+                show-password-strength
+              />
+            </Field>
+            <Field
+              v-slot="{ field, errorMessage }"
+              key="confirmNewPassword"
+              name="confirmNewPassword"
+              :rules="{
+                passwords_match: newPassword,
+              }"
+            >
+              <InputPassword
+                v-bind="field"
+                v-model="confirmNewPassword"
+                data-cy="confirm-new-password"
+                :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
+                :label="$t('pages.secureLogin.changePassword.confirmNewPassword')"
+                :message="errorMessage"
+                hide-eye-icon
+              />
+            </Field>
+
+            <BtnMain
+              class="btn-reset-password"
+              variant="primary"
+              type="submit"
+              extend
+              :disabled="(
+                !newPassword
+                || !currentPassword
+                || !confirmNewPassword
+                || !!errors.newPassword
+                || !!errors.confirmNewPassword
+              )"
+              :text="$t('pages.secureLogin.changePassword.reset')"
+            />
+          </Form>
+
+          <Transition name="fade-transition">
+            <InfoBox
+              v-if="isPasswordChangedSuccessfully"
+              class="info-box"
+              type="success"
+              :text="$t('pages.secureLogin.changePassword.success')"
+            />
+          </Transition>
         </div>
       </div>
-
-      <InfoBox
-        v-else
-        class="warning-box"
-        type="warning"
-      >
-        <TemplateRenderer :str="$t('pages.secureLogin.unsupportedDevice')" />
-      </InfoBox>
     </IonContent>
   </IonPage>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import {
+  defineComponent,
+  nextTick,
+  onMounted,
+  ref,
+} from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
+import { Form, Field } from 'vee-validate';
 
-import { IS_MOBILE_APP } from '@/constants';
-import { useAuth, useUi } from '@/composables';
+import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
+import { ComponentRef } from '@/types';
+import { useAuth, useModals, useUi } from '@/composables';
 
-import RadioButton from '../components/RadioButton.vue';
-import SwitchButton from '../components/SwitchButton.vue';
-import InfoBox from '../components/InfoBox.vue';
-import TemplateRenderer from '../components/TemplateRenderer.vue';
-
-const AUTHENTICATION_TIMEOUTS = {
-  0: 0,
-  1: 60000,
-  5: 300000,
-  15: 900000,
-  30: 1800000,
-} as const;
+import RadioButton from '@/popup/components/RadioButton.vue';
+import SwitchButton from '@/popup/components/SwitchButton.vue';
+import InputPassword from '@/popup/components/InputPassword.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import InfoBox from '@/popup/components/InfoBox.vue';
 
 export default defineComponent({
   name: 'SecureLoginSettings',
   components: {
+    InputPassword,
+    BtnMain,
     RadioButton,
     SwitchButton,
-    TemplateRenderer,
-    InfoBox,
     IonPage,
     IonContent,
+    Form,
+    Field,
+    InfoBox,
   },
   setup() {
-    const isSecureLoginAvailable = ref(false);
+    const infoBoxEl = ref<ComponentRef>();
+    const isBiometricLoginAvailable = ref(false);
+    const isAuthFailed = ref(false);
+    const isAuthenticating = ref(false);
+    const isPasswordChangedSuccessfully = ref(false);
+    const currentPassword = ref('');
+    const newPassword = ref('');
+    const confirmNewPassword = ref('');
 
-    const { checkSecureLoginAvailability, openEnableSecureLoginModal } = useAuth();
     const {
-      isSecureLoginEnabled,
-      secureLoginTimeout,
-      setSecureLoginEnabled,
-      setSecureLoginTimeout,
+      checkBiometricLoginAvailability,
+      updatePassword,
+      secureLoginTimeoutDecrypted,
+    } = useAuth();
+    const {
+      isBiometricLoginEnabled,
+      setBiometricLoginEnabled,
     } = useUi();
+    const { openEnableBiometricLoginModal } = useModals();
+
+    async function setNewPassword() {
+      if (isAuthenticating.value) {
+        return;
+      }
+      isAuthFailed.value = false;
+      isAuthenticating.value = true;
+
+      try {
+        await updatePassword(currentPassword.value, newPassword.value);
+        isPasswordChangedSuccessfully.value = true;
+        await nextTick();
+        infoBoxEl.value?.$el?.scrollBy(0, infoBoxEl.value?.$el?.scrollWidth);
+      } catch (error) {
+        isAuthFailed.value = true;
+        isPasswordChangedSuccessfully.value = false;
+      } finally {
+        isAuthenticating.value = false;
+        currentPassword.value = '';
+        newPassword.value = '';
+        confirmNewPassword.value = '';
+      }
+    }
+
+    function msToMinutes(ms: number) {
+      return Math.floor(ms / 60000);
+    }
 
     onMounted(async () => {
-      isSecureLoginAvailable.value = await checkSecureLoginAvailability();
-      if (!isSecureLoginAvailable.value && IS_MOBILE_APP) {
-        openEnableSecureLoginModal();
+      isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
+      if (!isBiometricLoginAvailable.value && IS_MOBILE_APP) {
+        openEnableBiometricLoginModal();
       }
     });
 
     return {
-      IS_MOBILE_APP,
-      isSecureLoginAvailable,
-      isSecureLoginEnabled,
-      secureLoginTimeout,
-      setSecureLoginEnabled,
-      setSecureLoginTimeout,
       AUTHENTICATION_TIMEOUTS,
+      IS_MOBILE_APP,
+      infoBoxEl,
+      isBiometricLoginEnabled,
+      isBiometricLoginAvailable,
+      isPasswordChangedSuccessfully,
+      isAuthFailed,
+      secureLoginTimeoutDecrypted,
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+      setNewPassword,
+      setBiometricLoginEnabled,
+      msToMinutes,
     };
   },
 });
@@ -131,50 +268,30 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .secure-login-settings {
-  .top-wrapper {
+  padding-top: 16px;
+  padding-bottom: 24px;
+
+  .form-group {
     padding-inline: var(--screen-padding-x);
-    margin-bottom: 28px;
-  }
 
-  .text-description {
-    padding: 16px 0;
-  }
-
-  .options-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 8px;
-
-    &.dimmed {
-      opacity: 0.5;
+    .form-group-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 16px;
     }
   }
 
-  .options-label {
-    @extend %face-sans-15-medium;
+  .dimmed {
+    opacity: 0.5;
   }
 
-  .options-description {
-    @extend %face-sans-15-regular;
-    opacity: 0.85;
+  .btn-reset-password {
+    margin-top: 40px;
   }
 
-  .options {
-    margin-top: 20px;
-    padding-inline: var(--screen-padding-x);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-
-    .row {
-      @extend %face-sans-15-medium;
-    }
+  .info-box {
+    margin-top: 24px;
   }
-}
-
-.warning-box {
-  margin: 16px;
 }
 </style>

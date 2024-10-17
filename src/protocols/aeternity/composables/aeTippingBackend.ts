@@ -6,6 +6,7 @@ import type { BackendHealth } from '@/protocols/aeternity/types';
 import { fetchJson, postJson } from '@/utils';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
+import { UNFINISHED_FEATURES } from '@/constants';
 
 const POLLING_INTERVAL = 15000;
 
@@ -56,7 +57,10 @@ export function useAeTippingBackend() {
     return fetchJson(`${backendUrl}/tips/single/${id}`);
   }
 
-  initPollingWatcher(() => checkBackendStatus());
+  // Temporary disable backend status check, due to backend issues
+  if (UNFINISHED_FEATURES) {
+    initPollingWatcher(() => checkBackendStatus());
+  }
 
   return {
     isBackendUnavailable,

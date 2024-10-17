@@ -6,6 +6,7 @@ import {
   APP_LINK_WEB,
   IS_MOBILE_APP,
   IS_WEB,
+  MODAL_WALLET_CONNECT,
   POPUP_TYPE,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
@@ -24,8 +25,10 @@ import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   useAuth,
+  useModals,
   usePopupProps,
   useUi,
+  useWalletConnect,
 } from '@/composables';
 import { routes } from './routes';
 import {
@@ -50,20 +53,23 @@ const router = createRouter({
 const {
   isLoggedIn,
   activeAccount,
-  areAccountsRestored,
+  areAccountsReady,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
-const { openSecureLoginModal } = useAuth();
+const {
+  checkUserAuth,
+} = useAuth();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
-  // Wait until we are sure that the user login state is correct
-  await watchUntilTruthy(areAccountsRestored);
+  await checkUserAuth();
+
+  await watchUntilTruthy(areAccountsReady);
 
   const meta = to.meta as WalletRouteMeta;
 
@@ -76,8 +82,6 @@ router.beforeEach(async (to, from, next) => {
     }
     return;
   }
-
-  await openSecureLoginModal();
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
@@ -140,7 +144,19 @@ if (IS_MOBILE_APP) {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
 
     App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
+      const { setIsOpenUsingDeeplink, wcSession } = useWalletConnect();
+      const { openModal } = useModals();
+
       const deepllinkUrl = new URL(event.url);
+      if (deepllinkUrl.origin === 'wc://') {
+        setIsOpenUsingDeeplink(true);
+        router.push({ name: ROUTE_ACCOUNT });
+
+        if (!wcSession.value) {
+          openModal(MODAL_WALLET_CONNECT, { deeplinkUri: event.url });
+        }
+        return;
+      }
       const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepllinkUrl.origin === p);
       if (!prefix) throw new Error(`Unknown url: ${deepllinkUrl.origin}`);
 

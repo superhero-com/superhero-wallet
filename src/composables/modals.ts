@@ -13,10 +13,14 @@ import type {
 import {
   IN_FRAME,
   IS_WEB,
+  MODAL_BIOMETRIC_LOGIN,
   MODAL_CONFIRM,
   MODAL_DEFAULT,
+  MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_ERROR_LOG,
+  MODAL_PASSWORD_LOGIN,
   MODAL_SCAN_QR,
+  MODAL_SET_PASSWORD,
   MODAL_SHARE_ADDRESS,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
@@ -185,7 +189,27 @@ export function useModals() {
     protocol: Protocol;
     title?: string;
   }) {
-    openModal(MODAL_SHARE_ADDRESS, options);
+    return openModal(MODAL_SHARE_ADDRESS, options);
+  }
+
+  async function openSetPasswordModal(isRestoredWallet = false) {
+    return openModal<string>(MODAL_SET_PASSWORD, {
+      isRestoredWallet,
+    });
+  }
+
+  function openBiometricLoginModal(options?: {
+    force: boolean;
+  }) {
+    return openModal(MODAL_BIOMETRIC_LOGIN, options);
+  }
+
+  function openPasswordLoginModal() {
+    return openModal(MODAL_PASSWORD_LOGIN);
+  }
+
+  async function openEnableBiometricLoginModal() {
+    openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
   }
 
   return {
@@ -197,6 +221,10 @@ export function useModals() {
     openErrorModal,
     openScanQrModal,
     openShareAddressModal,
+    openSetPasswordModal,
+    openBiometricLoginModal,
+    openPasswordLoginModal,
+    openEnableBiometricLoginModal,
     closeModalByKey,
   };
 }

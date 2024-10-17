@@ -34,6 +34,7 @@
               <ClaimTips />
             </template>
           </PanelItem>
+
           <PanelItem
             :to="{ name: ROUTE_INVITE }"
             :title="$t('pages.titles.giftCards')"
@@ -64,6 +65,7 @@
             <BuyIcon />
           </template>
         </PanelItem>
+
         <PanelItem
           v-else-if="isNodeTestnet"
           :disabled="!isActiveAccountAe"
@@ -74,6 +76,7 @@
             <FaucetIcon />
           </template>
         </PanelItem>
+
         <PanelItem
           :href="AE_DEX_URL"
           :title="$t('pages.more.dex')"
@@ -92,6 +95,18 @@
             <AboutIcon />
           </template>
         </PanelItem>
+
+        <PanelItem
+          v-if="isMnemonicEncrypted || isBiometricLoginEnabled"
+          :title="$t('pages.secureLogin.lockWallet')"
+          :disabled="isUsingDefaultPassword || (!isMnemonicEncrypted && !isBiometricLoginEnabled)"
+          data-cy="lock-wallet"
+          @click="lockWallet()"
+        >
+          <template #icon>
+            <SecureIcon />
+          </template>
+        </PanelItem>
       </div>
     </IonContent>
   </IonPage>
@@ -100,23 +115,31 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
+
 import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
-import { useAccounts, useAddressBook, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  useAddressBook,
+  useAeSdk,
+  useAuth,
+  useUi,
+} from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
 import { ROUTE_ADDRESS_BOOK, ROUTE_INVITE } from '@/popup/router/routeNames';
 
-import PanelItem from '../components/PanelItem.vue';
+import PanelItem from '@/popup/components/PanelItem.vue';
 
-import Invites from '../../icons/invites.svg?vue-component';
-import Settings from '../../icons/settings.svg?vue-component';
-import BugReport from '../../icons/bug-report.svg?vue-component';
-import AboutIcon from '../../icons/about.svg?vue-component';
-import BuyIcon from '../../icons/credit-card.svg?vue-component';
-import Dex from '../../icons/dex.svg?vue-component';
-import ClaimTips from '../../icons/claim-tips.svg?vue-component';
-import FaucetIcon from '../../icons/faucet.svg?vue-component';
-import MenuCardIcon from '../../icons/menu-card-fill.svg?vue-component';
+import Invites from '@/icons/invites.svg?vue-component';
+import Settings from '@/icons/settings.svg?vue-component';
+import BugReport from '@/icons/bug-report.svg?vue-component';
+import AboutIcon from '@/icons/about.svg?vue-component';
+import BuyIcon from '@/icons/credit-card.svg?vue-component';
+import Dex from '@/icons/dex.svg?vue-component';
+import ClaimTips from '@/icons/claim-tips.svg?vue-component';
+import FaucetIcon from '@/icons/faucet.svg?vue-component';
+import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
+import SecureIcon from '@/icons/secure-lock.svg?vue-component';
 
 export default defineComponent({
   name: 'More',
@@ -133,11 +156,14 @@ export default defineComponent({
     BuyIcon,
     FaucetIcon,
     MenuCardIcon,
+    SecureIcon,
   },
   setup() {
     const { activeAccount } = useAccounts();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
     const { addressBook } = useAddressBook();
+    const { isMnemonicEncrypted, isUsingDefaultPassword, lockWallet } = useAuth();
+    const { isBiometricLoginEnabled } = useUi();
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
     const activeAccountFaucetUrl = computed(
@@ -152,11 +178,15 @@ export default defineComponent({
       UNFINISHED_FEATURES,
       ROUTE_ADDRESS_BOOK,
       ROUTE_INVITE,
+      lockWallet,
       activeAccountFaucetUrl,
       addressBookCount,
       isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
+      isMnemonicEncrypted,
+      isBiometricLoginEnabled,
+      isUsingDefaultPassword,
     };
   },
 });

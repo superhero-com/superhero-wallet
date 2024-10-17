@@ -1,5 +1,11 @@
-import { IPopupMessageData } from '@/types';
-import { openPopup, removePopup, getPopup } from './bgPopupHandler';
+import { IBackgroundMessageData } from '@/types';
+import {
+  openPopup,
+  removePopup,
+  getPopup,
+  getSessionEncryptionKey,
+  setSessionTimeout,
+} from './bgPopupHandler';
 import { updateDynamicRules } from './redirectRule';
 
 (async () => {
@@ -28,14 +34,14 @@ import { updateDynamicRules } from './redirectRule';
 /**
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
-function handleMessage(msg: IPopupMessageData, _: any, sendResponse: Function) {
+function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
     const {
       aepp,
       id,
       popupProps,
       popupType,
-    } = msg.params!;
+    } = msg.params ?? {};
     switch (msg.method) {
       case 'openPopup':
         openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
@@ -48,13 +54,21 @@ function handleMessage(msg: IPopupMessageData, _: any, sendResponse: Function) {
       case 'getPopup':
         sendResponse(getPopup(id!));
         return false;
+      case 'getSessionEncryptionKey':
+        getSessionEncryptionKey().then((encryptionKey) => {
+          sendResponse(encryptionKey);
+        });
+        return true;
+      case 'setSessionTimeout':
+        sendResponse(setSessionTimeout(msg.payload));
+        return false;
       default:
         break;
     }
   }
 
   // forward messages to the offscreen page
-  browser.runtime.sendMessage<IPopupMessageData>({
+  browser.runtime.sendMessage<IBackgroundMessageData>({
     ...msg,
     target: 'offscreen',
   });

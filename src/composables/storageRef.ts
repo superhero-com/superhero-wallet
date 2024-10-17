@@ -1,9 +1,16 @@
 import { Ref, ref, watch } from 'vue';
 import type { Migration, StorageKey } from '@/types';
-import { asyncPipe } from '@/utils';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { asyncPipe } from '@/utils';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
+import { IS_MOBILE_APP } from '@/constants';
 
-interface ICreateStorageRefOptions<T> {
+export interface ICreateStorageRefOptions<T> {
+  /**
+   * Enable secure storage for the data.
+   * Mobile app only.
+   */
+  enableSecureStorage?: boolean;
   /**
    * Enable state synchronization between the extension and the background.
    */
@@ -20,6 +27,10 @@ interface ICreateStorageRefOptions<T> {
    * Allows to ensure the state is already synced with browser storage and migrated.
    */
   onRestored?: (val: T | null) => any;
+  /**
+   * Allows to run a callback whenever the state is synced with the background.
+   */
+  onBackgroundSync?: (val: T) => any;
 }
 
 /**
@@ -33,38 +44,41 @@ export function useStorageRef<T = string | object | any[]>(
   options: ICreateStorageRefOptions<T> = {},
 ) {
   const {
+    enableSecureStorage = false,
     serializer,
     backgroundSync = false,
     migrations,
     onRestored,
+    onBackgroundSync,
   } = options;
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
-  const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136
+  const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
+  const storage = (enableSecureStorage && IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
 
-  function setLocalState(val: T | null) {
+  async function setLocalState(val: T | null) {
     if (val !== null) {
       watcherDisabled = true;
-      state.value = (serializer?.read) ? serializer.read(val) : val;
+      state.value = (serializer?.read) ? await serializer.read(val) : val;
       setTimeout(() => { watcherDisabled = false; }, 0);
     }
   }
 
-  function setStorageState(val: T | null) {
-    WalletStorage.set(storageKey, (val && serializer?.write) ? serializer.write(val) : val);
+  async function setStorageState(val: T | null) {
+    storage.set(storageKey, (val && serializer?.write) ? await serializer.write(val) : val);
   }
 
   // Restore state and run watchers
   (async () => {
-    let restoredValue = await WalletStorage.get<T | null>(storageKey);
+    let restoredValue = await storage.get<T | null>(storageKey);
     if (migrations?.length) {
-      restoredValue = await asyncPipe<T | null>(migrations)(restoredValue);
+      restoredValue = await asyncPipe<T | null>(migrations)(restoredValue!);
       if (restoredValue !== null) {
-        setStorageState(restoredValue);
+        await setStorageState(restoredValue);
       }
     }
     onRestored?.(restoredValue);
-    setLocalState(restoredValue);
+    await setLocalState(restoredValue);
 
     /**
      * Synchronize the state value with the storage.
@@ -81,7 +95,10 @@ export function useStorageRef<T = string | object | any[]>(
      * and the offscreen tab pick this and synchronize their own state with the change.
      */
     if (backgroundSync) {
-      WalletStorage.watch?.(storageKey, (val) => setLocalState(val));
+      storage.watch?.(storageKey, (val) => {
+        setLocalState(val);
+        onBackgroundSync?.(val);
+      });
     }
   })();
 

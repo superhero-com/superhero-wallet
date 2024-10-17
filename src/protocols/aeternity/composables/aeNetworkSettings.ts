@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import type { NetworkTypeDefault } from '@/types';
 import { NETWORK_TYPE_CUSTOM, NETWORK_TYPE_TESTNET } from '@/constants';
-import { createCustomScopedComposable } from '@/composables/composablesHelpers';
+import { createCustomScopedComposable } from '@/utils';
 import { useNetworks } from '@/composables/networks';
 
 import type { IAeNetworkPredefinedSettings, IAeNetworkSettings } from '@/protocols/aeternity/types';

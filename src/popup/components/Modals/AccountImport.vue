@@ -99,9 +99,9 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { t } = useI18n();
-    const { discoverAccounts, setMnemonic } = useAccounts();
+    const { discoverAccounts } = useAccounts();
     const { openScanQrModal } = useModals();
-    const { openEnableSecureLoginModal } = useAuth();
+    const { setMnemonicAndInitializeAuthentication } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
     const discovering = ref(false);
@@ -128,14 +128,18 @@ export default defineComponent({
         return;
       }
 
-      discovering.value = true;
-      setMnemonic(mnemonicParsed);
-      setBackedUpSeed(true);
-      await discoverAccounts();
-      props.resolve();
-      router.push(loginTargetLocation.value);
-      openEnableSecureLoginModal();
-      discovering.value = false;
+      try {
+        await setMnemonicAndInitializeAuthentication(mnemonicParsed);
+        discovering.value = true;
+        setBackedUpSeed(true);
+        await discoverAccounts();
+        props.resolve();
+        router.push(loginTargetLocation.value);
+      } catch {
+        error.value = t('pages.index.passwordWasNotSet');
+      } finally {
+        discovering.value = false;
+      }
     }
 
     async function scanAccountQrCode() {

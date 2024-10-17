@@ -28,7 +28,7 @@ export const POPUP_TYPE = url.searchParams.get('type') as PopupType || null;
 export const IN_FRAME = window.parent !== window;
 
 /**
- * Running in a desktop or mobile browser
+ * Running in a desktop or mobile browser, but not as an extension.
  */
 export const IS_WEB = PLATFORM === 'web';
 
@@ -38,17 +38,15 @@ export const IS_WEB = PLATFORM === 'web';
 export const IS_MOBILE_APP = PLATFORM === 'ionic';
 
 /**
- * Running as a browser extension
- */
-export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
-
-export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
-
-/**
  * The Offscreen API allows the extension to use DOM APIs in a hidden document.
  * The runtime API is the only extensions API supported by offscreen documents.
  */
 export const IS_OFFSCREEN_TAB = window.location.pathname === '/offscreen.html';
+
+/**
+ * Running as a browser extension
+ */
+export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS && !IS_OFFSCREEN_TAB;
 
 export const IS_IOS = isPlatform('ios');
 

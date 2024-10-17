@@ -1,6 +1,5 @@
 import {
   MODAL_ACCOUNT_CREATE,
-  MODAL_AE_ACCOUNT_CREATE,
   MODAL_ACCOUNT_IMPORT,
   MODAL_ACCOUNT_SELECT_OPTIONS,
   MODAL_ASSET_SELECTOR,
@@ -22,6 +21,9 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_NETWORK_SWITCHER,
   MODAL_PAYLOAD_FORM,
+  MODAL_PRIVATE_KEY_EXPORT,
+  MODAL_PRIVATE_KEY_IMPORT,
+  MODAL_PROTOCOL_SELECT,
   MODAL_SCAN_QR,
   MODAL_RECIPIENT_HELPER,
   MODAL_RECIPIENT_INFO,
@@ -33,22 +35,24 @@ import {
   MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
-  MODAL_SECURE_LOGIN,
-  MODAL_ENABLE_SECURE_LOGIN,
+  MODAL_BIOMETRIC_LOGIN,
+  MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   MODAL_ADDRESS_BOOK_IMPORT,
   MODAL_SHARE_ADDRESS,
   MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
+  MODAL_SET_PASSWORD,
+  MODAL_PASSWORD_LOGIN,
 } from '@/constants';
 import { useModals } from '@/composables';
 
-import AeternityAccountCreate from '@/protocols/aeternity/views/AccountCreateModal.vue';
 import NetworkSwitcherModal from '@/popup/components/Modals/NetworkSwitcherModal.vue';
 
+import AccountCreate from '../components/Modals/AccountCreate.vue';
 import Default from '../components/Modals/Default.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
-import AccountCreate from '../components/Modals/AccountCreate.vue';
+import ProtocolSelect from '../components/Modals/ProtocolSelect.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
@@ -56,6 +60,7 @@ import Confirm from '../components/Modals/Confirm.vue';
 import ConfirmConnect from '../pages/Popups/Connect.vue';
 
 import ErrorLog from '../components/Modals/ErrorLog.vue';
+import PrivateKeyExport from '../components/Modals/PrivateKeyExport.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
@@ -74,14 +79,17 @@ import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
-import SecureLogin from '../components/Modals/SecureLogin.vue';
-import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
+import BiometricLogin from '../components/Modals/BiometricLogin.vue';
+import EnableBiometricLogin from '../components/Modals/EnableBiometricLogin.vue';
 import WalletConnect from '../components/Modals/WalletConnectModal.vue';
 import AirGapImportAccounts from '../components/Modals/AirGapImportAccounts.vue';
 import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vue';
 import AddressBookImport from '../components/Modals/AddressBookImport.vue';
 import ShareAddress from '../components/ShareAddress.vue';
 import AddressBookAccountSelector from '../components/Modals/AddressBookAccountSelector.vue';
+import SetPassword from '../components/Modals/SetPassword.vue';
+import PasswordLogin from '../components/Modals/PasswordLogin.vue';
+import PrivateKeyImport from '../components/Modals/PrivateKeyImport.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -94,6 +102,9 @@ export default () => {
   });
   registerModal(MODAL_ACCOUNT_IMPORT, {
     component: AccountImport,
+  });
+  registerModal(MODAL_PRIVATE_KEY_IMPORT, {
+    component: PrivateKeyImport,
   });
   registerModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS, {
     component: AirGapImportAccounts,
@@ -139,12 +150,18 @@ export default () => {
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
     showInPopupIfWebFrame: true,
   });
+  registerModal(MODAL_PRIVATE_KEY_EXPORT, {
+    component: PrivateKeyExport,
+  });
   registerModal(MODAL_MESSAGE_SIGN, {
     component: MessageSign,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_SCAN_QR, {
     component: QrCodeScanner,
+  });
+  registerModal(MODAL_PROTOCOL_SELECT, {
+    component: ProtocolSelect,
   });
   registerModal(MODAL_TRANSFER_RECEIVE, {
     component: ProtocolSpecificView,
@@ -181,9 +198,6 @@ export default () => {
   registerModal(MODAL_NETWORK_SWITCHER, {
     component: NetworkSwitcherModal,
   });
-  registerModal(MODAL_AE_ACCOUNT_CREATE, {
-    component: AeternityAccountCreate,
-  });
   registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
     component: BrowserActions,
   });
@@ -193,11 +207,11 @@ export default () => {
   registerModal(MODAL_WARNING_DAPP_BROWSER, {
     component: WarningDappBrowser,
   });
-  registerModal(MODAL_SECURE_LOGIN, {
-    component: SecureLogin,
+  registerModal(MODAL_BIOMETRIC_LOGIN, {
+    component: BiometricLogin,
   });
-  registerModal(MODAL_ENABLE_SECURE_LOGIN, {
-    component: EnableSecureLogin,
+  registerModal(MODAL_ENABLE_BIOMETRIC_LOGIN, {
+    component: EnableBiometricLogin,
   });
   registerModal(MODAL_SIGN_AIR_GAP_TRANSACTION, {
     component: SignAirGapTransaction,
@@ -210,5 +224,11 @@ export default () => {
   });
   registerModal(MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, {
     component: AddressBookAccountSelector,
+  });
+  registerModal(MODAL_SET_PASSWORD, {
+    component: SetPassword,
+  });
+  registerModal(MODAL_PASSWORD_LOGIN, {
+    component: PasswordLogin,
   });
 };

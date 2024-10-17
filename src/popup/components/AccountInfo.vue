@@ -1,7 +1,7 @@
 <template>
   <div
     class="account-info"
-    :class="{ 'can-copy-address': canCopyAddress, dense }"
+    :class="{ dense }"
   >
     <Avatar
       class="avatar"
@@ -37,24 +37,19 @@
       />
 
       <slot name="address">
-        <div
+        <CopyText
           v-if="account.address?.length"
+          :disabled="!canCopyAddress || showExplorerLink"
+          :value="account.address"
           class="account-address"
         >
-          <CopyText
-            data-cy="copy"
-            :value="account.address"
-            :disabled="!canCopyAddress"
-          >
-            <AddressTruncated
-              :address="account.address"
-              :protocol="account.protocol"
-              :show-protocol-icon="showProtocolIcon"
-              :show-explorer-link="showExplorerLink"
-              class="ae-address"
-            />
-          </CopyText>
-        </div>
+          <AddressTruncated
+            :address="account.address"
+            :protocol="account.protocol"
+            :show-protocol-icon="showProtocolIcon"
+            :show-explorer-link="showExplorerLink"
+          />
+        </CopyText>
       </slot>
     </div>
   </div>
@@ -138,6 +133,7 @@ export default defineComponent({
 
   .account-details {
     display: flex;
+    align-items: start;
     flex-direction: column;
     justify-content: center;
     gap: 4px;
@@ -148,6 +144,7 @@ export default defineComponent({
       @extend %face-sans-16-medium;
 
       line-height: 20px; // Avoid cutting off bottom part of some letters, e.g.: "g"
+      max-width: 100%;
     }
 
     &.list-name {
@@ -160,37 +157,14 @@ export default defineComponent({
         margin: 0;
       }
     }
-
-    .ae-address {
-      color: rgba($color-white, 0.85);
-      user-select: none;
-
-      .icon {
-        width: 22px;
-        height: 22px;
-        margin-left: 2px;
-      }
-    }
   }
 
   .account-address {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
     margin-top: -2px;
+    color: rgba($color-white, 0.85);
 
-    .protocol-icon {
-      margin-right: 6px;
-    }
-  }
-
-  &.can-copy-address {
-    .ae-address {
-      opacity: 0.85;
-
-      &:hover {
-        opacity: 1;
-      }
+    &:hover {
+      color: $color-white;
     }
   }
 

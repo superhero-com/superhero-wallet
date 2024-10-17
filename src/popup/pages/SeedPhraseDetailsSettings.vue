@@ -8,14 +8,14 @@
 
         <CardMnemonic class="mnemonics">
           <p class="mnemonics-text">
-            {{ mnemonic }}
+            {{ mnemonicDecrypted }}
           </p>
           <BtnMain
             variant="dark"
             class="copy-btn"
             big-icon
             :icon="copied ? CheckSuccessCircle : CopyOutlined"
-            @click="copy(mnemonic)"
+            @click="copy(mnemonicDecrypted)"
           >
             <template v-if="!copied">
               {{ $t('pages.seed-phrase-settings.copy') }}
@@ -49,7 +49,7 @@
             class="button"
             extend
             :text="$t('pages.seedPhrase.verifySeed')"
-            :to="{ name: 'settings-seed-phrase-verify' }"
+            :to="{ name: ROUTE_SEED_PHRASE_VERIFY }"
           />
           <BtnMain
             variant="muted"
@@ -68,12 +68,12 @@ import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
-  useAccounts,
+  useAuth,
   useCopy,
   useNotifications,
   useUi,
 } from '@/composables';
-import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { ROUTE_ACCOUNT, ROUTE_SEED_PHRASE_VERIFY } from '@/popup/router/routeNames';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CardMnemonic from '../components/CardMnemonic.vue';
@@ -93,7 +93,7 @@ export default defineComponent({
 
     const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
-    const { mnemonic } = useAccounts();
+    const { mnemonicDecrypted } = useAuth();
     const { removeIsSeedBackedUpNotification } = useNotifications({
       requirePolling: false,
     });
@@ -107,10 +107,11 @@ export default defineComponent({
     return {
       CopyOutlined,
       CheckSuccessCircle,
-      copy,
       copied,
-      mnemonic,
+      mnemonicDecrypted,
+      copy,
       markSeedPhraseAsBackedUp,
+      ROUTE_SEED_PHRASE_VERIFY,
     };
   },
 });

@@ -4,7 +4,7 @@
       id="app-wrapper"
       class="app-wrapper"
       :class="{
-        'show-header': delayedShowHeader,
+        'show-header': showHeader,
       }"
     >
       <Loader v-if="isLoaderVisible && !isMobileQrScannerVisible" />
@@ -14,13 +14,25 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header v-if="delayedShowHeader" />
+        <Header v-if="showHeader" />
 
-        <!-- We are disabling animations on FF because of a bug that causes flickering
-          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <!--
+          Layer displayed under the password protection modal when content is not visible.
+        -->
+        <div
+          v-if="!IS_MOBILE_APP"
+          class="app-unauthenticated-placeholder"
+          :class="{ visible: !showRouter }"
+        />
+
+        <!--
+          We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620
+        -->
         <IonRouterOutlet
+          v-show="showRouter"
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-          :class="{ 'show-header': delayedShowHeader, ios: IS_IOS }"
+          :class="{ 'show-header': showHeader, ios: IS_IOS }"
           class="main"
         />
 
@@ -61,6 +73,7 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+
 import { WalletRouteMeta } from '@/types';
 import {
   APP_LINK_FIREFOX,
@@ -74,12 +87,12 @@ import {
   IS_FIREFOX,
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
-  PAGE_TRANSITION_DURATION,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
+  useAuth,
   useConnection,
   useCurrencies,
   useLanguages,
@@ -95,6 +108,8 @@ import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
 import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
 
+import AppLogo from '@/icons/logo-small.svg?vue-component';
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -105,12 +120,14 @@ export default defineComponent({
     IonRouterOutlet,
     IonPage,
     Loader,
+    AppLogo,
   },
   setup() {
     const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
 
+    const { isAuthenticated } = useAuth();
     const { watchConnectionStatus } = useConnection();
     const {
       isSeedBackedUp,
@@ -127,15 +144,22 @@ export default defineComponent({
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
-    const delayedShowHeader = ref(false);
+    const isRouterReady = ref(false);
 
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
+
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
-    const showHeader = computed(() => !(
-      RUNNING_IN_POPUP
-      || route.params.app // TODO determine if still used
-      || routeMeta.value?.hideHeader
+    const showRouter = computed(() => (
+      isAuthenticated.value
+      || routeMeta.value?.ifNotAuthOnly
+      || routeMeta.value?.ifNotAuth
+    ));
+
+    const showHeader = computed(() => (
+      !RUNNING_IN_POPUP
+      && isRouterReady.value
+      && !routeMeta.value?.hideHeader
     ));
 
     /**
@@ -217,24 +241,6 @@ export default defineComponent({
       },
     );
 
-    watch(
-      showHeader,
-      async (value) => {
-        if (value) {
-          delayedShowHeader.value = true;
-        } else {
-          if (!isLoggedIn.value) {
-            delayedShowHeader.value = false;
-            return;
-          }
-          setTimeout(() => {
-            delayedShowHeader.value = false;
-          }, PAGE_TRANSITION_DURATION);
-        }
-      },
-      { immediate: true },
-    );
-
     initVisibilityListeners();
 
     onBeforeMount(async () => {
@@ -251,6 +257,15 @@ export default defineComponent({
     });
 
     onMounted(() => {
+      isRouterReady.value = false;
+      /**
+       * returned value from `useRoute` function will have an empty `meta`
+       * field on the initialization, after awaiting for `router.isReady()`
+       * correct `meta` info will be presented
+       */
+      router.isReady().then(() => {
+        isRouterReady.value = true;
+      });
       checkExtensionUpdates();
       restoreLanguage();
       restoreTransferSendForm();
@@ -282,13 +297,15 @@ export default defineComponent({
       IS_IOS,
       IS_WEB,
       IS_EXTENSION,
+      IS_MOBILE_APP,
       IS_MOBILE_DEVICE,
       RUNNING_IN_TESTS,
-      modalsOpen,
+      isAuthenticated,
       isLoaderVisible,
       isMobileQrScannerVisible,
+      modalsOpen,
+      showRouter,
       showHeader,
-      delayedShowHeader,
       showScrollbar,
       innerElement,
     };
@@ -343,6 +360,25 @@ export default defineComponent({
 
       &.ios {
         top: 10px;
+      }
+    }
+
+    .app-unauthenticated-placeholder {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      visibility: hidden;
+      opacity: 0;
+      background: $color-black url('../image/wallet-locked-bg.svg');
+      background-size: cover;
+      transition: all 0.5s ease-in-out;
+      transform: scale(1.1);
+      will-change: opacity, transform;
+
+      &.visible {
+        visibility: visible;
+        opacity: 1;
+        transform: scale(1);
       }
     }
 

@@ -223,7 +223,7 @@ exports[`Pages Index 1`] = `
           </div>
         </label>
         <a
-          class="terms-of-use agreed"
+          class="terms-of-use"
           data-cy="terms"
         >
           locale-specific-text
@@ -253,7 +253,7 @@ exports[`Pages Index 1`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-lg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed icon-wrapper"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -291,7 +291,7 @@ exports[`Pages Index 1`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-lg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed icon-wrapper"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -375,7 +375,7 @@ exports[`Pages Index 2`] = `
           </div>
         </label>
         <a
-          class="terms-of-use agreed"
+          class="terms-of-use"
           data-cy="terms"
         >
           locale-specific-text
@@ -405,7 +405,7 @@ exports[`Pages Index 2`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-lg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed icon-wrapper"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -443,7 +443,7 @@ exports[`Pages Index 2`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-lg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed icon-wrapper"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -527,7 +527,7 @@ exports[`Pages Index 3`] = `
           </div>
         </label>
         <a
-          class="terms-of-use agreed"
+          class="terms-of-use"
           data-cy="terms"
         >
           locale-specific-text
@@ -557,7 +557,7 @@ exports[`Pages Index 3`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-lg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed icon-wrapper"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -595,7 +595,7 @@ exports[`Pages Index 3`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-lg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed icon-wrapper"
               >
                 <svg
                   class="icon-wrapper-icon"

@@ -32,7 +32,7 @@
       />
     </template>
 
-    <template #bottom>
+    <template #bottom-left>
       <AccountCardConsensus
         v-if="!pending"
         :multisig-account="account"

@@ -8,8 +8,12 @@ import {
 } from '@/constants';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '@/constants/stubs';
 import {
+  generateEncryptionKey,
+  encrypt,
+  encodeBase64,
   formatDate,
   formatTime,
+  generateSalt,
   prepareStorageKey,
 } from '@/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
@@ -39,6 +43,7 @@ Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const params = `?id=${id}&type=${type}`;
   const onBeforeLoad = () => (txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType'));
   cy.visit(`${params}`, { onBeforeLoad })
+    .loginUsingPassword()
     .get('[data-cy=popup-aex2]')
     .should('exist')
     .should('be.visible');
@@ -73,43 +78,65 @@ Cypress.Commands.add('mockExternalRequests', () => {
   cy.stub(CoinGecko, 'fetchCoinCurrencyRates', { usd: 0.05 });
 });
 
+Cypress.Commands.add('loginUsingPassword', () => {
+  cy.get('[data-cy=password] input')
+    .should('be.visible')
+    .type(STUB_ACCOUNT.password);
+  cy.get('[data-cy=login-btn]')
+    .should('be.visible')
+    .click();
+});
+
 Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
-  if (isMockingExternalRequests) cy.mockExternalRequests();
+  cy.then(async () => {
+    const salt = generateSalt();
+    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, salt);
+    const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
+    return [mnemonicEncryptionResult, salt];
+  }).then(([mnemonicEncryptionResult, salt]) => {
+    if (isMockingExternalRequests) cy.mockExternalRequests();
 
-  const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
+    const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
 
-  cy.openPopup(async (contentWindow) => {
-    const dataToBeStored = {
-      [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
-      [prepareStorageKey([STORAGE_KEYS.mnemonic])]: STUB_ACCOUNT.mnemonic,
-      [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
-        idx: 0,
-        protocol: PROTOCOLS.aeternity,
-        isRestored: true,
-        type: 'hd-wallet',
-      }],
-      [prepareStorageKey([STORAGE_KEYS.otherSettings])]: {
-        isSeedBackedUp,
-      },
-      [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
-        [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
-      },
-      [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: 0,
-    };
+    cy.openPopup(async (contentWindow) => {
+      const dataToBeStored = {
+        [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
+        [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionResult,
+        [prepareStorageKey([STORAGE_KEYS.encryptionSalt])]: encodeBase64(salt),
+        [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
+          idx: 0,
+          protocol: PROTOCOLS.aeternity,
+          isRestored: true,
+          type: 'hd-wallet',
+        }],
+        [prepareStorageKey([STORAGE_KEYS.otherSettings])]: {
+          isSeedBackedUp,
+        },
+        [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
+          [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
+        },
+        [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: 0,
+      };
 
-    Object.entries(dataToBeStored).forEach(([key, data]) => {
-      /* eslint-disable-next-line no-param-reassign */
-      contentWindow.localStorage[key] = JSON.stringify(data);
-    });
-  }, route);
+      Object.entries(dataToBeStored).forEach(([key, data]) => {
+        /* eslint-disable-next-line no-param-reassign */
+        contentWindow.localStorage[key] = JSON.stringify(data);
+      });
+    }, route);
+    cy.loginUsingPassword();
+  });
 });
 
 Cypress.Commands.add('logout', () => {
   cy.openPopup(() => localStorage.clear());
 });
 
-Cypress.Commands.add('shouldRedirect', (url, to) => {
-  cy.visit(`${url}`).urlEquals(to);
+Cypress.Commands.add('shouldRedirect', (url, to, shouldLogin = false) => {
+  cy.visit(`${url}`);
+  if (shouldLogin) {
+    cy.loginUsingPassword();
+  }
+  cy.urlEquals(to);
 });
 
 Cypress.Commands.add('openPageMore', () => {

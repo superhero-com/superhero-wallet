@@ -3,6 +3,7 @@
     :href="explorerUrl"
     class="account-item"
     variant="muted"
+    is-external
   >
     <div
       class="avatar-wrapper"
@@ -36,10 +37,6 @@
       :address="address"
       :protocol="protocol"
     />
-
-    <template #icon>
-      <ExternalLinkIcon class="external-link-icon" />
-    </template>
   </LinkButton>
 </template>
 
@@ -54,8 +51,6 @@ import LinkButton from './LinkButton.vue';
 import Truncate from './Truncate.vue';
 import ProtocolIcon from './ProtocolIcon.vue';
 
-import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
-
 const SIZE = ['rg', 'md'] as const;
 
 type SizeType = typeof SIZE[number]
@@ -65,7 +60,6 @@ export default defineComponent({
     ProtocolIcon,
     Avatar,
     AddressTruncated,
-    ExternalLinkIcon,
     LinkButton,
     Truncate,
   },
@@ -135,14 +129,6 @@ export default defineComponent({
 
   .name {
     max-width: 230px;
-  }
-
-  .external-link-icon {
-    flex-shrink: 0;
-    margin-top: -4px; // Compensate the icon position
-    margin-left: -4px;
-    width: 22px;
-    height: 22px;
   }
 }
 </style>

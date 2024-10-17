@@ -1,5 +1,4 @@
-import type { Migration } from '@/types';
-import type { IOtherSettings } from '@/composables';
+import type { Migration, IOtherSettings } from '@/types';
 import { collectVuexState } from './migrationHelpers';
 
 const migration: Migration<IOtherSettings> = async (restoredValue: IOtherSettings) => {

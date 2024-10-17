@@ -56,7 +56,7 @@
         :description="$t('dashboard.backUpCard.description')"
         :btn-text="$t('dashboard.backUpCard.button')"
         :icon="WarningTriangleIcon"
-        :to="{ name: 'settings-seed-phrase' }"
+        :to="{ name: ROUTE_SEED_PHRASE_SETTINGS }"
         data-cy="backup-seed-phrase"
         variant="danger"
       />
@@ -69,6 +69,7 @@
 <script lang="ts">
 import { PropType, defineComponent } from 'vue';
 import type { IAccount, IFormSelectOption, IMultisigAccount } from '@/types';
+import { ROUTE_SEED_PHRASE_SETTINGS } from '@/popup/router/routeNames';
 import { useUi } from '@/composables';
 
 import DashboardCard from './DashboardCard.vue';
@@ -104,6 +105,7 @@ export default defineComponent({
     return {
       isSeedBackedUp,
       WarningTriangleIcon,
+      ROUTE_SEED_PHRASE_SETTINGS,
     };
   },
 });

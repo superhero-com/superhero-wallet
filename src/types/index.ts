@@ -19,6 +19,7 @@ import {
   NOTIFICATION_TYPES,
   POPUP_ACTIONS,
   POPUP_METHODS,
+  SESSION_METHODS,
   POPUP_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
@@ -267,6 +268,7 @@ export interface IAccountRaw {
   protocol: Protocol;
   address?: AccountAddress;
   publicKey?: string;
+  privateKey?: Uint8Array; // This is used for the imported private key accounts
 }
 
 /**
@@ -671,6 +673,9 @@ export interface IMiddlewareStatus {
 
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
 export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
+export type SessionMethod = ObjectValues<typeof SESSION_METHODS>;
+
+export type BackgroundMethod = PopupMethod | SessionMethod;
 
 export interface IPopupActions {
   resolve: ResolveCallback;
@@ -707,9 +712,9 @@ export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
 }
 
-export interface IPopupMessageData {
+export interface IBackgroundMessageData {
   target?: 'background' | 'offscreen';
-  method?: PopupMethod;
+  method?: BackgroundMethod;
   type?: PopupActionType;
   uuid?: string;
   params?: {
@@ -895,3 +900,13 @@ export interface IAddressBookEntry {
   isBookmarked: boolean;
   protocol: Protocol;
 }
+
+export interface IOtherSettings {
+  isSeedBackedUp?: boolean;
+  saveErrorLog?: boolean;
+  isBiometricLoginEnabled?: boolean;
+  secureLoginTimeout?: number;
+}
+
+/** [iv] + [encrypted message] */
+export type IEncryptionResult = string;

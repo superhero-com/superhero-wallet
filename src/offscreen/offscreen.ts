@@ -1,7 +1,11 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
-import { IPopupMessageData } from '@/types';
-import { IS_FIREFOX, POPUP_METHODS, UNFINISHED_FEATURES } from '@/constants';
+import { IBackgroundMessageData } from '@/types';
+import {
+  IS_FIREFOX,
+  POPUP_METHODS,
+  UNFINISHED_FEATURES,
+} from '@/constants';
 import { useWalletConnect } from '@/composables';
 import * as wallet from './wallet';
 import { useAccounts } from '../composables/accounts';
@@ -13,7 +17,7 @@ if (IS_FIREFOX) {
   browser.runtime.onInstalled.addListener(updateDynamicRules);
 }
 
-browser.runtime.onMessage.addListener(async ({ method }: IPopupMessageData) => {
+browser.runtime.onMessage.addListener(async ({ method }: IBackgroundMessageData) => {
   if (method === POPUP_METHODS.reload) {
     wallet.disconnect();
     window.location.reload();

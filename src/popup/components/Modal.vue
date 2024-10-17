@@ -12,12 +12,12 @@
         'from-bottom': fromBottom,
         'has-header': showHeader,
         'has-close-button': hasCloseButton,
+        'no-bg-blur': (IS_FIREFOX && IS_EXTENSION) || noBgBlur,
         'no-padding': noPadding,
         'no-padding-bottom': noPaddingBottom,
         transparent,
         dense,
         'semi-dense': semiDense,
-        'blur-bg': !(IS_FIREFOX && IS_EXTENSION),
         'min-height': minHeight,
       }"
     >
@@ -86,7 +86,9 @@ import {
   onMounted,
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
+
 import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
+
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
 import BackToTop from './BackToTop.vue';
@@ -104,6 +106,8 @@ export default defineComponent({
     fromBottom: Boolean,
     dense: Boolean,
     semiDense: Boolean,
+    /** Disable the cover backdrop blur effect */
+    noBgBlur: Boolean,
     noPadding: Boolean,
     noPaddingBottom: Boolean,
     centered: Boolean,
@@ -164,6 +168,7 @@ export default defineComponent({
   min-width: $extension-width;
   background-color: rgba($color-black, 0.7);
   display: flex;
+  backdrop-filter: blur(5px); // This is not working correctly in Firefox extension
   will-change: backdrop-filter;
 
   .container {
@@ -300,6 +305,10 @@ export default defineComponent({
     --screen-padding-x: 12px;
   }
 
+  &.no-bg-blur {
+    backdrop-filter: none;
+  }
+
   &.no-padding {
     --screen-padding-x: 0;
   }
@@ -308,11 +317,6 @@ export default defineComponent({
     .body {
       padding-bottom: 0;
     }
-  }
-
-  // This is not working correctly in Firefox extension
-  &.blur-bg {
-    backdrop-filter: blur(5px);
   }
 
   &.pop-in-transition {

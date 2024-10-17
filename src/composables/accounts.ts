@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+
 import type {
   AccountAddress,
   AccountType,
@@ -14,155 +14,185 @@ import {
   PROTOCOLS,
   PROTOCOL_LIST,
   STORAGE_KEYS,
-  IS_IOS,
-  IS_MOBILE_APP,
   ACCOUNT_TYPES_LIST,
   ACCOUNT_TYPES,
 } from '@/constants';
 import {
   createCallbackRegistry,
+  createCustomScopedComposable,
+  decryptedComputed,
   excludeFalsy,
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
-import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
-import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
-import { useStorageRef } from './storageRef';
 
-let composableInitialized = false;
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
+import { useStorageRef } from './storageRef';
+import { useAuth } from './auth';
 
 const {
   addCallback: onAccountChange,
   runCallbacks: runOnAccountChangeCallbacks,
 } = createCallbackRegistry<(newAccount: IAccount, oldAccount: IAccount) => any>();
 
-const areAccountsRestored = ref(false);
-
-/**
- * TODO Implement more safe way of storing mnemonic
- * For example by encrypting it with password or pin code.
- */
-const mnemonic = useStorageRef<string>(
-  '',
-  STORAGE_KEYS.mnemonic,
-  {
-    backgroundSync: true,
-    migrations: [
-      ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
-      migrateMnemonicVuexToComposable,
-    ],
-  },
-);
-
-const accountsRaw = useStorageRef<IAccountRaw[]>(
-  [],
-  STORAGE_KEYS.accountsRaw,
-  {
-    backgroundSync: true,
-    migrations: [
-      migrateAccountsVuexToComposable,
-    ],
-    onRestored: () => {
-      areAccountsRestored.value = true;
-    },
-  },
-);
-
-const activeAccountGlobalIdx = useStorageRef<number>(
-  0,
-  STORAGE_KEYS.activeAccountGlobalIdx,
-  { backgroundSync: true },
-);
-
-const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>(
-  {},
-  STORAGE_KEYS.protocolLastActiveAccountIdx,
-  { backgroundSync: true },
-);
-
-const mnemonicSeed = computed(() => mnemonic.value ? mnemonicToSeed(mnemonic.value) : null);
-
-const accounts = computed((): IAccount[] => {
-  if (!mnemonic.value || !accountsRaw.value?.length) {
-    return [];
-  }
-
-  // Indexes for each protocol and account type
-  const idxList = PROTOCOL_LIST.reduce(
-    (acc, protocol) => ({
-      ...acc,
-      [protocol]: ACCOUNT_TYPES_LIST.reduce(
-        (acc2, type) => ({ ...acc2, [type]: 0 }),
-        {} as Record<AccountType, number>,
-      ),
-    }),
-    {} as Required<ProtocolRecord<Record<AccountType, number>>>,
-  );
-
-  return accountsRaw.value
-    .map((account, globalIdx) => {
-      const idx = idxList[account.protocol][account.type];
-
-      const adapter = ProtocolAdapterFactory.getAdapter(account.protocol);
-      const resolvedAccount = adapter
-        .resolveAccountRaw(account, idx, globalIdx, mnemonicSeed.value);
-      if (resolvedAccount) {
-        idxList[account.protocol][account.type] += 1;
-      } else {
-        accountsRaw.value.splice(globalIdx, 1);
-      }
-      return resolvedAccount;
-    }).filter(excludeFalsy) as IAccount[];
-});
-
-const activeAccount = computed((): IAccount => accounts.value[activeAccountGlobalIdx.value] || {});
-
-const isActiveAccountAirGap = computed(
-  (): boolean => activeAccount.value.type === ACCOUNT_TYPES.airGap,
-);
-
-const accountsGroupedByProtocol = computed(
-  () => accounts.value.reduce(
-    (acc, account) => ({
-      ...acc,
-      [account.protocol]: [...(acc?.[account.protocol] || []), account],
-    }),
-    {} as ProtocolRecord<IAccount[]>,
-  ),
-);
-
-const aeAccounts = computed(
-  (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOLS.aeternity] || [],
-);
-
-const accountsAddressList = computed(
-  (): string[] => accounts.value.map(({ address }) => address),
-);
-
-const accountsSelectOptions = computed(
-  (): IFormSelectOption[] => prepareAccountSelectOptions(accounts.value),
-);
-
-const aeAccountsSelectOptions = computed(
-  (): IFormSelectOption[] => prepareAccountSelectOptions(aeAccounts.value),
-);
-
-const isLoggedIn = computed(
-  (): boolean => activeAccount.value && Object.keys(activeAccount.value).length > 0,
-);
-
-const protocolsInUse = computed(
-  (): Protocol[] => uniq(accounts.value.map(({ protocol }) => protocol)),
-);
-
 /**
  * Composable that handles all operations related to the accounts.
  * The app is storing only basic account data in the browser storage.
  * The wallets's data is created in fly with the use of computed properties.
  */
-export function useAccounts() {
+export const useAccounts = createCustomScopedComposable(() => {
+  const {
+    mnemonic,
+    mnemonicSeed,
+    isMnemonicRestored,
+    encryptionKey,
+  } = useAuth();
+
+  const areAccountsRestored = ref(false);
+  const arePrivateKeysAccountsDecrypted = ref(false);
+  const arePrivateKeysAccountsEncryptedRestored = ref(false);
+
+  const accountsRaw = useStorageRef<IAccountRaw[]>(
+    [],
+    STORAGE_KEYS.accountsRaw,
+    {
+      backgroundSync: true,
+      migrations: [
+        migrateAccountsVuexToComposable,
+      ],
+      onRestored: () => {
+        areAccountsRestored.value = true;
+      },
+    },
+  );
+
+  const accountsPrivateKeysEncrypted = useStorageRef<string | null>(
+    null,
+    STORAGE_KEYS.privateKeyAccountsRaw,
+    {
+      backgroundSync: true,
+      enableSecureStorage: true,
+      onRestored: () => {
+        arePrivateKeysAccountsEncryptedRestored.value = true;
+      },
+    },
+  );
+
+  /**
+   * `accountsPrivateKeysDecrypted` stores the JSON version
+   * of the array of imported account private keys
+   */
+  const accountsPrivateKeysDecrypted = decryptedComputed(
+    encryptionKey,
+    accountsPrivateKeysEncrypted,
+    '[]',
+    {
+      onDecrypted: () => {
+        arePrivateKeysAccountsDecrypted.value = true;
+      },
+    },
+  );
+
+  const activeAccountGlobalIdx = useStorageRef<number>(
+    0,
+    STORAGE_KEYS.activeAccountGlobalIdx,
+    { backgroundSync: true },
+  );
+
+  const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>(
+    {},
+    STORAGE_KEYS.protocolLastActiveAccountIdx,
+    { backgroundSync: true },
+  );
+
+  const arePrivateKeysAccountsRestored = computed(() => (
+    (arePrivateKeysAccountsEncryptedRestored.value && !accountsPrivateKeysEncrypted.value)
+    || (arePrivateKeysAccountsEncryptedRestored.value && arePrivateKeysAccountsDecrypted.value)
+  ));
+
+  const privateKeyAccountsRaw = computed<IAccountRaw[]>(() => JSON.parse(accountsPrivateKeysDecrypted.value || '[]'));
+
+  const areAccountsReady = computed(() => (
+    areAccountsRestored.value && arePrivateKeysAccountsRestored.value
+  ));
+
+  const accounts = computed((): IAccount[] => {
+    if (!isMnemonicRestored.value || !mnemonicSeed.value || !accountsRaw.value?.length) {
+      return [];
+    }
+
+    // Indexes for each protocol and account type
+    const idxList = PROTOCOL_LIST.reduce(
+      (acc, protocol) => ({
+        ...acc,
+        [protocol]: ACCOUNT_TYPES_LIST.reduce(
+          (acc2, type) => ({ ...acc2, [type]: 0 }),
+          {} as Record<AccountType, number>,
+        ),
+      }),
+      {} as Required<ProtocolRecord<Record<AccountType, number>>>,
+    );
+
+    return [...accountsRaw.value, ...privateKeyAccountsRaw.value]
+      .map((account, globalIdx) => {
+        const idx = idxList[account.protocol][account.type];
+
+        const adapter = ProtocolAdapterFactory.getAdapter(account.protocol);
+        const resolvedAccount = adapter
+          .resolveAccountRaw(account, idx, globalIdx, mnemonicSeed.value);
+        if (resolvedAccount) {
+          idxList[account.protocol][account.type] += 1;
+        } else {
+          accountsRaw.value.splice(globalIdx, 1);
+        }
+        return resolvedAccount;
+      }).filter(excludeFalsy) as IAccount[];
+  });
+
+  const activeAccount = computed(
+    (): IAccount => accounts.value[activeAccountGlobalIdx.value] || {},
+  );
+
+  const isActiveAccountAirGap = computed(
+    (): boolean => activeAccount.value.type === ACCOUNT_TYPES.airGap,
+  );
+
+  const accountsGroupedByProtocol = computed(
+    () => accounts.value.reduce(
+      (acc, account) => ({
+        ...acc,
+        [account.protocol]: [...(acc?.[account.protocol] || []), account],
+      }),
+      {} as ProtocolRecord<IAccount[]>,
+    ),
+  );
+
+  const aeAccounts = computed(
+    (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOLS.aeternity] || [],
+  );
+
+  const accountsAddressList = computed(
+    (): string[] => accounts.value.map(({ address }) => address),
+  );
+
+  const accountsSelectOptions = computed(
+    (): IFormSelectOption[] => prepareAccountSelectOptions(accounts.value),
+  );
+
+  const aeAccountsSelectOptions = computed(
+    (): IFormSelectOption[] => prepareAccountSelectOptions(aeAccounts.value),
+  );
+
+  const isLoggedIn = computed(
+    (): boolean => activeAccount.value && Object.keys(activeAccount.value).length > 0,
+  );
+
+  const protocolsInUse = computed(
+    (): Protocol[] => uniq(accounts.value.map(({ protocol }) => protocol)),
+  );
+
   function getAccountByAddress(address: AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
@@ -222,14 +252,6 @@ export function useAccounts() {
     setActiveAccountByProtocolAndIdx(protocol, account?.idx || 0);
   }
 
-  function setMnemonic(newMnemonic: string) {
-    mnemonic.value = newMnemonic;
-  }
-
-  function setGeneratedMnemonic() {
-    setMnemonic(generateMnemonic());
-  }
-
   /**
    * Determine if provided address belongs to any of the current user's accounts.
    */
@@ -239,6 +261,17 @@ export function useAccounts() {
 
   function addRawAccount(account: IAccountRaw): number {
     accountsRaw.value.push(account);
+    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+  }
+
+  async function addPrivateKeyAccount(account: IAccountRaw): Promise<number> {
+    const length = privateKeyAccountsRaw.value.length || 0;
+    accountsPrivateKeysDecrypted.value = JSON.stringify([
+      ...privateKeyAccountsRaw.value,
+      account,
+    ]);
+
+    await watchUntilTruthy(() => privateKeyAccountsRaw.value.length === length + 1);
     return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
   }
 
@@ -269,14 +302,10 @@ export function useAccounts() {
   }
 
   (async () => {
-    if (!composableInitialized) {
-      composableInitialized = true;
+    await watchUntilTruthy(isLoggedIn);
 
-      await watchUntilTruthy(isLoggedIn);
-
-      protocolLastActiveGlobalIdx
-        .value[activeAccount.value.protocol] = activeAccount.value.globalIdx;
-    }
+    protocolLastActiveGlobalIdx
+      .value[activeAccount.value.protocol] = activeAccount.value.globalIdx;
   })();
 
   return {
@@ -289,15 +318,16 @@ export function useAccounts() {
     accountsRaw,
     activeAccount,
     activeAccountGlobalIdx,
+    areAccountsReady,
     areAccountsRestored,
+    arePrivateKeysAccountsRestored,
     isLoggedIn,
     isActiveAccountAirGap,
-    mnemonic,
-    mnemonicSeed,
     protocolsInUse,
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
+    addPrivateKeyAccount,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
@@ -306,8 +336,6 @@ export function useAccounts() {
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,
     setActiveAccountByProtocol,
-    setMnemonic,
-    setGeneratedMnemonic,
     resetAccounts,
   };
-}
+});

@@ -26,12 +26,14 @@
               class="tag"
               scope="global"
             >
-              <span class="emphasis">{{ $t('pages.index.heading.receive') }}</span>
-              <span class="emphasis">{{ $t('pages.index.heading.store') }}</span>
-              <span class="emphasis">{{ $t('pages.index.heading.send') }}</span>
-              <span class="aeternity-name">
-                {{ $t('pages.index.heading.aeternityBlockchain') }}
-              </span>
+              <span
+                class="emphasis"
+                v-text="$t('pages.index.heading.web3')"
+              />
+              <span
+                class="emphasis"
+                v-text="$t('pages.index.heading.deFi')"
+              />
             </i18n-t>
           </div>
 
@@ -51,7 +53,6 @@
             :to="{ name: 'about-terms' }"
             data-cy="terms"
             class="terms-of-use"
-            :class="{ agreed: termsAgreed }"
           >
             {{ $t('pages.index.termsAndConditions') }}
           </RouterLink>
@@ -126,13 +127,15 @@ export default defineComponent({
     const {
       isLoggedIn,
       addRawAccount,
-      setGeneratedMnemonic,
-      mnemonic,
       discoverAccounts,
       setActiveAccountByGlobalIdx,
     } = useAccounts();
+    const {
+      mnemonic,
+      generateMnemonic,
+      setMnemonicAndInitializeAuthentication,
+    } = useAuth();
     const { openModal } = useModals();
-    const { openEnableSecureLoginModal } = useAuth();
     const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
@@ -141,14 +144,13 @@ export default defineComponent({
 
     async function createWallet() {
       isWalletNew = true;
-      setGeneratedMnemonic();
+      await setMnemonicAndInitializeAuthentication(generateMnemonic());
       addRawAccount({
         isRestored: false,
         protocol: PROTOCOLS.aeternity,
         type: ACCOUNT_TYPES.hdWallet,
       });
       router.push(loginTargetLocation.value);
-      openEnableSecureLoginModal();
     }
 
     async function importWallet() {
@@ -213,24 +215,17 @@ export default defineComponent({
   }
 
   .terms-agreement {
+    @extend %face-sans-15-medium;
     @include mixins.flex(center, center);
 
     margin-bottom: 16px;
 
     .terms-of-use {
-      @extend %face-sans-15-regular;
-
-      color: rgba($color-white, 0.75);
       text-decoration: none;
       margin-left: 4px;
 
       &:hover {
-        color: $color-white;
         text-decoration: underline;
-      }
-
-      &.agreed {
-        color: white;
       }
     }
 

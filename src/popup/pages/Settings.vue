@@ -3,13 +3,12 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="settings">
         <PanelItem
-          :to="{ name: 'settings-seed-phrase' }"
+          :to="{ name: ROUTE_SEED_PHRASE_SETTINGS }"
           :title="$t('pages.index.seedPhrase')"
         />
         <PanelItem
-          v-if="IS_MOBILE_APP"
           :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
-          :info="isSecureLoginEnabled ? $t('common.on') : $t('common.off')"
+          :info="secureLoginSettingsInfo"
           :title="$t('pages.titles.secureLogin')"
         />
         <PanelItem
@@ -52,6 +51,8 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import { IS_MOBILE_APP } from '@/constants';
 import {
   useCurrencies,
@@ -62,6 +63,7 @@ import {
   ROUTE_NETWORK_SETTINGS,
   ROUTE_PERMISSIONS_SETTINGS,
   ROUTE_SECURE_LOGIN_SETTINGS,
+  ROUTE_SEED_PHRASE_SETTINGS,
 } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
@@ -74,22 +76,32 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const { t } = useI18n();
     const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
-    const { saveErrorLog, isSecureLoginEnabled } = useUi();
+    const { saveErrorLog, isBiometricLoginEnabled } = useUi();
 
     const activeCurrency = computed(
       () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,
     );
+
+    const secureLoginSettingsInfo = computed(() => {
+      if (IS_MOBILE_APP) {
+        return isBiometricLoginEnabled.value ? t('common.on') : t('common.off');
+      }
+      return null;
+    });
 
     return {
       IS_MOBILE_APP,
       ROUTE_NETWORK_SETTINGS,
       ROUTE_PERMISSIONS_SETTINGS,
       ROUTE_SECURE_LOGIN_SETTINGS,
+      ROUTE_SEED_PHRASE_SETTINGS,
       activeNetwork,
       saveErrorLog,
-      isSecureLoginEnabled,
+      secureLoginSettingsInfo,
+      isBiometricLoginEnabled,
       activeCurrency,
     };
   },

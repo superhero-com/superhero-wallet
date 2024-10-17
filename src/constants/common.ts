@@ -1,4 +1,5 @@
 import type { ICurrency, IPermission } from '@/types';
+import { IS_MOBILE_APP } from './environment';
 
 export const APP_NAME = 'Superhero Wallet';
 export const APP_URL = 'wallet.superhero.com';
@@ -10,9 +11,9 @@ export const MOBILE_SCHEMA = 'superhero://';
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
 export const PROTOCOLS = {
-  aeternity: 'aeternity',
   bitcoin: 'bitcoin',
   ethereum: 'ethereum',
+  aeternity: 'aeternity',
 } as const;
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
@@ -55,6 +56,7 @@ export const TX_DIRECTION = {
 } as const;
 
 export const CONNECTION_TYPES = {
+  SESSION: 'SESSION',
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };
@@ -64,6 +66,7 @@ export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 export const ACCOUNT_TYPES = {
   hdWallet: 'hd-wallet',
   airGap: 'airgap',
+  privateKey: 'private-key',
 } as const;
 
 export const ACCOUNT_TYPES_LIST = Object.values(ACCOUNT_TYPES);
@@ -106,6 +109,7 @@ export const DEX = 'DEX';
 export const STORAGE_KEYS = {
   mnemonic: 'mnemonic',
   accountsRaw: 'accounts-raw',
+  privateKeyAccountsRaw: 'accounts-private-keys',
   activeAccountGlobalIdx: 'active-account-global-idx',
   protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',
   balances: 'balances',
@@ -133,8 +137,10 @@ export const STORAGE_KEYS = {
   transactionsPending: 'transactions-pending',
   transferSendData: 'transfer-send-data',
   secureLogin: 'secure-login',
+  secureLoginTimeout: 'secure-login-timeout',
   walletConnectSession: 'wallet-connect-session',
   addressBook: 'address-book',
+  encryptionSalt: 'encryption-salt',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -306,8 +312,9 @@ export const SUPERHERO_CHAT_URLS = [
 export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const MODAL_ACCOUNT_CREATE = 'account-create';
-export const MODAL_AE_ACCOUNT_CREATE = 'account-ae-create';
-export const MODAL_ACCOUNT_IMPORT = 'import-account';
+export const MODAL_ACCOUNT_IMPORT = 'account-import';
+export const MODAL_PRIVATE_KEY_EXPORT = 'private-key-export';
+export const MODAL_PRIVATE_KEY_IMPORT = 'private-key-import';
 export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
@@ -327,6 +334,7 @@ export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_NETWORK_SWITCHER = 'network-switcher';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
+export const MODAL_PROTOCOL_SELECT = 'protocol-select';
 export const MODAL_SCAN_QR = 'scan-qr';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
@@ -337,13 +345,15 @@ export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
-export const MODAL_SECURE_LOGIN = 'secure-login';
-export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
+export const MODAL_BIOMETRIC_LOGIN = 'secure-login';
+export const MODAL_ENABLE_BIOMETRIC_LOGIN = 'enable-biometric-login';
 export const MODAL_AIR_GAP_IMPORT_ACCOUNTS = 'air-gap-import-accounts';
 export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
 export const MODAL_SHARE_ADDRESS = 'share-address';
 export const MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR = 'address-book-account-selector';
+export const MODAL_SET_PASSWORD = 'set-password';
+export const MODAL_PASSWORD_LOGIN = 'password-login';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -377,6 +387,11 @@ export const POPUP_METHODS = {
   reload: 'reload',
   paste: 'paste',
   checkHasAccount: 'checkHasAccount', // TODO check if still used
+} as const;
+
+export const SESSION_METHODS = {
+  setSessionTimeout: 'setSessionTimeout',
+  getSessionEncryptionKey: 'getSessionEncryptionKey',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';
@@ -466,3 +481,24 @@ export const POLLING_INTERVAL_TRANSACTIONS = 15000;
 
 // toBase64Url(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' }))
 export const JWT_HEADER = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9';
+
+export const PASSWORD_ENCRYPTION_ALGO = 'AES-GCM';
+
+/** Authentication timeouts in milliseconds */
+export const AUTHENTICATION_TIMEOUTS = [
+  0,
+  60000,
+  300000,
+  900000,
+  1800000,
+] as const;
+
+export const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
+  ? AUTHENTICATION_TIMEOUTS[0]
+  : AUTHENTICATION_TIMEOUTS[2];
+
+export const PASSWORD_STRENGTH = {
+  weak: 'weak',
+  medium: 'medium',
+  strong: 'strong',
+} as const;
