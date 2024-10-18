@@ -1,5 +1,4 @@
-import type { ICurrency, IAppData, IPermission } from '@/types';
-import { IS_MOBILE_APP } from './environment';
+import type { IAppData, ICurrency, IPermission } from '@/types';
 
 export const APP_NAME = 'Superhero Wallet';
 export const APP_URL = 'wallet.superhero.com';
@@ -503,10 +502,6 @@ export const AUTHENTICATION_TIMEOUTS = [
   900000,
   1800000,
 ] as const;
-
-export const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
-  ? AUTHENTICATION_TIMEOUTS[0]
-  : AUTHENTICATION_TIMEOUTS[2];
 
 export const PASSWORD_STRENGTH = {
   weak: 'weak',
