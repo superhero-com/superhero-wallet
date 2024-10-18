@@ -4,6 +4,7 @@
     :class="{
       expandable,
       expanded,
+      warning,
     }"
   >
     <Component
@@ -11,6 +12,7 @@
       class="text-label label"
       @click="toggleExpanded()"
     >
+      <slot name="before-label" />
       {{ label }}
       <span
         v-if="$slots.label"
@@ -63,6 +65,7 @@ export default defineComponent({
     expandable: Boolean,
     small: Boolean,
     highlight: Boolean,
+    warning: Boolean,
   },
   setup(props) {
     const expanded = ref(!props.expandable);
@@ -154,6 +157,16 @@ export default defineComponent({
           transform: scaleY(-1);
         }
       }
+    }
+  }
+
+  &.warning {
+    .label {
+      color: $color-warning;
+    }
+
+    .value {
+      color: rgba($color-warning, 0.85);
     }
   }
 }

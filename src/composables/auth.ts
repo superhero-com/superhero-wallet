@@ -10,7 +10,7 @@ import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/b
 
 import { tg as t } from '@/popup/plugins/i18n';
 import {
-  AUTHENTICATION_TIMEOUT_DEFAULT,
+  AUTHENTICATION_TIMEOUTS,
   IS_EXTENSION,
   IS_IOS,
   IS_MOBILE_APP,
@@ -44,6 +44,9 @@ import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
+const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
+  ? AUTHENTICATION_TIMEOUTS[0]
+  : AUTHENTICATION_TIMEOUTS[2];
 
 /**
  * Top level composable that controls if user is allowed to interact with the wallet.
