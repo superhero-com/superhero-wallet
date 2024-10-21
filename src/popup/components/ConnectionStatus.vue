@@ -98,7 +98,7 @@ export default defineComponent({
   padding: 8px;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   color: $color-white;
-  // backdrop-filter: blur($bg-blur-radius);
+  backdrop-filter: blur($bg-blur-radius);
   text-align: center;
   width: 100%;
   right: 0;

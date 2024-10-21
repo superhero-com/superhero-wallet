@@ -1,31 +1,27 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="transaction-details">
-        <template v-if="transaction">
-          <TransactionDetailsBase
-            :transaction="transaction"
-            :amount="amount"
-            :amount-total="amountTotal"
-            :fee="fee"
-            :hash="hash"
+  <div class="transaction-details">
+    <template v-if="transaction">
+      <TransactionDetailsBase
+        :transaction="transaction"
+        :amount="amount"
+        :amount-total="amountTotal"
+        :fee="fee"
+        :hash="hash"
+        :protocol="protocol"
+        show-header
+      >
+        <template #tokens>
+          <TransactionAssetRows
+            :assets="assets"
+            :is-rounded="!!assets"
             :protocol="protocol"
-            show-header
-          >
-            <template #tokens>
-              <TransactionAssetRows
-                :assets="assets"
-                :is-rounded="!!assets"
-                :protocol="protocol"
-                icon-size="rg"
-                multiple-rows
-              />
-            </template>
-          </TransactionDetailsBase>
+            icon-size="rg"
+            multiple-rows
+          />
         </template>
-      </div>
-    </IonContent>
-  </IonPage>
+      </TransactionDetailsBase>
+    </template>
+  </div>
 </template>
 
 <script lang="ts">
@@ -37,7 +33,6 @@ import {
   watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ITokenResolved, ITransaction, Protocol } from '@/types';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
@@ -53,8 +48,6 @@ export default defineComponent({
   components: {
     TransactionDetailsBase,
     TransactionAssetRows,
-    IonContent,
-    IonPage,
   },
   props: {
     protocol: { type: String as any as import('vue').PropType<Protocol>, default: PROTOCOLS.bitcoin },
