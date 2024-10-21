@@ -14,8 +14,6 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header class="header" />
-
         <!--
           Layer displayed under the password protection modal when content is not visible.
         -->
@@ -103,7 +101,6 @@ import {
 } from '@/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
 
-import Header from '@/popup/components/Header.vue';
 import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
 import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
@@ -113,7 +110,6 @@ import AppLogo from '@/icons/logo-small.svg?vue-component';
 export default defineComponent({
   name: 'App',
   components: {
-    Header,
     ConnectionStatus,
     QrCodeReaderMobileOverlay,
     IonApp,
@@ -362,13 +358,6 @@ export default defineComponent({
       }
     }
 
-    .header {
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 1s;
-      will-change: opacity visibility;
-    }
-
     .app-unauthenticated-placeholder {
       position: absolute;
       z-index: 2;
@@ -395,13 +384,6 @@ export default defineComponent({
       padding-bottom: env(safe-area-inset-bottom);
       left: 0;
       width: 100%;
-    }
-
-    &.show-header {
-      .header {
-        visibility: visible;
-        opacity: 1;
-      }
     }
   }
 

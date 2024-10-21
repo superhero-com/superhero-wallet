@@ -1,5 +1,5 @@
 <template>
-  <IonPage>
+  <IonPage class="default-pages-router">
     <!-- We are disabling animations on FF because of a bug that causes flickering
       see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
 
@@ -18,6 +18,7 @@ import { RUNNING_IN_TESTS, IS_FIREFOX } from '@/constants';
 import { popInAnimation } from '@/popup/animations';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
+// TODO remove?
 export default defineComponent({
   components: {
     IonRouterOutlet,

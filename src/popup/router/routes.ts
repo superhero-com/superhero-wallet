@@ -132,76 +132,69 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/',
-    component: DefaultPagesRouter,
-    redirect: { name: ROUTE_ACCOUNT },
+    path: '/account',
+    name: ROUTE_ACCOUNT,
+    component: Dashboard,
+  },
+  {
+    path: '/account-details',
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
     children: [
       {
-        path: 'account',
-        name: ROUTE_ACCOUNT,
-        component: Dashboard,
+        path: '',
+        name: ROUTE_ACCOUNT_DETAILS,
+        component: AccountDetailsTransactions,
+        meta: {
+          showFilterBar: true,
+        },
       },
       {
-        path: 'account-details/',
+        path: 'assets',
+        name: ROUTE_ACCOUNT_DETAILS_ASSETS,
         component: ProtocolSpecificView,
-        props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
+        props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS },
+        meta: {
+          redirectIfNull: ROUTE_ACCOUNT_DETAILS,
+          showFilterBar: true,
+          hideHeader: true,
+          hideFilterButton: true,
+        },
+      },
+      {
+        path: 'names',
+        component: ProtocolSpecificView,
+        props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES },
+        meta: {
+          redirectIfNull: ROUTE_ACCOUNT_DETAILS,
+        },
         children: [
           {
             path: '',
-            name: ROUTE_ACCOUNT_DETAILS,
-            component: AccountDetailsTransactions,
+            name: ROUTE_ACCOUNT_DETAILS_NAMES,
+            component: NamesList,
+            props: true,
             meta: {
-              showFilterBar: true,
-            },
-          },
-          {
-            path: 'assets',
-            name: ROUTE_ACCOUNT_DETAILS_ASSETS,
-            component: ProtocolSpecificView,
-            props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS },
-            meta: {
-              redirectIfNull: ROUTE_ACCOUNT_DETAILS,
-              showFilterBar: true,
               hideHeader: true,
-              hideFilterButton: true,
             },
           },
           {
-            path: 'names',
-            component: ProtocolSpecificView,
-            props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES },
+            path: 'auctions',
+            component: AuctionList,
+            props: true,
+            name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
             meta: {
-              redirectIfNull: ROUTE_ACCOUNT_DETAILS,
+              hideHeader: true,
             },
-            children: [
-              {
-                path: '',
-                name: ROUTE_ACCOUNT_DETAILS_NAMES,
-                component: NamesList,
-                props: true,
-                meta: {
-                  hideHeader: true,
-                },
-              },
-              {
-                path: 'auctions',
-                component: AuctionList,
-                props: true,
-                name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
-                meta: {
-                  hideHeader: true,
-                },
-              },
-              {
-                path: 'claim',
-                component: NameClaim,
-                props: true,
-                name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-                meta: {
-                  hideHeader: true,
-                },
-              },
-            ],
+          },
+          {
+            path: 'claim',
+            component: NameClaim,
+            props: true,
+            name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+            meta: {
+              hideHeader: true,
+            },
           },
         ],
       },

@@ -129,15 +129,7 @@ ion-router-outlet {
     &::part(scroll) {
       --padding-end: 0;
       --padding-start: 0;
-      --padding-top: calc(var(--header-height) + env(safe-area-inset-top));
-    }
-  }
-
-  &.has-header {
-    ion-content {
-      &::part(scroll) {
-        --padding-top: calc(var(--header-height) + env(safe-area-inset-top));
-      }
+      --padding-top: env(safe-area-inset-top);
     }
   }
 }

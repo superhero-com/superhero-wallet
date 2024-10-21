@@ -1,45 +1,43 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="tips-claim">
-        <AccountInfo
-          :account="activeAccount"
-        />
+  <PageWrapper :page-title="$t('pages.claimTips.title')">
+    <div class="tips-claim">
+      <AccountInfo
+        :account="activeAccount"
+      />
 
-        <div class="header">
-          <p class="text-description">
-            {{ $t('pages.claimTips.header') }}
-          </p>
+      <div class="header">
+        <p class="text-description">
+          {{ $t('pages.claimTips.header') }}
+        </p>
 
-          <BtnHelp
-            class="help-button"
-            :title="$t('modals.verify.title')"
-            :msg="$t('modals.verify.msg')"
-            :option="{
-              attrs: {
-                href: AE_BLOG_CLAIM_TIP_URL,
-                target: '_blank',
-              },
-            }"
-            icon="success"
-          />
-        </div>
-
-        <InputField
-          v-model="tipUrl"
-          :label="$t('pages.claimTips.urlToClaim')"
-          :error="!normalizedUrl"
-        />
-
-        <BtnMain
-          :disabled="!normalizedUrl || !isTippingSupported"
-          :text="$t('common.confirm')"
-          extend
-          @click="handleClaimTips()"
+        <BtnHelp
+          class="help-button"
+          :title="$t('modals.verify.title')"
+          :msg="$t('modals.verify.msg')"
+          :option="{
+            attrs: {
+              href: AE_BLOG_CLAIM_TIP_URL,
+              target: '_blank',
+            },
+          }"
+          icon="success"
         />
       </div>
-    </IonContent>
-  </IonPage>
+
+      <InputField
+        v-model="tipUrl"
+        :label="$t('pages.claimTips.urlToClaim')"
+        :error="!normalizedUrl"
+      />
+
+      <BtnMain
+        :disabled="!normalizedUrl || !isTippingSupported"
+        :text="$t('common.confirm')"
+        extend
+        @click="handleClaimTips()"
+      />
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -51,7 +49,6 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IonContent, IonPage } from '@ionic/vue';
 import { isUrlValid, toURL } from '@/utils';
 import { IS_EXTENSION, MODAL_CLAIM_SUCCESS } from '@/constants';
 import {
@@ -67,6 +64,7 @@ import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -75,12 +73,11 @@ import AccountInfo from '../components/AccountInfo.vue';
 export default defineComponent({
   name: 'TipsClaim',
   components: {
+    PageWrapper,
     InputField,
     BtnMain,
     BtnHelp,
     AccountInfo,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { t } = useI18n();
