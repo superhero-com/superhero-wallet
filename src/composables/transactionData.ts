@@ -52,6 +52,11 @@ interface UseTransactionOptions {
 }
 
 /**
+ * Transaction data is not optimized since it is required user to have the full
+ * list of fungible tokens.
+ */
+
+/**
  * Provide detailed information for the provided transaction based on other app states.
  */
 export function useTransactionData({
