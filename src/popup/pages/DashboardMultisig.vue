@@ -1,59 +1,51 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <DashboardBase
-        v-if="isValidActiveIdx"
-        class="dashboard-multisig"
+  <DashboardBase
+    v-if="isValidActiveIdx"
+    class="dashboard-multisig"
+    :active-idx="multisigAccountIdx"
+    :balances-total="multisigBalancesTotal"
+    :accounts="multisigAccounts"
+    is-multisig
+  >
+    <template #swiper>
+      <AccountSwiper
         :active-idx="multisigAccountIdx"
-        :balances-total="multisigBalancesTotal"
-        :accounts="multisigAccounts"
+        :address-list="addressList"
         is-multisig
+        @select-account="(index) => selectAccount(index)"
       >
-        <template #swiper>
-          <AccountSwiper
-            :active-idx="multisigAccountIdx"
-            :address-list="addressList"
-            is-multisig
-            @select-account="(index) => selectAccount(index)"
-          >
-            <template #slide="{ index, selected }">
-              <AccountCardMultisig
-                :account="multisigAccounts[index]"
-                :pending="isPendingAccount(multisigAccounts[index])"
-                :selected="selected"
-                :idx="index"
-                :to="{ name: ROUTE_MULTISIG_DETAILS }"
-              />
-            </template>
-          </AccountSwiper>
-        </template>
-
-        <template #buttons>
-          <OpenTransferReceiveModalBtn
-            :disabled="isActiveMultisigAccountPending"
-            is-multisig
-            is-big
-          />
-          <OpenTransferSendModalBtn
-            :disabled="!!pendingMultisigTransaction || isActiveMultisigAccountPending"
-            is-multisig
-            is-big
+        <template #slide="{ index, selected }">
+          <AccountCardMultisig
+            :account="multisigAccounts[index]"
+            :pending="isPendingAccount(multisigAccounts[index])"
+            :selected="selected"
+            :idx="index"
+            :to="{ name: ROUTE_MULTISIG_DETAILS }"
           />
         </template>
+      </AccountSwiper>
+    </template>
 
-        <template #widgets>
-          <PendingMultisigTransactionCard />
-        </template>
-      </DashboardBase>
-    </IonContent>
-  </IonPage>
+    <template #buttons>
+      <OpenTransferReceiveModalBtn
+        :disabled="isActiveMultisigAccountPending"
+        is-multisig
+        is-big
+      />
+      <OpenTransferSendModalBtn
+        :disabled="!!pendingMultisigTransaction || isActiveMultisigAccountPending"
+        is-multisig
+        is-big
+      />
+    </template>
+
+    <template #widgets>
+      <PendingMultisigTransactionCard />
+    </template>
+  </DashboardBase>
 </template>
 
 <script lang="ts">
-import {
-  IonPage,
-  IonContent,
-} from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import BigNumber from 'bignumber.js';
 
@@ -80,8 +72,6 @@ export default defineComponent({
     OpenTransferReceiveModalBtn,
     DashboardBase,
     PendingMultisigTransactionCard,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { openModal } = useModals();

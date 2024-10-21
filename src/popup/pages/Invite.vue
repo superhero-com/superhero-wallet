@@ -1,74 +1,71 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="invite-page">
-        <AccountInfo
-          :account="activeAccount"
-          can-copy-address
-          show-protocol-icon
-        />
-        <BalanceInfo
-          :balance="balance.toNumber()"
-          :protocol="activeAccount.protocol"
-          horizontal-offline-message
-        />
-        <p class="section-title">
-          {{ $t('pages.invite.generate-link') }}
-        </p>
-        <Field
-          v-slot="{ field, errorMessage, resetField }"
-          v-model="formModel.amount"
+  <PageWrapper :page-title="$t('pages.titles.giftCards')">
+    <div class="invite-page">
+      <AccountInfo
+        :account="activeAccount"
+        can-copy-address
+        show-protocol-icon
+      />
+      <BalanceInfo
+        :balance="balance.toNumber()"
+        :protocol="activeAccount.protocol"
+        horizontal-offline-message
+      />
+      <p class="section-title">
+        {{ $t('pages.invite.generate-link') }}
+      </p>
+      <Field
+        v-slot="{ field, errorMessage, resetField }"
+        v-model="formModel.amount"
+        name="amount"
+        :rules="{
+          does_not_exceed_decimals: formModel.selectedAsset?.decimals,
+          min_value_exclusive: 0,
+          ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+          enough_coin: fee.toString(),
+        }"
+      >
+        <InputAmount
+          v-bind="field"
+          :model-value="formModel.amount"
+          class="amount"
           name="amount"
-          :rules="{
-            does_not_exceed_decimals: formModel.selectedAsset?.decimals,
-            min_value_exclusive: 0,
-            ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-            enough_coin: fee.toString(),
-          }"
+          :label="$t('pages.invite.tip-attached')"
+          :message="errorMessage"
+          readonly
+          :protocol="PROTOCOLS.aeternity"
+          :selected-asset="formModel.selectedAsset"
+          @asset-selected="(val) => formModel.selectedAsset = val"
+        />
+        <BtnMain
+          extend
+          :icon="PlusCircleFillIcon"
+          :disabled="!formModel.amount || !!errorMessage"
+          data-cy="invite-generate"
+          @click="generate(resetField)"
         >
-          <InputAmount
-            v-bind="field"
-            :model-value="formModel.amount"
-            class="amount"
-            name="amount"
-            :label="$t('pages.invite.tip-attached')"
-            :message="errorMessage"
-            readonly
-            :protocol="PROTOCOLS.aeternity"
-            :selected-asset="formModel.selectedAsset"
-            @asset-selected="(val) => formModel.selectedAsset = val"
-          />
-          <BtnMain
-            extend
-            :icon="PlusCircleFillIcon"
-            :disabled="!formModel.amount || !!errorMessage"
-            data-cy="invite-generate"
-            @click="generate(resetField)"
-          >
-            {{ $t('pages.invite.generate') }}
-          </BtnMain>
-        </Field>
-        <div
-          v-if="invites.length > 0"
-          class="generated-links"
-        >
-          <p class="section-title">
-            {{ $t('pages.invite.created-links') }}
-          </p>
-          <InviteItem
-            v-for="link in invites"
-            v-bind="link ?? null"
-            :key="link.secretKey.toString()"
-            @loading="(val) => setLoaderVisible(val)"
-          />
-        </div>
+          {{ $t('pages.invite.generate') }}
+        </BtnMain>
+      </Field>
+      <div
+        v-if="invites.length > 0"
+        class="generated-links"
+      >
+        <p class="section-title">
+          {{ $t('pages.invite.created-links') }}
+        </p>
+        <InviteItem
+          v-for="link in invites"
+          v-bind="link ?? null"
+          :key="link.secretKey.toString()"
+          @loading="(val) => setLoaderVisible(val)"
+        />
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
 import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
@@ -86,6 +83,7 @@ import {
   useUi,
 } from '@/composables';
 
+import PageWrapper from '../components/PageWrapper.vue';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import InputAmount from '../components/InputAmount.vue';
@@ -101,8 +99,7 @@ export default defineComponent({
     BtnMain,
     InviteItem,
     Field,
-    IonPage,
-    IonContent,
+    PageWrapper,
   },
   setup() {
     const { activeAccount } = useAccounts();

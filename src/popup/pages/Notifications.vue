@@ -1,33 +1,30 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div
-        ref="innerElement"
-        class="notifications"
+  <PageWrapper :page-title="$t('pages.titles.notifications')">
+    <div
+      ref="innerElement"
+      class="notifications"
+    >
+      <InfiniteScroll
+        v-if="notificationsToShow.length"
+        @load-more="loadMoreNotifications"
       >
-        <InfiniteScroll
-          v-if="notificationsToShow.length"
-          @load-more="loadMoreNotifications"
-        >
-          <NotificationItem
-            v-for="notification in notificationsToShow"
-            :key="notification.id"
-            :notification="notification"
-          />
-        </InfiniteScroll>
-        <p
-          v-else
-          class="empty-list-message"
-        >
-          {{ $t('pages.notifications.noNotifications') }}
-        </p>
-      </div>
-    </IonContent>
-  </IonPage>
+        <NotificationItem
+          v-for="notification in notificationsToShow"
+          :key="notification.id"
+          :notification="notification"
+        />
+      </InfiniteScroll>
+      <p
+        v-else
+        class="empty-list-message"
+      >
+        {{ $t('pages.notifications.noNotifications') }}
+      </p>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onBeforeUnmount,
@@ -38,16 +35,16 @@ import {
 import { IS_EXTENSION } from '@/constants';
 import { useViewport, useNotifications } from '@/composables';
 
-import NotificationItem from '../components/NotificationItem.vue';
-import InfiniteScroll from '../components/InfiniteScroll.vue';
+import PageWrapper from '@/popup/components/PageWrapper.vue';
+import NotificationItem from '@/popup/components/NotificationItem.vue';
+import InfiniteScroll from '@/popup/components/InfiniteScroll.vue';
 
 export default defineComponent({
   name: 'Notifications',
   components: {
+    PageWrapper,
     InfiniteScroll,
     NotificationItem,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { initViewport } = useViewport();
