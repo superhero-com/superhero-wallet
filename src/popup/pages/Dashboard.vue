@@ -1,94 +1,83 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <DashboardBase
-        class="dashboard"
-        :accounts="accounts"
-        :accounts-select-options="accountsSelectOptions"
-        :active-account-address="activeAccount.address"
+  <DashboardBase
+    class="dashboard"
+    :accounts="accounts"
+    :accounts-select-options="accountsSelectOptions"
+    :active-account-address="activeAccount.address"
+    :active-idx="activeAccountGlobalIdx"
+    :balances-total="totalBalance"
+    @select-account="(address) => setActiveAccountByAddress(address)"
+  >
+    <template #swiper>
+      <AccountSwiper
         :active-idx="activeAccountGlobalIdx"
-        :balances-total="totalBalance"
-        @select-account="(address) => setActiveAccountByAddress(address)"
+        :address-list="accountsAddressList"
+        @select-account="(index) => setActiveAccountByGlobalIdx(index)"
       >
-        <template #swiper>
-          <AccountSwiper
-            :active-idx="activeAccountGlobalIdx"
-            :address-list="accountsAddressList"
-            @select-account="(index) => setActiveAccountByGlobalIdx(index)"
-          >
-            <template #slide="{ index, selected }">
-              <AccountCard
-                :account="accounts[index]"
-                :selected="selected"
-                :idx="index"
-                :to="{ name: ROUTE_ACCOUNT_DETAILS }"
-              />
-            </template>
-          </AccountSwiper>
-        </template>
-
-        <template #buttons>
-          <OpenTransferReceiveModalBtn is-big />
-          <OpenTransferSendModalBtn is-big />
-        </template>
-
-        <template #cards>
-          <LatestTransactionsCard />
-
-          <DashboardCard
-            v-if="IS_MOBILE_APP || UNFINISHED_FEATURES"
-            :title="$t('dashboard.daeppBrowserCard.title')"
-            :description="$t('dashboard.daeppBrowserCard.description')"
-            :btn-text="$t('dashboard.daeppBrowserCard.button')"
-            :background="daeppBrowserBackground"
-            :icon="GlobeIcon"
-            :to="{ name: ROUTE_APPS_BROWSER }"
-            :card-id="DASHBOARD_CARD_ID.daeppBrowser!"
-          />
-          <DashboardCard
-            v-if="isNodeMainnet && UNFINISHED_FEATURES"
-            :title="$t('dashboard.buyCard.title')"
-            :description="$t('dashboard.buyCard.description')"
-            :btn-text="$t('dashboard.buyCard.button')"
-            :background="buyBackground"
-            :icon="CardIcon"
-            :href="activeAccountSimplexLink"
-            :card-id="DASHBOARD_CARD_ID.buyAe"
-          />
-
-          <DashboardCard
-            v-if="(
-              (isNodeMainnet || isNodeTestnet)
-              && activeAccount.protocol === PROTOCOLS.aeternity
-            )"
-            :title="$t('dashboard.nameCard.title')"
-            :description="$t('dashboard.nameCard.description')"
-            :btn-text="$t('dashboard.nameCard.button')"
-            :background="chainNameBackground"
-            :icon="ActionIcon"
-            :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
-            :card-id="DASHBOARD_CARD_ID.claimName"
-            variant="purple"
+        <template #slide="{ index, selected }">
+          <AccountCard
+            :account="accounts[index]"
+            :selected="selected"
+            :idx="index"
+            :to="{ name: ROUTE_ACCOUNT_DETAILS }"
           />
         </template>
-      </DashboardBase>
-    </IonContent>
-  </IonPage>
+      </AccountSwiper>
+    </template>
+
+    <template #buttons>
+      <OpenTransferReceiveModalBtn is-big />
+      <OpenTransferSendModalBtn is-big />
+    </template>
+
+    <template #cards>
+      <LatestTransactionsCard />
+
+      <DashboardCard
+        v-if="IS_MOBILE_APP || UNFINISHED_FEATURES"
+        :title="$t('dashboard.daeppBrowserCard.title')"
+        :description="$t('dashboard.daeppBrowserCard.description')"
+        :btn-text="$t('dashboard.daeppBrowserCard.button')"
+        :background="daeppBrowserBackground"
+        :icon="GlobeIcon"
+        :to="{ name: ROUTE_APPS_BROWSER }"
+        :card-id="DASHBOARD_CARD_ID.daeppBrowser!"
+      />
+      <DashboardCard
+        v-if="isNodeMainnet && UNFINISHED_FEATURES"
+        :title="$t('dashboard.buyCard.title')"
+        :description="$t('dashboard.buyCard.description')"
+        :btn-text="$t('dashboard.buyCard.button')"
+        :background="buyBackground"
+        :icon="CardIcon"
+        :href="activeAccountSimplexLink"
+        :card-id="DASHBOARD_CARD_ID.buyAe"
+      />
+
+      <DashboardCard
+        v-if="(
+          (isNodeMainnet || isNodeTestnet)
+          && activeAccount.protocol === PROTOCOLS.aeternity
+        )"
+        :title="$t('dashboard.nameCard.title')"
+        :description="$t('dashboard.nameCard.description')"
+        :btn-text="$t('dashboard.nameCard.button')"
+        :background="chainNameBackground"
+        :icon="ActionIcon"
+        :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
+        :card-id="DASHBOARD_CARD_ID.claimName"
+        variant="purple"
+      />
+    </template>
+  </DashboardBase>
 </template>
 
 <script lang="ts">
 import {
   computed,
   defineComponent,
-  ref,
   watch,
 } from 'vue';
-import {
-  IonPage,
-  IonContent,
-  onIonViewWillEnter,
-  onIonViewDidLeave,
-} from '@ionic/vue';
 import { useRoute } from 'vue-router';
 
 import {
@@ -136,15 +125,11 @@ export default defineComponent({
     AccountSwiper,
     DashboardBase,
     DashboardCard,
-    IonPage,
-    IonContent,
     LatestTransactionsCard,
     OpenTransferReceiveModalBtn,
     OpenTransferSendModalBtn,
   },
   setup() {
-    const pageIsActive = ref(true);
-
     const route = useRoute();
 
     const {
@@ -178,14 +163,6 @@ export default defineComponent({
       },
     );
 
-    onIonViewWillEnter(() => {
-      pageIsActive.value = true;
-    });
-
-    onIonViewDidLeave(() => {
-      pageIsActive.value = false;
-    });
-
     return {
       DASHBOARD_CARD_ID,
       IS_MOBILE_APP,
@@ -213,7 +190,6 @@ export default defineComponent({
       daeppBrowserBackground,
       isNodeMainnet,
       isNodeTestnet,
-      pageIsActive,
       totalBalance,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,

@@ -1,5 +1,8 @@
 <template>
-  <IonPage>
+  <PageWrapper
+    class="address-book-wrapper"
+    :page-title="$t('pages.titles.addressBook')"
+  >
     <div class="address-book">
       <Transition name="slide-transition">
         <div
@@ -29,16 +32,16 @@
 
       <AddressBookList v-model:hideButtons="hideButtons" />
     </div>
-  </IonPage>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonPage } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 
 import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
 import { useAddressBook } from '@/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 
@@ -48,7 +51,7 @@ import ExportIcon from '@/icons/export-address-book.svg?vue-component';
 
 export default defineComponent({
   components: {
-    IonPage,
+    PageWrapper,
     AddressBookList,
     BtnBox,
   },
