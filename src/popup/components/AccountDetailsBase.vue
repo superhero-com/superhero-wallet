@@ -1,88 +1,86 @@
 <template>
-  <PageWrapper has-sub-pages hide-header>
-    <div
-      class="account-details-base"
-      :data-account-address="activeAccount.address"
-    >
-      <div class="account-info-wrapper">
-        <slot name="account-info">
-          <AccountInfo
-            :account="activeAccount"
-            can-copy-address
-            show-protocol-icon
-          />
-        </slot>
+  <div
+    class="account-details-base"
+    :data-account-address="activeAccount.address"
+  >
+    <div class="account-info-wrapper">
+      <slot name="account-info">
+        <AccountInfo
+          :account="activeAccount"
+          can-copy-address
+          show-protocol-icon
+        />
+      </slot>
 
-        <BtnClose
-          data-cy="btn-close"
-          class="close-button"
-          @click="close"
+      <BtnClose
+        data-cy="btn-close"
+        class="close-button"
+        @click="close"
+      />
+    </div>
+
+    <div>
+      <slot
+        v-if="$slots.balance"
+        name="balance"
+      />
+      <BalanceInfo
+        v-else
+        :balance="balanceNumeric"
+        :protocol="activeAccount.protocol"
+        horizontal-offline-message
+      />
+
+      <HorizontalScroll
+        ref="buttonsScrollContainer"
+        class="buttons"
+      >
+        <template v-if="!withoutDefaultButtons">
+          <OpenTransferReceiveModalBtn />
+          <OpenTransferSendModalBtn />
+          <OpenShareAddressModalBtn
+            :address="activeAccount.address"
+            :protocol="activeAccount.protocol"
+          />
+          <BtnBox
+            :text="$t('common.key')"
+            :icon="PrivateKeyIcon"
+            data-cy="export-private-key"
+            @click="exportPrivateKey()"
+          />
+        </template>
+        <slot
+          v-if="$slots.buttons"
+          name="buttons"
+        />
+      </HorizontalScroll>
+
+      <div
+        ref="headerEl"
+        class="header"
+      >
+        <slot name="navigation" />
+
+        <TransactionAndTokenFilter
+          :key="routeName!"
+          :show-all-filter-options="activeAccount.protocol === PROTOCOLS.aeternity"
+          :show-filters="isScrollEnabled"
         />
       </div>
 
-      <div>
-        <slot
-          v-if="$slots.balance"
-          name="balance"
+      <div
+        class="tabs-content"
+        :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px` }"
+      >
+        <!-- We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <IonRouterOutlet
+          :animated="!IS_FIREFOX"
+          :animation="fadeAnimation"
         />
-        <BalanceInfo
-          v-else
-          :balance="balanceNumeric"
-          :protocol="activeAccount.protocol"
-          horizontal-offline-message
-        />
-
-        <HorizontalScroll
-          ref="buttonsScrollContainer"
-          class="buttons"
-        >
-          <template v-if="!withoutDefaultButtons">
-            <OpenTransferReceiveModalBtn />
-            <OpenTransferSendModalBtn />
-            <OpenShareAddressModalBtn
-              :address="activeAccount.address"
-              :protocol="activeAccount.protocol"
-            />
-            <BtnBox
-              :text="$t('common.key')"
-              :icon="PrivateKeyIcon"
-              data-cy="export-private-key"
-              @click="exportPrivateKey()"
-            />
-          </template>
-          <slot
-            v-if="$slots.buttons"
-            name="buttons"
-          />
-        </HorizontalScroll>
-
-        <div
-          ref="headerEl"
-          class="header"
-        >
-          <slot name="navigation" />
-
-          <TransactionAndTokenFilter
-            :key="routeName!"
-            :show-all-filter-options="activeAccount.protocol === PROTOCOLS.aeternity"
-            :show-filters="isScrollEnabled"
-          />
-        </div>
-
-        <div
-          class="tabs-content"
-          :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px` }"
-        >
-          <!-- We are disabling animations on FF because of a bug that causes flickering
-            see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
-          <IonRouterOutlet
-            :animated="!IS_FIREFOX"
-            :animation="fadeAnimation"
-          />
-        </div>
       </div>
     </div>
-  </PageWrapper>
+  </div>
 </template>
 
 <script lang="ts">
@@ -110,9 +108,8 @@ import {
   useUi,
   useScrollConfig,
 } from '@/composables';
-import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+import { fadeAnimation } from '@/popup/animations';
 
-import PageWrapper from '@/popup/components/PageWrapper.vue';
 import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
@@ -130,7 +127,6 @@ const INITIAL_TABS_HEIGHT = 330;
 export default defineComponent({
   name: 'AccountDetailsBase',
   components: {
-    PageWrapper,
     AccountInfo,
     BalanceInfo,
     BtnBox,
@@ -174,7 +170,8 @@ export default defineComponent({
     }
 
     function close() {
-      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push', popOutAnimation);
+      // Used to prevent animating the dashboard when switching the route
+      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push');
     }
 
     /**

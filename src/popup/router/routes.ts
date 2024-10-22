@@ -125,7 +125,6 @@ export const routes: WalletAppRouteConfig[] = [
     name: ROUTE_INDEX,
     component: Index,
     meta: {
-      title: '',
       hideHeader: true,
       ifNotAuthOnly: true,
       notPersist: true,
@@ -206,8 +205,6 @@ export const routes: WalletAppRouteConfig[] = [
     component: ProtocolSpecificView,
     props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
     meta: {
-      title: 'txDetails',
-      showHeaderNavigation: true,
       backRoute: { name: ROUTE_ACCOUNT_DETAILS },
     },
   },
@@ -263,8 +260,6 @@ export const routes: WalletAppRouteConfig[] = [
         component: TransactionDetails,
         props: { multisigDashboard: true },
         meta: {
-          title: 'txDetails',
-          showHeaderNavigation: true,
           backRoute: { name: ROUTE_MULTISIG_DETAILS },
         },
       },
@@ -274,9 +269,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: MultisigProposalDetails,
         props: true,
         meta: {
-          title: 'multisigProposalDetails',
           backRoute: { name: ROUTE_MULTISIG_DETAILS },
-          showHeaderNavigation: true,
         },
       },
       {
@@ -303,9 +296,7 @@ export const routes: WalletAppRouteConfig[] = [
             component: AccountDetailsMultisigTransactions,
             props: true,
             meta: {
-              title: 'coinDetails',
               backRoute: { name: ROUTE_MULTISIG_DETAILS_ASSETS },
-              showHeaderNavigation: true,
               showFilterBar: true,
               hideSearchBar: true,
               isMultisig: true,
@@ -317,9 +308,7 @@ export const routes: WalletAppRouteConfig[] = [
             component: AssetDetailsInfo,
             props: true,
             meta: {
-              title: 'coinDetails',
               backRoute: { name: ROUTE_MULTISIG_DETAILS_ASSETS },
-              showHeaderNavigation: true,
               isMultisig: true,
             },
           },
@@ -389,138 +378,80 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings',
     name: 'settings',
     component: Settings,
-    meta: {
-      title: 'settings',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/reset-wallet',
     name: 'settings-reset-wallet',
     component: ResetWallet,
-    meta: {
-      title: 'resetWallet',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/errors-log',
     name: 'settings-errors-log',
     component: ErrorLogSettings,
-    meta: {
-      title: 'saveErrorsLog',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/language',
     name: 'settings-language',
     component: LanguageSettings,
-    meta: {
-      title: 'language',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/currency',
     name: 'settings-currency',
     component: CurrencySettings,
-    meta: {
-      title: 'currency',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/seed-phrase',
     name: ROUTE_SEED_PHRASE_SETTINGS,
     component: SeedPhraseSettings,
-    meta: {
-      title: 'seedPhrase',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/seed-phrase/details',
     name: ROUTE_SEED_PHRASE_DETAILS,
     component: SeedPhraseDetailsSettings,
-    meta: {
-      title: 'seedPhrase',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/seed-phrase/details/verify',
     name: ROUTE_SEED_PHRASE_VERIFY,
     component: SeedPhraseVerifySettings,
-    meta: {
-      title: 'seedPhrase',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/secure-login',
     component: SecureLoginSettings,
     name: ROUTE_SECURE_LOGIN_SETTINGS,
-    meta: {
-      title: 'secureLogin',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/networks',
     name: ROUTE_NETWORK_SETTINGS,
     component: Networks,
     props: true,
-    meta: {
-      title: 'networks',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/networks/add',
     name: ROUTE_NETWORK_ADD,
     component: NetworkForm,
     props: true,
-    meta: {
-      title: 'networkAdd',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/networks/:name',
     name: ROUTE_NETWORK_EDIT,
     component: NetworkForm,
     props: true,
-    meta: {
-      title: 'networkEdit',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/permissions',
     component: PermissionsSettings,
     name: ROUTE_PERMISSIONS_SETTINGS,
-    meta: {
-      title: 'permissionsSettings',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/permissions/add',
     component: PermissionManager,
     name: ROUTE_PERMISSIONS_ADD,
-    meta: {
-      title: 'permissionsAdd',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/permissions/:host',
     component: PermissionManager,
     name: ROUTE_PERMISSIONS_DETAILS,
     meta: {
-      title: 'permissionsEdit',
-      showHeaderNavigation: true,
       isEdit: true,
     },
   },
@@ -528,18 +459,12 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/about',
     component: About,
     name: 'about',
-    meta: {
-      title: 'about',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/about/terms',
     component: TermsOfService,
     name: 'about-terms',
     meta: {
-      title: 'terms',
-      showHeaderNavigation: true,
       showScrollbar: true,
       ifNotAuth: true,
     },
@@ -549,9 +474,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: PrivacyPolicy,
     name: 'about-privacy',
     meta: {
-      title: 'privacy',
       ifNotAuth: true,
-      showHeaderNavigation: true,
       showScrollbar: true,
     },
   },
@@ -559,10 +482,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/tips-claim',
     name: 'tips-claim',
     component: TipsClaim,
-    meta: {
-      title: 'claimTips',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/tips',
@@ -572,46 +491,30 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'sendTip',
       notPersist: true,
-      showHeaderNavigation: true,
     },
   },
   {
     path: '/more',
     component: More,
     name: 'more',
-    meta: {
-      title: 'more',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/invite',
     name: ROUTE_INVITE,
     component: Invite,
-    meta: {
-      title: 'giftCards',
-      showHeaderNavigation: true,
-    },
   },
   {
     path: '/more/settings/notifications',
     name: 'notification-settings',
     component: NotificationSettings,
-    meta: {
-      title: 'notifications',
-      showHeaderNavigation: true,
-    },
   },
   {
     name: ROUTE_ADDRESS_BOOK,
     path: '/more/address-book',
     component: AddressBook,
     meta: {
-      title: 'addressBook',
       notPersist: true,
-      showHeaderNavigation: true,
     },
   },
   {
@@ -619,19 +522,13 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/address-book/add',
     component: AddressBookForm,
     props: true,
-    meta: {
-      title: 'addressBookAdd',
-      showHeaderNavigation: true,
-    },
   },
   {
     name: ROUTE_ADDRESS_BOOK_EDIT,
     path: '/more/address-book/:id',
     component: AddressBookForm,
     meta: {
-      title: 'addressBookEdit',
       notPersist: true,
-      showHeaderNavigation: true,
     },
   },
   {
@@ -644,10 +541,6 @@ export const routes: WalletAppRouteConfig[] = [
         component: AuctionBid,
         props: true,
         name: ROUTE_AUCTION_BID,
-        meta: {
-          title: 'auction',
-          showHeaderNavigation: true,
-        },
       },
       {
         path: 'history',
@@ -655,9 +548,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         name: ROUTE_AUCTION_HISTORY,
         meta: {
-          title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
-          showHeaderNavigation: true,
         },
       },
     ],
@@ -666,9 +557,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/comment',
     component: CommentNew,
     meta: {
-      title: 'commentNew',
       notPersist: true,
-      showHeaderNavigation: true,
     },
   },
   {
@@ -677,7 +566,6 @@ export const routes: WalletAppRouteConfig[] = [
     component: DonateError,
     props: true,
     meta: {
-      title: 'donateError',
       notPersist: true,
       ifNotAuth: true,
     },
@@ -687,7 +575,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/address',
     component: Address,
     meta: {
-      title: 'address',
       notPersist: true,
       hideHeader: true,
     },
@@ -710,9 +597,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: AssetDetailsTransactions,
         props: true,
         meta: {
-          title: 'coinDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
-          showHeaderNavigation: true,
           showFilterBar: true,
           hideSearchBar: true,
         },
@@ -723,9 +608,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: AssetDetailsInfo,
         props: true,
         meta: {
-          title: 'coinDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
-          showHeaderNavigation: true,
         },
       },
     ],
@@ -748,9 +631,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: AssetDetailsTransactions,
         props: true,
         meta: {
-          title: 'tokenDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
-          showHeaderNavigation: true,
           showFilterBar: true,
           hideSearchBar: true,
         },
@@ -761,9 +642,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: AssetDetailsInfo,
         props: true,
         meta: {
-          title: 'tokenDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
-          showHeaderNavigation: true,
         },
       },
     ],
@@ -773,7 +652,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-message',
     component: SignMessage,
     meta: {
-      title: 'signMessage',
       notPersist: true,
       hideHeader: true,
     },
@@ -783,7 +661,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-transaction',
     component: SignTransaction,
     meta: {
-      title: 'signTransaction',
       notPersist: true,
       hideHeader: true,
     },
@@ -793,7 +670,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-jwt',
     component: JwtSign,
     meta: {
-      title: 'signMessage',
       notPersist: true,
       hideHeader: true,
     },
@@ -803,7 +679,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/apps-browser',
     component: AppsBrowser,
     meta: {
-      title: 'appsBrowser',
       hideHeader: true,
       notPersist: true,
     },
@@ -814,7 +689,6 @@ export const routes: WalletAppRouteConfig[] = [
     component: InviteClaim,
     props: true,
     meta: {
-      title: 'invite',
       notPersist: true,
     },
   },
@@ -823,8 +697,6 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/notifications',
     component: Notifications,
     meta: {
-      title: 'notifications',
-      showHeaderNavigation: true,
       notPersist: true,
     },
   },
@@ -836,8 +708,6 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       ifNotAuth: true,
       notPersist: true,
-      showHeaderNavigation: true,
-      title: 'notFound',
     },
   },
   {
@@ -847,8 +717,6 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       ifNotAuth: true,
       notPersist: true,
-      showHeaderNavigation: true,
-      title: 'notFound',
     },
   },
 ];

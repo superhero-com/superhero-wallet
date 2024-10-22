@@ -17,10 +17,11 @@
 
     <component
       :is="hasSubPages ? 'div' : 'IonContent'"
+      ref="contentEl"
       :class="{ 'has-header': !hideHeader }"
       class="page-wrapper-content"
     >
-      <slot />
+      <slot v-bind="{ contentEl }" />
     </component>
   </component>
 </template>
@@ -57,6 +58,7 @@ export default defineComponent({
   },
   setup() {
     const isPageActive = ref();
+    const contentEl = ref();
 
     onIonViewDidEnter(() => {
       isPageActive.value = true;
@@ -68,6 +70,7 @@ export default defineComponent({
 
     return {
       isPageActive,
+      contentEl,
     };
   },
 });

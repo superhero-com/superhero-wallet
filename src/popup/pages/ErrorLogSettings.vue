@@ -1,35 +1,32 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="errors-log-settings">
-        <p class="text-description">
-          {{ $t('pages.errors-log-settings.description') }}
-        </p>
+  <PageWrapper :page-title="$t('pages.titles.saveErrorsLog')">
+    <div class="errors-log-settings">
+      <p class="text-description">
+        {{ $t('pages.errors-log-settings.description') }}
+      </p>
 
-        <div class="options">
-          <SwitchButton
-            :label="$t('pages.titles.saveErrorsLog')"
-            :model-value="saveErrorLog"
-            @update:modelValue="setSaveErrorLog"
-          />
-        </div>
+      <div class="options">
+        <SwitchButton
+          :label="$t('pages.titles.saveErrorsLog')"
+          :model-value="saveErrorLog"
+          @update:modelValue="setSaveErrorLog"
+        />
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
 import { useUi } from '@/composables';
 
-import SwitchButton from '../components/SwitchButton.vue';
+import PageWrapper from '@/popup/components/PageWrapper.vue';
+import SwitchButton from '@/popup/components/SwitchButton.vue';
 
 export default defineComponent({
   components: {
+    PageWrapper,
     SwitchButton,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { saveErrorLog, setSaveErrorLog } = useUi();
@@ -43,9 +40,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-@use '@/styles/typography';
-
 .errors-log-settings {
   padding-inline: var(--screen-padding-x);
 

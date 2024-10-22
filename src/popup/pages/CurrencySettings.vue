@@ -1,54 +1,52 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="currency-settings">
-        <p class="text-description">
-          {{ $t('pages.currencySettings.chooseLanguage') }}
-        </p>
+  <PageWrapper :page-title="$t('pages.titles.currency')">
+    <div class="currency-settings">
+      <p
+        class="text-description"
+        v-text="$t('pages.currencySettings.chooseLanguage')"
+      />
 
-        <div class="options">
-          <RadioButton
-            v-for="({ code, name, symbol }, index) in CURRENCIES"
-            :key="`${index}-${code}`"
-            :value="currentCurrencyCode === code"
-            :class="{ active: currentCurrencyCode === code }"
-            class="currency"
-            has-label-effect
-            @input="setCurrentCurrency(code)"
-          >
-            <div class="row">
-              <div class="left">
-                <div class="code">
-                  {{ code }}
-                </div>
-                <div class="symbol">
-                  ({{ symbol }})
-                </div>
+      <div class="options">
+        <RadioButton
+          v-for="({ code, name, symbol }, index) in CURRENCIES"
+          :key="`${index}-${code}`"
+          :value="currentCurrencyCode === code"
+          :class="{ active: currentCurrencyCode === code }"
+          class="currency"
+          has-label-effect
+          @input="setCurrentCurrency(code)"
+        >
+          <div class="row">
+            <div class="left">
+              <div class="code">
+                {{ code }}
               </div>
-              <div class="name">
-                {{ name }}
+              <div class="symbol">
+                ({{ symbol }})
               </div>
             </div>
-          </RadioButton>
-        </div>
+            <div class="name">
+              {{ name }}
+            </div>
+          </div>
+        </RadioButton>
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
 import { useCurrencies } from '@/composables';
 
-import RadioButton from '../components/RadioButton.vue';
+import PageWrapper from '@/popup/components/PageWrapper.vue';
+import RadioButton from '@/popup/components/RadioButton.vue';
 
 export default defineComponent({
   name: 'CurrencySettings',
   components: {
+    PageWrapper,
     RadioButton,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { CURRENCIES, currentCurrencyCode, setCurrentCurrency } = useCurrencies();
