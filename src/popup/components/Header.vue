@@ -38,25 +38,8 @@
 </template>
 
 <script lang="ts">
-import {
-  useBackButton,
-  useIonRouter,
-} from '@ionic/vue';
-import {
-  computed,
-  defineComponent,
-} from 'vue';
-import { useRoute } from 'vue-router';
-import { IS_MOBILE_APP } from '@/constants';
-import {
-  ROUTE_ACCOUNT,
-  ROUTE_INDEX,
-  ROUTE_MORE,
-} from '@/popup/router/routeNames';
-import {
-  useAccounts,
-  useUi,
-} from '@/composables';
+import { defineComponent } from 'vue';
+import { usePageNavigation } from '@/composables';
 
 import BackIcon from '@/icons/back.svg?vue-component';
 
@@ -74,55 +57,17 @@ export default defineComponent({
     text: { type: String, default: null },
   },
   setup() {
-    const route = useRoute();
-    const ionRouter = useIonRouter();
-
-    const { homeRouteName } = useUi();
-    const { isLoggedIn } = useAccounts();
-
-    const currentHomeRouteName = computed(
-      () => isLoggedIn.value
-        ? homeRouteName.value
-        : ROUTE_INDEX,
-    );
-
-    function back() {
-      const { fullPath, meta } = route;
-      const { backRoute } = meta || {};
-
-      if (!isLoggedIn.value) {
-        return ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
-      }
-
-      if (backRoute) {
-        // TODO: rewrite back button logic in more unified way
-        return ionRouter.navigate(backRoute, 'back', 'push');
-      }
-
-      const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
-
-      return ionRouter.navigate(
-        path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
-        'back',
-        'push',
-      );
-    }
-
-    function close() {
-      ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
-    }
-
-    useBackButton(1, back);
+    const {
+      isLoggedIn,
+      navigateBack,
+      navigateHome,
+    } = usePageNavigation();
 
     return {
-      ROUTE_ACCOUNT,
-      ROUTE_MORE,
-      IS_MOBILE_APP,
-      homeRouteName,
       BackIcon,
       isLoggedIn,
-      back,
-      close,
+      back: navigateBack,
+      close: navigateHome,
     };
   },
 });
@@ -131,7 +76,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
-@use '@/styles/mixins';
 
 .page-header {
   display: flex;

@@ -221,6 +221,9 @@ describe.each(testCases)('Pages', (test) => {
           $tm: () => 'locale-specific-text',
         },
         stubs: {
+          PageWrapper: {
+            template: '<div><slot /></div>',
+          },
           RouterLink: RouterLinkStub,
           'i18n-t': {
             template: '<span />',

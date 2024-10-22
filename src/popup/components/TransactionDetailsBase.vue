@@ -1,10 +1,9 @@
 <template>
-  <PageWrapper :page-title="$t('pages.titles.txDetails')">
+  <PageWrapper
+    :page-title="$t('pages.titles.txDetails')"
+  >
     <div class="transaction-details-base">
-      <div
-        v-if="showHeader || isErrorTransaction"
-        class="header"
-      >
+      <div class="header">
         <TransactionErrorStatus
           v-if="isErrorTransaction"
           :return-type="transaction?.tx?.returnType"
@@ -226,7 +225,6 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
     price: { type: Number, default: undefined },
     isErrorTransaction: Boolean,
-    showHeader: Boolean,
     hideAmountTotal: Boolean,
     hideFiat: Boolean,
   },

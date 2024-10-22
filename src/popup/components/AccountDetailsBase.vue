@@ -1,8 +1,5 @@
 <template>
-  <PageWrapper
-    has-sub-pages
-    hide-header
-  >
+  <PageWrapper hide-header>
     <div
       class="account-details-base"
       :data-account-address="activeAccount.address"
@@ -171,7 +168,7 @@ export default defineComponent({
 
     const routerHeight = ref<string>();
     const headerEl = ref<HTMLDivElement>();
-    const resizeObserver = ref<ResizeObserver>();
+    let resizeObserver: ResizeObserver | undefined;
 
     const balanceNumeric = computed(() => balance.value.toNumber());
     const routeName = computed(() => route.name);
@@ -188,6 +185,7 @@ export default defineComponent({
     }
 
     function close() {
+      // Used to prevent animating the dashboard when switching the route
       ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push');
     }
 
@@ -196,8 +194,10 @@ export default defineComponent({
      * Tabs change height when filters are shown/hidden
      */
     function observeTabsHeight() {
-      resizeObserver.value = new ResizeObserver(calculateRouterHeight);
-      resizeObserver.value.observe(headerEl.value!);
+      if (headerEl.value) {
+        resizeObserver = new ResizeObserver(calculateRouterHeight);
+        resizeObserver.observe(headerEl.value!);
+      }
     }
 
     onMounted(() => {
@@ -213,7 +213,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      resizeObserver.value?.disconnect();
+      resizeObserver?.disconnect();
       if (IS_MOBILE_APP) {
         setMobileStatusBarColor('#141414');
       }
@@ -297,7 +297,6 @@ export default defineComponent({
         min-width: 84px;
       }
     }
-
   }
 
   .collapsible-top {

@@ -8,7 +8,6 @@
         :fee="fee"
         :hash="hash"
         :protocol="protocol"
-        show-header
       >
         <template #tokens>
           <TransactionAssetRows

@@ -7,8 +7,7 @@
         :amount-total="amountTotal"
         :fee="transactionFee"
         :is-error-transaction="isErrorTransaction"
-        :payload="getTransactionPayload(transaction)!"
-        :show-header="!isAllowance"
+        :payload="getTransactionPayload(transaction)"
         :hide-amount-total="(
           isDex
           || isAllowance

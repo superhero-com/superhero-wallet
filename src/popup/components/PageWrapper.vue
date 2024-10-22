@@ -1,12 +1,9 @@
 <template>
-  <component
-    :is="hasSubPages ? 'div' : 'IonPage'"
-    class="page-wrapper ion-padding ion-content-bg"
-  >
+  <IonPage class="page-wrapper ion-padding ion-content-bg">
     <IonHeader
       v-if="!hideHeader"
       id="header"
-      class="header ion-no-border"
+      class="page-wrapper-header ion-no-border"
     >
       <IonToolbar class="toolbar">
         <slot name="header">
@@ -16,23 +13,27 @@
     </IonHeader>
 
     <component
-      :is="hasSubPages ? 'div' : 'IonContent'"
-      :class="{ 'has-header': !hideHeader }"
+      :is="(hasSubContent) ? 'div' : 'IonContent'"
+      ref="contentEl"
+      :class="{
+        'has-header': !hideHeader,
+        'has-sub-content': hasSubContent,
+      }"
       class="page-wrapper-content"
     >
-      <slot />
+      <slot v-bind="{ contentEl }" />
     </component>
-  </component>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import { defineComponent, ref } from 'vue';
 import {
   IonContent,
   IonHeader,
   IonPage,
   IonToolbar,
 } from '@ionic/vue';
-import { defineComponent } from 'vue';
 
 import PageHeader from './Header.vue';
 
@@ -47,8 +48,16 @@ export default defineComponent({
   },
   props: {
     pageTitle: { type: String, default: null },
-    hasSubPages: Boolean,
+    /** Set to true if the page itself has IonContent as a child */
+    hasSubContent: Boolean,
     hideHeader: Boolean,
+  },
+  setup() {
+    const contentEl = ref();
+
+    return {
+      contentEl,
+    };
   },
 });
 </script>
@@ -57,13 +66,25 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .page-wrapper {
-  ion-content.has-header {
+  &::part(scroll) {
+    height: 100%;
+  }
+
+  .has-header {
     &::part(scroll) {
       --padding-top: calc(#{$header-default-height} + env(safe-area-inset-top));
     }
   }
 
-  .header {
+  .page-wrapper-content {
+    min-height: 100%;
+
+    &.has-header.has-sub-content {
+      padding-top: calc(#{$header-default-height} + env(safe-area-inset-top));
+    }
+  }
+
+  .page-wrapper-header {
     position: fixed;
     z-index: $z-index-header;
     padding-top: env(safe-area-inset-top);

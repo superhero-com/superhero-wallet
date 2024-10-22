@@ -67,6 +67,7 @@ describe('Notifications page', () => {
         stubs: {
           IonPage: { template: '<div><slot /></div>' },
           IonContent: { template: '<div><slot /></div>' },
+          PageWrapper: { template: '<div><slot /></div>' },
         },
       },
     });

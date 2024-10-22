@@ -1,52 +1,56 @@
 <template>
-  <div class="donate-error">
-    <h1>{{ $t('pages.donate-error.error-report') }}</h1>
-    <FormTextarea
-      v-model="description"
-      :placeholder="$t('pages.donate-error.error-placeholder')"
-      size="md"
-    />
-    <h1>{{ $t('pages.donate-error.data-collected') }}</h1>
-    <h2 class="error-info-title">
-      {{ $t('pages.donate-error.browser') }}
-    </h2>
-    <p class="error-info-content">
-      {{ browser }}
-    </p>
-    <h2 class="error-info-title">
-      {{ $t('pages.donate-error.details') }}
-    </h2>
-    <p class="error-info-content">
-      {{ error.message }}
-    </p>
-    <p class="error-info-content">
-      {{ error.stack }}
-    </p>
-    <BtnMain
-      variant="muted"
-      inline
-      extra-padded
-      to="/"
-    >
-      {{ $t('common.cancel') }}
-    </BtnMain>
-    <BtnMain
-      inline
-      @click="donate"
-    >
-      {{ $t('pages.donate-error.donate') }}
-    </BtnMain>
-  </div>
+  <PageWrapper :page-title="$t('pages.titles.donateError')">
+    <div class="donate-error">
+      <h1>{{ $t('pages.donate-error.error-report') }}</h1>
+      <FormTextarea
+        v-model="description"
+        :placeholder="$t('pages.donate-error.error-placeholder')"
+        size="md"
+      />
+      <h1>{{ $t('pages.donate-error.data-collected') }}</h1>
+      <h2 class="error-info-title">
+        {{ $t('pages.donate-error.browser') }}
+      </h2>
+      <p class="error-info-content">
+        {{ browser }}
+      </p>
+      <h2 class="error-info-title">
+        {{ $t('pages.donate-error.details') }}
+      </h2>
+      <p class="error-info-content">
+        {{ error.message }}
+      </p>
+      <p class="error-info-content">
+        {{ error.stack }}
+      </p>
+      <BtnMain
+        variant="muted"
+        inline
+        extra-padded
+        to="/"
+      >
+        {{ $t('common.cancel') }}
+      </BtnMain>
+      <BtnMain
+        inline
+        @click="donate"
+      >
+        {{ $t('pages.donate-error.donate') }}
+      </BtnMain>
+    </div>
+  </PageWrapper>
 </template>
 
 <script>
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
+import PageWrapper from '../components/PageWrapper.vue';
 import { useModals } from '../../composables';
 import FormTextarea from '../components/form/FormTextarea.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default {
   components: {
+    PageWrapper,
     FormTextarea,
     BtnMain,
   },
