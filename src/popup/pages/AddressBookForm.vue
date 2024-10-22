@@ -1,115 +1,114 @@
 <template>
-  <IonPage class="address-book-form">
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="address-book-form-content">
-        <div class="top-part">
-          <div class="info">
-            <AccountInfo
-              class="account-info"
-              :account="account"
-              :custom-name="accountName"
-              :is-placeholder="isPlaceholder"
-              :avatar-borderless="isPlaceholder"
-              :show-protocol-icon="!isPlaceholder"
-              :show-explorer-link="!isPlaceholder"
-            />
-            <Field
-              v-slot="{ field }"
-              name="isBookmarked"
-              :model-value="formModel.isBookmarked"
-            >
-              <BtnPill
-                class="bookmark-button"
-                variant="dark"
-                @click="toggleBookmark()"
-              >
-                <IconWrapper
-                  :icon="FavoriteIcon"
-                  icon-size="rg"
-                  class="icon"
-                  :class="{ yellow: field.value }"
-                />
-                {{
-                  field.value
-                    ? $t('pages.addressBook.entry.bookmarked')
-                    : $t('pages.addressBook.entry.bookmark')
-                }}
-              </BtnPill>
-            </Field>
-          </div>
-          <BtnIcon
-            class="qrcode-wrapper"
-            :disabled="isPlaceholder"
-            @click="shareAddress()"
-          >
-            <QrCode
-              :value="[account.address ?? '']"
-              :size="116"
-              class="qrcode"
-              :class="{ hidden: isPlaceholder }"
-              disable-click-to-copy
-            />
-          </BtnIcon>
-        </div>
-        <div class="inputs">
+  <PageWrapper
+    :page-title="(isEdit) ? $t('pages.titles.addressBookEdit') : $t('pages.titles.addressBookAdd')"
+  >
+    <div class="address-book-form">
+      <div class="top-part">
+        <div class="info">
+          <AccountInfo
+            class="account-info"
+            :account="account"
+            :custom-name="accountName"
+            :is-placeholder="isPlaceholder"
+            :avatar-borderless="isPlaceholder"
+            :show-protocol-icon="!isPlaceholder"
+            :show-explorer-link="!isPlaceholder"
+          />
           <Field
-            v-slot="{ field, errorMessage }"
-            name="name"
-            :model-value="formModel.name"
-            :validate-on-mount="!!formModel.name"
-            :rules="{
-              required: true,
-              address_book_entry_exists: [addressBook, savedEntry?.name, 'name'],
-              max_len: 33,
-            }"
+            v-slot="{ field }"
+            name="isBookmarked"
+            :model-value="formModel.isBookmarked"
           >
-            <FormTextarea
-              v-bind="field"
-              v-model="formModel.name"
-              name="name"
-              data-cy="name"
-              auto-height
-              :text-limit="33"
-              :message="errorMessage"
-              :label="$t('common.name')"
-              :placeholder="$t('pages.addressBook.entry.namePlaceholder')"
-            />
-          </Field>
-
-          <Field
-            v-slot="{ field, errorMessage }"
-            name="address"
-            :model-value="formModel.address"
-            :validate-on-mount="!!formModel.address"
-            :rules="{
-              required: true,
-              address_book_entry_exists: [addressBook, savedEntry?.address, 'address'],
-              account_address: true,
-            }"
-          >
-            <FormTextarea
-              v-bind="field"
-              v-model="formModel.address"
-              name="address"
-              data-cy="address"
-              auto-height
-              :message="errorMessage"
-              :label="$t('common.address')"
-              :placeholder="$t('pages.addressBook.entry.addressPlaceholder')"
+            <BtnPill
+              class="bookmark-button"
+              variant="dark"
+              @click="toggleBookmark()"
             >
-              <template #label-after>
-                <BtnIcon
-                  :icon="QrScanIcon"
-                  data-cy="scan-button"
-                  @click="scanQr()"
-                />
-              </template>
-            </FormTextarea>
+              <IconWrapper
+                :icon="FavoriteIcon"
+                icon-size="rg"
+                class="icon"
+                :class="{ yellow: field.value }"
+              />
+              {{
+                field.value
+                  ? $t('pages.addressBook.entry.bookmarked')
+                  : $t('pages.addressBook.entry.bookmark')
+              }}
+            </BtnPill>
           </Field>
         </div>
+        <BtnIcon
+          class="qrcode-wrapper"
+          :disabled="isPlaceholder"
+          @click="shareAddress()"
+        >
+          <QrCode
+            :value="[account.address ?? '']"
+            :size="116"
+            class="qrcode"
+            :class="{ hidden: isPlaceholder }"
+            disable-click-to-copy
+          />
+        </BtnIcon>
       </div>
-    </IonContent>
-    <FixedScreenFooter class="footer">
+      <div class="inputs">
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="name"
+          :model-value="formModel.name"
+          :validate-on-mount="!!formModel.name"
+          :rules="{
+            required: true,
+            address_book_entry_exists: [addressBook, savedEntry?.name, 'name'],
+            max_len: 33,
+          }"
+        >
+          <FormTextarea
+            v-bind="field"
+            v-model="formModel.name"
+            name="name"
+            data-cy="name"
+            auto-height
+            :text-limit="33"
+            :message="errorMessage"
+            :label="$t('common.name')"
+            :placeholder="$t('pages.addressBook.entry.namePlaceholder')"
+          />
+        </Field>
+
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="address"
+          :model-value="formModel.address"
+          :validate-on-mount="!!formModel.address"
+          :rules="{
+            required: true,
+            address_book_entry_exists: [addressBook, savedEntry?.address, 'address'],
+            account_address: true,
+          }"
+        >
+          <FormTextarea
+            v-bind="field"
+            v-model="formModel.address"
+            name="address"
+            data-cy="address"
+            auto-height
+            :message="errorMessage"
+            :label="$t('common.address')"
+            :placeholder="$t('pages.addressBook.entry.addressPlaceholder')"
+          >
+            <template #label-after>
+              <BtnIcon
+                :icon="QrScanIcon"
+                data-cy="scan-button"
+                @click="scanQr()"
+              />
+            </template>
+          </FormTextarea>
+        </Field>
+      </div>
+
       <div class="main-buttons">
         <BtnMain
           variant="muted"
@@ -123,20 +122,22 @@
           @click="confirm()"
         />
       </div>
+
       <BtnMain
         v-if="savedEntry?.address"
         variant="muted"
+        class="btn-delete"
         :text="$t('pages.addressBook.entry.delete')"
         :icon="TrashIcon"
         extend
         @click="deleteEntry()"
       />
-    </FixedScreenFooter>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, useIonRouter } from '@ionic/vue';
+import { useIonRouter } from '@ionic/vue';
 import {
   defineComponent,
   computed,
@@ -150,13 +151,15 @@ import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
 import type { IAddressBookEntry } from '@/types';
-import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
+import { getProtocolByAddress } from '@/utils';
+import { ROUTE_ADDRESS_BOOK, ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
 import {
   useAddressBook,
   useAddressBookEntryForm,
   useModals,
 } from '@/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnPill from '@/popup/components/buttons/BtnPill.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
@@ -164,17 +167,14 @@ import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import QrCode from '@/popup/components/QrCode.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
-import FixedScreenFooter from '@/popup/components/FixedScreenFooter.vue';
 
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import FavoriteIcon from '@/icons/star-full.svg?vue-component';
 import TrashIcon from '@/icons/trash.svg?vue-component';
-import { getProtocolByAddress } from '@/utils';
 
 export default defineComponent({
   components: {
-    IonPage,
-    IonContent,
+    PageWrapper,
     AccountInfo,
     FormTextarea,
     BtnMain,
@@ -182,7 +182,6 @@ export default defineComponent({
     BtnIcon,
     QrCode,
     IconWrapper,
-    FixedScreenFooter,
     Field,
   },
   setup() {
@@ -205,6 +204,7 @@ export default defineComponent({
       { addressBookEntryData: {} },
     );
 
+    const isEdit = (route.name === ROUTE_ADDRESS_BOOK_EDIT);
     const accountName = computed(() => isPlaceholder.value ? defaultName : formModel.value.name);
     const accountAddress = computed(
       () => isPlaceholder.value ? defaultAddress : formModel.value.address,
@@ -287,6 +287,7 @@ export default defineComponent({
     return {
       account,
       accountName,
+      isEdit,
       formModel,
       isPlaceholder,
       addressBook,
@@ -312,82 +313,79 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .address-book-form {
-  &-content {
-    padding: 16px;
+  padding: 16px;
 
-    .top-part {
-      display: flex;
-      justify-content: space-between;
-      height: auto;
-      margin-bottom: 16px;
-
-      .info {
-        display: flex;
-        flex-flow: column;
-        align-items: flex-start;
-        justify-content: space-between;
-
-        .account-info {
-          --maxWidth: 155px;
-        }
-
-        .bookmark-button {
-          display: flex;
-          gap: 4px;
-          padding: 8px 16px;
-          min-width: 138px;
-          border-radius: 10px;
-          font-weight: 500;
-          color: $color-white;
-          background-color: rgba($color-white, 0.08);
-
-          .icon {
-            color: rgba($color-white, 0.50);
-
-            &.yellow {
-              color: $color-warning;
-            }
-          }
-
-          &:hover {
-            background-color: rgba($color-white, 0.05);
-            color: rgba($color-white, 0.8);
-          }
-        }
-      }
-
-      .qrcode-wrapper {
-        border-radius: 12px;
-        background-color: rgba($color-white, 0.15);
-
-        .qrcode {
-          display: inline-flex;
-          border-radius: 12px;
-          height: 116px;
-          width: 116px;
-          padding: 8px;
-          background-color: $color-white;
-          object-fit: contain;
-
-          &.hidden {
-            opacity: 0;
-          }
-        }
-      }
-    }
-  }
-
-  .footer {
+  .top-part {
     display: flex;
-    flex-flow: column;
-    background-color: $color-bg-app;
+    justify-content: space-between;
+    height: auto;
+    margin-bottom: 16px;
 
-    .main-buttons {
+    .info {
       display: flex;
-      flex-flow: row;
-      gap: 8px;
+      flex-flow: column;
+      align-items: flex-start;
+      justify-content: space-between;
+
+      .account-info {
+        --maxWidth: 155px;
+      }
+
+      .bookmark-button {
+        display: flex;
+        gap: 4px;
+        padding: 8px 16px;
+        min-width: 138px;
+        border-radius: 10px;
+        font-weight: 500;
+        color: $color-white;
+        background-color: rgba($color-white, 0.08);
+
+        .icon {
+          color: rgba($color-white, 0.50);
+
+          &.yellow {
+            color: $color-warning;
+          }
+        }
+
+        &:hover {
+          background-color: rgba($color-white, 0.05);
+          color: rgba($color-white, 0.8);
+        }
+      }
+    }
+
+    .qrcode-wrapper {
+      border-radius: 16px;
+      background-color: rgba($color-white, 0.15);
+
+      .qrcode {
+        display: inline-flex;
+        border-radius: 12px;
+        height: 116px;
+        width: 116px;
+        padding: 8px;
+        background-color: $color-white;
+        object-fit: contain;
+
+        &.hidden {
+          opacity: 0;
+        }
+      }
     }
   }
 
+  .main-buttons {
+    display: flex;
+    flex-flow: row;
+    gap: 8px;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .btn-delete {
+    margin-top: 8px;
+  }
 }
 </style>

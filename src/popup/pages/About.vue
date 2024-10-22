@@ -140,7 +140,6 @@ export default defineComponent({
 .about {
   --screen-padding-x: 8px;
 
-  padding-top: 16px;
   padding-inline: var(--screen-padding-x);
 
   .icon-github {

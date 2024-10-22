@@ -1,177 +1,172 @@
 <template>
-  <IonPage>
-    <IonContent
-      ref="infoBoxEl"
-      class="ion-padding ion-content-bg"
-    >
-      <div class="secure-login-settings">
-        <!--
-          Enable secure login option
-        -->
-        <div class="form-group">
-          <template v-if="IS_MOBILE_APP">
-            <p
-              class="text-description"
-              v-text="$t('pages.secureLogin.descriptionBiometric')"
-            />
-            <div class="form-group-fields">
-              <SwitchButton
-                :label="$t('pages.secureLogin.enableSecureLogin')"
-                :model-value="isBiometricLoginEnabled"
-                :disabled="!isBiometricLoginAvailable"
-                @update:modelValue="setBiometricLoginEnabled"
-              />
-            </div>
-          </template>
-          <template v-else>
-            <p
-              class="text-description"
-              v-text="$t('pages.secureLogin.descriptionPassword')"
-            />
-            <div class="form-group-fields">
-              <SwitchButton
-                :label="$t('pages.secureLogin.enablePasswordProtection')"
-                :model-value="!isUsingDefaultPassword"
-                @update:modelValue="setPasswordEnabled"
-              />
-            </div>
-          </template>
-
-          <hr>
-        </div>
-
-        <!--
-          Auto-lock wallet time options
-        -->
-        <div
-          class="form-group"
-          :class="{
-            dimmed: (
-              (IS_MOBILE_APP && !isBiometricLoginEnabled)
-              || (!IS_MOBILE_APP && isUsingDefaultPassword)
-            ),
-          }"
-        >
-          <div>
-            <p class="text-heading-5" v-text="$t('pages.secureLogin.autoLock.title')" />
-            <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart1')" />
-            <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart2')" />
-          </div>
-
+  <PageWrapper ref="wrapper" :page-title="$t('pages.titles.secureLogin')">
+    <div class="secure-login-settings">
+      <!--
+        Enable secure login option
+      -->
+      <div class="form-group">
+        <template v-if="IS_MOBILE_APP">
+          <p
+            class="text-description"
+            v-text="$t('pages.secureLogin.descriptionBiometric')"
+          />
           <div class="form-group-fields">
-            <RadioButton
-              v-for="(ms) in AUTHENTICATION_TIMEOUTS"
-              :key="`timeout-${ms}`"
-              :value="+secureLoginTimeoutDecrypted === ms"
-              :class="{ active: +secureLoginTimeoutDecrypted === ms }"
-              :label="$t('pages.secureLogin.authenticationTimeout', msToMinutes(ms))"
-              class="timeout"
-              has-label-effect
-              @input="secureLoginTimeoutDecrypted = ms.toString()"
+            <SwitchButton
+              :label="$t('pages.secureLogin.enableSecureLogin')"
+              :model-value="isBiometricLoginEnabled"
+              :disabled="!isBiometricLoginAvailable"
+              @update:modelValue="setBiometricLoginEnabled"
             />
           </div>
+        </template>
+        <template v-else>
+          <p
+            class="text-description"
+            v-text="$t('pages.secureLogin.descriptionPassword')"
+          />
+          <div class="form-group-fields">
+            <SwitchButton
+              :label="$t('pages.secureLogin.enablePasswordProtection')"
+              :model-value="!isUsingDefaultPassword"
+              @update:modelValue="setPasswordEnabled"
+            />
+          </div>
+        </template>
 
-          <hr>
+        <hr>
+      </div>
+
+      <!--
+        Auto-lock wallet time options
+      -->
+      <div
+        class="form-group"
+        :class="{
+          dimmed: (
+            (IS_MOBILE_APP && !isBiometricLoginEnabled)
+            || (!IS_MOBILE_APP && isUsingDefaultPassword)
+          ),
+        }"
+      >
+        <div>
+          <p class="text-heading-5" v-text="$t('pages.secureLogin.autoLock.title')" />
+          <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart1')" />
+          <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart2')" />
         </div>
 
-        <!--
-          Change password options
-        -->
-        <div
-          v-if="!IS_MOBILE_APP"
-          class="form-group"
-          :class="{ dimmed: (!IS_MOBILE_APP && isUsingDefaultPassword) }"
-        >
-          <div>
-            <p
-              class="text-heading-5"
-              v-text="$t('pages.changePassword.title')"
-            />
-            <p
-              class="text-description"
-              v-text="$t('pages.changePassword.description')"
-            />
-          </div>
+        <div class="form-group-fields">
+          <RadioButton
+            v-for="(ms) in AUTHENTICATION_TIMEOUTS"
+            :key="`timeout-${ms}`"
+            :value="+secureLoginTimeoutDecrypted === ms"
+            :class="{ active: +secureLoginTimeoutDecrypted === ms }"
+            :label="$t('pages.secureLogin.authenticationTimeout', msToMinutes(ms))"
+            class="timeout"
+            has-label-effect
+            @input="secureLoginTimeoutDecrypted = ms.toString()"
+          />
+        </div>
 
-          <Form
-            v-slot="{ errors }"
-            @submit="setNewPassword()"
+        <hr>
+      </div>
+
+      <!--
+        Change password options
+      -->
+      <div
+        v-if="!IS_MOBILE_APP"
+        class="form-group"
+        :class="{ dimmed: (!IS_MOBILE_APP && isUsingDefaultPassword) }"
+      >
+        <div>
+          <p
+            class="text-heading-5"
+            v-text="$t('pages.changePassword.title')"
+          />
+          <p
+            class="text-description"
+            v-text="$t('pages.changePassword.description')"
+          />
+        </div>
+
+        <Form
+          v-slot="{ errors }"
+          @submit="setNewPassword()"
+        >
+          <InputPassword
+            v-model="currentPassword"
+            data-cy="current-password"
+            :placeholder="$t('pages.changePassword.currentPasswordPlaceholder')"
+            :label="$t('pages.changePassword.currentPassword')"
+            :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
+            @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
+          />
+          <Field
+            v-slot="{ field, errorMessage }"
+            key="newPassword"
+            name="newPassword"
+            :validate-on-blur="true"
+            :validate-on-model-update="!!errors.password"
+            :rules="{
+              password_min_len: 4,
+            }"
           >
             <InputPassword
-              v-model="currentPassword"
-              data-cy="current-password"
-              :placeholder="$t('pages.changePassword.currentPasswordPlaceholder')"
-              :label="$t('pages.changePassword.currentPassword')"
-              :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
-              @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
+              v-bind="field"
+              v-model="newPassword"
+              data-cy="new-password"
+              :placeholder="$t('pages.changePassword.newPasswordPlaceholder')"
+              :label="$t('pages.changePassword.newPassword')"
+              :message="errorMessage ?? errors.confirmNewPassword"
+              show-password-strength
             />
-            <Field
-              v-slot="{ field, errorMessage }"
-              key="newPassword"
-              name="newPassword"
-              :validate-on-blur="true"
-              :validate-on-model-update="!!errors.password"
-              :rules="{
-                password_min_len: 4,
-              }"
-            >
-              <InputPassword
-                v-bind="field"
-                v-model="newPassword"
-                data-cy="new-password"
-                :placeholder="$t('pages.changePassword.newPasswordPlaceholder')"
-                :label="$t('pages.changePassword.newPassword')"
-                :message="errorMessage ?? errors.confirmNewPassword"
-                show-password-strength
-              />
-            </Field>
-            <Field
-              v-slot="{ field, errorMessage }"
-              key="confirmNewPassword"
-              name="confirmNewPassword"
-              :rules="{
-                passwords_match: newPassword,
-              }"
-            >
-              <InputPassword
-                v-bind="field"
-                v-model="confirmNewPassword"
-                data-cy="confirm-new-password"
-                :placeholder="$t('pages.setPassword.confirmPlaceholder')"
-                :label="$t('pages.changePassword.confirmNewPassword')"
-                :message="errorMessage"
-                hide-eye-icon
-              />
-            </Field>
+          </Field>
+          <Field
+            v-slot="{ field, errorMessage }"
+            key="confirmNewPassword"
+            name="confirmNewPassword"
+            :rules="{
+              passwords_match: newPassword,
+            }"
+          >
+            <InputPassword
+              v-bind="field"
+              v-model="confirmNewPassword"
+              data-cy="confirm-new-password"
+              :placeholder="$t('pages.setPassword.confirmPlaceholder')"
+              :label="$t('pages.changePassword.confirmNewPassword')"
+              :message="errorMessage"
+              hide-eye-icon
+            />
+          </Field>
 
-            <BtnMain
-              class="btn-reset-password"
-              variant="primary"
-              type="submit"
-              extend
-              :disabled="(
-                !newPassword
-                || !currentPassword
-                || !confirmNewPassword
-                || !!errors.newPassword
-                || !!errors.confirmNewPassword
-              )"
-              :text="$t('pages.changePassword.reset')"
-            />
-          </Form>
+          <BtnMain
+            class="btn-reset-password"
+            variant="primary"
+            type="submit"
+            extend
+            :disabled="(
+              !newPassword
+              || !currentPassword
+              || !confirmNewPassword
+              || !!errors.newPassword
+              || !!errors.confirmNewPassword
+            )"
+            :text="$t('pages.changePassword.reset')"
+          />
+        </Form>
 
-          <Transition name="fade-transition">
-            <InfoBox
-              v-if="isPasswordChangedSuccessfully"
-              class="info-box"
-              type="success"
-              :text="$t('pages.changePassword.success')"
-            />
-          </Transition>
-        </div>
+        <Transition name="fade-transition">
+          <InfoBox
+            v-if="isPasswordChangedSuccessfully"
+            class="info-box"
+            type="success"
+            :text="$t('pages.changePassword.success')"
+          />
+        </Transition>
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -181,7 +176,6 @@ import {
   onMounted,
   ref,
 } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
 import { Form, Field } from 'vee-validate';
 
 import type { ComponentRef } from '@/types';
@@ -189,6 +183,7 @@ import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import { useAuth, useModals, useUi } from '@/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import RadioButton from '@/popup/components/RadioButton.vue';
 import SwitchButton from '@/popup/components/SwitchButton.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
@@ -198,12 +193,11 @@ import InfoBox from '@/popup/components/InfoBox.vue';
 export default defineComponent({
   name: 'SecureLoginSettings',
   components: {
+    PageWrapper,
     InputPassword,
     BtnMain,
     RadioButton,
     SwitchButton,
-    IonPage,
-    IonContent,
     Form,
     Field,
     InfoBox,
@@ -217,6 +211,7 @@ export default defineComponent({
     const currentPassword = ref('');
     const newPassword = ref('');
     const confirmNewPassword = ref('');
+    const wrapper = ref();
 
     const {
       checkBiometricLoginAvailability,
@@ -242,7 +237,8 @@ export default defineComponent({
         await updatePassword(currentPassword.value, newPassword.value);
         isPasswordChangedSuccessfully.value = true;
         await nextTick();
-        infoBoxEl.value?.$el?.scrollBy(0, infoBoxEl.value?.$el?.scrollWidth);
+        const scrollEl: HTMLElement = wrapper.value?.contentEl?.$el;
+        scrollEl?.scrollBy(0, scrollEl?.scrollWidth);
       } catch (error) {
         isAuthFailed.value = true;
         isPasswordChangedSuccessfully.value = false;
@@ -280,6 +276,7 @@ export default defineComponent({
     });
 
     return {
+      wrapper,
       AUTHENTICATION_TIMEOUTS,
       IS_MOBILE_APP,
       infoBoxEl,

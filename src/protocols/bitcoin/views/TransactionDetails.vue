@@ -1,27 +1,25 @@
 <template>
-  <div class="transaction-details">
-    <template v-if="transaction">
-      <TransactionDetailsBase
-        :transaction="transaction"
-        :amount="amount"
-        :amount-total="amountTotal"
-        :fee="fee"
-        :hash="hash"
+  <TransactionDetailsBase
+    v-if="transaction"
+    class="transaction-details"
+    :transaction="transaction"
+    :amount="amount"
+    :amount-total="amountTotal"
+    :fee="fee"
+    :hash="hash"
+    :protocol="PROTOCOLS.bitcoin"
+    show-header
+  >
+    <template #tokens>
+      <TransactionAssetRows
+        :assets="assets"
+        :is-rounded="!!assets"
         :protocol="PROTOCOLS.bitcoin"
-        show-header
-      >
-        <template #tokens>
-          <TransactionAssetRows
-            :assets="assets"
-            :is-rounded="!!assets"
-            :protocol="PROTOCOLS.bitcoin"
-            icon-size="rg"
-            multiple-rows
-          />
-        </template>
-      </TransactionDetailsBase>
+        icon-size="rg"
+        multiple-rows
+      />
     </template>
-  </div>
+  </TransactionDetailsBase>
 </template>
 
 <script lang="ts">

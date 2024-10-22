@@ -1,55 +1,49 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="transaction-details">
-        <template v-if="transaction">
-          <TransactionDetailsBase
-            :transaction="transaction"
-            :amount="amount"
-            :amount-total="amountTotal"
-            :fee="fee"
-            :hash="hash"
-            :protocol="PROTOCOLS.ethereum"
-            :hide-amount-total="!isTransactionCoin"
-            :hide-fiat="!isTransactionCoin"
-            show-header
-          >
-            <template #tokens>
-              <TransactionAssetRows
-                :assets="transactionAssets"
-                :protocol="PROTOCOLS.ethereum"
-                icon-size="rg"
-                multiple-rows
-              />
-            </template>
+  <TransactionDetailsBase
+    v-if="transaction"
+    class="transaction-details"
+    :transaction="transaction"
+    :amount="amount"
+    :amount-total="amountTotal"
+    :fee="fee"
+    :hash="hash"
+    :protocol="PROTOCOLS.ethereum"
+    :hide-amount-total="!isTransactionCoin"
+    :hide-fiat="!isTransactionCoin"
+    show-header
+  >
+    <template #tokens>
+      <TransactionAssetRows
+        :assets="transactionAssets"
+        :protocol="PROTOCOLS.ethereum"
+        icon-size="rg"
+        multiple-rows
+      />
+    </template>
 
-            <template #gas>
-              <DetailsItem
-                v-if="transaction.tx.gasPrice"
-                :label="$t('pages.transactionDetails.gasPrice')"
-                data-cy="gas-price"
-              >
-                <template #value>
-                  <TokenAmount
-                    :amount="transaction.tx.gasPrice"
-                    :symbol="ETH_COIN_SYMBOL"
-                    :protocol="PROTOCOLS.ethereum"
-                    hide-fiat
-                  />
-                </template>
-              </DetailsItem>
-              <DetailsItem
-                v-if="transaction.tx.gasUsed"
-                :value="transaction.tx.gasUsed"
-                :label="$t('pages.transactionDetails.gasUsed')"
-                data-cy="gas"
-              />
-            </template>
-          </TransactionDetailsBase>
+    <template #gas>
+      <DetailsItem
+        v-if="transaction.tx.gasPrice"
+        :label="$t('pages.transactionDetails.gasPrice')"
+        data-cy="gas-price"
+      >
+        <template #value>
+          <TokenAmount
+            :amount="transaction.tx.gasPrice"
+            :symbol="ETH_COIN_SYMBOL"
+            :protocol="PROTOCOLS.ethereum"
+            hide-fiat
+          />
         </template>
-      </div>
-    </IonContent>
-  </IonPage>
+      </DetailsItem>
+      <DetailsItem
+        v-if="transaction.tx.gasUsed"
+        :value="transaction.tx.gasUsed"
+        :label="$t('pages.transactionDetails.gasUsed')"
+        data-cy="gas"
+      />
+    </template>
+  </TransactionDetailsBase>
 </template>
 
 <script lang="ts">
@@ -62,7 +56,6 @@ import {
   watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonContent, IonPage } from '@ionic/vue';
 
 import type { AccountAddress, ICommonTransaction, ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
@@ -89,8 +82,6 @@ export default defineComponent({
     TransactionAssetRows,
     DetailsItem,
     TokenAmount,
-    IonContent,
-    IonPage,
   },
   setup() {
     const router = useRouter();

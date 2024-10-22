@@ -1,5 +1,5 @@
 <template>
-  <IonPage>
+  <PageWrapper has-sub-content>
     <div class="auction">
       <div class="auction-tabs">
         <Tabs>
@@ -22,11 +22,11 @@
         :name="name"
       />
     </div>
-  </IonPage>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonRouterOutlet, IonPage } from '@ionic/vue';
+import { IonRouterOutlet } from '@ionic/vue';
 import {
   defineComponent,
   onBeforeUnmount,
@@ -47,18 +47,19 @@ import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
-import Tabs from '../../components/tabs/Tabs.vue';
-import Tab from '../../components/tabs/Tab.vue';
+import PageWrapper from '@/popup/components/PageWrapper.vue';
+import Tabs from '@/popup/components/tabs/Tabs.vue';
+import Tab from '@/popup/components/tabs/Tab.vue';
 
 const POLLING_INTERVAL = 3000;
 
 export default defineComponent({
   name: 'Auction',
   components: {
+    PageWrapper,
     Tabs,
     Tab,
     IonRouterOutlet,
-    IonPage,
   },
   props: {
     name: { type: String as PropType<ChainName>, required: true },
