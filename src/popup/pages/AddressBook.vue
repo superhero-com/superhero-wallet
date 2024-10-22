@@ -2,6 +2,7 @@
   <PageWrapper
     class="address-book-wrapper"
     :page-title="$t('pages.titles.addressBook')"
+    has-sub-content
   >
     <div class="address-book">
       <Transition name="slide-transition">

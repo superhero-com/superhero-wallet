@@ -229,6 +229,8 @@ export default defineComponent({
     multisigDashboard: Boolean,
   },
   setup(props) {
+    console.log('Tx Details: Setup');
+
     const router = useRouter();
     const route = useRoute();
 
@@ -317,6 +319,8 @@ export default defineComponent({
     });
 
     onMounted(async () => {
+      console.log('Tx Details: Mounted');
+
       let rawTransaction: ITransaction | undefined = transactionsLoaded.value
         .find((tx) => tx.hash === hash) as ITransaction;
 

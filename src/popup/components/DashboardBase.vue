@@ -1,7 +1,6 @@
 <template>
   <PageWrapper
     class="dashboard-base"
-    is-dashboard
   >
     <template #header>
       <DashboardHeader />

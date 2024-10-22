@@ -80,33 +80,6 @@ export default defineComponent({
     const { homeRouteName } = useUi();
     const { isLoggedIn } = useAccounts();
 
-    // const pageTitles: Record<string, () => string> = {
-    //   language: () => t('pages.titles.language'),
-    //   sendTip: () => t('pages.titles.sendTip'),
-    //   privacy: () => t('pages.titles.privacy'),
-    //   currency: () => t('pages.titles.currency'),
-    //   auction: () => t('pages.titles.auction'),
-    //   networks: () => t('pages.titles.networks'),
-    //   permissionsSettings: () => t('pages.titles.permissionsSettings'),
-    //   permissionsEdit: () => t('pages.titles.permissionsEdit'),
-    //   permissionsAdd: () => t('pages.titles.permissionsAdd'),
-    //   commentNew: () => t('pages.titles.commentNew'),
-    //   donateError: () => t('pages.titles.donateError'),
-    //   address: () => t('pages.titles.address'),
-    //   signMessage: () => t('pages.titles.signMessage'),
-    //   signTransaction: () => t('pages.titles.signTransaction'),
-    //   saveErrorsLog: () => t('pages.titles.saveErrorsLog'),
-    //   resetWallet: () => t('pages.resetWallet.title'),
-    //   seedPhrase: () => t('pages.titles.seedPhrase'),
-    //   networkAdd: () => t('pages.titles.networkAdd'),
-    //   networkEdit: () => t('pages.titles.networkEdit'),
-    //   notFound: () => t('pages.titles.notFound'),
-    //   multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
-    //   secureLogin: () => t('pages.titles.secureLogin'),
-    //   addressBookEdit: () => t('pages.titles.addressBookEdit'),
-    //   addressBookAdd: () => t('pages.titles.addressBookAdd'),
-    // };
-
     const currentHomeRouteName = computed(
       () => isLoggedIn.value
         ? homeRouteName.value

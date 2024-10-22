@@ -1,52 +1,54 @@
 <template>
-  <AccountDetailsBase
-    v-if="activeMultisigAccount"
-    without-default-buttons
-  >
-    <template #account-info>
-      <AccountInfo
-        :account="convertMultisigAccountToAccount(activeMultisigAccount)"
-        is-multisig
-        show-protocol-icon
-        can-copy-address
-      />
-    </template>
+  <PageWrapper hide-header>
+    <AccountDetailsBase
+      v-if="activeMultisigAccount"
+      without-default-buttons
+    >
+      <template #account-info>
+        <AccountInfo
+          :account="convertMultisigAccountToAccount(activeMultisigAccount)"
+          is-multisig
+          show-protocol-icon
+          can-copy-address
+        />
+      </template>
 
-    <template #balance>
-      <BalanceInfo
-        :balance="+(activeMultisigAccount.balance || 0)"
-        :protocol="PROTOCOLS.aeternity"
-      />
-    </template>
+      <template #balance>
+        <BalanceInfo
+          :balance="+(activeMultisigAccount.balance || 0)"
+          :protocol="PROTOCOLS.aeternity"
+        />
+      </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalBtn is-multisig />
-      <OpenTransferSendModalBtn
-        :disabled="!!pendingMultisigTransaction"
-        is-multisig
-      />
-      <OpenShareAddressModalBtn
-        :address="convertMultisigAccountToAccount(activeMultisigAccount).address!"
-        :protocol="PROTOCOLS.aeternity"
-      />
-      <BtnBox
-        v-if="UNFINISHED_FEATURES"
-        :icon="CreditCardIcon"
-        :text="$t('common.buy')"
-        :href="simplexLink"
-      />
-    </template>
+      <template #buttons>
+        <OpenTransferReceiveModalBtn is-multisig />
+        <OpenTransferSendModalBtn
+          :disabled="!!pendingMultisigTransaction"
+          is-multisig
+        />
+        <OpenShareAddressModalBtn
+          :address="convertMultisigAccountToAccount(activeMultisigAccount).address!"
+          :protocol="PROTOCOLS.aeternity"
+        />
+        <BtnBox
+          v-if="UNFINISHED_FEATURES"
+          :icon="CreditCardIcon"
+          :text="$t('common.buy')"
+          :href="simplexLink"
+        />
+      </template>
 
-    <template #navigation>
-      <AccountDetailsNavigation
-        :route-names="[
-          ROUTE_MULTISIG_DETAILS,
-          ROUTE_MULTISIG_DETAILS_INFO,
-          ROUTE_MULTISIG_DETAILS_ASSETS,
-        ]"
-      />
-    </template>
-  </AccountDetailsBase>
+      <template #navigation>
+        <AccountDetailsNavigation
+          :route-names="[
+            ROUTE_MULTISIG_DETAILS,
+            ROUTE_MULTISIG_DETAILS_INFO,
+            ROUTE_MULTISIG_DETAILS_ASSETS,
+          ]"
+        />
+      </template>
+    </AccountDetailsBase>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -60,6 +62,7 @@ import {
 } from '@/popup/router/routeNames';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
@@ -73,6 +76,7 @@ import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 
 export default defineComponent({
   components: {
+    PageWrapper,
     OpenTransferSendModalBtn,
     OpenTransferReceiveModalBtn,
     OpenShareAddressModalBtn,
