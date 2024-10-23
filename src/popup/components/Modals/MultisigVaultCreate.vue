@@ -34,17 +34,17 @@
         <Field
           v-else
           v-slot="{ field, errorMessage }"
-          v-model.trim="signer.address"
+          v-model="signer.address"
           :name="`signer-address-${index}`"
           :rules="{
             required: true,
             account_address: [PROTOCOLS.aeternity],
           }"
         >
-          <FormTextarea
+          <FormAccountInput
             v-bind="field"
             :model-value="signer.address"
-            auto-height
+            hide-clear-icon
             :label="getSignerLabel(index)"
             :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
             :name="`signer-address-${index}`"
@@ -66,15 +66,27 @@
               </div>
             </template>
             <template #after>
-              <BtnPlain
-                v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
-                class="btn-remove-signer"
+              <BtnIcon
+                v-if="(
+                  signers.length > MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
+                  && (!signer.address || signer.address.length === 0)
+                )"
+                :icon="TrashIcon"
+                data-cy="clear-address-button"
+                class="close-icon"
+                size="sm"
                 @click="removeSigner(index)"
-              >
-                <PlusCircleIcon class="remove-signer-icon" />
-              </BtnPlain>
+              />
+              <BtnIcon
+                v-if="signer.address?.length > 0"
+                :icon="CircleCloseIcon"
+                data-cy="clear-address-button"
+                class="close-icon"
+                size="sm"
+                @click="clearSigner(index)"
+              />
             </template>
-          </FormTextarea>
+          </FormAccountInput>
         </Field>
       </div>
 
@@ -196,18 +208,9 @@ import {
 } from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import {
-  MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
-  PROTOCOLS,
-} from '@/constants';
-import {
-  excludeFalsy,
-  handleUnknownError,
-} from '@/utils';
-import type {
-  ICreateMultisigAccount,
-  ObjectValues,
-} from '@/types';
+import type { ICreateMultisigAccount, ObjectValues } from '@/types';
+import { MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, PROTOCOLS } from '@/constants';
+import { excludeFalsy, handleUnknownError } from '@/utils';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
@@ -221,21 +224,21 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
 } from '@/protocols/aeternity/config';
 
-import Modal from '../Modal.vue';
-import BtnMain from '../buttons/BtnMain.vue';
-import BtnPlain from '../buttons/BtnPlain.vue';
-import BtnIcon from '../buttons/BtnIcon.vue';
-import BtnText from '../buttons/BtnText.vue';
-import BtnHelp from '../buttons/BtnHelp.vue';
-import FormSelect from '../form/FormSelect.vue';
-import FormTextarea from '../form/FormTextarea.vue';
-import FormNumberSelect from '../form/FormNumberSelect.vue';
-import MultisigVaultCreateReview from '../MultisigVaultCreateReview.vue';
-import MultisigVaultCreateProgress from '../MultisigVaultCreateProgress.vue';
+import FormAccountInput from '@/popup/components/form/FormAccountInput.vue';
+import Modal from '@/popup/components/Modal.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
+import BtnText from '@/popup/components/buttons/BtnText.vue';
+import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
+import FormSelect from '@/popup/components/form/FormSelect.vue';
+import FormNumberSelect from '@/popup/components/form/FormNumberSelect.vue';
+import MultisigVaultCreateReview from '@/popup/components/MultisigVaultCreateReview.vue';
+import MultisigVaultCreateProgress from '@/popup/components/MultisigVaultCreateProgress.vue';
 
-import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
-import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
-import AddressBookIcon from '../../../icons/menu-card-fill.svg?vue-component';
+import TrashIcon from '@/icons/trash.svg?vue-component';
+import CircleCloseIcon from '@/icons/circle-close.svg?vue-component';
+import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
+import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
 
 const STEPS = {
   form: 'form',
@@ -247,11 +250,10 @@ type Step = ObjectValues<typeof STEPS>;
 export default defineComponent({
   name: 'MultisigVaultCreate',
   components: {
+    FormAccountInput,
     FormNumberSelect,
-    FormTextarea,
     Modal,
     BtnMain,
-    BtnPlain,
     BtnIcon,
     BtnText,
     BtnHelp,
@@ -260,7 +262,6 @@ export default defineComponent({
     FormSelect,
     Field,
     Form,
-    PlusCircleIcon,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -332,6 +333,10 @@ export default defineComponent({
 
     function removeSigner(index: number) {
       signers.value.splice(index, 1);
+    }
+
+    function clearSigner(index: number) {
+      signers.value[index].address = undefined;
     }
 
     function updateSigner(index: number, address: Encoded.AccountAddress) {
@@ -457,9 +462,10 @@ export default defineComponent({
     );
 
     return {
+      TrashIcon,
+      CircleCloseIcon,
       QrScanIcon,
       AddressBookIcon,
-      PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
       PROTOCOLS,
@@ -484,6 +490,7 @@ export default defineComponent({
       scanSignerAccountQrCode,
       addNewSigner,
       removeSigner,
+      clearSigner,
       getSignerLabel,
       navigateToMultisigVault,
       checkIfSignerAddressDuplicated,
@@ -516,21 +523,10 @@ export default defineComponent({
       }
     }
 
-    .btn-remove-signer {
-      display: flex;
-
-      .remove-signer-icon {
-        width: 20px !important;
-        margin: -4px -6px -4px 0;
-        transform: rotate(45deg);
-        cursor: pointer;
-        transition: $transition-interactive;
-        color: $color-grey-light;
-
-        &:hover {
-          opacity: 0.8;
-        }
-      }
+    .close-icon {
+      padding: 0;
+      opacity: 0.5;
+      z-index: 0;
     }
 
     .buttons {
