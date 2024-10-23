@@ -116,7 +116,7 @@ export function useCurrencies({
   function formatCurrency(value: number): string {
     return new Intl.NumberFormat(
       DEFAULT_LOCALE,
-      { style: 'currency', currencyDisplay: 'narrowSymbol', currency: currentCurrencyCode.value },
+      { style: 'currency', currencyDisplay: 'code', currency: currentCurrencyCode.value },
     ).format(value);
   }
 
