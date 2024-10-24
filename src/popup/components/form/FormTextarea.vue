@@ -83,12 +83,14 @@ export default defineComponent({
 
     onMounted(() => {
       watch(() => props.modelValue, () => {
-        if (props.autoHeight && textarea.value) {
+        if (props.autoHeight && textarea?.value) {
           height.value = 'auto';
           nextTick(() => {
-            const { scrollHeight, clientHeight } = textarea.value!;
-            const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
-            height.value = `${newHeight}px`;
+            if (textarea?.value) {
+              const { scrollHeight, clientHeight } = textarea.value!;
+              const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
+              height.value = `${newHeight}px`;
+            }
           });
         }
       }, { immediate: true });
