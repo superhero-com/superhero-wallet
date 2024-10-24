@@ -63,6 +63,7 @@ const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
       protocol: tokenBalance.protocol,
       name: tokenBalance?.name!,
       symbol: tokenBalance?.symbol!,
+      price: tokenBalance.price,
     }));
 
   const customTokensAvailable = uniqueTokens.reduce((customTokens, token) => {

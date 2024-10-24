@@ -17,9 +17,10 @@
               || isAex9
               || isTokenSwap
             )"
-            :hide-fiat="isAex9"
+            :hide-fiat="hideFiat"
             :hash="hash"
             :protocol="PROTOCOLS.aeternity"
+            :price="price"
           >
             <template #tokens>
               <TransactionAssetRows
@@ -244,7 +245,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
-    const { getTxAmountTotal } = useFungibleTokens();
+    const { getTxAmountTotal, tokenBalances } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -281,6 +282,15 @@ export default defineComponent({
       transactionCustomOwner,
       showDetailedAllowanceInfo: true,
     });
+
+    const hideFiat = computed(() => (
+      isAex9.value
+      && !tokenBalances.value
+        .find((asset) => asset.contractId === transactionAssets.value[0]?.contractId)?.price
+    ));
+
+    const price = computed(() => tokenBalances.value
+      .find((asset) => asset.contractId === transactionAssets.value[0]?.contractId)?.price);
 
     const amount = computed((): number => transaction.value
       ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
@@ -396,6 +406,7 @@ export default defineComponent({
       transaction,
       amount,
       amountTotal,
+      hideFiat,
       isAex9,
       isErrorTransaction,
       isDex,
@@ -416,6 +427,7 @@ export default defineComponent({
       gasUsed,
       multisigTransactionFeePaidBy,
       multisigContractId,
+      price,
       transactionFee,
       transactionAssets,
     };

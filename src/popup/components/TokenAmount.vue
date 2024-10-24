@@ -49,6 +49,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 export default defineComponent({
   props: {
     amount: { type: Number, required: true },
+    price: { type: Number, default: 1 },
     symbol: { type: String, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     vertical: Boolean,
@@ -89,7 +90,7 @@ export default defineComponent({
     }
 
     function getAmountFiat() {
-      return (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol);
+      return (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount * props.price, props.protocol);
     }
 
     function updateAmountValues() {

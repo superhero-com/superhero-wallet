@@ -61,6 +61,8 @@ export class EthplorerService {
       protocol: PROTOCOLS.ethereum,
       symbol: token.symbol,
       image: (token.image) ? `${this.resourcesUrl}${token.image}` : undefined,
+      // TODO: get an actual info about token price
+      price: 0,
     };
   }
 
@@ -104,6 +106,7 @@ export class EthplorerService {
       symbol,
       name,
       protocol: PROTOCOLS.ethereum,
+      price: 0,
     })) || [];
   }
 

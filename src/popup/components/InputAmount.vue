@@ -39,7 +39,7 @@
         :class="{ focused }"
       >
         <span
-          v-if="currentAssetFiatPrice"
+          v-if="selectedAsset.price"
           class="input-amount-desc-total"
           data-cy="total-amount-currency"
         >
@@ -48,11 +48,11 @@
         </span>
 
         <span
-          v-if="currentAssetFiatPrice"
+          v-if="selectedAsset.price"
           class="input-amount-desc-at"
         >
           @{{
-            (currentAssetFiatPrice)
+            (selectedAsset.price)
               ? currentAssetFiatPriceFormatted
               : $t('common.priceNotAvailable')
           }}
@@ -69,11 +69,7 @@ import {
   onMounted,
   PropType,
 } from 'vue';
-import {
-  useAccounts,
-  useBalances,
-  useCurrencies,
-} from '@/composables';
+import { useBalances, useCurrencies } from '@/composables';
 import type { IAsset, Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -97,33 +93,24 @@ export default defineComponent({
   emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {
     const {
-      getCurrentCurrencyRate,
+      getFormattedAndRoundedFiat,
       marketData,
       formatCurrency,
     } = useCurrencies();
     const { balance } = useBalances();
-    const { protocolsInUse } = useAccounts();
 
     const defaultCoin = computed(() => ProtocolAdapterFactory
       .getAdapter(props.protocol)
       .getDefaultCoin(marketData.value!, +balance.value));
 
     const currentAsset = computed((): IAsset => props.selectedAsset || defaultCoin.value);
-    const isDefaultAsset = computed(
-      () => protocolsInUse.value
-        .map((protocol) => ProtocolAdapterFactory.getAdapter(protocol).coinContractId)
-        .includes(currentAsset.value.contractId),
-    );
-    const currentAssetFiatPrice = computed(
-      () => (isDefaultAsset.value) ? getCurrentCurrencyRate(props.protocol) : 0,
-    );
+
     const currentAssetFiatPriceFormatted = computed(
-      () => formatCurrency(currentAssetFiatPrice.value),
+      () => getFormattedAndRoundedFiat(currentAsset.value.price, props.protocol),
     );
-    const totalAmountFormatted = computed(() => formatCurrency(
-      (currentAssetFiatPrice.value)
-        ? (+props.modelValue || 0) * currentAssetFiatPrice.value
-        : 0,
+    const totalAmountFormatted = computed(() => getFormattedAndRoundedFiat(
+      +props.modelValue * currentAsset.value.price,
+      props.protocol,
     ));
 
     function handleAssetSelected(asset: IAsset) {
@@ -139,7 +126,6 @@ export default defineComponent({
     return {
       defaultCoin,
       totalAmountFormatted,
-      currentAssetFiatPrice,
       currentAssetFiatPriceFormatted,
       currentAsset,
       formatCurrency,
