@@ -23,6 +23,7 @@ import {
   POPUP_TYPE_SIGN,
   STORAGE_KEYS,
   PROTOCOLS,
+  UNKNOWN_SOURCE,
 } from '@/constants';
 import { getCleanModalOptions } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
@@ -197,8 +198,8 @@ export function usePermissions() {
         popup = POPUP_TYPE_RAW_SIGN;
       }
       await (
-        (IS_OFFSCREEN_TAB && app?.url)
-          ? openPopup(popup, app.url, props)
+        (IS_OFFSCREEN_TAB)
+          ? openPopup(popup, app?.url || UNKNOWN_SOURCE, props)
           : openModal(modal, props)
       );
       return true;
