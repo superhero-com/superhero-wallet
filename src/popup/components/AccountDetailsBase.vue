@@ -1,25 +1,24 @@
 <template>
   <div
-    class="account-details"
+    class="account-details-base"
     :data-account-address="activeAccount.address"
   >
     <div class="account-info-wrapper">
-      <slot
-        v-if="$slots['account-info']"
-        name="account-info"
-      />
-      <AccountInfo
-        v-else
-        :account="activeAccount"
-        can-copy-address
-        show-protocol-icon
-      />
+      <slot name="account-info">
+        <AccountInfo
+          :account="activeAccount"
+          can-copy-address
+          show-protocol-icon
+        />
+      </slot>
+
       <BtnClose
         data-cy="btn-close"
         class="close-button"
         @click="close"
       />
     </div>
+
     <div>
       <slot
         v-if="$slots.balance"
@@ -109,7 +108,7 @@ import {
   useUi,
   useScrollConfig,
 } from '@/composables';
-import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+import { fadeAnimation } from '@/popup/animations';
 
 import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
@@ -171,7 +170,8 @@ export default defineComponent({
     }
 
     function close() {
-      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push', popOutAnimation);
+      // Used to prevent animating the dashboard when switching the route
+      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push');
     }
 
     /**
@@ -230,20 +230,16 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
 
-.account-details {
+.account-details-base {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
   --screen-bg-color: #{$color-bg-modal};
   --header-height: 64px;
 
-  position: relative;
-  top: env(safe-area-inset-top);
   background-color: $color-bg-4;
-  border-radius: $border-radius-app;
   min-height: 100%;
   height: 100%;
   color: $color-white;
-  box-shadow: 0 0 0 1px $color-border, 0 0 50px rgba($color-black, 0.6);
 
   @include mixins.mobile {
     min-height: 100vh;

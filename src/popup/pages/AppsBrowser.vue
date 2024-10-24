@@ -1,82 +1,84 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div
-        class="apps-browser"
-        :class="{ 'app-selected': selectedApp }"
-      >
-        <AppsBrowserHeader
-          :selected-app="selectedApp"
-          :iframe="iframeEl"
-          @back="back()"
-          @refresh="refresh()"
-        />
-        <div v-if="!selectedApp">
-          <Field
-            v-slot="{ field, errorMessage, resetField }"
-            v-model="customAppURL"
-            name="customAppURL"
-            :rules="{
-              url: customAppURL.length > 0,
-            }"
+  <PageWrapper>
+    <template #header>
+      <AppsBrowserHeader
+        :selected-app="selectedApp"
+        :iframe="iframeEl"
+        @back="back()"
+        @refresh="refresh()"
+      />
+    </template>
+
+    <div
+      class="apps-browser"
+      :class="{ 'app-selected': selectedApp }"
+    >
+      <div v-if="!selectedApp">
+        <Field
+          v-slot="{ field, errorMessage, resetField }"
+          v-model="customAppURL"
+          name="customAppURL"
+          :rules="{
+            url: customAppURL.length > 0,
+          }"
+        >
+          <InputField
+            v-bind="field"
+            :model-value="customAppURL"
+            class="input-url"
+            type="url"
+            show-message-help
+            :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
+            :message="errorMessage"
+            @keydown.enter.stop="(event: any) => handleEnter(event, errorMessage)"
           >
-            <InputField
-              v-bind="field"
-              :model-value="customAppURL"
-              class="input-url"
-              type="url"
-              show-message-help
-              :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
-              :message="errorMessage"
-              @keydown.enter.stop="(event: any) => handleEnter(event, errorMessage)"
-            >
-              <template #after>
-                <Component
-                  :is="GlobeSmallIcon"
-                  v-if="!customAppURL.length"
-                />
-                <BtnIcon
-                  v-else
-                  size="sm"
-                  :icon="CloseIcon"
-                  @click="resetField({ value: '' })"
-                />
-              </template>
-            </InputField>
-          </Field>
-
-          <div class="apps-browser-popular-apps">
-            {{ $t('pages.appsBrowser.popularApps') }}
-          </div>
-
-          <div class="apps-browser-list">
-            <div
-              v-for="app in DAPPS_LIST"
-              :key="app.title"
-              class="apps-browser-card"
-            >
-              <AppsBrowserListItem
-                :title="app.title"
-                :image="app.image"
-                @click="onSelectApp(app)"
+            <template #after>
+              <Component
+                :is="GlobeSmallIcon"
+                v-if="!customAppURL.length"
               />
-            </div>
-          </div>
-          <AppsBrowserHistory @select-app="onSelectApp" />
+              <BtnIcon
+                v-else
+                size="sm"
+                :icon="CloseIcon"
+                @click="resetField({ value: '' })"
+              />
+            </template>
+          </InputField>
+        </Field>
+
+        <div class="apps-browser-popular-apps">
+          {{ $t('pages.appsBrowser.popularApps') }}
         </div>
 
-        <iframe
-          v-else
-          ref="iframeEl"
-          title="selectedApp"
-          class="apps-browser-iframe"
-          :src="selectedApp.url"
-          @load="onAppLoaded()"
-        />
+        <div class="apps-browser-list">
+          <div
+            v-for="app in DAPPS_LIST"
+            :key="app.title"
+            class="apps-browser-card"
+          >
+            <AppsBrowserListItem
+              :title="app.title"
+              :image="app.image"
+              @click="onSelectApp(app)"
+            />
+          </div>
+        </div>
+        <AppsBrowserHistory @select-app="onSelectApp" />
       </div>
-      <BackToTop v-if="!selectedApp" />
-    </IonContent>
-  </IonPage>
+
+      <iframe
+        v-else
+        ref="iframeEl"
+        title="selectedApp"
+        class="apps-browser-iframe"
+        :src="selectedApp.url"
+        @load="onAppLoaded()"
+      />
+    </div>
+
+    <BackToTop v-if="!selectedApp" />
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -84,7 +86,6 @@ import {
   BrowserWindowMessageConnection,
   RPC_STATUS,
 } from '@aeternity/aepp-sdk';
-import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onUnmounted,
@@ -103,6 +104,7 @@ import {
 } from '@/utils';
 import { useAeSdk, useAppsBrowserHistory, useModals } from '@/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import InputField from '@/popup/components/InputField.vue';
 import AppsBrowserHeader from '@/popup/components/AppsBrowser/AppsBrowserHeader.vue';
 import AppsBrowserListItem from '@/popup/components/AppsBrowser/AppsBrowserListItem.vue';
@@ -141,14 +143,13 @@ const LOCAL_STORAGE_ITEM = 'selected-app';
 
 export default defineComponent({
   components: {
+    PageWrapper,
     AppsBrowserListItem,
     AppsBrowserHeader,
     AppsBrowserHistory,
     InputField,
     BtnIcon,
     Field,
-    IonPage,
-    IonContent,
     BackToTop,
   },
   setup() {
@@ -321,14 +322,10 @@ export default defineComponent({
   }
 
   .apps-browser-iframe {
-    --header-height: 40px;
-
     width: 100%;
     height: 100%;
     overflow: hidden;
     border: none;
-    margin-top: calc(-1 * (var(--header-height) + env(safe-area-inset-top)));
-    padding-top: calc(var(--header-height) + env(safe-area-inset-top));
   }
 }
 </style>

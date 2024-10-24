@@ -1,39 +1,36 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="comment-new">
-        <AccountSelector
-          v-model="creatorAddress"
-          :options="aeAccountsSelectOptions"
-          @select="setActiveAccountByAddress"
-        />
-        <div class="comment-text">
-          {{ text }}
-        </div>
-
-        <FixedScreenFooter>
-          <BtnMain
-            variant="muted"
-            extra-padded
-            class="cancel-button"
-            @click="openCallbackOrGoHome(false)"
-          >
-            {{ $t('common.cancel') }}
-          </BtnMain>
-          <BtnMain
-            :disabled="!isTippingSupported"
-            @click="sendComment"
-          >
-            {{ $t('common.confirm') }}
-          </BtnMain>
-        </FixedScreenFooter>
+  <PageWrapper :page-title="$t('pages.titles.commentNew')">
+    <div class="comment-new">
+      <AccountSelector
+        v-model="creatorAddress"
+        :options="aeAccountsSelectOptions"
+        @select="setActiveAccountByAddress"
+      />
+      <div class="comment-text">
+        {{ text }}
       </div>
-    </ioncontent>
-  </ionpage>
+
+      <FixedScreenFooter>
+        <BtnMain
+          variant="muted"
+          extra-padded
+          class="cancel-button"
+          @click="openCallbackOrGoHome(false)"
+        >
+          {{ $t('common.cancel') }}
+        </BtnMain>
+        <BtnMain
+          :disabled="!isTippingSupported"
+          @click="sendComment"
+        >
+          {{ $t('common.confirm') }}
+        </BtnMain>
+      </FixedScreenFooter>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   ref,
@@ -53,6 +50,7 @@ import {
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import FixedScreenFooter from '../components/FixedScreenFooter.vue';
@@ -60,11 +58,10 @@ import FixedScreenFooter from '../components/FixedScreenFooter.vue';
 export default defineComponent({
   name: 'CommentNew',
   components: {
+    PageWrapper,
     AccountSelector,
     BtnMain,
     FixedScreenFooter,
-    IonPage,
-    IonContent,
   },
   setup() {
     const router = useRouter();

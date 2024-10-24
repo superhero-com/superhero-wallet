@@ -33,16 +33,6 @@ export interface WalletRouteMeta {
    */
   notPersist?: boolean;
   /**
-   * Part of the translation string that point to the translated page title
-   * 'pages.title[title]`
-   */
-  title?: string;
-  /**
-   * Decide if the header should display the logo and more button
-   * or the back and close buttons.
-   */
-  showHeaderNavigation?: boolean;
-  /**
    * Decide if the header should hide back button
    */
   hideBackButton?: boolean;
