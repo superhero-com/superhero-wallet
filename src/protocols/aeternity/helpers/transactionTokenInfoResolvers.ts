@@ -20,7 +20,8 @@ interface TransactionResolverReturnData {
 
 type TransactionResolver = (
   transaction: ITransaction,
-  tokens?: AssetList | null
+  tokens?: AssetList | null,
+  tokenAddressMapper?: (address: string) => string,
 ) => TransactionResolverReturnData;
 
 type TransactionResolverGenerator = (
@@ -358,6 +359,62 @@ const withdraw: TransactionResolver = (transaction, tokens = null) => ({
   ],
 });
 
+/**
+ * Token Swap Buy
+ */
+const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
+  const isConfirm = !transaction.tx.return;
+  const tokenAddress: string = isConfirm && tokenAddressMapper
+    ? tokenAddressMapper(transaction.tx.contractId)
+    : transaction.tx.log?.slice(-1)[0]?.address;
+
+  const [amount] = transaction.tx.arguments!;
+  const token = {
+    amount: amount?.value,
+    ...defaultToken,
+    symbol: tokens?.[tokenAddress]?.symbol,
+    contractId: tokenAddress,
+    ...tokens?.[tokenAddress],
+    isReceived: true,
+  };
+  const aeToken = {
+    ...defaultToken,
+    amount: transaction.tx.amount,
+    isReceived: false,
+  };
+
+  return {
+    tokens: [token, aeToken],
+  };
+};
+
+/**
+ * Token Swap Sell
+ */
+const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
+  const isConfirm = !transaction.tx.return;
+  const tokenAddress: string = isConfirm && tokenAddressMapper
+    ? tokenAddressMapper(transaction.tx.contractId)
+    : transaction.tx.log?.slice(-1)[0]?.address;
+  const [amount] = transaction.tx.arguments!;
+  const aeAmount = transaction.tx.return?.value;
+  const token = {
+    amount: amount?.value,
+    ...defaultToken,
+    symbol: tokens?.[tokenAddress]?.symbol,
+    ...tokens?.[tokenAddress],
+    isReceived: false,
+  };
+  const aeToken = {
+    ...defaultToken,
+    amount: aeAmount,
+    isReceived: true,
+  };
+  return {
+    tokens: [token, aeToken],
+  };
+};
+
 const resolvers: TransactionResolvers = {
   addLiquidity,
   addLiquidityAe,
@@ -374,6 +431,8 @@ const resolvers: TransactionResolvers = {
   transferAllowance,
   deposit,
   withdraw,
+  buy,
+  sell,
 };
 
 export function getTransactionTokenInfoResolver(txFunctionName: TxFunctionParsed) {
