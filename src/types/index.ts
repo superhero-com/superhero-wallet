@@ -212,6 +212,10 @@ export interface ITokenBalance {
   // Allow setting symbol and name so that we can extract custom tokens from balance data
   symbol?: string;
   name?: string;
+  /**
+   * This price is in coin per token
+   */
+  price: number;
 }
 
 /**
@@ -237,6 +241,7 @@ export interface IToken {
   name: string;
   protocol: Protocol;
   symbol: string;
+  price: number;
 }
 
 export type TokenPair = Record<'token0' | 'token1', IToken | null>

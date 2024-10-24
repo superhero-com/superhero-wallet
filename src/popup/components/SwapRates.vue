@@ -70,7 +70,7 @@ export default defineComponent({
     });
 
     const rates = computed(() => {
-      if (!(isDexSwap.value || isTokenSwap.value) || !txFunctionParsed.value) {
+      if (!isDexSwap.value || !isTokenSwap.value || !txFunctionParsed.value) {
         return [];
       }
 

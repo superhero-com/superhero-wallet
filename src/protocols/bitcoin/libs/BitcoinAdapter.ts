@@ -132,6 +132,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       decimals: this.getAmountPrecision(),
       name: this.coinName,
       convertedBalance,
+      price: 1,
     };
   }
 

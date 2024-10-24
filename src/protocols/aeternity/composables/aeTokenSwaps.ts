@@ -3,18 +3,23 @@ import camelCaseKeysDeep from 'camelcase-keys-deep';
 
 import { ITokenSwap } from '@/types';
 import { NETWORK_TYPE_CUSTOM } from '@/constants';
-import { fetchAllPages, fetchJson, handleUnknownError } from '@/utils';
+import {
+  createCustomScopedComposable,
+  fetchAllPages,
+  fetchJson,
+  handleUnknownError,
+} from '@/utils';
 import { useNetworks } from '@/composables';
 import { AE_TOKEN_SWAPS_URLS } from '@/protocols/aeternity/config';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
+
+const POLLING_INTERVAL = 60000;
 
 let composableInitialized = false;
 
 const areTokenSwapsReady = ref(false);
 
 const tokenSwapsUrl = ref('');
-
-const POLLING_INTERVAL = 60000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
@@ -23,7 +28,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
  */
 const tokenSwaps = ref<ITokenSwap[]>([]);
 
-export function useAeTokenSwaps() {
+export const useAeTokenSwaps = createCustomScopedComposable(() => {
   const { activeNetwork, onNetworkChange } = useNetworks();
 
   const tokenSwapAddresses = computed(
@@ -42,11 +47,11 @@ export function useAeTokenSwaps() {
 
   async function fetchTokenSwaps(path: string) {
     const res = await fetchJson(`${tokenSwapsUrl.value}/${path}`);
-    const meta = res?.meta;
+    const { items, meta } = res || {};
     return {
-      data: res?.items,
+      data: items,
       meta,
-      next: meta?.totalPages && meta.totalPages > meta?.currentPage
+      next: meta?.totalPages > meta?.currentPage
         ? `${path.split('?')[0]}?page=${(meta?.currentPage ?? 0) + 1}`
         : '',
     };
@@ -90,4 +95,4 @@ export function useAeTokenSwaps() {
     areTokenSwapsReady,
     tokenSwapAddressToTokenContractAddress,
   };
-}
+});
