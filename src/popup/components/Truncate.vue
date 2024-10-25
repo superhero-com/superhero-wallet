@@ -155,8 +155,8 @@ export default defineComponent({
         linear-gradient(
           90deg,
           rgba(black, 0) 0%,
-          rgba(black, 1) 2px,
-          rgba(black, 1) calc(100% - 2px),
+          rgba(black, 1) 4px,
+          rgba(black, 1) calc(100% - 4px),
           rgba(black, 0) 100%
         );
 

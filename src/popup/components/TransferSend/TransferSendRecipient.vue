@@ -11,14 +11,14 @@
         ...validationRules,
       }"
     >
-      <FormTextarea
+      <FormAccountInput
         v-bind="field"
         :model-value="modelValue"
         name="address"
         data-cy="address"
-        auto-height
         show-help
         show-message-help
+        :protocol="protocol"
         :label="$t('modals.send.recipientLabel')"
         :placeholder="placeholder"
         :message="addressMessage"
@@ -39,7 +39,7 @@
             />
           </div>
         </template>
-      </FormTextarea>
+      </FormAccountInput>
     </Field>
     <div
       v-if="isTipUrl"
@@ -60,23 +60,24 @@ import { Field } from 'vee-validate';
 
 import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
-import { MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, MODAL_RECIPIENT_INFO, PROTOCOLS } from '@/constants';
 import {
-  useAccounts,
-  useModals,
-} from '@/composables';
+  MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
+  MODAL_RECIPIENT_INFO,
+  PROTOCOLS,
+} from '@/constants';
+import { useAccounts, useModals } from '@/composables';
 import { useAeTippingUrls } from '@/protocols/aeternity/composables';
 
 import UrlStatus from '@/popup/components/UrlStatus.vue';
-import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
+import FormAccountInput from '@/popup/components/form/FormAccountInput.vue';
 
 export default defineComponent({
   components: {
-    FormTextarea,
+    FormAccountInput,
     UrlStatus,
     Field,
     BtnIcon,
