@@ -112,22 +112,25 @@ body {
   }
 }
 
-ion-content {
-  /** hide scrollbar **/
-  --offset-bottom: auto !important;
-  --overflow: hidden;
+ion-router-outlet {
+  ion-content {
+    /** hide scrollbar **/
+    --offset-bottom: auto !important;
+    --overflow: hidden;
 
-  overflow: auto;
+    overflow: auto;
+    transition: padding-top 10s;
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
-  /** remove left-right padding **/
-  &::part(scroll) {
-    --padding-end: 0;
-    --padding-start: 0;
-    --padding-top: 0;
+    /** remove left-right padding **/
+    &::part(scroll) {
+      --padding-end: 0;
+      --padding-start: 0;
+      --padding-top: env(safe-area-inset-top);
+    }
   }
 }
 

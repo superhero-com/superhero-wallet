@@ -1,111 +1,111 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div
-        class="network-form"
-        data-cy="network-form"
+  <PageWrapper
+    :page-title="(isEdit) ? $t('pages.titles.networkEdit') : $t('pages.titles.networkAdd')"
+  >
+    <div
+      class="network-form"
+      data-cy="network-form"
+    >
+      <InfoBox
+        v-if="isNetworkPrefilled"
+        :type="INFO_BOX_TYPES.warning"
+        :text="$t('pages.network.thirdPartyDetails')"
+      />
+      <p
+        v-else
+        class="text-description"
       >
-        <InfoBox
-          v-if="isNetworkPrefilled"
-          :type="INFO_BOX_TYPES.warning"
-          :text="$t('pages.network.thirdPartyDetails')"
-        />
-        <p
-          v-else
-          class="text-description"
-        >
-          {{ $t('pages.network.formLabel') }}
-        </p>
+        {{ $t('pages.network.formLabel') }}
+      </p>
 
+      <Field
+        v-slot="{ field, errorMessage }"
+        key="name"
+        name="name"
+        :rules="{
+          required: true,
+          network_exists: [customNetworks, savedNetworkName],
+          max_len: NETWORK_NAME_MAX_LENGTH,
+        }"
+      >
+        <InputField
+          v-bind="field"
+          v-model="newNetworkName"
+          data-cy="network-name"
+          :placeholder="$t('pages.network.networkNamePlaceholder')"
+          :label="$t('pages.network.networkNameLabel')"
+          :message="errorMessage"
+          :text-limit="NETWORK_NAME_MAX_LENGTH"
+        />
+      </Field>
+
+      <div
+        v-for="{ inputs, name, protocol } in formStructure"
+        :key="protocol"
+        :data-cy="`group-${protocol}`"
+      >
+        <hr>
+        <h3
+          class="text-heading-5"
+          v-text="name"
+        />
         <Field
+          v-for="input in inputs"
           v-slot="{ field, errorMessage }"
-          key="name"
-          name="name"
+          :key="protocol + input.key"
+          :name="`${protocol}-${input.key}`"
           :rules="{
-            required: true,
-            network_exists: [customNetworks, savedNetworkName],
-            max_len: NETWORK_NAME_MAX_LENGTH,
+            required: input.required === true,
+            url: true,
+            ...input.validationRules,
           }"
         >
           <InputField
             v-bind="field"
-            v-model="newNetworkName"
-            data-cy="network-name"
-            :placeholder="$t('pages.network.networkNamePlaceholder')"
-            :label="$t('pages.network.networkNameLabel')"
+            v-model="newNetworkProtocols[protocol][input.key]"
+            :placeholder="input.getPlaceholder()"
+            :label="input.getLabel()"
+            :data-cy="input.key"
             :message="errorMessage"
-            :text-limit="NETWORK_NAME_MAX_LENGTH"
           />
         </Field>
-
-        <div
-          v-for="{ inputs, name, protocol } in formStructure"
-          :key="protocol"
-          :data-cy="`group-${protocol}`"
-        >
-          <hr>
-          <h3
-            class="text-heading-5"
-            v-text="name"
-          />
-          <Field
-            v-for="input in inputs"
-            v-slot="{ field, errorMessage }"
-            :key="protocol + input.key"
-            :name="`${protocol}-${input.key}`"
-            :rules="{
-              required: input.required === true,
-              url: true,
-              ...input.validationRules,
-            }"
-          >
-            <InputField
-              v-bind="field"
-              v-model="newNetworkProtocols[protocol][input.key]"
-              :placeholder="input.getPlaceholder()"
-              :label="input.getLabel()"
-              :data-cy="input.key"
-              :message="errorMessage"
-            />
-          </Field>
-        </div>
-
-        <Transition name="fade-transition">
-          <InfoBox
-            v-if="Object.keys(errors).length"
-            class="invalid-form-message"
-            :type="INFO_BOX_TYPES.danger"
-            :text="$t('validation.formInvalid')"
-          />
-        </Transition>
-
-        <div class="button-wrapper">
-          <BtnMain
-            data-cy="cancel"
-            variant="muted"
-            class="cancel-button"
-            extra-padded
-            :text="$t('common.cancel')"
-            @click="goBack"
-          />
-          <BtnMain
-            :icon="isEdit ? null : PlusCircleIcon"
-            :disabled="!!Object.keys(errors).length"
-            data-cy="btn-add-network"
-            class="add-button"
-            @click="addOrUpdateNetwork()"
-          >
-            <template v-if="isEdit">
-              {{ $t('pages.network.apply') }}
-            </template>
-            <template v-else>
-              {{ $t('pages.network.addNetwork') }}
-            </template>
-          </BtnMain>
-        </div>
       </div>
-    </IonContent>
-  </IonPage>
+
+      <Transition name="fade-transition">
+        <InfoBox
+          v-if="Object.keys(errors).length"
+          class="invalid-form-message"
+          :type="INFO_BOX_TYPES.danger"
+          :text="$t('validation.formInvalid')"
+        />
+      </Transition>
+
+      <div class="button-wrapper">
+        <BtnMain
+          data-cy="cancel"
+          variant="muted"
+          class="cancel-button"
+          extra-padded
+          :text="$t('common.cancel')"
+          @click="goBack"
+        />
+        <BtnMain
+          :icon="isEdit ? null : PlusCircleIcon"
+          :disabled="!!Object.keys(errors).length"
+          data-cy="btn-add-network"
+          class="add-button"
+          @click="addOrUpdateNetwork()"
+        >
+          <template v-if="isEdit">
+            {{ $t('pages.network.apply') }}
+          </template>
+          <template v-else>
+            {{ $t('pages.network.addNetwork') }}
+          </template>
+        </BtnMain>
+      </div>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -116,7 +116,6 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Field, useForm } from 'vee-validate';
-import { IonPage, IonContent } from '@ionic/vue';
 import type {
   AdapterNetworkSettingList,
   INetwork,
@@ -135,6 +134,7 @@ import { useNetworks } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InputField from '../components/InputField.vue';
 import InfoBox, { INFO_BOX_TYPES } from '../components/InfoBox.vue';
@@ -149,12 +149,11 @@ interface IFormBlock {
 export default defineComponent({
   name: 'NetworkForm',
   components: {
+    PageWrapper,
     InfoBox,
     BtnMain,
     InputField,
     Field,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { setValues, validate, errors } = useForm();

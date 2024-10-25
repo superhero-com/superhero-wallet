@@ -72,6 +72,8 @@ export default defineComponent({
     },
   },
   setup(props) {
+    console.log('ProtocolSpecificView', props);
+
     const route = useRoute();
     const routeMeta = route.meta as WalletRouteMeta;
     const routeParams = route.params;

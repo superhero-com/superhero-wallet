@@ -1,5 +1,11 @@
 <template>
-  <div class="dashboard-base">
+  <PageWrapper
+    class="dashboard-base"
+  >
+    <template #header>
+      <DashboardHeader />
+    </template>
+
     <div class="dashboard-header">
       <div
         v-if="accounts.length > 1"
@@ -63,7 +69,7 @@
 
       <slot name="cards" />
     </div>
-  </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -73,15 +79,19 @@ import { ROUTE_SEED_PHRASE_SETTINGS } from '@/popup/router/routeNames';
 import { useUi } from '@/composables';
 
 import DashboardCard from './DashboardCard.vue';
+import DashboardHeader from './DashboardHeader.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
 import FormSelect from './form/FormSelect.vue';
 import BtnPill from './buttons/BtnPill.vue';
 
 import WarningTriangleIcon from '../../icons/warning-triangle.svg?vue-component';
+import PageWrapper from './PageWrapper.vue';
 
 export default defineComponent({
   name: 'DashboardBase',
   components: {
+    PageWrapper,
+    DashboardHeader,
     BtnPill,
     DashboardCard,
     FormSelect,

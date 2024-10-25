@@ -1,120 +1,119 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="more">
-        <PanelItem
-          :to="{ name: 'settings' }"
-          :title="$t('pages.titles.settings')"
-          data-cy="settings"
-        >
-          <template #icon>
-            <Settings />
-          </template>
-        </PanelItem>
-
-        <PanelItem
-          :to="{ name: ROUTE_ADDRESS_BOOK }"
-          :title="$t('pages.titles.addressBook')"
-          :info="addressBookCount"
-          data-cy="address-book"
-        >
-          <template #icon>
-            <MenuCardIcon />
-          </template>
-        </PanelItem>
-
-        <template v-if="isNodeMainnet || isNodeTestnet">
-          <PanelItem
-            :to="{ name: 'tips-claim' }"
-            :title="$t('pages.claimTips.title')"
-            :disabled="!isActiveAccountAe"
-            data-cy="tips-claim"
-          >
-            <template #icon>
-              <ClaimTips />
-            </template>
-          </PanelItem>
-
-          <PanelItem
-            :to="{ name: ROUTE_INVITE }"
-            :title="$t('pages.titles.giftCards')"
-            :disabled="!isActiveAccountAe"
-            data-cy="invite"
-          >
-            <template #icon>
-              <Invites />
-            </template>
-          </PanelItem>
+  <PageWrapper
+    :page-title="$t('pages.titles.more')"
+  >
+    <div class="more">
+      <PanelItem
+        :to="{ name: 'settings' }"
+        :title="$t('pages.titles.settings')"
+        data-cy="settings"
+      >
+        <template #icon>
+          <Settings />
         </template>
+      </PanelItem>
 
-        <PanelItem
-          :href="BUG_REPORT_URL"
-          :title="$t('pages.about.reportBug')"
-        >
-          <template #icon>
-            <BugReport />
-          </template>
-        </PanelItem>
+      <PanelItem
+        :to="{ name: ROUTE_ADDRESS_BOOK }"
+        :title="$t('pages.titles.addressBook')"
+        :info="addressBookCount"
+        data-cy="address-book"
+      >
+        <template #icon>
+          <MenuCardIcon />
+        </template>
+      </PanelItem>
 
+      <template v-if="isNodeMainnet || isNodeTestnet">
         <PanelItem
-          v-if="isNodeMainnet && UNFINISHED_FEATURES"
-          :href="AE_SIMPLEX_URL"
-          :title="$t('pages.fungible-tokens.buyAe')"
-        >
-          <template #icon>
-            <BuyIcon />
-          </template>
-        </PanelItem>
-
-        <PanelItem
-          v-else-if="isNodeTestnet"
+          :to="{ name: 'tips-claim' }"
+          :title="$t('pages.claimTips.title')"
           :disabled="!isActiveAccountAe"
-          :href="activeAccountFaucetUrl"
-          :title="$t('common.faucet')"
+          data-cy="tips-claim"
         >
           <template #icon>
-            <FaucetIcon />
+            <ClaimTips />
           </template>
         </PanelItem>
 
         <PanelItem
-          :href="AE_DEX_URL"
-          :title="$t('pages.more.dex')"
+          :to="{ name: ROUTE_INVITE }"
+          :title="$t('pages.titles.giftCards')"
+          :disabled="!isActiveAccountAe"
+          data-cy="invite"
         >
           <template #icon>
-            <Dex />
+            <Invites />
           </template>
         </PanelItem>
+      </template>
 
-        <PanelItem
-          :to="{ name: 'about' }"
-          :title="$t('pages.titles.about')"
-          data-cy="about"
-        >
-          <template #icon>
-            <AboutIcon />
-          </template>
-        </PanelItem>
+      <PanelItem
+        :href="BUG_REPORT_URL"
+        :title="$t('pages.about.reportBug')"
+      >
+        <template #icon>
+          <BugReport />
+        </template>
+      </PanelItem>
 
-        <PanelItem
-          v-if="isMnemonicEncrypted || isBiometricLoginEnabled"
-          :title="$t('pages.secureLogin.lockWallet')"
-          :disabled="isUsingDefaultPassword || (!isMnemonicEncrypted && !isBiometricLoginEnabled)"
-          data-cy="lock-wallet"
-          @click="lockWallet()"
-        >
-          <template #icon>
-            <SecureIcon />
-          </template>
-        </PanelItem>
-      </div>
-    </IonContent>
-  </IonPage>
+      <PanelItem
+        v-if="isNodeMainnet && UNFINISHED_FEATURES"
+        :href="AE_SIMPLEX_URL"
+        :title="$t('pages.fungible-tokens.buyAe')"
+      >
+        <template #icon>
+          <BuyIcon />
+        </template>
+      </PanelItem>
+
+      <PanelItem
+        v-else-if="isNodeTestnet"
+        :disabled="!isActiveAccountAe"
+        :href="activeAccountFaucetUrl"
+        :title="$t('common.faucet')"
+      >
+        <template #icon>
+          <FaucetIcon />
+        </template>
+      </PanelItem>
+
+      <PanelItem
+        :href="AE_DEX_URL"
+        :title="$t('pages.more.dex')"
+      >
+        <template #icon>
+          <Dex />
+        </template>
+      </PanelItem>
+
+      <PanelItem
+        :to="{ name: 'about' }"
+        :title="$t('pages.titles.about')"
+        data-cy="about"
+      >
+        <template #icon>
+          <AboutIcon />
+        </template>
+      </PanelItem>
+
+      <PanelItem
+        v-if="isMnemonicEncrypted || isBiometricLoginEnabled"
+        :title="$t('pages.secureLogin.lockWallet')"
+        :disabled="isUsingDefaultPassword || (!isMnemonicEncrypted && !isBiometricLoginEnabled)"
+        data-cy="lock-wallet"
+        @click="lockWallet()"
+      >
+        <template #icon>
+          <SecureIcon />
+        </template>
+      </PanelItem>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { IonContent, IonPage } from '@ionic/vue';
 
 import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import {
@@ -128,6 +127,7 @@ import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
 import { ROUTE_ADDRESS_BOOK, ROUTE_INVITE } from '@/popup/router/routeNames';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
 
 import Invites from '@/icons/invites.svg?vue-component';
@@ -144,9 +144,8 @@ import SecureIcon from '@/icons/secure-lock.svg?vue-component';
 export default defineComponent({
   name: 'More',
   components: {
+    PageWrapper,
     PanelItem,
-    IonPage,
-    IonContent,
     Invites,
     Settings,
     AboutIcon,
