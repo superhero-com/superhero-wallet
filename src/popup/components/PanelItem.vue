@@ -9,7 +9,7 @@
     <div class="panel-item-left">
       <slot name="icon" />
       <div class="panel-item-title">
-        {{ title }}
+        <slot>{{ title }}</slot>
       </div>
     </div>
     <div class="panel-item-right">
@@ -54,7 +54,7 @@ export default defineComponent({
     BtnBase,
   },
   props: {
-    title: { type: String, required: true },
+    title: { type: String, default: '' },
     info: { type: String, default: '' },
     to: { type: Object as PropType<RouteLocationNamedRaw>, default: null },
     href: { type: String, default: null },

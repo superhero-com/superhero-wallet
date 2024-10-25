@@ -15,6 +15,7 @@
         :is-selector="isSelector"
       />
     </IonHeader>
+
     <IonContent
       ref="scrollWrapperEl"
       class="ion-padding"
@@ -24,12 +25,23 @@
         v-if="Object.keys(addressBookFiltered).length"
         class="list"
       >
-        <AddressBookItem
-          v-for="(entry) in addressBookFiltered"
-          :key="entry.name"
-          :item="entry"
-          @click="handleAddressBookItemClick(entry)"
-        />
+        <PanelItem
+          v-for="({ address, name, protocol }) in addressBookFiltered"
+          :key="name"
+          :to="
+            (isSelector)
+              ? undefined
+              : { name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: address } }
+          "
+          class="address-book-item"
+          @click="$emit('select-address', address)"
+        >
+          <AccountInfo
+            :account="{ address, protocol }"
+            :custom-name="name"
+            show-protocol-icon
+          />
+        </PanelItem>
       </div>
       <p
         v-else
@@ -53,22 +65,24 @@ import { IonHeader, IonContent } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 
 import { tg } from '@/popup/plugins/i18n';
-import { ComponentRef, IAddressBookEntry } from '@/types';
-import { ROUTE_ADDRESS_BOOK } from '@/popup/router/routeNames';
+import { ComponentRef } from '@/types';
+import { ROUTE_ADDRESS_BOOK, ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAddressBook } from '@/composables';
 
 import InputSearch from '@/popup/components/InputSearch.vue';
-import AddressBookItem from '@/popup/components/AddressBook/AddressBookItem.vue';
+import AccountInfo from '@/popup/components/AccountInfo.vue';
 import AddressBookFilters from '@/popup/components/AddressBook/AddressBookFilters.vue';
+import PanelItem from '@/popup/components/PanelItem.vue';
 
 export default defineComponent({
   components: {
     IonHeader,
     IonContent,
-    AddressBookItem,
+    AccountInfo,
     AddressBookFilters,
     InputSearch,
+    PanelItem,
   },
   props: {
     modelValue: Boolean,
@@ -111,12 +125,6 @@ export default defineComponent({
       () => addressBookFilteredByProtocol.value.some((entry) => entry.isBookmarked),
     );
 
-    function handleAddressBookItemClick(entry: IAddressBookEntry) {
-      if (entry) {
-        emit('select-address', entry.address);
-      }
-    }
-
     const handleScroll = throttle(() => {
       if (!scrollWrapper.value) return;
       isScrolled.value = scrollWrapper.value?.scrollTop > 0;
@@ -138,6 +146,7 @@ export default defineComponent({
     }, { deep: true });
 
     return {
+      ROUTE_ADDRESS_BOOK_EDIT,
       scrollWrapperEl,
       isSearchVisible,
       hasBookmarkedEntries,
@@ -145,7 +154,6 @@ export default defineComponent({
       addressBookFiltered,
       noRecordsMessage,
       protocolName,
-      handleAddressBookItemClick,
     };
   },
 });
@@ -169,12 +177,6 @@ export default defineComponent({
 
   .search-field {
     margin-bottom: 16px;
-  }
-
-  .list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
   }
 
   .message {
