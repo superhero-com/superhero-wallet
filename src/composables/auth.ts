@@ -15,8 +15,8 @@ import {
   IS_IOS,
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
+  RUNNING_IN_TESTS,
   STORAGE_KEYS,
-  UNFINISHED_FEATURES,
 } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
@@ -292,8 +292,22 @@ export const useAuth = createCustomScopedComposable(() => {
         isAuthenticated.value = true;
       }
     } else if (isMnemonicEncrypted.value) {
-      // Check if extension can be restored without requiring password
-      if (!encryptionKey.value && IS_EXTENSION && !IS_OFFSCREEN_TAB) {
+      // Environments that will always ask user about password
+      const autoLoginDisabledEnv = IS_OFFSCREEN_TAB || RUNNING_IN_TESTS;
+
+      // Attempt to log in with the default password that is set when a user skips
+      // password protection. This check needs to go first as we need to know
+      // if default password was used.
+      if (!encryptionKey.value && !autoLoginDisabledEnv) {
+        try {
+          await authenticateWithPassword(STUB_ACCOUNT.password);
+          isUsingDefaultPassword.value = true;
+        } catch (error) { /* NOOP */ }
+      }
+
+      // If default password auth failed, check if extension can be restored
+      // by using data stored in the background process.
+      if (!encryptionKey.value && !autoLoginDisabledEnv && IS_EXTENSION) {
         setLoaderVisible(true);
         const sessionEncryptionKey = await getSessionEncryptionKey();
         if (sessionEncryptionKey) {
@@ -304,17 +318,7 @@ export const useAuth = createCustomScopedComposable(() => {
         setLoaderVisible(false);
       }
 
-      // If restoring from background failed try to use the dev mode password set
-      // when using "Skip" when setting password.
-      if (!encryptionKey.value && UNFINISHED_FEATURES && !IS_OFFSCREEN_TAB) {
-        await authenticateWithPassword(STUB_ACCOUNT.password)
-          .then(() => {
-            isUsingDefaultPassword.value = true;
-          })
-          .catch(() => openPasswordLoginModal());
-      }
-
-      // Finally if other attempts failed ask user for the password
+      // Finally if other attempts failed, ask user for the password.
       if (!encryptionKey.value) {
         await openPasswordLoginModal();
       }
@@ -434,6 +438,7 @@ export const useAuth = createCustomScopedComposable(() => {
     lockWallet,
     logout,
     setMnemonicAndInitializeAuthentication,
+    setPassword,
     updatePassword,
   };
 });

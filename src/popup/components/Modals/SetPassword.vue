@@ -2,7 +2,6 @@
   <Modal
     class="set-password"
     from-bottom
-    :has-close-button="!isRestoredWallet"
     centered
     @close="handleClose()"
   >
@@ -19,20 +18,18 @@
     <div class="info">
       <h3
         class="text-heading-4"
-        v-text="$t('pages.secureLogin.setPassword.title')"
+        v-text="$t('pages.setPassword.title')"
       />
-      <p class="text-subheading" v-text="$t('pages.secureLogin.setPassword.text')" />
-      <div class="text-description">
-        <p
-          v-text="isRestoredWallet
-            ? $t('pages.secureLogin.setPassword.textRestoredWallet-1')
-            : $t('pages.secureLogin.setPassword.text-2')"
-        />
-        <p
-          v-if="isRestoredWallet"
-          v-text="$t('pages.secureLogin.setPassword.textRestoredWallet-2')"
-        />
-      </div>
+      <p
+        class="text-subheading"
+        v-text="$t('pages.setPassword.text')"
+      />
+      <p
+        class="text-description"
+        v-text="isRestoredWallet
+          ? $t('pages.setPassword.textRestoredWallet')
+          : $t('pages.setPassword.text-2')"
+      />
     </div>
 
     <div class="inputs">
@@ -52,12 +49,12 @@
             v-model="password"
             data-cy="password"
             class="password-input"
-            :placeholder="$t('pages.secureLogin.setPassword.passwordPlaceholder')"
-            :label="$t('pages.secureLogin.setPassword.passwordLabel')"
+            :placeholder="$t('pages.setPassword.passwordPlaceholder')"
+            :label="$t('pages.setPassword.passwordLabel')"
             :message="errorMessage ?? errors.confirmPassword"
             :help="{
-              title: $t('pages.secureLogin.setPassword.help.title'),
-              msg: $t('pages.secureLogin.setPassword.help.text'),
+              title: $t('pages.setPassword.help.title'),
+              msg: $t('pages.setPassword.help.text'),
               fullscreen: true,
             }"
             show-password-strength
@@ -76,8 +73,8 @@
             v-model="confirmPassword"
             data-cy="confirm-password"
             class="password-input"
-            :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
-            :label="$t('pages.secureLogin.setPassword.confirmLabel')"
+            :placeholder="$t('pages.setPassword.confirmPlaceholder')"
+            :label="$t('pages.setPassword.confirmLabel')"
             :message="errorMessage"
             hide-eye-icon
             @keydown.enter="handleSubmit($event, onSubmit)"
@@ -86,7 +83,6 @@
 
         <div class="buttons">
           <BtnMain
-            class="btn-main"
             variant="primary"
             extend
             nowrap
@@ -96,15 +92,13 @@
               || !!errors.password
               || !!errors.confirmPassword
             )"
-            :text="$t('pages.secureLogin.setPassword.confirm')"
+            :text="$t('pages.setPassword.confirm')"
             @click="handleSubmit($event, onSubmit)"
           />
           <BtnMain
-            v-if="UNFINISHED_FEATURES"
-            class="default-password"
-            title="Use default password"
             variant="muted"
-            text="skip"
+            :text="$t('pages.setPassword.skip')"
+            extend
             nowrap
             @click="useDefaultPassword"
           />
@@ -119,8 +113,8 @@ import { defineComponent, PropType, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { UNFINISHED_FEATURES } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
+import { useAuth } from '@/composables';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -128,7 +122,6 @@ import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 
 import LockIcon from '@/icons/secure-lock-outline.svg?vue-component';
-import { useAuth } from '@/composables';
 
 export default defineComponent({
   components: {
@@ -160,11 +153,13 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Bypassing password protection means we will still encrypt some important data,
+     * but the stub password will be used for the encryption.
+     */
     function useDefaultPassword() {
-      if (UNFINISHED_FEATURES) {
-        props.resolve(STUB_ACCOUNT.password);
-        isUsingDefaultPassword.value = true;
-      }
+      props.resolve(STUB_ACCOUNT.password);
+      isUsingDefaultPassword.value = true;
     }
 
     return {
@@ -175,7 +170,6 @@ export default defineComponent({
       handleClose,
       useDefaultPassword,
       LockIcon,
-      UNFINISHED_FEATURES,
     };
   },
 });
@@ -199,20 +193,13 @@ export default defineComponent({
       flex-direction: column;
       gap: 8px;
     }
+  }
 
-    .buttons {
-      display: flex;
-      margin-top: 40px;
-      gap: 8px;
-
-      .btn-main {
-        width: 100%;
-      }
-
-      .default-password {
-        width: 20%;
-      }
-    }
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
   }
 }
 </style>

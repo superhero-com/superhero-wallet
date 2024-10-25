@@ -1,38 +1,41 @@
 <template>
-  <div :class="['switch-button', { disabled, active: !!modelValue }]">
-    <div class="label">
-      {{ label }}
-    </div>
+  <div
+    class="switch-button"
+    :class="{
+      disabled,
+      checked: !!modelValue,
+    }"
+  >
+    <div
+      class="label"
+      v-text="label"
+    />
     <label class="switch">
       <input
-        v-model="active"
+        :checked="modelValue"
         type="checkbox"
         :disabled="disabled"
+        @change="$emit('update:modelValue', !modelValue)"
       >
       <span class="slider round" />
     </label>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   props: {
-    modelValue: { type: Boolean },
+    modelValue: Boolean,
     label: { type: String, default: '' },
-    disabled: { type: Boolean, default: false },
+    disabled: Boolean,
   },
-  emits: ['update:modelValue'],
-  computed: {
-    active: {
-      get() {
-        return this.modelValue;
-      },
-      set(modelValue) {
-        this.$emit('update:modelValue', modelValue);
-      },
-    },
+  emits: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    'update:modelValue': (checked: boolean) => true,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -54,9 +57,10 @@ export default {
   }
 
   .label {
-    color: rgba($color-white, 0.5);
-
     @extend %face-sans-15-medium;
+
+    color: rgba($color-white, 0.5);
+    transition: color .1s;
   }
 
   .switch {
@@ -69,16 +73,6 @@ export default {
       opacity: 0;
       width: 0;
       height: 0;
-
-      &:checked + .slider {
-        background-color: $color-primary;
-
-        &::before {
-          -webkit-transform: translateX(16px);
-          -ms-transform: translateX(16px);
-          transform: translateX(16px);
-        }
-      }
     }
 
     .slider {
@@ -89,18 +83,16 @@ export default {
       right: 0;
       bottom: 0;
       background-color: rgba($color-white, 0.15);
-      -webkit-transition: 0.4s;
       transition: 0.4s;
 
       &::before {
+        content: '';
         position: absolute;
-        content: "";
         height: 16px;
         width: 16px;
         left: 2px;
         bottom: 2px;
         background-color: rgba($color-white, 0.75);
-        -webkit-transition: 0.4s;
         transition: 0.4s;
       }
 
@@ -114,13 +106,20 @@ export default {
     }
   }
 
-  &.active {
+  &.checked {
     .label {
       color: rgba($color-white, 1);
     }
 
-    .switch .slider::before {
-      background-color: rgba($color-white, 1);
+    .switch {
+      .slider {
+        background-color: $color-primary;
+
+        &::before {
+          background-color: rgba($color-white, 1);
+          transform: translateX(16px);
+        }
+      }
     }
   }
 }

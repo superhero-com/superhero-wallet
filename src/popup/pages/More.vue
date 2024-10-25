@@ -3,12 +3,12 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="more">
         <PanelItem
-          :to="{ name: 'settings' }"
+          :to="{ name: ROUTE_SETTINGS }"
           :title="$t('pages.titles.settings')"
           data-cy="settings"
         >
           <template #icon>
-            <Settings />
+            <SettingsIcon />
           </template>
         </PanelItem>
 
@@ -25,13 +25,13 @@
 
         <template v-if="isNodeMainnet || isNodeTestnet">
           <PanelItem
-            :to="{ name: 'tips-claim' }"
+            :to="{ name: ROUTE_TIPS_CLAIM }"
             :title="$t('pages.claimTips.title')"
             :disabled="!isActiveAccountAe"
             data-cy="tips-claim"
           >
             <template #icon>
-              <ClaimTips />
+              <ClaimTipsIcon />
             </template>
           </PanelItem>
 
@@ -42,7 +42,7 @@
             data-cy="invite"
           >
             <template #icon>
-              <Invites />
+              <InvitesIcon />
             </template>
           </PanelItem>
         </template>
@@ -52,7 +52,7 @@
           :title="$t('pages.about.reportBug')"
         >
           <template #icon>
-            <BugReport />
+            <BugReportIcon />
           </template>
         </PanelItem>
 
@@ -67,7 +67,7 @@
         </PanelItem>
 
         <PanelItem
-          v-else-if="isNodeTestnet"
+          v-else-if="isNodeTestnet && activeAccountFaucetUrl"
           :disabled="!isActiveAccountAe"
           :href="activeAccountFaucetUrl"
           :title="$t('common.faucet')"
@@ -82,12 +82,12 @@
           :title="$t('pages.more.dex')"
         >
           <template #icon>
-            <Dex />
+            <DexIcon />
           </template>
         </PanelItem>
 
         <PanelItem
-          :to="{ name: 'about' }"
+          :to="{ name: ROUTE_ABOUT }"
           :title="$t('pages.titles.about')"
           data-cy="about"
         >
@@ -97,9 +97,11 @@
         </PanelItem>
 
         <PanelItem
-          v-if="isMnemonicEncrypted || isBiometricLoginEnabled"
+          v-if="(
+            (isMnemonicEncrypted && !isUsingDefaultPassword)
+            || (IS_MOBILE_APP && isBiometricLoginEnabled)
+          )"
           :title="$t('pages.secureLogin.lockWallet')"
-          :disabled="isUsingDefaultPassword || (!isMnemonicEncrypted && !isBiometricLoginEnabled)"
           data-cy="lock-wallet"
           @click="lockWallet()"
         >
@@ -116,7 +118,12 @@
 import { computed, defineComponent } from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 
-import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
+import {
+  BUG_REPORT_URL,
+  IS_MOBILE_APP,
+  PROTOCOLS,
+  UNFINISHED_FEATURES,
+} from '@/constants';
 import {
   useAccounts,
   useAddressBook,
@@ -126,17 +133,23 @@ import {
 } from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
-import { ROUTE_ADDRESS_BOOK, ROUTE_INVITE } from '@/popup/router/routeNames';
+import {
+  ROUTE_ABOUT,
+  ROUTE_ADDRESS_BOOK,
+  ROUTE_INVITE,
+  ROUTE_SETTINGS,
+  ROUTE_TIPS_CLAIM,
+} from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
 
-import Invites from '@/icons/invites.svg?vue-component';
-import Settings from '@/icons/settings.svg?vue-component';
-import BugReport from '@/icons/bug-report.svg?vue-component';
+import InvitesIcon from '@/icons/invites.svg?vue-component';
+import SettingsIcon from '@/icons/settings.svg?vue-component';
+import BugReportIcon from '@/icons/bug-report.svg?vue-component';
 import AboutIcon from '@/icons/about.svg?vue-component';
 import BuyIcon from '@/icons/credit-card.svg?vue-component';
-import Dex from '@/icons/dex.svg?vue-component';
-import ClaimTips from '@/icons/claim-tips.svg?vue-component';
+import DexIcon from '@/icons/dex.svg?vue-component';
+import ClaimTipsIcon from '@/icons/claim-tips.svg?vue-component';
 import FaucetIcon from '@/icons/faucet.svg?vue-component';
 import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
 import SecureIcon from '@/icons/secure-lock.svg?vue-component';
@@ -147,12 +160,12 @@ export default defineComponent({
     PanelItem,
     IonPage,
     IonContent,
-    Invites,
-    Settings,
+    InvitesIcon,
+    SettingsIcon,
     AboutIcon,
-    Dex,
-    BugReport,
-    ClaimTips,
+    DexIcon,
+    BugReportIcon,
+    ClaimTipsIcon,
     BuyIcon,
     FaucetIcon,
     MenuCardIcon,
@@ -176,8 +189,12 @@ export default defineComponent({
       AE_SIMPLEX_URL,
       BUG_REPORT_URL,
       UNFINISHED_FEATURES,
+      ROUTE_ABOUT,
       ROUTE_ADDRESS_BOOK,
       ROUTE_INVITE,
+      ROUTE_SETTINGS,
+      ROUTE_TIPS_CLAIM,
+      IS_MOBILE_APP,
       lockWallet,
       activeAccountFaucetUrl,
       addressBookCount,
