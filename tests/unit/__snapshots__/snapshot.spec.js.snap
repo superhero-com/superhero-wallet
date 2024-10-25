@@ -115,7 +115,9 @@ exports[`Pages About 1`] = `
             <div
               class="panel-item-title"
             >
+              
               locale-specific-text
+              
             </div>
           </div>
           <div
@@ -146,7 +148,9 @@ exports[`Pages About 1`] = `
             <div
               class="panel-item-title"
             >
+              
               locale-specific-text
+              
             </div>
           </div>
           <div
