@@ -32,7 +32,6 @@ import { useAeSdk, useTransactionData } from '@/composables';
 
 import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import TransactionInfo from './TransactionInfo.vue';
@@ -49,8 +48,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { getAeSdk } = useAeSdk();
-    const { getName } = useAeNames();
-    const { getMiddleware } = useAeMiddleware();
+    const { getName, getNameByNameHash } = useAeNames();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview>({} as IAccountOverview);
@@ -219,9 +217,8 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const middleware = await getMiddleware();
       if (innerTx.value.recipientId?.startsWith('nm_')) {
-        name.value = (await middleware.getName(innerTx.value.recipientId)).name;
+        name.value = await getNameByNameHash(innerTx.value.recipientId);
       }
       let transactionOwnerAddress;
       if (innerTx.value.function === TX_FUNCTIONS.claim) {

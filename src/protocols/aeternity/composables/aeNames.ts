@@ -132,6 +132,16 @@ export function useAeNames() {
     return computed(() => externalNamesRegistry.value[nodeNetworkId.value!]?.[address] || '');
   }
 
+  // This function returns the resolved chain name from a name hash
+  async function getNameByNameHash(address?: Encoded.Name) {
+    if (!address) {
+      return '';
+    }
+
+    const middleware = await getMiddleware();
+    return (await middleware.getName(address)).name;
+  }
+
   function getNameAuction(name: string): IAuction {
     return auctions.value[name] || null;
   }
@@ -342,6 +352,7 @@ export function useAeNames() {
     areNamesFetching,
     updateOwnedNames,
     getName,
+    getNameByNameHash,
     getNameAuction,
     getNameAuctionHighestBid,
     updateNamePointer,

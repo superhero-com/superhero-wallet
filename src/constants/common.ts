@@ -1,4 +1,4 @@
-import type { ICurrency, IPermission } from '@/types';
+import type { ICurrency, IPermission, ObjectValues } from '@/types';
 import { IS_MOBILE_APP } from './environment';
 
 export const APP_NAME = 'Superhero Wallet';
@@ -557,3 +557,12 @@ export const PASSWORD_STRENGTH = {
   medium: 'medium',
   strong: 'strong',
 } as const;
+
+export const ACCOUNT_SELECT_TYPE_FILTER = {
+  all: 'all',
+  bookmarked: 'bookmarked',
+  owned: 'owned',
+  addressBook: 'addressBook',
+  recent: 'recent',
+} as const;
+export type AccountSelectTypeFilter = ObjectValues<typeof ACCOUNT_SELECT_TYPE_FILTER>;

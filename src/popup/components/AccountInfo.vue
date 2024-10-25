@@ -5,7 +5,7 @@
   >
     <Avatar
       class="avatar"
-      :address="account.address"
+      :address="address"
       :name="name"
       :size="avatarSize"
       :borderless="avatarBorderless"
@@ -27,7 +27,8 @@
         v-else-if="name"
         class="account-name"
       >
-        <Truncate :str="name" />
+        <ion-skeleton-text v-if="isLoading" animated />
+        <Truncate v-if="!isLoading" :str="name" />
       </div>
       <div
         v-else
@@ -38,16 +39,17 @@
 
       <slot name="address">
         <CopyText
-          v-if="account.address?.length"
+          v-if="address?.length"
           :disabled="!canCopyAddress || showExplorerLink"
-          :value="account.address"
+          :value="address"
           class="account-address"
         >
           <AddressTruncated
-            :address="account.address"
+            :address="address"
             :protocol="account.protocol"
             :show-protocol-icon="showProtocolIcon"
             :show-explorer-link="showExplorerLink"
+            :hide-address="!!nameAddress"
           />
         </CopyText>
       </slot>
@@ -56,11 +58,16 @@
 </template>
 
 <script lang="ts">
+import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
   PropType,
+  ref,
+  watch,
 } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk';
+
 import type { IAccount } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -77,6 +84,7 @@ export default defineComponent({
     Avatar,
     Truncate,
     CopyText,
+    IonSkeletonText,
   },
   props: {
     account: { type: Object as PropType<Partial<IAccount>>, required: true },
@@ -90,25 +98,48 @@ export default defineComponent({
     showProtocolIcon: Boolean,
     dense: Boolean,
     showExplorerLink: Boolean,
+    nameAddress: { type: String as PropType<Encoded.Name>, default: undefined },
   },
   setup(props) {
-    const { getName } = useAeNames();
+    const { getName, getNameByNameHash } = useAeNames();
 
-    const name = computed(() => props.customName || getName(props.account.address!).value);
+    const isLoading = ref(true);
+    const resolvedChainName = ref('');
+    const address = computed(() => props.nameAddress || props.account.address!);
+    const name = computed(() => (
+      resolvedChainName.value
+      || props.customName
+      || getName(address.value).value
+    ));
 
     const explorerUrl = computed(
       () => (props.account.protocol)
         ? ProtocolAdapterFactory
           .getAdapter(props.account.protocol)
           .getExplorer()
-          .prepareUrlForAccount(props.account.address!)
+          .prepareUrlForAccount(address.value)
         : '',
     );
 
+    watch(
+      () => [props.nameAddress],
+      async ([nameAddress]) => {
+        if (nameAddress) {
+          resolvedChainName.value = await getNameByNameHash(nameAddress);
+        } else {
+          resolvedChainName.value = '';
+        }
+        isLoading.value = false;
+      },
+      { immediate: true },
+    );
+
     return {
-      name,
+      name: resolvedChainName.value || name,
+      address,
       explorerUrl,
       getDefaultAccountLabel,
+      isLoading,
     };
   },
 });
@@ -172,6 +203,15 @@ export default defineComponent({
     .account-name {
       font-size: 15px;
     }
+  }
+
+  ion-skeleton-text {
+    --border-radius: 16px;
+    --background: rgba(#{$color-white-rgb}, 0.1);
+    --background-rgb: #{$color-white-rgb};
+    width: 150px;
+    height: 16px;
+    margin: 0 0 4px 0;
   }
 }
 </style>

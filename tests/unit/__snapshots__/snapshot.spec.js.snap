@@ -132,6 +132,7 @@ exports[`Pages About 1`] = `
             />
             
           </div>
+          <!--v-if-->
           
         </a>
         <a
@@ -165,6 +166,7 @@ exports[`Pages About 1`] = `
             />
             
           </div>
+          <!--v-if-->
           
         </a>
       </div>
