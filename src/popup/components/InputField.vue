@@ -3,8 +3,8 @@
   <div
     class="input-field"
     :class="{
-      error: hasError,
-      warning: hasWarning,
+      error: hasError && (!hideError || !focused),
+      warning: hasWarning && (!hideError || !focused),
       readonly,
       code,
       focused,
@@ -44,8 +44,13 @@
     <label
       data-cy="input-wrapper"
       class="input-wrapper"
-      @click="$emit('click', $event)"
+      @click="handleLabelClick"
+      @focusin="focused = true"
+      @focusout="focused = false"
     >
+      <slot
+        name="before-main"
+      />
       <div class="main-inner">
         <slot
           v-if="!hasError && !hasWarning"
@@ -76,8 +81,6 @@
             :autocapitalize="autoCapitalize"
             @input="handleInput"
             @keydown="checkIfNumber"
-            @focusin="focused = true"
-            @focusout="focused = false"
           >
         </slot>
         <slot
@@ -97,6 +100,7 @@
     <div
       v-if="showMessage"
       class="message"
+      :class="{ hidden: (hideError && focused) }"
       data-cy="input-message"
     >
       <label
@@ -167,6 +171,10 @@ export default defineComponent({
       type: Number,
       default: null,
     },
+    /** Forces the error to be hidden, i.e. when the autocomplete dropdown is open */
+    hideError: Boolean,
+    /** Makes the label not clickable to prevent unwanted presses on buttons inside the label */
+    disableLabelFocus: Boolean,
   },
   emits: [
     'update:modelValue',
@@ -228,6 +236,13 @@ export default defineComponent({
       emit('update:modelValue', props.type === 'number' ? value?.replace(',', '.') : value);
     }
 
+    function handleLabelClick(event: Event) {
+      if (props.disableLabelFocus) {
+        event.preventDefault();
+      }
+      emit('click', event);
+    }
+
     watch(
       () => focused.value,
       (val) => emit('focus-change', val),
@@ -268,6 +283,7 @@ export default defineComponent({
       availableTextLimit,
       checkIfNumber,
       handleInput,
+      handleLabelClick,
     };
   },
 });
@@ -326,6 +342,7 @@ export default defineComponent({
       @extend %face-sans-15-regular;
 
       margin-left: auto;
+      margin-right: 2px;
       user-select: none;
       color: $color-grey-dark;
 
@@ -336,12 +353,12 @@ export default defineComponent({
   }
 
   .input-wrapper {
+    position: relative;
     display: block;
-    padding: 10px 12px; // Decides on the input size
+    padding: 10px 8px 12px 10px; // Decides on the input size
     background-color: var(--color-bg);
     border: none;
     border-radius: $border-radius-interactive;
-    overflow: hidden;
     box-shadow: inset 0 0 0 2px var(--color-border);
     transition: 100ms ease-in-out;
     cursor: text;
@@ -350,6 +367,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       width: 100%;
+      gap: 6px;
 
       :deep(.icon) {
         width: var(--size, 24px);
@@ -412,6 +430,10 @@ export default defineComponent({
       height: 24px;
       padding-left: 5px;
       color: rgba($color-black, 0.75);
+    }
+
+    &.hidden {
+      visibility: hidden;
     }
   }
 
