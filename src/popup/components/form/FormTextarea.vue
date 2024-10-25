@@ -83,10 +83,10 @@ export default defineComponent({
 
     onMounted(() => {
       watch(() => props.modelValue, () => {
-        if (props.autoHeight && textarea?.value) {
+        if (props.autoHeight) {
           height.value = 'auto';
           nextTick(() => {
-            if (textarea?.value) {
+            if (textarea.value) {
               const { scrollHeight, clientHeight } = textarea.value!;
               const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
               height.value = `${newHeight}px`;

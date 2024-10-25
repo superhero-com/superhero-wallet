@@ -941,6 +941,11 @@ export interface IAddressBookEntry {
   protocol: Protocol;
 }
 
+export interface IAccountSelectorEntry extends IAddressBookEntry {
+  isOwnAddress?: boolean;
+  nameAddress?: Encoded.Name;
+}
+
 export interface IOtherSettings {
   isSeedBackedUp?: boolean;
   saveErrorLog?: boolean;

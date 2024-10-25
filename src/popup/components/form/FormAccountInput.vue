@@ -153,14 +153,9 @@ export default defineComponent({
 
     onMounted(() => {
       watch(() => props.modelValue, () => {
-        const searchAddress = addressBookFiltered.value
-          ?.find((entry: IAddressBookEntry) => (entry.address === props.modelValue));
-        if (searchAddress) {
-          selectedAddress.value = searchAddress;
-        }
-        if (!props.modelValue) { // If it's cleared externally
-          selectedAddress.value = undefined;
-        }
+        selectedAddress.value = (props.modelValue)
+          ? addressBookFiltered.value?.find((entry) => (entry.address === props.modelValue))
+          : undefined; // If it's cleared externally
 
         isDropdownOpen.value = props.modelValue.toString().length >= 2
             && filteredOptions.value.length > 0;

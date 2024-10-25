@@ -633,11 +633,13 @@
       "exportAddressBook": "Export",
       "searchPlaceholder": "Search for name or {0}address",
       "scanTitle": "Scan the address you want to add",
-      "selectAddress": "Select recipient’s address",
+      "selectRecipientAddress": "Select recipient’s address",
+      "selectSignerAddress": "Select signer’s address",
       "noRecords": {
         "addressBook": "There are no records in your address book.",
         "blockchain": "Currently there are no address records for the blockchain selected.",
         "bookmarked": "There are no bookmarked address records.",
+        "recent": "There are no recent recipients.",
         "search": "No address records found for your search query."
       },
       "entry": {
@@ -659,6 +661,11 @@
       "export": {
         "title": "Address book exported",
         "message": "Address book has been successfully exported. You can find the file at: "
+      },
+      "filters":  {
+        "addressBook": "Address Book",
+        "own": "Own",
+        "recent": "Recent"
       }
     },
     "secureLogin": {

@@ -34,7 +34,7 @@ export const useAddressBook = createCustomScopedComposable(() => {
   const { openModal, openDefaultModal } = useModals();
 
   const protocolFilter = ref<Protocol | null>(null);
-  const searchQuery = ref<string>('');
+  const searchQuery = ref('');
   const showBookmarked = ref(false);
 
   function filterAddressBookByBookmarked(entries: IAddressBookEntry[]) {

@@ -239,6 +239,7 @@ import TrashIcon from '@/icons/trash.svg?vue-component';
 import CircleCloseIcon from '@/icons/circle-close.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
 
 const STEPS = {
   form: 'form',
@@ -359,7 +360,7 @@ export default defineComponent({
     async function updateSignerFromAddressBook(index: number) {
       const address = await openModal<Encoded.AccountAddress>(
         MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
-        { protocol: PROTOCOLS.aeternity },
+        { protocol: PROTOCOLS.aeternity, isSigner: true },
       );
       if (address) {
         updateSigner(index, address);
@@ -466,6 +467,7 @@ export default defineComponent({
       CircleCloseIcon,
       QrScanIcon,
       AddressBookIcon,
+      PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
       PROTOCOLS,

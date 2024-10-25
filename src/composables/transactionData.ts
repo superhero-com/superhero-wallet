@@ -4,7 +4,6 @@ import type {
   AccountAddress,
   ITokenResolved,
   ITransaction,
-  ObjectValues,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -213,18 +212,16 @@ export function useTransactionData({
   ));
 
   const direction = computed(
-    (): ObjectValues<typeof TX_DIRECTION> => (innerTx.value?.function === TX_FUNCTIONS.claim)
-      ? TX_DIRECTION.received
-      : getTxDirection(
-        outerTx.value?.payerId ? outerTx.value : innerTx.value,
-        transactionCustomOwner?.value
-        || transaction.value?.transactionOwner
-        || (
-          ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
-          && txOwnerAddress.value
-        )
-        || activeAccount.value.address,
-      ),
+    () => getTxDirection(
+      outerTx.value?.payerId ? outerTx.value : innerTx.value,
+      transactionCustomOwner?.value
+      || transaction.value?.transactionOwner
+      || (
+        ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
+        && txOwnerAddress.value
+      )
+      || activeAccount.value.address,
+    ),
   );
 
   /**
