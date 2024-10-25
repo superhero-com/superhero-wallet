@@ -8,23 +8,34 @@
         <!--
           Enable secure login option
         -->
-        <div
-          v-if="IS_MOBILE_APP"
-          class="form-group"
-        >
-          <p
-            class="text-description"
-            v-text="$t('pages.secureLogin.description')"
-          />
-
-          <div class="form-group-fields">
-            <SwitchButton
-              :label="$t('pages.secureLogin.enableSecureLogin')"
-              :model-value="isBiometricLoginEnabled"
-              :disabled="!isBiometricLoginAvailable"
-              @update:modelValue="setBiometricLoginEnabled"
+        <div class="form-group">
+          <template v-if="IS_MOBILE_APP">
+            <p
+              class="text-description"
+              v-text="$t('pages.secureLogin.descriptionBiometric')"
             />
-          </div>
+            <div class="form-group-fields">
+              <SwitchButton
+                :label="$t('pages.secureLogin.enableSecureLogin')"
+                :model-value="isBiometricLoginEnabled"
+                :disabled="!isBiometricLoginAvailable"
+                @update:modelValue="setBiometricLoginEnabled"
+              />
+            </div>
+          </template>
+          <template v-else>
+            <p
+              class="text-description"
+              v-text="$t('pages.secureLogin.descriptionPassword')"
+            />
+            <div class="form-group-fields">
+              <SwitchButton
+                :label="$t('pages.secureLogin.enablePasswordProtection')"
+                :model-value="!isUsingDefaultPassword"
+                @update:modelValue="setPasswordEnabled"
+              />
+            </div>
+          </template>
 
           <hr>
         </div>
@@ -32,8 +43,16 @@
         <!--
           Auto-lock wallet time options
         -->
-        <div class="form-group">
-          <div :class="{ dimmed: IS_MOBILE_APP && !isBiometricLoginEnabled }">
+        <div
+          class="form-group"
+          :class="{
+            dimmed: (
+              (IS_MOBILE_APP && !isBiometricLoginEnabled)
+              || (!IS_MOBILE_APP && isUsingDefaultPassword)
+            ),
+          }"
+        >
+          <div>
             <p class="text-heading-5" v-text="$t('pages.secureLogin.autoLock.title')" />
             <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart1')" />
             <p class="text-description" v-text="$t('pages.secureLogin.autoLock.descriptionPart2')" />
@@ -61,15 +80,16 @@
         <div
           v-if="!IS_MOBILE_APP"
           class="form-group"
+          :class="{ dimmed: (!IS_MOBILE_APP && isUsingDefaultPassword) }"
         >
           <div>
             <p
               class="text-heading-5"
-              v-text="$t('pages.secureLogin.changePassword.title')"
+              v-text="$t('pages.changePassword.title')"
             />
             <p
               class="text-description"
-              v-text="$t('pages.secureLogin.changePassword.description')"
+              v-text="$t('pages.changePassword.description')"
             />
           </div>
 
@@ -80,8 +100,8 @@
             <InputPassword
               v-model="currentPassword"
               data-cy="current-password"
-              :placeholder="$t('pages.secureLogin.changePassword.currentPasswordPlaceholder')"
-              :label="$t('pages.secureLogin.changePassword.currentPassword')"
+              :placeholder="$t('pages.changePassword.currentPasswordPlaceholder')"
+              :label="$t('pages.changePassword.currentPassword')"
               :message="isAuthFailed ? $t('pages.secureLogin.login.error') : null"
               @input="isAuthFailed = false; isPasswordChangedSuccessfully = false"
             />
@@ -99,8 +119,8 @@
                 v-bind="field"
                 v-model="newPassword"
                 data-cy="new-password"
-                :placeholder="$t('pages.secureLogin.changePassword.newPasswordPlaceholder')"
-                :label="$t('pages.secureLogin.changePassword.newPassword')"
+                :placeholder="$t('pages.changePassword.newPasswordPlaceholder')"
+                :label="$t('pages.changePassword.newPassword')"
                 :message="errorMessage ?? errors.confirmNewPassword"
                 show-password-strength
               />
@@ -117,8 +137,8 @@
                 v-bind="field"
                 v-model="confirmNewPassword"
                 data-cy="confirm-new-password"
-                :placeholder="$t('pages.secureLogin.setPassword.confirmPlaceholder')"
-                :label="$t('pages.secureLogin.changePassword.confirmNewPassword')"
+                :placeholder="$t('pages.setPassword.confirmPlaceholder')"
+                :label="$t('pages.changePassword.confirmNewPassword')"
                 :message="errorMessage"
                 hide-eye-icon
               />
@@ -136,7 +156,7 @@
                 || !!errors.newPassword
                 || !!errors.confirmNewPassword
               )"
-              :text="$t('pages.secureLogin.changePassword.reset')"
+              :text="$t('pages.changePassword.reset')"
             />
           </Form>
 
@@ -145,7 +165,7 @@
               v-if="isPasswordChangedSuccessfully"
               class="info-box"
               type="success"
-              :text="$t('pages.secureLogin.changePassword.success')"
+              :text="$t('pages.changePassword.success')"
             />
           </Transition>
         </div>
@@ -164,8 +184,9 @@ import {
 import { IonPage, IonContent } from '@ionic/vue';
 import { Form, Field } from 'vee-validate';
 
+import type { ComponentRef } from '@/types';
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
-import { ComponentRef } from '@/types';
+import { STUB_ACCOUNT } from '@/constants/stubs';
 import { useAuth, useModals, useUi } from '@/composables';
 
 import RadioButton from '@/popup/components/RadioButton.vue';
@@ -200,13 +221,15 @@ export default defineComponent({
     const {
       checkBiometricLoginAvailability,
       updatePassword,
+      setPassword,
       secureLoginTimeoutDecrypted,
+      isUsingDefaultPassword,
     } = useAuth();
     const {
       isBiometricLoginEnabled,
       setBiometricLoginEnabled,
     } = useUi();
-    const { openEnableBiometricLoginModal } = useModals();
+    const { openEnableBiometricLoginModal, openSetPasswordModal } = useModals();
 
     async function setNewPassword() {
       if (isAuthenticating.value) {
@@ -231,6 +254,20 @@ export default defineComponent({
       }
     }
 
+    async function setPasswordEnabled(val: boolean) {
+      let passwordToSet = STUB_ACCOUNT.password;
+
+      if (val) {
+        try {
+          isUsingDefaultPassword.value = false;
+          passwordToSet = await openSetPasswordModal();
+        } catch (error) { /* NOOP */ }
+      }
+
+      setPassword(passwordToSet);
+      isUsingDefaultPassword.value = (passwordToSet === STUB_ACCOUNT.password);
+    }
+
     function msToMinutes(ms: number) {
       return Math.floor(ms / 60000);
     }
@@ -250,6 +287,7 @@ export default defineComponent({
       isBiometricLoginAvailable,
       isPasswordChangedSuccessfully,
       isAuthFailed,
+      isUsingDefaultPassword,
       secureLoginTimeoutDecrypted,
       currentPassword,
       newPassword,
@@ -257,6 +295,7 @@ export default defineComponent({
       setNewPassword,
       setBiometricLoginEnabled,
       msToMinutes,
+      setPasswordEnabled,
     };
   },
 });
@@ -284,6 +323,7 @@ export default defineComponent({
 
   .dimmed {
     opacity: 0.5;
+    pointer-events: none;
   }
 
   .btn-reset-password {

@@ -656,24 +656,15 @@
       }
     },
     "secureLogin": {
-      "description": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",
+      "descriptionBiometric": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",
+      "descriptionPassword": "Enabling secure login will let you set a custom password to unlock Superhero Wallet with.",
       "enableSecureLogin": "Enable secure login",
+      "enablePasswordProtection": "Enable secure login with password",
       "enableDeviceSecureLogin": "Enable device secure authentication",
       "autoLock": {
         "title": "Auto-lock wallet",
         "descriptionPart1": "Superhero Wallet will be locked after the preset time interval of inactivity.",
-        "descriptionPart2": "You will be asked to authenticate in order to unlock the screen and continue using the wallet."
-      },
-      "changePassword": {
-        "title": "Change Password",
-        "description": "You must provide your current password in order to reset it.",
-        "currentPassword": "Current password",
-        "currentPasswordPlaceholder": "Enter your current password",
-        "newPassword": "New password",
-        "newPasswordPlaceholder": "Enter strong new password",
-        "confirmNewPassword": "Confirm new password",
-        "reset": "Reset password",
-        "success": "Your password has been successfully reset. Please remember your new password."
+        "descriptionPart2": "You will be asked to authenticate in order to unlock the wallet and continue using it."
       },
       "authenticationTimeout": "Immediately | After {n} min inactivity | After {n} min inactivity",
       "available": {
@@ -691,22 +682,6 @@
       "toUnlock": "to unlock your wallet",
       "authFailed": "Authentication failed",
       "authFailedSubtitle": "Tap on the screen to try again!",
-      "setPassword": {
-        "title": "Set a password",
-        "text": "to securely access your wallet",
-        "text-2": "Choose a strong password and make sure you remember it or back it up safely.",
-        "textRestoredWallet-1": "Superhero Wallet has been updated introducing increased level of security.",
-        "textRestoredWallet-2": "You need to set a password to continue using your wallet. Chose a strong one and make sure you remember it or back it up safely.",
-        "passwordLabel": "Password",
-        "passwordPlaceholder": "Enter strong password",
-        "confirmLabel": "Confirm password",
-        "confirmPlaceholder": "Repeat the password you chose",
-        "confirm": "Continue to wallet",
-        "help": {
-          "title": "Set a password",
-          "text": "to securely access Superhero Wallet {'<'}br /{'>'} {'<'}br /{'>'} Superhero Wallet stores your seed phrase securely encrypted in the local storage. {'<'}br /{'>'} That’s why you need to set a password that will be used to unlock your wallet. {'<'}br /{'>'} {'<'}br /{'>'} If you forget the password the only way to access your wallet and funds will be to use the seed phrase (a mnemonic consisting of 12 or more words) in order to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} That is the reason why it is very important to remember your password and even more important to back up the seed phrase as soon as your wallet is created."
-        }
-      },
       "passwordStrength": {
         "weak": "Weak",
         "medium": "Medium",
@@ -719,6 +694,33 @@
         "unlock": "Unlock",
         "forgot": "Forgot password?"
       }
+    },
+    "setPassword": {
+      "title": "Set a password",
+      "text": "to securely access your wallet",
+      "text-2": "Choose a strong password and make sure you remember it or back it up safely.",
+      "textRestoredWallet": "Superhero Wallet has been updated introducing increased level of security. It is recommended that you choose a strong password and make sure to remember it or back it up safely.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter strong password",
+      "confirmLabel": "Confirm password",
+      "confirmPlaceholder": "Repeat the password you chose",
+      "confirm": "Set password",
+      "skip": "Skip password",
+      "help": {
+        "title": "Set a password",
+        "text": "to securely access Superhero Wallet {'<'}br /{'>'} {'<'}br /{'>'} For security reasons it is recommended that you set a custom password that will be used to unlock your wallet. {'<'}br /{'>'} {'<'}br /{'>'} If you forget the password the only way to access your wallet and funds will be to use the seed phrase (a mnemonic consisting of 12 or more words) in order to restore your accounts and set a new password. {'<'}br /{'>'} {'<'}br /{'>'} That is the reason why it is very important to remember your password and even more important to back up the seed phrase as soon as your wallet is created."
+      }
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "description": "You must provide your current password in order to reset it.",
+      "currentPassword": "Current password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Enter strong new password",
+      "confirmNewPassword": "Confirm new password",
+      "reset": "Reset password",
+      "success": "Your password has been successfully reset. Please remember your new password."
     },
     "about": {
       "terms": "Terms",
