@@ -24,9 +24,9 @@
         />
 
         <DetailsRow
-          v-if="decimals"
+          v-if="assetData.decimals"
           :label="$t('pages.token-details.decimals')"
-          :text="decimals"
+          :text="assetData.decimals"
         />
 
         <DetailsRow
@@ -38,6 +38,45 @@
               show-explorer-link
               :protocol="assetData.protocol"
               :address="assetData.contractId"
+            />
+          </template>
+        </DetailsRow>
+
+        <DetailsRow
+          v-if="assetData.ownerAddress"
+          :label="$t('pages.token-details.ownerAddress')"
+        >
+          <template #text>
+            <AddressTruncated
+              show-explorer-link
+              :protocol="assetData.protocol"
+              :address="assetData.ownerAddress"
+            />
+          </template>
+        </DetailsRow>
+
+        <DetailsRow
+          v-if="assetData.swapAddress"
+          :label="$t('pages.token-details.swapAddress')"
+        >
+          <template #text>
+            <AddressTruncated
+              show-explorer-link
+              :protocol="assetData.protocol"
+              :address="assetData.swapAddress"
+            />
+          </template>
+        </DetailsRow>
+
+        <DetailsRow
+          v-if="assetData.creatorAddress"
+          :label="$t('pages.token-details.creatorAddress')"
+        >
+          <template #text>
+            <AddressTruncated
+              show-explorer-link
+              :protocol="assetData.protocol"
+              :address="assetData.creatorAddress"
             />
           </template>
         </DetailsRow>
@@ -58,8 +97,14 @@
           v-if="assetData?.marketCap"
           :label="$t('pages.token-details.market-cap')"
           class="price"
-          :text="formatCurrency(assetData.marketCap)"
-        />
+        >
+          <template #text>
+            <TokenAmount
+              :amount="assetData.marketCap"
+              :protocol="assetData.protocol"
+            />
+          </template>
+        </DetailsRow>
 
         <DetailsRow
           v-if="tokenPairs.balances"
@@ -117,22 +162,31 @@
           </template>
         </DetailsRow>
 
-        <!--
-          TODO decide if we still need this
-        -->
-        <template v-if="UNFINISHED_FEATURES">
-          <DetailsRow
-            :label="$t('pages.token-details.transactions')"
-          />
+        <DetailsRow
+          v-if="assetData.daoBalance"
+          :label="$t('pages.token-details.daoBalance')"
+        >
+          <template #text>
+            <TokenAmount
+              :amount="assetData.daoBalance"
+              :protocol="assetData.protocol"
+              high-precision
+            />
+          </template>
+        </DetailsRow>
 
-          <DetailsRow
-            :label="$t('pages.token-details.feeDaily')"
-          />
-
-          <DetailsRow
-            :label="$t('pages.token-details.priceAe')"
-          />
-        </template>
+        <DetailsRow
+          v-if="assetData.price"
+          :label="$t('pages.token-details.priceAe')"
+        >
+          <template #text>
+            <TokenAmount
+              :amount="assetData.price"
+              :protocol="assetData.protocol"
+              high-precision
+            />
+          </template>
+        </DetailsRow>
 
         <DetailsRow
           v-if="assetData?.currentPrice"
@@ -190,10 +244,7 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage } from '@ionic/vue';
-import {
-  PROTOCOLS,
-  UNFINISHED_FEATURES,
-} from '@/constants';
+
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   amountRounded,
@@ -202,11 +253,14 @@ import {
   toShiftedBigNumber,
 } from '@/utils';
 import { useAssetDetails, useCurrencies } from '@/composables';
+import { PROTOCOLS } from '@/constants';
+import { useAeTokenSwaps } from '@/protocols/aeternity/composables/aeTokenSwaps';
 
 import DetailsRow from '@/popup/components/Assets/DetailsRow.vue';
 import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 import Tokens from '@/popup/components/Tokens.vue';
 import LinkButton from '@/popup/components/LinkButton.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 export default defineComponent({
   name: 'AssetDetailsInfo',
@@ -217,20 +271,51 @@ export default defineComponent({
     IonPage,
     IonContent,
     LinkButton,
+    TokenAmount,
   },
 
   setup() {
     const { sharedAssetDetails } = useAssetDetails();
     const { formatCurrency } = useCurrencies();
+    const { tokenSwaps } = useAeTokenSwaps();
 
-    const assetData = computed(() => sharedAssetDetails.tokenData || {});
-    const adapter = computed(() => ProtocolAdapterFactory.getAdapter(assetData.value?.protocol));
-    const assetContractId = computed(() => assetData.value.contractId);
+    const tokenSwapInfo = computed(() => (
+      sharedAssetDetails.tokenData.protocol === PROTOCOLS.aeternity
+        ? tokenSwaps.value
+          .find((token) => token.address === sharedAssetDetails.tokenData.contractId)
+        : undefined
+    ));
+
+    const adapter = computed(() => ProtocolAdapterFactory.getAdapter(
+      sharedAssetDetails.tokenData.protocol,
+    ));
+
+    const assetData = computed(() => ({
+      ...sharedAssetDetails.tokenData,
+      ...sharedAssetDetails.tokenBalance,
+      ...(tokenSwapInfo.value ? {
+        totalSupply: tokenSwapInfo.value?.totalSupply
+          ? +toShiftedBigNumber(
+            tokenSwapInfo.value.totalSupply,
+            -sharedAssetDetails.tokenData.decimals,
+          )
+          : undefined,
+        marketCap: tokenSwapInfo.value?.marketCap
+          ? +toShiftedBigNumber(tokenSwapInfo.value.marketCap, -adapter.value.coinPrecision)
+          : undefined,
+        creatorAddress: tokenSwapInfo.value?.creatorAddress,
+        ownerAddress: tokenSwapInfo.value?.ownerAddress,
+        swapAddress: tokenSwapInfo.value?.saleAddress,
+        daoBalance: tokenSwapInfo.value?.daoBalance
+          ? +toShiftedBigNumber(tokenSwapInfo.value?.daoBalance, -adapter.value.coinPrecision)
+          : undefined,
+      }
+        : {}
+      ),
+    }));
     const tokens = computed(() => sharedAssetDetails.tokens);
     const tokenPairs = computed(() => sharedAssetDetails.tokenPairs || {});
-    const tokenBalance = computed(() => sharedAssetDetails.tokenBalance);
-    const isCoin = computed(() => isAssetCoin(assetContractId.value));
-    const decimals = computed(() => assetData.value?.decimals || tokenBalance.value?.decimals);
+    const isCoin = computed(() => isAssetCoin(assetData.value.contractId));
     const coinGeckoLinkUrl = computed(() => `https://www.coingecko.com/en/coins/${adapter.value.getCoinGeckoCoinId()}`);
     const coinGeckoLinkLabel = computed(() => coinGeckoLinkUrl.value.replace('https://', '').replace('en/coins', '...'));
 
@@ -247,8 +332,6 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOLS,
-      UNFINISHED_FEATURES,
       isCoin,
       poolShare,
       getPooledTokenAmount,
@@ -259,9 +342,7 @@ export default defineComponent({
       coinGeckoLinkLabel,
       tokens,
       tokenPairs,
-      tokenBalance,
       assetData,
-      decimals,
     };
   },
 });

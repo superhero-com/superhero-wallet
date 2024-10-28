@@ -201,7 +201,7 @@ export interface ITokenSwap {
 /**
  * Account's fungible token balance data
  */
-export interface ITokenBalance {
+export interface ITokenBalance extends Partial<ITokenSwap>{
   address: AccountAddress;
   amount: number | string;
   contractId: AssetContractId;

@@ -834,7 +834,11 @@
       "poolShare": "Pool share",
       "holders": "Holders",
       "transactions": "Transactions",
-      "pooled": "Pooled"
+      "pooled": "Pooled",
+      "daoBalance": "Dao balance",
+      "ownerAddress": "Dao address",
+      "swapAddress": "Swap address",
+      "creatorAddress": "Creator address"
     },
     "more": {
       "dex": "Superhero DEX"
