@@ -165,10 +165,42 @@ export type AssetContractId =
   | typeof ETH_CONTRACT_ID
   | string;
 
+export interface ITokenSwapPriceData {
+  usd: number;
+  eur: number;
+  aud: number;
+  brl: number;
+  cad: number;
+  chf: number;
+  gbp: number;
+  xau: number;
+}
+
+export interface ITokenSwap {
+  dao_balance: string;
+  id: number;
+  network_id: string;
+  factory_address: string;
+  sale_address: string;
+  owner_address: string;
+  creator_address: string;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  price: number;
+  price_data: ITokenSwapPriceData;
+  sell_price: number;
+  sell_price_data: ITokenSwapPriceData;
+  market_cap: number;
+  market_cap_data: ITokenSwapPriceData;
+  total_supply: number;
+  created_at: string;
+}
 /**
  * Account's fungible token balance data
  */
-export interface ITokenBalance {
+export interface ITokenBalance extends Partial<ITokenSwap>{
   address: AccountAddress;
   amount: number | string;
   contractId: AssetContractId;
@@ -915,34 +947,3 @@ export interface IOtherSettings {
 
 /** [iv] + [encrypted message] */
 export type IEncryptionResult = string;
-
-export interface ITokenSwapPriceData {
-  usd: number;
-  eur: number;
-  aud: number;
-  brl: number;
-  cad: number;
-  chf: number;
-  gbp: number;
-  xau: number;
-}
-
-export interface ITokenSwap {
-  id: number;
-  network_id: string;
-  factory_address: string;
-  sale_address: string;
-  owner_address: string;
-  address: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-  price: number;
-  price_data: ITokenSwapPriceData;
-  sell_price: number;
-  sell_price_data: ITokenSwapPriceData;
-  market_cap: number;
-  market_cap_data: ITokenSwapPriceData;
-  total_supply: number;
-  created_at: string;
-}
