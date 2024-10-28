@@ -11,11 +11,12 @@ import type {
   ProtocolRecord,
 } from '@/types';
 import {
-  PROTOCOLS,
-  PROTOCOL_LIST,
-  STORAGE_KEYS,
-  ACCOUNT_TYPES_LIST,
   ACCOUNT_TYPES,
+  ACCOUNT_TYPES_LIST,
+  MODAL_PROTOCOL_SELECT,
+  PROTOCOL_LIST,
+  PROTOCOLS,
+  STORAGE_KEYS,
 } from '@/constants';
 import {
   createCallbackRegistry,
@@ -25,12 +26,14 @@ import {
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
+import { tg } from '@/popup/plugins/i18n';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { useStorageRef } from './storageRef';
 import { useAuth } from './auth';
+import { useModals } from './modals';
 
 const {
   addCallback: onAccountChange,
@@ -49,6 +52,8 @@ export const useAccounts = createCustomScopedComposable(() => {
     isMnemonicRestored,
     encryptionKey,
   } = useAuth();
+
+  const { openModal } = useModals();
 
   const areAccountsRestored = ref(false);
   const arePrivateKeysAccountsDecrypted = ref(false);
@@ -293,6 +298,17 @@ export const useAccounts = createCustomScopedComposable(() => {
         addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       }
     });
+
+    // If no accounts was discovered user is asked to choose default protocol account.
+    if (!accountsAddressList.value.length) {
+      try {
+        const protocol = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
+          title: tg('modals.createAccount.title'),
+          subtitle: tg('modals.createAccount.generateOrImport'),
+        });
+        addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
+      } catch (error) { /* NOOP */ }
+    }
   }
 
   function resetAccounts() {

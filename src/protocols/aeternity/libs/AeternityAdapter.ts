@@ -236,16 +236,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return null;
   }
 
-  /**
-   * As the Aeternity protocol is the primary one we always return at least index 0 (one account).
-   */
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
-    const index = await getLastNotEmptyAccountIndex(
+    return getLastNotEmptyAccountIndex(
       this.isAccountUsed.bind(this),
       this.getHdWalletAccountFromMnemonicSeed.bind(this),
       seed,
     );
-    return (index > -1) ? index : 0;
   }
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
