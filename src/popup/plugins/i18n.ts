@@ -16,7 +16,6 @@ export type SupportedLanguage = keyof typeof SUPPORTED_LANGUAGES;
 export const FALLBACK_LOCALE = SUPPORTED_LANGUAGES.en;
 
 export const i18n = createI18n({
-  allowComposition: true,
   fallbackLocale: FALLBACK_LOCALE,
   locale: FALLBACK_LOCALE,
   messages: { en },
