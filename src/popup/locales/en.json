@@ -911,6 +911,7 @@
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Please enter the words of your seed phrase (separated by spaces) in the correct order to restore your Superhero Wallet.",
       "importAccount": "Restore wallet",
+      "selectProtocol": "Please select blockchain to create your first wallet account on.",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
       "passwordWasNotSet": "Password was not set. Please set a password to continue.",
       "invalidSeed": "Your seed phrase should consist of 12 or more words separated by spaces.",

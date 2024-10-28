@@ -88,30 +88,33 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
+import { useI18n } from 'vue-i18n';
+import type { Protocol } from '@/types';
 import {
-  IN_FRAME,
-  IS_MOBILE_DEVICE,
-  IS_MOBILE_APP,
-  IS_WEB,
-  IS_IOS,
-  MODAL_ACCOUNT_IMPORT,
-  PROTOCOLS,
   ACCOUNT_TYPES,
+  IN_FRAME,
+  IS_IOS,
+  IS_MOBILE_APP,
+  IS_MOBILE_DEVICE,
+  IS_WEB,
+  MODAL_ACCOUNT_IMPORT,
+  MODAL_PROTOCOL_SELECT,
 } from '@/constants';
+import { watchUntilTruthy } from '@/utils';
 import {
   useAccounts,
   useAuth,
   useModals,
   useUi,
 } from '@/composables';
-import { watchUntilTruthy } from '@/utils';
 
-import CheckBox from '../components/CheckBox.vue';
-import BtnSubheader from '../components/buttons/BtnSubheader.vue';
-import Platforms from '../components/Platforms.vue';
-import SuperheroLogoIcon from '../../icons/logo.svg?vue-component';
-import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
-import CheckCircleIcon from '../../icons/check-circle-fill.svg?vue-component';
+import CheckBox from '@/popup/components/CheckBox.vue';
+import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
+import Platforms from '@/popup/components/Platforms.vue';
+
+import SuperheroLogoIcon from '@/icons/logo.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import CheckCircleIcon from '@/icons/check-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -124,6 +127,7 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
+    const { t } = useI18n();
     const {
       isLoggedIn,
       addRawAccount,
@@ -144,12 +148,21 @@ export default defineComponent({
 
     async function createWallet() {
       isWalletNew = true;
+
+      const selectedProtocol = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
+        title: t('pages.index.generateWallet'),
+        subtitle: t('pages.index.selectProtocol'),
+        resolve: (protocol: Protocol) => protocol,
+      });
+
       await setMnemonicAndInitializeAuthentication(generateMnemonic());
+
       addRawAccount({
         isRestored: false,
-        protocol: PROTOCOLS.aeternity,
+        protocol: selectedProtocol,
         type: ACCOUNT_TYPES.hdWallet,
       });
+
       router.push(loginTargetLocation.value);
     }
 
