@@ -42,8 +42,8 @@ export function useBalances() {
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
 
-  const accountsTotalBalance = computed(() => {
-    const result = accounts.value.reduce(
+  const accountsTotalBalance = computed(
+    () => accounts.value.reduce(
       (total, account) => {
         const accountBalance = balances.value?.[account.address];
         if (!accountBalance) {
@@ -52,10 +52,8 @@ export function useBalances() {
         return total + (getCurrentCurrencyRate(account.protocol) * accountBalance.toNumber());
       },
       0,
-    );
-
-    return result.toFixed(2);
-  });
+    ).toFixed(2),
+  );
 
   function getAccountBalance(address: string) {
     return balances.value[address] || new BigNumber(0);

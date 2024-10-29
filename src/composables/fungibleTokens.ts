@@ -1,8 +1,10 @@
 /* eslint-disable no-param-reassign */
 
 import { computed, watch } from 'vue';
+import { uniqBy, isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Encoding, Tag } from '@aeternity/aepp-sdk';
+
 import { isAssetCoin, toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
@@ -24,7 +26,7 @@ import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTok
 import { AE_COIN_PRECISION } from '@/protocols/aeternity/config';
 import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 
-import { uniqBy } from 'lodash-es';
+import { useCurrencies } from './currencies';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
@@ -107,10 +109,33 @@ export function useFungibleTokens() {
     protocolsInUse,
     getLastActiveProtocolAccount,
   } = useAccounts();
+  const { getCurrentCurrencyRate } = useCurrencies();
 
   function getAccountTokenBalances(address: AccountAddress): ITokenBalance[] {
     return tokenBalances.value.filter((token) => token.address === address) || [];
   }
+
+  const accountsTotalTokenBalance = computed(
+    () => accounts.value.reduce(
+      (total, account) => {
+        const accountTokenBalance = getAccountTokenBalances(account.address);
+        if (isEmpty(accountTokenBalance)) {
+          return total;
+        }
+        let accountTotal = 0;
+        accountTokenBalance
+          .filter((token) => token.price && token.convertedBalance)
+          .forEach((token) => {
+            if (token.convertedBalance && token.price) {
+              accountTotal += new BigNumber(token.convertedBalance)
+                .multipliedBy(token.price).toNumber();
+            }
+          });
+        return total + (getCurrentCurrencyRate(account.protocol) * accountTotal);
+      },
+      0,
+    ).toFixed(2),
+  );
 
   function getAccountTokenBalance(
     address: AccountAddress,
@@ -322,6 +347,7 @@ export function useFungibleTokens() {
   }
 
   return {
+    accountsTotalTokenBalance,
     tokenBalances,
     tokensAvailable,
     createOrChangeAllowance,
