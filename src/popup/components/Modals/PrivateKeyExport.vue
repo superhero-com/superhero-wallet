@@ -63,7 +63,11 @@
         @click="resolve()"
       />
       <BtnMain
-        :disabled="(!password.length || isAuthenticating || isAuthFailed) && !IS_MOBILE_DEVICE"
+        :disabled="(
+          (!password.length || isAuthenticating || isAuthFailed)
+          && !IS_MOBILE_DEVICE
+          && !isUsingDefaultPassword
+        )"
         :text="mainButtonText"
         @click="handleMainButtonClick()"
       />
@@ -128,7 +132,7 @@ export default defineComponent({
     const privateKey = ref('');
 
     const { activeAccount } = useAccounts();
-    const { encryptionSalt, mnemonicEncrypted } = useAuth();
+    const { encryptionSalt, mnemonicEncrypted, isUsingDefaultPassword } = useAuth();
     const { copy, copied } = useCopy();
     const { openBiometricLoginModal } = useModals();
     const { isBiometricLoginEnabled } = useUi();
@@ -175,6 +179,10 @@ export default defineComponent({
       }
     }
 
+    if (isUsingDefaultPassword.value) {
+      privateKey.value = Buffer.from(activeAccount.value.secretKey).toString('hex');
+    }
+
     return {
       PrivateKeyIcon,
       IS_MOBILE_DEVICE,
@@ -182,6 +190,7 @@ export default defineComponent({
       copied,
       isAuthenticating,
       isAuthFailed,
+      isUsingDefaultPassword,
       mainButtonText,
       password,
       privateKey,
