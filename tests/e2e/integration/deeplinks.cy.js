@@ -1,11 +1,12 @@
 import { tg } from '@/popup/plugins/i18n';
+import { AE_NETWORK_TESTNET_ID } from '@/protocols/aeternity/config';
 import { STUB_ACCOUNT, STUB_TX_BASE_64 } from '@/constants/stubs';
 
-const callbackUrl = encodeURIComponent('https://example.com');
+const callbackUrl = encodeURIComponent('http://localhost');
 const encodedContractCallTx = encodeURIComponent('tx_+HQrAaEBbLQV9y00r/WCZ4XWrEVDpdiLPiLx2282rdKA1dkRTlmCA7yhBWuJbvnfcBIKpR/IbC+ywuM9P7fvmDFNerFKykCB+M1qA4al2v8FcAAAhzcV8VZnVACDGBf4hDuaygCQKxEV1igBG2+HI4byb8D/wPOLADU=');
 const encodedGaAttachTx = encodeURIComponent('tx_+O1QAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCITuIv4iUYDoIMndi6iAoqQltixF/3A6WlN0+rWVAan4LvFLy2pEJlhwLhcuDv+RNZEHwA3ADcAGg6CPwEDP/5s8lcLADcCFwcXdwAIPAIE+wNNTm90IGluIEF1dGggY29udGV4dAEBAJsvAhFE1kQfEWluaXQRbPJXCyVhdXRob3JpemWCLwCFNy4xLjAAoGzyVwsKFZm3CCkeUKo9rxPQx/JIS8M33a0kE6N/1KAJgwcAA4ZIjzqPaAAATIQ7msoAhysRRNZEHz+4yEN3');
-const message = 'This is a test message! http://example.com';
-const hexMessage = '5468697320697320612074657374206d6573736167652120687474703a2f2f6578616d706c652e636f6d';
+const message = 'This is a test message! http://localhost';
+const hexMessage = '5468697320697320612074657374206d6573736167652120687474703a2f2f6c6f63616c686f7374';
 const callbackParams = `x-success=${callbackUrl}&x-cancel=${callbackUrl}`;
 const encodedJWTPayload = encodeURIComponent('{"a":1,"b":2}');
 const signedJWT = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoxLCJiIjoyLCJzdWJfandrIjp7ImNydiI6IkVkMjU1MTkiLCJrdHkiOiJPS1AiLCJ4IjoiM0NneVdoMnRkWnFzNEJKVnliX29LRTNoSzgxb1l6dGVXRUtuamZaU1oyYyJ9fQ.BxbRGRRmA6OKHn9OdGuJRpGlWnZOurVJi8riFlqHXBFYidOT00EmBlGYctKY7WwW2pBNwwoaBlmavCq8Y96UDQ';
@@ -13,8 +14,7 @@ const signedJWT = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoxLCJiIjoyLCJzdWJf
 const encodedTestDeploymentUrl = encodeURIComponent('http://localhost:8080');
 
 describe('Test cases for deeplinks', () => {
-  // TODO bring back the test
-  it.skip('Signs transaction and verifies signature', () => {
+  it('Signs transaction and verifies signature', () => {
     cy.login(
       {},
       `/sign-transaction?transaction=${encodeURIComponent(STUB_TX_BASE_64)}&networkId=ae_uat`
@@ -33,6 +33,8 @@ describe('Test cases for deeplinks', () => {
       .splittedStringToBeEqual('[data-cy=recipient] [data-cy=address]', 'ak_2YFAH6kk1ZqTJcAtp7fupGqP9gK8KfPmQVCUuM4gSmzMSczaGc')
       .get('[data-cy=accept]')
       .click()
+      .url()
+      .should('not.contain', '/sign-transaction')
       .url()
       .then((url) => {
         expect(url.split('?')[1]).to.equal('tx_%2BJsLAfhCuECWzpMfRK1jZkRzF9%2BO%2BkLl8IkeJmTsDc2KKATrF745bg91rWb3l0HcS3ks6DKgtwvLWgg5%2BPiJ1gQpgF1yYlgLuFP4UQwBoQHKo8Vp2ZCTiwa3IOKq6iwBnIok2aF6so6GF5UgRhMsIqEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCILhg8m9WHIAAATgHk6x1k%3D');
@@ -72,8 +74,7 @@ describe('Test cases for deeplinks', () => {
       .should('contain', tg('modals.wrongNetwork.msg', ['ae_mainnet']));
   });
 
-  // TODO bring back the test
-  it.skip('Signs message as unencoded string and hex, verifies that signatures equal', () => {
+  it('Signs message as unencoded string and hex, verifies that signatures equal', () => {
     let messageSignature;
 
     cy.login(
@@ -90,6 +91,8 @@ describe('Test cases for deeplinks', () => {
       .should('contain', message)
       .get('[data-cy=accept]')
       .click()
+      .url()
+      .should('not.contain', '/sign-message')
       .url()
       .then((url) => {
         [, messageSignature] = url.split('?');
@@ -108,20 +111,36 @@ describe('Test cases for deeplinks', () => {
       .get('[data-cy=accept]')
       .click()
       .url()
+      .should('not.contain', '/sign-message')
+      .url()
       .then((url) => {
         expect(url.split('?')[1]).to.equal(messageSignature);
       });
   });
 
-  it('Connects to dapp', () => {
-    cy.login({}, `/address?${callbackParams}`)
+  it('Connects to dapp, and return address and networkId', () => {
+    cy.login(
+      {},
+      '/address?'
+      + `x-success=${encodedTestDeploymentUrl}%2Faccount%3F%7Baddress%7D%26%7BnetworkId%7D`
+      + `&x-cancel=${encodedTestDeploymentUrl}`,
+    )
       .get('[data-cy=label]')
       .should('be.visible')
-      .should('contain', tg('pages.connectConfirm.title'));
+      .should('contain', tg('pages.connectConfirm.title'))
+      .click()
+      .get('[data-cy=accept]')
+      .click()
+      .url()
+      .should('not.contain', '/address')
+      .url()
+      .then((url) => {
+        expect(url.split('?')[1].split('&')[0]).to.equal(STUB_ACCOUNT.addressAeternity);
+        expect(url.split('&')[1]).to.equal(AE_NETWORK_TESTNET_ID);
+      });
   });
 
-  // TODO bring back the test
-  it.skip('JWT signing and verifying signature', () => {
+  it('JWT signing and verifying signature', () => {
     cy.login(
       {},
       `/sign-jwt?payload=${encodedJWTPayload}`
@@ -140,6 +159,8 @@ describe('Test cases for deeplinks', () => {
       .should('contain', '{"a":1,"b":2,"sub_jwk":{"kty":"OKP","crv":"Ed25519","x":"3CgyWh2tdZqs4BJVyb_oKE3hK81oYzteWEKnjfZSZ2c"}}')
       .get('[data-cy=accept]')
       .click()
+      .url()
+      .should('not.contain', '/sign-jwt')
       .url()
       .then((url) => {
         expect(url.split('?')[1]).to.equal(signedJWT);

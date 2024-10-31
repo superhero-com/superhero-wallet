@@ -8,9 +8,10 @@ import { computed, defineComponent, onMounted } from 'vue';
 import type { IAppData } from '@/types';
 import {
   useAccounts,
-  useDeepLinkApi,
   useAeSdk,
+  useDeepLinkApi,
   useModals,
+  useUi,
 } from '@/composables';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
@@ -22,10 +23,11 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const { nodeNetworkId } = useAeSdk();
+    const { getAeSdk, nodeNetworkId } = useAeSdk();
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
     const { activeAccount } = useAccounts();
     const { openModal } = useModals();
+    const { setLoaderVisible } = useUi();
 
     const app = computed((): IAppData => callbackOrigin.value ? {
       name: callbackOrigin.value.hostname,
@@ -35,10 +37,14 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
+        setLoaderVisible(true);
         await openModal(MODAL_CONFIRM_CONNECT, {
           access: [POPUP_CONNECT_ADDRESS_PERMISSION],
           app: app.value,
         });
+
+        // Sdk should be initialized in order to get a current networkId.
+        await getAeSdk();
         openCallbackOrGoHome(true, {
           address: activeAccount.value.address,
           networkId: nodeNetworkId.value!,
@@ -48,6 +54,8 @@ export default defineComponent({
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
         }
+      } finally {
+        setLoaderVisible(false);
       }
     });
   },
