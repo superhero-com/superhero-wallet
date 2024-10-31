@@ -150,6 +150,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       decimals: this.coinPrecision,
       name: this.coinName,
       convertedBalance,
+      price: 1,
     };
   }
 

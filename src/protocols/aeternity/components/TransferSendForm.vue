@@ -186,7 +186,7 @@ import {
   useAccounts,
   useBalances,
   useCurrencies,
-  useFungibleTokens,
+  useAccountAssetsList,
   useMaxAmount,
   useModals,
   useMultisigAccounts,
@@ -267,7 +267,7 @@ export default defineComponent({
       setActiveAccountByAddress,
     } = useAccounts();
 
-    const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { accountAssets } = useAccountAssetsList();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
@@ -280,7 +280,7 @@ export default defineComponent({
           return undefined;
         }
         hasMultisigTokenWarning.value = false;
-        return getProtocolAvailableTokens(PROTOCOLS.aeternity)[assetContractId] || aeCoin;
+        return accountAssets.value.find((asset) => asset.contractId === assetContractId) || aeCoin;
       } if (!selectedAsset) {
         return aeCoin;
       }

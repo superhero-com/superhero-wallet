@@ -19,7 +19,8 @@
               large
               :protocol="currentActiveProtocol"
               :amount="assetBalance"
-              :hide-fiat="!isCoin"
+              :hide-fiat="hideFiat"
+              :price="fungibleTokenBalance?.price"
             />
           </div>
 
@@ -251,6 +252,7 @@ export default defineComponent({
     const fungibleTokenBalance = computed(
       () => (isCoin) ? undefined : getAccountTokenBalance(currentActiveAddress.value, contractId),
     );
+    const hideFiat = computed(() => !isCoin && !fungibleTokenBalance.value?.price);
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
     const activeAccountFaucetUrl = computed(
@@ -400,6 +402,8 @@ export default defineComponent({
       assetData,
       contractId,
       currentActiveProtocol,
+      fungibleTokenBalance,
+      hideFiat,
       stickyTabsWrapperEl,
       fungibleToken,
       isAeCoin,

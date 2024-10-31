@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_NAME: wallet
+      TOKEN_SWAP_URL_MAINNET: ${{ secrets.TOKEN_SWAP_URL_MAINNET }}
+      TOKEN_SWAP_URL_TESTNET: ${{ secrets.TOKEN_SWAP_URL_TESTNET }}
     steps:
       - uses: actions/checkout@v4
         with:

@@ -7,7 +7,7 @@
         :accounts-select-options="accountsSelectOptions"
         :active-account-address="activeAccount.address"
         :active-idx="activeAccountGlobalIdx"
-        :balances-total="accountsTotalBalance"
+        :balances-total="totalBalance"
         @select-account="(address) => setActiveAccountByAddress(address)"
       >
         <template #swiper>
@@ -107,6 +107,7 @@ import {
   useAeSdk,
   useBalances,
   useDeepLinkApi,
+  useFungibleTokens,
 } from '@/composables';
 import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
@@ -157,11 +158,16 @@ export default defineComponent({
     } = useAccounts();
 
     const { accountsTotalBalance } = useBalances();
+    const { accountsTotalTokenBalance } = useFungibleTokens();
     const { checkIfOpenTransferSendModal } = useDeepLinkApi();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
     const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
     const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
+
+    const totalBalance = computed(() => (
+      (+accountsTotalBalance.value + +accountsTotalTokenBalance.value).toString()
+    ));
 
     watch(
       () => route.query,
@@ -198,7 +204,6 @@ export default defineComponent({
       accounts,
       accountsAddressList,
       accountsSelectOptions,
-      accountsTotalBalance,
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
@@ -209,6 +214,7 @@ export default defineComponent({
       isNodeMainnet,
       isNodeTestnet,
       pageIsActive,
+      totalBalance,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
     };

@@ -6,6 +6,8 @@ jobs:
     env:
       APP_NAME: wallet
       WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
+      TOKEN_SWAP_URL_MAINNET: ${{ secrets.TOKEN_SWAP_URL_MAINNET }}
+      TOKEN_SWAP_URL_TESTNET: ${{ secrets.TOKEN_SWAP_URL_TESTNET }}
     steps:
       - uses: actions/checkout@v4
         with:
