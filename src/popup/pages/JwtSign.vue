@@ -30,7 +30,7 @@ export default defineComponent({
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
-      const { nodeNetworkId } = useAeSdk();
+      const { getAeSdk, nodeNetworkId } = useAeSdk();
       const { openModal } = useModals();
       const { setLoaderVisible } = useUi();
       const { getLastActiveProtocolAccount } = useAccounts();
@@ -72,6 +72,8 @@ export default defineComponent({
 
         const dataToSign = JSON.parse(payload);
 
+        // Sdk should be initialized in order to get a current networkId.
+        await getAeSdk();
         const signedJwt = await signJwt(dataToSign, new AeAccountHdWallet(nodeNetworkId));
         openCallbackOrGoHome(true, { 'signed-payload': signedJwt, address: signerAddress });
       } catch (error: any) {
