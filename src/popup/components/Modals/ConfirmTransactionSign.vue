@@ -51,7 +51,7 @@
       <!-- Aeternity DEX & Tokaen transactions any ETH transactions involving multiple assets -->
       <template
         v-if="(
-          (isDex || isTokenSwap) && tokenList.length
+          (isDex || isTokenSale) && tokenList.length
           || protocol === PROTOCOLS.ethereum && tokenList.length > 1
         )"
       >
@@ -61,7 +61,7 @@
           :token="token"
           :tokens="token.tokens || null"
           :label="getLabels(token, idx)"
-          :hide-amount="isDexSwap || isTokenSwap"
+          :hide-amount="isDexSwap || isTokenSale"
           :protocol="protocol"
         />
       </template>
@@ -78,7 +78,7 @@
         </DetailsItem>
 
         <DetailsItem
-          v-if="isDexSwap || isTokenSwap"
+          v-if="isDexSwap || isTokenSale"
           :label="swapDirectionTranslation"
         >
           <TokenAmount
@@ -137,7 +137,7 @@
         >
           <TokenAmount
             :amount="executionCost || amountTotal"
-            :symbol="isTokenSwap ? undefined : tokenSymbol"
+            :symbol="isTokenSale ? undefined : tokenSymbol"
             :hide-fiat="isAex9"
             :protocol="protocol"
             high-precision
@@ -301,7 +301,7 @@ import { decodeTxData } from '@/protocols/ethereum/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import type { EthDecodedCallData } from '@/protocols/ethereum/types';
-import { useAeTokenSwaps } from '@/protocols/aeternity/composables/aeTokenSwaps';
+import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
@@ -361,7 +361,7 @@ export default defineComponent({
     const { popupProps, setPopupProps } = usePopupProps();
     const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
     const { openModal } = useModals();
-    const { areTokenSwapsReady, tokenSwapAddressToTokenContractAddress } = useAeTokenSwaps();
+    const { areTokenSalesReady, tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
@@ -394,7 +394,7 @@ export default defineComponent({
       isDexMinReceived,
       isDexPool,
       isDexSwap,
-      isTokenSwap,
+      isTokenSale,
       txFunctionParsed,
       transactionAssets,
     } = useTransactionData({
@@ -479,23 +479,23 @@ export default defineComponent({
       : undefined);
 
     async function getTokens(txParams: ITx): Promise<ITokenResolved[]> {
-      if (!isDex.value && !isDexAllowance.value && !isTokenSwap.value) {
+      if (!isDex.value && !isDexAllowance.value && !isTokenSale.value) {
         return [singleToken.value];
       }
       const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
       if (!resolver) {
         return [];
       }
-      if (protocol === PROTOCOLS.aeternity && isTokenSwap.value) {
-        // Wait until token swap tokens are resolved
-        await watchUntilTruthy(areTokenSwapsReady);
+      if (protocol === PROTOCOLS.aeternity && isTokenSale.value) {
+        // Wait until token sale tokens are resolved
+        await watchUntilTruthy(areTokenSalesReady);
       }
       const tokens = resolver(
         { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
         getProtocolAvailableTokens(PROTOCOLS.aeternity),
-        tokenSwapAddressToTokenContractAddress,
+        tokenSaleAddressToTokenContractAddress,
       )?.tokens;
-      if (!(isDexPool.value || isTokenSwap.value)) {
+      if (!(isDexPool.value || isTokenSale.value)) {
         return tokens;
       }
       if (isDexLiquidityAdd.value) {
@@ -703,7 +703,7 @@ export default defineComponent({
       isDexMaxSpent,
       isDexMinReceived,
       isDexSwap,
-      isTokenSwap,
+      isTokenSale,
       isHash,
       loading,
       nameAeFee,

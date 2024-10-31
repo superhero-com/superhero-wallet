@@ -580,8 +580,8 @@
       "abort": "Failed",
       "revert": "Reverted"
     },
-    "tokenSwap": {
-      "tag": "token swap",
+    "tokenSale": {
+      "tag": "token sale",
       "bought": "Bought",
       "sold": "Sold"
     }
@@ -839,7 +839,7 @@
       "pooled": "Pooled",
       "daoBalance": "Dao balance",
       "ownerAddress": "Dao address",
-      "swapAddress": "Swap address",
+      "saleAddress": "Sale address",
       "creatorAddress": "Creator address"
     },
     "more": {

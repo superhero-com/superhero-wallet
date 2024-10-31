@@ -56,14 +56,14 @@
         </DetailsRow>
 
         <DetailsRow
-          v-if="assetData.swapAddress"
-          :label="$t('pages.token-details.swapAddress')"
+          v-if="assetData.saleAddress"
+          :label="$t('pages.token-details.saleAddress')"
         >
           <template #text>
             <AddressTruncated
               show-explorer-link
               :protocol="assetData.protocol"
-              :address="assetData.swapAddress"
+              :address="assetData.saleAddress"
             />
           </template>
         </DetailsRow>
@@ -254,7 +254,7 @@ import {
 } from '@/utils';
 import { useAssetDetails, useCurrencies } from '@/composables';
 import { PROTOCOLS } from '@/constants';
-import { useAeTokenSwaps } from '@/protocols/aeternity/composables/aeTokenSwaps';
+import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 
 import DetailsRow from '@/popup/components/Assets/DetailsRow.vue';
 import AddressTruncated from '@/popup/components/AddressTruncated.vue';
@@ -277,11 +277,11 @@ export default defineComponent({
   setup() {
     const { sharedAssetDetails } = useAssetDetails();
     const { formatCurrency } = useCurrencies();
-    const { tokenSwaps } = useAeTokenSwaps();
+    const { tokenSales } = useAeTokenSales();
 
-    const tokenSwapInfo = computed(() => (
+    const tokenSaleInfo = computed(() => (
       sharedAssetDetails.tokenData.protocol === PROTOCOLS.aeternity
-        ? tokenSwaps.value
+        ? tokenSales.value
           .find((token) => token.address === sharedAssetDetails.tokenData.contractId)
         : undefined
     ));
@@ -293,21 +293,21 @@ export default defineComponent({
     const assetData = computed(() => ({
       ...sharedAssetDetails.tokenData,
       ...sharedAssetDetails.tokenBalance,
-      ...(tokenSwapInfo.value ? {
-        totalSupply: tokenSwapInfo.value?.totalSupply
+      ...(tokenSaleInfo.value ? {
+        totalSupply: tokenSaleInfo.value?.totalSupply
           ? +toShiftedBigNumber(
-            tokenSwapInfo.value.totalSupply,
+            tokenSaleInfo.value.totalSupply,
             -sharedAssetDetails.tokenData.decimals,
           )
           : undefined,
-        marketCap: tokenSwapInfo.value?.marketCap
-          ? +toShiftedBigNumber(tokenSwapInfo.value.marketCap, -adapter.value.coinPrecision)
+        marketCap: tokenSaleInfo.value?.marketCap
+          ? +toShiftedBigNumber(tokenSaleInfo.value.marketCap, -adapter.value.coinPrecision)
           : undefined,
-        creatorAddress: tokenSwapInfo.value?.creatorAddress,
-        ownerAddress: tokenSwapInfo.value?.ownerAddress,
-        swapAddress: tokenSwapInfo.value?.saleAddress,
-        daoBalance: tokenSwapInfo.value?.daoBalance
-          ? +toShiftedBigNumber(tokenSwapInfo.value?.daoBalance, -adapter.value.coinPrecision)
+        creatorAddress: tokenSaleInfo.value?.creatorAddress,
+        ownerAddress: tokenSaleInfo.value?.ownerAddress,
+        saleAddress: tokenSaleInfo.value?.saleAddress,
+        daoBalance: tokenSaleInfo.value?.daoBalance
+          ? +toShiftedBigNumber(tokenSaleInfo.value?.daoBalance, -adapter.value.coinPrecision)
           : undefined,
       }
         : {}

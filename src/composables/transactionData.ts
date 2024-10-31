@@ -24,7 +24,7 @@ import {
   TX_FUNCTIONS,
   TX_FUNCTIONS_MULTISIG,
   TX_FUNCTIONS_TYPE_DEX,
-  TX_FUNCTIONS_TOKEN_SWAP,
+  TX_FUNCTIONS_TOKEN_SALE,
 } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -40,7 +40,7 @@ import {
   isTxDex,
 } from '@/protocols/aeternity/helpers';
 import { useFungibleTokens } from '@/composables/fungibleTokens';
-import { useAeTokenSwaps } from '@/protocols/aeternity/composables/aeTokenSwaps';
+import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 
@@ -68,9 +68,9 @@ export function useTransactionData({
   const { getProtocolAvailableTokens, getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
   const {
     tokenContractAddresses,
-    tokenSwapAddresses,
-    tokenSwapAddressToTokenContractAddress,
-  } = useAeTokenSwaps();
+    tokenSaleAddresses,
+    tokenSaleAddressToTokenContractAddress,
+  } = useAeTokenSales();
 
   const protocol = computed(() => transaction.value?.protocol || PROTOCOLS.aeternity);
   const outerTx = computed(() => transaction.value?.tx);
@@ -116,24 +116,24 @@ export function useTransactionData({
     ),
   );
 
-  const isTokenSwap = computed(
+  const isTokenSale = computed(
     (): boolean => [
       ...tokenContractAddresses.value,
-      ...tokenSwapAddresses.value,
+      ...tokenSaleAddresses.value,
     ].some((address) => address === innerTx.value?.contractId),
   );
 
-  const isTokenSwapBuy = computed(
+  const isTokenSaleBuy = computed(
     (): boolean => (
-      isTokenSwap.value
-      && includes(TX_FUNCTIONS_TOKEN_SWAP.buy, txFunctionRaw.value)
+      isTokenSale.value
+      && includes(TX_FUNCTIONS_TOKEN_SALE.buy, txFunctionRaw.value)
     ),
   );
 
-  const isTokenSwapSell = computed(
+  const isTokenSaleSell = computed(
     (): boolean => (
-      isTokenSwap.value
-      && includes(TX_FUNCTIONS_TOKEN_SWAP.sell, txFunctionRaw.value)
+      isTokenSale.value
+      && includes(TX_FUNCTIONS_TOKEN_SALE.sell, txFunctionRaw.value)
     ),
   );
 
@@ -255,7 +255,7 @@ export function useTransactionData({
     if (protocol.value === PROTOCOLS.aeternity) {
       // AE DEX and wrapped AE (WAE)
       if (
-        (isDex.value || isTokenSwap.value)
+        (isDex.value || isTokenSale.value)
         && txFunctionParsed.value
         && (!isDexAllowance.value || showDetailedAllowanceInfo)
       ) {
@@ -264,7 +264,7 @@ export function useTransactionData({
           return functionResolver(
             { tx: outerTx.value } as ITransaction,
             protocolTokens,
-            tokenSwapAddressToTokenContractAddress,
+            tokenSaleAddressToTokenContractAddress,
           )
             .tokens
             .map(({
@@ -343,9 +343,9 @@ export function useTransactionData({
     isAex9,
     isErrorTransaction,
 
-    isTokenSwap,
-    isTokenSwapBuy,
-    isTokenSwapSell,
+    isTokenSale,
+    isTokenSaleBuy,
+    isTokenSaleSell,
 
     isDex,
     isDexAllowance,
