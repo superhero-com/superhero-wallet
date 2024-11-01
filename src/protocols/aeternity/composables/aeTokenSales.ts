@@ -2,7 +2,7 @@ import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 
 import { ITokenSale } from '@/types';
-import { NETWORK_TYPE_CUSTOM } from '@/constants';
+import { NETWORK_TYPE_CUSTOM, STORAGE_KEYS } from '@/constants';
 import {
   createCustomScopedComposable,
   fetchAllPages,
@@ -12,6 +12,7 @@ import {
 import { useNetworks } from '@/composables';
 import { AE_TOKEN_SALES_URLS } from '@/protocols/aeternity/config';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
+import { useStorageRef } from '@/composables/storageRef';
 
 const POLLING_INTERVAL = 60000;
 
@@ -26,7 +27,10 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 /**
  * List of all token sales available
  */
-const tokenSales = ref<ITokenSale[]>([]);
+const tokenSales = useStorageRef<ITokenSale[]>(
+  [],
+  STORAGE_KEYS.tokenSales,
+);
 
 export const useAeTokenSales = createCustomScopedComposable(() => {
   const { activeNetwork, onNetworkChange } = useNetworks();
@@ -68,7 +72,6 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
         ));
         tokenSales.value = response || [];
       } catch (e) {
-        tokenSales.value = [];
         handleUnknownError(e);
       }
     } else {
