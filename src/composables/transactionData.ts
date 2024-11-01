@@ -65,7 +65,12 @@ export function useTransactionData({
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
-  const { getProtocolAvailableTokens, getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
+  const {
+    getProtocolAvailableTokens,
+    getTxAmountTotal,
+    getTxAssetSymbol,
+    tokenBalances,
+  } = useFungibleTokens();
   const {
     tokenSaleAddresses,
     tokenSaleAddressToTokenContractAddress,
@@ -267,10 +272,13 @@ export function useTransactionData({
             .map(({
               amount,
               decimals,
+              contractId,
               ...otherAssetData
             }) => ({
               amount: +toShiftedBigNumber(amount!, -decimals!),
+              contractId,
               ...otherAssetData,
+              price: tokenBalances.value.find((token) => contractId === token.contractId)?.price,
             }));
         }
       }
@@ -308,6 +316,9 @@ export function useTransactionData({
       name: token?.name,
       protocol,
       symbol: getTxAssetSymbol(transaction.value),
+      price: tokenBalances.value.find(
+        (tokenBalance) => outerTx.value!.contractId === tokenBalance.contractId,
+      )?.price,
     }].concat(isReceived || hideFeeFromAssets ? [] : [feeToken]);
   });
 

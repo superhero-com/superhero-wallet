@@ -11,6 +11,7 @@ import {
   AE_CONTRACT_ID,
   AE_PROTOCOL_NAME,
 } from '@/protocols/aeternity/config';
+import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 
 interface TransactionResolverReturnData {
   tokens: ITokenResolved[];
@@ -379,6 +380,8 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
   };
   const aeToken = {
     ...defaultToken,
+    assetType: ASSET_TYPES.coin,
+    protocol: PROTOCOLS.aeternity,
     amount: transaction.tx.amount,
     isReceived: false,
   };
@@ -407,6 +410,8 @@ const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMappe
   };
   const aeToken = {
     ...defaultToken,
+    assetType: ASSET_TYPES.coin,
+    protocol: PROTOCOLS.aeternity,
     amount: aeAmount,
     isReceived: true,
   };
