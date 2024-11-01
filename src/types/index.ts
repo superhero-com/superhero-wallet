@@ -165,7 +165,7 @@ export type AssetContractId =
   | typeof ETH_CONTRACT_ID
   | string;
 
-export interface ITokenSwapPriceData {
+export interface ITokenSalePriceData {
   usd: number;
   eur: number;
   aud: number;
@@ -176,7 +176,7 @@ export interface ITokenSwapPriceData {
   xau: number;
 }
 
-export interface ITokenSwap {
+export interface ITokenSale {
   address: string;
   createdAt: string;
   creatorAddress: string;
@@ -185,15 +185,15 @@ export interface ITokenSwap {
   factoryAddress: string;
   id: number;
   marketCap: number;
-  marketCapData: ITokenSwapPriceData;
+  marketCapData: ITokenSalePriceData;
   name: string;
   networkId: string;
   ownerAddress: string;
   price: number;
-  priceData: ITokenSwapPriceData;
+  priceData: ITokenSalePriceData;
   saleAddress: string;
   sellPrice: number;
-  sellPriceData: ITokenSwapPriceData;
+  sellPriceData: ITokenSalePriceData;
   symbol: string;
   totalSupply: number;
 }
@@ -201,7 +201,7 @@ export interface ITokenSwap {
 /**
  * Account's fungible token balance data
  */
-export interface ITokenBalance extends Partial<ITokenSwap>{
+export interface ITokenBalance extends Partial<ITokenSale>{
   address: AccountAddress;
   amount: number | string;
   contractId: AssetContractId;
@@ -608,7 +608,7 @@ export type DexFunctionType =
   | 'maxSpent'
   | 'minReceived';
 
-export type TokenSwapFunctionType = 'buy' | 'sell';
+export type TokenSaleFunctionType = 'buy' | 'sell';
 
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 

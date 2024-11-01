@@ -3,7 +3,7 @@ import type {
   DexFunctionType,
   IDefaultNetworkTypeData,
   IDexContracts,
-  TokenSwapFunctionType,
+  TokenSaleFunctionType,
   TxFunctionRaw,
 } from '@/types';
 import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
@@ -42,9 +42,9 @@ export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSett
   },
 };
 
-export const AE_TOKEN_SWAPS_URLS: IDefaultNetworkTypeData<string> = {
-  [NETWORK_TYPE_MAINNET]: process.env.TOKEN_SWAP_URL_MAINNET!,
-  [NETWORK_TYPE_TESTNET]: process.env.TOKEN_SWAP_URL_TESTNET!,
+export const AE_TOKEN_SALES_URLS: IDefaultNetworkTypeData<string> = {
+  [NETWORK_TYPE_MAINNET]: process.env.TOKEN_SALES_URL_MAINNET!,
+  [NETWORK_TYPE_TESTNET]: process.env.TOKEN_SALES_URL_TESTNET!,
 };
 
 export const AE_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
@@ -136,7 +136,7 @@ export const TX_FUNCTIONS = {
   gaMetaSpend: 'ga_meta_spend',
   /** For example Connecting to superhero.chat */
   verifyAccount: 'verify_account',
-  /** token swaps */
+  /** token sales */
   buy: 'buy',
   sell: 'sell',
 } as const;
@@ -181,7 +181,7 @@ export const TX_FUNCTIONS_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
   ],
 };
 
-export const TX_FUNCTIONS_TOKEN_SWAP: Record<TokenSwapFunctionType, TxFunctionRaw[]> = {
+export const TX_FUNCTIONS_TOKEN_SALE: Record<TokenSaleFunctionType, TxFunctionRaw[]> = {
   buy: ['buy'],
   sell: ['sell'],
 };

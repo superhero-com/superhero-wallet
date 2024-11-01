@@ -162,8 +162,8 @@ module.exports = {
       definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
       definitions['process.env.ETHERSCAN_API_KEY'] = JSON.stringify(process.env.ETHERSCAN_API_KEY);
       definitions['process.env.WALLET_CONNECT_PROJECT_ID'] = JSON.stringify(process.env.WALLET_CONNECT_PROJECT_ID);
-      definitions['process.env.TOKEN_SWAP_URL_TESTNET'] = JSON.stringify(process.env.TOKEN_SWAP_URL_TESTNET);
-      definitions['process.env.TOKEN_SWAP_URL_MAINNET'] = JSON.stringify(process.env.TOKEN_SWAP_URL_MAINNET);
+      definitions['process.env.TOKEN_SALES_URL_TESTNET'] = JSON.stringify(process.env.TOKEN_SALES_URL_TESTNET);
+      definitions['process.env.TOKEN_SALES_URL_MAINNET'] = JSON.stringify(process.env.TOKEN_SALES_URL_MAINNET);
 
       return [definitions];
     }).end();

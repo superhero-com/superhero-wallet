@@ -360,7 +360,7 @@ const withdraw: TransactionResolver = (transaction, tokens = null) => ({
 });
 
 /**
- * Token Swap Buy
+ * Token Sale Buy
  */
 const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
   const isConfirm = !transaction.tx.return;
@@ -389,7 +389,7 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
 };
 
 /**
- * Token Swap Sell
+ * Token Sale Sell
  */
 const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
   const isConfirm = !transaction.tx.return;

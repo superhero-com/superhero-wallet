@@ -67,7 +67,7 @@ import {
   AEX9_TRANSFER_EVENT,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeMiddleware, useAeNetworkSettings, useAeTokenSwaps } from '@/protocols/aeternity/composables';
+import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
 
 import { aettosToAe } from '../helpers';
 
@@ -258,7 +258,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
     const { fetchFromMiddleware } = useAeMiddleware();
-    const { areTokenSwapsReady, tokenSwaps } = useAeTokenSwaps();
+    const { areTokenSalesReady, tokenSales } = useAeTokenSales();
     try {
       const tokens: ITokenBalanceResponse[] = camelCaseKeysDeep(await fetchAllPages(
         () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
@@ -266,7 +266,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       ));
       if (tokens.length) {
         await Promise.race([
-          watchUntilTruthy(areTokenSwapsReady),
+          watchUntilTruthy(areTokenSalesReady),
           sleep(5000),
         ]);
       }
@@ -276,7 +276,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         contractId,
         convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
         protocol: PROTOCOLS.aeternity,
-        price: tokenSwaps.value.find((token) => token.address === contractId)?.price ?? 0,
+        price: tokenSales.value.find((token) => token.address === contractId)?.price ?? 0,
       }));
     } catch (error: any) {
       handleUnknownError(error);

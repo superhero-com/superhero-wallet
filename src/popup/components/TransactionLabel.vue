@@ -121,8 +121,8 @@ export default defineComponent({
       isDexAllowance,
       isDexLiquidityAdd,
       isDexLiquidityRemove,
-      isTokenSwapBuy,
-      isTokenSwapSell,
+      isTokenSaleBuy,
+      isTokenSaleSell,
       isErrorTransaction,
       isTip,
       txTypeListLabel,
@@ -167,10 +167,10 @@ export default defineComponent({
       } else if (isDex.value) {
         text = t('common.swap');
         hasComma = true;
-      } else if (isTokenSwapBuy.value) {
-        text = t('transaction.tokenSwap.bought');
-      } else if (isTokenSwapSell.value) {
-        text = t('transaction.tokenSwap.sold');
+      } else if (isTokenSaleBuy.value) {
+        text = t('transaction.tokenSale.bought');
+      } else if (isTokenSaleSell.value) {
+        text = t('transaction.tokenSale.sold');
       } else if (isTip.value && props.transaction.claim) {
         text = t('transaction.listType.tipReceived');
       } else if (isTip.value) {
