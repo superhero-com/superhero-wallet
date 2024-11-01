@@ -53,6 +53,9 @@ import {
   ROUTE_SEED_PHRASE_SETTINGS,
   ROUTE_SEED_PHRASE_DETAILS,
   ROUTE_SEED_PHRASE_VERIFY,
+  ROUTE_ABOUT,
+  ROUTE_TIPS_CLAIM,
+  ROUTE_SETTINGS,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -395,7 +398,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings',
-    name: 'settings',
+    name: ROUTE_SETTINGS,
     component: Settings,
     meta: {
       title: 'settings',
@@ -535,7 +538,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/about',
     component: About,
-    name: 'about',
+    name: ROUTE_ABOUT,
     meta: {
       title: 'about',
       showHeaderNavigation: true,
@@ -565,7 +568,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/tips-claim',
-    name: 'tips-claim',
+    name: ROUTE_TIPS_CLAIM,
     component: TipsClaim,
     meta: {
       title: 'claimTips',

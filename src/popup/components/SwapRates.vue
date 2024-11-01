@@ -46,6 +46,7 @@ import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { getTransactionTokenInfoResolver } from '@/protocols/aeternity/helpers';
 import { useFungibleTokens, useTransactionData } from '@/composables';
+import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 
 import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
@@ -62,13 +63,14 @@ export default defineComponent({
   },
   setup(props) {
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
 
-    const { isDexSwap, txFunctionParsed } = useTransactionData({
+    const { isDexSwap, txFunctionParsed, isTokenSale } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
 
     const rates = computed(() => {
-      if (!isDexSwap.value || !txFunctionParsed.value) {
+      if (!isDexSwap.value || !isTokenSale.value || !txFunctionParsed.value) {
         return [];
       }
 
@@ -80,6 +82,7 @@ export default defineComponent({
       const { tokens } = resolver(
         props.transaction,
         getProtocolAvailableTokens(PROTOCOLS.aeternity),
+        tokenSaleAddressToTokenContractAddress,
       );
 
       if (tokens?.length <= 1) {

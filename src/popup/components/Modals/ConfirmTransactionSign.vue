@@ -48,10 +48,10 @@
         :value="decodedCallData.functionName"
       />
 
-      <!-- Aeternity DEX transactions and any ETH transactions involving multiple assets -->
+      <!-- Aeternity DEX & Tokaen transactions any ETH transactions involving multiple assets -->
       <template
         v-if="(
-          isDex && tokenList.length
+          (isDex || isTokenSale) && tokenList.length
           || protocol === PROTOCOLS.ethereum && tokenList.length > 1
         )"
       >
@@ -61,7 +61,7 @@
           :token="token"
           :tokens="token.tokens || null"
           :label="getLabels(token, idx)"
-          :hide-amount="isDexSwap"
+          :hide-amount="isDexSwap || isTokenSale"
           :protocol="protocol"
         />
       </template>
@@ -78,7 +78,7 @@
         </DetailsItem>
 
         <DetailsItem
-          v-if="isDexSwap"
+          v-if="isDexSwap || isTokenSale"
           :label="swapDirectionTranslation"
         >
           <TokenAmount
@@ -137,7 +137,7 @@
         >
           <TokenAmount
             :amount="executionCost || amountTotal"
-            :symbol="tokenSymbol"
+            :symbol="isTokenSale ? undefined : tokenSymbol"
             :hide-fiat="isAex9"
             :protocol="protocol"
             high-precision
@@ -280,6 +280,7 @@ import {
   handleUnknownError,
   isNotFoundError,
   toShiftedBigNumber,
+  watchUntilTruthy,
 } from '@/utils';
 import {
   useAccounts,
@@ -300,6 +301,7 @@ import { decodeTxData } from '@/protocols/ethereum/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import type { EthDecodedCallData } from '@/protocols/ethereum/types';
+import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
@@ -359,6 +361,7 @@ export default defineComponent({
     const { popupProps, setPopupProps } = usePopupProps();
     const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
     const { openModal } = useModals();
+    const { areTokenSalesReady, tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
@@ -391,6 +394,7 @@ export default defineComponent({
       isDexMinReceived,
       isDexPool,
       isDexSwap,
+      isTokenSale,
       txFunctionParsed,
       transactionAssets,
     } = useTransactionData({
@@ -474,19 +478,24 @@ export default defineComponent({
       ? JsonBig.stringify(decodedCallData.value.args)
       : undefined);
 
-    function getTokens(txParams: ITx): ITokenResolved[] {
-      if (!isDex.value && !isDexAllowance.value) {
+    async function getTokens(txParams: ITx): Promise<ITokenResolved[]> {
+      if (!isDex.value && !isDexAllowance.value && !isTokenSale.value) {
         return [singleToken.value];
       }
       const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
       if (!resolver) {
         return [];
       }
+      if (protocol === PROTOCOLS.aeternity && isTokenSale.value) {
+        // Wait until token sale tokens are resolved
+        await watchUntilTruthy(areTokenSalesReady);
+      }
       const tokens = resolver(
         { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
         getProtocolAvailableTokens(PROTOCOLS.aeternity),
+        tokenSaleAddressToTokenContractAddress,
       )?.tokens;
-      if (!isDexPool.value) {
+      if (!(isDexPool.value || isTokenSale.value)) {
         return tokens;
       }
       if (isDexLiquidityAdd.value) {
@@ -616,7 +625,7 @@ export default defineComponent({
             value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
           }));
 
-          const allTokens = getTokens(transaction.value.tx);
+          const allTokens = await getTokens(transaction.value.tx);
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
@@ -694,6 +703,7 @@ export default defineComponent({
       isDexMaxSpent,
       isDexMinReceived,
       isDexSwap,
+      isTokenSale,
       isHash,
       loading,
       nameAeFee,

@@ -147,15 +147,24 @@ export default defineComponent({
     });
 
     const fiatAmount = computed(() => {
+      const tokenAsset = transactionAssets.value[0];
       const protocolCoin = transactionAssets.value?.find(
         ({ assetType }) => assetType === ASSET_TYPES.coin,
       );
-      if (!protocolCoin || isErrorTransaction.value || isDexPool.value || !protocolCoin.protocol) {
+      if (
+        (!tokenAsset?.price && !protocolCoin)
+        || isErrorTransaction.value
+        || isDexPool.value
+      ) {
         return 0;
       }
       return getFormattedAndRoundedFiat(
-        +amountRounded(protocolCoin.amount || 0),
-        protocolCoin.protocol,
+        +amountRounded(
+          tokenAsset?.price && tokenAsset?.amount
+            ? +tokenAsset.amount * tokenAsset.price
+            : protocolCoin?.amount || 0,
+        ),
+        transactionProtocol.value,
       );
     });
 

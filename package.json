@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "release": "standard-version"
   },
   "dependencies": {
-    "@aeternity/aepp-calldata": "^1.7.0",
+    "@aeternity/aepp-calldata": "^1.8.0",
     "@aeternity/aepp-sdk": "13.3.2",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/json-bigint": "^0.3.1",

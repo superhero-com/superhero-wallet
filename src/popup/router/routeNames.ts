@@ -2,6 +2,7 @@
  * Regular pages
  */
 export const ROUTE_INDEX = 'index';
+export const ROUTE_ABOUT = 'about';
 export const ROUTE_ACCOUNT = 'account';
 export const ROUTE_ACCOUNT_DETAILS = 'account-details';
 export const ROUTE_ACCOUNT_DETAILS_ASSETS = 'account-details-assets';
@@ -32,7 +33,9 @@ export const ROUTE_INVITE = 'invite';
 export const ROUTE_INVITE_CLAIM = 'invite-claim';
 export const ROUTE_DONATE_ERROR = 'donate-error';
 export const ROUTE_APPS_BROWSER = 'apps-browser';
+export const ROUTE_SETTINGS = 'settings';
 export const ROUTE_TERMS = 'about-terms';
+export const ROUTE_TIPS_CLAIM = 'tips-claim';
 export const ROUTE_AUCTION_BID = 'auction-bid';
 export const ROUTE_AUCTION_HISTORY = 'auction-history';
 export const ROUTE_PERMISSIONS_ADD = 'permissions-add';

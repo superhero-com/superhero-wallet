@@ -34,7 +34,6 @@
         :key="asset.contractId"
         :asset="asset"
         :selected="isAssetSelected(asset)"
-        show-current-price
         prevent-navigation
         @click="resolve(asset)"
       />

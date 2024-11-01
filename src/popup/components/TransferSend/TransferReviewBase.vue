@@ -56,6 +56,7 @@
           :symbol="tokenSymbol"
           :protocol="protocol"
           :hide-fiat="!showFiat"
+          :price="transferData.selectedAsset?.price"
           data-cy="review-amount"
         />
       </template>

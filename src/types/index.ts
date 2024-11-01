@@ -165,10 +165,43 @@ export type AssetContractId =
   | typeof ETH_CONTRACT_ID
   | string;
 
+export interface ITokenSalePriceData {
+  usd: number;
+  eur: number;
+  aud: number;
+  brl: number;
+  cad: number;
+  chf: number;
+  gbp: number;
+  xau: number;
+}
+
+export interface ITokenSale {
+  address: string;
+  createdAt: string;
+  creatorAddress: string;
+  daoBalance: string;
+  decimals: number;
+  factoryAddress: string;
+  id: number;
+  marketCap: number;
+  marketCapData: ITokenSalePriceData;
+  name: string;
+  networkId: string;
+  ownerAddress: string;
+  price: number;
+  priceData: ITokenSalePriceData;
+  saleAddress: string;
+  sellPrice: number;
+  sellPriceData: ITokenSalePriceData;
+  symbol: string;
+  totalSupply: number;
+}
+
 /**
  * Account's fungible token balance data
  */
-export interface ITokenBalance {
+export interface ITokenBalance extends Partial<ITokenSale>{
   address: AccountAddress;
   amount: number | string;
   contractId: AssetContractId;
@@ -179,6 +212,10 @@ export interface ITokenBalance {
   // Allow setting symbol and name so that we can extract custom tokens from balance data
   symbol?: string;
   name?: string;
+  /**
+   * This price is in coin per token
+   */
+  price: number;
 }
 
 /**
@@ -204,6 +241,7 @@ export interface IToken {
   name: string;
   protocol: Protocol;
   symbol: string;
+  price: number;
 }
 
 export type TokenPair = Record<'token0' | 'token1', IToken | null>
@@ -569,6 +607,8 @@ export type DexFunctionType =
   | 'allowance'
   | 'maxSpent'
   | 'minReceived';
+
+export type TokenSaleFunctionType = 'buy' | 'sell';
 
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 

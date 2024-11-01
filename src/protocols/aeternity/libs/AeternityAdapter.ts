@@ -45,7 +45,9 @@ import {
   fetchJson,
   getLastNotEmptyAccountIndex,
   handleUnknownError,
+  sleep,
   toShiftedBigNumber,
+  watchUntilTruthy,
 } from '@/utils';
 import Logger from '@/lib/logger';
 
@@ -65,7 +67,7 @@ import {
   AEX9_TRANSFER_EVENT,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
 
 import { aettosToAe } from '../helpers';
 
@@ -145,6 +147,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       name: this.coinName,
       symbol: this.coinSymbol,
       convertedBalance,
+      price: 1,
     };
   }
 
@@ -236,16 +239,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return null;
   }
 
-  /**
-   * As the Aeternity protocol is the primary one we always return at least index 0 (one account).
-   */
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
-    const index = await getLastNotEmptyAccountIndex(
+    return getLastNotEmptyAccountIndex(
       this.isAccountUsed.bind(this),
       this.getHdWalletAccountFromMnemonicSeed.bind(this),
       seed,
     );
-    return (index > -1) ? index : 0;
   }
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
@@ -259,17 +258,25 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
     const { fetchFromMiddleware } = useAeMiddleware();
+    const { areTokenSalesReady, tokenSales } = useAeTokenSales();
     try {
       const tokens: ITokenBalanceResponse[] = camelCaseKeysDeep(await fetchAllPages(
         () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
         fetchFromMiddleware,
       ));
+      if (tokens.length) {
+        await Promise.race([
+          watchUntilTruthy(areTokenSalesReady),
+          sleep(5000),
+        ]);
+      }
       return tokens.map(({ amount, contractId, decimals }) => ({
         address,
         amount,
         contractId,
         convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
         protocol: PROTOCOLS.aeternity,
+        price: tokenSales.value.find((token) => token.address === contractId)?.price ?? 0,
       }));
     } catch (error: any) {
       handleUnknownError(error);

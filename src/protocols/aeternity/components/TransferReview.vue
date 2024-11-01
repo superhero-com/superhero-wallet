@@ -9,7 +9,7 @@
     :transfer-data="transferData"
     :loading="loading"
     :avatar-name="isAddressChain ? transferData.address : undefined"
-    :show-fiat="!isSelectedAssetAex9"
+    :show-fiat="showTotal"
     :protocol="PROTOCOLS.aeternity"
     :no-header-padding="isActiveAccountAirGap"
     class="transfer-review"
@@ -120,7 +120,7 @@
 
     <template #total>
       <DetailsItem
-        v-if="!isSelectedAssetAex9"
+        v-if="showTotal"
         :label="isMultisig
           ? $t('transaction.proposalTotal')
           : $t('common.total')"
@@ -240,8 +240,11 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
 
-    const isSelectedAssetAex9 = computed(
-      () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
+    const showTotal = computed(
+      () => (
+        props.transferData?.selectedAsset?.contractId === AE_CONTRACT_ID
+        || !!props.transferData?.selectedAsset?.price
+      ),
     );
 
     const headerTitle = computed(() => {
@@ -498,7 +501,6 @@ export default defineComponent({
       PROTOCOLS,
       gasCost,
       isActiveAccountAirGap,
-      isSelectedAssetAex9,
       activeMultisigAccount,
       aettosToAe,
       AE_SYMBOL,
@@ -507,6 +509,7 @@ export default defineComponent({
       loading,
       headerTitle,
       headerSubtitle,
+      showTotal,
       submit,
     };
   },

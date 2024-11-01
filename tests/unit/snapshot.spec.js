@@ -16,6 +16,12 @@ afterAll(() => {
   process.env = OLD_ENV;
 });
 
+jest.mock('vue-i18n', () => ({
+  useI18n: jest.fn(() => ({
+    t: () => 'locale-specific-text',
+  })),
+}));
+
 jest.mock('../../src/constants/environment', () => ({
   __esModule: true,
   IS_WEB: null,

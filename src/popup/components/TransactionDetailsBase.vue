@@ -127,6 +127,7 @@
               :symbol="assetSymbol"
               :hide-fiat="hideFiat"
               :protocol="protocol"
+              :price="price"
               high-precision
             />
           </template>
@@ -218,6 +219,7 @@ export default defineComponent({
     payload: { type: String, default: '' },
     hash: { type: String, required: true },
     protocol: { type: String as PropType<Protocol>, required: true },
+    price: { type: Number, default: undefined },
     isErrorTransaction: Boolean,
     showHeader: Boolean,
     hideAmountTotal: Boolean,

@@ -26,19 +26,17 @@
           />
         </div>
       </Transition>
-      <AddressBookList v-model:hideButtons="hideButtons" @select-address="handleSelectAddress" />
+
+      <AddressBookList v-model:hideButtons="hideButtons" />
     </div>
   </IonPage>
 </template>
 
 <script lang="ts">
-import { IonPage, useIonRouter } from '@ionic/vue';
-import {
-  defineComponent,
-  ref,
-} from 'vue';
+import { IonPage } from '@ionic/vue';
+import { defineComponent, ref } from 'vue';
 
-import { ROUTE_ADDRESS_BOOK_ADD, ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
+import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
 import { useAddressBook } from '@/composables';
 
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
@@ -57,20 +55,12 @@ export default defineComponent({
   setup() {
     const hideButtons = ref(false);
 
-    const router = useIonRouter();
     const { exportAddressBook, importAddressBook } = useAddressBook();
-
-    function handleSelectAddress(address: string) {
-      router.push({ name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: address } });
-    }
 
     return {
       hideButtons,
-
       exportAddressBook,
       importAddressBook,
-      handleSelectAddress,
-
       AddIcon,
       ImportIcon,
       ExportIcon,

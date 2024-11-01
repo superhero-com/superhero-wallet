@@ -22,18 +22,18 @@
       />
       <TokenAmount
         :amount="+(asset.convertedBalance ?? 0)"
-        :protocol="PROTOCOLS.aeternity"
+        :protocol="asset.protocol"
         dynamic-sizing
         hide-symbol
         hide-fiat
       />
     </div>
     <div
-      v-if="isCoin"
+      v-if="!!asset.price"
       class="row bottom"
     >
       <div class="price">
-        @ {{ price }}
+        @ {{ priceFormatted }}
       </div>
       <div class="price">
         {{ balanceFormatted }}
@@ -45,7 +45,6 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import type { IAsset } from '@/types';
-import { PROTOCOLS } from '@/constants';
 import { isAssetCoin } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '@/popup/router/routeNames';
@@ -63,26 +62,24 @@ export default defineComponent({
   props: {
     asset: { type: Object as PropType<IAsset>, default: null },
     preventNavigation: Boolean,
-    showCurrentPrice: Boolean,
     selected: Boolean,
     isMultisig: Boolean,
   },
   setup(props) {
-    const {
-      getCurrentCurrencyRate,
-      getFormattedFiat,
-      formatCurrency,
-    } = useCurrencies();
-
-    /**
-     * price and balanceFormatted are applicable only for AE Coin
-     */
-    const price = computed(() => formatCurrency(getCurrentCurrencyRate(props.asset.protocol)));
-    const balanceFormatted = computed(
-      () => getFormattedFiat(props.asset.convertedBalance || 0, props.asset.protocol),
-    );
+    const { getFormattedAndRoundedFiat } = useCurrencies();
 
     const isCoin = computed(() => isAssetCoin(props.asset.contractId));
+
+    const priceFormatted = computed(() => getFormattedAndRoundedFiat(
+      props.asset.price,
+      props.asset.protocol,
+    ));
+    const balanceFormatted = computed(
+      () => getFormattedAndRoundedFiat(
+        (props.asset.convertedBalance || 0) * props.asset.price,
+        props.asset.protocol,
+      ),
+    );
 
     const targetRouteName = computed(() => {
       if (props.isMultisig) {
@@ -95,9 +92,8 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOLS,
       isCoin,
-      price,
+      priceFormatted,
       targetRouteName,
       balanceFormatted,
     };

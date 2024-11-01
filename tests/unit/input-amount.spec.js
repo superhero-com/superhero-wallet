@@ -2,10 +2,13 @@ import BigNumber from 'bignumber.js';
 import { config, mount } from '@vue/test-utils';
 import { defineRule } from 'vee-validate';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
-import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 import { PROTOCOLS } from '../../src/constants';
 
 const maxBalance = 10000;
+const selectedAsset = {
+  symbol: 'test',
+  price: 3,
+};
 
 config.global = {
   mocks: {
@@ -15,7 +18,7 @@ config.global = {
 
 describe('InputAmount', () => {
   it('should render', async () => {
-    const wrapper = mount(InputAmount, { props: { protocol: PROTOCOLS.aeternity } });
+    const wrapper = mount(InputAmount, { props: { protocol: PROTOCOLS.aeternity, selectedAsset } });
     expect(wrapper.classes()).toContain('input-amount');
   });
 
@@ -71,13 +74,14 @@ describe('InputAmount', () => {
       props: {
         modelValue: test.value,
         protocol: PROTOCOLS.aeternity,
+        selectedAsset,
         ...test.props,
       },
     });
     defineRule('enough_coin', (_, arg) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg[0]));
 
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
-    expect(wrapper.find('[data-cy=select-asset]').text()).toBe(AE_SYMBOL);
+    expect(wrapper.find('[data-cy=select-asset]').text()).toBe(selectedAsset.symbol);
 
     // expect(wrapper.find('[data-cy=amount-currency]').text())
     //   .toBe(`($${test.currency.toFixed(2)})`);
