@@ -821,8 +821,8 @@
       "name": "Name",
       "coin": "Coin",
       "decimals": "Decimals",
-      "total-supply": "Total supply",
-      "max-supply": "Max supply",
+      "total-supply": "Total Supply",
+      "max-supply": "Max Supply",
       "supply": "Supply",
       "priceAe": "Price (AE)",
       "price": "Price",
@@ -833,14 +833,15 @@
       "atl-change": "All time low",
       "ath-change": "All time high",
       "more": "More",
-      "poolShare": "Pool share",
+      "poolShare": "Pool Share",
       "holders": "Holders",
       "transactions": "Transactions",
       "pooled": "Pooled",
-      "daoBalance": "Dao balance",
-      "ownerAddress": "Dao address",
-      "saleAddress": "Sale address",
-      "creatorAddress": "Creator address"
+      "daoBalance": "DAO Balance",
+      "ownerAddress": "DAO Address",
+      "saleAddress": "Sale Address",
+      "creatorAddress": "Creator Address",
+      "smartContract": "Smart Contract"
     },
     "more": {
       "dex": "Superhero DEX"

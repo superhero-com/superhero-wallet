@@ -31,7 +31,7 @@
 
         <DetailsRow
           v-if="assetData?.contractId && !isCoin"
-          :label="$t('common.smartContract')"
+          :label="$t('pages.token-details.smartContract')"
         >
           <template #text>
             <AddressTruncated
@@ -92,6 +92,19 @@
           :label="$t('pages.token-details.total-supply')"
           :text="formatNumber(assetData.totalSupply)"
         />
+
+        <DetailsRow
+          v-if="assetData.price"
+          :label="$t('pages.token-details.price')"
+        >
+          <template #text>
+            <TokenAmount
+              :amount="assetData.price"
+              :protocol="assetData.protocol"
+              high-precision
+            />
+          </template>
+        </DetailsRow>
 
         <DetailsRow
           v-if="assetData?.marketCap"
@@ -169,19 +182,6 @@
           <template #text>
             <TokenAmount
               :amount="assetData.daoBalance"
-              :protocol="assetData.protocol"
-              high-precision
-            />
-          </template>
-        </DetailsRow>
-
-        <DetailsRow
-          v-if="assetData.price"
-          :label="$t('pages.token-details.priceAe')"
-        >
-          <template #text>
-            <TokenAmount
-              :amount="assetData.price"
               :protocol="assetData.protocol"
               high-precision
             />
