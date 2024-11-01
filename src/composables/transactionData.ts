@@ -67,7 +67,6 @@ export function useTransactionData({
   const { tippingContractAddresses } = useTippingContracts();
   const { getProtocolAvailableTokens, getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
   const {
-    tokenContractAddresses,
     tokenSaleAddresses,
     tokenSaleAddressToTokenContractAddress,
   } = useAeTokenSales();
@@ -117,10 +116,8 @@ export function useTransactionData({
   );
 
   const isTokenSale = computed(
-    (): boolean => [
-      ...tokenContractAddresses.value,
-      ...tokenSaleAddresses.value,
-    ].some((address) => address === innerTx.value?.contractId),
+    (): boolean => tokenSaleAddresses.value
+      .some((address) => address === innerTx.value?.contractId),
   );
 
   const isTokenSaleBuy = computed(
