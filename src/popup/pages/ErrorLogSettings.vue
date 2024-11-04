@@ -3,16 +3,24 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="errors-log-settings">
         <p class="text-description">
-          {{ $t('pages.errors-log-settings.description') }}
+          <TemplateRenderer :str="$t('pages.errors-log-settings.description')" />
         </p>
 
         <div class="options">
           <SwitchButton
-            :label="$t('pages.titles.saveErrorsLog')"
+            :label="$t('pages.errors-log-settings.keepErrorLog')"
             :model-value="saveErrorLog"
             @update:modelValue="setSaveErrorLog"
           />
         </div>
+
+        <BtnMain
+          extend
+          class="account-select-options-item"
+          @click.prevent="$emit('click')"
+        >
+          {{ $t("pages.errors-log-settings.exportErrorLog") }}
+        </BtnMain>
       </div>
     </IonContent>
   </IonPage>
@@ -23,10 +31,14 @@ import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
 import { useUi } from '@/composables';
 
-import SwitchButton from '../components/SwitchButton.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import SwitchButton from '@/popup/components/SwitchButton.vue';
+import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 
 export default defineComponent({
   components: {
+    TemplateRenderer,
+    BtnMain,
     SwitchButton,
     IonPage,
     IonContent,
@@ -51,6 +63,7 @@ export default defineComponent({
 
   .options {
     margin-top: 20px;
+    margin-bottom: 36px;
   }
 }
 </style>
