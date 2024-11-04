@@ -1,6 +1,4 @@
 import { computed, ref, watch } from 'vue';
-import { Directory, Filesystem } from '@capacitor/filesystem';
-import { Capacitor } from '@capacitor/core';
 
 import {
   AccountAddress,
@@ -10,12 +8,12 @@ import {
 import { STORAGE_KEYS, MODAL_ADDRESS_BOOK_IMPORT } from '@/constants';
 import { AddressBookEntryExists, AddressBookInvalidAddress, AddressBookRequiredFields } from '@/lib/errors';
 import {
-  convertBlobToBase64,
   createCustomScopedComposable,
   getProtocolByAddress,
   handleUnknownError,
   selectFiles,
   pipe,
+  exportFile,
 } from '@/utils';
 import { tg as t } from '@/popup/plugins/i18n';
 
@@ -170,29 +168,15 @@ export const useAddressBook = createCustomScopedComposable(() => {
   }
 
   async function exportAddressBook() {
-    const json = JSON.stringify(addressBook.value);
-    const blob = new Blob([json], { type: 'text/plain' });
-    const a = document.createElement('a');
-    const href = window.URL.createObjectURL(blob);
-    const filename = 'addressBookExport.json';
-
-    if (Capacitor.isNativePlatform()) {
-      const base64 = await convertBlobToBase64(blob);
-      const saveFile = await Filesystem.writeFile({
-        path: filename,
-        data: base64,
-        directory: Directory.Documents,
-      });
-      const path = saveFile.uri;
+    const path = await exportFile(
+      JSON.stringify(addressBook.value),
+      'addressBookExport.json',
+    );
+    if (path) {
       openDefaultModal({
         title: t('pages.addressBook.export.title'),
         msg: t('pages.addressBook.export.message') + path,
       });
-    } else {
-      a.download = filename;
-      a.href = href;
-      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      a.click();
     }
   }
 

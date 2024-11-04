@@ -41,7 +41,6 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAccounts,
   useLatestTransactionList,
-  useModals,
   useUi,
 } from '@/composables';
 import { PROTOCOLS } from '@/constants';
@@ -50,6 +49,7 @@ import { ETH_COIN_SYMBOL } from '@/protocols/ethereum/config';
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   name: 'EthTransferReview',
@@ -68,7 +68,6 @@ export default defineComponent({
     const { t } = useI18n();
     const router = useRouter();
     const { homeRouteName } = useUi();
-    const { openDefaultModal } = useModals();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { addAccountPendingTransaction } = useLatestTransactionList();
 
@@ -81,10 +80,11 @@ export default defineComponent({
     );
 
     function openTransactionFailedModal(msg: string) {
-      openDefaultModal({
-        title: t('modals.transaction-failed.msg'),
-        icon: 'critical',
-        msg,
+      Logger.write({
+        title: t('modals.transaction-failed.title'),
+        message: msg || t('modals.transaction-failed.msg'),
+        type: 'api-response',
+        modal: true,
       });
     }
 
@@ -148,7 +148,7 @@ export default defineComponent({
         }
       } catch (error: any) {
         openTransactionFailedModal(error.message);
-        throw error;
+        return;
       } finally {
         loading.value = false;
       }

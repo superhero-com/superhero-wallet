@@ -22,6 +22,7 @@ import {
   useUi,
   useAccounts,
 } from '@/composables';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   name: 'SignTransaction',
@@ -98,16 +99,17 @@ export default defineComponent({
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
       } catch (error: any) {
-        await openDefaultModal({
-          title: t('modals.transaction-failed.msg'),
-          icon: 'critical',
-          msg: error.message,
-        });
-        openCallbackOrGoHome(false);
-
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
+        } else {
+          Logger.write({
+            title: t('modals.transaction-failed.title'),
+            message: error.message || t('modals.transaction-failed.msg'),
+            type: 'api-response',
+            modal: true,
+          });
         }
+        openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }

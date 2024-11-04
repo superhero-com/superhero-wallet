@@ -255,6 +255,7 @@ export default defineComponent({
   .address-book-item {
     background-color: var(--bg-color);
     border: var(--border-width) solid var(--bg-color);
+    padding: 8px 2px 8px 8px;
   }
 
   .search-field {
