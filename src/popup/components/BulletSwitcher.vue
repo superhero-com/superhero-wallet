@@ -42,7 +42,7 @@
 import { computed, defineComponent } from 'vue';
 
 import BtnPlain from './buttons/BtnPlain.vue';
-import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
 
 // Physical size of the bullet area in pixels
 const BULLET_SIZE = 16;

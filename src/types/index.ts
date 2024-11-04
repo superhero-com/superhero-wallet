@@ -23,6 +23,7 @@ import {
   POPUP_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
+  CONNECT_PERMISSIONS,
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
@@ -379,21 +380,20 @@ export interface IRawMultisigAccount {
   rawTx?: Encoded.Transaction;
 }
 
+export type ConnectPermission = ObjectValues<typeof CONNECT_PERMISSIONS>;
+
 export interface IPermission {
   address: boolean;
   addressList: boolean;
   host: string;
   messageSign: boolean;
+  /** Dapp name */
   name: string;
   dailySpendLimit: boolean;
   transactionSignFirstAskedOn: string | null;
-  /**
-   * Daily limit for transactions
-   */
+  /** Daily limit for transactions */
   transactionSignLimit: number;
-  /**
-   * Amount spent during that day
-   */
+  /** Amount spent during that day */
   transactionSignSpent: number;
 }
 

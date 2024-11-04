@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 export const INFO_BOX_TYPES = {
   default: 'default',
@@ -21,7 +21,7 @@ export type InfoBoxType = keyof typeof INFO_BOX_TYPES;
 export default defineComponent({
   props: {
     type: {
-      type: String,
+      type: String as PropType<InfoBoxType>,
       validator: (value: InfoBoxType) => Object.keys(INFO_BOX_TYPES).includes(value),
       default: INFO_BOX_TYPES.default,
     },

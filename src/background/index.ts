@@ -34,7 +34,11 @@ import { updateDynamicRules } from './redirectRule';
 /**
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
-function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Function) {
+const handleMessage: browser.runtime.onMessageBool = (
+  msg: IBackgroundMessageData,
+  sender: browser.runtime.MessageSender,
+  sendResponse: Function,
+) => {
   if (msg.target === 'background') {
     const {
       aepp,
@@ -73,7 +77,7 @@ function handleMessage(msg: IBackgroundMessageData, _: any, sendResponse: Functi
     target: 'offscreen',
   });
   return true;
-}
+};
 
 browser.runtime.onMessage.addListener(handleMessage);
 browser.runtime.onInstalled.addListener(updateDynamicRules);

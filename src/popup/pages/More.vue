@@ -145,7 +145,7 @@ import PanelItem from '@/popup/components/PanelItem.vue';
 
 import InvitesIcon from '@/icons/invites.svg?vue-component';
 import SettingsIcon from '@/icons/settings.svg?vue-component';
-import BugReportIcon from '@/icons/bug-report.svg?vue-component';
+import BugReportIcon from '@/icons/bug.svg?vue-component';
 import AboutIcon from '@/icons/about.svg?vue-component';
 import BuyIcon from '@/icons/credit-card.svg?vue-component';
 import DexIcon from '@/icons/dex.svg?vue-component';

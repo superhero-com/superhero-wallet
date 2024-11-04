@@ -81,7 +81,7 @@ import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Modal from '@/popup/components/Modal.vue';
 
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 import CheckCircleIcon from '@/icons/check-circle-fill.svg?vue-component';
 import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
 

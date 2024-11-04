@@ -1,137 +1,29 @@
 <template>
-  <Modal
-    show
-    full-screen
-    class="account-list"
-    data-cy="popup-aex2"
-  >
-    <TransactionInfo
-      :custom-labels="[$t('pages.connectConfirm.title')]"
-      :sender="sender"
-      :recipient="recipient"
-    />
-
-    <div
-      class="subtitle"
-      data-cy="aepp"
-    >
-      <span class="app-name">{{ sender.name }}</span>
-      ({{ sender.address }}) {{ $t('pages.accountListConfirm.websiteRequestConnect') }}
-    </div>
-
-    <div class="permissions">
-      <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
-        <span class="title">
-          <CheckMark class="icon" /> {{ $t('common.allAddresses') }}
-        </span>
-        <div class="description">
-          <p>
-            {{ $t('pages.accountListConfirm.addressesRequest') }}
-          </p>
-          <p class="color-warning">
-            {{ $t('pages.accountListConfirm.message') }}
-          </p>
-        </div>
-      </template>
-    </div>
-
-    <template #footer>
-      <BtnMain
-        variant="muted"
-        data-cy="deny"
-        extra-padded
-        :text="$t('pages.connectConfirm.cancelButton')"
-        @click="cancel()"
-      />
-      <BtnMain
-        data-cy="accept"
-        :text="$t('pages.connectConfirm.confirmButton')"
-        @click="confirm()"
-      />
-    </template>
-  </Modal>
+  <ConnectBase
+    class="connect-account-list-popup"
+    :access="access"
+  />
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  onUnmounted,
-} from 'vue';
-import type { IAccountOverview } from '@/types';
-import { RejectedByUserError } from '@/lib/errors';
-import {
-  APP_NAME,
-  PERMISSION_DEFAULTS,
-  POPUP_CONNECT_ADDRESS_PERMISSION,
-} from '@/constants';
-import { usePopupProps } from '@/composables';
-import { usePermissions } from '@/composables/permissions';
+import { defineComponent, PropType } from 'vue';
 
-import Modal from '../../components/Modal.vue';
-import BtnMain from '../../components/buttons/BtnMain.vue';
-import TransactionInfo from '../../components/TransactionInfo.vue';
-import CheckMark from '../../../icons/check-mark.svg?vue-component';
+import type { ConnectPermission } from '@/types';
+import { CONNECT_PERMISSIONS } from '@/constants';
+
+import ConnectBase from './ConnectBase.vue';
 
 export default defineComponent({
   components: {
-    Modal,
-    BtnMain,
-    TransactionInfo,
-    CheckMark,
+    ConnectBase,
   },
   props: {
     access: {
-      type: Array,
+      type: Array as PropType<ConnectPermission[]>,
       default: () => ([
-        POPUP_CONNECT_ADDRESS_PERMISSION,
+        CONNECT_PERMISSIONS.addressList,
       ]),
     },
-  },
-  setup() {
-    const { popupProps, sender, setPopupProps } = usePopupProps();
-    const { permissions, addPermission } = usePermissions();
-
-    const permission = computed(() => {
-      const host = popupProps.value?.app?.host;
-      return (host) ? permissions.value[host] : undefined;
-    });
-
-    const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
-
-    const recipient: IAccountOverview = {
-      wallet: APP_NAME,
-    };
-
-    function confirm() {
-      addPermission({
-        ...PERMISSION_DEFAULTS,
-        ...popupProps.value?.app,
-        ...permission.value,
-      });
-      popupProps.value?.resolve();
-    }
-
-    function cancel() {
-      popupProps.value?.reject(new RejectedByUserError());
-    }
-
-    onMounted(() => {
-      sender.value.name = appName.value;
-    });
-
-    onUnmounted(() => {
-      setPopupProps(null);
-    });
-
-    return {
-      POPUP_CONNECT_ADDRESS_PERMISSION,
-      sender,
-      confirm,
-      cancel,
-      recipient,
-    };
   },
 });
 </script>

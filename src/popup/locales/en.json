@@ -21,6 +21,7 @@
     "contractId": "Contract ID",
     "notNow": "Not now",
     "copy": "Copy",
+    "dapp": "dApp",
     "days": "{n} days | {n} day | {n} days",
     "disconnect": "Disconnect",
     "disconnecting": "Disconnecting...",
@@ -791,20 +792,20 @@
       "current-highest-bid": "Current highest bid",
       "ending-height": "Ending height"
     },
-    "accountListConfirm": {
-      "websiteRequestConnect": "would like to connect to your Superhero Wallet.",
-      "addressesRequest": "This aepp is requesting access to view all of your account addresses.",
-      "message": "Make sure you trust the aepp provider before accepting the request."
-    },
     "connectConfirm": {
-      "title": "Allow access",
-      "websiteRequestConnect": "would like to connect to your account.",
-      "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
-      "cancelButton": "Deny",
-      "confirmButton": "Accept",
-      "transactionLabel": "Transaction",
-      "addressRequest": "This aepp is requesting access to view your current account address.",
-      "transactionRequest": "This aepp may prepare a transaction, you are in charge of confirming it."
+      "title": "Connect with Superhero Wallet",
+      "subTitle": "only if you trust the dApp and its owner.",
+      "unknownSource": "Unknown source",
+      "unknownUrl": "Unknown URL",
+      "unknownOriginWarning": "Kindly ensure that you are aware of the request origin. Providing permission might cause undesired results, including loss of your funds.",
+      "websiteRequestConnect": "would like to connect to your wallet",
+      "permissionsHeader": "and receive permission to:",
+      "addressLabel": "View your address",
+      "addressRequest": "This dApp is requesting permission to view your current account address.",
+      "addressListLabel": "View your address list",
+      "addressListRequest": "This dApp is requesting permission to view your account address list.",
+      "transactionLabel": "Propose transactions",
+      "transactionRequest": "This dApp may propose transactions. You are in charge of confirming them."
     },
     "fungible-tokens": {
       "tokens": "Tokens | Token | Tokens",

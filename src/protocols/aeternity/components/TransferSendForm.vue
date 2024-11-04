@@ -216,7 +216,7 @@ import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmou
 
 import EditIcon from '@/icons/pencil.svg?vue-component';
 import DeleteIcon from '@/icons/trash.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   name: 'AeTransferSendForm',

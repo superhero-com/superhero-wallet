@@ -3,9 +3,7 @@
     class="apps-browser-list-item"
     type="button"
   >
-    <div
-      class="app-image-wrapper"
-    >
+    <div class="app-image-wrapper">
       <img
         v-if="imageUrl"
         :src="imageUrl"
@@ -13,9 +11,10 @@
         alt="Dapp favicon"
       >
     </div>
-    <div class="app-title">
-      {{ title }}
-    </div>
+    <div
+      class="app-name"
+      v-text="name"
+    />
   </button>
 </template>
 
@@ -25,10 +24,8 @@ import { computed, defineComponent } from 'vue';
 export default defineComponent({
   name: 'AppsBrowserListItem',
   props: {
-    title: { type: String, required: true },
-    /**
-     * App image name, should be located in src\icons\dapp
-     */
+    name: { type: String, required: true },
+    /** App image name, should be located in src\icons\dapp */
     image: { type: String, default: null },
   },
   setup(props) {
@@ -67,7 +64,7 @@ export default defineComponent({
       background: $color-disabled;
     }
 
-    .app-title,
+    .app-name,
     .app-image {
       opacity: 1;
     }
@@ -89,7 +86,7 @@ export default defineComponent({
     opacity: 0.85;
   }
 
-  .app-title {
+  .app-name {
     padding: 4px 8px;
     font-size: 12px;
     line-height: 16px;

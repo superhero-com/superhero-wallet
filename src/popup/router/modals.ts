@@ -58,6 +58,7 @@ import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue'
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ConfirmConnect from '../pages/Popups/Connect.vue';
+import ConfirmAccountList from '../pages/Popups/AccountList.vue';
 
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import PrivateKeyExport from '../components/Modals/PrivateKeyExport.vue';
@@ -148,6 +149,7 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
+    component: ConfirmAccountList,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_PRIVATE_KEY_EXPORT, {
