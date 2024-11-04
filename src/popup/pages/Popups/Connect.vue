@@ -1,194 +1,33 @@
 <template>
-  <Modal
-    show
-    full-screen
-    class="connect"
-    data-cy="popup-aex2"
-  >
-    <TransactionInfo
-      :custom-labels="[$t('pages.connectConfirm.title')]"
-      :sender="sender"
-      :recipient="activeAccount"
-    />
-
-    <div
-      class="subtitle"
-      data-cy="aepp"
-    >
-      <span class="app-name">{{ sender.name }}</span>
-      ({{ sender.address }}) {{ $t('pages.connectConfirm.websiteRequestConnect') }}
-    </div>
-
-    <div class="permissions">
-      <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
-        <span class="title">
-          <CheckMark class="icon" /> {{ $t('common.address') }}
-        </span>
-        <span class="description">
-          {{ $t('pages.connectConfirm.addressRequest') }}
-        </span>
-      </template>
-      <template v-if="access.includes(POPUP_CONNECT_TRANSACTIONS_PERMISSION)">
-        <span class="title">
-          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.transactionLabel') }}
-        </span>
-        <span class="description">
-          {{ $t('pages.connectConfirm.transactionRequest') }}
-        </span>
-      </template>
-    </div>
-
-    <template #footer>
-      <BtnMain
-        variant="muted"
-        data-cy="deny"
-        extra-padded
-        :text="$t('pages.connectConfirm.cancelButton')"
-        @click="cancel()"
-      />
-      <BtnMain
-        data-cy="accept"
-        :text="$t('pages.connectConfirm.confirmButton')"
-        @click="confirm()"
-      />
-    </template>
-  </Modal>
+  <ConnectBase
+    class="connect-popup"
+    :access="access"
+  />
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  onUnmounted,
-} from 'vue';
-import { RejectedByUserError } from '@/lib/errors';
-import {
-  PERMISSION_DEFAULTS,
-  POPUP_CONNECT_ADDRESS_PERMISSION,
-  POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-  PROTOCOLS,
-} from '@/constants';
-import { useAccounts, usePopupProps } from '@/composables';
-import { usePermissions } from '@/composables/permissions';
+import { defineComponent, PropType } from 'vue';
 
-import Modal from '../../components/Modal.vue';
-import BtnMain from '../../components/buttons/BtnMain.vue';
-import TransactionInfo from '../../components/TransactionInfo.vue';
-import CheckMark from '../../../icons/check-mark.svg?vue-component';
+import type { ConnectPermission } from '@/types';
+import { CONNECT_PERMISSIONS } from '@/constants';
+
+import ConnectBase from './ConnectBase.vue';
 
 export default defineComponent({
   components: {
-    Modal,
-    BtnMain,
-    TransactionInfo,
-    CheckMark,
+    ConnectBase,
   },
   props: {
     access: {
-      type: Array,
+      type: Array as PropType<ConnectPermission[]>,
       default: () => ([
-        POPUP_CONNECT_ADDRESS_PERMISSION,
-        POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+        CONNECT_PERMISSIONS.address,
+        CONNECT_PERMISSIONS.transactions,
       ]),
     },
   },
   setup() {
-    const { getLastActiveProtocolAccount } = useAccounts();
-    const { popupProps, sender, setPopupProps } = usePopupProps();
-    const { permissions, addPermission } = usePermissions();
-
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-
-    const permission = computed(() => {
-      const host = popupProps.value?.app?.host;
-      return (host) ? permissions.value[host] : undefined;
-    });
-
-    const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
-
-    function confirm() {
-      addPermission({
-        ...PERMISSION_DEFAULTS,
-        ...popupProps.value?.app,
-        ...permission.value,
-      });
-      popupProps.value?.resolve();
-    }
-
-    function cancel() {
-      popupProps.value?.reject(new RejectedByUserError());
-    }
-
-    onMounted(() => {
-      sender.value.name = appName.value;
-    });
-
-    onUnmounted(() => {
-      setPopupProps(null);
-    });
-
-    return {
-      POPUP_CONNECT_ADDRESS_PERMISSION,
-      POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-      activeAccount,
-      sender,
-      confirm,
-      cancel,
-    };
+    return {};
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '@/styles/variables' as *;
-@use '@/styles/typography';
-
-.connect {
-  .transaction-info {
-    margin-bottom: 16px;
-  }
-
-  .subtitle {
-    @extend %face-sans-15-medium;
-
-    margin-top: 24px;
-    margin-bottom: 16px;
-    color: $color-grey-light;
-    text-align: center;
-
-    .app-name {
-      color: $color-white;
-    }
-  }
-
-  .permissions {
-    margin: 16px 0;
-
-    .title {
-      @extend %face-sans-15-medium;
-
-      display: flex;
-      align-items: center;
-      padding-bottom: 4px;
-      color: $color-grey-dark;
-
-      .icon {
-        width: 24px;
-        height: 24px;
-        color: $color-success;
-        padding-right: 4px;
-      }
-    }
-
-    .description {
-      @extend %face-sans-15-regular;
-
-      display: block;
-      padding-bottom: 16px;
-      color: $color-white;
-      text-align: left;
-    }
-  }
-}
-</style>

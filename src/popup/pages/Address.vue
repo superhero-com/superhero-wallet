@@ -15,7 +15,7 @@ import {
 } from '@/composables';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
-import { MODAL_CONFIRM_CONNECT, POPUP_CONNECT_ADDRESS_PERMISSION } from '@/constants';
+import { CONNECT_PERMISSIONS, MODAL_CONFIRM_CONNECT } from '@/constants';
 
 export default defineComponent({
   name: 'Address',
@@ -39,7 +39,7 @@ export default defineComponent({
       try {
         setLoaderVisible(true);
         await openModal(MODAL_CONFIRM_CONNECT, {
-          access: [POPUP_CONNECT_ADDRESS_PERMISSION],
+          access: [CONNECT_PERMISSIONS.address],
           app: app.value,
         });
 

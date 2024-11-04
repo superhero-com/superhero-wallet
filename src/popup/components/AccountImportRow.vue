@@ -2,6 +2,7 @@
   <AccountSelectOptionsItem
     :custom-account="account"
     :outside-balance="balance"
+    clickable
   />
 </template>
 

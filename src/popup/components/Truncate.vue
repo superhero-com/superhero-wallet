@@ -31,6 +31,7 @@
 </template>
 
 <script lang="ts">
+import { debounce } from 'lodash-es';
 import {
   computed,
   defineComponent,
@@ -41,7 +42,6 @@ import {
   onBeforeUnmount,
 } from 'vue';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
-import { debounce } from 'lodash-es';
 
 export default defineComponent({
   props: {

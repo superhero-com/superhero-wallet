@@ -108,7 +108,7 @@ import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 
 import EditIcon from '@/icons/pencil.svg?vue-component';
 import DeleteIcon from '@/icons/trash.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   name: 'BtcTransferSendForm',

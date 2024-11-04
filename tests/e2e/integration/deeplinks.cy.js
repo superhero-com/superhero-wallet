@@ -125,7 +125,7 @@ describe('Test cases for deeplinks', () => {
       + `x-success=${encodedTestDeploymentUrl}%2Faccount%3F%7Baddress%7D%26%7BnetworkId%7D`
       + `&x-cancel=${encodedTestDeploymentUrl}`,
     )
-      .get('[data-cy=label]')
+      .get('[data-cy=page-header]')
       .should('be.visible')
       .should('contain', tg('pages.connectConfirm.title'))
       .click()

@@ -16,12 +16,13 @@
       />
     </template>
 
-    <div>
+    <div class="items-list">
       <AccountSelectOptionsItem
         v-for="(option, index) in optionsFiltered"
         :key="option.value || index"
         :option="option"
         :selected="option.value === value"
+        clickable
         @click="resolve(option.value)"
       />
     </div>
@@ -81,3 +82,14 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.account-select-options {
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+    padding-inline: 8px;
+  }
+}
+</style>

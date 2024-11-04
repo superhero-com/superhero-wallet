@@ -1,28 +1,39 @@
 <template>
   <transition name="fade-transition">
     <div
-      v-if="isVisible"
+      v-if="!isHidden"
       class="card"
-      :class="{
-        dense,
-        disabled,
-      }"
+      :class="[
+        `variant-${variant}`,
+        {
+          dense,
+          disabled,
+          'icon-centered': iconCentered,
+        },
+      ]"
       :style="styleComponent"
     >
-      <IconWrapper
-        v-if="icon"
-        :icon="icon"
-        class="card-icon"
-        is-boxed
-      />
+      <slot name="icon">
+        <IconWrapper
+          v-if="icon"
+          :icon="icon"
+          class="card-icon"
+          is-boxed
+        />
+      </slot>
 
-      <div>
-        <div class="text">
-          {{ text }}
-        </div>
-        <div class="description">
-          {{ description }}
-        </div>
+      <div class="card-content">
+        <div
+          v-if="text"
+          class="text"
+          v-text="text"
+        />
+        <div
+          v-if="description"
+          class="description"
+          v-text="description"
+        />
+
         <slot />
       </div>
 
@@ -40,12 +51,18 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent } from 'vue';
+import {
+  Component,
+  PropType,
+  computed,
+  defineComponent,
+} from 'vue';
 import { useUi } from '@/composables';
 
-import BtnIcon from './buttons/BtnIcon.vue';
-import CloseIcon from '../../icons/times-circle.svg?vue-component';
-import IconWrapper from './IconWrapper.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
+import IconWrapper from '@/popup/components/IconWrapper.vue';
+
+import CloseIcon from '@/icons/times-circle.svg?vue-component';
 
 export default defineComponent({
   name: 'Card',
@@ -54,11 +71,13 @@ export default defineComponent({
     IconWrapper,
   },
   props: {
-    text: { type: String, required: true },
-    description: { type: String, required: true },
+    text: { type: String, default: null },
+    description: { type: String, default: null },
     background: { type: String, default: null },
     cardId: { type: String as PropType<string | null>, default: null },
-    icon: { type: Object, default: null },
+    icon: { type: Object as PropType<Component>, default: null },
+    variant: { type: String, default: 'default' },
+    iconCentered: Boolean,
     dense: Boolean,
     disabled: Boolean,
   },
@@ -66,20 +85,18 @@ export default defineComponent({
     const { hiddenCards, setCardHidden } = useUi();
 
     const styleComponent = computed(() => ({
-      backgroundImage: props.background ? `url("${props.background}")` : null,
+      backgroundImage: props.background ? `url("${props.background}")` : undefined,
     }));
 
-    const isVisible = computed(
-      () => !(
-        props.cardId
-        && hiddenCards.value.includes(props.cardId)
-      ),
-    );
+    const isHidden = computed(() => (
+      props.cardId
+      && !hiddenCards.value.includes(props.cardId)
+    ));
 
     return {
       CloseIcon,
       styleComponent,
-      isVisible,
+      isHidden,
       hiddenCards,
       setCardHidden,
     };
@@ -96,28 +113,23 @@ export default defineComponent({
   z-index: 1;
   position: relative;
   display: flex;
-  align-items: flex-start;
   width: 100%;
-  min-height: 116px;
   border-radius: $border-radius-interactive;
   padding: 20px 16px;
   gap: 16px;
   background-color: $color-bg-6;
   background-repeat: no-repeat;
   background-size: cover;
+  color: $color-white;
   transition: $transition-interactive;
-
-  &-darken::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    background-color: var(--screen-bg-color);
-    opacity: 0.7;
-  }
 
   .card-icon {
     color: $color-white;
+  }
+
+  .card-content {
+    width: 100%;
+    overflow: hidden;
   }
 
   .card-close {
@@ -128,27 +140,38 @@ export default defineComponent({
 
   .text {
     @extend %face-sans-16-semi-bold;
-
-    color: $color-white;
   }
 
   .description {
     @extend %face-sans-13-regular;
 
-    color: $color-white;
     opacity: 0.7;
     margin-top: 4px;
   }
 
   &.dense {
+    padding: 6px 8px;
+    gap: 8px;
+
     .description {
-      margin-top: 0;
+      margin-top: 1px;
     }
   }
 
   &.disabled {
     pointer-events: none;
     opacity: 0.4;
+  }
+
+  &.icon-centered {
+    align-items: center;
+  }
+
+  &.variant {
+    &-warning {
+      color: $color-warning;
+      background-color: rgba($color-warning, 0.15);
+    }
   }
 }
 </style>

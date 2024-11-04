@@ -30,16 +30,17 @@ const popups: Dictionary<IPopupConfigNoActions> = {};
 
 const storageSession = (browser.storage as any)?.session;
 
-export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
-
 export const openPopup = async (
   popupType: PopupType,
-  aepp: string | object,
+  aepp: string | Record<string, any>, // TODO establish correct type for the object
   popupProps: Partial<IPopupProps> = {},
 ) => {
   const id = uuid();
-  const { href, protocol, host } = (typeof aepp === 'object') ? getAeppUrl(aepp) : new URL(aepp);
-  const { name = host } = (typeof aepp === 'object') ? aepp : {} as any;
+  const url = (typeof aepp === 'object') ? aepp.connection.port.sender.url : aepp;
+  const { href, protocol, host } = new URL(url);
+
+  // TODO fix the name resolving issue happening in `onSubscription` of aeSdk
+  const name = (typeof aepp === 'object') ? aepp.name : undefined;
 
   const tabs = await browser.tabs.query({ active: true });
 

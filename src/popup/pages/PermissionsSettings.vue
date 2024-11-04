@@ -40,9 +40,10 @@ import { usePermissions } from '@/composables/permissions';
 import { ROUTE_PERMISSIONS_ADD, ROUTE_PERMISSIONS_DETAILS } from '@/popup/router/routeNames';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
-import PanelItem from '../components/PanelItem.vue';
-import BtnMain from '../components/buttons/BtnMain.vue';
-import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
+import PanelItem from '@/popup/components/PanelItem.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+
+import PlusIcon from '@/icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   components: {

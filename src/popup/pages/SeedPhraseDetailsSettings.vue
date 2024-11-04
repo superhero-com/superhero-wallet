@@ -78,7 +78,7 @@ import { ROUTE_ACCOUNT, ROUTE_SEED_PHRASE_VERIFY } from '@/popup/router/routeNam
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CardMnemonic from '../components/CardMnemonic.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
-import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
+import CheckSuccessCircle from '../../icons/check-mark-circle-outline.svg?vue-component';
 
 export default defineComponent({
   name: 'SeedPhraseDetailsSettings',

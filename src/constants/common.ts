@@ -373,8 +373,11 @@ export const POPUP_TYPES = [
   POPUP_TYPE_UNSAFE_SIGN,
 ] as const;
 
-export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
-export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
+export const CONNECT_PERMISSIONS = {
+  address: 'address',
+  addressList: 'addressList',
+  transactions: 'transactions',
+} as const;
 
 export const POPUP_ACTIONS = {
   getProps: 'getProps',
@@ -466,6 +469,56 @@ export const BROWSER_ACTIONS = {
   share: 'share',
   favourite: 'favourite',
 } as const;
+
+/**
+ * List of dapps that we are sure that we support.
+ */
+export const TRUSTED_DAPPS: {
+  name: string;
+  url: string;
+  image: string;
+  /** Display the dapp link in the app browser featured section */
+  isFeatured?: boolean;
+}[] = [
+  {
+    name: 'Aeternity Governance',
+    url: 'https://governance.aeternity.com',
+    image: 'Governance.webp',
+    isFeatured: true,
+  },
+  {
+    name: 'Graffiti Aepp',
+    url: 'https://graffiti.aeternity.com',
+    image: 'graffiti.svg',
+    isFeatured: true,
+  },
+  {
+    name: 'Superhero Social',
+    url: 'https://superhero.com',
+    image: 'superhero-social.svg',
+  },
+  {
+    name: 'Superhero DEX',
+    url: 'https://aepp.dex.superhero.com',
+    image: 'superhero-dex.svg',
+    isFeatured: true,
+  },
+  {
+    name: 'aeScan',
+    url: 'https://aescan.io',
+    image: 'aescan.svg',
+  },
+  {
+    name: 'Tokaen.org (DEV)',
+    url: 'https://dev.tokaen.org',
+    image: 'tokaen-org.svg',
+  },
+  {
+    name: 'Tokaen.org',
+    url: 'https://tokaen.org',
+    image: 'tokaen-org.svg',
+  },
+];
 
 export const PAGE_TRANSITION_DURATION = 150;
 
