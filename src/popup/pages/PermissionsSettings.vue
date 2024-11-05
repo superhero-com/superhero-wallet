@@ -15,9 +15,9 @@
           <PanelItem
             v-for="permission in permissions"
             :key="permission.host"
-            class="host"
-            :to="{ name: ROUTE_PERMISSIONS_DETAILS, params: { host: permission.host } }"
             :title="permission.name"
+            class="host"
+            @click="manage(permission.host)"
           />
         </div>
 
@@ -25,8 +25,8 @@
           extend
           variant="muted"
           :text="$t('pages.permissions.add')"
-          :to="{ name: ROUTE_PERMISSIONS_ADD }"
           :icon="PlusIcon"
+          @click="manage()"
         />
       </div>
     </IonContent>
@@ -36,8 +36,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
+import { MODAL_PERMISSION_MANAGER } from '@/constants';
 import { usePermissions } from '@/composables/permissions';
-import { ROUTE_PERMISSIONS_ADD, ROUTE_PERMISSIONS_DETAILS } from '@/popup/router/routeNames';
+import { useModals } from '@/composables';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
@@ -55,12 +56,16 @@ export default defineComponent({
   },
   setup() {
     const { permissions } = usePermissions();
+    const { openModal } = useModals();
+
+    function manage(host?: string) {
+      openModal(MODAL_PERMISSION_MANAGER, { host });
+    }
 
     return {
-      ROUTE_PERMISSIONS_ADD,
-      ROUTE_PERMISSIONS_DETAILS,
       PlusIcon,
       permissions,
+      manage,
     };
   },
 });

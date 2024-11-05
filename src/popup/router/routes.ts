@@ -37,14 +37,12 @@ import {
   ROUTE_DONATE_ERROR,
   ROUTE_AUCTION_BID,
   ROUTE_AUCTION_HISTORY,
-  ROUTE_PERMISSIONS_ADD,
   ROUTE_POPUP_ACCOUNT_LIST,
   ROUTE_POPUP_SIGN_TX,
   ROUTE_POPUP_CONNECT,
   ROUTE_POPUP_RAW_SIGN,
   ROUTE_POPUP_UNSAFE_SIGN,
   ROUTE_POPUP_MESSAGE_SIGN,
-  ROUTE_PERMISSIONS_DETAILS,
   ROUTE_PERMISSIONS_SETTINGS,
   ROUTE_SECURE_LOGIN_SETTINGS,
   ROUTE_ADDRESS_BOOK,
@@ -90,7 +88,6 @@ import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
 import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
-import PermissionManager from '../pages/PermissionManager.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
 import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
@@ -514,25 +511,6 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'permissionsSettings',
       showHeaderNavigation: true,
-    },
-  },
-  {
-    path: '/more/settings/permissions/add',
-    component: PermissionManager,
-    name: ROUTE_PERMISSIONS_ADD,
-    meta: {
-      title: 'permissionsAdd',
-      showHeaderNavigation: true,
-    },
-  },
-  {
-    path: '/more/settings/permissions/:host',
-    component: PermissionManager,
-    name: ROUTE_PERMISSIONS_DETAILS,
-    meta: {
-      title: 'permissionsEdit',
-      showHeaderNavigation: true,
-      isEdit: true,
     },
   },
   {
