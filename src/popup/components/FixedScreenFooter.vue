@@ -29,6 +29,7 @@ export default defineComponent({
   bottom: 0;
   margin: auto 0 0; // Moves the footer to the bottom of the container
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   padding: var(--screen-padding-x);
