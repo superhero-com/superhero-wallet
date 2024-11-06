@@ -257,9 +257,12 @@ export function useTransactionData({
     if (protocol.value === PROTOCOLS.aeternity) {
       // AE DEX and wrapped AE (WAE)
       if (
-        (isDex.value || isTokenSale.value)
-        && txFunctionParsed.value
-        && (!isDexAllowance.value || showDetailedAllowanceInfo)
+        txFunctionParsed.value
+        && (
+          isDex.value
+          || isTokenSale.value
+          || (isDexAllowance.value && showDetailedAllowanceInfo)
+        )
       ) {
         const functionResolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
         if (functionResolver) {
