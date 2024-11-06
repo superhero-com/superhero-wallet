@@ -58,7 +58,7 @@ export default defineComponent({
       txFunctionLabel,
       isDex,
       isDexPool,
-      isDexAllowance,
+      isAllowance,
       isTokenSale,
       isTokenSaleBuy,
       isTokenSaleSell,
@@ -110,7 +110,7 @@ export default defineComponent({
             ? t('transaction.spendType.in')
             : t('transaction.spendType.out'),
         );
-      } else if (isDexAllowance.value) {
+      } else if (isAllowance.value) {
         arr.push(t('transaction.dexType.allowToken'));
       } else if (isDex.value) {
         arr.push(
