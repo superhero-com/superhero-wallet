@@ -336,7 +336,7 @@ export default defineComponent({
       direction,
       isAex9,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexLiquidityAdd,
       isDexLiquidityRemove,
       isDexMaxSpent,
@@ -429,7 +429,7 @@ export default defineComponent({
       : undefined);
 
     async function getTokens(txParams: ITx): Promise<ITokenResolved[]> {
-      if (!isDex.value && !isDexAllowance.value && !isTokenSale.value) {
+      if (!isDex.value && !isAllowance.value && !isTokenSale.value) {
         return [singleToken.value];
       }
       const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
@@ -460,7 +460,7 @@ export default defineComponent({
     }
 
     function getLabels(token: any, idx: number) {
-      if (isDexAllowance.value) {
+      if (isAllowance.value) {
         return t('pages.signTransaction.approveUseOfToken');
       }
       if (isDexLiquidityAdd.value) {
@@ -652,7 +652,7 @@ export default defineComponent({
       getTxAssetSymbol,
       isAex9,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexMaxSpent,
       isDexMinReceived,
       isDexSwap,

@@ -36,12 +36,12 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
 
-    const { isDexLiquidityAdd, isDexAllowance } = useTransactionData({
+    const { isDexLiquidityAdd, isAllowance } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
 
     function getLabel(isPool?: boolean): string {
-      if (isDexAllowance.value) {
+      if (isAllowance.value) {
         return t('pages.transactionDetails.approveTokenUse');
       }
       if (isPool) {

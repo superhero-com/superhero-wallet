@@ -118,7 +118,7 @@ export default defineComponent({
       direction,
       innerTx,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexLiquidityAdd,
       isDexLiquidityRemove,
       isTokenSaleBuy,
@@ -158,7 +158,7 @@ export default defineComponent({
         text = props.showTransactionOwner
           ? t('transaction.type.transactionFeePaidBy')
           : t('transaction.type.transactionFeePaid');
-      } else if (isDexAllowance.value) {
+      } else if (isAllowance.value) {
         text = t('transaction.dexType.allowToken');
       } else if (isDexLiquidityAdd.value) {
         text = t('transaction.dexType.provideLiquidity');
