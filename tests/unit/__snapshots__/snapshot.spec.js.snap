@@ -19,7 +19,7 @@ exports[`Pages About 1`] = `
         >
           
           <div
-            class="panel-table-item"
+            class="variant-default panel-table-item"
             is-external="false"
           >
             <div
@@ -36,7 +36,7 @@ exports[`Pages About 1`] = `
             </div>
           </div>
           <a
-            class="link-button variant-default clickable panel-table-item"
+            class="link-button variant-default variant-default clickable panel-table-item"
             href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
             rel="noopener noreferrer"
             target="_blank"
@@ -61,7 +61,7 @@ exports[`Pages About 1`] = `
             <!--v-if-->
           </a>
           <div
-            class="panel-table-item"
+            class="variant-default panel-table-item"
             is-external="false"
           >
             <div
@@ -78,7 +78,7 @@ exports[`Pages About 1`] = `
             </div>
           </div>
           <div
-            class="panel-table-item"
+            class="variant-default panel-table-item"
             is-external="false"
           >
             <div
