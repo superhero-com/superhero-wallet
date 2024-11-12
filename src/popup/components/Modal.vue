@@ -21,7 +21,10 @@
         'min-height': minHeight,
       }"
     >
-      <div class="container">
+      <div
+        ref="scrollElem"
+        class="container"
+      >
         <div
           v-if="showHeader"
           class="header"
@@ -82,12 +85,14 @@
 import {
   computed,
   defineComponent,
+  ref,
   onBeforeUnmount,
   onMounted,
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
 
 import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
+import { useScrollConfig, useViewport } from '@/composables';
 
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
@@ -113,10 +118,16 @@ export default defineComponent({
     centered: Boolean,
     minHeight: Boolean,
     transparent: Boolean,
+    initializeViewport: Boolean,
     header: { type: String, default: null },
   },
   emits: ['close', 'open'],
   setup(props, { slots, emit }) {
+    const scrollElem = ref<HTMLElement>();
+
+    const { setScrollConf } = useScrollConfig();
+    const { initViewport } = useViewport();
+
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
     function handleClose() {
@@ -128,6 +139,10 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      if (props.initializeViewport) {
+        setScrollConf(false);
+        initViewport(scrollElem.value!);
+      }
       document.addEventListener('ionBackButton', onBackButtonHandler);
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
@@ -135,6 +150,9 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
+      if (props.initializeViewport) {
+        setScrollConf(false);
+      }
       document.removeEventListener('ionBackButton', onBackButtonHandler);
       document.body.style.overflow = '';
     });
@@ -143,6 +161,7 @@ export default defineComponent({
       handleClose,
       IS_FIREFOX,
       IS_EXTENSION,
+      scrollElem,
       showHeader,
     };
   },
