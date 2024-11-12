@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.3.0...v2.3.1) (2024-11-01)
+
+
+### Features
+
+* add additional info in token details ([7d442c8](https://github.com/Superhero-com/superhero-wallet/commit/7d442c8d0e931f28a39ca2ec410e65fcd569d442))
+* add token balance to accounts total ([3853a6b](https://github.com/Superhero-com/superhero-wallet/commit/3853a6b533a5dface18ea2de0403393f96e1570e))
+* **aeternity:** show fiat value for tokens with price ([60aa5e2](https://github.com/Superhero-com/superhero-wallet/commit/60aa5e21ca8446725a38873cad060f8c7c6815e6))
+* allow copy private key when password skipped ([4998613](https://github.com/Superhero-com/superhero-wallet/commit/4998613d3954c093c3596fd6a487f11c41b4a89b))
+* choose protocol when creating new wallet ([765dc53](https://github.com/Superhero-com/superhero-wallet/commit/765dc5375ee8a5959915b53d9fccdb23bf9e4815))
+* enrich token swap transactions ([fb62884](https://github.com/Superhero-com/superhero-wallet/commit/fb6288498a6ea5ef3d037d32684c7e7846f94efd))
+* preserve tokenSales info in case fetching failed ([c4cf011](https://github.com/Superhero-com/superhero-wallet/commit/c4cf011661325771308309c8ff99cd70e83f805f))
+* reusable component for selecting account from a dropdown while typing ([1ae39b9](https://github.com/Superhero-com/superhero-wallet/commit/1ae39b92569a5a9e2abdb412485af2fc6a45e04e))
+* show price for tokens ([cfbc24b](https://github.com/Superhero-com/superhero-wallet/commit/cfbc24b4baeb14042e39147f28257b9c5163cd43))
+* skip password protection for web ([435d3d0](https://github.com/Superhero-com/superhero-wallet/commit/435d3d0967b33516856969610e55edd6715d5ba8))
+* use usd currency name instead of dollar sign ([e1fde63](https://github.com/Superhero-com/superhero-wallet/commit/e1fde63c028fc7c3e36d854ccd834f824d30c7be))
+
+
+### Bug Fixes
+
+* **aeternity:** show fiat value for transaction that have coin spent ([8966088](https://github.com/Superhero-com/superhero-wallet/commit/896608841b21fdd1c4ad9171f4ec787f4680d5e3))
+* **deep-link:** be able to return networkId ([e590832](https://github.com/Superhero-com/superhero-wallet/commit/e590832470cfdb4ff763edee4c726151ef57d2ca))
+* show token sale label only for token sale transactions ([c2c3572](https://github.com/Superhero-com/superhero-wallet/commit/c2c3572e13f5c06ae78b288b8377f436677e1196))
+
+
+### Maintenance
+
+* address book items use panel items ([0572fa5](https://github.com/Superhero-com/superhero-wallet/commit/0572fa56ab438356874d3efa5c429394f00703ce))
+* adjust asset details page ([1d609a4](https://github.com/Superhero-com/superhero-wallet/commit/1d609a4e5cdd9bdb4095f802dd8b938c9c01a639))
+* rename tokenSwaps to tokenSales ([4a7d815](https://github.com/Superhero-com/superhero-wallet/commit/4a7d8158520a47e70b0b429009108835d6fdd7c5))
+
 ## [2.3.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.2.11...v2.3.0) (2024-10-16)
 
 
