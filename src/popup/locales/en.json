@@ -2,6 +2,7 @@
   "common": {
     "activeAccount": "Active account",
     "address": "Address",
+    "allow": "Allow",
     "name": "Name",
     "addressCopied": "Copied",
     "all": "All",
@@ -55,6 +56,7 @@
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
+    "unknown": "Unknown",
     "unrecognized": "Unrecognized",
     "you": "You",
     "verifying": "Verifying...",
@@ -801,8 +803,9 @@
       "websiteRequestConnect": "would like to connect to your account.",
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
-      "confirmButton": "Accept",
-      "transactionLabel": "Transaction",
+      "addressLabel": "Address request",
+      "transactionLabel": "Confirm transaction",
+      "unknownSource": "Unknown source",
       "addressRequest": "This aepp is requesting access to view your current account address.",
       "transactionRequest": "This aepp may prepare a transaction, you are in charge of confirming it."
     },
@@ -1214,6 +1217,18 @@
       "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
       "decline": "Decline"
     }
+  },
+  "unknownDapp": {
+    "request": "Unknown URL would like you to {action}.",
+    "warning": "Kindly ensure that you are aware of the request origin. {warning} might cause undesired results, including loss of your funds.",
+    "signMessageAction": "sign a message",
+    "signMessageWarning": "Signing this message",
+    "allowAccessAction": "access your account",
+    "allowAccessWarning": "Allowing access",
+    "confirmTransactionAction": "confirm a transaction",
+    "confirmTransactionWarning": "Confirming this transaction",
+    "signDataAction": "sign data",
+    "signDataWarning": "Signing this data"
   },
   "dappActionBrowser": {
     "refresh": {

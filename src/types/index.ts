@@ -115,8 +115,9 @@ export interface IPageableResponse<T> {
 }
 
 export interface IAppData {
-  name: string;
-  url: string;
+  href?: string;
+  name?: string;
+  url?: string;
   host: string;
   protocol?: string;
 }

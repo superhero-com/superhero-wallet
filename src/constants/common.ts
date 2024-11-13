@@ -1,5 +1,4 @@
-import type { ICurrency, IPermission } from '@/types';
-import { IS_MOBILE_APP } from './environment';
+import type { IAppData, ICurrency, IPermission } from '@/types';
 
 export const APP_NAME = 'Superhero Wallet';
 export const APP_URL = 'wallet.superhero.com';
@@ -376,6 +375,16 @@ export const POPUP_TYPES = [
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
 export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
 
+export const UNKNOWN_SOURCE = 'Unknown source';
+export const UNKNOWN_URL = 'Unknown url';
+export const UNKNOWN_APP_DETAILS: IAppData = {
+  url: UNKNOWN_URL,
+  href: UNKNOWN_URL,
+  protocol: '',
+  host: '',
+  name: UNKNOWN_SOURCE,
+};
+
 export const POPUP_ACTIONS = {
   getProps: 'getProps',
   resolve: 'resolve',
@@ -494,10 +503,6 @@ export const AUTHENTICATION_TIMEOUTS = [
   900000,
   1800000,
 ] as const;
-
-export const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
-  ? AUTHENTICATION_TIMEOUTS[0]
-  : AUTHENTICATION_TIMEOUTS[2];
 
 export const PASSWORD_STRENGTH = {
   weak: 'weak',
