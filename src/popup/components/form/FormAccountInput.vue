@@ -8,7 +8,7 @@
     :placeholder="placeholder"
     :disable-label-focus="!!selectedAddress"
     auto-height
-    @input="$emit('update:modelValue', $event.target.value)"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template v-if="selectedAddress" #default>
       <Truncate
