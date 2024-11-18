@@ -113,9 +113,11 @@
         >
           <template #text>
             <TokenAmount
+              v-if="!isCoin"
               :amount="assetData.marketCap"
               :protocol="assetData.protocol"
             />
+            <span v-else>{{ formatCurrency(assetData.marketCap) }}</span>
           </template>
         </DetailsRow>
 
