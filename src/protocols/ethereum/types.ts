@@ -1,4 +1,5 @@
-import { Dictionary, INetworkProtocolSettings } from '@/types';
+import type { Dictionary, INetworkProtocolSettings, ObjectValues } from '@/types';
+import { ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
 
 /**
  * Settings specific to this protocol.
@@ -22,3 +23,19 @@ export interface EthDecodedCallData {
   functionName: string;
   args: Dictionary;
 }
+
+/** All method params are encoded */
+export interface IEthRpcMethodParameters {
+  address?: string;
+  to?: string;
+  from?: string;
+  data?: string;
+  gas?: string;
+  tag?: string;
+  value?: string;
+  chainId?: string;
+}
+
+export type EthRpcMethod = ObjectValues<typeof ETH_RPC_METHODS>;
+export type EthRpcEtherscanProxyMethod = ObjectValues<typeof ETH_RPC_ETHERSCAN_PROXY_METHODS>;
+export type EthRpcSupportedMethods = EthRpcMethod | EthRpcEtherscanProxyMethod;

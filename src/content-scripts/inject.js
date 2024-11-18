@@ -20,16 +20,56 @@ const runContentScript = () => {
       .then((res) => resolve(res));
   });
 
+  async function handleEthRpcRequest(event, method, params) {
+    const result = await sendToOffscreen(method, {
+      rpcMethodParams: params,
+      aepp: event.origin,
+    });
+    event.source.postMessage({
+      jsonrpc: '2.0',
+      result,
+      method: event.data.method,
+      superheroWalletApproved: true,
+      type: 'result',
+      requestId: event.data.requestId,
+    }, event.origin);
+  }
+
   // Subscribe from postMessages from page
   window.addEventListener(
     'message',
-    ({ data }) => {
-      let { method } = data;
+    async (event) => {
+      if (event.data.type === 'result') {
+        return;
+      }
+      let { method } = event.data;
       if (!method) method = 'pageMessage';
 
-      // Handle message from page and redirect to offscreen page
-      if (!data.resolve) {
-        sendToOffscreen(method, data);
+      switch (method) {
+        case 'eth_getBalance':
+          handleEthRpcRequest(event, method, { address: event.data.params[0] });
+          break;
+        case 'eth_blockNumber':
+        case 'eth_chainId':
+        case 'eth_accounts':
+        case 'eth_requestAccounts':
+        case 'wallet_requestPermissions':
+        case 'wallet_revokePermissions':
+          handleEthRpcRequest(event, method, event.data.params?.[0]);
+          break;
+        case 'eth_call':
+        case 'wallet_switchEthereumChain':
+        case 'eth_sendTransaction':
+          handleEthRpcRequest(event, method, {
+            ...event.data.params[0],
+            tag: event.data.params[1],
+          });
+          break;
+        default:
+          if (!event.data.resolve) {
+            sendToOffscreen(method, event.data);
+          }
+          break;
       }
     },
     false,

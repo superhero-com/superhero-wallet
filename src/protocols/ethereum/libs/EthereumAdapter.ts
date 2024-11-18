@@ -287,7 +287,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   override async transferPreparedTransaction({
     to,
     from,
-    data,
+    data = '0x',
     value,
     gas,
   }: any = {}): Promise<ITransferResponse> {

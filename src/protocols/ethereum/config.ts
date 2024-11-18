@@ -97,3 +97,22 @@ export const ETH_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
 export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
   ? ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
   : ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
+
+export const ETH_RPC_ETHERSCAN_PROXY_METHODS = {
+  callContractOffChain: 'eth_call',
+  // NOT yet supported
+  getBlockByNumber: 'eth_getBlockByNumber',
+} as const;
+
+export const ETH_RPC_METHODS = {
+  getBalance: 'eth_getBalance',
+  getBlockNumber: 'eth_blockNumber',
+  getChainId: 'eth_chainId',
+  getAccounts: 'eth_accounts',
+  sendTransaction: 'eth_sendTransaction',
+  requestAccounts: 'eth_requestAccounts',
+  // wallet
+  requestPermissions: 'wallet_requestPermissions',
+  switchNetwork: 'wallet_switchEthereumChain',
+  revokePermissions: 'wallet_revokePermissions',
+} as const;
