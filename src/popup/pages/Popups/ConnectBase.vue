@@ -174,7 +174,9 @@ export default defineComponent({
       },
     };
 
-    const activeAccount = computed(() => getLastActiveProtocolAccount(PROTOCOLS.aeternity));
+    const activeAccount = computed(() => getLastActiveProtocolAccount(
+      popupProps.value?.protocol || PROTOCOLS.aeternity,
+    ));
 
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;

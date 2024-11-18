@@ -6,7 +6,7 @@ import {
   getSessionEncryptionKey,
   setSessionTimeout,
 } from './bgPopupHandler';
-import { updateDynamicRules } from './redirectRule';
+import { registerInPageContentScript, updateDynamicRules } from './utils';
 
 (async () => {
   // Check all windows controlled by the service worker to see if one
@@ -70,14 +70,10 @@ const handleMessage: browser.runtime.onMessageBool = (
         break;
     }
   }
-
-  // forward messages to the offscreen page
-  browser.runtime.sendMessage<IBackgroundMessageData>({
-    ...msg,
-    target: 'offscreen',
-  });
   return true;
 };
 
 browser.runtime.onMessage.addListener(handleMessage);
 browser.runtime.onInstalled.addListener(updateDynamicRules);
+
+registerInPageContentScript();
