@@ -239,7 +239,7 @@ import TrashIcon from '@/icons/trash.svg?vue-component';
 import CircleCloseIcon from '@/icons/circle-close.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 
 const STEPS = {
   form: 'form',
