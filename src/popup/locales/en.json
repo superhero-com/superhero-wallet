@@ -104,6 +104,11 @@
       "title": "Multisig backend failure",
       "description": "Multisig vaults may not be accessible at the moment due to temporary backend failure. <p> If you are trying to access your multisig vaults please try again later. </p>"
     },
+    "etherscan": {
+      "statusMessage": "Etherscan services are down.",
+      "title": "Etherscan services are down",
+      "description": "Some features such as fetching transaction history and transaction details on Ethereum network may not be functioning properly at the moment."
+    },
     "backend": {
       "statusMessage": "Temporary backend failure.",
       "title": "Backend failure",
