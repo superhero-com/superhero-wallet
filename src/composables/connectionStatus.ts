@@ -11,6 +11,7 @@ import {
 import { StatusIconType } from '@/types';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { useAeMiddleware, useAeTippingBackend } from '@/protocols/aeternity/composables';
+import { isEtherscanUnavailable } from '@/protocols/ethereum/libs/EtherscanService';
 import { tg as t } from '@/popup/plugins/i18n';
 
 interface StatusType {
@@ -38,14 +39,7 @@ export function useConnectionStatus() {
   const showMultisigError = computed(
     () => route.name === ROUTE_ACCOUNT && isMultisigBackendUnavailable.value,
   );
-  const isError = computed(() => (
-    !isOnline.value
-    || isAeNodeError.value
-    || isMiddlewareUnavailable.value
-    || (middlewareStatus.value && !middlewareStatus.value.mdwSynced)
-    || showMultisigError.value
-    || isBackendUnavailable.value
-  ));
+  const isError = computed(() => !isAeNodeConnecting.value && !justBeenConnected.value);
 
   // Display "Connected" message for a while after connecting to node.
   watch(isAeNodeReady, (val) => {
@@ -95,6 +89,13 @@ export function useConnectionStatus() {
           statusMessage: t('connectionStatus.backend.statusMessage'),
           title: t('connectionStatus.backend.title'),
           description: t('connectionStatus.backend.description'),
+          icon: 'critical',
+        };
+      case isEtherscanUnavailable.value:
+        return {
+          statusMessage: t('connectionStatus.etherscan.statusMessage'),
+          title: t('connectionStatus.etherscan.title'),
+          description: t('connectionStatus.etherscan.description'),
           icon: 'critical',
         };
       case showMultisigError.value:

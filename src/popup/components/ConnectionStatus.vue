@@ -16,9 +16,6 @@
         :icon="status.icon"
         warning
         class="btn-help"
-        :class="{
-          'is-error': isError,
-        }"
       />
     </div>
   </transition>
