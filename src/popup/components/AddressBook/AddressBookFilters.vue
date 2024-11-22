@@ -2,22 +2,65 @@
   <div class="address-book-filters">
     <!-- All/Bookmarked Filters -->
     <BtnFilter
-      :is-active="!showBookmarked && (!protocolFilter || isSelector)"
+      v-if="!isSelector"
+      :is-active="(
+        accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.addressBook
+        && (!protocolFilter || isSelector)
+      )"
       :text="$t('common.all')"
       data-cy="all-filter"
       @click="clearFilters(!isSelector)"
     />
 
     <BtnFilter
-      :is-active="showBookmarked"
+      v-if="hasBookmarkedEntries || !isSelector"
+      :is-active="accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.bookmarked"
       data-cy="bookmarked-filter"
-      @click="() => setShowBookmarked(true, !isSelector)"
+      @click="() => setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.bookmarked, !isSelector)"
     >
       <IconWrapper
         :icon="FavoritesIcon"
         icon-size="rg"
       />
     </BtnFilter>
+
+    <template v-if="isSelector">
+      <BtnFilter
+        :is-active="(
+          accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.owned
+          && (!protocolFilter || isSelector)
+        )"
+        :text="$t('pages.addressBook.filters.own')"
+        data-cy="own-filter"
+        @click="setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.owned, !isSelector)"
+      />
+
+      <BtnFilter
+        :is-active="(
+          accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.addressBook
+          && (!protocolFilter || isSelector)
+        )"
+        :text="$t('pages.addressBook.filters.addressBook')"
+        data-cy="address-book-filter"
+        @click="setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.addressBook, !isSelector)"
+      />
+
+      <BtnFilter
+        :is-active="(
+          accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.recent
+          && (!protocolFilter || isSelector)
+        )"
+        :text="$t('pages.addressBook.filters.recent')"
+        data-cy="recent-filter"
+        @click="setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.recent, !isSelector)"
+      >
+        <IconWrapper
+          :icon="HistoryIcon"
+          icon-size="rg"
+        />
+        {{ $t('pages.addressBook.filters.recent') }}
+      </BtnFilter>
+    </template>
 
     <template v-if="!isSelector">
       <div class="divider" />
@@ -45,13 +88,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { PROTOCOL_LIST } from '@/constants';
-import { useAddressBook } from '@/composables';
+import { ACCOUNT_SELECT_TYPE_FILTER, PROTOCOL_LIST } from '@/constants';
+import { useAccountSelector } from '@/composables';
 
 import BtnFilter from '@/popup/components/buttons/BtnFilter.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
 
 import FavoritesIcon from '@/icons/star-full.svg?vue-component';
+import HistoryIcon from '@/icons/history.svg?vue-component';
 import HorizontalScroll from '../HorizontalScroll.vue';
 
 export default defineComponent({
@@ -62,26 +106,29 @@ export default defineComponent({
   },
   props: {
     isSelector: Boolean,
+    hasBookmarkedEntries: Boolean,
   },
   setup() {
     const {
+      accountSelectType,
       protocolFilter,
-      showBookmarked,
+      setAccountSelectType,
       setProtocolFilter,
-      setShowBookmarked,
       clearFilters,
-    } = useAddressBook();
+    } = useAccountSelector();
 
     return {
+      accountSelectType,
       protocolFilter,
-      showBookmarked,
 
+      setAccountSelectType,
       setProtocolFilter,
-      setShowBookmarked,
       clearFilters,
 
       FavoritesIcon,
+      HistoryIcon,
       PROTOCOL_LIST,
+      ACCOUNT_SELECT_TYPE_FILTER,
     };
   },
 });

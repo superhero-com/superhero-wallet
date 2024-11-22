@@ -323,8 +323,6 @@ Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = nu
   if (token) {
     cy.get('[data-cy=select-asset]')
       .click()
-      .get('[data-cy=loader]')
-      .should('be.visible')
       .get('.modal .header [data-cy=input]')
       .type(token.contractId)
       .get('.tokens-list-item:first-child', { timeout: 8000 })

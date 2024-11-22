@@ -83,8 +83,8 @@ import type { IMultisigAccount, IMultisigCreationPhase } from '@/types';
 import { MULTISIG_CREATION_PHASES } from '@/protocols/aeternity/config';
 
 import ProgressBar from './ProgressBar.vue';
-import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
-import CheckSuccessCircleIcon from '../../icons/check-success-circle.svg?vue-component';
+import PlusCircle from '../../icons/plus-circle.svg?vue-component';
+import CheckSuccessCircleIcon from '../../icons/check-mark-circle-outline.svg?vue-component';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 interface PhaseLabel {

@@ -424,6 +424,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         hash,
         transactionOwner ?? transaction.from,
         transaction.blockNumber,
+        transaction.input,
       );
 
       if (tokenTx) {

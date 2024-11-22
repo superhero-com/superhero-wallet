@@ -178,8 +178,6 @@
     "connectConfirm": {
       "websiteRequestConnect": "想要连接到你的帐户",
       "websiteRequest": "网站请求查看你的当前地址。请确认当前网站可信。 ",
-      "cancelButton": "拒绝",
-      "confirmButton": "接受",
       "addressLabel": "地址",
       "transactionLabel": "交易",
       "addressRequest": "aepp请求查看你的当前地址",

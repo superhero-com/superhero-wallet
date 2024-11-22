@@ -3,10 +3,10 @@
     full-screen
     from-bottom
     has-close-button
+    initialize-viewport
     no-padding
     class="asset-selector"
     @close="reject()"
-    @open="onModalOpen"
   >
     <template #header>
       <span
@@ -20,14 +20,10 @@
       />
     </template>
 
-    <Loader
-      class="appearing-element"
-      :class="{ visible: loading }"
-    />
-    <div
-      v-show="isFullyOpen"
-      class="appearing-element"
-      :class="{ visible: !loading }"
+    <InfiniteScroll
+      class="list"
+      data-cy="list"
+      @load-more="pageNumber += 1"
     >
       <AssetListItem
         v-for="asset in accountAssetsToDisplay"
@@ -37,7 +33,7 @@
         prevent-navigation
         @click="resolve(asset)"
       />
-    </div>
+    </InfiniteScroll>
   </Modal>
 </template>
 
@@ -45,9 +41,9 @@
 import {
   computed,
   defineComponent,
-  nextTick,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import type {
   IAsset,
@@ -56,11 +52,12 @@ import type {
   ResolveCallback,
 } from '@/types';
 import { useAccountAssetsList } from '@/composables';
+import { ASSETS_PER_PAGE } from '@/constants';
 
 import Modal from '../Modal.vue';
 import AssetListItem from '../Assets/AssetListItem.vue';
 import InputSearch from '../InputSearch.vue';
-import Loader from '../Loader.vue';
+import InfiniteScroll from '../InfiniteScroll.vue';
 
 export type AssetSelectorResolvedVal = IAsset;
 
@@ -70,7 +67,7 @@ export default defineComponent({
     AssetListItem,
     Modal,
     InputSearch,
-    Loader,
+    InfiniteScroll,
   },
   props: {
     resolve: {
@@ -83,52 +80,44 @@ export default defineComponent({
     withBalanceOnly: Boolean,
   },
   setup(props) {
-    const loading = ref(true);
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
+    const pageNumber = ref(1);
 
     const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
       withBalanceOnly: props.withBalanceOnly,
     });
 
-    const accountAssetsToDisplay = computed(() => (props.protocol)
-      ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
-      : accountAssetsFiltered.value);
+    const accountAssetsToDisplay = computed(() => (
+      (props.protocol)
+        ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
+        : accountAssetsFiltered.value
+    )
+      .slice(0, pageNumber.value * ASSETS_PER_PAGE));
 
     function isAssetSelected(token: IAsset): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
     }
-
-    /**
-     * Delay displaying tokens list until the modal transition is finished to prevent
-     * performance issues when both animating the modal and rendering large amount of data.
-     */
-    async function onModalOpen() {
-      await nextTick();
-      isFullyOpen.value = true;
-      setTimeout(() => {
-        loading.value = false;
-      }, 250);
-    }
+    watch(
+      searchTerm,
+      () => {
+        pageNumber.value = 1;
+      },
+    );
 
     return {
-      loading,
-      searchTerm,
-      isFullyOpen,
       accountAssetsToDisplay,
+      isFullyOpen,
+      pageNumber,
+      searchTerm,
       isAssetSelected,
-      onModalOpen,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-@use '@/styles/typography';
-@use '@/styles/mixins';
-
 .asset-selector {
   padding-top: env(safe-area-inset-top);
 
@@ -141,19 +130,6 @@ export default defineComponent({
     margin-bottom: 0;
     line-height: 48px;
     text-align: left;
-  }
-
-  .appearing-element {
-    width: 100%;
-    opacity: 0;
-    z-index: -1;
-    transition: opacity 0.25s ease-in-out;
-    padding-bottom: 40px; // Back-to-top button height
-
-    &.visible {
-      opacity: 1;
-      z-index: 1;
-    }
   }
 }
 </style>

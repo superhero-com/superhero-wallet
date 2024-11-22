@@ -1,4 +1,4 @@
-import type { ICurrency, IPermission } from '@/types';
+import type { ICurrency, IPermission, ObjectValues } from '@/types';
 import { IS_MOBILE_APP } from './environment';
 
 export const APP_NAME = 'Superhero Wallet';
@@ -83,6 +83,7 @@ export const NETWORK_NAME_MAX_LENGTH = 15;
 export const DEFAULT_WAITING_HEIGHT = 15;
 export const FIXED_TABS_SCROLL_HEIGHT = 30;
 
+export const ASSETS_PER_PAGE = 30;
 export const TXS_PER_PAGE = 30;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
@@ -336,6 +337,7 @@ export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_NETWORK_SWITCHER = 'network-switcher';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_PROTOCOL_SELECT = 'protocol-select';
+export const MODAL_PERMISSION_MANAGER = 'permission-manager';
 export const MODAL_SCAN_QR = 'scan-qr';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
@@ -372,8 +374,11 @@ export const POPUP_TYPES = [
   POPUP_TYPE_UNSAFE_SIGN,
 ] as const;
 
-export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
-export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
+export const CONNECT_PERMISSIONS = {
+  address: 'address',
+  addressList: 'addressList',
+  transactions: 'transactions',
+} as const;
 
 export const POPUP_ACTIONS = {
   getProps: 'getProps',
@@ -466,6 +471,56 @@ export const BROWSER_ACTIONS = {
   favourite: 'favourite',
 } as const;
 
+/**
+ * List of dapps that we are sure that we support.
+ */
+export const TRUSTED_DAPPS: {
+  name: string;
+  url: string;
+  image: string;
+  /** Display the dapp link in the app browser featured section */
+  isFeatured?: boolean;
+}[] = [
+  {
+    name: 'Aeternity Governance',
+    url: 'https://governance.aeternity.com',
+    image: 'Governance.webp',
+    isFeatured: true,
+  },
+  {
+    name: 'Graffiti Aepp',
+    url: 'https://graffiti.aeternity.com',
+    image: 'graffiti.svg',
+    isFeatured: true,
+  },
+  {
+    name: 'Superhero Social',
+    url: 'https://superhero.com',
+    image: 'superhero-social.svg',
+  },
+  {
+    name: 'Superhero DEX',
+    url: 'https://aepp.dex.superhero.com',
+    image: 'superhero-dex.svg',
+    isFeatured: true,
+  },
+  {
+    name: 'aeScan',
+    url: 'https://aescan.io',
+    image: 'aescan.svg',
+  },
+  {
+    name: 'Tokaen.org (DEV)',
+    url: 'https://dev.tokaen.org',
+    image: 'tokaen-org.svg',
+  },
+  {
+    name: 'Tokaen.org',
+    url: 'https://tokaen.org',
+    image: 'tokaen-org.svg',
+  },
+];
+
 export const PAGE_TRANSITION_DURATION = 150;
 
 export const MAX_BROWSER_HISTORY_ITEMS = 10;
@@ -503,3 +558,12 @@ export const PASSWORD_STRENGTH = {
   medium: 'medium',
   strong: 'strong',
 } as const;
+
+export const ACCOUNT_SELECT_TYPE_FILTER = {
+  all: 'all',
+  bookmarked: 'bookmarked',
+  owned: 'owned',
+  addressBook: 'addressBook',
+  recent: 'recent',
+} as const;
+export type AccountSelectTypeFilter = ObjectValues<typeof ACCOUNT_SELECT_TYPE_FILTER>;

@@ -11,7 +11,7 @@
       :protocol="protocol"
       class="address-truncated-protocol"
     />
-    <div class="address-truncated-chunks">
+    <div v-if="!hideAddress" class="address-truncated-chunks">
       <span class="address-chunk">{{ truncatedAddress[0] }}</span>
       <span class="dots">&middot;&middot;&middot;</span>
       <span class="address-chunk">{{ truncatedAddress[1] }}</span>
@@ -42,6 +42,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, default: undefined },
     showExplorerLink: Boolean,
     showProtocolIcon: Boolean,
+    hideAddress: Boolean,
   },
   setup(props) {
     const truncatedAddress = computed(() => truncateAddress(props.address));

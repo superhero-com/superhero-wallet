@@ -45,18 +45,19 @@
             </InputField>
           </Field>
 
-          <div class="apps-browser-popular-apps">
-            {{ $t('pages.appsBrowser.popularApps') }}
-          </div>
+          <div
+            class="apps-browser-popular-apps"
+            v-text="$t('pages.appsBrowser.popularApps')"
+          />
 
           <div class="apps-browser-list">
             <div
-              v-for="app in DAPPS_LIST"
-              :key="app.title"
+              v-for="app in featuredDapps"
+              :key="app.name"
               class="apps-browser-card"
             >
               <AppsBrowserListItem
-                :title="app.title"
+                :name="app.name"
                 :image="app.image"
                 @click="onSelectApp(app)"
               />
@@ -93,7 +94,7 @@ import {
   computed,
 } from 'vue';
 import { Field } from 'vee-validate';
-import { MODAL_WARNING_DAPP_BROWSER, IS_SAFARI } from '@/constants';
+import { IS_SAFARI, MODAL_WARNING_DAPP_BROWSER, TRUSTED_DAPPS } from '@/constants';
 import {
   getLocalStorageItem,
   setLocalStorageItem,
@@ -112,24 +113,6 @@ import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 
 import CloseIcon from '@/icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
-
-const DAPPS_LIST = [
-  {
-    title: 'Aeternity Governance',
-    url: 'https://governance.aeternity.com/',
-    image: 'Governance.webp',
-  },
-  {
-    title: 'Graffiti Aepp',
-    url: 'https://graffiti.aeternity.com',
-    image: 'graffiti.svg',
-  },
-  {
-    title: 'Superhero DEX',
-    url: 'https://aepp.dex.superhero.com/swap',
-    image: 'SuperheroDEX.svg',
-  },
-];
 
 interface App {
   title?: string;
@@ -158,6 +141,7 @@ export default defineComponent({
     const iframeEl = ref<HTMLIFrameElement>();
     const customAppURL = ref('');
     const currentClientId = ref('');
+    const featuredDapps = TRUSTED_DAPPS.filter(({ isFeatured }) => isFeatured);
     let shareWalletInfoInterval: any;
     let lastUrlAddedToHistory = '';
 
@@ -261,7 +245,7 @@ export default defineComponent({
       refresh,
       iframeEl,
       customAppURL,
-      DAPPS_LIST,
+      featuredDapps,
       selectedApp,
       onSelectApp,
       onAppLoaded,

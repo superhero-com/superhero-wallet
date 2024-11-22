@@ -118,7 +118,7 @@ export async function decodeTxData(
       address: contractId,
     });
 
-  if (contractAbi?.message !== 'OK') {
+  if (!contractAbi?.message?.startsWith('OK')) {
     return undefined;
   }
   const parsedAbi = JSON.parse(contractAbi.result);
@@ -131,6 +131,8 @@ export async function decodeTxData(
 
   try {
     // Decode the method and parameters from the input data
+    // TODO contractInstance doesn't always have the method signatures
+    // then we are not able to decode the method name and get the parameters
     const methodSignature = txData.slice(0, 10);
     const method = contractInstance.options.jsonInterface
       .find((m) => m.signature === methodSignature);
@@ -139,7 +141,7 @@ export async function decodeTxData(
 
     return {
       functionName: (method as any).name,
-      args: params[0] as Dictionary,
+      args: params as Dictionary,
     };
   } catch (e) {
     handleUnknownError(e);

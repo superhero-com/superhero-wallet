@@ -91,7 +91,7 @@ import BalanceInfo from '../components/BalanceInfo.vue';
 import InputAmount from '../components/InputAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
-import PlusCircleFillIcon from '../../icons/plus-circle-fill.svg?vue-component';
+import PlusCircleFillIcon from '../../icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   components: {

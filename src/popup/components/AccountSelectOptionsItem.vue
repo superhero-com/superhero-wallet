@@ -1,5 +1,6 @@
 <template>
-  <BtnPlain
+  <component
+    :is="(clickable) ? 'BtnPlain' : 'div'"
     v-if="account"
     class="account-select-options-item"
     :style="bgColorStyle"
@@ -7,7 +8,7 @@
   >
     <div
       class="option-wrapper"
-      :class="{ selected }"
+      :class="{ selected, clickable }"
     >
       <AccountInfo
         :account="account"
@@ -15,9 +16,10 @@
         avatar-size="rg"
         avatar-borderless
         is-list-name
-        show-protocol-icon
+        :show-protocol-icon="!hideProtocolIcon"
       />
       <TokenAmount
+        v-if="!hideBalance"
         :amount="balance"
         :symbol="tokenSymbol"
         :protocol="account.protocol"
@@ -26,7 +28,7 @@
         small
       />
     </div>
-  </BtnPlain>
+  </component>
 </template>
 
 <script lang="ts">
@@ -66,6 +68,9 @@ export default defineComponent({
       default: 0,
     },
     selected: Boolean,
+    hideBalance: Boolean,
+    hideProtocolIcon: Boolean,
+    clickable: Boolean,
   },
   setup(props) {
     const { getAccountBalance } = useBalances();
@@ -106,7 +111,6 @@ export default defineComponent({
   --border-width: 3px;
 
   width: 100%;
-  padding: 2px 8px;
 
   .option-wrapper {
     position: relative;
@@ -130,10 +134,10 @@ export default defineComponent({
       border: var(--border-width) solid var(--bg-color);
       box-sizing: border-box;
       border-radius: 10px;
-      transition: background-color 0.12s ease-in-out;
+      transition: all 0.12s ease-in-out;
     }
 
-    &:hover:not(.selected) {
+    &.clickable:hover:not(.selected) {
       &::before {
         opacity: 0.8;
       }

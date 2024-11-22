@@ -30,8 +30,6 @@ import {
   MODAL_RESET_WALLET,
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
-  PROTOCOL_VIEW_TRANSFER_RECEIVE,
-  PROTOCOL_VIEW_TRANSFER_SEND,
   MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
@@ -44,6 +42,9 @@ import {
   MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
   MODAL_SET_PASSWORD,
   MODAL_PASSWORD_LOGIN,
+  MODAL_PERMISSION_MANAGER,
+  PROTOCOL_VIEW_TRANSFER_RECEIVE,
+  PROTOCOL_VIEW_TRANSFER_SEND,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -58,6 +59,7 @@ import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue'
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ConfirmConnect from '../pages/Popups/Connect.vue';
+import ConfirmAccountList from '../pages/Popups/AccountList.vue';
 
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import PrivateKeyExport from '../components/Modals/PrivateKeyExport.vue';
@@ -90,6 +92,7 @@ import AddressBookAccountSelector from '../components/Modals/AddressBookAccountS
 import SetPassword from '../components/Modals/SetPassword.vue';
 import PasswordLogin from '../components/Modals/PasswordLogin.vue';
 import PrivateKeyImport from '../components/Modals/PrivateKeyImport.vue';
+import PermissionManager from '../components/Modals/PermissionManager.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -148,6 +151,7 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
+    component: ConfirmAccountList,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_PRIVATE_KEY_EXPORT, {
@@ -162,6 +166,9 @@ export default () => {
   });
   registerModal(MODAL_PROTOCOL_SELECT, {
     component: ProtocolSelect,
+  });
+  registerModal(MODAL_PERMISSION_MANAGER, {
+    component: PermissionManager,
   });
   registerModal(MODAL_TRANSFER_RECEIVE, {
     component: ProtocolSpecificView,

@@ -113,7 +113,7 @@ import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Platforms from '@/popup/components/Platforms.vue';
 
 import SuperheroLogoIcon from '@/icons/logo.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 import CheckCircleIcon from '@/icons/check-circle-fill.svg?vue-component';
 
 export default defineComponent({

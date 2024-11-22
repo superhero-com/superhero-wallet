@@ -145,64 +145,21 @@
           />
         </DetailsItem>
       </div>
-
       <DetailsItem
         expandable
+        class="advanced-transaction-details"
         :label="$t('transaction.advancedDetails')"
       >
-        <DetailsItem
-          v-if="transaction?.tx?.data"
-          :label="$t('transaction.data')"
-        >
-          <Tabs class="tabs">
-            <Tab
-              v-for="({ name, text }) in dataTabs"
-              :key="name"
-              :data-cy="name"
-              :name="name"
-              :text="text"
-              :active="activeTab === name"
-              @click="setActiveTab(name)"
-            />
-          </Tabs>
-          <div class="tabs-content">
-            <!-- Decoded Data -->
-            <DetailsItem v-if="activeTab === dataTabs[0].name">
-              <Panel v-if="decodedCallData?.args">
-                <PanelTableItem
-                  v-for="([key, value]) in Object.entries(decodedCallData?.args as any) || []"
-                  :key="key"
-                  :name="key"
-                >
-                  <div class="scrollable">
-                    {{ value }}
-                  </div>
-                </PanelTableItem>
-              </Panel>
-              <InfoBox
-                v-else
-                type="warning"
-                :text="$t('transaction.decodingDataFailed')"
-              />
-            </DetailsItem>
-            <!--
-              Raw Data
-              Display the ETH transaction raw data until we are able to decode it
-              into human readable arguments (e.g.: amount).
-            -->
-            <DetailsItem
-              v-if="activeTab === dataTabs[1].name"
-              :value="transaction.tx.data"
-            />
-          </div>
-        </DetailsItem>
-
+        <TransactionCallDataDetails
+          :call-data="transaction?.tx?.data"
+          :call-data-decoded="decodedCallData"
+          :loading="decodingCallData"
+        />
         <DetailsItem
           v-if="transactionArguments"
           :label="$t('modals.confirmTransactionSign.arguments')"
           :value="transactionArguments"
         />
-
         <DetailsItem
           v-for="key in filteredTxFields"
           :key="key"
@@ -310,11 +267,7 @@ import TransactionOverview from '../TransactionOverview.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
-import Panel from '../Panel.vue';
-import PanelTableItem from '../PanelTableItem.vue';
-import Tabs from '../tabs/Tabs.vue';
-import Tab from '../tabs/Tab.vue';
-import InfoBox from '../InfoBox.vue';
+import TransactionCallDataDetails from '../TransactionCallDataDetails.vue';
 
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
@@ -345,11 +298,7 @@ export default defineComponent({
     DetailsItem,
     TokenAmount,
     TransactionDetailsPoolTokenRow,
-    PanelTableItem,
-    Panel,
-    Tabs,
-    Tab,
-    InfoBox,
+    TransactionCallDataDetails,
     AnimatedSpinner,
   },
   setup() {
@@ -387,7 +336,7 @@ export default defineComponent({
       direction,
       isAex9,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexLiquidityAdd,
       isDexLiquidityRemove,
       isDexMaxSpent,
@@ -410,6 +359,7 @@ export default defineComponent({
     const gasPrice = ref(0);
     const decodedCallData = ref<AeDecodedCallData | EthDecodedCallData | undefined>();
     const activeTab = ref(dataTabs[0].name);
+    const decodingCallData = ref(false);
 
     const app = computed(() => popupProps.value?.app);
 
@@ -479,7 +429,7 @@ export default defineComponent({
       : undefined);
 
     async function getTokens(txParams: ITx): Promise<ITokenResolved[]> {
-      if (!isDex.value && !isDexAllowance.value && !isTokenSale.value) {
+      if (!isDex.value && !isAllowance.value && !isTokenSale.value) {
         return [singleToken.value];
       }
       const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
@@ -510,7 +460,7 @@ export default defineComponent({
     }
 
     function getLabels(token: any, idx: number) {
-      if (isDexAllowance.value) {
+      if (isAllowance.value) {
         return t('pages.signTransaction.approveUseOfToken');
       }
       if (isDexLiquidityAdd.value) {
@@ -645,11 +595,13 @@ export default defineComponent({
         && popupProps.value?.tx?.data
         && popupProps.value?.tx?.contractId
       ) {
+        decodingCallData.value = true;
         decodedCallData.value = await decodeTxData(
           popupProps.value.tx.data,
           popupProps.value.tx.contractId,
           activeAccount.address,
         );
+        decodingCallData.value = false;
       }
     }
 
@@ -688,6 +640,7 @@ export default defineComponent({
       cancel,
       decodedCallData,
       decodedPayload,
+      decodingCallData,
       direction,
       error,
       executionCost,
@@ -699,7 +652,7 @@ export default defineComponent({
       getTxAssetSymbol,
       isAex9,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexMaxSpent,
       isDexMinReceived,
       isDexSwap,
@@ -739,10 +692,6 @@ export default defineComponent({
     margin: 0 auto;
     width: 56px;
     height: 56px;
-  }
-
-  .scrollable {
-    word-break: keep-all;
   }
 
   .subtitle {
@@ -793,6 +742,10 @@ export default defineComponent({
 
   .button-action-primary {
     display: flex;
+  }
+
+  .advanced-transaction-details {
+    width:100%;
   }
 }
 </style>

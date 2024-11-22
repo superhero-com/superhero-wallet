@@ -165,8 +165,6 @@ export default defineComponent({
       more: () => t('pages.titles.more'),
       networks: () => t('pages.titles.networks'),
       permissionsSettings: () => t('pages.titles.permissionsSettings'),
-      permissionsEdit: () => t('pages.titles.permissionsEdit'),
-      permissionsAdd: () => t('pages.titles.permissionsAdd'),
       commentNew: () => t('pages.titles.commentNew'),
       donateError: () => t('pages.titles.donateError'),
       address: () => t('pages.titles.address'),

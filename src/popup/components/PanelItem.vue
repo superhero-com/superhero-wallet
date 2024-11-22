@@ -35,6 +35,12 @@
         />
       </slot>
     </div>
+    <div
+      v-if="$slots['bottom-right-icon']"
+      class="panel-item-bottom-right"
+    >
+      <slot name="bottom-right-icon" />
+    </div>
   </BtnBase>
 </template>
 
@@ -134,6 +140,12 @@ export default defineComponent({
       opacity: 0.5;
       transition: $transition-interactive;
     }
+  }
+
+  .panel-item-bottom-right {
+    display: inline-flex;
+    align-self: flex-end;
+    margin-right: 4px;
   }
 }
 </style>

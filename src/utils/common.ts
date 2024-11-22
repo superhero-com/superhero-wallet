@@ -343,6 +343,15 @@ export function prepareAccountSelectOptions(accountList: IAccount[]): IFormSelec
   }));
 }
 
+/**
+ * Remove trailing slash and protocol from the url
+ */
+export function prepareUrlToDisplay(url?: string) {
+  return (url?.endsWith('/') ? url?.slice(0, -1) : url)
+    ?.replace('http://', '')
+    ?.replace('https://', '');
+}
+
 export function removeDuplicatedTransactions(transactions: ITransaction[]) {
   return uniqWith(
     transactions,
@@ -673,6 +682,10 @@ export function decryptedComputed(
       }
     }
   }, { immediate: true });
+
+  if (IS_MOBILE_APP) {
+    options.onDecrypted?.(encryptedState.value);
+  }
 
   return (IS_MOBILE_APP)
     ? encryptedState // On mobile devices we are not encrypting states

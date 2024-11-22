@@ -39,7 +39,7 @@ import { MODAL_PROTOCOL_SELECT, MODAL_ACCOUNT_CREATE, PROTOCOLS } from '@/consta
 import { useModals } from '@/composables';
 
 import AccountCardBase, { accountCardBaseCommonProps } from '@/popup/components/AccountCardBase.vue';
-import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   components: {

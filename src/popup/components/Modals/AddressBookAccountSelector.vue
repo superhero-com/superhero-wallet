@@ -9,9 +9,14 @@
     <IonPage>
       <h2
         class="header"
-        v-text="$t('pages.addressBook.selectAddress')"
+        v-text="(
+          isSigner ? $t('pages.addressBook.selectSignerAddress') : $t('pages.addressBook.selectRecipientAddress')
+        )"
       />
-      <AddressBookList is-selector @select-address="handleSelectAddress" />
+      <AddressBookList
+        is-selector
+        @select-address="handleSelectAddress"
+      />
     </IonPage>
   </Modal>
 </template>
@@ -41,6 +46,7 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     protocol: { type: String as PropType<Protocol>, default: null },
+    isSigner: Boolean,
   },
   setup(props) {
     const { activeAccount } = useAccounts();

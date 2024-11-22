@@ -1,4 +1,6 @@
+import { ref } from 'vue';
 import { fromWei } from 'web3-utils';
+
 import type { AccountAddress, AssetContractId, ITransaction } from '@/types';
 import { ETHERSCAN_API_KEY, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
@@ -21,6 +23,8 @@ interface EtherscanApiCallParams {
 
 let lastCallTime: number;
 
+export const isEtherscanUnavailable = ref(false);
+
 /**
  * @see docs.etherscan.io
  */
@@ -28,7 +32,7 @@ export class EtherscanService {
   apiUrl: string;
 
   // TODO - update delay if we use paid API key
-  freeVersionTimeDelay = ETHERSCAN_API_KEY ? 250 : 5300;
+  freeVersionTimeDelay = 5300;
 
   constructor(apiUrl: string) {
     this.apiUrl = apiUrl;
@@ -40,7 +44,6 @@ export class EtherscanService {
       apikey: ETHERSCAN_API_KEY,
     }).toString();
 
-    // Without API key amount of calls are limited to one per every 5 seconds.
     // With free API key we can make 5 calls per second.
     // We're adding delays between calls to avoid getting empty results.
     // TODO: Use own node or paid version
@@ -50,8 +53,14 @@ export class EtherscanService {
     if (timeToWait > 0) {
       await sleep(timeToWait);
     }
-
-    return fetchJson<T>(`${this.apiUrl}?${query}`);
+    try {
+      const response = await fetchJson<T>(`${this.apiUrl}?${query}`);
+      isEtherscanUnavailable.value = false;
+      return response;
+    } catch (e) {
+      isEtherscanUnavailable.value = true;
+      throw e;
+    }
   }
 
   /**
@@ -138,13 +147,25 @@ export class EtherscanService {
     hash: string,
     address: string,
     blockNumber: string,
+    input?: string,
   ): Promise<ITransaction | undefined> {
     // Not the best solution, but it seems to be the only way to get token transaction details
     const blockTransactions = await this.fetchAccountTokenTransactions(address, {
       startblock: blockNumber,
       endblock: blockNumber,
     });
-    return blockTransactions.find((tx) => tx.hash === hash);
+
+    // The token transaction API doesn't always return input data, so we are adding it manually
+    // if we have it from the previous call
+    const transaction = blockTransactions.find((tx) => tx.hash === hash);
+    if (
+      transaction
+      && input
+      && (!transaction?.tx?.callData || (transaction?.tx?.callData as any) === 'deprecated')
+    ) {
+      transaction.tx.callData = input as any;
+    }
+    return transaction;
   }
 
   static normalizeEtherscanTransactionStructure(
@@ -164,6 +185,7 @@ export class EtherscanService {
       timeStamp,
       to,
       value,
+      input,
     } = transaction;
 
     const senderId = toEthChecksumAddress(from) as any;
@@ -178,7 +200,7 @@ export class EtherscanService {
     const amount = Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
-    const isEthTransfer = !contractAddress;
+    const isEthTransfer = !contractAddress && !input;
 
     return {
       protocol: PROTOCOLS.ethereum,
@@ -194,6 +216,7 @@ export class EtherscanService {
         type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
         arguments: [],
         callerId: isEthTransfer ? '' as any : senderId,
+        callData: isEthTransfer ? null : input,
         contractId,
         function: functionName,
         nonce,

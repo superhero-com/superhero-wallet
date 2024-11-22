@@ -364,18 +364,14 @@ const withdraw: TransactionResolver = (transaction, tokens = null) => ({
  * Token Sale Buy
  */
 const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
-  const isConfirm = !transaction.tx.return;
-  const tokenAddress: string = isConfirm && tokenAddressMapper
-    ? tokenAddressMapper(transaction.tx.contractId)
-    : transaction.tx.log?.slice(-1)[0]?.address;
+  const tokenAddress: string | undefined = tokenAddressMapper?.(transaction.tx.contractId);
 
   const [amount] = transaction.tx.arguments!;
   const token = {
     amount: amount?.value,
     ...defaultToken,
-    symbol: tokens?.[tokenAddress]?.symbol,
-    contractId: tokenAddress,
-    ...tokens?.[tokenAddress],
+    symbol: tokenAddress && tokens?.[tokenAddress]?.symbol,
+    ...(tokenAddress ? tokens?.[tokenAddress] : {}),
     isReceived: true,
   };
   const aeToken = {
@@ -396,16 +392,15 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
  */
 const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
   const isConfirm = !transaction.tx.return;
-  const tokenAddress: string = isConfirm && tokenAddressMapper
-    ? tokenAddressMapper(transaction.tx.contractId)
-    : transaction.tx.log?.slice(-1)[0]?.address;
-  const [amount] = transaction.tx.arguments!;
-  const aeAmount = transaction.tx.return?.value;
+  const tokenAddress: string | undefined = tokenAddressMapper?.(transaction.tx.contractId);
+
+  const amount = isConfirm ? transaction.tx.arguments?.[0]?.value : transaction.tx.arguments?.[0]!;
+  const aeAmount = isConfirm ? transaction.tx.arguments?.[1]?.value : transaction.tx.return?.value;
   const token = {
     amount: amount?.value,
     ...defaultToken,
-    symbol: tokens?.[tokenAddress]?.symbol,
-    ...tokens?.[tokenAddress],
+    symbol: tokenAddress && tokens?.[tokenAddress]?.symbol,
+    ...(tokenAddress ? tokens?.[tokenAddress] : {}),
     isReceived: false,
   };
   const aeToken = {
@@ -416,7 +411,7 @@ const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMappe
     isReceived: true,
   };
   return {
-    tokens: [token, aeToken],
+    tokens: [aeToken, token],
   };
 };
 

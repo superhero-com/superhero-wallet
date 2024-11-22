@@ -4,7 +4,6 @@ import type {
   AccountAddress,
   ITokenResolved,
   ITransaction,
-  ObjectValues,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -141,7 +140,13 @@ export function useTransactionData({
 
   const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
 
-  const isDexAllowance = computed((): boolean => (
+  /**
+   * This variable is true if it is an allowance type of transaction.
+   * ('transfer_allowance', 'change_allowance', 'create_allowance')
+   * Allowance type of transaction is transaction where,
+   * user controls/authorizes a contract to use user's AEX9 token.
+   */
+  const isAllowance = computed((): boolean => (
     !!innerTx.value
     && includes(TX_FUNCTIONS_TYPE_DEX.allowance, txFunctionRaw.value)
     && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
@@ -207,18 +212,16 @@ export function useTransactionData({
   ));
 
   const direction = computed(
-    (): ObjectValues<typeof TX_DIRECTION> => (innerTx.value?.function === TX_FUNCTIONS.claim)
-      ? TX_DIRECTION.received
-      : getTxDirection(
-        outerTx.value?.payerId ? outerTx.value : innerTx.value,
-        transactionCustomOwner?.value
-        || transaction.value?.transactionOwner
-        || (
-          ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
-          && txOwnerAddress.value
-        )
-        || activeAccount.value.address,
-      ),
+    () => getTxDirection(
+      outerTx.value?.payerId ? outerTx.value : innerTx.value,
+      transactionCustomOwner?.value
+      || transaction.value?.transactionOwner
+      || (
+        ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
+        && txOwnerAddress.value
+      )
+      || activeAccount.value.address,
+    ),
   );
 
   /**
@@ -257,9 +260,12 @@ export function useTransactionData({
     if (protocol.value === PROTOCOLS.aeternity) {
       // AE DEX and wrapped AE (WAE)
       if (
-        (isDex.value || isTokenSale.value)
-        && txFunctionParsed.value
-        && (!isDexAllowance.value || showDetailedAllowanceInfo)
+        txFunctionParsed.value
+        && (
+          isDex.value
+          || isTokenSale.value
+          || (isAllowance.value && showDetailedAllowanceInfo)
+        )
       ) {
         const functionResolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
         if (functionResolver) {
@@ -284,14 +290,14 @@ export function useTransactionData({
       }
     }
 
-    const amount = (isDexAllowance.value)
+    const amount = (isAllowance.value)
       ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision).toNumber()
       : amountTotal.value;
     const isReceived = direction.value === TX_DIRECTION.received;
 
     if (
       isTransactionCoin.value
-      || isDexAllowance.value
+      || isAllowance.value
       || isMultisig.value
       || isNonTokenContract.value
     ) {
@@ -356,7 +362,7 @@ export function useTransactionData({
     isTokenSaleSell,
 
     isDex,
-    isDexAllowance,
+    isAllowance,
     isDexLiquidityAdd,
     isDexLiquidityRemove,
     isDexMaxSpent,

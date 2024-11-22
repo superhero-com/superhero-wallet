@@ -15,15 +15,19 @@
     <slot>
       <img
         v-if="!isPlaceholder && srcUrl"
+        v-show="!isLoading"
         class="avatar-img"
         :src="srcUrl"
         alt="Avatar"
+        @load="isLoading = false"
       >
+      <ion-skeleton-text v-if="isLoading" animated />
     </slot>
   </div>
 </template>
 
 <script lang="ts">
+import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -31,6 +35,7 @@ import {
   PropType,
   ref,
 } from 'vue';
+
 import { checkImageAvailability, getAddressColor } from '@/utils';
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/protocols/aeternity/helpers';
@@ -43,6 +48,9 @@ const VARIANTS = ['primary', 'grey'] as const;
 type AvatarVariant = typeof VARIANTS[number];
 
 export default defineComponent({
+  components: {
+    IonSkeletonText,
+  },
   props: {
     address: { type: String, default: '' },
     name: { type: String, default: null },
@@ -63,6 +71,7 @@ export default defineComponent({
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
     const profileImageAvailable = ref(false);
+    const isLoading = ref(true);
 
     const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.address}`);
 
@@ -89,6 +98,7 @@ export default defineComponent({
       srcUrl,
       calculatedColor,
       profileImageAvailable,
+      isLoading,
     };
   },
 });
@@ -173,6 +183,15 @@ $size-xl: 56px;
 
   &.borderless {
     border: none;
+  }
+
+  ion-skeleton-text {
+    --border-radius: 16px;
+    --background: rgba(#{$color-white-rgb}, 0.1);
+    --background-rgb: #{$color-white-rgb};
+    width: 100%;
+    height: 100%;
+    margin: 0;
   }
 }
 </style>

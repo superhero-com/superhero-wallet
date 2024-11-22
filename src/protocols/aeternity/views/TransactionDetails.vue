@@ -10,10 +10,10 @@
             :fee="transactionFee"
             :is-error-transaction="isErrorTransaction"
             :payload="getTransactionPayload(transaction)!"
-            :show-header="!isDexAllowance"
+            :show-header="!isAllowance"
             :hide-amount-total="(
               isDex
-              || isDexAllowance
+              || isAllowance
               || isAex9
               || isTokenSale
             )"
@@ -43,7 +43,7 @@
 
             <template #additional-content>
               <TransactionDetailsPoolTokens
-                v-if="(isDexPool || isDexAllowance)"
+                v-if="(isDexPool || isAllowance)"
                 :transaction="transaction"
                 :tokens="transactionAssets"
                 :reversed="isDexPool"
@@ -271,7 +271,7 @@ export default defineComponent({
       isAex9,
       isErrorTransaction,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexPool,
       isDexSwap,
       isTokenSale,
@@ -413,7 +413,7 @@ export default defineComponent({
       isAex9,
       isErrorTransaction,
       isDex,
-      isDexAllowance,
+      isAllowance,
       isDexPool,
       isDexSwap,
       isTokenSale,
