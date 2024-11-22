@@ -683,6 +683,10 @@ export function decryptedComputed(
     }
   }, { immediate: true });
 
+  if (IS_MOBILE_APP) {
+    options.onDecrypted?.(encryptedState.value);
+  }
+
   return (IS_MOBILE_APP)
     ? encryptedState // On mobile devices we are not encrypting states
     : computed<string>({
