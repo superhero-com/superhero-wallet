@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.3.1...v2.3.2) (2024-11-22)
+
+
+### Features
+
+* account selector improvements ([05b4f7d](https://github.com/Superhero-com/superhero-wallet/commit/05b4f7df03c8df0127bb6de54e14629e6bd5d03d))
+* connect modal layout update ([7a02d70](https://github.com/Superhero-com/superhero-wallet/commit/7a02d70feabbcb51f105d59d1b74c9b994d18a39))
+* permission manager form as modal ([b51b1d5](https://github.com/Superhero-com/superhero-wallet/commit/b51b1d54fdb7ebae1129c08f2d0c8cc2f22b162e))
+* show decoded call data on eth tx details ([79dcf90](https://github.com/Superhero-com/superhero-wallet/commit/79dcf90e6099c2a602f1017bfcb758a5f1a745b1))
+
+
+### Bug Fixes
+
+* **aeternity:** show correct allowance transaction info ([b5ff9d5](https://github.com/Superhero-com/superhero-wallet/commit/b5ff9d5e4c252422c94a159397a3bb3f5a430384))
+* be able to import private key account on mobile app ([80dd57f](https://github.com/Superhero-com/superhero-wallet/commit/80dd57f2eb816d524af8c8f6f4174ca2b9f30d8d))
+* be able to receive ethereum related info ([7832b3a](https://github.com/Superhero-com/superhero-wallet/commit/7832b3a6ff2eebc34193b020f60faf0348b7ca3d))
+* change svg name ([e20264f](https://github.com/Superhero-com/superhero-wallet/commit/e20264f87ad39ffb691ab85b9aa5ac07c861471b))
+* get correct token address for token sale transaction ([e619c24](https://github.com/Superhero-com/superhero-wallet/commit/e619c246e1f9cb8e1a6752929814b02235c8191c))
+* missing warning message when focusing/unfocusing autocomplete input ([8f7578f](https://github.com/Superhero-com/superhero-wallet/commit/8f7578f24027df23096e15580258bd629ef0db43))
+* raw callData should not be deprecated ([8ea7faf](https://github.com/Superhero-com/superhero-wallet/commit/8ea7fafcd809b256052c59e5a33488d526c07914))
+* show assets for sell transactions correctly ([e90d260](https://github.com/Superhero-com/superhero-wallet/commit/e90d260b8e3562b40caf57159a4feb594b4bbc57))
+* show correct market cap coin info ([a9106bc](https://github.com/Superhero-com/superhero-wallet/commit/a9106bc4ee855bc6f176db88d1a09ed295748578))
+
+
+### Maintenance
+
+* token allowance modification are not only for dex ([9667530](https://github.com/Superhero-com/superhero-wallet/commit/96675308834d7fb3191816f42607b010ce26ee54))
+
+
+### Performance
+
+* **asset-selector:** do not render all assets at once ([3ab5296](https://github.com/Superhero-com/superhero-wallet/commit/3ab52962d5d2fbc2794826142b0f1e01f4c5b071))
+
 ### [2.3.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.3.0...v2.3.1) (2024-11-01)
 
 
