@@ -28,6 +28,7 @@
         :title="help?.title"
         :msg="help?.msg"
         :full-screen="!!help?.fullscreen"
+        data-cy="btn-help"
         @help="$emit('help')"
       />
       <div
