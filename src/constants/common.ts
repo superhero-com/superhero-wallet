@@ -391,8 +391,6 @@ export const POPUP_METHODS = {
   removePopup: 'removePopup',
   getPopup: 'getPopup',
   reload: 'reload',
-  paste: 'paste',
-  checkHasAccount: 'checkHasAccount', // TODO check if still used
 } as const;
 
 export const SESSION_METHODS = {

@@ -3,11 +3,7 @@ import '@/protocols/registerAdapters';
 import type { IBackgroundMessageData } from '@/types';
 import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
-import {
-  IS_FIREFOX,
-  POPUP_METHODS,
-  UNFINISHED_FEATURES,
-} from '@/constants';
+import { IS_FIREFOX, POPUP_METHODS } from '@/constants';
 import { useWalletConnect } from '@/composables';
 import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
 import * as wallet from './wallet';
@@ -26,23 +22,6 @@ browser.runtime.onMessage.addListener(
       wallet.disconnect();
       window.location.reload();
       return null;
-    }
-
-    if (method === POPUP_METHODS.checkHasAccount) {
-      const { isLoggedIn } = useAccounts();
-      return isLoggedIn.value;
-    }
-
-    if (UNFINISHED_FEATURES && method === POPUP_METHODS.paste) {
-      let result = '';
-      const textarea = document.createElement('textarea');
-      document.body.appendChild(textarea);
-      textarea.focus();
-      if (document.execCommand('paste')) {
-        result = textarea.value;
-      }
-      document.body.removeChild(textarea);
-      return result;
     }
 
     if (typeof aepp === 'string' && method) {
