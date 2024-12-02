@@ -27,6 +27,7 @@ import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
+import Logger from '@/lib/logger';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -114,13 +115,11 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Uint8Array> {
     const account = AeAccountHdWallet.getAccount(options?.fromAccount);
     if (account && isAccountAirGap(account)) {
-      const { openDefaultModal } = useModals();
-
-      openDefaultModal({
+      Logger.write({
         title: tg('airGap.signMessageErrorModal.title'),
-        msg: tg('airGap.signMessageErrorModal.msg'),
-        icon: 'critical',
-        textCenter: true,
+        message: tg('airGap.signMessageErrorModal.msg'),
+        type: 'api-response',
+        modal: true,
       });
     }
 

@@ -617,7 +617,7 @@
       "txDetails": "Transaction details",
       "tokenDetails": "Token details",
       "coinDetails": "Coin details",
-      "saveErrorsLog": "Save error log",
+      "saveErrorsLog": "Error log",
       "resetWallet": "Reset wallet",
       "seedPhrase": "Seed phrase",
       "secureLogin": "Secure login",
@@ -631,7 +631,16 @@
       "addressBookAdd": "Add new address"
     },
     "errors-log-settings": {
-      "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
+      "description": "<p>Superhero Wallet is able of maintaining an error log file on your device, recording the last {0} errors encountered.</p><p>The error log can be exported in JSON format to facilitate debugging or support assistance.</p>",
+      "keepErrorLog": "Keep error log",
+      "exportErrorLog": "Export error log",
+      "disableDialog": {
+        "title": "Disable error log",
+        "subtitle": "and export collected data",
+        "msg": "You are about to disable keeping an error log for Superhero Wallet. This will delete all previous error data saved in the storage.",
+        "question": "Would you like to export the error log and disable the feature?",
+        "btnText": "Export and disable"
+      }
     },
     "addressBook": {
       "addAddress": "Add",
