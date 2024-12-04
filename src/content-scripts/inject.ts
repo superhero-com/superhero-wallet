@@ -5,10 +5,14 @@ import {
   connectionProxy,
 } from '@aeternity/aepp-sdk';
 
+import type { IEthRpcMethodParameters } from '@/protocols/ethereum/types';
+import type { BackgroundMethod } from '@/types';
+import { ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
+
 window.browser = require('webextension-polyfill');
 
 const runContentScript = () => {
-  const sendToOffscreen = (method, params) => new Promise((resolve) => {
+  const sendToOffscreen = (method: BackgroundMethod, params: any) => new Promise((resolve) => {
     browser.runtime
       .sendMessage({
         target: 'offscreen',
@@ -20,7 +24,11 @@ const runContentScript = () => {
       .then((res) => resolve(res));
   });
 
-  async function handleEthRpcRequest(event, method, params) {
+  async function handleEthRpcRequest(
+    event: any,
+    method: BackgroundMethod,
+    params: IEthRpcMethodParameters,
+  ) {
     const result = await sendToOffscreen(method, {
       rpcMethodParams: params,
       aepp: event.origin,
@@ -45,31 +53,19 @@ const runContentScript = () => {
       let { method } = event.data;
       if (!method) method = 'pageMessage';
 
-      switch (method) {
-        case 'eth_getBalance':
-          handleEthRpcRequest(event, method, { address: event.data.params[0] });
-          break;
-        case 'eth_blockNumber':
-        case 'eth_chainId':
-        case 'eth_accounts':
-        case 'eth_requestAccounts':
-        case 'wallet_requestPermissions':
-        case 'wallet_revokePermissions':
-          handleEthRpcRequest(event, method, event.data.params?.[0]);
-          break;
-        case 'eth_call':
-        case 'wallet_switchEthereumChain':
-        case 'eth_sendTransaction':
-          handleEthRpcRequest(event, method, {
-            ...event.data.params[0],
-            tag: event.data.params[1],
-          });
-          break;
-        default:
-          if (!event.data.resolve) {
-            sendToOffscreen(method, event.data);
-          }
-          break;
+      if (method === ETH_RPC_METHODS.getBalance) {
+        handleEthRpcRequest(event, method, { address: event.data.params[0] });
+      } else if (
+        Object.values(ETH_RPC_METHODS).includes(method)
+        || Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
+      ) {
+        handleEthRpcRequest(event, method, {
+          ...(event.data.params?.[0] || {}),
+          ...(event.data.params?.[1] && !event.data.params?.[0]?.tag
+            ? { tag: event.data.params[1] } : {}),
+        });
+      } else if (!event.data.resolve) {
+        sendToOffscreen(method, event.data);
       }
     },
     false,
@@ -82,6 +78,7 @@ const runContentScript = () => {
     if (document.readyState === 'complete') {
       clearInterval(readyStateCheckInterval);
       const port = browser.runtime.connect();
+      // @ts-expect-error
       const extConnection = new BrowserRuntimeConnection({ port });
       const pageConnection = new BrowserWindowMessageConnection({
         target: window,

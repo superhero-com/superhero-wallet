@@ -176,7 +176,7 @@ export async function handleEthereumRpcMethod(
     }
     return false;
   }
-  if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.callContractOffChain) {
+  if (Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)) {
     const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
     const result = await new EtherscanService(apiUrl)
       .fetchFromApi({
