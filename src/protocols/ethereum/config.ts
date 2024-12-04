@@ -100,8 +100,13 @@ export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testne
 
 export const ETH_RPC_ETHERSCAN_PROXY_METHODS = {
   callContractOffChain: 'eth_call',
-  // NOT yet supported
   getBlockByNumber: 'eth_getBlockByNumber',
+  getUncleByBlockNumberAndIndex: 'eth_getUncleByBlockNumberAndIndex',
+  estimateGas: 'eth_estimateGas',
+  getTransactionByHash: 'eth_getTransactionByHash',
+  getTransactionCount: 'eth_getTransactionCount',
+  gasPrice: 'eth_gasPrice',
+  getTransactionReceipt: 'eth_getTransactionReceipt',
 } as const;
 
 export const ETH_RPC_METHODS = {
