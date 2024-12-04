@@ -377,6 +377,7 @@ export const POPUP_TYPES = [
 export const CONNECT_PERMISSIONS = {
   address: 'address',
   addressList: 'addressList',
+  networks: 'networks',
   transactions: 'transactions',
 } as const;
 

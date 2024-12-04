@@ -27,6 +27,10 @@
         vertical
         small
       />
+      <slot
+        v-if="$slots.right"
+        name="right"
+      />
     </div>
   </component>
 </template>
