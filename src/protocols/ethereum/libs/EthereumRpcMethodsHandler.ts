@@ -7,7 +7,7 @@ import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import type { IModalProps } from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
-import { handleUnknownError, sleep, watchUntilTruthy } from '@/utils';
+import { sleep, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
@@ -15,6 +15,7 @@ import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCal
 import { ETH_CONTRACT_ID, ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
 
 import {
+  CONNECT_PERMISSIONS,
   PERMISSION_DEFAULTS,
   PROTOCOLS,
 } from '@/constants';
@@ -26,68 +27,72 @@ import {
 
 const isCheckingPermissions = ref(false);
 
+async function checkOrAskEthPermission(aepp: string) {
+  const {
+    addPermission,
+    checkOrAskPermission,
+    permissions,
+  } = usePermissions();
+
+  await watchUntilTruthy(() => !isCheckingPermissions.value);
+
+  isCheckingPermissions.value = true;
+  const permission = await checkOrAskPermission(
+    METHODS.subscribeAddress,
+    aepp,
+    {
+      protocol: PROTOCOLS.ethereum,
+      access: [
+        CONNECT_PERMISSIONS.address,
+        CONNECT_PERMISSIONS.networks,
+        CONNECT_PERMISSIONS.transactions,
+      ],
+    },
+  );
+  const { hostname: host } = new URL(aepp);
+  if (permission && !permissions.value[host]?.address) {
+    // awaiting for default permissions to be synced
+    // with background after being set in `checkOrAskPermission`
+    await sleep(50);
+    addPermission({
+      ...PERMISSION_DEFAULTS,
+      ...(permissions.value[host] || {}),
+      address: true,
+      addressList: true,
+      host,
+      name: host,
+    });
+  }
+  isCheckingPermissions.value = false;
+
+  return permission;
+}
+
 export async function handleEthereumRpcMethod(
   aepp: string,
   method: EthRpcSupportedMethods,
   params: IEthRpcMethodParameters,
   name?: string,
 ) {
-  const {
-    addPermission,
-    checkOrAskPermission,
-    permissions,
-    removePermission,
-  } = usePermissions();
+  const { checkOrAskPermission, removePermission } = usePermissions();
   const { getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
   const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
 
-  if (method === ETH_RPC_METHODS.requestPermissions || method === ETH_RPC_METHODS.requestAccounts) {
-    isCheckingPermissions.value = true;
-    if (await checkOrAskPermission(
-      METHODS.subscribeAddress,
-        aepp as string,
-        { protocol: PROTOCOLS.ethereum },
-    )) {
-      const { hostname: host } = new URL(aepp as string);
-      // awaiting for default permissions to be synced
-      // with background after being set in `checkOrAskPermission`
-      await sleep(50);
-      addPermission({
-        ...PERMISSION_DEFAULTS,
-        ...(permissions.value[host] || {}),
-        address: true,
-        addressList: true,
-        host,
-        name: host,
-      });
-    }
-    isCheckingPermissions.value = false;
-    return method === ETH_RPC_METHODS.requestAccounts
+  if (method === ETH_RPC_METHODS.requestPermissions) {
+    return (await checkOrAskEthPermission(aepp)) ? { eth_accounts: true } : {};
+  }
+
+  if (method === ETH_RPC_METHODS.requestAccounts || method === ETH_RPC_METHODS.getAccounts) {
+    return (await checkOrAskEthPermission(aepp))
       ? [getLastActiveProtocolAccount(PROTOCOLS.ethereum)!.address]
-    // TODO: consider setting and returning any other permission in future
-      : { eth_accounts: true };
+      : [];
   }
 
   if (method === ETH_RPC_METHODS.revokePermissions) {
-    const { host } = new URL(aepp as string);
+    const { host } = new URL(aepp);
     removePermission(host);
     return null;
-  }
-  if (method === ETH_RPC_METHODS.getAccounts) {
-    try {
-      await watchUntilTruthy(() => !isCheckingPermissions.value);
-      if (await checkOrAskPermission(
-        METHODS.subscribeAddress,
-          aepp as string,
-          { protocol: PROTOCOLS.ethereum },
-      )) {
-        return [getLastActiveProtocolAccount(PROTOCOLS.ethereum)!.address];
-      }
-    } catch (e) {
-      handleUnknownError(e);
-    }
-    return [];
   }
 
   if (method === ETH_RPC_METHODS.getBalance) {
