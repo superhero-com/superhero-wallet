@@ -201,7 +201,7 @@ export class EtherscanService {
     const amount = Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
-    const isEthTransfer = !contractAddress && !input;
+    const isEthTransfer = !contractAddress && (!input || input === '0x');
 
     return {
       protocol: PROTOCOLS.ethereum,
