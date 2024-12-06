@@ -12,7 +12,12 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
-import { ETH_CONTRACT_ID, ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
+import {
+  ETH_CONTRACT_ID,
+  ETH_RPC_ETHERSCAN_PROXY_METHODS,
+  ETH_RPC_METHODS,
+  ETH_RPC_WALLET_EVENTS,
+} from '@/protocols/ethereum/config';
 
 import {
   CONNECT_PERMISSIONS,
@@ -176,7 +181,10 @@ export async function handleEthereumRpcMethod(
     }
     return false;
   }
-  if (Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)) {
+  if (
+    method !== ETH_RPC_WALLET_EVENTS.chainChanged
+    && Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
+  ) {
     const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
     const result = await new EtherscanService(apiUrl)
       .fetchFromApi({

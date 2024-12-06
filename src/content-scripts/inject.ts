@@ -7,7 +7,13 @@ import {
 
 import type { IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 import type { BackgroundMethod } from '@/types';
-import { ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
+import {
+  ETH_RPC_ETHERSCAN_PROXY_METHODS,
+  ETH_RPC_METHODS,
+  ETH_RPC_WALLET_EVENTS,
+} from '@/protocols/ethereum/config';
+
+const connectedDapps: Record<string, any> = {};
 
 window.browser = require('webextension-polyfill');
 
@@ -33,6 +39,9 @@ const runContentScript = () => {
       rpcMethodParams: params,
       aepp: event.origin,
     });
+    if (!connectedDapps[event.origin]) {
+      connectedDapps[event.origin] = event.source;
+    }
     event.source.postMessage({
       jsonrpc: '2.0',
       result,
@@ -70,6 +79,19 @@ const runContentScript = () => {
     },
     false,
   );
+  browser.runtime.onMessage.addListener(({ method, result }: any) => {
+    if (method === ETH_RPC_WALLET_EVENTS.chainChanged) {
+      Object.entries(connectedDapps).forEach(([origin, source]) => {
+        source.postMessage({
+          jsonrpc: '2.0',
+          result,
+          method,
+          superheroWalletApproved: true,
+          type: 'result',
+        }, origin as any);
+      });
+    }
+  });
 
   /**
    * Aex-2 Aepp communication
