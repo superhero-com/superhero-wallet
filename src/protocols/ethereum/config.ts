@@ -121,3 +121,7 @@ export const ETH_RPC_METHODS = {
   switchNetwork: 'wallet_switchEthereumChain',
   revokePermissions: 'wallet_revokePermissions',
 } as const;
+
+export const ETH_RPC_WALLET_EVENTS = {
+  chainChanged: 'chainChanged',
+} as const;

@@ -1,4 +1,4 @@
-import { IBackgroundMessageData } from '@/types';
+import type { IBackgroundMessageData } from '@/types';
 import {
   openPopup,
   removePopup,
@@ -47,6 +47,18 @@ const handleMessage: browser.runtime.onMessageBool = (
       popupType,
     } = msg.params ?? {};
     switch (msg.method) {
+      case 'chainChanged':
+        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
+          if (tab.id) {
+            browser.tabs.sendMessage(tab.id, {
+              superheroWalletApproved: true,
+              method: msg.method,
+              result: msg.params?.rpcMethodParams?.result,
+              type: 'result',
+            });
+          }
+        });
+        break;
       case 'openPopup':
         openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
           sendResponse(popupConfig);
