@@ -59,9 +59,7 @@ const {
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
-const {
-  checkUserAuth,
-} = useAuth();
+const { checkUserAuth } = useAuth();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
