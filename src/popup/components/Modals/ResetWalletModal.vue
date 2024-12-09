@@ -59,13 +59,14 @@
 import { defineComponent, PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
+import { IS_MOBILE_APP } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
   useNetworks,
+  usePermissions,
   useUi,
 } from '@/composables';
-import { IS_MOBILE_APP } from '@/constants';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
@@ -93,21 +94,25 @@ export default defineComponent({
     const { resetNetworks } = useNetworks();
     const { resetUiSettings } = useUi();
     const { disconnectDapps } = useAeSdk();
+    const { resetPermissions } = usePermissions();
 
     async function onReset() {
       resetAccounts();
       resetNetworks();
       resetUiSettings();
       disconnectDapps();
+      resetPermissions();
 
       WalletStorage.clear();
       if (IS_MOBILE_APP) {
         SecureMobileStorage.clear();
       }
+
       // TODO: Rethink this approach
       // It is removing the remaining vuex state
       await browser.storage.local.clear();
       await router.push({ name: ROUTE_INDEX });
+
       props.resolve();
       window.location.reload();
     }
@@ -122,8 +127,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
-@use '@/styles/mixins';
-@use '@/styles/typography';
 
 .reset-wallet {
   .icon-wrapper {
