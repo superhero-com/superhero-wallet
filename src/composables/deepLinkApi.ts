@@ -4,7 +4,12 @@ import { useIonRouter } from '@ionic/vue';
 
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { checkIfSuperheroCallbackUrl } from '@/utils';
-import { IS_IOS, IS_MOBILE_APP, MODAL_TRANSFER_SEND } from '@/constants';
+import {
+  IS_IOS,
+  IS_MOBILE_APP,
+  IS_WEB,
+  MODAL_TRANSFER_SEND,
+} from '@/constants';
 import { useModals } from '@/composables/modals';
 
 export function useDeepLinkApi() {
@@ -45,11 +50,20 @@ export function useDeepLinkApi() {
       decodeURIComponent(String(route.query[isSuccess ? 'x-success' : 'x-cancel'])),
     ) as string;
     router.replace({ name: ROUTE_ACCOUNT });
-    if (IS_MOBILE_APP && !IS_IOS) {
-      window.open(callbackUrl, '_system');
-    } else {
-      window.open(callbackUrl, '_self');
-    }
+    /**
+     * When auto-sign is enabled (daily spend limit),
+     * there are cases (mostly on iOS) where it's not redirecting back to the callback URL.
+     * This might be due to the time it takes for iOS to animate the navigation.
+     * Adding a small delay fixes this
+     * TODO some more research to figure out the exact reason
+     */
+    setTimeout(() => {
+      if (IS_MOBILE_APP && !IS_IOS) {
+        window.open(callbackUrl, '_system');
+      } else {
+        window.open(callbackUrl, '_self');
+      }
+    }, IS_WEB ? 0 : 300);
   }
 
   return {
