@@ -80,7 +80,6 @@ export function useAeSdk() {
   } = useNetworks();
   const {
     accountsAddressList,
-    isLoggedIn,
     getLastActiveProtocolAccount,
     onAccountChange,
   } = useAccounts();
@@ -130,10 +129,7 @@ export function useAeSdk() {
   async function initAeSdk() {
     isAeSdkUpdating.value = true;
 
-    await Promise.all([
-      watchUntilTruthy(isLoggedIn),
-      watchUntilTruthy(areNetworksRestored),
-    ]);
+    await watchUntilTruthy(areNetworksRestored);
 
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
