@@ -132,6 +132,8 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .reset-wallet {
+  z-index: $z-index-login-modal;
+
   .icon-wrapper {
     margin: 8px auto 18px;
     color: $color-danger;
