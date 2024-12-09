@@ -62,6 +62,7 @@ import type { RejectCallback, ResolveCallback } from '@/types';
 import {
   useAccounts,
   useAeSdk,
+  useModals,
   useNetworks,
   useUi,
 } from '@/composables';
@@ -93,12 +94,14 @@ export default defineComponent({
     const { resetNetworks } = useNetworks();
     const { resetUiSettings } = useUi();
     const { disconnectDapps } = useAeSdk();
+    const { closeAllModals } = useModals();
 
     async function onReset() {
       resetAccounts();
       resetNetworks();
       resetUiSettings();
       disconnectDapps();
+      closeAllModals();
 
       WalletStorage.clear();
       if (IS_MOBILE_APP) {
@@ -122,8 +125,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
-@use '@/styles/mixins';
-@use '@/styles/typography';
 
 .reset-wallet {
   .icon-wrapper {
