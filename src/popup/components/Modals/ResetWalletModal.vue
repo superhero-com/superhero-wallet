@@ -63,6 +63,7 @@ import { IS_MOBILE_APP } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
+  useModals,
   useNetworks,
   usePermissions,
   useUi,
@@ -95,6 +96,7 @@ export default defineComponent({
     const { resetUiSettings } = useUi();
     const { disconnectDapps } = useAeSdk();
     const { resetPermissions } = usePermissions();
+    const { closeAllModals } = useModals();
 
     async function onReset() {
       resetAccounts();
@@ -102,6 +104,7 @@ export default defineComponent({
       resetUiSettings();
       disconnectDapps();
       resetPermissions();
+      closeAllModals();
 
       WalletStorage.clear();
       if (IS_MOBILE_APP) {
