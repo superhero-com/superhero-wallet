@@ -6,9 +6,19 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :custom-labels="[$t('modals.confirm-raw-sign.title')]"
+      :custom-labels="[
+        ...(isUnknownDapp ? [$t('common.unknown')] : []),
+        $t('modals.confirm-raw-sign.title'),
+      ]"
       :sender="sender"
       :recipient="activeAccount!"
+      :first-label-warning="isUnknownDapp"
+    />
+
+    <NoOriginWarning
+      v-if="isUnknownDapp"
+      :action="$t('unknownDapp.signDataAction')"
+      :warning="$t('unknownDapp.signDataWarning')"
     />
 
     <div
@@ -62,6 +72,7 @@ import {
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
   RUNNING_IN_POPUP,
+  UNKNOWN_SOURCE,
 } from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, useModals, usePopupProps } from '@/composables';
@@ -93,6 +104,9 @@ export default defineComponent({
     const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     const dataAsString = computed((): string => popupProps.value?.txBase64?.toString() || '');
+    const isUnknownDapp = computed(() => (
+      !popupProps.value?.app || popupProps.value.app.name === UNKNOWN_SOURCE
+    ));
 
     async function confirm() {
       if (RUNNING_IN_POPUP && activeAccount?.type === 'airgap') {
@@ -124,6 +138,7 @@ export default defineComponent({
       cancel,
       activeAccount,
       dataAsString,
+      isUnknownDapp,
       sender,
     };
   },

@@ -7,7 +7,7 @@ import { IonPage } from '@ionic/vue';
 import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { MODAL_MESSAGE_SIGN } from '@/constants';
+import { MODAL_MESSAGE_SIGN, UNKNOWN_APP_DETAILS } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import {
@@ -39,14 +39,16 @@ export default defineComponent({
         const message = isHexEncodedMessage ? Buffer.from(rawMessage, 'hex') : rawMessage;
         const displayMessage = message?.toString();
         const { host, href } = callbackOrigin.value || {} as any;
-
-        await openModal(MODAL_MESSAGE_SIGN, {
-          message: displayMessage,
-          app: {
+        const app = host && href
+          ? {
             host,
             name: host,
             url: href,
-          },
+          } : UNKNOWN_APP_DETAILS;
+
+        await openModal(MODAL_MESSAGE_SIGN, {
+          message: displayMessage,
+          app,
         });
 
         const signature = await aeSdk.signMessage(message as string);
