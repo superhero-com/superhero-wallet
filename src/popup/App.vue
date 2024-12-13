@@ -23,6 +23,7 @@
           v-if="!IS_MOBILE_APP"
           class="app-unauthenticated-placeholder"
           :class="{ visible: !showRouter }"
+          data-cy="app-unauthenticated-placeholder"
         />
 
         <!--
