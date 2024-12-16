@@ -207,6 +207,10 @@ export function usePermissions() {
     }
   }
 
+  function resetPermissions() {
+    permissions.value = {};
+  }
+
   return {
     permissions,
     addPermission,
@@ -214,5 +218,6 @@ export function usePermissions() {
     checkPermission,
     checkOrAskPermission,
     checkTransactionSignLimit,
+    resetPermissions,
   };
 }

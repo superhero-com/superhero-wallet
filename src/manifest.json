@@ -7,6 +7,7 @@
   },
   "permissions": [
     "storage",
+    "scripting",
     "unlimitedStorage",
     "activeTab",
     "tabs",
@@ -17,7 +18,10 @@
     "clipboardWrite"
   ],
   "host_permissions": [
-    "https://wallet.superhero.com/*"
+    "https://wallet.superhero.com/*",
+    "file://*/*",
+    "http://*/*",
+    "https://*/*"
   ],
   "icons": {
     "48": "./icons/icon_48.png",
@@ -52,7 +56,8 @@
     },
     {
       "resources": [
-        "js/inject.js"
+        "js/inject.js",
+        "js/inpage.js"
       ],
       "matches": ["*://*/*"]
     }
@@ -60,6 +65,10 @@
   "side_panel": {
     "default_title": "Superhero Wallet",
     "default_path": "index.html"
+  },
+  "externally_connectable": {
+    "matches": ["https://wallet.superhero.com/*"],
+    "ids": ["*"]
   },
   "sidebar_action": {
     "default_title": "Superhero Wallet",

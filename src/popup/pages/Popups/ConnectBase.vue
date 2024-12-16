@@ -55,35 +55,67 @@
           v-text="$t('pages.connectConfirm.websiteRequestConnect')"
         />
       </div>
+      <template v-if="activeAccount">
+        <!-- USER CARD -->
+        <AccountSelectOptionsItem
+          :custom-account="activeAccount"
+          hide-balance
+          hide-protocol-icon
+        >
+          <template #right>
+            <NetworkButton
+              variant="outlined"
+              class="network-button"
+            />
+          </template>
+        </AccountSelectOptionsItem>
 
-      <!-- USER CARD -->
-      <AccountSelectOptionsItem
-        v-if="activeAccount"
-        :custom-account="activeAccount"
-        hide-balance
-        hide-protocol-icon
-      />
-      <Card v-else dense>
-        <AnimatedSpinnerIcon class="spinner" />
-      </Card>
-    </div>
-
-    <p
-      class="text-description text-center permissions-header"
-      v-text="$t('pages.connectConfirm.permissionsHeader')"
-    />
-
-    <div class="permissions">
-      <div v-for="(accessName, index) in access" :key="index">
-        <div class="label">
-          <CheckMark class="icon" />
-          {{ accessLabels[accessName]?.label || 'Unknown' }}
-        </div>
-        <div
-          class="description"
-          v-text="accessLabels[accessName]?.description"
+        <p
+          class="text-description text-center permissions-header"
+          v-text="$t('pages.connectConfirm.permissionsHeader')"
         />
-      </div>
+
+        <div class="permissions">
+          <div v-for="(accessName, index) in accessList" :key="index">
+            <div class="label">
+              <CheckMark class="icon" />
+              {{ accessLabels[accessName]?.label || 'Unknown' }}
+            </div>
+            <TemplateRenderer
+              class="description"
+              :str="accessLabels[accessName]?.description"
+            />
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <Card class="skeleton-card">
+          <ion-skeleton-text
+            class="avatar"
+            animated
+          />
+          <div class="name-and-address">
+            <ion-skeleton-text
+              class="name"
+              animated
+            />
+            <ion-skeleton-text
+              class="address"
+              animated
+            />
+          </div>
+        </Card>
+        <InfoBox
+          class="danger"
+          type="danger"
+        >
+          <div
+            class="label"
+            v-text="$t('pages.connectConfirm.noAccountsFoundLabel', [protocolName])"
+          />
+          <span v-text="$t('pages.connectConfirm.noAccountsFoundDescription', [protocolName])" />
+        </InfoBox>
+      </template>
     </div>
 
     <template #footer>
@@ -97,6 +129,7 @@
       <BtnMain
         data-cy="accept"
         wide
+        :disabled="!activeAccount"
         :text="$t('common.confirm')"
         @click="confirm()"
       />
@@ -123,15 +156,18 @@ import {
 } from '@/constants';
 import { useAccounts, usePopupProps } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import Card from '@/popup/components/Card.vue';
 import Avatar from '@/popup/components/Avatar.vue';
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import AccountSelectOptionsItem from '@/popup/components/AccountSelectOptionsItem.vue';
+import InfoBox from '@/popup/components/InfoBox.vue';
+import NetworkButton from '@/popup/components/NetworkButton.vue';
+import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 import Truncate from '@/popup/components/Truncate.vue';
 
-import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import CheckMark from '@/icons/check-mark-circle-outline.svg?vue-component';
 import DappIcon from '@/icons/dapp.svg?vue-component';
 import TriangleRightIcon from '@/icons/triangle-right.svg?vue-component';
@@ -143,8 +179,10 @@ export default defineComponent({
     Avatar,
     Modal,
     BtnMain,
+    InfoBox,
+    NetworkButton,
+    TemplateRenderer,
     Truncate,
-    AnimatedSpinnerIcon,
     CheckMark,
     DappIcon,
     TriangleRightIcon,
@@ -152,7 +190,7 @@ export default defineComponent({
   props: {
     access: { type: Array as PropType<ConnectPermission[]>, required: true },
   },
-  setup() {
+  setup(props) {
     const { t } = useI18n();
 
     const { getLastActiveProtocolAccount } = useAccounts();
@@ -168,13 +206,23 @@ export default defineComponent({
         label: t('pages.connectConfirm.addressListLabel'),
         description: t('pages.connectConfirm.addressListRequest'),
       },
+      [CONNECT_PERMISSIONS.networks]: {
+        label: t('pages.connectConfirm.networkLabel'),
+        description: t('pages.connectConfirm.networkRequest'),
+      },
       [CONNECT_PERMISSIONS.transactions]: {
         label: t('pages.connectConfirm.transactionLabel'),
         description: t('pages.connectConfirm.transactionRequest'),
       },
     };
 
-    const activeAccount = computed(() => getLastActiveProtocolAccount(PROTOCOLS.aeternity));
+    // @ts-expect-error
+    const accessList = computed<ConnectPermission[]>(() => popupProps.value?.access
+      || props.access);
+
+    const protocol = computed(() => popupProps.value?.protocol || PROTOCOLS.aeternity);
+
+    const activeAccount = computed(() => getLastActiveProtocolAccount(protocol.value));
 
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;
@@ -209,6 +257,10 @@ export default defineComponent({
      */
     const isUnknown = computed(() => !popupProps.value?.app?.url && !popupProps.value?.app?.name);
 
+    const protocolName = computed(
+      () => ProtocolAdapterFactory.getAdapter(protocol.value).protocolName,
+    );
+
     function confirm() {
       if (popupProps.value?.app?.host) {
         addPermission({
@@ -230,6 +282,7 @@ export default defineComponent({
     });
 
     return {
+      accessList,
       popupProps,
       activeAccount,
       dappIcon,
@@ -239,6 +292,7 @@ export default defineComponent({
       dappUrlToDisplay,
       accessLabels,
       isUnknown,
+      protocolName,
       confirm,
       cancel,
     };
@@ -279,6 +333,20 @@ export default defineComponent({
       }
     }
 
+    .network-button {
+      pointer-events: none;
+    }
+
+    .danger {
+      margin-top: 24px;
+
+      .label {
+        @extend %face-sans-15-medium;
+
+        margin-bottom: 8px;
+      }
+    }
+
     .connect-parties-label {
       $arrow-space: 35px;
 
@@ -313,10 +381,44 @@ export default defineComponent({
       }
     }
 
-    .spinner {
-      display: block;
-      width: 40px;
-      margin: -5px auto;
+    .skeleton-card {
+      padding: 8px 8px;
+
+      &:deep(.card-content) {
+        display: flex;
+      }
+
+      .name-and-address {
+        display: flex;
+        flex-direction: column;
+        margin-left: 8px;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      ion-skeleton-text {
+        --background: rgba(#{$color-white-rgb}, 0.1);
+        --background-rgb: #{$color-white-rgb};
+        margin: 0;
+
+        &.name {
+          height: 12px;
+          width: 152px;
+          border-radius: 8px;
+        }
+
+        &.address {
+          height: 12px;
+          width: 96px;
+          border-radius: 8px;
+        }
+
+        &.avatar {
+          --border-radius: 25px;
+          height: 40px;
+          width: 40px;
+        }
+      }
     }
   }
 
