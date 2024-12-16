@@ -3,40 +3,79 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="errors-log-settings">
         <p class="text-description">
-          {{ $t('pages.errors-log-settings.description') }}
+          <TemplateRenderer :str="$t('pages.errors-log-settings.description', [maxLogEntries])" />
         </p>
 
         <div class="options">
           <SwitchButton
-            :label="$t('pages.titles.saveErrorsLog')"
+            :label="$t('pages.errors-log-settings.keepErrorLog')"
             :model-value="saveErrorLog"
-            @update:modelValue="setSaveErrorLog"
+            @click.prevent="toggleSaveErrorLog"
           />
         </div>
+
+        <BtnMain
+          :disabled="!hasErrors || !saveErrorLog"
+          extend
+          class="account-select-options-item"
+          @click="exportErrorLog(false)"
+        >
+          {{ $t("pages.errors-log-settings.exportErrorLog") }}
+        </BtnMain>
       </div>
     </IonContent>
   </IonPage>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useUi } from '@/composables';
+import { MAX_LOG_ENTRIES, MODAL_CONFIRM_DISABLE_ERROR_LOG } from '@/constants';
+import { useModals, useUi } from '@/composables';
+import { formatNumber } from '@/utils';
+import Logger from '@/lib/logger';
 
-import SwitchButton from '../components/SwitchButton.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import SwitchButton from '@/popup/components/SwitchButton.vue';
+import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 
 export default defineComponent({
   components: {
+    TemplateRenderer,
+    BtnMain,
     SwitchButton,
     IonPage,
     IonContent,
   },
   setup() {
     const { saveErrorLog, setSaveErrorLog } = useUi();
+    const { openModal } = useModals();
+    const hasErrors = ref(Logger.get().length > 0);
+
+    async function exportErrorLog(clear: boolean = false) {
+      Logger.exportErrorLog(clear);
+    }
+
+    async function toggleSaveErrorLog() {
+      if (saveErrorLog.value && hasErrors.value) {
+        try {
+          await openModal<boolean>(MODAL_CONFIRM_DISABLE_ERROR_LOG);
+          exportErrorLog(true);
+          setSaveErrorLog(false);
+          hasErrors.value = false;
+        } catch (error) { /* NOOP */ }
+      } else {
+        setSaveErrorLog(!saveErrorLog.value);
+      }
+    }
 
     return {
+      hasErrors,
+      exportErrorLog,
+      toggleSaveErrorLog,
       saveErrorLog,
       setSaveErrorLog,
+      maxLogEntries: formatNumber(MAX_LOG_ENTRIES),
     };
   },
 });
@@ -51,6 +90,7 @@ export default defineComponent({
 
   .options {
     margin-top: 20px;
+    margin-bottom: 36px;
   }
 }
 </style>

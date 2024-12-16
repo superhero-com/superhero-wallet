@@ -11,6 +11,7 @@ import {
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
+  MODAL_CONFIRM_DISABLE_ERROR_LOG,
   MODAL_CONSENSUS_INFO,
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
@@ -50,49 +51,50 @@ import { useModals } from '@/composables';
 
 import NetworkSwitcherModal from '@/popup/components/Modals/NetworkSwitcherModal.vue';
 
-import AccountCreate from '../components/Modals/AccountCreate.vue';
-import Default from '../components/Modals/Default.vue';
-import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
-import ProtocolSelect from '../components/Modals/ProtocolSelect.vue';
-import AccountImport from '../components/Modals/AccountImport.vue';
-import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
-import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
-import Confirm from '../components/Modals/Confirm.vue';
-import ConfirmConnect from '../pages/Popups/Connect.vue';
-import ConfirmAccountList from '../pages/Popups/AccountList.vue';
+import ConfirmDisableErrorLog from '@/popup/components/Modals/ConfirmDisableErrorLog.vue';
+import AccountCreate from '@/popup/components/Modals/AccountCreate.vue';
+import Default from '@/popup/components/Modals/Default.vue';
+import ProtocolSpecificView from '@/popup/components/ProtocolSpecificView.vue';
+import ProtocolSelect from '@/popup/components/Modals/ProtocolSelect.vue';
+import AccountImport from '@/popup/components/Modals/AccountImport.vue';
+import AccountSelectOptions from '@/popup/components/Modals/AccountSelectOptions.vue';
+import ClaimSuccess from '@/popup/components/Modals/ClaimSuccess.vue';
+import Confirm from '@/popup/components/Modals/Confirm.vue';
+import ConfirmConnect from '@/popup/pages/Popups/Connect.vue';
+import ConfirmAccountList from '@/popup/pages/Popups/AccountList.vue';
 
-import ErrorLog from '../components/Modals/ErrorLog.vue';
-import PrivateKeyExport from '../components/Modals/PrivateKeyExport.vue';
-import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
-import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
-import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
-import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
-import QrCodeScanner from '../components/Modals/QrCodeScanner.vue';
-import Help from '../components/Modals/Help.vue';
-import AssetSelector from '../components/Modals/AssetSelector.vue';
-import ResetWallet from '../components/Modals/ResetWalletModal.vue';
-import RecipientHelper from '../components/Modals/RecipientHelper.vue';
-import RecipientInfo from '../components/Modals/RecipientInfo.vue';
-import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
-import PayloadForm from '../components/Modals/PayloadForm.vue';
-import ClaimGiftCard from '../components/Modals/ClaimGiftCard.vue';
-import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
-import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
-import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
-import MessageSign from '../pages/Popups/MessageSign.vue';
-import BrowserActions from '../components/Modals/BrowserActions.vue';
-import BiometricLogin from '../components/Modals/BiometricLogin.vue';
-import EnableBiometricLogin from '../components/Modals/EnableBiometricLogin.vue';
-import WalletConnect from '../components/Modals/WalletConnectModal.vue';
-import AirGapImportAccounts from '../components/Modals/AirGapImportAccounts.vue';
-import SignAirGapTransaction from '../components/Modals/SignAirGapTransaction.vue';
-import AddressBookImport from '../components/Modals/AddressBookImport.vue';
-import ShareAddress from '../components/ShareAddress.vue';
-import AddressBookAccountSelector from '../components/Modals/AddressBookAccountSelector.vue';
-import SetPassword from '../components/Modals/SetPassword.vue';
-import PasswordLogin from '../components/Modals/PasswordLogin.vue';
-import PrivateKeyImport from '../components/Modals/PrivateKeyImport.vue';
-import PermissionManager from '../components/Modals/PermissionManager.vue';
+import ErrorLog from '@/popup/components/Modals/ErrorLog.vue';
+import PrivateKeyExport from '@/popup/components/Modals/PrivateKeyExport.vue';
+import FormSelectOptions from '@/popup/components/Modals/FormSelectOptions.vue';
+import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
+import ConfirmRawSign from '@/popup/components/Modals/ConfirmRawSign.vue';
+import ConfirmUnsafeSign from '@/popup/components/Modals/ConfirmUnsafeSign.vue';
+import QrCodeScanner from '@/popup/components/Modals/QrCodeScanner.vue';
+import Help from '@/popup/components/Modals/Help.vue';
+import AssetSelector from '@/popup/components/Modals/AssetSelector.vue';
+import ResetWallet from '@/popup/components/Modals/ResetWalletModal.vue';
+import RecipientHelper from '@/popup/components/Modals/RecipientHelper.vue';
+import RecipientInfo from '@/popup/components/Modals/RecipientInfo.vue';
+import ConsensusInfo from '@/popup/components/Modals/ConsensusInfo.vue';
+import PayloadForm from '@/popup/components/Modals/PayloadForm.vue';
+import ClaimGiftCard from '@/popup/components/Modals/ClaimGiftCard.vue';
+import MultisigVaultCreate from '@/popup/components/Modals/MultisigVaultCreate.vue';
+import WarningDappBrowser from '@/popup/components/Modals/WarningDappBrowser.vue';
+import MultisigProposalConfirmActions from '@/popup/components/Modals/MultisigProposalConfirmActions.vue';
+import MessageSign from '@/popup/pages/Popups/MessageSign.vue';
+import BrowserActions from '@/popup/components/Modals/BrowserActions.vue';
+import BiometricLogin from '@/popup/components/Modals/BiometricLogin.vue';
+import EnableBiometricLogin from '@/popup/components/Modals/EnableBiometricLogin.vue';
+import WalletConnect from '@/popup/components/Modals/WalletConnectModal.vue';
+import AirGapImportAccounts from '@/popup/components/Modals/AirGapImportAccounts.vue';
+import SignAirGapTransaction from '@/popup/components/Modals/SignAirGapTransaction.vue';
+import AddressBookImport from '@/popup/components/Modals/AddressBookImport.vue';
+import ShareAddress from '@/popup/components/ShareAddress.vue';
+import AddressBookAccountSelector from '@/popup/components/Modals/AddressBookAccountSelector.vue';
+import SetPassword from '@/popup/components/Modals/SetPassword.vue';
+import PasswordLogin from '@/popup/components/Modals/PasswordLogin.vue';
+import PrivateKeyImport from '@/popup/components/Modals/PrivateKeyImport.vue';
+import PermissionManager from '@/popup/components/Modals/PermissionManager.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -152,6 +154,10 @@ export default () => {
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
     component: ConfirmAccountList,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_CONFIRM_DISABLE_ERROR_LOG, {
+    component: ConfirmDisableErrorLog,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_PRIVATE_KEY_EXPORT, {

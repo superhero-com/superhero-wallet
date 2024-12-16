@@ -50,6 +50,7 @@ import {
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 import { decrypt, encrypt } from './crypto';
 
 /**
@@ -693,4 +694,29 @@ export function decryptedComputed(
       get: () => decrypted.value,
       set: setEncryptedState,
     });
+}
+
+export async function exportFile(
+  text: string,
+  filename: string,
+): Promise<string | undefined> {
+  const blob = new Blob([text], { type: 'text/plain' });
+
+  if (IS_MOBILE_APP) {
+    const base64 = await convertBlobToBase64(blob);
+    const saveFile = await Filesystem.writeFile({
+      path: filename,
+      data: base64,
+      directory: Directory.Documents,
+    });
+    return saveFile.uri;
+  }
+  const a = document.createElement('a');
+  const href = window.URL.createObjectURL(blob);
+
+  a.download = filename;
+  a.href = href;
+  a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+  a.click();
+  return undefined;
 }

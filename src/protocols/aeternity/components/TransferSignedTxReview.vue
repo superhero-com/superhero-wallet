@@ -125,6 +125,7 @@ import AvatarWithChainName from '@/popup/components/AvatarWithChainName.vue';
 import ModalHeader from '@/popup/components/ModalHeader.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
 import FormScanQrResult from '@/popup/components/form/FormScanQrResult.vue';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   name: 'TransferSignedTxReview',
@@ -231,10 +232,12 @@ export default defineComponent({
           },
         };
         addAccountPendingTransaction(activeAccount.value.address, tempTransaction);
-      } catch (e) {
-        openModal(MODAL_DEFAULT, {
+      } catch (error: any) {
+        Logger.write({
           title: tg('modals.transaction-failed.title'),
-          icon: 'critical',
+          message: error.message || tg('modals.transaction-failed.msg'),
+          type: 'api-response',
+          modal: true,
         });
       }
     }
