@@ -215,8 +215,13 @@ export function useModals() {
     openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
   }
 
+  function closeAllModals() {
+    modalsOpenRaw.value?.forEach(({ key }) => closeModalByKey(key));
+  }
+
   return {
     modalsOpen,
+    closeAllModals,
     registerModal,
     openModal,
     openDefaultModal,

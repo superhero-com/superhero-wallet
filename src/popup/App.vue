@@ -365,7 +365,7 @@ export default defineComponent({
 
     .app-unauthenticated-placeholder {
       position: absolute;
-      z-index: 2;
+      z-index: $z-index-placeholder;
       inset: 0;
       visibility: hidden;
       opacity: 0;
