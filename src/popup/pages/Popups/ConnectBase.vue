@@ -138,6 +138,7 @@
 </template>
 
 <script lang="ts">
+import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -180,6 +181,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     InfoBox,
+    IonSkeletonText,
     NetworkButton,
     TemplateRenderer,
     Truncate,
