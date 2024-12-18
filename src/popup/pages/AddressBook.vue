@@ -27,7 +27,7 @@
         </div>
       </Transition>
 
-      <AddressBookList v-model:hideButtons="hideButtons" />
+      <AddressBookList v-model:hide-buttons="hideButtons" />
     </div>
   </IonPage>
 </template>

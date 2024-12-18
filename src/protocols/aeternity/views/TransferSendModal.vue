@@ -13,7 +13,7 @@
       <component
         :is="currentStepConfig.component"
         ref="currentRenderedComponent"
-        v-model:transferData="transferData"
+        v-model:transfer-data="transferData"
         :is-multisig="isMultisig"
         :is-address-chain="isAddressChain"
         :is-address-url="isAddressUrl"
