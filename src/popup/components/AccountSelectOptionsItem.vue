@@ -27,6 +27,10 @@
         vertical
         small
       />
+      <slot
+        v-if="$slots.right"
+        name="right"
+      />
     </div>
   </component>
 </template>
@@ -78,14 +82,14 @@ export default defineComponent({
 
     const account = props.customAccount ?? getAccountByAddress(props.option.value as string);
 
-    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.option.value) }));
+    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(account.address) }));
 
     const balance = computed(() => {
       switch (true) {
         case !!props.outsideBalance:
           return props.outsideBalance;
-        case !!props.option.value:
-          return getAccountBalance(props.option.value.toString()).toNumber();
+        case !!account:
+          return getAccountBalance(account.address.toString()).toNumber();
         default:
           return 0;
       }

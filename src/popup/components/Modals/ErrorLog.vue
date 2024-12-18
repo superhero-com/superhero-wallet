@@ -1,92 +1,72 @@
 <template>
-  <Modal
-    has-close-button
-    @close="resolve"
+  <Default
+    v-bind="{ ...$attrs, resolve }"
+    :title="title"
+    :msg="msg"
+    icon="critical"
+    text-center
+    class="error-modal"
   >
-    <h2 class="text-heading-4 text-center">
-      {{ $t('modals.error-log.title') }}
-    </h2>
-
-    <div class="error-msg">
-      {{ messageTruncated }}...
-    </div>
-    <div>
-      <span>{{ $t('modals.error-log.sub-title') }}</span>
-      {{ $t('modals.error-log.content') }}
-    </div>
-
     <template #footer>
       <BtnMain
+        v-if="saveErrorLogEnabled"
         variant="muted"
-        @click="cancel"
-      >
-        {{ $t('common.cancel') }}
-      </BtnMain>
-      <BtnMain @click="createReport">
-        {{ $t('modals.error-log.create-report') }}
-      </BtnMain>
+        class="center-button"
+        :text="$t('pages.errors-log-settings.exportErrorLog')"
+        :icon="ExportIcon"
+        @click="exportErrorLog"
+      />
+      <BtnMain
+        class="center-button"
+        :text="$t('common.ok')"
+        @click="resolve"
+      />
     </template>
-  </Modal>
+  </Default>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { useRouter } from 'vue-router';
-import type { RejectCallback, ResolveCallback } from '../../../types';
-import { RejectedByUserError } from '../../../lib/errors';
-import { ROUTE_DONATE_ERROR } from '../../router/routeNames';
-import Modal from '../Modal.vue';
-import BtnMain from '../buttons/BtnMain.vue';
+import type { ResolveCallback } from '@/types';
+import Logger from '@/lib/logger';
+
+import Default from '@/popup/components/Modals/Default.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+
+import ExportIcon from '@/icons/export-address-book.svg?vue-component';
 
 export default defineComponent({
   components: {
-    Modal,
+    Default,
     BtnMain,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
-    reject: { type: Function as PropType<RejectCallback>, required: true },
-    entry: { type: Object, required: true },
+    title: { type: String, default: '' },
+    msg: { type: String, default: '' },
   },
-  setup(props) {
-    const router = useRouter();
+  setup({ resolve }) {
+    const saveErrorLogEnabled = computed(() => Logger.saveErrorLog.value);
 
-    const messageTruncated = computed(() => {
-      const { message = '' } = props.entry.error;
-      return message.substr(0, 150);
-    });
-
-    function cancel() {
-      props.reject(new RejectedByUserError());
-    }
-
-    function createReport() {
-      props.resolve(true);
-      router.push({
-        name: ROUTE_DONATE_ERROR,
-        params: { entry: props.entry as any },
-      });
+    function exportErrorLog() {
+      Logger.exportErrorLog();
+      resolve();
     }
 
     return {
-      messageTruncated,
-      cancel,
-      createReport,
+      saveErrorLogEnabled,
+      exportErrorLog,
+      ExportIcon,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-
-.error-msg {
-  color: $color-danger;
-  margin-bottom: 30px;
-}
-
-span {
-  display: block;
-  font-weight: bold;
+.error-modal {
+  .center-button {
+    width: auto;
+    padding: 0 24px;
+  }
 }
 </style>

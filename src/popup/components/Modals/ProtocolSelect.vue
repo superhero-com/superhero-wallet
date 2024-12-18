@@ -22,6 +22,7 @@
       :subheader="$t(
         'modals.createAccount.addProtocolAccount', { name: getProtocolName(protocol) })"
       :protocol-icon="protocol"
+      :data-cy="`btn-add-${protocol}`"
       @click="resolve(protocol)"
     />
   </Modal>

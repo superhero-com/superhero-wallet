@@ -16,7 +16,7 @@ const popups: Dictionary<IPopupConfig> = {};
 
 export const openPopup = async (
   popupType: PopupType,
-  aepp: string | object,
+  aepp: string | object | undefined,
   popupProps: Partial<IPopupProps> = {},
 ) => executeOrSendMessageToBackground(
   POPUP_METHODS.openPopup,

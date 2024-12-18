@@ -1,5 +1,4 @@
 import type { ICurrency, IPermission, ObjectValues } from '@/types';
-import { IS_MOBILE_APP } from './environment';
 
 export const APP_NAME = 'Superhero Wallet';
 export const APP_URL = 'wallet.superhero.com';
@@ -326,6 +325,7 @@ export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
 export const MODAL_CONFIRM_UNSAFE_SIGN = 'confirm-unsafe-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
 export const MODAL_CONFIRM_ACCOUNT_LIST = 'confirm-account-list';
+export const MODAL_CONFIRM_DISABLE_ERROR_LOG = 'confirm-disable-error-log';
 export const MODAL_CONSENSUS_INFO = 'consensus-info';
 export const MODAL_DEFAULT = 'default';
 export const MODAL_ERROR_LOG = 'error-log';
@@ -377,6 +377,7 @@ export const POPUP_TYPES = [
 export const CONNECT_PERMISSIONS = {
   address: 'address',
   addressList: 'addressList',
+  networks: 'networks',
   transactions: 'transactions',
 } as const;
 
@@ -391,8 +392,6 @@ export const POPUP_METHODS = {
   removePopup: 'removePopup',
   getPopup: 'getPopup',
   reload: 'reload',
-  paste: 'paste',
-  checkHasAccount: 'checkHasAccount', // TODO check if still used
 } as const;
 
 export const SESSION_METHODS = {
@@ -549,10 +548,6 @@ export const AUTHENTICATION_TIMEOUTS = [
   1800000,
 ] as const;
 
-export const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
-  ? AUTHENTICATION_TIMEOUTS[0]
-  : AUTHENTICATION_TIMEOUTS[2];
-
 export const PASSWORD_STRENGTH = {
   weak: 'weak',
   medium: 'medium',
@@ -567,3 +562,5 @@ export const ACCOUNT_SELECT_TYPE_FILTER = {
   recent: 'recent',
 } as const;
 export type AccountSelectTypeFilter = ObjectValues<typeof ACCOUNT_SELECT_TYPE_FILTER>;
+
+export const MAX_LOG_ENTRIES = 1000;

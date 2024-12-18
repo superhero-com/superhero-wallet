@@ -11,6 +11,7 @@ import {
   Tag,
 } from '@aeternity/aepp-sdk';
 import type { Animation } from '@ionic/vue';
+
 import {
   ACCOUNT_TYPES,
   ALLOWED_ICON_STATUSES,
@@ -27,6 +28,7 @@ import {
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
+import type { EthRpcSupportedMethods, IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 import {
   AE_CONTRACT_ID,
   MULTISIG_CREATION_PHASES,
@@ -116,8 +118,8 @@ export interface IPageableResponse<T> {
 }
 
 export interface IAppData {
-  name: string;
-  url: string;
+  name?: string;
+  href?: string;
   host: string;
   protocol?: string;
 }
@@ -714,8 +716,7 @@ export interface IMiddlewareStatus {
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
 export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
 export type SessionMethod = ObjectValues<typeof SESSION_METHODS>;
-
-export type BackgroundMethod = PopupMethod | SessionMethod;
+export type BackgroundMethod = PopupMethod | SessionMethod | EthRpcSupportedMethods;
 
 export interface IPopupActions {
   resolve: ResolveCallback;
@@ -762,6 +763,7 @@ export interface IBackgroundMessageData {
     popupType?: PopupType;
     popupProps?: Partial<IPopupProps>;
     id?: string;
+    rpcMethodParams?: IEthRpcMethodParameters;
   };
   payload?: any;
 }

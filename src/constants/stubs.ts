@@ -55,7 +55,7 @@ export const STUB_CURRENCY: CoinGeckoMarketResponse = {
 };
 
 export const STUB_APP_DATA: IAppData = {
-  url: 'http://localhost:5000/aepp/aepp',
+  href: 'http://localhost:5000/aepp/aepp',
   name: 'AEPP',
   protocol: 'http:',
   host: 'localhost',
