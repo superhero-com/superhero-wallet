@@ -15,12 +15,15 @@ export function usePopupProps() {
   const sender = computed((): IAccountOverview => ({
     name: popupProps.value?.app?.name,
     address: popupProps.value?.app?.host,
-    url: popupProps.value?.app?.url,
+    url: popupProps.value?.app?.href,
   }));
 
+  const isUnknownDapp = computed(() => !popupProps.value?.app?.href);
+
   return {
-    sender,
+    isUnknownDapp,
     popupProps,
+    sender,
     setPopupProps,
   };
 }

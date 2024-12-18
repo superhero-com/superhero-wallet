@@ -175,7 +175,7 @@ export function usePermissions() {
         host: url.host,
         name: url.hostname,
         protocol: url.protocol,
-        url: url.href,
+        href: url.href,
       };
       props = { ...props, app };
     }
@@ -197,8 +197,8 @@ export function usePermissions() {
         popup = POPUP_TYPE_RAW_SIGN;
       }
       await (
-        (IS_OFFSCREEN_TAB && app?.url)
-          ? openPopup(popup, app.url, props)
+        (IS_OFFSCREEN_TAB)
+          ? openPopup(popup, app?.href, props)
           : openModal(modal, props)
       );
       return true;

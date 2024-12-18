@@ -6,9 +6,19 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :custom-labels="[$t('modals.confirm-raw-sign.title')]"
+      :custom-labels="[
+        ...(isUnknownDapp ? [$t('common.unknown')] : []),
+        $t('modals.confirm-raw-sign.title'),
+      ]"
       :sender="sender"
       :recipient="activeAccount!"
+      :first-label-warning="isUnknownDapp"
+    />
+
+    <NoOriginWarning
+      v-if="isUnknownDapp"
+      :action="$t('unknownDapp.signDataAction')"
+      :warning="$t('unknownDapp.signDataWarning')"
     />
 
     <div
@@ -86,7 +96,12 @@ export default defineComponent({
     CopyText,
   },
   setup() {
-    const { popupProps, sender, setPopupProps } = usePopupProps();
+    const {
+      isUnknownDapp,
+      popupProps,
+      sender,
+      setPopupProps,
+    } = usePopupProps();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { openModal } = useModals();
 
@@ -124,6 +139,7 @@ export default defineComponent({
       cancel,
       activeAccount,
       dataAsString,
+      isUnknownDapp,
       sender,
     };
   },

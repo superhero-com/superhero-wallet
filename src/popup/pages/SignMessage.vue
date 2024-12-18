@@ -16,6 +16,7 @@ import {
   useAeSdk,
   useUi,
 } from '@/composables';
+import { IAppData } from '@/types';
 
 export default defineComponent({
   name: 'SignMessage',
@@ -39,14 +40,16 @@ export default defineComponent({
         const message = isHexEncodedMessage ? Buffer.from(rawMessage, 'hex') : rawMessage;
         const displayMessage = message?.toString();
         const { host, href } = callbackOrigin.value || {} as any;
+        const app = host && href
+          ? {
+            host,
+            name: host,
+            href,
+          } : {} as IAppData;
 
         await openModal(MODAL_MESSAGE_SIGN, {
           message: displayMessage,
-          app: {
-            host,
-            name: host,
-            url: href,
-          },
+          app,
         });
 
         const signature = await aeSdk.signMessage(message as string);
