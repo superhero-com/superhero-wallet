@@ -38,6 +38,7 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
+import { isEqual } from 'lodash-es';
 
 import { PROTOCOLS } from '@/constants';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -63,7 +64,7 @@ export default defineComponent({
     const highestBid = computed(() => getNameAuctionHighestBid(props.name));
 
     const previousBids = computed(
-      () => getNameAuction(props.name).bids.filter((bid) => bid !== highestBid.value),
+      () => getNameAuction(props.name).bids.filter((bid) => !isEqual(bid, highestBid.value)),
     );
 
     return {
