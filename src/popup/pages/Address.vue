@@ -31,7 +31,7 @@ export default defineComponent({
 
     const app = computed((): IAppData => callbackOrigin.value ? {
       name: callbackOrigin.value.hostname,
-      url: callbackOrigin.value.origin,
+      href: callbackOrigin.value.origin,
       host: callbackOrigin.value.host,
     } : {} as IAppData);
 

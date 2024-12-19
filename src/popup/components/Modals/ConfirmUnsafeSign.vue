@@ -7,6 +7,7 @@
   >
     <TransactionInfo
       :custom-labels="[
+        ...(isUnknownDapp ? [$t('common.unknown')] : []),
         ...(isAeppChatSuperhero)
           ? [$t('modals.confirmTransactionSign.superheroChat')]
           : [],
@@ -14,9 +15,17 @@
       ]"
       :sender="sender"
       :recipient="activeAccount"
+      :first-label-warning="isUnknownDapp"
+    />
+
+    <NoOriginWarning
+      v-if="isUnknownDapp"
+      :action="$t('unknownDapp.signDataAction')"
+      :warning="$t('unknownDapp.signDataWarning')"
     />
 
     <DetailsItem
+      v-else
       :label="isAeppChatSuperhero ? $t('modals.confirmTransactionSign.superheroChat') : sender.name"
       class="sender"
       data-cy="aepp"
@@ -78,7 +87,11 @@ import {
   onUnmounted,
 } from 'vue';
 
-import { JWT_HEADER, PROTOCOLS, SUPERHERO_CHAT_URLS } from '@/constants';
+import {
+  JWT_HEADER,
+  PROTOCOLS,
+  SUPERHERO_CHAT_URLS,
+} from '@/constants';
 import { fromBase64Url, handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
@@ -88,6 +101,7 @@ import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import DetailsItem from '../DetailsItem.vue';
 import CopyText from '../CopyText.vue';
+import NoOriginWarning from '../NoOriginWarning.vue';
 
 export default defineComponent({
   components: {
@@ -96,9 +110,15 @@ export default defineComponent({
     BtnMain,
     DetailsItem,
     CopyText,
+    NoOriginWarning,
   },
   setup() {
-    const { popupProps, sender, setPopupProps } = usePopupProps();
+    const {
+      isUnknownDapp,
+      popupProps,
+      sender,
+      setPopupProps,
+    } = usePopupProps();
     const { getLastActiveProtocolAccount } = useAccounts();
 
     const isJwt = ref(false);
@@ -144,6 +164,7 @@ export default defineComponent({
       activeAccount,
       isAeppChatSuperhero,
       isJwt,
+      isUnknownDapp,
       messageToDisplay,
       sender,
       popupProps,

@@ -45,6 +45,7 @@
                 data-cy="gas"
               />
               <DetailsItem
+                v-if="innerTx?.callData && innerTx?.contractId"
                 expandable
                 class="advanced-transaction-details"
                 :label="$t('transaction.advancedDetails')"
@@ -211,6 +212,7 @@ export default defineComponent({
       amountTotal,
       decodedCallData,
       decodingCallData,
+      innerTx,
       isTransactionCoin,
       hash,
       fee,

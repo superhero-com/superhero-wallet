@@ -86,13 +86,6 @@
             >
               <Save class="input-address-icon" />
             </BtnPlain>
-            <BtnPlain
-              v-if="UNFINISHED_FEATURES"
-              v-show="!newPointer.length"
-              @click="insertValueFromClipboard"
-            >
-              <Paste class="input-address-icon" />
-            </BtnPlain>
           </template>
         </InputField>
 
@@ -148,15 +141,7 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IName, IBackgroundMessageData } from '@/types';
-import { Clipboard } from '@capacitor/clipboard';
-import {
-  IS_EXTENSION,
-  IS_MOBILE_APP,
-  POPUP_METHODS,
-  UNFINISHED_FEATURES,
-} from '@/constants';
-import Logger from '@/lib/logger';
+import { IName } from '@/types';
 import {
   blocksToRelativeTime,
   handleUnknownError,
@@ -182,7 +167,6 @@ import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
 import Save from '../../icons/account-card/btn-save.svg?vue-component';
-import Paste from '../../icons/paste.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -194,7 +178,6 @@ export default defineComponent({
     Truncate,
     ChevronDownIcon,
     Save,
-    Paste,
   },
   props: {
     nameEntry: { type: Object as PropType<IName>, required: true },
@@ -232,37 +215,6 @@ export default defineComponent({
       props.nameEntry?.pointers?.accountPubkey
       || Object.values(props.nameEntry?.pointers || {})[0]
     ));
-
-    async function readValueFromClipboard(): Promise<string | undefined> {
-      if (!UNFINISHED_FEATURES) {
-        return undefined;
-      }
-      let text = '';
-
-      if (IS_MOBILE_APP) {
-        const { type, value } = await Clipboard.read();
-        if (type === 'string') {
-          text = value;
-        }
-      } else if (IS_EXTENSION) {
-        text = await browser!.runtime.sendMessage<IBackgroundMessageData>({
-          method: POPUP_METHODS.paste,
-        });
-      } else {
-        try {
-          text = await navigator.clipboard.readText();
-        } catch (e: any) {
-          if (!e.message.includes('Read permission denied.')) {
-            Logger.write(e);
-          }
-        }
-      }
-      return text;
-    }
-
-    async function insertValueFromClipboard() {
-      newPointer.value = (await readValueFromClipboard()) || '';
-    }
 
     function expandAndShowInput() {
       expand.value = true;
@@ -338,7 +290,6 @@ export default defineComponent({
     });
 
     return {
-      UNFINISHED_FEATURES,
       activeAccount,
       addressOrFirstPointer,
       canBeDefault,
@@ -353,7 +304,6 @@ export default defineComponent({
       blocksToRelativeTime,
       expandAndShowInput,
       handleSetDefault,
-      insertValueFromClipboard,
       onExpandCollapse,
       toggleAutoExtend,
       setPointer,

@@ -2,7 +2,6 @@ import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
 import type { Web3Wallet as IWeb3Wallet } from '@walletconnect/web3wallet';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { fromWei, toChecksumAddress } from 'web3-utils';
 import {
   computed,
   reactive,
@@ -10,9 +9,7 @@ import {
   watch,
 } from 'vue';
 import { App } from '@capacitor/app';
-import { METHODS, Tag } from '@aeternity/aepp-sdk';
 
-import type { IModalProps } from '@/types';
 import {
   APP_NAME,
   APP_URL,
@@ -21,15 +18,13 @@ import {
   WALLET_CONNECT_PROJECT_ID,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import { ETH_CHAIN_NAMESPACE, ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
-import { IEthNetworkSettings } from '@/protocols/ethereum/types';
-import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
+import { ETH_CHAIN_NAMESPACE } from '@/protocols/ethereum/config';
+import { EthRpcSupportedMethods, IEthNetworkSettings } from '@/protocols/ethereum/types';
+import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
 
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
-import { usePermissions } from './permissions';
 import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
 
@@ -38,15 +33,6 @@ export type WalletConnectUri = `ws:${string}`;
 type SupportedRequestMethod =
   | 'eth_sendTransaction'
   | 'personal_sign';
-
-/** All method params are encoded */
-interface SendTransactionParams {
-  data: string;
-  from: string;
-  gas: string;
-  to: string;
-  value: string;
-}
 
 const isOpenUsingDeeplink = ref(false);
 let composableInitialized = false;
@@ -74,10 +60,6 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   const { activeAccount, accountsGroupedByProtocol, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks } = useNetworks();
   const { openDefaultModal } = useModals();
-  const { checkOrAskPermission } = usePermissions();
-  const { updateFeeList, maxFeePerGas } = useEthFeeCalculation();
-
-  const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
   const ethAccounts = computed(() => accountsGroupedByProtocol.value[PROTOCOLS.ethereum] || []);
 
@@ -87,50 +69,6 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       setTimeout(() => App.exitApp(), 3000);
     }
   }
-
-  const sessionRequestMethodHandlers: Partial<{
-    [key in SupportedRequestMethod]: (p: any) => Promise<string | false>
-  }> = {
-    eth_sendTransaction: async (params: SendTransactionParams) => {
-      await updateFeeList();
-
-      const { url, name } = wcSession.value?.peer.metadata! || {};
-      const gas = Number(params.gas);
-      const senderId = toChecksumAddress(params.from);
-      const recipientId = toChecksumAddress(params.to);
-      const isCoinTransfer = !params.data;
-      const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
-      const modalProps: IModalProps = {
-        protocol: PROTOCOLS.ethereum,
-        app: { url, host: url ? new URL(url).hostname : '', name },
-        tx: {
-          amount: params.value ? +fromWei(params.value, 'ether') : 0,
-          fee: gas * +(maxFeePerGas.value || 0),
-          gas,
-          contractId: (isCoinTransfer) ? ETH_CONTRACT_ID : recipientId,
-          type: Tag[tag],
-          tag,
-          senderId,
-          recipientId,
-          data: params.data, // TODO find out the way for decoding the data
-        },
-      };
-
-      const permitted = await checkOrAskPermission(
-        METHODS.sign,
-        wcSession.value?.peer?.metadata?.url,
-        modalProps,
-      );
-      if (permitted) {
-        if (adapter?.transferPreparedTransaction) {
-          const actionResult = await adapter.transferPreparedTransaction(params);
-          closeAppIfOpenUsingDeeplink();
-          return actionResult?.hash ?? false;
-        }
-      }
-      return false;
-    },
-  };
 
   function resetSessionAndState() {
     Object.keys(wcState).forEach((key) => { (wcState as Record<string, boolean>)[key] = false; });
@@ -226,9 +164,13 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   function monitorActiveSessionEvents() {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
-      const method = proposal.request.method as SupportedRequestMethod;
-      const methodHandler = sessionRequestMethodHandlers[method];
-      const result = await methodHandler?.(proposal.request.params[0]);
+      const { url, name } = wcSession.value?.peer.metadata! || {};
+      const result = await handleEthereumRpcMethod(
+        url,
+        proposal.request.method as EthRpcSupportedMethods,
+        proposal.request.params[0],
+        name,
+      );
 
       web3wallet!.respondSessionRequest({
         topic,

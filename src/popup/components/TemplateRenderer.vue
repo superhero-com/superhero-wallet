@@ -9,6 +9,7 @@ const renderNodeContent = (createElement, node, option = null) => (!node.childNo
       switch (n.tagName) {
         case 'strong':
         case 'ol':
+        case 'ul':
         case 'li':
         case 'p':
           return createElement(n.tagName, renderNodeContent(createElement, n));

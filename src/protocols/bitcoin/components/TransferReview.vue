@@ -37,7 +37,6 @@ import { useI18n } from 'vue-i18n';
 import {
   useAccounts,
   useLatestTransactionList,
-  useModals,
   useUi,
 } from '@/composables';
 import type { ITransaction, ITransferArgs, TransferFormModel } from '@/types';
@@ -49,6 +48,7 @@ import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import BigNumber from 'bignumber.js';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   name: 'BtcTransferReview',
@@ -67,18 +67,17 @@ export default defineComponent({
     const { t } = useI18n();
     const router = useRouter();
     const { homeRouteName } = useUi();
-    const { openDefaultModal } = useModals();
     const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
     const { addAccountPendingTransaction } = useLatestTransactionList();
 
     const loading = ref<boolean>(false);
 
     function openTransactionFailedModal(msg: string) {
-      openDefaultModal({
+      Logger.write({
         title: t('modals.transaction-failed.title'),
-        icon: 'critical',
-        msg,
-        textCenter: true,
+        message: msg || t('modals.transaction-failed.msg'),
+        type: 'api-response',
+        modal: true,
       });
     }
 
@@ -90,8 +89,9 @@ export default defineComponent({
       return textAreaDiv.innerHTML;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
+    async function transfer(
+      { amount, recipient }: ITransferArgs,
+    ): Promise<string | undefined> {
       const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
       try {
         loading.value = true;
@@ -107,7 +107,7 @@ export default defineComponent({
         } else {
           openTransactionFailedModal(processedErrorMessage);
         }
-        throw error;
+        return undefined;
       } finally {
         loading.value = false;
       }

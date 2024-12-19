@@ -93,6 +93,7 @@
               || !!errors.confirmPassword
             )"
             :text="$t('pages.setPassword.confirm')"
+            data-cy="btn-set-password"
             @click="handleSubmit($event, onSubmit)"
           />
           <BtnMain
@@ -100,6 +101,7 @@
             :text="$t('pages.setPassword.skip')"
             extend
             nowrap
+            data-cy="btn-skip-password"
             @click="useDefaultPassword"
           />
         </div>

@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import type {
   Dictionary,
+  IAppData,
   IPopupProps,
   PopupType,
 } from '@/types';
@@ -32,15 +33,20 @@ const storageSession = (browser.storage as any)?.session;
 
 export const openPopup = async (
   popupType: PopupType,
-  aepp: string | Record<string, any>, // TODO establish correct type for the object
+  aepp: string | Record<string, any> | undefined, // TODO establish correct type for the object
   popupProps: Partial<IPopupProps> = {},
 ) => {
   const id = uuid();
-  const url = (typeof aepp === 'object') ? aepp.connection.port.sender.url : aepp;
-  const { href, protocol, host } = new URL(url);
 
-  // TODO fix the name resolving issue happening in `onSubscription` of aeSdk
-  const name = (typeof aepp === 'object') ? aepp.name : undefined;
+  let app: IAppData;
+
+  if (typeof aepp === 'object') {
+    app = new URL(aepp.connection.port.sender.url);
+  } else if (aepp === undefined) {
+    app = {} as IAppData;
+  } else {
+    app = new URL(aepp);
+  }
 
   const tabs = await browser.tabs.query({ active: true });
 
@@ -48,14 +54,14 @@ export const openPopup = async (
     const tabUrl = new URL(tabURL as string);
     if (
       tabUrl.searchParams.get('type') === POPUP_TYPE_CONNECT
-      && decodeURIComponent(tabUrl.searchParams.get('url') || '') === href
+      && decodeURIComponent(tabUrl.searchParams.get('url') || '') === app.href
     ) {
       browser.tabs.remove(tabId as number);
     }
   });
 
   const extUrl = browser.runtime.getURL('./index.html');
-  const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
+  const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
   const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
 
   const popupWindow = await browser.windows.create({
@@ -74,10 +80,10 @@ export const openPopup = async (
     props: {
       ...popupProps,
       app: {
-        url: href,
-        name,
-        protocol,
-        host,
+        href: app.href,
+        name: app.name || app.host,
+        protocol: app.protocol,
+        host: app.host,
       },
     },
   };

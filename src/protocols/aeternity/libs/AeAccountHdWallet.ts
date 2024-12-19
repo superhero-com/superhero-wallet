@@ -25,8 +25,10 @@ import { handleUnknownError, isAccountAirGap } from '@/utils';
 
 import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
+import { useDeepLinkApi } from '@/composables/deepLinkApi';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
+import Logger from '@/lib/logger';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -39,12 +41,21 @@ interface InternalOptions {
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
+  /**
+   * The `isSigningAlreadyConfirmed` property
+   * is used to not show an additional confirmation modal
+   * at the time of the actual raw sign,
+   * in case the user has already confirmed the action.
+   */
+  isSigningAlreadyConfirmed: boolean;
+
   nodeNetworkId: Ref<string | undefined>;
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super(Buffer.alloc(64));
     const aeAccount = AeAccountHdWallet.getAccount();
     this.address = aeAccount!.address as Encoded.AccountAddress;
+    this.isSigningAlreadyConfirmed = false;
     this.nodeNetworkId = nodeNetworkId;
   }
 
@@ -84,8 +95,10 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
+    const { isDeepLinkUsed } = useDeepLinkApi({ doNotInitializeRouter: true });
+
     const tx = unpackTx(txBase64) as any as ITx;
-    if (options?.aeppOrigin) {
+    if (isDeepLinkUsed || IS_OFFSCREEN_TAB) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.sign,
@@ -101,9 +114,9 @@ export class AeAccountHdWallet extends MemoryAccount {
       return signedTx;
     }
 
+    this.isSigningAlreadyConfirmed = true;
     return super.signTransaction(txBase64, {
       ...options, // Mainly to pass the `fromAccount` property
-      aeppOrigin: undefined,
       networkId: this.nodeNetworkId.value,
     } as any);
   }
@@ -114,17 +127,15 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Uint8Array> {
     const account = AeAccountHdWallet.getAccount(options?.fromAccount);
     if (account && isAccountAirGap(account)) {
-      const { openDefaultModal } = useModals();
-
-      openDefaultModal({
+      Logger.write({
         title: tg('airGap.signMessageErrorModal.title'),
-        msg: tg('airGap.signMessageErrorModal.msg'),
-        icon: 'critical',
-        textCenter: true,
+        message: tg('airGap.signMessageErrorModal.msg'),
+        type: 'api-response',
+        modal: true,
       });
     }
 
-    if (options?.aeppOrigin) {
+    if (IS_OFFSCREEN_TAB) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
@@ -136,12 +147,10 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
+    this.isSigningAlreadyConfirmed = true;
     return super.signMessage(
       message,
-      {
-        ...options, // Mainly to pass the `fromAccount` property
-        aeppOrigin: undefined,
-      },
+      options, // Mainly to pass the `fromAccount` property
     );
   }
 
@@ -150,7 +159,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     aci: Parameters<AccountBase['signTypedData']>[1],
     options: Parameters<AccountBase['signTypedData']>[2] = {},
   ): Promise<Encoded.Signature> {
-    if (options?.aeppOrigin) {
+    if (IS_OFFSCREEN_TAB) {
       const dataType = new TypeResolver().resolveType(aci);
       const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
       const {
@@ -174,13 +183,11 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
+    this.isSigningAlreadyConfirmed = true;
     return super.signTypedData(
       data,
       aci,
-      {
-        ...options, // Mainly to pass the `fromAccount` property
-        aeppOrigin: undefined,
-      },
+      options, // Mainly to pass the `fromAccount` property
     );
   }
 
@@ -191,7 +198,8 @@ export class AeAccountHdWallet extends MemoryAccount {
     let message;
     let resolvedName;
     const { getMiddleware } = useAeMiddleware();
-    if (options?.aeppOrigin) {
+
+    if (IS_OFFSCREEN_TAB) {
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -228,6 +236,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
+    this.isSigningAlreadyConfirmed = true;
     return super.signDelegation(delegation, {
       ...options, // Mainly to pass the `fromAccount` property
       networkId: this.nodeNetworkId.value,
@@ -245,7 +254,9 @@ export class AeAccountHdWallet extends MemoryAccount {
     if (account && isAccountAirGap(account)) {
       throw new Error('AirGap sign not implemented yet');
     }
-    if (options?.aeppOrigin) {
+
+    if (IS_OFFSCREEN_TAB && !this.isSigningAlreadyConfirmed) {
+      this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.unsafeSign,

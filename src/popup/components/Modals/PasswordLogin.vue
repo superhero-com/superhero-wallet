@@ -143,9 +143,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 
 .password-login {
+  z-index: $z-index-login-modal;
+
   .content-wrapper,
   .password-login-form {
     display: flex;
