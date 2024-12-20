@@ -313,6 +313,7 @@ export default defineComponent({
     border: none;
     margin-top: calc(-1 * (var(--header-height) + env(safe-area-inset-top)));
     padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+    padding-bottom: 15px;
   }
 }
 </style>
