@@ -890,6 +890,7 @@ test.describe('SH Wallet checks', () => {
   test('SH Wallet_rst_multisig acc_testnet', async ({ page }) => {
     await switchToTestnet(page, expect);
     await page.getByRole('button', { name: 'Show multisig vaults' }).click();
+    await revokePendingProposal(page, expect);
     // Check Show multisig screen
     await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 12000 });
     await expect.soft(page.getByText('Total in multisig vaults')).toBeVisible();
@@ -928,6 +929,7 @@ test.describe('SH Wallet checks', () => {
     // Go to Multisig vaults
     await page.getByRole('button', { name: 'Show multisig vaults' }).click();
     // Select current multisig account
+    await revokePendingProposal(page, expect);
     await page.locator('//a[@data-cy="account-card-base"]//div[text()="Multisig vault"]').nth(0).click();
     // Check receive screen
     await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 1000 });
@@ -1062,12 +1064,7 @@ test.describe('SH Wallet checks', () => {
     // Multisig transaction proposal screen
     await page.getByTestId('next-step-button').click();
     // Confirm of reject screen
-    await expect(page.locator('//div[text()="Propose Tx"]')).toBeVisible({ timeout: 10000 });
-    await page.getByTestId('accept').click();
-    await expect(page.getByTestId('loader')).toBeVisible();
-    await expect(page.getByTestId('loader')).not.toBeVisible({ timeout: 15000 });
-    // Multisig Tx proposal details
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.locator('//span[text()="Multisig Tx proposal details"]')).toBeVisible({ timeout: 20000 });
     // Multisig Tx proposal details
     await expect(page.getByRole('button', { name: 'Disapprove' })).toBeVisible({ timeout: 8000 });
     await expect(page.getByRole('button', { name: 'Revoke transaction proposal' })).toBeVisible();
@@ -1104,9 +1101,7 @@ test.describe('SH Wallet checks', () => {
     await page.getByTestId('next-step-button').click();
     // Confirm of reject screen
     await page.waitForTimeout(1500);
-    await expect(page.locator('//div[text()="Propose Tx"]')).toBeVisible();
-    await page.getByTestId('accept').click();
-    await expect(page.getByTestId('loader')).toBeVisible();
+    await expect(page.locator('//span[text()="Multisig Tx proposal details"]')).toBeVisible({ timeout: 20000 });
     await expect(page.getByTestId('loader')).not.toBeVisible({ timeout: 15000 });
     // Multisig Tx proposal details
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -1119,7 +1114,6 @@ test.describe('SH Wallet checks', () => {
     await expect(page.locator('//h2')).toContainText('Revoke transaction proposal');
     await eyes.check('Revoke transaction proposal', Target.window().fully());
     await page.getByTestId('to-confirm').click();
-    await page.locator('//button[@data-cy="accept"]').click({ timeout: 10000 });
   });
   // Registering a name is a long operation and it will make other operation stuck
   // until we will implement the nonce handling on our side, or sdk will improve it
