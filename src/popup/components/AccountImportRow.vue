@@ -2,6 +2,7 @@
   <AccountSelectOptionsItem
     :custom-account="account"
     :outside-balance="balance"
+    :selected="selected"
     clickable
   />
 </template>
@@ -27,6 +28,7 @@ export default defineComponent({
   },
   props: {
     account: { type: Object as PropType<IAccount>, required: true },
+    selected: Boolean,
   },
   setup(props) {
     const balance = ref(0);

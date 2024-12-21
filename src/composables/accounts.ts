@@ -33,6 +33,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useStorageRef, useAuth, useModals } from '@/composables';
 
 import AirGapIcon from '@/icons/air-gap.svg?vue-component';
+import LedgerIcon from '@/icons/ledger.svg?vue-component';
 import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
 
 const {
@@ -321,6 +322,8 @@ export const useAccounts = createCustomScopedComposable(() => {
         return AirGapIcon;
       case ACCOUNT_TYPES.privateKey:
         return PrivateKeyIcon;
+      case ACCOUNT_TYPES.ledger:
+        return LedgerIcon;
       default:
         return null;
     }

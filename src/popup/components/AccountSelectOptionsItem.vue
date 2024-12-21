@@ -4,7 +4,6 @@
     v-if="account"
     class="account-select-options-item"
     :style="bgColorStyle"
-    @click.prevent="$emit('click')"
   >
     <div
       class="option-wrapper"

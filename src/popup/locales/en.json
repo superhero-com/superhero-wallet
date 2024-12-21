@@ -491,6 +491,38 @@
       }
     }
   },
+  "ledger": {
+    "title": "Ledger",
+    "importAccounts": {
+      "title": "Connect Ledger device",
+      "subtitle": "Import and manage Ledger accounts.",
+      "connected": "Ledger device is connected",
+      "subtitleConnected": "Import or create accounts",
+      "sendingRequest": "Sending request to your Ledger hardware wallet",
+      "connectionError": "Connection timed out. Please make sure that your Ledger hardware wallet is properly plugged in and try connecting again.",
+      "importAccounts": "Import accounts",
+      "discoverAccountsTitle": "Import accounts with previous activity.",
+      "nothingDiscovered": "No Ledger accounts with the previous activity have been discovered.",
+      "deriveAccount": "Derive account #",
+      "deriveAccountTitle": "Derive new account from your Ledger seed. You can use custom account index number.",
+      "createAccount": "Create account",
+      "createNewAccount": "Create new account",
+      "selectAll": "Select all",
+      "usbGuide1": "Plug in your Ledger into USB port.",
+      "usbGuide2": "Open the æternity app on your Ledger.",
+      "usbGuide3": "Click the button below to connect."
+    },
+    "sign": {
+      "title": "Confirm this action",
+      "subtitle": "on your Ledger device",
+      "confirm": "You need to confirm this action in your hardware wallet.",
+      "unlock": "Please make sure it is unlocked and the æternity app is active."
+    },
+    "accountCreate": {
+      "title": "Add Ledger accounts",
+      "subtitle": "Connect Ledger hardware wallet"
+    }
+  },
   "filters": {
     "out": "Out",
     "in": "In",

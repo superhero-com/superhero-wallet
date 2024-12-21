@@ -162,6 +162,7 @@ export default defineComponent({
       type: Object as PropType<{ title: string; msg: string; fullscreen: Boolean }>,
       default: null,
     },
+    integer: Boolean,
     readonly: Boolean,
     showHelp: Boolean,
     blinkOnChange: Boolean,
@@ -226,7 +227,7 @@ export default defineComponent({
       if (
         props.type === 'number'
         && isSingleChar
-        && (alreadyHasDot || !/^([0-9]+|,|\.)$/.test(event.key)) // Non numerical
+        && (alreadyHasDot || !/^([0-9]+|,|\.)$/.test(event.key) || (props.integer && /^\.$/.test(event.key))) // Non numerical
       ) {
         event.preventDefault();
       }

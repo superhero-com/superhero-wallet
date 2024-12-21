@@ -19,6 +19,8 @@ module.exports = {
   moduleNameMapper: {
     '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
     '\\.(css|scss)$': 'identity-obj-proxy',
+    '@ledgerhq/devices/hid-framing':
+      '<rootDir>/node_modules/@ledgerhq/devices/lib/hid-framing',
   },
   setupFiles: [
     '<rootDir>/config/jest/setEnvVars.js',

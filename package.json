@@ -64,6 +64,7 @@
     "@ionic/cli": "^7.2.0",
     "@ionic/vue": "^8.2.6",
     "@ionic/vue-router": "^8.2.6",
+    "@ledgerhq/hw-transport-webusb": "^6.29.4",
     "@ngraveio/bc-ur": "^1.1.13",
     "@trapezedev/configure": "^7.0.10",
     "@vee-validate/i18n": "^4.13.2",

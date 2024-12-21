@@ -228,7 +228,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         ...this.getHdWalletAccountFromMnemonicSeed(seed, idx),
       };
     }
-    if (rawAccount.type === ACCOUNT_TYPES.airGap) {
+    if (rawAccount.type === ACCOUNT_TYPES.airGap || rawAccount.type === ACCOUNT_TYPES.ledger) {
       return {
         globalIdx,
         idx,

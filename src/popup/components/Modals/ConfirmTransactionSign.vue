@@ -232,6 +232,7 @@ import { RejectedByUserError } from '@/lib/errors';
 import {
   ACCOUNT_TYPES,
   AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  MODAL_LEDGER_SIGN,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
   RUNNING_IN_POPUP,
@@ -495,6 +496,9 @@ export default defineComponent({
             target: 'offscreen',
           });
         }
+      }
+      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.ledger) {
+        await openModal(MODAL_LEDGER_SIGN);
       }
       popupProps.value?.resolve();
     }
