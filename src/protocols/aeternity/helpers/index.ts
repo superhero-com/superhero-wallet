@@ -12,7 +12,7 @@ import {
   isAddressValid,
   unpackTx,
 } from '@aeternity/aepp-sdk';
-import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
+import type { Node } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -163,6 +163,8 @@ export function convertMultisigAccountToAccount(
     globalIdx: 0,
   };
 }
+
+type NameEntry = Awaited<ReturnType<InstanceType<typeof Node>['getNameEntryByName']>>;
 
 export function getAddressByNameEntry(nameEntry: NameEntry, pointer = 'account_pubkey') {
   return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;

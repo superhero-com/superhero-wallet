@@ -3,7 +3,6 @@ import { numeric, required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce, throttle } from 'lodash-es';
 import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
-import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import {
   IAddressBookEntry,
   INetwork,
@@ -173,7 +172,7 @@ export default () => {
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
         const dryAeSdk = await getDryAeSdk();
-        const nameEntry = (await dryAeSdk.api.getNameEntryByName(name)) as any as NameEntry;
+        const nameEntry = await dryAeSdk.api.getNameEntryByName(name);
         const address = getAddressByNameEntry(nameEntry);
         resolve(({
           [NAME_STATES.REGISTERED]: true,

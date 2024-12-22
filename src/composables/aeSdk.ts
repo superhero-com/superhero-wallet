@@ -11,7 +11,6 @@ import {
   RPC_STATUS,
   Encoded,
 } from '@aeternity/aepp-sdk';
-import { WalletApi } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import { isEmpty } from 'lodash-es';
 
 import type {
@@ -44,7 +43,9 @@ import { usePermissions } from './permissions';
 import { useNetworks } from './networks';
 
 /** AeSdkWallet / onConnected / params */
-type OnAeppConnectionParams = Omit<Parameters<WalletApi[METHODS.connect]>[0], 'version'>;
+type OnAeppConnectionParams = Parameters<
+  ConstructorParameters<typeof AeSdkSuperhero>[0]['onConnection']
+>[1];
 type AeppInfoData = OnAeppConnectionParams & { origin: string };
 
 let composableInitialized = false;
@@ -144,13 +145,13 @@ export function useAeSdk() {
         }],
         id: APP_NAME,
         type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
-        onConnection(aeppId: string, params: OnAeppConnectionParams, origin: string) {
+        onConnection(aeppId, params, origin) {
           aeppInfo[aeppId] = { ...params, origin };
         },
-        onDisconnect(aeppId: string) {
+        onDisconnect(aeppId) {
           delete aeppInfo[aeppId];
         },
-        async onSubscription(aeppId: string, params: any, origin: string) {
+        async onSubscription(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
           const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
@@ -160,7 +161,7 @@ export function useAeSdk() {
           }
           return Promise.reject(new RpcRejectedByUserError());
         },
-        async onAskAccounts(aeppId: string, params: any, origin: string) {
+        async onAskAccounts(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
           const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.address, host)) {
