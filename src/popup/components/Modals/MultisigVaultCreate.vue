@@ -210,7 +210,7 @@ import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { ICreateMultisigAccount, ObjectValues } from '@/types';
 import { MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR, PROTOCOLS } from '@/constants';
-import { excludeFalsy, handleUnknownError } from '@/utils';
+import { excludeFalsy } from '@/utils';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
@@ -240,6 +240,7 @@ import CircleCloseIcon from '@/icons/circle-close.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import AddressBookIcon from '@/icons/menu-card-fill.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
+import Logger from '@/lib/logger';
 
 const STEPS = {
   form: 'form',
@@ -426,12 +427,11 @@ export default defineComponent({
           signersAddressList.value,
         );
       } catch (error: any) {
-        handleUnknownError(error);
-        await openDefaultModal({
+        Logger.write({
           title: t('multisig.multisigVaultCreationFailed'),
-          icon: 'critical',
-          msg: error?.details?.reason,
-          textCenter: true,
+          message: error?.details?.reason || '',
+          type: 'api-response',
+          modal: true,
         });
         currentStep.value = STEPS.form;
       }

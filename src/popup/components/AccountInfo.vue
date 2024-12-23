@@ -30,11 +30,11 @@
         <ion-skeleton-text v-if="isLoading" animated />
         <Truncate v-if="!isLoading" :str="name" />
       </div>
-      <div
+      <Truncate
         v-else
         data-cy="account-name-number"
         class="account-name"
-        v-text="getDefaultAccountLabel(account)"
+        :str="getDefaultAccountLabel(account)"
       />
 
       <slot name="address">

@@ -174,8 +174,11 @@ export function useModals() {
     return openModal(MODAL_CONFIRM, options);
   }
 
-  function openErrorModal(entry: Record<string, any>) {
-    return openModal(MODAL_ERROR_LOG, { entry }).catch(handleUnknownError);
+  function openErrorModal(options: {
+    title?: string;
+    msg?: string;
+  }) {
+    return openModal(MODAL_ERROR_LOG, options).catch(handleUnknownError);
   }
 
   function openScanQrModal(options: {
@@ -212,8 +215,13 @@ export function useModals() {
     openModal(MODAL_ENABLE_BIOMETRIC_LOGIN);
   }
 
+  function closeAllModals() {
+    modalsOpenRaw.value?.forEach(({ key }) => closeModalByKey(key));
+  }
+
   return {
     modalsOpen,
+    closeAllModals,
     registerModal,
     openModal,
     openDefaultModal,

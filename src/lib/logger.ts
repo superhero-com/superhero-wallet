@@ -2,10 +2,14 @@
 import { pick } from 'lodash-es';
 import { detect } from 'detect-browser';
 import { App, ComputedRef } from 'vue';
-import { IS_PRODUCTION, STORAGE_KEYS } from '@/constants';
-import { useModals, useUi } from '../composables';
-import { RejectedByUserError } from './errors';
+
+import { IS_PRODUCTION, MAX_LOG_ENTRIES, STORAGE_KEYS } from '@/constants';
+import { exportFile } from '@/utils';
+import { tg as t } from '@/popup/plugins/i18n';
+import { useModals, useUi } from '@/composables';
+
 import { WalletStorage } from './WalletStorage';
+import { RejectedByUserError } from './errors';
 
 interface ILoggerOptions {
   background?: boolean;
@@ -21,6 +25,7 @@ interface ILoggerEntry {
 }
 
 interface ILoggerInput {
+  title?: string;
   modal?: boolean;
   message: string;
   type: 'vue-error' | 'unhandledrejection' | 'window-error' | 'api-response';
@@ -87,6 +92,13 @@ export default class Logger {
   }
 
   static write({ modal = !IS_PRODUCTION, ...error }: ILoggerInput) {
+    if (!Logger.background && modal && error.message) {
+      const { openErrorModal } = useModals();
+      openErrorModal({
+        title: error.title || t('modals.error-log.title'),
+        msg: error.message,
+      });
+    }
     if (!Logger.saveErrorLog.value) {
       return;
     }
@@ -98,11 +110,7 @@ export default class Logger {
       platform: process.env.PLATFORM!,
       time: Date.now(),
     };
-    WalletStorage.set(STORAGE_KEYS.errorLog, [...errorLog, logEntry]);
-    if (!Logger.background && modal && error.message) {
-      const { openErrorModal } = useModals();
-      openErrorModal(logEntry);
-    }
+    WalletStorage.set(STORAGE_KEYS.errorLog, [...errorLog, logEntry].slice(-MAX_LOG_ENTRIES));
   }
 
   static get(): ILoggerEntry[] {
@@ -113,6 +121,23 @@ export default class Logger {
     const errorLog = Logger.get();
     if (errorLog) {
       // TODO: make call to backend here
+    }
+  }
+
+  static async exportErrorLog(clear: boolean = false) {
+    const path = await exportFile(
+      JSON.stringify(Logger.get()),
+      'errorLogExport.json',
+    );
+    if (path) {
+      const { openDefaultModal } = useModals();
+      openDefaultModal({
+        title: t('pages.addressBook.export.title'),
+        msg: t('pages.addressBook.export.message') + path,
+      });
+    }
+    if (clear) {
+      WalletStorage.set(STORAGE_KEYS.errorLog, []);
     }
   }
 }

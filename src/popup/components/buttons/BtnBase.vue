@@ -37,6 +37,7 @@ export const BTN_VARIANT = [
   'danger',
   'purple',
   'dark',
+  'outlined',
 ] as const;
 
 export type BtnVariant = typeof BTN_VARIANT[number];
@@ -198,6 +199,10 @@ export default defineComponent({
 
     &-dark {
       --bg-color: #{$color-bg-6};
+    }
+
+    &-outlined::before {
+      opacity: 0.2;
     }
   }
 }

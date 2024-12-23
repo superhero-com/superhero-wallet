@@ -53,7 +53,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 20px 12px;
+  padding: 20px 16px;
   border-radius: $border-radius-interactive;
   color: $color-white;
 

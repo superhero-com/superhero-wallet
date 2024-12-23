@@ -10,7 +10,7 @@
       <component
         :is="currentStepConfig.component"
         ref="currentRenderedComponent"
-        v-model:transferData="transferData"
+        v-model:transfer-data="transferData"
         @success="currentStepConfig.onSuccess"
         @error="(val: any) => error = val"
       />

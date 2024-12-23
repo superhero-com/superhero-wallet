@@ -12,6 +12,7 @@ import {
   Encoded,
 } from '@aeternity/aepp-sdk';
 import { WalletApi } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
+import { isEmpty } from 'lodash-es';
 
 import type {
   INetwork,
@@ -79,8 +80,8 @@ export function useAeSdk() {
     onNetworkChange,
   } = useNetworks();
   const {
+    activeAccount,
     accountsAddressList,
-    isLoggedIn,
     getLastActiveProtocolAccount,
     onAccountChange,
   } = useAccounts();
@@ -130,10 +131,7 @@ export function useAeSdk() {
   async function initAeSdk() {
     isAeSdkUpdating.value = true;
 
-    await Promise.all([
-      watchUntilTruthy(isLoggedIn),
-      watchUntilTruthy(areNetworksRestored),
-    ]);
+    await watchUntilTruthy(areNetworksRestored);
 
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
@@ -156,6 +154,8 @@ export function useAeSdk() {
           const aepp = aeppInfo[aeppId];
           const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
+            // Waiting for activeAccount to sync back to the background
+            await watchUntilTruthy(() => !isEmpty(activeAccount.value));
             return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
           }
           return Promise.reject(new RpcRejectedByUserError());
@@ -164,6 +164,8 @@ export function useAeSdk() {
           const aepp = aeppInfo[aeppId];
           const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.address, host)) {
+            // Waiting for activeAccount to sync back to the background
+            await watchUntilTruthy(() => !isEmpty(activeAccount.value));
             return accountsAddressList.value;
           }
           return Promise.reject(new RpcRejectedByUserError());

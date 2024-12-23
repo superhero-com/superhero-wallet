@@ -22,6 +22,7 @@ import {
   useUi,
   useAccounts,
 } from '@/composables';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   name: 'SignTransaction',
@@ -33,7 +34,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
+      const { callbackOrigin, openCallbackOrGoHome, setIsDeepLinkUsed } = useDeepLinkApi();
       const { nodeNetworkId, getAeSdk } = useAeSdk();
       const { openDefaultModal } = useModals();
       const { setLoaderVisible } = useUi();
@@ -57,6 +58,7 @@ export default defineComponent({
       }
 
       try {
+        setIsDeepLinkUsed(true);
         setLoaderVisible(true);
         const {
           transaction, networkId, broadcast, 'replace-caller': replaceCaller,
@@ -85,7 +87,7 @@ export default defineComponent({
           decodeURIComponent(txToSign as string) as Encoded.Transaction,
           {
             networkId,
-            aeppOrigin: callbackOrigin.value?.toString(),
+            aeppOrigin: callbackOrigin.value?.toString() || undefined,
             isSenderReplaced: replaceCaller === 'true',
           } as any,
         );
@@ -98,17 +100,19 @@ export default defineComponent({
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
       } catch (error: any) {
-        await openDefaultModal({
-          title: t('modals.transaction-failed.msg'),
-          icon: 'critical',
-          msg: error.message,
-        });
-        openCallbackOrGoHome(false);
-
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
+        } else {
+          Logger.write({
+            title: t('modals.transaction-failed.title'),
+            message: error.message || t('modals.transaction-failed.msg'),
+            type: 'api-response',
+            modal: true,
+          });
         }
+        openCallbackOrGoHome(false);
       } finally {
+        setIsDeepLinkUsed(false);
         setLoaderVisible(false);
       }
     });

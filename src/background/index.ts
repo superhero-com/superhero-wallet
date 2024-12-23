@@ -1,4 +1,4 @@
-import { IBackgroundMessageData } from '@/types';
+import type { IBackgroundMessageData } from '@/types';
 import {
   openPopup,
   removePopup,
@@ -6,7 +6,7 @@ import {
   getSessionEncryptionKey,
   setSessionTimeout,
 } from './bgPopupHandler';
-import { updateDynamicRules } from './redirectRule';
+import { registerInPageContentScript, updateDynamicRules } from './utils';
 
 (async () => {
   // Check all windows controlled by the service worker to see if one
@@ -47,6 +47,18 @@ const handleMessage: browser.runtime.onMessageBool = (
       popupType,
     } = msg.params ?? {};
     switch (msg.method) {
+      case 'chainChanged':
+        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
+          if (tab.id) {
+            browser.tabs.sendMessage(tab.id, {
+              superheroWalletApproved: true,
+              method: msg.method,
+              result: msg.params?.rpcMethodParams?.result,
+              type: 'result',
+            });
+          }
+        });
+        break;
       case 'openPopup':
         openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
           sendResponse(popupConfig);
@@ -70,14 +82,10 @@ const handleMessage: browser.runtime.onMessageBool = (
         break;
     }
   }
-
-  // forward messages to the offscreen page
-  browser.runtime.sendMessage<IBackgroundMessageData>({
-    ...msg,
-    target: 'offscreen',
-  });
   return true;
 };
 
 browser.runtime.onMessage.addListener(handleMessage);
 browser.runtime.onInstalled.addListener(updateDynamicRules);
+
+registerInPageContentScript();

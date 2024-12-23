@@ -6,12 +6,21 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :custom-labels="[$t('pages.popupMessageSign.title')]"
+      :custom-labels="[
+        ...(isUnknownDapp ? [$t('common.unknown')] : []),
+        $t('pages.popupMessageSign.title'),
+      ]"
       :sender="sender"
       :recipient="activeAccount"
+      :first-label-warning="isUnknownDapp"
     />
-
+    <NoOriginWarning
+      v-if="isUnknownDapp"
+      :action="$t('unknownDapp.signMessageAction')"
+      :warning="$t('unknownDapp.signMessageWarning')"
+    />
     <div
+      v-else
       class="subtitle"
       data-cy="aepp"
     >
@@ -52,6 +61,7 @@ import { PROTOCOLS } from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
 
+import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
@@ -65,10 +75,16 @@ export default defineComponent({
     TransactionInfo,
     DetailsItem,
     CopyText,
+    NoOriginWarning,
   },
   setup() {
     const { getLastActiveProtocolAccount } = useAccounts();
-    const { popupProps, sender, setPopupProps } = usePopupProps();
+    const {
+      isUnknownDapp,
+      popupProps,
+      sender,
+      setPopupProps,
+    } = usePopupProps();
 
     const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
@@ -82,6 +98,7 @@ export default defineComponent({
 
     return {
       activeAccount,
+      isUnknownDapp,
       popupProps,
       sender,
       cancel,

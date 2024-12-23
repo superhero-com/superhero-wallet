@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { fromWei } from 'web3-utils';
 
 import type { AccountAddress, AssetContractId, ITransaction } from '@/types';
+import type { EthRpcEtherscanProxyMethod } from '@/protocols/ethereum/types';
 import { ETHERSCAN_API_KEY, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
 import { ETH_CONTRACT_ID, ETH_SAFE_CONFIRMATION_COUNT } from '../config';
@@ -17,7 +18,7 @@ interface EtherscanDefaultResponse {
 
 interface EtherscanApiCallParams {
   module: 'account' | 'contract' | 'transaction' | 'block' | 'logs' | 'proxy' | 'stats' | 'gastracker';
-  action: 'txlist' | 'tokentx' | 'getabi'; // Extend in the future
+  action: 'txlist' | 'tokentx' | 'getabi' | EthRpcEtherscanProxyMethod; // Extend in the future
   [key: string]: string | undefined;
 }
 
@@ -200,7 +201,7 @@ export class EtherscanService {
     const amount = Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
-    const isEthTransfer = !contractAddress && !input;
+    const isEthTransfer = !contractAddress && (!input || input === '0x');
 
     return {
       protocol: PROTOCOLS.ethereum,

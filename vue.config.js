@@ -81,7 +81,8 @@ module.exports = {
           },
           contentScripts: {
             entries: {
-              inject: 'src/content-scripts/inject.js',
+              inject: 'src/content-scripts/inject.ts',
+              inpage: 'src/content-scripts/inpage.ts',
             },
           },
         },

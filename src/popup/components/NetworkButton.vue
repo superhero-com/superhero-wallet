@@ -3,6 +3,7 @@
     class="network-button"
     dense
     hollow
+    :variant="variant"
     @click.prevent="openNetworkSwitcherModal()"
   >
     <div
@@ -17,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { MODAL_NETWORK_SWITCHER } from '@/constants';
 import {
   useConnection,
@@ -26,11 +27,15 @@ import {
   useModals,
 } from '@/composables';
 
+import { BtnVariant } from './buttons/BtnBase.vue';
 import BtnPill from './buttons/BtnPill.vue';
 
 export default defineComponent({
   components: {
     BtnPill,
+  },
+  props: {
+    variant: { type: String as PropType<BtnVariant>, default: 'primary' },
   },
   setup() {
     const { isOnline } = useConnection();
@@ -57,6 +62,8 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .network-button {
+  white-space: nowrap;
+
   .circle {
     width: 6px;
     height: 6px;

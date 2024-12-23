@@ -34,7 +34,7 @@
             isOwnAddress,
             nameAddress,
             type,
-          }) in accountsFiltered"
+          }, index) in accountsFiltered"
           :key="address"
           :to="
             (isSelector)
@@ -43,6 +43,8 @@
           "
           class="address-book-item"
           :style="bgColorStyle(isOwnAddress, nameAddress, address)"
+          :idx="index"
+          data-cy="address-book-item"
           @click="selectAddress(nameAddress, address)"
         >
           <AccountInfo
@@ -253,6 +255,7 @@ export default defineComponent({
   .address-book-item {
     background-color: var(--bg-color);
     border: var(--border-width) solid var(--bg-color);
+    padding: 8px 2px 8px 8px;
   }
 
   .search-field {

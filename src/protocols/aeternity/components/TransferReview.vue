@@ -156,7 +156,6 @@ import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
-  handleUnknownError,
   toShiftedBigNumber,
 } from '@/utils';
 import { tg } from '@/popup/plugins/i18n';
@@ -166,7 +165,6 @@ import {
   useDeepLinkApi,
   useFungibleTokens,
   useLatestTransactionList,
-  useModals,
   useMultisigAccounts,
   useMultisigTransactions,
   useTippingContracts,
@@ -191,6 +189,7 @@ import AccountItem from '@/popup/components/AccountItem.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   name: 'AeTransferReview',
@@ -218,7 +217,6 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
-    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount, isActiveAccountAirGap } = useAccounts();
@@ -270,10 +268,12 @@ export default defineComponent({
         : 0,
     );
 
-    function openTransactionFailedModal() {
-      openDefaultModal({
-        title: t('modals.transaction-failed.msg'),
-        icon: 'critical',
+    function openTransactionFailedModal(msg: string) {
+      Logger.write({
+        title: t('modals.transaction-failed.title'),
+        message: msg || t('modals.transaction-failed.msg'),
+        type: 'api-response',
+        modal: true,
       });
     }
 
@@ -297,7 +297,9 @@ export default defineComponent({
       );
     }
 
-    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
+    async function transfer(
+      { amount, recipient, selectedAsset }: ITransferArgs,
+    ): Promise<string | undefined> {
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
@@ -351,9 +353,9 @@ export default defineComponent({
         // TODO find out if emitting success in case falsy `actionResult` makes sense.
         emit('success');
         return actionResult?.hash;
-      } catch (error) {
-        openTransactionFailedModal();
-        throw error;
+      } catch (error: any) {
+        openTransactionFailedModal(error.message);
+        return undefined;
       } finally {
         loading.value = false;
       }
@@ -413,9 +415,8 @@ export default defineComponent({
         emit('success');
       } catch (error: any) {
         openCallbackOrGoHome(false);
-        openTransactionFailedModal();
+        openTransactionFailedModal(error.message);
         error.payload = { url: recipient };
-        throw error;
       } finally {
         loading.value = false;
       }
@@ -447,13 +448,13 @@ export default defineComponent({
 
           await postSpendTx(txToPropose, proposeTxHash);
           await updateMultisigAccounts();
+          emit('success');
           router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
         }
-      } catch (error) {
-        handleUnknownError(error);
+      } catch (error: any) {
+        openTransactionFailedModal(error.message);
       } finally {
-        emit('success');
-        loading.value = true;
+        loading.value = false;
       }
     }
 
@@ -493,7 +494,9 @@ export default defineComponent({
           recipient,
           selectedAsset,
         });
-        router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
+        if (hash) {
+          router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
+        }
       }
     }
 
