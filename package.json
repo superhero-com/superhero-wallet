@@ -3,7 +3,7 @@
   "version": "2.5.1",
   "description": "Superhero wallet",
   "author": "Superhero",
-  "license": "MIT",
+  "license": "ISC",
   "private": true,
   "scripts": {
     "lint:vue": "vue-cli-service lint --no-fix",
