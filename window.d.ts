@@ -1,9 +1,13 @@
+import _browser from 'webextension-polyfill';
 import { IPopupProps } from './src/types';
 
 export { };
 
 declare global {
+  const browser = _browser;
+
   interface Window {
+    browser: _browser;
     popupProps?: Partial<IPopupProps>;
   }
   interface ScreenOrientation {

@@ -13,8 +13,8 @@ import { registerInPageContentScript, updateDynamicRules } from './utils';
   // of them is the offscreen document with the given path
   const offscreenUrl = browser.runtime.getURL('offscreen.html');
 
-  // @ts-expect-error - browser type is not complete
   const existingContexts = await browser.runtime.getContexts({
+    // @ts-expect-error - browser type is not complete
     contextTypes: ['OFFSCREEN_DOCUMENT'],
     documentUrls: [offscreenUrl],
   });
@@ -34,10 +34,10 @@ import { registerInPageContentScript, updateDynamicRules } from './utils';
 /**
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
-const handleMessage: browser.runtime.onMessageBool = (
+const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0] = (
   msg: IBackgroundMessageData,
-  sender: browser.runtime.MessageSender,
-  sendResponse: Function,
+  _sender,
+  sendResponse,
 ) => {
   if (msg.target === 'background') {
     const {
@@ -66,10 +66,10 @@ const handleMessage: browser.runtime.onMessageBool = (
         return true;
       case 'removePopup':
         sendResponse(removePopup(id!));
-        return false;
+        return undefined;
       case 'getPopup':
         sendResponse(getPopup(id!));
-        return false;
+        return undefined;
       case 'getSessionEncryptionKey':
         getSessionEncryptionKey().then((encryptionKey) => {
           sendResponse(encryptionKey);
@@ -77,7 +77,7 @@ const handleMessage: browser.runtime.onMessageBool = (
         return true;
       case 'setSessionTimeout':
         sendResponse(setSessionTimeout(msg.payload));
-        return false;
+        return undefined;
       default:
         break;
     }

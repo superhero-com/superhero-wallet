@@ -22,7 +22,7 @@ export const i18n = createI18n({
   messages: { en },
 });
 
-// @ts-ignore type coming from VueI18n is excessively deep and possibly infinite
+// @ts-expect-error type coming from VueI18n is excessively deep and possibly infinite
 export const tg = i18n.global.t;
 
 export const languages: Record<SupportedLanguage, ILanguageConfig> = {

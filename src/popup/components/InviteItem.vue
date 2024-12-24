@@ -223,7 +223,6 @@ export default defineComponent({
         await aeSdk.spend(
           formModel.value.amount!, // validateAll method confirms the presence of the amount field
           address.value,
-          // @ts-ignore
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
         await updateBalance();

@@ -124,8 +124,8 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  // @ts-ignore
-  next(meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
+  if (meta?.ifNotAuthOnly) next({ name: ROUTE_ACCOUNT });
+  else next();
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));

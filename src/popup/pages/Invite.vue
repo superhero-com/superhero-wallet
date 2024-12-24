@@ -130,7 +130,6 @@ export default defineComponent({
         await aeSdk.spend(
           formModel.value.amount || 0,
           address,
-          // @ts-ignore
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
       } catch (error: any) {

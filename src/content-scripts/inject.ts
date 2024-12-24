@@ -79,7 +79,7 @@ const runContentScript = () => {
     },
     false,
   );
-  browser.runtime.onMessage.addListener(({ method, result }: any) => {
+  browser.runtime.onMessage.addListener(({ method, result }: any): undefined => {
     if (method === ETH_RPC_WALLET_EVENTS.chainChanged) {
       Object.entries(connectedDapps).forEach(([origin, source]) => {
         source.postMessage({
@@ -91,6 +91,7 @@ const runContentScript = () => {
         }, origin as any);
       });
     }
+    return undefined;
   });
 
   /**
@@ -100,8 +101,7 @@ const runContentScript = () => {
     if (document.readyState === 'complete') {
       clearInterval(readyStateCheckInterval);
       const port = browser.runtime.connect();
-      // @ts-expect-error
-      const extConnection = new BrowserRuntimeConnection({ port });
+      const extConnection = new BrowserRuntimeConnection({ port, debug: false });
       const pageConnection = new BrowserWindowMessageConnection({
         target: window,
         origin: window.origin,

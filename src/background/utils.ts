@@ -5,7 +5,6 @@
  */
 export function updateDynamicRules() {
   const extUrl = browser.runtime.getURL('./index.html');
-  // @ts-ignore
   browser.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [1],
     addRules: [
@@ -29,7 +28,6 @@ export function updateDynamicRules() {
 
 export async function registerInPageContentScript() {
   try {
-    // @ts-expect-error
     await browser?.scripting.registerContentScripts([
       {
         id: 'inpage',

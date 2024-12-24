@@ -8,6 +8,7 @@ import { POPUP_METHODS, SESSION_METHODS } from '@/constants';
 import { executeOrSendMessageToBackground } from './utils';
 
 interface IPopupConfig {
+  id: string;
   actions: Pick<IPopupProps, 'resolve' | 'reject'>;
   props: Omit<IPopupProps, 'resolve' | 'reject'>;
 }
@@ -26,7 +27,7 @@ export const openPopup = async (
     aepp,
   },
 )
-  .then((popupConfig) => new Promise<IPopupConfig>((resolve, reject) => {
+  .then((popupConfig: IPopupConfig) => new Promise<IPopupConfig>((resolve, reject) => {
     const popupWithActions = {
       ...popupConfig,
       actions: {
@@ -47,5 +48,5 @@ export const removePopup = async (id: string) => {
 export const getPopup = (id: string) => popups[id];
 
 export const getSessionEncryptionKey = async (): Promise<string | null> => (
-  executeOrSendMessageToBackground(SESSION_METHODS.getSessionEncryptionKey)
+  await executeOrSendMessageToBackground(SESSION_METHODS.getSessionEncryptionKey) as string | null
 );
