@@ -629,18 +629,7 @@ export interface IFeeItem {
  */
 export type PopupType = typeof POPUP_TYPES[number];
 
-export interface ITopHeader {
-  hash: string;
-  height: number;
-  pofHash?: string;
-  prevHash: string;
-  prevKeyHash: string;
-  signature?: string;
-  stateHash: string;
-  time: number;
-  txsHash?: string;
-  version: number;
-}
+export type ITopHeader = Awaited<ReturnType<InstanceType<typeof Node>['getTopHeader']>>
 
 /**
  * Todo replace ChainName with AensName within the app

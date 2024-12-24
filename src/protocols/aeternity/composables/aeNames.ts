@@ -19,7 +19,7 @@ import {
   fetchJson,
   handleUnknownError,
 } from '@/utils';
-import { Encoded, NAME_TTL } from '@aeternity/aepp-sdk';
+import { Encoded, Name } from '@aeternity/aepp-sdk';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   PROTOCOLS,
@@ -258,12 +258,12 @@ export function useAeNames() {
     }: IUpdateNamePointerParams,
   ) {
     const aeSdk = await getAeSdk();
-    const nameEntry = await aeSdk.aensQuery(name);
+    const nameObj = new Name(name, aeSdk.getContext());
     try {
       if (type === UPDATE_POINTER_ACTION.extend) {
-        await nameEntry.extendTtl(NAME_TTL);
+        await nameObj.extendTtl();
       } else if (type === UPDATE_POINTER_ACTION.update) {
-        await aeSdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
+        await nameObj.update({ account_pubkey: address }, { extendPointers: true });
       }
       openDefaultModal({
         msg: tg('pages.names.pointer-added', { type }),

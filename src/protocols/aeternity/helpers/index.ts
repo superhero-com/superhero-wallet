@@ -1,5 +1,4 @@
 import { camelCase, snakeCase } from 'lodash-es';
-import nacl from 'tweetnacl';
 import {
   AE_AMOUNT_FORMATS,
   Encoded,
@@ -8,6 +7,7 @@ import {
   MemoryAccount,
   Tag,
   decode,
+  encode,
   formatAmount,
   isAddressValid,
   unpackTx,
@@ -368,9 +368,7 @@ export function checkAddressOrChannel(value: string) {
 export function getAccountFromSecret(secretKey: Buffer) {
   // `secretKey` variable can be either seed or seed + public key (legacy)
   return new MemoryAccount(
-    Buffer.from(secretKey).length === SEED_LENGTH
-      ? nacl.sign.keyPair.fromSeed(Buffer.from(secretKey)).secretKey
-      : Buffer.from(secretKey),
+    encode(secretKey.subarray(0, SEED_LENGTH), Encoding.AccountSecretKey),
   );
 }
 

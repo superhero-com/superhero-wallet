@@ -83,7 +83,8 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
           !tokenInstance
           || tokenInstance.$options.address !== val.selectedAsset.contractId
         ) {
-          tokenInstance = await aeSdk.initializeContract({
+          tokenInstance = await Contract.initialize({
+            ...aeSdk.getContext(),
             aci: FungibleTokenFullInterfaceACI,
             address: val.selectedAsset.contractId as Encoded.ContractAddress,
           });

@@ -171,7 +171,7 @@ export default defineComponent({
       );
     });
 
-    const address = computed(() => getAccountFromSecret(props.secretKey).address);
+    const address = computed(() => getAccountFromSecret(Buffer.from(props.secretKey)).address);
 
     function deleteItem() {
       removeInvite(props.secretKey);

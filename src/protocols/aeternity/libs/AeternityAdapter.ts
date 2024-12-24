@@ -1,15 +1,16 @@
 /* eslint-disable prefer-const */
 /* eslint-disable class-methods-use-this */
 import {
+  Contract,
   decode,
   encode,
   Encoded,
   Encoding,
-  getAddressFromPriv,
-  getHdWalletAccountFromSeed,
   isAddressValid,
+  MemoryAccount,
   Tag,
 } from '@aeternity/aepp-sdk';
+import { getHdWalletAccountFromSeed } from '@aeternity/aepp-sdk-13';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 
 import type {
@@ -209,7 +210,9 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     seed?: Uint8Array,
   ): IAccount | null {
     if (rawAccount.type === ACCOUNT_TYPES.privateKey && rawAccount.privateKey) {
-      const address = getAddressFromPriv(Buffer.from(rawAccount.privateKey));
+      const { address } = new MemoryAccount(
+        encode(Buffer.from(rawAccount.privateKey).subarray(0, 32), Encoding.AccountSecretKey),
+      );
       return {
         idx,
         globalIdx,
@@ -292,7 +295,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   ) {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    const tokenContract = await aeSdk.initializeContract({
+    const tokenContract = await Contract.initialize({
+      ...aeSdk.getContext(),
       aci: FungibleTokenFullInterfaceACI,
       address: contractId as Encoded.ContractAddress,
     });

@@ -3,12 +3,13 @@ import {
   AccountBase,
   DelegationTag,
   MemoryAccount,
-  sign,
   RpcRejectedByUserError,
   unpackDelegation,
   unpackTx,
   Encoded,
+  Encoding,
   METHODS,
+  encode,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import { Ref } from 'vue';
@@ -29,6 +30,7 @@ import { useAccounts } from '@/composables/accounts';
 import { useDeepLinkApi } from '@/composables/deepLinkApi';
 import { useLedger } from '@/composables';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
+import { SEED_LENGTH } from '@/protocols/aeternity/config';
 import { usePermissions } from '@/composables/permissions';
 import Logger from '@/lib/logger';
 
@@ -54,7 +56,7 @@ export class AeAccountHdWallet extends MemoryAccount {
   nodeNetworkId: Ref<string | undefined>;
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
-    super(Buffer.alloc(64));
+    super(encode(Buffer.alloc(SEED_LENGTH), Encoding.AccountSecretKey));
     const aeAccount = AeAccountHdWallet.getAccount();
     this.address = aeAccount!.address as Encoded.AccountAddress;
     this.isSigningAlreadyConfirmed = false;
@@ -296,7 +298,9 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
     if (account && account.secretKey && account.protocol === PROTOCOLS.aeternity) {
-      return sign(data, account.secretKey);
+      return new MemoryAccount(
+        encode(account.secretKey.subarray(0, SEED_LENGTH), Encoding.AccountSecretKey),
+      ).sign(data);
     }
 
     throw new Error('Unsupported protocol');

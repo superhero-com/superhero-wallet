@@ -149,7 +149,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Encoded, Tag } from '@aeternity/aepp-sdk';
+import { Contract, Encoded, Tag } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
@@ -285,7 +285,8 @@ export default defineComponent({
       options: ContractInitializeOptions,
     ) {
       const aeSdk = await getAeSdk();
-      const tokenContract = await aeSdk.initializeContract({
+      const tokenContract = await Contract.initialize({
+        ...aeSdk.getContext(),
         aci: ZeitTokenACI,
         address,
       });

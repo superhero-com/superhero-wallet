@@ -7,6 +7,7 @@ import {
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
+  RpcMethodNotFoundError,
   METHODS,
   RPC_STATUS,
   Encoded,
@@ -170,6 +171,10 @@ export function useAeSdk() {
             return accountsAddressList.value;
           }
           return Promise.reject(new RpcRejectedByUserError());
+        },
+        onAskToSelectNetwork() {
+          // TODO: add popup asking user to confirm network switch by aepp request
+          throw new RpcMethodNotFoundError();
         },
       },
       nodeNetworkId,

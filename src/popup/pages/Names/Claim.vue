@@ -88,6 +88,7 @@ import {
   getExecutionCost,
   getMinimumNameFee,
   isNameValid as isAensNameValid,
+  Name,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -186,9 +187,10 @@ export default defineComponent({
       }
 
       const aeSdk = await getAeSdk();
-      const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);
+      const nameObj = new Name(fullName.value, aeSdk.getContext());
+      const isNameRegistered = await nameObj.getState().then(() => true, () => false);
 
-      if (nameEntry) {
+      if (isNameRegistered) {
         setLoaderVisible(false);
         openDefaultModal({
           title: t('modals.name-exist.msg'),
@@ -197,8 +199,8 @@ export default defineComponent({
         let claimTxHash;
 
         try {
-          const { salt } = await aeSdk.aensPreclaim(fullName.value);
-          claimTxHash = (await aeSdk.aensClaim(fullName.value, salt, { waitMined: false })).hash;
+          await nameObj.preclaim();
+          claimTxHash = (await nameObj.claim({ waitMined: false })).hash;
           if (autoExtend.value) {
             setPendingAutoExtendName(fullName.value);
           }

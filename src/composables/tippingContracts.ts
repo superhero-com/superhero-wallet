@@ -45,12 +45,14 @@ export function useTippingContracts() {
       tippingV1,
       tippingV2,
     ] = await Promise.all([
-      aeSdk.initializeContract<AeTippingV1ContractApi>({
+      Contract.initialize<AeTippingV1ContractApi>({
+        ...aeSdk.getContext(),
         aci: TippingV1ACI,
         address: tippingContractAddresses.value.tippingV1,
       }),
       tippingContractAddresses.value.tippingV2
-        ? aeSdk.initializeContract<AeTippingV2ContractApi>({
+        ? Contract.initialize<AeTippingV2ContractApi>({
+          ...aeSdk.getContext(),
           aci: TippingV2ACI,
           address: tippingContractAddresses.value.tippingV2,
         })
