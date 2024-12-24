@@ -101,7 +101,12 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     const { isDeepLinkUsed } = useDeepLinkApi({ doNotInitializeRouter: true });
 
-    const tx = unpackTx(txBase64) as any as ITx;
+    let tx: ITx | undefined;
+    try {
+      tx = unpackTx(txBase64) as unknown as ITx;
+    } catch {
+      tx = undefined;
+    }
     if (isDeepLinkUsed || IS_OFFSCREEN_TAB) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(

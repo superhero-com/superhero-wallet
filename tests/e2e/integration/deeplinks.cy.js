@@ -4,7 +4,7 @@ import { STUB_ACCOUNT, STUB_TX_BASE_64 } from '@/constants/stubs';
 
 const callbackUrl = encodeURIComponent('http://localhost');
 const encodedContractCallTx = encodeURIComponent('tx_+HQrAaEBbLQV9y00r/WCZ4XWrEVDpdiLPiLx2282rdKA1dkRTlmCA7yhBWuJbvnfcBIKpR/IbC+ywuM9P7fvmDFNerFKykCB+M1qA4al2v8FcAAAhzcV8VZnVACDGBf4hDuaygCQKxEV1igBG2+HI4byb8D/wPOLADU=');
-const encodedGaAttachTx = encodeURIComponent('tx_+O1QAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCITuIv4iUYDoIMndi6iAoqQltixF/3A6WlN0+rWVAan4LvFLy2pEJlhwLhcuDv+RNZEHwA3ADcAGg6CPwEDP/5s8lcLADcCFwcXdwAIPAIE+wNNTm90IGluIEF1dGggY29udGV4dAEBAJsvAhFE1kQfEWluaXQRbPJXCyVhdXRob3JpemWCLwCFNy4xLjAAoGzyVwsKFZm3CCkeUKo9rxPQx/JIS8M33a0kE6N/1KAJgwcAA4ZIjzqPaAAATIQ7msoAhysRRNZEHz+4yEN3');
+const encodedUnknownTx = encodeURIComponent('tx_+FKB/wGhAcqjxWnZkJOLBrcg4qrqLAGciiTZoXqyjoYXlSBGEywioQHKo8Vp2ZCTiwa3IOKq6iwBnIok2aF6so6GF5UgRhMsIguGDyb1YcgAABOAFw87cw==');
 const message = 'This is a test message! http://localhost';
 const hexMessage = '5468697320697320612074657374206d6573736167652120687474703a2f2f6c6f63616c686f7374';
 const callbackParams = `x-success=${callbackUrl}&x-cancel=${callbackUrl}`;
@@ -54,7 +54,7 @@ describe('Test cases for deeplinks', () => {
   });
 
   it('Signs transaction of unsupported type', () => {
-    cy.login({}, `/sign-transaction?transaction=${encodedGaAttachTx}&networkId=ae_uat&replace-caller=true&${callbackParams}`)
+    cy.login({}, `/sign-transaction?transaction=${encodedUnknownTx}&networkId=ae_uat&${callbackParams}`)
       .get('[data-cy=label]')
       .should('be.visible')
       .should('contain', tg('modals.confirm-raw-sign.title'))
@@ -64,7 +64,7 @@ describe('Test cases for deeplinks', () => {
       .scrollTo('bottom')
       .get('[data-cy=data]')
       .should('be.visible')
-      .should('contain', decodeURIComponent(encodedGaAttachTx));
+      .should('contain', decodeURIComponent(encodedUnknownTx));
   });
 
   it('Signs transaction with wrong networkId', () => {
