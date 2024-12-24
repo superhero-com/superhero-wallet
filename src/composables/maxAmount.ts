@@ -48,7 +48,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
   const { getLastActiveProtocolAccount } = useAccounts();
   const { getTippingContracts } = useTippingContracts();
 
-  let updateTokenBalanceInterval: NodeJS.Timer;
+  let updateTokenBalanceInterval: NodeJS.Timeout;
   const fee = ref<BigNumber>(new BigNumber(0));
   const total = ref<BigNumber>(new BigNumber(0));
   const gasUsed = ref(0);
