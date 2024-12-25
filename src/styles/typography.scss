@@ -1,3 +1,5 @@
+@use 'variables';
+
 @import '~@fontsource/ibm-plex-sans/300.css';
 @import '~@fontsource/ibm-plex-sans/400.css';
 @import '~@fontsource/ibm-plex-sans/400-italic.css';
@@ -5,8 +7,6 @@
 @import '~@fontsource/ibm-plex-sans/600.css';
 
 @import '~@fontsource/ibm-plex-mono/500.css';
-
-@import 'variables';
 
 /**
  * Sans Serif
@@ -127,42 +127,42 @@
  */
 
 %face-mono-16-medium {
-  font-family: $font-mono;
+  font-family: variables.$font-mono;
   font-weight: 500;
   font-size: 16px;
   line-height: 20px;
 }
 
 %face-mono-15-medium {
-  font-family: $font-mono;
+  font-family: variables.$font-mono;
   font-weight: 500;
   font-size: 15px;
   line-height: 24px;
 }
 
 %face-mono-14-medium {
-  font-family: $font-mono;
+  font-family: variables.$font-mono;
   font-weight: 500;
   font-size: 14px;
   line-height: 16px;
 }
 
 %face-mono-12-medium {
-  font-family: $font-mono;
+  font-family: variables.$font-mono;
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
 }
 
 %face-mono-11-medium {
-  font-family: $font-mono;
+  font-family: variables.$font-mono;
   font-weight: 500;
   font-size: 11px;
   line-height: 20px;
 }
 
 %face-mono-10-medium {
-  font-family: $font-mono;
+  font-family: variables.$font-mono;
   font-weight: 500;
   font-size: 10px;
   line-height: 16px;
