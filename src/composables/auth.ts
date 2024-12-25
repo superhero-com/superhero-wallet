@@ -6,7 +6,8 @@ import {
   ref,
   watch,
 } from 'vue';
-import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import {
@@ -130,13 +131,13 @@ export const useAuth = createCustomScopedComposable(() => {
 
   /** If mnemonic is invalid, it is most likely encrypted */
   const isMnemonicEncrypted = computed(
-    () => !IS_MOBILE_APP && mnemonic.value && !validateMnemonic(mnemonic.value),
+    () => !IS_MOBILE_APP && mnemonic.value && !validateMnemonic(mnemonic.value, wordlist),
   );
   const mnemonicEncrypted = computed(() => isMnemonicEncrypted.value ? mnemonic.value : null);
   const mnemonicDecrypted = ref('');
 
   const mnemonicSeed = computed(
-    () => mnemonicDecrypted.value ? mnemonicToSeed(mnemonicDecrypted.value) : null,
+    () => mnemonicDecrypted.value === '' ? null : mnemonicToSeedSync(mnemonicDecrypted.value),
   );
 
   const biometricAuth = reactive({
@@ -426,7 +427,7 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonicSeed,
     encryptionKey,
     encryptionSalt,
-    generateMnemonic,
+    generateMnemonic: () => generateMnemonic(wordlist),
     secureLoginTimeoutDecrypted,
     authenticateWithBiometry,
     authenticateWithPassword,

@@ -125,7 +125,8 @@ export const useAccounts = createCustomScopedComposable(() => {
   ));
 
   const accounts = computed((): IAccount[] => {
-    if (!isMnemonicRestored.value || !mnemonicSeed.value || !accountsRaw.value?.length) {
+    const ms = mnemonicSeed.value;
+    if (!isMnemonicRestored.value || !ms || !accountsRaw.value?.length) {
       return [];
     }
 
@@ -147,7 +148,7 @@ export const useAccounts = createCustomScopedComposable(() => {
 
         const adapter = ProtocolAdapterFactory.getAdapter(account.protocol);
         const resolvedAccount = adapter
-          .resolveAccountRaw(account, idx, globalIdx, mnemonicSeed.value);
+          .resolveAccountRaw(account, idx, globalIdx, ms);
         if (resolvedAccount) {
           idxList[account.protocol][account.type] += 1;
         } else {
@@ -290,11 +291,13 @@ export const useAccounts = createCustomScopedComposable(() => {
    * and collect the raw accounts so they can be stored in the browser storage.
    */
   async function discoverAccounts() {
+    const ms = mnemonicSeed.value;
+    if (ms == null) throw new Error('Can\'t discover accounts without mnemonic seed');
     const lastUsedAccountIndexRegistry: number[] = await Promise.all(
       PROTOCOL_LIST.map(
         (protocol) => ProtocolAdapterFactory
           .getAdapter(protocol)
-          .discoverLastUsedAccountIndex(mnemonicSeed.value),
+          .discoverLastUsedAccountIndex(ms),
       ),
     );
 
