@@ -87,6 +87,16 @@
             />
           </div>
         </div>
+
+        <div>
+          <CheckBox
+            v-model="rememberMe"
+            class="remember-me"
+            data-cy="checkbox"
+          >
+            {{ $t('pages.connectConfirm.rememberMe') }}
+          </CheckBox>
+        </div>
       </template>
       <template v-else>
         <Card class="skeleton-card">
@@ -144,6 +154,7 @@ import {
   defineComponent,
   onUnmounted,
   PropType,
+  ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { ConnectPermission } from '@/types';
@@ -168,6 +179,7 @@ import InfoBox from '@/popup/components/InfoBox.vue';
 import NetworkButton from '@/popup/components/NetworkButton.vue';
 import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 import Truncate from '@/popup/components/Truncate.vue';
+import CheckBox from '@/popup/components/CheckBox.vue';
 
 import CheckMark from '@/icons/check-mark-circle-outline.svg?vue-component';
 import DappIcon from '@/icons/dapp.svg?vue-component';
@@ -186,6 +198,7 @@ export default defineComponent({
     TemplateRenderer,
     Truncate,
     CheckMark,
+    CheckBox,
     DappIcon,
     TriangleRightIcon,
   },
@@ -194,6 +207,7 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
+    const rememberMe = ref(true);
 
     const { getLastActiveProtocolAccount } = useAccounts();
     const {
@@ -264,11 +278,17 @@ export default defineComponent({
 
     function confirm() {
       if (popupProps.value?.app?.host) {
+        /**
+         * TODO: When a user disconnects, set the `rememberMe` permission to false
+         * Currently, disconnecting through the dapp does not call the appropriate
+         * `onDisconnect` method, seems to be an issue with the SDK
+         * */
         addPermission({
           ...PERMISSION_DEFAULTS,
           ...popupProps.value?.app,
           ...permission.value,
           name: permission.value?.name || popupProps.value.app.name || popupProps.value.app.host,
+          address: rememberMe.value,
         });
       }
       popupProps.value?.resolve();
@@ -283,6 +303,7 @@ export default defineComponent({
     });
 
     return {
+      rememberMe,
       accessList,
       popupProps,
       activeAccount,
@@ -453,6 +474,10 @@ export default defineComponent({
       text-align: left;
       opacity: .85;
     }
+  }
+
+  .remember-me {
+    @extend %face-sans-15-medium;
   }
 }
 </style>
