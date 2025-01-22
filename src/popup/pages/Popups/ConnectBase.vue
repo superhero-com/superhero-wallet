@@ -55,20 +55,36 @@
           v-text="$t('pages.connectConfirm.websiteRequestConnect')"
         />
       </div>
-      <template v-if="activeAccount">
+      <template v-if="selectedAccount">
         <!-- USER CARD -->
-        <AccountSelectOptionsItem
-          :custom-account="activeAccount"
-          hide-balance
-          hide-protocol-icon
+        <FormSelect
+          :model-value="selectedAccount.address"
+          :default-text="$t('pages.connectConfirm.selectAccount')"
+          :options="getAccountsSelectOptionsByProtocol(protocol)"
+          class="account-select-input"
+          item-title="value"
+          account-select
+          unstyled
+          hide-arrow
+          @select="selectedAccount = getAccountByAddress($event)"
         >
-          <template #right>
-            <NetworkButton
-              variant="outlined"
-              class="network-button"
-            />
+          <template #current-text>
+            <AccountSelectOptionsItem
+              :custom-account="selectedAccount"
+              hide-balance
+            >
+              <template #right>
+                <NetworkButton
+                  variant="outlined"
+                  class="network-button"
+                />
+              </template>
+              <template #after-address>
+                <ChevronDown class="chevron" />
+              </template>
+            </AccountSelectOptionsItem>
           </template>
-        </AccountSelectOptionsItem>
+        </FormSelect>
 
         <p
           class="text-description text-center permissions-header"
@@ -87,6 +103,11 @@
             />
           </div>
         </div>
+
+        <p
+          class="ensure-network color-warning"
+          v-text="$t('pages.connectConfirm.ensureNetwork')"
+        />
 
         <div>
           <CheckBox
@@ -157,7 +178,7 @@ import {
   ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { ConnectPermission } from '@/types';
+import type { ConnectPermission, IAccount } from '@/types';
 import { prepareUrlToDisplay } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import {
@@ -180,14 +201,17 @@ import NetworkButton from '@/popup/components/NetworkButton.vue';
 import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 import Truncate from '@/popup/components/Truncate.vue';
 import CheckBox from '@/popup/components/CheckBox.vue';
+import FormSelect from '@/popup/components/form/FormSelect.vue';
 
 import CheckMark from '@/icons/check-mark-circle-outline.svg?vue-component';
 import DappIcon from '@/icons/dapp.svg?vue-component';
 import TriangleRightIcon from '@/icons/triangle-right.svg?vue-component';
+import ChevronDown from '@/icons/chevron-down.svg?vue-component';
 
 export default defineComponent({
   components: {
     AccountSelectOptionsItem,
+    FormSelect,
     Card,
     Avatar,
     Modal,
@@ -201,6 +225,7 @@ export default defineComponent({
     CheckBox,
     DappIcon,
     TriangleRightIcon,
+    ChevronDown,
   },
   props: {
     access: { type: Array as PropType<ConnectPermission[]>, required: true },
@@ -209,7 +234,12 @@ export default defineComponent({
     const { t } = useI18n();
     const rememberMe = ref(true);
 
-    const { getLastActiveProtocolAccount } = useAccounts();
+    const {
+      getAccountsSelectOptionsByProtocol,
+      getLastActiveProtocolAccount,
+      getAccountByAddress,
+      setActiveAccountByAddress,
+    } = useAccounts();
     const {
       isUnknownDapp,
       popupProps,
@@ -244,6 +274,8 @@ export default defineComponent({
     const protocol = computed(() => popupProps.value?.protocol || PROTOCOLS.aeternity);
 
     const activeAccount = computed(() => getLastActiveProtocolAccount(protocol.value));
+
+    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol.value));
 
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;
@@ -291,6 +323,7 @@ export default defineComponent({
           address: rememberMe.value,
         });
       }
+      setActiveAccountByAddress(selectedAccount.value?.address);
       popupProps.value?.resolve();
     }
 
@@ -307,6 +340,10 @@ export default defineComponent({
       accessList,
       popupProps,
       activeAccount,
+      protocol,
+      selectedAccount,
+      getAccountsSelectOptionsByProtocol,
+      getAccountByAddress,
       dappIcon,
       sender,
       trustedDapp,
@@ -347,6 +384,10 @@ export default defineComponent({
       margin-block: 0 16px;
     }
 
+    .ensure-network {
+      margin: 0px 0px 15px 0px;
+    }
+
     .aepp-data {
       width: 100%;
 
@@ -356,6 +397,9 @@ export default defineComponent({
     }
 
     .network-button {
+      align-self: stretch;
+      margin: -6px -8px -6px 0px;
+      border-radius: 0px;
       pointer-events: none;
     }
 
@@ -444,6 +488,10 @@ export default defineComponent({
     }
   }
 
+  .account-select-input {
+    width: 100%;
+  }
+
   .permissions-header {
     margin-block: 16px;
   }
@@ -478,6 +526,15 @@ export default defineComponent({
 
   .remember-me {
     @extend %face-sans-15-medium;
+  }
+
+  .chevron {
+    width: 10px;
+    height: 10px;
+    align-self: center;
+    opacity: 0.7;
+    margin-left: 1px;
+    padding-top: 4px;
   }
 }
 </style>

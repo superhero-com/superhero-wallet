@@ -30,10 +30,10 @@ import { tg } from '@/popup/plugins/i18n';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useStorageRef, useAuth, useModals } from '@/composables';
 
-import { useStorageRef } from './storageRef';
-import { useAuth } from './auth';
-import { useModals } from './modals';
+import AirGapIcon from '@/icons/air-gap.svg?vue-component';
+import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
 
 const {
   addCallback: onAccountChange,
@@ -206,6 +206,10 @@ export const useAccounts = createCustomScopedComposable(() => {
     return accounts.value.find((acc) => acc.globalIdx === globalIdx);
   }
 
+  function getAccountsSelectOptionsByProtocol(protocol: Protocol): IFormSelectOption[] {
+    return prepareAccountSelectOptions(accounts.value.filter((acc) => acc.protocol === protocol));
+  }
+
   /**
    * Access last used (or current) account of the protocol when accessing features
    * related to protocol different than the current account is using.
@@ -311,6 +315,17 @@ export const useAccounts = createCustomScopedComposable(() => {
     }
   }
 
+  function getAccountIcon(type: AccountType) {
+    switch (type) {
+      case ACCOUNT_TYPES.airGap:
+        return AirGapIcon;
+      case ACCOUNT_TYPES.privateKey:
+        return PrivateKeyIcon;
+      default:
+        return null;
+    }
+  }
+
   function resetAccounts() {
     mnemonic.value = '';
     accountsRaw.value = [];
@@ -347,6 +362,8 @@ export const useAccounts = createCustomScopedComposable(() => {
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
+    getAccountsSelectOptionsByProtocol,
+    getAccountIcon,
     onAccountChange,
     setActiveAccountByAddress,
     setActiveAccountByGlobalIdx,

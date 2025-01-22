@@ -13,6 +13,7 @@
         :title="title"
         :options-length="options.length"
         :search-placeholder="$t('pages.accounts.searchAccountsPlaceholder')"
+        :hide-search="hideSearch"
       />
     </template>
 
@@ -60,6 +61,7 @@ export default defineComponent({
     title: { type: String, default: null },
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
+    hideSearch: Boolean,
   },
   setup(props) {
     // TODO AIRGAP: implement multiple accounts selection
@@ -88,7 +90,7 @@ export default defineComponent({
   .items-list {
     display: flex;
     flex-direction: column;
-    row-gap: 2px;
+    row-gap: 8px;
     padding-inline: 8px;
   }
 }
