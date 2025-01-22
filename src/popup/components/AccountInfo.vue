@@ -18,25 +18,35 @@
       class="account-details"
       :class="{ 'list-name': isListName }"
     >
-      <div
-        v-if="isMultisig"
-        class="account-name"
-        v-text="$t('multisig.multisigVault')"
-      />
-      <div
-        v-else-if="name"
-        class="account-name"
-      >
-        <ion-skeleton-text v-if="isLoading" animated />
-        <Truncate v-if="!isLoading" :str="name" />
+      <div class="account-with-icons">
+        <Component
+          :is="type && getAccountIcon(type)"
+          class="account-type-icon"
+        />
+        <div
+          v-if="isMultisig"
+          class="account-name"
+          v-text="$t('multisig.multisigVault')"
+        />
+        <template
+          v-else-if="name"
+        >
+          <ion-skeleton-text v-if="isLoading" animated />
+          <Truncate v-if="!isLoading" class="account-name" :str="name" />
+        </template>
+        <template
+          v-else
+        >
+          <Truncate
+            data-cy="account-name-number"
+            class="account-name"
+            :str="getDefaultAccountLabel(account)"
+          />
+        </template>
+        <div>
+          <slot name="after-address" />
+        </div>
       </div>
-      <Truncate
-        v-else
-        data-cy="account-name-number"
-        class="account-name"
-        :str="getDefaultAccountLabel(account)"
-      />
-
       <slot name="address">
         <CopyText
           v-if="address?.length"
@@ -72,11 +82,12 @@ import type { IAccount } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { useAccounts } from '@/composables';
 
-import Avatar, { type AvatarSize } from './Avatar.vue';
-import CopyText from './CopyText.vue';
-import Truncate from './Truncate.vue';
-import AddressTruncated from './AddressTruncated.vue';
+import Avatar, { type AvatarSize } from '@/popup/components/Avatar.vue';
+import CopyText from '@/popup/components/CopyText.vue';
+import Truncate from '@/popup/components/Truncate.vue';
+import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 
 export default defineComponent({
   components: {
@@ -102,6 +113,7 @@ export default defineComponent({
   },
   setup(props) {
     const { getName, getNameByNameHash } = useAeNames();
+    const { getAccountIcon, getAccountByAddress } = useAccounts();
 
     const isLoading = ref(true);
     const resolvedChainName = ref('');
@@ -111,6 +123,7 @@ export default defineComponent({
       || props.customName
       || getName(address.value).value
     ));
+    const type = computed(() => getAccountByAddress(props.account.address!)?.type);
 
     const explorerUrl = computed(
       () => (props.account.protocol)
@@ -136,8 +149,10 @@ export default defineComponent({
 
     return {
       name: resolvedChainName.value || name,
+      type,
       address,
       explorerUrl,
+      getAccountIcon,
       getDefaultAccountLabel,
       isLoading,
     };
@@ -171,11 +186,18 @@ export default defineComponent({
     max-width: var(--maxWidth);
     font-weight: 500;
 
+    .account-with-icons {
+      display: flex;
+      align-items: center;
+      max-width: 100%;
+    }
+
     .account-name {
       @extend %face-sans-16-medium;
 
       line-height: 20px; // Avoid cutting off bottom part of some letters, e.g.: "g"
       max-width: 100%;
+      flex: 1;
     }
 
     &.list-name {
@@ -212,6 +234,12 @@ export default defineComponent({
     width: 150px;
     height: 16px;
     margin: 0 0 4px 0;
+  }
+
+  .account-type-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
   }
 }
 </style>

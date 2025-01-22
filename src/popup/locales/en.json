@@ -833,7 +833,9 @@
       "networkRequest": "This dAppp is requesting permission to use the networks available in your Superhero wallet: {'<'}br /{'>'}{'<'}br /{'>'}{'<'}ul{'>'}{'<'}li {'>'}Mainnet{'<'}/li {'>'}{'<'}li {'>'}Testnet{'<'}/li {'>'}{'<'}/ul{'>'}",
       "transactionLabel": "Propose transactions",
       "transactionRequest": "This dApp may propose transactions. You are in charge of confirming them.",
-      "rememberMe": "Remember me"
+      "rememberMe": "Remember me",
+      "selectAccount": "Select account to connect with",
+      "ensureNetwork": "Kindly ensure that Superhero Wallet and dApp are connected to the same network before making any transaction."
     },
     "fungible-tokens": {
       "tokens": "Tokens | Token | Tokens",

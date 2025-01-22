@@ -2,7 +2,7 @@
   <div class="form-select-options-header">
     <span class="text-heading-5 text-muted title">{{ title }}</span>
     <InputSearch
-      v-if="optionsLength > SHOW_SEARCH_THRESHOLD"
+      v-if="optionsLength > SHOW_SEARCH_THRESHOLD && !hideSearch"
       :value="value"
       :placeholder="searchPlaceholder || $t('common.search')"
       class="search-field"
@@ -24,6 +24,7 @@ export default defineComponent({
     title: { type: String, default: '' },
     optionsLength: { type: Number, default: 0 },
     searchPlaceholder: { type: String, default: '' },
+    hideSearch: Boolean,
   },
   setup(props, { emit }) {
     function filterOptions(searchPhrase: string) {

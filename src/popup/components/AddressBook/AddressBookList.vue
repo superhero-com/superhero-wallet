@@ -33,7 +33,6 @@
             protocol,
             isOwnAddress,
             nameAddress,
-            type,
           }, index) in accountsFiltered"
           :key="address"
           :to="
@@ -42,10 +41,10 @@
               : { name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: address } }
           "
           class="address-book-item"
-          :style="bgColorStyle(isOwnAddress, nameAddress, address)"
+          :style="bgColorStyle(isOwnAddress, address)"
           :idx="index"
           data-cy="address-book-item"
-          @click="selectAddress(nameAddress, address)"
+          @click="selectAddress(nameAddress!, address)"
         >
           <AccountInfo
             :account="{ address, protocol }"
@@ -53,12 +52,6 @@
             :name-address="nameAddress"
             show-protocol-icon
           />
-          <template v-if="accountIcon(type) && isSelector" #bottom-right-icon>
-            <Component
-              :is="accountIcon(type)"
-              class="account-type-icon"
-            />
-          </template>
         </PanelItem>
       </div>
       <p
@@ -83,8 +76,8 @@ import { IonContent, IonHeader } from '@ionic/vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { useRoute } from 'vue-router';
 
-import type { AccountType, ComponentRef } from '@/types';
-import { ACCOUNT_SELECT_TYPE_FILTER, ACCOUNT_TYPES } from '@/constants';
+import type { ComponentRef } from '@/types';
+import { ACCOUNT_SELECT_TYPE_FILTER } from '@/constants';
 import { ROUTE_ADDRESS_BOOK, ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/routeNames';
 import { getAddressColor } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -97,18 +90,9 @@ import InputSearch from '@/popup/components/InputSearch.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import AddressBookFilters from '@/popup/components/AddressBook/AddressBookFilters.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
-import BtnBase from '@/popup/components/buttons/BtnBase.vue';
-import BtnMain from '@/popup/components/buttons/BtnMain.vue';
-import IconWrapper from '@/popup/components/IconWrapper.vue';
-
-import AirGapIcon from '@/icons/air-gap.svg?vue-component';
-import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
 
 export default defineComponent({
   components: {
-    IconWrapper,
-    BtnMain,
-    BtnBase,
     IonHeader,
     IonContent,
     AccountInfo,
@@ -174,18 +158,7 @@ export default defineComponent({
       emit('update:hideButtons', hideOuterButtons.value);
     }, 100);
 
-    function accountIcon(type: AccountType) {
-      switch (type) {
-        case ACCOUNT_TYPES.airGap:
-          return AirGapIcon;
-        case ACCOUNT_TYPES.privateKey:
-          return PrivateKeyIcon;
-        default:
-          return null;
-      }
-    }
-
-    function bgColorStyle(isOwnAddress: boolean, nameAddress: String, address: String) {
+    function bgColorStyle(isOwnAddress: boolean, address: String) {
       return isOwnAddress ? { '--bg-color': getAddressColor(address) } : {};
     }
 
@@ -229,7 +202,6 @@ export default defineComponent({
       noRecordsMessage,
       protocolName,
       bgColorStyle,
-      accountIcon,
       selectAddress,
     };
   },

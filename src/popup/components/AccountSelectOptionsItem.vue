@@ -17,7 +17,11 @@
         avatar-borderless
         is-list-name
         :show-protocol-icon="!hideProtocolIcon"
-      />
+      >
+        <template #after-address>
+          <slot name="after-address" />
+        </template>
+      </AccountInfo>
       <TokenAmount
         v-if="!hideBalance"
         :amount="balance"
@@ -80,23 +84,25 @@ export default defineComponent({
     const { getAccountBalance } = useBalances();
     const { getAccountByAddress } = useAccounts();
 
-    const account = props.customAccount ?? getAccountByAddress(props.option.value as string);
+    const account = computed(() => (
+      props.customAccount ?? getAccountByAddress(props.option.value as string)
+    ));
 
-    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(account.address) }));
+    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(account.value.address) }));
 
     const balance = computed(() => {
       switch (true) {
         case !!props.outsideBalance:
           return props.outsideBalance;
-        case !!account:
-          return getAccountBalance(account.address.toString()).toNumber();
+        case !!account.value:
+          return getAccountBalance(account.value.address.toString()).toNumber();
         default:
           return 0;
       }
     });
 
     const tokenSymbol = computed(
-      () => ProtocolAdapterFactory.getAdapter(account!.protocol).coinSymbol,
+      () => ProtocolAdapterFactory.getAdapter(account.value.protocol).coinSymbol,
     );
 
     return {
@@ -125,6 +131,7 @@ export default defineComponent({
     padding: 6px 8px;
     border-radius: 10px;
     width: 100%;
+    gap: 4px;
 
     &::before {
       top: 0;
