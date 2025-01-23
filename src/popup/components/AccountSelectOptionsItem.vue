@@ -13,7 +13,6 @@
         :account="account"
         class="account-info"
         avatar-size="rg"
-        avatar-borderless
         is-list-name
         :show-protocol-icon="!hideProtocolIcon"
       >
@@ -117,58 +116,28 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .account-select-options-item {
-  --border-width: 3px;
+  --border-width: 2px;
 
   width: 100%;
 
   .option-wrapper {
-    position: relative;
-    z-index: +1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
+    padding: 4px 8px;
     border-radius: 10px;
     width: 100%;
+    border: var(--border-width) solid var(--bg-color);
+    background-color: var(--bg-color);
     gap: 4px;
 
-    &::before {
-      top: 0;
-      left: 0;
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      background-color: var(--bg-color);
-      border: var(--border-width) solid var(--bg-color);
-      box-sizing: border-box;
-      border-radius: 10px;
-      transition: all 0.12s ease-in-out;
-    }
-
     &.clickable:hover:not(.selected) {
-      &::before {
-        opacity: 0.8;
-      }
+      background-color: color-mix(in srgb, var(--bg-color) 80%, transparent);
     }
 
     &.selected {
-      background-color: transparent;
-      border: var(--border-width) solid var(--bg-color);
+      background-color: color-mix(in srgb, var(--bg-color) 40%, transparent);
       transition: background-color 0.12s ease-in-out;
-
-      &::before {
-        --border-offset: calc(var(--border-width) - 2px);
-
-        opacity: 0.4;
-        border-color: transparent;
-        border-radius: 5px;
-        top: var(--border-offset);
-        left: var(--border-offset);
-        width: calc(100% - 2 * var(--border-offset));
-        height: calc(100% - 2 * var(--border-offset));
-      }
     }
 
     .account-info {
