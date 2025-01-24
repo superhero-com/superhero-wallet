@@ -229,7 +229,7 @@ export function useTransactionData({
    */
   const amountTotal = computed(
     (): number => (transaction.value)
-      ? getTxAmountTotal(transaction.value, direction.value)
+      ? getTxAmountTotal(transaction.value, direction.value, isTokenSaleBuy.value)
       : 0,
   );
 

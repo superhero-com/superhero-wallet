@@ -275,6 +275,7 @@ export default defineComponent({
       isDexPool,
       isDexSwap,
       isTokenSale,
+      isTokenSaleBuy,
       outerTxTag,
       transactionAssets,
     } = useTransactionData({
@@ -296,10 +297,10 @@ export default defineComponent({
       : undefined);
 
     const amount = computed((): number => transaction.value
-      ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
+      ? getTxAmountTotal(transaction.value, TX_DIRECTION.received, isTokenSaleBuy.value)
       : 0);
     const amountTotal = computed((): number => transaction.value
-      ? getTxAmountTotal(transaction.value, direction.value)
+      ? getTxAmountTotal(transaction.value, direction.value, isTokenSaleBuy.value)
       : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
