@@ -720,3 +720,13 @@ export async function exportFile(
   a.click();
   return undefined;
 }
+
+export function getActivityHash(activity: any) {
+  return (
+    activity?.payload?.txHash
+    ?? activity?.payload?.hash
+    ?? activity?.payload?.callTxHash
+    ?? activity?.payload?.refTxHash
+    ?? activity?.payload?.contractTxHash
+  );
+}
