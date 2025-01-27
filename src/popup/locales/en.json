@@ -949,7 +949,7 @@
       "generateWallet": "Create new wallet",
       "getStartedWithWallet": "Get started with Superhero Wallet",
       "importWallet": "Restore existing wallet",
-      "enterSeed": "Enter seed phrase",
+      "enterSeed": "with seed phrase",
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Please enter the words of your seed phrase (separated by spaces) in the correct order to restore your Superhero Wallet.",
       "importAccount": "Restore wallet",
