@@ -16,6 +16,7 @@
               || isAllowance
               || isAex9
               || isTokenSale
+              || isTokenSaleFactory
             )"
             :hide-fiat="hideFiat"
             :hash="hash"
@@ -276,6 +277,7 @@ export default defineComponent({
       isDexSwap,
       isTokenSale,
       isTokenSaleBuy,
+      isTokenSaleFactory,
       outerTxTag,
       transactionAssets,
     } = useTransactionData({
@@ -418,6 +420,7 @@ export default defineComponent({
       isDexPool,
       isDexSwap,
       isTokenSale,
+      isTokenSaleFactory,
       getTransactionPayload,
       tipUrl,
       tipLink,

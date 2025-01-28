@@ -71,6 +71,7 @@ export function useTransactionData({
     tokenBalances,
   } = useFungibleTokens();
   const {
+    tokenFactories,
     tokenSaleAddresses,
     tokenSaleAddressToTokenContractAddress,
   } = useAeTokenSales();
@@ -136,6 +137,11 @@ export function useTransactionData({
       isTokenSale.value
       && includes(TX_FUNCTIONS_TOKEN_SALE.sell, txFunctionRaw.value)
     ),
+  );
+
+  const isTokenSaleFactory = computed(
+    (): boolean => tokenFactories.value
+      .some(({ contractId }) => contractId === innerTx.value?.contractId),
   );
 
   const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
@@ -264,6 +270,7 @@ export function useTransactionData({
         && (
           isDex.value
           || isTokenSale.value
+          || isTokenSaleFactory.value
           || (isAllowance.value && showDetailedAllowanceInfo)
         )
       ) {
@@ -359,6 +366,7 @@ export function useTransactionData({
 
     isTokenSale,
     isTokenSaleBuy,
+    isTokenSaleFactory,
     isTokenSaleSell,
 
     isDex,

@@ -436,6 +436,30 @@ const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMappe
   };
 };
 
+const createCommunity: TransactionResolver = (
+  transaction,
+  tokens = null,
+) => {
+  const isConfirm = !transaction.tx.return;
+  const token = {
+    amount: transaction.tx.arguments?.[2]?.value,
+    ...defaultToken,
+    symbol: transaction.tx.arguments?.[1]?.value,
+    ...(isConfirm ? {} : tokens?.[transaction.tx.log?.[2]?.address]),
+    isReceived: true,
+  };
+  const aeToken = {
+    ...defaultToken,
+    assetType: ASSET_TYPES.coin,
+    protocol: PROTOCOLS.aeternity,
+    amount: transaction.tx.amount,
+    isReceived: false,
+  };
+  return {
+    tokens: [token, aeToken],
+  };
+};
+
 // TODO: refactor resolver to use internal events and be generic for every contract call,
 // instead of creating a unique resolver each time for the supported contracts
 
@@ -457,6 +481,7 @@ const resolvers: TransactionResolvers = {
   withdraw,
   buy,
   sell,
+  createCommunity,
 };
 
 export function getTransactionTokenInfoResolver(txFunctionName: TxFunctionParsed) {

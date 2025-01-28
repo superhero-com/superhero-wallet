@@ -139,6 +139,7 @@ export const TX_FUNCTIONS = {
   /** token sales */
   buy: 'buy',
   sell: 'sell',
+  createCommunity: 'create_community',
 } as const;
 
 /**

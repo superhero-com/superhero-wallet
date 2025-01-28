@@ -122,6 +122,7 @@ export default defineComponent({
       isDexLiquidityAdd,
       isDexLiquidityRemove,
       isTokenSaleBuy,
+      isTokenSaleFactory,
       isTokenSaleSell,
       isErrorTransaction,
       isTip,
@@ -171,6 +172,8 @@ export default defineComponent({
         text = t('transaction.tokenSale.bought');
       } else if (isTokenSaleSell.value) {
         text = t('transaction.tokenSale.sold');
+      } else if (isTokenSaleFactory.value) {
+        text = t('transaction.tokenSale.createdToken');
       } else if (isTip.value && props.transaction.claim) {
         text = t('transaction.listType.tipReceived');
       } else if (isTip.value) {
