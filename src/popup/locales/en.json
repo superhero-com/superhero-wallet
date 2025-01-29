@@ -622,6 +622,9 @@
     },
     "tokenSale": {
       "tag": "token sale",
+      "createToken": "Create Token",
+      "createdToken": "Created token",
+      "tokenName": "Token name",
       "bought": "Bought",
       "sold": "Sold"
     }

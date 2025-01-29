@@ -515,6 +515,7 @@ export interface ITx {
   gasLimit?: number;
   gasPrice?: number;
   gasUsed?: number;
+  internalEvents?: any[]; // TODO: type internal events
   log?: any[]; // TODO find source
   name?: any;
   nameFee?: number;

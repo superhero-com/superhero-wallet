@@ -1,6 +1,10 @@
 import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import { camelCase } from 'lodash-es';
+import {
+  camelCase,
+  flatMap,
+  groupBy,
+} from 'lodash-es';
 import { Tag } from '@aeternity/aepp-sdk';
 import type {
   AccountAddress,
@@ -9,11 +13,11 @@ import type {
   ITransaction,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { fetchJson, watchUntilTruthy } from '@/utils';
+import { fetchJson, getActivityHash, watchUntilTruthy } from '@/utils';
 import { genSwaggerClient, mapObject } from '@/lib/swagger';
 
 import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
-import { AEX9_TRANSFER_EVENT, TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { ACTIVITIES_TYPES, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
 
 import { useAeNetworkSettings } from './aeNetworkSettings';
@@ -105,6 +109,29 @@ export function useAeMiddleware() {
     return middleware;
   }
 
+  function normalizeActivitiesStructure(activities: any[]) {
+    const groupedActivitiesByHash = groupBy(activities, getActivityHash);
+
+    return flatMap(groupedActivitiesByHash, (group) => {
+      const primaryObjectIndex = group.findIndex(({ type }) => (
+        type !== ACTIVITIES_TYPES.aex9TransferEvent
+        && type !== ACTIVITIES_TYPES.internalTransferEvent
+        && type !== ACTIVITIES_TYPES.internalContractCallEvent
+      ));
+
+      if (primaryObjectIndex === -1) {
+        // TODO: find the way to handle all the existing activities types
+        return [];
+      }
+
+      const primaryObject = group[primaryObjectIndex];
+      primaryObject.payload.tx.internalEvents = group
+        .filter((_, index) => index !== primaryObjectIndex);
+
+      return primaryObject;
+    });
+  }
+
   function normalizeMiddlewareTransactionStructure(
     { payload, type }: any, // Response data
     transactionOwner?: AccountAddress,
@@ -117,7 +144,7 @@ export function useAeMiddleware() {
     };
 
     // AEX9 transfer has no TX property so we need to normalize it
-    if (type === AEX9_TRANSFER_EVENT) {
+    if (type === ACTIVITIES_TYPES.aex9TransferEvent) {
       normalizedTransaction.hash = payload.txHash;
       normalizedTransaction.tx = {
         ...payload,
@@ -146,6 +173,7 @@ export function useAeMiddleware() {
     fetchFromMiddleware,
     fetchFromMiddlewareCamelCased,
     fetchMiddlewareStatus,
+    normalizeActivitiesStructure,
     normalizeMiddlewareTransactionStructure,
     isMiddlewareReady,
     isMiddlewareUnavailable,

@@ -134,6 +134,7 @@ export const STORAGE_KEYS = {
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
   tokenSales: 'token-sales',
+  tokenFactories: 'token-factories',
   transactionsLatest: 'transactions-latest',
   transactionsLoaded: 'transactions-loaded',
   transactionsPending: 'transactions-pending',

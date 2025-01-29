@@ -24,7 +24,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 import { AE_COIN_PRECISION } from '@/protocols/aeternity/config';
-import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
+import { aettosToAe, categorizeContractCallTxObject, getTokenSaleBuyAmount } from '@/protocols/aeternity/helpers';
 
 import { useCurrencies } from './currencies';
 import { useAccounts } from './accounts';
@@ -264,6 +264,7 @@ export function useFungibleTokens() {
   function getTxAmountTotal(
     transaction: ITransaction,
     direction: string = TX_DIRECTION.sent,
+    isTokenSaleBuy: boolean = false,
   ) {
     const isReceived = direction === TX_DIRECTION.received;
     const { protocol, tx } = transaction || {};
@@ -294,7 +295,8 @@ export function useFungibleTokens() {
     const claimTipAmount = (tx.function === 'claim') ? tx.log?.[0]?.topics[2] : null;
 
     const rawAmount = (
-      tx?.amount
+      (isTokenSaleBuy && getTokenSaleBuyAmount(tx))
+      || tx?.amount
       || (tx?.tx?.tx as any)?.amount
       || tx?.nameFee
       || claimTipAmount
