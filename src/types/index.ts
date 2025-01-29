@@ -304,6 +304,7 @@ export type AccountType = ObjectValues<typeof ACCOUNT_TYPES>;
  * or fetched when discovering the accounts.
  */
 export interface IAccountRaw {
+  idx?: number;
   type: AccountType;
   isRestored: boolean;
   protocol: Protocol;
@@ -747,6 +748,7 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   fromAccount?: string;
   isSenderReplaced?: boolean;
   protocol?: Protocol;
+  accountIdx?: number;
 }
 
 export interface IModalProps extends Partial<IPopupProps> {

@@ -120,22 +120,7 @@
         </div>
       </template>
       <template v-else>
-        <Card class="skeleton-card">
-          <ion-skeleton-text
-            class="avatar"
-            animated
-          />
-          <div class="name-and-address">
-            <ion-skeleton-text
-              class="name"
-              animated
-            />
-            <ion-skeleton-text
-              class="address"
-              animated
-            />
-          </div>
-        </Card>
+        <AccountSkeleton />
         <InfoBox
           class="danger"
           type="danger"
@@ -169,7 +154,6 @@
 </template>
 
 <script lang="ts">
-import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -191,6 +175,7 @@ import { useAccounts, usePopupProps } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import AccountSkeleton from '@/popup/components/AccountSkeleton.vue';
 import Card from '@/popup/components/Card.vue';
 import Avatar from '@/popup/components/Avatar.vue';
 import Modal from '@/popup/components/Modal.vue';
@@ -212,12 +197,12 @@ export default defineComponent({
   components: {
     AccountSelectOptionsItem,
     FormSelect,
+    AccountSkeleton,
     Card,
     Avatar,
     Modal,
     BtnMain,
     InfoBox,
-    IonSkeletonText,
     NetworkButton,
     TemplateRenderer,
     Truncate,
@@ -443,46 +428,6 @@ export default defineComponent({
           color: $color-grey-border;
           transform: translateY(2px) rotate(90deg);
           width: 16px;
-        }
-      }
-    }
-
-    .skeleton-card {
-      padding: 8px 8px;
-
-      &:deep(.card-content) {
-        display: flex;
-      }
-
-      .name-and-address {
-        display: flex;
-        flex-direction: column;
-        margin-left: 8px;
-        gap: 8px;
-        margin-top: 4px;
-      }
-
-      ion-skeleton-text {
-        --background: rgba(#{$color-white-rgb}, 0.1);
-        --background-rgb: #{$color-white-rgb};
-        margin: 0;
-
-        &.name {
-          height: 12px;
-          width: 152px;
-          border-radius: 8px;
-        }
-
-        &.address {
-          height: 12px;
-          width: 96px;
-          border-radius: 8px;
-        }
-
-        &.avatar {
-          --border-radius: 25px;
-          height: 40px;
-          width: 40px;
         }
       }
     }

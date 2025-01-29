@@ -16,6 +16,7 @@ import { Ref } from 'vue';
 import { tg } from '@/popup/plugins/i18n';
 import type { ITx } from '@/types';
 import {
+  ACCOUNT_TYPES,
   AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
   IS_OFFSCREEN_TAB,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
@@ -26,6 +27,7 @@ import { handleUnknownError, isAccountAirGap } from '@/utils';
 import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useDeepLinkApi } from '@/composables/deepLinkApi';
+import { useLedger } from '@/composables';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
 import Logger from '@/lib/logger';
@@ -110,6 +112,19 @@ export class AeAccountHdWallet extends MemoryAccount {
       }
     }
 
+    if (account && account.type === ACCOUNT_TYPES.ledger) {
+      const { signTransaction } = useLedger();
+      const signedTransaction = await signTransaction(
+        account.address as Encoded.AccountAddress,
+        account.idx,
+        txBase64,
+      );
+      if (!signedTransaction) {
+        throw new RpcRejectedByUserError();
+      }
+      return signedTransaction;
+    }
+
     if (account && isAccountAirGap(account) && IS_OFFSCREEN_TAB && signedTx) {
       return signedTx;
     }
@@ -145,6 +160,19 @@ export class AeAccountHdWallet extends MemoryAccount {
       if (!permissionGranted) {
         throw new RpcRejectedByUserError();
       }
+    }
+
+    if (account && account.type === ACCOUNT_TYPES.ledger) {
+      const { signMessage } = useLedger();
+      const signedMessage = await signMessage(
+        account.address as Encoded.AccountAddress,
+        account.idx,
+        message,
+      );
+      if (!signedMessage) {
+        throw new RpcRejectedByUserError();
+      }
+      return signedMessage;
     }
 
     this.isSigningAlreadyConfirmed = true;

@@ -1,11 +1,12 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
 import { watch } from 'vue';
+
 import type { IBackgroundMessageData } from '@/types';
 import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
 import { IS_FIREFOX, POPUP_METHODS, PROTOCOLS } from '@/constants';
-import { useWalletConnect, useNetworks } from '@/composables';
+import { useWalletConnect, useNetworks, useLedger } from '@/composables';
 import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
 import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
@@ -47,11 +48,34 @@ if (IS_FIREFOX) {
 }
 
 browser.runtime.onMessage.addListener(
-  async ({ method, params: { aepp, rpcMethodParams = {} } = {} }: IBackgroundMessageData) => {
+  async ({
+    method,
+    payload,
+    params: { aepp, rpcMethodParams = {} } = {},
+  }: IBackgroundMessageData) => {
     if (method === POPUP_METHODS.reload) {
       wallet.disconnect();
       window.location.reload();
       return null;
+    }
+
+    if (method === POPUP_METHODS.ledgerDeriveAccount) {
+      const { deriveAccount } = useLedger();
+      return deriveAccount(payload.accountIndex);
+    }
+
+    if (method === POPUP_METHODS.ledgerDiscoverAccounts) {
+      const { discoverAccounts } = useLedger();
+      return discoverAccounts();
+    }
+    if (method === POPUP_METHODS.ledgerSignTransaction) {
+      const { signTransaction } = useLedger();
+      return signTransaction(payload.address, payload.accountIndex, payload.transaction);
+    }
+
+    if (method === POPUP_METHODS.ledgerSignMessage) {
+      const { signMessage } = useLedger();
+      return signMessage(payload.address, payload.accountIndex, payload.message);
     }
 
     if (typeof aepp === 'string' && method) {

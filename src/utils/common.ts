@@ -218,6 +218,7 @@ export function getDefaultAccountLabel(
   const accountTypeName = (() => {
     switch (true) {
       case type === ACCOUNT_TYPES.airGap: return tg('airGap.title');
+      case type === ACCOUNT_TYPES.ledger: return tg('ledger.title');
       case type === ACCOUNT_TYPES.privateKey: return tg(
         'pages.account.privateKey',
         { protocol: ProtocolAdapterFactory.getAdapter(protocol!).protocolName },
