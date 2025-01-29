@@ -924,6 +924,20 @@
         "bids-on": "Bids on"
       }
     },
+    "address": {
+      "connectingFailedTitle": "Failed to connect",
+      "connectingFailedMessage": "Connecting failed for an unknown reason."
+    },
+    "jwtSign": {
+      "noPayload": "There is no payload to sign.",
+      "wrongProtocol": "JWT signing is supported only by æternity accounts.",
+      "signingFailedTitle": "Failed to sign JWT",
+      "signingFailedMessage": "JWT signing failed for an unknown reason."
+    },
+    "signMessage": {
+      "signingFailedTitle": "Failed to sign message",
+      "signingFailedMessage": "Message signing failed for an unknown reason."
+    },
     "languageSettings": {
       "chooseLanguage": "Choose Superhero Wallet UI language."
     },
