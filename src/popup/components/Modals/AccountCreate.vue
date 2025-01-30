@@ -46,7 +46,7 @@
       @click="connectAirGapAccounts()"
     />
     <BtnSubheader
-      v-if="!isMultisig && protocol === PROTOCOLS.aeternity && !IS_MOBILE_APP"
+      v-if="!isMultisig && protocol === PROTOCOLS.aeternity && !IS_MOBILE_APP && !IS_FIREFOX"
       :header="$t('ledger.accountCreate.title')"
       :subheader="$t('ledger.accountCreate.subtitle')"
       :icon="LedgerIcon"
@@ -71,6 +71,7 @@ import { type AirGapImportAccountsResolvedVal } from '@/popup/components/Modals/
 
 import {
   ACCOUNT_TYPES,
+  IS_FIREFOX,
   IS_MOBILE_APP,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
   MODAL_LEDGER_IMPORT_ACCOUNTS,
@@ -181,6 +182,7 @@ export default defineComponent({
       PrivateKeyIcon,
       LedgerIcon,
       isOnline,
+      IS_FIREFOX,
       IS_MOBILE_APP,
       PROTOCOLS,
       createPlainAccount,
