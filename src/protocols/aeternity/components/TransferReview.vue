@@ -268,8 +268,8 @@ export default defineComponent({
         : 0,
     );
 
-    function openTransactionFailedModal(msg: string) {
-      Logger.write({
+    async function openTransactionFailedModal(msg: string) {
+      await Logger.write({
         title: t('modals.transaction-failed.title'),
         message: msg || t('modals.transaction-failed.msg'),
         type: 'api-response',
@@ -414,8 +414,9 @@ export default defineComponent({
         openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {
+        await openTransactionFailedModal(error.message);
         openCallbackOrGoHome(false);
-        openTransactionFailedModal(error.message);
+
         error.payload = { url: recipient };
       } finally {
         loading.value = false;

@@ -5,11 +5,13 @@
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
 import { defineComponent, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
+import Logger from '@/lib/logger';
 import {
   useDeepLinkApi,
   useModals,
@@ -31,6 +33,7 @@ export default defineComponent({
       const { getAeSdk } = useAeSdk();
       const { openModal } = useModals();
       const { setLoaderVisible } = useUi();
+      const { t } = useI18n();
 
       try {
         setLoaderVisible(true);
@@ -56,11 +59,17 @@ export default defineComponent({
         const signatureHex = Buffer.from(signature).toString('hex');
         openCallbackOrGoHome(true, { signature: signatureHex, address: aeSdk.address });
       } catch (error: any) {
-        openCallbackOrGoHome(false);
-
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
+        } else {
+          await Logger.write({
+            title: t('pages.signMessage.signingFailedTitle'),
+            message: error.message || t('pages.signMessage.signingFailedMessage'),
+            type: 'api-response',
+            modal: true,
+          });
         }
+        openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }

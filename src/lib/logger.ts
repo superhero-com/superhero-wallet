@@ -91,10 +91,10 @@ export default class Logger {
     };
   }
 
-  static write({ modal = !IS_PRODUCTION, ...error }: ILoggerInput) {
+  static async write({ modal = !IS_PRODUCTION, ...error }: ILoggerInput) {
     if (!Logger.background && modal && error.message) {
       const { openErrorModal } = useModals();
-      openErrorModal({
+      await openErrorModal({
         title: error.title || t('modals.error-log.title'),
         msg: error.message,
       });

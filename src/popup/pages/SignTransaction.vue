@@ -103,7 +103,7 @@ export default defineComponent({
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
         } else {
-          Logger.write({
+          await Logger.write({
             title: t('modals.transaction-failed.title'),
             message: error.message || t('modals.transaction-failed.msg'),
             type: 'api-response',

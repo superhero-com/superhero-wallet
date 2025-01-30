@@ -5,6 +5,7 @@
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
 import { defineComponent, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { Encoded, decode, signJwt } from '@aeternity/aepp-sdk';
 
@@ -16,6 +17,7 @@ import {
 } from '@/constants';
 import { handleUnknownError, toBase64Url } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
+import Logger from '@/lib/logger';
 import {
   useAccounts,
   useAeSdk,
@@ -32,6 +34,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
+    const { t } = useI18n();
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
@@ -55,11 +58,11 @@ export default defineComponent({
         const signerAddress = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address;
 
         if (!payload) {
-          throw new Error('There is no payload to sign');
+          throw new Error(t('pages.jwtSign.noPayload'));
         }
 
         if (!signerAddress) {
-          throw new Error('Wallet failed to sign the data.');
+          throw new Error(t('pages.jwtSign.wrongProtocol'));
         }
 
         const payloadAsJson = JSON.parse(payload);
@@ -84,11 +87,17 @@ export default defineComponent({
         const signedJwt = await signJwt(dataToSign, new AeAccountHdWallet(nodeNetworkId));
         openCallbackOrGoHome(true, { 'signed-payload': signedJwt, address: signerAddress });
       } catch (error: any) {
-        openCallbackOrGoHome(false);
-
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
+        } else {
+          await Logger.write({
+            title: t('pages.jwtSign.signingFailedTitle'),
+            message: error.message || t('pages.jwtSign.signingFailedMessage'),
+            type: 'api-response',
+            modal: true,
+          });
         }
+        openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }
