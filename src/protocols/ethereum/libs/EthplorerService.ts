@@ -1,5 +1,5 @@
 import type { IToken, ITokenBalance } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { PROTOCOLS, ETHPLORER_API_KEY } from '@/constants';
 import {
   fetchJson,
   toShiftedBigNumber,
@@ -9,7 +9,7 @@ import {
 import { ETH_CONTRACT_ID_EXTERNAL } from '../config';
 import { toEthChecksumAddress } from '../helpers';
 
-const ETHPLORER_API_KEY = 'freekey';
+const ethplorerApiKey = ETHPLORER_API_KEY || 'freekey';
 /**
  * Standard HTTP status code for too many requests
  * ? https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
@@ -36,13 +36,13 @@ export class EthplorerService {
   async fetchFromApi(action: string, params: any = {}) {
     const query = new URLSearchParams({
       ...params,
-      apiKey: ETHPLORER_API_KEY, // Without API key amount of calls are limited but still possible
+      apiKey: ethplorerApiKey, // Without API key amount of calls are limited but still possible
     }).toString();
 
     // Without API key amount of calls are limited to two per every 1 second.
     // We're adding delays between calls to avoid getting empty results.
     // TODO: Use own node or paid version
-    if (!ETHPLORER_API_KEY || ETHPLORER_API_KEY === 'freekey') {
+    if (!ethplorerApiKey || ethplorerApiKey === 'freekey') {
       const currTime = new Date().getTime();
       const timeToWait = (lastCallTime) ? this.freeVersionTimeDelay - (currTime - lastCallTime) : 0;
       lastCallTime = currTime + ((timeToWait > 0) ? timeToWait : 0);
