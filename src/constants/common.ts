@@ -65,6 +65,7 @@ export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 export const ACCOUNT_TYPES = {
   hdWallet: 'hd-wallet',
   airGap: 'airgap',
+  ledger: 'ledger',
   privateKey: 'private-key',
 } as const;
 
@@ -133,6 +134,7 @@ export const STORAGE_KEYS = {
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
   tokenSales: 'token-sales',
+  tokenFactories: 'token-factories',
   transactionsLatest: 'transactions-latest',
   transactionsLoaded: 'transactions-loaded',
   transactionsPending: 'transactions-pending',
@@ -351,6 +353,8 @@ export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_BIOMETRIC_LOGIN = 'secure-login';
 export const MODAL_ENABLE_BIOMETRIC_LOGIN = 'enable-biometric-login';
 export const MODAL_AIR_GAP_IMPORT_ACCOUNTS = 'air-gap-import-accounts';
+export const MODAL_LEDGER_IMPORT_ACCOUNTS = 'ledger-import-accounts';
+export const MODAL_LEDGER_SIGN = 'ledger-sign';
 export const MODAL_SIGN_AIR_GAP_TRANSACTION = 'sign-air-gap-transaction';
 export const MODAL_ADDRESS_BOOK_IMPORT = 'address-book-import';
 export const MODAL_SHARE_ADDRESS = 'share-address';
@@ -392,6 +396,10 @@ export const POPUP_METHODS = {
   removePopup: 'removePopup',
   getPopup: 'getPopup',
   reload: 'reload',
+  ledgerDeriveAccount: 'ledgerDeriveAccount',
+  ledgerDiscoverAccounts: 'ledgerDiscoverAccounts',
+  ledgerSignMessage: 'ledgerSignMessage',
+  ledgerSignTransaction: 'ledgerSignTransaction',
 } as const;
 
 export const SESSION_METHODS = {

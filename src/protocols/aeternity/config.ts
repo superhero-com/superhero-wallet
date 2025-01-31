@@ -139,6 +139,7 @@ export const TX_FUNCTIONS = {
   /** token sales */
   buy: 'buy',
   sell: 'sell',
+  createCommunity: 'create_community',
 } as const;
 
 /**
@@ -248,7 +249,12 @@ export const DEX_CONTRACTS: Record<string, IDexContracts> = {
   },
 };
 
-export const AEX9_TRANSFER_EVENT = 'Aex9TransferEvent';
+export const ACTIVITIES_TYPES = {
+  aex9TransferEvent: 'Aex9TransferEvent',
+  contractCallTxEvent: 'ContractCallTxEvent',
+  internalContractCallEvent: 'InternalContractCallEvent',
+  internalTransferEvent: 'InternalTransferEvent',
+} as const;
 
 export const AE_TRANSACTION_OWNERSHIP_STATUS = {
   other: 0,

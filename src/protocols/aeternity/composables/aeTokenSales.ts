@@ -22,6 +22,11 @@ const areTokenSalesReady = ref(false);
 
 const tokenSalesUrl = ref('');
 
+interface TokenFactory {
+  contractId: string;
+  description: string;
+}
+
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 /**
@@ -30,6 +35,11 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 const tokenSales = useStorageRef<ITokenSale[]>(
   [],
   STORAGE_KEYS.tokenSales,
+);
+
+const tokenFactories = useStorageRef<TokenFactory[]>(
+  [],
+  STORAGE_KEYS.tokenFactories,
 );
 
 export const useAeTokenSales = createCustomScopedComposable(() => {
@@ -61,7 +71,7 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
     };
   }
 
-  async function loadAllTokenSales() {
+  async function loadTokenSalesInfo() {
     areTokenSalesReady.value = false;
     if (activeNetwork.value.type !== NETWORK_TYPE_CUSTOM) {
       tokenSalesUrl.value = AE_TOKEN_SALES_URLS[activeNetwork.value.type];
@@ -70,6 +80,7 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
           () => fetchTokenSales('tokens'),
           fetchTokenSales,
         ));
+        tokenFactories.value = (await fetchJson(`${tokenSalesUrl.value}/contracts`)) || [];
         tokenSales.value = response || [];
       } catch (e) {
         handleUnknownError(e);
@@ -82,16 +93,17 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
 
   if (!composableInitialized) {
     composableInitialized = true;
-    initPollingWatcher(() => loadAllTokenSales());
+    initPollingWatcher(() => loadTokenSalesInfo());
 
     onNetworkChange(async (network, oldNetwork) => {
       if (network.type !== oldNetwork.type) {
-        await loadAllTokenSales();
+        await loadTokenSalesInfo();
       }
     });
   }
 
   return {
+    tokenFactories,
     tokenSales,
     tokenSaleAddresses,
     tokenContractAddresses,

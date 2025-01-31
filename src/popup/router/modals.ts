@@ -37,6 +37,8 @@ import {
   MODAL_BIOMETRIC_LOGIN,
   MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+  MODAL_LEDGER_IMPORT_ACCOUNTS,
+  MODAL_LEDGER_SIGN,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   MODAL_ADDRESS_BOOK_IMPORT,
   MODAL_SHARE_ADDRESS,
@@ -87,6 +89,8 @@ import BiometricLogin from '@/popup/components/Modals/BiometricLogin.vue';
 import EnableBiometricLogin from '@/popup/components/Modals/EnableBiometricLogin.vue';
 import WalletConnect from '@/popup/components/Modals/WalletConnectModal.vue';
 import AirGapImportAccounts from '@/popup/components/Modals/AirGapImportAccounts.vue';
+import LedgerImportAccounts from '@/popup/components/Modals/LedgerImportAccounts.vue';
+import LedgerSign from '@/popup/pages/Popups/LedgerSign.vue';
 import SignAirGapTransaction from '@/popup/components/Modals/SignAirGapTransaction.vue';
 import AddressBookImport from '@/popup/components/Modals/AddressBookImport.vue';
 import ShareAddress from '@/popup/components/ShareAddress.vue';
@@ -113,6 +117,12 @@ export default () => {
   });
   registerModal(MODAL_AIR_GAP_IMPORT_ACCOUNTS, {
     component: AirGapImportAccounts,
+  });
+  registerModal(MODAL_LEDGER_IMPORT_ACCOUNTS, {
+    component: LedgerImportAccounts,
+  });
+  registerModal(MODAL_LEDGER_SIGN, {
+    component: LedgerSign,
   });
   registerModal(MODAL_CLAIM_SUCCESS, {
     component: ClaimSuccess,

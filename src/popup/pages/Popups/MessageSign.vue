@@ -49,7 +49,7 @@
       <BtnMain
         data-cy="accept"
         :text="$t('common.confirm')"
-        @click="popupProps?.resolve()"
+        @click="approve()"
       />
     </template>
   </Modal>
@@ -57,9 +57,14 @@
 
 <script lang="ts">
 import { defineComponent, onUnmounted } from 'vue';
-import { PROTOCOLS } from '@/constants';
+import {
+  ACCOUNT_TYPES,
+  MODAL_LEDGER_SIGN,
+  PROTOCOLS,
+  RUNNING_IN_POPUP,
+} from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
-import { useAccounts, usePopupProps } from '@/composables';
+import { useAccounts, usePopupProps, useModals } from '@/composables';
 
 import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
 import Modal from '../../components/Modal.vue';
@@ -88,6 +93,14 @@ export default defineComponent({
 
     const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
+    async function approve() {
+      const { openModal } = useModals();
+      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.ledger) {
+        await openModal(MODAL_LEDGER_SIGN);
+      }
+      popupProps.value?.resolve();
+    }
+
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
     }
@@ -101,6 +114,7 @@ export default defineComponent({
       isUnknownDapp,
       popupProps,
       sender,
+      approve,
       cancel,
     };
   },

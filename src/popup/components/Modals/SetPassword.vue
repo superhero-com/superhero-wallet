@@ -178,7 +178,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables' as *;
+
 .set-password {
+  z-index: $z-index-login-modal;
+
   .info {
     margin-top: 8px;
     text-align: center;

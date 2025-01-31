@@ -51,7 +51,7 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   min-height: 40px;
-  padding: 4px 10px;
+  padding: 0px 10px;
   color: $color-white;
   backdrop-filter: blur($bg-blur-radius);
   text-align: center;

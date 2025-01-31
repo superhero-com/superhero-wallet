@@ -115,9 +115,9 @@ export default defineComponent({
     overflow-x: hidden;
 
     :deep(.icon) {
-      width: 24px;
-      height: 24px;
-      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      margin-right: 4px;
     }
   }
 

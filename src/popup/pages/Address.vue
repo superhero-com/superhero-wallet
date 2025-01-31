@@ -5,6 +5,8 @@
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
 import { computed, defineComponent, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import type { IAppData } from '@/types';
 import {
   useAccounts,
@@ -15,6 +17,7 @@ import {
 } from '@/composables';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
+import Logger from '@/lib/logger';
 import { CONNECT_PERMISSIONS, MODAL_CONFIRM_CONNECT } from '@/constants';
 
 export default defineComponent({
@@ -28,6 +31,7 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { openModal } = useModals();
     const { setLoaderVisible } = useUi();
+    const { t } = useI18n();
 
     const app = computed((): IAppData => callbackOrigin.value ? {
       name: callbackOrigin.value.hostname,
@@ -50,10 +54,17 @@ export default defineComponent({
           networkId: nodeNetworkId.value!,
         });
       } catch (error: any) {
-        openCallbackOrGoHome(false);
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
+        } else {
+          await Logger.write({
+            title: t('pages.address.connectingFailedTitle'),
+            message: error.message || t('pages.address.connectingFailedMessage'),
+            type: 'api-response',
+            modal: true,
+          });
         }
+        openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }

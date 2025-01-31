@@ -86,6 +86,7 @@ export default defineComponent({
         value: props.modelValue,
         options: props.options,
         title: props.defaultText,
+        hideSearch: true,
       })
         .then((val) => {
           emit('select', val);

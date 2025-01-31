@@ -6,12 +6,14 @@ import {
   TxFunctionParsed,
 } from '@/types';
 import {
+  ACTIVITIES_TYPES,
   AE_SYMBOL,
   AE_COIN_PRECISION,
   AE_CONTRACT_ID,
   AE_PROTOCOL_NAME,
 } from '@/protocols/aeternity/config';
 import { ASSET_TYPES, PROTOCOLS } from '@/constants';
+import { getTokenSaleBuyAmount } from '@/protocols/aeternity/helpers';
 
 interface TransactionResolverReturnData {
   tokens: ITokenResolved[];
@@ -364,7 +366,25 @@ const withdraw: TransactionResolver = (transaction, tokens = null) => ({
  * Token Sale Buy
  */
 const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper = undefined) => {
+  const { internalEvents } = transaction.tx;
   const tokenAddress: string | undefined = tokenAddressMapper?.(transaction.tx.contractId);
+
+  const additionalTokenEvent = internalEvents
+    ?.find(({ type, payload: { contractId, recipientId } }) => (
+      ACTIVITIES_TYPES.aex9TransferEvent === type
+    && contractId !== tokenAddress
+    && transaction.tx.callerId === recipientId
+    ));
+
+  const additionalToken = additionalTokenEvent
+    ? {
+      ...defaultToken,
+      amount: additionalTokenEvent.payload.amount,
+      symbol: additionalTokenEvent.payload.tokenSymbol,
+      ...tokens?.[additionalTokenEvent.payload.contractId],
+      isReceived: true,
+    }
+    : {};
 
   const [amount] = transaction.tx.arguments!;
   const token = {
@@ -374,16 +394,17 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
     ...(tokenAddress ? tokens?.[tokenAddress] : {}),
     isReceived: true,
   };
+
   const aeToken = {
     ...defaultToken,
     assetType: ASSET_TYPES.coin,
     protocol: PROTOCOLS.aeternity,
-    amount: transaction.tx.amount,
+    amount: getTokenSaleBuyAmount(transaction.tx),
     isReceived: false,
   };
 
   return {
-    tokens: [token, aeToken],
+    tokens: [token, ...(additionalTokenEvent ? [additionalToken] : []), aeToken],
   };
 };
 
@@ -415,6 +436,33 @@ const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMappe
   };
 };
 
+const createCommunity: TransactionResolver = (
+  transaction,
+  tokens = null,
+) => {
+  const isConfirm = !transaction.tx.return;
+  const token = {
+    amount: transaction.tx.arguments?.[2]?.value,
+    ...defaultToken,
+    symbol: transaction.tx.arguments?.[1]?.value,
+    ...(isConfirm ? {} : tokens?.[transaction.tx.log?.[2]?.address]),
+    isReceived: true,
+  };
+  const aeToken = {
+    ...defaultToken,
+    assetType: ASSET_TYPES.coin,
+    protocol: PROTOCOLS.aeternity,
+    amount: transaction.tx.amount,
+    isReceived: false,
+  };
+  return {
+    tokens: [token, aeToken],
+  };
+};
+
+// TODO: refactor resolver to use internal events and be generic for every contract call,
+// instead of creating a unique resolver each time for the supported contracts
+
 const resolvers: TransactionResolvers = {
   addLiquidity,
   addLiquidityAe,
@@ -433,6 +481,7 @@ const resolvers: TransactionResolvers = {
   withdraw,
   buy,
   sell,
+  createCommunity,
 };
 
 export function getTransactionTokenInfoResolver(txFunctionName: TxFunctionParsed) {

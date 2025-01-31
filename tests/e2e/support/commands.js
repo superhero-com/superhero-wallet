@@ -325,7 +325,7 @@ Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = nu
       .click()
       .get('.modal .header [data-cy=input]')
       .type(token.contractId)
-      .get('.tokens-list-item:first-child', { timeout: 8000 })
+      .get('.tokens-list-item:first-child', { timeout: 16000 })
       .click();
   }
   cy.splittedStringToBeEqual('[data-cy=qr-code-info]', address)

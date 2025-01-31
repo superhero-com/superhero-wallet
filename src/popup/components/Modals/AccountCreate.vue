@@ -43,7 +43,14 @@
       :header="$t('airGap.importAccount.btnText')"
       :subheader="$t('airGap.importAccount.btnSubtitle')"
       :icon="QrScanIcon"
-      @click="connectHardwareWallet()"
+      @click="connectAirGapAccounts()"
+    />
+    <BtnSubheader
+      v-if="!isMultisig && protocol === PROTOCOLS.aeternity && !IS_MOBILE_APP && !IS_FIREFOX"
+      :header="$t('ledger.accountCreate.title')"
+      :subheader="$t('ledger.accountCreate.subtitle')"
+      :icon="LedgerIcon"
+      @click="connectLedgerAccounts()"
     />
     <BtnSubheader
       v-if="!isMultisig"
@@ -64,7 +71,10 @@ import { type AirGapImportAccountsResolvedVal } from '@/popup/components/Modals/
 
 import {
   ACCOUNT_TYPES,
+  IS_FIREFOX,
+  IS_MOBILE_APP,
   MODAL_AIR_GAP_IMPORT_ACCOUNTS,
+  MODAL_LEDGER_IMPORT_ACCOUNTS,
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_PRIVATE_KEY_IMPORT,
   PROTOCOLS,
@@ -84,6 +94,7 @@ import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 import CheckCircleIcon from '@/icons/check-circle-fill.svg?vue-component';
 import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
+import LedgerIcon from '@/icons/ledger.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -97,6 +108,7 @@ export default defineComponent({
   },
   setup(props) {
     const {
+      accounts,
       addRawAccount,
       setActiveAccountByGlobalIdx,
     } = useAccounts();
@@ -131,13 +143,31 @@ export default defineComponent({
       props.resolve();
     }
 
-    async function connectHardwareWallet() {
+    async function connectAirGapAccounts() {
       try {
         const selectedAccounts = await openModal<AirGapImportAccountsResolvedVal>(
           MODAL_AIR_GAP_IMPORT_ACCOUNTS,
         );
         selectedAccounts.forEach((account) => {
-          addRawAccountAndSetActive(account);
+          if (!accounts.value.find(({ address }) => account.address === address)) {
+            addRawAccountAndSetActive(account);
+          }
+        });
+      } catch (error) {
+        handleUnknownError(error);
+      }
+      props.resolve();
+    }
+
+    async function connectLedgerAccounts() {
+      try {
+        const selectedAccounts = await openModal<IAccountRaw[]>(
+          MODAL_LEDGER_IMPORT_ACCOUNTS,
+        );
+        selectedAccounts.forEach((account) => {
+          if (!accounts.value.find(({ address }) => account.address === address)) {
+            addRawAccountAndSetActive(account);
+          }
         });
       } catch (error) {
         handleUnknownError(error);
@@ -150,11 +180,15 @@ export default defineComponent({
       PlusCircleIcon,
       QrScanIcon,
       PrivateKeyIcon,
+      LedgerIcon,
       isOnline,
+      IS_FIREFOX,
+      IS_MOBILE_APP,
       PROTOCOLS,
       createPlainAccount,
       createMultisigAccount,
-      connectHardwareWallet,
+      connectAirGapAccounts,
+      connectLedgerAccounts,
       getProtocolName,
       importPrivateKey,
     };

@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.4.0...v2.5.0) (2025-01-30)
+
+
+### Features
+
+* change active account on dapp login ([3ea2f1e](https://github.com/Superhero-com/superhero-wallet/commit/3ea2f1e63b34dadf22214b61e2221a4e5b88d618))
+* padding on fixed footer to fix overlay issue with status ([7153427](https://github.com/Superhero-com/superhero-wallet/commit/7153427e39886fbe9ab446aa5065b2650181838a))
+* show full information for token sale buy transactions ([5aeaf45](https://github.com/Superhero-com/superhero-wallet/commit/5aeaf450d7dee6ba5f7f9c24af60664b0275d545))
+* show more information on create_community transactions ([a047eb5](https://github.com/Superhero-com/superhero-wallet/commit/a047eb57b5cd2596dbb958e92492b8aa243fc869))
+* support ledger using usb transport ([fcaad39](https://github.com/Superhero-com/superhero-wallet/commit/fcaad3980a255280e2bde8053acecee454d82ff4))
+* wallet connect remember me checkbox ([534cc8b](https://github.com/Superhero-com/superhero-wallet/commit/534cc8b75a429d21647e49efb4a4bcbc64076b74))
+
+
+### Bug Fixes
+
+* be able to migrate raw mnemonic to encrypted ([1e8a779](https://github.com/Superhero-com/superhero-wallet/commit/1e8a77903900ca408d6d0662d050b7c95a5bffdf))
+* **deep-link:** show internal error modal before redirect ([9e3e417](https://github.com/Superhero-com/superhero-wallet/commit/9e3e417f1331cc3ce4ef2b5d160c5987940c6b19))
+* missing compliance on testflight ([27e05e6](https://github.com/Superhero-com/superhero-wallet/commit/27e05e66176b6fdcac1584657ac8163c8e9eac18))
+* popup being cut if the height of it is small ([865ae75](https://github.com/Superhero-com/superhero-wallet/commit/865ae75e589046986ebb0e990a9cc585fa240b32))
+* welcome screen wording ([a1f9e59](https://github.com/Superhero-com/superhero-wallet/commit/a1f9e597fd490bebadae5d88ec872ee2d2162734))
+
+
+### Maintenance
+
+* do not omit internal events ([c92ce8f](https://github.com/Superhero-com/superhero-wallet/commit/c92ce8ff8bd554e81b0402bae0ebfc4d1868184f))
+* do not show add ledger account in firefox ([bab3f19](https://github.com/Superhero-com/superhero-wallet/commit/bab3f19577d63a4bb0949aa5370dfa15868e5294))
+* simplify AccountSelectOptionsItem ([c016022](https://github.com/Superhero-com/superhero-wallet/commit/c016022bf03a26ff496800ca19698391bab7d986))
+
 ## [2.4.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.3.2...v2.4.0) (2024-12-19)
 
 

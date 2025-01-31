@@ -329,7 +329,6 @@ export default defineComponent({
 
   position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
@@ -340,7 +339,7 @@ export default defineComponent({
     position: relative;
     margin: 0 auto;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     border-radius: var(--screen-border-radius);
     color: $color-white;
     background-color: var(--screen-bg-color);

@@ -3,6 +3,7 @@
     class="fixed-screen-footer"
     :class="{
       mobile: IS_MOBILE_DEVICE,
+      'has-status': status && !modalsOpen.length,
     }"
   >
     <slot />
@@ -12,11 +13,18 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IS_MOBILE_DEVICE } from '@/constants';
+import { useModals } from '@/composables';
+import { useConnectionStatus } from '@/composables/connectionStatus';
 
 export default defineComponent({
   setup() {
+    const { status } = useConnectionStatus();
+    const { modalsOpen } = useModals();
+
     return {
       IS_MOBILE_DEVICE,
+      status,
+      modalsOpen,
     };
   },
 });
@@ -34,9 +42,14 @@ export default defineComponent({
   gap: 8px;
   padding: var(--screen-padding-x);
   padding-top: 24px;
+  transition: all 0.15s linear;
 
   &.mobile {
     margin-bottom: 20px;
+  }
+
+  &.has-status {
+    padding-bottom: 50px;
   }
 
   // Semi-transparent and gradient-like cover under the buttons

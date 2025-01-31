@@ -62,6 +62,7 @@ export default defineComponent({
       isAllowance,
       isTokenSale,
       isTokenSaleBuy,
+      isTokenSaleFactory,
       isTokenSaleSell,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
@@ -130,6 +131,8 @@ export default defineComponent({
             ? t('common.sell')
             : '',
         );
+      } else if (isTokenSaleFactory.value) {
+        arr.push(t('transaction.tokenSale.createToken'));
       } else if (
         props.transaction.claim
         || (

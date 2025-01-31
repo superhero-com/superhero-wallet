@@ -55,20 +55,36 @@
           v-text="$t('pages.connectConfirm.websiteRequestConnect')"
         />
       </div>
-      <template v-if="activeAccount">
+      <template v-if="selectedAccount">
         <!-- USER CARD -->
-        <AccountSelectOptionsItem
-          :custom-account="activeAccount"
-          hide-balance
-          hide-protocol-icon
+        <FormSelect
+          :model-value="selectedAccount.address"
+          :default-text="$t('pages.connectConfirm.selectAccount')"
+          :options="getAccountsSelectOptionsByProtocol(protocol)"
+          class="account-select-input"
+          item-title="value"
+          account-select
+          unstyled
+          hide-arrow
+          @select="selectedAccount = getAccountByAddress($event)"
         >
-          <template #right>
-            <NetworkButton
-              variant="outlined"
-              class="network-button"
-            />
+          <template #current-text>
+            <AccountSelectOptionsItem
+              :custom-account="selectedAccount"
+              hide-balance
+            >
+              <template #right>
+                <NetworkButton
+                  variant="outlined"
+                  class="network-button"
+                />
+              </template>
+              <template #after-address>
+                <ChevronDown class="chevron" />
+              </template>
+            </AccountSelectOptionsItem>
           </template>
-        </AccountSelectOptionsItem>
+        </FormSelect>
 
         <p
           class="text-description text-center permissions-header"
@@ -87,24 +103,24 @@
             />
           </div>
         </div>
+
+        <p
+          class="ensure-network color-warning"
+          v-text="$t('pages.connectConfirm.ensureNetwork')"
+        />
+
+        <div>
+          <CheckBox
+            v-model="rememberMe"
+            class="remember-me"
+            data-cy="checkbox"
+          >
+            {{ $t('pages.connectConfirm.rememberMe') }}
+          </CheckBox>
+        </div>
       </template>
       <template v-else>
-        <Card class="skeleton-card">
-          <ion-skeleton-text
-            class="avatar"
-            animated
-          />
-          <div class="name-and-address">
-            <ion-skeleton-text
-              class="name"
-              animated
-            />
-            <ion-skeleton-text
-              class="address"
-              animated
-            />
-          </div>
-        </Card>
+        <AccountSkeleton />
         <InfoBox
           class="danger"
           type="danger"
@@ -138,15 +154,15 @@
 </template>
 
 <script lang="ts">
-import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
   onUnmounted,
   PropType,
+  ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { ConnectPermission } from '@/types';
+import type { ConnectPermission, IAccount } from '@/types';
 import { prepareUrlToDisplay } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import {
@@ -159,6 +175,7 @@ import { useAccounts, usePopupProps } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import AccountSkeleton from '@/popup/components/AccountSkeleton.vue';
 import Card from '@/popup/components/Card.vue';
 import Avatar from '@/popup/components/Avatar.vue';
 import Modal from '@/popup/components/Modal.vue';
@@ -168,34 +185,46 @@ import InfoBox from '@/popup/components/InfoBox.vue';
 import NetworkButton from '@/popup/components/NetworkButton.vue';
 import TemplateRenderer from '@/popup/components/TemplateRenderer.vue';
 import Truncate from '@/popup/components/Truncate.vue';
+import CheckBox from '@/popup/components/CheckBox.vue';
+import FormSelect from '@/popup/components/form/FormSelect.vue';
 
 import CheckMark from '@/icons/check-mark-circle-outline.svg?vue-component';
 import DappIcon from '@/icons/dapp.svg?vue-component';
 import TriangleRightIcon from '@/icons/triangle-right.svg?vue-component';
+import ChevronDown from '@/icons/chevron-down.svg?vue-component';
 
 export default defineComponent({
   components: {
     AccountSelectOptionsItem,
+    FormSelect,
+    AccountSkeleton,
     Card,
     Avatar,
     Modal,
     BtnMain,
     InfoBox,
-    IonSkeletonText,
     NetworkButton,
     TemplateRenderer,
     Truncate,
     CheckMark,
+    CheckBox,
     DappIcon,
     TriangleRightIcon,
+    ChevronDown,
   },
   props: {
     access: { type: Array as PropType<ConnectPermission[]>, required: true },
   },
   setup(props) {
     const { t } = useI18n();
+    const rememberMe = ref(true);
 
-    const { getLastActiveProtocolAccount } = useAccounts();
+    const {
+      getAccountsSelectOptionsByProtocol,
+      getLastActiveProtocolAccount,
+      getAccountByAddress,
+      setActiveAccountByAddress,
+    } = useAccounts();
     const {
       isUnknownDapp,
       popupProps,
@@ -231,6 +260,8 @@ export default defineComponent({
 
     const activeAccount = computed(() => getLastActiveProtocolAccount(protocol.value));
 
+    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol.value));
+
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;
       return (host) ? permissions.value[host] : undefined;
@@ -264,13 +295,20 @@ export default defineComponent({
 
     function confirm() {
       if (popupProps.value?.app?.host) {
+        /**
+         * TODO: When a user disconnects, set the `rememberMe` permission to false
+         * Currently, disconnecting through the dapp does not call the appropriate
+         * `onDisconnect` method, seems to be an issue with the SDK
+         * */
         addPermission({
           ...PERMISSION_DEFAULTS,
           ...popupProps.value?.app,
           ...permission.value,
           name: permission.value?.name || popupProps.value.app.name || popupProps.value.app.host,
+          address: rememberMe.value,
         });
       }
+      setActiveAccountByAddress(selectedAccount.value?.address);
       popupProps.value?.resolve();
     }
 
@@ -283,9 +321,14 @@ export default defineComponent({
     });
 
     return {
+      rememberMe,
       accessList,
       popupProps,
       activeAccount,
+      protocol,
+      selectedAccount,
+      getAccountsSelectOptionsByProtocol,
+      getAccountByAddress,
       dappIcon,
       sender,
       trustedDapp,
@@ -326,6 +369,10 @@ export default defineComponent({
       margin-block: 0 16px;
     }
 
+    .ensure-network {
+      margin: 0px 0px 15px 0px;
+    }
+
     .aepp-data {
       width: 100%;
 
@@ -335,6 +382,9 @@ export default defineComponent({
     }
 
     .network-button {
+      align-self: stretch;
+      margin: -6px -8px -6px 0px;
+      border-radius: 0px;
       pointer-events: none;
     }
 
@@ -381,46 +431,10 @@ export default defineComponent({
         }
       }
     }
+  }
 
-    .skeleton-card {
-      padding: 8px 8px;
-
-      &:deep(.card-content) {
-        display: flex;
-      }
-
-      .name-and-address {
-        display: flex;
-        flex-direction: column;
-        margin-left: 8px;
-        gap: 8px;
-        margin-top: 4px;
-      }
-
-      ion-skeleton-text {
-        --background: rgba(#{$color-white-rgb}, 0.1);
-        --background-rgb: #{$color-white-rgb};
-        margin: 0;
-
-        &.name {
-          height: 12px;
-          width: 152px;
-          border-radius: 8px;
-        }
-
-        &.address {
-          height: 12px;
-          width: 96px;
-          border-radius: 8px;
-        }
-
-        &.avatar {
-          --border-radius: 25px;
-          height: 40px;
-          width: 40px;
-        }
-      }
-    }
+  .account-select-input {
+    width: 100%;
   }
 
   .permissions-header {
@@ -453,6 +467,19 @@ export default defineComponent({
       text-align: left;
       opacity: .85;
     }
+  }
+
+  .remember-me {
+    @extend %face-sans-15-medium;
+  }
+
+  .chevron {
+    width: 10px;
+    height: 10px;
+    align-self: center;
+    opacity: 0.7;
+    margin-left: 1px;
+    padding-top: 4px;
   }
 }
 </style>

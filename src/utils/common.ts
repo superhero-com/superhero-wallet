@@ -218,6 +218,7 @@ export function getDefaultAccountLabel(
   const accountTypeName = (() => {
     switch (true) {
       case type === ACCOUNT_TYPES.airGap: return tg('airGap.title');
+      case type === ACCOUNT_TYPES.ledger: return tg('ledger.title');
       case type === ACCOUNT_TYPES.privateKey: return tg(
         'pages.account.privateKey',
         { protocol: ProtocolAdapterFactory.getAdapter(protocol!).protocolName },
@@ -719,4 +720,14 @@ export async function exportFile(
   a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
   a.click();
   return undefined;
+}
+
+export function getActivityHash(activity: any) {
+  return (
+    activity?.payload?.txHash
+    ?? activity?.payload?.hash
+    ?? activity?.payload?.callTxHash
+    ?? activity?.payload?.refTxHash
+    ?? activity?.payload?.contractTxHash
+  );
 }

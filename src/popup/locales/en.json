@@ -491,6 +491,38 @@
       }
     }
   },
+  "ledger": {
+    "title": "Ledger",
+    "importAccounts": {
+      "title": "Connect Ledger device",
+      "subtitle": "Import and manage Ledger accounts.",
+      "connected": "Ledger device is connected",
+      "subtitleConnected": "Import or create accounts",
+      "sendingRequest": "Sending request to your Ledger hardware wallet",
+      "connectionError": "Connection timed out. Please make sure that your Ledger hardware wallet is properly plugged in and try connecting again.",
+      "importAccounts": "Import accounts",
+      "discoverAccountsTitle": "Import accounts with previous activity.",
+      "nothingDiscovered": "No Ledger accounts with the previous activity have been discovered.",
+      "deriveAccount": "Derive account #",
+      "deriveAccountTitle": "Derive new account from your Ledger seed. You can use custom account index number.",
+      "createAccount": "Create account",
+      "createNewAccount": "Create new account",
+      "selectAll": "Select all",
+      "usbGuide1": "Plug in your Ledger into USB port.",
+      "usbGuide2": "Open the æternity app on your Ledger.",
+      "usbGuide3": "Click the button below to connect."
+    },
+    "sign": {
+      "title": "Confirm this action",
+      "subtitle": "on your Ledger device",
+      "confirm": "You need to confirm this action in your hardware wallet.",
+      "unlock": "Please make sure it is unlocked and the æternity app is active."
+    },
+    "accountCreate": {
+      "title": "Add Ledger accounts",
+      "subtitle": "Connect Ledger hardware wallet"
+    }
+  },
   "filters": {
     "out": "Out",
     "in": "In",
@@ -590,6 +622,9 @@
     },
     "tokenSale": {
       "tag": "token sale",
+      "createToken": "Create Token",
+      "createdToken": "Created token",
+      "tokenName": "Token name",
       "bought": "Bought",
       "sold": "Sold"
     }
@@ -832,7 +867,10 @@
       "networkLabel": "Use available networks",
       "networkRequest": "This dAppp is requesting permission to use the networks available in your Superhero wallet: {'<'}br /{'>'}{'<'}br /{'>'}{'<'}ul{'>'}{'<'}li {'>'}Mainnet{'<'}/li {'>'}{'<'}li {'>'}Testnet{'<'}/li {'>'}{'<'}/ul{'>'}",
       "transactionLabel": "Propose transactions",
-      "transactionRequest": "This dApp may propose transactions. You are in charge of confirming them."
+      "transactionRequest": "This dApp may propose transactions. You are in charge of confirming them.",
+      "rememberMe": "Remember me",
+      "selectAccount": "Select account to connect with",
+      "ensureNetwork": "Kindly ensure that Superhero Wallet and dApp are connected to the same network before making any transaction."
     },
     "fungible-tokens": {
       "tokens": "Tokens | Token | Tokens",
@@ -921,6 +959,20 @@
         "bids-on": "Bids on"
       }
     },
+    "address": {
+      "connectingFailedTitle": "Failed to connect",
+      "connectingFailedMessage": "Connecting failed for an unknown reason."
+    },
+    "jwtSign": {
+      "noPayload": "There is no payload to sign.",
+      "wrongProtocol": "JWT signing is supported only by æternity accounts.",
+      "signingFailedTitle": "Failed to sign JWT",
+      "signingFailedMessage": "JWT signing failed for an unknown reason."
+    },
+    "signMessage": {
+      "signingFailedTitle": "Failed to sign message",
+      "signingFailedMessage": "Message signing failed for an unknown reason."
+    },
     "languageSettings": {
       "chooseLanguage": "Choose Superhero Wallet UI language."
     },
@@ -946,7 +998,7 @@
       "generateWallet": "Create new wallet",
       "getStartedWithWallet": "Get started with Superhero Wallet",
       "importWallet": "Restore existing wallet",
-      "enterSeed": "Enter seed phrase",
+      "enterSeed": "with seed phrase",
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Please enter the words of your seed phrase (separated by spaces) in the correct order to restore your Superhero Wallet.",
       "importAccount": "Restore wallet",

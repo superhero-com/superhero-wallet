@@ -4,7 +4,6 @@
     v-if="account"
     class="account-select-options-item"
     :style="bgColorStyle"
-    @click.prevent="$emit('click')"
   >
     <div
       class="option-wrapper"
@@ -14,10 +13,13 @@
         :account="account"
         class="account-info"
         avatar-size="rg"
-        avatar-borderless
         is-list-name
         :show-protocol-icon="!hideProtocolIcon"
-      />
+      >
+        <template #after-address>
+          <slot name="after-address" />
+        </template>
+      </AccountInfo>
       <TokenAmount
         v-if="!hideBalance"
         :amount="balance"
@@ -80,23 +82,25 @@ export default defineComponent({
     const { getAccountBalance } = useBalances();
     const { getAccountByAddress } = useAccounts();
 
-    const account = props.customAccount ?? getAccountByAddress(props.option.value as string);
+    const account = computed(() => (
+      props.customAccount ?? getAccountByAddress(props.option.value as string)
+    ));
 
-    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(account.address) }));
+    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(account.value.address) }));
 
     const balance = computed(() => {
       switch (true) {
         case !!props.outsideBalance:
           return props.outsideBalance;
-        case !!account:
-          return getAccountBalance(account.address.toString()).toNumber();
+        case !!account.value:
+          return getAccountBalance(account.value.address.toString()).toNumber();
         default:
           return 0;
       }
     });
 
     const tokenSymbol = computed(
-      () => ProtocolAdapterFactory.getAdapter(account!.protocol).coinSymbol,
+      () => ProtocolAdapterFactory.getAdapter(account.value.protocol).coinSymbol,
     );
 
     return {
@@ -112,57 +116,28 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .account-select-options-item {
-  --border-width: 3px;
+  --border-width: 2px;
 
   width: 100%;
 
   .option-wrapper {
-    position: relative;
-    z-index: +1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
+    padding: 4px 8px;
     border-radius: 10px;
     width: 100%;
-
-    &::before {
-      top: 0;
-      left: 0;
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      background-color: var(--bg-color);
-      border: var(--border-width) solid var(--bg-color);
-      box-sizing: border-box;
-      border-radius: 10px;
-      transition: all 0.12s ease-in-out;
-    }
+    border: var(--border-width) solid var(--bg-color);
+    background-color: var(--bg-color);
+    gap: 4px;
 
     &.clickable:hover:not(.selected) {
-      &::before {
-        opacity: 0.8;
-      }
+      background-color: color-mix(in srgb, var(--bg-color) 80%, transparent);
     }
 
     &.selected {
-      background-color: transparent;
-      border: var(--border-width) solid var(--bg-color);
+      background-color: color-mix(in srgb, var(--bg-color) 40%, transparent);
       transition: background-color 0.12s ease-in-out;
-
-      &::before {
-        --border-offset: calc(var(--border-width) - 2px);
-
-        opacity: 0.4;
-        border-color: transparent;
-        border-radius: 5px;
-        top: var(--border-offset);
-        left: var(--border-offset);
-        width: calc(100% - 2 * var(--border-offset));
-        height: calc(100% - 2 * var(--border-offset));
-      }
     }
 
     .account-info {

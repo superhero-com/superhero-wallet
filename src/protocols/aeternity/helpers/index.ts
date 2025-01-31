@@ -39,6 +39,7 @@ import {
   isNotFoundError,
 } from '@/utils';
 import {
+  ACTIVITIES_TYPES,
   AE_AENS_DOMAIN,
   AE_CONTRACT_ID,
   AE_FAUCET_URL,
@@ -135,6 +136,17 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
     default:
       return null;
   }
+}
+
+export function getTokenSaleBuyAmount(tx: ITx) {
+  const refundEvent = tx?.internalEvents
+    ?.find(({ type }) => ACTIVITIES_TYPES.internalContractCallEvent === type);
+
+  return (
+    refundEvent && refundEvent.payload.internalTx.recipientId === tx.callerId
+  )
+    ? tx.amount - refundEvent.payload.internalTx.amount
+    : tx.amount;
 }
 
 /**

@@ -6,6 +6,7 @@ jest.mock('vue-router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
+  useRoute: jest.fn(),
 }));
 
 describe('ImportAccount', () => { // TODO: rewrite test
