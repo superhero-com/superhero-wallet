@@ -113,6 +113,16 @@ export function useAeMiddleware() {
     const groupedActivitiesByHash = groupBy(activities, getActivityHash);
 
     return flatMap(groupedActivitiesByHash, (group) => {
+      if (
+        group.length === 1
+        && (
+          group[0].type === ACTIVITIES_TYPES.aex9TransferEvent
+          || group[0].type === ACTIVITIES_TYPES.internalContractCallEvent
+        )
+      ) {
+        return group;
+      }
+
       const primaryObjectIndex = group.findIndex(({ type }) => (
         type !== ACTIVITIES_TYPES.aex9TransferEvent
         && type !== ACTIVITIES_TYPES.internalTransferEvent
@@ -133,7 +143,7 @@ export function useAeMiddleware() {
   }
 
   function normalizeMiddlewareTransactionStructure(
-    { payload, type }: any, // Response data
+    { payload, type, blockTime }: any, // Response data
     transactionOwner?: AccountAddress,
   ): ITransaction {
     const normalizedTransaction: ITransaction = {
@@ -153,6 +163,14 @@ export function useAeMiddleware() {
         type: Tag[Tag.ContractCallTx],
       };
       normalizedTransaction.incomplete = true;
+    } else if (
+      type === ACTIVITIES_TYPES.internalContractCallEvent
+      && payload.internalTx.type === Tag[Tag.SpendTx]
+    ) {
+      normalizedTransaction.hash = payload.callTxHash;
+      normalizedTransaction.tx = payload.internalTx;
+      // TODO: get an actual time
+      normalizedTransaction.microTime = blockTime;
     }
 
     const contractCallData = categorizeContractCallTxObject(normalizedTransaction);

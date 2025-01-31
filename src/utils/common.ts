@@ -728,6 +728,5 @@ export function getActivityHash(activity: any) {
     ?? activity?.payload?.hash
     ?? activity?.payload?.callTxHash
     ?? activity?.payload?.refTxHash
-    ?? activity?.payload?.contractTxHash
   );
 }
