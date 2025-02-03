@@ -49,13 +49,13 @@ jobs:
           publish_dir: dist/web/root
           cname: wallet.superhero.com
 
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2.2.1
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: Release ${{ github.ref }}
-      - uses: alexellis/upload-assets@0.4.0
+      - uses: alexellis/upload-assets@0.4.1
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +64,7 @@ jobs:
 
       - uses: rlespinasse/github-slug-action@v4.x
       - name: Deploy to stage
-        uses: easingthemes/ssh-deploy@v4.1.8
+        uses: easingthemes/ssh-deploy@v5.1.0
         if: github.event_name == 'push'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.STAGE_PRIVATE_KEY }}
