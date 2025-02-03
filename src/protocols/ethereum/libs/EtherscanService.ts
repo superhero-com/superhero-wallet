@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { fromWei } from 'web3-utils';
+import BigNumber from 'bignumber.js';
 
 import type { AccountAddress, AssetContractId, ITransaction } from '@/types';
 import type { EthRpcEtherscanProxyMethod } from '@/protocols/ethereum/types';
@@ -187,6 +188,7 @@ export class EtherscanService {
       to,
       value,
       input,
+      tokenDecimal,
     } = transaction;
 
     const senderId = toEthChecksumAddress(from) as any;
@@ -198,7 +200,7 @@ export class EtherscanService {
     );
     const gasPriceInEther = Number(fromWei(gasPrice, 'ether'));
     const fee = gasUsed * gasPriceInEther;
-    const amount = Number(fromWei(value, 'ether'));
+    const amount = tokenDecimal ? Number(new BigNumber(value).shiftedBy(-tokenDecimal)) : Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
     const isEthTransfer = !contractAddress && (!input || input === '0x');
