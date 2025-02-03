@@ -120,7 +120,7 @@ export default defineComponent({
       // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/ae_mdw/issues/666
       activeAuctions.value = (
         await fetchAllPages(
-          () => fetchFromMiddlewareCamelCased('/v3/names/auctions?limit=100&direction=forward'),
+          () => fetchFromMiddlewareCamelCased('/v3/names/auctions?limit=100'),
           fetchFromMiddlewareCamelCased,
         )
       ).map(({ name, lastBid, auctionEnd }) => ({
