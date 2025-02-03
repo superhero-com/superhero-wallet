@@ -24,7 +24,7 @@ import Alert from '../../icons/alert.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
 import CheckCircle from '../../icons/check-circle.svg?vue-component';
 import NotSecure from '../../icons/not-secure.svg?vue-component';
-import Globe from '../../icons/globe.svg?vue-component';
+import Globe from '../../icons/globe-small.svg?vue-component';
 import QrScan from '../../icons/qr-scan.svg?vue-component';
 
 export default defineComponent({

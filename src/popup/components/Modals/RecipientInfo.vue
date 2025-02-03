@@ -1,7 +1,7 @@
 <template>
   <Default
     v-bind="{ ...$attrs, resolve }"
-    icon="help"
+    icon="info"
     :title="$t('modals.recipient.title')"
     :close="resolve"
     full-screen
