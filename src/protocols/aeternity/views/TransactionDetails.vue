@@ -443,8 +443,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
+
+.ion-content-bg {
+  background-color: $color-bg-4;
+}
 
 .transaction-details {
   .tip-url {
