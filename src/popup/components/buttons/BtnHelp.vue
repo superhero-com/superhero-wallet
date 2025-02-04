@@ -26,6 +26,7 @@ export default defineComponent({
     small: Boolean,
     warning: Boolean,
     fullScreen: Boolean,
+    showAboveAll: Boolean,
   },
   setup(props, { emit }) {
     const { openModal } = useModals();
@@ -41,6 +42,7 @@ export default defineComponent({
           option: props.option,
           textCenter: true,
           fullScreen: props.fullScreen,
+          showAboveAll: props.showAboveAll,
         });
       }
     }
