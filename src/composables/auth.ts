@@ -361,13 +361,8 @@ export const useAuth = createCustomScopedComposable(() => {
       mnemonicDecrypted.value = mnemonic.value;
     }
 
-    if (!IS_MOBILE_APP && !encryptionKey.value) {
-      if (IS_EXTENSION) {
-        await checkUserAuth(); // Check auth when opening again the extension
-      }
-      if (IS_OFFSCREEN_TAB) {
-        syncBackgroundEncryptionKey();
-      }
+    if (!encryptionKey.value && IS_EXTENSION) {
+      await checkUserAuth(); // Check auth when opening again the extension
     }
   })();
 
