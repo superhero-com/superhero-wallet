@@ -62,7 +62,7 @@ export default defineComponent({
      * Array of tokens that is returned by the transactionTokenInfoResolvers
      */
     tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
-    symbolLength: { type: Number, default: 11 },
+    symbolLength: { type: Number, default: 10 },
     doubleSymbolLength: { type: Number, default: 5 },
     /**
      * TODO if protocol is not set, assume AE, but this should be set correctly
