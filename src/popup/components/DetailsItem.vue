@@ -112,13 +112,16 @@ export default defineComponent({
   .value {
     @extend %face-sans-15-regular;
 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
     letter-spacing: 0.05em;
     color: rgba($color-white, 0.85);
     margin-bottom: 8px;
 
     .secondary {
       color: $color-grey-light;
-      margin-left: 4px;
       white-space: nowrap;
     }
 
