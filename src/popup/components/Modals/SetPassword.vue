@@ -56,6 +56,7 @@
               title: $t('pages.setPassword.help.title'),
               msg: $t('pages.setPassword.help.text'),
               fullscreen: true,
+              showAboveAll: true,
             }"
             show-password-strength
           />

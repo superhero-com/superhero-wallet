@@ -200,7 +200,10 @@ export function useAeSdk() {
    */
   async function getDryAeSdk(): Promise<AeSdk> {
     if (!dryAeSdk) {
-      const nodeInstance = new Node(aeActiveNetworkSettings.value.nodeUrl, { ignoreVersion: true });
+      const nodeInstance = new Node(
+        aeActiveNetworkSettings.value.nodeUrl,
+        { ignoreVersion: true, retryCount: 0 },
+      );
       dryAeSdk = new AeSdk({
         nodes: [{
           name: activeNetworkName.value,
