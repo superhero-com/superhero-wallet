@@ -28,6 +28,7 @@
         :title="help?.title"
         :msg="help?.msg"
         :full-screen="!!help?.fullscreen"
+        :show-above-all="!!help?.showAboveAll"
         data-cy="btn-help"
         @help="$emit('help')"
       />
@@ -159,7 +160,12 @@ export default defineComponent({
       default: null,
     },
     help: {
-      type: Object as PropType<{ title: string; msg: string; fullscreen: Boolean }>,
+      type: Object as PropType<{
+        title: string;
+        msg: string;
+        fullscreen: Boolean;
+        showAboveAll: Boolean;
+      }>,
       default: null,
     },
     integer: Boolean,

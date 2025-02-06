@@ -439,15 +439,40 @@ const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMappe
 const createCommunity: TransactionResolver = (
   transaction,
   tokens = null,
+  tokenAddressMapper = undefined,
 ) => {
-  const isConfirm = !transaction.tx.return;
-  const token = {
-    amount: transaction.tx.arguments?.[2]?.value,
+  const { internalEvents } = transaction.tx;
+  const additionalTokenEvents = internalEvents?.filter(({ type, payload: { recipientId } }) => (
+    ACTIVITIES_TYPES.aex9TransferEvent === type
+    && transaction.tx.callerId === recipientId
+  ));
+
+  let receivedTokens = additionalTokenEvents?.map(({
+    payload: {
+      tokenSymbol, amount, contractId,
+    },
+  }) => ({
+    amount,
     ...defaultToken,
-    symbol: transaction.tx.arguments?.[1]?.value,
-    ...(isConfirm ? {} : tokens?.[transaction.tx.log?.[2]?.address]),
+    symbol: tokenSymbol,
+    ...(tokens?.[contractId] || {}),
     isReceived: true,
-  };
+  }));
+
+  const tokenAddress: string | undefined = tokenAddressMapper?.(
+    transaction.tx.return?.value[1]?.value,
+  );
+
+  if (!receivedTokens?.length) {
+    receivedTokens = [{
+      amount: transaction.tx.arguments?.[2]?.value,
+      ...defaultToken,
+      symbol: transaction.tx.arguments?.[1]?.value,
+      ...(tokenAddress ? tokens?.[tokenAddress] : {}),
+      isReceived: true,
+    }];
+  }
+
   const aeToken = {
     ...defaultToken,
     assetType: ASSET_TYPES.coin,
@@ -456,7 +481,7 @@ const createCommunity: TransactionResolver = (
     isReceived: false,
   };
   return {
-    tokens: [token, aeToken],
+    tokens: [...(receivedTokens || []), aeToken],
   };
 };
 

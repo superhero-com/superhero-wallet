@@ -158,7 +158,7 @@ defineRule(
 export default () => {
   const { balance, updateBalances } = useBalances();
   const { currencyRates } = useCurrencies({ pollingDisabled: true });
-  const { getAeSdk } = useAeSdk();
+  const { getDryAeSdk } = useAeSdk();
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
@@ -172,8 +172,8 @@ export default () => {
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
-        const aeSdk = await getAeSdk();
-        const nameEntry = (await aeSdk.api.getNameEntryByName(name)) as any as NameEntry;
+        const dryAeSdk = await getDryAeSdk();
+        const nameEntry = (await dryAeSdk.api.getNameEntryByName(name)) as any as NameEntry;
         const address = getAddressByNameEntry(nameEntry);
         resolve(({
           [NAME_STATES.REGISTERED]: true,
@@ -196,14 +196,9 @@ export default () => {
     { leading: true },
   );
 
-  let lastName: string;
   function checkName(expectedNameState: ObjectValues<typeof NAME_STATES>) {
     return (name: string, [comparedAddress]: string[]): Promise<boolean> => new Promise(
       (resolve, reject) => {
-        if (name === lastName) {
-          checkNameDebounced.flush();
-        }
-        lastName = name;
         checkNameDebounced(name, expectedNameState, comparedAddress, { resolve, reject });
       },
     );

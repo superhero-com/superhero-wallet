@@ -190,6 +190,7 @@ import {
 import {
   useAccounts,
   useFungibleTokens,
+  useLatestTransactionList,
   useMultisigAccounts,
   useTransactionData,
   useTransactionList,
@@ -247,6 +248,7 @@ export default defineComponent({
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
     const { getTxAmountTotal, tokenBalances } = useFungibleTokens();
+    const { allLatestTransactions } = useLatestTransactionList();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -342,7 +344,10 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      let rawTransaction: ITransaction | undefined = transactionsLoaded.value
+      let rawTransaction: ITransaction | undefined = [
+        ...transactionsLoaded.value,
+        ...allLatestTransactions.value,
+      ]
         .find((tx) => tx.hash === hash) as ITransaction;
 
       // Claim transactions have missing data that needs to be fetched from the middleware
@@ -443,8 +448,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
+
+.ion-content-bg {
+  background-color: $color-bg-4;
+}
 
 .transaction-details {
   .tip-url {

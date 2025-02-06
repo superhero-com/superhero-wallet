@@ -131,6 +131,8 @@ export default defineComponent({
 
       .amount {
         @extend %face-sans-18-regular;
+
+        font-size: var(--font-size);
       }
     }
   }
