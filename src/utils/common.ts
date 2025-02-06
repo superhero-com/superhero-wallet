@@ -90,7 +90,7 @@ export function calculateFontSize(amountValue: BigNumber | number | string) {
     return '16px';
   }
   if (amountLength <= 14) {
-    return '14px';
+    return '13px';
   }
   return '12px';
 }
