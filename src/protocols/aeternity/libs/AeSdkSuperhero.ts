@@ -31,10 +31,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
     this.nodeNetworkId = nodeNetworkId;
   }
 
-  _resolveAccount(options: any) {
-    if (options) {
-      return super._resolveAccount(options);
-    }
+  _resolveAccount() {
     // TODO cache the account instead of instantiating it whenever the library is asked for it
     return new AeAccountHdWallet(this.nodeNetworkId);
   }

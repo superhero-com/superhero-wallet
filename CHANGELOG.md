@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.0...v2.5.1) (2025-02-06)
+
+
+### Features
+
+* be able to set ethplorer api key ([f409883](https://github.com/Superhero-com/superhero-wallet/commit/f409883892408dba7e35df7c46ec1992ce6c8ab4))
+* show full createCommunity contract call info ([34ed221](https://github.com/Superhero-com/superhero-wallet/commit/34ed2218aaf5d2e45b850d10523af62ec89795f5))
+* show internal spendTx correctly ([35bd814](https://github.com/Superhero-com/superhero-wallet/commit/35bd8143e397bff1da20b3a32e713a740957d419))
+
+
+### Bug Fixes
+
+* **aeternity:** correct usage of onAccount property ([b2227b0](https://github.com/Superhero-com/superhero-wallet/commit/b2227b0909d39a088c4b5c037fdd957864d1cbeb))
+* be able to show set password help modal ([453c777](https://github.com/Superhero-com/superhero-wallet/commit/453c7775d5cebf01a8cce67ca061b65f75a520b7))
+* do not overlap token name with amount in TransactionAssetRow ([08b6df1](https://github.com/Superhero-com/superhero-wallet/commit/08b6df14ba9767464fdcc8d5655e8c42d321d4c9))
+* do not rewrite encrypted state with default value on initialization ([1328fcf](https://github.com/Superhero-com/superhero-wallet/commit/1328fcf396bee6181735ad452f541570a48d38fe))
+* **ethereum:** show correct token transaction details ([2f3fa84](https://github.com/Superhero-com/superhero-wallet/commit/2f3fa841229055c44f6229a790b1bb190c652909))
+* show correct information for loaded transactions ([621f082](https://github.com/Superhero-com/superhero-wallet/commit/621f082e67187b72462b683ca5fac737ee0ca8c3))
+
+
+### Maintenance
+
+* adjust transaction details page ([238e022](https://github.com/Superhero-com/superhero-wallet/commit/238e022056428adc16e34536361509f54329ff42))
+* change several icons style ([24a75a0](https://github.com/Superhero-com/superhero-wallet/commit/24a75a02b26e1fd3e7dd78cc0f5719249e83635b))
+* update github actions ([9883c3a](https://github.com/Superhero-com/superhero-wallet/commit/9883c3aced519d98dc47aaba79a7425c367326c5))
+
+
+### Performance
+
+* reduce the number of name check requests ([f294b29](https://github.com/Superhero-com/superhero-wallet/commit/f294b292b708886b23f04f66f57da9619ac1f46b))
+
 ## [2.5.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.4.0...v2.5.0) (2025-01-30)
 
 
