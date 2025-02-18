@@ -58,6 +58,7 @@ import { useAccounts, useModals } from '@/composables';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import Modal from '@/popup/components/Modal.vue';
+import { isAddressValid, Encoding, decode } from '@aeternity/aepp-sdk';
 
 export default defineComponent({
   components: {
@@ -84,13 +85,16 @@ export default defineComponent({
 
     async function importPrivateKey() {
       const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      let privateKeyBuffer;
       try {
+        privateKeyBuffer = isAddressValid(privateKey.value, Encoding.AccountSecretKey)
+          ? decode(privateKey.value) : Buffer.from(privateKey.value, 'hex');
         const account = adapter.resolveAccountRaw(
           {
             type: ACCOUNT_TYPES.privateKey,
             isRestored: false,
             protocol: props.protocol,
-            privateKey: Buffer.from(privateKey.value, 'hex'),
+            privateKey: privateKeyBuffer,
           },
           0,
           0,
@@ -120,7 +124,7 @@ export default defineComponent({
         type: ACCOUNT_TYPES.privateKey,
         isRestored: false,
         protocol: props.protocol,
-        privateKey: Buffer.from(privateKey.value, 'hex'),
+        privateKey: privateKeyBuffer,
       });
       setActiveAccountByGlobalIdx(globalIdx);
       props.resolve();
