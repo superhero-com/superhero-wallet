@@ -4,56 +4,59 @@
     class="call-data-details"
     :label="$t('transaction.data')"
   >
-    <Tabs class="tabs">
-      <Tab
-        v-for="({ name, text }) in dataTabs"
-        :key="name"
-        :data-cy="name"
-        :text="text"
-        :active="activeTab === name"
-        @click="setActiveTab(name)"
-      />
-    </Tabs>
-    <div class="tabs-content">
-      <DetailsItem v-if="activeTab === dataTabs[0].name">
-        <AnimatedSpinner
-          v-if="loading"
-          class="loader"
+    <div class="call-data-details-wrapper">
+      <Tabs class="tabs">
+        <Tab
+          v-for="({ name, text }) in dataTabs"
+          :key="name"
+          :data-cy="name"
+          :text="text"
+          :active="activeTab === name"
+          @click="setActiveTab(name)"
         />
-        <div v-else-if="callDataDecoded">
-          <DetailsItem
-            :label="$t('modals.confirmTransactionSign.functionName')"
-            :value="callDataDecoded?.functionName"
+      </Tabs>
+      <div class="tabs-content">
+        <DetailsItem v-if="activeTab === dataTabs[0].name">
+          <AnimatedSpinner
+            v-if="loading"
+            class="loader"
           />
-          <DetailsItem :label="$t('modals.confirmTransactionSign.arguments')">
-            <template #value>
-              <Panel class="arguments">
-                <PanelTableItem
-                  v-for="([key, value]) in argumentsEntries"
-                  :key="key"
-                  :name="key"
-                  variant="left-aligned-name-bolder"
-                >
-                  <div class="value">
-                    {{ typeof value === 'bigint' ? Number(value) : value }}
-                  </div>
-                </PanelTableItem>
-              </Panel>
-            </template>
-          </DetailsItem>
-        </div>
-        <InfoBox
-          v-else
-          type="warning"
-          :text="$t('transaction.decodingDataFailed')"
-        />
-      </DetailsItem>
+          <div v-else-if="callDataDecoded">
+            <DetailsItem
+              :label="$t('modals.confirmTransactionSign.functionName')"
+              :value="callDataDecoded?.functionName"
+            />
+            <DetailsItem :label="$t('modals.confirmTransactionSign.arguments')">
+              <template #value>
+                <Panel class="arguments">
+                  <PanelTableItem
+                    v-for="([key, value]) in argumentsEntries"
+                    :key="key"
+                    :name="key"
+                    variant="left-aligned-name-bolder"
+                  >
+                    <div class="value">
+                      {{ typeof value === 'bigint' ? Number(value) : value }}
+                    </div>
+                  </PanelTableItem>
+                </Panel>
+              </template>
+            </DetailsItem>
+          </div>
+          <InfoBox
+            v-else
+            type="warning"
+            :text="$t('transaction.decodingDataFailed')"
+          />
+        </DetailsItem>
 
-      <!-- Raw Data -->
-      <DetailsItem
-        v-if="activeTab === dataTabs[1].name"
-        :value="callData"
-      />
+        <!-- Raw Data -->
+        <DetailsItem
+          v-if="activeTab === dataTabs[1].name"
+          :value="callData"
+          class="raw-data"
+        />
+      </div>
     </div>
   </DetailsItem>
 </template>
@@ -133,7 +136,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .call-data-details {
-  width: 100%;
+  .call-data-details-wrapper {
+    width: 100%;
+  }
 
   .tabs-content {
     .loader {
@@ -149,6 +154,10 @@ export default defineComponent({
 
     .arguments {
       margin-top: 8px;
+    }
+
+    .raw-data {
+      word-break: break-all;
     }
   }
 }
