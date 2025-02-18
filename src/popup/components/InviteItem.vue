@@ -162,7 +162,7 @@ export default defineComponent({
 
     const link = computed(() => {
       // nm_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (encode(Buffer.from(props.secretKey), Encoding.Name)).slice(3);
+      const secretKey = (encode(props.secretKey, Encoding.Name)).slice(3);
       return new URL(
         `${router
           .resolve({ name: ROUTE_INVITE_CLAIM })
@@ -171,7 +171,7 @@ export default defineComponent({
       );
     });
 
-    const address = computed(() => getAccountFromSecret(Buffer.from(props.secretKey)).address);
+    const address = computed(() => getAccountFromSecret(props.secretKey).address);
 
     function deleteItem() {
       removeInvite(props.secretKey);
@@ -192,7 +192,7 @@ export default defineComponent({
       emit('loading', true);
       try {
         await claimInvite({
-          secretKey: Buffer.from(props.secretKey),
+          secretKey: props.secretKey,
           recipientId: getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address!,
           isMax: true,
         });

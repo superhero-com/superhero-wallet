@@ -899,8 +899,15 @@ export interface IFormSelectOption {
 export type Migration<T = any> = (restoredValue: T | any) => Promise<T>;
 
 export interface IInvite {
-  secretKey: object;
+  secretKey: Buffer;
   createdAt: number;
+}
+
+export interface IInviteSerialized extends Omit<IInvite, 'secretKey'> {
+  secretKey: {
+    type: 'Buffer';
+    data: number[];
+  };
 }
 
 export interface IHistoryItem {

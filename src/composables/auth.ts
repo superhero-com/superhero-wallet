@@ -101,7 +101,7 @@ export const useAuth = createCustomScopedComposable(() => {
   );
 
   /** Part of the `encryptionKey` that is used to encrypt/decrypt protected data */
-  const encryptionSalt = useStorageRef<Uint8Array | null>(
+  const encryptionSalt = useStorageRef<Uint8Array | null, string>(
     null,
     STORAGE_KEYS.encryptionSalt,
     {

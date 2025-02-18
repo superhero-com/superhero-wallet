@@ -2,7 +2,7 @@ import {
   AE_AMOUNT_FORMATS,
   Encoded,
 } from '@aeternity/aepp-sdk';
-import type { AccountAddress, IInvite } from '@/types';
+import type { AccountAddress, IInvite, IInviteSerialized } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
@@ -11,13 +11,20 @@ import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
 import { useAeSdk } from './aeSdk';
 
-const invites = useStorageRef<IInvite[]>(
+const invites = useStorageRef<IInvite[], IInviteSerialized[]>(
   [],
   STORAGE_KEYS.invites,
   {
     migrations: [
       migrateInvitesVuexToComposable,
     ],
+    serializer: {
+      read: (arr) => arr
+        // TODO: remove `as any` after updating `Buffer.from` type
+        .map(({ secretKey, ...item }) => ({ ...item, secretKey: Buffer.from(secretKey as any) })),
+      write: (arr) => arr
+        .map(({ secretKey, ...item }) => ({ ...item, secretKey: secretKey.toJSON() })),
+    },
   },
 );
 
@@ -27,7 +34,7 @@ export function useInvites() {
 
   function addInvite(secretKey: Buffer) {
     invites.value.unshift({
-      secretKey: secretKey.toJSON(),
+      secretKey,
       createdAt: Date.now(),
     });
   }
