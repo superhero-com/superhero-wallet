@@ -3,6 +3,7 @@ import { METHODS, Tag } from '@aeternity/aepp-sdk';
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
 import Web3Eth, { getBlock } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
+import { isEmpty } from 'lodash-es';
 
 import type { IModalProps } from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
@@ -80,7 +81,7 @@ export async function handleEthereumRpcMethod(
   name?: string,
 ) {
   const { checkOrAskPermission, removePermission } = usePermissions();
-  const { getLastActiveProtocolAccount } = useAccounts();
+  const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
   const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
 
@@ -89,9 +90,12 @@ export async function handleEthereumRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts || method === ETH_RPC_METHODS.getAccounts) {
-    return (await checkOrAskEthPermission(aepp))
-      ? [getLastActiveProtocolAccount(PROTOCOLS.ethereum)!.address]
-      : [];
+    const permitted = await checkOrAskEthPermission(aepp);
+    if (permitted) {
+      await watchUntilTruthy(() => !isEmpty(activeAccount.value));
+      return [getLastActiveProtocolAccount(PROTOCOLS.ethereum)!.address];
+    }
+    return [];
   }
 
   if (method === ETH_RPC_METHODS.revokePermissions) {
