@@ -660,58 +660,7 @@ class SuperheroWalletMessageListener {
   };
 
   public readonly injectEthereumIntoWindow = () => {
-    if (!('ethereum' in window) || !window.ethereum) {
-      // no existing signer found
-      window.ethereum = {
-        isSuperheroWallet: true,
-        isConnected: this.WindowEthereumIsConnected.bind(window.ethereum),
-        request: this.WindowEthereumRequest.bind(window.ethereum),
-        send: this.WindowEthereumSend.bind(window.ethereum),
-        sendAsync: this.WindowEthereumSendAsync.bind(window.ethereum),
-        on: this.WindowEthereumOn.bind(window.ethereum),
-        removeListener: this.WindowEthereumRemoveListener.bind(window.ethereum),
-        enable: this.WindowEthereumEnable.bind(window.ethereum),
-        ...this.unsupportedMethods(window.ethereum),
-      };
-      this.connected = true;
-      return;
-    }
-    if (window.ethereum.isSuperheroWallet) return;
-
-    // subscribe for signers events
-    window.ethereum.on('accountsChanged', (accounts: readonly string[]) => {
-      this.WindowEthereumRequest({ method: 'eth_accounts_reply', params: [{ type: 'success', accounts, requestAccounts: false }] });
-    });
-    window.ethereum.on('disconnect', (_error: ProviderRpcError) => {
-      this.sendMessageToBackgroundPage({ method: 'connected_to_signer', params: [false, this.currentSigner] });
-    });
-    window.ethereum.on('chainChanged', (chainId: string) => {
-      // TODO: this is a hack to get coinbase working that calls this numbers in base 10 instead of in base 16
-      // eslint-disable-next-line radix
-      const params = /\d/.test(chainId) ? [`0x${parseInt(chainId).toString(16)}`] : [chainId];
-      this.WindowEthereumRequest({ method: 'signer_chainChanged', params });
-    });
-
-    this.connected = !window.ethereum.isConnected || window.ethereum.isConnected();
-    this.signerWindowEthereumRequest = window.ethereum.request.bind(window.ethereum); // store the request object to signer
-
-    if (window.ethereum.isBraveWallet || window.ethereum.providerMap || window.ethereum.isCoinbaseWallet) {
-      const oldWinEthereum = (window.ethereum.providerMap ? window.ethereum.providerMap.get('CoinbaseWallet') : undefined) ?? window.ethereum;
-      window.ethereum = {
-        isSuperheroWallet: true,
-        isConnected: this.WindowEthereumIsConnected.bind(oldWinEthereum),
-        request: this.WindowEthereumRequest.bind(oldWinEthereum),
-        send: this.WindowEthereumSend.bind(oldWinEthereum),
-        sendAsync: this.WindowEthereumSendAsync.bind(oldWinEthereum),
-        on: this.WindowEthereumOn.bind(oldWinEthereum),
-        removeListener: this.WindowEthereumRemoveListener.bind(oldWinEthereum),
-        enable: this.WindowEthereumEnable.bind(oldWinEthereum),
-        ...this.unsupportedMethods(oldWinEthereum),
-      };
-      return;
-    }
-    // we cannot inject window.ethereum alone here as it seems like window.ethereum is cached (maybe ethers.js does that?)
-    Object.assign(window.ethereum, {
+    const superheroWalletProvider = {
       isSuperheroWallet: true,
       isConnected: this.WindowEthereumIsConnected.bind(window.ethereum),
       request: this.WindowEthereumRequest.bind(window.ethereum),
@@ -721,7 +670,50 @@ class SuperheroWalletMessageListener {
       removeListener: this.WindowEthereumRemoveListener.bind(window.ethereum),
       enable: this.WindowEthereumEnable.bind(window.ethereum),
       ...this.unsupportedMethods(window.ethereum),
+    };
+    Object.defineProperties(window, {
+      superheroWallet: {
+        value: superheroWalletProvider,
+        configurable: false,
+        writable: false,
+      },
+      ethereum: {
+        get() {
+          // @ts-expect-error
+          return window.superheroWalletRouter.currentProvider;
+        },
+        set(newProvider) {
+          // @ts-expect-error
+          window.superheroWalletRouter?.addProvider(newProvider);
+        },
+        configurable: false,
+      },
+      superheroWalletRouter: {
+        value: {
+          superheroWalletProvider,
+          lastInjectedProvider: window.ethereum,
+          currentProvider: superheroWalletProvider,
+          providers: [
+            superheroWalletProvider,
+            ...(window.ethereum ? [window.ethereum] : []),
+          ],
+          addProvider(provider: any) {
+            // @ts-expect-error
+            if (!window.superheroWalletRouter?.providers?.includes(provider)) {
+              // @ts-expect-error
+              window.superheroWalletRouter?.providers?.push(provider);
+            }
+            if (superheroWalletProvider !== provider) {
+              // @ts-expect-error
+              window.superheroWalletRouter.lastInjectedProvider = provider;
+            }
+          },
+        },
+        configurable: false,
+        writable: false,
+      },
     });
+    this.connected = true;
   };
 }
 
@@ -729,17 +721,6 @@ function injectSuperheroWallet() {
   const superheroWalletMessageListener = new SuperheroWalletMessageListener();
   window.addEventListener('message', superheroWalletMessageListener.onMessage);
   window.dispatchEvent(new Event('ethereum#initialized'));
-
-  // listen if Metamask injects (I think this method of injection is only supported by Metamask currently) their payload, and if so, reinject
-  const superheroWalletCapturedDispatcher = window.dispatchEvent;
-  window.dispatchEvent = (event: Event) => {
-    superheroWalletCapturedDispatcher(event);
-    if (!(typeof event === 'object' && event !== null && 'type' in event && typeof event.type === 'string')) return true;
-    if (event.type !== 'ethereum#initialized') return true;
-    superheroWalletMessageListener.injectEthereumIntoWindow();
-    window.dispatchEvent = superheroWalletCapturedDispatcher;
-    return true;
-  };
 }
 
 injectSuperheroWallet();
