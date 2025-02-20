@@ -35,7 +35,7 @@ const runContentScript = () => {
     method: BackgroundMethod,
     params: IEthRpcMethodParameters,
   ) {
-    const result = await sendToOffscreen(method, {
+    const { result, error }: any = await sendToOffscreen(method, {
       rpcMethodParams: params,
       aepp: event.origin,
     });
@@ -45,6 +45,7 @@ const runContentScript = () => {
     event.source.postMessage({
       jsonrpc: '2.0',
       result,
+      ...(error ? { error } : {}),
       method: event.data.method,
       superheroWalletApproved: true,
       type: 'result',
