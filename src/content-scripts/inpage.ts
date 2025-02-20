@@ -169,6 +169,51 @@ interface EIP6963ProviderInfo {
   rdns: string;
 }
 
+function shouldInjectProvider() {
+  return doctypeCheck() && suffixCheck() && documentElementCheck();
+}
+
+/**
+ * Checks the doctype of the current document if it exists
+ */
+function doctypeCheck() {
+  const { doctype } = window.document;
+  if (doctype) {
+    return doctype.name === 'html';
+  }
+  return true;
+}
+
+/**
+ * Returns whether or not the extension (suffix) of the current document is prohibited
+ *
+ * This checks {@code window.location.pathname} against a set of file extensions
+ * that we should not inject the provider into. This check is indifferent of
+ * query parameters in the location.
+ */
+function suffixCheck() {
+  const prohibitedTypes = [/\.xml$/u, /\.pdf$/u];
+  const currentUrl = window.location.pathname;
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < prohibitedTypes.length; i++) {
+    if (prohibitedTypes[i].test(currentUrl)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Checks the documentElement of the current document
+ */
+function documentElementCheck() {
+  const documentElement = document.documentElement.nodeName;
+  if (documentElement) {
+    return documentElement.toLowerCase() === 'html';
+  }
+  return true;
+}
+
 type SingleSendAsyncParam = { readonly id: string | number | null; readonly method: string; readonly params: readonly unknown[] }
 
 type OnMessage = 'accountsChanged' | 'message' | 'connect' | 'close' | 'disconnect' | 'chainChanged'
@@ -208,7 +253,9 @@ class SuperheroWalletMessageListener {
   private pendingSignerAddressRequest: Future<boolean> | undefined = undefined;
 
   public constructor() {
-    this.injectEthereumIntoWindow();
+    if (shouldInjectProvider()) {
+      this.injectEthereumIntoWindow();
+    }
     this.onPageLoad();
   }
 
