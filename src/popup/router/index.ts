@@ -65,6 +65,12 @@ RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
+  let popupProps: IPopupProps | null = null;
+
+  if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND && !Object.keys(to.params).length) {
+    popupProps = await getPopupProps();
+  }
+
   await checkUserAuth();
 
   await watchUntilTruthy(areAccountsReady);
@@ -107,10 +113,7 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_UNSAFE_SIGN]: ROUTE_POPUP_UNSAFE_SIGN,
     }[POPUP_TYPE];
 
-    let popupProps: IPopupProps | null = null;
-
     if (!Object.keys(to.params).length) {
-      popupProps = await getPopupProps();
       if (!popupProps?.app) {
         next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
         return;
