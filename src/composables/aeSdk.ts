@@ -12,7 +12,6 @@ import {
   RPC_STATUS,
   Encoded,
 } from '@aeternity/aepp-sdk';
-import { isEmpty } from 'lodash-es';
 
 import type {
   INetwork,
@@ -82,7 +81,6 @@ export function useAeSdk() {
     onNetworkChange,
   } = useNetworks();
   const {
-    activeAccount,
     accountsAddressList,
     getLastActiveProtocolAccount,
     onAccountChange,
@@ -156,8 +154,6 @@ export function useAeSdk() {
           const aepp = aeppInfo[aeppId];
           const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
-            // Waiting for activeAccount to sync back to the background
-            await watchUntilTruthy(() => !isEmpty(activeAccount.value));
             return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
           }
           return Promise.reject(new RpcRejectedByUserError());
@@ -166,8 +162,6 @@ export function useAeSdk() {
           const aepp = aeppInfo[aeppId];
           const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
           if (await checkOrAskPermission(METHODS.address, host)) {
-            // Waiting for activeAccount to sync back to the background
-            await watchUntilTruthy(() => !isEmpty(activeAccount.value));
             return accountsAddressList.value;
           }
           return Promise.reject(new RpcRejectedByUserError());

@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash-es';
 import type { IModalProps } from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
-import { sleep, watchUntilTruthy } from '@/utils';
+import { watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { EtherscanService, EtherscanDefaultResponse } from '@/protocols/ethereum/libs/EtherscanService';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
@@ -22,7 +22,6 @@ import {
 
 import {
   CONNECT_PERMISSIONS,
-  PERMISSION_DEFAULTS,
   PROTOCOLS,
 } from '@/constants';
 import {
@@ -46,12 +45,8 @@ const ERROR_USER_REJECTED_REQUEST = {
 const isCheckingPermissions = ref(false);
 
 async function checkOrAskEthPermission(aepp: string) {
-  const {
-    addPermission,
-    checkOrAskPermission,
-    permissions,
-  } = usePermissions();
-
+  const { checkOrAskPermission } = usePermissions();
+  const { activeAccount } = useAccounts();
   await watchUntilTruthy(() => !isCheckingPermissions.value);
 
   isCheckingPermissions.value = true;
@@ -67,20 +62,7 @@ async function checkOrAskEthPermission(aepp: string) {
       ],
     },
   );
-  const { hostname: host } = new URL(aepp);
-  if (permission && !permissions.value[host]?.address) {
-    // awaiting for default permissions to be synced
-    // with background after being set in `checkOrAskPermission`
-    await sleep(50);
-    addPermission({
-      ...PERMISSION_DEFAULTS,
-      ...(permissions.value[host] || {}),
-      address: true,
-      addressList: true,
-      host,
-      name: host,
-    });
-  }
+  await watchUntilTruthy(() => !isEmpty(activeAccount.value));
   isCheckingPermissions.value = false;
 
   return permission;
@@ -93,7 +75,7 @@ export async function handleEthereumRpcMethod(
   name?: string,
 ): Promise<{ result?: any; error?: { code: number; message: string } }> {
   const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
-  const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
+  const { getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
   const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
 
@@ -106,8 +88,7 @@ export async function handleEthereumRpcMethod(
   if (method === ETH_RPC_METHODS.getAccounts) {
     const { host } = new URL(aepp);
 
-    if (checkPermission(host, METHODS.address)) {
-      await watchUntilTruthy(() => !isEmpty(activeAccount.value));
+    if (checkPermission(host, METHODS.connect)) {
       const ethereumAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
 
       return {
@@ -120,9 +101,7 @@ export async function handleEthereumRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    const permitted = await checkOrAskEthPermission(aepp);
-    if (permitted) {
-      await watchUntilTruthy(() => !isEmpty(activeAccount.value));
+    if (await checkOrAskEthPermission(aepp)) {
       return { result: [getLastActiveProtocolAccount(PROTOCOLS.ethereum)!.address] };
     }
     return ERROR_USER_REJECTED_REQUEST;
