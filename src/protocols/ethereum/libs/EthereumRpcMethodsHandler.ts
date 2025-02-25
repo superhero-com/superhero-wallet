@@ -1,6 +1,12 @@
 import { ref } from 'vue';
 import { METHODS, Tag } from '@aeternity/aepp-sdk';
-import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
+import {
+  fromWei,
+  toChecksumAddress,
+  toWei,
+  hexToString,
+} from 'web3-utils';
+import { sign } from 'web3-eth-accounts';
 import Web3Eth, { getBlock } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { isEmpty } from 'lodash-es';
@@ -213,6 +219,35 @@ export async function handleEthereumRpcMethod(
         } catch (error: any) {
           return getUnknownError(error.message);
         }
+      }
+    }
+    return ERROR_USER_REJECTED_REQUEST;
+  }
+  if (method === ETH_RPC_METHODS.signPersonal) {
+    const ethereumAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
+
+    let rawMessage: string;
+
+    try {
+      rawMessage = hexToString(params.data!);
+    } catch (e: any) {
+      return { error: { code: -32602, message: e.message } };
+    }
+
+    const permitted = await checkOrAskPermission(
+      METHODS.signMessage,
+      aepp,
+      {
+        protocol: PROTOCOLS.ethereum,
+        message: rawMessage,
+      },
+    );
+    if (permitted && ethereumAccount?.secretKey) {
+      try {
+        const signedMessage = await sign(rawMessage, `0x${Buffer.from(ethereumAccount.secretKey).toString('hex')}`);
+        return { result: signedMessage.signature };
+      } catch (e: any) {
+        return getUnknownError(e.message);
       }
     }
     return ERROR_USER_REJECTED_REQUEST;

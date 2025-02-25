@@ -91,7 +91,8 @@ export default defineComponent({
       setPopupProps,
     } = usePopupProps();
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+    const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
+    const activeAccount = getLastActiveProtocolAccount(protocol);
 
     async function approve() {
       const { openModal } = useModals();

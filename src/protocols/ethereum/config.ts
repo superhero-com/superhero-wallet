@@ -114,8 +114,10 @@ export const ETH_RPC_METHODS = {
   getBlockNumber: 'eth_blockNumber',
   getChainId: 'eth_chainId',
   getAccounts: 'eth_accounts',
-  sendTransaction: 'eth_sendTransaction',
   requestAccounts: 'eth_requestAccounts',
+  // signing
+  sendTransaction: 'eth_sendTransaction',
+  signPersonal: 'personal_sign',
   // wallet
   requestPermissions: 'wallet_requestPermissions',
   switchNetwork: 'wallet_switchEthereumChain',

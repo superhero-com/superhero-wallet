@@ -65,6 +65,8 @@ const runContentScript = () => {
 
       if (method === ETH_RPC_METHODS.getBalance) {
         handleEthRpcRequest(event, method, { address: event.data.params[0] });
+      } else if (method === ETH_RPC_METHODS.signPersonal) {
+        handleEthRpcRequest(event, method, { data: event.data.params?.[0] });
       } else if (
         Object.values(ETH_RPC_METHODS).includes(method)
         || Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
