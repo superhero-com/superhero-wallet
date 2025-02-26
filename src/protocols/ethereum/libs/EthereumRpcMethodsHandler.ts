@@ -265,6 +265,9 @@ export async function handleEthereumRpcMethod(
           action: method,
           ...params,
         });
+      if (!response?.message?.startsWith('OK')) {
+        getUnknownError(response?.result || 'Unknown error');
+      }
       return { result: response?.result };
     } catch (error: any) {
       return getUnknownError(error.message);
