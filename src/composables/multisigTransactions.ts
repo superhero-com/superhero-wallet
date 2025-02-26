@@ -5,6 +5,7 @@ import {
   encode,
   Encoded,
   Encoding,
+  Contract,
 } from '@aeternity/aepp-sdk';
 
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
@@ -114,7 +115,8 @@ export function useMultisigTransactions() {
 
     const spendTxHash = await aeSdk.buildAuthTxHash(spendTx, GA_META_PARAMS);
 
-    const gaContractRpc = await aeSdk.initializeContract({
+    const gaContractRpc = await Contract.initialize({
+      ...aeSdk.getContext(),
       aci: SimpleGAMultiSigAci,
       address: contractId,
     });
@@ -148,7 +150,8 @@ export function useMultisigTransactions() {
   ) {
     const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
-    const gaContractRpc = await aeSdk.initializeContract({
+    const gaContractRpc = await Contract.initialize({
+      ...aeSdk.getContext(),
       aci: SimpleGAMultiSigAci,
       address: contractId,
     });
@@ -167,7 +170,8 @@ export function useMultisigTransactions() {
     nonce: number,
   ): Promise<any> {
     const dryAeSdk = await getDryAeSdk();
-    const gaContractRpc = await dryAeSdk.initializeContract({
+    const gaContractRpc = await Contract.initialize({
+      ...dryAeSdk.getContext(),
       aci: SimpleGAMultiSigAci,
       bytecode: MULTISIG_SIMPLE_GA_BYTECODE,
     });

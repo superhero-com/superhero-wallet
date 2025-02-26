@@ -71,7 +71,7 @@
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
-import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
+import { AE_AMOUNT_FORMATS, decode, MemoryAccount } from '@aeternity/aepp-sdk';
 
 import type { IFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -123,14 +123,13 @@ export default defineComponent({
 
     async function generate(resetField: () => void) {
       setLoaderVisible(true);
-      const { publicKey, secretKey } = generateKeyPair();
+      const { address, secretKey } = MemoryAccount.generate();
 
       try {
         const aeSdk = await getAeSdk();
         await aeSdk.spend(
           formModel.value.amount || 0,
-          publicKey,
-          // @ts-ignore
+          address,
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
       } catch (error: any) {
@@ -142,7 +141,7 @@ export default defineComponent({
         setLoaderVisible(false);
       }
 
-      addInvite(Buffer.from(secretKey, 'hex').slice(0, 32));
+      addInvite(decode(secretKey));
       // Field is dirty after submit, so we need to reset it and not just clear the value
       resetField();
     }

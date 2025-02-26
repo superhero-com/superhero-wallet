@@ -629,18 +629,7 @@ export interface IFeeItem {
  */
 export type PopupType = typeof POPUP_TYPES[number];
 
-export interface ITopHeader {
-  hash: string;
-  height: number;
-  pofHash?: string;
-  prevHash: string;
-  prevKeyHash: string;
-  signature?: string;
-  stateHash: string;
-  time: number;
-  txsHash?: string;
-  version: number;
-}
+export type ITopHeader = Awaited<ReturnType<InstanceType<typeof Node>['getTopHeader']>>
 
 /**
  * Todo replace ChainName with AensName within the app
@@ -910,8 +899,15 @@ export interface IFormSelectOption {
 export type Migration<T = any> = (restoredValue: T | any) => Promise<T>;
 
 export interface IInvite {
-  secretKey: object;
+  secretKey: Buffer;
   createdAt: number;
+}
+
+export interface IInviteSerialized extends Omit<IInvite, 'secretKey'> {
+  secretKey: {
+    type: 'Buffer';
+    data: number[];
+  };
 }
 
 export interface IHistoryItem {

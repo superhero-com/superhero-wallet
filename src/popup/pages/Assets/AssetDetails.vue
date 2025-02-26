@@ -108,7 +108,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Encoded } from '@aeternity/aepp-sdk';
+import { Contract, Encoded } from '@aeternity/aepp-sdk';
 
 import type { AssetContractId, IToken, TokenPair } from '@/types';
 import {
@@ -306,7 +306,8 @@ export default defineComponent({
       try {
         const aeSdk = await getAeSdk();
         const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-        const tokenContract = await aeSdk.initializeContract({
+        const tokenContract = await Contract.initialize({
+          ...aeSdk.getContext(),
           aci: AedexV2PairACI,
           address,
         });

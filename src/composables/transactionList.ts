@@ -63,7 +63,7 @@ export function useTransactionList({
   assetContractId,
   protocol,
 }: UseTransactionListOptions) {
-  let pollingIntervalId: NodeJS.Timer | undefined;
+  let pollingIntervalId: NodeJS.Timeout | undefined;
   const isLoading = ref(false);
 
   const { isOnline } = useConnection();

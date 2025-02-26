@@ -1,7 +1,7 @@
-import type { IInvite, Migration } from '@/types';
+import type { IInviteSerialized, Migration } from '@/types';
 import { collectVuexState } from './migrationHelpers';
 
-const migration: Migration<IInvite[]> = async (restoredValue: IInvite[]) => {
+const migration: Migration<IInviteSerialized[]> = async (restoredValue: IInviteSerialized[]) => {
   if (!restoredValue?.length) {
     const invites = (await collectVuexState())?.invites?.invites;
     if (invites?.length) {

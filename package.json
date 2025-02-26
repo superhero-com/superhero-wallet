@@ -3,7 +3,7 @@
   "version": "2.5.1",
   "description": "Superhero wallet",
   "author": "Superhero",
-  "license": "MIT",
+  "license": "ISC",
   "private": true,
   "scripts": {
     "lint:vue": "vue-cli-service lint --no-fix",
@@ -33,8 +33,8 @@
   },
   "dependencies": {
     "@aeternity/aepp-calldata": "^1.8.0",
-    "@aeternity/aepp-sdk": "13.3.2",
-    "@aeternity/bip39": "^0.1.0",
+    "@aeternity/aepp-sdk": "14.0.0",
+    "@aeternity/aepp-sdk-13": "npm:@aeternity/aepp-sdk@13.3.2",
     "@aeternity/json-bigint": "^0.3.1",
     "@airgap/aeternity": "^0.13.31",
     "@airgap/serializer": "^0.13.31",
@@ -66,6 +66,7 @@
     "@ionic/vue-router": "^8.2.6",
     "@ledgerhq/hw-transport-webusb": "^6.29.4",
     "@ngraveio/bc-ur": "^1.1.13",
+    "@scure/bip39": "^1.5.0",
     "@trapezedev/configure": "^7.0.10",
     "@vee-validate/i18n": "^4.13.2",
     "@vee-validate/rules": "^4.13.2",
@@ -92,7 +93,6 @@
     "swagger-client": "3.18.4",
     "swiper": "^11.0.7",
     "ts-jest": "^27.1.5",
-    "tweetnacl": "^1.0.3",
     "uuid": "^9.0.1",
     "validator": "^13.12.0",
     "vee-validate": "^4.13.2",
@@ -115,6 +115,7 @@
     "@commitlint/config-conventional": "^19.2.2",
     "@intlify/vue-i18n-loader": "^5.0.1",
     "@types/lodash-es": "^4.17.12",
+    "@types/webextension-polyfill": "^0.12.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vue/cli-plugin-babel": "~5.0.8",
@@ -156,7 +157,6 @@
     "ts-jest": "^27.1.5",
     "typescript": "^4.9.5",
     "vue-cli-plugin-browser-extension": "npm:@rhilip/vue-cli-plugin-browser-extension@^0.27.0",
-    "web-ext-types": "^3.2.1",
     "xml-js": "^1.6.11"
   },
   "overrides": {

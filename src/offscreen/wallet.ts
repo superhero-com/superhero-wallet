@@ -136,8 +136,7 @@ export async function disconnect() {
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
       );
       aepp.rpc.connection.disconnect();
-      // @ts-ignore
-      browser.tabs.reload(aepp.rpc.connection.port.sender.tab.id);
+      browser.tabs.reload((aepp.rpc.connection as BrowserRuntimeConnection).port.sender!.tab!.id);
     }
     aeSdk.removeRpcClient(aeppId);
   });

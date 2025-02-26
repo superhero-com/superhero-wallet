@@ -58,7 +58,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/typography';
+@use '@/styles/typography';
 
 .transaction-speed-picker {
   margin-top: 4px;

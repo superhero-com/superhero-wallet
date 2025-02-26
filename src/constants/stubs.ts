@@ -14,11 +14,7 @@ import type {
   PopupType,
   TxFunctionParsed,
 } from '@/types';
-import { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
-import {
-  AE_COINGECKO_COIN_ID,
-  AE_CONTRACT_ID,
-} from '@/protocols/aeternity/config';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
@@ -49,10 +45,6 @@ export const STUB_ACCOUNT = {
 
 export const recipientId: Encoded.AccountAddress = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
 export const contractCallAddress: Encoded.ContractAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
-
-export const STUB_CURRENCY: CoinGeckoMarketResponse = {
-  id: AE_COINGECKO_COIN_ID, symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', currentPrice: 0.076783, marketCap: 31487891, marketCapRank: 523, fullyDilutedValuation: null, totalVolume: 217034, high24h: 0.078539, low24h: 0.076793, priceChange24h: -0.001092194951687525, priceChangePercentage24h: -1.4025, marketCapChange24h: -429134.39267925173, marketCapChangePercentage24h: -1.34453, circulatingSupply: 409885828.49932, totalSupply: 536306702.0, maxSupply: null, ath: 5.69, athChangePercentage: -98.65091, athDate: '2018-04-29T03:50:39.593Z', atl: 0.059135, atlChangePercentage: 29.84246, atlDate: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, lastUpdated: '2023-01-17T11:38:23.610Z',
-};
 
 export const STUB_APP_DATA: IAppData = {
   href: 'http://localhost:5000/aepp/aepp',

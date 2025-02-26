@@ -66,7 +66,8 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { validateMnemonic } from '@aeternity/bip39';
+import { validateMnemonic } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { isSeedLengthValid } from '@/utils';
@@ -123,7 +124,7 @@ export default defineComponent({
         error.value = t('pages.index.invalidSeed');
         return;
       }
-      if (!mnemonicParsed || !validateMnemonic(mnemonicParsed)) {
+      if (!mnemonicParsed || !validateMnemonic(mnemonicParsed, wordlist)) {
         error.value = t('pages.index.accountNotFound');
         return;
       }
