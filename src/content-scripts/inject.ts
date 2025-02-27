@@ -35,7 +35,7 @@ const runContentScript = () => {
     method: BackgroundMethod,
     params: IEthRpcMethodParameters,
   ) {
-    const result = await sendToOffscreen(method, {
+    const { result, error }: any = await sendToOffscreen(method, {
       rpcMethodParams: params,
       aepp: event.origin,
     });
@@ -45,6 +45,7 @@ const runContentScript = () => {
     event.source.postMessage({
       jsonrpc: '2.0',
       result,
+      ...(error ? { error } : {}),
       method: event.data.method,
       superheroWalletApproved: true,
       type: 'result',
@@ -64,6 +65,23 @@ const runContentScript = () => {
 
       if (method === ETH_RPC_METHODS.getBalance) {
         handleEthRpcRequest(event, method, { address: event.data.params[0] });
+      } else if (method === ETH_RPC_METHODS.signPersonal) {
+        handleEthRpcRequest(event, method, { data: event.data.params?.[0] });
+      } else if (
+        method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionByHash
+        || method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionReceipt
+      ) {
+        handleEthRpcRequest(event, method, { txhash: event.data.params?.[0] });
+      } else if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getBlockByNumber) {
+        handleEthRpcRequest(event, method, {
+          tag: event.data.params?.[0],
+          boolean: event.data.params?.[1],
+        });
+      } else if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getUncleByBlockNumberAndIndex) {
+        handleEthRpcRequest(event, method, {
+          tag: event.data.params?.[0],
+          index: event.data.params?.[1],
+        });
       } else if (
         Object.values(ETH_RPC_METHODS).includes(method)
         || Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)

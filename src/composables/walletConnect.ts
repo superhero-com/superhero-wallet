@@ -165,7 +165,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
       const { url, name } = wcSession.value?.peer.metadata! || {};
-      const result = await handleEthereumRpcMethod(
+      const { result, error } = await handleEthereumRpcMethod(
         url,
         proposal.request.method as EthRpcSupportedMethods,
         proposal.request.params[0],
@@ -177,7 +177,14 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         response: {
           id,
           jsonrpc: '2.0',
-          ...(result) ? { result } : { error: { code: 5000, message: 'User rejected.' } },
+          ...(result
+            ? { result }
+            : {
+              error: {
+                code: error?.code || 5000,
+                message: error?.message || 'User rejected.',
+              },
+            }),
         },
       });
     });
