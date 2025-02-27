@@ -70,6 +70,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
+      initViewport(undefined);
       if (!IS_EXTENSION) {
         markAsReadAll();
       }
