@@ -19,7 +19,7 @@ import {
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 
-import { ETH_CHAIN_NAMESPACE } from '@/protocols/ethereum/config';
+import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
 import { EthRpcSupportedMethods, IEthNetworkSettings } from '@/protocols/ethereum/types';
 import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
 
@@ -168,7 +168,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       const { result, error } = await handleEthereumRpcMethod(
         url,
         proposal.request.method as EthRpcSupportedMethods,
-        proposal.request.params[0],
+        proposal.request.method === ETH_RPC_METHODS.signPersonal
+          ? { data: proposal.request.params[0] }
+          : proposal.request.params[0],
         name,
       );
 
