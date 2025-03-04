@@ -136,6 +136,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .call-data-details {
+  width: 100%;
+
   .call-data-details-wrapper {
     width: 100%;
   }
