@@ -10,11 +10,14 @@
   >
     <template #recipient>
       <TransferSendRecipient
-        v-model.trim="formModel.address"
+        v-model="formModel.addresses"
+        :max-recipients="10"
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.bitcoin })"
         :errors="errors"
         :protocol="PROTOCOLS.bitcoin"
-        :validation-rules="{ account_address: [PROTOCOLS.bitcoin, activeNetwork.type] }"
+        :validation-rules="{
+          account_address: [PROTOCOLS.bitcoin, activeNetwork.type],
+        }"
         @openQrModal="scanTransferQrCode()"
       />
     </template>
@@ -157,13 +160,16 @@ export default defineComponent({
     const feeSlow = ref(new BigNumber(0.00002));
     const feeMedium = ref(new BigNumber(0.00002));
     const feeHigh = ref(new BigNumber(0.00002));
+    const recipientsCount = computed(() => formModel.value.addresses?.length || 1);
 
     const feeList = computed((): IFeeItem[] => [
       { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
       { fee: feeMedium.value, time: 600, label: t('common.transferSpeed.medium') },
       { fee: feeHigh.value, time: 25, label: t('common.transferSpeed.fast') },
     ]);
-    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
+    const fee = computed(() => (
+      feeList.value[feeSelectedIndex.value].fee.multipliedBy(recipientsCount.value)
+    ));
 
     const numericFee = computed(() => +fee.value.toFixed());
     const max = computed(() => balance.value.minus(fee.value));
@@ -172,7 +178,7 @@ export default defineComponent({
       const inputPayload: TransferFormModel = {
         ...formModel.value,
         fee: fee.value as BigNumber,
-        total: numericFee.value + +(formModel.value?.amount || 0),
+        total: numericFee.value + +(formModel.value?.amount || 0) * recipientsCount.value,
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };
@@ -199,7 +205,7 @@ export default defineComponent({
           // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
           // consider returning an actual amount in future
           0,
-          formModel.value.address || activeAccount.value.address,
+          formModel.value.addresses?.[0] || activeAccount.value.address,
           {
             fee: 0,
             ...activeAccount.value,

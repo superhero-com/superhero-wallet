@@ -169,6 +169,10 @@ export function excludeFalsy<T>(value: T): value is Truthy<T> {
   return !!value;
 }
 
+export function removeDuplicates<T>(entry: T, index: number, self: T[]): boolean {
+  return self.findIndex((e) => e !== undefined && e === entry) === index;
+}
+
 export function executeAndSetInterval(handler: () => any, timeout: number) {
   handler();
   return setInterval(handler, timeout);

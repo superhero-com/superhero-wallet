@@ -75,7 +75,7 @@ export default defineComponent({
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
-      address: props.address as any, // TODO change to string globally
+      addresses: props.address ? [props.address] : [] as any[], // TODO change to string globally
       amount: props.amount,
       payload: props.payload,
       selectedAsset: (props.tokenContractId)
@@ -83,12 +83,13 @@ export default defineComponent({
         : undefined,
     });
 
-    const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AE_AENS_DOMAIN));
+    const isAddressChain = computed(() => (
+      !!transferData.value.addresses?.[0]?.endsWith(AE_AENS_DOMAIN)));
 
     const isAddressUrl = computed(() => (
       !isAddressChain.value
-      && transferData.value.address
-      && isUrlValid(transferData.value.address)
+      && transferData.value.addresses
+      && isUrlValid(transferData.value.addresses[0])
     ));
 
     const showNextButton = computed(() => (
@@ -99,7 +100,10 @@ export default defineComponent({
     const isSendingDisabled = computed(() => (
       error.value
       || !isAeNodeReady.value
-      || (!showNextButton.value && (!transferData.value.address || !transferData.value.amount))
+      || (
+        !showNextButton.value
+        && (!transferData.value.addresses?.length || !transferData.value.amount)
+      )
     ));
 
     const customPrimaryButtonText = computed(() => {

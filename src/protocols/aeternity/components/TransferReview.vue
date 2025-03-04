@@ -4,11 +4,11 @@
     :subtitle="headerSubtitle"
     :without-subtitle="isMultisig"
     :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : undefined"
+    :amount-label="recipientsCount > 1 ? $t('pages.send.singleAccountLabel') : undefined"
     :fee-label="isMultisig ? $t('transaction.proposalTransactionFee') : undefined"
     :base-token-symbol="AE_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
-    :avatar-name="isAddressChain ? transferData.address : undefined"
     :show-fiat="showTotal"
     :protocol="PROTOCOLS.aeternity"
     :no-header-padding="isActiveAccountAirGap"
@@ -50,7 +50,7 @@
         data-cy="review-tip-url"
         class="tip-url details-item"
         :label="$t('pages.send.receivingUrl')"
-        :value="transferData.address"
+        :value="transferData.addresses?.[0]"
       />
     </template>
 
@@ -238,6 +238,8 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
 
+    const recipientsCount = computed(() => (props.transferData.addresses?.length || 1));
+
     const showTotal = computed(
       () => (
         props.transferData?.selectedAsset?.contractId === AE_CONTRACT_ID
@@ -258,6 +260,9 @@ export default defineComponent({
     const headerSubtitle = computed(() => {
       if (isActiveAccountAirGap.value) {
         return tg('airGap.send.reviewSubtitle');
+      }
+      if (recipientsCount.value > 1) {
+        return tg('pages.send.multicheckalert');
       }
       return tg('pages.send.checkalert');
     });
@@ -298,9 +303,9 @@ export default defineComponent({
       );
     }
 
-    async function transfer(
-      { amount, recipient, selectedAsset }: ITransferArgs,
-    ): Promise<string | undefined> {
+    async function transfer({
+      amount, recipient, selectedAsset, nonce,
+    }: ITransferArgs): Promise<string | undefined> {
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
@@ -313,7 +318,10 @@ export default defineComponent({
             new BigNumber(amount).toFixed().toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
-            { waitMined: false },
+            {
+              waitMined: false,
+              nonce,
+            },
           );
         } else if (!isSelectedAssetAeCoin) {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
@@ -325,12 +333,15 @@ export default defineComponent({
               waitMined: false,
               // in case of custom AEX9 token, we need to pass it to avoid the error
               omitUnknown: true,
+              nonce,
             },
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
           actionResult = await aeternityAdapter.spend(Number(amount), recipient, {
             payload: props.transferData.payload,
+            waitMined: false,
+            nonce,
           });
         }
 
@@ -434,7 +445,7 @@ export default defineComponent({
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
             activeMultisigAccount.value.gaAccountId as Encoded.AccountAddress,
-            props.transferData.address!,
+            props.transferData.addresses?.[0]!,
             aeToAettos(props.transferData.amount!),
             props.transferData.payload || undefined,
           );
@@ -472,12 +483,12 @@ export default defineComponent({
 
       const {
         amount: amountRaw,
-        address: recipient,
+        addresses: recipients,
         selectedAsset,
         note,
       } = props.transferData;
 
-      if (!amountRaw || !recipient || !selectedAsset) {
+      if (!amountRaw || !recipients?.length || !selectedAsset) {
         return;
       }
 
@@ -490,16 +501,28 @@ export default defineComponent({
       } else if (props.isAddressUrl) {
         await sendTip({
           amount,
-          recipient,
+          recipient: recipients[0],
           selectedAsset,
           note,
         });
       } else {
-        const hash = await transfer({
-          amount,
-          recipient,
-          selectedAsset,
-        });
+        let hash;
+        const aeSdk = await getAeSdk();
+
+        let currentNonce = (await aeSdk.api.getAccountByPubkey(
+          activeAccount.value.address,
+        )).nonce + 1;
+          // eslint-disable-next-line no-restricted-syntax
+        for (const recipient of recipients) {
+          // eslint-disable-next-line no-await-in-loop
+          hash = await transfer({
+            amount,
+            recipient,
+            selectedAsset,
+            nonce: currentNonce,
+          });
+          currentNonce += 1;
+        }
         if (hash) {
           router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
         }
@@ -508,6 +531,7 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
+      recipientsCount,
       gasCost,
       isActiveAccountAirGap,
       activeMultisigAccount,

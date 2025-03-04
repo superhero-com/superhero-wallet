@@ -33,6 +33,7 @@
         <template #value>
           <AvatarWithChainName
             :address="senderId"
+            :protocol="PROTOCOLS.aeternity"
             show-address
           />
         </template>
@@ -46,6 +47,7 @@
         <template #value>
           <AvatarWithChainName
             :address="recipientId"
+            :protocol="PROTOCOLS.aeternity"
             show-address
           />
         </template>
@@ -202,11 +204,11 @@ export default defineComponent({
           amount: amountRaw,
           fee,
           selectedAsset,
-          address: recipient,
+          addresses: recipients,
         } = transferData.value!;
         const isSelectedAssetAeCoin = selectedAsset?.contractId === AE_CONTRACT_ID;
 
-        if (!amountRaw || !recipient || !selectedAsset) {
+        if (!amountRaw || !recipients?.length || !selectedAsset) {
           return;
         }
 
@@ -226,7 +228,7 @@ export default defineComponent({
             senderId: activeAccount.value.address,
             type: (isSelectedAssetAeCoin) ? Tag[Tag.SpendTx] : Tag[Tag.ContractCallTx],
             function: TX_FUNCTIONS.transfer,
-            recipientId: recipient,
+            recipientId: recipients[0],
             arguments: [],
             fee: Number(fee),
           },
