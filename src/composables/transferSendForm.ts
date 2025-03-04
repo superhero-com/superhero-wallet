@@ -45,7 +45,7 @@ export function useTransferSendForm({
   const { accountAssets } = useAccountAssetsList();
 
   const hasError = computed(
-    (): boolean => ['address', 'amount'].some(
+    (): boolean => ['addresses', 'amount'].some(
       (errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error',
     ),
   );
@@ -75,7 +75,7 @@ export function useTransferSendForm({
       result.selectedAsset = selectedToken;
     }
     if (account) {
-      result.address = account;
+      result.addresses = [account, ...(formModel.value.addresses ?? [])];
     }
     if (amount) {
       result.amount = amount;
@@ -120,7 +120,7 @@ export function useTransferSendForm({
         if (!IS_PRODUCTION) {
           Logger.write(error);
         }
-        formModel.value.address = undefined;
+        formModel.value.addresses = undefined;
         openDefaultModal({
           title: t('modals.invalid-qr-code.msg'),
           icon: 'critical',
@@ -132,7 +132,7 @@ export function useTransferSendForm({
       const requestedTokenBalance = accountAssets.value
         .find(({ contractId }) => contractId === parsedScanResult.tokenContract);
       if (!requestedTokenBalance) {
-        formModel.value.address = undefined;
+        formModel.value.addresses = undefined;
         openDefaultModal({ msg: t('modals.insufficient-balance.msg') });
         return;
       }
@@ -141,7 +141,7 @@ export function useTransferSendForm({
       formModel.value.selectedAsset = requestedTokenBalance;
 
       // SET result data
-      formModel.value.address = parsedScanResult.tokenContract;
+      formModel.value.addresses = [parsedScanResult.tokenContract];
       formModel.value.amount = toShiftedBigNumber(
         parsedScanResult.amount,
         -(formModel.value.selectedAsset?.decimals || -0),
@@ -163,8 +163,8 @@ export function useTransferSendForm({
       ].map(([k, v]) => [k, v])));
       invoiceId.value = null;
     }
-    if (!formModel.value.address) {
-      formModel.value.address = undefined;
+    if (!formModel.value.addresses) {
+      formModel.value.addresses = undefined;
     }
   }
 

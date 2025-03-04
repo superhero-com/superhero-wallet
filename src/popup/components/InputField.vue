@@ -54,7 +54,7 @@
       <slot
         name="before-main"
       />
-      <div class="main-inner">
+      <div class="main-inner styled-scrollbar">
         <slot
           v-if="!hasError && !hasWarning"
           name="before"
@@ -110,7 +110,7 @@
         class="message-text"
         data-cy="input-field-message"
         :for="inputId"
-        v-text="(messageAsObject) ? messageAsObject.text : null"
+        v-text="(messageAsObject) ? messageAsObject.text?.split('||')[0] : null"
       />
     </div>
   </div>
@@ -376,8 +376,8 @@ export default defineComponent({
     .main-inner {
       display: flex;
       align-items: center;
-      width: 100%;
       gap: 6px;
+      width: 100%;
 
       :deep(.icon) {
         width: var(--size, 24px);

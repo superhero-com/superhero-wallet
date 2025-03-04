@@ -51,7 +51,7 @@
     </span>
 
     <div class="tip-url">
-      {{ transferData.address }}
+      {{ transferData.addresses[0] }}
     </div>
 
     <FormTextarea

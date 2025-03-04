@@ -94,9 +94,9 @@ export default defineComponent({
     ): Promise<string | undefined> {
       const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
       try {
-        loading.value = true;
         const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
-          fee: props.transferData.fee?.toNumber(),
+          fee: props.transferData.fee
+            ?.dividedBy(props.transferData.addresses?.length || 1).toNumber(),
           ...activeAccount.value,
         });
         return hash;
@@ -108,47 +108,58 @@ export default defineComponent({
           openTransactionFailedModal(processedErrorMessage);
         }
         return undefined;
-      } finally {
-        loading.value = false;
       }
     }
 
     async function submit(): Promise<void> {
       const {
         amount,
-        address: recipient,
+        addresses: recipients,
         selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipient || !selectedAsset) {
+      if (!amount || !recipients?.length || !selectedAsset) {
         return;
       }
-      const hash = await transfer({
-        amount,
-        recipient,
-        selectedAsset,
-      });
 
-      if (hash) {
-        const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
-        const transaction: ITransaction = {
-          hash: hash as any,
-          pending: true,
-          transactionOwner: lastActiveBtcAccount?.address,
-          protocol: PROTOCOLS.bitcoin,
-          tx: {
-            amount: Number(amount),
-            callerId: lastActiveBtcAccount?.address!,
-            contractId: selectedAsset.contractId as any,
-            senderId: lastActiveBtcAccount?.address,
-            type: 'SpendTx',
-            recipientId: recipient,
-            arguments: [],
-            fee: props.transferData.fee?.toNumber() ?? 0,
-          },
-        };
-        addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+      loading.value = true;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const recipient of recipients) {
+        // eslint-disable-next-line no-await-in-loop
+        const hash = await transfer({
+          amount,
+          recipient,
+          selectedAsset,
+        });
+
+        if (hash) {
+          const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
+          const transaction: ITransaction = {
+            hash: hash as any,
+            pending: true,
+            transactionOwner: lastActiveBtcAccount?.address,
+            protocol: PROTOCOLS.bitcoin,
+            tx: {
+              amount: Number(amount),
+              callerId: lastActiveBtcAccount?.address!,
+              contractId: selectedAsset.contractId as any,
+              senderId: lastActiveBtcAccount?.address,
+              type: 'SpendTx',
+              recipientId: recipient,
+              arguments: [],
+              fee: props.transferData.fee?.dividedBy(recipients.length).toNumber() ?? 0,
+            },
+          };
+          addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+        }
+        /**
+         * A timeout is necessary to allow the blockchain to have time
+         * to submit the previous transaction in case there are multiple recipients
+         */
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => setTimeout(resolve, 10000));
       }
+      loading.value = false;
 
       // TODO - redirect after transfer function will be ready
       router.push({ name: homeRouteName.value });

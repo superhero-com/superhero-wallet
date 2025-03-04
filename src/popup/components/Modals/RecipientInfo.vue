@@ -20,7 +20,7 @@
               v-if="isProtocolAe"
               class="title"
             >
-              {{ $t('modals.recipient.msg.publicAddress.title') }}
+              {{ $t('modals.recipient.msg.publicAddress.title') }}:
             </strong>
           </i18n-t>
         </p>
@@ -35,6 +35,17 @@
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
+          </i18n-t>
+        </p>
+        <p>
+          <i18n-t
+            keypath="modals.recipient.msg.multiple.msg"
+            tag="div"
+            scope="global"
+          >
+            <strong class="title">
+              {{ $t('modals.recipient.msg.multiple.title') }}:
+            </strong>
           </i18n-t>
         </p>
       </div>

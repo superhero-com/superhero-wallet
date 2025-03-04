@@ -1,7 +1,12 @@
 import { Web3Eth } from 'web3-eth';
 import { fromWei } from 'web3-utils';
 import BigNumber from 'bignumber.js';
-import { computed, ref } from 'vue';
+import {
+  computed,
+  ComputedRef,
+  Ref,
+  ref,
+} from 'vue';
 
 import type { IFeeItem } from '@/types';
 import { tg } from '@/popup/plugins/i18n';
@@ -14,7 +19,7 @@ const MAX_PRIORITY_FEE_MULTIPLIERS = {
   fast: 2,
 } as const;
 
-export function useEthFeeCalculation() {
+export function useEthFeeCalculation(recipientsCount: Ref<number> | ComputedRef<number> = ref(1)) {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
   const feeSelectedIndex = ref(0);
@@ -70,12 +75,17 @@ export function useEthFeeCalculation() {
     },
   ]);
 
-  const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
-  const maxFeePerGas = computed(() => feeList.value[feeSelectedIndex.value].maxFeePerGas);
+  const fee = computed(() => (
+    feeList.value[feeSelectedIndex.value].fee.multipliedBy(recipientsCount.value)
+  ));
+  const maxFeePerGas = computed(() => (
+    feeList.value[feeSelectedIndex.value].maxFeePerGas!.multipliedBy(recipientsCount.value)
+  ));
   const maxPriorityFeePerGas = computed(
-    () => feeList.value[feeSelectedIndex.value].maxPriorityFee,
+    () => feeList.value[feeSelectedIndex.value].maxPriorityFee!.multipliedBy(recipientsCount.value),
   );
-  const maxFee = computed(() => maxFeePerGas.value!.multipliedBy(gasLimit.value));
+  const maxFee = computed(() => (
+    maxFeePerGas.value!.multipliedBy(gasLimit.value).multipliedBy(recipientsCount.value)));
 
   async function updateFeeList(newGasLimit?: number) {
     gasLimit.value = newGasLimit ?? ETH_GAS_LIMIT;

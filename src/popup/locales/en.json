@@ -306,6 +306,10 @@
           "title": "Send to .chain name",
           "linkTitle": "claim your own .chain name",
           "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s account. Before sending any funds make sure the recipient is still the name owner."
+        },
+        "multiple": {
+          "title": "Send to multiple recipients",
+          "msg": "{0} you can send the chosen amount of coins or tokens to multiple addresses and/or .chain names separated with commas or spaces."
         }
       }
     },
@@ -416,7 +420,7 @@
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
-      "recipientPlaceholderProtocol": "Enter {name} public address",
+      "recipientPlaceholderProtocol": "Enter {name} address",
       "recipientPlaceholderENS": "or ENS name",
       "transactionSpeed": "Transaction speed",
       "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
@@ -693,6 +697,9 @@
       "scanTitle": "Scan the address you want to add",
       "selectRecipientAddress": "Select recipient’s address",
       "selectSignerAddress": "Select signer’s address",
+      "singleRecipient": "Single recipient",
+      "multipleRecipients": "Multiple recipients",
+      "useSelected": "Use selected",
       "noRecords": {
         "addressBook": "There are no records in your address book.",
         "blockchain": "Currently there are no address records for the blockchain selected.",
@@ -1085,17 +1092,23 @@
       "title": "Transaction has been submitted",
       "copy": "Copy QR code",
       "reviewtx": "Review transaction",
+      "multicheckalert": "to multiple recipients carefully",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
       "receivingUrl": "Receiving URL",
+      "show": "Show",
+      "hide": "Hide",
+      "recipients": "recipients",
       "sending": "Sending",
       "sentTo": "have been successfully sent to",
       "sendingCryptoToUrl": "Sending tip to URL",
       "tipInfo": "Your transaction will be publicly displayed as URL tip on {0}",
       "to": "To",
       "messageUrlOwner": "Message the URL owner (optional)",
-      "scanAddress": "Scan the recipient’s account address QR code in order to send {assetName} to them."
+      "scanAddress": "Scan the recipient’s account address QR code in order to send {assetName} to them.",
+      "singleAccountLabel": "Single transfer amount",
+      "multipleAccountLabel": "All transfers amount"
     },
     "signTransaction": {
       "reject": "Reject",
@@ -1359,6 +1372,7 @@
     "enoughCoin": "{0} balance is not enough to pay for transaction fee.",
     "enoughAeSigner": "Insufficient balance in your signing account to propose a transaction.",
     "maxLength": "Maximum {0} characters are allowed in this field.",
+    "maxRecipients": "Maximum {0} recipients are allowed in this field.",
     "maxValue": "Amount exceeds maximum available: {0}.",
     "maxRedeem": "Maximum redeemable amount is {0} AE.",
     "maxValueVault": "Amount exceeds vault balance: {0}.",

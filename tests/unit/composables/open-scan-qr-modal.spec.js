@@ -63,20 +63,20 @@ describe('scanTransferQrCode', () => {
 
   it('parses address qr code', async () => {
     await scanTransferQrCode();
-    expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
+    expect(formModel.value.addresses[0]).toBe(STUB_ACCOUNT.addressAeternity);
   });
 
   it('parses ae amount qr code', async () => {
     numberOfTheTest = 1;
     await scanTransferQrCode();
-    expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
+    expect(formModel.value.addresses[0]).toBe(STUB_ACCOUNT.addressAeternity);
     expect(formModel.value.amount).toBe(testAmount);
   });
 
   it('parses contract amount qr code', async () => {
     numberOfTheTest = 2;
     await scanTransferQrCode();
-    expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
+    expect(formModel.value.addresses[0]).toBe(STUB_ACCOUNT.addressAeternity);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
   });
@@ -84,7 +84,7 @@ describe('scanTransferQrCode', () => {
   it('parses contract amount legacy qr code', async () => {
     numberOfTheTest = 3;
     await scanTransferQrCode();
-    expect(formModel.value.address).toBe(STUB_ACCOUNT.addressAeternity);
+    expect(formModel.value.addresses[0]).toBe(STUB_ACCOUNT.addressAeternity);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
   });
@@ -92,7 +92,7 @@ describe('scanTransferQrCode', () => {
   it('parses zeit contract qr code', async () => {
     numberOfTheTest = 4;
     await scanTransferQrCode();
-    expect(formModel.value.address).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
+    expect(formModel.value.addresses[0]).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset.contractId).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
     expect(invoiceId.value).toBe(testInvoiceId);
@@ -102,7 +102,7 @@ describe('scanTransferQrCode', () => {
   it('handles user scan reject with existing data', async () => {
     numberOfTheTest = 5;
     await scanTransferQrCode();
-    expect(formModel.value.address).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
+    expect(formModel.value.addresses[0]).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset.contractId).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
   });

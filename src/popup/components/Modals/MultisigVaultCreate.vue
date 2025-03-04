@@ -34,7 +34,6 @@
         <Field
           v-else
           v-slot="{ field, errorMessage }"
-          v-model="signer.address"
           :name="`signer-address-${index}`"
           :rules="{
             required: true,
@@ -43,8 +42,9 @@
         >
           <FormAccountInput
             v-bind="field"
-            :model-value="signer.address"
+            :model-value="signer.address ? [signer.address] : undefined"
             hide-clear-icon
+            single-default-format
             :label="getSignerLabel(index)"
             :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
             :name="`signer-address-${index}`"
@@ -52,6 +52,8 @@
             :class="{
               error: checkIfSignerAddressDuplicated(signer),
             }"
+            :protocol="PROTOCOLS.aeternity"
+            @update:modelValue="($event) => updateSigner(index, $event[0])"
           >
             <template #label-after>
               <div class="buttons">
@@ -78,7 +80,7 @@
                 @click="removeSigner(index)"
               />
               <BtnIcon
-                v-if="signer.address?.length > 0"
+                v-if="signer.address?.length! > 0"
                 :icon="CircleCloseIcon"
                 data-cy="clear-address-button"
                 class="close-icon"
@@ -359,12 +361,12 @@ export default defineComponent({
     }
 
     async function updateSignerFromAddressBook(index: number) {
-      const address = await openModal<Encoded.AccountAddress>(
+      const addresses = await openModal<Encoded.AccountAddress[]>(
         MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
         { protocol: PROTOCOLS.aeternity, isSigner: true },
       );
-      if (address) {
-        updateSigner(index, address);
+      if (addresses) {
+        updateSigner(index, addresses[0]);
       }
     }
 
@@ -492,6 +494,7 @@ export default defineComponent({
       scanSignerAccountQrCode,
       addNewSigner,
       removeSigner,
+      updateSigner,
       clearSigner,
       getSignerLabel,
       navigateToMultisigVault,
