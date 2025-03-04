@@ -57,9 +57,22 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
   let tokenInstance: Contract<ContractMethodsBase> | null;
   const selectedAssetDecimals = ref(0);
 
+  const recipientsCount = computed(() => (
+    formModel.value?.addresses?.length || 1));
+
+  const totalFee = computed(() => (
+    fee.value.multipliedBy(recipientsCount.value)
+  ));
+  const totalMultiple = computed(() => (
+    total.value.multipliedBy(recipientsCount.value)
+  ));
+
   const max = computed(() => {
     if (balance.value && formModel.value?.selectedAsset?.contractId === AE_CONTRACT_ID) {
-      const _max = balance.value.minus(fee.value);
+      const _max = balance.value
+        .minus(BigNumber(fee.value).multipliedBy(recipientsCount.value))
+        .dividedBy(recipientsCount.value)
+        .decimalPlaces(formModel.value.selectedAsset.decimals!);
       return (_max.isPositive() ? _max : 0).toString();
     }
     return selectedTokenBalance.value.toString();
@@ -148,8 +161,8 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
       }
 
       if (callResult?.result) {
-        const aettosFee = (callResult.tx as any).fee;
-        gasUsed.value = +callResult.result.gasUsed.toString() ?? 0;
+        const aettosFee = (callResult.tx as any).fee * recipientsCount.value;
+        gasUsed.value = +callResult.result.gasUsed.toString();
         gasPrice.value = +aettosToAe(callResult.result.gasPrice.toString());
         total.value = new BigNumber(callResult.result.gasUsed ?? 0)
           .multipliedBy(callResult.result.gasPrice.toString() ?? 0)
@@ -174,7 +187,9 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
         }),
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION);
-      if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
+      if (!minFee.isEqualTo(fee.value)) {
+        fee.value = new BigNumber(minFee);
+      }
       total.value = new BigNumber(numericAmount).plus(fee.value);
     },
     500,
@@ -203,10 +218,10 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
   onBeforeUnmount(() => clearInterval(updateTokenBalanceInterval));
 
   return {
-    fee,
+    fee: totalFee,
     gasPrice,
     gasUsed,
     max,
-    total,
+    total: totalMultiple,
   };
 }

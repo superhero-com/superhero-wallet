@@ -58,24 +58,29 @@ defineRule(
  */
 defineRule(
   'account_address',
-  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => {
-    if (protocol) {
-      return (ProtocolAdapterFactory
-        .getAdapter(protocol)
-        .isAccountAddressValid(value, networkType)
-      || tg('validation.addressGeneric', { protocol })
-      );
-    }
-    return getProtocolByAddress(value) ? true : tg('validation.invalidAddress');
-  },
-);
+  (value: string[], [protocol, networkType]: [Protocol, NetworkType]) => {
+    if (typeof value === 'string' || !value) return false;
 
-defineRule(
-  'min_value',
-  (value: string, [arg]: [number]) => (
-    BigNumber(value).isGreaterThanOrEqualTo(arg)
-    || tg('validation.minValue', [arg])
-  ),
+    const validationResults: boolean[] = [];
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const item of value) {
+      const isValid = protocol
+        ? ProtocolAdapterFactory.getAdapter(protocol).isAccountAddressValid(item, networkType)
+        : !!getProtocolByAddress(item);
+
+      validationResults.push(isValid);
+    }
+
+    const invalidItems = value.filter((_, index) => !validationResults[index]);
+
+    if (invalidItems.length === 0) return true;
+
+    return [
+      protocol ? tg('validation.addressGeneric', { protocol }) : tg('validation.invalidAddress'),
+      invalidItems.join(','),
+    ].join('||');
+  },
 );
 
 defineRule(
@@ -234,21 +239,46 @@ export default () => {
 
   defineRule(
     'aens_name_registered_or_address',
-    async (value: string) => {
-      const isValid = isNameValid(value)
-        ? await checkNameRegisteredAddress(value)
-        : isAddressValid(value);
-      return isValid || tg('validation.nameRegisteredAddress');
+    async (value: string[]) => {
+      if (typeof value === 'string' || !value) return false;
+
+      const validationResults: boolean[] = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const item of value) {
+        validationResults.push(isNameValid(item)
+        // eslint-disable-next-line no-await-in-loop
+          ? await checkNameRegisteredAddress(item)
+          : isAddressValid(item));
+      }
+
+      const invalidItems = value.filter((_, index) => !validationResults[index]);
+
+      if (invalidItems.length === 0) return true;
+
+      return [tg('validation.nameRegisteredAddress'), invalidItems.join(',')].join('||');
     },
   );
 
   defineRule(
     'aens_name_registered_or_address_or_url',
-    async (value: string) => {
-      const isValid = isNameValid(value)
-        ? await checkNameRegisteredAddress(value)
-        : isAddressValid(value) || isUrlValid(value);
-      return isValid || tg('validation.invalidAddressChainUrl');
+    async (value: string[]) => {
+      if (typeof value === 'string' || !value) return false;
+
+      const validationResults: boolean[] = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const item of value) {
+        validationResults.push(isNameValid(item)
+        // eslint-disable-next-line no-await-in-loop
+          ? await checkNameRegisteredAddress(item)
+          : isAddressValid(item) || isUrlValid(item));
+      }
+
+      // Collect invalid items
+      const invalidItems = value.filter((_, index) => !validationResults[index]);
+
+      if (invalidItems.length === 0) return true;
+
+      return [tg('validation.invalidAddressChainUrl'), invalidItems.join(',')].join('||');
     },
   );
 
@@ -277,12 +307,19 @@ export default () => {
 
   defineRule(
     'address_not_same_as',
-    (value: string, [comparedAddress, protocol]: [string, Protocol]) => (
-      value !== comparedAddress
-      || tg('validation.addressNotSameAs', [(protocol)
-        ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
-        : tg('common.tokens')])
-    ),
+    (value: string[], [comparedAddress, protocol]: [string, Protocol]) => {
+      if (typeof value === 'string' || !value) return false;
+
+      const invalidAddresses = value.filter((address) => address === comparedAddress);
+
+      if (invalidAddresses.length === 0) return true;
+
+      return [tg('validation.addressNotSameAs', [
+        protocol
+          ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
+          : tg('common.tokens'),
+      ]), invalidAddresses.join(',')].join('||');
+    },
   );
 
   defineRule(

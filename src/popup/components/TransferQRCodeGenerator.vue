@@ -80,11 +80,15 @@ export default defineComponent({
       const aeSdk = await getAeSdk();
       const {
         amount: amountRaw,
-        address: recipient,
+        addresses: recipients,
         selectedAsset,
       } = props.transferData;
 
-      if (!amountRaw || !recipient || !selectedAsset || !isActiveAccountAirGap.value) {
+      if (!amountRaw
+        || !recipients
+        || !recipients.length
+        || !selectedAsset
+        || !isActiveAccountAirGap.value) {
         return null;
       }
 
@@ -95,7 +99,7 @@ export default defineComponent({
       const txRaw = await aeSdk.buildTx({
         tag: Tag.SpendTx,
         senderId: activeAccount.value.address as Encoded.AccountAddress,
-        recipientId: recipient,
+        recipientId: recipients[0],
         amount: new BigNumber(amount).toFixed().toString(),
         payload: encode(new TextEncoder().encode(props.transferData.payload), Encoding.Bytearray),
       });

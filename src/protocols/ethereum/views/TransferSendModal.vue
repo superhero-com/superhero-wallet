@@ -1,7 +1,10 @@
 <template>
   <TransferSendBase
     :current-step="currentStep"
-    :sending-disabled="error || !transferData.address || !transferData.amount"
+    :sending-disabled="error
+      || !transferData.addresses
+      || !transferData.addresses.length
+      || !transferData.amount"
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
@@ -62,7 +65,7 @@ export default defineComponent({
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
-      address: props.address as any, // TODO change to string globally
+      addresses: props.address ? [props.address] : [] as any[], // TODO change to string globally
       amount: props.amount,
       payload: props.payload,
       selectedAsset: (props.tokenContractId)

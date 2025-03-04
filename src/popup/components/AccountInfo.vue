@@ -112,7 +112,8 @@ export default defineComponent({
     showExplorerLink: Boolean,
     nameAddress: { type: String as PropType<Encoded.Name>, default: undefined },
   },
-  setup(props) {
+  emits: ['resolved-chain-name'],
+  setup(props, { emit }) {
     const { getName, getNameByNameHash } = useAeNames();
     const { getAccountIcon, getAccountByAddress } = useAccounts();
 
@@ -140,6 +141,7 @@ export default defineComponent({
       async ([nameAddress]) => {
         if (nameAddress) {
           resolvedChainName.value = await getNameByNameHash(nameAddress);
+          emit('resolved-chain-name', resolvedChainName.value);
         } else {
           resolvedChainName.value = '';
         }

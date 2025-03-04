@@ -116,38 +116,43 @@ export default defineComponent({
     async function submit(): Promise<void> {
       const {
         amount,
-        address: recipient,
+        addresses: recipients,
         selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipient || !selectedAsset) {
+      if (!amount || !recipients || !recipients.length || !selectedAsset) {
         return;
       }
-      const hash = await transfer({
-        amount,
-        recipient,
-        selectedAsset,
-      });
 
-      if (hash) {
-        const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
-        const transaction: ITransaction = {
-          hash: hash as any,
-          pending: true,
-          transactionOwner: lastActiveBtcAccount?.address,
-          protocol: PROTOCOLS.bitcoin,
-          tx: {
-            amount: Number(amount),
-            callerId: lastActiveBtcAccount?.address!,
-            contractId: selectedAsset.contractId as any,
-            senderId: lastActiveBtcAccount?.address,
-            type: 'SpendTx',
-            recipientId: recipient,
-            arguments: [],
-            fee: props.transferData.fee?.toNumber() ?? 0,
-          },
-        };
-        addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const recipient of recipients) {
+        // eslint-disable-next-line no-await-in-loop
+        const hash = await transfer({
+          amount,
+          recipient,
+          selectedAsset,
+        });
+
+        if (hash) {
+          const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
+          const transaction: ITransaction = {
+            hash: hash as any,
+            pending: true,
+            transactionOwner: lastActiveBtcAccount?.address,
+            protocol: PROTOCOLS.bitcoin,
+            tx: {
+              amount: Number(amount),
+              callerId: lastActiveBtcAccount?.address!,
+              contractId: selectedAsset.contractId as any,
+              senderId: lastActiveBtcAccount?.address,
+              type: 'SpendTx',
+              recipientId: recipient,
+              arguments: [],
+              fee: props.transferData.fee?.toNumber() ?? 0,
+            },
+          };
+          addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+        }
       }
 
       // TODO - redirect after transfer function will be ready

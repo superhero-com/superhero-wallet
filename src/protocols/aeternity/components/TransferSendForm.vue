@@ -60,7 +60,7 @@
 
     <template #recipient>
       <TransferSendRecipient
-        v-model="formModel.address"
+        v-model="formModel.addresses"
         :errors="errors"
         :is-tip-url="isTipUrl"
         :protocol="PROTOCOLS.aeternity"
@@ -320,10 +320,10 @@ export default defineComponent({
     );
 
     const isTipUrl = computed(() => (
-      !!formModel.value.address
+      !!formModel.value.addresses
       && isUrlTippingEnabled.value
-      && isUrlValid(formModel.value.address)
-      && !isNameValid(formModel.value.address)
+      && isUrlValid(formModel.value.addresses[0])
+      && !isNameValid(formModel.value.addresses[0])
     ));
 
     const mySignerAccounts = accounts.value.filter(

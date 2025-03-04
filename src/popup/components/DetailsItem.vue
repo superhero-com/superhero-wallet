@@ -12,7 +12,7 @@
       class="text-label label"
       @click="toggleExpanded()"
     >
-      {{ label }}
+      {{ expanded && expandedLabel ? expandedLabel : label }}
       <span
         v-if="$slots.label"
         :class="{ indent: label }"
@@ -59,6 +59,7 @@ export default defineComponent({
   },
   props: {
     label: { type: String, default: '' },
+    expandedLabel: { type: String, default: '' },
     value: { type: [String, Number, Array], default: '' },
     secondary: { type: String, default: '' },
     expandable: Boolean,
@@ -93,7 +94,7 @@ export default defineComponent({
   .label {
     display: flex;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 
     .indent {
       margin-left: 8px;

@@ -2,6 +2,9 @@
   <div
     class="avatar-with-chain-name"
     :class="{ 'only-name': (name || !showAddress) && !hideAvatar }"
+    :style="{
+      'background-color': color,
+    }"
   >
     <Avatar
       v-if="!hideAvatar"
@@ -26,11 +29,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent, PropType } from 'vue';
+import { IAccount, Protocol } from '@/types';
+import { getAddressColor } from '@/utils';
+import { useAccounts } from '@/composables';
+
+import { isNameValid } from '@aeternity/aepp-sdk';
+
 import Avatar from './Avatar.vue';
 import AddressFormatted from './AddressFormatted.vue';
 
-export default {
+export default defineComponent({
   components: {
     AddressFormatted,
     Avatar,
@@ -50,8 +60,29 @@ export default {
       default: 'md',
     },
     showAddress: Boolean,
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
-};
+  setup(props) {
+    const {
+      accountsGroupedByProtocol,
+    } = useAccounts();
+
+    function isOwnAddress(address: string) {
+      return accountsGroupedByProtocol.value[props.protocol]?.some(
+        (account: IAccount) => account.address === address,
+      );
+    }
+
+    const color = computed(() => (
+      props.address && !isNameValid(props.address) && isOwnAddress(props.address)
+        ? getAddressColor(props.address)
+        : undefined));
+
+    return {
+      color,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -60,13 +91,13 @@ export default {
 @use '@/styles/typography';
 
 .avatar-with-chain-name {
-  @include mixins.flex(flex-start, flex-start);
+  @include mixins.flex(flex-start, center);
 
   width: 100%;
   gap: 8px;
+  padding: 8px;
 
   .avatar {
-    margin-top: 8px;
     background-color: $color-black;
   }
 

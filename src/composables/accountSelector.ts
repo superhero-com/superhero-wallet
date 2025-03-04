@@ -140,16 +140,9 @@ export const useAccountSelector = createCustomScopedComposable(() => {
         return [];
     }
   });
-  const accountsFiltered = computed(() => {
-    const entries: IAccountSelectorEntry[] = accountsFilteredByType.value ?? [];
-    const searchQueryLower = searchQuery.value.toLowerCase();
-
+  function transformAccounts(entries: IAccountSelectorEntry[]) {
     return entries
-      .filter( // Filter by searchQuery
-        ({ name, address }) => [name, address].some(
-          (val) => val.toLowerCase().includes(searchQueryLower),
-        ),
-      ).filter( // Remove duplicates
+      .filter( // Remove duplicates
         (entry, index, self) => self.findIndex(
           (e) => (
             (e.address !== undefined && e.address === entry.address)
@@ -164,7 +157,24 @@ export const useAccountSelector = createCustomScopedComposable(() => {
           ),
         }),
       );
+  }
+  const accountsFiltered = computed(() => {
+    const entries: IAccountSelectorEntry[] = accountsFilteredByType.value ?? [];
+    const searchQueryLower = searchQuery.value.toLowerCase();
+
+    return transformAccounts(entries
+      .filter( // Filter by searchQuery
+        ({ name, address }) => [name, address].some(
+          (val) => val.toLowerCase().includes(searchQueryLower),
+        ),
+      ));
   });
+  const allAccounts = computed(() => (
+    transformAccounts([
+      ...addressBookFiltered.value,
+      ...ownAddresses.value,
+      ...latestTransactions.value,
+    ])));
 
   function setAccountSelectType(type: AccountSelectTypeFilter, resetProtocolFilter = false) {
     accountSelectType.value = type;
@@ -201,6 +211,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
   return {
     accountSelectType,
     accountsFiltered,
+    allAccounts,
     addressBookFilteredByProtocol,
     protocolFilter,
     showBookmarked,

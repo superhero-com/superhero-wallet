@@ -25,6 +25,7 @@
       <div
         v-if="Object.keys(accountsFiltered).length"
         class="list"
+        :style="{ paddingBottom: isMultiple ? '88px' : '0px' }"
       >
         <PanelItem
           v-for="({
@@ -41,6 +42,10 @@
               : { name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: address } }
           "
           class="address-book-item"
+          :class="{
+            selected:
+              selectedAddresses.includes(nameAddress ? resolvedChainNames[nameAddress] : address),
+          }"
           :style="bgColorStyle(isOwnAddress, address)"
           :idx="index"
           data-cy="address-book-item"
@@ -51,6 +56,9 @@
             :custom-name="name"
             :name-address="nameAddress"
             show-protocol-icon
+            @resolvedChainName="(chainName: string) => (
+              resolvedChainName(nameAddress!, chainName)
+            )"
           />
         </PanelItem>
       </div>
@@ -70,6 +78,7 @@ import {
   onMounted,
   ref,
   watch,
+  PropType,
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { IonContent, IonHeader } from '@ionic/vue';
@@ -82,8 +91,6 @@ import { ROUTE_ADDRESS_BOOK, ROUTE_ADDRESS_BOOK_EDIT } from '@/popup/router/rout
 import { getAddressColor } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAccountSelector } from '@/composables';
-
-import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import { tg } from '@/popup/plugins/i18n';
 import InputSearch from '@/popup/components/InputSearch.vue';
@@ -104,13 +111,17 @@ export default defineComponent({
     modelValue: Boolean,
     /** Whether the list is being used in an account selector or not  */
     isSelector: Boolean,
+    isMultiple: Boolean,
+    selectedAddresses: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
   },
   emits: ['update:hideButtons', 'select-address'],
   setup(props, { emit }) {
-    const { getNameByNameHash } = useAeNames();
-
     const scrollWrapperEl = ref<ComponentRef>();
     const isScrolled = ref(false);
+    const resolvedChainNames = ref<Record<string, string>>({});
 
     const {
       accountSelectType,
@@ -162,11 +173,13 @@ export default defineComponent({
       return isOwnAddress ? { '--bg-color': getAddressColor(address) } : {};
     }
 
-    async function selectAddress(nameAddress: Encoded.Name, address: String) {
+    async function selectAddress(nameAddress: Encoded.Name, address: string) {
+      emit('select-address', nameAddress ? resolvedChainNames.value[nameAddress] : address);
+    }
+
+    function resolvedChainName(nameAddress: Encoded.Name, chainName: string) {
       if (nameAddress) {
-        emit('select-address', await getNameByNameHash(nameAddress));
-      } else {
-        emit('select-address', address);
+        resolvedChainNames.value[nameAddress] = chainName;
       }
     }
 
@@ -201,8 +214,10 @@ export default defineComponent({
       searchQuery,
       noRecordsMessage,
       protocolName,
+      resolvedChainNames,
       bgColorStyle,
       selectAddress,
+      resolvedChainName,
     };
   },
 });
@@ -213,6 +228,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .address-book-list {
+  --border-width: 2px;
+
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -225,9 +242,15 @@ export default defineComponent({
   }
 
   .address-book-item {
+    --outline-size: 0px;
     background-color: var(--bg-color);
     border: var(--border-width) solid var(--bg-color);
     padding: 8px 2px 8px 8px;
+
+    &.selected {
+      background-color: color-mix(in srgb, var(--bg-color) 40%, transparent);
+      transition: background-color 0.12s ease-in-out;
+    }
   }
 
   .search-field {
