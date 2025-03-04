@@ -1,6 +1,6 @@
 import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
-import type { Web3Wallet as IWeb3Wallet } from '@walletconnect/web3wallet';
+import type { WalletKit as IWeb3Wallet } from '@reown/walletkit';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import {
   computed,
@@ -98,10 +98,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Dynamic import to avoid bloating the main built file with unused features.
     const [
       { Core },
-      { Web3Wallet },
+      { WalletKit },
     ] = await Promise.all([
       import('@walletconnect/core'),
-      import('@walletconnect/web3wallet'),
+      import('@reown/walletkit'),
     ]);
 
     const core = new Core({
@@ -110,7 +110,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     });
 
     // Create WebSocket channel
-    return Web3Wallet.init({
+    return WalletKit.init({
       core,
       metadata: {
         name: APP_NAME,
