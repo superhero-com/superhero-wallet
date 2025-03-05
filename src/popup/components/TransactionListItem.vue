@@ -105,7 +105,7 @@ export default defineComponent({
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
-    let timerInterval: NodeJS.Timer;
+    let timerInterval: NodeJS.Timeout;
     const transactionDate = ref();
 
     const currentTransaction = computed(

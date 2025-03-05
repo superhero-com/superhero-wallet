@@ -16,7 +16,7 @@ export function createPollingBasedOnMountedComponents(interval: number) {
   const { isAppActive } = useUi();
 
   let initialCallDone = false;
-  let pollingIntervalId: NodeJS.Timer | null = null;
+  let pollingIntervalId: NodeJS.Timeout | null = null;
   let mountedComponents = 0;
 
   /**

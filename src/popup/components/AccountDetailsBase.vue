@@ -44,6 +44,10 @@
             :protocol="activeAccount.protocol"
           />
           <BtnBox
+            v-if="(
+              activeAccount.type !== ACCOUNT_TYPES.airGap
+              && activeAccount.type !== ACCOUNT_TYPES.ledger
+            )"
             :text="$t('common.key')"
             :icon="PrivateKeyIcon"
             data-cy="export-private-key"
@@ -96,6 +100,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import {
+  ACCOUNT_TYPES,
   IS_MOBILE_APP,
   IS_FIREFOX,
   MODAL_PRIVATE_KEY_EXPORT,
@@ -218,6 +223,7 @@ export default defineComponent({
       close,
       fadeAnimation,
       exportPrivateKey,
+      ACCOUNT_TYPES,
       IS_FIREFOX,
       INITIAL_TABS_HEIGHT,
       PROTOCOLS,

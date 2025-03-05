@@ -148,8 +148,9 @@ export function useMultisigAccounts({
     const dryAeSdk = await getDryAeSdk();
     try {
       if (!multisigContractInstances[contractId]) {
-        multisigContractInstances[contractId] = await dryAeSdk
-          .initializeContract<SimpleGAMultiSigContractApi>({
+        multisigContractInstances[contractId] = await Contract
+          .initialize<SimpleGAMultiSigContractApi>({
+            ...dryAeSdk.getContext(),
             aci: SimpleGAMultiSigAci,
             address: contractId,
           });

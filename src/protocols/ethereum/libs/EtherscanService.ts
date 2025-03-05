@@ -11,7 +11,7 @@ import { toEthChecksumAddress } from '../helpers';
 
 const NO_TRANSACTIONS_FOUND_MESSAGE = 'No transactions found';
 
-interface EtherscanDefaultResponse {
+export interface EtherscanDefaultResponse {
   status: '1' | '0';
   message: string; // 'OK' / 'OK-<WithExplanation>'
   result: any;

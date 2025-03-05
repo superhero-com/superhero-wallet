@@ -7,7 +7,6 @@ import {
   spend,
   Encoded,
 } from '@aeternity/aepp-sdk';
-import { Accounts } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import { Ref } from 'vue';
 import type { IWalletInfo } from '@/types';
 import { PROTOCOLS } from '@/constants';
@@ -26,7 +25,10 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
 export class AeSdkSuperhero extends AeSdkWallet {
   nodeNetworkId: Ref<string | undefined>;
 
-  constructor(options: any, nodeNetworkId: Ref<string | undefined>) {
+  constructor(
+    options: ConstructorParameters<typeof AeSdkWallet>[0],
+    nodeNetworkId: Ref<string | undefined>,
+  ) {
     super(options);
     this.nodeNetworkId = nodeNetworkId;
   }
@@ -37,6 +39,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   getAccounts() {
+    type Accounts = ReturnType<InstanceType<typeof AeSdkWallet>['getAccounts']>;
     const accounts: Accounts = { connected: {}, current: {} };
     const { getLastActiveProtocolAccount } = useAccounts();
     const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;

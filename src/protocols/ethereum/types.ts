@@ -35,6 +35,8 @@ export interface IEthRpcMethodParameters {
   value?: string;
   chainId?: string;
   result?: string;
+  /** This exist for proxy Etherscan methods */
+  [key: string]: string | undefined;
 }
 
 export type EthRpcMethod = ObjectValues<typeof ETH_RPC_METHODS>;

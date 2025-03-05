@@ -55,6 +55,7 @@ export function normalizeWeb3EthTransactionStructure(
       senderId: from ? toChecksumAddress(from) : undefined,
       recipientId: to ? toChecksumAddress(to) : undefined,
       type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
+      tag: (isEthTransfer ? 'SpendTx' : 'ContractCallTx') as any, // TODO: create own types
       arguments: [],
       callerId: '',
       contractId,

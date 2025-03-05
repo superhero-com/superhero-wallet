@@ -126,6 +126,7 @@
               :amount="amount"
               :symbol="assetSymbol"
               :hide-fiat="hideFiat"
+              :hide-symbol="!assetSymbol"
               :protocol="protocol"
               :price="price"
               high-precision

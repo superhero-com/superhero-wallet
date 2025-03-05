@@ -4,9 +4,9 @@ import {
   Encoded,
   MemoryAccount,
   Tag,
-  generateKeyPair,
   hash,
   unpackTx,
+  Contract,
 } from '@aeternity/aepp-sdk';
 import dayjs from 'dayjs';
 
@@ -58,7 +58,8 @@ export function useMultisigAccountCreate() {
 
   async function createMultisigContractInstance() {
     const dryAeSdk = await getDryAeSdk();
-    return dryAeSdk.initializeContract({
+    return Contract.initialize({
+      ...dryAeSdk.getContext(),
       aci: SimpleGAMultiSigAci,
       bytecode: MULTISIG_SIMPLE_GA_BYTECODE,
     });
@@ -91,10 +92,10 @@ export function useMultisigAccountCreate() {
     const dryAeSdk = await getDryAeSdk();
 
     // Create a temporary account
-    const gaAccount = generateKeyPair();
-    pendingMultisigCreationTxs.value[gaAccount.publicKey] = {};
+    const gaAccount = MemoryAccount.generate();
+    pendingMultisigCreationTxs.value[gaAccount.address] = {};
     const multisigContractInstance = await createMultisigContractInstance();
-    pendingMultisigCreationTxs.value[gaAccount.publicKey]
+    pendingMultisigCreationTxs.value[gaAccount.address]
       .multisigAccountCreationEncodedCallData = multisigContractInstance._calldata.encode(
         multisigContractInstance._name,
         'init',
@@ -103,9 +104,9 @@ export function useMultisigAccountCreate() {
 
     // Build Attach transaction
     const attachTX = await dryAeSdk.buildTx({
-      ownerId: gaAccount.publicKey,
+      ownerId: gaAccount.address,
       code: multisigContractInstance.$options.bytecode!,
-      callData: pendingMultisigCreationTxs.value[gaAccount.publicKey]
+      callData: pendingMultisigCreationTxs.value[gaAccount.address]
         .multisigAccountCreationEncodedCallData!,
       authFun: hash('authorize'),
       tag: Tag.GaAttachTx,
@@ -113,17 +114,17 @@ export function useMultisigAccountCreate() {
         multisigContractInstance,
         noOfConfirmations,
         signersAddresses,
-        gaAccount.publicKey,
+        gaAccount.address,
       ),
       nonce: 1,
     });
-    pendingMultisigCreationTxs.value[gaAccount.publicKey]
+    pendingMultisigCreationTxs.value[gaAccount.address]
       .signedAttachTx = await dryAeSdk.signTransaction(attachTX, {
         innerTx: true,
-        onAccount: new MemoryAccount(gaAccount.secretKey),
+        onAccount: gaAccount,
       });
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.prepared;
-    return gaAccount.publicKey;
+    return gaAccount.address;
   }
 
   /**

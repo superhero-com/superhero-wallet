@@ -6,7 +6,7 @@ import {
   PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
-import { STUB_CURRENCY, STUB_ACCOUNT } from '@/constants/stubs';
+import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
   generateEncryptionKey,
   encrypt,
@@ -16,7 +16,6 @@ import {
   generateSalt,
   prepareStorageKey,
 } from '@/utils';
-import { CoinGecko } from '../../../src/lib/CoinGecko';
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
   const { address } = STUB_ACCOUNT;
@@ -73,11 +72,6 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('mockExternalRequests', () => {
-  cy.stub(CoinGecko, 'fetchCoinMarketData', STUB_CURRENCY);
-  cy.stub(CoinGecko, 'fetchCoinCurrencyRates', { usd: 0.05 });
-});
-
 Cypress.Commands.add('loginUsingPassword', () => {
   cy.get('[data-cy=password] input')
     .should('be.visible')
@@ -87,15 +81,13 @@ Cypress.Commands.add('loginUsingPassword', () => {
     .click();
 });
 
-Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
+Cypress.Commands.add('login', (options, route) => {
   cy.then(async () => {
     const salt = generateSalt();
     const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, salt);
     const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
     return [mnemonicEncryptionResult, salt];
   }).then(([mnemonicEncryptionResult, salt]) => {
-    if (isMockingExternalRequests) cy.mockExternalRequests();
-
     const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
 
     cy.openPopup(async (contentWindow) => {

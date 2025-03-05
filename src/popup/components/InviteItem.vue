@@ -162,7 +162,7 @@ export default defineComponent({
 
     const link = computed(() => {
       // nm_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (encode(Buffer.from(props.secretKey), Encoding.Name)).slice(3);
+      const secretKey = (encode(props.secretKey, Encoding.Name)).slice(3);
       return new URL(
         `${router
           .resolve({ name: ROUTE_INVITE_CLAIM })
@@ -192,7 +192,7 @@ export default defineComponent({
       emit('loading', true);
       try {
         await claimInvite({
-          secretKey: Buffer.from(props.secretKey),
+          secretKey: props.secretKey,
           recipientId: getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address!,
           isMax: true,
         });
@@ -223,7 +223,6 @@ export default defineComponent({
         await aeSdk.spend(
           formModel.value.amount!, // validateAll method confirms the presence of the amount field
           address.value,
-          // @ts-ignore
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
         await updateBalance();

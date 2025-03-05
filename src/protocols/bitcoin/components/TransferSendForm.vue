@@ -235,7 +235,7 @@ export default defineComponent({
       }
     }
 
-    let polling: NodeJS.Timer | null = null;
+    let polling: NodeJS.Timeout | null = null;
 
     onMounted(() => {
       polling = executeAndSetInterval(() => {

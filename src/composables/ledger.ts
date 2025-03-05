@@ -38,7 +38,8 @@ export function useLedger() {
     const aeSdk = await getAeSdk();
     const transport = await TransportWebUSB.create();
     const accountFactory = new AccountLedgerFactory(transport);
-    const ledgerAccounts = await accountFactory.discover(aeSdk.api);
+    // TODO: remove `as` after fixing https://github.com/aeternity/aepp-sdk-js/issues/2046
+    const ledgerAccounts = (await accountFactory.discover(aeSdk.api)) as AccountLedger[];
     await transport.close();
     return ledgerAccounts;
   }

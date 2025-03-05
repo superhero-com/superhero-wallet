@@ -1,6 +1,6 @@
 import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
-import type { Web3Wallet as IWeb3Wallet } from '@walletconnect/web3wallet';
+import type { WalletKit as IWeb3Wallet } from '@reown/walletkit';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import {
   computed,
@@ -19,7 +19,7 @@ import {
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 
-import { ETH_CHAIN_NAMESPACE } from '@/protocols/ethereum/config';
+import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
 import { EthRpcSupportedMethods, IEthNetworkSettings } from '@/protocols/ethereum/types';
 import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
 
@@ -98,10 +98,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Dynamic import to avoid bloating the main built file with unused features.
     const [
       { Core },
-      { Web3Wallet },
+      { WalletKit },
     ] = await Promise.all([
       import('@walletconnect/core'),
-      import('@walletconnect/web3wallet'),
+      import('@reown/walletkit'),
     ]);
 
     const core = new Core({
@@ -110,7 +110,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     });
 
     // Create WebSocket channel
-    return Web3Wallet.init({
+    return WalletKit.init({
       core,
       metadata: {
         name: APP_NAME,
@@ -165,10 +165,12 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
       const { url, name } = wcSession.value?.peer.metadata! || {};
-      const result = await handleEthereumRpcMethod(
+      const { result, error } = await handleEthereumRpcMethod(
         url,
         proposal.request.method as EthRpcSupportedMethods,
-        proposal.request.params[0],
+        proposal.request.method === ETH_RPC_METHODS.signPersonal
+          ? { data: proposal.request.params[0] }
+          : proposal.request.params[0],
         name,
       );
 
@@ -177,7 +179,14 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         response: {
           id,
           jsonrpc: '2.0',
-          ...(result) ? { result } : { error: { code: 5000, message: 'User rejected.' } },
+          ...(result
+            ? { result }
+            : {
+              error: {
+                code: error?.code || 5000,
+                message: error?.message || 'User rejected.',
+              },
+            }),
         },
       });
     });

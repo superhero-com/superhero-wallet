@@ -5,7 +5,7 @@ import { asyncPipe } from '@/utils';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { IS_MOBILE_APP } from '@/constants';
 
-export interface ICreateStorageRefOptions<T> {
+export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
   /**
    * Enable secure storage for the data.
    * Mobile app only.
@@ -19,10 +19,10 @@ export interface ICreateStorageRefOptions<T> {
    * Callbacks run on the data that will be saved and read from the browser storage.
    */
   serializer?: {
-    read: (val: T) => any;
-    write: (val: T) => any;
+    read: (val: TSerialized) => T;
+    write: (val: T) => TSerialized;
   };
-  migrations?: Migration<T>[];
+  migrations?: Migration<TSerialized>[];
   /**
    * Allows to ensure the state is already synced with browser storage and migrated.
    */
@@ -38,14 +38,17 @@ export interface ICreateStorageRefOptions<T> {
  * Also allows to sync the state between the app and the extension background.
  * Inspired by `useStorage`: https://vueuse.org/core/useStorage/
  */
-export function useStorageRef<T = string | object | any[]>(
+export function useStorageRef<T = string | object | any[], TSerialized = unknown>(
   initialState: T,
   storageKey: StorageKey,
-  options: ICreateStorageRefOptions<T> = {},
+  options: ICreateStorageRefOptions<T, TSerialized> = {},
 ) {
   const {
     enableSecureStorage = false,
-    serializer,
+    serializer = {
+      read: (a: unknown) => a,
+      write: (a: unknown) => a,
+    } as unknown as NonNullable<typeof options['serializer']>,
     backgroundSync = false,
     migrations,
     onRestored,
@@ -56,28 +59,28 @@ export function useStorageRef<T = string | object | any[]>(
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
   const storage = (enableSecureStorage && IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
 
-  async function setLocalState(val: T | null) {
+  async function setLocalState(val: TSerialized | null) {
     if (val !== null) {
       watcherDisabled = true;
-      state.value = (serializer?.read) ? await serializer.read(val) : val;
+      state.value = await serializer.read(val);
       setTimeout(() => { watcherDisabled = false; }, 0);
     }
   }
 
   async function setStorageState(val: T | null) {
-    storage.set(storageKey, (val && serializer?.write) ? await serializer.write(val) : val);
+    storage.set(storageKey, val ? await serializer.write(val) : val);
   }
 
   // Restore state and run watchers
   (async () => {
-    let restoredValue = await storage.get<T | null>(storageKey);
+    let restoredValue = await storage.get<TSerialized | null>(storageKey);
     if (migrations?.length) {
-      restoredValue = await asyncPipe<T | null>(migrations)(restoredValue!);
+      restoredValue = await asyncPipe<TSerialized | null>(migrations)(restoredValue!);
       if (restoredValue !== null) {
-        await setStorageState(restoredValue);
+        storage.set(storageKey, restoredValue);
       }
     }
-    onRestored?.(restoredValue);
+    onRestored?.(restoredValue == null ? restoredValue as T : await serializer.read(restoredValue));
     await setLocalState(restoredValue);
 
     /**

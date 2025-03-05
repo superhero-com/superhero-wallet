@@ -1,4 +1,5 @@
 import { v4 as genUuid } from 'uuid';
+import type { Runtime } from 'webextension-polyfill';
 import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
 import type {
   Dictionary,
@@ -28,7 +29,7 @@ export function buildTx(txType: TxType) {
 
 const postMessage = (() => {
   const pendingRequests: Dictionary<IPopupActions> = {};
-  let background: browser.runtime.Port;
+  let background: Runtime.Port;
 
   return async ({ type, payload }: IBackgroundMessageData): Promise<IPopupData | null> => {
     if (!IS_EXTENSION || !browser) {

@@ -3,7 +3,7 @@
 import { computed, watch } from 'vue';
 import { uniqBy, isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
-import { Encoding, Tag } from '@aeternity/aepp-sdk';
+import { Contract, Encoding, Tag } from '@aeternity/aepp-sdk';
 
 import { isAssetCoin, toShiftedBigNumber } from '@/utils';
 import type {
@@ -219,7 +219,8 @@ export function useFungibleTokens() {
     const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
     const tokenData = getProtocolAvailableTokens(PROTOCOLS.aeternity)[contractId];
 
-    const tokenContract = await aeSdk.initializeContract({
+    const tokenContract = await Contract.initialize({
+      ...aeSdk.getContext(),
       aci: FungibleTokenFullInterfaceACI,
       address: contractId as any,
     });

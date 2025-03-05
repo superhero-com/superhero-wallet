@@ -16,6 +16,7 @@ import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
 
 type Balances = Record<AccountAddress, Balance>;
+type BalancesSerialized = Record<AccountAddress, string>;
 
 let composableInitialized = false;
 
@@ -24,7 +25,7 @@ const POLLING_INTERVAL = 5000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
-const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
+const balances = useStorageRef<Balances, BalancesSerialized>({}, STORAGE_KEYS.balances, {
   serializer: {
     read: (val) => mapValues(val, (balance: BalanceRaw) => new BigNumber(balance)),
     write: (val) => mapValues(val, (balance) => balance.toFixed()),

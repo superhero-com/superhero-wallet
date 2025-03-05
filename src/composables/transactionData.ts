@@ -1,5 +1,7 @@
 import { computed, Ref } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
+import { isEmpty } from 'lodash-es';
+
 import type {
   AccountAddress,
   ITokenResolved,
@@ -115,9 +117,10 @@ export function useTransactionData({
 
   const isNonTokenContract = computed(
     (): boolean => (
-      !getProtocolAvailableTokens(protocol.value)[innerTx.value?.contractId]
-      || innerTxTag.value === Tag.ContractCreateTx
-    ),
+      !isEmpty(getProtocolAvailableTokens(protocol.value))
+      && !getProtocolAvailableTokens(protocol.value)[innerTx.value?.contractId]
+    )
+    || innerTxTag.value === Tag.ContractCreateTx,
   );
 
   const isTokenSale = computed(

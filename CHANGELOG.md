@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.1...v2.5.2) (2025-03-04)
+
+
+### Features
+
+* support personal sign with EVM and WalletConnect ([44b3b4d](https://github.com/Superhero-com/superhero-wallet/commit/44b3b4d534cfbaf96134a4a14b5511d650c572f5))
+
+
+### Bug Fixes
+
+* be able to connect if permission set and wallet is locked ([1dd92d9](https://github.com/Superhero-com/superhero-wallet/commit/1dd92d9b1dabe107944d46aa94149a2f9b373e71))
+* **evm:** propagate errors ([2cdf577](https://github.com/Superhero-com/superhero-wallet/commit/2cdf5777613f5acecffabd6eee4b458d6a77d3ce))
+* **evm:** proxy several methods with Etherscan correctly ([8f6a973](https://github.com/Superhero-com/superhero-wallet/commit/8f6a973e608a6b380b7e44d8d05746e854c8a398))
+* **evm:** return correct account on account request ([bdb2b5e](https://github.com/Superhero-com/superhero-wallet/commit/bdb2b5e813e828bf551877ec0c295f90810ab436))
+* **evm:** set window ethereum object correctly ([eb854fa](https://github.com/Superhero-com/superhero-wallet/commit/eb854fac7800e358f4f08fb8c2db88b9e0251fe1))
+* **popup:** call reject on window close ([d0437d0](https://github.com/Superhero-com/superhero-wallet/commit/d0437d094098b3b53d11f3ac466bc8cb2fed152c))
+* show advanced call data details correctly ([2ea0771](https://github.com/Superhero-com/superhero-wallet/commit/2ea077145551ff0948975be8e09450cb499d2068))
+* show asset as unrecognized if so ([fc95116](https://github.com/Superhero-com/superhero-wallet/commit/fc9511619ac1a9c2a26903cec82cb189c2bbb1ee))
+* show private key only if wallet knows it ([e42888b](https://github.com/Superhero-com/superhero-wallet/commit/e42888b69740362719c105fceefdd3a33ac4a066))
+* show transactionCallDataDetails correctly ([49628c6](https://github.com/Superhero-com/superhero-wallet/commit/49628c62e8c889a11f8fcf3fd705ee6aededc01d))
+* **wallet-connect:** be able to use personal_sign method ([d35f0a8](https://github.com/Superhero-com/superhero-wallet/commit/d35f0a8fc1731afc65a987fa76b7ee58e472facb))
+
+
+### Tests
+
+* fix unknown tx signing ([06706e7](https://github.com/Superhero-com/superhero-wallet/commit/06706e7b23befcd3750038168e683eabd341d8c3))
+* remove old not working coingecko stubs ([2c797d0](https://github.com/Superhero-com/superhero-wallet/commit/2c797d05932b13fd272b1bf53119e03ff521460b))
+* stub requests to coingecko in e2e to avoid rate limit errors ([445397e](https://github.com/Superhero-com/superhero-wallet/commit/445397e9c9b77ed36574ff6b55c8aff535e174af))
+
+
+### Performance
+
+* **evm:** add ethereum object only when necessary ([911da0b](https://github.com/Superhero-com/superhero-wallet/commit/911da0b54fbc2f974b408658e1fbd96882b1c59f))
+
+
+### Maintenance
+
+* add serialized type to `useStorageRef` ([0300170](https://github.com/Superhero-com/superhero-wallet/commit/030017018cd441568f9771e2e7d31e0d7fe57706))
+* avoid importing aesdk internals ([939c4ba](https://github.com/Superhero-com/superhero-wallet/commit/939c4ba34ae2b53aaf017609af115f21183a35fd))
+* **deps:** update sdk to 14.0.0 ([ad4429f](https://github.com/Superhero-com/superhero-wallet/commit/ad4429f29592469d5181d5abe25dff3fef49bf07))
+* **deps:** use a maintained bip39 implementation ([abfb4a4](https://github.com/Superhero-com/superhero-wallet/commit/abfb4a43c86c08e15211372d4e4d21ea22e47d13))
+* prefer `use` over `import` in scss ([e783f10](https://github.com/Superhero-com/superhero-wallet/commit/e783f10d038b9591b21fd4348d19d7e8a0ed732c))
+* put the same license to package.json as in LICENSE file ([f681ad7](https://github.com/Superhero-com/superhero-wallet/commit/f681ad7e7eeedf5b2df747a5527aae8b1d121ea3))
+* update walletconnect dependencies ([60e7fc6](https://github.com/Superhero-com/superhero-wallet/commit/60e7fc6bdc626a30ae9092ebe4b7cd1e74a978f1))
+* use NodeJS.Timeout instead NodeJS.Timer everywhere ([b2381cf](https://github.com/Superhero-com/superhero-wallet/commit/b2381cfe3c9e731d8751bb5e48adc48e0bf68eef))
+* use ts-expect-error instead ts-ignore ([6efbbe0](https://github.com/Superhero-com/superhero-wallet/commit/6efbbe0d91e0f1861e64b1509f1304d8766c0e09))
+
 ### [2.5.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.0...v2.5.1) (2025-02-06)
 
 

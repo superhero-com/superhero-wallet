@@ -73,6 +73,7 @@ import {
   buildTx,
   unpackTx,
   Tag,
+  Name,
 } from '@aeternity/aepp-sdk';
 import { useForm, useFieldError, Field } from 'vee-validate';
 
@@ -149,11 +150,12 @@ export default defineComponent({
       if (!(await validate()).valid) {
         return;
       }
-      const aeSdk = await getAeSdk();
       if (amountError.value) return;
+      const aeSdk = await getAeSdk();
+      const nameObj = new Name(props.name, aeSdk.getContext());
       try {
         setLoaderVisible(true);
-        await aeSdk.aensBid(props.name, aeToAettos(amount.value));
+        await nameObj.bid(aeToAettos(amount.value));
         openDefaultModal({
           msg: t('pages.names.auctions.bid-added', { name: props.name }),
         });

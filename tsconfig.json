@@ -17,8 +17,7 @@
     "sourceMap": true,
     "typeRoots": [
       "node_modules/@types",
-      "node_modules/@aeternity/aepp-sdk/src/typings",
-      "node_modules/web-ext-types"
+      "node_modules/@aeternity/aepp-sdk/src/typings"
     ],
     "outDir": "dist",
   },

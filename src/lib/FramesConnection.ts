@@ -12,7 +12,7 @@ const POLLING_INTERVAL = 3000;
 export const FramesConnection = (() => {
   const connectedFrames = new Set();
   let initialized = false;
-  let baseIntervalId: NodeJS.Timer;
+  let baseIntervalId: NodeJS.Timeout;
 
   function getArrayOfAvailableFrames(): Window[] {
     return [
@@ -37,7 +37,7 @@ export const FramesConnection = (() => {
             connectedFrames.add(target);
             const connection = new BrowserWindowMessageConnection({ target });
             const originalConnect = connection.connect;
-            let intervalId: NodeJS.Timer;
+            let intervalId: NodeJS.Timeout;
 
             connection.connect = function connect(onMessage: any) {
               originalConnect.call(this, (data: any, origin: any, source: any) => {

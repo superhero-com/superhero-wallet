@@ -1,4 +1,5 @@
 import { METHODS } from '@aeternity/aepp-sdk';
+import { isEmpty } from 'lodash-es';
 
 import type {
   IAppData,
@@ -24,10 +25,11 @@ import {
   STORAGE_KEYS,
   PROTOCOLS,
 } from '@/constants';
-import { getCleanModalOptions } from '@/utils';
+import { getCleanModalOptions, watchUntilTruthy } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
+import { useAccounts } from '@/composables';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
 
@@ -164,11 +166,22 @@ export function usePermissions() {
   ): Promise<boolean> {
     let app: IAppData | undefined;
     let props = getCleanModalOptions<typeof modalProps>(modalProps);
+    const { activeAccount } = useAccounts();
 
     if (fullUrl) {
       const url = new URL(fullUrl);
       if (checkPermission(url.host, method, modalProps.tx)) {
-        return true;
+        try {
+          await Promise.race(
+            [
+              watchUntilTruthy(() => !isEmpty(activeAccount.value)),
+              new Promise((_r, reject) => setTimeout(reject, 1000)),
+            ],
+          );
+          return true;
+        } catch (error) {
+          // Intentionally ignoring the error
+        }
       }
 
       app = {
