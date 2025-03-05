@@ -1,1 +1,0 @@
-(self["webpackChunksuperhero_wallet"]=self["webpackChunksuperhero_wallet"]||[]).push([[9040],{42065:()=>{},6448:()=>{}}]);
