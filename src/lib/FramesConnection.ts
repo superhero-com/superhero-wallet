@@ -54,6 +54,7 @@ export const FramesConnection = (() => {
             intervalId = executeAndSetInterval(() => {
               if (!getArrayOfAvailableFrames().includes(target)) {
                 clearInterval(intervalId);
+                aeSdk.removeRpcClient(clientId);
                 return;
               }
               aeSdk.shareWalletInfo(clientId);
