@@ -64,7 +64,7 @@ export const AE_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
   },
 };
 
-export const AE_AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
+export const AE_AVATAR_URL = 'https://avatars.superherowallet.com/';
 export const AE_BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 export const AE_COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
 export const AE_DEX_URL = 'https://aepp.dex.superhero.com';
