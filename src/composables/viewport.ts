@@ -31,6 +31,7 @@ export const useViewport = () => {
     onBeforeUnmount(() => {
       if (viewportElement.value) {
         viewportElement.value.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
+        viewportElement.value = undefined;
       }
       window.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
     });

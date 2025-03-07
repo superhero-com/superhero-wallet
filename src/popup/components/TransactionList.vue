@@ -52,8 +52,8 @@ import {
   computed,
   defineComponent,
   nextTick,
+  onBeforeUnmount,
   onMounted,
-  onUnmounted,
   PropType,
   ref,
   watch,
@@ -245,7 +245,10 @@ export default defineComponent({
       }
     });
 
-    onUnmounted(() => setScrollConf(false));
+    onBeforeUnmount(() => {
+      setScrollConf(false);
+      appInnerElem.value?.removeEventListener('scroll', throttledScroll());
+    });
 
     return {
       activeAccount,

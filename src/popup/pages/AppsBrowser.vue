@@ -142,7 +142,7 @@ export default defineComponent({
     const customAppURL = ref('');
     const currentClientId = ref('');
     const featuredDapps = TRUSTED_DAPPS.filter(({ isFeatured }) => isFeatured);
-    let shareWalletInfoInterval: any;
+    let shareWalletInfoInterval: NodeJS.Timeout;
     let lastUrlAddedToHistory = '';
 
     const { getAeSdk } = useAeSdk();
@@ -153,8 +153,10 @@ export default defineComponent({
     );
 
     async function removeRpcClientIfAny() {
+      if (shareWalletInfoInterval) {
+        clearInterval(shareWalletInfoInterval);
+      }
       if (!currentClientId.value) return;
-      clearInterval(shareWalletInfoInterval);
       const sdk = await getAeSdk();
       sdk.removeRpcClient(currentClientId.value);
       currentClientId.value = '';

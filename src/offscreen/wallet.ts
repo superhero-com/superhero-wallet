@@ -34,7 +34,10 @@ const addAeppConnection = async (port: Runtime.Port) => {
     () => !isAeSdkBlocked && aeSdk.shareWalletInfo(clientId),
     3000,
   );
-  port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
+  port.onDisconnect.addListener(() => {
+    clearInterval(shareWalletInfo);
+    aeSdk.removeRpcClient(clientId);
+  });
 };
 
 export async function init() {

@@ -79,8 +79,9 @@ export async function checkOrRequestDeviceCameraPermission(): Promise<boolean> {
           return;
         }
 
-        permissionStatus?.addEventListener('change', () => {
+        permissionStatus?.addEventListener('change', function resolveStatusChange() {
           resolve(permissionStatus.state === 'granted');
+          permissionStatus?.removeEventListener('change', resolveStatusChange);
         });
 
         checkCameraPermissionFallback(resolve);

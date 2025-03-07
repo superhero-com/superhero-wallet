@@ -99,6 +99,7 @@ import {
   defineComponent,
   ref,
   PropType,
+  onBeforeUnmount,
   onMounted,
 } from 'vue';
 import { useForm } from 'vee-validate';
@@ -172,6 +173,7 @@ export default defineComponent({
     const { getFormattedFiat } = useCurrencies();
     const { claimInvite } = useInvites();
 
+    let updateBalanceInterval: NodeJS.Timeout;
     const recipientId = ref<AccountAddress>(aeAccounts.value[0].address);
     const amount = ref('');
     const balance = ref(new BigNumber(0));
@@ -271,7 +273,13 @@ export default defineComponent({
         step.value = STEPS.redeemFull;
         isCardEmpty.value = true;
       }
-      setInterval(updateBalance, 3000);
+      updateBalanceInterval = setInterval(updateBalance, 3000);
+    });
+
+    onBeforeUnmount(() => {
+      if (updateBalanceInterval) {
+        clearInterval(updateBalanceInterval);
+      }
     });
 
     return {

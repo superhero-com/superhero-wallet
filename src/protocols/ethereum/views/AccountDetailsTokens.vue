@@ -1,10 +1,7 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg--lighter">
-      <div
-        ref="innerScrollElem"
-        class="account-details-tokens"
-      >
+      <div class="account-details-tokens">
         <AssetList
           v-if="isOnline"
           :search-term="searchPhrase"

@@ -459,7 +459,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
         const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
         const isTransactionPickedUpByNode = await this.fetchTransactionByHash(hash);
 
-        // In BTC we fetch tranactions directly from the node, so we can be sure that
+        // In BTC we fetch transactions directly from the node, so we can be sure that
         // the transaction will be in the list of transactions even when it's not mined yet.
         if (isTransactionPickedUpByNode) {
           clearInterval(interval);
