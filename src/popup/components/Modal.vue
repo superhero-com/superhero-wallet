@@ -152,6 +152,7 @@ export default defineComponent({
     onBeforeUnmount(() => {
       if (props.initializeViewport) {
         setScrollConf(false);
+        initViewport(undefined);
       }
       document.removeEventListener('ionBackButton', onBackButtonHandler);
       document.body.style.overflow = '';

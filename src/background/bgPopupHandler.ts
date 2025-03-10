@@ -113,8 +113,11 @@ export const setSessionTimeout = async (sessionTimeout: number) => {
   keepAliveInterval = setInterval(browser.runtime.getPlatformInfo, 20000);
   expirationTimeout = setTimeout(
     async () => {
-      await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
-      clearInterval(keepAliveInterval);
+      try {
+        await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
+      } finally {
+        clearInterval(keepAliveInterval);
+      }
     },
     sessionTimeout,
   );
