@@ -21,7 +21,7 @@
         alt="Avatar"
         @load="isLoading = false"
       >
-      <ion-skeleton-text v-if="isLoading" animated />
+      <ion-skeleton-text v-if="!IS_TRANSITIONS_DISABLED && isLoading" animated />
     </slot>
   </div>
 </template>
@@ -40,6 +40,7 @@ import { checkImageAvailability, getAddressColor } from '@/utils';
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { IS_TRANSITIONS_DISABLED } from '@/constants';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'] as const;
 export type AvatarSize = typeof SIZES[number];
@@ -95,6 +96,7 @@ export default defineComponent({
     });
 
     return {
+      IS_TRANSITIONS_DISABLED,
       srcUrl,
       calculatedColor,
       profileImageAvailable,
