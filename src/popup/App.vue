@@ -1,5 +1,10 @@
 <template>
-  <IonApp class="app">
+  <IonApp
+    class="app"
+    :class="{
+      'disable-transitions': IS_TRANSITIONS_DISABLED,
+    }"
+  >
     <IonPage
       id="app-wrapper"
       class="app-wrapper"
@@ -326,6 +331,10 @@ export default defineComponent({
   --screen-bg-color: #{$color-bg-app};
   --header-height: 0;
   --gap: 12px;
+
+  &.disable-transitions * {
+    transition: none !important;
+  }
 
   position: relative;
   display: flex;
