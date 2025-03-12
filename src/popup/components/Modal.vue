@@ -1,7 +1,7 @@
 <template>
   <transition
     appear
-    :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
+    :name="transitionName"
     @after-enter="$emit('open')"
   >
     <div
@@ -91,7 +91,11 @@ import {
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
 
-import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
+import {
+  IS_TRANSITIONS_DISABLED,
+  IS_EXTENSION,
+  IS_FIREFOX,
+} from '@/constants';
 import { useScrollConfig, useViewport } from '@/composables';
 
 import BtnClose from './buttons/BtnClose.vue';
@@ -130,6 +134,13 @@ export default defineComponent({
 
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
+    const transitionName = computed(() => {
+      if (IS_TRANSITIONS_DISABLED) {
+        return undefined;
+      }
+      return props.fromBottom ? 'from-bottom-transition' : 'pop-in-transition';
+    });
+
     function handleClose() {
       emit('close');
     }
@@ -164,6 +175,7 @@ export default defineComponent({
       IS_EXTENSION,
       scrollElem,
       showHeader,
+      transitionName,
     };
   },
 });

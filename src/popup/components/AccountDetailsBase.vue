@@ -80,7 +80,7 @@
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
-          :animated="!IS_FIREFOX"
+          :animated="!IS_FIREFOX && !IS_TRANSITIONS_DISABLED"
           :animation="fadeAnimation"
         />
       </div>
@@ -103,6 +103,7 @@ import {
   ACCOUNT_TYPES,
   IS_MOBILE_APP,
   IS_FIREFOX,
+  IS_TRANSITIONS_DISABLED,
   MODAL_PRIVATE_KEY_EXPORT,
   PROTOCOLS,
 } from '@/constants';
@@ -225,6 +226,7 @@ export default defineComponent({
       exportPrivateKey,
       ACCOUNT_TYPES,
       IS_FIREFOX,
+      IS_TRANSITIONS_DISABLED,
       INITIAL_TABS_HEIGHT,
       PROTOCOLS,
     };
