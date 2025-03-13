@@ -97,7 +97,7 @@
     "validator": "^13.12.0",
     "vee-validate": "^4.13.2",
     "vue": "^3.4.34",
-    "vue-i18n": "^9.13.1",
+    "vue-i18n": "^11.1.2",
     "vue-loader": "^17.4.2",
     "vue-router": "^4.4.0",
     "web3-eth": "^4.8.2",
