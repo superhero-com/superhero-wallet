@@ -93,7 +93,8 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
       }
 
       const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
-      const amount = new BigNumber(numericAmount).shiftedBy(AE_COIN_PRECISION);
+      const amount = new BigNumber(numericAmount)
+        .shiftedBy(isAssetAe ? AE_COIN_PRECISION : selectedAssetDecimals.value);
 
       let callResult: any;
 
@@ -102,7 +103,10 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
           callResult = await tokenInstance.transfer(
             val.address ?? account.address,
             amount.toFixed(),
-            { callStatic: true },
+            {
+              callStatic: true,
+              omitUnknown: true,
+            },
           );
         } catch (e) {
           return;
@@ -171,7 +175,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
-      total.value = new BigNumber(amount).shiftedBy(-AE_COIN_PRECISION).plus(fee.value);
+      total.value = new BigNumber(numericAmount).plus(fee.value);
     },
     500,
     { leading: true },

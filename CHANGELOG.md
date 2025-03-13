@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.2...v2.5.3) (2025-03-12)
+
+
+### Bug Fixes
+
+* be able to send custom aex9 tokens ([608256e](https://github.com/Superhero-com/superhero-wallet/commit/608256e87969ba3ff8877557902cbb3ca3ba83da))
+* calculate max token amount correctly ([f0b5edf](https://github.com/Superhero-com/superhero-wallet/commit/f0b5edfc1fdba6f0deba7293ab25bdc282427df8))
+
+
+### Performance
+
+* clear component link on component remove ([4d9f2b4](https://github.com/Superhero-com/superhero-wallet/commit/4d9f2b43d9671f5c0cc173109a73f2d221f5acac))
+* optimize all svgs ([7d55ad8](https://github.com/Superhero-com/superhero-wallet/commit/7d55ad809d9760fabd8c2a222b7a364d07bbaa3b))
+* properly clear several intervals ([788ce5b](https://github.com/Superhero-com/superhero-wallet/commit/788ce5bdae1a14430df8da26217acd1dc18b2c18))
+* remove addded event listeners on unmount ([f571e39](https://github.com/Superhero-com/superhero-wallet/commit/f571e397b25c0a71d54f59298681237716a4b5e8))
+* remove rpc client on port disconnect ([45e9ec2](https://github.com/Superhero-com/superhero-wallet/commit/45e9ec20c3a4f2116ed4d57e1e7c16f58bdc4f67))
+
+
+### Maintenance
+
+* disable page/modal transitions in Chrome based browsers ([2b7fe31](https://github.com/Superhero-com/superhero-wallet/commit/2b7fe3179d9d560a23924deefea23f74f6f693f6))
+* disable transitions on chrome web and extension ([b33d00b](https://github.com/Superhero-com/superhero-wallet/commit/b33d00b7f1e9755c3527e9d3c3d51b0048396993))
+* temporary remove all transition in chrome based browsers ([fc957d1](https://github.com/Superhero-com/superhero-wallet/commit/fc957d13eafdb5f017c78073b91badb87cf862bc))
+* use new avatars url ([f7e90cb](https://github.com/Superhero-com/superhero-wallet/commit/f7e90cbab49ac31b963424fb6c052697ea79caca))
+* use new bug report url ([74738ec](https://github.com/Superhero-com/superhero-wallet/commit/74738ec22932117285582024973fa3f94a034b70))
+
 ### [2.5.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.1...v2.5.2) (2025-03-04)
 
 

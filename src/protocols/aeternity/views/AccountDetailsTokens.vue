@@ -30,6 +30,7 @@ import {
   computed,
   watch,
   onMounted,
+  onBeforeUnmount,
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
@@ -88,6 +89,10 @@ export default defineComponent({
       if (innerScrollElem.value && appInnerElem.value) {
         appInnerElem.value.addEventListener('scroll', throttledScroll());
       }
+    });
+
+    onBeforeUnmount(() => {
+      appInnerElem.value?.removeEventListener('scroll', throttledScroll());
     });
 
     return {

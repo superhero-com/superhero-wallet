@@ -321,7 +321,11 @@ export default defineComponent({
             new BigNumber(amount).toFixed().toString(),
             recipient,
             selectedAsset.contractId as Encoded.ContractAddress,
-            { waitMined: false },
+            {
+              waitMined: false,
+              // in case of custom AEX9 token, we need to pass it to avoid the error
+              omitUnknown: true,
+            },
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);

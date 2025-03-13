@@ -17,6 +17,7 @@
 
       <IonRouterOutlet
         v-if="!isLoaderVisible"
+        :animated="!IS_FIREFOX && !IS_TRANSITIONS_DISABLED"
         :animation="fadeAnimation"
         class="auction-router"
         :name="name"
@@ -46,6 +47,7 @@ import { fadeAnimation } from '@/popup/animations';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { IS_FIREFOX, IS_TRANSITIONS_DISABLED } from '@/constants';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -121,6 +123,8 @@ export default defineComponent({
     );
 
     return {
+      IS_FIREFOX,
+      IS_TRANSITIONS_DISABLED,
       ROUTE_AUCTION_BID,
       ROUTE_AUCTION_HISTORY,
       isLoaderVisible,

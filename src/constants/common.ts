@@ -305,7 +305,7 @@ export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
 
-export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
+export const BUG_REPORT_URL = 'https://form.typeform.com/to/Kk3Zyjdr';
 export const AGGREGATOR_URL = 'https://superhero.com/';
 export const SUPERHERO_CHAT_URLS = [
   'https://chat.superhero.com',
