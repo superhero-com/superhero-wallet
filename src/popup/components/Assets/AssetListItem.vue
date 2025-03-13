@@ -20,12 +20,9 @@
         full-symbol
         bright
       />
-      <TokenAmount
-        :amount="+(asset.convertedBalance ?? 0)"
-        :protocol="asset.protocol"
-        dynamic-sizing
-        hide-symbol
-        hide-fiat
+      <TokenAmountFormatted
+        :amount="asset.convertedBalance?.toString()"
+        is-received
       />
     </div>
     <div
@@ -49,13 +46,13 @@ import { isAssetCoin } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '@/popup/router/routeNames';
 
-import TokenAmount from '../TokenAmount.vue';
+import TokenAmountFormatted from '../TokenAmountFormatted.vue';
 import Tokens from '../Tokens.vue';
 import ListItemWrapper from '../ListItemWrapper.vue';
 
 export default defineComponent({
   components: {
-    TokenAmount,
+    TokenAmountFormatted,
     Tokens,
     ListItemWrapper,
   },
