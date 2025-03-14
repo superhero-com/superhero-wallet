@@ -13,7 +13,6 @@
         received: asset.isReceived,
         'multiple-rows': multipleRows,
       }"
-      :style="{ '--font-size': calculateFontSize(asset.amount!) }"
     >
       <Tokens
         :tokens="asset.isPool ? filteredAssets : [asset]"
@@ -22,15 +21,12 @@
         full-symbol
         bright
       />
-      <span class="amount">
-        {{ asset.isReceived ? '' : '&minus;' }}
-        {{ amountFormatted({ token: asset, isRounded }) }}
-        <span
-          v-if="asset?.symbol"
-          class="symbol"
-          v-text="truncateString(asset.symbol, 5)"
-        />
-      </span>
+      <TokenAmountFormatted
+        :amount="asset.amount?.toString()"
+        :symbol="asset.symbol"
+        :is-received="asset.isReceived"
+        class="token-amount-formatted"
+      />
     </div>
   </div>
 </template>
@@ -43,19 +39,18 @@ import {
 } from 'vue';
 import type { ITokenResolved, Protocol } from '@/types';
 import { TX_DIRECTION } from '@/constants';
-import {
-  amountRounded,
-  calculateFontSize,
-  convertWrappedCoinTokenToCoin,
-  truncateString,
-} from '@/utils';
+import { calculateFontSize, convertWrappedCoinTokenToCoin } from '@/utils';
 
 import { AllowedAssetIconSize } from './AssetIcon.vue';
 import Tokens from './Tokens.vue';
+import TokenAmountFormatted from './TokenAmountFormatted.vue';
 
 export default defineComponent({
   name: 'TransactionAssetRows',
-  components: { Tokens },
+  components: {
+    Tokens,
+    TokenAmountFormatted,
+  },
   props: {
     assets: { type: Array as PropType<ITokenResolved[]>, default: null },
     iconSize: { type: String as PropType<AllowedAssetIconSize>, default: 'sm' },
@@ -73,19 +68,9 @@ export default defineComponent({
         ?.map((asset) => convertWrappedCoinTokenToCoin(asset)),
     );
 
-    const amountFormatted = ({ token, isRounded }: {token: ITokenResolved; isRounded: boolean}) => {
-      // if amount is in scientific notation it is not rounded
-      if (token.amount && (!isRounded || token.amount?.toString().indexOf('e') !== -1)) {
-        return amountRounded(token.amount);
-      }
-      return token.amount;
-    };
-
     return {
       TX_DIRECTION,
       filteredAssets,
-      truncateString,
-      amountFormatted,
       calculateFontSize,
     };
   },
@@ -107,32 +92,18 @@ export default defineComponent({
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
-    font-size: var(--font-size);
+    font-size: 18px;
 
-    .amount {
-      color: $color-white;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    &.received .amount {
+    &.received .token-amount-formatted {
       color: $color-success-dark;
-    }
-
-    .symbol {
-      @extend %text-body;
-
-      letter-spacing: -2%;
     }
 
     &.multiple-rows {
       margin-bottom: 12px;
       padding-inline: 16px;
 
-      .amount {
+      .token-amount-formatted {
         @extend %face-sans-18-regular;
-
-        font-size: var(--font-size);
       }
     }
   }
