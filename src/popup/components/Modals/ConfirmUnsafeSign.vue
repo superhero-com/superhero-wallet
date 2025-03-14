@@ -125,11 +125,11 @@ export default defineComponent({
     const messageToDisplay = ref('');
 
     if (popupProps.value?.data) {
-      messageToDisplay.value = Buffer.from(popupProps.value?.data).toString();
+      messageToDisplay.value = Buffer.from(popupProps.value?.data as any).toString();
 
-      if (Buffer.from(popupProps.value?.data).toString().startsWith(JWT_HEADER)) {
+      if (Buffer.from(popupProps.value?.data as any).toString().startsWith(JWT_HEADER)) {
         try {
-          const jwtToString = fromBase64Url(Buffer.from(popupProps.value?.data).toString().split('.')[1]).toString();
+          const jwtToString = fromBase64Url(Buffer.from(popupProps.value?.data as any).toString().split('.')[1]).toString();
           JSON.parse(jwtToString);
           messageToDisplay.value = jwtToString;
           isJwt.value = true;

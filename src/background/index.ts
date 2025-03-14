@@ -38,7 +38,7 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
   msg: IBackgroundMessageData,
   _sender,
   sendResponse,
-) => {
+): any => {
   if (msg.target === 'background') {
     const {
       aepp,
