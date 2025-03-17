@@ -73,7 +73,7 @@ export default defineComponent({
           x: toBase64Url(decode(signerAddress as Encoded.AccountAddress)),
         };
 
-        const messageToConfirm = `${JWT_HEADER}.${toBase64Url(JSON.stringify(payloadAsJson))}`;
+        const messageToConfirm = `${JWT_HEADER}.${toBase64Url(JSON.stringify(payloadAsJson) as any)}`;
 
         await openModal(MODAL_CONFIRM_UNSAFE_SIGN, {
           data: messageToConfirm,
