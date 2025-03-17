@@ -79,6 +79,7 @@ const genLiquiditySwapResolver: TransactionResolverGenerator = (
       ...tokenA,
       amount: returns?.[0]?.value || tokenA.amount,
       ...defaultToken,
+      contractId: tokenA.contractId,
       ...tokens?.[tokenA.contractId!], /** token_a: IAEX9Minimal */
       isReceived: liquidityMethod === 'remove',
     }, {
@@ -86,11 +87,13 @@ const genLiquiditySwapResolver: TransactionResolverGenerator = (
       amount: returns?.[1]?.value || tokenB.amount,
       ...defaultToken,
       ...tokens?.[tokenB.contractId!], /** token_b: IAEX9Minimal */
+      contractId: tokenB.contractId,
       isReceived: liquidityMethod === 'remove' || !liquidityMethod,
     }, ...poolTokenAmountMapper ? [{
       ...defaultPoolToken,
       ...(poolTokenSymbol ? { symbol: poolTokenSymbol } : {}),
       amount: returns?.[2]?.value || poolTokenAmountMapper(transaction), // min_liquidity: int
+      contractId: transaction.tx.log?.[0]?.address,
       ...tokens?.[transaction.tx.log?.[0]?.address],
       isReceived: liquidityMethod && liquidityMethod === 'add',
       isPool: true,
@@ -381,6 +384,7 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
       ...defaultToken,
       amount: additionalTokenEvent.payload.amount,
       symbol: additionalTokenEvent.payload.tokenSymbol,
+      contractId: additionalTokenEvent.payload.contractId,
       ...tokens?.[additionalTokenEvent.payload.contractId],
       isReceived: true,
     }
@@ -391,6 +395,7 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
     amount: amount?.value,
     ...defaultToken,
     symbol: tokenAddress && tokens?.[tokenAddress]?.symbol,
+    contractId: tokenAddress,
     ...(tokenAddress ? tokens?.[tokenAddress] : {}),
     isReceived: true,
   };
@@ -455,6 +460,7 @@ const createCommunity: TransactionResolver = (
     amount,
     ...defaultToken,
     symbol: tokenSymbol,
+    contractId,
     ...(tokens?.[contractId] || {}),
     isReceived: true,
   }));
@@ -468,6 +474,7 @@ const createCommunity: TransactionResolver = (
       amount: transaction.tx.arguments?.[2]?.value,
       ...defaultToken,
       symbol: transaction.tx.arguments?.[1]?.value,
+      contractId: tokenAddress,
       ...(tokenAddress ? tokens?.[tokenAddress] : {}),
       isReceived: true,
     }];

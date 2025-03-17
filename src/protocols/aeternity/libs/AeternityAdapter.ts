@@ -250,6 +250,20 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     );
   }
 
+  async fetchTokenInfo?(contractId: AssetContractId)
+    : Promise<IToken | undefined> {
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+    try {
+      const token = await fetchFromMiddlewareCamelCased(`/v3/aex9/${contractId}`);
+      if (token.error) {
+        return undefined;
+      }
+      return token;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
   override async fetchAvailableTokens(): Promise<IToken[]> {
     const { fetchFromMiddleware } = useAeMiddleware();
     const response: Omit<IToken, 'protocol'>[] = camelCaseKeysDeep(await fetchAllPages(
@@ -273,11 +287,16 @@ export class AeternityAdapter extends BaseProtocolAdapter {
           sleep(5000),
         ]);
       }
-      return tokens.map(({ amount, contractId, decimals }) => ({
+      return tokens.map(({
+        amount, contractId, decimals, tokenName, tokenSymbol,
+      }) => ({
         address,
         amount,
         contractId,
         convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
+        decimals,
+        name: tokenName,
+        symbol: tokenSymbol,
         protocol: PROTOCOLS.aeternity,
         price: tokenSales.value.find((token) => token.address === contractId)?.price ?? 0,
       }));

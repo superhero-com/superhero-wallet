@@ -137,7 +137,7 @@ export abstract class BaseProtocolAdapter {
 
   transferPreparedTransaction?(transactionData: any): Promise<ITransferResponse | undefined>;
 
-  fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
+  async fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
 
   abstract fetchBalance(address: AccountAddress): Promise<string>;
 
