@@ -125,10 +125,10 @@ export default defineComponent({
   }
 
   .symbol {
-    @extend %text-body;
+    @extend %face-sans-16-medium;
 
-    letter-spacing: -2%;
-    margin-left: 2px;
+    letter-spacing: -0.02em;
+    margin-left: 2.5px;
   }
 }
 </style>
