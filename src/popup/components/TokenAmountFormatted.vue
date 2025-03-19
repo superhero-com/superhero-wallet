@@ -27,7 +27,7 @@
 import { computed, defineComponent } from 'vue';
 import BigNumber from 'bignumber.js';
 
-import { amountRounded, truncateString } from '@/utils';
+import { amountRounded, formatNumber, truncateString } from '@/utils';
 
 export default defineComponent({
   props: {
@@ -41,6 +41,10 @@ export default defineComponent({
         return {
           number: '0',
         };
+      }
+
+      function formatLongNumber(number: string): string {
+        return formatNumber(Number(number), { maximumFractionDigits: 2 });
       }
       const amount = new BigNumber(props.amount);
 
@@ -61,30 +65,36 @@ export default defineComponent({
 
       if (amount.gt(1000000000000)) {
         return {
-          number: `${amount.dividedBy(1000000000000).toFixed(2, 1)}T`,
+          number: `${formatLongNumber(amount.dividedBy(1000000000000).toFixed(2, 1))}T`,
         };
       }
 
       if (amount.gt(1000000000)) {
         return {
-          number: `${amount.dividedBy(1000000000).toFixed(2, 1)}B`,
+          number: `${formatLongNumber(amount.dividedBy(1000000000).toFixed(2, 1))}B`,
         };
       }
 
       if (amount.gt(1000000)) {
         return {
-          number: `${amount.dividedBy(1000000).toFixed(2, 1)}M`,
+          number: `${formatLongNumber(amount.dividedBy(1000000).toFixed(2, 1))}M`,
         };
       }
 
       if (amount.gt(100000)) {
         return {
-          number: `${amount.dividedBy(1000).toFixed(2, 1)}K`,
+          number: `${formatLongNumber(amount.dividedBy(1000).toFixed(2, 1))}K`,
+        };
+      }
+
+      if (amount.lt(1)) {
+        return {
+          number: amountRounded(props.amount),
         };
       }
 
       return {
-        number: amountRounded(props.amount),
+        number: formatLongNumber(amountRounded(props.amount)),
       };
     });
 
@@ -115,10 +125,10 @@ export default defineComponent({
   }
 
   .symbol {
-    @extend %text-body;
+    @extend %face-sans-16-medium;
 
-    letter-spacing: -2%;
-    margin-left: 2px;
+    letter-spacing: -0.02em;
+    margin-left: 2.5px;
   }
 }
 </style>
