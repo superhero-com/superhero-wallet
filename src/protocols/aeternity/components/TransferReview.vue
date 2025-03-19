@@ -303,9 +303,9 @@ export default defineComponent({
       );
     }
 
-    async function transfer(
-      { amount, recipient, selectedAsset }: ITransferArgs,
-    ): Promise<string | undefined> {
+    async function transfer({
+      amount, recipient, selectedAsset, nonce,
+    }: ITransferArgs): Promise<string | undefined> {
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
@@ -318,7 +318,10 @@ export default defineComponent({
             new BigNumber(amount).toFixed().toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
-            { waitMined: false },
+            {
+              waitMined: false,
+              nonce,
+            },
           );
         } else if (!isSelectedAssetAeCoin) {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
@@ -330,12 +333,15 @@ export default defineComponent({
               waitMined: false,
               // in case of custom AEX9 token, we need to pass it to avoid the error
               omitUnknown: true,
+              nonce,
             },
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
           actionResult = await aeternityAdapter.spend(Number(amount), recipient, {
             payload: props.transferData.payload,
+            waitMined: false,
+            nonce,
           });
         }
 
@@ -501,14 +507,21 @@ export default defineComponent({
         });
       } else {
         let hash;
-        // eslint-disable-next-line no-restricted-syntax
+        const aeSdk = await getAeSdk();
+
+        let currentNonce = (await aeSdk.api.getAccountByPubkey(
+          activeAccount.value.address,
+        )).nonce + 1;
+          // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           // eslint-disable-next-line no-await-in-loop
           hash = await transfer({
             amount,
             recipient,
             selectedAsset,
+            nonce: currentNonce,
           });
+          currentNonce += 1;
         }
         if (hash) {
           router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });

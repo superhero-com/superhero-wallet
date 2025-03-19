@@ -848,6 +848,7 @@ export interface ITransferArgs {
   amount: string | BigNumberPublic;
   recipient: AccountAddress;
   selectedAsset: IAsset;
+  nonce?: number;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;

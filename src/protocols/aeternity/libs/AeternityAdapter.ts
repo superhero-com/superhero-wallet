@@ -502,7 +502,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   override async spend(
     amount: number,
     recipient: string,
-    options: { payload: string },
+    options: { payload: string; nonce: number },
   ): Promise<ITransferResponse> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
@@ -512,6 +512,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       {
         waitMined: false,
         payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
+        nonce: options.nonce,
       },
     );
   }
