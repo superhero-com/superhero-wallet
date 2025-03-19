@@ -59,12 +59,19 @@ defineRule(
 defineRule(
   'account_address',
   (value: string[], [protocol, networkType]: [Protocol, NetworkType]) => {
-    if (typeof value === 'string' || !value) return false;
+    let addresses: string[] = [];
+    if (!value) return false;
+
+    if (typeof value === 'string') {
+      addresses = [value];
+    } else {
+      addresses = value;
+    }
 
     const validationResults: boolean[] = [];
 
     // eslint-disable-next-line no-restricted-syntax
-    for (const item of value) {
+    for (const item of addresses) {
       const isValid = protocol
         ? ProtocolAdapterFactory.getAdapter(protocol).isAccountAddressValid(item, networkType)
         : !!getProtocolByAddress(item);
@@ -72,7 +79,7 @@ defineRule(
       validationResults.push(isValid);
     }
 
-    const invalidItems = value.filter((_, index) => !validationResults[index]);
+    const invalidItems = addresses.filter((_, index) => !validationResults[index]);
 
     if (invalidItems.length === 0) return true;
 
