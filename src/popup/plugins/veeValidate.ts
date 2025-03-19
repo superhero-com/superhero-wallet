@@ -68,18 +68,9 @@ defineRule(
       addresses = value;
     }
 
-    const validationResults: boolean[] = [];
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const item of addresses) {
-      const isValid = protocol
-        ? ProtocolAdapterFactory.getAdapter(protocol).isAccountAddressValid(item, networkType)
-        : !!getProtocolByAddress(item);
-
-      validationResults.push(isValid);
-    }
-
-    const invalidItems = addresses.filter((_, index) => !validationResults[index]);
+    const invalidItems = addresses.filter((address) => !(protocol
+      ? ProtocolAdapterFactory.getAdapter(protocol).isAccountAddressValid(address, networkType)
+      : !!getProtocolByAddress(address)));
 
     if (invalidItems.length === 0) return true;
 
