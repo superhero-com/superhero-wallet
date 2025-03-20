@@ -45,6 +45,7 @@ import {
 } from '@/composables';
 import { PROTOCOLS } from '@/constants';
 import { ETH_COIN_SYMBOL } from '@/protocols/ethereum/config';
+import { EthereumAdapter } from '@/protocols/ethereum/libs/EthereumAdapter';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -103,6 +104,8 @@ export default defineComponent({
       let actionResult;
       const lastActiveEthAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
       try {
+        let currentNonce = (await (ethAdapter as EthereumAdapter)
+          .getTransactionCount(lastActiveEthAccount?.address!)) + 1;
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           if (!isSelectedAssetEthCoin.value) {
@@ -115,6 +118,7 @@ export default defineComponent({
                 fromAccount: lastActiveEthAccount?.address,
                 maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
                 maxFeePerGas: props.transferData.maxFeePerGas,
+                nonce: currentNonce,
               },
             );
           } else {
@@ -126,9 +130,11 @@ export default defineComponent({
                 fromAccount: lastActiveEthAccount?.address,
                 maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
                 maxFeePerGas: props.transferData.maxFeePerGas,
+                nonce: currentNonce,
               },
             );
           }
+          currentNonce += 1;
 
           if (actionResult) {
             const transaction: ITransaction = {

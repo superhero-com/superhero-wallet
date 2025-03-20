@@ -348,6 +348,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       fromAccount: AccountAddress;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
+      nonce: number;
     },
   ): Promise<ITransferResponse> {
     const {
@@ -385,7 +386,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
-    const [nonce, gasLimit] = await Promise.all([
+    const [gasLimit] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas(),
     ]);
@@ -393,7 +394,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
       chainId: toHex(chainId),
-      nonce,
+      nonce: options.nonce,
       to: contractId,
       data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
       value: 0x0,
@@ -526,7 +527,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       throw new Error('Ethereum transaction construction & signing was initiated from non existing or not ethereum account.');
     }
 
-    const nonce = await this.getTransactionCount(options.fromAccount);
+    const { nonce } = options;
     const { chainId } = ethActiveNetworkSettings.value;
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
@@ -556,6 +557,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       fromAccount: AccountAddress;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
+      nonce: number;
     },
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
