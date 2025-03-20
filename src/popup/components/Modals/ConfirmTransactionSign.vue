@@ -260,7 +260,7 @@ import {
   usePopupProps,
   useTransactionData,
 } from '@/composables';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   getAeFee,
@@ -323,7 +323,11 @@ export default defineComponent({
     const { getAeSdk } = useAeSdk();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { isUnknownDapp, popupProps, setPopupProps } = usePopupProps();
-    const { getProtocolAvailableTokens, getTxAssetSymbol } = useFungibleTokens();
+    const {
+      loadSingleToken,
+      getProtocolAvailableTokens,
+      getTxAssetSymbol,
+    } = useFungibleTokens();
     const { openModal } = useModals();
     const { areTokenSalesReady, tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
 
@@ -490,6 +494,16 @@ export default defineComponent({
       return (idx === 0) ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
     }
 
+    async function loadContractInfo(contractId: string | undefined) {
+      if (contractId) {
+        try {
+          await loadSingleToken(contractId, protocol);
+        } catch (e) {
+          handleUnknownError(e);
+        }
+      }
+    }
+
     async function confirm() {
       if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.airGap) {
         const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
@@ -594,7 +608,20 @@ export default defineComponent({
             value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
           }));
 
-          const allTokens = await getTokens(transaction.value.tx);
+          // 1. Before resolving transaction, we are not aware of the contractIds of the tokens.
+          // 2. After resolving transaction, we would need to ensure that tokens info were fetched.
+          // 3. After fetching, resolve transaction again, but with fetched tokens info.
+
+          let allTokens = await getTokens(transaction.value.tx);
+
+          await Promise.all(allTokens.map((token) => {
+            if (token.contractId !== AE_CONTRACT_ID) {
+              return loadContractInfo(token.contractId);
+            }
+            return undefined;
+          }));
+
+          allTokens = await getTokens(transaction.value.tx);
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
@@ -635,6 +662,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (popupProps.value) {
+        await loadContractInfo(popupProps.value?.tx?.contractId);
         await Promise.all([
           verifyTransaction(),
           loadAdditionalContractCallInfo(),

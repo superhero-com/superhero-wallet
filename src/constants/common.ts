@@ -129,6 +129,7 @@ export const STORAGE_KEYS = {
   namesDefault: 'names-default',
   notificationsSettings: 'notifications-settings',
   lastRoute: 'last-route',
+  lastAvailableTokensLoadTime: 'last-available-tokens-load-time',
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
   permissions: 'permissions',

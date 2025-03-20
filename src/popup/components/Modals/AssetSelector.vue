@@ -41,6 +41,7 @@
 import {
   computed,
   defineComponent,
+  onMounted,
   PropType,
   ref,
   watch,
@@ -51,7 +52,7 @@ import type {
   RejectCallback,
   ResolveCallback,
 } from '@/types';
-import { useAccountAssetsList } from '@/composables';
+import { useAccountAssetsList, useFungibleTokens } from '@/composables';
 import { ASSETS_PER_PAGE } from '@/constants';
 
 import Modal from '../Modal.vue';
@@ -84,6 +85,8 @@ export default defineComponent({
     const isFullyOpen = ref(false);
     const pageNumber = ref(1);
 
+    const { loadAvailableTokens } = useFungibleTokens();
+
     const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
       withBalanceOnly: props.withBalanceOnly,
@@ -105,6 +108,12 @@ export default defineComponent({
         pageNumber.value = 1;
       },
     );
+
+    onMounted(() => {
+      if (!props.withBalanceOnly) {
+        loadAvailableTokens();
+      }
+    });
 
     return {
       accountAssetsToDisplay,
