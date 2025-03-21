@@ -337,6 +337,7 @@ export default defineComponent({
 
   &.disable-transitions * {
     transition: none !important;
+    animation: none !important;
   }
 
   position: relative;

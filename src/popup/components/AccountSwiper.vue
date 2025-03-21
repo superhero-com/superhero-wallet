@@ -37,7 +37,7 @@
           <AccountCardAdd
             :is-multisig="isMultisig"
             :idx="addressList.length"
-            selected
+            :selected="currentIdx === addressList.length"
           />
         </SwiperSlide>
       </Swiper>
