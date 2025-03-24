@@ -38,6 +38,7 @@ import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import {
   BTC_COIN_PRECISION,
+  BTC_NETWORK_ADDITIONAL_SETTINGS,
   BTC_NETWORK_DEFAULT_SETTINGS,
   BTC_COINGECKO_COIN_ID,
   BTC_CONTRACT_ID,
@@ -85,6 +86,13 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
       getLabel: () => tg('pages.network.networkUrlLabel'),
     },
+    {
+      key: 'explorerUrl',
+      required: true,
+      defaultValue: BTC_NETWORK_ADDITIONAL_SETTINGS[NETWORK_TYPE_TESTNET].explorerUrl,
+      getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
+      getLabel: () => tg('pages.network.explorerUrlLabel'),
+    },
   ];
 
   override getAccountPrefix() {
@@ -96,8 +104,14 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    const { btcActiveNetworkPredefinedSettings } = useBtcNetworkSettings();
-    return new Blockstream(btcActiveNetworkPredefinedSettings.value.explorerUrl!);
+    const {
+      btcActiveNetworkSettings,
+      btcActiveNetworkPredefinedSettings,
+    } = useBtcNetworkSettings();
+    return new Blockstream(
+      btcActiveNetworkSettings.value.explorerUrl
+      ?? btcActiveNetworkPredefinedSettings.value.explorerUrl,
+    );
   }
 
   override getAmountPrecision(): number {

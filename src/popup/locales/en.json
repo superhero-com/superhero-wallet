@@ -1221,6 +1221,8 @@
       "networkMiddlewarePlaceholder": "Enter network middleware URL",
       "networkMiddlewareLabel": "Network middleware",
       "backendUrlPlaceholder": "Enter tipping backend URL",
+      "explorerUrlLabel": "Explorer",
+      "explorerUrlPlaceholder": "Enter explorer URL",
       "backendUrlLabel": "Tipping backend",
       "chainIdPlaceholder": "1",
       "chainIdLabel": "Chain id (number)",

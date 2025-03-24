@@ -9,7 +9,7 @@ import type { AccountAddress, INetworkProtocolSettings } from '@/types';
 export type AeNetworkProtocolSettings =
   | 'middlewareUrl'
   | 'backendUrl' // Tipping backend URL, rename in future to something more meaningful.
-
+  | 'explorerUrl'
 /**
  * Settings that are not editable by the user but are assigned to specific network types.
  */
