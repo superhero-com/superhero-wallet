@@ -42,7 +42,7 @@
         />
 
         <ConnectionStatus
-          v-if="!modalsOpen.length"
+          v-show="!modalsOpen.length"
           class="connection-status"
         />
 
@@ -398,9 +398,6 @@ export default defineComponent({
       position: fixed;
       z-index: $z-index-header;
       bottom: 0;
-      padding-bottom: env(safe-area-inset-bottom);
-      left: 0;
-      width: 100%;
     }
 
     &.show-header {
