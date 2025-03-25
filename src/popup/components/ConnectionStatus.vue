@@ -17,6 +17,7 @@
           :title="status.title"
           :msg="status.description"
           :icon="status.icon"
+          :option="status.option"
           warning
           class="btn-help"
         />

@@ -120,6 +120,11 @@
       "statusMessage": "Temporary aeternity backend failure.",
       "title": "aeternity backend failure",
       "description": "Some features such as setting default name and tipping related functionality may not be accessible at the moment due to temporary aeternity backend failure. <p> Transaction history is still accessible except the claim tip transactions that cannot be currently fetched and displayed. </p>"
+    },
+    "currencies": {
+      "statusMessage": "Unable to update assets fiat value.",
+      "title": "Unable to fetch assets fiat value",
+      "description": "Superhero Wallet is temporarily unable to properly fetch and display the updated fiat value of assets due to exceeding third party API calls limit. <p></p>Check real-time prices at <a> CoinGecko </a>"
     }
   },
   "dashboard": {

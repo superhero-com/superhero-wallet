@@ -7,6 +7,7 @@ import {
   useConnection,
   useAeSdk,
   useMultisigAccounts,
+  useCurrencies,
 } from '@/composables';
 import { StatusIconType } from '@/types';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
@@ -19,6 +20,7 @@ interface StatusType {
   title?: TranslateResult;
   description?: TranslateResult;
   icon?: StatusIconType;
+  option?: any;
 }
 
 const CONNECTED_DISPLAY_TIME = 2000;
@@ -32,6 +34,7 @@ export function useConnectionStatus() {
   const { middlewareStatus, isMiddlewareUnavailable } = useAeMiddleware();
   const { isMultisigBackendUnavailable } = useMultisigAccounts({ pollingDisabled: true });
   const { isBackendUnavailable } = useAeTippingBackend();
+  const { isCurrenciesUnavailable } = useCurrencies({ pollingDisabled: true });
   const route = useRoute();
 
   const justBeenConnected = ref(false);
@@ -76,6 +79,17 @@ export function useConnectionStatus() {
           title: t('connectionStatus.node.error.title'),
           description: t('connectionStatus.node.error.description'),
           icon: 'critical',
+        };
+      case isCurrenciesUnavailable.value:
+        return {
+          statusMessage: t('connectionStatus.currencies.statusMessage'),
+          title: t('connectionStatus.currencies.title'),
+          description: t('connectionStatus.currencies.description'),
+          icon: 'critical',
+          option: {
+            href: 'https://www.coingecko.com/',
+            target: '_blank',
+          },
         };
       case isMiddlewareUnavailable.value:
         return {
