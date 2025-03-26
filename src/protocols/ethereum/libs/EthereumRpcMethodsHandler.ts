@@ -252,6 +252,11 @@ export async function handleEthereumRpcMethod(
     }
     return ERROR_USER_REJECTED_REQUEST;
   }
+
+  if (method === ETH_RPC_METHODS.web3ClientVersion) {
+    return { result: `Superhero Wallet/v${process.env.npm_package_version}` };
+  }
+
   if (
     method !== ETH_RPC_WALLET_EVENTS.chainChanged
     && Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
