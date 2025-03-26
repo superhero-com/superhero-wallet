@@ -43,7 +43,7 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -55,6 +55,7 @@ import {
   ETH_COINGECKO_COIN_ID,
   ETH_CONTRACT_ID,
   ETH_GAS_LIMIT,
+  ETH_NETWORK_ADDITIONAL_SETTINGS,
   ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_NETWORK_DEFAULT_ENV_SETTINGS,
   ETH_PROTOCOL_NAME,
@@ -109,6 +110,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       getPlaceholder: () => tg('pages.network.chainIdPlaceholder'),
       getLabel: () => tg('pages.network.chainIdLabel'),
     },
+    {
+      key: 'explorerUrl',
+      required: true,
+      defaultValue: ETH_NETWORK_ADDITIONAL_SETTINGS[NETWORK_TYPE_TESTNET].explorerUrl,
+      getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
+      getLabel: () => tg('pages.network.explorerUrlLabel'),
+    },
   ];
 
   async getTransactionCount(address: string): Promise<number> {
@@ -130,8 +138,14 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-    return new EtherscanExplorer(ethActiveNetworkPredefinedSettings.value.explorerUrl!);
+    const {
+      ethActiveNetworkSettings,
+      ethActiveNetworkPredefinedSettings,
+    } = useEthNetworkSettings();
+    return new EtherscanExplorer(
+      ethActiveNetworkSettings.value.explorerUrl
+      ?? ethActiveNetworkPredefinedSettings.value.explorerUrl,
+    );
   }
 
   override getUrlTokenKey(): string {

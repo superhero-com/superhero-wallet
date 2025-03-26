@@ -34,11 +34,13 @@ export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSett
     nodeUrl: AE_NETWORK_MAINNET_NODE_URL,
     middlewareUrl: 'https://mainnet.aeternity.io/mdw',
     backendUrl: 'https://superhero-backend-mainnet.prd.service.aepps.com',
+    explorerUrl: 'https://aescan.io',
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: AE_NETWORK_TESTNET_NODE_URL,
     middlewareUrl: 'https://testnet.aeternity.io/mdw',
     backendUrl: 'https://superhero-backend-testnet.prd.service.aepps.com',
+    explorerUrl: 'https://testnet.aescan.io',
   },
 };
 

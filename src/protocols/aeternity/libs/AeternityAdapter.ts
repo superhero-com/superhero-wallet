@@ -113,6 +113,13 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       getPlaceholder: () => tg('pages.network.backendUrlPlaceholder'),
       getLabel: () => tg('pages.network.backendUrlLabel'),
     },
+    {
+      key: 'explorerUrl',
+      required: true,
+      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.explorerUrl,
+      getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
+      getLabel: () => tg('pages.network.explorerUrlLabel'),
+    },
   ];
 
   override getAccountPrefix() {
@@ -120,8 +127,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-    return new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
+    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    return new AeScan(
+      aeActiveNetworkSettings.value.explorerUrl
+      ?? aeActiveNetworkPredefinedSettings.value.explorerUrl,
+    );
   }
 
   override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces = {}): number {
