@@ -170,7 +170,10 @@ export function usePermissions() {
 
     if (fullUrl) {
       const url = new URL(fullUrl);
-      if (checkPermission(url.host, method, modalProps.tx)) {
+      if (
+        checkPermission(url.host, method, modalProps.tx)
+        && !(method === METHODS.sign && modalProps.protocol !== PROTOCOLS.aeternity)
+      ) {
         try {
           await Promise.race(
             [
