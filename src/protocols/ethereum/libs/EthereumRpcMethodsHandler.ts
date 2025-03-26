@@ -276,5 +276,5 @@ export async function handleEthereumRpcMethod(
 
   // eslint-disable-next-line no-console
   console.warn(`Method ${method} is not supported.`);
-  return { error: { code: -32004, message: 'Method is not supported' } };
+  return { error: { code: -32004, message: `Method "${method}" is not supported` } };
 }

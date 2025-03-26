@@ -283,7 +283,6 @@ class SuperheroWalletMessageListener {
 
   // sends a message to superheroWallets background script
   private readonly WindowEthereumRequest = async (methodAndParams: { readonly method: string; readonly params?: readonly unknown[] }) => {
-    if (this.waitForAccountsFromWallet !== undefined) await this.waitForAccountsFromWallet; // wait for wallet to return to us before continuing with other requests
     try {
       // make a message that the background script will catch and reply us. We'll wait until the background script replies to us and return only after that
       return await this.sendMessageToBackgroundPage({ method: methodAndParams.method, params: methodAndParams.params });
@@ -405,10 +404,6 @@ class SuperheroWalletMessageListener {
       if (SuperheroWalletMessageListener.getErrorCodeAndMessage(error)) return await this.sendMessageToBackgroundPage({ method: 'eth_accounts_reply', params: [{ type: 'error', requestAccounts: false, error }] });
       if (error instanceof Error) return await this.sendMessageToBackgroundPage({ method: 'eth_accounts_reply', params: [{ type: 'error', requestAccounts: false, error: { message: error.message, code: METAMASK_ERROR_BLANKET_ERROR } }] });
       return await this.sendMessageToBackgroundPage({ method: 'eth_accounts_reply', params: [{ type: 'error', requestAccounts: false, error: { message: 'unknown error', code: METAMASK_ERROR_BLANKET_ERROR } }] });
-    } finally {
-      if (this.waitForAccountsFromWallet === undefined) return;
-      this.waitForAccountsFromWallet.resolve(true);
-      this.waitForAccountsFromWallet = undefined;
     }
   };
 

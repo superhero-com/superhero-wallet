@@ -91,6 +91,8 @@ const runContentScript = () => {
           ...(event.data.params?.[1] && !event.data.params?.[0]?.tag
             ? { tag: event.data.params[1] } : {}),
         });
+      } else if (event.data.superheroWalletRequest) {
+        handleEthRpcRequest(event, method, event.data.params);
       } else if (!event.data.resolve) {
         sendToOffscreen(method, event.data);
       }
