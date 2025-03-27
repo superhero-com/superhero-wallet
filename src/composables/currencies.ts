@@ -52,13 +52,18 @@ const currentCurrencyCode = useStorageRef<CurrencyCode>(
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
+const isCurrenciesUnavailable = ref(false);
+
 export function useCurrencies({
   pollingDisabled = false,
 }: UseCurrenciesOptions = {}) {
   const { protocolsInUse, isLoggedIn } = useAccounts();
+
   const currentCurrencyInfo = computed(
     (): ICurrency => CURRENCIES.find(({ code }) => code === currentCurrencyCode.value)!,
   );
+
+  const noCurrencyRateFiat = computed(() => `${currentCurrencyCode.value.toUpperCase()} —`);
 
   function getCurrentCurrencyRate(protocol: Protocol): number {
     return currencyRates.value?.[protocol]?.[currentCurrencyCode.value] || 0;
@@ -106,6 +111,9 @@ export function useCurrencies({
     if (fetchedCurrencyRates) {
       currencyRates.value = fetchedCurrencyRates;
     }
+    isCurrenciesUnavailable.value = (
+      !Object.keys(currencyRates.value).length && !Object.keys(fetchedCurrencyRates ?? {}).length
+    );
     isLoadingCurrencies.value = false;
   }
 
@@ -136,6 +144,9 @@ export function useCurrencies({
    *   according to the user's browser settings
    */
   function getFormattedFiat(value: number, protocol: Protocol) {
+    if (getCurrentCurrencyRate(protocol) === 0) {
+      return noCurrencyRateFiat.value;
+    }
     return formatCurrency(getFiat(value, protocol));
   }
 
@@ -146,7 +157,10 @@ export function useCurrencies({
    * @param protocol used protocol
    */
   function getFormattedAndRoundedFiat(value: number, protocol: Protocol): string {
-    if (!getCurrentCurrencyRate(protocol) || value === 0) {
+    if (getCurrentCurrencyRate(protocol) === 0) {
+      return noCurrencyRateFiat.value;
+    }
+    if (value === 0) {
       return formatCurrency(0);
     }
     const converted = getFiat(value, protocol);
@@ -178,6 +192,8 @@ export function useCurrencies({
     currencyRates,
     currentCurrencyCode,
     currentCurrencyInfo,
+    isCurrenciesUnavailable,
+    noCurrencyRateFiat,
     getCurrentCurrencyRate,
     loadCoinsData,
     loadCurrencyRates,

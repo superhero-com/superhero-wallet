@@ -20,10 +20,12 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { formatCurrency } = useCurrencies();
+    const { isCurrenciesUnavailable, noCurrencyRateFiat, formatCurrency } = useCurrencies();
 
     const totalAmount = computed(
-      () => formatCurrency(+props.totalBalance),
+      () => isCurrenciesUnavailable.value
+        ? noCurrencyRateFiat.value
+        : formatCurrency(+props.totalBalance),
     );
 
     return {

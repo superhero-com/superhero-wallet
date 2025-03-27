@@ -95,7 +95,6 @@ export default defineComponent({
     const {
       getFormattedAndRoundedFiat,
       marketData,
-      formatCurrency,
     } = useCurrencies();
     const { balance } = useBalances();
 
@@ -128,7 +127,6 @@ export default defineComponent({
       totalAmountFormatted,
       currentAssetFiatPriceFormatted,
       currentAsset,
-      formatCurrency,
       handleAssetSelected,
     };
   },

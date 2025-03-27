@@ -40,7 +40,7 @@ import BtnBase from '@/popup/components/buttons/BtnBase.vue';
 import AnimatedPendingIcon from '@/icons/animated-pending.svg?vue-component';
 
 const SIZES = ['sm', 'rg'] as const;
-const VARIANTS = ['default', 'success', 'danger'] as const;
+const VARIANTS = ['default', 'success', 'danger', 'warning'] as const;
 
 export default defineComponent({
   components: {
@@ -135,6 +135,11 @@ export default defineComponent({
 
     &-danger {
       --icon-color-hover: #{$color-danger};
+    }
+
+    &-warning {
+      --icon-color: #{$color-warning};
+      --icon-color-hover: #{$color-warning};
     }
   }
 }
