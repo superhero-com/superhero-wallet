@@ -216,6 +216,15 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         wcSession.value.namespaces[ETH_CHAIN_NAMESPACE].accounts = accounts;
 
         try {
+          await web3wallet.emitSessionEvent({
+            topic: wcSession.value.topic,
+            event: {
+              name: 'accountsChanged',
+              data: [newAccount.address],
+            },
+            chainId: chains[0],
+          });
+
           const { acknowledged } = await web3wallet.updateSession({
             topic: wcSession.value.topic,
             namespaces: wcSession.value.namespaces,
@@ -267,7 +276,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
                   accounts,
                   chains,
                   // approving all the required events
-                  events: proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.events || [],
+                  events: uniq([...proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.events || [], 'accountsChanged']),
                   methods,
                 },
               },
@@ -301,7 +310,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       // Try to restore open WC session:
       // - after refreshing the tab or extension (only once),
       // - in the extension offscreen when the new session state is detected (constant monitoring).
-      watch(wcSession, async (session, oldSession) => {
+      watch(wcSession, async (session) => {
         if (session) {
           if (!web3wallet) {
             web3wallet = await initWeb3wallet();
@@ -310,12 +319,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           const sessions = web3wallet.getActiveSessions();
           const activeTopic = Object.values(sessions)?.[0]?.topic;
 
-          if (!oldSession && activeTopic && activeTopic === session.topic) {
+          if (activeTopic && activeTopic === session.topic) {
             monitorActiveSessionEvents();
-
-            if (!offscreen) {
-              monitorActiveAccountAndNetwork();
-            }
+            monitorActiveAccountAndNetwork();
           } else {
             disconnect();
           }
