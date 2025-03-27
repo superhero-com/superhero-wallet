@@ -122,6 +122,8 @@ export const ETH_RPC_METHODS = {
   requestPermissions: 'wallet_requestPermissions',
   switchNetwork: 'wallet_switchEthereumChain',
   revokePermissions: 'wallet_revokePermissions',
+  // app-version
+  web3ClientVersion: 'web3_clientVersion',
 } as const;
 
 export const ETH_RPC_WALLET_EVENTS = {
