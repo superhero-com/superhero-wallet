@@ -305,7 +305,7 @@
         "chain": {
           "title": "Send to .chain name",
           "linkTitle": "claim your own .chain name",
-          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses."
+          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s account. Before sending any funds make sure the recipient is still the name owner."
         }
       }
     },

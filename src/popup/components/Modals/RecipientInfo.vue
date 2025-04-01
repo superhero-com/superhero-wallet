@@ -3,17 +3,13 @@
     v-bind="{ ...$attrs, resolve }"
     icon="info"
     :title="$t('modals.recipient.title')"
+    :subtitle="isProtocolAe
+      ? $t('modals.recipient.ae-sub-header')
+      : $t('modals.recipient.sub-header', { protocolName })"
     :close="resolve"
-    full-screen
   >
     <template #msg>
       <div class="msg">
-        <span class="sub-header">
-          {{ isProtocolAe
-            ? $t('modals.recipient.ae-sub-header')
-            : $t('modals.recipient.sub-header', { protocolName })
-          }}
-        </span>
         <p :class="{ capitalize: !isProtocolAe }">
           <i18n-t
             keypath="modals.recipient.msg.publicAddress.msg"
@@ -33,22 +29,12 @@
             keypath="modals.recipient.msg.chain.msg"
             tag="div"
             scope="global"
+            class="aens"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
-          </i18n-t>
-        </p>
-        <p v-if="UNFINISHED_FEATURES && isProtocolAe">
-          <i18n-t
-            keypath="modals.readMore.msg"
-            class="help"
-            scope="global"
-          >
-            <a :href="AE_BLOG_CLAIM_TIP_URL">
-              {{ $t('modals.readMore.linkTitle') }}
-            </a>
           </i18n-t>
         </p>
       </div>
@@ -75,8 +61,7 @@ import {
   Protocol,
   ResolveCallback,
 } from '@/types';
-import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
-import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -98,8 +83,6 @@ export default defineComponent({
     );
 
     return {
-      AE_BLOG_CLAIM_TIP_URL,
-      UNFINISHED_FEATURES,
       protocolName,
       isProtocolAe,
     };
@@ -111,21 +94,15 @@ export default defineComponent({
 @use '@/styles/share-info';
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
-@use '@/styles/mixins';
 
 .msg {
-  @extend %face-sans-14-regular;
+  @extend %face-sans-15-regular;
 
-  text-align: left;
+  text-align: center;
   line-height: 20px;
 
-  .sub-header {
-    @extend %face-sans-16-medium;
-
-    @include mixins.flex(center, center);
-
-    text-align: center;
-    margin-bottom: 20px;
+  .aens {
+    padding: 10px;
   }
 
   .title {
