@@ -18,6 +18,11 @@
           data-cy="networks-settings"
         />
         <PanelItem
+          :to="{ name: ROUTE_TOKEN_SALES }"
+          :title="$t('pages.titles.tokenSales')"
+          data-cy="token-sales"
+        />
+        <PanelItem
           :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
           :title="$t('pages.titles.permissionsSettings')"
         />
@@ -66,6 +71,7 @@ import {
   ROUTE_PERMISSIONS_SETTINGS,
   ROUTE_SECURE_LOGIN_SETTINGS,
   ROUTE_SEED_PHRASE_SETTINGS,
+  ROUTE_TOKEN_SALES,
 } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
@@ -102,6 +108,7 @@ export default defineComponent({
       ROUTE_PERMISSIONS_SETTINGS,
       ROUTE_SECURE_LOGIN_SETTINGS,
       ROUTE_SEED_PHRASE_SETTINGS,
+      ROUTE_TOKEN_SALES,
       activeNetwork,
       protocolsInUse,
       saveErrorLog,

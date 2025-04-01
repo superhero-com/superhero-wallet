@@ -670,7 +670,8 @@
       "appsBrowser": "Browse the æcosystem",
       "addressBook": "Address book",
       "addressBookEdit": "Edit address record",
-      "addressBookAdd": "Add new address"
+      "addressBookAdd": "Add new address",
+      "tokenSales": "Token sales"
     },
     "errors-log-settings": {
       "description": "<p>Superhero Wallet is able of maintaining an error log file on your device, recording the last {0} errors encountered.</p><p>The error log can be exported in JSON format to facilitate debugging or support assistance.</p>",
@@ -764,6 +765,18 @@
         "unlock": "Unlock",
         "forgot": "Forgot password?"
       }
+    },
+    "tokenSales": {
+      "heading": "You may add custom token sales factory URLs. This will allow Superhero Wallet to support properly token sales on your preferred dApps.",
+      "inputLabel": "Token sales URL",
+      "inputPlaceholder": "Enter custom token sales factory URL",
+      "addUrl": "Add URL",
+      "helpTitle": "Custom token sales URLs",
+      "helpSubtitle": "to manage token sales on various dApps",
+      "urlListLabel": "Token sales URLs",
+      "errorInvalidUrl": "Please enter a valid token sales factory URL.",
+      "errorUrlExists": "This token sales URL has been already added.",
+      "errorTimeout": "URL connection timed out. Please try again later."
     },
     "setPassword": {
       "title": "Set a password",

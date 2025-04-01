@@ -25,6 +25,11 @@ const {
   runCallbacks: runOnNetworkChangeCallbacks,
 } = createCallbackRegistry<(newNetwork: INetwork, oldNetwork: INetwork) => any>();
 
+const {
+  addCallback: onNetworkRemoved,
+  runCallbacks: runOnNetworkRemovedCallbacks,
+} = createCallbackRegistry<(oldNetwork: INetwork) => any>();
+
 const defaultNetworks: INetwork[] = [];
 const areNetworksRestored = ref(false);
 
@@ -115,7 +120,9 @@ export function useNetworks() {
         if (name === activeNetwork.value.name) {
           switchNetwork(NETWORK_NAME_MAINNET);
         }
+        const oldNetwork = customNetworks.value[index];
         customNetworks.value.splice(index, 1);
+        runOnNetworkRemovedCallbacks(oldNetwork);
         return true;
       }
       return false;
@@ -153,5 +160,6 @@ export function useNetworks() {
     deleteCustomNetwork,
     resetNetworks,
     onNetworkChange,
+    onNetworkRemoved,
   };
 }
