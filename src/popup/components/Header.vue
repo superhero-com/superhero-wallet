@@ -185,6 +185,7 @@ export default defineComponent({
       addressBook: () => t('pages.titles.addressBook'),
       addressBookEdit: () => t('pages.titles.addressBookEdit'),
       addressBookAdd: () => t('pages.titles.addressBookAdd'),
+      tokenSales: () => t('pages.titles.tokenSales'),
     };
 
     const currentHomeRouteName = computed(

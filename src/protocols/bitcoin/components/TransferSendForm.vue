@@ -106,10 +106,6 @@ import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmou
 import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 
-import EditIcon from '@/icons/pencil.svg?vue-component';
-import DeleteIcon from '@/icons/trash.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
-
 export default defineComponent({
   name: 'BtcTransferSendForm',
   components: {
@@ -291,9 +287,6 @@ export default defineComponent({
       clearPayload,
       scanTransferQrCode,
       handleAssetChange,
-      EditIcon,
-      DeleteIcon,
-      PlusCircleIcon,
       submit,
       setMaxAmount,
       toBitcoin,

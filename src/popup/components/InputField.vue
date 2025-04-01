@@ -26,6 +26,7 @@
         v-if="help || showHelp"
         class="btn-help"
         :title="help?.title"
+        :subtitle="help?.subtitle"
         :msg="help?.msg"
         :full-screen="!!help?.fullscreen"
         :show-above-all="!!help?.showAboveAll"
@@ -163,8 +164,9 @@ export default defineComponent({
       type: Object as PropType<{
         title: string;
         msg: string;
-        fullscreen: Boolean;
-        showAboveAll: Boolean;
+        subtitle?: string;
+        fullscreen?: Boolean;
+        showAboveAll?: Boolean;
       }>,
       default: null,
     },

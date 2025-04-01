@@ -20,6 +20,7 @@ export default defineComponent({
   components: { BtnPlain, QuestionCircle },
   props: {
     title: { type: String, default: '' },
+    subtitle: { type: String, default: '' },
     msg: { type: String, default: '' },
     icon: { type: String, default: '' },
     option: { type: Object, default: null },
@@ -38,6 +39,7 @@ export default defineComponent({
         openModal(MODAL_HELP, {
           icon: props.icon || 'info',
           title: props.title,
+          subtitle: props.subtitle,
           msg: props.msg,
           option: props.option,
           textCenter: true,

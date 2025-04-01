@@ -134,8 +134,11 @@ export const STORAGE_KEYS = {
   fungibleTokenBalances: 'fungible-token-balances',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
+
   tokenSales: 'token-sales',
   tokenFactories: 'token-factories',
+  customTokenSalesUrls: 'custom-token-sales-urls',
+
   transactionsLatest: 'transactions-latest',
   transactionsLoaded: 'transactions-loaded',
   transactionsPending: 'transactions-pending',
