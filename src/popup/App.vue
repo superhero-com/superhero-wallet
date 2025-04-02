@@ -381,8 +381,10 @@ export default defineComponent({
       inset: 0;
       visibility: hidden;
       opacity: 0;
-      background: $color-black url('../image/wallet-locked-bg.svg');
-      background-size: cover;
+      background: $color-bg-app url('../image/wallet-locked-bg.svg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center top;
       transition: all 0.5s ease-in-out;
       transform: scale(1.1);
       will-change: opacity, transform;
