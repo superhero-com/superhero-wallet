@@ -178,7 +178,7 @@ export default defineComponent({
     const numericFee = computed(() => +fee.value.toFixed());
     const numericMaxFee = computed(() => +maxFee.value.toFixed());
 
-    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })} ${t('modals.send.recipientPlaceholderENS')}`;
+    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })}`;
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
