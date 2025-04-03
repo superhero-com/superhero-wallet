@@ -42,8 +42,8 @@
       >
         <template #label-after>
           <BtnMaxAmount
-            :is-max="formModel?.amount?.toString() === max.toString()"
-            @click="setMaxAmount"
+            :is-max="shouldUseMaxAmount"
+            @click="toggleMaxAmount"
           />
         </template>
       </TransferSendAmount>
@@ -88,6 +88,7 @@ import {
   useNetworks,
 } from '@/composables';
 import { useTransferSendForm } from '@/composables/transferSendForm';
+import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import {
   executeAndSetInterval,
@@ -141,6 +142,7 @@ export default defineComponent({
 
     const hasMultisigTokenWarning = ref(false);
     const isUrlTippingEnabled = ref(false);
+    const shouldUseMaxAmount = ref(false);
 
     const {
       formModel,
@@ -172,7 +174,8 @@ export default defineComponent({
     ));
 
     const numericFee = computed(() => +fee.value.toFixed());
-    const max = computed(() => balance.value.minus(fee.value));
+
+    const { max } = useCoinMaxAmount({ formModel, fee });
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -194,8 +197,11 @@ export default defineComponent({
       }
     }
 
-    function setMaxAmount() {
-      formModel.value.amount = max.value.isPositive() ? max.value.toString() : '0';
+    function toggleMaxAmount() {
+      shouldUseMaxAmount.value = !shouldUseMaxAmount.value;
+      if (shouldUseMaxAmount.value) {
+        formModel.value.amount = max.value;
+      }
     }
 
     async function updateFeeList() {
@@ -258,6 +264,15 @@ export default defineComponent({
     });
 
     watch(
+      max,
+      (newMax) => {
+        if (shouldUseMaxAmount.value) {
+          formModel.value.amount = newMax;
+        }
+      },
+    );
+
+    watch(
       hasError,
       (val) => emit('error', val),
       { deep: true },
@@ -291,10 +306,11 @@ export default defineComponent({
       balance,
       max,
       clearPayload,
+      shouldUseMaxAmount,
       scanTransferQrCode,
       handleAssetChange,
       submit,
-      setMaxAmount,
+      toggleMaxAmount,
       toBitcoin,
     };
   },

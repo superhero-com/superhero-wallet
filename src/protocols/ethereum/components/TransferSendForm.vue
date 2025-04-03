@@ -87,6 +87,7 @@ import {
 } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useTransferSendForm } from '@/composables/transferSendForm';
+import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { executeAndSetInterval } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -95,7 +96,6 @@ import {
   ETH_COIN_SYMBOL,
   ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
-import { useEthMaxAmount } from '@/protocols/ethereum/composables/ethMaxAmount';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
@@ -173,7 +173,7 @@ export default defineComponent({
 
     const shouldUseMaxAmount = ref(false);
 
-    const { max } = useEthMaxAmount({ formModel, fee: maxFee });
+    const { max } = useCoinMaxAmount({ formModel, fee: maxFee });
 
     const numericFee = computed(() => +fee.value.toFixed());
     const numericMaxFee = computed(() => +maxFee.value.toFixed());
