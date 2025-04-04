@@ -345,7 +345,6 @@ export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_PROTOCOL_SELECT = 'protocol-select';
 export const MODAL_PERMISSION_MANAGER = 'permission-manager';
 export const MODAL_SCAN_QR = 'scan-qr';
-export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';

@@ -26,7 +26,6 @@ import {
   MODAL_PRIVATE_KEY_IMPORT,
   MODAL_PROTOCOL_SELECT,
   MODAL_SCAN_QR,
-  MODAL_RECIPIENT_HELPER,
   MODAL_RECIPIENT_INFO,
   MODAL_RESET_WALLET,
   MODAL_TRANSFER_RECEIVE,
@@ -75,7 +74,6 @@ import QrCodeScanner from '@/popup/components/Modals/QrCodeScanner.vue';
 import Help from '@/popup/components/Modals/Help.vue';
 import AssetSelector from '@/popup/components/Modals/AssetSelector.vue';
 import ResetWallet from '@/popup/components/Modals/ResetWalletModal.vue';
-import RecipientHelper from '@/popup/components/Modals/RecipientHelper.vue';
 import RecipientInfo from '@/popup/components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '@/popup/components/Modals/ConsensusInfo.vue';
 import PayloadForm from '@/popup/components/Modals/PayloadForm.vue';
@@ -199,9 +197,6 @@ export default () => {
   });
   registerModal(MODAL_RESET_WALLET, {
     component: ResetWallet,
-  });
-  registerModal(MODAL_RECIPIENT_HELPER, {
-    component: RecipientHelper,
   });
   registerModal(MODAL_RECIPIENT_INFO, {
     component: RecipientInfo,
