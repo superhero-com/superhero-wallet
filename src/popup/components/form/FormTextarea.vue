@@ -22,7 +22,7 @@
         :disabled="readonly"
         @keydown.enter.prevent="handleEnterClick"
         @input="(payload) => handleInput(payload as InputEvent)"
-        @blur="(payload) => handleInput(payload as unknown as InputEvent)"
+        @blur="handleBlur"
       />
     </template>
 
@@ -66,13 +66,19 @@ export default defineComponent({
     autoHeight: Boolean,
     readonly: Boolean,
   },
-  emits: ['update:modelValue', 'submit'],
+  emits: ['update:modelValue', 'submit', 'blur'],
   setup(props, { emit }) {
     const textarea = ref<HTMLTextAreaElement>();
     const height = ref<string | undefined>();
+
     function handleInput(event: InputEvent) {
       const { value } = event.target as HTMLInputElement;
       emit('update:modelValue', value);
+    }
+
+    function handleBlur(event: InputEvent) {
+      handleInput(event as unknown as InputEvent);
+      emit('blur', event);
     }
 
     function handleEnterClick() {
@@ -101,6 +107,7 @@ export default defineComponent({
       height,
       handleInput,
       handleEnterClick,
+      handleBlur,
     };
   },
 });
