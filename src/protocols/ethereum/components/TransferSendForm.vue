@@ -11,7 +11,8 @@
   >
     <template #recipient>
       <TransferSendRecipient
-        v-model.trim="formModel.address"
+        v-model="formModel.addresses"
+        :max-recipients="10"
         :placeholder="recipientPlaceholderText"
         :errors="errors"
         :protocol="PROTOCOLS.ethereum"
@@ -86,6 +87,7 @@ import {
 } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useTransferSendForm } from '@/composables/transferSendForm';
+import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { executeAndSetInterval } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -94,7 +96,6 @@ import {
   ETH_COIN_SYMBOL,
   ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
-import { useEthMaxAmount } from '@/protocols/ethereum/composables/ethMaxAmount';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
@@ -133,17 +134,7 @@ export default defineComponent({
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
     const { activeAccount } = useAccounts();
-    const {
-      fee,
-      maxFee,
-      feeList,
-      feeSelectedIndex,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      updateFeeList,
-    } = useEthFeeCalculation();
     const { accountAssets } = useAccountAssetsList();
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       if (assetContractId) {
@@ -155,7 +146,6 @@ export default defineComponent({
       }
       return undefined;
     }
-
     const {
       formModel,
       errors,
@@ -169,15 +159,26 @@ export default defineComponent({
       transferData: props.transferData,
       getSelectedAssetValue,
     });
+    const recipientsCount = computed(() => formModel.value.addresses?.length || 1);
+    const {
+      fee,
+      maxFee,
+      feeList,
+      feeSelectedIndex,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      updateFeeList,
+    } = useEthFeeCalculation(recipientsCount);
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
     const shouldUseMaxAmount = ref(false);
 
-    const { max } = useEthMaxAmount({ formModel, fee: maxFee });
+    const { max } = useCoinMaxAmount({ formModel, fee: maxFee });
 
     const numericFee = computed(() => +fee.value.toFixed());
     const numericMaxFee = computed(() => +maxFee.value.toFixed());
 
-    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })} ${t('modals.send.recipientPlaceholderENS')}`;
+    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })}`;
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -185,7 +186,7 @@ export default defineComponent({
         fee: fee.value as BigNumber,
         maxFeePerGas: maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION),
         maxPriorityFeePerGas: maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION),
-        total: numericFee.value + +(formModel.value?.amount || 0),
+        total: numericFee.value + +(formModel.value?.amount || 0) * recipientsCount.value,
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };
@@ -208,22 +209,27 @@ export default defineComponent({
       }
     }
 
-    function getTransferGasLimit() {
+    async function getTransferGasLimit() {
       const amount = new BigNumber(formModel.value.amount!);
       if (
         props.transferData.selectedAsset?.contractId !== 'ethereum'
         && amount.gt(0)
-        && formModel.value.address
+        && formModel.value.addresses?.length
       ) {
         const { nodeUrl } = ethActiveNetworkSettings.value;
 
-        return getTokenTransferGasLimit(
-          formModel.value.selectedAsset?.contractId!,
-          formModel.value.address,
-          activeAccount.value?.address,
-          amount,
-          nodeUrl,
+        const results = await Promise.all(
+          formModel.value.addresses.map((address) => getTokenTransferGasLimit(
+            formModel.value.selectedAsset?.contractId!,
+            address,
+            activeAccount.value?.address,
+            amount,
+            nodeUrl,
+          )),
         );
+
+        const total = results.reduce((sum, value) => sum + value, 0);
+        return total;
       }
       return undefined;
     }
@@ -294,6 +300,7 @@ export default defineComponent({
       errors,
       balance,
       max,
+      recipientsCount,
       shouldUseMaxAmount,
       scanTransferQrCode,
       handleAssetChange,

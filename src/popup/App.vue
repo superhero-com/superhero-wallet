@@ -42,7 +42,7 @@
         />
 
         <ConnectionStatus
-          v-if="!modalsOpen.length"
+          v-show="!modalsOpen.length"
           class="connection-status"
         />
 
@@ -337,6 +337,7 @@ export default defineComponent({
 
   &.disable-transitions * {
     transition: none !important;
+    animation: none !important;
   }
 
   position: relative;
@@ -380,8 +381,10 @@ export default defineComponent({
       inset: 0;
       visibility: hidden;
       opacity: 0;
-      background: $color-black url('../image/wallet-locked-bg.svg');
-      background-size: cover;
+      background: $color-bg-app url('../image/wallet-locked-bg.svg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center top;
       transition: all 0.5s ease-in-out;
       transform: scale(1.1);
       will-change: opacity, transform;
@@ -397,9 +400,6 @@ export default defineComponent({
       position: fixed;
       z-index: $z-index-header;
       bottom: 0;
-      padding-bottom: env(safe-area-inset-bottom);
-      left: 0;
-      width: 100%;
     }
 
     &.show-header {

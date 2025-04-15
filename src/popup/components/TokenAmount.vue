@@ -73,28 +73,21 @@ export default defineComponent({
 
     const symbolComputed = computed(() => props.symbol || adapter.coinSymbol);
 
-    function getAmountRounded() {
-      if (Number.isInteger(props.amount) || props.amount === 0) {
-        return props.amount;
-      }
-      return formatNumber(
+    function getAmountFiat() {
+      return (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount * props.price, props.protocol);
+    }
+
+    function updateAmountValues() {
+      amountRounded.value = formatNumber(
         props.amount,
         {
-          minimumFractionDigits: 2,
+          minimumFractionDigits: Number.isInteger(props.amount) || props.amount === 0 ? 0 : 2,
           maximumFractionDigits: adapter.getAmountPrecision({
             amount: props.amount,
             highPrecision: props.highPrecision,
           }),
         },
       );
-    }
-
-    function getAmountFiat() {
-      return (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount * props.price, props.protocol);
-    }
-
-    function updateAmountValues() {
-      amountRounded.value = getAmountRounded();
       amountFiat.value = getAmountFiat();
     }
 

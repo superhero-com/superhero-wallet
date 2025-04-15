@@ -113,6 +113,13 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       getPlaceholder: () => tg('pages.network.backendUrlPlaceholder'),
       getLabel: () => tg('pages.network.backendUrlLabel'),
     },
+    {
+      key: 'explorerUrl',
+      required: true,
+      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.explorerUrl,
+      getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
+      getLabel: () => tg('pages.network.explorerUrlLabel'),
+    },
   ];
 
   override getAccountPrefix() {
@@ -120,8 +127,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-    return new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
+    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    return new AeScan(
+      aeActiveNetworkSettings.value.explorerUrl
+      ?? aeActiveNetworkPredefinedSettings.value.explorerUrl,
+    );
   }
 
   override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces = {}): number {
@@ -250,6 +260,20 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     );
   }
 
+  async fetchTokenInfo?(contractId: AssetContractId)
+    : Promise<IToken | undefined> {
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+    try {
+      const token = await fetchFromMiddlewareCamelCased(`/v3/aex9/${contractId}`);
+      if (token.error) {
+        return undefined;
+      }
+      return token;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
   override async fetchAvailableTokens(): Promise<IToken[]> {
     const { fetchFromMiddleware } = useAeMiddleware();
     const response: Omit<IToken, 'protocol'>[] = camelCaseKeysDeep(await fetchAllPages(
@@ -273,11 +297,16 @@ export class AeternityAdapter extends BaseProtocolAdapter {
           sleep(5000),
         ]);
       }
-      return tokens.map(({ amount, contractId, decimals }) => ({
+      return tokens.map(({
+        amount, contractId, decimals, tokenName, tokenSymbol,
+      }) => ({
         address,
         amount,
         contractId,
         convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
+        decimals,
+        name: tokenName,
+        symbol: tokenSymbol,
         protocol: PROTOCOLS.aeternity,
         price: tokenSales.value.find((token) => token.address === contractId)?.price ?? 0,
       }));
@@ -502,7 +531,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   override async spend(
     amount: number,
     recipient: string,
-    options: { payload: string },
+    options: { payload: string; nonce: number },
   ): Promise<ITransferResponse> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
@@ -512,6 +541,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       {
         waitMined: false,
         payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
+        nonce: options.nonce,
       },
     );
   }

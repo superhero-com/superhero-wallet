@@ -169,6 +169,10 @@ export function excludeFalsy<T>(value: T): value is Truthy<T> {
   return !!value;
 }
 
+export function removeDuplicates<T>(entry: T, index: number, self: T[]): boolean {
+  return self.findIndex((e) => e !== undefined && e === entry) === index;
+}
+
 export function executeAndSetInterval(handler: () => any, timeout: number) {
   handler();
   return setInterval(handler, timeout);
@@ -550,7 +554,7 @@ export function getCleanModalOptions<T>(options: T): Omit<T, 'onCompiler' | 'onN
 export const fromBase64Url = (data: string): Buffer => Buffer
   .from(data.replace(/_/g, '/').replace(/-/g, '+'), 'base64');
 
-export const toBase64Url = (data: Buffer | Uint8Array | string): string => Buffer
+export const toBase64Url = (data: Buffer | Uint8Array): string => Buffer
   .from(data)
   .toString('base64')
   .replace(/\//g, '_')

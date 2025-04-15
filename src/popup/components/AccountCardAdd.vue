@@ -7,7 +7,10 @@
   >
     <template #top>
       <div class="title text-heading-2">
-        <PlusCircleIcon class="plus-icon" />
+        <PlusCircleIcon
+          class="plus-icon"
+          :class=" { selected }"
+        />
         <strong>
           {{
             isMultisig
@@ -92,12 +95,24 @@ export default defineComponent({
       width: 48px;
       height: 48px;
       margin-right: 8px;
+
+      &.selected {
+        animation: pulse 5s ease-in-out;
+      }
     }
   }
 
   .caption {
     padding-left: 12px;
     color: rgba($color-white, 0.85);
+  }
+
+  @keyframes pulse {
+    0%, 100%  { transform: scale(1.0); }
+
+    10%, 50%, 90%  { transform: scale(1.1); }
+
+    30%, 70%  { transform: scale(0.9); }
   }
 }
 </style>

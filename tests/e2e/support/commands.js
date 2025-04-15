@@ -331,17 +331,31 @@ Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = nu
     .invoke('readText')
     .then(async (text) => {
       const receiveUrl = await text;
-      cy.login({}, receiveUrl.replace(APP_LINK_WEB, ''))
-        .get('[data-cy=address] [data-cy=textarea]')
-        .should('have.value', address)
-        .get('[data-cy=amount] [data-cy=input]')
-        .should('have.value', amount);
+      cy.login({}, receiveUrl.replace(APP_LINK_WEB, ''));
 
-      if (token) {
-        cy.get('[data-cy=select-asset]')
-          .should('contain', token.name);
-      }
-      cy.get('[data-cy=btn-close]')
-        .click();
+      cy.get('[data-cy="input-wrapper"] .truncate');
+
+      cy.document().then(($document) => {
+        // When a valid address (based on selected coin) is entered, the format changes
+        const documentResult = $document.querySelectorAll('[data-cy=input-wrapper] .under .address-truncated .address-chunk:first-child');
+        if (documentResult.length) {
+          cy.get('[data-cy=input-wrapper] .under .address-truncated .address-chunk:first-child')
+            .should('have.text', address.substr(0, 6));
+          cy.get('[data-cy=input-wrapper] .under .address-truncated .address-chunk:last-child')
+            .should('have.text', address.substr(-3));
+        } else {
+          // Invalid address
+          cy.get('[data-cy=input-wrapper] .truncate')
+            .should('have.text', address);
+        }
+        cy.get('[data-cy=amount] [data-cy=input]')
+          .should('have.value', amount);
+        if (token) {
+          cy.get('[data-cy=select-asset]')
+            .should('contain', token.name);
+        }
+        cy.get('[data-cy=btn-close]')
+          .click();
+      });
     });
 });

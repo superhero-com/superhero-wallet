@@ -18,10 +18,16 @@
           data-cy="networks-settings"
         />
         <PanelItem
+          :to="{ name: ROUTE_TOKEN_SALES }"
+          :title="$t('pages.titles.tokenSales')"
+          data-cy="token-sales"
+        />
+        <PanelItem
           :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
           :title="$t('pages.titles.permissionsSettings')"
         />
         <PanelItem
+          v-if="protocolsInUse.includes(PROTOCOLS.aeternity)"
           :to="{ name: 'notification-settings' }"
           :title="$t('pages.titles.notifications')"
         />
@@ -53,8 +59,9 @@ import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { IS_MOBILE_APP } from '@/constants';
+import { IS_MOBILE_APP, PROTOCOLS } from '@/constants';
 import {
+  useAccounts,
   useCurrencies,
   useNetworks,
   useUi,
@@ -64,6 +71,7 @@ import {
   ROUTE_PERMISSIONS_SETTINGS,
   ROUTE_SECURE_LOGIN_SETTINGS,
   ROUTE_SEED_PHRASE_SETTINGS,
+  ROUTE_TOKEN_SALES,
 } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
@@ -77,6 +85,7 @@ export default defineComponent({
   },
   setup() {
     const { t } = useI18n();
+    const { protocolsInUse } = useAccounts();
     const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
     const { saveErrorLog, isBiometricLoginEnabled } = useUi();
@@ -94,11 +103,14 @@ export default defineComponent({
 
     return {
       IS_MOBILE_APP,
+      PROTOCOLS,
       ROUTE_NETWORK_SETTINGS,
       ROUTE_PERMISSIONS_SETTINGS,
       ROUTE_SECURE_LOGIN_SETTINGS,
       ROUTE_SEED_PHRASE_SETTINGS,
+      ROUTE_TOKEN_SALES,
       activeNetwork,
+      protocolsInUse,
       saveErrorLog,
       secureLoginSettingsInfo,
       isBiometricLoginEnabled,

@@ -60,9 +60,13 @@
 
     <template #recipient>
       <TransferSendRecipient
-        v-model="formModel.address"
+        v-model="formModel.addresses"
         :errors="errors"
         :is-tip-url="isTipUrl"
+        :is-url-tipping-enabled="isUrlTippingEnabled"
+        :max-recipients="isMultisig
+          || isActiveAccountAirGap
+          || isUrlTippingEnabled ? 1 : 10"
         :protocol="PROTOCOLS.aeternity"
         :placeholder="(isUrlTippingEnabled)
           ? $t('modals.send.recipientPlaceholderUrl')
@@ -71,7 +75,9 @@
           aens_name_registered_or_address_or_url: isUrlTippingEnabled,
           aens_name_registered_or_address: !isUrlTippingEnabled,
           ...(isMultisig
-            ? { address_not_same_as: [multisigVaultAddress, PROTOCOLS.aeternity] }
+            ? {
+              address_not_same_as: [multisigVaultAddress, PROTOCOLS.aeternity],
+            }
             : {}),
           token_to_an_address: [!isAe],
           airgap_to_an_address: isActiveAccountAirGap,
@@ -320,10 +326,10 @@ export default defineComponent({
     );
 
     const isTipUrl = computed(() => (
-      !!formModel.value.address
+      !!formModel.value.addresses
       && isUrlTippingEnabled.value
-      && isUrlValid(formModel.value.address)
-      && !isNameValid(formModel.value.address)
+      && isUrlValid(formModel.value.addresses[0])
+      && !isNameValid(formModel.value.addresses[0])
     ));
 
     const mySignerAccounts = accounts.value.filter(

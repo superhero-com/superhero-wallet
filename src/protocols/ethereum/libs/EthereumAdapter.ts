@@ -43,7 +43,7 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -55,6 +55,7 @@ import {
   ETH_COINGECKO_COIN_ID,
   ETH_CONTRACT_ID,
   ETH_GAS_LIMIT,
+  ETH_NETWORK_ADDITIONAL_SETTINGS,
   ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_NETWORK_DEFAULT_ENV_SETTINGS,
   ETH_PROTOCOL_NAME,
@@ -109,6 +110,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       getPlaceholder: () => tg('pages.network.chainIdPlaceholder'),
       getLabel: () => tg('pages.network.chainIdLabel'),
     },
+    {
+      key: 'explorerUrl',
+      required: true,
+      defaultValue: ETH_NETWORK_ADDITIONAL_SETTINGS[NETWORK_TYPE_TESTNET].explorerUrl,
+      getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
+      getLabel: () => tg('pages.network.explorerUrlLabel'),
+    },
   ];
 
   async getTransactionCount(address: string): Promise<number> {
@@ -130,8 +138,14 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-    return new EtherscanExplorer(ethActiveNetworkPredefinedSettings.value.explorerUrl!);
+    const {
+      ethActiveNetworkSettings,
+      ethActiveNetworkPredefinedSettings,
+    } = useEthNetworkSettings();
+    return new EtherscanExplorer(
+      ethActiveNetworkSettings.value.explorerUrl
+      ?? ethActiveNetworkPredefinedSettings.value.explorerUrl,
+    );
   }
 
   override getUrlTokenKey(): string {
@@ -348,6 +362,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       fromAccount: AccountAddress;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
+      nonce: number;
     },
   ): Promise<ITransferResponse> {
     const {
@@ -385,7 +400,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
-    const [nonce, gasLimit] = await Promise.all([
+    const [gasLimit] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas(),
     ]);
@@ -393,7 +408,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
       chainId: toHex(chainId),
-      nonce,
+      nonce: options.nonce,
       to: contractId,
       data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
       value: 0x0,
@@ -526,7 +541,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       throw new Error('Ethereum transaction construction & signing was initiated from non existing or not ethereum account.');
     }
 
-    const nonce = await this.getTransactionCount(options.fromAccount);
+    const { nonce } = options;
     const { chainId } = ethActiveNetworkSettings.value;
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
@@ -556,6 +571,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       fromAccount: AccountAddress;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
+      nonce: number;
     },
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();

@@ -19,7 +19,7 @@ import {
   fetchJson,
   handleUnknownError,
 } from '@/utils';
-import { Encoded, Name } from '@aeternity/aepp-sdk';
+import { AensName, Encoded, Name } from '@aeternity/aepp-sdk';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   PROTOCOLS,
@@ -74,6 +74,8 @@ const defaultNamesRegistry = useStorageRef<NamesRegistry>({}, STORAGE_KEYS.names
  */
 const externalNamesRegistry = ref<NamesRegistry>({});
 const auctions = ref<Record<string, IAuction>>({});
+
+const resolvedChainNames = ref<Record<Encoded.Name, AensName>>({});
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
@@ -137,9 +139,11 @@ export function useAeNames() {
     if (!address) {
       return '';
     }
-
-    const middleware = await getMiddleware();
-    return (await middleware.getName(address)).name;
+    if (!resolvedChainNames.value[address]) {
+      const middleware = await getMiddleware();
+      resolvedChainNames.value[address] = (await middleware.getName(address)).name;
+    }
+    return resolvedChainNames.value[address];
   }
 
   function getNameAuction(name: string): IAuction {
@@ -351,6 +355,7 @@ export function useAeNames() {
     ownedNames,
     areNamesFetching,
     updateOwnedNames,
+    resolvedChainNames,
     getName,
     getNameByNameHash,
     getNameAuction,

@@ -53,6 +53,7 @@ import {
   ROUTE_SEED_PHRASE_VERIFY,
   ROUTE_ABOUT,
   ROUTE_TIPS_CLAIM,
+  ROUTE_TOKEN_SALES,
   ROUTE_SETTINGS,
 } from './routeNames';
 
@@ -113,6 +114,7 @@ import AppsBrowser from '../pages/AppsBrowser.vue';
 import SecureLoginSettings from '../pages/SecureLoginSettings.vue';
 import AddressBook from '../pages/AddressBook.vue';
 import AddressBookForm from '../pages/AddressBookForm.vue';
+import TokenSalesSettings from '../pages/TokenSalesSettings.vue';
 
 import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
@@ -501,6 +503,15 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'networkEdit',
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    path: '/more/settings/token-sales',
+    component: TokenSalesSettings,
+    name: ROUTE_TOKEN_SALES,
+    meta: {
+      title: 'tokenSales',
       showHeaderNavigation: true,
     },
   },

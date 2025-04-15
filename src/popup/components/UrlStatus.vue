@@ -20,7 +20,7 @@
 import { computed, defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { StatusIconType, UrlStatus } from '@/types';
-import { MODAL_RECIPIENT_HELPER } from '@/constants';
+import { MODAL_HELP } from '@/constants';
 import { useModals } from '@/composables';
 
 import Default from '@/icons/badges/default.svg?vue-component';
@@ -84,7 +84,7 @@ export default defineComponent({
     });
 
     function showModal() {
-      openModal(MODAL_RECIPIENT_HELPER, {
+      openModal(MODAL_HELP, {
         title: statusData.value?.title,
         msg: statusData.value?.msg,
         icon: statusData.value?.icon,

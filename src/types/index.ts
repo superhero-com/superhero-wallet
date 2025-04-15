@@ -818,7 +818,7 @@ export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
 export interface IFormModel {
   amount?: string;
   selectedAsset?: IAsset;
-  address?: Encoded.AccountAddress;
+  addresses?: Encoded.AccountAddress[];
   payload?: string;
 }
 
@@ -848,6 +848,7 @@ export interface ITransferArgs {
   amount: string | BigNumberPublic;
   recipient: AccountAddress;
   selectedAsset: IAsset;
+  nonce?: number;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;

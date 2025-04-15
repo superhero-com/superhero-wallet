@@ -1,50 +1,39 @@
 <template>
   <div class="transfer-send-recipient">
-    <Field
-      v-slot="{ field }"
-      name="address"
+    <FormAccountInput
+      :v-model="modelValue"
       :model-value="modelValue"
-      :validate-on-mount="!!modelValue"
-      :rules="{
-        required: true,
-        address_not_same_as: [activeAccount.address, protocol],
-        ...validationRules,
-      }"
+      name="addresses"
+      data-cy="address"
+      show-help
+      show-message-help
+      is-recipient
+      :single-default-format="isUrlTippingEnabled"
+      :protocol="protocol"
+      :label="$t('modals.send.recipientLabel')"
+      :placeholder="placeholder"
+      :message="addressMessage"
+      @update:modelValue="$emit('update:modelValue', $event)"
+      @help="showRecipientHelp()"
+      @blur="handleBlur($event, true)"
     >
-      <FormAccountInput
-        v-bind="field"
-        :model-value="modelValue"
-        name="address"
-        data-cy="address"
-        show-help
-        show-message-help
-        :protocol="protocol"
-        :label="$t('modals.send.recipientLabel')"
-        :placeholder="placeholder"
-        :message="addressMessage"
-        @update:modelValue="$emit('update:modelValue', $event)"
-        @help="showRecipientHelp()"
-      >
-        <template #label-after>
-          <div class="buttons">
-            <BtnIcon
-              :icon="AddressBookIcon"
-              data-cy="address-book-button"
-              @click="selectFromAddressBook()"
-            />
-            <BtnIcon
-              :icon="QrScanIcon"
-              data-cy="scan-button"
-              @click="$emit('openQrModal')"
-            />
-          </div>
-        </template>
-      </FormAccountInput>
-    </Field>
-    <div
-      v-if="isTipUrl"
-      class="status"
-    >
+      <template #label-after>
+        <div class="buttons">
+          <BtnIcon
+            :icon="AddressBookIcon"
+            data-cy="address-book-button"
+            @click="selectFromAddressBook()"
+          />
+          <BtnIcon
+            :icon="QrScanIcon"
+            data-cy="scan-button"
+            @click="$emit('openQrModal')"
+          />
+        </div>
+      </template>
+    </FormAccountInput>
+
+    <div v-if="isTipUrl" class="status">
       <UrlStatus :status="urlStatus" />
     </div>
   </div>
@@ -55,8 +44,9 @@ import {
   computed,
   defineComponent,
   PropType,
+  watch,
 } from 'vue';
-import { Field } from 'vee-validate';
+import { useField } from 'vee-validate';
 
 import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
@@ -79,12 +69,13 @@ export default defineComponent({
   components: {
     FormAccountInput,
     UrlStatus,
-    Field,
     BtnIcon,
   },
   props: {
+    isUrlTippingEnabled: Boolean,
     isTipUrl: Boolean,
-    modelValue: { type: String, default: '' },
+    maxRecipients: { type: Number, default: null },
+    modelValue: { type: Array as PropType<string[]>, default: () => [] },
     placeholder: { type: String, default: '' },
     protocol: { type: String as PropType<Protocol>, required: true },
     validationRules: { type: Object, default: () => ({}) },
@@ -96,11 +87,25 @@ export default defineComponent({
 
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
+    const { value: fieldValue, handleBlur } = useField('addresses', {
+      required: true,
+      // TODO: currently it only shows the first warning/error, so give priority to error
+      ...(props.maxRecipients ? { max_recipients: props.maxRecipients } : {}),
+      ...props.validationRules,
+      address_not_same_as: [activeAccount.value.address, props.protocol],
+    }, {
+      bails: false, // TODO: validate all rules and show them all instead of the first
+    });
+
     const { getTippingUrlStatus } = useAeTippingUrls({ ensureFetchedOnInit: isAe.value });
 
-    const urlStatus = computed(() => getTippingUrlStatus(props.modelValue));
+    const urlStatus = computed(() => getTippingUrlStatus(props.modelValue?.[0]));
 
     const addressMessage = computed((): IInputMessage => {
+      const messagesByFieldName = getMessageByFieldName(props.errors.addresses);
+      if (messagesByFieldName.status === 'error') {
+        return messagesByFieldName;
+      }
       if (props.isTipUrl) {
         switch (urlStatus.value) {
           case 'verified':
@@ -114,7 +119,7 @@ export default defineComponent({
             throw new Error(`Unknown url status: ${urlStatus.value}`);
         }
       }
-      return getMessageByFieldName(props.errors.address);
+      return messagesByFieldName;
     });
 
     function showRecipientHelp() {
@@ -122,11 +127,27 @@ export default defineComponent({
     }
 
     async function selectFromAddressBook() {
-      const address = await openModal<string>(MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR);
-      if (address) {
-        emit('update:modelValue', address);
+      const addresses = await openModal<string[]>(
+        MODAL_ADDRESS_BOOK_ACCOUNT_SELECTOR,
+        {
+          preSelectedAddresses: props.modelValue,
+          allowMultiple: props.maxRecipients > 1,
+        },
+      );
+      if (addresses) {
+        // This includes all addresses, even if the user has typed them,
+        // since we are passing the preSelectedAddresses as a prop
+        emit('update:modelValue', [...addresses]);
       }
     }
+
+    watch(
+      () => props.modelValue,
+      (val) => {
+        fieldValue.value = val;
+      }, // validate on mount
+      { immediate: !!props.modelValue.length },
+    );
 
     return {
       QrScanIcon,
@@ -134,6 +155,7 @@ export default defineComponent({
       urlStatus,
       activeAccount,
       addressMessage,
+      handleBlur,
       showRecipientHelp,
       selectFromAddressBook,
     };

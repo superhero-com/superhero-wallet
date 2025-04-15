@@ -25,6 +25,7 @@
       <div
         v-if="Object.keys(accountsFiltered).length"
         class="list"
+        :class="{ multiple: isMultiple }"
       >
         <PanelItem
           v-for="({
@@ -41,6 +42,10 @@
               : { name: ROUTE_ADDRESS_BOOK_EDIT, params: { id: address } }
           "
           class="address-book-item"
+          :class="{
+            selected:
+              selectedAddresses.includes(nameAddress ? resolvedChainNames[nameAddress] : address),
+          }"
           :style="bgColorStyle(isOwnAddress, address)"
           :idx="index"
           data-cy="address-book-item"
@@ -70,6 +75,7 @@ import {
   onMounted,
   ref,
   watch,
+  PropType,
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { IonContent, IonHeader } from '@ionic/vue';
@@ -104,10 +110,15 @@ export default defineComponent({
     modelValue: Boolean,
     /** Whether the list is being used in an account selector or not  */
     isSelector: Boolean,
+    isMultiple: Boolean,
+    selectedAddresses: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
   },
   emits: ['update:hideButtons', 'select-address'],
   setup(props, { emit }) {
-    const { getNameByNameHash } = useAeNames();
+    const { resolvedChainNames } = useAeNames();
 
     const scrollWrapperEl = ref<ComponentRef>();
     const isScrolled = ref(false);
@@ -162,12 +173,8 @@ export default defineComponent({
       return isOwnAddress ? { '--bg-color': getAddressColor(address) } : {};
     }
 
-    async function selectAddress(nameAddress: Encoded.Name, address: String) {
-      if (nameAddress) {
-        emit('select-address', await getNameByNameHash(nameAddress));
-      } else {
-        emit('select-address', address);
-      }
+    async function selectAddress(nameAddress: Encoded.Name, address: string) {
+      emit('select-address', nameAddress ? resolvedChainNames.value[nameAddress] : address);
     }
 
     onMounted(() => {
@@ -203,6 +210,7 @@ export default defineComponent({
       protocolName,
       bgColorStyle,
       selectAddress,
+      resolvedChainNames,
     };
   },
 });
@@ -213,6 +221,8 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .address-book-list {
+  --border-width: 2px;
+
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -225,9 +235,15 @@ export default defineComponent({
   }
 
   .address-book-item {
+    --outline-size: 0px;
     background-color: var(--bg-color);
     border: var(--border-width) solid var(--bg-color);
     padding: 8px 2px 8px 8px;
+
+    &.selected {
+      background-color: color-mix(in srgb, var(--bg-color) 40%, transparent);
+      transition: background-color 0.12s ease-in-out;
+    }
   }
 
   .search-field {
@@ -254,6 +270,10 @@ export default defineComponent({
   .add-record-button {
     width: 100%;
     gap: 4px;
+  }
+
+  .multiple {
+    padding-bottom: 88px;
   }
 }
 </style>

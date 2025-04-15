@@ -1,13 +1,13 @@
-<template>
-  <!--
-    Web and extension:
-      Display the video stream inside of the modal box.
+<!--
+  Web and extension:
+    Display the video stream inside of the modal box.
 
-    Mobile:
-      Display the device settings button if user has no camera access.
-      The camera stream is placed as separate full screen layer above the app.
-      (see QrCodeReaderMobileOverlay.vue)
-  -->
+  Mobile:
+    Display the device settings button if user has no camera access.
+    The camera stream is placed as separate full screen layer above the app.
+    (see QrCodeReaderMobileOverlay.vue)
+-->
+<template>
   <Modal
     v-if="!IS_MOBILE_APP || !cameraPermissionGranted"
     class="qr-code-scanner"

@@ -23,7 +23,14 @@
     <h2
       v-if="title"
       class="text-heading-4 text-center title"
+      :class="{ 'without-margin': subtitle }"
       v-text="title"
+    />
+
+    <h2
+      v-if="subtitle"
+      class="text-heading-5 text-center subtitle"
+      v-text="subtitle"
     />
 
     <slot name="msg">
@@ -68,6 +75,7 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     close: { type: Function, default: null },
     title: { type: String, default: '' },
+    subtitle: { type: String, default: '' },
     msg: { type: String, default: '' },
     icon: { type: String as PropType<StatusIconType>, default: '' },
     buttonMessage: { type: String, default: '' },
@@ -84,6 +92,17 @@ export default defineComponent({
 .default {
   .title {
     margin-bottom: 16px;
+
+    &.without-margin {
+      margin-bottom: 0;
+    }
+  }
+
+  .subtitle {
+    color: inherit;
+    font-weight: 400;
+    margin-bottom: 16px;
+    margin-top: 4px;
   }
 
   .top-icon-wrapper {

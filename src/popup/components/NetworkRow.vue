@@ -45,7 +45,11 @@
           :key="protocol"
           class="url"
         >
-          <td class="url-label" v-text="getProtocolName(protocol)" />
+          <td
+            class="url-label"
+            :class="{ 'lower-case': protocol === PROTOCOLS.aeternity }"
+            v-text="getProtocolName(protocol)"
+          />
           <td class="url-address" v-text="protocolSettings.nodeUrl?.replace('https://', '')" />
         </tr>
       </tbody>
@@ -56,7 +60,7 @@
 <script lang="ts">
 import { PropType, computed, defineComponent } from 'vue';
 import type { INetwork, NetworkProtocolsSettings, Protocol } from '@/types';
-import { NETWORK_TYPE_CUSTOM } from '@/constants';
+import { NETWORK_TYPE_CUSTOM, PROTOCOLS } from '@/constants';
 import { ROUTE_NETWORK_EDIT } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -98,6 +102,7 @@ export default defineComponent({
 
     return {
       NETWORK_TYPE_CUSTOM,
+      PROTOCOLS,
       ROUTE_NETWORK_EDIT,
       PencilIcon,
       TrashIcon,
@@ -144,6 +149,10 @@ export default defineComponent({
       vertical-align: top;
     }
 
+    .url-address {
+      letter-spacing: -0.03em;
+    }
+
     .url-label {
       width: 0;
       padding-right: 8px;
@@ -151,6 +160,10 @@ export default defineComponent({
       text-transform: capitalize;
       user-select: none;
       font-weight: 500;
+
+      &.lower-case {
+        text-transform: lowercase;
+      }
     }
   }
 }

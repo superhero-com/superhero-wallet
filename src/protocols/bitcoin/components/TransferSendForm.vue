@@ -10,11 +10,14 @@
   >
     <template #recipient>
       <TransferSendRecipient
-        v-model.trim="formModel.address"
+        v-model="formModel.addresses"
+        :max-recipients="10"
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.bitcoin })"
         :errors="errors"
         :protocol="PROTOCOLS.bitcoin"
-        :validation-rules="{ account_address: [PROTOCOLS.bitcoin, activeNetwork.type] }"
+        :validation-rules="{
+          account_address: [PROTOCOLS.bitcoin, activeNetwork.type],
+        }"
         @openQrModal="scanTransferQrCode()"
       />
     </template>
@@ -39,8 +42,8 @@
       >
         <template #label-after>
           <BtnMaxAmount
-            :is-max="formModel?.amount?.toString() === max.toString()"
-            @click="setMaxAmount"
+            :is-max="shouldUseMaxAmount"
+            @click="toggleMaxAmount"
           />
         </template>
       </TransferSendAmount>
@@ -85,6 +88,7 @@ import {
   useNetworks,
 } from '@/composables';
 import { useTransferSendForm } from '@/composables/transferSendForm';
+import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import {
   executeAndSetInterval,
@@ -105,10 +109,6 @@ import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendR
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
 import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
-
-import EditIcon from '@/icons/pencil.svg?vue-component';
-import DeleteIcon from '@/icons/trash.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   name: 'BtcTransferSendForm',
@@ -142,6 +142,7 @@ export default defineComponent({
 
     const hasMultisigTokenWarning = ref(false);
     const isUrlTippingEnabled = ref(false);
+    const shouldUseMaxAmount = ref(false);
 
     const {
       formModel,
@@ -161,22 +162,26 @@ export default defineComponent({
     const feeSlow = ref(new BigNumber(0.00002));
     const feeMedium = ref(new BigNumber(0.00002));
     const feeHigh = ref(new BigNumber(0.00002));
+    const recipientsCount = computed(() => formModel.value.addresses?.length || 1);
 
     const feeList = computed((): IFeeItem[] => [
       { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
       { fee: feeMedium.value, time: 600, label: t('common.transferSpeed.medium') },
       { fee: feeHigh.value, time: 25, label: t('common.transferSpeed.fast') },
     ]);
-    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
+    const fee = computed(() => (
+      feeList.value[feeSelectedIndex.value].fee.multipliedBy(recipientsCount.value)
+    ));
 
     const numericFee = computed(() => +fee.value.toFixed());
-    const max = computed(() => balance.value.minus(fee.value));
+
+    const { max } = useCoinMaxAmount({ formModel, fee });
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
         ...formModel.value,
         fee: fee.value as BigNumber,
-        total: numericFee.value + +(formModel.value?.amount || 0),
+        total: numericFee.value + +(formModel.value?.amount || 0) * recipientsCount.value,
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };
@@ -192,8 +197,11 @@ export default defineComponent({
       }
     }
 
-    function setMaxAmount() {
-      formModel.value.amount = max.value.isPositive() ? max.value.toString() : '0';
+    function toggleMaxAmount() {
+      shouldUseMaxAmount.value = !shouldUseMaxAmount.value;
+      if (shouldUseMaxAmount.value) {
+        formModel.value.amount = max.value;
+      }
     }
 
     async function updateFeeList() {
@@ -203,7 +211,7 @@ export default defineComponent({
           // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
           // consider returning an actual amount in future
           0,
-          formModel.value.address || activeAccount.value.address,
+          formModel.value.addresses?.[0] || activeAccount.value.address,
           {
             fee: 0,
             ...activeAccount.value,
@@ -256,6 +264,15 @@ export default defineComponent({
     });
 
     watch(
+      max,
+      (newMax) => {
+        if (shouldUseMaxAmount.value) {
+          formModel.value.amount = newMax;
+        }
+      },
+    );
+
+    watch(
       hasError,
       (val) => emit('error', val),
       { deep: true },
@@ -289,13 +306,11 @@ export default defineComponent({
       balance,
       max,
       clearPayload,
+      shouldUseMaxAmount,
       scanTransferQrCode,
       handleAssetChange,
-      EditIcon,
-      DeleteIcon,
-      PlusCircleIcon,
       submit,
-      setMaxAmount,
+      toggleMaxAmount,
       toBitcoin,
     };
   },

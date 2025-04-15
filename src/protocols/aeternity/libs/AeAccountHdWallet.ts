@@ -19,6 +19,7 @@ import type { ITx } from '@/types';
 import {
   ACCOUNT_TYPES,
   AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+  IN_FRAME,
   IS_OFFSCREEN_TAB,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
@@ -107,7 +108,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     } catch {
       tx = undefined;
     }
-    if (isDeepLinkUsed || IS_OFFSCREEN_TAB) {
+    if (isDeepLinkUsed || IS_OFFSCREEN_TAB || IN_FRAME) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.sign,
@@ -157,7 +158,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       });
     }
 
-    if (IS_OFFSCREEN_TAB) {
+    if (IS_OFFSCREEN_TAB || IN_FRAME) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
@@ -194,7 +195,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     aci: Parameters<AccountBase['signTypedData']>[1],
     options: Parameters<AccountBase['signTypedData']>[2] = {},
   ): Promise<Encoded.Signature> {
-    if (IS_OFFSCREEN_TAB) {
+    if (IS_OFFSCREEN_TAB || IN_FRAME) {
       const dataType = new TypeResolver().resolveType(aci);
       const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
       const {
@@ -234,7 +235,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let resolvedName;
     const { getMiddleware } = useAeMiddleware();
 
-    if (IS_OFFSCREEN_TAB) {
+    if (IS_OFFSCREEN_TAB || IN_FRAME) {
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -290,7 +291,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       throw new Error('AirGap sign not implemented yet');
     }
 
-    if (IS_OFFSCREEN_TAB && !this.isSigningAlreadyConfirmed) {
+    if ((IN_FRAME || IS_OFFSCREEN_TAB) && !this.isSigningAlreadyConfirmed) {
       this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(

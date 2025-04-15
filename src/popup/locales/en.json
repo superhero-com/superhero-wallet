@@ -120,6 +120,11 @@
       "statusMessage": "Temporary aeternity backend failure.",
       "title": "aeternity backend failure",
       "description": "Some features such as setting default name and tipping related functionality may not be accessible at the moment due to temporary aeternity backend failure. <p> Transaction history is still accessible except the claim tip transactions that cannot be currently fetched and displayed. </p>"
+    },
+    "currencies": {
+      "statusMessage": "Unable to update assets fiat value.",
+      "title": "Unable to fetch assets fiat value",
+      "description": "Superhero Wallet is temporarily unable to properly fetch and display the updated fiat value of assets due to exceeding third party API calls limit. <p></p>Check real-time prices at <a> CoinGecko </a>"
     }
   },
   "dashboard": {
@@ -300,7 +305,11 @@
         "chain": {
           "title": "Send to .chain name",
           "linkTitle": "claim your own .chain name",
-          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses."
+          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s account. Before sending any funds make sure the recipient is still the name owner."
+        },
+        "multiple": {
+          "title": "Send to multiple recipients",
+          "msg": "{0} you can send the chosen amount of coins or tokens to multiple addresses and/or .chain names separated with commas or spaces."
         }
       }
     },
@@ -411,7 +420,7 @@
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
-      "recipientPlaceholderProtocol": "Enter {name} public address",
+      "recipientPlaceholderProtocol": "Enter {name} address",
       "recipientPlaceholderENS": "or ENS name",
       "transactionSpeed": "Transaction speed",
       "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
@@ -665,7 +674,8 @@
       "appsBrowser": "Browse the æcosystem",
       "addressBook": "Address book",
       "addressBookEdit": "Edit address record",
-      "addressBookAdd": "Add new address"
+      "addressBookAdd": "Add new address",
+      "tokenSales": "Token sales"
     },
     "errors-log-settings": {
       "description": "<p>Superhero Wallet is able of maintaining an error log file on your device, recording the last {0} errors encountered.</p><p>The error log can be exported in JSON format to facilitate debugging or support assistance.</p>",
@@ -687,6 +697,9 @@
       "scanTitle": "Scan the address you want to add",
       "selectRecipientAddress": "Select recipient’s address",
       "selectSignerAddress": "Select signer’s address",
+      "singleRecipient": "Single recipient",
+      "multipleRecipients": "Multiple recipients",
+      "useSelected": "Use selected",
       "noRecords": {
         "addressBook": "There are no records in your address book.",
         "blockchain": "Currently there are no address records for the blockchain selected.",
@@ -759,6 +772,18 @@
         "unlock": "Unlock",
         "forgot": "Forgot password?"
       }
+    },
+    "tokenSales": {
+      "heading": "You may add custom token sales factory URLs. This will allow Superhero Wallet to support properly token sales on your preferred dApps.",
+      "inputLabel": "Token sales URL",
+      "inputPlaceholder": "Enter custom token sales factory URL",
+      "addUrl": "Add URL",
+      "helpTitle": "Custom token sales URLs",
+      "helpSubtitle": "to manage token sales on various dApps",
+      "urlListLabel": "Token sales URLs",
+      "errorInvalidUrl": "Please enter a valid token sales factory URL.",
+      "errorUrlExists": "This token sales URL has been already added.",
+      "errorTimeout": "URL connection timed out. Please try again later."
     },
     "setPassword": {
       "title": "Set a password",
@@ -1067,17 +1092,23 @@
       "title": "Transaction has been submitted",
       "copy": "Copy QR code",
       "reviewtx": "Review transaction",
+      "multicheckalert": "to multiple recipients carefully",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
       "receivingUrl": "Receiving URL",
+      "show": "Show",
+      "hide": "Hide",
+      "recipients": "recipients",
       "sending": "Sending",
       "sentTo": "have been successfully sent to",
       "sendingCryptoToUrl": "Sending tip to URL",
       "tipInfo": "Your transaction will be publicly displayed as URL tip on {0}",
       "to": "To",
       "messageUrlOwner": "Message the URL owner (optional)",
-      "scanAddress": "Scan the recipient’s account address QR code in order to send {assetName} to them."
+      "scanAddress": "Scan the recipient’s account address QR code in order to send {assetName} to them.",
+      "singleAccountLabel": "Single transfer amount",
+      "multipleAccountLabel": "All transfers amount"
     },
     "signTransaction": {
       "reject": "Reject",
@@ -1221,6 +1252,8 @@
       "networkMiddlewarePlaceholder": "Enter network middleware URL",
       "networkMiddlewareLabel": "Network middleware",
       "backendUrlPlaceholder": "Enter tipping backend URL",
+      "explorerUrlLabel": "Explorer",
+      "explorerUrlPlaceholder": "Enter explorer URL",
       "backendUrlLabel": "Tipping backend",
       "chainIdPlaceholder": "1",
       "chainIdLabel": "Chain id (number)",
@@ -1339,6 +1372,7 @@
     "enoughCoin": "{0} balance is not enough to pay for transaction fee.",
     "enoughAeSigner": "Insufficient balance in your signing account to propose a transaction.",
     "maxLength": "Maximum {0} characters are allowed in this field.",
+    "maxRecipients": "Maximum {0} recipients are allowed in this field.",
     "maxValue": "Amount exceeds maximum available: {0}.",
     "maxRedeem": "Maximum redeemable amount is {0} AE.",
     "maxValueVault": "Amount exceeds vault balance: {0}.",

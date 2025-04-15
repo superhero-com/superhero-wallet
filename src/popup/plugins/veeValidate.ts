@@ -58,24 +58,27 @@ defineRule(
  */
 defineRule(
   'account_address',
-  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => {
-    if (protocol) {
-      return (ProtocolAdapterFactory
-        .getAdapter(protocol)
-        .isAccountAddressValid(value, networkType)
-      || tg('validation.addressGeneric', { protocol })
-      );
-    }
-    return getProtocolByAddress(value) ? true : tg('validation.invalidAddress');
-  },
-);
+  (value: string[], [protocol, networkType]: [Protocol, NetworkType]) => {
+    let addresses: string[] = [];
+    if (!value) return false;
 
-defineRule(
-  'min_value',
-  (value: string, [arg]: [number]) => (
-    BigNumber(value).isGreaterThanOrEqualTo(arg)
-    || tg('validation.minValue', [arg])
-  ),
+    if (typeof value === 'string') {
+      addresses = [value];
+    } else {
+      addresses = value;
+    }
+
+    const invalidItems = addresses.filter((address) => !(protocol
+      ? ProtocolAdapterFactory.getAdapter(protocol).isAccountAddressValid(address, networkType)
+      : !!getProtocolByAddress(address)));
+
+    if (invalidItems.length === 0) return true;
+
+    return [
+      protocol ? tg('validation.addressGeneric', { protocol }) : tg('validation.invalidAddress'),
+      invalidItems.join(','),
+    ].join('||');
+  },
 );
 
 defineRule(
@@ -113,6 +116,11 @@ defineRule(
 defineRule(
   'max_len',
   (value: string, [arg]: [number]) => (value && value.length <= arg) || tg('validation.maxLength', [arg]),
+);
+
+defineRule(
+  'max_recipients',
+  (value: string[], [arg]: [number]) => (value && value.length <= arg) || tg('validation.maxRecipients', [arg]),
 );
 
 defineRule(
@@ -234,21 +242,46 @@ export default () => {
 
   defineRule(
     'aens_name_registered_or_address',
-    async (value: string) => {
-      const isValid = isNameValid(value)
-        ? await checkNameRegisteredAddress(value)
-        : isAddressValid(value);
-      return isValid || tg('validation.nameRegisteredAddress');
+    async (value: string[]) => {
+      if (typeof value === 'string' || !value) return false;
+
+      const validationResults: boolean[] = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const item of value) {
+        validationResults.push(isNameValid(item)
+        // eslint-disable-next-line no-await-in-loop
+          ? await checkNameRegisteredAddress(item)
+          : isAddressValid(item));
+      }
+
+      const invalidItems = value.filter((_, index) => !validationResults[index]);
+
+      if (invalidItems.length === 0) return true;
+
+      return [tg('validation.nameRegisteredAddress'), invalidItems.join(',')].join('||');
     },
   );
 
   defineRule(
     'aens_name_registered_or_address_or_url',
-    async (value: string) => {
-      const isValid = isNameValid(value)
-        ? await checkNameRegisteredAddress(value)
-        : isAddressValid(value) || isUrlValid(value);
-      return isValid || tg('validation.invalidAddressChainUrl');
+    async (value: string[]) => {
+      if (typeof value === 'string' || !value) return false;
+
+      const validationResults: boolean[] = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const item of value) {
+        validationResults.push(isNameValid(item)
+        // eslint-disable-next-line no-await-in-loop
+          ? await checkNameRegisteredAddress(item)
+          : isAddressValid(item) || isUrlValid(item));
+      }
+
+      // Collect invalid items
+      const invalidItems = value.filter((_, index) => !validationResults[index]);
+
+      if (invalidItems.length === 0) return true;
+
+      return [tg('validation.invalidAddressChainUrl'), invalidItems.join(',')].join('||');
     },
   );
 
@@ -277,12 +310,19 @@ export default () => {
 
   defineRule(
     'address_not_same_as',
-    (value: string, [comparedAddress, protocol]: [string, Protocol]) => (
-      value !== comparedAddress
-      || tg('validation.addressNotSameAs', [(protocol)
-        ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
-        : tg('common.tokens')])
-    ),
+    (value: string[], [comparedAddress, protocol]: [string, Protocol]) => {
+      if (typeof value === 'string' || !value) return false;
+
+      const invalidAddresses = value.filter((address) => address === comparedAddress);
+
+      if (invalidAddresses.length === 0) return true;
+
+      return [tg('validation.addressNotSameAs', [
+        protocol
+          ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
+          : tg('common.tokens'),
+      ]), invalidAddresses.join(',')].join('||');
+    },
   );
 
   defineRule(

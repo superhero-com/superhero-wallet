@@ -54,6 +54,11 @@ const tokenBalances = useStorageRef<ITokenBalance[]>(
   STORAGE_KEYS.fungibleTokenBalances,
 );
 
+const lastAvailableTokensLoadTime = useStorageRef<number>(
+  0,
+  STORAGE_KEYS.lastAvailableTokensLoadTime,
+);
+
 /**
  * List of all fungible tokens available on user's protocols.
  * Includes tokens from the user's account that are not on the main list.
@@ -62,6 +67,7 @@ const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
   const uniqueTokens: IToken[] = uniqBy(tokenBalances.value, 'contractId')
     .map((tokenBalance) => ({
       contractId: tokenBalance.contractId,
+      decimals: tokenBalance.decimals,
       protocol: tokenBalance.protocol,
       name: tokenBalance?.name!,
       symbol: tokenBalance?.symbol!,
@@ -81,7 +87,7 @@ const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
 
   return Object.values(PROTOCOLS).reduce((allTokens, protocol) => {
     allTokens[protocol] = {
-      ...defaultTokensAvailable.value[protocol],
+      ...(defaultTokensAvailable.value[protocol] ?? {}),
       ...customTokensAvailable[protocol],
     };
     return allTokens;
@@ -92,7 +98,23 @@ function getProtocolAvailableTokens(protocol: Protocol): AssetList {
   return tokensAvailable.value[protocol] || {} as AssetList;
 }
 
-const availableTokensPooling = createPollingBasedOnMountedComponents(60000);
+async function loadSingleToken(contractId: string, protocol: Protocol) {
+  if (!getProtocolAvailableTokens(protocol)[contractId]) {
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const response = await adapter?.fetchTokenInfo?.(contractId);
+
+    if (response) {
+      if (!defaultTokensAvailable.value[protocol]) {
+        defaultTokensAvailable.value[protocol] = {};
+      }
+      defaultTokensAvailable.value[protocol]![contractId] = {
+        ...response,
+        protocol,
+      };
+    }
+  }
+}
+
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
 let areTokenBalancesUpdating = false;
@@ -146,6 +168,10 @@ export function useFungibleTokens() {
   }
 
   async function loadAvailableTokens() {
+    // Do not load tokens if the last load was less than a minute ago
+    if (Date.now() - lastAvailableTokensLoadTime.value < 1000 * 60) {
+      return;
+    }
     const tokensFetchPromises = protocolsInUse.value.map(
       (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens?.(),
     );
@@ -173,6 +199,8 @@ export function useFungibleTokens() {
       accumulator[protocol]![contractId] = token;
       return accumulator;
     }, {} as typeof defaultTokensAvailable.value);
+
+    lastAvailableTokensLoadTime.value = Date.now();
   }
 
   async function loadTokenBalances() {
@@ -319,7 +347,6 @@ export function useFungibleTokens() {
       .plus(isReceived ? 0 : gasCost));
   }
 
-  availableTokensPooling(() => loadAvailableTokens());
   tokenBalancesPooling(() => loadTokenBalances());
 
   if (!composableInitialized) {
@@ -329,11 +356,6 @@ export function useFungibleTokens() {
     watch(accounts, (val, oldVal) => {
       if (val.length !== oldVal.length) {
         loadTokenBalances();
-
-        // this is to check if the new account is the first for specified protocol
-        if (val.filter(({ protocol }) => protocol === val.at(-1)?.protocol).length === 1) {
-          loadAvailableTokens();
-        }
       }
     });
 
@@ -343,7 +365,7 @@ export function useFungibleTokens() {
       if (newMiddlewareUrl !== oldMiddlewareUrl) {
         tokenBalances.value = [];
         defaultTokensAvailable.value = {};
-        await loadAvailableTokens();
+        lastAvailableTokensLoadTime.value = 0;
         await loadTokenBalances();
       }
     });
@@ -354,6 +376,7 @@ export function useFungibleTokens() {
     tokenBalances,
     tokensAvailable,
     createOrChangeAllowance,
+    loadSingleToken,
     getAccountTokenBalance,
     getAccountTokenBalances,
     getProtocolAvailableTokens,

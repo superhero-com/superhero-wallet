@@ -69,7 +69,7 @@ export function useTransactionList({
   const { isOnline } = useConnection();
   const { isAppActive } = useUi();
   const { activeNetwork } = useNetworks();
-  const { accountsTransactionsPending } = useLatestTransactionList();
+  const { accountsTransactionsLatest, accountsTransactionsPending } = useLatestTransactionList();
 
   const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
@@ -78,10 +78,11 @@ export function useTransactionList({
       .filter(({ tx }) => tx?.contractId === assetContractId),
   );
 
-  const transactionsLoadedAndPending = computed(() => [
+  const transactionsLoadedAndPending = computed(() => uniqBy([
     ...transactionsPending.value,
+    ...(accountsTransactionsLatest.value[accountAddress] || []),
     ...transactionsLoaded.value,
-  ]);
+  ], 'hash'));
 
   function resetState() {
     state.value = {
