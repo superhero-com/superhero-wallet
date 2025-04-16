@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.3...v2.6.0) (2025-04-15)
+
+
+### Features
+
+* add pulse animation to plus icon on add card ([8baec96](https://github.com/Superhero-com/superhero-wallet/commit/8baec96faee4825f1f59a352221ad45fd79b3f85))
+* be able to add custom token sale url ([2ceb4aa](https://github.com/Superhero-com/superhero-wallet/commit/2ceb4aac0380ff22479e3c43cac92e38f32f0c4c))
+* be able to set custom explorer url ([e2a2342](https://github.com/Superhero-com/superhero-wallet/commit/e2a2342155a5d16baf0f85df31205b9c5bba7474))
+* be able to shrink error status ([7ba5a81](https://github.com/Superhero-com/superhero-wallet/commit/7ba5a817676f7f7cbe2fe70af8f7cf65da61cb5b))
+* do not show notification settings if no aeternity account ([b041e99](https://github.com/Superhero-com/superhero-wallet/commit/b041e9912c370a147236afe67305924e67963b97))
+* **evm:** support web3_clientVersion method ([9200b6e](https://github.com/Superhero-com/superhero-wallet/commit/9200b6e563fa4bf55bd43954e23b7c24429e8092))
+* handle long numbers ([0f44f35](https://github.com/Superhero-com/superhero-wallet/commit/0f44f359d1efb7da45dbabe9a64bf03b7d40db70))
+* multiple recipients transaction ([d775ccb](https://github.com/Superhero-com/superhero-wallet/commit/d775ccb56a5f2f1a20cf3ddfb17e1dd4c7afecd8))
+* show info on currencies unavailable ([0a4cd51](https://github.com/Superhero-com/superhero-wallet/commit/0a4cd51803f2f37a4bd2f03cc4ee06be4f70836a))
+* **wallet-connect:** propagate account change ([21e9b89](https://github.com/Superhero-com/superhero-wallet/commit/21e9b894add816b55b85b0d6708606dda735267f))
+
+
+### Bug Fixes
+
+* add generic max calcutation composable ([4c8bd2c](https://github.com/Superhero-com/superhero-wallet/commit/4c8bd2cba848fcea2ffd9f0d3e76676e76eef6c7))
+* background svg responsiveness ([b9b8564](https://github.com/Superhero-com/superhero-wallet/commit/b9b8564253eb5e9fa8676b742c6d81c27bcd5e6a))
+* be able to handle all evm requests ([bc33d42](https://github.com/Superhero-com/superhero-wallet/commit/bc33d422eebf703ff060dc10debf3421ef4da180))
+* do not autosign in reverse iframe ([78c4a3a](https://github.com/Superhero-com/superhero-wallet/commit/78c4a3a7203e27c2c578fa0af2e8b815a3711577))
+* do not calculate daily limit for ethereum ([f4a18b8](https://github.com/Superhero-com/superhero-wallet/commit/f4a18b8715d1948dbea2d5c20748f116f9589133))
+* handle blur on custom field from vee-validate ([39965d4](https://github.com/Superhero-com/superhero-wallet/commit/39965d47edf60429f39d4a2295ebdc8c95e95871))
+* modify placeholder since ENS is not yet supported ([353c23c](https://github.com/Superhero-com/superhero-wallet/commit/353c23c745591b91a093b14b3c7acbc7fd0eb44b))
+* qr code modal missing closing animation ([4e79563](https://github.com/Superhero-com/superhero-wallet/commit/4e79563ebdb8f197d782da95a900433a00b64b2c))
+* show latest transaction in account transaction list ([a0f0cc1](https://github.com/Superhero-com/superhero-wallet/commit/a0f0cc13b1ebf1a0e3431c79f0b42ed5a7ee334e))
+
+
+### Performance
+
+* do not load all fungible tokens on each initialization ([47c7d0a](https://github.com/Superhero-com/superhero-wallet/commit/47c7d0a83f469332d916429339471a576d0c5025))
+
+
+### Style
+
+* adjust Tokens style ([5db40e9](https://github.com/Superhero-com/superhero-wallet/commit/5db40e90120a4b7476a474e6ca09fd158ecc3f0d))
+* show aeternity protocol name lower-case ([28f765a](https://github.com/Superhero-com/superhero-wallet/commit/28f765aa23acc2b7097b3618b38c6a2c4358e794))
+
+
+### Maintenance
+
+* format number based on language in token amount formatted ([45c8d0f](https://github.com/Superhero-com/superhero-wallet/commit/45c8d0f7311ff8810d8accde5bdfdb1b1e8b3a35))
+* remove unused tip related info ([68d1e10](https://github.com/Superhero-com/superhero-wallet/commit/68d1e10300e0d04bd301a9f47c825a80110cc62f))
+* run npm update and fix linter issues ([ae46aa8](https://github.com/Superhero-com/superhero-wallet/commit/ae46aa83eb6b248a4b6217744796c543b310d725))
+* **token-amount:** also format integers ([67b52a4](https://github.com/Superhero-com/superhero-wallet/commit/67b52a46419512821b726dfa9319e9b9fec9b1d1))
+* update vue-i18n ([3bb9e25](https://github.com/Superhero-com/superhero-wallet/commit/3bb9e25a6148878ef85bac897c974708810bcd75))
+
 ### [2.5.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.2...v2.5.3) (2025-03-12)
 
 

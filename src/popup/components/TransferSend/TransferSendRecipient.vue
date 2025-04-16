@@ -15,6 +15,7 @@
       :message="addressMessage"
       @update:modelValue="$emit('update:modelValue', $event)"
       @help="showRecipientHelp()"
+      @blur="handleBlur($event, true)"
     >
       <template #label-after>
         <div class="buttons">
@@ -86,7 +87,7 @@ export default defineComponent({
 
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
-    const { value: fieldValue } = useField('addresses', {
+    const { value: fieldValue, handleBlur } = useField('addresses', {
       required: true,
       // TODO: currently it only shows the first warning/error, so give priority to error
       ...(props.maxRecipients ? { max_recipients: props.maxRecipients } : {}),
@@ -154,6 +155,7 @@ export default defineComponent({
       urlStatus,
       activeAccount,
       addressMessage,
+      handleBlur,
       showRecipientHelp,
       selectFromAddressBook,
     };
