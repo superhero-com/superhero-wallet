@@ -8,7 +8,8 @@
       show-help
       show-message-help
       is-recipient
-      :single-default-format="isUrlTippingEnabled"
+      :single-default-format="maxRecipients === 1"
+      :is-tip-url-enabled="isUrlTippingEnabled"
       :protocol="protocol"
       :label="$t('modals.send.recipientLabel')"
       :placeholder="placeholder"
@@ -91,8 +92,8 @@ export default defineComponent({
       required: true,
       // TODO: currently it only shows the first warning/error, so give priority to error
       ...(props.maxRecipients ? { max_recipients: props.maxRecipients } : {}),
-      ...props.validationRules,
       address_not_same_as: [activeAccount.value.address, props.protocol],
+      ...props.validationRules,
     }, {
       bails: false, // TODO: validate all rules and show them all instead of the first
     });
