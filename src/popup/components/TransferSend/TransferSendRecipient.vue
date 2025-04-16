@@ -8,7 +8,8 @@
       show-help
       show-message-help
       is-recipient
-      :single-default-format="isUrlTippingEnabled"
+      :single-default-format="maxRecipients === 1"
+      :is-tip-url-enabled="isUrlTippingEnabled"
       :protocol="protocol"
       :label="$t('modals.send.recipientLabel')"
       :placeholder="placeholder"
