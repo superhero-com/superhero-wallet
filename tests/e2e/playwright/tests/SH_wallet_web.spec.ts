@@ -157,8 +157,10 @@ test.describe('SH Wallet checks', () => {
 
     // Incorrect address string
     await page.locator('//textarea[@data-cy="textarea"]').fill('12345678');
+    await page.keyboard.press('Enter');
     await expect(page.locator('//div[@data-cy="address"]//label[@data-cy="input-field-message"]'))
       .toContainText('Invalid address or .chain name');
+    await page.getByTestId('clear-address-button').nth(1).click();
 
     // Send amount over max available
     await page.locator('//input[@name="amount"]').fill('12345678');
@@ -169,11 +171,12 @@ test.describe('SH Wallet checks', () => {
     // Send amount is 0
     await page.locator('//input[@name="amount"]').fill('0');
     await page.locator('//textarea[@data-cy="textarea"]').click();
-    // expect(page.locator('//div[@data-cy="amount"]//label[@data-cy="input-field-message"]')).
-    // toHaveText('Amount must be more than 0.');
+    expect(page.locator('//div[@data-cy="amount"]//label[@data-cy="input-field-message"]'))
+      .toHaveText('Amount must be more than 0.');
 
     // Sender and receiver the same address
     await page.locator('//textarea[@data-cy="textarea"]').fill(aeAccAddress);
+    await page.keyboard.press('Enter');
     await expect(page.locator('//div[@data-cy="address"]//label[@data-cy="input-field-message"]'))
       .toHaveText("Sender's and recipient's addresses are the same. You are about to send AE to your own account.");
 
