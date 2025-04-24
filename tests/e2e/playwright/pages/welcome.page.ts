@@ -22,9 +22,9 @@ export class WelcomePage {
 
   enterSeedPhraseBtn = this.page.getByTestId('import-wallet');
 
-  seedPhraseInputField = this.page.getByPlaceholder('Enter or paste your seed phrase here');
+  seedPhraseInputField = this.page.getByTestId('textarea');
 
-  restoreWalletBtn = this.page.getByRole('button', { name: 'Restore wallet' });
+  restoreWalletBtn = this.page.getByTestId('btn-import');
 
   passwordField = this.page.locator('//input[@name="password"]');
 
