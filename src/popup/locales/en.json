@@ -55,7 +55,6 @@
     "browser": "Browser",
     "title": "Superhero Wallet",
     "total": "Total",
-    "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
     "unknown": "Unknown",
     "unrecognized": "Unrecognized",
