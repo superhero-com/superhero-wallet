@@ -92,8 +92,8 @@ export default defineComponent({
       required: true,
       // TODO: currently it only shows the first warning/error, so give priority to error
       ...(props.maxRecipients ? { max_recipients: props.maxRecipients } : {}),
-      address_not_same_as: [activeAccount.value.address, props.protocol],
       ...props.validationRules,
+      address_not_same_as: [activeAccount.value.address, props.protocol],
     }, {
       bails: false, // TODO: validate all rules and show them all instead of the first
     });

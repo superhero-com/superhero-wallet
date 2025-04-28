@@ -34,7 +34,6 @@
           <AvatarWithChainName
             :address="senderId"
             :protocol="PROTOCOLS.aeternity"
-            show-address
           />
         </template>
       </DetailsItem>
@@ -48,7 +47,6 @@
           <AvatarWithChainName
             :address="recipientId"
             :protocol="PROTOCOLS.aeternity"
-            show-address
           />
         </template>
       </DetailsItem>
