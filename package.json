@@ -116,7 +116,7 @@
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
-    "@applitools/eyes-playwright": "^1.36.3",
+    "@applitools/eyes-playwright": "^1.37.2",
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.2",
     "@commitlint/cli": "^19.3.0",
