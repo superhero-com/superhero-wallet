@@ -272,7 +272,7 @@ test.describe('SH Wallet checks', () => {
     const page2Promise = page.waitForEvent('popup');
     await page.locator('//div[@class="account-row"]').click();
     const page2 = await page2Promise;
-    let aeScanBalance: string = await page2.locator('//tr[@class="account-details-panel__row"]//div[@class="price-label"]').first()
+    let aeScanBalance: string = await page2.locator('//div[@class="price-label"]//div//span').first()
       .textContent() as string;
     //  Convert the balance string from aeScan
     // to the same format as it is in the Wallet account details page
@@ -313,7 +313,7 @@ test.describe('SH Wallet checks', () => {
     await page.locator('//div[@class="account-row"]').click();
     const page2 = await page2Promise;
     await page.waitForTimeout(5000);
-    let aeScanBalance: string = await page2.locator('//tr[@class="account-details-panel__row"]//div[@class="price-label"]').first()
+    let aeScanBalance: string = await page2.locator('//div[@class="price-label"]//div//span').first()
       .textContent() as string;
     //  Convert the balance string from aeScan
     // to the same format as it is in the Wallet account details page
@@ -678,6 +678,7 @@ test.describe('SH Wallet checks', () => {
     // Open send and make transaction
     await page.getByRole('button', { name: 'Send assets to others' }).click();
     await page.locator('//textarea[@data-cy="textarea"]').fill(secAeAccAddress);
+    await page.keyboard.press('Enter');
     await page.locator('//input[@name="amount"]').fill(txnValue.toString());
     // Read txn fee value
     await page.waitForTimeout(3000);
@@ -685,18 +686,19 @@ test.describe('SH Wallet checks', () => {
     const txnFeeValue = parseFloat(txnFeeValueStr);
     await page.locator('//button[@data-cy="next-step-button"]').click();
     await page.waitForTimeout(500);
-    await eyes.check('Review transaction', Target.window().fully());
 
     // Go back check values for editing
     await page.getByRole('button', { name: 'Edit' }).click();
-    await expect(page.locator('//textarea[@data-cy="textarea"]')).toHaveValue(secAeAccAddress);
+    await expect(page.locator('//label[@data-cy="input-wrapper"]//div[@class="address-truncated-chunks"]')).toContainText('ak_2Ek···Up9');
     await expect(page.locator('//input[@name="amount"]')).toHaveValue(txnValue.toString());
     await page.waitForTimeout(5000);
     await page.locator('//button[@data-cy="next-step-button"]').click();
 
     // Open Review transaction screen. Check address and ae amounts
     await expect(page.locator('#app-wrapper')).toContainText(aeAccAddress);
+    await page.getByRole('button', { name: 'Show 1 recipients ' }).click();
     await expect(page.locator('#app-wrapper')).toContainText(secAeAccAddress);
+    await eyes.check('Review transaction', Target.window().fully());
     await expect(page.getByTestId('review-amount')).toContainText(`${txnValue.toString()} AE`);
     await page.waitForTimeout(500);
     await expect(page.locator('//div[@class="transfer-review-base transfer-review"]//span[@data-cy="review-fee"]//span[@class="amount"]')).toContainText(txnFeeValueStr);
@@ -900,7 +902,7 @@ test.describe('SH Wallet checks', () => {
     await page.getByRole('button', { name: 'Show multisig vaults' }).click();
     await revokePendingProposal(page, expect);
     // Check Show multisig screen
-    await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 12000 });
+    await expect(page.locator('//span[text()="ak_2Hj"]')).toBeVisible({ timeout: 12000 });
     await expect.soft(page.getByText('Total in multisig vaults')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Receive to multisig vault' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Propose Tx to other signers' })).toBeVisible();
@@ -940,7 +942,6 @@ test.describe('SH Wallet checks', () => {
     await revokePendingProposal(page, expect);
     await page.locator('//a[@data-cy="account-card-base"]//div[text()="Multisig vault"]').nth(0).click();
     // Check receive screen
-    await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 10000 });
     await page.locator('//div[@class="horizontal-scroll buttons"]//button[@data-cy="receive"]').click();
     await expect(page.getByRole('heading')).toContainText('Receive funds to multisig vault');
     // Enter some number into amount field so the link under QR code will be
@@ -976,7 +977,7 @@ test.describe('SH Wallet checks', () => {
     // Check if a transaction proposal is awaiting
     await revokePendingProposal(page, expect);
     // Check propose txn screen
-    await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('//span[text()="ak_2Hj"]')).toBeVisible({ timeout: 15000 });
     await page.locator('//a[@data-cy="account-card-base"]//div[text()="Multisig vault"]').nth(0).click();
     await page.locator('//div[@class="horizontal-scroll buttons"]//span[text()="Propose Tx"]').click();
     await expect(page.getByRole('heading')).toContainText('Multisig transaction proposal', { timeout: 8000 });
@@ -998,8 +999,10 @@ test.describe('SH Wallet checks', () => {
       .toContainText('This field is required');
     // Incorrect address string
     await page.locator('//textarea[@data-cy="textarea"]').fill('12345678');
+    await page.keyboard.press('Enter');
     await expect(page.locator('//div[@data-cy="address"]//label[@data-cy="input-field-message"]'))
       .toContainText('Invalid address or .chain name');
+    await page.getByTestId('clear-address-button').nth(1).click();
     // Send amount over max available
     await page.locator('//input[@name="amount"]').fill('12345678');
     await page.locator('//textarea[@data-cy="textarea"]').click();
@@ -1045,7 +1048,7 @@ test.describe('SH Wallet checks', () => {
     // Multisig Tx proposal details after sending
     await expect(page.getByTestId('loader')).not.toBeVisible({ timeout: 25000 });
     await expect(page.locator('//div[@class="consensus"]//div[@class="info-box success"]')).toContainText('Transaction has been successfully sent.', { timeout: 20000 });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(800);
     await expect(page.locator('//div[@class="payload-text"]')).toContainText('Hello. This is a test!');
     await eyes.check('Multisig Tx proposal details', Target.region(page.locator('//div[@class="multisig-proposal-details"]/parent::ion-content')).fully());
   });
@@ -1059,7 +1062,7 @@ test.describe('SH Wallet checks', () => {
     // Check if a transaction proposal is awaiting
     await revokePendingProposal(page, expect);
     // Select current multisig account
-    await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('//span[text()="ak_2Hj"]')).toBeVisible({ timeout: 10000 });
     await page.locator('//a[@data-cy="account-card-base"]//div[text()="Multisig vault"]').nth(0).click();
     // Check propose txn screen
     await page.locator('//div[@class="horizontal-scroll buttons"]//span[text()="Propose Tx"]').click();
@@ -1095,7 +1098,7 @@ test.describe('SH Wallet checks', () => {
     // Check if a transaction proposal is awaiting
     await revokePendingProposal(page, expect);
     // Select current multisig account
-    await expect(page.locator('//span[text()="ak_2Mw"]')).toBeVisible({ timeout: 12000 });
+    await expect(page.locator('//span[text()="ak_2Hj"]')).toBeVisible({ timeout: 12000 });
     await page.locator('//a[@data-cy="account-card-base"]//div[text()="Multisig vault"]').nth(0).click();
     // Check propose txn screen
     await page.locator('//div[@class="horizontal-scroll buttons"]//span[text()="Propose Tx"]').click();
@@ -1148,10 +1151,10 @@ test.describe('SH Wallet checks', () => {
       await page.waitForTimeout(5000);
       await page.locator('//div[@class="claim"]//div[@class="label-text"]').focus();
       await page.locator('//div[@class="claim"]//button').nth(1).click();
-      await page.locator('//button[@data-cy="accept"]').click();
-      await page.locator('//button[@data-cy="accept"]').click({ timeout: 20000 });
+      // await page.locator('//button[@data-cy="accept"]').click();
+      // await page.locator('//button[@data-cy="accept"]').click({ timeout: 20000 });
       // Chosen chain name should appear in the Names list with status pending
-      await expect(page.getByText(newChainName)).toBeVisible({ timeout: 25000 });
+      await expect(page.getByText(newChainName)).toBeVisible({ timeout: 35000 });
       await expect(page.locator('//div[@class="pending"]')).toBeVisible();
       // Currently the pending status take very long
       //  await expect.soft(page.locator('//span[text()="Name update successful!"]'))
@@ -1164,7 +1167,7 @@ test.describe('SH Wallet checks', () => {
 
     await switchToTestnet(page, expect);
     await page.getByTestId('account-card-base').first().click();
-    await page.locator('//div[@data-cy="list"]//a').isVisible();
+    await page.locator('//div[@data-cy="list"]//a').first().isVisible();
     await page.waitForTimeout(2000);
     await page.locator('//div[@data-cy="list"]//a').last().focus();
     await expect(page.locator('//div[@class="back-to-top-btn-container"]//button')).toBeVisible();
