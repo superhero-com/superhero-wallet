@@ -101,11 +101,14 @@ test.describe('SH Wallet checks BTC', () => {
 
     // Incorrect address string
     await page.getByTestId('textarea').fill('12345678');
+    await page.keyboard.press('Enter');
     await expect(page.locator('//div[@data-cy="address"]//label[@data-cy="input-field-message"]'))
       .toContainText('Invalid bitcoin address');
+    await page.getByTestId('clear-address-button').nth(1).click();
 
     // Sender and receiver the same address
     await page.getByTestId('textarea').fill('bc1qkwagn38f4zv80wdlhw539vn7geyvsyaj79jejw');
+    await page.keyboard.press('Enter');
     await expect(page.locator('//div[@data-cy="address"]//label[@data-cy="input-field-message"]'))
       .toHaveText("Sender's and recipient's addresses are the same. You are about to send BTC to your own account.");
 
