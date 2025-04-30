@@ -24,8 +24,8 @@
     "https://*/*"
   ],
   "icons": {
-    "48": "./icons/icon_48.png",
-    "128": "./icons/icon_128.png"
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
   },
   "action": {
     "default_title": "Superhero Wallet",

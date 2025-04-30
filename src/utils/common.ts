@@ -26,6 +26,7 @@ import type {
   IDashboardTransaction,
   IFormSelectOption,
   IHdWalletAccount,
+  IMultisigAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
   ITokenResolved,
@@ -342,10 +343,11 @@ export function postJson(url: string, options?: IRequestInitBodyParsed) {
 /**
  * Accounts data formatted as the form select options
  */
-export function prepareAccountSelectOptions(accountList: IAccount[]): IFormSelectOption[] {
+export function prepareAccountSelectOptions(accountList: IAccount[] | IMultisigAccount[])
+  : IFormSelectOption[] {
   return accountList.map((acc): IFormSelectOption => ({
-    text: getDefaultAccountLabel(acc),
-    value: acc.address,
+    text: (acc as IMultisigAccount).gaAccountId ?? getDefaultAccountLabel(acc as IAccount),
+    value: (acc as IMultisigAccount).gaAccountId ?? (acc as IAccount).address,
   }));
 }
 

@@ -5,7 +5,7 @@
     />
     <span
       class="label"
-      v-text="isMultisig ? $t('common.totalMultisig') : $t('common.total')"
+      v-text="$t('common.total')"
     />
   </div>
 </template>
