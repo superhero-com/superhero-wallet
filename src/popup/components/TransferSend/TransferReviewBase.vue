@@ -22,8 +22,6 @@
       <template #value>
         <AvatarWithChainName
           :address="activeAccount.address"
-          :name="activeAccount.name"
-          :show-address="!isRecipientName"
           :protocol="protocol"
         />
       </template>
@@ -37,9 +35,12 @@
       v-else
       class="details-item receiving-addresses"
       data-cy="review-recipient"
-      expandable
+      :class="{ 'multiple-addresses': transferData.addresses?.length! > 1 }"
+      :expandable="transferData.addresses?.length! > 1"
       :label="`${$t('pages.send.show')} ${transferData.addresses?.length} ${$t('pages.send.recipients')}`"
-      :expanded-label="`${$t('pages.send.hide')} ${transferData.addresses?.length} ${$t('pages.send.recipients')}`"
+      :expanded-label="transferData.addresses?.length! > 1
+        ? `${$t('pages.send.hide')} ${transferData.addresses?.length} ${$t('pages.send.recipients')}`
+        : $t('pages.send.recipient')"
     >
       <template #value>
         <div
@@ -50,7 +51,6 @@
           <AvatarWithChainName
             :address="address"
             :name="isNameValid(address) ? address : undefined"
-            :show-address="!isNameValid(address)"
             :protocol="protocol"
           />
         </div>
@@ -207,7 +207,6 @@ export default defineComponent({
     margin-top: 16px;
 
     &.receiving-addresses {
-      border-radius: 10px;
       overflow: hidden;
 
       .receiving-address {
@@ -216,19 +215,29 @@ export default defineComponent({
         background-color: $color-border;
       }
 
-      :deep(.label) {
-        width: 100%;
-        justify-content: space-between;
-        padding: 10px 8px;
-        margin: 0;
-        background-color: $color-border;
+      :deep(.value) {
+        border-radius: 10px;
+        overflow: hidden;
       }
 
-      :deep(.value) {
-        margin: 4px 0px 0px 0px;
-        padding: 0;
-        border: 0;
-        background: none;
+      &.multiple-addresses {
+        border-radius: 10px;
+
+        :deep(.value) {
+          margin: 4px 0px 0px 0px;
+          padding: 0;
+          border: 0;
+          background: none;
+          border-radius: 0;
+        }
+
+        :deep(.label) {
+          width: 100%;
+          justify-content: space-between;
+          padding: 10px 8px;
+          margin: 0;
+          background-color: $color-border;
+        }
       }
     }
   }
