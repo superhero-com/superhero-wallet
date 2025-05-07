@@ -583,7 +583,7 @@
       "sentTx": "Sending",
       "receivedTx": "Receiving",
       "multisigVaultCreated": "Multisig vault created",
-      "transactionFeePaidBy": "Transaction paid by",
+      "transactionFeePaidBy": "Transaction paid",
       "transactionFeePaid": "Transaction fee paid",
       "createMultisigVault": "Create multisig vault"
     },
