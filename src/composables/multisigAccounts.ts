@@ -10,11 +10,14 @@ import type {
   IMultisigAccountResponse,
   AccountAddress,
   Dictionary,
+  IFormSelectOption,
+  IAccount,
 } from '@/types';
-import { STORAGE_KEYS } from '@/constants';
+import { PROTOCOLS, STORAGE_KEYS } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
+  prepareAccountSelectOptions,
   toShiftedBigNumber,
 } from '@/utils';
 
@@ -99,6 +102,10 @@ export function useMultisigAccounts({
     ),
   );
 
+  const multisigAccountsSelectOptions = computed(
+    (): IFormSelectOption[] => prepareAccountSelectOptions(allMultisigAccounts.value),
+  );
+
   function setActiveMultisigAccountId(gaAccountId: AccountAddress) {
     if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
@@ -119,6 +126,7 @@ export function useMultisigAccounts({
       (account) => account.gaAccountId === gaAccountId
         ? {
           ...account,
+          balance: BigNumber(account.balance),
           txHash,
           hasPendingTransaction: true,
           proposedBy,
@@ -247,6 +255,23 @@ export function useMultisigAccounts({
     return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
 
+  function getMultisigIAccountByAccountId(accountId: AccountAddress)
+    : Partial<IAccount> | undefined {
+    const account = getMultisigAccountByAccountId(accountId);
+    if (!account) return undefined;
+
+    const idx = multisigAccounts.value.findIndex(
+      (acc) => acc.gaAccountId === accountId,
+    );
+
+    return {
+      address: account.gaAccountId,
+      globalIdx: idx,
+      idx,
+      protocol: PROTOCOLS.aeternity,
+    };
+  }
+
   /**
    * Refresh the list of the multisig accounts.
    */
@@ -349,11 +374,14 @@ export function useMultisigAccounts({
     isActiveMultisigAccountPending,
     isMultisigBackendUnavailable,
     multisigAccounts: allMultisigAccounts,
+    multisigAccountsSelectOptions,
     pendingMultisigAccounts,
     addPendingMultisigAccount,
     addTransactionToPendingMultisigAccount,
     fetchAdditionalInfo,
     getMultisigAccountByContractId,
+    getMultisigAccountByAccountId,
+    getMultisigIAccountByAccountId,
     setActiveMultisigAccountId,
     stopFetchingAdditionalInfo,
     updateMultisigAccounts,

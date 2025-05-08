@@ -1,7 +1,7 @@
 <template>
   <div
     class="avatar-with-chain-name"
-    :class="{ 'only-name': (name || !showAddress) && !hideAvatar }"
+    :class="{ 'only-name': !showAddress && !hideAvatar }"
     :style="{
       'background-color': color,
     }"
@@ -10,31 +10,36 @@
       v-if="!hideAvatar"
       v-bind="$attrs"
       :size="avatarSize"
-      :address="address"
+      :address="localChainNameAddress || address"
     />
 
-    <div
-      v-if="name || !showAddress"
-      class="chain-name"
-      :class="{ centered: hideAvatar }"
-    >
-      {{ name }}
+    <div class="address-container">
+      <div
+        v-if="calculatedName"
+        class="address-name"
+        :class="{ centered: hideAvatar }"
+      >
+        {{ calculatedName }}
+      </div>
+      <AddressFormatted
+        v-if="showAddress"
+        v-bind="$attrs"
+        :address="localChainNameAddress || address"
+        class="text-address"
+        columns
+      />
     </div>
-    <AddressFormatted
-      v-else
-      v-bind="$attrs"
-      :address="address"
-      columns
-    />
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { IAccount, Protocol } from '@/types';
+import { Protocol } from '@/types';
 import { getAddressColor } from '@/utils';
-import { useAccounts } from '@/composables';
+import { useAccounts, useAccountSelector, useMultisigAccounts } from '@/composables';
 
+import { tg } from '@/popup/plugins/i18n';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { isNameValid } from '@aeternity/aepp-sdk';
 
 import Avatar from './Avatar.vue';
@@ -59,26 +64,56 @@ export default defineComponent({
       type: String,
       default: 'md',
     },
-    showAddress: Boolean,
     protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const {
       accountsGroupedByProtocol,
     } = useAccounts();
+    const { allAccounts } = useAccountSelector();
+    const { ownedNames } = useAeNames();
+    const { multisigAccounts } = useMultisigAccounts();
 
     function isOwnAddress(address: string) {
       return accountsGroupedByProtocol.value[props.protocol]?.some(
-        (account: IAccount) => account.address === address,
+        (account) => account.address === address,
+      ) || multisigAccounts.value.some(
+        (account) => account.gaAccountId === address,
       );
     }
 
+    const account = computed(() => (
+      allAccounts.value.filter((acc) => acc.address === props.address)[0]
+    ));
+
+    const localChainNameAddress = computed(() => {
+      const ownedName = ownedNames.value.filter((entry) => (
+        entry.name === props.name && entry.pointers.accountPubkey
+      ))[0];
+      if (ownedName) {
+        return ownedName.pointers.accountPubkey;
+      }
+      return '';
+    });
+
+    const calculatedName = computed(() => (
+      props.name || localChainNameAddress.value || account.value?.name || tg('modals.send.recipientLabel')
+    ));
+
+    const showAddress = computed(() => (
+      !isNameValid(props.address) || localChainNameAddress.value
+    ));
+
     const color = computed(() => (
-      props.address && !isNameValid(props.address) && isOwnAddress(props.address)
-        ? getAddressColor(props.address)
+      (props.address && !isNameValid(props.address) && isOwnAddress(props.address))
+      || localChainNameAddress.value
+        ? getAddressColor(localChainNameAddress.value || props.address)
         : undefined));
 
     return {
+      showAddress,
+      localChainNameAddress,
+      calculatedName,
       color,
     };
   },
@@ -91,7 +126,7 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .avatar-with-chain-name {
-  @include mixins.flex(flex-start, center);
+  @include mixins.flex(flex-start, flex-start);
 
   width: 100%;
   gap: 8px;
@@ -99,13 +134,19 @@ export default defineComponent({
 
   .avatar {
     background-color: $color-black;
+    margin-top: 6px;
   }
 
-  .chain-name {
-    @extend %face-sans-15-medium;
+  .address-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .address-name {
+    @extend %face-sans-16-semi-bold;
 
     text-align: left;
-    opacity: 0.75;
+    line-height: 24px;
   }
 
   .centered {
@@ -115,6 +156,12 @@ export default defineComponent({
     text-align: center;
     color: $color-white;
     width: 100%;
+  }
+
+  .text-address {
+    @extend %face-mono-14-medium;
+
+    line-height: 24px;
   }
 
   &.only-name {

@@ -6,11 +6,35 @@
     :resizable="false"
     :placeholder="placeholder"
     :message="message"
+    :disable-label-focus="isSingleRecipient"
     auto-height
     enter-submit
     @update:modelValue="($event: any) => inputValue = $event"
     @submit="handleEnter"
   >
+    <template
+      v-if="isSingleRecipient"
+      #default
+    >
+      <Truncate
+        class="truncated-text"
+        :class="{
+          error: (hasError && messageAsObject?.text?.includes(selectedAddresses[0].address)),
+          warning: (hasWarning && messageAsObject?.text?.includes(selectedAddresses[0].address)),
+        }"
+        :str="selectedAddresses[0].name"
+      />
+      <AddressTruncated
+        v-if="!isNameValid(selectedAddresses[0].address)
+          && isAccountAddressValid(selectedAddresses[0].address)"
+        :address="selectedAddresses[0].address"
+        :protocol="protocol"
+        :class="{
+          error: (hasError && messageAsObject?.text?.includes(selectedAddresses[0].address)),
+          warning: (hasWarning && messageAsObject?.text?.includes(selectedAddresses[0].address)),
+        }"
+      />
+    </template>
     <template #after>
       <BtnIcon
         v-if="!hideClearIcon && (selectedAddresses.length || inputValue.length)"
@@ -166,7 +190,9 @@ export default defineComponent({
     },
     readonly: Boolean,
     hideClearIcon: Boolean,
+    singleRecipient: Boolean,
     singleDefaultFormat: Boolean,
+    isTipUrlEnabled: Boolean,
     protocol: { type: String as PropType<Protocol>, default: null },
   },
   emits: ['update:modelValue', 'submit'],
@@ -208,6 +234,18 @@ export default defineComponent({
       () => (messageAsObject.value?.status === INPUT_MESSAGE_STATUSES.warning),
     );
 
+    function isAccountAddressValid(value: string) {
+      return ProtocolAdapterFactory
+        .getAdapter(props.protocol)
+        .isAccountAddressValid(value, activeNetwork.value?.type);
+    }
+
+    const isSingleRecipient = computed(() => !!(
+      props.singleDefaultFormat
+      && selectedAddresses.value.length
+      && (!props.isTipUrlEnabled || isAccountAddressValid(selectedAddresses.value[0].address))
+    ));
+
     function clearAddress(idx: number) {
       selectedAddresses.value.splice(idx, 1);
       emit('update:modelValue', selectedAddresses.value.map((account) => account.address));
@@ -228,12 +266,6 @@ export default defineComponent({
         emit('update:modelValue', [entry.address, ...props.modelValue]);
       }
       isDropdownOpen.value = false;
-    }
-
-    function isAccountAddressValid(value: string) {
-      return ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .isAccountAddressValid(value, activeNetwork.value?.type);
     }
 
     function handleEnter() {
@@ -267,7 +299,7 @@ export default defineComponent({
                 protocol: props.protocol,
               };
             }) || [];
-          if (selectedAddresses.value.length === 1 && props.singleDefaultFormat) {
+          if (selectedAddresses.value.length === 1 && isSingleRecipient.value) {
             inputValue.value = selectedAddresses.value[0].address;
           }
         } else {
@@ -279,7 +311,7 @@ export default defineComponent({
       watch(inputValue, () => {
         isDropdownOpen.value = inputValue.value.length >= 2
           && filteredOptions.value.length > 0;
-        if (props.singleDefaultFormat) {
+        if (props.isTipUrlEnabled) {
           emit('update:modelValue', [inputValue.value]);
           return;
         }
@@ -301,9 +333,13 @@ export default defineComponent({
             inputValue.value = '';
           }
           if (parsedValues.length > 0) {
-            inputValue.value = '';
+            if (!isSingleRecipient.value) {
+              inputValue.value = '';
+            }
             emit('update:modelValue', [...parsedValues, ...props.modelValue].filter(removeDuplicates));
           }
+        } else if (props.singleDefaultFormat) {
+          emit('update:modelValue', [...props.modelValue]);
         }
       });
     });
@@ -322,6 +358,7 @@ export default defineComponent({
       isDropdownOpen,
       isNameValid,
       isAccountAddressValid,
+      isSingleRecipient,
       CircleCloseIcon,
       TrashIcon,
     };

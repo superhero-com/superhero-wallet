@@ -15,6 +15,7 @@
         avatar-size="rg"
         is-list-name
         :show-protocol-icon="!hideProtocolIcon"
+        :is-multisig="isMultisig"
       >
         <template #after-address>
           <slot name="after-address" />
@@ -44,7 +45,7 @@ import {
   PropType,
 } from 'vue';
 import type { IAccount, IFormSelectOption } from '@/types';
-import { useAccounts, useBalances } from '@/composables';
+import { useAccounts, useBalances, useMultisigAccounts } from '@/composables';
 import { getAddressColor } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -81,10 +82,23 @@ export default defineComponent({
   setup(props) {
     const { getAccountBalance } = useBalances();
     const { getAccountByAddress } = useAccounts();
+    const { getMultisigAccountByAccountId, getMultisigIAccountByAccountId } = useMultisigAccounts();
+
+    const multisigAccount = computed(() => (
+      getMultisigAccountByAccountId(props.option.value as string)
+    ));
+
+    const multisigIAccount = computed(() => (
+      getMultisigIAccountByAccountId(props.option.value as string)
+    ));
 
     const account = computed(() => (
-      props.customAccount ?? getAccountByAddress(props.option.value as string)
+      props.customAccount
+      ?? multisigIAccount.value
+      ?? getAccountByAddress(props.option.value as string)
     ));
+
+    const isMultisig = computed(() => !!multisigAccount.value);
 
     const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(account.value.address) }));
 
@@ -92,8 +106,10 @@ export default defineComponent({
       switch (true) {
         case !!props.outsideBalance:
           return props.outsideBalance;
-        case !!account.value:
+        case !!account.value && !isMultisig.value:
           return getAccountBalance(account.value.address.toString()).toNumber();
+        case !!account.value && isMultisig.value:
+          return multisigAccount.value?.balance.toNumber();
         default:
           return 0;
       }
@@ -105,6 +121,7 @@ export default defineComponent({
 
     return {
       account,
+      isMultisig,
       balance,
       bgColorStyle,
       tokenSymbol,

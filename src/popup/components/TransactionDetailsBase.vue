@@ -273,6 +273,7 @@ export default defineComponent({
 
     min-height: 73px;
     position: initial;
+    background-color: $color-bg-app;
 
     @include mixins.mobile {
       width: 100%;

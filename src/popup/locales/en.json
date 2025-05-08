@@ -55,7 +55,6 @@
     "browser": "Browser",
     "title": "Superhero Wallet",
     "total": "Total",
-    "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
     "unknown": "Unknown",
     "unrecognized": "Unrecognized",
@@ -362,7 +361,9 @@
       "superheroChat": "Superhero Chat",
       "senderReplaced": "Your active wallet account will be the sender for the transaction.",
       "unableToExecute": "This transaction can not be executed.",
-      "confirmSigning": "would like you to confirm a transaction."
+      "confirmSigning": "would like you to confirm a transaction.",
+      "notEnoughAE": "Your AE balance is not enough to pay for this transaction.",
+      "paidByDapp": "It will only be executed if the dapp pays for the transaction and gas cost."
     },
     "confirm-raw-sign": {
       "title": "Sign raw transaction",
@@ -582,7 +583,7 @@
       "sentTx": "Sending",
       "receivedTx": "Receiving",
       "multisigVaultCreated": "Multisig vault created",
-      "transactionFeePaidBy": "Transaction paid by",
+      "transactionFeePaidBy": "Transaction paid",
       "transactionFeePaid": "Transaction fee paid",
       "createMultisigVault": "Create multisig vault"
     },

@@ -48,6 +48,18 @@
       >
         {{ $t('modals.confirmTransactionSign.senderReplaced') }}
       </span>
+      <span
+        v-if="dappBalanceError"
+        class="sender-replaced"
+        data-cy="ae-balance-warning"
+      >
+        <p>
+          {{ $t('modals.confirmTransactionSign.notEnoughAE') }}
+        </p>
+        <p>
+          {{ $t('modals.confirmTransactionSign.paidByDapp') }}
+        </p>
+      </span>
       <DetailsItem
         v-if="decodedCallData?.functionName"
         :label="$t('modals.confirmTransactionSign.functionName')"
@@ -366,6 +378,7 @@ export default defineComponent({
       isTokenSaleFactory,
       txFunctionParsed,
       transactionAssets,
+      outerTxTag,
     } = useTransactionData({
       transaction,
       hideFeeFromAssets: true,
@@ -380,6 +393,7 @@ export default defineComponent({
     const decodedCallData = ref<AeDecodedCallData | EthDecodedCallData | undefined>();
     const activeTab = ref(dataTabs[0].name);
     const decodingCallData = ref(false);
+    const dappBalanceError = ref(false);
 
     const app = computed(() => popupProps.value?.app);
 
@@ -551,8 +565,12 @@ export default defineComponent({
           executionCost.value = getAeFee(executionCostAettos);
 
           if (new BigNumber(balance).isLessThan(executionCostAettos)) {
-            error.value = t('validation.enoughCoin');
-            return;
+            if (protocol === PROTOCOLS.aeternity && outerTxTag.value === Tag.ContractCallTx) {
+              dappBalanceError.value = true;
+            } else {
+              error.value = t('validation.enoughCoin');
+              return;
+            }
           }
           const txParams = unpackTx(popupProps.value.txBase64);
           if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
@@ -689,6 +707,7 @@ export default defineComponent({
       decodedPayload,
       decodingCallData,
       direction,
+      dappBalanceError,
       error,
       executionCost,
       filteredTxFields,

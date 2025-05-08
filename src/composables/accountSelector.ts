@@ -23,6 +23,7 @@ import {
   useAccounts,
   useAddressBook,
   useLatestTransactionList,
+  useMultisigAccounts,
 } from '@/composables';
 
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -57,6 +58,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
     accountsGroupedByProtocol,
     getAccountByAddress,
   } = useAccounts();
+  const { multisigAccounts, getMultisigAccountByAccountId } = useMultisigAccounts();
   const { accountsTransactionsLatest } = useLatestTransactionList();
   const accountSelectType = ref<AccountSelectTypeFilter>(ACCOUNT_SELECT_TYPE_FILTER.addressBook);
 
@@ -93,6 +95,8 @@ export const useAccountSelector = createCustomScopedComposable(() => {
             name = ownedName.name;
             localChainNameAddress = ownedName.pointers.accountPubkey;
           }
+        } else if (getMultisigAccountByAccountId(recipientId!)) {
+          name = tg('multisig.multisigVault');
         } else {
           const account = getAccountByAddress(recipientId!);
           if (account) {
@@ -154,6 +158,8 @@ export const useAccountSelector = createCustomScopedComposable(() => {
           ...entry,
           isOwnAddress: ownAddresses.value.some(
             (account) => account.address === entry.address,
+          ) || multisigAccounts.value.some(
+            (account) => account.gaAccountId === entry.address,
           ),
         }),
       );
