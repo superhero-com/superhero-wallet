@@ -41,7 +41,7 @@ const buildZip = (src, dist, zipFilename) => {
   return new Promise((resolve, reject) => {
     archive
       .directory(src, false)
-      .on('error', err => reject(err))
+      .on('error', (err) => reject(err))
       .pipe(stream);
 
     stream.on('close', () => resolve());
