@@ -157,7 +157,7 @@ export async function handleEthereumRpcMethod(
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    return { result: currentBlock?.number };
+    return { result: currentBlock?.number.toString() };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     const { updateFeeList, maxFeePerGas } = useEthFeeCalculation();
