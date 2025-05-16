@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.0...v2.6.1) (2025-05-15)
+
+
+### Features
+
+* account name on transaction review ([bc90aea](https://github.com/Superhero-com/superhero-wallet/commit/bc90aeae7d4b20c149c927650bb2713ecae74f0e))
+* select account in multisig dashboard ([31ac897](https://github.com/Superhero-com/superhero-wallet/commit/31ac8976f97ee3b6dff7861c0281ead29ff4babe))
+* sign transaction despite not enough balance ([db3d91c](https://github.com/Superhero-com/superhero-wallet/commit/db3d91c0cf2ee3e6d60788c650839dca4012451a))
+* ui improvement on single recipient ([19eeceb](https://github.com/Superhero-com/superhero-wallet/commit/19eecebeba07d7bda2f3624122d7a82c8012e9ca))
+
+
+### Bug Fixes
+
+* chrome extension store missing icons ([83f3c14](https://github.com/Superhero-com/superhero-wallet/commit/83f3c1446e13c5c532195986a45577988b5cf250))
+* dynamic symbol of token in test ([61c9227](https://github.com/Superhero-com/superhero-wallet/commit/61c9227a80e89daea44216fec6cfb469b494d35a))
+* **evm:** return blockNumber in correct format ([165bdd2](https://github.com/Superhero-com/superhero-wallet/commit/165bdd20f6f5892b1685e06be8b64ca4da07aef8))
+* translation issue in paid by ([c713b81](https://github.com/Superhero-com/superhero-wallet/commit/c713b8157ce6fe4c00c2bad29d454664663dd2e4))
+
 ## [2.6.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.5.3...v2.6.0) (2025-04-15)
 
 
