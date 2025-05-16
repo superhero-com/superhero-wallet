@@ -8,6 +8,7 @@
         :active-account-address="activeAccount.address"
         :active-idx="activeAccountGlobalIdx"
         :balances-total="totalBalance"
+        :force-header="multisigAccounts.length > 1"
         @select-account="(address) => setActiveAccountByAddress(address)"
       >
         <template #swiper>
@@ -108,6 +109,7 @@ import {
   useBalances,
   useDeepLinkApi,
   useFungibleTokens,
+  useMultisigAccounts,
 } from '@/composables';
 import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
@@ -156,6 +158,7 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
     } = useAccounts();
+    const { multisigAccounts } = useMultisigAccounts();
 
     const { accountsTotalBalance } = useBalances();
     const { accountsTotalTokenBalance } = useFungibleTokens();
@@ -201,6 +204,7 @@ export default defineComponent({
       GlobeIcon,
       ActionIcon,
 
+      multisigAccounts,
       accounts,
       accountsAddressList,
       accountsSelectOptions,

@@ -2,7 +2,8 @@
   <div class="dashboard-base">
     <div class="dashboard-header">
       <div
-        v-if="accounts.length > 1"
+        v-if="showHeader"
+        :style="{ visibility: accounts.length > 1 ? 'visible' : 'hidden' }"
         class="dashboard-header-info"
       >
         <TotalWalletAmount
@@ -67,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
 import type { IAccount, IFormSelectOption, IMultisigAccount } from '@/types';
 import { ROUTE_SEED_PHRASE_SETTINGS } from '@/popup/router/routeNames';
 import { useUi } from '@/composables';
@@ -94,15 +95,19 @@ export default defineComponent({
     activeIdx: { type: Number, default: 0 },
     balancesTotal: { type: String, default: null },
     isMultisig: Boolean,
+    forceHeader: Boolean,
   },
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     'select-account': (address: string) => true,
   },
-  setup() {
+  setup(props) {
     const { isSeedBackedUp } = useUi();
 
+    const showHeader = computed(() => props.accounts.length > 1 || props.forceHeader);
+
     return {
+      showHeader,
       isSeedBackedUp,
       WarningTriangleIcon,
       ROUTE_SEED_PHRASE_SETTINGS,
@@ -123,6 +128,7 @@ export default defineComponent({
     padding: 5px 20px 8px 24px;
     display: flex;
     align-items: center;
+    min-height: 35px;
 
     .account-select-btn {
       padding: 0;

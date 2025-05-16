@@ -4,10 +4,14 @@
       <DashboardBase
         v-if="isValidActiveIdx"
         class="dashboard-multisig"
+        :accounts="multisigAccounts"
+        :accounts-select-options="multisigAccountsSelectOptions"
+        :active-account-address="activeMultisigAccount?.gaAccountId"
         :active-idx="multisigAccountIdx"
         :balances-total="multisigBalancesTotal"
-        :accounts="multisigAccounts"
+        :force-header="accounts.length > 1"
         is-multisig
+        @select-account="(address) => setActiveMultisigAccountId(address)"
       >
         <template #swiper>
           <AccountSwiper
@@ -58,18 +62,24 @@ import { computed, defineComponent } from 'vue';
 import BigNumber from 'bignumber.js';
 
 import type { IMultisigAccount } from '@/types';
-import { MODAL_TRANSFER_SEND } from '@/constants';
-import { useModals, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
+import { MODAL_TRANSFER_SEND, PROTOCOLS } from '@/constants';
+import {
+  useAccounts,
+  useCurrencies,
+  useModals,
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
+} from '@/composables';
 import { ROUTE_MULTISIG_DETAILS } from '@/popup/router/routeNames';
 
 import AccountCardMultisig from '@/popup/components/AccountCardMultisig.vue';
 import AccountSwiper from '@/popup/components/AccountSwiper.vue';
-import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
-import DashboardBase from '../components/DashboardBase.vue';
-import OpenTransferReceiveModalBtn from '../components/OpenTransferReceiveModalBtn.vue';
-import OpenTransferSendModalBtn from '../components/OpenTransferSendModalBtn.vue';
+import PendingMultisigTransactionCard from '@/popup/components/PendingMultisigTransactionCard.vue';
+import DashboardBase from '@/popup/components/DashboardBase.vue';
+import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
+import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 
-import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
+import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 
 export default defineComponent({
   name: 'DashboardMultisig',
@@ -86,13 +96,17 @@ export default defineComponent({
   setup() {
     const { openModal } = useModals();
     const {
+      activeMultisigAccount,
       multisigAccounts,
+      multisigAccountsSelectOptions,
       activeMultisigAccountId,
       pendingMultisigAccounts,
       isActiveMultisigAccountPending,
       setActiveMultisigAccountId,
     } = useMultisigAccounts();
+    const { accounts } = useAccounts();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction();
+    const { getCurrentCurrencyRate } = useCurrencies();
 
     const addressList = computed(() => multisigAccounts.value.map((acc) => acc.gaAccountId));
 
@@ -108,6 +122,7 @@ export default defineComponent({
       () => multisigAccounts.value
         .map((acc) => acc.balance)
         .reduce((total, balance) => total.plus(balance), new BigNumber(0))
+        .multipliedBy(getCurrentCurrencyRate(PROTOCOLS.aeternity))
         .toFixed(),
     );
 
@@ -131,18 +146,22 @@ export default defineComponent({
     }
 
     return {
+      activeMultisigAccount,
       isActiveMultisigAccountPending,
       pendingMultisigTransaction,
       isValidActiveIdx,
       ROUTE_MULTISIG_DETAILS,
       ArrowSendIcon,
       addressList,
+      accounts,
       multisigAccountIdx,
       multisigAccounts,
+      multisigAccountsSelectOptions,
       multisigBalancesTotal,
       openTransferSendModal,
       selectAccount,
       isPendingAccount,
+      setActiveMultisigAccountId,
     };
   },
 });
