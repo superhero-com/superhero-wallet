@@ -587,7 +587,10 @@ export default defineComponent({
             }
           }
         } catch (e: any) {
-          error.value = e.message;
+          if (!isNotFoundError(e)) {
+            handleUnknownError(e);
+            error.value = e.message;
+          }
         } finally {
           verifying.value = false;
         }
