@@ -1,0 +1,32 @@
+name: Test using playwright
+on: [push]
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: wallet
+      APPLITOOLS_KEY: ${{ secrets.APPLITOOLS_KEY }}
+      ETHERSCAN_API_KEY: "${{ github.ref == 'refs/heads/master' && secrets.ETHERSCAN_API_KEY_PROD || secrets.ETHERSCAN_API_KEY_DEV }}"
+      PLAYWRIGHT_SEED_PHRASE: ${{ secrets.PLAYWRIGHT_SEED_PHRASE }}
+      TOKEN_SALES_URL_MAINNET: ${{ secrets.TOKEN_SALES_URL_MAINNET }}
+      TOKEN_SALES_URL_TESTNET: ${{ secrets.TOKEN_SALES_URL_TESTNET }}
+      WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 100
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install app dependencies
+        run: npm ci
+      - name: Install playwright
+        run: npx playwright install
+      - name: Run parallel tests
+        run: |
+          npm run build:web
+          npm run test:playwright:parallel
