@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.1...v2.6.2) (2025-05-23)
+
+
+### Bug Fixes
+
+* be able to sign transaction with new/empty account ([62a69f3](https://github.com/Superhero-com/superhero-wallet/commit/62a69f3a2d11812aca1f19981ed20ce221ecf32c))
+
 ### [2.6.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.0...v2.6.1) (2025-05-15)
 
 
