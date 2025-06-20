@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.2...v2.6.3) (2025-06-20)
+
+
+### Features
+
+* **deep-link:** be able to sign as inner transaction ([bb4d9c0](https://github.com/Superhero-com/superhero-wallet/commit/bb4d9c0d68f56ac93bcfa6c7167dced45e88c41e))
+
 ### [2.6.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.1...v2.6.2) (2025-05-23)
 
 
