@@ -61,7 +61,7 @@ export default defineComponent({
         setIsDeepLinkUsed(true);
         setLoaderVisible(true);
         const {
-          transaction, networkId, broadcast, 'replace-caller': replaceCaller,
+          transaction, networkId, broadcast, 'replace-caller': replaceCaller, innerTx,
         } = route.query;
 
         if (networkId !== nodeNetworkId.value) {
@@ -89,6 +89,7 @@ export default defineComponent({
             networkId,
             aeppOrigin: callbackOrigin.value?.toString() || undefined,
             isSenderReplaced: replaceCaller === 'true',
+            innerTx: innerTx === 'true',
           } as any,
         );
 

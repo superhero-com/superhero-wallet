@@ -29,6 +29,7 @@ https://wallet.superhero.com/sign-transaction
   & networkId=<string>
   & broadcast=<boolean>
   & replace-caller=<boolean>
+  & innerTx=<boolean>
   & x-success=<success-url>
   & x-cancel=<cancel-url>
 ```
@@ -39,6 +40,7 @@ https://wallet.superhero.com/sign-transaction
 |`networkId` (required)|The `networkId` identifier of the network which the wallet should sign your transaction with.|
 |`broadcast` (optional)| This flag is for sending a signed transaction by the wallet.|
 |`replace-caller` (optional)| This flag is used to ensure that the transmitted `transaction` is called using the current address.|
+|`innerTx` (optional)| This flag is used to sign as inner transaction for PayingFor.|
 |`x-success` (required)| This is a callback URL in case user signs the transaction. If the `broadcast` flag is: <br> - `false/not set` callback **must** contain `{transaction}` parameter in order to get the signed transaction; <br> - `true` callback can have `{transaction-hash}` of the broadcasted transaction.|
 |`x-cancel` (required)| This is a callback URL in case user doesn't sign the transaction. |
 
