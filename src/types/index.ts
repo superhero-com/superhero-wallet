@@ -168,35 +168,17 @@ export type AssetContractId =
   | typeof ETH_CONTRACT_ID
   | string;
 
-export interface ITokenSalePriceData {
-  usd: number;
-  eur: number;
-  aud: number;
-  brl: number;
-  cad: number;
-  chf: number;
-  gbp: number;
-  xau: number;
-}
-
 export interface ITokenSale {
   address: string;
-  createdAt: string;
   creatorAddress: string;
   daoBalance: string;
   decimals: number;
-  factoryAddress: string;
-  id: number;
   marketCap: number;
-  marketCapData: ITokenSalePriceData;
   name: string;
   networkId: string;
   ownerAddress: string;
   price: number;
-  priceData: ITokenSalePriceData;
   saleAddress: string;
-  sellPrice: number;
-  sellPriceData: ITokenSalePriceData;
   symbol: string;
   totalSupply: number;
 }
