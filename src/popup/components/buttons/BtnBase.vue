@@ -36,6 +36,7 @@ export const BTN_VARIANT = [
   'muted',
   'danger',
   'purple',
+  'teal',
   'dark',
   'outlined',
 ] as const;
@@ -195,6 +196,10 @@ export default defineComponent({
 
     &-purple {
       --bg-color: #{$color-purple};
+    }
+
+    &-teal {
+      --bg-color: #{$color-teal};
     }
 
     &-dark {

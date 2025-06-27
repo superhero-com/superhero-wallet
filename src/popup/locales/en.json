@@ -149,6 +149,11 @@
       "description": "Explore æpps from within your wallet with the new built-in browser.",
       "button": "Browse"
     },
+    "bridgeSwapBrowserCard": {
+      "title": "Exchange With Superhero Swap",
+      "description": "Exchange ETH to AE or aeETH to AE in just a few easy steps.",
+      "button": "Exchange"
+    },
     "buyCard": {
       "title": "Buy AE",
       "description": "Use Simplex to buy æternity coins with your credit card or bank account.",

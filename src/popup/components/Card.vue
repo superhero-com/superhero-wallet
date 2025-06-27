@@ -143,7 +143,7 @@ export default defineComponent({
   }
 
   .description {
-    @extend %face-sans-13-regular;
+    @extend %face-sans-13-medium;
 
     opacity: 0.7;
     margin-top: 4px;
