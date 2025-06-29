@@ -207,7 +207,7 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="!!error || verifying"
+        :disabled="!!error || verifying || loading"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
