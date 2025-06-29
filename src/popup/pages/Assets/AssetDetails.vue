@@ -56,6 +56,12 @@
               :icon="SwapIcon"
               :href="AE_DEX_URL"
             />
+            <BtnBox
+              v-if="isEthCoin"
+              :text="$t('common.swap')"
+              :icon="BridgeSwapIcon"
+              @click="onSwapClick"
+            />
           </div>
 
           <div
@@ -106,7 +112,7 @@ import {
   nextTick,
   watch,
 } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Contract, Encoded } from '@aeternity/aepp-sdk';
 
@@ -115,12 +121,15 @@ import {
   ICON_SIZES,
   IS_FIREFOX,
   IS_IOS,
+  IS_MOBILE_APP,
   IS_TRANSITIONS_DISABLED,
   PROTOCOLS,
+  TRUSTED_DAPPS,
   UNFINISHED_FEATURES,
 } from '@/constants';
-import { excludeFalsy } from '@/utils';
+import { excludeFalsy, setLocalStorageItem } from '@/utils';
 import {
+  ROUTE_APPS_BROWSER,
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
   ROUTE_MULTISIG_COIN,
@@ -143,6 +152,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fadeAnimation } from '@/popup/animations';
 import AedexV2PairACI from '@/protocols/aeternity/aci/AedexV2PairACI.json';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
+import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import {
   buildAeFaucetUrl,
   buildSimplexLink,
@@ -162,6 +172,7 @@ import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilte
 import SwapIcon from '../../../icons/swap.svg?vue-component';
 import BuyIcon from '../../../icons/credit-card.svg?vue-component';
 import FaucetIcon from '../../../icons/faucet.svg?vue-component';
+import BridgeSwapIcon from '../../../icons/bridgeswap.svg?vue-component';
 
 export default defineComponent({
   name: 'AssetDetails',
@@ -180,6 +191,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
+    const router = useRouter();
     const { t } = useI18n();
     const { setSharedAssetDetails, resetSharedAssetDetails } = useAssetDetails();
     const { setLoaderVisible } = useUi();
@@ -209,7 +221,7 @@ export default defineComponent({
     const currentActiveProtocol = computed(
       () => isMultisig.value
         ? PROTOCOLS.aeternity
-        : activeAccount.value.protocol,
+        : activeAccount.value?.protocol,
     );
 
     const isCoin: boolean = !!route.matched.find(
@@ -222,6 +234,7 @@ export default defineComponent({
     );
     const contractId = route.params.id as AssetContractId;
     const isAeCoin = contractId === AE_CONTRACT_ID;
+    const isEthCoin = contractId === ETH_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
     const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
@@ -360,6 +373,20 @@ export default defineComponent({
       }
     }
 
+    function onSwapClick() {
+      const superheroSwapDapp = TRUSTED_DAPPS.filter(({ isFeatured, name }) => (
+        isFeatured && name === 'Superhero Swap'
+      ))[0];
+      if (superheroSwapDapp) {
+        if (IS_MOBILE_APP || UNFINISHED_FEATURES) {
+          setLocalStorageItem(['selected-app'], superheroSwapDapp);
+          router.push({ name: ROUTE_APPS_BROWSER });
+        } else {
+          window.open(superheroSwapDapp.url, '_blank');
+        }
+      }
+    }
+
     onMounted(async () => {
       if (isContract(contractId) && !isAeCoin) {
         setLoaderVisible(true);
@@ -396,10 +423,12 @@ export default defineComponent({
       IS_IOS,
       IS_TRANSITIONS_DISABLED,
       AE_DEX_URL,
+      ROUTE_APPS_BROWSER,
 
       BuyIcon,
       FaucetIcon,
       SwapIcon,
+      BridgeSwapIcon,
 
       assetBalance,
       assetData,
@@ -410,6 +439,7 @@ export default defineComponent({
       stickyTabsWrapperEl,
       fungibleToken,
       isAeCoin,
+      isEthCoin,
       isCoin,
       isNodeMainnet,
       isNodeTestnet,
@@ -425,6 +455,8 @@ export default defineComponent({
       route,
       routerHeight,
       fadeAnimation,
+
+      onSwapClick,
     };
   },
 });
