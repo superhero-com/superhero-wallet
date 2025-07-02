@@ -46,9 +46,7 @@ import {
   getActivityHash,
   getLastNotEmptyAccountIndex,
   handleUnknownError,
-  sleep,
   toShiftedBigNumber,
-  watchUntilTruthy,
 } from '@/utils';
 import Logger from '@/lib/logger';
 
@@ -285,18 +283,17 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
     const { fetchFromMiddleware } = useAeMiddleware();
-    const { areTokenSalesReady, tokenSales } = useAeTokenSales();
+    const { loadAllTokenSalesInfoByAccount, tokenSales } = useAeTokenSales();
     try {
-      const tokens: ITokenBalanceResponse[] = camelCaseKeysDeep(await fetchAllPages(
-        () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
-        fetchFromMiddleware,
-      ));
-      if (tokens.length) {
-        await Promise.race([
-          watchUntilTruthy(areTokenSalesReady),
-          sleep(5000),
-        ]);
-      }
+      const [tokens]: ITokenBalanceResponse[][] = await Promise.all(
+        [
+          camelCaseKeysDeep(await fetchAllPages(
+            () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+            fetchFromMiddleware,
+          )),
+          loadAllTokenSalesInfoByAccount(address as Encoded.AccountAddress),
+        ],
+      );
       return tokens.map(({
         amount, contractId, decimals, tokenName, tokenSymbol,
       }) => ({
