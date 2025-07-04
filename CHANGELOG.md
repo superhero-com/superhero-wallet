@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.3...v2.6.4) (2025-07-04)
+
+
+### Bug Fixes
+
+* do not allow to sign transaction while loading info ([55430db](https://github.com/Superhero-com/superhero-wallet/commit/55430db125664321cd5b510b3c03f19337bfa1c5))
+
+
+### Performance
+
+* **token-sale:** load only necessary token info ([3d805ae](https://github.com/Superhero-com/superhero-wallet/commit/3d805aee9947e0d8247cb92192614f93057bd1a5))
+
+
+### Maintenance
+
+* run npm audit fix ([b57bdf9](https://github.com/Superhero-com/superhero-wallet/commit/b57bdf922ec2fdd56b25ff014c275885e6c68229))
+
 ### [2.6.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.2...v2.6.3) (2025-06-20)
 
 
