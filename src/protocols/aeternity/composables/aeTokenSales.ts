@@ -1,5 +1,7 @@
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
+import { Encoded } from '@aeternity/aepp-sdk';
+import { uniqBy } from 'lodash-es';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import { ITokenSale } from '@/types';
@@ -21,11 +23,29 @@ const TIMEOUT_LIMIT = 5000;
 
 let composableInitialized = false;
 
-const areTokenSalesReady = ref(false);
-
 interface TokenFactory {
-  contractId: string;
+  contractId: Encoded.ContractAddress;
+}
+
+interface TokenFactoryRaw extends TokenFactory {
   description: string;
+}
+
+function normalizeTokenSales(ITokenSaleRaw: any): ITokenSale {
+  return {
+    address: ITokenSaleRaw.address,
+    creatorAddress: ITokenSaleRaw.creatorAddress,
+    daoBalance: ITokenSaleRaw.daoBalance,
+    decimals: ITokenSaleRaw.decimals,
+    marketCap: ITokenSaleRaw.marketCap,
+    name: ITokenSaleRaw.name,
+    networkId: ITokenSaleRaw.networkId,
+    ownerAddress: ITokenSaleRaw.ownerAddress,
+    price: ITokenSaleRaw.price,
+    saleAddress: ITokenSaleRaw.saleAddress,
+    symbol: ITokenSaleRaw.symbol,
+    totalSupply: ITokenSaleRaw.totalSupply,
+  };
 }
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
@@ -79,29 +99,76 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
     };
   }
 
-  async function loadTokenSalesInfo(tokenSalesUrl: string): Promise<{
-    tokenFactories: TokenFactory[]; tokenSales: ITokenSale[];
-  }> {
-    try {
-      const response: ITokenSale[] = camelCaseKeysDeep(await fetchAllPages(
-        () => fetchTokenSales(tokenSalesUrl)('tokens'),
-        fetchTokenSales(tokenSalesUrl),
-      ));
-      return {
-        tokenSales: response,
-        tokenFactories: (await fetchJson(`${tokenSalesUrl}/contracts`)) || [],
-      };
-    } catch (e) {
-      handleUnknownError(e);
-      return {
-        tokenSales: [],
-        tokenFactories: [],
-      };
+  /**
+   * Loading first encountered valid additional information
+   * about contractId and saving it in tokenSales list,
+   * if contractId belongs to token sale.
+   * @param contractId - sale address or token address
+   * @returns void
+   */
+  async function loadTokenSalesInfoByContractId(
+    contractId: Encoded.ContractAddress,
+  ): Promise<void> {
+    const tokenSalesUrls = [
+      ...(activeNetwork.value.type !== NETWORK_TYPE_CUSTOM
+        ? [AE_TOKEN_SALES_URLS[activeNetwork.value.type]]
+        : []),
+      ...(customTokenSalesUrls.value[activeNetwork.value.name] || []),
+    ];
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < tokenSalesUrls.length; i++) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const response = await fetchJson(`${tokenSalesUrls[i]}/tokens/${contractId}`);
+        tokenSales.value = uniqBy(
+          [...tokenSales.value, ...(response ? [normalizeTokenSales(response)] : [])],
+          'address',
+        );
+        return;
+      } catch (e) {
+        /** NOOP */
+      }
     }
   }
 
-  async function loadAllTokenSalesInfo() {
-    areTokenSalesReady.value = false;
+  async function loadTokenSalesInfoByAccount(
+    tokenSalesUrl: string,
+    address: Encoded.AccountAddress,
+  ): Promise<ITokenSale[]> {
+    try {
+      const response = camelCaseKeysDeep(await fetchAllPages(
+        () => fetchTokenSales(tokenSalesUrl)(`accounts/${address}/tokens`),
+        fetchTokenSales(tokenSalesUrl),
+      ));
+      return response?.map(({ token }: any) => normalizeTokenSales(token));
+    } catch (e) {
+      handleUnknownError(e);
+      return [];
+    }
+  }
+
+  async function loadAllTokenFactoriesInfo() {
+    const tokenSalesUrls = [
+      ...(activeNetwork.value.type !== NETWORK_TYPE_CUSTOM
+        ? [AE_TOKEN_SALES_URLS[activeNetwork.value.type]]
+        : []),
+      ...(customTokenSalesUrls.value[activeNetwork.value.name] || []),
+    ];
+    await Promise.all(
+      tokenSalesUrls.map(async (url) => {
+        const response = await fetchJson(`${url}/contracts`);
+        tokenFactories.value = uniqBy(
+          [
+            ...tokenFactories.value,
+            ...(response.map(({ contractId }: TokenFactoryRaw) => ({ contractId })) || []),
+          ],
+          'contractId',
+        );
+      }),
+    );
+  }
+
+  async function loadAllTokenSalesInfoByAccount(address: Encoded.AccountAddress) {
     const tokenSalesUrls = [
       ...(activeNetwork.value.type !== NETWORK_TYPE_CUSTOM
         ? [AE_TOKEN_SALES_URLS[activeNetwork.value.type]]
@@ -109,15 +176,15 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
       ...(customTokenSalesUrls.value[activeNetwork.value.name] || []),
     ];
     const currentNetworkName = activeNetwork.value.name;
-    const allTokenSalesInfo = await Promise.all(tokenSalesUrls.map(loadTokenSalesInfo));
+    const allTokenSalesInfo = await Promise.all(
+      tokenSalesUrls.map((url) => loadTokenSalesInfoByAccount(url, address)),
+    );
     if (currentNetworkName !== activeNetwork.value.name) {
       return;
     }
     allTokenSalesInfo.forEach((response) => {
-      tokenSales.value = [...tokenSales.value, ...response.tokenSales];
-      tokenFactories.value = [...tokenFactories.value, ...(response.tokenFactories || [])];
+      tokenSales.value = uniqBy([...tokenSales.value, ...response], 'address');
     });
-    areTokenSalesReady.value = true;
   }
 
   async function validateTokenSalesUrl(url: string): Promise<{
@@ -169,13 +236,13 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
 
   if (!composableInitialized) {
     composableInitialized = true;
-    initPollingWatcher(() => loadAllTokenSalesInfo());
+    initPollingWatcher(() => loadAllTokenFactoriesInfo());
 
     onNetworkChange(async (network, oldNetwork) => {
       if (network.name !== oldNetwork.name) {
         tokenSales.value = [];
         tokenFactories.value = [];
-        await loadAllTokenSalesInfo();
+        await loadAllTokenFactoriesInfo();
       }
     });
 
@@ -187,13 +254,14 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
   }
 
   return {
-    areTokenSalesReady,
     customTokenSalesUrls,
     tokenFactories,
     tokenSales,
     tokenSaleAddresses,
     tokenContractAddresses,
     addCustomTokenSalesUrl,
+    loadTokenSalesInfoByContractId,
+    loadAllTokenSalesInfoByAccount,
     removeCustomTokenSalesUrl,
     tokenSaleAddressToTokenContractAddress,
     validateTokenSalesUrl,
