@@ -207,7 +207,7 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="!!error || verifying"
+        :disabled="!!error || verifying || loading"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
@@ -262,7 +262,6 @@ import {
   handleUnknownError,
   isNotFoundError,
   toShiftedBigNumber,
-  watchUntilTruthy,
 } from '@/utils';
 import {
   useAccounts,
@@ -341,7 +340,10 @@ export default defineComponent({
       getTxAssetSymbol,
     } = useFungibleTokens();
     const { openModal } = useModals();
-    const { areTokenSalesReady, tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
+    const {
+      loadTokenSalesInfoByContractId,
+      tokenSaleAddressToTokenContractAddress,
+    } = useAeTokenSales();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
@@ -470,9 +472,10 @@ export default defineComponent({
       if (!resolver) {
         return [];
       }
-      if (protocol === PROTOCOLS.aeternity && (isTokenSale.value || isTokenSaleFactory.value)) {
-        // Wait until token sale tokens are resolved
-        await watchUntilTruthy(areTokenSalesReady);
+      if (protocol === PROTOCOLS.aeternity && popupProps.value?.tx?.contractId) {
+        await loadTokenSalesInfoByContractId(
+          popupProps.value?.tx?.contractId as Encoded.ContractAddress,
+        );
       }
       const tokens = resolver(
         { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
