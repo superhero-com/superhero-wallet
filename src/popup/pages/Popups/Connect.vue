@@ -2,6 +2,7 @@
   <ConnectBase
     class="connect-popup"
     :access="access"
+    :icon="icon"
   />
 </template>
 
@@ -25,6 +26,7 @@ export default defineComponent({
         CONNECT_PERMISSIONS.transactions,
       ]),
     },
+    icon: { type: String, default: undefined },
   },
   setup() {
     return {};

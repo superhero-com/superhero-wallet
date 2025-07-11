@@ -214,6 +214,7 @@ export default defineComponent({
   },
   props: {
     access: { type: Array as PropType<ConnectPermission[]>, required: true },
+    icon: { type: String, default: undefined },
   },
   setup(props) {
     const { t } = useI18n();
@@ -286,7 +287,7 @@ export default defineComponent({
       () => (trustedDapp.value)
         // eslint-disable-next-line global-require, import/no-dynamic-require
         ? require(`@/icons/dapp/${trustedDapp.value.image}`)
-        : null,
+        : props.icon,
     );
 
     const protocolName = computed(
