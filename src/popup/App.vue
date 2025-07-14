@@ -254,6 +254,7 @@ export default defineComponent({
       setHtmlBrowserClass();
 
       if (IS_MOBILE_APP) {
+        StatusBar.setOverlaysWebView({ overlay: false });
         StatusBar.setStyle({ style: Style.Dark });
         StatusBar.setBackgroundColor({
           color: '#141414',
