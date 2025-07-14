@@ -65,7 +65,12 @@ export default defineComponent({
     const { getProtocolAvailableTokens } = useFungibleTokens();
     const { tokenSaleAddressToTokenContractAddress } = useAeTokenSales();
 
-    const { isDexSwap, txFunctionParsed, isTokenSale } = useTransactionData({
+    const {
+      isDexSwap,
+      txFunctionParsed,
+      isTokenSale,
+      innerTx,
+    } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
 
@@ -80,7 +85,7 @@ export default defineComponent({
       }
 
       const { tokens } = resolver(
-        props.transaction,
+        { tx: innerTx.value } as ITransaction,
         getProtocolAvailableTokens(PROTOCOLS.aeternity),
         tokenSaleAddressToTokenContractAddress,
       );
