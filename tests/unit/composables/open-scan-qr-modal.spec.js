@@ -36,9 +36,12 @@ jest.mock('@/composables/accountAssetsList', () => ({
   })),
 }));
 
-jest.mock('@/composables/modals', () => ({
+jest.mock('@/composables', () => ({
   useModals: jest.fn(() => ({
     openScanQrModal: qrCodeSource,
+  })),
+  useAccounts: jest.fn(() => ({
+    accounts: [],
   })),
 }));
 

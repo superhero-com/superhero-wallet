@@ -46,7 +46,7 @@ export const RouteQueryActionsController = (() => {
      * Take action after opening the link copied in the transfer receive modal.
      */
     transferSend: (_, query) => {
-      const { openModal } = useModals();
+      const { openModal, closeAllModals } = useModals();
       const { setActiveAccountByProtocol } = useAccounts();
 
       // Determine the active protocol for the current transfer
@@ -66,6 +66,7 @@ export const RouteQueryActionsController = (() => {
        */
       setActiveAccountByProtocol(currentActionProtocol || PROTOCOLS.aeternity);
 
+      closeAllModals();
       openModal(MODAL_TRANSFER_SEND);
       return true;
     },
@@ -82,7 +83,7 @@ export const RouteQueryActionsController = (() => {
    * Monitor the action arguments in the query string and perform assigned action method.
    */
   function init(router: Router) {
-    const unbind = router.beforeResolve(({ query }, from, next) => {
+    router.beforeResolve(({ query }, from, next) => {
       const action = query?.[ACTION_PROP] as null | RouteQueryActionName;
 
       if (action && typeof action === 'string' && availableActions[action]) {
@@ -93,7 +94,6 @@ export const RouteQueryActionsController = (() => {
         if (shouldOpenRequestedPage) {
           next();
         }
-        unbind();
       } else {
         next();
       }
