@@ -60,6 +60,47 @@ const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
 const { checkUserAuth } = useAuth();
 
+let pendingDeeplinkUrl: string | null = null;
+let appReady = false;
+
+function handleDeeplink(url: string) {
+  const { connect, setIsOpenUsingDeeplink, wcSession } = useWalletConnect();
+
+  setTimeout(() => {
+    const deepLinkUrl = new URL(url);
+    if (deepLinkUrl.origin === 'wc://' || url.startsWith('superhero://wc')) {
+      setIsOpenUsingDeeplink(true);
+      router.push({ name: ROUTE_ACCOUNT });
+
+      if (!wcSession.value) {
+        connect(deepLinkUrl.searchParams.get('uri') as WalletConnectUri, true);
+      }
+      return;
+    }
+    const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepLinkUrl.origin === p);
+    if (!prefix) throw new Error(`Unknown url: ${deepLinkUrl.origin}`);
+
+    try {
+      router.push({
+        path: deepLinkUrl.pathname,
+        hash: deepLinkUrl.hash,
+        query: Object.fromEntries(deepLinkUrl.searchParams.entries()),
+      });
+    } catch (error: any) {
+      if (error.name !== 'NavigationDuplicated') throw error;
+    }
+  }, 1000);
+}
+
+App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
+  console.log('[Deeplink] Received', event.url);
+  if (appReady) {
+    handleDeeplink(event.url);
+  } else {
+    pendingDeeplinkUrl = event.url;
+  }
+});
+
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
@@ -143,32 +184,12 @@ if (IS_MOBILE_APP) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
 
-    App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
-      const { connect, setIsOpenUsingDeeplink, wcSession } = useWalletConnect();
+    appReady = true;
 
-      const deepLinkUrl = new URL(event.url);
-      if (deepLinkUrl.origin === 'wc://' || event.url.startsWith('superhero://wc')) {
-        setIsOpenUsingDeeplink(true);
-        router.push({ name: ROUTE_ACCOUNT });
-
-        if (!wcSession.value) {
-          connect(deepLinkUrl.searchParams.get('uri') as WalletConnectUri, true);
-        }
-        return;
-      }
-      const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepLinkUrl.origin === p);
-      if (!prefix) throw new Error(`Unknown url: ${deepLinkUrl.origin}`);
-
-      try {
-        router.push({
-          path: deepLinkUrl.pathname,
-          hash: deepLinkUrl.hash,
-          query: Object.fromEntries(deepLinkUrl.searchParams.entries()),
-        });
-      } catch (error: any) {
-        if (error.name !== 'NavigationDuplicated') throw error;
-      }
-    });
+    if (pendingDeeplinkUrl) {
+      handleDeeplink(pendingDeeplinkUrl);
+      pendingDeeplinkUrl = null;
+    }
 
     // TODO establish if we still need this
     router.afterEach((to) => {
