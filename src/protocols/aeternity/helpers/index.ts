@@ -244,7 +244,6 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
     || transaction.url
     || (
       !transaction.pending
-      && !transaction.claim
       && transaction.tx.log?.[0]
       && transaction.tx?.function
       && includes(
