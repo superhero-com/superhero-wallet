@@ -13,6 +13,7 @@ import { App } from '@capacitor/app';
 import {
   APP_NAME,
   APP_URL,
+  MODAL_CONFIRM_CONNECT,
   PROTOCOLS,
   STORAGE_KEYS,
   WALLET_CONNECT_PROJECT_ID,
@@ -28,7 +29,7 @@ import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
 
-export type WalletConnectUri = `ws:${string}`;
+export type WalletConnectUri = `wc:${string}`;
 
 type SupportedRequestMethod =
   | 'eth_sendTransaction'
@@ -59,7 +60,7 @@ const wcState = reactive({
 export function useWalletConnect({ offscreen } = { offscreen: false }) {
   const { activeAccount, accountsGroupedByProtocol, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks } = useNetworks();
-  const { openDefaultModal } = useModals();
+  const { openDefaultModal, openModal } = useModals();
 
   const ethAccounts = computed(() => accountsGroupedByProtocol.value[PROTOCOLS.ethereum] || []);
 
@@ -189,6 +190,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             }),
         },
       });
+      closeAppIfOpenUsingDeeplink();
     });
 
     // User manually initiated disconnecting on the DAPP side
@@ -247,7 +249,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   /**
    * @param uri identifier copied or scanned from QR code
    */
-  async function connect(uri: WalletConnectUri) {
+  async function connect(uri: WalletConnectUri, isConfirmRequired: boolean = false) {
     wcState.connecting = true;
 
     try {
@@ -267,6 +269,14 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         monitorActiveSessionEvents();
 
         try {
+          if (isConfirmRequired) {
+            const app = new URL(proposal.proposer.metadata.url);
+            const { icons } = proposal.proposer.metadata;
+            const icon = icons?.[0] ?? '';
+
+            await openModal(MODAL_CONFIRM_CONNECT, { app, icon });
+          }
+
           wcSession.value = await web3wallet!.approveSession({
             id,
             namespaces: buildApprovedNamespaces({

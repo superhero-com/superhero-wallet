@@ -6,7 +6,6 @@ import {
   APP_LINK_WEB,
   IS_MOBILE_APP,
   IS_WEB,
-  MODAL_WALLET_CONNECT,
   POPUP_TYPE,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
@@ -25,10 +24,10 @@ import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   useAuth,
-  useModals,
   usePopupProps,
   useUi,
   useWalletConnect,
+  type WalletConnectUri,
 } from '@/composables';
 import { routes } from './routes';
 import {
@@ -145,27 +144,26 @@ if (IS_MOBILE_APP) {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
 
     App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
-      const { setIsOpenUsingDeeplink, wcSession } = useWalletConnect();
-      const { openModal } = useModals();
+      const { connect, setIsOpenUsingDeeplink, wcSession } = useWalletConnect();
 
-      const deepllinkUrl = new URL(event.url);
-      if (deepllinkUrl.origin === 'wc://') {
+      const deepLinkUrl = new URL(event.url);
+      if (deepLinkUrl.origin === 'wc://' || event.url.startsWith('superhero://wc')) {
         setIsOpenUsingDeeplink(true);
         router.push({ name: ROUTE_ACCOUNT });
 
         if (!wcSession.value) {
-          openModal(MODAL_WALLET_CONNECT, { deeplinkUri: event.url });
+          connect(deepLinkUrl.searchParams.get('uri') as WalletConnectUri, true);
         }
         return;
       }
-      const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepllinkUrl.origin === p);
-      if (!prefix) throw new Error(`Unknown url: ${deepllinkUrl.origin}`);
+      const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepLinkUrl.origin === p);
+      if (!prefix) throw new Error(`Unknown url: ${deepLinkUrl.origin}`);
 
       try {
         router.push({
-          path: deepllinkUrl.pathname,
-          hash: deepllinkUrl.hash,
-          query: Object.fromEntries(deepllinkUrl.searchParams.entries()),
+          path: deepLinkUrl.pathname,
+          hash: deepLinkUrl.hash,
+          query: Object.fromEntries(deepLinkUrl.searchParams.entries()),
         });
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
