@@ -41,6 +41,7 @@ const defaultToken: ITokenResolved = {
   name: AE_PROTOCOL_NAME,
   decimals: AE_COIN_PRECISION,
   contractId: AE_CONTRACT_ID,
+  protocol: PROTOCOLS.aeternity,
 };
 const defaultPoolToken = {
   symbol: 'Pool Token',
@@ -403,7 +404,6 @@ const buy: TransactionResolver = (transaction, tokens = null, tokenAddressMapper
   const aeToken = {
     ...defaultToken,
     assetType: ASSET_TYPES.coin,
-    protocol: PROTOCOLS.aeternity,
     amount: getTokenSaleBuyAmount(transaction.tx),
     isReceived: false,
   };
@@ -432,7 +432,6 @@ const sell: TransactionResolver = (transaction, tokens = null, tokenAddressMappe
   const aeToken = {
     ...defaultToken,
     assetType: ASSET_TYPES.coin,
-    protocol: PROTOCOLS.aeternity,
     amount: aeAmount,
     isReceived: true,
   };
@@ -483,7 +482,6 @@ const createCommunity: TransactionResolver = (
   const aeToken = {
     ...defaultToken,
     assetType: ASSET_TYPES.coin,
-    protocol: PROTOCOLS.aeternity,
     amount: transaction.tx.amount,
     isReceived: false,
   };
