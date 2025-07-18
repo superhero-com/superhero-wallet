@@ -871,7 +871,6 @@ export interface ITransactionApiPaginationParams {
 export interface IFetchTransactionResult {
   regularTransactions: ITransaction[];
   pendingTransactions?: any[]; // TODO prepare types for PendingTransaction
-  tipWithdrawnTransactions?: ITransaction[];
   paginationParams: ITransactionApiPaginationParams;
 }
 export interface IFormSelectOption {

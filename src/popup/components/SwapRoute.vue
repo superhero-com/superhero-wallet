@@ -61,7 +61,7 @@ export default defineComponent({
 
     const { nodeNetworkId } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
-    const { isDexSwap, txFunctionParsed } = useTransactionData({
+    const { isDexSwap, txFunctionParsed, innerTx } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
 
@@ -77,8 +77,7 @@ export default defineComponent({
       if (!resolver) {
         return [];
       }
-
-      let { tokens } = resolver(props.transaction, aeTokensAvailable.value);
+      let { tokens } = resolver({ tx: innerTx.value } as ITransaction, aeTokensAvailable.value);
       const args = props.transaction.tx.arguments || [];
       const index = args.findIndex(({ type }) => type === 'list');
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;

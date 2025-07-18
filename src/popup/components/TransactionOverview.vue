@@ -19,7 +19,6 @@ import {
   toRef,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
   AccountAddress,
@@ -28,9 +27,8 @@ import type {
 } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useAeSdk, useTransactionData } from '@/composables';
+import { useTransactionData } from '@/composables';
 
-import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
@@ -47,7 +45,6 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
 
-    const { getAeSdk } = useAeSdk();
     const { getName, getNameByNameHash } = useAeNames();
 
     const name = ref('');
@@ -197,33 +194,11 @@ export default defineComponent({
       }
     });
 
-    async function decodeClaimTransactionAccount(): Promise<Encoded.AccountAddress | undefined> {
-      // eslint-disable-next-line camelcase
-      const calldata = innerTx.value.callData || innerTx.value.call_data;
-
-      if (!(innerTx.value.contractId && calldata)) {
-        return undefined;
-      }
-
-      const aeSdk = await getAeSdk();
-      const { bytecode } = await aeSdk.getContractByteCode(innerTx.value.contractId);
-
-      const bytecodeContractCallEncoder = new BytecodeContractCallEncoder(bytecode);
-
-      const txParams = bytecodeContractCallEncoder.decodeCall(calldata) as AeDecodedCallData;
-      if (!txParams) return undefined;
-
-      return txParams.args?.[0] as Encoded.AccountAddress;
-    }
-
     onMounted(async () => {
       if (innerTx.value.recipientId?.startsWith('nm_')) {
         name.value = await getNameByNameHash(innerTx.value.recipientId);
       }
       let transactionOwnerAddress;
-      if (innerTx.value.function === TX_FUNCTIONS.claim) {
-        transactionOwnerAddress = await decodeClaimTransactionAccount();
-      }
       const address = getOwnershipAddress(transactionOwnerAddress);
       ownershipAccount.value = {
         address,

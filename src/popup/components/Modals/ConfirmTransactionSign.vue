@@ -367,6 +367,7 @@ export default defineComponent({
     const {
       amountTotal,
       direction,
+      innerTx,
       isAex9,
       isDex,
       isAllowance,
@@ -478,7 +479,7 @@ export default defineComponent({
         );
       }
       const tokens = resolver(
-        { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
+        { tx: { ...txParams, ...innerTx.value } } as ITransaction,
         getProtocolAvailableTokens(PROTOCOLS.aeternity),
         tokenSaleAddressToTokenContractAddress,
       )?.tokens;

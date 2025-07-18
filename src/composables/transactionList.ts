@@ -110,7 +110,6 @@ export function useTransactionList({
         paginationParams,
         regularTransactions,
         pendingTransactions,
-        tipWithdrawnTransactions,
       } = await fetchTransactions(state.value.nextPagePaginationParams);
 
       if (accountAddress !== state.value.accountAddress
@@ -128,14 +127,12 @@ export function useTransactionList({
       if (
         regularTransactions?.length
         || pendingTransactions?.length
-        || tipWithdrawnTransactions?.length
       ) {
         state.value.transactionsLoaded = uniqBy(
           [
             ...(state.value.isInitialLoadDone ? state.value.transactionsLoaded : []),
             ...regularTransactions,
             ...(pendingTransactions || []),
-            ...(tipWithdrawnTransactions || []),
           ],
           'hash',
         );
@@ -168,7 +165,6 @@ export function useTransactionList({
           paginationParams,
           regularTransactions,
           pendingTransactions,
-          tipWithdrawnTransactions,
         } = await fetchTransactions();
 
         if (accountAddress !== state.value.accountAddress
@@ -191,7 +187,6 @@ export function useTransactionList({
           state.value.transactionsLoaded = [
             ...regularTransactions,
             ...(pendingTransactions || []),
-            ...(tipWithdrawnTransactions || []),
           ];
           state.value.nextPagePaginationParams = paginationParams;
           state.value.isEndReached = false;

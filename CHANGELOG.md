@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.4...v2.6.5) (2025-07-18)
+
+
+### Features
+
+* **wallet-connect:** use our own URI schema for mobile linking ([fce5ff5](https://github.com/Superhero-com/superhero-wallet/commit/fce5ff52e5b4029d30946fb582c11cfa8f805190))
+
+
+### Bug Fixes
+
+* show correct information for wrapped transactions ([7225be3](https://github.com/Superhero-com/superhero-wallet/commit/7225be3340dc839d8def9ded3e15ba17fec9a6d7))
+
+
+### Performance
+
+* load tipping related information from mdw ([632f1d8](https://github.com/Superhero-com/superhero-wallet/commit/632f1d8e12622865a3c907880fe38b2b453ab6b3))
+
+
+### Maintenance
+
+* **android:** update target API level to 35 ([72823f8](https://github.com/Superhero-com/superhero-wallet/commit/72823f81d95e9d097fedee613842cacd1e7afe0f))
+* update podfile.lock ([621d6c9](https://github.com/Superhero-com/superhero-wallet/commit/621d6c964f090e6b98145f4e3448a6cc649d9a14))
+
 ### [2.6.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.3...v2.6.4) (2025-07-04)
 
 

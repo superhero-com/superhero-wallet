@@ -200,10 +200,10 @@ export default defineComponent({
         let completeText: string | null;
 
         const listener = await BarcodeScanner.addListener(
-          'barcodeScanned',
-          async ({ barcode }) => {
-            if (barcode.displayValue) {
-              completeText = await handleReceivePart(barcode.displayValue);
+          'barcodesScanned',
+          async ({ barcodes }) => {
+            if (barcodes[0].displayValue) {
+              completeText = await handleReceivePart(barcodes[0].displayValue);
               if (completeText) {
                 await listener.remove();
                 stopReading();

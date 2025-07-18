@@ -8,7 +8,6 @@ import {
   Encoding,
   isAddressValid,
   MemoryAccount,
-  Tag,
 } from '@aeternity/aepp-sdk';
 import { getHdWalletAccountFromSeed } from '@aeternity/aepp-sdk-13';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
@@ -42,7 +41,6 @@ import { tg } from '@/popup/plugins/i18n';
 import {
   amountRounded,
   fetchAllPages,
-  fetchJson,
   getActivityHash,
   getLastNotEmptyAccountIndex,
   handleUnknownError,
@@ -352,9 +350,9 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       if (
         (
           lastActivityType === ACTIVITIES_TYPES.aex9TransferEvent
-        || lastActivityType === ACTIVITIES_TYPES.contractCallTxEvent
-        || lastActivityType === ACTIVITIES_TYPES.internalContractCallEvent
-        || lastActivityType === ACTIVITIES_TYPES.internalTransferEvent
+          || lastActivityType === ACTIVITIES_TYPES.contractCallTxEvent
+          || lastActivityType === ACTIVITIES_TYPES.internalContractCallEvent
+          || lastActivityType === ACTIVITIES_TYPES.internalTransferEvent
         )
         && next
       ) {
@@ -401,49 +399,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     }
   }
 
-  async fetchTipWithdrawnTransactions(address: string, recent: boolean) {
-    try {
-      const { aeActiveNetworkSettings } = useAeNetworkSettings();
-      const { getAeSdk } = useAeSdk();
-      await getAeSdk();
-
-      const response = await fetchJson(
-        `${aeActiveNetworkSettings.value.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? '&limit=5' : ''}`,
-      );
-
-      if (response.message) {
-        return [];
-      }
-
-      // TODO prepare interface for response
-      const tipWithdrawnTransactions: ITransaction[] = (response as any[]).map(({
-        amount,
-        contract,
-        height,
-        data: { tx },
-        ...t
-      }) => ({
-        tx: {
-          ...tx,
-          address,
-          amount,
-          contractId: contract,
-          type: Tag[Tag.ContractCallTx],
-        },
-        ...t,
-        microTime: new Date(t.createdAt).getTime(),
-        blockHeight: height,
-        claim: true,
-        protocol: PROTOCOLS.aeternity,
-        transactionOwner: address,
-      }));
-
-      return tipWithdrawnTransactions;
-    } catch (error) {
-      return [];
-    }
-  }
-
   override async fetchAccountTransactions(
     address: AccountAddress,
     { nextPageUrl }: ITransactionApiPaginationParams = {},
@@ -453,11 +408,9 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const [
       { regularTransactions = [], nextPageUrl: newNextPageUrl },
       pendingTransactions,
-      tipWithdrawnTransactions,
     ] = await Promise.all([
       this.fetchRegularTransactions(address, TXS_PER_PAGE, nextPageUrl),
       this.fetchPendingTransactions(address),
-      this.fetchTipWithdrawnTransactions(address, !nextPageUrl),
     ]);
 
     if (newNextPageUrl) {
@@ -467,7 +420,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return {
       regularTransactions,
       pendingTransactions,
-      tipWithdrawnTransactions,
       paginationParams,
     };
   }

@@ -79,7 +79,6 @@ export function useLatestTransactionList() {
     const {
       regularTransactions,
       pendingTransactions,
-      tipWithdrawnTransactions,
     } = await adapter.fetchAccountTransactions(address);
 
     // This is necessary in case the user switches between networks faster,
@@ -91,12 +90,10 @@ export function useLatestTransactionList() {
     if (
       regularTransactions?.length
       || pendingTransactions?.length
-      || tipWithdrawnTransactions?.length
     ) {
       accountsTransactionsLatest.value[address] = [
         ...regularTransactions,
         ...(pendingTransactions || []),
-        ...(tipWithdrawnTransactions || []),
       ];
 
       if (accountsTransactionsPending.value[address]?.length) {
