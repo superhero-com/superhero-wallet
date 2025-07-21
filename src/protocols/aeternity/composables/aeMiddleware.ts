@@ -19,6 +19,7 @@ import { genSwaggerClient, mapObject } from '@/lib/swagger';
 import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
 import { ACTIVITIES_TYPES, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
+import { useTippingContracts } from '@/composables/tippingContracts';
 
 import { useAeNetworkSettings } from './aeNetworkSettings';
 import { categorizeContractCallTxObject } from '../helpers';
@@ -146,6 +147,7 @@ export function useAeMiddleware() {
     { payload, type, blockTime }: any, // Response data
     transactionOwner?: AccountAddress,
   ): ITransaction {
+    const { tippingContractAddresses } = useTippingContracts();
     const normalizedTransaction: ITransaction = {
       ...payload,
       tx: payload.tx || {}, // Ensure `tx` property is defined
@@ -178,6 +180,19 @@ export function useAeMiddleware() {
       normalizedTransaction.tx.amount = contractCallData.amount;
       normalizedTransaction.tx.contractId = contractCallData.assetContractId;
       normalizedTransaction.url = contractCallData.url;
+    }
+
+    // Tip claim transactions are presented only as a internalContractCallEvent
+    // with an internal spendTx to the account
+
+    if (
+      tippingContractAddresses.value.tippingV1 === payload.contractId
+      && transactionOwner === normalizedTransaction.tx.recipientId
+    ) {
+      normalizedTransaction.claim = true;
+      normalizedTransaction.tx.function = 'claim';
+      normalizedTransaction.tx.type = Tag[Tag.ContractCallTx];
+      normalizedTransaction.tx.contractId = payload.contractId;
     }
 
     return normalizedTransaction;

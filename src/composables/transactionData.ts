@@ -280,7 +280,7 @@ export function useTransactionData({
         const functionResolver = getTransactionTokenInfoResolver(txFunctionParsed.value);
         if (functionResolver) {
           return functionResolver(
-            { tx: outerTx.value } as ITransaction,
+            { tx: innerTx.value } as ITransaction,
             protocolTokens,
             tokenSaleAddressToTokenContractAddress,
           )
