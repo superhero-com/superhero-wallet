@@ -170,6 +170,8 @@ export function useModals() {
   function openConfirmModal(options: {
     title?: string;
     msg?: string;
+    icon?: StatusIconType;
+    buttonMessage?: string;
   }) {
     return openModal(MODAL_CONFIRM, options);
   }

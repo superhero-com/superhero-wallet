@@ -21,7 +21,7 @@
       />
       <BtnMain
         data-cy="to-confirm"
-        :text="$t('common.confirm')"
+        :text="buttonMessage || $t('common.confirm')"
         @click="resolve"
       />
     </template>
@@ -48,6 +48,7 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
+    buttonMessage: { type: String, default: '' },
   },
   setup(props) {
     function cancel() {
