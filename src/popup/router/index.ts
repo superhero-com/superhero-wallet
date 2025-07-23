@@ -16,6 +16,7 @@ import {
   RUNNING_IN_POPUP,
   PROTOCOLS,
   UNFINISHED_FEATURES,
+  MODAL_ACCOUNT_CREATE,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
@@ -24,11 +25,13 @@ import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   useAuth,
+  useModals,
   usePopupProps,
   useUi,
   useWalletConnect,
   type WalletConnectUri,
 } from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
@@ -59,6 +62,7 @@ const {
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
 const { checkUserAuth } = useAuth();
+const { openModal, openConfirmModal } = useModals();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
@@ -95,9 +99,26 @@ router.beforeEach(async (to, from, next) => {
 
     // In-app browser only works with AE accounts
     if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
-      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-      setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
-      next({ name: ROUTE_APPS_BROWSER });
+      const lastActiveAeAccountIdx = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.globalIdx;
+      if (lastActiveAeAccountIdx !== undefined) {
+        setActiveAccountByGlobalIdx(lastActiveAeAccountIdx);
+        next({ name: ROUTE_APPS_BROWSER });
+      } else {
+        try {
+          await openConfirmModal({
+            title: tg('modals.appsBrowserError.title'),
+            icon: 'warning',
+            buttonMessage: tg('modals.appsBrowserError.createAccount'),
+          });
+          openModal(MODAL_ACCOUNT_CREATE, {
+            protocol: PROTOCOLS.aeternity,
+          });
+        } catch (error) {
+          /* NOOP */
+        } finally {
+          next(false);
+        }
+      }
       return;
     }
   }
