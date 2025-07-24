@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.6](https://github.com/superhero-com/superhero-wallet/compare/v2.6.5...v2.6.6) (2025-07-23)
+
+
+### Bug Fixes
+
+* browse apps not doing anything when no aeternity account ([cff8867](https://github.com/superhero-com/superhero-wallet/commit/cff8867e407f59871b0252cfff032f83bce1c4fc))
+
 ### [2.6.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.4...v2.6.5) (2025-07-18)
 
 
