@@ -460,6 +460,10 @@
       "redeemFull": "Redeem full amount",
       "redeemedBy": "{0} redeemed by",
       "alreadyRedeemed": "This gift card has already been redeemed."
+    },
+    "appsBrowserError": {
+      "title": "You need an æternity account to browse the æcosystem",
+      "createAccount":"Create account"
     }
   },
   "airGap": {
