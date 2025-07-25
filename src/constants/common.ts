@@ -498,6 +498,12 @@ export const TRUSTED_DAPPS: {
     isFeatured: true,
   },
   {
+    name: 'Superhero Swap',
+    url: 'https://swap.superhero.com',
+    image: 'bridgeswap.svg',
+    isFeatured: true,
+  },
+  {
     name: 'Graffiti Aepp',
     url: 'https://graffiti.aeternity.com',
     image: 'graffiti.svg',

@@ -47,6 +47,17 @@
             :card-id="DASHBOARD_CARD_ID.daeppBrowser!"
           />
           <DashboardCard
+            :title="$t('dashboard.bridgeSwapBrowserCard.title')"
+            :description="$t('dashboard.bridgeSwapBrowserCard.description')"
+            :btn-text="$t('dashboard.bridgeSwapBrowserCard.button')"
+            :background="bridgeSwapBackground"
+            :icon="BridgeSwapIcon"
+            :card-id="DASHBOARD_CARD_ID.daeppBrowser!"
+            style="background-blend-mode: soft-light"
+            variant="teal"
+            @click="onSwapClick"
+          />
+          <DashboardCard
             v-if="isNodeMainnet && UNFINISHED_FEATURES"
             :title="$t('dashboard.buyCard.title')"
             :description="$t('dashboard.buyCard.description')"
@@ -90,12 +101,13 @@ import {
   onIonViewWillEnter,
   onIonViewDidLeave,
 } from '@ionic/vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import {
   DASHBOARD_CARD_ID,
   IS_MOBILE_APP,
   PROTOCOLS,
+  TRUSTED_DAPPS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import {
@@ -125,11 +137,14 @@ import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import CardIcon from '@/icons/credit-card.svg?vue-component';
 import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 import ActionIcon from '@/icons/action.svg?vue-component';
+import BridgeSwapIcon from '@/icons/bridgeswap.svg?vue-component';
 
 import buyBackground from '@/image/dashboard/buy-ae.webp';
 import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
+import bridgeSwapBackground from '@/image/dashboard/bridge-swap.png';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
+import { setLocalStorageItem } from '../../utils';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -148,6 +163,7 @@ export default defineComponent({
     const pageIsActive = ref(true);
 
     const route = useRoute();
+    const router = useRouter();
 
     const {
       accounts,
@@ -171,6 +187,20 @@ export default defineComponent({
     const totalBalance = computed(() => (
       (+accountsTotalBalance.value + +accountsTotalTokenBalance.value).toString()
     ));
+
+    function onSwapClick() {
+      const superheroSwapDapp = TRUSTED_DAPPS.filter(({ isFeatured, name }) => (
+        isFeatured && name === 'Superhero Swap'
+      ))[0];
+      if (superheroSwapDapp) {
+        if (IS_MOBILE_APP || UNFINISHED_FEATURES) {
+          setLocalStorageItem(['selected-app'], superheroSwapDapp);
+          router.push({ name: ROUTE_APPS_BROWSER });
+        } else {
+          window.open(superheroSwapDapp.url, '_blank');
+        }
+      }
+    }
 
     watch(
       () => route.query,
@@ -203,6 +233,7 @@ export default defineComponent({
       CardIcon,
       GlobeIcon,
       ActionIcon,
+      BridgeSwapIcon,
 
       multisigAccounts,
       accounts,
@@ -215,12 +246,15 @@ export default defineComponent({
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
+      bridgeSwapBackground,
       isNodeMainnet,
       isNodeTestnet,
       pageIsActive,
       totalBalance,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
+
+      onSwapClick,
     };
   },
 });
