@@ -182,14 +182,13 @@ export function useTransferSendForm({
         const { query } = route;
         if (query && Object.keys(query).length > 0) {
           formModel.value.addresses = undefined;
+          router.replace({ query: {} });
         }
 
         updateFormModelValues({
           ...query,
           token: query.token || formModel.value.selectedAsset?.contractId,
         });
-
-        router.replace({ query: {} });
       },
       { deep: true, immediate: true },
     );

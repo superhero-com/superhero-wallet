@@ -53,6 +53,9 @@ export const RouteQueryActionsController = (() => {
       const token = query[TOKEN_PROP];
 
       const currentActionProtocol = PROTOCOL_LIST.find((protocol) => {
+        if (protocol === PROTOCOLS.ethereum && token?.startsWith('0x')) {
+          return true;
+        }
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         return adapter.getUrlTokenKey() === token;
       });
@@ -63,6 +66,7 @@ export const RouteQueryActionsController = (() => {
        * Aeternity: https://wallet...?op=transferSend&token=AE&amount=1&account=
        * Bitcoin: https://wallet...?op=transferSend&token=bitcoin&amount=0.0002103&account=
        * AEX9 tokens: https://wallet...?op=transferSend&token=ct_mijZGKXeqQBS1dDmdJbbrDzKRrP58XLjJ2u5edkwafzfcXMsY&amount=1&account=
+       * To support ETH tokens, a condition has been added to check if the token starts with '0x...'
        */
       setActiveAccountByProtocol(currentActionProtocol || PROTOCOLS.aeternity);
 
