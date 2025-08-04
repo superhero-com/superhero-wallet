@@ -498,12 +498,6 @@ export const TRUSTED_DAPPS: {
     isFeatured: true,
   },
   {
-    name: 'Graffiti Aepp',
-    url: 'https://graffiti.aeternity.com',
-    image: 'graffiti.svg',
-    isFeatured: true,
-  },
-  {
     name: 'Superhero Social',
     url: 'https://superhero.com',
     image: 'superhero-social.svg',
@@ -520,14 +514,14 @@ export const TRUSTED_DAPPS: {
     image: 'aescan.svg',
   },
   {
-    name: 'Tokaen.org (DEV)',
-    url: 'https://dev.tokaen.org',
-    image: 'tokaen-org.svg',
+    name: 'WordCraft (DEV)',
+    url: 'https://dev.wordcraft.fun',
+    image: 'wordcraft.png',
   },
   {
-    name: 'Tokaen.org',
-    url: 'https://tokaen.org',
-    image: 'tokaen-org.svg',
+    name: 'WordCraft',
+    url: 'https://wordcraft.fun/',
+    image: 'wordcraft.png',
   },
 ];
 
