@@ -46,13 +46,16 @@ export const RouteQueryActionsController = (() => {
      * Take action after opening the link copied in the transfer receive modal.
      */
     transferSend: (_, query) => {
-      const { openModal } = useModals();
+      const { openModal, closeAllModals } = useModals();
       const { setActiveAccountByProtocol } = useAccounts();
 
       // Determine the active protocol for the current transfer
       const token = query[TOKEN_PROP];
 
       const currentActionProtocol = PROTOCOL_LIST.find((protocol) => {
+        if (protocol === PROTOCOLS.ethereum && token?.startsWith('0x')) {
+          return true;
+        }
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         return adapter.getUrlTokenKey() === token;
       });
@@ -63,9 +66,11 @@ export const RouteQueryActionsController = (() => {
        * Aeternity: https://wallet...?op=transferSend&token=AE&amount=1&account=
        * Bitcoin: https://wallet...?op=transferSend&token=bitcoin&amount=0.0002103&account=
        * AEX9 tokens: https://wallet...?op=transferSend&token=ct_mijZGKXeqQBS1dDmdJbbrDzKRrP58XLjJ2u5edkwafzfcXMsY&amount=1&account=
+       * To support ETH tokens, a condition has been added to check if the token starts with '0x...'
        */
       setActiveAccountByProtocol(currentActionProtocol || PROTOCOLS.aeternity);
 
+      closeAllModals();
       openModal(MODAL_TRANSFER_SEND);
       return true;
     },
@@ -82,7 +87,7 @@ export const RouteQueryActionsController = (() => {
    * Monitor the action arguments in the query string and perform assigned action method.
    */
   function init(router: Router) {
-    const unbind = router.beforeResolve(({ query }, from, next) => {
+    router.beforeResolve(({ query }, from, next) => {
       const action = query?.[ACTION_PROP] as null | RouteQueryActionName;
 
       if (action && typeof action === 'string' && availableActions[action]) {
@@ -93,7 +98,6 @@ export const RouteQueryActionsController = (() => {
         if (shouldOpenRequestedPage) {
           next();
         }
-        unbind();
       } else {
         next();
       }

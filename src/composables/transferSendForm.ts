@@ -1,10 +1,13 @@
 import {
   computed,
   nextTick,
+  onMounted,
   ref,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from 'vee-validate';
+import { useRoute, useRouter } from 'vue-router';
 
 import type {
   Dictionary,
@@ -12,7 +15,7 @@ import type {
   IToken,
   TransferFormModel,
 } from '@/types';
-import { useModals } from '@/composables/modals';
+import { useAccounts, useModals } from '@/composables';
 import { APP_LINK_WEB, IS_PRODUCTION } from '@/constants';
 import { toShiftedBigNumber, getMessageByFieldName, isUrlValid } from '@/utils';
 import Logger from '@/lib/logger';
@@ -38,11 +41,15 @@ export function useTransferSendForm({
   const invoiceId = ref(null);
   const invoiceContract = ref(null);
 
+  const route = useRoute();
+  const router = useRouter();
+
   const { t } = useI18n();
   const { openDefaultModal, openScanQrModal } = useModals();
   const { errors, validate, validateField } = useForm();
   const { saveTransferSendFormModel } = useTransferSendHandler();
   const { accountAssets } = useAccountAssetsList();
+  const { activeAccount } = useAccounts();
 
   const hasError = computed(
     (): boolean => ['addresses', 'amount'].some(
@@ -167,6 +174,25 @@ export function useTransferSendForm({
       formModel.value.addresses = undefined;
     }
   }
+
+  onMounted(() => {
+    watch(
+      [activeAccount, () => route.query],
+      () => {
+        const { query } = route;
+        if (query && Object.keys(query).length > 0) {
+          formModel.value.addresses = undefined;
+          router.replace({ query: {} });
+        }
+
+        updateFormModelValues({
+          ...query,
+          token: query.token || formModel.value.selectedAsset?.contractId,
+        });
+      },
+      { deep: true, immediate: true },
+    );
+  });
 
   return {
     formModel,
