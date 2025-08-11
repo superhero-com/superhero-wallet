@@ -376,8 +376,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
       throw new Error('Token transfer were initiated from not existing or not ethereum account.');
     }
+    const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
 
-    const contractAbi = await new EtherscanService(apiUrl)
+    const contractAbi = await new EtherscanService(apiUrl, chainId)
       .fetchFromApi({
         module: 'contract',
         action: 'getabi',
@@ -390,7 +391,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       { from: options.fromAccount },
     );
 
-    const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
     contract.setProvider(nodeUrl);
 
     const amountBN = new BigNumber(amount);
@@ -436,8 +436,15 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     // If the transaction is a token transfer, fetch the token transaction using the etherscan API
     // Because the web3 library does not give enough information about token transactions
     if (transaction?.input !== '0x' && transaction?.blockNumber) {
-      const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-      const service = new EtherscanService(ethActiveNetworkPredefinedSettings.value.middlewareUrl);
+      const {
+        ethActiveNetworkPredefinedSettings,
+        ethActiveNetworkSettings,
+      } = useEthNetworkSettings();
+      const { chainId } = ethActiveNetworkSettings.value;
+      const service = new EtherscanService(
+        ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+        chainId,
+      );
       const tokenTx = await service.fetchAccountTokenTransactionByHash(
         hash,
         transactionOwner ?? transaction.from,
@@ -465,8 +472,15 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     let regularTransactions: ITransaction[] = [];
 
     try {
-      const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-      const service = new EtherscanService(ethActiveNetworkPredefinedSettings.value.middlewareUrl);
+      const {
+        ethActiveNetworkPredefinedSettings,
+        ethActiveNetworkSettings,
+      } = useEthNetworkSettings();
+      const { chainId } = ethActiveNetworkSettings.value;
+      const service = new EtherscanService(
+        ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+        chainId,
+      );
       const [coinTransactions, tokenTransactions] = await Promise.all([
         service.fetchAccountCoinTransactions(address, { page: nextPageNum }),
         service.fetchAccountTokenTransactions(address, { page: nextPageNum }),
@@ -506,8 +520,15 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     let regularTransactions: ITransaction[] = [];
 
     try {
-      const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-      const service = new EtherscanService(ethActiveNetworkPredefinedSettings.value.middlewareUrl);
+      const {
+        ethActiveNetworkPredefinedSettings,
+        ethActiveNetworkSettings,
+      } = useEthNetworkSettings();
+      const { chainId } = ethActiveNetworkSettings.value;
+      const service = new EtherscanService(
+        ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+        chainId,
+      );
       regularTransactions = (assetContractId === this.coinContractId)
         ? await service.fetchAccountCoinTransactions(address, { page: nextPageNum })
         : await service.fetchAccountTokenTransactions(

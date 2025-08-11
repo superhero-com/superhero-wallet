@@ -33,15 +33,19 @@ export const isEtherscanUnavailable = ref(false);
 export class EtherscanService {
   apiUrl: string;
 
+  chainId: string;
+
   // TODO - update delay if we use paid API key
   freeVersionTimeDelay = 5300;
 
-  constructor(apiUrl: string) {
+  constructor(apiUrl: string, chainId: string) {
     this.apiUrl = apiUrl;
+    this.chainId = chainId;
   }
 
   async fetchFromApi<T = EtherscanDefaultResponse>(obj: EtherscanApiCallParams): Promise<T | null> {
     const query = new URLSearchParams({
+      chainId: this.chainId,
       ...removeObjectUndefinedProperties(obj),
       apikey: ETHERSCAN_API_KEY,
     }).toString();
