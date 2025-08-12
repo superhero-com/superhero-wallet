@@ -84,6 +84,7 @@ export async function handleEthereumRpcMethod(
   const { getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
   const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+  const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
     return (await checkOrAskEthPermission(aepp))
@@ -150,7 +151,6 @@ export async function handleEthereumRpcMethod(
   }
   if (method === ETH_RPC_METHODS.getBlockNumber) {
     let currentBlock;
-    const { nodeUrl } = ethActiveNetworkSettings.value;
 
     try {
       currentBlock = await getBlock(new Web3Eth(nodeUrl), 'latest', true, DEFAULT_RETURN_FORMAT);
@@ -170,6 +170,7 @@ export async function handleEthereumRpcMethod(
 
     const estimatedGas = params?.gas ? null : (await new EtherscanService(
       ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+      chainId,
     )
       .fetchFromApi({
         module: 'proxy',
@@ -264,7 +265,7 @@ export async function handleEthereumRpcMethod(
     const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
     let response: EtherscanDefaultResponse | null;
     try {
-      response = await new EtherscanService(apiUrl)
+      response = await new EtherscanService(apiUrl, chainId)
         .fetchFromApi({
           module: 'proxy',
           action: method,
