@@ -74,7 +74,6 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 import BigNumber from 'bignumber.js';
 
 import type { AssetContractId, IAsset, TransferFormModel } from '@/types';
@@ -128,7 +127,6 @@ export default defineComponent({
     'error',
   ],
   setup(props, { emit }) {
-    const route = useRoute();
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
     const { marketData } = useCurrencies();
@@ -154,7 +152,6 @@ export default defineComponent({
       invoiceContract,
       scanTransferQrCode,
       handleAssetChange,
-      updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
@@ -240,12 +237,6 @@ export default defineComponent({
       polling = executeAndSetInterval(async () => {
         updateFeeList(await getTransferGasLimit());
       }, 5000);
-
-      const { query } = route;
-      updateFormModelValues({
-        ...query,
-        token: query.token || props.transferData.selectedAsset?.contractId,
-      });
     });
 
     onUnmounted(() => {

@@ -84,12 +84,12 @@ export const ETH_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
 > = {
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://etherscan.io',
-    middlewareUrl: 'https://api.etherscan.io/api', // TODO replace temp values
+    middlewareUrl: 'https://api.etherscan.io/v2/api', // TODO replace temp values
     tokenMiddlewareUrl: 'https://api.ethplorer.io',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://sepolia.etherscan.io',
-    middlewareUrl: 'https://api-sepolia.etherscan.io/api', // TODO replace temp values
+    middlewareUrl: 'https://api.etherscan.io/v2/api', // TODO replace temp values
     tokenMiddlewareUrl: 'https://sepolia-api.ethplorer.io',
   },
 };

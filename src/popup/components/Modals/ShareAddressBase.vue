@@ -37,7 +37,7 @@
           <Scrollable class="address-scrollable-area">
             <AddressFormatted
               data-cy="qr-code-info"
-              :address="accountAddressToDisplay"
+              :address="accountAddress"
             />
           </Scrollable>
         </CopyText>
@@ -198,14 +198,8 @@ export default defineComponent({
         : props.accountAddress,
     );
 
-    const accountAddressToDisplay = computed(
-      () => (amount.value && +amount.value > 0)
-        ? `${props.accountAddress}?${new URLSearchParams(getTokenInfoQuery()).toString()}`
-        : props.accountAddress,
-    );
-
     async function share() {
-      const address = accountAddressToDisplay.value;
+      const address = props.accountAddress;
       const walletLink = getAccountLink(address);
       const { protocolName } = ProtocolAdapterFactory.getAdapter(props.protocol);
       const text = (amount.value && +amount.value > 0)
@@ -260,7 +254,6 @@ export default defineComponent({
       copyAddress,
       copied,
       activeAccount,
-      accountAddressToDisplay,
       accountAddressToCopy,
     };
   },

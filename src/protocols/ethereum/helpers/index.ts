@@ -109,10 +109,12 @@ export async function decodeTxData(
 ): Promise<EthDecodedCallData| undefined> {
   const {
     ethActiveNetworkPredefinedSettings,
+    ethActiveNetworkSettings,
   } = useEthNetworkSettings();
   const { middlewareUrl: apiUrl } = ethActiveNetworkPredefinedSettings.value;
+  const { chainId } = ethActiveNetworkSettings.value;
 
-  const contractAbi = await new EtherscanService(apiUrl)
+  const contractAbi = await new EtherscanService(apiUrl, chainId)
     .fetchFromApi({
       module: 'contract',
       action: 'getabi',

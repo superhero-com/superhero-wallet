@@ -301,7 +301,6 @@ export default defineComponent({
       invoiceContract,
       clearPayload,
       handleAssetChange,
-      updateFormModelValues,
       scanTransferQrCode,
     } = useTransferSendForm({
       transferData: props.transferData,
@@ -433,10 +432,6 @@ export default defineComponent({
         if (checkIfSuperheroCallbackUrl(query)) {
           isUrlTippingEnabled.value = true;
         }
-        updateFormModelValues({
-          ...query,
-          token: query.token || formModel.value?.selectedAsset?.contractId,
-        });
       },
       { deep: true, immediate: true },
     );

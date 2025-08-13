@@ -77,7 +77,6 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
 
@@ -134,7 +133,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
 
-    const route = useRoute();
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
     const { balance } = useBalances();
@@ -153,7 +151,6 @@ export default defineComponent({
       clearPayload,
       handleAssetChange,
       scanTransferQrCode,
-      updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
     });
@@ -249,12 +246,6 @@ export default defineComponent({
       polling = executeAndSetInterval(() => {
         updateFeeList();
       }, 5000);
-
-      const { query } = route;
-      updateFormModelValues({
-        ...query,
-        token: query.token,
-      });
     });
 
     onUnmounted(() => {

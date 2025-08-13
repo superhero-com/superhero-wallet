@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.7](https://github.com/superhero-com/superhero-wallet/compare/v2.6.6...v2.6.7) (2025-08-12)
+
+
+### Features
+
+* update trusted dapps ([d60ac63](https://github.com/superhero-com/superhero-wallet/commit/d60ac6375bba756bb0b57f8699716e1c75aafffa))
+
+
+### Bug Fixes
+
+* send popup not opening the second time ([766cec3](https://github.com/superhero-com/superhero-wallet/commit/766cec3d094f925d19b3e3e68fe3066198885d63))
+* support eth coins in deeplink send link ([e452f9e](https://github.com/superhero-com/superhero-wallet/commit/e452f9ee252dd48d8cf6afdc96e1f9cfb1285a07))
+* wrong display of account and share link ([1ab63f5](https://github.com/superhero-com/superhero-wallet/commit/1ab63f55ea472594ac78e427c0cb4de71c7700bf))
+
+
+### Maintenance
+
+* migrate to etherscan v2 ([6de4734](https://github.com/superhero-com/superhero-wallet/commit/6de47343afd55179d70305efdde4752d2b33d187))
+* npm audit fix ([c908bf0](https://github.com/superhero-com/superhero-wallet/commit/c908bf0057d9b6570a8acee9c12797401ba4300f))
+
 ### [2.6.6](https://github.com/superhero-com/superhero-wallet/compare/v2.6.5...v2.6.6) (2025-07-23)
 
 

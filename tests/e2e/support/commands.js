@@ -333,29 +333,62 @@ Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = nu
       const receiveUrl = await text;
       cy.login({}, receiveUrl.replace(APP_LINK_WEB, ''));
 
-      cy.get('[data-cy="input-wrapper"] .truncate');
+      cy.formRecipientAddressToBeEqual(address);
 
-      cy.document().then(($document) => {
-        // When a valid address (based on selected coin) is entered, the format changes
-        const documentResult = $document.querySelectorAll('[data-cy=input-wrapper] .under .address-truncated .address-chunk:first-child');
-        if (documentResult.length) {
-          cy.get('[data-cy=input-wrapper] .under .address-truncated .address-chunk:first-child')
-            .should('have.text', address.substr(0, 6));
-          cy.get('[data-cy=input-wrapper] .under .address-truncated .address-chunk:last-child')
-            .should('have.text', address.substr(-3));
-        } else {
-          // Invalid address
-          cy.get('[data-cy=input-wrapper] .truncate')
-            .should('have.text', address);
-        }
-        cy.get('[data-cy=amount] [data-cy=input]')
-          .should('have.value', amount);
-        if (token) {
-          cy.get('[data-cy=select-asset]')
-            .should('contain', token.name);
-        }
-        cy.get('[data-cy=btn-close]')
-          .click();
-      });
+      cy.get('[data-cy=amount] [data-cy=input]')
+        .should('have.value', amount);
+
+      if (token) {
+        cy.get('[data-cy=select-asset]')
+          .should('contain', token.name);
+      }
+
+      cy.get('[data-cy=btn-close]')
+        .click();
     });
+});
+
+Cypress.Commands.add('formRecipientAddressToBeEqual', (address) => {
+  cy.get('[data-cy="input-wrapper"] .truncate');
+
+  cy.document().then(($document) => {
+    // When a valid address (based on selected coin) is entered, the format changes
+    const documentResult = $document.querySelectorAll('[data-cy=input-wrapper] .under .address-truncated .address-chunk:first-child');
+    if (documentResult.length) {
+      cy.get('[data-cy=input-wrapper] .under .address-truncated .address-chunk:first-child')
+        .should('be.visible')
+        .should('have.text', address.substr(0, 6));
+      cy.get('[data-cy=input-wrapper] .under .address-truncated .address-chunk:last-child')
+        .should('be.visible')
+        .should('have.text', address.substr(-3));
+    } else {
+      // Invalid address
+      cy.get('[data-cy=input-wrapper] .truncate')
+        .should('be.visible')
+        .should('have.text', address);
+    }
+  });
+});
+
+Cypress.Commands.add('addEthereumBitcoinAccounts', () => {
+  // Ethereum
+  cy.get('[data-cy=bullet-switcher-add]')
+    .click()
+    .get('[data-cy=account-card-add]')
+    .click()
+    .get('.button-subheader ')
+    .eq(1)
+    .click()
+    .get('[data-cy=create-plain-account]')
+    .click()
+    // Bitcoin
+    .get('[data-cy=bullet-switcher-add]')
+    .click()
+    .get('[data-cy=account-card-add]')
+    .click()
+    .get('.button-subheader ')
+    .eq(0)
+    .click()
+    .get('[data-cy=create-plain-account]')
+    .click();
 });

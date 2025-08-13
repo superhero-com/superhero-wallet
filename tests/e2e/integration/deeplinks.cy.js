@@ -12,6 +12,9 @@ const encodedJWTPayload = encodeURIComponent('{"a":1,"b":2}');
 const signedJWT = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoxLCJiIjoyLCJzdWJfandrIjp7ImNydiI6IkVkMjU1MTkiLCJrdHkiOiJPS1AiLCJ4IjoiM0NneVdoMnRkWnFzNEJKVnliX29LRTNoSzgxb1l6dGVXRUtuamZaU1oyYyJ9fQ.BxbRGRRmA6OKHn9OdGuJRpGlWnZOurVJi8riFlqHXBFYidOT00EmBlGYctKY7WwW2pBNwwoaBlmavCq8Y96UDQ';
 // used to test the signing
 const encodedTestDeploymentUrl = encodeURIComponent('http://localhost:8080');
+const testAmount = 111.11;
+const testAmountEthereum = 222.22;
+const testAmountBitcoin = 333.33;
 
 describe('Test cases for deeplinks', () => {
   it('Signs transaction and verifies signature', () => {
@@ -195,6 +198,69 @@ describe('Test cases for deeplinks', () => {
     cy.login({}, `/tips?url=${callbackUrl}&${callbackParams}`)
       .get('.modal')
       .should('not.exist');
+  });
+
+  describe('Transfer send modal from deeplink', () => {
+    it('Test transfer deeplinks with hard reload', () => {
+      cy.login({})
+        .addEthereumBitcoinAccounts()
+        .visit(`/account?op=transferSend&token=AE&amount=${testAmount}&account=${STUB_ACCOUNT.addressAeternity}`)
+        .loginUsingPassword()
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressAeternity)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('be.visible')
+        .should('have.value', testAmount)
+        .get('[data-cy=btn-close]')
+        .click()
+        .visit(`/account?op=transferSend&token=ethereum&amount=${testAmountEthereum}&account=${STUB_ACCOUNT.addressEthereum}`)
+        .loginUsingPassword()
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressEthereum)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('be.visible')
+        .should('have.value', testAmountEthereum)
+        .get('[data-cy=btn-close]')
+        .click()
+        .visit(`/account?op=transferSend&token=bitcoin&amount=${testAmountBitcoin}&account=${STUB_ACCOUNT.addressBitcoinTestnet}`)
+        .loginUsingPassword()
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressBitcoinTestnet)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('be.visible')
+        .should('have.value', testAmountBitcoin)
+        .get('[data-cy=btn-close]')
+        .click();
+    });
+
+    it('Test transfer deeplinks with vue router navigation', () => {
+      cy.login({})
+        .addEthereumBitcoinAccounts()
+        .visit(`/account?op=transferSend&token=AE&amount=${testAmount}&account=${STUB_ACCOUNT.addressAeternity}`)
+        .loginUsingPassword()
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressAeternity)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('be.visible')
+        .should('have.value', testAmount)
+        // Testing with modal closed
+        .get('[data-cy=btn-close]')
+        .click()
+        .window()
+        .then((win) => {
+          win.__app__.config.globalProperties.$router.push(`/account?op=transferSend&token=ethereum&amount=${testAmountEthereum}&account=${STUB_ACCOUNT.addressEthereum}`);
+        })
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('be.visible')
+        .should('have.value', testAmountEthereum)
+        // Testing with modal open
+        .window()
+        .then((win) => {
+          win.__app__.config.globalProperties.$router.push(`/account?op=transferSend&token=bitcoin&amount=${testAmountBitcoin}&account=${STUB_ACCOUNT.addressBitcoinTestnet}`);
+        })
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressBitcoinTestnet)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('be.visible')
+        .should('have.value', testAmountBitcoin)
+        .get('[data-cy=btn-close]')
+        .click();
+    });
   });
 
   // TODO: retip, comment
