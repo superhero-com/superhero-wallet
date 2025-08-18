@@ -7,6 +7,7 @@
 /bower_components
 /.history
 /.idea
+/.vscode
 /.nyc_output
 .DS_Store
 /tests/e2e/videos

@@ -1,15 +1,23 @@
 <template>
   <component
     :is="selectedIcon"
-    v-if="selectedIcon"
+    v-if="selectedIcon && !isSolana"
     class="asset-icon"
     :class="[iconSize]"
     :title="asset?.name || asset?.symbol"
   />
   <img
+    v-else-if="isSolana"
+    src="../../icons/coin/solana.svg"
+    class="asset-icon"
+    :class="[iconSize]"
+    :title="asset?.name || asset?.symbol"
+    alt="Solana"
+  >
+  <img
     v-else
     class="asset-icon"
-    :src="asset.image || getTokenPlaceholderUrl(asset!)"
+    :src="asset.image || getTokenPlaceholderUrl(asset)"
     :class="[iconSize, { 'is-placeholder': !asset?.image }]"
     :title="asset?.name || asset?.symbol"
     alt="Asset image"
@@ -74,6 +82,9 @@ export default defineComponent({
       || ProtocolAdapterFactory.getAdapter(protocol.value).coinContractId
     ));
     const selectedIcon = computed(() => ASSET_ICONS[contractId.value]);
+    // Solana icon is served via <img> to avoid gradient/defs ID collisions and scoped CSS
+    // side-effects observed when the SVG is inlined as a component in some views.
+    const isSolana = computed(() => contractId.value === PROTOCOLS.solana);
 
     function getTokenPlaceholderUrl(token: ITokenResolved) {
       // TODO Should not be protocol specific
@@ -82,6 +93,7 @@ export default defineComponent({
 
     return {
       selectedIcon,
+      isSolana,
       getTokenPlaceholderUrl,
     };
   },
