@@ -24,7 +24,7 @@
     "watch:ff": "npm run build:extension:ff -- --watch --mode production",
     "test:unit": "vue-cli-service test:unit",
     "test:unit:snapshot": "npm run test:unit -- --updateSnapshot",
-    "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true vue-cli-service test:e2e",
+    "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true NODE_ENV=development vue-cli-service test:e2e",
     "test": "npm run test:unit && npm run test:e2e -- --headless",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build:extension",
     "gen:capacitor-assets": "npx @capacitor/assets generate --iconBackgroundColor '#141414' --splashBackgroundColor '#141414' --splashBackgroundColorDark '#141414' --android --ios ",
