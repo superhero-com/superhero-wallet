@@ -9,7 +9,7 @@
             :amount-total="amountTotal"
             :fee="fee"
             :hash="hash"
-            :protocol="PROTOCOLS.ethereum"
+            :protocol="protocol"
             :hide-amount-total="!isTransactionCoin"
             :hide-fiat="!isTransactionCoin"
             show-header
@@ -17,7 +17,7 @@
             <template #tokens>
               <TransactionAssetRows
                 :assets="transactionAssets"
-                :protocol="PROTOCOLS.ethereum"
+                :protocol="protocol"
                 icon-size="rg"
                 multiple-rows
               />
@@ -32,8 +32,8 @@
                 <template #value>
                   <TokenAmount
                     :amount="transaction.tx.gasPrice"
-                    :symbol="ETH_COIN_SYMBOL"
-                    :protocol="PROTOCOLS.ethereum"
+                    :symbol="coinSymbol"
+                    :protocol="protocol"
                     hide-fiat
                   />
                 </template>
@@ -72,12 +72,17 @@ import {
   ref,
   toRef,
   watch,
+  PropType,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonContent, IonPage } from '@ionic/vue';
 
-import type { AccountAddress, ICommonTransaction, ITransaction } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import type {
+  AccountAddress,
+  ICommonTransaction,
+  ITransaction,
+  Protocol,
+} from '@/types';
 import {
   useAccounts,
   useLatestTransactionList,
@@ -88,7 +93,6 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 
-import { ETH_COIN_SYMBOL, ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { decodeTxData } from '@/protocols/ethereum/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
@@ -107,13 +111,16 @@ export default defineComponent({
     IonPage,
     TransactionCallDataDetails,
   },
-  setup() {
+  props: {
+    protocol: { type: String as PropType<Protocol>, required: true },
+  },
+  setup(props) {
     const router = useRouter();
     const route = useRoute();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as AccountAddress;
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    const adapter = computed(() => ProtocolAdapterFactory.getAdapter(props.protocol));
 
     const transaction = ref<ITransaction>();
     const decodedCallData = ref();
@@ -134,18 +141,21 @@ export default defineComponent({
 
     const { transactionsLoaded } = useTransactionList({
       accountAddress: transactionOwner || activeAccount.value.address,
-      protocol: PROTOCOLS.ethereum,
+      protocol: props.protocol,
     });
 
     // TODO move these calculations to base component after unifying ITransaction AE values
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
     const amount = computed((): number => transaction.value?.tx?.amount || 0);
 
+    const coinSymbol = computed(() => adapter.value.coinSymbol);
+    const coinContractId = computed(() => adapter.value.coinContractId);
+
     async function getDecodedCallData() {
       if (innerTx.value?.callData && innerTx.value?.contractId) {
         return decodeTxData(
           innerTx.value.callData,
-          (innerTx.value.contractId !== ETH_CONTRACT_ID)
+          (innerTx.value.contractId !== coinContractId.value)
             ? innerTx.value.contractId
             : innerTx.value.recipientId,
           activeAccount.value.address,
@@ -190,7 +200,7 @@ export default defineComponent({
 
         // Lastly try to fetch the transaction.
         try {
-          return adapter.fetchTransactionByHash(hash, transactionOwner);
+          return adapter.value.fetchTransactionByHash(hash, transactionOwner);
         } catch (e) {
           setLoaderVisible(false);
           // TODO instead moving user to different route display error message
@@ -206,8 +216,6 @@ export default defineComponent({
     });
 
     return {
-      ETH_COIN_SYMBOL,
-      PROTOCOLS,
       amount,
       amountTotal,
       decodedCallData,
@@ -218,6 +226,7 @@ export default defineComponent({
       fee,
       transaction,
       transactionAssets,
+      coinSymbol,
     };
   },
 });
