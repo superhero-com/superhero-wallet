@@ -63,7 +63,11 @@ export const useAccountSelector = createCustomScopedComposable(() => {
   const accountSelectType = ref<AccountSelectTypeFilter>(ACCOUNT_SELECT_TYPE_FILTER.addressBook);
 
   const latestTransactions = computed(
-    () => (accountsTransactionsLatest.value[activeAccount.value.address] || [])
+    () => (
+      accountsTransactionsLatest.value[activeAccount.value.address]
+      || []
+    )
+      .filter(({ protocol }) => protocol === activeAccount.value.protocol)
       .map((transaction: ITransaction): IAccountSelectorEntry | null => {
         const outerTx = transaction.tx!;
         const innerTx = transaction.tx ? getInnerTransaction(transaction.tx) : null;
@@ -72,7 +76,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
           outerTx?.payerId ? outerTx : innerTx,
           (
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
-              !== AE_TRANSACTION_OWNERSHIP_STATUS.current
+            !== AE_TRANSACTION_OWNERSHIP_STATUS.current
             && getTxOwnerAddress(innerTx)
           ) || activeAccount.value.address,
         );

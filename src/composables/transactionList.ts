@@ -82,7 +82,7 @@ export function useTransactionList({
     ...transactionsPending.value,
     ...(accountsTransactionsLatest.value[accountAddress] || []),
     ...transactionsLoaded.value,
-  ], 'hash'));
+  ].filter(({ protocol: transactionProtocol }) => transactionProtocol === protocol), 'hash'));
 
   function resetState() {
     state.value = {
