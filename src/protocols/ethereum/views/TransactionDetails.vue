@@ -192,8 +192,11 @@ export default defineComponent({
         // If the transaction is a token transfer and it is still pending
         // use the pending transaction because API wont be synced yet.
         // pendingTransaction will have the most accurate data at this point.
-        const pendingTransaction = (accountsTransactionsPending.value[transactionOwner] || [])
-          .find((tx) => tx.hash === hash);
+        const pendingTransaction = (
+          accountsTransactionsPending.value[transactionOwner]
+          || []
+        )
+          .find((tx) => tx.hash === hash && tx.protocol === props.protocol);
         if (pendingTransaction) {
           return pendingTransaction as ITransaction;
         }
