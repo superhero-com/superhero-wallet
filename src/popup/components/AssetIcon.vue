@@ -45,6 +45,7 @@ import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 import SolanaIcon from '@/icons/coin/solana.svg?vue-component';
+import BnbIcon from '@/icons/coin/bnb.svg?vue-component';
 import LexonTokenIcon from '@/icons/tokens/ct_xtk8rSz9suPb6D6VLquyfVji25FcnFRDjn3dnn5mmvHsPiESt.svg?vue-component';
 
 const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.md, ICON_SIZES.lg, ICON_SIZES.xxl] as const;
@@ -56,6 +57,7 @@ const COIN_ICONS: Record<Protocol, Component> = {
   [PROTOCOLS.bitcoin]: BitcoinIcon,
   [PROTOCOLS.ethereum]: EthereumIcon,
   [PROTOCOLS.solana]: SolanaIcon,
+  [PROTOCOLS.bnb]: BnbIcon,
 };
 
 const ASSET_ICONS: Dictionary<Component> = {

@@ -5,6 +5,7 @@ import type {
   AccountAddress,
   Balance,
   BalanceRaw,
+  Protocol,
 } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import { handleUnknownError, isNotFoundError } from '@/utils';
@@ -15,8 +16,8 @@ import { useAccounts } from './accounts';
 import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
 
-type Balances = Record<AccountAddress, Balance>;
-type BalancesSerialized = Record<AccountAddress, string>;
+type Balances = Record<Protocol, Record<AccountAddress, Balance>>;
+type BalancesSerialized = Record<Protocol, Record<AccountAddress, string>>;
 
 let composableInitialized = false;
 
@@ -25,12 +26,20 @@ const POLLING_INTERVAL = 5000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
-const balances = useStorageRef<Balances, BalancesSerialized>({}, STORAGE_KEYS.balances, {
-  serializer: {
-    read: (val) => mapValues(val, (balance: BalanceRaw) => new BigNumber(balance)),
-    write: (val) => mapValues(val, (balance) => balance.toFixed()),
+const balances = useStorageRef<Balances, BalancesSerialized>(
+  {} as Balances,
+  STORAGE_KEYS.balances,
+  {
+    serializer: {
+      read: (val) => mapValues(val, (perProtocol) => (
+        mapValues(perProtocol, (balance: BalanceRaw) => new BigNumber(balance))
+      )),
+      write: (val) => mapValues(val, (perProtocol) => (
+        mapValues(perProtocol, (balance) => balance.toFixed())
+      )),
+    },
   },
-});
+);
 
 /**
  * This composable detects if any app components requires balances data and polls the API
@@ -41,12 +50,13 @@ export function useBalances() {
   const { onNetworkChange } = useNetworks();
   const { getCurrentCurrencyRate } = useCurrencies();
 
-  const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
+  const balance = computed(() => (
+    balances.value[activeAccount.value.protocol][activeAccount.value.address] || new BigNumber(0)));
 
   const accountsTotalBalance = computed(
     () => accounts.value.reduce(
       (total, account) => {
-        const accountBalance = balances.value?.[account.address];
+        const accountBalance = balances.value?.[activeAccount.value.protocol]?.[account.address];
         if (!accountBalance) {
           return total;
         }
@@ -56,8 +66,8 @@ export function useBalances() {
     ).toFixed(2),
   );
 
-  function getAccountBalance(address: string) {
-    return balances.value[address] || new BigNumber(0);
+  function getAccountBalance(protocol: Protocol, address: string) {
+    return balances.value[protocol][address] || new BigNumber(0);
   }
 
   async function updateBalances() {
@@ -74,9 +84,15 @@ export function useBalances() {
       }),
     );
     const rawBalances = await Promise.all(balancesPromises);
-    balances.value = Object.fromEntries(rawBalances.map(
-      (val, index) => [accountsCached[index].address, BigNumber(val || 0)],
-    ));
+    const newBalances: Balances = {} as Balances;
+
+    rawBalances.forEach((val, index) => {
+      const { protocol, address } = accountsCached[index];
+      newBalances[protocol] ??= {};
+      newBalances[protocol][address] = new BigNumber(val || 0);
+    });
+
+    balances.value = newBalances;
   }
 
   initPollingWatcher(() => updateBalances());

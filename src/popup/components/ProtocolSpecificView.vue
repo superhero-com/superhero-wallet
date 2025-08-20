@@ -4,6 +4,7 @@
     v-if="viewComponentName"
     :page-did-enter="pageDidEnter"
     :page-will-enter="pageWillEnter"
+    :protocol="protocol"
   />
   <div v-else>
     <InfoBox
@@ -61,6 +62,7 @@ const views: Record<Protocol, ProtocolViewsConfig> = {
   bitcoin: bitcoinViews,
   ethereum: ethereumViews,
   solana: solanaViews,
+  bnb: ethereumViews,
 };
 
 export default defineComponent({
@@ -144,6 +146,7 @@ export default defineComponent({
       componentToDisplay,
       pageDidEnter,
       pageWillEnter,
+      protocol,
     };
   },
 });

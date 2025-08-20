@@ -107,7 +107,8 @@ export default defineComponent({
         case !!props.outsideBalance:
           return props.outsideBalance;
         case !!account.value && !isMultisig.value:
-          return getAccountBalance(account.value.address.toString()).toNumber();
+          return getAccountBalance(account.value.protocol, account.value.address.toString())
+            .toNumber();
         case !!account.value && isMultisig.value:
           return multisigAccount.value?.balance.toNumber();
         default:

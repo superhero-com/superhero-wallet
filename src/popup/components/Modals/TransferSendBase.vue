@@ -38,7 +38,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { ResolveCallback, TransferSendStep } from '@/types';
+import type { Protocol, ResolveCallback, TransferSendStep } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 import { TRANSFER_SEND_STEPS } from '@/constants';
@@ -59,6 +59,7 @@ export const transferSendModalRequiredProps = {
   address: { type: String, default: undefined },
   amount: { type: String, default: '' },
   payload: { type: String, default: '' },
+  protocol: { type: String as PropType<Protocol>, required: true },
 };
 
 export default defineComponent({

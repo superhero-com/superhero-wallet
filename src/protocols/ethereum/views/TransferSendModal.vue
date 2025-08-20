@@ -4,6 +4,7 @@
     :sending-disabled="error
       || !transferData.addresses?.length
       || !transferData.amount"
+    :protocol="protocol"
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
@@ -11,6 +12,7 @@
     <template #content>
       <component
         :is="currentStepConfig.component"
+        :protocol="protocol"
         ref="currentRenderedComponent"
         v-model:transfer-data="transferData"
         @success="currentStepConfig.onSuccess"
@@ -34,9 +36,9 @@ import type {
   TransferSendStepConfigRegistry,
   AssetList,
   AssetContractId,
+  Protocol,
 } from '@/types';
 import {
-  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -54,11 +56,12 @@ export default defineComponent({
   props: {
     ...transferSendModalRequiredProps,
     tokenContractId: { type: String as PropType<AssetContractId>, default: null },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const { getProtocolAvailableTokens } = useFungibleTokens();
 
-    const ethTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.ethereum));
+    const ethTokensAvailable = computed(() => getProtocolAvailableTokens(props.protocol));
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);

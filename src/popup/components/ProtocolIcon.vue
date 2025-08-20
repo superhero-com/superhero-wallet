@@ -28,10 +28,17 @@ import AeternityLogo from '@/icons/logo/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 import SolanaIcon from '@/icons/coin/solana.svg?vue-component';
+import BnbIcon from '@/icons/coin/bnb.svg?vue-component';
 
-const SIZES = [ICON_SIZES.xs, ICON_SIZES.md, ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xl] as const;
+const SIZES = [
+  ICON_SIZES.xs,
+  ICON_SIZES.md,
+  ICON_SIZES.rg,
+  ICON_SIZES.lg,
+  ICON_SIZES.xl,
+] as const;
 
-export type AllowedProtocolIconSize = typeof SIZES[number];
+export type AllowedProtocolIconSize = (typeof SIZES)[number];
 
 export default defineComponent({
   props: {
@@ -51,6 +58,7 @@ export default defineComponent({
       [PROTOCOLS.bitcoin]: BitcoinIcon,
       [PROTOCOLS.ethereum]: EthereumIcon,
       [PROTOCOLS.solana]: SolanaIcon,
+      [PROTOCOLS.bnb]: BnbIcon,
     };
 
     const selectedIcon = computed((): Component => iconsMap[props.protocol]);

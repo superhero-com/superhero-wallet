@@ -1,5 +1,4 @@
 /* eslint-disable class-methods-use-this */
-
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
@@ -10,11 +9,13 @@ import {
   FeeMarketEIP1559TxData,
   bigIntToHex,
   privateKeyToPublicKey,
+  Transaction,
+  TxData,
+  Common,
 } from 'web3-eth-accounts';
 import Web3Eth, {
   NUMBER_DATA_FORMAT,
   getBalance,
-  getTransactionCount,
   getTransaction,
   sendSignedTransaction,
   getBlock,
@@ -43,54 +44,51 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  ERC20_ABI,
-  ETH_COIN_PRECISION,
-  ETH_COIN_SYMBOL,
-  ETH_COINGECKO_COIN_ID,
-  ETH_CONTRACT_ID,
-  ETH_GAS_LIMIT,
-  ETH_NETWORK_ADDITIONAL_SETTINGS,
-  ETH_NETWORK_DEFAULT_SETTINGS,
-  ETH_NETWORK_DEFAULT_ENV_SETTINGS,
-  ETH_PROTOCOL_NAME,
-  ETH_MDW_TO_NODE_APPROX_DELAY_TIME,
+  BNB_COIN_PRECISION,
+  BNB_COIN_SYMBOL,
+  BNB_CONTRACT_ID,
+  BNB_GAS_LIMIT,
+  BNB_MDW_TO_NODE_APPROX_DELAY_TIME,
+  BNB_NETWORK_DEFAULT_SETTINGS,
+  BNB_PROTOCOL_NAME,
+} from '@/protocols/bnb/config';
+import {
+  ERC20_ABI, // reuse ERC20 ABI from ETH
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
-import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
-import { EtherscanExplorer } from './EtherscanExplorer';
-import { EtherscanService } from './EtherscanService';
-import { normalizeWeb3EthTransactionStructure } from '../helpers';
-import { EthplorerService } from './EthplorerService';
+import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
+import { EtherscanExplorer } from '@/protocols/ethereum/libs/EtherscanExplorer';
+import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
+import { normalizeWeb3EthTransactionStructure } from '@/protocols/ethereum/helpers';
+import { EthplorerService } from '@/protocols/ethereum/libs/EthplorerService';
 
 const TRANSACTION_POLLING_INTERVAL = 6000;
 const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
 const BLOCKS_TO_WAIT = 3;
 
-export class EthereumAdapter extends BaseProtocolAdapter {
-  override protocol = PROTOCOLS.ethereum;
+export class BnbAdapter extends BaseProtocolAdapter {
+  override protocol = PROTOCOLS.bnb;
 
-  override protocolName = ETH_PROTOCOL_NAME;
+  override protocolName = BNB_PROTOCOL_NAME;
 
-  override coinName = ETH_PROTOCOL_NAME;
+  override coinName = BNB_PROTOCOL_NAME;
 
-  override coinSymbol = ETH_COIN_SYMBOL;
+  override coinSymbol = BNB_COIN_SYMBOL;
 
-  override coinContractId = ETH_CONTRACT_ID;
+  override coinContractId = BNB_CONTRACT_ID;
 
-  override coinPrecision = ETH_COIN_PRECISION;
-
-  override coinGeckoCoinId = ETH_COINGECKO_COIN_ID;
+  override coinPrecision = BNB_COIN_PRECISION;
 
   override hasTokensSupport = true;
 
-  override mdwToNodeApproxDelayTime = ETH_MDW_TO_NODE_APPROX_DELAY_TIME;
+  override mdwToNodeApproxDelayTime = BNB_MDW_TO_NODE_APPROX_DELAY_TIME;
 
   private bip32 = BIP32Factory(ecc);
 
@@ -98,34 +96,25 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     {
       key: 'nodeUrl',
       testId: 'url',
-      defaultValue: ETH_NETWORK_DEFAULT_ENV_SETTINGS.nodeUrl,
+      defaultValue: '', // filled by default network settings
       getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
       getLabel: () => tg('pages.network.networkUrlLabel'),
     },
     {
       key: 'chainId',
-      defaultValue: ETH_NETWORK_DEFAULT_ENV_SETTINGS.chainId,
-      validationRules: {
-        url: false,
-        numeric: true,
-      },
+      defaultValue: '',
+      validationRules: { url: false, numeric: true },
       getPlaceholder: () => tg('pages.network.chainIdPlaceholder'),
       getLabel: () => tg('pages.network.chainIdLabel'),
     },
     {
       key: 'explorerUrl',
       required: true,
-      defaultValue: ETH_NETWORK_ADDITIONAL_SETTINGS[NETWORK_TYPE_TESTNET].explorerUrl,
+      defaultValue: 'https://bscscan.com',
       getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
       getLabel: () => tg('pages.network.explorerUrlLabel'),
     },
   ];
-
-  async getTransactionCount(address: string): Promise<number> {
-    const web3Eth = this.getWeb3EthInstance();
-    const txCount = await getTransactionCount(web3Eth, address, 'pending', NUMBER_DATA_FORMAT);
-    return txCount;
-  }
 
   override getAccountPrefix() {
     return '0x';
@@ -135,19 +124,23 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return 9;
   }
 
+  override getCoinGeckoCoinId() {
+    return 'binancecoin';
+  }
+
   override getExplorer() {
     const {
-      ethActiveNetworkSettings,
-      ethActiveNetworkPredefinedSettings,
-    } = useEthNetworkSettings();
+      bnbActiveNetworkSettings,
+      bnbActiveNetworkPredefinedSettings,
+    } = useBnbNetworkSettings();
     return new EtherscanExplorer(
-      ethActiveNetworkSettings.value.explorerUrl
-      ?? ethActiveNetworkPredefinedSettings.value.explorerUrl,
+      bnbActiveNetworkSettings.value.explorerUrl
+      ?? bnbActiveNetworkPredefinedSettings.value.explorerUrl,
     );
   }
 
   override getUrlTokenKey(): string {
-    return ETH_CONTRACT_ID;
+    return BNB_CONTRACT_ID;
   }
 
   override getDefaultCoin(
@@ -155,8 +148,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.ethereum]! || {} as MarketData),
-      protocol: PROTOCOLS.ethereum,
+      ...(marketData?.[PROTOCOLS.bnb]! || ({} as MarketData)),
+      protocol: PROTOCOLS.bnb,
       contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.coinPrecision,
@@ -171,12 +164,17 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
-    return ETH_NETWORK_DEFAULT_SETTINGS[networkType];
+    return BNB_NETWORK_DEFAULT_SETTINGS[networkType] as INetworkProtocolSettings;
   }
 
   override async fetchBalance(address: AccountAddress): Promise<string> {
     const web3Eth = this.getWeb3EthInstance();
-    const balanceInWei = await getBalance(web3Eth, address, 'latest', NUMBER_DATA_FORMAT);
+    const balanceInWei = await getBalance(
+      web3Eth,
+      toChecksumAddress(address),
+      'latest',
+      NUMBER_DATA_FORMAT,
+    );
     return fromWei(balanceInWei, 'ether').toString();
   }
 
@@ -193,8 +191,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       await this.fetchBalance(address),
       this.getTransactionCount(address),
     ]);
+    return parseFloat(balance) > 0 || txCount > 0;
+  }
 
-    return (parseFloat(balance) > 0 || txCount > 0);
+  async getTransactionCount(address: string): Promise<number> {
+    const web3Eth = this.getWeb3EthInstance();
+    const txCount = await web3Eth.getTransactionCount(address, 'pending');
+    return Number(txCount);
   }
 
   override getHdWalletAccountFromMnemonicSeed(
@@ -204,9 +207,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const hdNodeWallet = this.bip32.fromSeed(Buffer.from(seed));
     const path = `m/44'/60'/${accountIndex}'/0/0`;
     const childWallet = hdNodeWallet.derivePath(path);
-
-    const address = toChecksumAddress(privateKeyToAddress(childWallet.privateKey!).toString());
-
+    const address = toChecksumAddress(
+      privateKeyToAddress(childWallet.privateKey!).toString(),
+    );
     return {
       secretKey: childWallet.privateKey!,
       publicKey: childWallet.publicKey,
@@ -231,13 +234,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         ...rawAccount,
         privateKey: undefined,
         address,
-        publicKey: Buffer.from(privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), false)),
+        publicKey: Buffer.from(
+          privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), false),
+        ),
       };
     }
-
     if (rawAccount.type === ACCOUNT_TYPES.hdWallet && seed) {
       const hdWallet = this.getHdWalletAccountFromMnemonicSeed(seed, idx);
-
       return {
         globalIdx,
         idx,
@@ -245,24 +248,14 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         ...hdWallet,
       };
     }
-
     return null;
   }
 
-  override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
-    return getLastNotEmptyAccountIndex(
-      this.isAccountUsed.bind(this),
-      this.getHdWalletAccountFromMnemonicSeed.bind(this),
-      seed,
-    );
-  }
-
   override async fetchAvailableTokens(): Promise<IToken[] | null> {
-    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    const { bnbActiveNetworkPredefinedSettings } = useBnbNetworkSettings();
+    const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    if (!apiUrl) return null;
     try {
-      // Temporary solution for fetching the ERC-20 tokens.
-      // TODO Replace with our own node API
       const response = await new EthplorerService(apiUrl).fetchTopTokens();
       return response;
     } catch (error: any) {
@@ -271,13 +264,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     }
   }
 
-  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null> {
-    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+  override async fetchAccountTokenBalances(
+    address: string,
+  ): Promise<ITokenBalance[] | null> {
+    const { bnbActiveNetworkPredefinedSettings } = useBnbNetworkSettings();
+    const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    if (!apiUrl) return null;
     try {
-      // Temporary solution for fetching the ERC-20 token balances.
-      // TODO Replace with our own node API
-      const response = await new EthplorerService(apiUrl).fetchAccountTokenBalances(address);
+      const response = await new EthplorerService(
+        apiUrl,
+      ).fetchAccountTokenBalances(address);
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -285,13 +281,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     }
   }
 
-  override async fetchTokenInfo(contractId: string): Promise<IToken | undefined> {
-    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+  override async fetchTokenInfo(
+    contractId: string,
+  ): Promise<IToken | undefined> {
+    const { bnbActiveNetworkPredefinedSettings } = useBnbNetworkSettings();
+    const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    if (!apiUrl) return undefined;
     try {
-      // Temporary solution for fetching the ERC-20 token info.
-      // TODO Replace with our own node API
-      const response = await new EthplorerService(apiUrl).fetchTokenInfo(contractId);
+      const response = await new EthplorerService(apiUrl).fetchTokenInfo(
+        contractId,
+      );
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -306,9 +305,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     value,
     gas,
   }: any = {}): Promise<ITransferResponse> {
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByAddress } = useAccounts();
-    const { chainId } = ethActiveNetworkSettings.value;
+    const { chainId } = bnbActiveNetworkSettings.value;
     const {
       updateFeeList,
       maxFeePerGas,
@@ -316,8 +315,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     } = useEthFeeCalculation(this.protocol);
 
     const account = getAccountByAddress(toChecksumAddress(from));
-    if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    if (!account || account.protocol !== PROTOCOLS.bnb) {
+      throw new Error(
+        'Token transfer was initiated from non-existing or non-bnb account.',
+      );
     }
 
     const [nonce] = await Promise.all([
@@ -336,19 +337,28 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       data,
       value,
       gasLimit: gas,
-      maxPriorityFeePerGas: bigIntToHex(BigInt(toWei(maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
-      maxFeePerGas: bigIntToHex(BigInt(toWei(maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
+      maxPriorityFeePerGas: bigIntToHex(
+        BigInt(
+          toWei(
+            maxPriorityFeePerGas.value?.toFormat(BNB_COIN_PRECISION),
+            'ether',
+          ),
+        ),
+      ),
+      maxFeePerGas: bigIntToHex(
+        BigInt(
+          toWei(maxFeePerGas.value?.toFormat(BNB_COIN_PRECISION), 'ether'),
+        ),
+      ),
       type: '0x02',
     };
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
-
     const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
     const web3Eth = this.getWeb3EthInstance();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
     sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
-
     return { hash };
   }
 
@@ -364,27 +374,33 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     },
   ): Promise<ITransferResponse> {
     const {
-      ethActiveNetworkSettings,
-      ethActiveNetworkPredefinedSettings,
-    } = useEthNetworkSettings();
+      bnbActiveNetworkSettings,
+      bnbActiveNetworkPredefinedSettings,
+    } = useBnbNetworkSettings();
     const { getAccountByAddress } = useAccounts();
-    const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
+    const apiUrl = bnbActiveNetworkPredefinedSettings.value.middlewareUrl;
 
     const account = getAccountByAddress(options.fromAccount);
-    if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    if (!account || account.protocol !== PROTOCOLS.bnb) {
+      throw new Error(
+        'Token transfer was initiated from non-existing or non-bnb account.',
+      );
     }
-    const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
+    const { chainId, nodeUrl } = bnbActiveNetworkSettings.value;
 
-    const contractAbi = await new EtherscanService(apiUrl, chainId)
-      .fetchFromApi({
-        module: 'contract',
-        action: 'getabi',
-        address: contractId,
-      });
+    const contractAbi = await new EtherscanService(
+      apiUrl,
+      chainId,
+    ).fetchFromApi({
+      module: 'contract',
+      action: 'getabi',
+      address: contractId,
+    });
 
     const contract = new Contract(
-      contractAbi && Array.isArray(contractAbi?.result) ? contractAbi.result : ERC20_ABI,
+      contractAbi && Array.isArray(contractAbi?.result)
+        ? contractAbi.result
+        : ERC20_ABI,
       contractId,
       { from: options.fromAccount },
     );
@@ -392,18 +408,26 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     contract.setProvider(nodeUrl);
 
     const amountBN = new BigNumber(amount);
-    const hexAmount = bigIntToHex(BigInt(toWei(amountBN.toFixed(
-      Number(await contract.methods.decimals().call()),
-    ), 'ether')));
-    const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
-    const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
+    const hexAmount = bigIntToHex(
+      BigInt(
+        toWei(
+          amountBN.toFixed(Number(await contract.methods.decimals().call())),
+          'ether',
+        ),
+      ),
+    );
+    const maxPriorityFeePerGas = bigIntToHex(
+      BigInt(toWei(options.maxPriorityFeePerGas, 'ether')),
+    );
+    const maxFeePerGas = bigIntToHex(
+      BigInt(toWei(options.maxFeePerGas, 'ether')),
+    );
 
     const [gasLimit] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas(),
     ]);
 
-    // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
       chainId: toHex(chainId),
       nonce: options.nonce,
@@ -417,30 +441,33 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
-
     const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
     const web3Eth = this.getWeb3EthInstance();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
     sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
-
     return { hash };
   }
 
-  override async fetchTransactionByHash(hash: string, transactionOwner?: AccountAddress) {
+  override async fetchTransactionByHash(
+    hash: string,
+    transactionOwner?: AccountAddress,
+  ) {
     const web3Eth = this.getWeb3EthInstance();
-    const transaction = await getTransaction(web3Eth, hash, DEFAULT_RETURN_FORMAT);
+    const transaction = await getTransaction(
+      web3Eth,
+      hash,
+      DEFAULT_RETURN_FORMAT,
+    );
 
-    // If the transaction is a token transfer, fetch the token transaction using the etherscan API
-    // Because the web3 library does not give enough information about token transactions
     if (transaction?.input !== '0x' && transaction?.blockNumber) {
       const {
-        ethActiveNetworkPredefinedSettings,
-        ethActiveNetworkSettings,
-      } = useEthNetworkSettings();
-      const { chainId } = ethActiveNetworkSettings.value;
+        bnbActiveNetworkPredefinedSettings,
+        bnbActiveNetworkSettings,
+      } = useBnbNetworkSettings();
+      const { chainId } = bnbActiveNetworkSettings.value;
       const service = new EtherscanService(
-        ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+        bnbActiveNetworkPredefinedSettings.value.middlewareUrl,
         chainId,
       );
       const tokenTx = await service.fetchAccountTokenTransactionByHash(
@@ -450,16 +477,22 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         transaction.blockNumber,
         transaction.input,
       );
-
-      if (tokenTx) {
-        return tokenTx;
-      }
+      if (tokenTx) return tokenTx;
     }
 
     const block = transaction?.blockHash
-      ? await getBlock(web3Eth, transaction.blockHash, true, DEFAULT_RETURN_FORMAT)
+      ? await getBlock(
+        web3Eth,
+        transaction.blockHash,
+        true,
+        DEFAULT_RETURN_FORMAT,
+      )
       : undefined;
-    const normalized = normalizeWeb3EthTransactionStructure(transaction, block, transactionOwner);
+    const normalized = normalizeWeb3EthTransactionStructure(
+      transaction,
+      block,
+      transactionOwner,
+    );
     return normalized;
   }
 
@@ -472,12 +505,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     try {
       const {
-        ethActiveNetworkPredefinedSettings,
-        ethActiveNetworkSettings,
-      } = useEthNetworkSettings();
-      const { chainId } = ethActiveNetworkSettings.value;
+        bnbActiveNetworkPredefinedSettings,
+        bnbActiveNetworkSettings,
+      } = useBnbNetworkSettings();
+      const { chainId } = bnbActiveNetworkSettings.value;
       const service = new EtherscanService(
-        ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+        bnbActiveNetworkPredefinedSettings.value.middlewareUrl,
         chainId,
       );
       const [coinTransactions, tokenTransactions] = await Promise.all([
@@ -485,30 +518,28 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         service.fetchAccountTokenTransactions(address, this.protocol, { page: nextPageNum }),
       ]);
 
-      // Remove duplicate coin transactions (e.g.: token transfer fee paid with coin)
       tokenTransactions.forEach((tokenTransaction) => {
         const index = coinTransactions.findIndex(
           (coinTransaction) => coinTransaction.hash === tokenTransaction.hash,
         );
-        if (index > -1) {
-          coinTransactions.splice(index, 1);
-        }
+        if (index > -1) coinTransactions.splice(index, 1);
       });
 
-      regularTransactions = [...coinTransactions, ...tokenTransactions];
-
+      regularTransactions = [...coinTransactions, ...tokenTransactions].map((transaction) => ({
+        ...transaction,
+        protocol: this.protocol,
+      }));
       if (regularTransactions?.length) {
-        paginationParams.nextPageNum = ((nextPageNum) ? +nextPageNum + 1 : 2).toString();
+        paginationParams.nextPageNum = (
+          nextPageNum ? +nextPageNum + 1 : 2
+        ).toString();
       }
     } catch (error: any) {
       console.log(error);
       Logger.write(error);
     }
 
-    return {
-      regularTransactions,
-      paginationParams,
-    };
+    return { regularTransactions, paginationParams };
   }
 
   override async fetchAccountAssetTransactions(
@@ -521,69 +552,85 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     try {
       const {
-        ethActiveNetworkPredefinedSettings,
-        ethActiveNetworkSettings,
-      } = useEthNetworkSettings();
-      const { chainId } = ethActiveNetworkSettings.value;
+        bnbActiveNetworkPredefinedSettings,
+        bnbActiveNetworkSettings,
+      } = useBnbNetworkSettings();
+      const { chainId } = bnbActiveNetworkSettings.value;
       const service = new EtherscanService(
-        ethActiveNetworkPredefinedSettings.value.middlewareUrl,
+        bnbActiveNetworkPredefinedSettings.value.middlewareUrl,
         chainId,
       );
-      regularTransactions = (assetContractId === this.coinContractId)
-        ? await service.fetchAccountCoinTransactions(address, this.protocol, { page: nextPageNum })
-        : await service.fetchAccountTokenTransactions(
-          address,
-          this.protocol,
-          { page: nextPageNum, assetContractId },
-        );
+      regularTransactions = assetContractId === this.coinContractId
+        ? await service.fetchAccountCoinTransactions(address, this.protocol, {
+          page: nextPageNum,
+        })
+        : await service.fetchAccountTokenTransactions(address, this.protocol, {
+          page: nextPageNum,
+          assetContractId,
+        });
 
       if (regularTransactions?.length) {
-        paginationParams.nextPageNum = ((nextPageNum) ? +nextPageNum + 1 : 2).toString();
+        paginationParams.nextPageNum = (
+          nextPageNum ? +nextPageNum + 1 : 2
+        ).toString();
       }
     } catch (error: any) {
       Logger.write(error);
     }
 
-    return {
-      regularTransactions,
-      paginationParams,
-    };
+    return { regularTransactions, paginationParams };
   }
 
-  override async constructAndSignTx(
+  async constructAndSignTx(
     amount: number,
     recipient: string,
     options: Record<string, any>,
-  ): Promise<FeeMarketEIP1559Transaction> {
+  ): Promise<any> {
     const { getAccountByAddress } = useAccounts();
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
+    console.log('construct');
 
     const account = getAccountByAddress(options.fromAccount);
-    if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Ethereum transaction construction & signing was initiated from non existing or not ethereum account.');
+    console.log(account);
+    if (!account || account.protocol !== PROTOCOLS.bnb) {
+      throw new Error(
+        'BNB transaction construction & signing was initiated from non-existing or non-bnb account.',
+      );
     }
 
     const { nonce } = options;
-    const { chainId } = ethActiveNetworkSettings.value;
+    const { chainId } = bnbActiveNetworkSettings.value;
 
-    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
-    const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
-    const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
+    const hexAmount = bigIntToHex(
+      BigInt(toWei(amount.toFixed(BNB_COIN_PRECISION), 'ether')),
+    );
+    const maxPriorityFeePerGas = bigIntToHex(
+      BigInt(toWei(options.maxPriorityFeePerGas, 'gwei')),
+    );
+    const gasPrice = bigIntToHex(
+      BigInt(toWei(options.maxFeePerGas, 'gwei')),
+    );
 
-    // All values are in wei
-    const txData: FeeMarketEIP1559TxData = {
-      chainId: toHex(chainId),
-      nonce,
+    console.log(BNB_GAS_LIMIT, nonce, maxPriorityFeePerGas, gasPrice, chainId);
+
+    const txData: TxData = {
+      nonce: toHex(nonce),
+      gasPrice,
+      gasLimit: toHex('21000'),
       to: recipient,
       value: hexAmount,
       data: '0x',
-      maxPriorityFeePerGas,
-      maxFeePerGas,
-      gasLimit: `0x${ETH_GAS_LIMIT.toString(16)}`,
-      type: '0x02',
     };
 
-    return FeeMarketEIP1559Transaction.fromTxData(txData).sign(account.secretKey);
+    const tx = new Transaction(txData, { common: Common.custom({ chainId }) });
+    console.log('Transaction created with chainId:', tx.common.chainId());
+
+    const signedTx = tx.sign(account.secretKey!);
+    return signedTx.serialize();
+    // return (await signTransaction(
+    //   new Transaction(txData, { common: Common.custom({ chainId, networkId: chainId }) }),
+    //   `0x${Buffer.from(account.secretKey).toString('hex')}`,
+    // )).rawTransaction;
   }
 
   override async spend(
@@ -597,13 +644,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     },
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
-    const signedTx = (await this.constructAndSignTx(amount, recipient, options));
-    const serializedTx = signedTx.serialize();
-    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-
-    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
-
-    return { hash };
+    const signedTx = await this.constructAndSignTx(amount, recipient, options);
+    sendSignedTransaction(web3Eth, signedTx, DEFAULT_RETURN_FORMAT);
+    return { hash: signedTx.transactionHash };
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {
@@ -615,18 +658,24 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         attemptNo += 1;
         const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
 
-        const minedTransaction = await getTransactionReceipt(web3Eth, hash, DEFAULT_RETURN_FORMAT);
-        const currentBlock = await getBlock(web3Eth, 'latest', true, DEFAULT_RETURN_FORMAT);
+        const minedTransaction = await getTransactionReceipt(
+          web3Eth,
+          hash,
+          DEFAULT_RETURN_FORMAT,
+        );
+        const currentBlock = await getBlock(
+          web3Eth,
+          'latest',
+          true,
+          DEFAULT_RETURN_FORMAT,
+        );
 
         if (
           minedTransaction?.blockNumber
-          && (
-            (
-              currentBlock?.number
-              && currentBlock.number - BigInt(minedTransaction.blockNumber) >= BLOCKS_TO_WAIT
-            )
-            || isLastAttempt
-          )
+          && ((currentBlock?.number
+            && currentBlock.number - BigInt(minedTransaction.blockNumber)
+            >= BLOCKS_TO_WAIT)
+            || isLastAttempt)
         ) {
           clearInterval(interval);
           return resolve(minedTransaction);
@@ -640,9 +689,19 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     });
   }
 
+  override async discoverLastUsedAccountIndex(
+    seed: Uint8Array,
+  ): Promise<number> {
+    return getLastNotEmptyAccountIndex(
+      this.isAccountUsed.bind(this),
+      this.getHdWalletAccountFromMnemonicSeed.bind(this),
+      seed,
+    );
+  }
+
   private getWeb3EthInstance(): Web3Eth {
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
-    const { nodeUrl } = ethActiveNetworkSettings.value;
+    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
+    const { nodeUrl } = bnbActiveNetworkSettings.value;
     return new Web3Eth(nodeUrl);
   }
 }
