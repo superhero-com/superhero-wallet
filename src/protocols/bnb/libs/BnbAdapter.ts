@@ -5,8 +5,6 @@ import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
 import { Contract } from 'web3-eth-contract';
 import {
   privateKeyToAddress,
-  FeeMarketEIP1559Transaction,
-  FeeMarketEIP1559TxData,
   bigIntToHex,
   privateKeyToPublicKey,
   Transaction,
@@ -308,11 +306,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByAddress } = useAccounts();
     const { chainId } = bnbActiveNetworkSettings.value;
-    const {
-      updateFeeList,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-    } = useEthFeeCalculation(this.protocol);
+    const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(this.protocol);
 
     const account = getAccountByAddress(toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.bnb) {
@@ -326,39 +320,35 @@ export class BnbAdapter extends BaseProtocolAdapter {
       updateFeeList(),
     ]);
 
-    if (!maxPriorityFeePerGas.value || !maxFeePerGas.value) {
+    if (!maxFeePerGas.value) {
       throw new Error('Failed to calculate the fee.');
     }
 
-    const txData: FeeMarketEIP1559TxData = {
-      chainId: toHex(chainId),
+    const web3Eth = this.getWeb3EthInstance();
+    const nodeGasPriceWei = await web3Eth.getGasPrice();
+    const providedGasPriceWei = BigInt(toWei(maxFeePerGas.value.toString(), 'gwei'));
+    const floorGwei = Number(chainId) === 56 ? 5 : 3; // mainnet/testnet
+    const floorWei = BigInt(toWei(String(floorGwei), 'gwei'));
+    const gasPriceWei = [providedGasPriceWei, BigInt(nodeGasPriceWei), floorWei]
+      .reduce((a, b) => (a > b ? a : b));
+    const gasPrice = bigIntToHex(gasPriceWei);
+
+    const txData: TxData = {
       nonce,
+      gasPrice,
+      gasLimit: typeof gas === 'string' ? gas : toHex(gas?.toString() ?? '21000'),
       to,
-      data,
       value,
-      gasLimit: gas,
-      maxPriorityFeePerGas: bigIntToHex(
-        BigInt(
-          toWei(
-            maxPriorityFeePerGas.value?.toFormat(BNB_COIN_PRECISION),
-            'ether',
-          ),
-        ),
-      ),
-      maxFeePerGas: bigIntToHex(
-        BigInt(
-          toWei(maxFeePerGas.value?.toFormat(BNB_COIN_PRECISION), 'ether'),
-        ),
-      ),
-      type: '0x02',
+      data,
     };
 
-    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+    const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
+    const tx = new Transaction(txData, { common });
     const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
-    const web3Eth = this.getWeb3EthInstance();
+    const raw = `0x${Buffer.from(serializedTx).toString('hex')}`;
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
     return { hash };
   }
 
@@ -416,36 +406,31 @@ export class BnbAdapter extends BaseProtocolAdapter {
         ),
       ),
     );
-    const maxPriorityFeePerGas = bigIntToHex(
-      BigInt(toWei(options.maxPriorityFeePerGas, 'ether')),
-    );
-    const maxFeePerGas = bigIntToHex(
-      BigInt(toWei(options.maxFeePerGas, 'ether')),
-    );
 
-    const [gasLimit] = await Promise.all([
+    const gasPrice = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'gwei')));
+
+    const [nonce, gasLimit] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas(),
     ]);
 
-    const txData: FeeMarketEIP1559TxData = {
-      chainId: toHex(chainId),
-      nonce: options.nonce,
+    const txData: TxData = {
+      nonce,
+      gasPrice,
+      gasLimit: `0x${gasLimit.toString(16)}`,
       to: contractId,
       data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
-      value: 0x0,
-      maxPriorityFeePerGas,
-      maxFeePerGas,
-      gasLimit: `0x${gasLimit.toString(16)}`,
-      type: '0x02',
+      value: '0x0',
     };
 
-    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+    const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
+    const tx = new Transaction(txData, { common });
     const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
     const web3Eth = this.getWeb3EthInstance();
+    const raw = `0x${Buffer.from(serializedTx).toString('hex')}`;
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
     return { hash };
   }
 
@@ -535,7 +520,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
         ).toString();
       }
     } catch (error: any) {
-      console.log(error);
       Logger.write(error);
     }
 
@@ -588,10 +572,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
   ): Promise<any> {
     const { getAccountByAddress } = useAccounts();
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
-    console.log('construct');
 
     const account = getAccountByAddress(options.fromAccount);
-    console.log(account);
     if (!account || account.protocol !== PROTOCOLS.bnb) {
       throw new Error(
         'BNB transaction construction & signing was initiated from non-existing or non-bnb account.',
@@ -604,33 +586,31 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const hexAmount = bigIntToHex(
       BigInt(toWei(amount.toFixed(BNB_COIN_PRECISION), 'ether')),
     );
-    const maxPriorityFeePerGas = bigIntToHex(
-      BigInt(toWei(options.maxPriorityFeePerGas, 'gwei')),
-    );
+    const floorGwei = Number(chainId) === 56 ? 5 : 3;
     const gasPrice = bigIntToHex(
-      BigInt(toWei(options.maxFeePerGas, 'gwei')),
+      BigInt(
+        toWei(
+          String(Math.max(Number(options.maxFeePerGas ?? 3), floorGwei)),
+          'gwei',
+        ),
+      ),
     );
-
-    console.log(BNB_GAS_LIMIT, nonce, maxPriorityFeePerGas, gasPrice, chainId);
 
     const txData: TxData = {
       nonce: toHex(nonce),
       gasPrice,
-      gasLimit: toHex('21000'),
+      gasLimit: toHex(String(BNB_GAS_LIMIT)),
       to: recipient,
       value: hexAmount,
       data: '0x',
     };
 
-    const tx = new Transaction(txData, { common: Common.custom({ chainId }) });
-    console.log('Transaction created with chainId:', tx.common.chainId());
-
+    const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
+    const tx = new Transaction(txData, { common });
     const signedTx = tx.sign(account.secretKey!);
-    return signedTx.serialize();
-    // return (await signTransaction(
-    //   new Transaction(txData, { common: Common.custom({ chainId, networkId: chainId }) }),
-    //   `0x${Buffer.from(account.secretKey).toString('hex')}`,
-    // )).rawTransaction;
+    const serializedTx = signedTx.serialize();
+    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
+    return { raw: serializedTx, hash };
   }
 
   override async spend(
@@ -644,9 +624,9 @@ export class BnbAdapter extends BaseProtocolAdapter {
     },
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
-    const signedTx = await this.constructAndSignTx(amount, recipient, options);
-    sendSignedTransaction(web3Eth, signedTx, DEFAULT_RETURN_FORMAT);
-    return { hash: signedTx.transactionHash };
+    const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
+    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
+    return { hash };
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {
