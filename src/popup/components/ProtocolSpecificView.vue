@@ -100,6 +100,12 @@ export default defineComponent({
           activeNetwork.value.type,
         )?.protocol;
         if (ownerProtocol) {
+          const activeProtocol = activeAccount.value.protocol;
+          const isEvm = (p?: Protocol) => p === PROTOCOLS.ethereum || p === PROTOCOLS.bnb;
+          // If both are EVM-like and differ, prefer the current active account protocol
+          if (isEvm(ownerProtocol) && isEvm(activeProtocol) && ownerProtocol !== activeProtocol) {
+            return activeProtocol;
+          }
           return ownerProtocol;
         }
       }
