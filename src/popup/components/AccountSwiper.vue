@@ -17,7 +17,7 @@
       >
         <SwiperSlide
           v-for="(address, index) in addressList"
-          :key="address"
+          :key="address + index"
           :swiper-ref="customSwiper"
           :virtual-index="index"
           class="account-swiper-slide"

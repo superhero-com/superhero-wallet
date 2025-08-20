@@ -13,6 +13,7 @@ export const PROTOCOLS = {
   bitcoin: 'bitcoin',
   ethereum: 'ethereum',
   aeternity: 'aeternity',
+  bnb: 'bnb',
 } as const;
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
