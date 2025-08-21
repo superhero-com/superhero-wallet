@@ -23,6 +23,7 @@ import { useModals } from './modals';
 interface IAddressBookOptions {
   name: string;
   address: AccountAddress;
+  protocol?: Protocol;
   isBookmarked?: boolean;
 }
 
@@ -105,7 +106,12 @@ export const useAddressBook = createCustomScopedComposable(() => {
    * Passing a savedEntryAddress will update the entry instead of adding a new one
    */
   function addAddressBookEntry(
-    { name, address, isBookmarked }: IAddressBookOptions,
+    {
+      name,
+      address,
+      isBookmarked,
+      protocol: formProtocol,
+    }: IAddressBookOptions,
     savedEntryAddress?: AccountAddress,
   ) {
     if (!name || !address) {
@@ -116,7 +122,7 @@ export const useAddressBook = createCustomScopedComposable(() => {
       throw new AddressBookEntryExists();
     }
 
-    const protocol = getProtocolByAddress(address);
+    const protocol = formProtocol || getProtocolByAddress(address);
     if (!protocol) {
       throw new AddressBookInvalidAddress();
     }

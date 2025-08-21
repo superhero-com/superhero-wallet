@@ -2,6 +2,7 @@
   "common": {
     "activeAccount": "Active account",
     "address": "Address",
+    "network": "Network",
     "allow": "Allow",
     "name": "Name",
     "addressCopied": "Copied",
@@ -838,7 +839,8 @@
       "backup": "backup",
       "updateAvailable": "Update available",
       "updateAvailableText": "There is a new wallet version available for download in the store",
-      "shareAddress": "Share your public address"
+      "shareAddress": "Share your public address",
+      "selectProtocol": "Select network"
     },
     "accounts": {
       "addAccount": "Add account",
