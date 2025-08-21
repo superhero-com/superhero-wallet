@@ -44,7 +44,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { IAccount, IFormSelectOption } from '@/types';
+import type { IAccount, IFormSelectOption, Protocol } from '@/types';
 import { useAccounts, useBalances, useMultisigAccounts } from '@/composables';
 import { getAddressColor } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -81,21 +81,23 @@ export default defineComponent({
   },
   setup(props) {
     const { getAccountBalance } = useBalances();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { getMultisigAccountByAccountId, getMultisigIAccountByAccountId } = useMultisigAccounts();
 
+    const [proto, address] = String(props.option.value).split(':');
+
     const multisigAccount = computed(() => (
-      getMultisigAccountByAccountId(props.option.value as string)
+      getMultisigAccountByAccountId(address)
     ));
 
     const multisigIAccount = computed(() => (
-      getMultisigIAccountByAccountId(props.option.value as string)
+      getMultisigIAccountByAccountId(address)
     ));
 
     const account = computed(() => (
       props.customAccount
       ?? multisigIAccount.value
-      ?? getAccountByAddress(props.option.value as string)
+      ?? getAccountByProtocolAndAddress(proto as Protocol, address)
     ));
 
     const isMultisig = computed(() => !!multisigAccount.value);

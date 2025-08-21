@@ -200,6 +200,11 @@ export const useAccounts = createCustomScopedComposable(() => {
     (): Protocol[] => uniq(accounts.value.map(({ protocol }) => protocol)),
   );
 
+  function getAccountByProtocolAndAddress(protocol: Protocol, address: AccountAddress)
+    : IAccount | undefined {
+    return accounts.value.find((acc) => acc.protocol === protocol && acc.address === address);
+  }
+
   function getAccountByAddress(address: AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
@@ -247,6 +252,17 @@ export const useAccounts = createCustomScopedComposable(() => {
   function setActiveAccountByAddress(address?: AccountAddress) {
     if (address) {
       setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
+    }
+  }
+
+  function setActiveAccountByAddressAndProtocol(
+    address: AccountAddress,
+    protocol: Protocol | string,
+  ) {
+    if (address) {
+      setActiveAccountByGlobalIdx(
+        getAccountByProtocolAndAddress(protocol as Protocol, address)?.globalIdx,
+      );
     }
   }
 
@@ -365,6 +381,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     isLocalAccountAddress,
     addRawAccount,
     addPrivateKeyAccount,
+    getAccountByProtocolAndAddress,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
@@ -372,6 +389,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     getAccountIcon,
     onAccountChange,
     setActiveAccountByAddress,
+    setActiveAccountByAddressAndProtocol,
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,
     setActiveAccountByProtocol,

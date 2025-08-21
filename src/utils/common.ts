@@ -47,6 +47,7 @@ import {
   NETWORK_TYPE_TESTNET,
   PASSWORD_STRENGTH,
   PROTOCOL_LIST,
+  PROTOCOLS,
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
@@ -347,7 +348,8 @@ export function prepareAccountSelectOptions(accountList: IAccount[] | IMultisigA
   : IFormSelectOption[] {
   return accountList.map((acc): IFormSelectOption => ({
     text: (acc as IMultisigAccount).gaAccountId ?? getDefaultAccountLabel(acc as IAccount),
-    value: (acc as IMultisigAccount).gaAccountId ?? (acc as IAccount).address,
+    value:
+      `${(acc as IAccount).protocol ?? PROTOCOLS.aeternity}:${(acc as IMultisigAccount).gaAccountId ?? (acc as IAccount).address}`,
   }));
 }
 
