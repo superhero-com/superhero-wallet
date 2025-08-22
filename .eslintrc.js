@@ -75,6 +75,10 @@ module.exports = {
       env: {
         jest: true,
       },
+      rules: {
+        // Allow using test-only deps like @jest/globals in unit tests
+        'import/no-extraneous-dependencies': 'off',
+      },
     },
   ],
 };

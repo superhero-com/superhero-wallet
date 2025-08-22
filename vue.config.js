@@ -120,6 +120,15 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
+    // Disable TypeScript type-checking to avoid TS@4 parsing errors on TS@5-only
+    // syntax in third-party declaration files (e.g. const type parameters in
+    // @solana/* packages). The build will transpile without failing on those.
+    try {
+      config.plugins.delete('fork-ts-checker');
+    } catch (e) {
+      // Plugin may not exist in some environments; ignore.
+    }
+
     config
       .plugin('node-polyfill')
       .use(NodePolyfillPlugin)
@@ -161,6 +170,7 @@ module.exports = {
       definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
       definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
+      definitions['process.env.ALCHEMY_API_KEY'] = JSON.stringify(process.env.ALCHEMY_API_KEY);
       definitions['process.env.ETHERSCAN_API_KEY'] = JSON.stringify(process.env.ETHERSCAN_API_KEY);
       definitions['process.env.ETHPLORER_API_KEY'] = JSON.stringify(process.env.ETHPLORER_API_KEY);
       definitions['process.env.WALLET_CONNECT_PROJECT_ID'] = JSON.stringify(process.env.WALLET_CONNECT_PROJECT_ID);
@@ -169,6 +179,22 @@ module.exports = {
 
       return [definitions];
     }).end();
+
+    // Ensure ts-loader only transpiles (no type checking) to avoid TS@4 trying to
+    // parse TS@5-only d.ts syntax from dependencies.
+    ['ts', 'tsx'].forEach((ruleName) => {
+      try {
+        config.module
+          .rule(ruleName)
+          .use('ts-loader')
+          .tap((loaderOptions = {}) => ({
+            ...loaderOptions,
+            transpileOnly: true,
+          }));
+      } catch (e) {
+        // Rule or loader may not exist in some builds; ignore.
+      }
+    });
 
     if (PLATFORM === 'extension') {
       config.module.rule('i18nTest')
@@ -227,12 +253,14 @@ module.exports = {
       .loader(path.resolve(__dirname, './custom-svg-loader.js'))
       .options({
         svgo: {
-          plugins: [{
-            name: 'addClassesToSVGElement',
-            params: {
-              classNames: ['icon'],
+          plugins: [
+            {
+              name: 'addClassesToSVGElement',
+              params: {
+                classNames: ['icon'],
+              },
             },
-          }],
+          ],
         },
       })
       .end()
