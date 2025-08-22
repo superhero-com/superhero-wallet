@@ -56,7 +56,7 @@ export function useBalances() {
   const accountsTotalBalance = computed(
     () => accounts.value.reduce(
       (total, account) => {
-        const accountBalance = balances.value?.[activeAccount.value.protocol]?.[account.address];
+        const accountBalance = balances.value?.[account.protocol]?.[account.address];
         if (!accountBalance) {
           return total;
         }
