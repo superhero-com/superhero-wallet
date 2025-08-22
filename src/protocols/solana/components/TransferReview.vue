@@ -103,48 +103,108 @@ export default defineComponent({
       let actionResult;
       const lastActiveSolanaAccount = getLastActiveProtocolAccount(PROTOCOLS.solana);
       try {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const recipient of recipients) {
-          if (!isSelectedAssetSolanaCoin.value) {
-            // eslint-disable-next-line no-await-in-loop
-            actionResult = await solanaAdapter.transferToken?.(
-              amount,
-              recipient,
-              selectedAsset.contractId,
-              {
-                fromAccount: lastActiveSolanaAccount?.address,
-              },
-            );
-          } else {
-            // eslint-disable-next-line no-await-in-loop
-            actionResult = await solanaAdapter.spend(
-              Number(amount),
-              recipient,
-              {
-                fromAccount: lastActiveSolanaAccount?.address,
-              },
-            );
-          }
+        if (!isSelectedAssetSolanaCoin.value && recipients.length > 1) {
+          const results = await (solanaAdapter as any).transferTokenBatch(
+            amount,
+            recipients,
+            selectedAsset.contractId,
+            { fromAccount: lastActiveSolanaAccount?.address },
+          );
+          results.forEach(({ hash, recipients: recs }: any) => {
+            recs.forEach((recipient: string) => {
+              const transaction: ITransaction = {
+                hash: hash as any,
+                pending: true,
+                transactionOwner: lastActiveSolanaAccount?.address,
+                protocol: PROTOCOLS.solana,
+                tx: {
+                  amount: Number(amount),
+                  callerId: lastActiveSolanaAccount?.address!,
+                  contractId: selectedAsset.contractId as any,
+                  senderId: lastActiveSolanaAccount?.address,
+                  type: 'ContractCallTx' as any,
+                  function: 'transfer',
+                  recipientId: recipient,
+                  arguments: [],
+                  fee: 0,
+                },
+              };
+              addAccountPendingTransaction(lastActiveSolanaAccount?.address!, transaction);
+            });
+          });
+        } else if (isSelectedAssetSolanaCoin.value && recipients.length > 1) {
+          const results = await (solanaAdapter as any).spendBatch(
+            Number(amount),
+            recipients,
+            { fromAccount: lastActiveSolanaAccount?.address },
+          );
+          results.forEach(({ hash, recipients: recs }: any) => {
+            recs.forEach((recipient: string) => {
+              const transaction: ITransaction = {
+                hash: hash as any,
+                pending: true,
+                transactionOwner: lastActiveSolanaAccount?.address,
+                protocol: PROTOCOLS.solana,
+                tx: {
+                  amount: Number(amount),
+                  callerId: lastActiveSolanaAccount?.address!,
+                  contractId: selectedAsset.contractId as any,
+                  senderId: lastActiveSolanaAccount?.address,
+                  type: 'SpendTx' as any,
+                  function: 'transfer',
+                  recipientId: recipient,
+                  arguments: [],
+                  fee: 0,
+                },
+              };
+              addAccountPendingTransaction(lastActiveSolanaAccount?.address!, transaction);
+            });
+          });
+        } else {
+          // Fallback: legacy per-recipient send
+          // eslint-disable-next-line no-restricted-syntax
+          for (const recipient of recipients) {
+            if (!isSelectedAssetSolanaCoin.value) {
+              // eslint-disable-next-line no-await-in-loop
+              actionResult = await solanaAdapter.transferToken?.(
+                amount,
+                recipient,
+                selectedAsset.contractId,
+                {
+                  fromAccount: lastActiveSolanaAccount?.address,
+                },
+              );
+            } else {
+              // eslint-disable-next-line no-await-in-loop
+              actionResult = await solanaAdapter.spend(
+                Number(amount),
+                recipient,
+                {
+                  fromAccount: lastActiveSolanaAccount?.address,
+                },
+              );
+            }
 
-          if (actionResult) {
-            const transaction: ITransaction = {
-              hash: actionResult.hash as any,
-              pending: true,
-              transactionOwner: lastActiveSolanaAccount?.address,
-              protocol: PROTOCOLS.solana,
-              tx: {
-                amount: Number(amount),
-                callerId: lastActiveSolanaAccount?.address!,
-                contractId: selectedAsset.contractId as any,
-                senderId: lastActiveSolanaAccount?.address,
-                type: (isSelectedAssetSolanaCoin.value) ? 'SpendTx' : 'ContractCallTx',
-                function: 'transfer',
-                recipientId: recipient,
-                arguments: [],
-                fee: 0,
-              },
-            };
-            addAccountPendingTransaction(lastActiveSolanaAccount?.address!, transaction);
+            if (actionResult) {
+              const transaction: ITransaction = {
+                hash: actionResult.hash as any,
+                pending: true,
+                transactionOwner: lastActiveSolanaAccount?.address,
+                protocol: PROTOCOLS.solana,
+                tx: {
+                  amount: Number(amount),
+                  callerId: lastActiveSolanaAccount?.address!,
+                  contractId: selectedAsset.contractId as any,
+                  senderId: lastActiveSolanaAccount?.address,
+                  type: (isSelectedAssetSolanaCoin.value) ? 'SpendTx' : 'ContractCallTx',
+                  function: 'transfer',
+                  recipientId: recipient,
+                  arguments: [],
+                  fee: 0,
+                },
+              };
+              addAccountPendingTransaction(lastActiveSolanaAccount?.address!, transaction);
+            }
           }
         }
       } catch (error: any) {

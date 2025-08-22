@@ -27,8 +27,8 @@ export const SOL_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings<'
     explorerUrl: 'https://explorer.solana.com',
   },
   [NETWORK_TYPE_TESTNET]: {
-    nodeUrl: 'https://api.testnet.solana.com',
-    explorerUrl: 'https://explorer.solana.com?cluster=testnet',
+    nodeUrl: `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+    explorerUrl: 'https://explorer.solana.com?cluster=devnet',
   },
 };
 

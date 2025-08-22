@@ -498,8 +498,13 @@ export class SolanaAdapter extends BaseProtocolAdapter {
 
     const keypair = Keypair.fromSecretKey(Uint8Array.from(sender.secretKey!));
     tx.sign(keypair);
-    const sig = await conn.sendRawTransaction(tx.serialize(), { skipPreflight: false, preflightCommitment: 'confirmed' });
-    return { hash: sig };
+    try {
+      const sig = await conn.sendRawTransaction(tx.serialize(), { skipPreflight: false, preflightCommitment: 'confirmed' } as any);
+      return { hash: sig };
+    } catch (error: any) {
+      console.error(error);
+      throw error;
+    }
   }
 
   private normalizeTransaction(
@@ -517,6 +522,12 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     );
     const amountSol = Math.max(0, (lamportsSpentBySigner - feeLamports)) / LAMPORTS_PER_SOL;
     const accountKeys = tx?.transaction?.message?.accountKeys || [];
+    // Resolve per-account lamports delta for SOL system transfers
+    const accountOwnersBase58: string[] = accountKeys.map((k: any) => k?.toBase58?.());
+    const solDeltas = accountOwnersBase58.map((addr, idx) => ({
+      owner: addr,
+      deltaLamports: Number((postBalances[idx] || 0) - (preBalances[idx] || 0)),
+    }));
     const from = accountKeys?.[0] || undefined;
     // Try to detect recipient for simple transfers
     const to = (() => {
@@ -568,9 +579,30 @@ export class SolanaAdapter extends BaseProtocolAdapter {
         undefined as any,
       );
 
-      const recipientId = inc?.owner || to;
-      const senderId = dec?.owner || from;
-      const tokenAmount = Math.abs(inc?.delta || 0);
+      let recipientId: any = inc?.owner || to;
+      let senderId: any = dec?.owner || from;
+      let tokenAmount = Math.abs(inc?.delta || 0);
+
+      // Adjust perspective for the provided transaction owner
+      // Recipients should see only the amount they actually received
+      if (owner) {
+        const ownerStr = owner as string;
+        const ownerDelta = deltas.find((d) => d.owner === ownerStr)?.delta;
+        if (typeof ownerDelta === 'number' && Number.isFinite(ownerDelta)) {
+          if (ownerDelta > 0) {
+            tokenAmount = ownerDelta;
+            recipientId = ownerStr;
+            senderId = (dec?.owner) || senderId;
+          } else if (ownerDelta < 0) {
+            tokenAmount = Math.abs(ownerDelta);
+            senderId = ownerStr;
+            // keep recipientId as the main positive delta owner
+          }
+        }
+      }
+
+      const senderIdStr = typeof senderId === 'string' ? senderId : senderId?.toBase58?.();
+      const recipientIdStr = typeof recipientId === 'string' ? recipientId : recipientId?.toBase58?.();
 
       return {
         hash: signature,
@@ -580,13 +612,13 @@ export class SolanaAdapter extends BaseProtocolAdapter {
         microTime: tx?.blockTime ? tx.blockTime * 1000 : undefined,
         tx: {
           amount: tokenAmount,
-          senderId,
-          recipientId,
+          senderId: senderIdStr,
+          recipientId: recipientIdStr,
           contractId: mint,
           type: (Tag[Tag.ContractCallTx] as any),
           tag: Tag.ContractCallTx as any,
           arguments: [],
-          callerId: senderId as any,
+          callerId: senderIdStr as any,
           fee: feeLamports / LAMPORTS_PER_SOL,
         } as any,
       } as ITransaction;
@@ -607,6 +639,34 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       } catch (e) { /* NOOP */ }
     }
 
+    // Adjust SOL amount per transaction owner perspective (batch transfers)
+    let finalAmountSol = Number.isFinite(amountSol) ? amountSol : 0;
+    if (owner) {
+      const ownerStr = owner as string;
+      const ownerDeltaLamports = solDeltas.find((d) => d.owner === ownerStr)?.deltaLamports || 0;
+      if (ownerDeltaLamports > 0) {
+        // Recipient: show only what they received
+        finalAmountSol = ownerDeltaLamports / LAMPORTS_PER_SOL;
+        try {
+          sysRecipient = new PublicKey(ownerStr);
+        } catch (_) { /* NOOP */ }
+        // Best-effort sender detection from the most negative delta
+        const decSol = solDeltas.reduce(
+          (a: any, c: any) => (c.deltaLamports < (a?.deltaLamports || Infinity) ? c : a),
+          undefined as any,
+        );
+        if (decSol?.owner) {
+          try {
+            sysSender = new PublicKey(decSol.owner);
+          } catch (_) { /* NOOP */ }
+        }
+      } else if (ownerDeltaLamports < 0) {
+        // Sender: show total sent excluding fee
+        const sentAbs = Math.abs(ownerDeltaLamports);
+        finalAmountSol = Math.max(0, sentAbs - feeLamports) / LAMPORTS_PER_SOL;
+      }
+    }
+
     return {
       hash: signature,
       protocol: PROTOCOLS.solana,
@@ -614,14 +674,14 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       pending: false,
       microTime: tx?.blockTime ? tx.blockTime * 1000 : undefined,
       tx: {
-        amount: Number.isFinite(amountSol) ? amountSol : 0,
-        senderId: sysSender,
-        recipientId: sysRecipient,
-        contractId: isSystemTransfer ? SOL_CONTRACT_ID : (programIdBase58 || SOL_CONTRACT_ID),
+        amount: finalAmountSol,
+        senderId: sysSender.toBase58(),
+        recipientId: sysRecipient.toBase58(),
+        ...(!isSystemTransfer ? { contractId: (programIdBase58 || SOL_CONTRACT_ID) } : {}),
         type: (isContractCall ? (Tag[Tag.ContractCallTx] as any) : (Tag[Tag.SpendTx] as any)),
         tag: (isContractCall ? Tag.ContractCallTx : Tag.SpendTx),
         arguments: [],
-        callerId: isContractCall ? (sysSender as any) : ('' as any),
+        ...(isContractCall ? { callerId: sysSender } : {}),
         fee: feeLamports / LAMPORTS_PER_SOL,
       } as any,
     } as ITransaction;
@@ -721,6 +781,135 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     return tx;
   }
 
+  /**
+   * Build a single transaction with multiple SOL transfer instructions.
+   */
+  private async constructAndSignBatchTx(
+    amount: number,
+    recipients: string[],
+    options: { fromAccount: AccountAddress },
+  ): Promise<Transaction> {
+    const { getAccountByAddress } = useAccounts();
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.solana) {
+      throw new Error('Solana tx signing initiated from invalid account.');
+    }
+
+    const fromPubkey = new PublicKey(account.address as string);
+    const conn = this.getConnection();
+    const { blockhash } = await conn.getLatestBlockhash('finalized');
+    const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+    const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
+
+    recipients.forEach((r) => {
+      const toPubkey = new PublicKey(r as string);
+      tx.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
+    });
+
+    const keypair = Keypair.fromSecretKey(Uint8Array.from(account.secretKey!));
+    tx.sign(keypair);
+    return tx;
+  }
+
+  /**
+   * Send SOL to multiple recipients using as few transactions as possible.
+   * This method automatically chunks recipients to fit transaction size limits.
+   * Returns an array of hashes with the list of recipients included in each tx.
+   */
+  async spendBatch(
+    amount: number,
+    recipients: AccountAddress[],
+    options: { fromAccount: AccountAddress },
+  ): Promise<Array<{ hash: string; recipients: AccountAddress[] }>> {
+    const conn = this.getConnection();
+
+    const trySend = async (
+      list: AccountAddress[],
+    ): Promise<Array<{ hash: string; recipients: AccountAddress[] }>> => {
+      try {
+        const tx = await this.constructAndSignBatchTx(amount, list as string[], options);
+        // Preflight balance check: base fee and total lamports
+        try {
+          const feeInfo = await conn.getFeeForMessage(tx.compileMessage(), 'confirmed');
+          const feeLamports = Number(feeInfo?.value || 0);
+          const amountLamports = Math.round(amount * LAMPORTS_PER_SOL) * list.length;
+          const payer = tx.feePayer as PublicKey;
+          const payerBalance = await conn.getBalance(payer);
+          const required = amountLamports + feeLamports;
+          if (payerBalance < required) {
+            throw new Error(`Insufficient SOL to cover total ${required / LAMPORTS_PER_SOL} (amount + fees). Balance: ${payerBalance / LAMPORTS_PER_SOL}`);
+          }
+        } catch (_) { /* best-effort */ }
+
+        // Preflight rent check: prevent sending to program-owned accounts below rent-exempt
+        try {
+          const pubkeys = (list as string[]).map((r) => new PublicKey(r));
+          const infos = await conn.getMultipleAccountsInfo(pubkeys);
+          // Pre-compute rent-exempt minimum for unique data sizes
+          const uniqueSizes = Array.from(new Set(
+            infos
+              .filter((info) => info && !info.owner.equals(SystemProgram.programId))
+              .map((info) => info!.data?.length || 0)
+              .filter((len) => len > 0),
+          ));
+          const rentValues = await Promise.all(
+            uniqueSizes.map((size) => conn.getMinimumBalanceForRentExemption(size)),
+          );
+          const rentMap = new Map<number, number>(
+            uniqueSizes.map((size, idx) => [size, rentValues[idx]]),
+          );
+
+          for (let i = 0; i < infos.length; i += 1) {
+            const info = infos[i];
+            if (!info) {
+              // Non-existent: system transfer to new account is fine
+              // No rent requirement for zero-size system accounts
+              // eslint-disable-next-line no-continue
+              continue;
+            }
+            const isSystemOwned = info.owner.equals(SystemProgram.programId);
+            const dataLen = info.data?.length || 0;
+            if (!isSystemOwned && dataLen > 0) {
+              const required = rentMap.get(dataLen) || 0;
+              const perRecipientLamports = Math.round(amount * LAMPORTS_PER_SOL);
+              const afterTransfer = info.lamports + perRecipientLamports;
+              if (afterTransfer < required) {
+                throw new Error(
+                  `Recipient ${pubkeys[i].toBase58()} is a program account with `
+                  + `insufficient rent. After transfer: ${afterTransfer / LAMPORTS_PER_SOL} SOL, `
+                  + `Requires: ${required / LAMPORTS_PER_SOL} SOL to be rent-exempt`,
+                );
+              }
+            }
+          }
+        } catch (_) { /* best-effort */ }
+        const signature = await conn.sendRawTransaction(tx.serialize(), {
+          skipPreflight: false,
+          preflightCommitment: 'confirmed',
+        } as any);
+        return [{ hash: signature, recipients: list }];
+      } catch (error: any) {
+        console.error(error);
+        throw error;
+      }
+    };
+
+    // Conservative pre-chunking to reduce likelihood of oversize txs
+    const MAX_INSTRUCTIONS_PER_TX = 16;
+    const chunks: AccountAddress[][] = [];
+    for (let i = 0; i < recipients.length; i += MAX_INSTRUCTIONS_PER_TX) {
+      chunks.push(recipients.slice(i, i + MAX_INSTRUCTIONS_PER_TX));
+    }
+    const results: Array<{ hash: string; recipients: AccountAddress[] }> = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const c of chunks) {
+      // eslint-disable-next-line no-await-in-loop
+      const partial = await trySend(c);
+      results.push(...partial);
+    }
+    return results;
+  }
+
   override async spend(
     amount: number,
     recipient: AccountAddress,
@@ -729,11 +918,146 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const signed = await this.constructAndSignTx(amount, recipient as string, options);
     const conn = this.getConnection();
     const raw = signed.serialize();
-    const signature = await conn.sendRawTransaction(raw, {
-      skipPreflight: false,
-      preflightCommitment: 'confirmed',
-    } as any);
-    return { hash: signature };
+    try {
+      const signature = await conn.sendRawTransaction(raw, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      } as any);
+      return { hash: signature };
+    } catch (error: any) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send SPL token transfers in batch using minimal number of transactions.
+   * Will create recipient ATAs if missing. Automatically chunks to fit size limits.
+   */
+  async transferTokenBatch(
+    amount: string,
+    recipients: AccountAddress[],
+    contractId: AssetContractId,
+    options: { fromAccount: AccountAddress },
+  ): Promise<Array<{ hash: string; recipients: AccountAddress[] }>> {
+    const { getAccountByAddress } = useAccounts();
+    const sender = getAccountByAddress(options.fromAccount);
+    if (!sender || sender.protocol !== PROTOCOLS.solana) {
+      throw new Error('Solana token transfer initiated from invalid account.');
+    }
+
+    const conn = this.getConnection();
+    const mintPk = new PublicKey(contractId as string);
+    const ownerPk = new PublicKey(sender.address as string);
+
+    // Resolve decimals and owner token account once
+    let decimals = this.tokenListCache?.find((t) => t.contractId === contractId)?.decimals || 0;
+    if (!decimals) {
+      try {
+        const mintInfo = await conn.getParsedAccountInfo(mintPk);
+        // @ts-ignore
+        decimals = mintInfo?.value?.data?.parsed?.info?.decimals || 0;
+      } catch (e) { /* NOOP */ }
+    }
+    const rawAmount = BigInt(new BigNumber(amount || 0).shiftedBy(decimals).toFixed(0));
+    const ownerTokenAccount = (await conn.getParsedTokenAccountsByOwner(ownerPk, { mint: mintPk }))
+      .value?.[0]?.pubkey;
+    if (!ownerTokenAccount) {
+      throw new Error('Sender does not have the specified token account.');
+    }
+
+    const keypair = Keypair.fromSecretKey(Uint8Array.from(sender.secretKey!));
+
+    const trySend = async (
+      list: AccountAddress[],
+    ): Promise<Array<{ hash: string; recipients: AccountAddress[] }>> => {
+      try {
+        const { blockhash } = await conn.getLatestBlockhash('finalized');
+        const tx = new Transaction({ recentBlockhash: blockhash, feePayer: ownerPk });
+
+        // Prepare ATAs and build instructions; batch existence checks
+        const resolvedMeta = await Promise.all(list.map(async (r) => {
+          const recipientPk = new PublicKey(r as string);
+          const recipientAta = await getAssociatedTokenAddress(
+            mintPk,
+            recipientPk,
+            false,
+            SPL_TOKEN_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID,
+          );
+          return { recipientPk, recipientAta };
+        }));
+        const accountsInfo = await conn.getMultipleAccountsInfo(
+          resolvedMeta.map((x) => x.recipientAta),
+        );
+        const resolved = resolvedMeta.map(
+          (m, idx) => ({ ...m, hasAta: accountsInfo[idx] != null }),
+        );
+
+        resolved.forEach(({ recipientPk, recipientAta, hasAta }) => {
+          if (!hasAta) {
+            tx.add(createAssociatedTokenAccountInstruction(
+              ownerPk, // payer
+              recipientAta,
+              recipientPk,
+              mintPk,
+              SPL_TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID,
+            ));
+          }
+          tx.add(createTransferInstruction(
+            ownerTokenAccount,
+            recipientAta,
+            ownerPk,
+            rawAmount,
+            [],
+            SPL_TOKEN_PROGRAM_ID,
+          ));
+        });
+
+        // Preflight balance check: include fees + ATA rent if any
+        try {
+          const feeInfo = await conn.getFeeForMessage(tx.compileMessage(), 'confirmed');
+          const feeLamports = Number(feeInfo?.value || 0);
+          const missingCount = resolved.filter((r) => !r.hasAta).length;
+          const rentPerAta = missingCount > 0
+            ? await conn.getMinimumBalanceForRentExemption(165)
+            : 0;
+          const required = feeLamports + (missingCount * rentPerAta);
+          const payerBalance = await conn.getBalance(ownerPk);
+          if (payerBalance < required) {
+            throw new Error(
+              `Insufficient SOL to fund ${missingCount} new token account(s) and fees. `
+              + `Required: ${required / LAMPORTS_PER_SOL}, Balance: ${payerBalance / LAMPORTS_PER_SOL}`,
+            );
+          }
+        } catch (_) { /* best-effort */ }
+
+        tx.sign(keypair);
+        const sig = await conn.sendRawTransaction(
+          tx.serialize(),
+          { skipPreflight: false, preflightCommitment: 'confirmed' } as any,
+        );
+        return [{ hash: sig, recipients: list }];
+      } catch (error: any) {
+        console.error(error);
+        throw error;
+      }
+    };
+
+    const MAX_INSTRUCTIONS_PER_TX = 12; // Tokens may require extra ATA create instructions
+    const chunks: AccountAddress[][] = [];
+    for (let i = 0; i < recipients.length; i += MAX_INSTRUCTIONS_PER_TX) {
+      chunks.push(recipients.slice(i, i + MAX_INSTRUCTIONS_PER_TX));
+    }
+    const results: Array<{ hash: string; recipients: AccountAddress[] }> = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const c of chunks) {
+      // eslint-disable-next-line no-await-in-loop
+      const partial = await trySend(c);
+      results.push(...partial);
+    }
+    return results;
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {

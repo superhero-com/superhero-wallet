@@ -118,8 +118,6 @@ export default defineComponent({
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
     const { activeAccount } = useAccounts();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _unused = activeAccount;
     const { accountAssets } = useAccountAssetsList();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
@@ -142,13 +140,20 @@ export default defineComponent({
       handleAssetChange,
     } = useTransferSendForm({ transferData: props.transferData, getSelectedAssetValue });
     const recipientsCount = computed(() => formModel.value.addresses?.length || 1);
+    const recipientsRef = computed(() => formModel.value.addresses || []);
+    const selectedAssetContractId = computed(
+      () => formModel.value.selectedAsset?.contractId as (string | undefined),
+    );
     const {
       fee,
       maxFee,
       feeList,
       feeSelectedIndex,
       updateFeeList,
-    } = useSolFeeCalculation(recipientsCount);
+    } = useSolFeeCalculation(recipientsCount, activeAccount.value?.address, {
+      recipients: recipientsRef,
+      selectedAssetContractId,
+    });
 
     const shouldUseMaxAmount = ref(false);
 
@@ -209,10 +214,11 @@ export default defineComponent({
     });
 
     watch(
-      () => formModel.value.selectedAsset,
+      () => [formModel.value.selectedAsset, formModel.value.addresses],
       async () => {
         updateFeeList();
       },
+      { deep: true },
     );
 
     watch(
