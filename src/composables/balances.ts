@@ -67,7 +67,7 @@ export function useBalances() {
   );
 
   function getAccountBalance(protocol: Protocol, address: string) {
-    return balances.value[protocol][address] || new BigNumber(0);
+    return balances.value[protocol]?.[address] || new BigNumber(0);
   }
 
   async function updateBalances() {
