@@ -109,7 +109,6 @@ export default defineComponent({
     'select-account': (address: string) => true,
   },
   setup(props) {
-    console.log(props.accountsSelectOptions);
     const { isSeedBackedUp } = useUi();
 
     const showHeader = computed(() => props.accounts.length > 1 || props.forceHeader);
