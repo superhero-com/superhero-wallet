@@ -4,6 +4,7 @@
     v-if="viewComponentName"
     :page-did-enter="pageDidEnter"
     :page-will-enter="pageWillEnter"
+    :protocol="protocol"
   />
   <div v-else>
     <InfoBox
@@ -58,6 +59,7 @@ const views: Record<Protocol, ProtocolViewsConfig> = {
   aeternity: aeternityViews,
   bitcoin: bitcoinViews,
   ethereum: ethereumViews,
+  bnb: ethereumViews,
 };
 
 export default defineComponent({
@@ -95,6 +97,12 @@ export default defineComponent({
           activeNetwork.value.type,
         )?.protocol;
         if (ownerProtocol) {
+          const activeProtocol = activeAccount.value.protocol;
+          const isEvm = (p?: Protocol) => p === PROTOCOLS.ethereum || p === PROTOCOLS.bnb;
+          // If both are EVM-like and differ, prefer the current active account protocol
+          if (isEvm(ownerProtocol) && isEvm(activeProtocol) && ownerProtocol !== activeProtocol) {
+            return activeProtocol;
+          }
           return ownerProtocol;
         }
       }
@@ -141,6 +149,7 @@ export default defineComponent({
       componentToDisplay,
       pageDidEnter,
       pageWillEnter,
+      protocol,
     };
   },
 });

@@ -71,15 +71,27 @@ export default defineComponent({
      * Decides if the dropdown arrow is visible
      */
     hideArrow: Boolean,
+    /**
+     * Decides if the input is a protocol input to display the protocol icon
+     */
+    isProtocol: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
     // TODO AIRGAP: implement multiple accounts selection
     const { openModal } = useModals();
 
-    const currentText = computed(() => props.persistentDefaultText || !props.modelValue
-      ? props.defaultText
-      : props.options.find(({ value }) => value === props.modelValue)?.[props.itemTitle]);
+    const currentText = computed(() => {
+      if (props.persistentDefaultText || !props.modelValue) return props.defaultText;
+      const mv = String(props.modelValue);
+      // If account select and model value contains protocol:address, show only the address
+      if (props.accountSelect && mv.includes(':')) return mv.split(':').pop();
+      const opt = props.options.find(({ value }) => {
+        const v = String(value);
+        return v === mv || (props.accountSelect && v.endsWith(`:${mv}`));
+      });
+      return (opt?.[props.itemTitle] as any) ?? mv;
+    });
 
     function openOptionsModal() {
       openModal(props.accountSelect ? MODAL_ACCOUNT_SELECT_OPTIONS : MODAL_FORM_SELECT_OPTIONS, {
@@ -87,6 +99,7 @@ export default defineComponent({
         options: props.options,
         title: props.defaultText,
         hideSearch: true,
+        isProtocol: props.isProtocol,
       })
         .then((val) => {
           emit('select', val);
