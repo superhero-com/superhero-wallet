@@ -22,6 +22,7 @@ export const PROTOCOLS = {
   bnb: 'bnb',
   avalanche: 'avalanche',
   polygonPos: 'polygonPos',
+  dogecoin: 'dogecoin',
 } as const;
 export const EVM_PROTOCOLS: Protocol[] = [
   PROTOCOLS.ethereum, PROTOCOLS.bnb, PROTOCOLS.avalanche, PROTOCOLS.polygonPos,
