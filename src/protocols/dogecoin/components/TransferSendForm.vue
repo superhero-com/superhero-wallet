@@ -15,7 +15,7 @@
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.dogecoin })"
         :errors="errors"
         :protocol="PROTOCOLS.dogecoin"
-        :validation-rules="{ account_address: [PROTOCOLS.dogecoin] }"
+        :validation-rules="{ account_address: [PROTOCOLS.dogecoin, activeNetwork.type] }"
         @openQrModal="scanTransferQrCode()"
       />
     </template>
@@ -38,7 +38,7 @@ import {
   PropType,
 } from 'vue';
 import type { TransferFormModel } from '@/types';
-import { useAccounts, useBalances } from '@/composables';
+import { useAccounts, useBalances, useNetworks } from '@/composables';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { PROTOCOLS } from '@/constants';
 import { DOGE_PROTOCOL_NAME, DOGE_SYMBOL } from '@/protocols/dogecoin/config';
@@ -55,6 +55,7 @@ export default defineComponent({
   emits: ['update:transferData', 'success', 'error'],
   setup(props, { emit }) {
     const { balance } = useBalances();
+    const { activeNetwork } = useNetworks();
     const { activeAccount } = useAccounts();
 
     const {
@@ -89,6 +90,7 @@ export default defineComponent({
       DOGE_PROTOCOL_NAME,
       DOGE_SYMBOL,
       PROTOCOLS,
+      activeNetwork,
       balance,
       activeAccount,
       formModel,
