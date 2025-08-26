@@ -4,7 +4,7 @@
 // eslint-disable-next-line max-classes-per-file
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
-import { payments } from 'bitcoinjs-lib';
+import { networks, payments, Psbt, Transaction } from 'bitcoinjs-lib';
 import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import ECPairFactory from 'ecpair';
 
@@ -24,7 +24,7 @@ import type {
   IAccount,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
-import { ACCOUNT_TYPES, PROTOCOLS, NETWORK_TYPE_TESTNET } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS, NETWORK_TYPE_TESTNET, NETWORK_TYPE_MAINNET } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
@@ -291,14 +291,127 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
   }
 
   async constructAndSignTx(
-    _amountInDoge: number,
-    _recipient: string,
-    _options: { address: string; fee: number; publicKey: Buffer; secretKey: Buffer },
-  ): Promise<any> { throw new Error('Dogecoin transaction signing is not supported yet'); }
+    amountInDoge: number,
+    recipient: string,
+    options: { address: string; fee: number; publicKey: Buffer; secretKey: Buffer },
+  ): Promise<Transaction> {
+    const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
 
-  async spend(_amount: number, _recipient: string, _options: any): Promise<ITransferResponse> {
-    throw new Error('Dogecoin spend is not implemented');
+    const network = activeNetwork.value.type === NETWORK_TYPE_TESTNET
+      ? DogecoinAdapter.DOGE_TESTNET
+      : DogecoinAdapter.DOGE_MAINNET;
+
+    const amountInSatoshi = Math.round(amountInDoge * 1e8);
+    const feeInSatoshi = Math.round(options.fee * 1e8);
+
+    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
+    const fullUtxos = await Promise.all((utxos || []).map(async (u: any) => {
+      const { txid, vout, value } = u;
+      const hex = await fetch(`${nodeUrl}/tx/${txid}/hex`).then((r) => r.text());
+      return {
+        txid, vout, value, transactionInHex: hex,
+      };
+    }));
+
+    const sorted = fullUtxos.sort((a, b) => (
+      Math.abs(a.value - amountInSatoshi + feeInSatoshi)
+      - Math.abs(b.value - amountInSatoshi + feeInSatoshi)
+    ));
+
+    let total = 0;
+    let enough = false;
+    const psbt = new Psbt({ network: network as any });
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const {
+      txid, vout, value, transactionInHex,
+    } of sorted) {
+      if (enough) break;
+      const parsed = Transaction.fromHex(transactionInHex);
+      psbt.addInput({ hash: txid, index: vout, nonWitnessUtxo: Buffer.from(transactionInHex, 'hex') });
+      total += value;
+      if (total >= amountInSatoshi + feeInSatoshi) enough = true;
+    }
+
+    if (!enough) throw new Error('Insufficient balance');
+
+    psbt.addOutput({ address: recipient, value: amountInSatoshi });
+    const change = total - amountInSatoshi - feeInSatoshi;
+    if (change > 0) psbt.addOutput({ address: options.address, value: change });
+
+    const signer = ECPairFactory(ecc).fromPrivateKey(Buffer.from(options.secretKey));
+    for (let i = 0; i < psbt.inputCount; i += 1) psbt.signInput(i, signer);
+    psbt.finalizeAllInputs();
+    return psbt.extractTransaction();
   }
 
-  override waitTransactionMined(_hash: string): Promise<any> { return Promise.resolve(null); }
+  async spend(
+    amount: number,
+    recipient: string,
+    options: { address: string; fee: number; publicKey: Buffer; secretKey: Buffer },
+  ): Promise<ITransferResponse> {
+    const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
+    const raw = (await this.constructAndSignTx(amount, recipient, options)).toHex();
+    const res = await fetch(`${nodeUrl}/tx`, {
+      method: 'POST',
+      headers: new Headers({ 'Content-Type': 'text/plain' }),
+      body: raw,
+      redirect: 'follow' as RequestRedirect,
+    });
+    if (res.status !== 200) throw new Error(await res.text());
+    const txid = await res.text();
+    return { hash: txid };
+  }
+
+  override waitTransactionMined(hash: string): Promise<any> {
+    const TRANSACTION_POLLING_INTERVAL = 5000;
+    const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
+    return new Promise((resolve) => {
+      let attemptNo = 0;
+      const interval = setInterval(async () => {
+        attemptNo += 1;
+        const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
+        const tx = await this.fetchTransactionByHash(hash);
+        if (tx) {
+          clearInterval(interval);
+          return resolve(tx);
+        }
+        if (isLastAttempt) {
+          clearInterval(interval);
+          return resolve(null);
+        }
+        return null;
+      }, TRANSACTION_POLLING_INTERVAL);
+    });
+  }
+
+  private normalizeDogeTx(t: any, owner?: string): ITransaction {
+    const vin0 = t?.vin?.[0];
+    const vout0 = t?.vout?.[0];
+    const vout1 = t?.vout?.[1];
+    const amountOut = vout1 && vin0?.prevout?.scriptpubkey === vout1?.scriptpubkey
+      ? vout0?.value : (vout0?.value ?? 0);
+    const recipient = vout1 && vin0?.prevout?.scriptpubkey === vout1?.scriptpubkey
+      ? vout0?.scriptpubkey_address : vout1?.scriptpubkey_address || vout0?.scriptpubkey_address;
+    return {
+      protocol: PROTOCOLS.dogecoin,
+      transactionOwner: owner as any,
+      hash: t?.txid || t?.hash,
+      blockHeight: t?.status?.block_height,
+      microTime: t?.status?.block_time ? t.status.block_time * 1000 : undefined,
+      pending: !t?.status?.confirmed,
+      tx: {
+        amount: (amountOut || 0) / 1e8,
+        fee: ((t?.fee || 0) / 1e8),
+        senderId: vin0?.prevout?.scriptpubkey_address || '' as any,
+        recipientId: recipient || '' as any,
+        type: 'SpendTx',
+        arguments: [],
+        callerId: '' as any,
+        contractId: DOGE_CONTRACT_ID as any,
+      },
+    };
+  }
 }
