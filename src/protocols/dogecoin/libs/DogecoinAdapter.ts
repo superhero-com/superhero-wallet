@@ -285,22 +285,7 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
     const raw = await fetchJson(`${nodeUrl}/tx/${hash}`);
     const t = raw || {};
-    return {
-      protocol: PROTOCOLS.dogecoin,
-      transactionOwner: transactionOwner as any,
-      hash,
-      pending: false,
-      tx: {
-        amount: 0,
-        fee: 0,
-        senderId: (t.vin && t.vin[0]?.prevout?.scriptpubkey_address) || '' as any,
-        recipientId: (t.vout && t.vout[0]?.scriptpubkey_address) || '' as any,
-        type: 'SpendTx',
-        arguments: [],
-        callerId: '' as any,
-        contractId: DOGE_CONTRACT_ID as any,
-      },
-    } as ITransaction;
+    return normalizeTransactionStructure(t, transactionOwner, PROTOCOLS.dogecoin);
   }
 
   async constructAndSignTx(
@@ -397,33 +382,5 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
         return null;
       }, TRANSACTION_POLLING_INTERVAL);
     });
-  }
-
-  private normalizeDogeTx(t: any, owner?: string): ITransaction {
-    const vin0 = t?.vin?.[0];
-    const vout0 = t?.vout?.[0];
-    const vout1 = t?.vout?.[1];
-    const amountOut = vout1 && vin0?.prevout?.scriptpubkey === vout1?.scriptpubkey
-      ? vout0?.value : (vout0?.value ?? 0);
-    const recipient = vout1 && vin0?.prevout?.scriptpubkey === vout1?.scriptpubkey
-      ? vout0?.scriptpubkey_address : vout1?.scriptpubkey_address || vout0?.scriptpubkey_address;
-    return {
-      protocol: PROTOCOLS.dogecoin,
-      transactionOwner: owner as any,
-      hash: t?.txid || t?.hash,
-      blockHeight: t?.status?.block_height,
-      microTime: t?.status?.block_time ? t.status.block_time * 1000 : undefined,
-      pending: !t?.status?.confirmed,
-      tx: {
-        amount: (amountOut || 0) / 1e8,
-        fee: ((t?.fee || 0) / 1e8),
-        senderId: vin0?.prevout?.scriptpubkey_address || '' as any,
-        recipientId: recipient || '' as any,
-        type: 'SpendTx',
-        arguments: [],
-        callerId: '' as any,
-        contractId: DOGE_CONTRACT_ID as any,
-      },
-    };
   }
 }

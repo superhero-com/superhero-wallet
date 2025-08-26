@@ -15,7 +15,7 @@
         ref="currentRenderedComponent"
         v-model:transfer-data="transferData"
         @success="currentStepConfig.onSuccess"
-        @error="(val: any) => error = val"
+        @error="(val) => error = val"
       />
     </template>
   </TransferSendBase>
@@ -66,7 +66,7 @@ export default defineComponent({
       amount: props.amount,
       payload: props.payload,
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOLS.bitcoin)
+        .getAdapter(PROTOCOLS.dogecoin)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
