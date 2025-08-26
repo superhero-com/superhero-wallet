@@ -51,6 +51,7 @@ import aeternityViews from '@/protocols/aeternity/views';
 import bitcoinViews from '@/protocols/bitcoin/views';
 import ethereumViews from '@/protocols/ethereum/views';
 import solanaViews from '@/protocols/solana/views';
+import dogecoinViews from '@/protocols/dogecoin/views';
 
 import InfoBox from './InfoBox.vue';
 
@@ -63,6 +64,7 @@ const views: Record<Protocol, ProtocolViewsConfig> = {
   ethereum: ethereumViews,
   solana: solanaViews,
   bnb: ethereumViews,
+  dogecoin: dogecoinViews,
 };
 
 export default defineComponent({
