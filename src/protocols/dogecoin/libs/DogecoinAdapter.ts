@@ -4,7 +4,11 @@
 // eslint-disable-next-line max-classes-per-file
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
-import { networks, payments, Psbt, Transaction } from 'bitcoinjs-lib';
+import {
+  payments,
+  Psbt,
+  Transaction,
+} from 'bitcoinjs-lib';
 import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import ECPairFactory from 'ecpair';
 
@@ -24,7 +28,11 @@ import type {
   IAccount,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
-import { ACCOUNT_TYPES, PROTOCOLS, NETWORK_TYPE_TESTNET, NETWORK_TYPE_MAINNET } from '@/constants';
+import {
+  ACCOUNT_TYPES,
+  PROTOCOLS,
+  NETWORK_TYPE_TESTNET,
+} from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
@@ -156,15 +164,20 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     return (sat / 1e8).toString();
   }
 
-  override isAccountAddressValid(address: string) {
+  override isAccountAddressValid(address: string, networkType?: NetworkTypeDefault) {
     try {
-      toOutputScript(address, DogecoinAdapter.DOGE_MAINNET as any);
+      toOutputScript(
+        address,
+        networkType === NETWORK_TYPE_TESTNET
+          ? DogecoinAdapter.DOGE_TESTNET
+          : DogecoinAdapter.DOGE_MAINNET,
+      );
       return true;
-    } catch (_e) { return false; }
+    } catch (_eTest) { return false; }
   }
 
-  override isValidAddressOrNameEncoding(address: string) {
-    return this.isAccountAddressValid(address);
+  override isValidAddressOrNameEncoding(address: string, networkType?: NetworkTypeDefault) {
+    return this.isAccountAddressValid(address, networkType);
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
@@ -328,7 +341,6 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       txid, vout, value, transactionInHex,
     } of sorted) {
       if (enough) break;
-      const parsed = Transaction.fromHex(transactionInHex);
       psbt.addInput({ hash: txid, index: vout, nonWitnessUtxo: Buffer.from(transactionInHex, 'hex') });
       total += value;
       if (total >= amountInSatoshi + feeInSatoshi) enough = true;
