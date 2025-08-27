@@ -17,7 +17,7 @@ export const BNB_MDW_TO_NODE_APPROX_DELAY_TIME = 30000;
 
 export const BNB_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<any> = {
   [NETWORK_TYPE_MAINNET]: {
-    nodeUrl: 'https://bsc-dataseed.bnbchain.org/',
+    nodeUrl: 'https://bsc-dataseed.binance.org/',
     chainId: '56',
   },
   [NETWORK_TYPE_TESTNET]: {

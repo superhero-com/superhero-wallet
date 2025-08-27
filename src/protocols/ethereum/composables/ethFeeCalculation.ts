@@ -85,19 +85,19 @@ export function useEthFeeCalculation(
       {
         fee: defaultGasPrice.value
           .multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.slow).multipliedBy(gasLimit.value),
-        time: 300,
+        time: 16,
         label: tg('common.transferSpeed.slow'),
       },
       {
         fee: defaultGasPrice.value
           .multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.medium).multipliedBy(gasLimit.value),
-        time: 180,
+        time: 8,
         label: tg('common.transferSpeed.medium'),
       },
       {
         fee: defaultGasPrice.value
           .multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.fast).multipliedBy(gasLimit.value),
-        time: 30,
+        time: 3,
         label: tg('common.transferSpeed.fast'),
       },
     ];

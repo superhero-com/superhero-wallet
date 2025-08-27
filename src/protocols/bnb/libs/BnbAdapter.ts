@@ -301,7 +301,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
     from,
     data = '0x',
     value,
-    gas,
   }: any = {}): Promise<ITransferResponse> {
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByAddress } = useAccounts();
@@ -326,17 +325,12 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
     const web3Eth = this.getWeb3EthInstance();
     const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const providedGasPriceWei = BigInt(toWei(maxFeePerGas.value.toString(), 'gwei'));
-    const floorGwei = Number(chainId) === 56 ? 5 : 3; // mainnet/testnet
-    const floorWei = BigInt(toWei(String(floorGwei), 'gwei'));
-    const gasPriceWei = [providedGasPriceWei, BigInt(nodeGasPriceWei), floorWei]
-      .reduce((a, b) => (a > b ? a : b));
-    const gasPrice = bigIntToHex(gasPriceWei);
+    const gasPrice = bigIntToHex(nodeGasPriceWei);
 
     const txData: TxData = {
       nonce,
       gasPrice,
-      gasLimit: typeof gas === 'string' ? gas : toHex(gas?.toString() ?? '21000'),
+      gasLimit: toHex(String(BNB_GAS_LIMIT)),
       to,
       value,
       data,
@@ -583,17 +577,12 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const { nonce } = options;
     const { chainId } = bnbActiveNetworkSettings.value;
 
+    const web3Eth = this.getWeb3EthInstance();
+    const nodeGasPriceWei = await web3Eth.getGasPrice();
+    const gasPrice = bigIntToHex(nodeGasPriceWei);
+
     const hexAmount = bigIntToHex(
       BigInt(toWei(amount.toFixed(BNB_COIN_PRECISION), 'ether')),
-    );
-    const floorGwei = Number(chainId) === 56 ? 5 : 3;
-    const gasPrice = bigIntToHex(
-      BigInt(
-        toWei(
-          String(Math.max(Number(options.maxFeePerGas ?? 3), floorGwei)),
-          'gwei',
-        ),
-      ),
     );
 
     const txData: TxData = {

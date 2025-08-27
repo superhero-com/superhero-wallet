@@ -93,7 +93,7 @@ import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCal
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
-import { executeAndSetInterval } from '@/utils';
+import { executeAndSetInterval, isEvm } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   ETH_COIN_PRECISION,
@@ -219,8 +219,7 @@ export default defineComponent({
     async function getTransferGasLimit() {
       const amount = new BigNumber(formModel.value.amount!);
       if (
-        props.transferData.selectedAsset?.contractId !== 'ethereum'
-        && props.transferData.selectedAsset?.contractId !== 'bnb'
+        !isEvm(props.transferData.selectedAsset?.contractId as Protocol)
         && amount.gt(0)
         && formModel.value.addresses?.length
       ) {
