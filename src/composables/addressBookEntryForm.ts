@@ -7,7 +7,7 @@ import { useForm } from 'vee-validate';
 import { IAddressBookEntry } from '@/types';
 
 interface UseAddressBookEntryForm {
-  addressBookEntryData: Partial<IAddressBookEntry>;
+  addressBookEntryData: Partial<Omit<IAddressBookEntry, 'protocol'>>;
 }
 
 export function useAddressBookEntryForm({

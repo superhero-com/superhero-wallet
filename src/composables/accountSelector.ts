@@ -18,6 +18,7 @@ import {
   createCustomScopedComposable,
   excludeFalsy,
   getDefaultAccountLabel,
+  isEvm,
 } from '@/utils';
 import {
   useAccounts,
@@ -160,6 +161,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
       ).map( // Add flag for own addresses
         (entry) => ({
           ...entry,
+          protocol: isEvm(entry.protocol) ? protocolFilter.value ?? entry.protocol : entry.protocol,
           isOwnAddress: ownAddresses.value.some(
             (account) => account.address === entry.address,
           ) || multisigAccounts.value.some(

@@ -44,6 +44,7 @@ import type {
 } from '@/types';
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOLS } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
+import { isEvm } from '@/utils';
 import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -101,7 +102,6 @@ export default defineComponent({
         )?.protocol;
         if (ownerProtocol) {
           const activeProtocol = activeAccount.value.protocol;
-          const isEvm = (p?: Protocol) => p === PROTOCOLS.ethereum || p === PROTOCOLS.bnb;
           // If both are EVM-like and differ, prefer the current active account protocol
           if (isEvm(ownerProtocol) && isEvm(activeProtocol) && ownerProtocol !== activeProtocol) {
             return activeProtocol;

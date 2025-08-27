@@ -14,6 +14,7 @@ import {
   selectFiles,
   pipe,
   exportFile,
+  isEvm,
 } from '@/utils';
 import { tg as t } from '@/popup/plugins/i18n';
 
@@ -23,7 +24,6 @@ import { useModals } from './modals';
 interface IAddressBookOptions {
   name: string;
   address: AccountAddress;
-  protocol?: Protocol;
   isBookmarked?: boolean;
 }
 
@@ -40,9 +40,13 @@ export const useAddressBook = createCustomScopedComposable(() => {
     return showBookmarked.value ? entries.filter((entry) => entry.isBookmarked) : entries;
   }
   function filterAddressBookByProtocol(entries: IAddressBookEntry[]) {
-    return protocolFilter.value
-      ? entries.filter((entry) => entry.protocol === protocolFilter.value)
-      : entries;
+    if (!protocolFilter.value) return entries;
+
+    const protocol = protocolFilter.value;
+    if (isEvm(protocol)) {
+      return entries.filter((e) => isEvm(e.protocol));
+    }
+    return entries.filter((e) => e.protocol === protocol);
   }
   function filterAddressBookBySearchPhrase(entries: IAddressBookEntry[]) {
     const searchQueryLower = searchQuery.value.toLowerCase();
@@ -106,12 +110,7 @@ export const useAddressBook = createCustomScopedComposable(() => {
    * Passing a savedEntryAddress will update the entry instead of adding a new one
    */
   function addAddressBookEntry(
-    {
-      name,
-      address,
-      isBookmarked,
-      protocol: formProtocol,
-    }: IAddressBookOptions,
+    { name, address, isBookmarked }: IAddressBookOptions,
     savedEntryAddress?: AccountAddress,
   ) {
     if (!name || !address) {
@@ -122,7 +121,7 @@ export const useAddressBook = createCustomScopedComposable(() => {
       throw new AddressBookEntryExists();
     }
 
-    const protocol = formProtocol || getProtocolByAddress(address);
+    const protocol = getProtocolByAddress(address);
     if (!protocol) {
       throw new AddressBookInvalidAddress();
     }

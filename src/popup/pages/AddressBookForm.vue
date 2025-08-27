@@ -106,24 +106,6 @@
               </template>
             </FormTextarea>
           </Field>
-
-          <Field
-            v-slot="{ field }"
-            v-if="isEVMAddress"
-            name="protocol"
-            :model-value="formModel.protocol"
-            :rules="{ required: true }"
-          >
-            <FormSelect
-              v-bind="field"
-              :model-value="formModel.protocol"
-              :options="protocolOptions"
-              :default-text="$t('pages.account.selectProtocol')"
-              :label="$t('common.network')"
-              is-protocol
-              @update:modelValue="(v) => { formModel.protocol = v }"
-            />
-          </Field>
         </div>
       </div>
     </IonContent>
@@ -180,7 +162,6 @@ import BtnPill from '@/popup/components/buttons/BtnPill.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
-import FormSelect from '@/popup/components/form/FormSelect.vue';
 import QrCode from '@/popup/components/QrCode.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
 import FixedScreenFooter from '@/popup/components/FixedScreenFooter.vue';
@@ -189,8 +170,6 @@ import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import FavoriteIcon from '@/icons/star-full.svg?vue-component';
 import TrashIcon from '@/icons/trash.svg?vue-component';
 import { getProtocolByAddress } from '@/utils';
-import { PROTOCOL_LIST, PROTOCOLS } from '@/constants';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   components: {
@@ -201,7 +180,6 @@ export default defineComponent({
     BtnMain,
     BtnPill,
     BtnIcon,
-    FormSelect,
     QrCode,
     IconWrapper,
     FixedScreenFooter,
@@ -226,12 +204,6 @@ export default defineComponent({
     const { formModel, hasError, updateFormModelValues } = useAddressBookEntryForm(
       { addressBookEntryData: {} },
     );
-    const protocolOptions = computed(() => PROTOCOL_LIST.filter(
-      (p) => p === PROTOCOLS.ethereum || p === PROTOCOLS.bnb,
-    ).map((p) => ({
-      text: ProtocolAdapterFactory.getAdapter(p).protocolName,
-      value: p,
-    })));
 
     const accountName = computed(() => isPlaceholder.value ? defaultName : formModel.value.name);
     const accountAddress = computed(
@@ -240,13 +212,6 @@ export default defineComponent({
     const protocol = computed(
       () => formModel.value.address ? getProtocolByAddress(formModel.value.address) : undefined,
     );
-    const isEVMAddress = computed(() => {
-      if (!formModel.value.address) {
-        return false;
-      }
-      const protocolByAddress = getProtocolByAddress(formModel.value.address);
-      return protocolByAddress === PROTOCOLS.ethereum || protocolByAddress === PROTOCOLS.bnb;
-    });
     const account = computed(() => ({
       name: accountName.value,
       address: accountAddress.value,
@@ -259,9 +224,6 @@ export default defineComponent({
 
     function confirm() {
       if (!hasError.value) {
-        if (!isEVMAddress.value) {
-          formModel.value.protocol = undefined; // It will be calculated based on the address
-        }
         addAddressBookEntry(formModel.value as IAddressBookEntry, savedEntry.value.address);
         goBack();
       }
@@ -330,14 +292,14 @@ export default defineComponent({
       addressBook,
       savedEntry,
       hasError,
-      protocolOptions,
+
       scanQr,
       goBack,
       confirm,
       deleteEntry,
       toggleBookmark,
       shareAddress,
-      isEVMAddress,
+
       FavoriteIcon,
       QrScanIcon,
       TrashIcon,
