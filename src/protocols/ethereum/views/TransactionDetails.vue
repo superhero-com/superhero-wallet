@@ -128,7 +128,7 @@ export default defineComponent({
 
     const { setLoaderVisible } = useUi();
     const { activeAccount } = useAccounts();
-    const { accountsTransactionsPending } = useLatestTransactionList();
+    const { accountsTransactionsPending, allLatestTransactions } = useLatestTransactionList();
     const {
       amountTotal,
       transactionAssets,
@@ -177,7 +177,18 @@ export default defineComponent({
 
     onMounted(async () => {
       const rawTransaction = await (async (): Promise<ICommonTransaction | null> => {
-        // First try to pick the cached transaction.
+        // First try to pick the transaction from global cache (most reliable)
+        const globalTransaction = allLatestTransactions.value.find((tx) => tx.hash === hash);
+
+        if (globalTransaction) {
+          // Ensure we're using the correct protocol from the transaction itself
+          if (globalTransaction.protocol !== props.protocol) {
+            console.warn(`Protocol mismatch: transaction is ${globalTransaction.protocol}, but component expects ${props.protocol}`);
+          }
+          return globalTransaction;
+        }
+
+        // Then try the protocol-specific cache
         const loadedTransaction = transactionsLoaded.value.find((tx) => tx.hash === hash);
 
         const isCallDataDeprecated = (
