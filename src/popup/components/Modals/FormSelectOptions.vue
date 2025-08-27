@@ -19,7 +19,6 @@
         v-for="(option, index) in optionsFiltered"
         :key="index"
         :option="option"
-        :is-protocol="isProtocol"
         @click="resolve(option.value)"
       />
     </div>
@@ -51,7 +50,6 @@ export default defineComponent({
     title: { type: String, default: null },
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
-    isProtocol: { type: Boolean, default: false },
   },
   setup(props) {
     const searchPhrase = ref('');

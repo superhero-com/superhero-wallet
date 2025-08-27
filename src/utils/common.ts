@@ -32,6 +32,7 @@ import type {
   ITokenResolved,
   ITransaction,
   ObjectValues,
+  Protocol,
   StorageKeysInput,
   Truthy,
 } from '@/types';
@@ -738,3 +739,6 @@ export function getActivityHash(activity: any) {
     ?? activity?.payload?.refTxHash
   );
 }
+
+export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb];
+export const isEvm = (p?: Protocol | null) => !!p && EVM_PROTOCOLS.includes(p);

@@ -71,10 +71,6 @@ export default defineComponent({
      * Decides if the dropdown arrow is visible
      */
     hideArrow: Boolean,
-    /**
-     * Decides if the input is a protocol input to display the protocol icon
-     */
-    isProtocol: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
@@ -99,7 +95,6 @@ export default defineComponent({
         options: props.options,
         title: props.defaultText,
         hideSearch: true,
-        isProtocol: props.isProtocol,
       })
         .then((val) => {
           emit('select', val);
