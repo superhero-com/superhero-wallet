@@ -42,6 +42,7 @@ import {
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
+  EVM_PROTOCOLS,
   IS_MOBILE_APP,
   LOCAL_STORAGE_PREFIX,
   NETWORK_TYPE_MAINNET,
@@ -740,5 +741,4 @@ export function getActivityHash(activity: any) {
   );
 }
 
-export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb];
 export const isEvm = (p?: Protocol | null) => !!p && EVM_PROTOCOLS.includes(p);
