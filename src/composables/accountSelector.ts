@@ -122,17 +122,27 @@ export const useAccountSelector = createCustomScopedComposable(() => {
       .filter(excludeFalsy),
   );
   const ownAddresses = computed(
-    () => (protocolFilter.value)
-      ? (accountsGroupedByProtocol.value[protocolFilter.value] ?? []).map((account) => (
-        {
+    () => {
+      // When viewing "All" or no protocol filter, include accounts from all protocols
+      if (!protocolFilter.value || accountSelectType.value === ACCOUNT_SELECT_TYPE_FILTER.all) {
+        return Object.values(accountsGroupedByProtocol.value).flat().map((account) => ({
           name: getName(account.address).value || getDefaultAccountLabel(account),
           address: account.address,
           isBookmarked: false,
-          protocol: protocolFilter.value ?? PROTOCOLS.aeternity,
+          protocol: account.protocol,
           type: account.type,
-        }
-      ))
-      : [],
+        }));
+      }
+
+      // When filtering by specific protocol, only show accounts from that protocol
+      return (accountsGroupedByProtocol.value[protocolFilter.value] ?? []).map((account) => ({
+        name: getName(account.address).value || getDefaultAccountLabel(account),
+        address: account.address,
+        isBookmarked: false,
+        protocol: protocolFilter.value ?? PROTOCOLS.aeternity,
+        type: account.type,
+      }));
+    },
   );
   const accountsFilteredByType = computed(() => {
     switch (accountSelectType.value) {

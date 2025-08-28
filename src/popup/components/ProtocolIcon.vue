@@ -99,7 +99,7 @@ export default defineComponent({
     return {
       selectedIcon,
       isEvmProtocol,
-      evmIcons: evmIcons.value.concat(evmIcons.value),
+      evmIcons,
     };
   },
 });
