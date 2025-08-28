@@ -11,6 +11,7 @@
               :is-placeholder="isPlaceholder"
               :avatar-borderless="isPlaceholder"
               :show-protocol-icon="!isPlaceholder"
+              :show-super-icon="!isPlaceholder"
               :show-explorer-link="!isPlaceholder"
             />
             <Field

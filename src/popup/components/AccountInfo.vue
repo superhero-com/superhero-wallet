@@ -58,6 +58,7 @@
             :address="address"
             :protocol="account.protocol"
             :show-protocol-icon="showProtocolIcon"
+            :show-super-icon="showSuperIcon"
             :show-explorer-link="showExplorerLink"
             :hide-address="!!nameAddress"
           />
@@ -108,6 +109,7 @@ export default defineComponent({
     isListName: Boolean,
     isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
+    showSuperIcon: Boolean,
     dense: Boolean,
     showExplorerLink: Boolean,
     nameAddress: { type: String as PropType<Encoded.Name>, default: undefined },
