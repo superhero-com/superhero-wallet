@@ -52,7 +52,7 @@ const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.md, ICON_SIZES.lg, ICON_
 
 export type AllowedAssetIconSize = typeof SIZES[number];
 
-const COIN_ICONS: Record<Protocol, Component> = {
+export const COIN_ICONS: Record<Protocol, Component> = {
   [PROTOCOLS.aeternity]: AeternityIcon,
   [PROTOCOLS.bitcoin]: BitcoinIcon,
   [PROTOCOLS.ethereum]: EthereumIcon,

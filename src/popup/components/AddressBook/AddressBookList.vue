@@ -56,6 +56,7 @@
             :custom-name="name"
             :name-address="nameAddress"
             show-protocol-icon
+            :show-super-icon="true"
           />
         </PanelItem>
       </div>
