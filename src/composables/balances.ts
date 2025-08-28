@@ -51,7 +51,8 @@ export function useBalances() {
   const { getCurrentCurrencyRate } = useCurrencies();
 
   const balance = computed(() => (
-    balances.value[activeAccount.value.protocol][activeAccount.value.address] || new BigNumber(0)));
+    balances.value[activeAccount.value.protocol]?.[activeAccount.value.address]
+    || new BigNumber(0)));
 
   const accountsTotalBalance = computed(
     () => accounts.value.reduce(
