@@ -20,10 +20,6 @@
       v-if="evmIcons.length > maxVisibleIcons"
       class="icon protocol-icon evm-more-indicator"
       :class="[iconSize]"
-      :style="{
-        marginLeft: '-10px',
-        zIndex: 0,
-      }"
     >
       &middot;&middot;&middot;
     </span>
@@ -145,11 +141,13 @@ export default defineComponent({
     background-color: #464646;
     border-radius: 50%;
     font-size: 12px;
+    margin-left: -10px;
     width: var(--icon-size-sm) !important;
     height: var(--icon-size-sm) !important;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 0;
   }
 }
 </style>
