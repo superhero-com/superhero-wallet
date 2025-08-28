@@ -84,7 +84,7 @@ export default defineComponent({
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { getMultisigAccountByAccountId, getMultisigIAccountByAccountId } = useMultisigAccounts();
 
-    const [proto, address] = String(props.option.value).split(':');
+    const [protocol, address] = String(props.option.value).split(':');
 
     const multisigAccount = computed(() => (
       getMultisigAccountByAccountId(address)
@@ -97,7 +97,7 @@ export default defineComponent({
     const account = computed(() => (
       props.customAccount
       ?? multisigIAccount.value
-      ?? getAccountByProtocolAndAddress(proto as Protocol, address)
+      ?? getAccountByProtocolAndAddress(protocol as Protocol, address)
     ));
 
     const isMultisig = computed(() => !!multisigAccount.value);
