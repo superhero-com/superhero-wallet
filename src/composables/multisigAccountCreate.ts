@@ -165,7 +165,7 @@ export function useMultisigAccountCreate() {
     multisigAccountCreationFee.value = +aettosToAe(creationFeeUnformatted);
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.signed;
     notEnoughBalanceToCreateMultisig.value = (
-      balances.value[PROTOCOLS.aeternity][payerId]?.isLessThan(multisigAccountCreationFee.value)
+      balances.value[PROTOCOLS.aeternity]?.[payerId]?.isLessThan(multisigAccountCreationFee.value)
     );
   }
 

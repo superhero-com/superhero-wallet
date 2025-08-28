@@ -49,6 +49,7 @@ export default defineComponent({
     const { getName, getNameByNameHash } = useAeNames();
 
     const name = ref('');
+    const ownershipAccount = ref<IAccountOverview>({} as IAccountOverview);
     const protocol = computed(() => props.transaction.protocol || PROTOCOLS.aeternity);
     const adapter = ProtocolAdapterFactory.getAdapter(protocol.value);
     const protocolExplorer = adapter.getExplorer();
@@ -59,6 +60,7 @@ export default defineComponent({
       innerTxTag,
       outerTxTag,
       direction,
+      getOwnershipAddress,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
@@ -83,41 +85,28 @@ export default defineComponent({
         callerId,
       } = innerTx.value;
 
-      // Handle Aeternity-specific transaction types
-      if (protocol.value === PROTOCOLS.aeternity) {
-        if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
-          return {
-            sender: {
-              address: innerTx.value.ownerId,
-              name: getName(innerTx.value.ownerId).value,
-              url: protocolExplorer.prepareUrlForAccount(innerTx.value.ownerId),
-              label: t('multisig.multisigVault'),
-            },
-            recipient: {
-              label: t('common.smartContract'),
-              address: innerTx.value.contractId,
-            },
-          };
-        }
+      if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
+        return {
+          sender: {
+            address: innerTx.value.ownerId,
+            name: getName(innerTx.value.ownerId).value,
+            url: protocolExplorer.prepareUrlForAccount(innerTx.value.ownerId),
+            label: t('multisig.multisigVault'),
+          },
+          recipient: {
+            label: t('common.smartContract'),
+            address: innerTx.value.contractId,
+          },
+        };
+      }
 
-        if (outerTxTag.value === Tag.GaMetaTx) {
-          return {
-            sender: {
-              address: innerTx.value.gaId,
-              name: getName(innerTx.value.gaId).value,
-              url: protocolExplorer.prepareUrlForAccount(innerTx.value.gaId),
-              label: t('multisig.multisigVault'),
-            },
-            recipient: {
-              address: recipientId,
-              name: name.value || getName(recipientId).value,
-              url: protocolExplorer.prepareUrlForAccount(recipientId),
-              label: t('transaction.overview.accountAddress'),
-            },
-          };
-        }
+      const transactionTag = (
+        outerTxTag.value === Tag.PayingForTx
+        || outerTxTag.value === Tag.GaMetaTx
+      ) ? innerTxTag.value : outerTxTag.value;
 
-        if (outerTxTag.value === Tag.SpendTx) {
+      switch (transactionTag) {
+        case Tag.SpendTx:
           return {
             sender: {
               address: senderId,
@@ -132,9 +121,8 @@ export default defineComponent({
               label: t('transaction.overview.accountAddress'),
             },
           };
-        }
 
-        if (outerTxTag.value === Tag.ContractCallTx) {
+        case Tag.ContractCallTx: {
           const contract: IAccountOverview = {
             address: contractId,
             url: protocolExplorer.prepareUrlForHash(contractId),
@@ -142,6 +130,23 @@ export default defineComponent({
               ? t('transaction.overview.superheroDex')
               : t('common.smartContract'),
           };
+
+          if (isEvm(protocol.value)) {
+            return {
+              sender: {
+                address: senderId,
+                name: '', // EVM protocols don't have names like Aeternity
+                url: protocolExplorer.prepareUrlForAccount(senderId),
+                label: t('transaction.overview.accountAddress'),
+              },
+              recipient: {
+                address: recipientId,
+                name: '', // EVM protocols don't have names like Aeternity
+                url: protocolExplorer.prepareUrlForAccount(recipientId),
+                label: t('common.smartContract'),
+              },
+            };
+          }
 
           let transactionOwner;
           let transactionReceiver = contract;
@@ -162,98 +167,86 @@ export default defineComponent({
 
           return {
             sender: direction.value === TX_DIRECTION.sent
-              ? {
-                address: senderId,
-                name: getName(senderId).value,
-                url: protocolExplorer.prepareUrlForAccount(senderId),
-                label: t('transaction.overview.accountAddress'),
-              }
+              ? ownershipAccount.value
               : transactionReceiver,
             recipient: direction.value === TX_DIRECTION.received
-              ? transactionOwner ?? {
-                address: senderId,
-                name: getName(senderId).value,
-                url: protocolExplorer.prepareUrlForAccount(senderId),
-                label: t('transaction.overview.accountAddress'),
-              }
+              ? transactionOwner ?? ownershipAccount.value
               : contract,
           };
         }
 
-        if (outerTxTag.value === Tag.ContractCreateTx) {
+        case Tag.ContractCreateTx:
           return {
-            sender: {
-              address: senderId,
-              name: getName(senderId).value,
-              url: protocolExplorer.prepareUrlForAccount(senderId),
-              label: t('transaction.overview.accountAddress'),
-            },
+            sender: ownershipAccount.value,
             recipient: {
               label: t('transaction.overview.contractCreate'),
             },
           };
-        }
 
-        if (outerTxTag.value === Tag.NamePreclaimTx
-          || outerTxTag.value === Tag.NameClaimTx
-          || outerTxTag.value === Tag.NameUpdateTx
-        ) {
+        case Tag.NamePreclaimTx:
+        case Tag.NameClaimTx:
+        case Tag.NameUpdateTx:
           return {
-            sender: {
-              address: senderId,
-              name: getName(senderId).value,
-              url: protocolExplorer.prepareUrlForAccount(senderId),
-              label: t('transaction.overview.accountAddress'),
-            },
+            sender: ownershipAccount.value,
             recipient: {
               label: t('transaction.overview.aens'),
             },
           };
-        }
+
+        default:
+          // Handle EVM string-based transaction types
+          if (isEvm(protocol.value)) {
+            const txType = props.transaction.tx?.type;
+
+            if (txType === 'SpendTx') {
+              return {
+                sender: {
+                  address: senderId,
+                  name: '', // EVM protocols don't have names like Aeternity
+                  url: protocolExplorer.prepareUrlForAccount(senderId),
+                  label: t('transaction.overview.accountAddress'),
+                },
+                recipient: getTransactionParty(recipientId),
+              };
+            }
+
+            if (txType === 'ContractCallTx') {
+              return {
+                sender: {
+                  address: senderId,
+                  name: '', // EVM protocols don't have names like Aeternity
+                  url: protocolExplorer.prepareUrlForAccount(senderId),
+                  label: t('transaction.overview.accountAddress'),
+                },
+                recipient: {
+                  address: recipientId,
+                  name: '', // EVM protocols don't have names like Aeternity
+                  url: protocolExplorer.prepareUrlForAccount(recipientId),
+                  label: t('common.smartContract'),
+                },
+              };
+            }
+          }
+
+          throw new Error(`Unsupported transaction type ${outerTxTag.value || props.transaction.tx?.type} for protocol ${protocol.value}`);
       }
-
-      // Handle EVM string-based transaction types
-      if (isEvm(protocol.value)) {
-        const txType = props.transaction.tx?.type;
-
-        if (txType === 'SpendTx') {
-          return {
-            sender: {
-              address: senderId,
-              name: '', // EVM protocols don't have names like Aeternity
-              url: protocolExplorer.prepareUrlForAccount(senderId),
-              label: t('transaction.overview.accountAddress'),
-            },
-            recipient: getTransactionParty(recipientId),
-          };
-        }
-
-        if (txType === 'ContractCallTx') {
-          return {
-            sender: {
-              address: senderId,
-              name: '', // EVM protocols don't have names like Aeternity
-              url: protocolExplorer.prepareUrlForAccount(senderId),
-              label: t('transaction.overview.accountAddress'),
-            },
-            recipient: {
-              address: recipientId,
-              name: '', // EVM protocols don't have names like Aeternity
-              url: protocolExplorer.prepareUrlForAccount(recipientId),
-              label: t('common.smartContract'),
-            },
-          };
-        }
-      }
-
-      // Default fallback for unsupported transaction types
-      throw new Error(`Unsupported transaction type ${outerTxTag.value || props.transaction.tx?.type} for protocol ${protocol.value}`);
     });
 
     onMounted(async () => {
       if (protocol.value === PROTOCOLS.aeternity) {
         if (innerTx.value.recipientId?.startsWith('nm_')) {
           name.value = await getNameByNameHash(innerTx.value.recipientId);
+        }
+
+        // Initialize ownership account for Aeternity
+        const address = getOwnershipAddress();
+        if (address) {
+          ownershipAccount.value = {
+            address,
+            name: getName(address).value,
+            label: t('transaction.overview.accountAddress'),
+            url: protocolExplorer.prepareUrlForAccount(address),
+          };
         }
       }
     });
