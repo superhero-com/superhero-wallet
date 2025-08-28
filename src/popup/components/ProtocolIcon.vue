@@ -113,7 +113,7 @@ export default defineComponent({
       selectedIcon,
       isEvmProtocol,
       isSolanaImg,
-      evmIcons: evmIcons.value.concat(evmIcons.value),
+      evmIcons,
     };
   },
 });
