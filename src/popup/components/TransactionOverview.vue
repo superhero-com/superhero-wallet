@@ -66,6 +66,7 @@ export default defineComponent({
     function getTransactionParty(address: AccountAddress): IAccountOverview {
       return {
         address,
+        name: protocol.value === PROTOCOLS.aeternity ? (name.value || getName(address).value) : '',
         label: t('transaction.overview.accountAddress'),
         url: protocolExplorer.prepareUrlForAccount(address),
       };
@@ -109,6 +110,7 @@ export default defineComponent({
             },
             recipient: {
               address: recipientId,
+              name: name.value || getName(recipientId).value,
               url: protocolExplorer.prepareUrlForAccount(recipientId),
               label: t('transaction.overview.accountAddress'),
             },
@@ -119,10 +121,16 @@ export default defineComponent({
           return {
             sender: {
               address: senderId,
+              name: getName(senderId).value,
               url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
-            recipient: getTransactionParty(recipientId),
+            recipient: {
+              address: recipientId,
+              name: name.value || getName(recipientId).value,
+              url: protocolExplorer.prepareUrlForAccount(recipientId),
+              label: t('transaction.overview.accountAddress'),
+            },
           };
         }
 
@@ -156,6 +164,7 @@ export default defineComponent({
             sender: direction.value === TX_DIRECTION.sent
               ? {
                 address: senderId,
+                name: getName(senderId).value,
                 url: protocolExplorer.prepareUrlForAccount(senderId),
                 label: t('transaction.overview.accountAddress'),
               }
@@ -163,6 +172,7 @@ export default defineComponent({
             recipient: direction.value === TX_DIRECTION.received
               ? transactionOwner ?? {
                 address: senderId,
+                name: getName(senderId).value,
                 url: protocolExplorer.prepareUrlForAccount(senderId),
                 label: t('transaction.overview.accountAddress'),
               }
@@ -174,6 +184,7 @@ export default defineComponent({
           return {
             sender: {
               address: senderId,
+              name: getName(senderId).value,
               url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
@@ -190,6 +201,7 @@ export default defineComponent({
           return {
             sender: {
               address: senderId,
+              name: getName(senderId).value,
               url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
@@ -208,6 +220,7 @@ export default defineComponent({
           return {
             sender: {
               address: senderId,
+              name: '', // EVM protocols don't have names like Aeternity
               url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
@@ -219,11 +232,13 @@ export default defineComponent({
           return {
             sender: {
               address: senderId,
+              name: '', // EVM protocols don't have names like Aeternity
               url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
+              name: '', // EVM protocols don't have names like Aeternity
               url: protocolExplorer.prepareUrlForAccount(recipientId),
               label: t('common.smartContract'),
             },
