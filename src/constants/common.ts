@@ -19,8 +19,9 @@ export const PROTOCOLS = {
   ethereum: 'ethereum',
   aeternity: 'aeternity',
   bnb: 'bnb',
+  avalanche: 'avalanche',
 } as const;
-export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb];
+export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb, PROTOCOLS.avalanche];
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
 
