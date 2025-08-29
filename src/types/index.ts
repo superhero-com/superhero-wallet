@@ -39,6 +39,7 @@ import {
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { Protocol } from './protocols';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 
 export * from './filter';
 export * from './networks';
@@ -166,6 +167,7 @@ export type AssetContractId =
   | typeof AE_CONTRACT_ID
   | typeof BTC_CONTRACT_ID
   | typeof ETH_CONTRACT_ID
+  | typeof BNB_CONTRACT_ID
   | string;
 
 export interface ITokenSale {
