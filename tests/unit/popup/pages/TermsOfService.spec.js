@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
+import TermsOfService from '../../../../src/popup/pages/TermsOfService.vue';
 
 describe('TermsOfService', () => {
   it('opens and closes accordion', async () => {

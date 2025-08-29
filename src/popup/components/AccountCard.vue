@@ -53,7 +53,8 @@ export default defineComponent({
   setup(props) {
     const { getAccountBalance } = useBalances();
 
-    const numericBalance = computed(() => getAccountBalance(props.account.address).toNumber());
+    const numericBalance = computed(() => (
+      getAccountBalance(props.account.protocol, props.account.address).toNumber()));
 
     return {
       numericBalance,

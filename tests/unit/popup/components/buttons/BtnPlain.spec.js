@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import BtnPlain from '../../src/popup/components/buttons/BtnPlain.vue';
+import BtnPlain from '../../../../../src/popup/components/buttons/BtnPlain.vue';
 
 describe('BtnPlain', () => {
   it('should have default slot', async () => {

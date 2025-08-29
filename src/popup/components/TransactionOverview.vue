@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { Encoded, Tag } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -28,6 +28,7 @@ import type {
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransactionData } from '@/composables';
+import { isEvm } from '@/utils';
 
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -67,6 +68,7 @@ export default defineComponent({
     function getTransactionParty(address: AccountAddress): IAccountOverview {
       return {
         address,
+        name: protocol.value === PROTOCOLS.aeternity ? (name.value || getName(address).value) : '',
         label: t('transaction.overview.accountAddress'),
         url: protocolExplorer.prepareUrlForAccount(address),
       };
@@ -129,15 +131,17 @@ export default defineComponent({
               : t('common.smartContract'),
           };
 
-          if (protocol.value === PROTOCOLS.ethereum) {
+          if (isEvm(protocol.value)) {
             return {
               sender: {
                 address: senderId,
+                name: '', // EVM protocols don't have names like Aeternity
                 url: protocolExplorer.prepareUrlForAccount(senderId),
                 label: t('transaction.overview.accountAddress'),
               },
               recipient: {
                 address: recipientId,
+                name: '', // EVM protocols don't have names like Aeternity
                 url: protocolExplorer.prepareUrlForAccount(recipientId),
                 label: t('common.smartContract'),
               },
@@ -190,22 +194,61 @@ export default defineComponent({
           };
 
         default:
-          throw new Error(`Unsupported transaction type ${outerTxTag.value}`);
+          // Handle EVM string-based transaction types
+          if (isEvm(protocol.value)) {
+            const txType = props.transaction.tx?.type;
+
+            if (txType === 'SpendTx') {
+              return {
+                sender: {
+                  address: senderId,
+                  name: '', // EVM protocols don't have names like Aeternity
+                  url: protocolExplorer.prepareUrlForAccount(senderId),
+                  label: t('transaction.overview.accountAddress'),
+                },
+                recipient: getTransactionParty(recipientId),
+              };
+            }
+
+            if (txType === 'ContractCallTx') {
+              return {
+                sender: {
+                  address: senderId,
+                  name: '', // EVM protocols don't have names like Aeternity
+                  url: protocolExplorer.prepareUrlForAccount(senderId),
+                  label: t('transaction.overview.accountAddress'),
+                },
+                recipient: {
+                  address: recipientId,
+                  name: '', // EVM protocols don't have names like Aeternity
+                  url: protocolExplorer.prepareUrlForAccount(recipientId),
+                  label: t('common.smartContract'),
+                },
+              };
+            }
+          }
+
+          throw new Error(`Unsupported transaction type ${outerTxTag.value || props.transaction.tx?.type} for protocol ${protocol.value}`);
       }
     });
 
     onMounted(async () => {
-      if (innerTx.value.recipientId?.startsWith('nm_')) {
-        name.value = await getNameByNameHash(innerTx.value.recipientId);
+      if (protocol.value === PROTOCOLS.aeternity) {
+        if (innerTx.value.recipientId?.startsWith('nm_')) {
+          name.value = await getNameByNameHash(innerTx.value.recipientId);
+        }
+
+        // Initialize ownership account for Aeternity
+        const address = getOwnershipAddress();
+        if (address) {
+          ownershipAccount.value = {
+            address,
+            name: getName(address).value,
+            label: t('transaction.overview.accountAddress'),
+            url: protocolExplorer.prepareUrlForAccount(address),
+          };
+        }
       }
-      let transactionOwnerAddress;
-      const address = getOwnershipAddress(transactionOwnerAddress);
-      ownershipAccount.value = {
-        address,
-        name: getName(address as Encoded.AccountAddress).value,
-        label: t('transaction.overview.accountAddress'),
-        url: protocolExplorer.prepareUrlForAccount(address as Encoded.AccountAddress),
-      };
     });
 
     return {

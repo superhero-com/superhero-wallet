@@ -1,5 +1,5 @@
 import { computed, ref, watch } from 'vue';
-import { difference, isEmpty } from 'lodash-es';
+import { difference } from 'lodash-es';
 import type {
   CurrencyCode,
   CurrencyRates,
@@ -10,6 +10,7 @@ import type {
 import {
   CURRENCIES,
   DEFAULT_LOCALE,
+  PROTOCOL_LIST,
   STORAGE_KEYS,
 } from '@/constants';
 import {
@@ -84,12 +85,23 @@ export function useCurrencies({
         currentCurrencyCode.value,
       ) || [];
 
-      // TODO Temporary solution. We need to map the coingecko IDs to our protocols.
-      const convertedMarketData = Object.fromEntries(fetchedMarketData.map(
-        (coinMarketData) => [coinMarketData.id as Protocol, coinMarketData],
-      ));
+      const idToProtocol = Object.fromEntries(
+        protocolsInUse.value.map((p) => [
+          ProtocolAdapterFactory.getAdapter(p).getCoinGeckoCoinId(),
+          p,
+        ]),
+      ) as Record<string, Protocol>;
 
-      marketData.value = isEmpty(convertedMarketData) ? null : convertedMarketData as MarketData;
+      const entries = (fetchedMarketData || [])
+        .map((m) => {
+          const protocol = idToProtocol[m.id];
+          return protocol ? [protocol, m] : null;
+        })
+        .filter(Boolean) as [Protocol, any][];
+
+      marketData.value = entries.length
+        ? (Object.fromEntries(entries) as MarketData)
+        : null;
     } catch (e) {
       handleUnknownError(e);
       marketData.value = null;
@@ -108,9 +120,28 @@ export function useCurrencies({
       getCoinGeckoCoinIdList(),
     );
 
-    if (fetchedCurrencyRates) {
-      currencyRates.value = fetchedCurrencyRates;
-    }
+    const idToProtocol = Object.fromEntries(
+      protocolsInUse.value.map((p) => [
+        ProtocolAdapterFactory.getAdapter(p).getCoinGeckoCoinId(),
+        p,
+      ]),
+    ) as Record<string, Protocol>;
+
+    const convertedRates = Object.fromEntries(
+      Object.entries(fetchedCurrencyRates || {})
+        .map(([id, rates]) => {
+          const protocol = idToProtocol[id];
+          return protocol ? [protocol, rates as any] : null;
+        })
+        .filter(Boolean) as [Protocol, any][],
+    );
+
+    const fullRates = Object.fromEntries(
+      PROTOCOL_LIST.map((p) => [p, (convertedRates as any)[p] ?? currencyRates.value?.[p] ?? {}]),
+    ) as any;
+
+    currencyRates.value = fullRates;
+
     isCurrenciesUnavailable.value = (
       !Object.keys(currencyRates.value).length && !Object.keys(fetchedCurrencyRates ?? {}).length
     );

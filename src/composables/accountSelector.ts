@@ -18,6 +18,7 @@ import {
   createCustomScopedComposable,
   excludeFalsy,
   getDefaultAccountLabel,
+  isEvm,
 } from '@/utils';
 import {
   useAccounts,
@@ -63,7 +64,11 @@ export const useAccountSelector = createCustomScopedComposable(() => {
   const accountSelectType = ref<AccountSelectTypeFilter>(ACCOUNT_SELECT_TYPE_FILTER.addressBook);
 
   const latestTransactions = computed(
-    () => (accountsTransactionsLatest.value[activeAccount.value.address] || [])
+    () => (
+      accountsTransactionsLatest.value[activeAccount.value.address]
+      || []
+    )
+      .filter(({ protocol }) => protocol === activeAccount.value.protocol)
       .map((transaction: ITransaction): IAccountSelectorEntry | null => {
         const outerTx = transaction.tx!;
         const innerTx = transaction.tx ? getInnerTransaction(transaction.tx) : null;
@@ -72,7 +77,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
           outerTx?.payerId ? outerTx : innerTx,
           (
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
-              !== AE_TRANSACTION_OWNERSHIP_STATUS.current
+            !== AE_TRANSACTION_OWNERSHIP_STATUS.current
             && getTxOwnerAddress(innerTx)
           ) || activeAccount.value.address,
         );
@@ -117,17 +122,27 @@ export const useAccountSelector = createCustomScopedComposable(() => {
       .filter(excludeFalsy),
   );
   const ownAddresses = computed(
-    () => (protocolFilter.value)
-      ? (accountsGroupedByProtocol.value[protocolFilter.value] ?? []).map((account) => (
-        {
+    () => {
+      // When viewing "All" or no protocol filter, include accounts from all protocols
+      if (!protocolFilter.value || accountSelectType.value === ACCOUNT_SELECT_TYPE_FILTER.all) {
+        return Object.values(accountsGroupedByProtocol.value).flat().map((account) => ({
           name: getName(account.address).value || getDefaultAccountLabel(account),
           address: account.address,
           isBookmarked: false,
-          protocol: protocolFilter.value ?? PROTOCOLS.aeternity,
+          protocol: account.protocol,
           type: account.type,
-        }
-      ))
-      : [],
+        }));
+      }
+
+      // When filtering by specific protocol, only show accounts from that protocol
+      return (accountsGroupedByProtocol.value[protocolFilter.value] ?? []).map((account) => ({
+        name: getName(account.address).value || getDefaultAccountLabel(account),
+        address: account.address,
+        isBookmarked: false,
+        protocol: protocolFilter.value ?? PROTOCOLS.aeternity,
+        type: account.type,
+      }));
+    },
   );
   const accountsFilteredByType = computed(() => {
     switch (accountSelectType.value) {
@@ -156,6 +171,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
       ).map( // Add flag for own addresses
         (entry) => ({
           ...entry,
+          protocol: isEvm(entry.protocol) ? protocolFilter.value ?? entry.protocol : entry.protocol,
           isOwnAddress: ownAddresses.value.some(
             (account) => account.address === entry.address,
           ) || multisigAccounts.value.some(

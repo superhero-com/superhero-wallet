@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import InputField from '../../src/popup/components/InputField.vue';
+import InputField from '../../../../src/popup/components/InputField.vue';
 
 describe('Input field', () => {
   it('should render', async () => {

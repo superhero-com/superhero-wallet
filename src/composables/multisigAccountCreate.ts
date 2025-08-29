@@ -16,7 +16,7 @@ import type {
   IMultisigCreationPhase,
   IRawMultisigAccount,
 } from '@/types';
-import { DEFAULT_WAITING_HEIGHT } from '@/constants';
+import { DEFAULT_WAITING_HEIGHT, PROTOCOLS } from '@/constants';
 import {
   MULTISIG_CREATION_PHASES,
   MULTISIG_SIMPLE_GA_BYTECODE,
@@ -165,7 +165,7 @@ export function useMultisigAccountCreate() {
     multisigAccountCreationFee.value = +aettosToAe(creationFeeUnformatted);
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.signed;
     notEnoughBalanceToCreateMultisig.value = (
-      balances.value[payerId]?.isLessThan(multisigAccountCreationFee.value)
+      balances.value[PROTOCOLS.aeternity]?.[payerId]?.isLessThan(multisigAccountCreationFee.value)
     );
   }
 

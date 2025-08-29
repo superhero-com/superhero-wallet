@@ -1,5 +1,5 @@
-import { validateHash } from '../../../src/protocols/aeternity/helpers';
-import { AeScan } from '../../../src/protocols/aeternity/libs/AeScan';
+import { validateHash } from '../../../../../src/protocols/aeternity/helpers';
+import { AeScan } from '../../../../../src/protocols/aeternity/libs/AeScan';
 
 const testHashes = [
   {

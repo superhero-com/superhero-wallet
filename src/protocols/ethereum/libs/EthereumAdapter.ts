@@ -44,7 +44,7 @@ import type {
   NetworkTypeDefault,
 } from '@/types';
 import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
-import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
+import { getLastNotEmptyAccountIndex, handleUnknownError, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -315,7 +315,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       updateFeeList,
       maxFeePerGas,
       maxPriorityFeePerGas,
-    } = useEthFeeCalculation();
+    } = useEthFeeCalculation(this.protocol);
 
     const account = getAccountByAddress(toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
@@ -448,6 +448,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       const tokenTx = await service.fetchAccountTokenTransactionByHash(
         hash,
         transactionOwner ?? transaction.from,
+        this.protocol,
         transaction.blockNumber,
         transaction.input,
       );
@@ -482,8 +483,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         chainId,
       );
       const [coinTransactions, tokenTransactions] = await Promise.all([
-        service.fetchAccountCoinTransactions(address, { page: nextPageNum }),
-        service.fetchAccountTokenTransactions(address, { page: nextPageNum }),
+        service.fetchAccountCoinTransactions(address, this.protocol, { page: nextPageNum }),
+        service.fetchAccountTokenTransactions(address, this.protocol, { page: nextPageNum }),
       ]);
 
       // Remove duplicate coin transactions (e.g.: token transfer fee paid with coin)
@@ -502,6 +503,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         paginationParams.nextPageNum = ((nextPageNum) ? +nextPageNum + 1 : 2).toString();
       }
     } catch (error: any) {
+      handleUnknownError(error);
       Logger.write(error);
     }
 
@@ -530,9 +532,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         chainId,
       );
       regularTransactions = (assetContractId === this.coinContractId)
-        ? await service.fetchAccountCoinTransactions(address, { page: nextPageNum })
+        ? await service.fetchAccountCoinTransactions(address, this.protocol, { page: nextPageNum })
         : await service.fetchAccountTokenTransactions(
           address,
+          this.protocol,
           { page: nextPageNum, assetContractId },
         );
 

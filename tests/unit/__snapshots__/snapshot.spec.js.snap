@@ -631,6 +631,456 @@ exports[`Pages Index 3`] = `
 </div>
 `;
 
+exports[`Pages More 1`] = `
+<div
+  class="ion-page"
+>
+  <ion-content
+    class="ion-padding ion-content-bg"
+  >
+    <div
+      class="more"
+    >
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="settings"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="address-book"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          >
+            0
+          </div>
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="tips-claim"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="invite"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        href="https://form.typeform.com/to/Kk3Zyjdr"
+        target="_blank"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        href="https://simplex.superhero.com"
+        target="_blank"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        href="https://aepp.dex.superhero.com"
+        target="_blank"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="about"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          <svg />
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <!--v-if-->
+    </div>
+  </ion-content>
+</div>
+`;
+
+exports[`Pages Networks 1`] = `
+<div
+  class="ion-page"
+>
+  <ion-content
+    class="ion-padding ion-content-bg"
+  >
+    <div
+      class="networks"
+      data-cy="networks"
+    >
+      <p
+        class="text-description"
+      >
+        locale-specific-text
+      </p>
+      <div
+        class="networks-list"
+      >
+        
+        <label
+          class="radio-button network-row"
+        >
+          <span
+            class="radio-dot"
+          >
+            <input
+              class="input"
+              name="activeNetwork"
+              type="radio"
+              value="false"
+            />
+          </span>
+          <span
+            class="radio-holder"
+          >
+            
+            <div
+              class="name-and-actions"
+            >
+              <p
+                class="name label-part-unchecked"
+                data-cy="network-name"
+              >
+                Mainnet
+              </p>
+              <!--v-if-->
+            </div>
+            <table
+              class="network-details label-part-unchecked"
+            >
+              <tbody>
+                
+                <tr
+                  class="url"
+                >
+                  <td
+                    class="url-label lower-case"
+                  >
+                    æternity
+                  </td>
+                  <td
+                    class="url-address"
+                  >
+                    mainnet.aeternity.io
+                  </td>
+                </tr>
+                
+              </tbody>
+            </table>
+            
+          </span>
+        </label>
+        <label
+          class="radio-button checked network-row"
+        >
+          <span
+            class="radio-dot"
+          >
+            <input
+              class="input"
+              name="activeNetwork"
+              type="radio"
+              value="true"
+            />
+          </span>
+          <span
+            class="radio-holder"
+          >
+            
+            <div
+              class="name-and-actions"
+            >
+              <p
+                class="name"
+                data-cy="network-name"
+              >
+                Testnet
+              </p>
+              <!--v-if-->
+            </div>
+            <table
+              class="network-details"
+            >
+              <tbody>
+                
+                <tr
+                  class="url"
+                >
+                  <td
+                    class="url-label lower-case"
+                  >
+                    æternity
+                  </td>
+                  <td
+                    class="url-address"
+                  >
+                    testnet.aeternity.io
+                  </td>
+                </tr>
+                
+              </tbody>
+            </table>
+            
+          </span>
+        </label>
+        
+      </div>
+      <a
+        class="add-custom-network btn-main extend has-icon add-custom-network variant-muted btn-base add-custom-network btn-main extend has-icon add-custom-network"
+        data-cy="to-add"
+        type="button"
+      >
+        
+        <svg
+          class="btn-main-icon"
+        />
+        
+        locale-specific-text
+        
+        
+      </a>
+    </div>
+  </ion-content>
+</div>
+`;
+
 exports[`Pages PrivacyPolicy 1`] = `
 <div
   class="ion-page"
@@ -1569,6 +2019,359 @@ exports[`Pages PrivacyPolicy 1`] = `
       >
         <!--v-if-->
       </transition-stub>
+    </div>
+  </ion-content>
+</div>
+`;
+
+exports[`Pages Settings 1`] = `
+<div
+  class="ion-page"
+>
+  <ion-content
+    class="ion-padding ion-content-bg"
+  >
+    <div
+      class="settings"
+    >
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="networks-settings"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          >
+            Testnet
+          </div>
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        data-cy="token-sales"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          >
+            USD ($)
+          </div>
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          >
+            locale-specific-text
+          </div>
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
+      <a
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <svg
+            class="icon-indicator"
+          />
+          
+        </div>
+        <!--v-if-->
+        
+      </a>
     </div>
   </ion-content>
 </div>

@@ -55,6 +55,7 @@
             :account="{ address, protocol }"
             :custom-name="name"
             :name-address="nameAddress"
+            :show-super-icon="true"
             show-protocol-icon
           />
         </PanelItem>

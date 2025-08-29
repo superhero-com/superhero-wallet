@@ -1,9 +1,9 @@
 <template>
   <TransferReviewBase
-    :base-token-symbol="ETH_COIN_SYMBOL"
+    :base-token-symbol="coinSymbol"
     :transfer-data="transferData"
     :loading="loading"
-    :protocol="PROTOCOLS.ethereum"
+    :protocol="protocol"
     :show-fiat="isSelectedAssetEthCoin"
     class="transfer-review"
   >
@@ -16,8 +16,8 @@
         <template #value>
           <TokenAmount
             :amount="+transferData.total!"
-            :symbol="ETH_COIN_SYMBOL"
-            :protocol="PROTOCOLS.ethereum"
+            :symbol="coinSymbol"
+            :protocol="protocol"
             data-cy="review-total"
             high-precision
           />
@@ -36,21 +36,21 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { ITransaction, TransferFormModel } from '@/types';
+import type { ITransaction, Protocol, TransferFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAccounts,
   useLatestTransactionList,
   useUi,
 } from '@/composables';
-import { PROTOCOLS } from '@/constants';
-import { ETH_COIN_SYMBOL } from '@/protocols/ethereum/config';
-import { EthereumAdapter } from '@/protocols/ethereum/libs/EthereumAdapter';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import Logger from '@/lib/logger';
+import { EthereumAdapter } from '@/protocols/ethereum/libs/EthereumAdapter';
+import { BnbAdapter } from '@/protocols/bnb/libs/BnbAdapter';
+import { PROTOCOLS } from '@/constants';
 
 export default defineComponent({
   name: 'EthTransferReview',
@@ -64,6 +64,7 @@ export default defineComponent({
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props, { emit }) {
     const { t } = useI18n();
@@ -74,10 +75,11 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
 
-    const ethAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+    const { coinSymbol } = adapter;
 
     const isSelectedAssetEthCoin = computed(
-      () => props.transferData?.selectedAsset?.contractId === ethAdapter.coinContractId,
+      () => props.transferData?.selectedAsset?.contractId === adapter.coinContractId,
     );
 
     function openTransactionFailedModal(msg: string) {
@@ -102,15 +104,17 @@ export default defineComponent({
 
       loading.value = true;
       let actionResult;
-      const lastActiveEthAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
+      const lastActiveEthAccount = getLastActiveProtocolAccount(props.protocol);
       try {
-        let currentNonce = await (ethAdapter as EthereumAdapter)
+        let currentNonce = await (props.protocol === PROTOCOLS.ethereum
+          ? adapter as EthereumAdapter
+          : adapter as BnbAdapter)
           .getTransactionCount(lastActiveEthAccount?.address!);
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           if (!isSelectedAssetEthCoin.value) {
             // eslint-disable-next-line no-await-in-loop
-            actionResult = await ethAdapter.transferToken?.(
+            actionResult = await adapter.transferToken?.(
               amount,
               recipient,
               selectedAsset.contractId,
@@ -123,7 +127,7 @@ export default defineComponent({
             );
           } else {
             // eslint-disable-next-line no-await-in-loop
-            actionResult = await ethAdapter.spend(
+            actionResult = await adapter.spend(
               Number(amount),
               recipient,
               {
@@ -141,7 +145,7 @@ export default defineComponent({
               hash: actionResult.hash as any,
               pending: true,
               transactionOwner: lastActiveEthAccount?.address,
-              protocol: PROTOCOLS.ethereum,
+              protocol: props.protocol,
               tx: {
                 amount: Number(amount),
                 callerId: lastActiveEthAccount?.address!,
@@ -169,9 +173,8 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOLS,
-      ETH_COIN_SYMBOL,
       loading,
+      coinSymbol,
       isSelectedAssetEthCoin,
       submit,
     };

@@ -21,7 +21,7 @@
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
           unstyled
-          @update:modelValue="$emit('update:modelValue', $event)"
+          @update:modelValue="onSelect"
         >
           <template #current-text="{ text }">
             <slot>
@@ -80,7 +80,7 @@ export default defineComponent({
     avatarOnly: Boolean,
   },
   emits: ['update:modelValue'],
-  setup(props) {
+  setup(props, { emit }) {
     const { accountsSelectOptions, getAccountByAddress } = useAccounts();
 
     const selectedAccount = computed(
@@ -88,9 +88,15 @@ export default defineComponent({
         ? getAccountByAddress(props.modelValue)
         : undefined,
     );
+
+    function onSelect(value: string) {
+      const [, address] = String(value).split(':');
+      emit('update:modelValue', address as AccountAddress);
+    }
     return {
       accountsSelectOptions,
       selectedAccount,
+      onSelect,
     };
   },
 });

@@ -108,7 +108,7 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props) {
-    const { activeAccount, getAccountByAddress } = useAccounts();
+    const { activeAccount, getAccountByProtocolAndAddress } = useAccounts();
     const { t } = useI18n();
     const { getName } = useAeNames();
 
@@ -205,7 +205,10 @@ export default defineComponent({
     });
 
     const ownerName = computed(() => {
-      const accountFound = getAccountByAddress(props.transaction.transactionOwner!);
+      const accountFound = getAccountByProtocolAndAddress(
+        props.transaction.protocol,
+        props.transaction.transactionOwner!,
+      );
       return getName(accountFound?.address).value || getDefaultAccountLabel(accountFound);
     });
 
