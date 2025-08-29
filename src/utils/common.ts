@@ -55,6 +55,8 @@ import {
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { decrypt, encrypt } from './crypto';
 
 /**
@@ -742,3 +744,16 @@ export function getActivityHash(activity: any) {
 }
 
 export const isEvm = (p?: Protocol | null) => !!p && EVM_PROTOCOLS.includes(p);
+
+/**
+ * Check if a contract ID belongs to an EVM-compatible chain
+ * @param contractId - The contract ID to check
+ * @returns true if the contract ID is for an EVM chain
+ */
+export const isEvmContract = (contractId?: AssetContractId | null): boolean => {
+  if (!contractId) return false;
+
+  // Check against known EVM contract IDs
+  return contractId === ETH_CONTRACT_ID
+    || contractId === BNB_CONTRACT_ID;
+};
