@@ -342,7 +342,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByAddress } = useAccounts();
     const { chainId } = bnbActiveNetworkSettings.value;
-    const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(this.protocol);
+    const { updateFeeList } = useEthFeeCalculation(this.protocol);
 
     const account = getAccountByAddress(toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.bnb) {
@@ -355,10 +355,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
       this.getTransactionCount(from),
       updateFeeList(),
     ]);
-
-    if (!maxFeePerGas.value) {
-      throw new Error('Failed to calculate the fee.');
-    }
 
     const web3Eth = this.getWeb3EthInstance();
     const nodeGasPriceWei = await web3Eth.getGasPrice();
@@ -452,11 +448,14 @@ export class BnbAdapter extends BaseProtocolAdapter {
       ),
     );
 
-    const gasPrice = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'gwei')));
+    // Use node-provided gasPrice on BNB (no EIP-1559)
+    const web3Eth = this.getWeb3EthInstance();
+    const nodeGasPriceWei = await web3Eth.getGasPrice();
+    const gasPrice = bigIntToHex(nodeGasPriceWei);
 
     const [nonce, gasLimit] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
-      contract.methods.transfer(recipient, hexAmount).estimateGas(),
+      contract.methods.transfer(recipient, hexAmount).estimateGas({ from: options.fromAccount }),
     ]);
 
     const txData: TxData = {
@@ -472,7 +471,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const tx = new Transaction(txData, { common });
     const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
-    const web3Eth = this.getWeb3EthInstance();
     const raw = `0x${Buffer.from(serializedTx).toString('hex')}`;
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
     sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);

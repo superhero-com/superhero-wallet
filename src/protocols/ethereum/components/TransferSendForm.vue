@@ -100,7 +100,6 @@ import {
   ETH_COIN_SYMBOL,
   ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
-import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -176,7 +175,6 @@ export default defineComponent({
       maxPriorityFeePerGas,
       updateFeeList,
     } = useEthFeeCalculation(props.protocol, recipientsCount);
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
     const shouldUseMaxAmount = ref(false);
 
@@ -223,7 +221,8 @@ export default defineComponent({
         && amount.gt(0)
         && formModel.value.addresses?.length
       ) {
-        const { nodeUrl } = ethActiveNetworkSettings.value;
+        // Use the active protocol's node URL
+        const { nodeUrl } = activeNetwork.value.protocols[props.protocol];
 
         const results = await Promise.all(
           formModel.value.addresses.map((address) => getTokenTransferGasLimit(
