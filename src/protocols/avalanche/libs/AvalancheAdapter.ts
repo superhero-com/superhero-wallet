@@ -416,11 +416,11 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     amount: number,
     recipient: AccountAddress,
     options: {
-            fromAccount: AccountAddress;
-            maxPriorityFeePerGas: string;
-            maxFeePerGas: string;
-            nonce: number;
-        },
+      fromAccount: AccountAddress;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+      nonce: number;
+    },
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
@@ -451,10 +451,10 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
 
         if (
           minedTransaction?.blockNumber
-                    && ((currentBlock?.number
-                        && currentBlock.number - BigInt(minedTransaction.blockNumber)
-                        >= BLOCKS_TO_WAIT)
-                        || isLastAttempt)
+          && ((currentBlock?.number
+            && currentBlock.number - BigInt(minedTransaction.blockNumber)
+            >= BLOCKS_TO_WAIT)
+            || isLastAttempt)
         ) {
           clearInterval(interval);
           return resolve(minedTransaction);
@@ -475,7 +475,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     } = useAvalancheNetworkSettings();
     return new EtherscanExplorer(
       avalancheActiveNetworkSettings.value.explorerUrl
-            ?? avalancheActiveNetworkPredefinedSettings.value.explorerUrl,
+      ?? avalancheActiveNetworkPredefinedSettings.value.explorerUrl,
     );
   }
 
