@@ -2,7 +2,7 @@
   <ShareAddressBase
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
-    :protocol="protocol"
+    :protocol="activeAccount.protocol"
     :token-contract-id="tokenContractId"
     is-receive
     @close="resolve()"
@@ -11,10 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import {
-  PROTOCOLS,
-  PROTOCOL_VIEW_TRANSFER_RECEIVE,
-} from '@/constants';
+import { PROTOCOL_VIEW_TRANSFER_RECEIVE } from '@/constants';
 import { useAccounts } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -32,9 +29,8 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
 
     return {
-      protocol: PROTOCOLS.ethereum,
       activeAccount,
-      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum).protocolName,
+      protocolName: ProtocolAdapterFactory.getAdapter(activeAccount.value.protocol).protocolName,
     };
   },
 });
