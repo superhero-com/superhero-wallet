@@ -86,6 +86,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override coinPrecision = ETH_COIN_PRECISION;
 
+  override coinGeckoCoinId = ETH_COINGECKO_COIN_ID;
+
   override hasTokensSupport = true;
 
   override mdwToNodeApproxDelayTime = ETH_MDW_TO_NODE_APPROX_DELAY_TIME;
@@ -131,10 +133,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override getAmountPrecision(): number {
     return 9;
-  }
-
-  override getCoinGeckoCoinId() {
-    return ETH_COINGECKO_COIN_ID;
   }
 
   override getExplorer() {
@@ -549,7 +547,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  async constructAndSignTx(
+  override async constructAndSignTx(
     amount: number,
     recipient: string,
     options: Record<string, any>,

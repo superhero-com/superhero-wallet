@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_NAME: wallet
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       ETHERSCAN_API_KEY: "${{ github.ref == 'refs/heads/master' && secrets.ETHERSCAN_API_KEY_PROD || secrets.ETHERSCAN_API_KEY_DEV }}"
       WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
       TOKEN_SALES_URL_MAINNET: ${{ secrets.TOKEN_SALES_URL_MAINNET }}
