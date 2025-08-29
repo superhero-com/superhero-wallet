@@ -59,12 +59,14 @@
         <PanelTableItem :name="$t('common.activeAccount')">
           <div class="connected-account">
             <AddressTruncated
-              :address="activeAccount?.address!"
-              :protocol="PROTOCOLS.ethereum"
+              :address="activeAccount && activeAccount.address ? activeAccount.address : ''"
+              :protocol="activeAccount && activeAccount.protocol
+                ? activeAccount.protocol
+                : PROTOCOLS.ethereum"
             />
             <Avatar
               size="sm"
-              :address="activeAccount?.address!"
+              :address="activeAccount && activeAccount.address ? activeAccount.address : ''"
             />
           </div>
         </PanelTableItem>
@@ -110,12 +112,13 @@
       />
 
       <DetailsItem
-        v-if="ethAccounts.length"
+        v-if="evmAccounts.length"
         class="active-account"
         :label="$t('common.connectingAs')"
       >
         <AccountInfo
-          :account="activeAccount!"
+          v-if="activeAccount"
+          :account="activeAccount"
           show-protocol-icon
           show-explorer-link
         />
@@ -129,7 +132,7 @@
       <FormScanQrResult
         v-model="connectionUri"
         :label="$t('walletConnect.uriInputLabel')"
-        :readonly="!ethAccounts.length || connecting"
+        :readonly="!evmAccounts.length || connecting"
         :qr-title="$t('walletConnect.uriInputLabel')"
         placeholder="wc:a2813545345bb3e4..."
         auto-height
@@ -155,7 +158,7 @@
         v-else
         :text="(connecting) ? $t('common.connecting') : $t('common.connect')"
         :icon="WalletConnectLogo"
-        :disabled="!ethAccounts.length || !connectionUri || connecting"
+        :disabled="!evmAccounts.length || !connectionUri || connecting"
         extend
         @click="connectToDapp()"
       />
@@ -223,15 +226,22 @@ export default defineComponent({
     deeplinkUri: { type: String as PropType<WalletConnectUri>, default: '' },
   },
   setup(props) {
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
-    const { protocolName } = adapter;
+    // Prefer active EVM protocol for naming; fallback to Ethereum adapter name
+    const ethAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    const { getLastActiveProtocolAccount } = useAccounts();
+    const activeAccount = computed(() => (
+      getLastActiveProtocolAccount(
+        (getLastActiveProtocolAccount(PROTOCOLS.bnb) ? PROTOCOLS.bnb : PROTOCOLS.ethereum),
+      )
+      || getLastActiveProtocolAccount(PROTOCOLS.ethereum)
+    ));
+    const protocolName = computed(() => ethAdapter.protocolName);
 
     const { isOnline } = useConnection();
-    const { getLastActiveProtocolAccount } = useAccounts();
     const {
       wcSession,
       wcState,
-      ethAccounts,
+      evmAccounts,
       connect,
       disconnect,
     } = useWalletConnect();
@@ -246,7 +256,7 @@ export default defineComponent({
     /** eg.: wc:1b3eda3f4... */
     const connectionUri = ref<WalletConnectUri | undefined>(props.deeplinkUri);
 
-    const activeAccount = computed(() => getLastActiveProtocolAccount(PROTOCOLS.ethereum));
+    // activeAccount already defined above for EVM context
     const peerMetadata = computed(() => wcSession.value?.peer?.metadata);
 
     async function connectToDapp() {
@@ -283,7 +293,7 @@ export default defineComponent({
       protocolName,
       isOnline,
       connectionUri,
-      ethAccounts,
+      evmAccounts,
       wcSession,
       connecting,
       disconnecting,
