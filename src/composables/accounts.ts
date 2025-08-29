@@ -144,6 +144,10 @@ export const useAccounts = createCustomScopedComposable(() => {
 
     return [...accountsRaw.value, ...privateKeyAccountsRaw.value]
       .map((account, globalIdx) => {
+        // When a blockchain is removed (i.e. when changing branches),
+        // the protocol will be undefined, so we need to return null
+        if (!idxList[account.protocol]) return null;
+
         const idx = idxList[account.protocol][account.type];
 
         const adapter = ProtocolAdapterFactory.getAdapter(account.protocol);
