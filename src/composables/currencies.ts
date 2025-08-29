@@ -87,7 +87,7 @@ export function useCurrencies({
 
       const idToProtocol = Object.fromEntries(
         protocolsInUse.value.map((p) => [
-          ProtocolAdapterFactory.getAdapter(p).getCoinGeckoCoinId(),
+          ProtocolAdapterFactory.getAdapter(p).coinGeckoCoinId,
           p,
         ]),
       ) as Record<string, Protocol>;
@@ -122,7 +122,7 @@ export function useCurrencies({
 
     const idToProtocol = Object.fromEntries(
       protocolsInUse.value.map((p) => [
-        ProtocolAdapterFactory.getAdapter(p).getCoinGeckoCoinId(),
+        ProtocolAdapterFactory.getAdapter(p).coinGeckoCoinId,
         p,
       ]),
     ) as Record<string, Protocol>;

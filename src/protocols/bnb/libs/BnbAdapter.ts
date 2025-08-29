@@ -83,6 +83,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override coinContractId = BNB_CONTRACT_ID;
 
+  override coinGeckoCoinId = 'binancecoin';
+
   override coinPrecision = BNB_COIN_PRECISION;
 
   override hasTokensSupport = true;
@@ -121,10 +123,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override getAmountPrecision(): number {
     return 9;
-  }
-
-  override getCoinGeckoCoinId() {
-    return 'binancecoin';
   }
 
   override getExplorer() {
