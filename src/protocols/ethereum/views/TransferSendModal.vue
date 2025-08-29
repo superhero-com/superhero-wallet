@@ -12,9 +12,9 @@
     <template #content>
       <component
         :is="currentStepConfig.component"
-        :protocol="protocol"
         ref="currentRenderedComponent"
         v-model:transfer-data="transferData"
+        :protocol="protocol"
         @success="currentStepConfig.onSuccess"
         @error="(val: any) => error = val"
       />

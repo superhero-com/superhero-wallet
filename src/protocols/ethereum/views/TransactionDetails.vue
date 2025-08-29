@@ -180,11 +180,7 @@ export default defineComponent({
         // First try to pick the transaction from global cache (most reliable)
         const globalTransaction = allLatestTransactions.value.find((tx) => tx.hash === hash);
 
-        if (globalTransaction) {
-          // Ensure we're using the correct protocol from the transaction itself
-          if (globalTransaction.protocol !== props.protocol) {
-            console.warn(`Protocol mismatch: transaction is ${globalTransaction.protocol}, but component expects ${props.protocol}`);
-          }
+        if (globalTransaction && globalTransaction.protocol === props.protocol) {
           return globalTransaction;
         }
 

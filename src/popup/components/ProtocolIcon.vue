@@ -6,9 +6,9 @@
     :class="[iconSize]"
   >
     <component
+      :is="icon"
       v-for="(icon, index) in evmIcons.slice(0, maxVisibleIcons)"
       :key="index"
-      :is="icon"
       class="protocol-icon"
       :class="[iconSize]"
       :style="{
@@ -27,8 +27,8 @@
 
   <!-- For non-EVM protocols or when showSuperIcon is false, show single icon -->
   <component
-    v-else-if="selectedIcon"
     :is="selectedIcon"
+    v-else-if="selectedIcon"
     class="protocol-icon"
     :class="[iconSize]"
   />
