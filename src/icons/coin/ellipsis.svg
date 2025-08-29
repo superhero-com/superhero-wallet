@@ -1,0 +1,13 @@
+<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_ellipsis)">
+<circle cx="8" cy="8" r="8" fill="#6B7280"/>
+<circle cx="5" cy="8" r="1.5" fill="white"/>
+<circle cx="8" cy="8" r="1.5" fill="white"/>
+<circle cx="11" cy="8" r="1.5" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_ellipsis">
+<rect width="16" height="16" rx="8" fill="white"/>
+</clipPath>
+</defs>
+</svg>
