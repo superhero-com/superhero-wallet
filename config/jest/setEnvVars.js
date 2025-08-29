@@ -14,3 +14,16 @@ Uint8Array = Buffer.__proto__;
  */
 Object.defineProperty(global, 'TextEncoder', { value: TextEncoder });
 Object.defineProperty(global, 'TextDecoder', { value: TextDecoder });
+
+// Polyfill crypto.getRandomValues for web3/ethereum-cryptography usage in Jest
+if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
+  Object.defineProperty(globalThis, 'crypto', {
+    value: {
+      getRandomValues: (arr) => {
+        for (let i = 0; i < arr.length; i += 1) arr[i] = 0;
+        return arr;
+      },
+    },
+    configurable: true,
+  });
+}

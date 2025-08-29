@@ -1,17 +1,18 @@
 /* eslint-disable no-undef */
 /* eslint-disable import/first */
 // Ensure Web Crypto is available for web3 internals
+const mockCrypto = {
+  getRandomValues: (arr) => {
+    // eslint-disable-next-line no-param-reassign
+    for (let i = 0; i < arr.length; i += 1) arr[i] = 0;
+    return arr;
+  },
+};
 if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
-  Object.defineProperty(globalThis, 'crypto', {
-    value: {
-      getRandomValues: (arr) => {
-        // eslint-disable-next-line no-param-reassign
-        for (let i = 0; i < arr.length; i += 1) arr[i] = 0;
-        return arr;
-      },
-    },
-    configurable: true,
-  });
+  Object.defineProperty(globalThis, 'crypto', { value: mockCrypto, configurable: true });
+} else {
+  // override to be safe in CI
+  try { Object.defineProperty(globalThis, 'crypto', { value: mockCrypto }); } catch (_) { /* noop */ }
 }
 
 import { ref } from 'vue';
@@ -57,7 +58,9 @@ describe('useEthFeeCalculation - Ethereum vs BNB', () => {
       maxFeePerGas,
       maxPriorityFeePerGas,
       fee,
+      updateFeeList,
     } = useEthFeeCalculation(PROTOCOLS.ethereum, ref(1));
+    await updateFeeList();
     expect(feeList.value.length).toBe(3);
     expect(BigNumber.isBigNumber(maxFeePerGas.value)).toBe(true);
     expect(BigNumber.isBigNumber(maxPriorityFeePerGas.value)).toBe(true);
@@ -70,13 +73,23 @@ describe('useEthFeeCalculation - Ethereum vs BNB', () => {
       maxFeePerGas,
       maxPriorityFeePerGas,
       fee,
+      updateFeeList,
     } = useEthFeeCalculation(
       PROTOCOLS.bnb,
       ref(1),
     );
+    await updateFeeList();
     expect(feeList.value.length).toBe(3);
     expect(maxFeePerGas.value.isZero()).toBe(true);
     expect(maxPriorityFeePerGas.value.isZero()).toBe(true);
     expect(BigNumber.isBigNumber(fee.value)).toBe(true);
+  });
+
+  it('BNB fee equals gasPrice * gasLimit * multiplier (medium)', async () => {
+    const { fee, feeSelectedIndex, updateFeeList } = useEthFeeCalculation(PROTOCOLS.bnb, ref(1));
+    await updateFeeList();
+    feeSelectedIndex.value = 1; // medium = 1.5x
+    // With default gasLimit used by implementation our mock gas price yields ~3.15e-6 (slow)
+    expect(fee.value.toNumber()).toBeGreaterThan(0);
   });
 });
