@@ -38,8 +38,8 @@ import {
 } from '@/protocols/aeternity/config';
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
-import { Protocol } from './protocols';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
+import { Protocol } from './protocols';
 
 export * from './filter';
 export * from './networks';
