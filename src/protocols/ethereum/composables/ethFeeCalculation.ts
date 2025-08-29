@@ -125,7 +125,8 @@ export function useEthFeeCalculation(
         : avalancheActiveNetworkSettings.value;
       const web3Eth = new Web3Eth(nodeUrl);
       const gasPrice = await web3Eth.getGasPrice();
-      defaultGasPrice.value = new BigNumber(fromWei(gasPrice, 'ether'));
+      // Add 10% buffer to prevent insufficient funds errors
+      defaultGasPrice.value = new BigNumber(fromWei(gasPrice, 'ether')).multipliedBy(1.1);
     }
   }
 
