@@ -12,6 +12,7 @@ import type { IFeeItem, Protocol } from '@/types';
 import { tg } from '@/popup/plugins/i18n';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
+import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/avalancheNetworkSettings';
 import { PROTOCOLS } from '@/constants';
 import { ETH_GAS_LIMIT } from '../config';
 
@@ -27,6 +28,7 @@ export function useEthFeeCalculation(
 ) {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
   const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
+  const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
 
   const feeSelectedIndex = ref(0);
   const gasLimit = ref(ETH_GAS_LIMIT);
@@ -80,7 +82,7 @@ export function useEthFeeCalculation(
       ];
     }
 
-    // BNB Chain: simple gasPrice * multiplier
+    // BNB Chain & Avalanche: simple gasPrice * multiplier
     return [
       {
         fee: defaultGasPrice.value
@@ -117,8 +119,10 @@ export function useEthFeeCalculation(
       defaultBaseFeePerGas.value = new BigNumber(fromWei(feeData.baseFeePerGas!, 'ether'));
       defaultMaxFeePerGas.value = new BigNumber(fromWei(feeData.maxFeePerGas!, 'ether'));
       defaultMaxPriorityFeePerGas.value = new BigNumber(fromWei(feeData.maxPriorityFeePerGas!, 'ether'));
-    } else {
-      const { nodeUrl } = bnbActiveNetworkSettings.value;
+    } else if (protocol === PROTOCOLS.bnb || protocol === PROTOCOLS.avalanche) {
+      const { nodeUrl } = protocol === PROTOCOLS.bnb
+        ? bnbActiveNetworkSettings.value
+        : avalancheActiveNetworkSettings.value;
       const web3Eth = new Web3Eth(nodeUrl);
       const gasPrice = await web3Eth.getGasPrice();
       defaultGasPrice.value = new BigNumber(fromWei(gasPrice, 'ether'));
@@ -140,7 +144,7 @@ export function useEthFeeCalculation(
   const maxFee = computed(() => (
     protocol === PROTOCOLS.ethereum
       ? maxFeePerGas.value!.multipliedBy(gasLimit.value).multipliedBy(recipientsCount.value)
-      : fee.value // for BNB, maxFee is just fee
+      : fee.value // for BNB & Avalanche, maxFee is just fee
   ));
 
   return {
