@@ -757,7 +757,7 @@ export function getActivityHash(activity: any) {
   );
 }
 
-export const isEvm = (p?: Protocol | null) => !!p && EVM_PROTOCOLS.includes(p);
+export const isEvm = (protocol: Protocol): boolean => EVM_PROTOCOLS.includes(protocol);
 
 /**
  * Check if a contract ID belongs to an EVM-compatible chain
