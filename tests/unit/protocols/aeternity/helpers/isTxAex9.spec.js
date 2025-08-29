@@ -1,5 +1,5 @@
-import { STUB_TRANSACTIONS } from '../../../src/constants/stubs';
-import { isTransactionAex9 } from '../../../src/protocols/aeternity/helpers';
+import { STUB_TRANSACTIONS } from '../../../../../src/constants/stubs';
+import { isTransactionAex9 } from '../../../../../src/protocols/aeternity/helpers';
 
 const tests = ({
   changeAllowance, createAllowance, transfer, pendingTransfer,
