@@ -3,6 +3,9 @@ import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
 import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
+import More from '../../src/popup/pages/More.vue';
+import Settings from '../../src/popup/pages/Settings.vue';
+import Networks from '../../src/popup/pages/Networks.vue';
 import * as environment from '../../src/constants/environment';
 
 const OLD_ENV = process.env;
@@ -31,6 +34,8 @@ jest.mock('../../src/constants/environment', () => ({
 jest.mock('../../src/composables', () => ({
   useAccounts: jest.fn(() => ({
     accounts: [],
+    activeAccount: { value: { protocol: 'aeternity', address: 'ak_test' } },
+    protocolsInUse: ['aeternity'],
   })),
   useAeMiddleware: jest.fn(() => ({
     fetchMiddlewareStatus: jest.fn(),
@@ -40,9 +45,52 @@ jest.mock('../../src/composables', () => ({
   })),
   useUi: jest.fn(() => ({
     loginTargetLocation: jest.fn(),
+    isBiometricLoginEnabled: { value: false },
+    saveErrorLog: { value: false },
+    setSaveErrorLog: jest.fn(),
   })),
   useAuth: jest.fn(() => ({
     openEnableBiometricLoginModal: jest.fn(),
+    isMnemonicEncrypted: { value: false },
+    isUsingDefaultPassword: { value: true },
+    lockWallet: jest.fn(),
+  })),
+  useAeSdk: jest.fn(() => ({
+    isNodeMainnet: { value: false },
+    isNodeTestnet: { value: true },
+  })),
+  useAddressBook: jest.fn(() => ({
+    addressBook: { value: {} },
+  })),
+  useCurrencies: jest.fn(() => ({
+    currentCurrencyInfo: { value: { code: 'usd', symbol: '$' } },
+  })),
+  useNetworks: jest.fn(() => ({
+    activeNetwork: {
+      name: 'Testnet',
+      type: 'Testnet',
+      protocols: {
+        aeternity: { nodeUrl: 'https://testnet.aeternity.io' },
+      },
+    },
+    networks: [
+      {
+        name: 'Mainnet',
+        type: 'Mainnet',
+        protocols: {
+          aeternity: { nodeUrl: 'https://mainnet.aeternity.io' },
+        },
+      },
+      {
+        name: 'Testnet',
+        type: 'Testnet',
+        protocols: {
+          aeternity: { nodeUrl: 'https://testnet.aeternity.io' },
+        },
+      },
+    ],
+    switchNetwork: jest.fn(),
+    deleteCustomNetwork: jest.fn(),
   })),
 }));
 jest.mock('@/utils', () => ({
@@ -91,6 +139,18 @@ const testCases = [
   {
     name: 'PrivacyPolicy',
     page: PrivacyPolicy,
+  },
+  {
+    name: 'More',
+    page: More,
+  },
+  {
+    name: 'Settings',
+    page: Settings,
+  },
+  {
+    name: 'Networks',
+    page: Networks,
   },
 ];
 
