@@ -1,5 +1,5 @@
 import type { IDefaultNetworkTypeData } from '@/types';
-import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
+import { ALCHEMY_API_KEY, NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
 
 export const BNB_PROTOCOL_NAME = 'BNB';
 
@@ -30,11 +30,11 @@ export const BNB_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> = {
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://bscscan.com',
     middlewareUrl: 'https://api.etherscan.io/v2/api ',
-    tokenMiddlewareUrl: '', // keep empty for now (skip token APIs)
+    tokenMiddlewareUrl: 'https://api.binplorer.com',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://testnet.bscscan.com',
     middlewareUrl: 'https://api.etherscan.io/v2/api ',
-    tokenMiddlewareUrl: '',
+    tokenMiddlewareUrl: `https://bnb-testnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   },
 };

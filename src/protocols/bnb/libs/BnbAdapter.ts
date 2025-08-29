@@ -42,7 +42,7 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, NETWORK_TYPE_MAINNET, PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -66,6 +66,7 @@ import { EtherscanExplorer } from '@/protocols/ethereum/libs/EtherscanExplorer';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '@/protocols/ethereum/helpers';
 import { EthplorerService } from '@/protocols/ethereum/libs/EthplorerService';
+import { AlchemyService } from '@/protocols/evm/libs/AlchemyService';
 
 const TRANSACTION_POLLING_INTERVAL = 6000;
 const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
@@ -250,28 +251,53 @@ export class BnbAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchAvailableTokens(): Promise<IToken[] | null> {
-    const { bnbActiveNetworkPredefinedSettings } = useBnbNetworkSettings();
-    const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
-    if (!apiUrl) return null;
-    try {
-      const response = await new EthplorerService(apiUrl).fetchTopTokens();
-      return response;
-    } catch (error: any) {
-      Logger.write(error);
-      return null;
+    const {
+      bnbActiveNetworkSettings,
+      bnbActiveNetworkPredefinedSettings,
+    } = useBnbNetworkSettings();
+    const predefinedUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    const chainId = Number(
+      bnbActiveNetworkSettings.value.chainId
+      || bnbActiveNetworkPredefinedSettings.value.chainId,
+    );
+
+    // Mainnet: use Ethplorer top tokens (temporary solution like ETH)
+    if (chainId === Number(BNB_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
+      try {
+        const response = await new EthplorerService(predefinedUrl)
+          .fetchTopTokens(PROTOCOLS.bnb);
+        // Tag protocol as BNB
+        return (response || [])?.map((t) => ({ ...t, protocol: PROTOCOLS.bnb }));
+      } catch (error: any) {
+        Logger.write(error);
+        return null;
+      }
     }
+
+    // Testnet: no Alchemy top-tokens endpoint – return null to use cache/manual
+    return null;
   }
 
   override async fetchAccountTokenBalances(
     address: string,
   ): Promise<ITokenBalance[] | null> {
-    const { bnbActiveNetworkPredefinedSettings } = useBnbNetworkSettings();
+    const {
+      bnbActiveNetworkSettings,
+      bnbActiveNetworkPredefinedSettings,
+    } = useBnbNetworkSettings();
     const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     if (!apiUrl) return null;
+    const chainId = Number(bnbActiveNetworkSettings.value.chainId);
+
     try {
-      const response = await new EthplorerService(
-        apiUrl,
-      ).fetchAccountTokenBalances(address);
+      // Mainnet → Ethplorer balances
+      if (chainId === Number(BNB_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
+        const response = await new EthplorerService(apiUrl)
+          .fetchAccountTokenBalances(address, PROTOCOLS.bnb);
+        // Ensure protocol is BNB
+        return (response || [])?.map((b) => ({ ...b, protocol: PROTOCOLS.bnb }));
+      }
+      const response = await new AlchemyService(apiUrl).getTokenBalances(address);
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -282,13 +308,23 @@ export class BnbAdapter extends BaseProtocolAdapter {
   override async fetchTokenInfo(
     contractId: string,
   ): Promise<IToken | undefined> {
-    const { bnbActiveNetworkPredefinedSettings } = useBnbNetworkSettings();
+    const {
+      bnbActiveNetworkSettings,
+      bnbActiveNetworkPredefinedSettings,
+    } = useBnbNetworkSettings();
     const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     if (!apiUrl) return undefined;
+    const chainId = Number(bnbActiveNetworkSettings.value.chainId);
+
     try {
-      const response = await new EthplorerService(apiUrl).fetchTokenInfo(
-        contractId,
-      );
+      // Mainnet → Ethplorer token info
+      if (chainId === Number(BNB_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
+        const response = await new EthplorerService(apiUrl)
+          .fetchTokenInfo(contractId, PROTOCOLS.bnb);
+        return response ? { ...response, protocol: PROTOCOLS.bnb } : undefined;
+      }
+      // Testnet → Alchemy token metadata
+      const response = await new AlchemyService(apiUrl).getTokenMetadata(contractId);
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -301,6 +337,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     from,
     data = '0x',
     value,
+    gas,
   }: any = {}): Promise<ITransferResponse> {
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByAddress } = useAccounts();
@@ -327,10 +364,24 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
+    // Determine gas limit: prefer provided gas from dapp/estimator
+    let gasLimitHex: string;
+    if (gas != null) {
+      let gasNum: number;
+      if (typeof gas === 'string') {
+        gasNum = gas.startsWith('0x') ? Number(gas) : Number(gas);
+      } else {
+        gasNum = Number(gas);
+      }
+      gasLimitHex = `0x${gasNum.toString(16)}`;
+    } else {
+      gasLimitHex = toHex(String(BNB_GAS_LIMIT));
+    }
+
     const txData: TxData = {
       nonce,
       gasPrice,
-      gasLimit: toHex(String(BNB_GAS_LIMIT)),
+      gasLimit: gasLimitHex,
       to,
       value,
       data,

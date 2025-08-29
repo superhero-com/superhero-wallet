@@ -263,7 +263,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     try {
       // Temporary solution for fetching the ERC-20 tokens.
       // TODO Replace with our own node API
-      const response = await new EthplorerService(apiUrl).fetchTopTokens();
+      const response = await new EthplorerService(apiUrl).fetchTopTokens(PROTOCOLS.ethereum);
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -277,7 +277,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     try {
       // Temporary solution for fetching the ERC-20 token balances.
       // TODO Replace with our own node API
-      const response = await new EthplorerService(apiUrl).fetchAccountTokenBalances(address);
+      const response = await new EthplorerService(apiUrl).fetchAccountTokenBalances(
+        address,
+        PROTOCOLS.ethereum,
+      );
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -291,7 +294,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     try {
       // Temporary solution for fetching the ERC-20 token info.
       // TODO Replace with our own node API
-      const response = await new EthplorerService(apiUrl).fetchTokenInfo(contractId);
+      const response = await new EthplorerService(apiUrl).fetchTokenInfo(
+        contractId,
+        PROTOCOLS.ethereum,
+      );
       return response;
     } catch (error: any) {
       Logger.write(error);

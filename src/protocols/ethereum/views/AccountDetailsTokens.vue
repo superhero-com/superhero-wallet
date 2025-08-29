@@ -5,7 +5,7 @@
         <AssetList
           v-if="isOnline"
           :search-term="searchPhrase"
-          :protocol="PROTOCOLS.ethereum"
+          :protocol="selectedProtocol"
           class="tokens-list"
           owned-only
         />
@@ -26,6 +26,7 @@ import {
   defineComponent,
 } from 'vue';
 import { PROTOCOLS } from '@/constants';
+import type { Protocol } from '@/types';
 import { useConnection, useTransactionAndTokenFilter } from '@/composables';
 
 import AssetList from '@/popup/components/Assets/AssetList.vue';
@@ -42,8 +43,13 @@ export default defineComponent({
   },
   props: {
     showFilters: Boolean,
+    protocol: {
+      type: String as () => Protocol,
+      required: false,
+      default: PROTOCOLS.ethereum,
+    },
   },
-  setup() {
+  setup(props) {
     const { isOnline } = useConnection();
     const { searchPhrase } = useTransactionAndTokenFilter();
 
@@ -51,6 +57,7 @@ export default defineComponent({
       PROTOCOLS,
       isOnline,
       searchPhrase,
+      selectedProtocol: props.protocol,
     };
   },
 });

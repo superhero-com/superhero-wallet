@@ -56,9 +56,12 @@ export function useAccountAssetsList({
   );
 
   const accountTokenBalances = computed(
-    () => getAccountTokenBalances(isMultisig
-      ? activeMultisigAccount.value?.gaAccountId!
-      : activeAccount.value.address),
+    () => getAccountTokenBalances(
+      isMultisig
+        ? activeMultisigAccount.value?.gaAccountId!
+        : activeAccount.value.address,
+      accountProtocol.value,
+    ),
   );
 
   const accountAvailableTokens = computed(

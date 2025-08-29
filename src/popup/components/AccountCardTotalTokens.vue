@@ -33,7 +33,7 @@ export default defineComponent({
     const { hasTokensSupport } = adapter;
 
     const totalTokens = computed(
-      () => getAccountTokenBalances(props.account.address).length,
+      () => getAccountTokenBalances(props.account.address, props.account.protocol).length,
     );
 
     return {
