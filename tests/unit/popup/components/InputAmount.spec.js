@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 import { config, mount } from '@vue/test-utils';
 import { defineRule } from 'vee-validate';
-import InputAmount from '../../src/popup/components/InputAmount.vue';
-import { PROTOCOLS } from '../../src/constants';
+import InputAmount from '../../../../src/popup/components/InputAmount.vue';
+import { PROTOCOLS } from '../../../../src/constants';
 
 const maxBalance = 10000;
 const selectedAsset = {

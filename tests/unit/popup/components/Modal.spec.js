@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import Modal from '../../src/popup/components/Modal.vue';
+import Modal from '../../../../src/popup/components/Modal.vue';
 
 describe('Modal', () => {
   it('should close on button close click', async () => {
@@ -43,33 +43,18 @@ describe('Modal', () => {
   });
 
   [
-    {
-      slot: 'header',
-      className: '.header',
-    },
-    {
-      slot: 'default',
-      className: '.body',
-    },
-    {
-      slot: 'footer',
-      className: '.fixed-screen-footer',
-    },
+    { slot: 'header', className: '.header' },
+    { slot: 'default', className: '.body' },
+    { slot: 'footer', className: '.fixed-screen-footer' },
   ].forEach(({ slot, className }) => it(`should have ${slot} slot`, async () => {
     const slotText = `${slot} test`;
     const wrapper = mount(Modal, {
-      props: {
-        show: true,
-      },
-      slots: {
-        [slot]: slotText,
-      },
+      props: { show: true },
+      slots: { [slot]: slotText },
       global: {
         mocks: {
           $t: () => 'locale-specific-text',
-          $store: {
-            state: {},
-          },
+          $store: { state: {} },
         },
       },
     });

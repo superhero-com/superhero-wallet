@@ -1,6 +1,6 @@
-import { ProtocolAdapterFactory } from '../../../../src/lib/ProtocolAdapterFactory';
-import { PROTOCOLS } from '../../../../src/constants';
-import { BnbAdapter } from '../../../../src/protocols/bnb/libs/BnbAdapter';
+import { ProtocolAdapterFactory } from '../../../../../src/lib/ProtocolAdapterFactory';
+import { PROTOCOLS } from '../../../../../src/constants';
+import { BnbAdapter } from '../../../../../src/protocols/bnb/libs/BnbAdapter';
 
 describe('BnbAdapter registration and metadata', () => {
   it('factory returns BnbAdapter instance for PROTOCOLS.bnb', () => {

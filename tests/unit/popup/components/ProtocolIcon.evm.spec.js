@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import ProtocolIcon from '../../../src/popup/components/ProtocolIcon.vue';
-import { PROTOCOLS, ICON_SIZES } from '../../../src/constants';
+import ProtocolIcon from '../../../../src/popup/components/ProtocolIcon.vue';
+import { PROTOCOLS, ICON_SIZES } from '../../../../src/constants';
 
 describe('ProtocolIcon - EVM modes', () => {
   it('single icon mode renders one icon for EVM protocol (ethereum)', () => {

@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import CheckBox from '../../src/popup/components/CheckBox.vue';
+import CheckBox from '../../../../src/popup/components/CheckBox.vue';
 
 describe('Checkbox', () => {
   it('should render', async () => {

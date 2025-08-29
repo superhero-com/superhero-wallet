@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import LinkButton from '../../src/popup/components/LinkButton.vue';
+import LinkButton from '../../../../src/popup/components/LinkButton.vue';
 
 describe('LinkButton', () => {
   it('should have correct "href" attribute', () => {

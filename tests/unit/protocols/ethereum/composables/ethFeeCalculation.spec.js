@@ -16,8 +16,8 @@ if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
 
 import { ref } from 'vue';
 import BigNumber from 'bignumber.js';
-import { useEthFeeCalculation } from '../../../../src/protocols/ethereum/composables/ethFeeCalculation';
-import { PROTOCOLS } from '../../../../src/constants';
+import { useEthFeeCalculation } from '../../../../../src/protocols/ethereum/composables/ethFeeCalculation';
+import { PROTOCOLS } from '../../../../../src/constants';
 
 jest.mock('web3-eth', () => {
   const impl = function Web3Eth() {
@@ -38,13 +38,13 @@ jest.mock('web3-eth', () => {
   };
 });
 
-jest.mock('../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
+jest.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: { value: { nodeUrl: 'https://rpc.example' } },
   }),
 }));
 
-jest.mock('../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
+jest.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: { value: { nodeUrl: 'https://bsc.rpc.example' } },
   }),
