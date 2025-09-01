@@ -70,7 +70,7 @@
       <template
         v-if="(
           (isDex || isTokenSale) && tokenList.length
-          || protocol === PROTOCOLS.ethereum && tokenList.length > 1
+          || EVM_PROTOCOLS.includes(protocol) && tokenList.length > 1
         )"
       >
         <TransactionDetailsPoolTokenRow
@@ -253,6 +253,7 @@ import {
   MODAL_LEDGER_SIGN,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
+  EVM_PROTOCOLS,
   RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
   TX_DIRECTION,
@@ -661,7 +662,7 @@ export default defineComponent({
           loading.value = false;
         }
       } else if (
-        protocol === PROTOCOLS.ethereum
+        EVM_PROTOCOLS.includes(protocol)
         && activeAccount
         && popupProps.value?.tx?.data
         && popupProps.value?.tx?.contractId
@@ -707,6 +708,7 @@ export default defineComponent({
       AnimatedSpinner,
       PAYLOAD_FIELD,
       PROTOCOLS,
+      EVM_PROTOCOLS,
       appName,
       confirm,
       cancel,

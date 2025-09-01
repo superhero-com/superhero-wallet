@@ -17,12 +17,14 @@ import {
   PROTOCOLS,
   STORAGE_KEYS,
   WALLET_CONNECT_PROJECT_ID,
+  EVM_PROTOCOLS,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 
-import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
-import { EthRpcSupportedMethods, IEthNetworkSettings } from '@/protocols/ethereum/types';
-import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
+import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_ETHERSCAN_PROXY_METHODS } from '@/protocols/ethereum/config';
+import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import type { Protocol, IAccount } from '@/types';
+import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
@@ -63,6 +65,11 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   const { openDefaultModal, openModal } = useModals();
 
   const ethAccounts = computed(() => accountsGroupedByProtocol.value[PROTOCOLS.ethereum] || []);
+  const evmAccounts = computed(() => (
+    EVM_PROTOCOLS
+      .map((p) => accountsGroupedByProtocol.value[p] || [])
+      .flat()
+  ));
 
   function closeAppIfOpenUsingDeeplink() {
     if (isOpenUsingDeeplink.value) {
@@ -140,24 +147,32 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
   }
 
   function getFormattedAccountsAndChains() {
-    const lastActiveAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
+    const networkList = Object.values(networks.value)
+      .sort(({ name }) => (name === activeNetwork.value.name) ? -1 : 1);
 
-    // Chain IDs with the active network's chain ID as the first one
-    const availableChainIds = uniq(
-      Object.values(networks.value)
-        .sort(({ name }) => (name === activeNetwork.value.name) ? -1 : 1)
-        .map(({ protocols }) => (protocols[PROTOCOLS.ethereum] as IEthNetworkSettings).chainId),
-    );
+    const chainIdsOrdered: string[] = [];
+    const chainIdToProtocol: Record<string, Protocol> = {};
 
-    // Supported chains (networks) in CAIP-2 format
-    const chains = availableChainIds.map((chainId) => `${ETH_CHAIN_NAMESPACE}:${chainId}`);
+    networkList.forEach(({ protocols }) => {
+      EVM_PROTOCOLS.forEach((protocol: Protocol) => {
+        const chainId = (protocols as any)[protocol]?.chainId?.toString();
+        if (!chainId) return;
+        if (!chainIdToProtocol[chainId]) {
+          chainIdToProtocol[chainId] = protocol;
+          chainIdsOrdered.push(chainId);
+        }
+      });
+    });
 
-    // User's accounts in CAIP-10 format. Active account first.
-    const accounts = chains.map(
-      (chain) => ethAccounts.value
-        .sort(({ address }) => (address === lastActiveAccount?.address) ? -1 : 1)
-        .map(({ address }) => `${chain}:${address}`),
-    ).flat();
+    const chains = chainIdsOrdered.map((chainId) => `${ETH_CHAIN_NAMESPACE}:${chainId}`);
+
+    const accounts = chainIdsOrdered.map((chainId) => {
+      const protocol = chainIdToProtocol[chainId] as Protocol;
+      const lastActive = getLastActiveProtocolAccount(protocol);
+      const protocolAccounts = ((accountsGroupedByProtocol.value[protocol] || []) as IAccount[])
+        .sort(({ address }: IAccount) => (address === lastActive?.address) ? -1 : 1);
+      return protocolAccounts.map(({ address }: IAccount) => `${ETH_CHAIN_NAMESPACE}:${chainId}:${address}`);
+    }).flat();
 
     return { chains, accounts };
   }
@@ -166,30 +181,40 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
       const { url, name } = wcSession.value?.peer.metadata! || {};
-      const { result, error } = await handleEthereumRpcMethod(
+      const { result, error } = await handleEvmRpcMethod(
         url,
         proposal.request.method as EthRpcSupportedMethods,
         proposal.request.method === ETH_RPC_METHODS.signPersonal
           ? { data: proposal.request.params[0] }
           : proposal.request.params[0],
         name,
+        proposal.chainId,
       );
 
-      web3wallet!.respondSessionRequest({
-        topic,
-        response: {
-          id,
-          jsonrpc: '2.0',
-          ...(result
-            ? { result }
-            : {
-              error: {
-                code: error?.code || 5000,
-                message: error?.message || 'User rejected.',
-              },
-            }),
-        },
-      });
+      try {
+        const activeSessions = web3wallet!.getActiveSessions?.() || {} as any;
+        if (!activeSessions[topic]) {
+          // Session is no longer active; skip responding to avoid throwing
+          return;
+        }
+        web3wallet!.respondSessionRequest({
+          topic,
+          response: {
+            id,
+            jsonrpc: '2.0',
+            ...(result
+              ? { result }
+              : {
+                error: {
+                  code: error?.code || 5000,
+                  message: error?.message || 'User rejected.',
+                },
+              }),
+          },
+        });
+      } catch (e) {
+        // Ignore if topic invalid; session likely closed concurrently
+      }
       closeAppIfOpenUsingDeeplink();
     });
 
@@ -208,7 +233,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
    */
   function monitorActiveAccountAndNetwork() {
     const unwatch = watch([activeAccount, activeNetwork], async ([newAccount]) => {
-      if (newAccount.protocol !== PROTOCOLS.ethereum) {
+      if (!EVM_PROTOCOLS.includes(newAccount.protocol)) {
         return;
       }
       if (web3wallet && wcSession.value) {
@@ -218,13 +243,24 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         wcSession.value.namespaces[ETH_CHAIN_NAMESPACE].accounts = accounts;
 
         try {
+          const activeProtocols = (networks.value[activeNetwork.value.name].protocols as any);
+          const preferredChainId = `${ETH_CHAIN_NAMESPACE}:${activeProtocols[newAccount.protocol].chainId}`;
           await web3wallet.emitSessionEvent({
             topic: wcSession.value.topic,
             event: {
               name: 'accountsChanged',
               data: [newAccount.address],
             },
-            chainId: chains[0],
+            chainId: preferredChainId,
+          });
+
+          await web3wallet.emitSessionEvent({
+            topic: wcSession.value.topic,
+            event: {
+              name: 'chainChanged',
+              data: activeProtocols[newAccount.protocol].chainId,
+            },
+            chainId: preferredChainId,
           });
 
           const { acknowledged } = await web3wallet.updateSession({
@@ -256,17 +292,30 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       if (!web3wallet) {
         web3wallet = await initWeb3wallet();
       }
-
-      // Ask the DAPP to send `session_proposal` event.
-      await web3wallet.pair({ uri });
-
-      // After requesting pairing with the DAPP we receive session proposal
-      // which we need to approve or reject.
+      let proposalHandled = false;
       web3wallet.on('session_proposal', async ({ id, params: proposal }) => {
+        if (proposalHandled) return;
+        proposalHandled = true;
         const { accounts, chains } = getFormattedAccountsAndChains();
-        const methods: SupportedRequestMethod[] = ['personal_sign', 'eth_sendTransaction'];
-
-        monitorActiveSessionEvents();
+        const requestedMethods = proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.methods || [];
+        const baseMethods = [
+          ETH_RPC_METHODS.requestAccounts,
+          ETH_RPC_METHODS.getAccounts,
+          ETH_RPC_METHODS.getChainId,
+          ETH_RPC_METHODS.getBlockNumber,
+          ETH_RPC_METHODS.signPersonal,
+          ETH_RPC_METHODS.sendTransaction,
+          // common proxy calls often used by dapps
+          ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas,
+          ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionCount,
+          ETH_RPC_ETHERSCAN_PROXY_METHODS.gasPrice,
+          // EIP-5792
+          'wallet_getCapabilities' as any,
+        ];
+        const methods = uniq([
+          ...requestedMethods,
+          ...baseMethods,
+        ]) as SupportedRequestMethod[];
 
         try {
           if (isConfirmRequired) {
@@ -285,7 +334,6 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
                 [ETH_CHAIN_NAMESPACE]: {
                   accounts,
                   chains,
-                  // approving all the required events
                   events: uniq([...proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.events || [], 'accountsChanged']),
                   methods,
                 },
@@ -293,6 +341,8 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             }),
           });
 
+          // Attach listeners only after session is approved
+          monitorActiveSessionEvents();
           monitorActiveAccountAndNetwork();
           closeAppIfOpenUsingDeeplink();
         } catch (error: any) {
@@ -302,6 +352,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           wcState.connecting = false;
         }
       });
+
+      // Ask the DAPP to send `session_proposal` event.
+      await web3wallet.pair({ uri });
     } catch (error: any) {
       handleConnectionError(error);
     }
@@ -347,5 +400,6 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     wcSession,
     wcState,
     ethAccounts,
+    evmAccounts,
   };
 }

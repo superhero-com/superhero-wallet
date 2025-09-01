@@ -20,7 +20,7 @@
             v-if="accounts.length > 5 && accountsSelectOptions"
             :default-text="$t('dashboard.selectAccount')"
             :options="accountsSelectOptions"
-            :model-value="activeAccountAddress"
+            :model-value="`${activeAccountProtocol}:${activeAccountAddress}`"
             class="account-select-input"
             unstyled
             account-select
@@ -69,9 +69,15 @@
 
 <script lang="ts">
 import { PropType, computed, defineComponent } from 'vue';
-import type { IAccount, IFormSelectOption, IMultisigAccount } from '@/types';
+import type {
+  IAccount,
+  IFormSelectOption,
+  IMultisigAccount,
+  Protocol,
+} from '@/types';
 import { ROUTE_SEED_PHRASE_SETTINGS } from '@/popup/router/routeNames';
 import { useUi } from '@/composables';
+import { PROTOCOLS } from '@/constants';
 
 import DashboardCard from './DashboardCard.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
@@ -92,6 +98,7 @@ export default defineComponent({
     accounts: { type: Array as PropType<IAccount[] | IMultisigAccount[]>, default: () => [] },
     accountsSelectOptions: { type: Array as PropType<IFormSelectOption[]>, default: null },
     activeAccountAddress: { type: String, default: '' },
+    activeAccountProtocol: { type: String as PropType<Protocol>, default: PROTOCOLS.aeternity },
     activeIdx: { type: Number, default: 0 },
     balancesTotal: { type: String, default: null },
     isMultisig: Boolean,

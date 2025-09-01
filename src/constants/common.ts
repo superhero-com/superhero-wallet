@@ -1,4 +1,9 @@
-import type { ICurrency, IPermission, ObjectValues } from '@/types';
+import type {
+  ICurrency,
+  IPermission,
+  ObjectValues,
+  Protocol,
+} from '@/types';
 
 export const APP_NAME = 'Superhero Wallet';
 export const APP_URL = 'wallet.superhero.com';
@@ -14,7 +19,9 @@ export const PROTOCOLS = {
   ethereum: 'ethereum',
   aeternity: 'aeternity',
   solana: 'solana',
+  bnb: 'bnb',
 } as const;
+export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb];
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
 

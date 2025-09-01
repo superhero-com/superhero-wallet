@@ -178,8 +178,8 @@ export function useLatestTransactionList() {
       balances,
       (newBalances, oldBalances) => {
         accounts.value.forEach((account) => {
-          const oldBalance = oldBalances[account.address];
-          const newBalance = newBalances[account.address];
+          const oldBalance = oldBalances[account.protocol]?.[account.address];
+          const newBalance = newBalances[account.protocol]?.[account.address];
           if (oldBalance && newBalance && !newBalance.isEqualTo(oldBalance)) {
             setTimeout(
               () => loadAccountLatestTransactions(account),

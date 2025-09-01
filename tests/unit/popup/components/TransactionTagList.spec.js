@@ -1,15 +1,15 @@
 import { mount } from '@vue/test-utils';
 import { i18n, tg } from '@/popup/plugins/i18n';
 import { useFungibleTokens } from '@/composables';
-import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
+import TransactionTagList from '../../../../src/popup/components/TransactionTagList.vue';
 import {
   STUB_TOKEN_CONTRACT_ADDRESS,
   STUB_TRANSACTIONS,
-} from '../../src/constants/stubs';
+} from '../../../../src/constants/stubs';
 import {
   AENS,
   PROTOCOLS,
-} from '../../src/constants';
+} from '../../../../src/constants';
 
 const transactionLabels = {
   payForGaAttach: [

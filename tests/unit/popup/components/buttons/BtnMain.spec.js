@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import BtnMain from '../../src/popup/components/buttons/BtnMain.vue';
+import BtnMain from '../../../../../src/popup/components/buttons/BtnMain.vue';
 
 describe('BtnMain', () => {
   it('handles properly the variants', () => {

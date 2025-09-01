@@ -1,7 +1,34 @@
 <template>
+  <!-- For EVM protocols, show multiple coin icons only when showSuperIcon is true -->
+  <div
+    v-if="isEvmProtocol && showSuperIcon"
+    class="evm-protocol-icons"
+    :class="[iconSize]"
+  >
+    <component
+      :is="icon"
+      v-for="(icon, index) in evmIcons.slice(0, maxVisibleIcons)"
+      :key="index"
+      class="protocol-icon"
+      :class="[iconSize]"
+      :style="{
+        marginLeft: index > 0 ? '-10px' : '0',
+        zIndex: maxVisibleIcons + 1 - index,
+      }"
+    />
+    <span
+      v-if="evmIcons.length > maxVisibleIcons"
+      class="icon protocol-icon evm-more-indicator"
+      :class="[iconSize]"
+    >
+      &middot;&middot;&middot;
+    </span>
+  </div>
+
+  <!-- For non-EVM protocols or when showSuperIcon is false, show single icon -->
   <component
     :is="selectedIcon"
-    v-if="selectedIcon && !isSolanaImg"
+    v-else-if="selectedIcon && !isSolanaImg"
     class="protocol-icon"
     :class="[iconSize]"
   />
@@ -21,17 +48,22 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { ICON_SIZES, PROTOCOLS } from '@/constants';
+import { ICON_SIZES, PROTOCOLS, EVM_PROTOCOLS } from '@/constants';
 import type { Protocol } from '@/types';
-
+import { isEvm } from '@/utils';
 import AeternityLogo from '@/icons/logo/aeternity.svg?vue-component';
-import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
-import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
-import SolanaIcon from '@/icons/coin/solana.svg?vue-component';
 
-const SIZES = [ICON_SIZES.xs, ICON_SIZES.md, ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xl] as const;
+import { COIN_ICONS } from './AssetIcon.vue';
 
-export type AllowedProtocolIconSize = typeof SIZES[number];
+const SIZES = [
+  ICON_SIZES.xs,
+  ICON_SIZES.md,
+  ICON_SIZES.rg,
+  ICON_SIZES.lg,
+  ICON_SIZES.xl,
+] as const;
+
+export type AllowedProtocolIconSize = (typeof SIZES)[number];
 
 export default defineComponent({
   props: {
@@ -44,13 +76,20 @@ export default defineComponent({
       default: ICON_SIZES.md,
       validator: (val: AllowedProtocolIconSize) => SIZES.includes(val),
     },
+    showSuperIcon: {
+      type: Boolean,
+      default: false,
+    },
+    maxVisibleIcons: {
+      type: Number,
+      default: 3,
+      validator: (val: number) => val > 0,
+    },
   },
   setup(props) {
     const iconsMap: Record<Protocol, Component> = {
-      [PROTOCOLS.aeternity]: AeternityLogo,
-      [PROTOCOLS.bitcoin]: BitcoinIcon,
-      [PROTOCOLS.ethereum]: EthereumIcon,
-      [PROTOCOLS.solana]: SolanaIcon,
+      ...COIN_ICONS,
+      [PROTOCOLS.aeternity]: AeternityLogo, // Override with logo version
     };
 
     const selectedIcon = computed((): Component => iconsMap[props.protocol]);
@@ -61,9 +100,16 @@ export default defineComponent({
     // We also prefix inlined SVG IDs via SVGO in vue.config.js for extra safety.
     const isSolanaImg = computed(() => props.protocol === PROTOCOLS.solana);
 
+    const isEvmProtocol = computed((): boolean => isEvm(props.protocol));
+    const evmIcons = computed((): Component[] => (
+      EVM_PROTOCOLS.map((protocol) => iconsMap[protocol])
+    ));
+
     return {
       selectedIcon,
+      isEvmProtocol,
       isSolanaImg,
+      evmIcons,
     };
   },
 });
@@ -91,6 +137,31 @@ export default defineComponent({
 
   &.xl {
     --icon-size: var(--icon-size-xl);
+  }
+}
+
+.evm-protocol-icons {
+  display: inline-flex;
+  align-items: center;
+
+  .protocol-icon {
+    width: var(--icon-size-sm) !important;
+    height: var(--icon-size-sm) !important;
+  }
+
+  .evm-more-indicator {
+    font-weight: bold;
+    color: #a3a3a3;
+    background-color: #464646;
+    border-radius: 50%;
+    font-size: 12px;
+    margin-left: -10px;
+    width: var(--icon-size-sm) !important;
+    height: var(--icon-size-sm) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 0;
   }
 }
 </style>

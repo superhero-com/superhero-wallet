@@ -4,6 +4,7 @@
     v-if="viewComponentName"
     :page-did-enter="pageDidEnter"
     :page-will-enter="pageWillEnter"
+    :protocol="protocol"
   />
   <div v-else>
     <InfoBox
@@ -42,7 +43,7 @@ import type {
   ProtocolViewsConfig,
 } from '@/types';
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOLS } from '@/constants';
-import { useAccounts, useNetworks } from '@/composables';
+import { useAccounts, useLatestTransactionList, useNetworks } from '@/composables';
 import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -61,6 +62,7 @@ const views: Record<Protocol, ProtocolViewsConfig> = {
   bitcoin: bitcoinViews,
   ethereum: ethereumViews,
   solana: solanaViews,
+  bnb: ethereumViews,
 };
 
 export default defineComponent({
@@ -78,6 +80,7 @@ export default defineComponent({
     const route = useRoute();
     const routeMeta = route.meta as WalletRouteMeta;
     const routeParams = route.params;
+    const transactionHash = routeParams.hash as string | undefined;
     const transactionOwner = routeParams.transactionOwner as string | undefined;
 
     const router = useRouter();
@@ -92,6 +95,18 @@ export default defineComponent({
       if (routeMeta.isMultisig) {
         return PROTOCOLS.aeternity;
       }
+
+      // If we have a transaction hash, try to get the actual transaction protocol
+      if (transactionHash) {
+        // Try to find the transaction in the latest transactions
+        const { allLatestTransactions } = useLatestTransactionList();
+        const transaction = allLatestTransactions.value.find((tx) => tx.hash === transactionHash);
+
+        if (transaction?.protocol) {
+          return transaction.protocol;
+        }
+      }
+
       if (transactionOwner) {
         const ownerProtocol = ProtocolAdapterFactory.getAdapterByAccountAddress(
           transactionOwner,
@@ -144,6 +159,7 @@ export default defineComponent({
       componentToDisplay,
       pageDidEnter,
       pageWillEnter,
+      protocol,
     };
   },
 });

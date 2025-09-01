@@ -1,5 +1,5 @@
-import { STUB_TRANSACTIONS } from '../../../src/constants/stubs';
-import { categorizeContractCallTxObject } from '../../../src/protocols/aeternity/helpers';
+import { STUB_TRANSACTIONS } from '../../../../../src/constants/stubs';
+import { categorizeContractCallTxObject } from '../../../../../src/protocols/aeternity/helpers';
 
 const expectedKeys = {
   retip_token: ['url', 'amount', 'assetContractId'],
@@ -30,8 +30,8 @@ const testCases = ({ retipToken, tipToken, ...otherTxs }) => [
 
 describe('categorizeContractCallTxObject', () => {
   testCases(STUB_TRANSACTIONS).forEach((test) => it(
-    `should return correct object for ${test.tx.type}/${test.tx.function ?? ''}\
-${test.pending ? '/pending' : ''}${test.incomplete ? '/incomplete' : ''}`,
+    `should return correct object for ${test.tx.type}/${test.tx.function ?? ''}`
+    + `${test.pending ? '/pending' : ''}${test.incomplete ? '/incomplete' : ''}`,
     () => {
       const result = categorizeContractCallTxObject(test);
       if (test.returnNull) {

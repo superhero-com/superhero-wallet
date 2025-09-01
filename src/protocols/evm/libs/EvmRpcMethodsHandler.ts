@@ -11,13 +11,14 @@ import Web3Eth, { getBlock } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { isEmpty } from 'lodash-es';
 
-import type { IModalProps } from '@/types';
+import type { IModalProps, Protocol } from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
 import { watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { EtherscanService, EtherscanDefaultResponse } from '@/protocols/ethereum/libs/EtherscanService';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
+import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import {
   ETH_CONTRACT_ID,
@@ -25,9 +26,11 @@ import {
   ETH_RPC_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 
 import {
   CONNECT_PERMISSIONS,
+  EVM_PROTOCOLS,
   PROTOCOLS,
 } from '@/constants';
 import {
@@ -37,7 +40,6 @@ import {
 } from '@/composables';
 
 function getUnknownError(message: string) {
-  // ERROR_BLANKET_ERROR
   return { error: { code: -32603, message } };
 }
 
@@ -50,7 +52,7 @@ const ERROR_USER_REJECTED_REQUEST = {
 
 const isCheckingPermissions = ref(false);
 
-async function checkOrAskEthPermission(aepp: string) {
+async function checkOrAskEvmPermission(aepp: string, protocol: Protocol) {
   const { checkOrAskPermission } = usePermissions();
   const { activeAccount } = useAccounts();
   await watchUntilTruthy(() => !isCheckingPermissions.value);
@@ -60,7 +62,7 @@ async function checkOrAskEthPermission(aepp: string) {
     METHODS.subscribeAddress,
     aepp,
     {
-      protocol: PROTOCOLS.ethereum,
+      protocol,
       access: [
         CONNECT_PERMISSIONS.address,
         CONNECT_PERMISSIONS.networks,
@@ -74,20 +76,76 @@ async function checkOrAskEthPermission(aepp: string) {
   return permission;
 }
 
-export async function handleEthereumRpcMethod(
+function getProtocolCoinContractId(protocol: Protocol) {
+  if (protocol === PROTOCOLS.bnb) return BNB_CONTRACT_ID as any;
+  return ETH_CONTRACT_ID as any;
+}
+
+function parseCaipChainId(chainIdOrCaip?: string): string | undefined {
+  if (!chainIdOrCaip) return undefined;
+  if (chainIdOrCaip.includes(':')) return chainIdOrCaip.split(':')[1];
+  // could be hex like 0x38 or decimal
+  return chainIdOrCaip.startsWith('0x')
+    ? BigInt(chainIdOrCaip).toString(10)
+    : chainIdOrCaip;
+}
+
+function selectProtocolByChainId(targetChainId?: string): Protocol {
+  const { activeNetwork, networks } = useNetworks();
+  const { activeAccount } = useAccounts();
+  const network = networks.value[activeNetwork.value.name];
+  if (targetChainId) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const protocol of EVM_PROTOCOLS) {
+      const protoSettings: any = network.protocols[protocol];
+      if (protoSettings?.chainId?.toString() === targetChainId.toString()) {
+        return protocol;
+      }
+    }
+  }
+  // Fallback to currently active EVM protocol if available, otherwise ethereum
+  return EVM_PROTOCOLS.includes(activeAccount.value.protocol)
+    ? activeAccount.value.protocol
+    : PROTOCOLS.ethereum;
+}
+
+function getActiveEvmNetworkSettings(protocol: Protocol) {
+  if (protocol === PROTOCOLS.bnb) {
+    const {
+      bnbActiveNetworkSettings,
+      bnbActiveNetworkPredefinedSettings,
+    } = useBnbNetworkSettings();
+    return {
+      chainId: bnbActiveNetworkSettings.value.chainId,
+      nodeUrl: bnbActiveNetworkSettings.value.nodeUrl,
+      predefined: bnbActiveNetworkPredefinedSettings.value,
+    };
+  }
+  const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+  return {
+    chainId: ethActiveNetworkSettings.value.chainId,
+    nodeUrl: ethActiveNetworkSettings.value.nodeUrl,
+    predefined: ethActiveNetworkPredefinedSettings.value,
+  };
+}
+
+export async function handleEvmRpcMethod(
   aepp: string,
   method: EthRpcSupportedMethods,
   params: IEthRpcMethodParameters,
   name?: string,
+  caipChainId?: string,
 ): Promise<{ result?: any; error?: { code: number; message: string } }> {
   const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
   const { getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
-  const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-  const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
+
+  const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
+  const protocol = selectProtocolByChainId(requestedChainId);
+  const { chainId, nodeUrl, predefined } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEthPermission(aepp))
+    return (await checkOrAskEvmPermission(aepp, protocol))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
@@ -96,11 +154,11 @@ export async function handleEthereumRpcMethod(
     const { host } = new URL(aepp);
 
     if (checkPermission(host, METHODS.connect)) {
-      const ethereumAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
+      const evmAccount = getLastActiveProtocolAccount(protocol);
 
       return {
-        result: ethereumAccount?.address
-          ? [ethereumAccount?.address]
+        result: evmAccount?.address
+          ? [evmAccount?.address]
           : [],
       };
     }
@@ -108,8 +166,22 @@ export async function handleEthereumRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEthPermission(aepp)) {
-      return { result: [getLastActiveProtocolAccount(PROTOCOLS.ethereum)!.address] };
+    if (await checkOrAskEvmPermission(aepp, protocol)) {
+      // ensure we emit connect event for EIP-1193 consumers
+      const account = getLastActiveProtocolAccount(protocol)!;
+      try {
+        const preferredChainId = `0x${BigInt(chainId).toString(16)}`;
+        // Guard browser for non-extension environments
+        if (typeof browser !== 'undefined' && browser?.runtime?.sendMessage) {
+          browser.runtime.sendMessage({
+            superheroWalletApproved: true,
+            method: ETH_RPC_WALLET_EVENTS.chainChanged,
+            result: preferredChainId,
+            type: 'result',
+          });
+        }
+      } catch (_) { /* noop */ }
+      return { result: [account.address] };
     }
     return ERROR_USER_REJECTED_REQUEST;
   }
@@ -122,7 +194,7 @@ export async function handleEthereumRpcMethod(
 
   if (method === ETH_RPC_METHODS.getBalance) {
     let balance: string;
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     try {
       balance = await adapter.fetchBalance(toChecksumAddress(params?.address!));
     } catch (error: any) {
@@ -131,12 +203,14 @@ export async function handleEthereumRpcMethod(
     return { result: balance ? toWei(balance, 'ether') : 0 };
   }
   if (method === ETH_RPC_METHODS.getChainId) {
-    return { result: `0x${BigInt(networks.value[activeNetwork.value.name].protocols[PROTOCOLS.ethereum].chainId).toString(16)}` };
+    return {
+      result: `0x${BigInt((networks.value[activeNetwork.value.name].protocols[protocol] as any).chainId).toString(16)}`,
+    };
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
     const network = Object.values(networks.value)
       .find(({ protocols }) => (
-        protocols[PROTOCOLS.ethereum].chainId === Number(params?.chainId).toString()
+        (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
       ));
     if (network) {
       switchNetwork(network.name);
@@ -160,46 +234,53 @@ export async function handleEthereumRpcMethod(
     return { result: currentBlock?.number.toString() };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
-    const { updateFeeList, maxFeePerGas } = useEthFeeCalculation();
+    const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
 
     await updateFeeList();
 
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
     const url = aepp;
 
-    const estimatedGas = params?.gas ? null : (await new EtherscanService(
-      ethActiveNetworkPredefinedSettings.value.middlewareUrl,
-      chainId,
-    )
-      .fetchFromApi({
-        module: 'proxy',
-        action: 'eth_estimateGas',
-        to: params.to,
-        // Etherscan will fail to fetch something if there is a leading 0 after 0x
-        value: `0x${Number(params.value).toString(16)}`,
-        data: params.data || '0x',
-      }))?.result;
+    let estimatedGas = null as any;
+    try {
+      estimatedGas = params?.gas ? null : (await new EtherscanService(
+        predefined.middlewareUrl,
+        chainId,
+      )
+        .fetchFromApi({
+          module: 'proxy',
+          action: 'eth_estimateGas',
+          to: params.to,
+          value: `0x${Number(params.value || 0).toString(16)}`,
+          data: params.data || '0x',
+        }))?.result;
+    } catch (_) {
+      // fall back to a conservative gas limit if estimation API fails
+      estimatedGas = '0x5208'; // 21000
+    }
 
-    const gas = Number(params?.gas ? params?.gas : estimatedGas);
+    const gasHexOrNum = params?.gas ?? estimatedGas;
+    const gas = Number(gasHexOrNum);
     const senderId = toChecksumAddress(params.from!);
     const recipientId = toChecksumAddress(params.to!);
     const isCoinTransfer = !params.data;
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
-      protocol: PROTOCOLS.ethereum,
+      protocol,
       app: { href: url, host: url ? new URL(url).hostname : '', name: name || url },
       tx: {
         amount: params.value ? +fromWei(params.value, 'ether') : 0,
         fee: gas * +(maxFeePerGas.value || 0),
         gas,
-        contractId: (isCoinTransfer) ? ETH_CONTRACT_ID : recipientId,
+        contractId: (isCoinTransfer) ? getProtocolCoinContractId(protocol) : recipientId,
         type: Tag[tag],
         tag,
         senderId,
         recipientId,
         data: params.data,
       },
+      fromAccount: senderId,
     };
 
     const permitted = await checkOrAskPermission(
@@ -212,7 +293,7 @@ export async function handleEthereumRpcMethod(
         try {
           const actionResult = await adapter.transferPreparedTransaction({
             ...params,
-            ...(params?.gas ? {} : { gas: estimatedGas }),
+            gas: gasHexOrNum,
           });
           return actionResult?.hash
             ? { result: actionResult?.hash }
@@ -225,7 +306,7 @@ export async function handleEthereumRpcMethod(
     return ERROR_USER_REJECTED_REQUEST;
   }
   if (method === ETH_RPC_METHODS.signPersonal) {
-    const ethereumAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
+    const evmAccount = getLastActiveProtocolAccount(protocol);
 
     let rawMessage: string;
 
@@ -239,13 +320,13 @@ export async function handleEthereumRpcMethod(
       METHODS.signMessage,
       aepp,
       {
-        protocol: PROTOCOLS.ethereum,
+        protocol,
         message: rawMessage,
       },
     );
-    if (permitted && ethereumAccount?.secretKey) {
+    if (permitted && evmAccount?.secretKey) {
       try {
-        const signedMessage = await sign(rawMessage, `0x${Buffer.from(ethereumAccount.secretKey).toString('hex')}`);
+        const signedMessage = await sign(rawMessage, `0x${Buffer.from(evmAccount.secretKey).toString('hex')}`);
         return { result: signedMessage.signature };
       } catch (e: any) {
         return getUnknownError(e.message);
@@ -262,7 +343,7 @@ export async function handleEthereumRpcMethod(
     method !== ETH_RPC_WALLET_EVENTS.chainChanged
     && Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
   ) {
-    const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
+    const apiUrl = predefined.middlewareUrl;
     let response: EtherscanDefaultResponse | null;
     try {
       response = await new EtherscanService(apiUrl, chainId)
@@ -278,6 +359,11 @@ export async function handleEthereumRpcMethod(
     } catch (error: any) {
       return getUnknownError(error.message);
     }
+  }
+
+  // EIP-5792: Wallet Capabilities – respond with empty object if queried
+  if ((method as string) === 'wallet_getCapabilities') {
+    return { result: {} };
   }
 
   // eslint-disable-next-line no-console
