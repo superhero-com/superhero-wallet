@@ -42,7 +42,7 @@
     "@aparajita/capacitor-secure-storage": "^7.1.2",
     "@awesome-cordova-plugins/screen-orientation": "^6.8.0",
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@capacitor-mlkit/barcode-scanning": "^7.2.1",
+    "@capacitor-mlkit/barcode-scanning": "^7.3.0",
     "@capacitor/android": "^7.4.2",
     "@capacitor/app": "^7.0.1",
     "@capacitor/assets": "^3.0.5",
