@@ -58,6 +58,7 @@
     "@capacitor/share": "^7.0.1",
     "@capacitor/splash-screen": "^7.0.1",
     "@capacitor/status-bar": "^7.0.0",
+    "@capawesome/capacitor-android-edge-to-edge-support": "^7.2.3",
     "@fontsource/ibm-plex-mono": "^5.0.13",
     "@fontsource/ibm-plex-sans": "^5.0.20",
     "@intlify/eslint-plugin-vue-i18n": "^2.0.0",
