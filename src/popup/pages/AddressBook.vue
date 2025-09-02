@@ -73,7 +73,7 @@ export default defineComponent({
 
     const { exportAddressBook, importAddressBook, addressBook } = useAddressBook();
     const { openDefaultModal, openModal } = useModals();
-    const { getLastActiveProtocolAccount } = useAccounts();
+    const { aeAccounts } = useAccounts();
     const { getAeSdk } = useAeSdk();
 
     const isSuperheroConnected = ref(false);
@@ -83,7 +83,7 @@ export default defineComponent({
     async function onSyncAddressBook() {
       try {
         isSyncing.value = true;
-        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
         const svc = new SuperheroIDService();
         const txBase64 = await svc.buildSetIdTx(JSON.stringify(addressBook.value)) as any;
@@ -110,7 +110,7 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) return;
         const svc = new SuperheroIDService();
         const exists = await svc.hasId();

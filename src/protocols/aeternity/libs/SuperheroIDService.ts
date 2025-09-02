@@ -9,7 +9,6 @@ import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
 import { useAeSdk } from '@/composables/aeSdk';
 import { useAccounts } from '@/composables/accounts';
 import { encrypt, decrypt, importAesKeyFromSecret } from '@/utils/crypto';
-import { PROTOCOLS } from '@/constants';
 import type { IAccount } from '@/types';
 
 export type SuperheroIdsContract = Contract<{
@@ -34,10 +33,10 @@ export class SuperheroIDService {
   }
 
   private static getCallerAccount(): IAccount {
-    const { getLastActiveProtocolAccount } = useAccounts();
-    const acc = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-    if (!acc?.address) throw new Error('No active æternity account');
-    return acc;
+    const { aeAccounts } = useAccounts();
+    const acc = aeAccounts.value?.[0];
+    if (!acc?.address) throw new Error('No æternity account available');
+    return acc as IAccount;
   }
 
   async setId(id: string) {

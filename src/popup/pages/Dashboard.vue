@@ -182,7 +182,6 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
       aeAccounts,
-      getLastActiveProtocolAccount,
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
     const { addressBook, addAddressBookEntriesFromJson } = useAddressBook();
@@ -245,7 +244,7 @@ export default defineComponent({
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _stub = SuperheroIdsAci;
-        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (addr) {
           hasSuperheroId.value = await superheroSvc.value.hasId();
           if (hasSuperheroId.value) {
@@ -266,7 +265,7 @@ export default defineComponent({
     async function onCreateSuperheroId() {
       try {
         if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
-        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
         const svc = new SuperheroIDService();
         const txBase64 = await svc.buildSetIdTx(JSON.stringify(addressBook.value)) as any;
