@@ -96,7 +96,6 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   ref,
   watch,
 } from 'vue';
@@ -250,9 +249,6 @@ export default defineComponent({
           if (hasSuperheroId.value) {
             const json = await superheroSvc.value.getId();
             if (json) addAddressBookEntriesFromJson(json);
-          } else {
-            await superheroSvc.value.setId(JSON.stringify(addressBook.value));
-            hasSuperheroId.value = true;
           }
         }
       } catch (e) {
@@ -287,9 +283,17 @@ export default defineComponent({
       }
     }
 
-    onMounted(() => {
-      onConnectSuperheroId();
-    });
+    watch(
+      () => [isNodeTestnet.value],
+      () => {
+        if (isNodeTestnet.value) {
+          onConnectSuperheroId();
+        }
+      },
+      {
+        immediate: true,
+      },
+    );
 
     return {
       DASHBOARD_CARD_ID,
