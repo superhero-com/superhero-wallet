@@ -5,11 +5,11 @@ contract SuperheroIds =
   entrypoint init() =
     { ids = {} }
 
-  stateful entrypoint set_id(who : address, id : string) =
-    put(state{ ids[who] = id })
+  stateful entrypoint set_id(id : string) =
+    put(state{ ids[Call.caller] = id })
 
-  entrypoint get_id(who : address) : option(string) =
-    Map.lookup(who, state.ids)
+  entrypoint get_id() : option(string) =
+    Map.lookup(Call.caller, state.ids)
 
-  entrypoint has_id(who : address) : bool =
-    Map.member(who, state.ids)
+  entrypoint has_id() : bool =
+    Map.member(Call.caller, state.ids)

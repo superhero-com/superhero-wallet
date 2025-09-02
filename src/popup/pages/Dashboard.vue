@@ -37,9 +37,6 @@
           <div class="buttons-row">
             <!-- <BtnPill @click="onDeployContract">
               Deploy Contract
-            </BtnPill>
-            <BtnPill @click="onConnectSuperheroId">
-              Connect Superhero ID
             </BtnPill> -->
           </div>
         </template>
@@ -155,6 +152,7 @@ import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
 import { unpackTx } from '@aeternity/aepp-sdk';
+// import BtnPill from '../components/buttons/BtnPill.vue';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -168,6 +166,7 @@ export default defineComponent({
     LatestTransactionsCard,
     OpenTransferReceiveModalBtn,
     OpenTransferSendModalBtn,
+    // BtnPill,
   },
   setup() {
     const pageIsActive = ref(true);
@@ -242,19 +241,18 @@ export default defineComponent({
       if (!aeAccounts.value.length) {
         return;
       }
-      const contractId = (connectedContractId.value || 'ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt') as any;
-      superheroSvc.value = new SuperheroIDService(contractId);
+      superheroSvc.value = new SuperheroIDService();
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _stub = SuperheroIdsAci;
         const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
         if (addr) {
-          hasSuperheroId.value = await superheroSvc.value.hasId(addr);
+          hasSuperheroId.value = await superheroSvc.value.hasId();
           if (hasSuperheroId.value) {
-            const json = await superheroSvc.value.getId(addr);
+            const json = await superheroSvc.value.getId();
             if (json) addAddressBookEntriesFromJson(json);
           } else {
-            await superheroSvc.value.setId(addr, JSON.stringify(addressBook.value));
+            await superheroSvc.value.setId(JSON.stringify(addressBook.value));
             hasSuperheroId.value = true;
           }
         }
@@ -270,8 +268,8 @@ export default defineComponent({
         if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
         const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
-        const svc = new SuperheroIDService('ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt' as any);
-        const txBase64 = await svc.buildSetIdTx(addr, JSON.stringify(addressBook.value)) as any;
+        const svc = new SuperheroIDService();
+        const txBase64 = await svc.buildSetIdTx(JSON.stringify(addressBook.value)) as any;
         const tx = unpackTx(txBase64) as any;
         await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
           txBase64,

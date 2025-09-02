@@ -85,8 +85,8 @@ export default defineComponent({
         isSyncing.value = true;
         const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
-        const svc = new SuperheroIDService('ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt' as any);
-        const txBase64 = await svc.buildSetIdTx(addr, JSON.stringify(addressBook.value)) as any;
+        const svc = new SuperheroIDService();
+        const txBase64 = await svc.buildSetIdTx(JSON.stringify(addressBook.value)) as any;
         const tx = unpackTx(txBase64) as any;
         await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
           txBase64,
@@ -112,8 +112,8 @@ export default defineComponent({
       try {
         const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
         if (!addr) return;
-        const svc = new SuperheroIDService('ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt' as any);
-        const exists = await svc.hasId(addr);
+        const svc = new SuperheroIDService();
+        const exists = await svc.hasId();
         isSuperheroConnected.value = true;
         hasSuperheroId.value = !!exists;
       } catch {

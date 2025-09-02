@@ -41,7 +41,6 @@
         },
         {
           "arguments": [
-            { "name": "who", "type": "address" },
             { "name": "id", "type": "string" }
           ],
           "name": "set_id",
@@ -50,18 +49,14 @@
           "stateful": true
         },
         {
-          "arguments": [
-            { "name": "who", "type": "address" }
-          ],
+          "arguments": [],
           "name": "get_id",
           "payable": false,
           "returns": { "option": ["string"] },
           "stateful": false
         },
         {
-          "arguments": [
-            { "name": "who", "type": "address" }
-          ],
+          "arguments": [],
           "name": "has_id",
           "payable": false,
           "returns": "bool",
