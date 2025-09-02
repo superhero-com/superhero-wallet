@@ -49,6 +49,8 @@
         <slot name="buttons" />
       </div>
 
+      <!-- action buttons are provided by parent via #buttons slot -->
+
       <slot name="widgets" />
 
       <DashboardCard

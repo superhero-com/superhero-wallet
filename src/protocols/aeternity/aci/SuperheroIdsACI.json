@@ -1,0 +1,76 @@
+[
+  {
+    "namespace": {
+      "name": "String",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "Option",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "Map",
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "name": "SuperheroIds",
+      "kind": "contract_main",
+      "payable": false,
+      "event": { "variant": [] },
+      "state": {
+        "record": [
+          {
+            "name": "ids",
+            "type": { "map": ["address", "string"] }
+          }
+        ]
+      },
+      "functions": [
+        {
+          "arguments": [],
+          "name": "init",
+          "payable": false,
+          "returns": "SuperheroIds.state",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "who", "type": "address" },
+            { "name": "id", "type": "string" }
+          ],
+          "name": "set_id",
+          "payable": false,
+          "returns": { "tuple": [] },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            { "name": "who", "type": "address" }
+          ],
+          "name": "get_id",
+          "payable": false,
+          "returns": { "option": ["string"] },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "who", "type": "address" }
+          ],
+          "name": "has_id",
+          "payable": false,
+          "returns": "bool",
+          "stateful": false
+        }
+      ],
+      "typedefs": []
+    }
+  }
+]
+
+

@@ -218,5 +218,6 @@ export const useAddressBook = createCustomScopedComposable(() => {
     toggleBookmarkAddressBookEntry,
     exportAddressBook,
     importAddressBook,
+    addAddressBookEntriesFromJson,
   };
 });

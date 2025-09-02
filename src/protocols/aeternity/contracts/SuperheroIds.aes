@@ -1,0 +1,17 @@
+contract SuperheroIds =
+  record state =
+    { ids : map(address, string) }
+
+  entrypoint init() =
+    { ids = {} }
+
+  stateful entrypoint set_id(who : address, id : string) =
+    put(state{ ids[who] = id })
+
+  entrypoint get_id(who : address) : option(string) =
+    Map.lookup(who, state.ids)
+
+  entrypoint has_id(who : address) : bool =
+    Map.member(who, state.ids)
+
+

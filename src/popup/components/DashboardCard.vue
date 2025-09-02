@@ -14,6 +14,7 @@
       :to="to"
       :variant="variant"
       inline
+      @click="$emit('click')"
     />
   </Card>
 </template>
@@ -30,6 +31,7 @@ export default defineComponent({
     BtnMain,
     Card,
   },
+  emits: ['click'],
   props: {
     title: { type: String, required: true },
     description: { type: String, required: true },

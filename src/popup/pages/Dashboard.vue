@@ -33,8 +33,41 @@
           <OpenTransferReceiveModalBtn is-big />
           <OpenTransferSendModalBtn is-big />
         </template>
-
+        <template #widgets>
+          <div class="buttons-row">
+            <!-- <BtnPill @click="onDeployContract">
+              Deploy Contract
+            </BtnPill>
+            <BtnPill @click="onConnectSuperheroId">
+              Connect Superhero ID
+            </BtnPill> -->
+          </div>
+        </template>
         <template #cards>
+          <template v-if="isConnected">
+            <DashboardCard
+              v-if="!hasSuperheroId"
+              title="Superhero ID"
+              description="Create your Superhero ID to store your settings to the blockchain"
+              btn-text="Create"
+              @click="onCreateSuperheroId"
+            />
+            <DashboardCard
+              v-if="hasSuperheroId"
+              title="Superhero ID"
+              description="Sync your address book Superhero ID"
+              btn-text="Sync"
+              @click="onSaveAddressBook"
+            />
+            <DashboardCard
+              v-if="hasSuperheroId"
+              title="Superhero ID"
+              description="Restore address book from Superhero ID"
+              btn-text="Restore"
+              @click="onLoadAddressBook"
+            />
+          </template>
+
           <LatestTransactionsCard />
 
           <DashboardCard
@@ -82,6 +115,7 @@
 import {
   computed,
   defineComponent,
+  onMounted,
   ref,
   watch,
 } from 'vue';
@@ -120,6 +154,10 @@ import DashboardBase from '@/popup/components/DashboardBase.vue';
 import DashboardCard from '@/popup/components/DashboardCard.vue';
 import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
 import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
+import { useAddressBook } from '@/composables/addressBook';
+import { useModals } from '@/composables/modals';
+import { SuperheroIDService } from '@/protocols/aeternity/libs/SuperheroIDService';
+import SuperheroIdsAci from '@/protocols/aeternity/aci/SuperheroIdsACI.json';
 
 import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
@@ -158,8 +196,12 @@ export default defineComponent({
       activeAccountGlobalIdx,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
+      aeAccounts,
+      getLastActiveProtocolAccount,
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
+    const { addressBook, addAddressBookEntriesFromJson } = useAddressBook();
+    const { openDefaultModal } = useModals();
 
     const { accountsTotalBalance } = useBalances();
     const { accountsTotalTokenBalance } = useFungibleTokens();
@@ -188,6 +230,87 @@ export default defineComponent({
 
     onIonViewDidLeave(() => {
       pageIsActive.value = false;
+    });
+
+    const superheroSvc = ref<SuperheroIDService | null>(null);
+    const connectedContractId = ref<string | null>(null);
+    const isConnected = computed(() => !!superheroSvc.value);
+    const hasSuperheroId = ref(false);
+
+    async function onDeployContract() {
+      try {
+        const res = await fetch('/contracts/SuperheroIds.aes');
+        const source = await res.text();
+        const svc = new SuperheroIDService();
+        const ct = await svc.deployFromSource(source);
+        connectedContractId.value = ct;
+        openDefaultModal({ title: 'Contract', msg: `Deployed: ${ct}` });
+      } catch (e) {
+        openDefaultModal({ title: 'Contract', msg: 'Deploy failed' });
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    }
+
+    async function onConnectSuperheroId() {
+      if (!aeAccounts.value.length) {
+        return;
+      }
+      const contractId = (connectedContractId.value || 'ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt') as any;
+      superheroSvc.value = new SuperheroIDService(contractId);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _stub = SuperheroIdsAci;
+        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        if (addr) {
+          hasSuperheroId.value = await superheroSvc.value.hasId(addr);
+          if (hasSuperheroId.value) {
+            const json = await superheroSvc.value.getId(addr);
+            if (json) addAddressBookEntriesFromJson(json);
+          }
+        }
+      } catch {
+        openDefaultModal({ title: 'Contract', msg: 'Connection to Superhero ID contract failed' });
+      }
+    }
+
+    async function onCreateSuperheroId() {
+      try {
+        if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
+        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        await superheroSvc.value.setId(addr, JSON.stringify(addressBook.value));
+        hasSuperheroId.value = true;
+        openDefaultModal({ title: 'Superhero ID', msg: 'Created Superhero ID.' });
+      } catch (e) {
+        openDefaultModal({ title: 'Superhero ID', msg: 'Create failed' });
+      }
+    }
+
+    async function onSaveAddressBook() {
+      try {
+        if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
+        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address;
+        await superheroSvc.value.setId(addr as `ak_${string}`, JSON.stringify(addressBook.value));
+        openDefaultModal({ title: 'Address Book', msg: 'Saved' });
+      } catch (e) {
+        openDefaultModal({ title: 'Address Book', msg: 'Save failed' });
+      }
+    }
+
+    async function onLoadAddressBook() {
+      try {
+        if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
+        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address;
+        const json = await superheroSvc.value.getId(addr as `ak_${string}`);
+        if (json) addAddressBookEntriesFromJson(json);
+        else openDefaultModal({ title: 'Address Book', msg: 'No data found.' });
+      } catch (e) {
+        openDefaultModal({ title: 'Address Book', msg: 'Load failed' });
+      }
+    }
+
+    onMounted(() => {
+      onConnectSuperheroId();
     });
 
     return {
@@ -222,6 +345,13 @@ export default defineComponent({
       totalBalance,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
+      isConnected,
+      hasSuperheroId,
+      onDeployContract,
+      onConnectSuperheroId,
+      onCreateSuperheroId,
+      onSaveAddressBook,
+      onLoadAddressBook,
     };
   },
 });
