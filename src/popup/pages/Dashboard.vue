@@ -132,6 +132,7 @@ import {
   IS_MOBILE_APP,
   PROTOCOLS,
   UNFINISHED_FEATURES,
+  LOCAL_STORAGE_PREFIX,
 } from '@/constants';
 import {
   ROUTE_ACCOUNT_DETAILS,
@@ -236,6 +237,7 @@ export default defineComponent({
     const connectedContractId = ref<string | null>(null);
     const isConnected = computed(() => !!superheroSvc.value);
     const hasSuperheroId = ref(false);
+    const AUTO_SYNC_KEY = `${LOCAL_STORAGE_PREFIX}:superhero-id-autosync`;
 
     async function onDeployContract() {
       try {
@@ -267,10 +269,17 @@ export default defineComponent({
           if (hasSuperheroId.value) {
             const json = await superheroSvc.value.getId(addr);
             if (json) addAddressBookEntriesFromJson(json);
+          } else if (!localStorage.getItem(AUTO_SYNC_KEY)) {
+            // First app load without Superhero ID: auto-create once
+            await superheroSvc.value.setId(addr, JSON.stringify(addressBook.value));
+            localStorage.setItem(AUTO_SYNC_KEY, '1');
+            hasSuperheroId.value = true;
           }
         }
-      } catch {
+      } catch (e) {
         openDefaultModal({ title: 'Contract', msg: 'Connection to Superhero ID contract failed' });
+        // eslint-disable-next-line no-console
+        console.error(e);
       }
     }
 
