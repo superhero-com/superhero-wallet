@@ -21,8 +21,11 @@ export const PROTOCOLS = {
   solana: 'solana',
   bnb: 'bnb',
   avalanche: 'avalanche',
+  polygonPos: 'polygonPos',
 } as const;
-export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb, PROTOCOLS.avalanche];
+export const EVM_PROTOCOLS: Protocol[] = [
+  PROTOCOLS.ethereum, PROTOCOLS.bnb, PROTOCOLS.avalanche, PROTOCOLS.polygonPos,
+];
 
 export const PROTOCOL_LIST = Object.values(PROTOCOLS);
 

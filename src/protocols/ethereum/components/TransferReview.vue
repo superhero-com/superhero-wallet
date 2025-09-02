@@ -48,9 +48,6 @@ import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBa
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import Logger from '@/lib/logger';
-import { EthereumAdapter } from '@/protocols/ethereum/libs/EthereumAdapter';
-import { BnbAdapter } from '@/protocols/bnb/libs/BnbAdapter';
-import { PROTOCOLS } from '@/constants';
 
 export default defineComponent({
   name: 'EthTransferReview',
@@ -106,9 +103,7 @@ export default defineComponent({
       let actionResult;
       const lastActiveEthAccount = getLastActiveProtocolAccount(props.protocol);
       try {
-        let currentNonce = await (props.protocol === PROTOCOLS.ethereum
-          ? adapter as EthereumAdapter
-          : adapter as BnbAdapter)
+        let currentNonce = await (adapter as any)
           .getTransactionCount(lastActiveEthAccount?.address!);
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {

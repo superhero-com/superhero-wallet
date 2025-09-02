@@ -20,6 +20,7 @@ import { EtherscanService, EtherscanDefaultResponse } from '@/protocols/ethereum
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
+import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import {
   ETH_CONTRACT_ID,
   ETH_RPC_ETHERSCAN_PROXY_METHODS,
@@ -27,6 +28,7 @@ import {
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
+import { POLYGON_POS_CONTRACT_ID } from '@/protocols/polygonPos/config';
 
 import {
   CONNECT_PERMISSIONS,
@@ -78,6 +80,7 @@ async function checkOrAskEvmPermission(aepp: string, protocol: Protocol) {
 
 function getProtocolCoinContractId(protocol: Protocol) {
   if (protocol === PROTOCOLS.bnb) return BNB_CONTRACT_ID as any;
+  if (protocol === PROTOCOLS.polygonPos) return POLYGON_POS_CONTRACT_ID as any;
   return ETH_CONTRACT_ID as any;
 }
 
@@ -119,6 +122,17 @@ function getActiveEvmNetworkSettings(protocol: Protocol) {
       chainId: bnbActiveNetworkSettings.value.chainId,
       nodeUrl: bnbActiveNetworkSettings.value.nodeUrl,
       predefined: bnbActiveNetworkPredefinedSettings.value,
+    };
+  }
+  if (protocol === PROTOCOLS.polygonPos) {
+    const {
+      polygonActiveNetworkSettings,
+      polygonActiveNetworkPredefinedSettings,
+    } = usePolygonNetworkSettings();
+    return {
+      chainId: polygonActiveNetworkSettings.value.chainId,
+      nodeUrl: polygonActiveNetworkSettings.value.nodeUrl,
+      predefined: polygonActiveNetworkPredefinedSettings.value,
     };
   }
   const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
