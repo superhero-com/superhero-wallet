@@ -44,29 +44,13 @@
           </div>
         </template>
         <template #cards>
-          <template v-if="isConnected">
-            <DashboardCard
-              v-if="!hasSuperheroId"
-              title="Superhero ID"
-              description="Create your Superhero ID to store your settings to the blockchain"
-              btn-text="Create"
-              @click="onCreateSuperheroId"
-            />
-            <DashboardCard
-              v-if="hasSuperheroId"
-              title="Superhero ID"
-              description="Sync your address book Superhero ID"
-              btn-text="Sync"
-              @click="onSaveAddressBook"
-            />
-            <DashboardCard
-              v-if="hasSuperheroId"
-              title="Superhero ID"
-              description="Restore address book from Superhero ID"
-              btn-text="Restore"
-              @click="onLoadAddressBook"
-            />
-          </template>
+          <DashboardCard
+            v-if="!hasSuperheroId && isConnected"
+            title="Superhero ID"
+            description="Create your Superhero ID to store your settings to the blockchain"
+            btn-text="Create"
+            @click="onCreateSuperheroId"
+          />
 
           <LatestTransactionsCard />
 
@@ -132,7 +116,6 @@ import {
   IS_MOBILE_APP,
   PROTOCOLS,
   UNFINISHED_FEATURES,
-  LOCAL_STORAGE_PREFIX,
 } from '@/constants';
 import {
   ROUTE_ACCOUNT_DETAILS,
@@ -237,7 +220,6 @@ export default defineComponent({
     const connectedContractId = ref<string | null>(null);
     const isConnected = computed(() => !!superheroSvc.value);
     const hasSuperheroId = ref(false);
-    const AUTO_SYNC_KEY = `${LOCAL_STORAGE_PREFIX}:superhero-id-autosync`;
 
     async function onDeployContract() {
       try {
@@ -269,10 +251,8 @@ export default defineComponent({
           if (hasSuperheroId.value) {
             const json = await superheroSvc.value.getId(addr);
             if (json) addAddressBookEntriesFromJson(json);
-          } else if (!localStorage.getItem(AUTO_SYNC_KEY)) {
-            // First app load without Superhero ID: auto-create once
+          } else {
             await superheroSvc.value.setId(addr, JSON.stringify(addressBook.value));
-            localStorage.setItem(AUTO_SYNC_KEY, '1');
             hasSuperheroId.value = true;
           }
         }
@@ -292,29 +272,6 @@ export default defineComponent({
         openDefaultModal({ title: 'Superhero ID', msg: 'Created Superhero ID.' });
       } catch (e) {
         openDefaultModal({ title: 'Superhero ID', msg: 'Create failed' });
-      }
-    }
-
-    async function onSaveAddressBook() {
-      try {
-        if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
-        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address;
-        await superheroSvc.value.setId(addr as `ak_${string}`, JSON.stringify(addressBook.value));
-        openDefaultModal({ title: 'Address Book', msg: 'Saved' });
-      } catch (e) {
-        openDefaultModal({ title: 'Address Book', msg: 'Save failed' });
-      }
-    }
-
-    async function onLoadAddressBook() {
-      try {
-        if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
-        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address;
-        const json = await superheroSvc.value.getId(addr as `ak_${string}`);
-        if (json) addAddressBookEntriesFromJson(json);
-        else openDefaultModal({ title: 'Address Book', msg: 'No data found.' });
-      } catch (e) {
-        openDefaultModal({ title: 'Address Book', msg: 'Load failed' });
       }
     }
 
@@ -359,8 +316,6 @@ export default defineComponent({
       onDeployContract,
       onConnectSuperheroId,
       onCreateSuperheroId,
-      onSaveAddressBook,
-      onLoadAddressBook,
     };
   },
 });

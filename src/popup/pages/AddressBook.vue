@@ -24,6 +24,14 @@
             :icon="ExportIcon"
             @click="exportAddressBook()"
           />
+          <BtnBox
+            v-if="isSuperheroConnected && hasSuperheroId"
+            data-cy="sync-address-book"
+            :text="isSyncing ? 'Syncing…' : 'Sync'"
+            :disabled="isSyncing"
+            :icon="ExportIcon"
+            @click="onSyncAddressBook"
+          />
         </div>
       </Transition>
 
@@ -34,10 +42,18 @@
 
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 
 import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
-import { useAddressBook } from '@/composables';
+import {
+  useAddressBook,
+  useAeSdk,
+  useModals,
+  useAccounts,
+} from '@/composables';
+import { MODAL_CONFIRM_TRANSACTION_SIGN, PROTOCOLS } from '@/constants';
+import { SuperheroIDService } from '@/protocols/aeternity/libs/SuperheroIDService';
+import { unpackTx } from '@aeternity/aepp-sdk';
 
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
@@ -55,12 +71,65 @@ export default defineComponent({
   setup() {
     const hideButtons = ref(false);
 
-    const { exportAddressBook, importAddressBook } = useAddressBook();
+    const { exportAddressBook, importAddressBook, addressBook } = useAddressBook();
+    const { openDefaultModal, openModal } = useModals();
+    const { getLastActiveProtocolAccount } = useAccounts();
+    const { getAeSdk } = useAeSdk();
+
+    const isSuperheroConnected = ref(false);
+    const hasSuperheroId = ref(false);
+    const isSyncing = ref(false);
+
+    async function onSyncAddressBook() {
+      try {
+        isSyncing.value = true;
+        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        if (!addr) throw new Error('No æternity account');
+        const svc = new SuperheroIDService('ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt' as any);
+        const txBase64 = await svc.buildSetIdTx(addr, JSON.stringify(addressBook.value)) as any;
+        const tx = unpackTx(txBase64) as any;
+        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
+          txBase64,
+          tx,
+          protocol: PROTOCOLS.aeternity,
+          app: { host: window.location.origin, href: window.location.origin },
+        });
+        const aeSdk = await getAeSdk();
+        const signed = await aeSdk.signTransaction(txBase64, { fromAccount: addr } as any);
+        const { txHash } = await aeSdk.api.postTransaction({ tx: signed });
+        await aeSdk.poll(txHash);
+        openDefaultModal({ title: 'Address Book', msg: 'Synced to Superhero ID' });
+      } catch (e) {
+        openDefaultModal({ title: 'Address Book', msg: 'Sync failed' });
+        // eslint-disable-next-line no-console
+        console.error(e);
+      } finally {
+        isSyncing.value = false;
+      }
+    }
+
+    onMounted(async () => {
+      try {
+        const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
+        if (!addr) return;
+        const svc = new SuperheroIDService('ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt' as any);
+        const exists = await svc.hasId(addr);
+        isSuperheroConnected.value = true;
+        hasSuperheroId.value = !!exists;
+      } catch {
+        isSuperheroConnected.value = false;
+        hasSuperheroId.value = false;
+      }
+    });
 
     return {
       hideButtons,
       exportAddressBook,
       importAddressBook,
+      onSyncAddressBook,
+      isSuperheroConnected,
+      hasSuperheroId,
+      isSyncing,
       AddIcon,
       ImportIcon,
       ExportIcon,
