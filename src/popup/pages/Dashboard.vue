@@ -114,6 +114,7 @@ import { useRoute } from 'vue-router';
 import {
   DASHBOARD_CARD_ID,
   IS_MOBILE_APP,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
   PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -153,6 +154,7 @@ import buyBackground from '@/image/dashboard/buy-ae.webp';
 import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
+import { unpackTx } from '@aeternity/aepp-sdk';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -185,12 +187,12 @@ export default defineComponent({
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
     const { addressBook, addAddressBookEntriesFromJson } = useAddressBook();
-    const { openDefaultModal } = useModals();
+    const { openModal, openDefaultModal } = useModals();
 
     const { accountsTotalBalance } = useBalances();
     const { accountsTotalTokenBalance } = useFungibleTokens();
     const { checkIfOpenTransferSendModal } = useDeepLinkApi();
-    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
+    const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk();
 
     const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
     const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
@@ -267,7 +269,20 @@ export default defineComponent({
       try {
         if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
         const addr = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address as `ak_${string}`;
-        await superheroSvc.value.setId(addr, JSON.stringify(addressBook.value));
+        if (!addr) throw new Error('No æternity account');
+        const svc = new SuperheroIDService('ct_2wRuibMpXp9yzTDNAjVp4UhicFipf1LG9aFArqyxQqkq4EaQUt' as any);
+        const txBase64 = await svc.buildSetIdTx(addr, JSON.stringify(addressBook.value)) as any;
+        const tx = unpackTx(txBase64) as any;
+        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
+          txBase64,
+          tx,
+          protocol: PROTOCOLS.aeternity,
+          app: { host: window.location.origin, href: window.location.origin },
+        });
+        const aeSdk = await getAeSdk();
+        const signed = await aeSdk.signTransaction(txBase64, { fromAccount: addr } as any);
+        const { txHash } = await aeSdk.api.postTransaction({ tx: signed });
+        await aeSdk.poll(txHash);
         hasSuperheroId.value = true;
         openDefaultModal({ title: 'Superhero ID', msg: 'Created Superhero ID.' });
       } catch (e) {

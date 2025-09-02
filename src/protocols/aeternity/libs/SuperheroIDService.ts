@@ -2,7 +2,6 @@ import {
   Contract,
   Encoded,
   Tag,
-  unpackTx,
 } from '@aeternity/aepp-sdk';
 
 import SuperheroIdsACI from '@/protocols/aeternity/aci/SuperheroIdsACI.json';
@@ -43,7 +42,7 @@ export class SuperheroIDService {
     if (!account?.secretKey) throw new Error('Missing secret key for encryption');
     const key = await importAesKeyFromSecret(account.secretKey);
     const ciphertext = await encrypt(key, id);
-    await contract.set_id(forAddress, ciphertext);
+    await (contract as any).set_id(forAddress, ciphertext, { fromAccount: forAddress });
   }
 
   async getId(forAddress: Encoded.AccountAddress): Promise<string | undefined> {
@@ -59,35 +58,6 @@ export class SuperheroIDService {
     } catch {
       return decodedResult;
     }
-  }
-
-  async estimateSetIdFee(forAddress: Encoded.AccountAddress, id: string): Promise<string> {
-    const { getAeSdk } = useAeSdk();
-    const aeSdk = await getAeSdk();
-    const contract = await this.getContractInstance();
-    const { getAccountByAddress } = useAccounts();
-    const account = getAccountByAddress(forAddress as any);
-    if (!account?.secretKey) throw new Error('Missing secret key for encryption');
-    const key = await importAesKeyFromSecret(account.secretKey);
-    const ciphertext = await encrypt(key, id);
-
-    // estimate gas
-    const gasLimit = await (contract as any)._estimateGas('set_id', [forAddress, ciphertext], {
-      senderId: forAddress,
-    });
-    // build tx to compute fee
-    const callData = (contract as any)._calldata.encode((contract as any)._name, 'set_id', [forAddress, ciphertext]);
-    const built = await aeSdk.buildTx({
-      tag: Tag.ContractCallTx,
-      callerId: forAddress,
-      contractId: this.contractId!,
-      abiVersion: 3,
-      amount: 0,
-      callData,
-      gasLimit,
-    } as any);
-    const tx = unpackTx(built, Tag.ContractCallTx);
-    return (tx.fee as any).toString();
   }
 
   async buildSetIdTx(forAddress: Encoded.AccountAddress, id: string): Promise<string> {
@@ -115,12 +85,6 @@ export class SuperheroIDService {
     return built;
   }
 
-  async hasId(forAddress: Encoded.AccountAddress): Promise<boolean> {
-    const contract = await this.getContractInstance();
-    const { decodedResult } = await contract.has_id(forAddress);
-    return decodedResult;
-  }
-
   async deployContract(bytecode: Encoded.ContractBytearray): Promise<Encoded.ContractAddress> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
@@ -130,7 +94,6 @@ export class SuperheroIDService {
       bytecode,
     }) as any;
 
-    // init has no args; calling it deploys the contract when bytecode is provided
     await instance.init();
     const address = instance.$options.address as Encoded.ContractAddress;
     this.contractId = address;
@@ -149,5 +112,11 @@ export class SuperheroIDService {
     const address = instance.$options.address as Encoded.ContractAddress;
     this.contractId = address;
     return address;
+  }
+
+  async hasId(forAddress: Encoded.AccountAddress): Promise<boolean> {
+    const contract = await this.getContractInstance();
+    const { decodedResult } = await contract.has_id(forAddress);
+    return decodedResult;
   }
 }

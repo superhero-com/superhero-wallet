@@ -13,5 +13,3 @@ contract SuperheroIds =
 
   entrypoint has_id(who : address) : bool =
     Map.member(who, state.ids)
-
-
