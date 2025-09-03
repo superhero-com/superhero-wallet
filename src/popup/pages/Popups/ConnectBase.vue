@@ -227,7 +227,7 @@ export default defineComponent({
     const {
       getAccountsSelectOptionsByProtocol,
       getLastActiveProtocolAccount,
-      getAccountByAddress,
+      getAccountByProtocolAndAddress,
       setActiveAccountByAddress,
     } = useAccounts();
     const {
@@ -290,8 +290,9 @@ export default defineComponent({
 
     const supported = computed(() => options.value.length > 0);
 
-    function onSelectAccount(address: string) {
-      selectedAccount.value = getAccountByAddress(address);
+    function onSelectAccount(addressWithProtocol: string) {
+      const [protocol, address] = addressWithProtocol.split(':');
+      selectedAccount.value = getAccountByProtocolAndAddress(protocol as Protocol, address);
     }
 
     const permission = computed(() => {
@@ -363,7 +364,6 @@ export default defineComponent({
       options,
       onSelectAccount,
       getAccountsSelectOptionsByProtocol,
-      getAccountByAddress,
       dappIcon,
       sender,
       trustedDapp,
