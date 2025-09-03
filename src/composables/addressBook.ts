@@ -173,16 +173,14 @@ export const useAddressBook = createCustomScopedComposable(() => {
   }
 
   async function exportAddressBook() {
-    const path = await exportFile(
+    await exportFile(
       JSON.stringify(addressBook.value),
       'addressBookExport.json',
     );
-    if (path) {
-      openDefaultModal({
-        title: t('pages.addressBook.export.title'),
-        msg: t('pages.addressBook.export.message') + path,
-      });
-    }
+    openDefaultModal({
+      title: t('pages.addressBook.export.title'),
+      msg: t('pages.addressBook.export.message'),
+    });
   }
 
   async function importAddressBook() {
