@@ -43,6 +43,7 @@
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
 import {
@@ -68,6 +69,7 @@ export default defineComponent({
   },
   setup() {
     const hideButtons = ref(false);
+    const { t } = useI18n();
 
     const { exportAddressBook, importAddressBook, addressBook } = useAddressBook();
     const { openDefaultModal } = useModals();
@@ -82,9 +84,9 @@ export default defineComponent({
         const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
         await syncAddressBook(JSON.stringify(addressBook.value));
-        openDefaultModal({ title: 'Superhero ID', msg: 'Address Book Sync with SH ID completed' });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('pages.addressBook.export.title') });
       } catch (e) {
-        openDefaultModal({ title: 'Superhero ID', msg: 'Sync failed' });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('common.connectionFailed') });
         handleUnknownError(e);
       } finally {
         isSyncing.value = false;

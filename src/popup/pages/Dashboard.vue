@@ -43,17 +43,17 @@
         <template #cards>
           <DashboardCard
             v-if="!hasSuperheroId"
-            title="Superhero ID"
-            description="Create your Superhero ID to store your settings to the blockchain"
-            btn-text="Create"
+            :title="$t('dashboard.superheroId.title')"
+            :description="$t('dashboard.superheroId.createDescription')"
+            :btn-text="$t('dashboard.superheroId.createBtn')"
             @click="onCreateSuperheroId"
           />
 
           <DashboardCard
             v-if="hasSuperheroId"
-            title="Superhero ID"
-            description="Connect to restore your settings from the blockchain"
-            btn-text="Connect"
+            :title="$t('dashboard.superheroId.title')"
+            :description="$t('dashboard.superheroId.connectDescription')"
+            :btn-text="$t('dashboard.superheroId.connectBtn')"
             @click="onConnectSuperheroId"
           />
 
@@ -113,6 +113,7 @@ import {
   onIonViewWillEnter,
   onIonViewDidLeave,
 } from '@ionic/vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import {
@@ -175,6 +176,7 @@ export default defineComponent({
   },
   setup() {
     const pageIsActive = ref(true);
+    const { t } = useI18n();
 
     const route = useRoute();
 
@@ -186,10 +188,9 @@ export default defineComponent({
       activeAccountGlobalIdx,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
-      aeAccounts,
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
-    const { addressBook, addAddressBookEntriesFromJson } = useAddressBook();
+    const { addressBook } = useAddressBook();
     const {
       superheroSvc,
       hasSuperheroId,
@@ -236,20 +237,19 @@ export default defineComponent({
         const svc = superheroSvc.value!;
         const ct = await svc.deployFromSource(source);
         connectedContractId.value = ct;
-        openDefaultModal({ title: 'Contract', msg: `Deployed: ${ct}` });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.deployedMsg', { ct }) });
       } catch (e) {
-        openDefaultModal({ title: 'Contract', msg: 'Deploy failed' });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.deployFailed') });
         handleUnknownError(e);
       }
     }
 
     async function onConnectSuperheroId() {
-      if (!aeAccounts.value.length) return;
       try {
-        const json = await loadAddressBook();
-        if (json) addAddressBookEntriesFromJson(json);
+        await loadAddressBook();
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.restoreMsg') });
       } catch (e) {
-        openDefaultModal({ title: 'Superhero ID', msg: 'Connection to Superhero ID contract failed' });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.connectFailed') });
         handleUnknownError(e);
       }
     }
@@ -257,9 +257,9 @@ export default defineComponent({
     async function onCreateSuperheroId() {
       try {
         await syncAddressBook(JSON.stringify(addressBook.value));
-        openDefaultModal({ title: 'Superhero ID', msg: 'Created Superhero ID.' });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.createdMsg') });
       } catch (e) {
-        openDefaultModal({ title: 'Superhero ID', msg: 'Create failed' });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.createFailed') });
       }
     }
 

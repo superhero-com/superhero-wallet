@@ -1,4 +1,9 @@
-import { Ref, ref, watch } from 'vue';
+import {
+  Ref,
+  ref,
+  watch,
+  computed,
+} from 'vue';
 import { SuperheroIDService } from '@/protocols/aeternity/libs/SuperheroIDService';
 import type { Encoded } from '@aeternity/aepp-sdk';
 import { useAccounts } from '@/composables/accounts';
@@ -7,6 +12,7 @@ import { useModals } from '@/composables/modals';
 import { MODAL_CONFIRM_TRANSACTION_SIGN, PROTOCOLS } from '@/constants';
 import { unpackTx } from '@aeternity/aepp-sdk';
 import { useNetworks } from '@/composables/networks';
+import { useAddressBook } from '@/composables/addressBook';
 
 const superheroSvcRef = ref<SuperheroIDService | null>(null);
 const hasSuperheroIdRef = ref(false);
@@ -16,16 +22,20 @@ export function useSuperheroId(): {
   hasSuperheroId: Ref<boolean>;
   refreshHasSuperheroId: () => Promise<void>;
   syncAddressBook: (json: string) => Promise<void>;
-  loadAddressBook: () => Promise<string | undefined>;
+  loadAddressBook: () => Promise<void>;
 } { // eslint-disable-line
   const { aeAccounts } = useAccounts();
   const { getAeSdk } = useAeSdk();
   const { openModal } = useModals();
+  const { addAddressBookEntriesFromJson } = useAddressBook();
+
+  const firstAeAddress = computed(() => (
+    aeAccounts.value?.[0]?.address as Encoded.AccountAddress | undefined));
 
   const svcRef = superheroSvcRef as unknown as Ref<SuperheroIDService | null>;
 
   async function refreshHasSuperheroId(): Promise<void> {
-    const addr = aeAccounts.value?.[0]?.address;
+    const addr = firstAeAddress.value;
     if (!addr) {
       hasSuperheroIdRef.value = false;
       return;
@@ -39,7 +49,7 @@ export function useSuperheroId(): {
   }
 
   async function syncAddressBook(json: string): Promise<void> {
-    const addr = aeAccounts.value?.[0]?.address;
+    const addr = firstAeAddress.value;
     if (!addr) throw new Error('No æternity account');
     if (!superheroSvcRef.value) throw new Error('Connect Superhero ID first');
     const svc = superheroSvcRef.value;
@@ -59,13 +69,15 @@ export function useSuperheroId(): {
     hasSuperheroIdRef.value = true;
   }
 
-  async function loadAddressBook(): Promise<string | undefined> {
-    const addr = aeAccounts.value?.[0]?.address;
-    if (!addr) return undefined;
+  async function loadAddressBook() {
+    const addr = firstAeAddress.value;
+    if (!addr) throw new Error('No æternity account');
     const svc = superheroSvcRef.value || new SuperheroIDService();
     const val = await svc.getId();
     hasSuperheroIdRef.value = !!val;
-    return val;
+    if (val) {
+      addAddressBookEntriesFromJson(val, false);
+    }
   }
 
   // Re-init on network change if an AE account exists
@@ -75,9 +87,8 @@ export function useSuperheroId(): {
   });
 
   // Auto-initialize service when first AE account is available; clear on removal
-
   watch(
-    () => aeAccounts.value?.[0]?.address,
+    () => firstAeAddress.value,
     async (addr) => {
       if (addr) {
         if (!superheroSvcRef.value) superheroSvcRef.value = new SuperheroIDService();
