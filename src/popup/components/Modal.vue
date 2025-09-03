@@ -91,11 +91,7 @@ import {
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
 
-import {
-  IS_TRANSITIONS_DISABLED,
-  IS_EXTENSION,
-  IS_FIREFOX,
-} from '@/constants';
+import { IS_EXTENSION, IS_FIREFOX } from '@/constants';
 import { useScrollConfig, useViewport } from '@/composables';
 
 import BtnClose from './buttons/BtnClose.vue';
@@ -134,12 +130,7 @@ export default defineComponent({
 
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
-    const transitionName = computed(() => {
-      if (IS_TRANSITIONS_DISABLED) {
-        return undefined;
-      }
-      return props.fromBottom ? 'from-bottom-transition' : 'pop-in-transition';
-    });
+    const transitionName = computed(() => props.fromBottom ? 'from-bottom-transition' : 'pop-in-transition');
 
     function handleClose() {
       emit('close');
