@@ -156,6 +156,7 @@ import buyBackground from '@/image/dashboard/buy-ae.webp';
 import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
+import { handleUnknownError } from '@/utils';
 // import BtnPill from '../components/buttons/BtnPill.vue';
 
 export default defineComponent({
@@ -238,8 +239,7 @@ export default defineComponent({
         openDefaultModal({ title: 'Contract', msg: `Deployed: ${ct}` });
       } catch (e) {
         openDefaultModal({ title: 'Contract', msg: 'Deploy failed' });
-        // eslint-disable-next-line no-console
-        console.error(e);
+        handleUnknownError(e);
       }
     }
 
@@ -249,9 +249,8 @@ export default defineComponent({
         const json = await loadAddressBook();
         if (json) addAddressBookEntriesFromJson(json);
       } catch (e) {
-        openDefaultModal({ title: 'Contract', msg: 'Connection to Superhero ID contract failed' });
-        // eslint-disable-next-line no-console
-        console.error(e);
+        openDefaultModal({ title: 'Superhero ID', msg: 'Connection to Superhero ID contract failed' });
+        handleUnknownError(e);
       }
     }
 

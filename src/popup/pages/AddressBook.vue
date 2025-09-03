@@ -58,6 +58,7 @@ import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 import AddIcon from '@/icons/plus-circle.svg?vue-component';
 import ImportIcon from '@/icons/import-address-book.svg?vue-component';
 import ExportIcon from '@/icons/export-address-book.svg?vue-component';
+import { handleUnknownError } from '@/utils';
 
 export default defineComponent({
   components: {
@@ -81,11 +82,10 @@ export default defineComponent({
         const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
         await syncAddressBook(JSON.stringify(addressBook.value));
-        openDefaultModal({ title: 'Address Book', msg: 'Synced to Superhero ID' });
+        openDefaultModal({ title: 'Superhero ID', msg: 'Address Book Sync with SH ID completed' });
       } catch (e) {
-        openDefaultModal({ title: 'Address Book', msg: 'Sync failed' });
-        // eslint-disable-next-line no-console
-        console.error(e);
+        openDefaultModal({ title: 'Superhero ID', msg: 'Sync failed' });
+        handleUnknownError(e);
       } finally {
         isSyncing.value = false;
       }
