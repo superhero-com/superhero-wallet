@@ -25,7 +25,7 @@
             @click="exportAddressBook()"
           />
           <BtnBox
-            v-if="isSuperheroConnected && hasSuperheroId"
+            v-if="hasSuperheroId"
             data-cy="sync-address-book"
             :text="isSyncing ? 'Syncing…' : 'Sync'"
             :disabled="isSyncing"
@@ -42,18 +42,15 @@
 
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 
 import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
 import {
   useAddressBook,
-  useAeSdk,
   useModals,
   useAccounts,
 } from '@/composables';
-import { MODAL_CONFIRM_TRANSACTION_SIGN, PROTOCOLS } from '@/constants';
-import { SuperheroIDService } from '@/protocols/aeternity/libs/SuperheroIDService';
-import { unpackTx } from '@aeternity/aepp-sdk';
+import { useSuperheroId } from '@/composables/superheroId';
 
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
@@ -72,12 +69,10 @@ export default defineComponent({
     const hideButtons = ref(false);
 
     const { exportAddressBook, importAddressBook, addressBook } = useAddressBook();
-    const { openDefaultModal, openModal } = useModals();
+    const { openDefaultModal } = useModals();
     const { aeAccounts } = useAccounts();
-    const { getAeSdk } = useAeSdk();
+    const { syncAddressBook, hasSuperheroId } = useSuperheroId();
 
-    const isSuperheroConnected = ref(false);
-    const hasSuperheroId = ref(false);
     const isSyncing = ref(false);
 
     async function onSyncAddressBook() {
@@ -85,19 +80,7 @@ export default defineComponent({
         isSyncing.value = true;
         const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
-        const svc = new SuperheroIDService();
-        const txBase64 = await svc.buildSetIdTx(JSON.stringify(addressBook.value)) as any;
-        const tx = unpackTx(txBase64) as any;
-        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
-          txBase64,
-          tx,
-          protocol: PROTOCOLS.aeternity,
-          app: { host: window.location.origin, href: window.location.origin },
-        });
-        const aeSdk = await getAeSdk();
-        const signed = await aeSdk.signTransaction(txBase64, { fromAccount: addr } as any);
-        const { txHash } = await aeSdk.api.postTransaction({ tx: signed });
-        await aeSdk.poll(txHash);
+        await syncAddressBook(JSON.stringify(addressBook.value));
         openDefaultModal({ title: 'Address Book', msg: 'Synced to Superhero ID' });
       } catch (e) {
         openDefaultModal({ title: 'Address Book', msg: 'Sync failed' });
@@ -108,26 +91,11 @@ export default defineComponent({
       }
     }
 
-    onMounted(async () => {
-      try {
-        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
-        if (!addr) return;
-        const svc = new SuperheroIDService();
-        const exists = await svc.hasId();
-        isSuperheroConnected.value = true;
-        hasSuperheroId.value = !!exists;
-      } catch {
-        isSuperheroConnected.value = false;
-        hasSuperheroId.value = false;
-      }
-    });
-
     return {
       hideButtons,
       exportAddressBook,
       importAddressBook,
       onSyncAddressBook,
-      isSuperheroConnected,
       hasSuperheroId,
       isSyncing,
       AddIcon,

@@ -42,11 +42,19 @@
         </template>
         <template #cards>
           <DashboardCard
-            v-if="!hasSuperheroId && isConnected"
+            v-if="!hasSuperheroId"
             title="Superhero ID"
             description="Create your Superhero ID to store your settings to the blockchain"
             btn-text="Create"
             @click="onCreateSuperheroId"
+          />
+
+          <DashboardCard
+            v-if="hasSuperheroId"
+            title="Superhero ID"
+            description="Connect to restore your settings from the blockchain"
+            btn-text="Connect"
+            @click="onConnectSuperheroId"
           />
 
           <LatestTransactionsCard />
@@ -110,7 +118,6 @@ import { useRoute } from 'vue-router';
 import {
   DASHBOARD_CARD_ID,
   IS_MOBILE_APP,
-  MODAL_CONFIRM_TRANSACTION_SIGN,
   PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -136,9 +143,8 @@ import DashboardCard from '@/popup/components/DashboardCard.vue';
 import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
 import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 import { useAddressBook } from '@/composables/addressBook';
+import { useSuperheroId } from '@/composables/superheroId';
 import { useModals } from '@/composables/modals';
-import { SuperheroIDService } from '@/protocols/aeternity/libs/SuperheroIDService';
-import SuperheroIdsAci from '@/protocols/aeternity/aci/SuperheroIdsACI.json';
 
 import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
@@ -150,7 +156,6 @@ import buyBackground from '@/image/dashboard/buy-ae.webp';
 import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
-import { unpackTx } from '@aeternity/aepp-sdk';
 // import BtnPill from '../components/buttons/BtnPill.vue';
 
 export default defineComponent({
@@ -184,12 +189,18 @@ export default defineComponent({
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
     const { addressBook, addAddressBookEntriesFromJson } = useAddressBook();
-    const { openModal, openDefaultModal } = useModals();
+    const {
+      superheroSvc,
+      hasSuperheroId,
+      syncAddressBook,
+      loadAddressBook,
+    } = useSuperheroId();
+    const { openDefaultModal } = useModals();
 
     const { accountsTotalBalance } = useBalances();
     const { accountsTotalTokenBalance } = useFungibleTokens();
     const { checkIfOpenTransferSendModal } = useDeepLinkApi();
-    const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk();
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
     const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
     const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
@@ -215,16 +226,13 @@ export default defineComponent({
       pageIsActive.value = false;
     });
 
-    const superheroSvc = ref<SuperheroIDService | null>(null);
     const connectedContractId = ref<string | null>(null);
-    const isConnected = computed(() => !!superheroSvc.value);
-    const hasSuperheroId = ref(false);
 
     async function onDeployContract() {
       try {
         const res = await fetch('/contracts/SuperheroIds.aes');
         const source = await res.text();
-        const svc = new SuperheroIDService();
+        const svc = superheroSvc.value!;
         const ct = await svc.deployFromSource(source);
         connectedContractId.value = ct;
         openDefaultModal({ title: 'Contract', msg: `Deployed: ${ct}` });
@@ -236,21 +244,10 @@ export default defineComponent({
     }
 
     async function onConnectSuperheroId() {
-      if (!aeAccounts.value.length) {
-        return;
-      }
-      superheroSvc.value = new SuperheroIDService();
+      if (!aeAccounts.value.length) return;
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _stub = SuperheroIdsAci;
-        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
-        if (addr) {
-          hasSuperheroId.value = await superheroSvc.value.hasId();
-          if (hasSuperheroId.value) {
-            const json = await superheroSvc.value.getId();
-            if (json) addAddressBookEntriesFromJson(json);
-          }
-        }
+        const json = await loadAddressBook();
+        if (json) addAddressBookEntriesFromJson(json);
       } catch (e) {
         openDefaultModal({ title: 'Contract', msg: 'Connection to Superhero ID contract failed' });
         // eslint-disable-next-line no-console
@@ -260,40 +257,12 @@ export default defineComponent({
 
     async function onCreateSuperheroId() {
       try {
-        if (!superheroSvc.value) throw new Error('Connect Superhero ID first');
-        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
-        if (!addr) throw new Error('No æternity account');
-        const svc = new SuperheroIDService();
-        const txBase64 = await svc.buildSetIdTx(JSON.stringify(addressBook.value)) as any;
-        const tx = unpackTx(txBase64) as any;
-        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
-          txBase64,
-          tx,
-          protocol: PROTOCOLS.aeternity,
-          app: { host: window.location.origin, href: window.location.origin },
-        });
-        const aeSdk = await getAeSdk();
-        const signed = await aeSdk.signTransaction(txBase64, { fromAccount: addr } as any);
-        const { txHash } = await aeSdk.api.postTransaction({ tx: signed });
-        await aeSdk.poll(txHash);
-        hasSuperheroId.value = true;
+        await syncAddressBook(JSON.stringify(addressBook.value));
         openDefaultModal({ title: 'Superhero ID', msg: 'Created Superhero ID.' });
       } catch (e) {
         openDefaultModal({ title: 'Superhero ID', msg: 'Create failed' });
       }
     }
-
-    watch(
-      () => [isNodeTestnet.value],
-      () => {
-        if (isNodeTestnet.value) {
-          onConnectSuperheroId();
-        }
-      },
-      {
-        immediate: true,
-      },
-    );
 
     return {
       DASHBOARD_CARD_ID,
@@ -327,7 +296,6 @@ export default defineComponent({
       totalBalance,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
-      isConnected,
       hasSuperheroId,
       onDeployContract,
       onConnectSuperheroId,

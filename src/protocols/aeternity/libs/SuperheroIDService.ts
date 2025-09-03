@@ -26,7 +26,7 @@ export class SuperheroIDService {
     const aeSdk = await getAeSdk();
     return Contract.initialize({
       ...aeSdk.getContext(),
-      ...(options || {}),
+      ...options,
       aci: SuperheroIdsACI as any,
       address: this.contractId,
     }) as unknown as SuperheroIdsContract;
