@@ -717,12 +717,25 @@ export async function exportFile(
 
   if (IS_MOBILE_APP) {
     const base64 = await convertBlobToBase64(blob);
+    // Use app cache directory to avoid Android external storage restrictions
     const saveFile = await Filesystem.writeFile({
       path: filename,
       data: base64,
-      directory: Directory.Documents,
+      directory: Directory.Cache,
     });
-    return saveFile.uri;
+
+    try {
+      const canShare = (await Share.canShare()).value;
+      if (canShare) {
+        // Share the file so the user can save/export it to their preferred location
+        await Share.share({
+          title: filename,
+          files: [saveFile.uri],
+        });
+      }
+    } catch (e) { /* NOOP */ }
+
+    return undefined;
   }
   const a = document.createElement('a');
   const href = window.URL.createObjectURL(blob);
