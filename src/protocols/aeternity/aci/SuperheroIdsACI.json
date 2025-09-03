@@ -19,15 +19,15 @@
   },
   {
     "contract": {
-      "name": "SuperheroIds",
+      "name": "SuperheroID",
       "kind": "contract_main",
       "payable": false,
       "event": { "variant": [] },
       "state": {
         "record": [
           {
-            "name": "ids",
-            "type": { "map": ["address", "string"] }
+            "name": "data",
+            "type": { "map": ["address", { "map": ["string", "string"] }] }
           }
         ]
       },
@@ -36,36 +36,55 @@
           "arguments": [],
           "name": "init",
           "payable": false,
-          "returns": "SuperheroIds.state",
+          "returns": "SuperheroData.state",
           "stateful": false
         },
         {
           "arguments": [
-            { "name": "id", "type": "string" }
+            { "name": "key", "type": "string" },
+            { "name": "value", "type": "string" }
           ],
-          "name": "set_id",
+          "name": "set_data",
           "payable": false,
           "returns": { "tuple": [] },
           "stateful": true
         },
         {
-          "arguments": [],
-          "name": "get_id",
+          "arguments": [
+            { "name": "key", "type": "string" }
+          ],
+          "name": "get_data",
           "payable": false,
           "returns": { "option": ["string"] },
           "stateful": false
         },
         {
           "arguments": [],
-          "name": "has_id",
+          "name": "has_data",
           "payable": false,
           "returns": "bool",
           "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "key", "type": "string" }
+          ],
+          "name": "has_key",
+          "payable": false,
+          "returns": "bool",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "key", "type": "string" }
+          ],
+          "name": "delete_key",
+          "payable": false,
+          "returns": { "tuple": [] },
+          "stateful": true
         }
       ],
       "typedefs": []
     }
   }
 ]
-
-

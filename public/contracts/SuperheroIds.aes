@@ -1,15 +1,31 @@
-contract SuperheroIds =
+contract SuperheroID =
   record state =
-    { ids : map(address, string) }
+    { data : map(address, map(string, string)) }
 
   entrypoint init() =
-    { ids = {} }
+    { data = {} }
 
-  stateful entrypoint set_id(id : string) =
-    put(state{ ids[Call.caller] = id })
+  stateful entrypoint set_data(key : string, value : string) =
+    let user_data = Map.lookup_default(Call.caller, state.data, {})
+    let new_user_data = user_data{ [key] = value }
+    put(state{ data[Call.caller] = new_user_data })
 
-  entrypoint get_id() : option(string) =
-    Map.lookup(Call.caller, state.ids)
+  entrypoint get_data(key : string) : option(string) =
+    switch(Map.lookup(Call.caller, state.data))
+      None => None
+      Some(user_data) => Map.lookup(key, user_data)
 
-  entrypoint has_id() : bool =
-    Map.member(Call.caller, state.ids)
+  entrypoint has_data() : bool =
+    Map.member(Call.caller, state.data)
+
+  entrypoint has_key(key : string) : bool =
+    switch(Map.lookup(Call.caller, state.data))
+      None => false
+      Some(user_data) => Map.member(key, user_data)
+
+  stateful entrypoint delete_key(key : string) =
+    switch(Map.lookup(Call.caller, state.data))
+      None => ()
+      Some(user_data) =>
+        let new_user_data = Map.delete(key, user_data)
+        put(state{ data[Call.caller] = new_user_data })

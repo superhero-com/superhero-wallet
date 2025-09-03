@@ -46,7 +46,7 @@ export function useSuperheroId(): {
     }
     const svc = getService();
     try {
-      hasSuperheroIdRef.value = await svc.hasId();
+      hasSuperheroIdRef.value = await svc.hasAnyData();
     } catch {
       hasSuperheroIdRef.value = false;
     }
@@ -56,7 +56,7 @@ export function useSuperheroId(): {
     const addr = firstAeAddress.value;
     if (!addr) throw new Error('No æternity account');
     const svc = getService();
-    const txBase64 = await svc.buildSetIdTx(json) as Encoded.Transaction;
+    const txBase64 = await svc.buildSetDataTx('address_book', json) as Encoded.Transaction;
     const tx = unpackTx(txBase64) as any;
     await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
       txBase64,
@@ -76,7 +76,7 @@ export function useSuperheroId(): {
     const addr = firstAeAddress.value;
     if (!addr) throw new Error('No æternity account');
     const svc = getService();
-    const val = await svc.getId();
+    const val = await svc.getData('address_book');
     hasSuperheroIdRef.value = !!val;
     if (val) {
       addAddressBookEntriesFromJson(val, false);
