@@ -45,6 +45,9 @@ export default defineComponent({
         await openModal(MODAL_CONFIRM_CONNECT, {
           access: [CONNECT_PERMISSIONS.address],
           app: app.value,
+          protocol: 'aeternity',
+          supportsProtocol: true,
+          supportedProtocols: ['aeternity'],
         });
 
         // Sdk should be initialized in order to get a current networkId.

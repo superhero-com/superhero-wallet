@@ -177,6 +177,126 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     return { chains, accounts };
   }
 
+  function getRequestedChainIdsFromProposal(proposal: any): string[] {
+    const extractChains = (ns: any) => (
+      ns?.[ETH_CHAIN_NAMESPACE]?.chains || []
+    ) as string[];
+
+    const chainsUris = [
+      ...extractChains(proposal?.optionalNamespaces),
+      ...extractChains(proposal?.requiredNamespaces),
+    ];
+
+    const requestedChainIds = uniq(
+      chainsUris
+        .map((uri) => uri?.split(':')?.[1])
+        .filter(Boolean),
+    ) as string[];
+
+    return requestedChainIds;
+  }
+
+  function getPreferredEvmProtocolFromProposal(proposal: any): Protocol | null {
+    const requestedChainIds = new Set(getRequestedChainIdsFromProposal(proposal));
+    if (!requestedChainIds.size) return null;
+
+    // Map chainId -> protocol from configured networks
+    const chainIdToProtocol: Record<string, Protocol> = {};
+    Object.values(networks.value).forEach(({ protocols }) => {
+      EVM_PROTOCOLS.forEach((protocol: Protocol) => {
+        const chainId = (protocols as any)[protocol]?.chainId?.toString();
+        if (!chainId) return;
+        if (!chainIdToProtocol[chainId]) {
+          chainIdToProtocol[chainId] = protocol;
+        }
+      });
+    });
+
+    const requestedProtocols = new Set<Protocol>(
+      [...requestedChainIds]
+        .map((id) => chainIdToProtocol[id])
+        .filter(Boolean) as Protocol[],
+    );
+
+    // 1) If active account protocol is supported, prefer it
+    if (EVM_PROTOCOLS.includes(activeAccount.value.protocol)
+      && requestedProtocols.has(activeAccount.value.protocol)) {
+      return activeAccount.value.protocol;
+    }
+
+    // 2) Otherwise, find first wallet account whose protocol is supported
+    const protocolWithAccounts = EVM_PROTOCOLS.find((protocol: Protocol) => (
+      requestedProtocols.has(protocol)
+      && (accountsGroupedByProtocol.value[protocol] || []).length > 0
+    ));
+    if (protocolWithAccounts) return protocolWithAccounts;
+
+    return null;
+  }
+
+  function getSupportedRequestedProtocols(proposal: any): Protocol[] {
+    const requestedChainIds = new Set(getRequestedChainIdsFromProposal(proposal));
+    if (!requestedChainIds.size) return [];
+
+    const chainIdToProtocol: Record<string, Protocol> = {};
+    Object.values(networks.value).forEach(({ protocols }) => {
+      EVM_PROTOCOLS.forEach((protocol: Protocol) => {
+        const chainId = (protocols as any)[protocol]?.chainId?.toString();
+        if (!chainId) return;
+        if (!chainIdToProtocol[chainId]) {
+          chainIdToProtocol[chainId] = protocol;
+        }
+      });
+    });
+
+    const requestedProtocols = new Set<Protocol>(
+      [...requestedChainIds]
+        .map((id) => chainIdToProtocol[id])
+        .filter(Boolean) as Protocol[],
+    );
+
+    return EVM_PROTOCOLS.filter((p) => requestedProtocols.has(p));
+  }
+
+  function getFormattedAccountsAndChainsForProtocol(
+    preferredProtocol: Protocol,
+    proposal: any,
+  ) {
+    const requestedChainIds = new Set(getRequestedChainIdsFromProposal(proposal));
+
+    const networkList = Object.values(networks.value)
+      .sort(({ name }) => (name === activeNetwork.value.name) ? -1 : 1);
+
+    const chainIdsOrdered: string[] = [];
+    networkList.forEach(({ protocols }) => {
+      const chainId = (protocols as any)[preferredProtocol]?.chainId?.toString();
+      if (!chainId) return;
+      if (requestedChainIds.size && !requestedChainIds.has(chainId)) return;
+      if (!chainIdsOrdered.includes(chainId)) {
+        chainIdsOrdered.push(chainId);
+      }
+    });
+
+    if (!chainIdsOrdered.length) {
+      // Fallback to all supported by wallet if intersection is empty
+      return getFormattedAccountsAndChains();
+    }
+
+    const chains = chainIdsOrdered.map((chainId) => `${ETH_CHAIN_NAMESPACE}:${chainId}`);
+
+    const lastActive = getLastActiveProtocolAccount(preferredProtocol);
+    const protocolAccounts = (
+      (accountsGroupedByProtocol.value[preferredProtocol] || []) as IAccount[]
+    ).sort(({ address }: IAccount) => (address === lastActive?.address) ? -1 : 1);
+
+    const accountsByChain = chainIdsOrdered.map((chainId) => (
+      protocolAccounts.map(({ address }) => `${ETH_CHAIN_NAMESPACE}:${chainId}:${address}`)
+    ));
+    const accounts = accountsByChain.flat();
+
+    return { chains, accounts };
+  }
+
   function monitorActiveSessionEvents() {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
@@ -296,7 +416,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       web3wallet.on('session_proposal', async ({ id, params: proposal }) => {
         if (proposalHandled) return;
         proposalHandled = true;
-        const { accounts, chains } = getFormattedAccountsAndChains();
+        const preferredProtocol = getPreferredEvmProtocolFromProposal(proposal);
+        const { accounts, chains } = preferredProtocol
+          ? getFormattedAccountsAndChainsForProtocol(preferredProtocol, proposal)
+          : getFormattedAccountsAndChains();
         const requestedMethods = proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.methods || [];
         const baseMethods = [
           ETH_RPC_METHODS.requestAccounts,
@@ -323,7 +446,16 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             const { icons } = proposal.proposer.metadata;
             const icon = icons?.[0] ?? '';
 
-            await openModal(MODAL_CONFIRM_CONNECT, { app, icon });
+            const supportedProtocols = getSupportedRequestedProtocols(proposal);
+            const displayProtocol = preferredProtocol || supportedProtocols[0];
+
+            await openModal(MODAL_CONFIRM_CONNECT, {
+              app,
+              icon,
+              protocol: displayProtocol || undefined,
+              supportsProtocol: supportedProtocols.length > 0,
+              supportedProtocols,
+            });
           }
 
           wcSession.value = await web3wallet!.approveSession({

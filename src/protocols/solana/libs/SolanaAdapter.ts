@@ -55,7 +55,7 @@ import type {
   AssetContractId,
   NetworkTypeDefault,
 } from '@/types';
-import { getLastNotEmptyAccountIndex, fetchJson } from '@/utils';
+import { getLastNotEmptyAccountIndex, fetchJson, handleUnknownError } from '@/utils';
 
 const TOKEN_PROGRAM_ID = new PublicKey(SOL_TOKEN_PROGRAM_ID);
 
@@ -502,7 +502,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       const sig = await conn.sendRawTransaction(tx.serialize(), { skipPreflight: false, preflightCommitment: 'confirmed' } as any);
       return { hash: sig };
     } catch (error: any) {
-      console.error(error);
+      handleUnknownError(error);
       throw error;
     }
   }
@@ -889,7 +889,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
         } as any);
         return [{ hash: signature, recipients: list }];
       } catch (error: any) {
-        console.error(error);
+        handleUnknownError(error);
         throw error;
       }
     };
@@ -925,7 +925,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       } as any);
       return { hash: signature };
     } catch (error: any) {
-      console.error(error);
+      handleUnknownError(error);
       throw error;
     }
   }
@@ -1040,7 +1040,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
         );
         return [{ hash: sig, recipients: list }];
       } catch (error: any) {
-        console.error(error);
+        handleUnknownError(error);
         throw error;
       }
     };

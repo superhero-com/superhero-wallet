@@ -213,6 +213,18 @@ export function usePermissions() {
         modal = MODAL_CONFIRM_RAW_SIGN;
         popup = POPUP_TYPE_RAW_SIGN;
       }
+      // Provide defaults for connect modal props to unify logic across protocols
+      if (modal === MODAL_CONFIRM_CONNECT) {
+        props = {
+          supportedProtocols: props?.supportedProtocols,
+          protocol: props?.protocol,
+          supportsProtocol: Array.isArray((props as any)?.supportedProtocols)
+            ? ((props as any).supportedProtocols as any[]).length > 0
+            : !!props?.protocol,
+          ...props,
+        } as any;
+      }
+
       await (
         (IS_OFFSCREEN_TAB)
           ? openPopup(popup, app?.href, props)
