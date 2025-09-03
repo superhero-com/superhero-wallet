@@ -14,15 +14,14 @@ import { unpackTx } from '@aeternity/aepp-sdk';
 import { useNetworks } from '@/composables/networks';
 import { useAddressBook } from '@/composables/addressBook';
 
-const superheroSvcRef = ref<SuperheroIDService | null>(null);
+const superheroSvcRef: Ref<SuperheroIDService | null> = ref(null);
 const hasSuperheroIdRef = ref(false);
 
 export function useSuperheroId(): {
-  superheroSvc: Ref<SuperheroIDService | null>;
   hasSuperheroId: Ref<boolean>;
-  refreshHasSuperheroId: () => Promise<void>;
   syncAddressBook: (json: string) => Promise<void>;
   loadAddressBook: () => Promise<void>;
+  deployContract: () => Promise<string>;
 } { // eslint-disable-line
   const { aeAccounts } = useAccounts();
   const { getAeSdk } = useAeSdk();
@@ -32,7 +31,12 @@ export function useSuperheroId(): {
   const firstAeAddress = computed(() => (
     aeAccounts.value?.[0]?.address as Encoded.AccountAddress | undefined));
 
-  const svcRef = superheroSvcRef as unknown as Ref<SuperheroIDService | null>;
+  function getService(): SuperheroIDService {
+    if (!(superheroSvcRef.value instanceof SuperheroIDService)) {
+      superheroSvcRef.value = new SuperheroIDService();
+    }
+    return superheroSvcRef.value;
+  }
 
   async function refreshHasSuperheroId(): Promise<void> {
     const addr = firstAeAddress.value;
@@ -40,7 +44,7 @@ export function useSuperheroId(): {
       hasSuperheroIdRef.value = false;
       return;
     }
-    const svc = superheroSvcRef.value || new SuperheroIDService();
+    const svc = getService();
     try {
       hasSuperheroIdRef.value = await svc.hasId();
     } catch {
@@ -51,8 +55,7 @@ export function useSuperheroId(): {
   async function syncAddressBook(json: string): Promise<void> {
     const addr = firstAeAddress.value;
     if (!addr) throw new Error('No æternity account');
-    if (!superheroSvcRef.value) throw new Error('Connect Superhero ID first');
-    const svc = superheroSvcRef.value;
+    const svc = getService();
     const txBase64 = await svc.buildSetIdTx(json) as Encoded.Transaction;
     const tx = unpackTx(txBase64) as any;
     await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
@@ -72,12 +75,19 @@ export function useSuperheroId(): {
   async function loadAddressBook() {
     const addr = firstAeAddress.value;
     if (!addr) throw new Error('No æternity account');
-    const svc = superheroSvcRef.value || new SuperheroIDService();
+    const svc = getService();
     const val = await svc.getId();
     hasSuperheroIdRef.value = !!val;
     if (val) {
       addAddressBookEntriesFromJson(val, false);
     }
+  }
+
+  async function deployContract(): Promise<string> {
+    const svc = getService();
+    const res = await fetch('/contracts/SuperheroIds.aes');
+    const source = await res.text();
+    return svc.deployFromSource(source);
   }
 
   // Re-init on network change if an AE account exists
@@ -91,7 +101,6 @@ export function useSuperheroId(): {
     () => firstAeAddress.value,
     async (addr) => {
       if (addr) {
-        if (!superheroSvcRef.value) superheroSvcRef.value = new SuperheroIDService();
         await refreshHasSuperheroId();
       } else {
         superheroSvcRef.value = null;
@@ -102,10 +111,9 @@ export function useSuperheroId(): {
   );
 
   return {
-    superheroSvc: svcRef,
     hasSuperheroId: hasSuperheroIdRef,
-    refreshHasSuperheroId,
     syncAddressBook,
     loadAddressBook,
+    deployContract,
   };
 }

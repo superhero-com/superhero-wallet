@@ -1,5 +1,6 @@
 import {
   Contract,
+  ContractMethodsBase,
   Encoded,
   Tag,
 } from '@aeternity/aepp-sdk';
@@ -11,25 +12,27 @@ import { useAccounts } from '@/composables/accounts';
 import { encrypt, decrypt, importAesKeyFromSecret } from '@/utils/crypto';
 import type { IAccount } from '@/types';
 
-export type SuperheroIdsContract = Contract<{
-  set_id: (id: string) => Promise<void>;
-  get_id: () => Promise<{ decodedResult: string | undefined }>;
-  has_id: () => Promise<{ decodedResult: boolean }>;
-}>;
+interface SuperheroIdsContractMethods extends ContractMethodsBase {
+  set_id: (id: string) => void;
+  get_id: () => string | undefined;
+  has_id: () => boolean;
+}
+
+export type SuperheroIdsContract = Contract<SuperheroIdsContractMethods>;
 
 export class SuperheroIDService {
-  private contractId: Encoded.ContractAddress = 'ct_kaUS1K6qFXn2wP2phR26WLWXEKu5YsgA2gq4RWvkB69KY2gYF';
+  private contractId = 'ct_kaUS1K6qFXn2wP2phR26WLWXEKu5YsgA2gq4RWvkB69KY2gYF' as const;
 
   private async getContractInstance(options?: Partial<ContractInitializeOptions>):
     Promise<SuperheroIdsContract> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    return Contract.initialize({
+    return Contract.initialize<SuperheroIdsContractMethods>({
       ...aeSdk.getContext(),
       ...options,
-      aci: SuperheroIdsACI as any,
+      aci: SuperheroIdsACI,
       address: this.contractId,
-    }) as unknown as SuperheroIdsContract;
+    });
   }
 
   private static getCallerAccount(): IAccount {
@@ -45,8 +48,7 @@ export class SuperheroIDService {
     if (!account?.secretKey) throw new Error('Missing secret key for encryption');
     const key = await importAesKeyFromSecret(account.secretKey);
     const ciphertext = await encrypt(key, id);
-    await (contract as any)
-      .set_id(ciphertext, { fromAccount: account.address as Encoded.AccountAddress });
+    await contract.set_id(ciphertext);
   }
 
   async getId(): Promise<string | undefined> {
@@ -77,33 +79,32 @@ export class SuperheroIDService {
     if (!account?.secretKey) throw new Error('Missing secret key for encryption');
     const key = await importAesKeyFromSecret(account.secretKey);
     const ciphertext = await encrypt(key, id);
-    const gasLimit = await (contract as any)._estimateGas('set_id', [ciphertext], {
+    const gasLimit = await contract._estimateGas('set_id', [ciphertext], {
       senderId: account.address as Encoded.AccountAddress,
     });
-    const callData = (contract as any)._calldata.encode((contract as any)._name, 'set_id', [ciphertext]);
-    const built = await aeSdk.buildTx({
+    const callData = contract._calldata.encode(contract._name, 'set_id', [ciphertext]);
+    return aeSdk.buildTx({
       tag: Tag.ContractCallTx,
       callerId: account.address as Encoded.AccountAddress,
-      contractId: this.contractId!,
+      contractId: this.contractId,
       abiVersion: 3,
       amount: 0,
       callData,
       gasLimit,
-    } as any);
-    return built;
+    });
   }
 
   async deployContract(bytecode: Encoded.ContractBytearray): Promise<Encoded.ContractAddress> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    const instance = await Contract.initialize({
+    const instance = await Contract.initialize<SuperheroIdsContract>({
       ...aeSdk.getContext(),
-      aci: SuperheroIdsACI as any,
+      aci: SuperheroIdsACI,
       bytecode,
-    }) as any;
+    });
 
     await instance.init();
-    const address = instance.$options.address as Encoded.ContractAddress;
+    const { address } = instance.$options;
     this.contractId = address;
     return address;
   }
@@ -111,13 +112,13 @@ export class SuperheroIDService {
   async deployFromSource(sourceCode: string): Promise<Encoded.ContractAddress> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    const instance = await Contract.initialize({
+    const instance = await Contract.initialize<SuperheroIdsContract>({
       ...aeSdk.getContext(),
-      aci: SuperheroIdsACI as any,
+      aci: SuperheroIdsACI,
       sourceCode,
-    }) as any;
+    });
     await instance.init();
-    const address = instance.$options.address as Encoded.ContractAddress;
+    const { address } = instance.$options;
     this.contractId = address;
     return address;
   }

@@ -192,7 +192,7 @@ export default defineComponent({
     const { multisigAccounts } = useMultisigAccounts();
     const { addressBook } = useAddressBook();
     const {
-      superheroSvc,
+      deployContract,
       hasSuperheroId,
       syncAddressBook,
       loadAddressBook,
@@ -228,15 +228,9 @@ export default defineComponent({
       pageIsActive.value = false;
     });
 
-    const connectedContractId = ref<string | null>(null);
-
     async function onDeployContract() {
       try {
-        const res = await fetch('/contracts/SuperheroIds.aes');
-        const source = await res.text();
-        const svc = superheroSvc.value!;
-        const ct = await svc.deployFromSource(source);
-        connectedContractId.value = ct;
+        const ct = await deployContract();
         openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.deployedMsg', { ct }) });
       } catch (e) {
         openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.deployFailed') });

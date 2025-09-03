@@ -749,6 +749,9 @@
         "addressBook": "Address Book",
         "own": "Own",
         "recent": "Recent"
+      },
+      "superheroId": {
+        "synced": "Address Book Sync with SH ID completed"
       }
     },
     "secureLogin": {

@@ -84,9 +84,8 @@ export default defineComponent({
         const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
         if (!addr) throw new Error('No æternity account');
         await syncAddressBook(JSON.stringify(addressBook.value));
-        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('pages.addressBook.export.title') });
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('pages.addressBook.superheroId.synced') });
       } catch (e) {
-        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('common.connectionFailed') });
         handleUnknownError(e);
       } finally {
         isSyncing.value = false;
