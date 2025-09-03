@@ -50,9 +50,8 @@ import {
   useAddressBook,
   useModals,
   useAccounts,
+  useSuperheroId,
 } from '@/composables';
-import { useSuperheroId } from '@/composables/superheroId';
-
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 

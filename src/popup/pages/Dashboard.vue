@@ -53,7 +53,8 @@
             v-if="hasSuperheroId"
             :title="$t('dashboard.superheroId.title')"
             :description="$t('dashboard.superheroId.connectDescription')"
-            :btn-text="$t('dashboard.superheroId.connectBtn')"
+            :btn-text="isRestoring ? ($t('common.pending') as string) : ($t('dashboard.superheroId.connectBtn') as string)"
+            :disabled="isRestoring"
             @click="onConnectSuperheroId"
           />
 
@@ -134,6 +135,9 @@ import {
   useDeepLinkApi,
   useFungibleTokens,
   useMultisigAccounts,
+  useSuperheroId,
+  useAddressBook,
+  useModals,
 } from '@/composables';
 import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
@@ -143,9 +147,6 @@ import DashboardBase from '@/popup/components/DashboardBase.vue';
 import DashboardCard from '@/popup/components/DashboardCard.vue';
 import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
 import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
-import { useAddressBook } from '@/composables/addressBook';
-import { useSuperheroId } from '@/composables/superheroId';
-import { useModals } from '@/composables/modals';
 
 import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
@@ -179,6 +180,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const route = useRoute();
+    const isRestoring = ref(false);
 
     const {
       accounts,
@@ -196,6 +198,7 @@ export default defineComponent({
       hasSuperheroId,
       syncAddressBook,
       loadAddressBook,
+      loadSettings,
     } = useSuperheroId();
     const { openDefaultModal } = useModals();
 
@@ -239,13 +242,15 @@ export default defineComponent({
     }
 
     async function onConnectSuperheroId() {
+      isRestoring.value = true;
       try {
         await loadAddressBook();
+        await loadSettings();
         openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.restoreMsg') });
       } catch (e) {
         openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.connectFailed') });
         handleUnknownError(e);
-      }
+      } finally { isRestoring.value = false; }
     }
 
     async function onCreateSuperheroId() {
@@ -290,6 +295,7 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
       hasSuperheroId,
+      isRestoring,
       onDeployContract,
       onConnectSuperheroId,
       onCreateSuperheroId,

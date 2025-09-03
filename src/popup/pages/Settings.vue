@@ -46,6 +46,12 @@
           :info="saveErrorLog ? $t('common.on') : $t('common.off')"
         />
         <PanelItem
+          v-if="hasSuperheroId"
+          :title="$t('dashboard.superheroId.syncSettingsBtn')"
+          :disabled="isSyncing"
+          @click="onSyncSettings"
+        />
+        <PanelItem
           :to="{ name: 'settings-reset-wallet' }"
           :title="$t('pages.titles.resetWallet')"
         />
@@ -56,7 +62,7 @@
 
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { IS_MOBILE_APP, PROTOCOLS } from '@/constants';
@@ -65,6 +71,7 @@ import {
   useCurrencies,
   useNetworks,
   useUi,
+  useSuperheroId,
 } from '@/composables';
 import {
   ROUTE_NETWORK_SETTINGS,
@@ -87,6 +94,8 @@ export default defineComponent({
     const { t } = useI18n();
     const { protocolsInUse } = useAccounts();
     const { currentCurrencyInfo } = useCurrencies();
+    const { hasSuperheroId, syncSettings } = useSuperheroId();
+    const isSyncing = ref(false);
     const { activeNetwork } = useNetworks();
     const { saveErrorLog, isBiometricLoginEnabled } = useUi();
 
@@ -100,6 +109,15 @@ export default defineComponent({
       }
       return null;
     });
+
+    async function onSyncSettings() {
+      try {
+        isSyncing.value = true;
+        await syncSettings(JSON.stringify({ currency: currentCurrencyInfo.value.code }));
+      } finally {
+        isSyncing.value = false;
+      }
+    }
 
     return {
       IS_MOBILE_APP,
@@ -115,6 +133,9 @@ export default defineComponent({
       secureLoginSettingsInfo,
       isBiometricLoginEnabled,
       activeCurrency,
+      hasSuperheroId,
+      onSyncSettings,
+      isSyncing,
     };
   },
 });

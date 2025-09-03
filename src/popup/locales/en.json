@@ -173,7 +173,10 @@
       "connectFailed": "Connection to Superhero ID contract failed",
       "restoreMsg": "Your address book and preferences have been restored",
       "deployFailed": "Deploy failed",
-      "deployedMsg": "Deployed: {ct}"
+      "deployedMsg": "Deployed: {ct}",
+      "syncSettingsBtn": "Sync Settings",
+      "settingsSynced": "Settings synced",
+      "settingsSyncFailed": "Settings sync failed"
     },
     "pendingMultisigCard": {
       "title": "Pending multisig transaction"
