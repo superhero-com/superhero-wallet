@@ -2339,6 +2339,37 @@ exports[`Pages Settings 1`] = `
         <!--v-if-->
         
       </a>
+      <button
+        class="panel-item variant-dark btn-base panel-item"
+        type="button"
+      >
+        
+        <div
+          class="panel-item-left"
+        >
+          
+          
+          <div
+            class="panel-item-title"
+          >
+            
+            locale-specific-text
+            
+          </div>
+        </div>
+        <div
+          class="panel-item-right"
+        >
+          <div
+            class="panel-item-info"
+          />
+          
+          <!--v-if-->
+          
+        </div>
+        <!--v-if-->
+        
+      </button>
       <a
         class="panel-item variant-dark btn-base panel-item"
         type="button"
