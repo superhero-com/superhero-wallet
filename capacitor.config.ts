@@ -15,6 +15,9 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       useDialog: true,
     },
+    EdgeToEdge: {
+      backgroundColor: '#141414',
+    },
   },
 };
 
