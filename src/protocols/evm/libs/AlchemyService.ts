@@ -33,8 +33,11 @@ type TokenMetadataResult = {
 export class AlchemyService {
   apiUrl: string;
 
-  constructor(apiUrl: string) {
+  protocol: Protocol;
+
+  constructor(apiUrl: string, protocol: Protocol = PROTOCOLS.bnb) {
     this.apiUrl = apiUrl;
+    this.protocol = protocol;
   }
 
   private async rpcCall<T = any>(method: string, params: any): Promise<T | undefined> {
@@ -86,7 +89,7 @@ export class AlchemyService {
           decimals,
           symbol: md?.symbol,
           name: md?.name,
-          protocol: PROTOCOLS.bnb as Protocol,
+          protocol: this.protocol,
           price: 0,
         } as ITokenBalance;
       });
@@ -102,7 +105,7 @@ export class AlchemyService {
       contractId: toChecksumAddress(contractAddress),
       decimals: Number(result.decimals ?? 0),
       name: result.name,
-      protocol: PROTOCOLS.bnb,
+      protocol: this.protocol,
       symbol: result.symbol,
       image: result.logo,
       price: 0,

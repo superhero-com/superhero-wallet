@@ -57,6 +57,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
+import { POLYGON_POS_CONTRACT_ID } from '@/protocols/polygonPos/config';
 import { decrypt, encrypt } from './crypto';
 
 /**
@@ -768,5 +769,6 @@ export const isEvmContract = (contractId?: AssetContractId | null): boolean => {
 
   // Check against known EVM contract IDs
   return contractId === ETH_CONTRACT_ID
-    || contractId === BNB_CONTRACT_ID;
+    || contractId === BNB_CONTRACT_ID
+    || contractId === POLYGON_POS_CONTRACT_ID;
 };
