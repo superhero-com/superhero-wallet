@@ -251,7 +251,13 @@ export default defineComponent({
       () => getProtocolAvailableTokens(currentActiveProtocol.value)[contractId],
     );
     const fungibleTokenBalance = computed(
-      () => (isCoin) ? undefined : getAccountTokenBalance(currentActiveAddress.value, contractId),
+      () => (isCoin)
+        ? undefined
+        : getAccountTokenBalance(
+          currentActiveAddress.value,
+          currentActiveProtocol.value,
+          contractId,
+        ),
     );
     const hideFiat = computed(() => !isCoin && !fungibleTokenBalance.value?.price);
     const routeName = computed(() => route.name);
@@ -280,7 +286,11 @@ export default defineComponent({
 
     const assetBalance = computed((): number => (isCoin)
       ? protocolCoinBalance.value.toNumber()
-      : getAccountTokenBalance(currentActiveAddress.value, contractId)?.convertedBalance || 0);
+      : getAccountTokenBalance(
+        currentActiveAddress.value,
+        currentActiveProtocol.value,
+        contractId,
+      )?.convertedBalance || 0);
 
     function calculateRouterHeight() {
       nextTick(() => {

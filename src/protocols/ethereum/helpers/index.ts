@@ -106,7 +106,7 @@ export async function decodeTxData(
   txData: string,
   contractId: string,
   fromAccount: string,
-): Promise<EthDecodedCallData| undefined> {
+): Promise<EthDecodedCallData | undefined> {
   const {
     ethActiveNetworkPredefinedSettings,
     ethActiveNetworkSettings,

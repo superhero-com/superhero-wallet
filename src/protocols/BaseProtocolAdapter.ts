@@ -39,6 +39,8 @@ export abstract class BaseProtocolAdapter {
 
   abstract coinPrecision: number;
 
+  abstract coinGeckoCoinId: string;
+
   /**
    * Defines if the protocol supports fungible tokens (token contracts).
    */
@@ -56,8 +58,6 @@ export abstract class BaseProtocolAdapter {
   abstract getAmountPrecision(args?: IAmountDecimalPlaces): number;
 
   abstract getUrlTokenKey(): string;
-
-  abstract getCoinGeckoCoinId(): string;
 
   abstract getDefaultCoin(
     marketData?: MarketData,

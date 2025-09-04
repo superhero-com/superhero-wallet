@@ -4,9 +4,9 @@
     :transfer-data="transferData"
     :fee="numericFee"
     :max-fee="numericMaxFee"
-    :fee-symbol="ETH_COIN_SYMBOL"
-    :protocol="PROTOCOLS.ethereum"
-    :custom-title="$t('modals.send.sendAsset', { name: ETH_PROTOCOL_NAME })"
+    :fee-symbol="coinSymbol"
+    :protocol="protocol"
+    :custom-title="$t('modals.send.sendAsset', { name: protocolName })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -15,8 +15,8 @@
         :max-recipients="10"
         :placeholder="recipientPlaceholderText"
         :errors="errors"
-        :protocol="PROTOCOLS.ethereum"
-        :validation-rules="{ account_address: [PROTOCOLS.ethereum] }"
+        :protocol="protocol"
+        :validation-rules="{ account_address: [protocol] }"
         @openQrModal="scanTransferQrCode()"
       />
     </template>
@@ -26,13 +26,13 @@
         v-model="formModel.amount"
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
-        :protocol="PROTOCOLS.ethereum"
+        :protocol="protocol"
         :blink-on-change="shouldUseMaxAmount"
         :validation-rules="{
           ...+balance.minus(maxFee) > 0
             ? { max_value: max }
             : {},
-          enough_coin: [maxFee.toString(), ETH_COIN_SYMBOL],
+          enough_coin: [maxFee.toString(), coinSymbol],
         }"
         @update:model-value="shouldUseMaxAmount = false"
         @asset-selected="handleAssetChange"
@@ -76,7 +76,12 @@ import {
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
-import type { AssetContractId, IAsset, TransferFormModel } from '@/types';
+import type {
+  AssetContractId,
+  IAsset,
+  Protocol,
+  TransferFormModel,
+} from '@/types';
 import {
   useAccountAssetsList,
   useBalances,
@@ -88,14 +93,13 @@ import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCal
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
-import { executeAndSetInterval } from '@/utils';
+import { executeAndSetInterval, isEvmContract } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   ETH_COIN_PRECISION,
   ETH_COIN_SYMBOL,
   ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
-import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -120,6 +124,7 @@ export default defineComponent({
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   emits: [
     'update:transferData',
@@ -127,6 +132,10 @@ export default defineComponent({
     'error',
   ],
   setup(props, { emit }) {
+    const adapter = computed(() => ProtocolAdapterFactory.getAdapter(props.protocol));
+    const protocolName = computed(() => adapter.value.protocolName);
+    const coinSymbol = computed(() => adapter.value.coinSymbol);
+
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
     const { marketData } = useCurrencies();
@@ -139,7 +148,7 @@ export default defineComponent({
         return accountAssets.value.find(({ contractId }) => contractId === assetContractId);
       } if (!selectedAsset) {
         return ProtocolAdapterFactory
-          .getAdapter(PROTOCOLS.ethereum)
+          .getAdapter(props.protocol)
           .getDefaultCoin(marketData.value!, +balance.value);
       }
       return undefined;
@@ -165,8 +174,7 @@ export default defineComponent({
       maxFeePerGas,
       maxPriorityFeePerGas,
       updateFeeList,
-    } = useEthFeeCalculation(recipientsCount);
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    } = useEthFeeCalculation(props.protocol, recipientsCount);
 
     const shouldUseMaxAmount = ref(false);
 
@@ -175,7 +183,7 @@ export default defineComponent({
     const numericFee = computed(() => +fee.value.toFixed());
     const numericMaxFee = computed(() => +maxFee.value.toFixed());
 
-    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })}`;
+    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: props.protocol })}`;
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -209,11 +217,12 @@ export default defineComponent({
     async function getTransferGasLimit() {
       const amount = new BigNumber(formModel.value.amount!);
       if (
-        props.transferData.selectedAsset?.contractId !== 'ethereum'
+        !isEvmContract(props.transferData.selectedAsset?.contractId)
         && amount.gt(0)
         && formModel.value.addresses?.length
       ) {
-        const { nodeUrl } = ethActiveNetworkSettings.value;
+        // Use the active protocol's node URL
+        const { nodeUrl } = activeNetwork.value.protocols[props.protocol];
 
         const results = await Promise.all(
           formModel.value.addresses.map((address) => getTokenTransferGasLimit(
@@ -276,6 +285,8 @@ export default defineComponent({
     );
 
     return {
+      protocolName,
+      coinSymbol,
       ETH_PROTOCOL_NAME,
       ETH_COIN_SYMBOL,
       PROTOCOLS,

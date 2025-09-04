@@ -38,6 +38,7 @@ import {
 } from '@/protocols/aeternity/config';
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { Protocol } from './protocols';
 
 export * from './filter';
@@ -166,6 +167,7 @@ export type AssetContractId =
   | typeof AE_CONTRACT_ID
   | typeof BTC_CONTRACT_ID
   | typeof ETH_CONTRACT_ID
+  | typeof BNB_CONTRACT_ID
   | string;
 
 export interface ITokenSale {
@@ -186,7 +188,7 @@ export interface ITokenSale {
 /**
  * Account's fungible token balance data
  */
-export interface ITokenBalance extends Partial<ITokenSale>{
+export interface ITokenBalance extends Partial<ITokenSale> {
   address: AccountAddress;
   amount: number | string;
   contractId: AssetContractId;

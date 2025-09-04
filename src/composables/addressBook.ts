@@ -14,6 +14,7 @@ import {
   selectFiles,
   pipe,
   exportFile,
+  isEvm,
 } from '@/utils';
 import { tg as t } from '@/popup/plugins/i18n';
 
@@ -39,9 +40,13 @@ export const useAddressBook = createCustomScopedComposable(() => {
     return showBookmarked.value ? entries.filter((entry) => entry.isBookmarked) : entries;
   }
   function filterAddressBookByProtocol(entries: IAddressBookEntry[]) {
-    return protocolFilter.value
-      ? entries.filter((entry) => entry.protocol === protocolFilter.value)
-      : entries;
+    if (!protocolFilter.value) return entries;
+
+    const protocol = protocolFilter.value;
+    if (isEvm(protocol)) {
+      return entries.filter((e) => isEvm(e.protocol));
+    }
+    return entries.filter((e) => e.protocol === protocol);
   }
   function filterAddressBookBySearchPhrase(entries: IAddressBookEntry[]) {
     const searchQueryLower = searchQuery.value.toLowerCase();
@@ -168,16 +173,14 @@ export const useAddressBook = createCustomScopedComposable(() => {
   }
 
   async function exportAddressBook() {
-    const path = await exportFile(
+    await exportFile(
       JSON.stringify(addressBook.value),
       'addressBookExport.json',
     );
-    if (path) {
-      openDefaultModal({
-        title: t('pages.addressBook.export.title'),
-        msg: t('pages.addressBook.export.message') + path,
-      });
-    }
+    openDefaultModal({
+      title: t('pages.addressBook.export.title'),
+      msg: t('pages.addressBook.export.message'),
+    });
   }
 
   async function importAddressBook() {

@@ -142,7 +142,7 @@
     -->
     <MultisigVaultCreateReview
       v-else-if="currentStep === STEPS.review"
-      :signers="signers"
+      :signers="signersReview"
       :phase="multisigAccountCreationPhase"
       :confirmations-required="confirmationsRequired"
       :account-id="currentMultisigAccountId"
@@ -301,8 +301,14 @@ export default defineComponent({
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
     const currentMultisigAccountId = ref<Encoded.AccountAddress>();
 
+    const toPlain = (addr?: string) => (
+      (addr && addr.includes(':') ? addr.split(':')[1] : addr) as Encoded.AccountAddress);
+
+    const signersReview = computed(() => (
+      signers.value.map((s) => ({ ...s, address: toPlain(s.address) }))));
+
     const signersAddressList = computed(
-      (): Encoded.AccountAddress[] => (signers.value)
+      (): Encoded.AccountAddress[] => (signersReview.value)
         .map(({ address }) => address)
         .filter(excludeFalsy),
     );
@@ -310,12 +316,13 @@ export default defineComponent({
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       return (
         validateHash(signer.address).valid
-        && signers.value.filter(({ address }) => signer.address === address).length >= 2
+        && signersReview.value.filter(({ address }) => (
+          signer.address === address)).length >= 2
       );
     }
 
     const isValidSigners = computed(
-      () => !signers.value.filter(
+      () => !signersReview.value.filter(
         (signer) => (
           !validateHash(signer.address).valid
           || checkIfSignerAddressDuplicated(signer)
@@ -325,7 +332,7 @@ export default defineComponent({
 
     const canCreateMultisig = computed(
       () => (
-        signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
+        signersReview.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         && isValidSigners.value
         && !errors.value?.length
       ),
@@ -485,6 +492,7 @@ export default defineComponent({
       currentStep,
       confirmationsRequired,
       signers,
+      signersReview,
       isValidSigners,
       canCreateMultisig,
       openFormStep,

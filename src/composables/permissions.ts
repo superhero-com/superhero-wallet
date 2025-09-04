@@ -24,6 +24,7 @@ import {
   POPUP_TYPE_SIGN,
   STORAGE_KEYS,
   PROTOCOLS,
+  EVM_PROTOCOLS,
 } from '@/constants';
 import { getCleanModalOptions, watchUntilTruthy } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
@@ -207,11 +208,23 @@ export function usePermissions() {
       if (
         method === METHODS.sign
         && (!modalProps.txBase64 || !isTxOfASupportedType(modalProps.txBase64))
-        && modalProps.protocol !== PROTOCOLS.ethereum
+        && !EVM_PROTOCOLS.includes(modalProps.protocol as any)
       ) {
         modal = MODAL_CONFIRM_RAW_SIGN;
         popup = POPUP_TYPE_RAW_SIGN;
       }
+      // Provide defaults for connect modal props to unify logic across protocols
+      if (modal === MODAL_CONFIRM_CONNECT) {
+        props = {
+          supportedProtocols: props?.supportedProtocols,
+          protocol: props?.protocol,
+          supportsProtocol: Array.isArray((props as any)?.supportedProtocols)
+            ? ((props as any).supportedProtocols as any[]).length > 0
+            : !!props?.protocol,
+          ...props,
+        } as any;
+      }
+
       await (
         (IS_OFFSCREEN_TAB)
           ? openPopup(popup, app?.href, props)

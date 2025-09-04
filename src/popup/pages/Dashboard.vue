@@ -6,10 +6,11 @@
         :accounts="accounts"
         :accounts-select-options="accountsSelectOptions"
         :active-account-address="activeAccount.address"
+        :active-account-protocol="activeAccount.protocol"
         :active-idx="activeAccountGlobalIdx"
         :balances-total="totalBalance"
         :force-header="multisigAccounts.length > 1"
-        @select-account="(address) => setActiveAccountByAddress(address)"
+        @select-account="(addressWithProtocol) => setActiveAccountByAddressAndProtocol(addressWithProtocol.split(':')[1], addressWithProtocol.split(':')[0])"
       >
         <template #swiper>
           <AccountSwiper
@@ -156,7 +157,7 @@ export default defineComponent({
       activeAccount,
       activeAccountGlobalIdx,
       setActiveAccountByGlobalIdx,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
 
@@ -220,7 +221,7 @@ export default defineComponent({
       pageIsActive,
       totalBalance,
       setActiveAccountByGlobalIdx,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
     };
   },
 });

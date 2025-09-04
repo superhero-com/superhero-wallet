@@ -9,6 +9,7 @@
     <ProtocolIcon
       v-if="showProtocolIcon && protocol"
       :protocol="protocol"
+      :show-super-icon="showSuperIcon"
       class="address-truncated-protocol"
     />
     <div v-if="!hideAddress" class="address-truncated-chunks">
@@ -42,6 +43,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, default: undefined },
     showExplorerLink: Boolean,
     showProtocolIcon: Boolean,
+    showSuperIcon: Boolean,
     hideAddress: Boolean,
   },
   setup(props) {

@@ -730,7 +730,7 @@
       },
       "export": {
         "title": "Address book exported",
-        "message": "Address book has been successfully exported. You can find the file at: "
+        "message": "Address book has been successfully exported. "
       },
       "filters":  {
         "addressBook": "Address Book",

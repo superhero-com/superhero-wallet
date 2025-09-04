@@ -32,6 +32,7 @@ import type {
   ITokenResolved,
   ITransaction,
   ObjectValues,
+  Protocol,
   StorageKeysInput,
   Truthy,
 } from '@/types';
@@ -41,17 +42,21 @@ import {
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
+  EVM_PROTOCOLS,
   IS_MOBILE_APP,
   LOCAL_STORAGE_PREFIX,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
   PASSWORD_STRENGTH,
   PROTOCOL_LIST,
+  PROTOCOLS,
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { decrypt, encrypt } from './crypto';
 
 /**
@@ -347,7 +352,8 @@ export function prepareAccountSelectOptions(accountList: IAccount[] | IMultisigA
   : IFormSelectOption[] {
   return accountList.map((acc): IFormSelectOption => ({
     text: (acc as IMultisigAccount).gaAccountId ?? getDefaultAccountLabel(acc as IAccount),
-    value: (acc as IMultisigAccount).gaAccountId ?? (acc as IAccount).address,
+    value:
+      `${(acc as IAccount).protocol ?? PROTOCOLS.aeternity}:${(acc as IMultisigAccount).gaAccountId ?? (acc as IAccount).address}`,
   }));
 }
 
@@ -711,12 +717,25 @@ export async function exportFile(
 
   if (IS_MOBILE_APP) {
     const base64 = await convertBlobToBase64(blob);
+    // Use app cache directory to avoid Android external storage restrictions
     const saveFile = await Filesystem.writeFile({
       path: filename,
       data: base64,
-      directory: Directory.Documents,
+      directory: Directory.Cache,
     });
-    return saveFile.uri;
+
+    try {
+      const canShare = (await Share.canShare()).value;
+      if (canShare) {
+        // Share the file so the user can save/export it to their preferred location
+        await Share.share({
+          title: filename,
+          files: [saveFile.uri],
+        });
+      }
+    } catch (e) { /* NOOP */ }
+
+    return undefined;
   }
   const a = document.createElement('a');
   const href = window.URL.createObjectURL(blob);
@@ -736,3 +755,18 @@ export function getActivityHash(activity: any) {
     ?? activity?.payload?.refTxHash
   );
 }
+
+export const isEvm = (p?: Protocol | null) => !!p && EVM_PROTOCOLS.includes(p);
+
+/**
+ * Check if a contract ID belongs to an EVM-compatible chain
+ * @param contractId - The contract ID to check
+ * @returns true if the contract ID is for an EVM chain
+ */
+export const isEvmContract = (contractId?: AssetContractId | null): boolean => {
+  if (!contractId) return false;
+
+  // Check against known EVM contract IDs
+  return contractId === ETH_CONTRACT_ID
+    || contractId === BNB_CONTRACT_ID;
+};

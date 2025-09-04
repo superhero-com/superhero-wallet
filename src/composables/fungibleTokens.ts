@@ -64,7 +64,10 @@ const lastAvailableTokensLoadTime = useStorageRef<number>(
  * Includes tokens from the user's account that are not on the main list.
  */
 const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
-  const uniqueTokens: IToken[] = uniqBy(tokenBalances.value, 'contractId')
+  const uniqueTokens: IToken[] = uniqBy(
+    tokenBalances.value,
+    (tb) => `${tb.protocol}:${tb.contractId}`,
+  )
     .map((tokenBalance) => ({
       contractId: tokenBalance.contractId,
       decimals: tokenBalance.decimals,
@@ -133,14 +136,15 @@ export function useFungibleTokens() {
   } = useAccounts();
   const { getCurrentCurrencyRate } = useCurrencies();
 
-  function getAccountTokenBalances(address: AccountAddress): ITokenBalance[] {
-    return tokenBalances.value.filter((token) => token.address === address) || [];
+  function getAccountTokenBalances(address: AccountAddress, protocol: Protocol): ITokenBalance[] {
+    return tokenBalances.value
+      .filter((token) => token.address === address && token.protocol === protocol) || [];
   }
 
   const accountsTotalTokenBalance = computed(
     () => accounts.value.reduce(
       (total, account) => {
-        const accountTokenBalance = getAccountTokenBalances(account.address);
+        const accountTokenBalance = getAccountTokenBalances(account.address, account.protocol);
         if (isEmpty(accountTokenBalance)) {
           return total;
         }
@@ -161,9 +165,10 @@ export function useFungibleTokens() {
 
   function getAccountTokenBalance(
     address: AccountAddress,
+    protocol: Protocol,
     contractId: string,
   ): ITokenBalance | undefined {
-    return getAccountTokenBalances(address)
+    return getAccountTokenBalances(address, protocol)
       .find((tokenBalance) => tokenBalance.contractId === contractId);
   }
 
@@ -209,10 +214,11 @@ export function useFungibleTokens() {
     }
 
     areTokenBalancesUpdating = true;
-    const tokenBalancesFetchPromisesByAddress: Dictionary<Promise<ITokenBalance[] | null>> = {};
+    const tokenBalancesFetchPromisesByKey: Dictionary<Promise<ITokenBalance[] | null>> = {};
     accounts.value.map(
       ({ address, protocol }) => {
-        tokenBalancesFetchPromisesByAddress[address] = ProtocolAdapterFactory
+        const key = `${address}:${protocol}`;
+        tokenBalancesFetchPromisesByKey[key] = ProtocolAdapterFactory
           .getAdapter(protocol).fetchAccountTokenBalances?.(address) ?? [] as any;
         return null;
       },
@@ -222,20 +228,19 @@ export function useFungibleTokens() {
     // because it means that we couldn't fetch new data
     const cachedTokenBalances = tokenBalances.value;
 
-    const cachedTokenBalancesByAddress: Dictionary<ITokenBalance[]> = {};
-    cachedTokenBalances.map(
-      (tokenBalance) => {
-        if (!cachedTokenBalancesByAddress[tokenBalance.address]) {
-          cachedTokenBalancesByAddress[tokenBalance.address] = [];
-        }
-        cachedTokenBalancesByAddress[tokenBalance.address].push(tokenBalance);
-        return null;
-      },
-    );
+    const cachedTokenBalancesByKey: Dictionary<ITokenBalance[]> = {};
+    cachedTokenBalances.map((tokenBalance) => {
+      const key = `${tokenBalance.address}:${tokenBalance.protocol}`;
+      if (!cachedTokenBalancesByKey[key]) {
+        cachedTokenBalancesByKey[key] = [];
+      }
+      cachedTokenBalancesByKey[key].push(tokenBalance);
+      return null;
+    });
 
     tokenBalances.value = (await Promise.all(
-      (Object.entries(tokenBalancesFetchPromisesByAddress)).map(
-        async ([address, promise]) => await promise || cachedTokenBalancesByAddress[address] || [],
+      (Object.entries(tokenBalancesFetchPromisesByKey)).map(
+        async ([key, promise]) => await promise || cachedTokenBalancesByKey[key] || [],
       ),
     )).flat();
 

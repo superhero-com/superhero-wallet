@@ -5,24 +5,40 @@ import { watch } from 'vue';
 import type { IBackgroundMessageData } from '@/types';
 import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
-import { IS_FIREFOX, POPUP_METHODS, PROTOCOLS } from '@/constants';
-import { useWalletConnect, useNetworks, useLedger } from '@/composables';
-import { handleEthereumRpcMethod } from '@/protocols/ethereum/libs/EthereumRpcMethodsHandler';
+import {
+  IS_FIREFOX,
+  POPUP_METHODS,
+  PROTOCOLS,
+  EVM_PROTOCOLS,
+} from '@/constants';
+import {
+  useWalletConnect,
+  useNetworks,
+  useLedger,
+  useAccounts,
+} from '@/composables';
+import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
 
 const { activeNetworkName, networks } = useNetworks();
+const { activeAccount } = useAccounts();
 
 watch(activeNetworkName, async (newNetworkName, oldNetworkName) => {
   if (oldNetworkName && newNetworkName !== oldNetworkName) {
+    const protocol = EVM_PROTOCOLS.includes(activeAccount.value.protocol)
+      ? activeAccount.value.protocol
+      : PROTOCOLS.ethereum;
+    const chainIdDec = networks.value[newNetworkName].protocols[protocol].chainId;
+    const chainIdHex = `0x${BigInt(chainIdDec).toString(16)}`;
     if (IS_FIREFOX) {
       const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
       if (tab.id) {
         browser.tabs.sendMessage(tab.id, {
           superheroWalletApproved: true,
           method: ETH_RPC_WALLET_EVENTS.chainChanged,
-          result: `0x${BigInt(networks.value[newNetworkName].protocols[PROTOCOLS.ethereum].chainId).toString(16)}`,
+          result: chainIdHex,
           type: 'result',
         });
       }
@@ -32,7 +48,7 @@ watch(activeNetworkName, async (newNetworkName, oldNetworkName) => {
         method: ETH_RPC_WALLET_EVENTS.chainChanged,
         params: {
           rpcMethodParams: {
-            result: `0x${BigInt(networks.value[newNetworkName].protocols[PROTOCOLS.ethereum].chainId).toString(16)}`,
+            result: chainIdHex,
           },
         },
       });
@@ -79,7 +95,7 @@ browser.runtime.onMessage.addListener(
     }
 
     if (typeof aepp === 'string' && method) {
-      return handleEthereumRpcMethod(aepp, method as EthRpcSupportedMethods, rpcMethodParams);
+      return handleEvmRpcMethod(aepp, method as EthRpcSupportedMethods, rpcMethodParams);
     }
 
     return true;

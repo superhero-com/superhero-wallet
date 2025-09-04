@@ -2,9 +2,14 @@ import { ref } from 'vue';
 import { fromWei } from 'web3-utils';
 import BigNumber from 'bignumber.js';
 
-import type { AccountAddress, AssetContractId, ITransaction } from '@/types';
+import type {
+  AccountAddress,
+  AssetContractId,
+  ITransaction,
+  Protocol,
+} from '@/types';
 import type { EthRpcEtherscanProxyMethod } from '@/protocols/ethereum/types';
-import { ETHERSCAN_API_KEY, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
+import { ETHERSCAN_API_KEY, TXS_PER_PAGE } from '@/constants';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
 import { ETH_CONTRACT_ID, ETH_SAFE_CONFIRMATION_COUNT } from '../config';
 import { toEthChecksumAddress } from '../helpers';
@@ -74,6 +79,7 @@ export class EtherscanService {
    */
   async fetchAccountCoinTransactions(
     address: string,
+    protocol: Protocol,
     options: { page?: string; offset?: string },
   ): Promise<ITransaction[]> {
     const {
@@ -96,6 +102,7 @@ export class EtherscanService {
 
     return response?.result?.map(
       (transaction: any) => EtherscanService.normalizeEtherscanTransactionStructure(
+        protocol,
         transaction,
         address,
       ),
@@ -107,6 +114,7 @@ export class EtherscanService {
    */
   async fetchAccountTokenTransactions(
     address: string,
+    protocol: Protocol,
     options: {
       page?: string;
       offset?: string;
@@ -142,6 +150,7 @@ export class EtherscanService {
 
     return response?.result?.map(
       (transaction: any) => EtherscanService.normalizeEtherscanTransactionStructure(
+        protocol,
         transaction,
         address,
         assetContractId,
@@ -152,11 +161,12 @@ export class EtherscanService {
   async fetchAccountTokenTransactionByHash(
     hash: string,
     address: string,
+    protocol: Protocol,
     blockNumber: string,
     input?: string,
   ): Promise<ITransaction | undefined> {
     // Not the best solution, but it seems to be the only way to get token transaction details
-    const blockTransactions = await this.fetchAccountTokenTransactions(address, {
+    const blockTransactions = await this.fetchAccountTokenTransactions(address, protocol, {
       startblock: blockNumber,
       endblock: blockNumber,
     });
@@ -175,6 +185,7 @@ export class EtherscanService {
   }
 
   static normalizeEtherscanTransactionStructure(
+    protocol: Protocol,
     transaction: any,
     transactionOwner?: AccountAddress,
     assetContractId?: AssetContractId,
@@ -210,7 +221,7 @@ export class EtherscanService {
     const isEthTransfer = !contractAddress && (!input || input === '0x');
 
     return {
-      protocol: PROTOCOLS.ethereum,
+      protocol,
       transactionOwner: transactionOwnerChecksumAddress,
       hash,
       microTime,

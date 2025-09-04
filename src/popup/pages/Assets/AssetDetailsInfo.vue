@@ -317,8 +317,9 @@ export default defineComponent({
     }));
     const tokens = computed(() => sharedAssetDetails.tokens);
     const tokenPairs = computed(() => sharedAssetDetails.tokenPairs || {});
-    const isCoin = computed(() => isAssetCoin(assetData.value.contractId));
-    const coinGeckoLinkUrl = computed(() => `https://www.coingecko.com/en/coins/${adapter.value.getCoinGeckoCoinId()}`);
+    const assetContractId = computed(() => sharedAssetDetails.tokenData?.contractId);
+    const isCoin = computed(() => isAssetCoin(assetContractId.value));
+    const coinGeckoLinkUrl = computed(() => `https://www.coingecko.com/en/coins/${adapter.value.coinGeckoCoinId}`);
     const coinGeckoLinkLabel = computed(() => coinGeckoLinkUrl.value.replace('https://', '').replace('en/coins', '...'));
 
     const poolShare = computed(() => {

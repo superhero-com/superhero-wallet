@@ -55,21 +55,22 @@
           v-text="$t('pages.connectConfirm.websiteRequestConnect')"
         />
       </div>
-      <template v-if="selectedAccount">
+      <template v-if="supported">
         <!-- USER CARD -->
         <FormSelect
-          :model-value="selectedAccount.address"
+          :model-value="selectedAccount?.address"
           :default-text="$t('pages.connectConfirm.selectAccount')"
-          :options="getAccountsSelectOptionsByProtocol(protocol)"
+          :options="options"
           class="account-select-input"
           item-title="value"
           account-select
           unstyled
           hide-arrow
-          @select="selectedAccount = getAccountByAddress($event)"
+          @select="onSelectAccount($event)"
         >
           <template #current-text>
             <AccountSelectOptionsItem
+              v-if="selectedAccount"
               :custom-account="selectedAccount"
               hide-balance
             >
@@ -145,7 +146,7 @@
       <BtnMain
         data-cy="accept"
         wide
-        :disabled="!activeAccount"
+        :disabled="!supported || !selectedAccount"
         :text="$t('common.confirm')"
         @click="confirm()"
       />
@@ -162,14 +163,14 @@ import {
   ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { ConnectPermission, IAccount } from '@/types';
+import type { ConnectPermission, IAccount, Protocol } from '@/types';
 import { prepareUrlToDisplay } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import {
   CONNECT_PERMISSIONS,
   PERMISSION_DEFAULTS,
-  PROTOCOLS,
   TRUSTED_DAPPS,
+  PROTOCOLS,
 } from '@/constants';
 import { useAccounts, usePopupProps } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
@@ -215,6 +216,9 @@ export default defineComponent({
   props: {
     access: { type: Array as PropType<ConnectPermission[]>, required: true },
     icon: { type: String, default: undefined },
+    protocol: { type: String as PropType<Protocol>, default: undefined },
+    supportsProtocol: { type: Boolean, default: false },
+    supportedProtocols: { type: Array as PropType<Protocol[]>, default: undefined },
   },
   setup(props) {
     const { t } = useI18n();
@@ -223,7 +227,7 @@ export default defineComponent({
     const {
       getAccountsSelectOptionsByProtocol,
       getLastActiveProtocolAccount,
-      getAccountByAddress,
+      getAccountByProtocolAndAddress,
       setActiveAccountByAddress,
     } = useAccounts();
     const {
@@ -257,11 +261,39 @@ export default defineComponent({
     const accessList = computed<ConnectPermission[]>(() => popupProps.value?.access
       || props.access);
 
-    const protocol = computed(() => popupProps.value?.protocol || PROTOCOLS.aeternity);
+    const requestedProtocol = computed(() => (
+      props.protocol || (popupProps.value?.protocol as Protocol | undefined)
+    ));
 
-    const activeAccount = computed(() => getLastActiveProtocolAccount(protocol.value));
+    const defaultProtocol = computed<Protocol | undefined>(() => (
+      requestedProtocol.value
+      || props.supportedProtocols?.[0]
+      || ((popupProps.value as any)?.supportedProtocols as Protocol[] | undefined)?.[0]
+      || PROTOCOLS.aeternity
+    ));
 
-    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol.value));
+    const activeAccount = computed(() => (
+      defaultProtocol.value ? getLastActiveProtocolAccount(defaultProtocol.value) : undefined
+    ));
+
+    const selectedAccount = ref<IAccount | undefined>(activeAccount.value);
+
+    const options = computed(() => {
+      const protos = props.supportedProtocols
+        || ((popupProps.value as any)?.supportedProtocols as Protocol[] | undefined)
+        || (requestedProtocol.value ? [requestedProtocol.value] : [PROTOCOLS.aeternity]);
+      const list = protos
+        .map((p) => getAccountsSelectOptionsByProtocol(p))
+        .flat();
+      return list;
+    });
+
+    const supported = computed(() => options.value.length > 0);
+
+    function onSelectAccount(addressWithProtocol: string) {
+      const [protocol, address] = addressWithProtocol.split(':');
+      selectedAccount.value = getAccountByProtocolAndAddress(protocol as Protocol, address);
+    }
 
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;
@@ -291,7 +323,7 @@ export default defineComponent({
     );
 
     const protocolName = computed(
-      () => ProtocolAdapterFactory.getAdapter(protocol.value).protocolName,
+      () => (defaultProtocol.value ? ProtocolAdapterFactory.getAdapter(defaultProtocol.value).protocolName : ''),
     );
 
     function confirm() {
@@ -326,10 +358,12 @@ export default defineComponent({
       accessList,
       popupProps,
       activeAccount,
-      protocol,
+      requestedProtocol,
+      supported,
       selectedAccount,
+      options,
+      onSelectAccount,
       getAccountsSelectOptionsByProtocol,
-      getAccountByAddress,
       dappIcon,
       sender,
       trustedDapp,

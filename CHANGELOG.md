@@ -2,6 +2,78 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.6...v2.7.0) (2025-09-03)
+
+
+### Features
+
+* add network selection dropdown in address book ([7693a3b](https://github.com/Superhero-com/superhero-wallet/commit/7693a3b781acc7c4e6c2c1d82ac4fb2157fc4e0a))
+* bnb send - fee calculation is wrong ([220cbed](https://github.com/Superhero-com/superhero-wallet/commit/220cbed017cc75ced4a332057efa681473a4fc52))
+* **bnb:** show tokens information ([ef0a116](https://github.com/Superhero-com/superhero-wallet/commit/ef0a11622040f2a71964dbe68b0268c1f5c8a05a))
+* dashboard account selector with protocol ([3d74e36](https://github.com/Superhero-com/superhero-wallet/commit/3d74e36cbeb0f9791452655c744c137e590ec97a))
+* display evm addresses in both eth and bnb ([d851a69](https://github.com/Superhero-com/superhero-wallet/commit/d851a69ef9efec5fdc5b9fc979ed8b96a33deda1))
+* draft bnb-chain, send not working ([6016845](https://github.com/Superhero-com/superhero-wallet/commit/6016845a1537b21479c335c1f6a597bf66d36cb0))
+* filter transactions based on protocol ([c3fd220](https://github.com/Superhero-com/superhero-wallet/commit/c3fd220a51e36f0d1c241acae908955495c909b7))
+* solana initial structure ([7d3251c](https://github.com/Superhero-com/superhero-wallet/commit/7d3251c6a6c07ce9f7b60b4e6fae457a5e572df7))
+* **solana:** add batch transactions support ([42e245b](https://github.com/Superhero-com/superhero-wallet/commit/42e245b922e5ffaf172c74e3f8d4e10c007fe809))
+* supericon for evm in address book ([1782feb](https://github.com/Superhero-com/superhero-wallet/commit/1782feb15cade630cafb33fe3614be707516248a))
+* support Solana ([41f9bd1](https://github.com/Superhero-com/superhero-wallet/commit/41f9bd17f6af8837bcae9038991f2850392a12d3))
+* update trusted dapps ([d60ac63](https://github.com/Superhero-com/superhero-wallet/commit/d60ac6375bba756bb0b57f8699716e1c75aafffa))
+* use ethplorer api key instead of freeKey ([4ca4e4c](https://github.com/Superhero-com/superhero-wallet/commit/4ca4e4c6b77ecc7f7a778b2cf5020ab5c28d1471))
+* **wallet-connect:** support BNB chain ([dd6dfa3](https://github.com/Superhero-com/superhero-wallet/commit/dd6dfa3e9f2f22eb69dea4b7af131dbc5d9e4b1e))
+
+
+### Bug Fixes
+
+* **android:** be able to export address book ([ab4d61f](https://github.com/Superhero-com/superhero-wallet/commit/ab4d61fc4a5afcf894ace559af921e0e0c7b545f))
+* **android:** edge to edge issue ([dc607b8](https://github.com/Superhero-com/superhero-wallet/commit/dc607b8ee229821da2a69dfa6e04c86d9ae17eba))
+* bnb speed and fee calculation ([4985696](https://github.com/Superhero-com/superhero-wallet/commit/49856960880ca396c6f5ee04875a22b6e1b88abd))
+* **bnb:** calculate fee for tokenTransfer correctly ([048033e](https://github.com/Superhero-com/superhero-wallet/commit/048033e068f07a65a5f2820111304d8785af9c90))
+* calculate correct protocol ([a94bbcf](https://github.com/Superhero-com/superhero-wallet/commit/a94bbcfa4d09aceccb3b7e28a0a48953ef9d9072))
+* choose account correctly in ConnectBase ([79824f6](https://github.com/Superhero-com/superhero-wallet/commit/79824f676fb890d13106cf5a8b483a5cfecaaed8))
+* correctly load currencies info ([e810025](https://github.com/Superhero-com/superhero-wallet/commit/e810025892aa582ebfb3e4867ea027adeac7c9dd))
+* dont show supericon when filter is selected ([3b80535](https://github.com/Superhero-com/superhero-wallet/commit/3b80535361a3e27010a45fa0684425d8ec686a41))
+* error when switching branches ([ed6b0a7](https://github.com/Superhero-com/superhero-wallet/commit/ed6b0a70493fb0a50f5538022ede425efd844ff3))
+* failling tests ([3ca2a1d](https://github.com/Superhero-com/superhero-wallet/commit/3ca2a1df9d4fc48809ef9f4cccf07b52dbf0c990))
+* lint ([56fd3cc](https://github.com/Superhero-com/superhero-wallet/commit/56fd3cc901cc551252a7435880d044f6534a852d))
+* load correct transaction details ([f8722d0](https://github.com/Superhero-com/superhero-wallet/commit/f8722d0d216359148edd9457bd46abd8ad476c24))
+* multisig form select ([0e4e836](https://github.com/Superhero-com/superhero-wallet/commit/0e4e83670a052bab90e2bd365f70ef8b6fbfc1a1))
+* nan balance ([20cc4e5](https://github.com/Superhero-com/superhero-wallet/commit/20cc4e57c841e9d665957ff905ef6edbcec18303))
+* own addresses not highlighted in All filter ([c11ca09](https://github.com/Superhero-com/superhero-wallet/commit/c11ca094306fcbb18935d96d10c0ad552683cdc5))
+* protocol in receive modal ([5751f33](https://github.com/Superhero-com/superhero-wallet/commit/5751f3338054c83251bc9e5f0a9db8ec1d089da9))
+* refactor variable name ([e1b308e](https://github.com/Superhero-com/superhero-wallet/commit/e1b308e08ba7710235d32715cf5e0bab1dd63b21))
+* replace console.log ([a519c30](https://github.com/Superhero-com/superhero-wallet/commit/a519c307278c5835034a954e6da63dfb7d68447a))
+* resolve name hash in new logic ([045780f](https://github.com/Superhero-com/superhero-wallet/commit/045780f39a5c41996db4128eafcb33c5deaea25f))
+* send popup not opening the second time ([766cec3](https://github.com/Superhero-com/superhero-wallet/commit/766cec3d094f925d19b3e3e68fe3066198885d63))
+* show correct account in transaction label based on protocol ([9b42804](https://github.com/Superhero-com/superhero-wallet/commit/9b42804862884e4c436734bbff3110ea8da8b9a7))
+* show protocol on connection correctly ([bcd6b9c](https://github.com/Superhero-com/superhero-wallet/commit/bcd6b9cc2eb97c59b0fff940d9615687ab00b384))
+* show supericon in all cases in address book ([0605284](https://github.com/Superhero-com/superhero-wallet/commit/0605284cbd878c091e2c5150fcacc3a81f26065f))
+* support eth coins in deeplink send link ([e452f9e](https://github.com/Superhero-com/superhero-wallet/commit/e452f9ee252dd48d8cf6afdc96e1f9cfb1285a07))
+* total balance ([40c0655](https://github.com/Superhero-com/superhero-wallet/commit/40c065594d41ee8f8e039978c436bac97fbe25dd))
+* transaction overview protocol ([ebf0d15](https://github.com/Superhero-com/superhero-wallet/commit/ebf0d1525e06612ec45fe5b2f58ffe2324bcb877))
+* wrong display of account and share link ([1ab63f5](https://github.com/Superhero-com/superhero-wallet/commit/1ab63f55ea472594ac78e427c0cb4de71c7700bf))
+
+
+### Tests
+
+* add several EVM tests ([bb0d767](https://github.com/Superhero-com/superhero-wallet/commit/bb0d76717e4db6a558ba1619ba477bc7ca7d79ff))
+* add several screens to snapshot ([77494d1](https://github.com/Superhero-com/superhero-wallet/commit/77494d129f82f23ef3cb397e7ec6f3698af1390e))
+* add several Solana functionality tests ([37754aa](https://github.com/Superhero-com/superhero-wallet/commit/37754aadbd46bb72a7c9925f39f885c573378fe9))
+* cover bnb and evm functionality with unit tests ([9da0e91](https://github.com/Superhero-com/superhero-wallet/commit/9da0e91cebe2fe9308e0f8599386f66da2d60cc1))
+* cover Connect.vue with unit tests ([9196c18](https://github.com/Superhero-com/superhero-wallet/commit/9196c18e98e71a230b65db4170193e95b6dc642e))
+* reorganize unit tests ([6ec7648](https://github.com/Superhero-com/superhero-wallet/commit/6ec764826e2915784eb1d21eac9e3537dce9a6bf))
+
+
+### Maintenance
+
+* be able to build for iOS ([957102c](https://github.com/Superhero-com/superhero-wallet/commit/957102c8102da0450fcc97eaa12fd176c621236b))
+* migrate to etherscan v2 ([6de4734](https://github.com/Superhero-com/superhero-wallet/commit/6de47343afd55179d70305efdde4752d2b33d187))
+* npm audit fix ([c908bf0](https://github.com/Superhero-com/superhero-wallet/commit/c908bf0057d9b6570a8acee9c12797401ba4300f))
+* **release:** 2.6.7 ([b69dfaa](https://github.com/Superhero-com/superhero-wallet/commit/b69dfaa89b455644d61b4a0780f7044ee0c0963c))
+* resolve lint warnings ([898cf6b](https://github.com/Superhero-com/superhero-wallet/commit/898cf6b02183df7969c6a7c47afaf370e1c74f83))
+* resolve several lint warnings ([f1c6d2c](https://github.com/Superhero-com/superhero-wallet/commit/f1c6d2c387385902cddd7a637df33a715f9ada06))
+* update ios pods ([18d72b9](https://github.com/Superhero-com/superhero-wallet/commit/18d72b9d07e26890aa284868cb25ecd86b7cc1e7))
+
 ### [2.6.7](https://github.com/superhero-com/superhero-wallet/compare/v2.6.6...v2.6.7) (2025-08-12)
 
 
