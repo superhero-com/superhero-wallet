@@ -5,7 +5,7 @@
         see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
       <IonRouterOutlet
         v-if="isOnline"
-        :animated="!IS_FIREFOX && !IS_TRANSITIONS_DISABLED"
+        :animated="!IS_FIREFOX"
         :animation="fadeAnimation"
       />
       <MessageOffline
@@ -20,7 +20,7 @@
 <script lang="ts">
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { IS_FIREFOX, IS_TRANSITIONS_DISABLED } from '@/constants';
+import { IS_FIREFOX } from '@/constants';
 import { fadeAnimation } from '@/popup/animations';
 import { useConnection } from '@/composables';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -37,7 +37,6 @@ export default defineComponent({
     return {
       isOnline,
       IS_FIREFOX,
-      IS_TRANSITIONS_DISABLED,
       fadeAnimation,
     };
   },

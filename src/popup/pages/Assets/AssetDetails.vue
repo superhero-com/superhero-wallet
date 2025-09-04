@@ -81,7 +81,7 @@
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
-          :animated="!IS_FIREFOX && !IS_TRANSITIONS_DISABLED"
+          :animated="!IS_FIREFOX"
           :animation="fadeAnimation"
           class="token-router"
           :style="{ height: routerHeight || '350px' }"
@@ -115,7 +115,6 @@ import {
   ICON_SIZES,
   IS_FIREFOX,
   IS_IOS,
-  IS_TRANSITIONS_DISABLED,
   PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -404,7 +403,6 @@ export default defineComponent({
       ICON_SIZES,
       IS_FIREFOX,
       IS_IOS,
-      IS_TRANSITIONS_DISABLED,
       AE_DEX_URL,
 
       BuyIcon,
