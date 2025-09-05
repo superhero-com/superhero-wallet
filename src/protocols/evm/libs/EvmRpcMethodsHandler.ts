@@ -222,9 +222,16 @@ export async function handleEvmRpcMethod(
     };
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
-    const network = Object.values(networks.value)
+    // Support both EIP-3326 param shapes and hex/decimal chainIds
+    const requestedParam = (params as any)?.chainId
+      ?? (Array.isArray(params) ? (params as any)?.[0]?.chainId : undefined);
+    if (!requestedParam) {
+      return { error: { code: -32602, message: 'Invalid params: chainId is required' } };
+    }
+    const requestedDec = parseCaipChainId(String(requestedParam));
+    const network = requestedDec && Object.values(networks.value)
       .find(({ protocols }) => (
-        (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
+        (protocols[protocol] as any).chainId === String(requestedDec)
       ));
     if (network) {
       switchNetwork(network.name);
@@ -233,7 +240,7 @@ export async function handleEvmRpcMethod(
     return {
       error: {
         code: 4902,
-        message: `Chain ${params?.chainId} is currently not supported`,
+        message: `Chain ${requestedDec ?? requestedParam} is currently not supported`,
       },
     };
   }

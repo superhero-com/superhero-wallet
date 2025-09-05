@@ -38,3 +38,4 @@ export * from './addressBook';
 export * from './addressBookEntryForm';
 export * from './accountSelector';
 export * from './ledger';
+export * from './inAppBrowser';

@@ -1,13 +1,9 @@
 <template>
   <div class="apps-browser-header">
-    <div
-      v-if="selectedApp"
-      class="left"
-    >
+    <div class="left">
       <AccountSelector
         v-model="accountAddress"
         avatar-only
-        :options="aeAccountsSelectOptions"
         @update:model-value="onAccountChange"
       />
 
@@ -21,25 +17,13 @@
 
     <div class="title">
       <Truncate
-        v-if="!selectedApp"
         :str="$t('pages.titles.appsBrowser')"
         class="text"
       />
-      <div
-        v-else
-        class="host"
-      >
-        <SecureIcon
-          v-if="isSecure"
-          class="icon secure-lock"
-        />
-        {{ selectedAppHost }}
-      </div>
     </div>
 
     <div class="right">
       <BtnIcon
-        v-if="selectedApp"
         :icon="ThreeDotsIcon"
         @click="openActions"
       />
@@ -61,7 +45,7 @@ import {
 } from 'vue';
 import { useIonRouter } from '@ionic/vue';
 import { Encoded } from '@aeternity/aepp-sdk';
-import { MODAL_DAPP_BROWSER_ACTIONS, BROWSER_ACTIONS } from '@/constants';
+import { MODAL_DAPP_BROWSER_ACTIONS } from '@/constants';
 import {
   useAccounts,
   useUi,
@@ -80,7 +64,6 @@ import Truncate from '@/popup/components/Truncate.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 
-import SecureIcon from '@/icons/lock.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
 import BackIcon from '@/icons/chevron.svg?vue-component';
 
@@ -89,15 +72,10 @@ export default defineComponent({
     BtnClose,
     Truncate,
     BtnIcon,
-    SecureIcon,
     AccountSelector,
   },
-  props: {
-    selectedApp: { type: Object, default: null },
-    iframe: { type: Object, default: null },
-  },
   emits: ['back', 'refresh'],
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const ionRouter = useIonRouter();
     const { openModal } = useModals();
 
@@ -105,7 +83,6 @@ export default defineComponent({
     const {
       isLoggedIn,
       activeAccount,
-      aeAccountsSelectOptions,
       setActiveAccountByAddressAndProtocol,
       getAccountByProtocolAndAddress,
     } = useAccounts();
@@ -115,11 +92,6 @@ export default defineComponent({
         ? homeRouteName.value
         : ROUTE_INDEX,
     );
-    const isSecure = computed(() => props?.selectedApp?.url.startsWith('https://'));
-    const selectedAppHost = computed(() => {
-      const url = new URL(props?.selectedApp?.url);
-      return url?.host;
-    });
 
     const accountAddress = ref(unref(activeAccount.value.address));
 
@@ -139,31 +111,18 @@ export default defineComponent({
     }
 
     async function openActions() {
-      // eslint-disable-next-line no-useless-catch
-      try {
-        const value = await openModal<BrowserActionsResolvedVal>(
-          MODAL_DAPP_BROWSER_ACTIONS,
-          {
-            iframe: props.iframe,
-            selectedApp: props?.selectedApp,
-          },
-        );
-        if (value?.action === BROWSER_ACTIONS.refresh) {
-          emit('refresh');
-        }
-      } catch (error) {
-        throw error;
-      }
+      const value = await openModal<BrowserActionsResolvedVal>(
+        MODAL_DAPP_BROWSER_ACTIONS,
+        {},
+      );
+      if (value?.action) emit('refresh');
     }
 
     return {
-      isSecure,
       openActions,
       homeRouteName,
       accountAddress,
-      selectedAppHost,
       onAccountChange,
-      aeAccountsSelectOptions,
       BackIcon,
       ThreeDotsIcon,
       ROUTE_ACCOUNT,
@@ -231,21 +190,6 @@ export default defineComponent({
       white-space: nowrap;
       line-height: 24px;
       color: $color-white;
-    }
-
-    .host {
-      @extend %face-sans-14-regular;
-
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      color: $color-white;
-
-      .secure-lock {
-        height: 17px;
-        width: 17px;
-        opacity: 0.75;
-      }
     }
   }
 }

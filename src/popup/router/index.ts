@@ -15,9 +15,7 @@ import {
   POPUP_TYPE_UNSAFE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
-  PROTOCOLS,
   UNFINISHED_FEATURES,
-  MODAL_ACCOUNT_CREATE,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
@@ -26,13 +24,11 @@ import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   useAuth,
-  useModals,
   usePopupProps,
   useUi,
   useWalletConnect,
   type WalletConnectUri,
 } from '@/composables';
-import { tg } from '@/popup/plugins/i18n';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
@@ -55,15 +51,11 @@ const router = createRouter({
 
 const {
   isLoggedIn,
-  activeAccount,
   areAccountsReady,
-  setActiveAccountByGlobalIdx,
-  getLastActiveProtocolAccount,
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
 const { checkUserAuth } = useAuth();
-const { openModal, openConfirmModal } = useModals();
 
 RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
@@ -95,31 +87,6 @@ router.beforeEach(async (to, from, next) => {
     // In-app browser is mobile-only
     if (!IS_MOBILE_APP && !UNFINISHED_FEATURES) {
       next({ name: ROUTE_NOT_FOUND });
-      return;
-    }
-
-    // In-app browser only works with AE accounts
-    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
-      const lastActiveAeAccountIdx = getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.globalIdx;
-      if (lastActiveAeAccountIdx !== undefined) {
-        setActiveAccountByGlobalIdx(lastActiveAeAccountIdx);
-        next({ name: ROUTE_APPS_BROWSER });
-      } else {
-        try {
-          await openConfirmModal({
-            title: tg('modals.appsBrowserError.title'),
-            icon: 'warning',
-            buttonMessage: tg('modals.appsBrowserError.createAccount'),
-          });
-          openModal(MODAL_ACCOUNT_CREATE, {
-            protocol: PROTOCOLS.aeternity,
-          });
-        } catch (error) {
-          /* NOOP */
-        } finally {
-          next(false);
-        }
-      }
       return;
     }
   }

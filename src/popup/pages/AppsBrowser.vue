@@ -3,15 +3,12 @@
     <IonContent class="ion-padding ion-content-bg">
       <div
         class="apps-browser"
-        :class="{ 'app-selected': selectedApp }"
       >
         <AppsBrowserHeader
-          :selected-app="selectedApp"
-          :iframe="iframeEl"
           @back="back()"
           @refresh="refresh()"
         />
-        <div v-if="!selectedApp">
+        <div>
           <Field
             v-slot="{ field, errorMessage, resetField }"
             v-model="customAppURL"
@@ -28,7 +25,7 @@
               show-message-help
               :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
               :message="errorMessage"
-              @keydown.enter.stop="(event: any) => handleEnter(event, errorMessage)"
+              @keydown.enter.stop="handleEnter($event, errorMessage)"
             >
               <template #after>
                 <Component
@@ -65,44 +62,35 @@
           </div>
           <AppsBrowserHistory @select-app="onSelectApp" />
         </div>
-
-        <iframe
-          v-else
-          ref="iframeEl"
-          title="selectedApp"
-          class="apps-browser-iframe"
-          :src="selectedApp.url"
-          @load="onAppLoaded()"
-        />
       </div>
-      <BackToTop v-if="!selectedApp" />
+      <BackToTop />
     </IonContent>
   </IonPage>
 </template>
 
 <script lang="ts">
-import {
-  BrowserWindowMessageConnection,
-  RPC_STATUS,
-} from '@aeternity/aepp-sdk';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
-  onUnmounted,
   onMounted,
   ref,
   computed,
 } from 'vue';
 import { Field } from 'vee-validate';
-import { IS_SAFARI, MODAL_WARNING_DAPP_BROWSER, TRUSTED_DAPPS } from '@/constants';
 import {
-  getLocalStorageItem,
-  setLocalStorageItem,
-  handleUnknownError,
-  executeAndSetInterval,
+  IS_MOBILE_APP,
+  MODAL_WARNING_DAPP_BROWSER,
+  TRUSTED_DAPPS,
+} from '@/constants';
+import {
+  openInNewWindow,
   toURL,
 } from '@/utils';
-import { useAeSdk, useAppsBrowserHistory, useModals } from '@/composables';
+import {
+  useAppsBrowserHistory,
+  useModals,
+  useInAppBrowser,
+} from '@/composables';
 
 import InputField from '@/popup/components/InputField.vue';
 import AppsBrowserHeader from '@/popup/components/AppsBrowser/AppsBrowserHeader.vue';
@@ -120,8 +108,6 @@ interface App {
   image?: string;
 }
 
-const LOCAL_STORAGE_ITEM = 'selected-app';
-
 export default defineComponent({
   components: {
     AppsBrowserListItem,
@@ -136,74 +122,33 @@ export default defineComponent({
   },
   setup() {
     const { addHistoryItem } = useAppsBrowserHistory();
+    const { open: iabOpen, refresh: iabRefresh } = useInAppBrowser();
 
-    const selectedApp = ref<App>();
-    const iframeEl = ref<HTMLIFrameElement>();
     const customAppURL = ref('');
-    const currentClientId = ref('');
     const featuredDapps = TRUSTED_DAPPS.filter(({ isFeatured }) => isFeatured);
-    let shareWalletInfoInterval: NodeJS.Timeout;
-    let lastUrlAddedToHistory = '';
-
-    const { getAeSdk } = useAeSdk();
     const { openModal, modalsOpen } = useModals();
 
     const isWarningModalOpened = computed(
       () => !!modalsOpen.value.find((modal) => modal.name === MODAL_WARNING_DAPP_BROWSER),
     );
 
-    async function removeRpcClientIfAny() {
-      if (shareWalletInfoInterval) {
-        clearInterval(shareWalletInfoInterval);
-      }
-      if (!currentClientId.value) return;
-      const sdk = await getAeSdk();
-      sdk.removeRpcClient(currentClientId.value);
-      currentClientId.value = '';
-    }
-
-    async function onAppLoaded() {
-      if (!iframeEl.value || !selectedApp.value) return;
-      // Don't recreate RpcClient in Safari desktop and iOS webview
-      // because on these platforms `load` event triggers on anchor navigation
-      if (IS_SAFARI && currentClientId.value) return;
-      await removeRpcClientIfAny();
-      const sdk = await getAeSdk();
-      const target = iframeEl.value.contentWindow!;
-      const connection = new BrowserWindowMessageConnection({ target });
-      currentClientId.value = sdk.addRpcClient(connection);
-      const app = selectedApp.value;
-      shareWalletInfoInterval = executeAndSetInterval(
-        () => {
-          const rpcClient = sdk._getClient(currentClientId.value);
-          if (rpcClient.status === RPC_STATUS.CONNECTED && lastUrlAddedToHistory !== app.url) {
-            lastUrlAddedToHistory = app.url;
-            addHistoryItem(app);
-          }
-          try {
-            if (rpcClient.status === RPC_STATUS.WAITING_FOR_CONNECTION_REQUEST) {
-              sdk.shareWalletInfo(currentClientId.value);
-            } else {
-              clearInterval(shareWalletInfoInterval);
-            }
-          } catch (e) {
-            handleUnknownError(e);
-          }
-        },
-        3000,
-      );
-    }
+    function openInAppBrowser(url: string) { iabOpen(url); }
 
     function refresh() {
-      if (iframeEl.value && selectedApp.value) {
-        setLocalStorageItem([LOCAL_STORAGE_ITEM], selectedApp.value);
-        window.location.reload();
+      if (IS_MOBILE_APP) {
+        iabRefresh();
       }
     }
 
     function onSelectApp(app: App) {
       openModal(MODAL_WARNING_DAPP_BROWSER).then(() => {
-        selectedApp.value = { ...app, url: toURL(app.url).toString() };
+        const url = toURL(app.url).toString();
+        if (IS_MOBILE_APP) {
+          openInAppBrowser(url);
+        } else {
+          openInNewWindow(url);
+        }
+        addHistoryItem({ ...app, url });
       }, () => { });
     }
 
@@ -218,44 +163,21 @@ export default defineComponent({
       }
     }
 
-    /**
-     * Clean up after the iframe is closed
-     */
-    async function onAppDisconnected() {
-      selectedApp.value = undefined;
-      customAppURL.value = '';
-      await removeRpcClientIfAny();
-    }
+    function back() { /* noop for simplified flow */ }
 
-    function back() {
-      onAppDisconnected();
-    }
-
-    onMounted(() => {
-      const isAppSelected = getLocalStorageItem<App>([LOCAL_STORAGE_ITEM]);
-      if (isAppSelected) {
-        selectedApp.value = isAppSelected;
-        setLocalStorageItem([LOCAL_STORAGE_ITEM], null);
-      }
-    });
-
-    onUnmounted(() => {
-      onAppDisconnected();
-    });
+    onMounted(() => { /* noop */ });
 
     return {
       refresh,
-      iframeEl,
       customAppURL,
       featuredDapps,
-      selectedApp,
       onSelectApp,
-      onAppLoaded,
       CloseIcon,
       GlobeSmallIcon,
       back,
       isWarningModalOpened,
       handleEnter,
+      IS_MOBILE_APP,
     };
   },
 });
@@ -268,15 +190,6 @@ export default defineComponent({
 
 .apps-browser {
   height: 100%;
-
-  &.app-selected {
-    height: 100vh;
-    overflow: hidden;
-
-    @include mixins.desktop {
-      height: $extension-height;
-    }
-  }
 
   .input-url {
     margin: 16px 8px;
@@ -304,17 +217,6 @@ export default defineComponent({
     opacity: 0.5;
     color: $color-white;
     line-height: 24px;
-  }
-
-  .apps-browser-iframe {
-    --header-height: 40px;
-
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border: none;
-    margin-top: calc(-1 * (var(--header-height) + env(safe-area-inset-top)));
-    padding-top: calc(var(--header-height) + env(safe-area-inset-top));
   }
 }
 </style>
