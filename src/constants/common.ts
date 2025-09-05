@@ -20,6 +20,7 @@ export const PROTOCOLS = {
   aeternity: 'aeternity',
   solana: 'solana',
   bnb: 'bnb',
+  dogecoin: 'dogecoin',
 } as const;
 export const EVM_PROTOCOLS: Protocol[] = [PROTOCOLS.ethereum, PROTOCOLS.bnb];
 
