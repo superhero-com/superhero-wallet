@@ -11,7 +11,7 @@
     <template #recipient>
       <TransferSendRecipient
         v-model="formModel.addresses"
-        :max-recipients="1"
+        :max-recipients="10"
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.dogecoin })"
         :errors="errors"
         :protocol="PROTOCOLS.dogecoin"
@@ -107,7 +107,8 @@ export default defineComponent({
     const feeSlow = ref(new BigNumber(0.01));
     const feeMedium = ref(new BigNumber(0.05));
     const feeHigh = ref(new BigNumber(0.1));
-    const recipientsCount = computed(() => 1);
+    const recipientsCount = computed(() => (
+      formModel.value?.addresses?.length || 1));
 
     const feeList = computed((): IFeeItem[] => [
       { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
