@@ -189,7 +189,7 @@ export function useMultisigAccounts({
       ]));
 
       const decodedConsensus = consensusResult.decodedResult;
-      const txHash = decodedConsensus.tx_hash as Uint8Array;
+      const txHash = decodedConsensus.tx_hash;
       const consensus: IMultisigConsensus = camelCaseKeysDeep(decodedConsensus);
 
       consensus.expirationHeight = Number(consensus.expirationHeight);
