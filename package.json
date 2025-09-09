@@ -34,7 +34,6 @@
   "dependencies": {
     "@aeternity/aepp-calldata": "^1.8.0",
     "@aeternity/aepp-sdk": "14.1.0",
-    "@aeternity/aepp-sdk-13": "npm:@aeternity/aepp-sdk@13.3.2",
     "@aeternity/json-bigint": "^0.3.1",
     "@airgap/aeternity": "^0.13.31",
     "@airgap/serializer": "^0.13.31",
