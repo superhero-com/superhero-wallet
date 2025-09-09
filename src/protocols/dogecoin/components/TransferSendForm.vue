@@ -25,6 +25,7 @@
         v-model="formModel.amount"
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
+        readonly
         :protocol="PROTOCOLS.dogecoin"
         :validation-rules="{
           ...+balance.minus(fee) > 0
@@ -32,7 +33,15 @@
             : {},
           enough_coin: [fee.toString(), DOGE_SYMBOL],
         }"
-      />
+        @asset-selected="handleAssetChange"
+      >
+        <template #label-after>
+          <BtnMaxAmount
+            :is-max="shouldUseMaxAmount"
+            @click="toggleMaxAmount"
+          />
+        </template>
+      </TransferSendAmount>
     </template>
 
     <template #extra>
@@ -74,10 +83,12 @@ import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendR
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
+import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 
 export default defineComponent({
   name: 'DogeTransferSendForm',
   components: {
+    BtnMaxAmount,
     TransactionSpeedPicker,
     DetailsItem,
     TransferSendAmount,
@@ -124,6 +135,15 @@ export default defineComponent({
 
     const { max } = useCoinMaxAmount({ formModel, fee });
 
+    const shouldUseMaxAmount = ref(false);
+
+    function toggleMaxAmount() {
+      shouldUseMaxAmount.value = !shouldUseMaxAmount.value;
+      if (shouldUseMaxAmount.value) {
+        formModel.value.amount = max.value;
+      }
+    }
+
     function emitCurrentFormModelState() {
       const inputPayload = {
         ...formModel.value,
@@ -157,6 +177,15 @@ export default defineComponent({
       { deep: true },
     );
 
+    watch(
+      max,
+      (newMax) => {
+        if (shouldUseMaxAmount.value) {
+          formModel.value.amount = newMax;
+        }
+      },
+    );
+
     return {
       DOGE_PROTOCOL_NAME,
       DOGE_SYMBOL,
@@ -173,6 +202,8 @@ export default defineComponent({
       formModel,
       errors,
       hasError,
+      shouldUseMaxAmount,
+      toggleMaxAmount,
       handleAssetChange,
       scanTransferQrCode,
       submit,
