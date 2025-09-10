@@ -282,7 +282,7 @@ export class AeAccountHdWallet extends MemoryAccount {
   /**
    * Sign data without any confirmation.
    */
-  override async sign(
+  override async unsafeSign(
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
@@ -305,8 +305,8 @@ export class AeAccountHdWallet extends MemoryAccount {
     }
     if (account && account.secretKey && account.protocol === PROTOCOLS.aeternity) {
       return new MemoryAccount(
-        encode(account.secretKey.subarray(0, SEED_LENGTH), Encoding.AccountSecretKey),
-      ).sign(data);
+        encode(account.secretKey, Encoding.AccountSecretKey),
+      ).unsafeSign(data);
     }
 
     throw new Error('Unsupported protocol');

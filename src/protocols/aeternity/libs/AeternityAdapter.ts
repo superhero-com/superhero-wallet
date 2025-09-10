@@ -8,8 +8,8 @@ import {
   Encoding,
   isAddressValid,
   MemoryAccount,
+  AccountMnemonicFactory,
 } from '@aeternity/aepp-sdk';
-import { getHdWalletAccountFromSeed } from '@aeternity/aepp-sdk-13';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 
 import type {
@@ -62,6 +62,7 @@ import {
   AE_PROTOCOL_NAME,
   AE_SYMBOL,
   ACTIVITIES_TYPES,
+  SEED_LENGTH,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
@@ -198,12 +199,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
-    const account = getHdWalletAccountFromSeed(seed, accountIndex);
+    const account = (new AccountMnemonicFactory(seed)).initializeSync(accountIndex);
     return {
       ...account,
-      publicKey: Buffer.from(account.publicKey),
-      secretKey: Buffer.from(account.secretKey, 'hex'),
-      address: account.publicKey,
+      publicKey: Buffer.from(account.address),
+      secretKey: decode(account.secretKey),
     };
   }
 
@@ -214,13 +214,16 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     seed?: Uint8Array,
   ): IAccount | null {
     if (rawAccount.type === ACCOUNT_TYPES.privateKey && rawAccount.privateKey) {
+      const bufferFromPrivateKey = rawAccount.privateKey.length === SEED_LENGTH
+        ? Buffer.from(rawAccount.privateKey)
+        : Buffer.from(rawAccount.privateKey).subarray(0, SEED_LENGTH);
       const { address } = new MemoryAccount(
-        encode(Buffer.from(rawAccount.privateKey).subarray(0, 32), Encoding.AccountSecretKey),
+        encode(bufferFromPrivateKey, Encoding.AccountSecretKey),
       );
       return {
         idx,
         globalIdx,
-        secretKey: Buffer.from(rawAccount.privateKey!),
+        secretKey: bufferFromPrivateKey,
         ...rawAccount,
         privateKey: undefined,
         address,
