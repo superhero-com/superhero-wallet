@@ -216,9 +216,21 @@ export default defineComponent({
         )).virtualSize();
         const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
-        const feeRate = (await fetchJson(`${nodeUrl}/fee-estimates`))['5'];
+        let feeRate: number | undefined;
+        try {
+          const estimates = await fetchJson(`${nodeUrl}/fee-estimates`);
+          // Prefer ~5-block target; fallback to 3/6/2 if missing
+          feeRate = estimates?.['5'] || estimates?.['6'] || estimates?.['7'] || estimates?.['8'];
+        } catch (_e) { /* ignore; fallback below */ }
+
+        // Sane defaults if API fails: medium ~15 sat/vB
+        const DEFAULT_RATE_SAT_PER_VB = 15;
+        const baseRate = (
+          Number.isFinite(feeRate) && feeRate! > 0
+        ) ? feeRate! : DEFAULT_RATE_SAT_PER_VB;
+
         const feeStepFactor = new BigNumber(0.5);
-        const newFeeMedium = new BigNumber(Math.ceil(feeRate * byteSize));
+        const newFeeMedium = new BigNumber(Math.ceil(baseRate * byteSize));
 
         feeSlow.value = new BigNumber(
           toBitcoin(Math.ceil(newFeeMedium.minus(newFeeMedium.times(feeStepFactor)).toNumber())),

@@ -340,7 +340,9 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     const signer = ECPairFactory(ecc).fromPrivateKey(Buffer.from(options.secretKey));
     for (let i = 0; i < psbt.inputCount; i += 1) psbt.signInput(i, signer);
     psbt.finalizeAllInputs();
-    return psbt.extractTransaction();
+    // Dogecoin typical fee per vbyte can exceed bitcoinjs's default maximumFeeRate.
+    // Pass `true` to bypass this safety check for Dogecoin.
+    return psbt.extractTransaction(true);
   }
 
   async spend(

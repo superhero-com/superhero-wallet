@@ -65,6 +65,8 @@ import {
   computed,
   defineComponent,
   nextTick,
+  onMounted,
+  onUnmounted,
   PropType,
   ref,
   watch,
@@ -77,6 +79,8 @@ import { useTransferSendForm } from '@/composables/transferSendForm';
 import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { DOGE_PROTOCOL_NAME, DOGE_SYMBOL } from '@/protocols/dogecoin/config';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { fetchJson, executeAndSetInterval } from '@/utils';
 
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
@@ -99,6 +103,8 @@ export default defineComponent({
   props: { transferData: { type: Object as PropType<TransferFormModel>, required: true } },
   emits: ['update:transferData', 'success', 'error'],
   setup(props, { emit }) {
+    const dogeAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.dogecoin);
+
     const { t } = useI18n();
     const { balance } = useBalances();
     const { activeNetwork } = useNetworks();
@@ -115,7 +121,8 @@ export default defineComponent({
     } = useTransferSendForm({ transferData: props.transferData });
 
     const feeSelectedIndex = ref(0); // slow by default
-    const feeSlow = ref(new BigNumber(0.01));
+    // Initial safe defaults; will be updated dynamically
+    const feeSlow = ref(new BigNumber(0.02));
     const feeMedium = ref(new BigNumber(0.05));
     const feeHigh = ref(new BigNumber(0.1));
     const recipientsCount = computed(() => (
@@ -155,6 +162,61 @@ export default defineComponent({
       emit('update:transferData', inputPayload);
       return nextTick();
     }
+
+    async function updateFeeList() {
+      try {
+        const byteSize = (await dogeAdapter.constructAndSignTx(
+          0,
+          formModel.value.addresses?.[0] || activeAccount.value.address,
+          {
+            fee: 0,
+            ...activeAccount.value,
+          },
+        )).virtualSize();
+
+        const { nodeUrl } = (activeNetwork.value.protocols as any)[PROTOCOLS.dogecoin] as any;
+
+        // Try Electrs-compatible fee estimates; fallback to 1 DOGE/kB baseline
+        let perByteKoinu: number | undefined;
+        try {
+          const estimates = await fetchJson(`${nodeUrl}/fee-estimates`);
+          perByteKoinu = Number(estimates?.['5'] || estimates?.['6'] || estimates?.['7'] || estimates?.['8']);
+        } catch (_e) { /* ignore; fallback below */ }
+
+        // 1 DOGE per kB => 100000 koinu/vB (1e8 / 1000)
+        const FALLBACK_PER_BYTE_KOINU = 100000; // medium
+        const baseRate = Number.isFinite(perByteKoinu) && perByteKoinu! > 0
+          ? perByteKoinu!
+          : FALLBACK_PER_BYTE_KOINU;
+
+        const feeStepFactor = new BigNumber(0.5);
+        const mediumKoinuTotal = new BigNumber(Math.ceil(baseRate * byteSize));
+
+        const toDoge = (koinu: BigNumber) => koinu.dividedBy(1e8);
+
+        feeSlow.value = toDoge(new BigNumber(
+          Math.ceil(mediumKoinuTotal.minus(mediumKoinuTotal.times(feeStepFactor)).toNumber()),
+        ));
+
+        feeMedium.value = toDoge(new BigNumber(
+          Math.ceil(mediumKoinuTotal.toNumber()),
+        ));
+
+        feeHigh.value = toDoge(new BigNumber(
+          Math.ceil(mediumKoinuTotal.plus(mediumKoinuTotal.times(feeStepFactor)).toNumber()),
+        ));
+      } catch (_error) {
+        // Keep defaults on failure
+      }
+    }
+
+    let polling: NodeJS.Timeout | null = null;
+
+    onMounted(() => {
+      polling = executeAndSetInterval(() => { updateFeeList(); }, 5000);
+    });
+
+    onUnmounted(() => { if (polling) { clearInterval(polling); } });
 
     async function submit() {
       if (!hasError.value) {
