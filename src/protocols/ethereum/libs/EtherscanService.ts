@@ -45,7 +45,8 @@ export class EtherscanService {
   freeVersionTimeDelay = 5300;
 
   constructor(apiUrl: string, chainId: string) {
-    this.apiUrl = apiUrl;
+    // Guard against accidental whitespace in configuration
+    this.apiUrl = (apiUrl || '').trim();
     this.chainId = chainId;
   }
 

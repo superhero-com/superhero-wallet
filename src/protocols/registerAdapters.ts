@@ -7,6 +7,7 @@ import { EthereumAdapter } from '@/protocols/ethereum/libs/EthereumAdapter';
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
 import { BnbAdapter } from '@/protocols/bnb/libs/BnbAdapter';
 import { AvalancheAdapter } from '@/protocols/avalanche/libs/AvalancheAdapter';
+import { PolygonAdapter } from '@/protocols/polygonPos/libs/PolygonPosAdapter';
 import { BaseProtocolAdapter } from './BaseProtocolAdapter';
 
 const protocolAdapters: Record<Protocol, Class<BaseProtocolAdapter>> = {
@@ -16,6 +17,7 @@ const protocolAdapters: Record<Protocol, Class<BaseProtocolAdapter>> = {
   [PROTOCOLS.solana]: SolanaAdapter,
   [PROTOCOLS.bnb]: BnbAdapter,
   [PROTOCOLS.avalanche]: AvalancheAdapter,
+  [PROTOCOLS.polygonPos]: PolygonAdapter,
 };
 
 Object.entries(protocolAdapters).forEach(([protocol, adapter]) => {

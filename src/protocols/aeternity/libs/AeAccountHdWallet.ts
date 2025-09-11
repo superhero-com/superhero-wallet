@@ -65,9 +65,9 @@ export class AeAccountHdWallet extends MemoryAccount {
   }
 
   static getAccount(fromAccount?: Encoded.AccountAddress) {
-    const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
+    const { getLastActiveProtocolAccount, getAccountByProtocolAndAddress } = useAccounts();
     return fromAccount
-      ? getAccountByAddress(fromAccount)
+      ? getAccountByProtocolAndAddress(PROTOCOLS.aeternity, fromAccount)
       : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
   }
 

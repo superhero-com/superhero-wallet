@@ -50,7 +50,8 @@
         >
           <template #value>
             <AccountItem
-              :address="(multisigVaultAddress as string)"
+              v-if="multisigVaultAddress"
+              :address="multisigVaultAddress"
               :protocol="PROTOCOLS.aeternity"
             />
           </template>
@@ -270,7 +271,7 @@ export default defineComponent({
       activeAccount,
       isActiveAccountAirGap,
       setActiveAccountByGlobalIdx,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
     } = useAccounts();
 
     const { accountAssets } = useAccountAssetsList();
@@ -358,7 +359,7 @@ export default defineComponent({
      */
     function selectAccount(address: Encoded.AccountAddress) {
       if (address) {
-        setActiveAccountByAddress(address);
+        setActiveAccountByAddressAndProtocol(address, PROTOCOLS.aeternity);
         if (formModel.value.amount && amountField.value) {
           amountField.value.validate();
         }

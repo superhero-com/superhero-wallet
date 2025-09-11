@@ -230,10 +230,10 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(PROTOCOLS.avalanche, options.fromAccount);
     if (!account || account.protocol !== PROTOCOLS.avalanche) {
       throw new Error(
         'Avalanche transaction construction & signing was initiated from non-existing or non-avalanche account.',

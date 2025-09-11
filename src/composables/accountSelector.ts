@@ -57,7 +57,7 @@ export const useAccountSelector = createCustomScopedComposable(() => {
     activeAccount,
     accounts,
     accountsGroupedByProtocol,
-    getAccountByAddress,
+    getAccountByProtocolAndAddress,
   } = useAccounts();
   const { multisigAccounts, getMultisigAccountByAccountId } = useMultisigAccounts();
   const { accountsTransactionsLatest } = useLatestTransactionList();
@@ -103,7 +103,10 @@ export const useAccountSelector = createCustomScopedComposable(() => {
         } else if (getMultisigAccountByAccountId(recipientId!)) {
           name = tg('multisig.multisigVault');
         } else {
-          const account = getAccountByAddress(recipientId!);
+          const account = getAccountByProtocolAndAddress(
+            activeAccount.value.protocol,
+            recipientId!,
+          );
           if (account) {
             name = getName(account.address).value || getDefaultAccountLabel(account);
           } else {

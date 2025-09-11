@@ -228,7 +228,7 @@ export default defineComponent({
       getAccountsSelectOptionsByProtocol,
       getLastActiveProtocolAccount,
       getAccountByProtocolAndAddress,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
     } = useAccounts();
     const {
       isUnknownDapp,
@@ -341,7 +341,12 @@ export default defineComponent({
           address: rememberMe.value,
         });
       }
-      setActiveAccountByAddress(selectedAccount.value?.address);
+      if (selectedAccount.value) {
+        setActiveAccountByAddressAndProtocol(
+          selectedAccount.value.address!,
+          selectedAccount.value.protocol,
+        );
+      }
       popupProps.value?.resolve();
     }
 

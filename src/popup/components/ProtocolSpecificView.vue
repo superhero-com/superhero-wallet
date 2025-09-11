@@ -64,6 +64,7 @@ const views: Record<Protocol, ProtocolViewsConfig> = {
   solana: solanaViews,
   bnb: ethereumViews,
   avalanche: ethereumViews,
+  polygonPos: ethereumViews,
 };
 
 export default defineComponent({

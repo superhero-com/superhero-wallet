@@ -1,13 +1,13 @@
 import { ProtocolAdapterFactory } from '../../../../../src/lib/ProtocolAdapterFactory';
 import { PROTOCOLS } from '../../../../../src/constants';
-import { BnbAdapter } from '../../../../../src/protocols/bnb/libs/BnbAdapter';
+import { PolygonAdapter } from '../../../../../src/protocols/polygonPos/libs/PolygonPosAdapter';
 
-jest.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
-  useBnbNetworkSettings: () => ({
-    bnbActiveNetworkSettings: { value: { nodeUrl: 'https://bsc.rpc', chainId: '56', explorerUrl: 'https://bscscan.com' } },
-    bnbActiveNetworkPredefinedSettings: {
+jest.mock('../../../../../src/protocols/polygonPos/composables/polygonPosNetworkSettings', () => ({
+  usePolygonNetworkSettings: () => ({
+    polygonActiveNetworkSettings: { value: { nodeUrl: 'https://polygon.rpc', chainId: '137', explorerUrl: 'https://polygonscan.com' } },
+    polygonActiveNetworkPredefinedSettings: {
       value: {
-        explorerUrl: 'https://bscscan.com', middlewareUrl: 'https://api.etherscan.io/v2/api ', tokenMiddlewareUrl: 'https://api.binplorer.com', chainId: '56',
+        explorerUrl: 'https://polygonscan.com', middlewareUrl: 'https://api.etherscan.io/v2/api ', tokenMiddlewareUrl: 'https://api.ethplorer.io', chainId: '137',
       },
     },
   }),
@@ -49,14 +49,14 @@ jest.mock('web3-eth-accounts', () => ({
 
 jest.mock('../../../../../src/composables', () => ({
   useAccounts: () => ({
-    getAccountByProtocolAndAddress: () => ({ protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
+    getAccountByProtocolAndAddress: () => ({ protocol: 'polygon', secretKey: new Uint8Array([1, 2, 3]) }),
   }),
 }));
 
 // ensure alias path is also mocked when code resolves via '@/composables'
 jest.mock('@/composables', () => ({
   useAccounts: () => ({
-    getAccountByProtocolAndAddress: () => ({ protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
+    getAccountByProtocolAndAddress: () => ({ protocol: 'polygon', secretKey: new Uint8Array([1, 2, 3]) }),
   }),
 }), { virtual: true });
 
@@ -70,16 +70,15 @@ jest.mock('web3-utils', () => ({
   fromWei: (v) => v,
   toWei: (v) => v,
 }));
-// (second mock removed; merged above)
 
-describe('BnbAdapter registration and metadata', () => {
-  it('factory returns BnbAdapter instance for PROTOCOLS.bnb', () => {
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
-    expect(adapter).toBeInstanceOf(BnbAdapter);
+describe('PolygonAdapter registration and metadata', () => {
+  it('factory returns PolygonAdapter instance for PROTOCOLS.polygonPos', () => {
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.polygonPos);
+    expect(adapter).toBeInstanceOf(PolygonAdapter);
   });
 
   it('coin metadata is set (name, symbol, contractId, decimals)', () => {
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.polygonPos);
     const defaultCoin = adapter.getDefaultCoin();
     expect(defaultCoin.symbol).toBe(adapter.coinSymbol);
     expect(defaultCoin.contractId).toBe(adapter.coinContractId);
@@ -88,17 +87,15 @@ describe('BnbAdapter registration and metadata', () => {
   });
 
   it('isAccountAddressValid validates 0x addresses', () => {
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.polygonPos);
     expect(adapter.isAccountAddressValid('0x0000000000000000000000000000000000000001')).toBe(true);
     expect(adapter.isAccountAddressValid('invalid')).toBe(false);
   });
 
-  it('getExplorer provides bscscan URL', () => {
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+  it('getExplorer provides polygonscan URL', () => {
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.polygonPos);
     const explorer = adapter.getExplorer();
     const url = explorer.prepareUrlForAccount('0x0000000000000000000000000000000000000001');
-    expect(url).toContain('bscscan.com');
+    expect(url).toContain('polygonscan.com');
   });
-
-  // NOTE: Complex signing path is covered in integration; skip heavy network-dependent test here.
 });

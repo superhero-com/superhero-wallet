@@ -48,48 +48,46 @@ import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  BNB_COIN_PRECISION,
-  BNB_COIN_SYMBOL,
-  BNB_CONTRACT_ID,
-  BNB_GAS_LIMIT,
-  BNB_MDW_TO_NODE_APPROX_DELAY_TIME,
-  BNB_NETWORK_DEFAULT_SETTINGS,
-  BNB_PROTOCOL_NAME,
-} from '@/protocols/bnb/config';
-import {
-  ERC20_ABI, // reuse ERC20 ABI from ETH
-} from '@/protocols/ethereum/config';
+  POLYGON_POS_COIN_PRECISION,
+  POLYGON_POS_COIN_SYMBOL,
+  POLYGON_POS_CONTRACT_ID,
+  POLYGON_POS_GAS_LIMIT,
+  POLYGON_MDW_TO_NODE_APPROX_DELAY_TIME,
+  POLYGON_NETWORK_DEFAULT_SETTINGS,
+  POLYGON_POS_PROTOCOL_NAME,
+} from '@/protocols/polygonPos/config';
+import { ERC20_ABI } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
-import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
+import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import { EtherscanExplorer } from '@/protocols/ethereum/libs/EtherscanExplorer';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '@/protocols/ethereum/helpers';
-import { EthplorerService } from '@/protocols/ethereum/libs/EthplorerService';
 import { AlchemyService } from '@/protocols/evm/libs/AlchemyService';
+import { EthplorerService } from '@/protocols/ethereum/libs/EthplorerService';
 
 const TRANSACTION_POLLING_INTERVAL = 6000;
 const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
 const BLOCKS_TO_WAIT = 3;
 
-export class BnbAdapter extends BaseProtocolAdapter {
-  override protocol = PROTOCOLS.bnb;
+export class PolygonAdapter extends BaseProtocolAdapter {
+  override protocol = PROTOCOLS.polygonPos;
 
-  override protocolName = BNB_PROTOCOL_NAME;
+  override protocolName = POLYGON_POS_PROTOCOL_NAME;
 
-  override coinName = BNB_PROTOCOL_NAME;
+  override coinName = POLYGON_POS_PROTOCOL_NAME;
 
-  override coinSymbol = BNB_COIN_SYMBOL;
+  override coinSymbol = POLYGON_POS_COIN_SYMBOL;
 
-  override coinContractId = BNB_CONTRACT_ID;
+  override coinContractId = POLYGON_POS_CONTRACT_ID;
 
-  override coinGeckoCoinId = 'binancecoin';
+  override coinGeckoCoinId = 'matic-network';
 
-  override coinPrecision = BNB_COIN_PRECISION;
+  override coinPrecision = POLYGON_POS_COIN_PRECISION;
 
   override hasTokensSupport = true;
 
-  override mdwToNodeApproxDelayTime = BNB_MDW_TO_NODE_APPROX_DELAY_TIME;
+  override mdwToNodeApproxDelayTime = POLYGON_MDW_TO_NODE_APPROX_DELAY_TIME;
 
   private bip32 = BIP32Factory(ecc);
 
@@ -97,7 +95,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     {
       key: 'nodeUrl',
       testId: 'url',
-      defaultValue: '', // filled by default network settings
+      defaultValue: '',
       getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
       getLabel: () => tg('pages.network.networkUrlLabel'),
     },
@@ -111,7 +109,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     {
       key: 'explorerUrl',
       required: true,
-      defaultValue: 'https://bscscan.com',
+      defaultValue: 'https://polygonscan.com',
       getPlaceholder: () => tg('pages.network.explorerUrlPlaceholder'),
       getLabel: () => tg('pages.network.explorerUrlLabel'),
     },
@@ -127,17 +125,17 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override getExplorer() {
     const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
+      polygonActiveNetworkSettings,
+      polygonActiveNetworkPredefinedSettings,
+    } = usePolygonNetworkSettings();
     return new EtherscanExplorer(
-      bnbActiveNetworkSettings.value.explorerUrl
-      ?? bnbActiveNetworkPredefinedSettings.value.explorerUrl,
+      polygonActiveNetworkSettings.value.explorerUrl
+      ?? polygonActiveNetworkPredefinedSettings.value.explorerUrl,
     );
   }
 
   override getUrlTokenKey(): string {
-    return BNB_CONTRACT_ID;
+    return POLYGON_POS_CONTRACT_ID;
   }
 
   override getDefaultCoin(
@@ -145,8 +143,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.bnb]! || ({} as MarketData)),
-      protocol: PROTOCOLS.bnb,
+      ...(marketData?.[PROTOCOLS.polygonPos]! || ({} as MarketData)),
+      protocol: PROTOCOLS.polygonPos,
       contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.coinPrecision,
@@ -161,7 +159,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
   }
 
   override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
-    return BNB_NETWORK_DEFAULT_SETTINGS[networkType] as INetworkProtocolSettings;
+    return POLYGON_NETWORK_DEFAULT_SETTINGS[networkType] as INetworkProtocolSettings;
   }
 
   override async fetchBalance(address: AccountAddress): Promise<string> {
@@ -231,8 +229,9 @@ export class BnbAdapter extends BaseProtocolAdapter {
         ...rawAccount,
         privateKey: undefined,
         address,
+        // Use compressed public keys for consistency with HD-derived accounts
         publicKey: Buffer.from(
-          privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), false),
+          privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), true),
         ),
       };
     }
@@ -250,22 +249,22 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override async fetchAvailableTokens(): Promise<IToken[] | null> {
     const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
-    const predefinedUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+      polygonActiveNetworkPredefinedSettings,
+      polygonActiveNetworkSettings,
+    } = usePolygonNetworkSettings();
+    const predefinedUrl = polygonActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     const chainId = Number(
-      bnbActiveNetworkSettings.value.chainId
-      || bnbActiveNetworkPredefinedSettings.value.chainId,
+      polygonActiveNetworkSettings.value.chainId
+      || polygonActiveNetworkPredefinedSettings.value.chainId,
     );
 
     // Mainnet: use Ethplorer top tokens (temporary solution like ETH)
-    if (chainId === Number(BNB_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
+    if (chainId === Number(POLYGON_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
       try {
         const response = await new EthplorerService(predefinedUrl)
-          .fetchTopTokens(PROTOCOLS.bnb);
-        // Tag protocol as BNB
-        return (response || [])?.map((t) => ({ ...t, protocol: PROTOCOLS.bnb }));
+          .fetchTopTokens(PROTOCOLS.polygonPos);
+        // Tag protocol as Polygon Pos
+        return (response || [])?.map((t) => ({ ...t, protocol: PROTOCOLS.polygonPos }));
       } catch (error: any) {
         Logger.write(error);
         return null;
@@ -280,22 +279,14 @@ export class BnbAdapter extends BaseProtocolAdapter {
     address: string,
   ): Promise<ITokenBalance[] | null> {
     const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
-    const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+      polygonActiveNetworkPredefinedSettings,
+    } = usePolygonNetworkSettings();
+    const apiUrl = polygonActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     if (!apiUrl) return null;
-    const chainId = Number(bnbActiveNetworkSettings.value.chainId);
 
     try {
-      // Mainnet → Ethplorer balances
-      if (chainId === Number(BNB_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
-        const response = await new EthplorerService(apiUrl)
-          .fetchAccountTokenBalances(address, PROTOCOLS.bnb);
-        // Ensure protocol is BNB
-        return (response || [])?.map((b) => ({ ...b, protocol: PROTOCOLS.bnb }));
-      }
-      const response = await new AlchemyService(apiUrl).getTokenBalances(address);
+      const response = await new AlchemyService(apiUrl, PROTOCOLS.polygonPos)
+        .getTokenBalances(address);
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -307,22 +298,14 @@ export class BnbAdapter extends BaseProtocolAdapter {
     contractId: string,
   ): Promise<IToken | undefined> {
     const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
-    const apiUrl = bnbActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+      polygonActiveNetworkPredefinedSettings,
+    } = usePolygonNetworkSettings();
+    const apiUrl = polygonActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     if (!apiUrl) return undefined;
-    const chainId = Number(bnbActiveNetworkSettings.value.chainId);
 
     try {
-      // Mainnet → Ethplorer token info
-      if (chainId === Number(BNB_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
-        const response = await new EthplorerService(apiUrl)
-          .fetchTokenInfo(contractId, PROTOCOLS.bnb);
-        return response ? { ...response, protocol: PROTOCOLS.bnb } : undefined;
-      }
-      // Testnet → Alchemy token metadata
-      const response = await new AlchemyService(apiUrl).getTokenMetadata(contractId);
+      const response = await new AlchemyService(apiUrl, PROTOCOLS.polygonPos)
+        .getTokenMetadata(contractId);
       return response;
     } catch (error: any) {
       Logger.write(error);
@@ -337,18 +320,15 @@ export class BnbAdapter extends BaseProtocolAdapter {
     value,
     gas,
   }: any = {}): Promise<ITransferResponse> {
-    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
+    const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
     const { getAccountByProtocolAndAddress } = useAccounts();
-    const { chainId } = bnbActiveNetworkSettings.value;
+    const { chainId } = polygonActiveNetworkSettings.value;
     const { updateFeeList } = useEthFeeCalculation(this.protocol);
 
-    const account = getAccountByProtocolAndAddress(
-      PROTOCOLS.bnb,
-      toChecksumAddress(from),
-    );
-    if (!account || account.protocol !== PROTOCOLS.bnb) {
+    const account = getAccountByProtocolAndAddress(PROTOCOLS.polygonPos, toChecksumAddress(from));
+    if (!account || account.protocol !== PROTOCOLS.polygonPos) {
       throw new Error(
-        'Token transfer was initiated from non-existing or non-bnb account.',
+        'Token transfer was initiated from non-existing or non-polygon account.',
       );
     }
 
@@ -361,7 +341,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
-    // Determine gas limit: prefer provided gas from dapp/estimator
     let gasLimitHex: string;
     if (gas != null) {
       let gasNum: number;
@@ -372,7 +351,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
       }
       gasLimitHex = `0x${gasNum.toString(16)}`;
     } else {
-      gasLimitHex = toHex(String(BNB_GAS_LIMIT));
+      gasLimitHex = toHex(String(POLYGON_POS_GAS_LIMIT));
     }
 
     const txData: TxData = {
@@ -406,22 +385,22 @@ export class BnbAdapter extends BaseProtocolAdapter {
     },
   ): Promise<ITransferResponse> {
     const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
+      polygonActiveNetworkSettings,
+      polygonActiveNetworkPredefinedSettings,
+    } = usePolygonNetworkSettings();
     const { getAccountByProtocolAndAddress } = useAccounts();
-    const apiUrl = bnbActiveNetworkPredefinedSettings.value.middlewareUrl;
+    const apiUrl = polygonActiveNetworkPredefinedSettings.value.middlewareUrl;
 
     const account = getAccountByProtocolAndAddress(
-      PROTOCOLS.bnb,
+      PROTOCOLS.polygonPos,
       toChecksumAddress(options.fromAccount),
     );
-    if (!account || account.protocol !== PROTOCOLS.bnb) {
+    if (!account || account.protocol !== PROTOCOLS.polygonPos) {
       throw new Error(
-        'Token transfer was initiated from non-existing or non-bnb account.',
+        'Token transfer was initiated from non-existing or non-polygon account.',
       );
     }
-    const { chainId, nodeUrl } = bnbActiveNetworkSettings.value;
+    const { chainId, nodeUrl } = polygonActiveNetworkSettings.value;
 
     const contractAbi = await new EtherscanService(
       apiUrl,
@@ -452,7 +431,6 @@ export class BnbAdapter extends BaseProtocolAdapter {
       ),
     );
 
-    // Use node-provided gasPrice on BNB (no EIP-1559)
     const web3Eth = this.getWeb3EthInstance();
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
@@ -494,12 +472,12 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
     if (transaction?.input !== '0x' && transaction?.blockNumber) {
       const {
-        bnbActiveNetworkPredefinedSettings,
-        bnbActiveNetworkSettings,
-      } = useBnbNetworkSettings();
-      const { chainId } = bnbActiveNetworkSettings.value;
+        polygonActiveNetworkPredefinedSettings,
+        polygonActiveNetworkSettings,
+      } = usePolygonNetworkSettings();
+      const { chainId } = polygonActiveNetworkSettings.value;
       const service = new EtherscanService(
-        bnbActiveNetworkPredefinedSettings.value.middlewareUrl,
+        polygonActiveNetworkPredefinedSettings.value.middlewareUrl,
         chainId,
       );
       const tokenTx = await service.fetchAccountTokenTransactionByHash(
@@ -537,12 +515,12 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
     try {
       const {
-        bnbActiveNetworkPredefinedSettings,
-        bnbActiveNetworkSettings,
-      } = useBnbNetworkSettings();
-      const { chainId } = bnbActiveNetworkSettings.value;
+        polygonActiveNetworkPredefinedSettings,
+        polygonActiveNetworkSettings,
+      } = usePolygonNetworkSettings();
+      const { chainId } = polygonActiveNetworkSettings.value;
       const service = new EtherscanService(
-        bnbActiveNetworkPredefinedSettings.value.middlewareUrl,
+        polygonActiveNetworkPredefinedSettings.value.middlewareUrl,
         chainId,
       );
       const [coinTransactions, tokenTransactions] = await Promise.all([
@@ -583,12 +561,12 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
     try {
       const {
-        bnbActiveNetworkPredefinedSettings,
-        bnbActiveNetworkSettings,
-      } = useBnbNetworkSettings();
-      const { chainId } = bnbActiveNetworkSettings.value;
+        polygonActiveNetworkPredefinedSettings,
+        polygonActiveNetworkSettings,
+      } = usePolygonNetworkSettings();
+      const { chainId } = polygonActiveNetworkSettings.value;
       const service = new EtherscanService(
-        bnbActiveNetworkPredefinedSettings.value.middlewareUrl,
+        polygonActiveNetworkPredefinedSettings.value.middlewareUrl,
         chainId,
       );
       regularTransactions = assetContractId === this.coinContractId
@@ -618,33 +596,33 @@ export class BnbAdapter extends BaseProtocolAdapter {
     options: Record<string, any>,
   ): Promise<any> {
     const { getAccountByProtocolAndAddress } = useAccounts();
-    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
+    const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
 
     const account = getAccountByProtocolAndAddress(
-      PROTOCOLS.bnb,
+      PROTOCOLS.polygonPos,
       toChecksumAddress(options.fromAccount),
     );
-    if (!account || account.protocol !== PROTOCOLS.bnb) {
+    if (!account || account.protocol !== PROTOCOLS.polygonPos) {
       throw new Error(
-        'BNB transaction construction & signing was initiated from non-existing or non-bnb account.',
+        'Polygon transaction construction & signing was initiated from non-existing or non-polygon account.',
       );
     }
 
     const { nonce } = options;
-    const { chainId } = bnbActiveNetworkSettings.value;
+    const { chainId } = polygonActiveNetworkSettings.value;
 
     const web3Eth = this.getWeb3EthInstance();
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
     const hexAmount = bigIntToHex(
-      BigInt(toWei(amount.toFixed(BNB_COIN_PRECISION), 'ether')),
+      BigInt(toWei(amount.toFixed(POLYGON_POS_COIN_PRECISION), 'ether')),
     );
 
     const txData: TxData = {
       nonce: toHex(nonce),
       gasPrice,
-      gasLimit: toHex(String(BNB_GAS_LIMIT)),
+      gasLimit: toHex(String(POLYGON_POS_GAS_LIMIT)),
       to: recipient,
       value: hexAmount,
       data: '0x',
@@ -725,8 +703,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
   }
 
   private getWeb3EthInstance(): Web3Eth {
-    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
-    const { nodeUrl } = bnbActiveNetworkSettings.value;
+    const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
+    const { nodeUrl } = polygonActiveNetworkSettings.value;
     return new Web3Eth(nodeUrl);
   }
 }

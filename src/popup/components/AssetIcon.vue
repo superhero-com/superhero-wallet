@@ -47,6 +47,7 @@ import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 import SolanaIcon from '@/icons/coin/solana.svg?vue-component';
 import BnbIcon from '@/icons/coin/bnb.svg?vue-component';
 import AvalancheIcon from '@/icons/coin/avalanche.svg?vue-component';
+import PolygonPosIcon from '@/icons/coin/polygonPos.svg?vue-component';
 import LexonTokenIcon from '@/icons/tokens/ct_xtk8rSz9suPb6D6VLquyfVji25FcnFRDjn3dnn5mmvHsPiESt.svg?vue-component';
 
 const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.md, ICON_SIZES.lg, ICON_SIZES.xxl] as const;
@@ -60,6 +61,7 @@ export const COIN_ICONS: Record<Protocol, Component> = {
   [PROTOCOLS.solana]: SolanaIcon,
   [PROTOCOLS.bnb]: BnbIcon,
   [PROTOCOLS.avalanche]: AvalancheIcon,
+  [PROTOCOLS.polygonPos]: PolygonPosIcon,
 };
 
 const ASSET_ICONS: Dictionary<Component> = {
