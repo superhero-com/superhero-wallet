@@ -3,7 +3,7 @@ import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
 
 export const AVALANCHE_PROTOCOL_NAME = 'Avalanche';
 
-export const AVALANCHE_CONTRACT_ID = 'avax';
+export const AVALANCHE_CONTRACT_ID = 'avalanche';
 export const AVALANCHE_COIN_SYMBOL = 'AVAX';
 export const AVALANCHE_COIN_PRECISION = 18;
 
