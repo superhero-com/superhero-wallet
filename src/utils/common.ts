@@ -57,6 +57,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
+import { AVALANCHE_CONTRACT_ID } from '@/protocols/avalanche/config';
 import { decrypt, encrypt } from './crypto';
 
 /**
@@ -756,7 +757,7 @@ export function getActivityHash(activity: any) {
   );
 }
 
-export const isEvm = (p?: Protocol | null) => !!p && EVM_PROTOCOLS.includes(p);
+export const isEvm = (protocol: Protocol): boolean => EVM_PROTOCOLS.includes(protocol);
 
 /**
  * Check if a contract ID belongs to an EVM-compatible chain
@@ -768,5 +769,6 @@ export const isEvmContract = (contractId?: AssetContractId | null): boolean => {
 
   // Check against known EVM contract IDs
   return contractId === ETH_CONTRACT_ID
-    || contractId === BNB_CONTRACT_ID;
+    || contractId === BNB_CONTRACT_ID
+    || contractId === AVALANCHE_CONTRACT_ID;
 };

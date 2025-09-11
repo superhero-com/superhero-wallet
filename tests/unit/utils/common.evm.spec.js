@@ -3,7 +3,7 @@ import { isEvm } from '../../../src/utils';
 
 describe('EVM utils and constants', () => {
   it('EVM_PROTOCOLS contains ethereum and bnb only', () => {
-    expect(EVM_PROTOCOLS).toEqual([PROTOCOLS.ethereum, PROTOCOLS.bnb]);
+    expect(EVM_PROTOCOLS).toEqual([PROTOCOLS.ethereum, PROTOCOLS.bnb, PROTOCOLS.avalanche]);
   });
 
   it('isEvm detects EVM protocols', () => {
