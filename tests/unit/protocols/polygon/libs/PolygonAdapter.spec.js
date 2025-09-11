@@ -49,14 +49,14 @@ jest.mock('web3-eth-accounts', () => ({
 
 jest.mock('../../../../../src/composables', () => ({
   useAccounts: () => ({
-    getAccountByAddress: () => ({ protocol: 'polygon', secretKey: new Uint8Array([1, 2, 3]) }),
+    getAccountByProtocolAndAddress: () => ({ protocol: 'polygon', secretKey: new Uint8Array([1, 2, 3]) }),
   }),
 }));
 
 // ensure alias path is also mocked when code resolves via '@/composables'
 jest.mock('@/composables', () => ({
   useAccounts: () => ({
-    getAccountByAddress: () => ({ protocol: 'polygon', secretKey: new Uint8Array([1, 2, 3]) }),
+    getAccountByProtocolAndAddress: () => ({ protocol: 'polygon', secretKey: new Uint8Array([1, 2, 3]) }),
   }),
 }), { virtual: true });
 

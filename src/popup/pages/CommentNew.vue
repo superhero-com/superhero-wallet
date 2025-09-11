@@ -5,7 +5,7 @@
         <AccountSelector
           v-model="creatorAddress"
           :options="aeAccountsSelectOptions"
-          @select="setActiveAccountByAddress"
+          @select="setActiveAccountByAddressAndProtocol($event, PROTOCOLS.aeternity)"
         />
         <div class="comment-text">
           {{ text }}
@@ -79,7 +79,7 @@ export default defineComponent({
     const {
       aeAccountsSelectOptions,
       getLastActiveProtocolAccount,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
     } = useAccounts();
 
     const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address);
@@ -139,6 +139,7 @@ export default defineComponent({
     })();
 
     return {
+      PROTOCOLS,
       creatorAddress,
       aeAccountsSelectOptions,
       id,
@@ -147,7 +148,7 @@ export default defineComponent({
       isTippingSupported,
       sendComment,
       openCallbackOrGoHome,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
     };
   },
 });

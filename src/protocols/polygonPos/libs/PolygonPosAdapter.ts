@@ -229,8 +229,9 @@ export class PolygonAdapter extends BaseProtocolAdapter {
         ...rawAccount,
         privateKey: undefined,
         address,
+        // Use compressed public keys for consistency with HD-derived accounts
         publicKey: Buffer.from(
-          privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), false),
+          privateKeyToPublicKey(Buffer.from(rawAccount.privateKey), true),
         ),
       };
     }
@@ -320,11 +321,11 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     gas,
   }: any = {}): Promise<ITransferResponse> {
     const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { chainId } = polygonActiveNetworkSettings.value;
     const { updateFeeList } = useEthFeeCalculation(this.protocol);
 
-    const account = getAccountByAddress(toChecksumAddress(from));
+    const account = getAccountByProtocolAndAddress(PROTOCOLS.polygonPos, toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.polygonPos) {
       throw new Error(
         'Token transfer was initiated from non-existing or non-polygon account.',
@@ -387,10 +388,13 @@ export class PolygonAdapter extends BaseProtocolAdapter {
       polygonActiveNetworkSettings,
       polygonActiveNetworkPredefinedSettings,
     } = usePolygonNetworkSettings();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const apiUrl = polygonActiveNetworkPredefinedSettings.value.middlewareUrl;
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.polygonPos,
+      toChecksumAddress(options.fromAccount),
+    );
     if (!account || account.protocol !== PROTOCOLS.polygonPos) {
       throw new Error(
         'Token transfer was initiated from non-existing or non-polygon account.',
@@ -591,10 +595,13 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.polygonPos,
+      toChecksumAddress(options.fromAccount),
+    );
     if (!account || account.protocol !== PROTOCOLS.polygonPos) {
       throw new Error(
         'Polygon transaction construction & signing was initiated from non-existing or non-polygon account.',

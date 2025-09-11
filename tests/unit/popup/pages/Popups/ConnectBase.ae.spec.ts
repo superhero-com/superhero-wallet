@@ -38,7 +38,7 @@ function mountBaseWith(popupProps: any = {}, props: any = {}) {
     getLastActiveProtocolAccount,
     getAccountsSelectOptionsByProtocol,
     getAccountByProtocolAndAddress: jest.fn((p, a) => ({ protocol: p, address: a })),
-    setActiveAccountByAddress: jest.fn(),
+    setActiveAccountByAddressAndProtocol: jest.fn(),
   });
 
   return mount(ConnectBase, {
