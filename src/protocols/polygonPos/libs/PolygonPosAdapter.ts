@@ -278,19 +278,12 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     address: string,
   ): Promise<ITokenBalance[] | null> {
     const {
-      polygonActiveNetworkSettings,
       polygonActiveNetworkPredefinedSettings,
     } = usePolygonNetworkSettings();
     const apiUrl = polygonActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     if (!apiUrl) return null;
-    const chainId = Number(polygonActiveNetworkSettings.value.chainId);
 
     try {
-      if (chainId === Number(POLYGON_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
-        const response = await new EthplorerService(apiUrl)
-          .fetchAccountTokenBalances(address, PROTOCOLS.polygonPos);
-        return (response || [])?.map((b) => ({ ...b, protocol: PROTOCOLS.polygonPos }));
-      }
       const response = await new AlchemyService(apiUrl, PROTOCOLS.polygonPos)
         .getTokenBalances(address);
       return response;
@@ -304,19 +297,12 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     contractId: string,
   ): Promise<IToken | undefined> {
     const {
-      polygonActiveNetworkSettings,
       polygonActiveNetworkPredefinedSettings,
     } = usePolygonNetworkSettings();
     const apiUrl = polygonActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     if (!apiUrl) return undefined;
-    const chainId = Number(polygonActiveNetworkSettings.value.chainId);
 
     try {
-      if (chainId === Number(POLYGON_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET].chainId)) {
-        const response = await new EthplorerService(apiUrl)
-          .fetchTokenInfo(contractId, PROTOCOLS.polygonPos);
-        return response ? { ...response, protocol: PROTOCOLS.polygonPos } : undefined;
-      }
       const response = await new AlchemyService(apiUrl, PROTOCOLS.polygonPos)
         .getTokenMetadata(contractId);
       return response;

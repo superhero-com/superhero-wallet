@@ -3,7 +3,7 @@ import { ALCHEMY_API_KEY, NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/c
 
 export const POLYGON_POS_PROTOCOL_NAME = 'Polygon PoS';
 
-export const POLYGON_POS_CONTRACT_ID = 'polygon';
+export const POLYGON_POS_CONTRACT_ID = 'polygonPos';
 export const POLYGON_POS_COIN_SYMBOL = 'POL';
 export const POLYGON_POS_COIN_PRECISION = 18;
 
@@ -27,7 +27,7 @@ export const POLYGON_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> =
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://polygonscan.com',
     middlewareUrl: 'https://api.etherscan.io/v2/api ',
-    tokenMiddlewareUrl: 'https://api.ethplorer.io',
+    tokenMiddlewareUrl: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://amoy.polygonscan.com',
