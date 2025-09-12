@@ -65,6 +65,7 @@ const views: Record<Protocol, ProtocolViewsConfig> = {
   bnb: ethereumViews,
   avalanche: ethereumViews,
   polygonPos: ethereumViews,
+  dogecoin: bitcoinViews,
 };
 
 export default defineComponent({

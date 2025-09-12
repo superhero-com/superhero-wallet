@@ -1,10 +1,10 @@
 <template>
   <TransferReviewBase
-    :base-token-symbol="coinSymbol"
+    :base-token-symbol="DOGE_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
     show-fiat
-    :protocol="protocol"
+    :protocol="PROTOCOLS.dogecoin"
     class="transfer-review"
   >
     <template #total>
@@ -14,10 +14,10 @@
       >
         <template #value>
           <TokenAmount
-            :amount="Number(transferData.total || 0)"
-            :symbol="coinSymbol"
+            :amount="reviewTotal"
+            :symbol="DOGE_SYMBOL"
             high-precision
-            :protocol="protocol"
+            :protocol="PROTOCOLS.dogecoin"
             data-cy="review-total"
           />
         </template>
@@ -31,44 +31,30 @@ import {
   defineComponent,
   PropType,
   ref,
+  computed,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { PROTOCOLS } from '@/constants';
+import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
+import DetailsItem from '@/popup/components/DetailsItem.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
+import { DOGE_SYMBOL } from '@/protocols/dogecoin/config';
+import type { TransferFormModel } from '@/types';
 import {
   useAccounts,
   useLatestTransactionList,
   useUi,
 } from '@/composables';
-import type {
-  ITransaction,
-  ITransferArgs,
-  TransferFormModel,
-  Protocol,
-} from '@/types';
-import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-
-import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
-import DetailsItem from '@/popup/components/DetailsItem.vue';
-import TokenAmount from '@/popup/components/TokenAmount.vue';
-// coin symbol is derived from adapter to support BTC/DOGE reuse
 import BigNumber from 'bignumber.js';
 import Logger from '@/lib/logger';
 
 export default defineComponent({
-  name: 'BtcTransferReview',
-  components: {
-    TokenAmount,
-    DetailsItem,
-    TransferReviewBase,
-  },
-  model: {
-    prop: 'transferData',
-  },
-  props: {
-    transferData: { type: Object as PropType<TransferFormModel>, required: true },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOLS.bitcoin },
-  },
+  name: 'DogeTransferReview',
+  components: { TokenAmount, DetailsItem, TransferReviewBase },
+  model: { prop: 'transferData' },
+  props: { transferData: { type: Object as PropType<TransferFormModel>, required: true } },
   setup(props, { emit }) {
     const { t } = useI18n();
     const router = useRouter();
@@ -87,32 +73,28 @@ export default defineComponent({
       });
     }
 
-    // TODO: replace that
-    // This is happening because of inner TemplateRenderer issue on parsing the blocksteam response
     function HtmlEncode(content: string) {
       const textAreaDiv = document.createElement('textarea');
       textAreaDiv.textContent = content;
       return textAreaDiv.innerHTML;
     }
 
-    async function transfer(
-      { amount, recipient }: ITransferArgs,
-    ): Promise<string | undefined> {
-      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+    async function transfer({ amount, recipient }: { amount: string | number; recipient: string }) {
+      const dogeAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.dogecoin);
       try {
-        const { hash } = await adapter.spend(BigNumber(amount).toNumber(), recipient, {
-          fee: props.transferData.fee
-            ?.dividedBy(props.transferData.addresses?.length || 1).toNumber(),
-          ...activeAccount.value,
-        });
-        return hash;
+        const { hash } = await dogeAdapter.spend(
+          BigNumber(amount).toNumber(),
+          recipient,
+          {
+            fee: props.transferData.fee
+              ?.dividedBy(props.transferData.addresses?.length || 1).toNumber(),
+            ...activeAccount.value,
+          },
+        );
+        return hash as string;
       } catch (error: any) {
         const processedErrorMessage = HtmlEncode(error.message);
-        if (processedErrorMessage.includes('dust')) {
-          openTransactionFailedModal(t('modals.transaction-failed.dustError'));
-        } else {
-          openTransactionFailedModal(processedErrorMessage);
-        }
+        openTransactionFailedModal(processedErrorMessage);
         return undefined;
       }
     }
@@ -124,68 +106,50 @@ export default defineComponent({
         selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipients?.length || !selectedAsset) {
-        return;
-      }
+      if (!amount || !recipients?.length || !selectedAsset) return;
 
       loading.value = true;
       // eslint-disable-next-line no-restricted-syntax
       for (const recipient of recipients) {
         // eslint-disable-next-line no-await-in-loop
-        const hash = await transfer({
-          amount,
-          recipient,
-          selectedAsset,
-        });
-
+        const hash = await transfer({ amount, recipient });
         if (hash) {
-          const lastActiveBtcAccount = getLastActiveProtocolAccount(props.protocol);
-          const transaction: ITransaction = {
+          const lastActiveDogeAccount = getLastActiveProtocolAccount(PROTOCOLS.dogecoin);
+          addAccountPendingTransaction(lastActiveDogeAccount?.address!, {
             hash: hash as any,
             pending: true,
-            transactionOwner: lastActiveBtcAccount?.address,
-            protocol: props.protocol,
+            transactionOwner: lastActiveDogeAccount?.address,
+            protocol: PROTOCOLS.dogecoin,
             tx: {
               amount: Number(amount),
-              callerId: lastActiveBtcAccount?.address!,
+              callerId: lastActiveDogeAccount?.address!,
               contractId: selectedAsset.contractId as any,
-              senderId: lastActiveBtcAccount?.address,
+              senderId: lastActiveDogeAccount?.address,
               type: 'SpendTx',
               recipientId: recipient,
               arguments: [],
               fee: props.transferData.fee?.dividedBy(recipients.length).toNumber() ?? 0,
             },
-          };
-          addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+          } as any);
         }
-        /**
-         * A timeout is necessary to allow the blockchain to have time
-         * to submit the previous transaction in case there are multiple recipients
-         */
         // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
       loading.value = false;
 
-      // TODO - redirect after transfer function will be ready
       router.push({ name: homeRouteName.value });
       emit('success');
     }
 
+    const reviewTotal = computed(() => +(props.transferData.total || 0));
+
     return {
       PROTOCOLS,
-      coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
+      DOGE_SYMBOL,
       loading,
+      reviewTotal,
       submit,
     };
   },
 });
 </script>
-
-<style scoped lang="scss">
-.transfer-review {
-  .details-item {
-    margin-top: 16px;
-  }
-}
-</style>
