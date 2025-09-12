@@ -338,11 +338,14 @@ export class BnbAdapter extends BaseProtocolAdapter {
     gas,
   }: any = {}): Promise<ITransferResponse> {
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { chainId } = bnbActiveNetworkSettings.value;
     const { updateFeeList } = useEthFeeCalculation(this.protocol);
 
-    const account = getAccountByAddress(toChecksumAddress(from));
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.bnb,
+      toChecksumAddress(from),
+    );
     if (!account || account.protocol !== PROTOCOLS.bnb) {
       throw new Error(
         'Token transfer was initiated from non-existing or non-bnb account.',
@@ -406,10 +409,13 @@ export class BnbAdapter extends BaseProtocolAdapter {
       bnbActiveNetworkSettings,
       bnbActiveNetworkPredefinedSettings,
     } = useBnbNetworkSettings();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const apiUrl = bnbActiveNetworkPredefinedSettings.value.middlewareUrl;
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.bnb,
+      toChecksumAddress(options.fromAccount),
+    );
     if (!account || account.protocol !== PROTOCOLS.bnb) {
       throw new Error(
         'Token transfer was initiated from non-existing or non-bnb account.',
@@ -611,10 +617,13 @@ export class BnbAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.bnb,
+      toChecksumAddress(options.fromAccount),
+    );
     if (!account || account.protocol !== PROTOCOLS.bnb) {
       throw new Error(
         'BNB transaction construction & signing was initiated from non-existing or non-bnb account.',

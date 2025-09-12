@@ -61,7 +61,7 @@ const allLatestTransactions = computed((): ICommonTransaction[] => {
  * and any transaction list before loading the lists in the component scope.
  */
 export function useLatestTransactionList() {
-  const { accounts, getAccountByAddress } = useAccounts();
+  const { accounts, getAccountByProtocolAndAddress } = useAccounts();
   const { activeNetwork, onNetworkChange } = useNetworks();
   const { balances } = useBalances();
   const { tokenBalances } = useFungibleTokens();
@@ -121,7 +121,7 @@ export function useLatestTransactionList() {
    * Add temporary pending transaction and remove it when it's mined.
    */
   async function addAccountPendingTransaction(address: AccountAddress, transaction: ITransaction) {
-    const account = getAccountByAddress(address);
+    const account = getAccountByProtocolAndAddress(transaction.protocol, address);
     if (account && transaction?.hash) {
       if (!accountsTransactionsPending.value[address]) {
         accountsTransactionsPending.value[address] = [];
@@ -165,7 +165,10 @@ export function useLatestTransactionList() {
       Object.entries(accountsTransactionsLatest.value)
         .forEach(([accountAddress, transactionList]) => {
           if (transactionList.some(({ pending }) => !!pending)) {
-            loadAccountLatestTransactions(getAccountByAddress(accountAddress)!);
+            const accProtocol = transactionList.find(Boolean)?.protocol;
+            if (!accProtocol) return;
+            const acc = getAccountByProtocolAndAddress(accProtocol, accountAddress)!;
+            loadAccountLatestTransactions(acc);
           }
         });
     }, 60000);

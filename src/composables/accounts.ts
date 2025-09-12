@@ -209,10 +209,6 @@ export const useAccounts = createCustomScopedComposable(() => {
     return accounts.value.find((acc) => acc.protocol === protocol && acc.address === address);
   }
 
-  function getAccountByAddress(address: AccountAddress): IAccount | undefined {
-    return accounts.value.find((acc) => acc.address === address);
-  }
-
   function getAccountByGlobalIdx(globalIdx: number): IAccount | undefined {
     return accounts.value.find((acc) => acc.globalIdx === globalIdx);
   }
@@ -250,12 +246,6 @@ export const useAccounts = createCustomScopedComposable(() => {
     if (accountNew && accountCurrent.address !== accountNew.address) {
       protocolLastActiveGlobalIdx.value[accountNew.protocol] = accountNew.globalIdx;
       runOnAccountChangeCallbacks(accountNew, accountCurrent);
-    }
-  }
-
-  function setActiveAccountByAddress(address?: AccountAddress) {
-    if (address) {
-      setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
     }
   }
 
@@ -386,13 +376,11 @@ export const useAccounts = createCustomScopedComposable(() => {
     addRawAccount,
     addPrivateKeyAccount,
     getAccountByProtocolAndAddress,
-    getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
     getAccountsSelectOptionsByProtocol,
     getAccountIcon,
     onAccountChange,
-    setActiveAccountByAddress,
     setActiveAccountByAddressAndProtocol,
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,

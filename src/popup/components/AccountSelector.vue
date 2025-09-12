@@ -45,7 +45,7 @@
         show-explorer-link
         show-protocol-icon
         :address="modelValue.toString()"
-        :protocol="selectedAccount?.protocol!"
+        :protocol="selectedAccount && selectedAccount.protocol"
         class="address-truncated"
       />
     </div>
@@ -81,13 +81,16 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const { accountsSelectOptions, getAccountByAddress } = useAccounts();
+    const { accountsSelectOptions, getAccountByProtocolAndAddress } = useAccounts();
 
-    const selectedAccount = computed(
-      () => (props.modelValue)
-        ? getAccountByAddress(props.modelValue)
-        : undefined,
-    );
+    const selectedAccount = computed(() => {
+      if (!props.modelValue) return undefined;
+      const [protocol, address] = String(props.modelValue).includes(':')
+        ? String(props.modelValue).split(':')
+        : [undefined, props.modelValue];
+      // eslint-disable-next-line no-nested-ternary
+      return getAccountByProtocolAndAddress(protocol as any, address as any);
+    });
 
     function onSelect(value: string) {
       const [, address] = String(value).split(':');

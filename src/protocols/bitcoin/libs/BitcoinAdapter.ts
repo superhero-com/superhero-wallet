@@ -423,7 +423,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
     await psbt.signAllInputs(new BitcoinTransactionSigner(options.secretKey, options.publicKey));
     await psbt.finalizeAllInputs();
-    return psbt.extractTransaction();
+    // Allow higher per-vbyte fees by bypassing bitcoinjs's maximumFeeRate check
+    return psbt.extractTransaction(true);
   }
 
   async spend(

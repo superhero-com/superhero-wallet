@@ -2,7 +2,7 @@
   <ShareAddressBase
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
-    :protocol="PROTOCOLS.bitcoin"
+    :protocol="protocol"
     disable-asset-selection
     is-receive
     @close="resolve()"
@@ -11,10 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import {
-  PROTOCOLS,
-  PROTOCOL_VIEW_TRANSFER_RECEIVE,
-} from '@/constants';
+import { PROTOCOLS, PROTOCOL_VIEW_TRANSFER_RECEIVE } from '@/constants';
 import { useAccounts } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -27,14 +24,14 @@ export default defineComponent({
   },
   props: {
     ...shareAddressRequiredProps,
+    protocol: { type: String as any as import('vue').PropType<import('@/types').Protocol>, default: PROTOCOLS.bitcoin },
   },
-  setup() {
+  setup(props) {
     const { activeAccount } = useAccounts();
 
     return {
-      PROTOCOLS,
       activeAccount,
-      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin).protocolName,
+      protocolName: ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
     };
   },
 });

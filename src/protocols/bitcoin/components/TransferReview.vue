@@ -1,10 +1,10 @@
 <template>
   <TransferReviewBase
-    :base-token-symbol="BTC_SYMBOL"
+    :base-token-symbol="coinSymbol"
     :transfer-data="transferData"
     :loading="loading"
     show-fiat
-    :protocol="PROTOCOLS.bitcoin"
+    :protocol="protocol"
     class="transfer-review"
   >
     <template #total>
@@ -14,10 +14,10 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData.total!"
-            :symbol="BTC_SYMBOL"
+            :amount="Number(transferData.total || 0)"
+            :symbol="coinSymbol"
             high-precision
-            :protocol="PROTOCOLS.bitcoin"
+            :protocol="protocol"
             data-cy="review-total"
           />
         </template>
@@ -39,14 +39,19 @@ import {
   useLatestTransactionList,
   useUi,
 } from '@/composables';
-import type { ITransaction, ITransferArgs, TransferFormModel } from '@/types';
+import type {
+  ITransaction,
+  ITransferArgs,
+  TransferFormModel,
+  Protocol,
+} from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
+// coin symbol is derived from adapter to support BTC/DOGE reuse
 import BigNumber from 'bignumber.js';
 import Logger from '@/lib/logger';
 
@@ -62,6 +67,7 @@ export default defineComponent({
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOLS.bitcoin },
   },
   setup(props, { emit }) {
     const { t } = useI18n();
@@ -92,9 +98,9 @@ export default defineComponent({
     async function transfer(
       { amount, recipient }: ITransferArgs,
     ): Promise<string | undefined> {
-      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
       try {
-        const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
+        const { hash } = await adapter.spend(BigNumber(amount).toNumber(), recipient, {
           fee: props.transferData.fee
             ?.dividedBy(props.transferData.addresses?.length || 1).toNumber(),
           ...activeAccount.value,
@@ -133,12 +139,12 @@ export default defineComponent({
         });
 
         if (hash) {
-          const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
+          const lastActiveBtcAccount = getLastActiveProtocolAccount(props.protocol);
           const transaction: ITransaction = {
             hash: hash as any,
             pending: true,
             transactionOwner: lastActiveBtcAccount?.address,
-            protocol: PROTOCOLS.bitcoin,
+            protocol: props.protocol,
             tx: {
               amount: Number(amount),
               callerId: lastActiveBtcAccount?.address!,
@@ -168,7 +174,7 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
-      BTC_SYMBOL,
+      coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
       loading,
       submit,
     };

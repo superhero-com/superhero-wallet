@@ -313,7 +313,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     gas,
   }: any = {}): Promise<ITransferResponse> {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { chainId } = ethActiveNetworkSettings.value;
     const {
       updateFeeList,
@@ -321,7 +321,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       maxPriorityFeePerGas,
     } = useEthFeeCalculation(this.protocol);
 
-    const account = getAccountByAddress(toChecksumAddress(from));
+    const account = getAccountByProtocolAndAddress(PROTOCOLS.ethereum, toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
       throw new Error('Token transfer were initiated from not existing or not ethereum account.');
     }
@@ -373,10 +373,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       ethActiveNetworkSettings,
       ethActiveNetworkPredefinedSettings,
     } = useEthNetworkSettings();
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.ethereum,
+      toChecksumAddress(options.fromAccount),
+    );
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
       throw new Error('Token transfer were initiated from not existing or not ethereum account.');
     }
@@ -561,10 +564,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: Record<string, any>,
   ): Promise<FeeMarketEIP1559Transaction> {
-    const { getAccountByAddress } = useAccounts();
+    const { getAccountByProtocolAndAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
-    const account = getAccountByAddress(options.fromAccount);
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.ethereum,
+      toChecksumAddress(options.fromAccount),
+    );
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
       throw new Error('Ethereum transaction construction & signing was initiated from non existing or not ethereum account.');
     }

@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue
 import { IPopupProps, WalletRouteMeta } from '@/types';
 import {
   APP_LINK_WEB,
+  APP_NAME,
   IS_MOBILE_APP,
   IS_WEB,
   POPUP_TYPE,
@@ -200,6 +201,61 @@ if (IS_MOBILE_APP) {
       }
     });
   })();
+}
+
+// Basic SEO: set title/canonical/OG/Twitter tags on navigation (web only)
+if (IS_WEB) {
+  const DEFAULT_DESCRIPTION = 'Superhero is a multi-blockchain wallet to manage crypto assets and navigate the web3 and DeFi space. Currently supporting Bitcoin, Ethereum, Solana, BNB and æternity blockchains.';
+
+  const ensureTag = <K extends keyof HTMLElementTagNameMap>(
+    tagName: K,
+    attributes: Record<string, string>,
+  ): HTMLElementTagNameMap[K] => {
+    const selector = Object.entries(attributes)
+      .map(([key, value]) => `${tagName}[${key}="${value}"]`).join('');
+    let el = document.head.querySelector(selector) as HTMLElementTagNameMap[K] | null;
+    if (!el) {
+      el = document.createElement(tagName) as HTMLElementTagNameMap[K];
+      Object.entries(attributes).forEach(([key, value]) => el!.setAttribute(key, value));
+      document.head.appendChild(el);
+    }
+    return el;
+  };
+
+  const setMeta = (name: string, content: string) => {
+    const el = ensureTag('meta', { name });
+    el.setAttribute('content', content);
+  };
+
+  const setOg = (property: string, content: string) => {
+    const el = ensureTag('meta', { property });
+    el.setAttribute('content', content);
+  };
+
+  router.afterEach((to) => {
+    const meta = to.meta as WalletRouteMeta;
+    const titleKey = meta?.title as string | undefined;
+    const translatedTitle = titleKey ? tg(`pages.titles.${titleKey}`) : '';
+    const title = translatedTitle ? `${APP_NAME} — ${translatedTitle}` : APP_NAME;
+    document.title = title;
+
+    const canonicalHref = `${APP_LINK_WEB}${to.fullPath}`;
+    const canonical = ensureTag('link', { rel: 'canonical' });
+    canonical.setAttribute('href', canonicalHref);
+
+    const description = DEFAULT_DESCRIPTION;
+    setMeta('description', description);
+    setMeta('twitter:card', 'summary_large_image');
+    setMeta('twitter:title', title);
+    setMeta('twitter:description', description);
+    setMeta('twitter:image', `${APP_LINK_WEB}/icons/icon-512.webp`);
+
+    setOg('og:type', 'website');
+    setOg('og:title', title);
+    setOg('og:description', description);
+    setOg('og:url', canonicalHref);
+    setOg('og:image', `${APP_LINK_WEB}/icons/icon-512.webp`);
+  });
 }
 
 export default router;

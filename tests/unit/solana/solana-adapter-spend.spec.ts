@@ -6,7 +6,7 @@ import { PROTOCOLS } from '@/constants';
 // Default mocks at module level to avoid redefining properties via spyOn
 jest.mock('@/composables', () => ({
   useAccounts: () => ({
-    getAccountByAddress: (addr: string) => ({
+    getAccountByProtocolAndAddress: (addr: string) => ({
       address: addr,
       protocol: PROTOCOLS.solana,
       secretKey: new Array(64).fill(1),
@@ -37,12 +37,12 @@ describe('SolanaAdapter - spend flow', () => {
 
   it('throws for invalid from account protocol', async () => {
     const adapter = new SolanaAdapter();
-    // Temporarily override getAccountByAddress behavior
+    // Temporarily override getAccountByProtocolAndAddress behavior
     // eslint-disable-next-line global-require
     const original = require('@/composables').useAccounts;
     // eslint-disable-next-line global-require
     (require('@/composables') as any).useAccounts = () => ({
-      getAccountByAddress: () => ({ protocol: 'not-solana' }),
+      getAccountByProtocolAndAddress: () => ({ protocol: 'not-solana' }),
     });
     await expect(adapter.constructAndSignTx(1, 'R', { fromAccount: 'S' } as any)).rejects.toThrow();
     // eslint-disable-next-line global-require

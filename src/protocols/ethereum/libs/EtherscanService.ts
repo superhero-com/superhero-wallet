@@ -10,8 +10,9 @@ import type {
 } from '@/types';
 import type { EthRpcEtherscanProxyMethod } from '@/protocols/ethereum/types';
 import { ETHERSCAN_API_KEY, TXS_PER_PAGE } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
-import { ETH_CONTRACT_ID, ETH_SAFE_CONFIRMATION_COUNT } from '../config';
+import { ETH_SAFE_CONFIRMATION_COUNT } from '../config';
 import { toEthChecksumAddress } from '../helpers';
 
 const NO_TRANSACTIONS_FOUND_MESSAGE = 'No transactions found';
@@ -44,7 +45,8 @@ export class EtherscanService {
   freeVersionTimeDelay = 5300;
 
   constructor(apiUrl: string, chainId: string) {
-    this.apiUrl = apiUrl;
+    // Guard against accidental whitespace in configuration
+    this.apiUrl = (apiUrl || '').trim();
     this.chainId = chainId;
   }
 
@@ -209,9 +211,10 @@ export class EtherscanService {
     const senderId = toEthChecksumAddress(from) as any;
     const recipientId = toEthChecksumAddress(to) as any;
     const transactionOwnerChecksumAddress = toEthChecksumAddress(transactionOwner!) as any;
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const contractId: any = (
       toEthChecksumAddress(contractAddress || assetContractId)
-      || ETH_CONTRACT_ID
+      || adapter.coinContractId
     );
     const gasPriceInEther = Number(fromWei(gasPrice, 'ether'));
     const fee = gasUsed * gasPriceInEther;
