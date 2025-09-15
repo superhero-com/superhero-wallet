@@ -1,9 +1,6 @@
 <template>
   <IonApp
     class="app"
-    :class="{
-      'disable-transitions': IS_TRANSITIONS_DISABLED,
-    }"
   >
     <IonPage
       id="app-wrapper"
@@ -36,7 +33,7 @@
         -->
         <IonRouterOutlet
           v-show="showRouter"
-          :animated="!RUNNING_IN_TESTS && !IS_FIREFOX && !IS_TRANSITIONS_DISABLED"
+          :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
           :class="{ 'show-header': showHeader, ios: IS_IOS }"
           class="main"
         />
@@ -83,7 +80,6 @@ import { WalletRouteMeta } from '@/types';
 import {
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
-  IS_TRANSITIONS_DISABLED,
   IS_WEB,
   IS_IOS,
   IS_MOBILE_DEVICE,
@@ -307,7 +303,6 @@ export default defineComponent({
       IS_EXTENSION,
       IS_MOBILE_APP,
       IS_MOBILE_DEVICE,
-      IS_TRANSITIONS_DISABLED,
       RUNNING_IN_TESTS,
       isAuthenticated,
       isLoaderVisible,

@@ -31,7 +31,7 @@
         <template
           v-else-if="name"
         >
-          <ion-skeleton-text v-if="!IS_TRANSITIONS_DISABLED && isLoading" animated />
+          <ion-skeleton-text v-if="isLoading" animated />
           <Truncate v-if="!isLoading" class="account-name" :str="name" />
         </template>
         <template
@@ -84,7 +84,6 @@ import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { useAccounts } from '@/composables';
-import { IS_TRANSITIONS_DISABLED } from '@/constants';
 
 import Avatar, { type AvatarSize } from '@/popup/components/Avatar.vue';
 import CopyText from '@/popup/components/CopyText.vue';
@@ -155,7 +154,6 @@ export default defineComponent({
     );
 
     return {
-      IS_TRANSITIONS_DISABLED,
       name: resolvedChainName.value || name,
       type,
       address,
