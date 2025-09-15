@@ -205,7 +205,7 @@ if (IS_MOBILE_APP) {
 
 // Basic SEO: set title/canonical/OG/Twitter tags on navigation (web only)
 if (IS_WEB) {
-  const DEFAULT_DESCRIPTION = 'Superhero is a multi-blockchain wallet to manage crypto assets and navigate the web3 and DeFi space. Currently supporting Bitcoin, Ethereum, Solana, BNB and æternity blockchains.';
+  const DEFAULT_DESCRIPTION = 'Superhero is a multi-blockchain wallet to manage crypto assets and navigate the web3 and DeFi space. Currently supporting Bitcoin, Ethereum, Solana, Dogecoin, Polygon PoS, Avalanche, BNB and æternity blockchains.';
 
   const ensureTag = <K extends keyof HTMLElementTagNameMap>(
     tagName: K,
