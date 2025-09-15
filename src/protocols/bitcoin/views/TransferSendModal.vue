@@ -1,6 +1,6 @@
 <template>
   <TransferSendBase
-    :protocol="PROTOCOLS.bitcoin"
+    :protocol="protocol"
     :current-step="currentStep"
     :sending-disabled="error
       || !transferData.addresses?.length
@@ -14,8 +14,9 @@
         :is="currentStepConfig.component"
         ref="currentRenderedComponent"
         v-model:transfer-data="transferData"
+        :protocol="protocol"
         @success="currentStepConfig.onSuccess"
-        @error="(val: any) => error = val"
+        @error="onChildError"
       />
     </template>
   </TransferSendBase>
@@ -32,9 +33,9 @@ import type {
   TransferFormModel,
   TransferSendStep,
   TransferSendStepConfigRegistry,
+  Protocol,
 } from '@/types';
 import {
-  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -53,7 +54,10 @@ export default defineComponent({
   components: {
     TransferSendBase,
   },
-  props: transferSendModalRequiredProps,
+  props: {
+    ...transferSendModalRequiredProps,
+    protocol: { type: String as any as import('vue').PropType<Protocol>, required: true },
+  },
   setup(props) {
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
@@ -66,7 +70,7 @@ export default defineComponent({
       amount: props.amount,
       payload: props.payload,
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOLS.bitcoin)
+        .getAdapter(props.protocol)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
@@ -81,6 +85,10 @@ export default defineComponent({
     function editTransfer() {
       error.value = false;
       currentStep.value = TRANSFER_SEND_STEPS.form;
+    }
+
+    function onChildError(val: any) {
+      error.value = Boolean(val);
     }
 
     const steps: TransferSendStepConfigRegistry = {
@@ -98,11 +106,11 @@ export default defineComponent({
 
     return {
       TRANSFER_SEND_STEPS,
-      PROTOCOLS,
       currentRenderedComponent,
       steps,
       currentStep,
       error,
+      onChildError,
       transferData,
       currentStepConfig,
       proceedToNextStep,

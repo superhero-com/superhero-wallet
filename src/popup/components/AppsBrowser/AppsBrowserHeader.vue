@@ -106,7 +106,8 @@ export default defineComponent({
       isLoggedIn,
       activeAccount,
       aeAccountsSelectOptions,
-      setActiveAccountByAddress,
+      setActiveAccountByAddressAndProtocol,
+      getAccountByProtocolAndAddress,
     } = useAccounts();
 
     const currentHomeRouteName = computed(
@@ -123,7 +124,10 @@ export default defineComponent({
     const accountAddress = ref(unref(activeAccount.value.address));
 
     function onAccountChange(address: Encoded.AccountAddress) {
-      setActiveAccountByAddress(address);
+      const acc = getAccountByProtocolAndAddress(activeAccount.value.protocol, address);
+      if (acc) {
+        setActiveAccountByAddressAndProtocol(address, acc.protocol);
+      }
     }
 
     function back() {

@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js';
 import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { BTC_COIN_PRECISION, BTC_CONTRACT_ID } from '../config';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { BTC_COIN_PRECISION } from '../config';
 
 export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
@@ -19,6 +20,7 @@ export function getTxAmountTotal(transaction: ITransaction, isReceived: boolean)
 export function normalizeTransactionStructure(
   transaction: any,
   transactionOwner?: string,
+  protocol: ITransaction['protocol'] = PROTOCOLS.bitcoin,
 ): ITransaction {
   const {
     fee,
@@ -60,7 +62,7 @@ export function normalizeTransactionStructure(
     : vout[1].scriptpubkey_address;
 
   return {
-    protocol: PROTOCOLS.bitcoin,
+    protocol,
     transactionOwner: transactionOwner as any,
     hash: txid, // TODO: we can go with additional field
     blockHeight: status.block_height,
@@ -74,7 +76,7 @@ export function normalizeTransactionStructure(
       type: 'SpendTx', // TODO: create own types
       arguments: [],
       callerId: '' as any,
-      contractId: BTC_CONTRACT_ID as any,
+      contractId: ProtocolAdapterFactory.getAdapter(protocol).coinContractId,
     },
   };
 }

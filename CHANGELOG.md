@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.7.0...v2.8.0) (2025-09-15)
+
+
+### Features
+
+* add Polygon Pos support ([b0c2a61](https://github.com/Superhero-com/superhero-wallet/commit/b0c2a6153d11fb43736d5283ef963c63cef31800))
+* avalanche c-chain support ([4f5b085](https://github.com/Superhero-com/superhero-wallet/commit/4f5b085927ef03275f8efec626d95ee4651f354b))
+* avalanche sending ([08af834](https://github.com/Superhero-com/superhero-wallet/commit/08af8340cd1a9282d7c0053495d51b02b404df66))
+* avax fee calculation ([efd1580](https://github.com/Superhero-com/superhero-wallet/commit/efd1580e75816dfff406a57f3d3017b9798b4550))
+* dogecoin support ([5dd99bc](https://github.com/Superhero-com/superhero-wallet/commit/5dd99bc2687865a9823c2ea1c9d8b6ee54803730))
+* **dogecoing:** add transaction speed picker ([92f5c95](https://github.com/Superhero-com/superhero-wallet/commit/92f5c95df39128b9d4603be5e08796a7599df83a))
+* **dogecoin:** implement MAX button ([6d1fbc6](https://github.com/Superhero-com/superhero-wallet/commit/6d1fbc6f81cbeafd566306cb827176b26cf9c8f3))
+* implement spending functionality ([558b88f](https://github.com/Superhero-com/superhero-wallet/commit/558b88fd87829df9f75759ed48958599439b8243))
+* improve SEO ([92488ad](https://github.com/Superhero-com/superhero-wallet/commit/92488adec282a11aa9881aa4b2e27b6994af26e8))
+
+
+### Bug Fixes
+
+* do not search for account only by address ([b93d6de](https://github.com/Superhero-com/superhero-wallet/commit/b93d6de4a173ff52d24f5b91103ad97a3df68e1a))
+* **dogecoin:** be able to send to the multiple recipients ([21c8fe7](https://github.com/Superhero-com/superhero-wallet/commit/21c8fe7d01358631ecd2ea3a802d3150f4f8d165))
+* **dogecoin:** validate addresses for each network ([fbb1514](https://github.com/Superhero-com/superhero-wallet/commit/fbb1514baa2221418d41e451da7b82dd7dcb8e7c))
+* estimate fee correctly for Bitcoin and Dogecoin ([52e3920](https://github.com/Superhero-com/superhero-wallet/commit/52e3920c1c4d0799ec954bc531d58302a3bcb951))
+* **polygon-pos:** use alchemy for fetching token info ([79fa1ae](https://github.com/Superhero-com/superhero-wallet/commit/79fa1ae21b554fd1cb3b25ff578f03346a0c692e))
+* show correct icon for coin transactions ([19c2668](https://github.com/Superhero-com/superhero-wallet/commit/19c2668d1ca0a8eef4d8066744a8a5d398135cb4))
+* transaction overview protocol ([ef982dd](https://github.com/Superhero-com/superhero-wallet/commit/ef982ddc5beedf14a223b33ae5e893146ae9173c))
+
+
+### Performance
+
+* remove unnecessary sdk 13 dependency ([69ded40](https://github.com/Superhero-com/superhero-wallet/commit/69ded402397ecabd25cd9bbb43ca425f26c6b07b))
+
+
+### Tests
+
+* cover Dogecoin functionality ([4b29e51](https://github.com/Superhero-com/superhero-wallet/commit/4b29e51c0a9f693645fb7fe7b1e6e9249f3c9326))
+
+
+### Maintenance
+
+* be able to build project for newer node version ([e9d2a6a](https://github.com/Superhero-com/superhero-wallet/commit/e9d2a6ae75f426ece358601b2c0a338e1c0b58ca))
+* build with node 22 ([ebb1d08](https://github.com/Superhero-com/superhero-wallet/commit/ebb1d0816e0425e5d80d498fae6d6ee5f22ff141))
+* reuse existing Bitcoin views for Dogecoin ([cb79e6c](https://github.com/Superhero-com/superhero-wallet/commit/cb79e6c84965c3d7f9b97c3c6af5a0bee27e4840))
+* update aeternity sdk to v14.1.0 ([d344e7c](https://github.com/Superhero-com/superhero-wallet/commit/d344e7cf9a36f32548e2cbf8e05675821bb1b98b))
+* update app description ([e29c278](https://github.com/Superhero-com/superhero-wallet/commit/e29c2784a25c1009c841ddd263d55a1ffb469bcc))
+
 ## [2.7.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.6.6...v2.7.0) (2025-09-03)
 
 

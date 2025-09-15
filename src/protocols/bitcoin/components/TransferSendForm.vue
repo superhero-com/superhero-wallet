@@ -3,20 +3,20 @@
     v-bind="$attrs"
     :transfer-data="transferData"
     :fee="numericFee"
-    :fee-symbol="BTC_SYMBOL"
-    :protocol="PROTOCOLS.bitcoin"
-    :custom-title="$t('modals.send.sendAsset', { name: BTC_PROTOCOL_NAME })"
+    :fee-symbol="coinSymbol"
+    :protocol="protocol"
+    :custom-title="$t('modals.send.sendAsset', { name: protocolName })"
     class="transfer-send-form"
   >
     <template #recipient>
       <TransferSendRecipient
         v-model="formModel.addresses"
         :max-recipients="10"
-        :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.bitcoin })"
+        :placeholder="recipientPlaceholderText"
         :errors="errors"
-        :protocol="PROTOCOLS.bitcoin"
+        :protocol="protocol"
         :validation-rules="{
-          account_address: [PROTOCOLS.bitcoin, activeNetwork.type],
+          account_address: [protocol, activeNetwork.type],
         }"
         @openQrModal="scanTransferQrCode()"
       />
@@ -28,12 +28,12 @@
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         readonly
-        :protocol="PROTOCOLS.bitcoin"
+        :protocol="protocol"
         :validation-rules="{
           ...+balance.minus(fee) > 0
             ? { max_value: max.toString() }
             : {},
-          enough_coin: [fee.toString(), BTC_SYMBOL],
+          enough_coin: [fee.toString(), coinSymbol],
           ...activeNetwork.type === NETWORK_TYPE_TESTNET
             ? {}
             : { min_value_exclusive: toBitcoin(DUST_AMOUNT) },
@@ -95,11 +95,7 @@ import {
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Logger from '@/lib/logger';
-import {
-  BTC_PROTOCOL_NAME,
-  BTC_SYMBOL,
-  DUST_AMOUNT,
-} from '@/protocols/bitcoin/config';
+import { DUST_AMOUNT } from '@/protocols/bitcoin/config';
 
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -124,6 +120,7 @@ export default defineComponent({
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
+    protocol: { type: String as PropType<keyof typeof PROTOCOLS>, default: PROTOCOLS.bitcoin },
   },
   emits: [
     'update:transferData',
@@ -131,7 +128,7 @@ export default defineComponent({
     'error',
   ],
   setup(props, { emit }) {
-    const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
+    const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(props.protocol);
 
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
@@ -214,11 +211,23 @@ export default defineComponent({
             ...activeAccount.value,
           },
         )).virtualSize();
-        const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+        const { nodeUrl } = (activeNetwork.value.protocols as any)[props.protocol];
 
-        const feeRate = (await fetchJson(`${nodeUrl}/fee-estimates`))['5'];
+        let feeRate: number | undefined;
+        try {
+          const estimates = await fetchJson(`${nodeUrl}/fee-estimates`);
+          // Prefer ~5-block target; fallback to 3/6/2 if missing
+          feeRate = estimates?.['5'] || estimates?.['6'] || estimates?.['7'] || estimates?.['8'];
+        } catch (_e) { /* ignore; fallback below */ }
+
+        // Sane defaults if API fails: medium ~15 sat/vB
+        const DEFAULT_RATE_SAT_PER_VB = 15;
+        const baseRate = (
+          Number.isFinite(feeRate) && feeRate! > 0
+        ) ? feeRate! : DEFAULT_RATE_SAT_PER_VB;
+
         const feeStepFactor = new BigNumber(0.5);
-        const newFeeMedium = new BigNumber(Math.ceil(feeRate * byteSize));
+        const newFeeMedium = new BigNumber(Math.ceil(baseRate * byteSize));
 
         feeSlow.value = new BigNumber(
           toBitcoin(Math.ceil(newFeeMedium.minus(newFeeMedium.times(feeStepFactor)).toNumber())),
@@ -279,8 +288,8 @@ export default defineComponent({
 
     return {
       INFO_BOX_TYPES,
-      BTC_PROTOCOL_NAME,
-      BTC_SYMBOL,
+      protocolName: ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
+      coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
       DUST_AMOUNT,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,

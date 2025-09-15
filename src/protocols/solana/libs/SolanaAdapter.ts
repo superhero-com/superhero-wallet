@@ -433,8 +433,8 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     contractId: AssetContractId,
     options: { fromAccount: AccountAddress },
   ): Promise<ITransferResponse> {
-    const { getAccountByAddress } = useAccounts();
-    const sender = getAccountByAddress(options.fromAccount);
+    const { getAccountByProtocolAndAddress } = useAccounts();
+    const sender = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
     if (!sender || sender.protocol !== PROTOCOLS.solana) {
       throw new Error('Solana token transfer initiated from invalid account.');
     }
@@ -759,8 +759,8 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: { fromAccount: AccountAddress },
   ): Promise<any> {
-    const { getAccountByAddress } = useAccounts();
-    const account = getAccountByAddress(options.fromAccount);
+    const { getAccountByProtocolAndAddress } = useAccounts();
+    const account = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
     if (!account || account.protocol !== PROTOCOLS.solana) {
       throw new Error('Solana tx signing initiated from invalid account.');
     }
@@ -789,8 +789,8 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     recipients: string[],
     options: { fromAccount: AccountAddress },
   ): Promise<Transaction> {
-    const { getAccountByAddress } = useAccounts();
-    const account = getAccountByAddress(options.fromAccount);
+    const { getAccountByProtocolAndAddress } = useAccounts();
+    const account = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
     if (!account || account.protocol !== PROTOCOLS.solana) {
       throw new Error('Solana tx signing initiated from invalid account.');
     }
@@ -940,8 +940,8 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     contractId: AssetContractId,
     options: { fromAccount: AccountAddress },
   ): Promise<Array<{ hash: string; recipients: AccountAddress[] }>> {
-    const { getAccountByAddress } = useAccounts();
-    const sender = getAccountByAddress(options.fromAccount);
+    const { getAccountByProtocolAndAddress } = useAccounts();
+    const sender = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
     if (!sender || sender.protocol !== PROTOCOLS.solana) {
       throw new Error('Solana token transfer initiated from invalid account.');
     }

@@ -116,7 +116,7 @@ export default defineComponent({
   },
   setup(props) {
     const { getName, getNameByNameHash } = useAeNames();
-    const { getAccountIcon, getAccountByAddress } = useAccounts();
+    const { getAccountIcon, getAccountByProtocolAndAddress } = useAccounts();
 
     const isLoading = ref(true);
     const resolvedChainName = ref('');
@@ -126,7 +126,11 @@ export default defineComponent({
       || props.customName
       || getName(address.value).value
     ));
-    const type = computed(() => getAccountByAddress(props.account.address!)?.type);
+    const type = computed(
+      () => (props.account.protocol)
+        ? getAccountByProtocolAndAddress(props.account.protocol, props.account.address!)?.type
+        : undefined,
+    );
 
     const explorerUrl = computed(
       () => (props.account.protocol)
