@@ -6,6 +6,8 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const commitHashRaw = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { version: sdkVersion } = require('./node_modules/@aeternity/aepp-sdk/package.json');
 
 // eslint-disable-next-line camelcase
@@ -302,6 +304,20 @@ module.exports = {
       .use('svgo-loader')
       .loader('svgo-loader')
       .end();
+
+    // Emit JSON stats for review builds
+    if (REVIEW_BUILD) {
+      try {
+        config
+          .plugin('bundle-analyzer')
+          .use(BundleAnalyzerPlugin, [{
+            analyzerMode: 'disabled',
+            generateStatsFile: true,
+            statsFilename: path.resolve(__dirname, './artifacts/review/webpack.stats.json'),
+            statsOptions: { source: false, modules: true, chunks: true },
+          }]);
+      } catch (e) { /* ignore */ }
+    }
 
     return config;
   },
