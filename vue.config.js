@@ -216,6 +216,26 @@ module.exports = {
           ],
         }])
         .end();
+
+      // Force un-hashed filenames for extension builds (JS/CSS/assets)
+      try {
+        config.output
+          .filename('js/[name].js')
+          .chunkFilename('js/[name].js')
+          .set('assetModuleFilename', 'img/[name][ext]');
+      } catch (e) { /* NOOP */ }
+
+      try {
+        // Ensure CSS files are also un-hashed
+        config.plugin('extract-css').tap((args = [{}]) => {
+          const opts = args[0] || {};
+          return [{
+            ...opts,
+            filename: 'css/[name].css',
+            chunkFilename: 'css/[name].css',
+          }];
+        });
+      } catch (e) { /* plugin may not exist in some environments; ignore. */ }
     }
 
     if (PLATFORM === 'web') {
@@ -271,7 +291,7 @@ module.exports = {
       .options({
         noquotes: true,
         limit: 4096,
-        name: 'img/[name].[hash:8].[ext]',
+        name: PLATFORM === 'extension' ? 'img/[name].[ext]' : 'img/[name].[hash:8].[ext]',
         esModule: false,
       })
       .end()
