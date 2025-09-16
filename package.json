@@ -17,6 +17,7 @@
     "build:extension": "npm run build:extension:chrome && npm run build:extension:ff",
     "build:extension:ff": "cross-env PLATFORM=extension IS_FIREFOX_EXT=true vue-cli-service build",
     "build:extension:chrome": "cross-env PLATFORM=extension vue-cli-service build",
+    "build:review:ff": "cross-env PLATFORM=extension IS_FIREFOX_EXT=true REVIEW_BUILD=true node scripts/build-review.js",
     "build:web": "cross-env PLATFORM=web ionic build",
     "build-zip": "node scripts/build-zip.js",
     "serve": "cross-env PLATFORM=web ionic serve --port=8080",
