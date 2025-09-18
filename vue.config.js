@@ -3,9 +3,11 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
-const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
+const commitHashRaw = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { version: sdkVersion } = require('./node_modules/@aeternity/aepp-sdk/package.json');
 
 // eslint-disable-next-line camelcase
@@ -25,6 +27,7 @@ const removeArrEntries = (arr, values) => values.forEach(
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
 const IS_FIREFOX_EXT = parseBool(process.env.IS_FIREFOX_EXT);
+const REVIEW_BUILD = parseBool(process.env.REVIEW_BUILD);
 
 module.exports = {
   configureWebpack: {
@@ -167,15 +170,18 @@ module.exports = {
       definitions['process.env.PLATFORM'] = JSON.stringify(PLATFORM);
       definitions['process.env.IS_EXTENSION'] = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
       definitions['process.env.RUNNING_IN_TESTS'] = RUNNING_IN_TESTS;
-      definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
-      definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
+      // Stabilize env-driven values for review builds to be identical with/without .env
+      const stable = (val) => (REVIEW_BUILD ? '' : val);
+      const commitForBuild = REVIEW_BUILD ? 'review' : commitHashRaw;
+      definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitForBuild);
+      definitions['process.env.NETWORK'] = JSON.stringify(stable(process.env.NETWORK));
       definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
-      definitions['process.env.ALCHEMY_API_KEY'] = JSON.stringify(process.env.ALCHEMY_API_KEY);
-      definitions['process.env.ETHERSCAN_API_KEY'] = JSON.stringify(process.env.ETHERSCAN_API_KEY);
-      definitions['process.env.ETHPLORER_API_KEY'] = JSON.stringify(process.env.ETHPLORER_API_KEY);
-      definitions['process.env.WALLET_CONNECT_PROJECT_ID'] = JSON.stringify(process.env.WALLET_CONNECT_PROJECT_ID);
-      definitions['process.env.TOKEN_SALES_URL_TESTNET'] = JSON.stringify(process.env.TOKEN_SALES_URL_TESTNET);
-      definitions['process.env.TOKEN_SALES_URL_MAINNET'] = JSON.stringify(process.env.TOKEN_SALES_URL_MAINNET);
+      definitions['process.env.ALCHEMY_API_KEY'] = JSON.stringify(stable(process.env.ALCHEMY_API_KEY));
+      definitions['process.env.ETHERSCAN_API_KEY'] = JSON.stringify(stable(process.env.ETHERSCAN_API_KEY));
+      definitions['process.env.ETHPLORER_API_KEY'] = JSON.stringify(stable(process.env.ETHPLORER_API_KEY));
+      definitions['process.env.WALLET_CONNECT_PROJECT_ID'] = JSON.stringify(stable(process.env.WALLET_CONNECT_PROJECT_ID));
+      definitions['process.env.TOKEN_SALES_URL_TESTNET'] = JSON.stringify(stable(process.env.TOKEN_SALES_URL_TESTNET));
+      definitions['process.env.TOKEN_SALES_URL_MAINNET'] = JSON.stringify(stable(process.env.TOKEN_SALES_URL_MAINNET));
 
       return [definitions];
     }).end();
@@ -216,6 +222,26 @@ module.exports = {
           ],
         }])
         .end();
+
+      // Force un-hashed filenames for extension builds (JS/CSS/assets)
+      try {
+        config.output
+          .filename('js/[name].js')
+          .chunkFilename('js/[name].js')
+          .set('assetModuleFilename', 'img/[name][ext]');
+      } catch (e) { /* NOOP */ }
+
+      try {
+        // Ensure CSS files are also un-hashed
+        config.plugin('extract-css').tap((args = [{}]) => {
+          const opts = args[0] || {};
+          return [{
+            ...opts,
+            filename: 'css/[name].css',
+            chunkFilename: 'css/[name].css',
+          }];
+        });
+      } catch (e) { /* plugin may not exist in some environments; ignore. */ }
     }
 
     if (PLATFORM === 'web') {
@@ -271,13 +297,27 @@ module.exports = {
       .options({
         noquotes: true,
         limit: 4096,
-        name: 'img/[name].[hash:8].[ext]',
+        name: PLATFORM === 'extension' ? 'img/[name].[ext]' : 'img/[name].[hash:8].[ext]',
         esModule: false,
       })
       .end()
       .use('svgo-loader')
       .loader('svgo-loader')
       .end();
+
+    // Emit JSON stats for review builds
+    if (REVIEW_BUILD) {
+      try {
+        config
+          .plugin('bundle-analyzer')
+          .use(BundleAnalyzerPlugin, [{
+            analyzerMode: 'disabled',
+            generateStatsFile: true,
+            statsFilename: path.resolve(__dirname, './artifacts/review/webpack.stats.json'),
+            statsOptions: { source: false, modules: true, chunks: true },
+          }]);
+      } catch (e) { /* ignore */ }
+    }
 
     return config;
   },
