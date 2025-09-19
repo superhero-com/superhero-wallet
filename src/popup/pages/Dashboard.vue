@@ -33,8 +33,31 @@
           <OpenTransferReceiveModalBtn is-big />
           <OpenTransferSendModalBtn is-big />
         </template>
-
+        <template #widgets>
+          <div class="buttons-row">
+            <!-- <BtnPill @click="onDeployContract">
+              Deploy Contract
+            </BtnPill> -->
+          </div>
+        </template>
         <template #cards>
+          <DashboardCard
+            v-if="!hasSuperheroId"
+            :title="$t('dashboard.superheroId.title')"
+            :description="$t('dashboard.superheroId.createDescription')"
+            :btn-text="$t('dashboard.superheroId.createBtn')"
+            @click="onCreateSuperheroId"
+          />
+
+          <DashboardCard
+            v-if="hasSuperheroId"
+            :title="$t('dashboard.superheroId.title')"
+            :description="$t('dashboard.superheroId.connectDescription')"
+            :btn-text="isRestoring ? ($t('common.pending') as string) : ($t('dashboard.superheroId.connectBtn') as string)"
+            :disabled="isRestoring"
+            @click="onConnectSuperheroId"
+          />
+
           <LatestTransactionsCard />
 
           <DashboardCard
@@ -91,6 +114,7 @@ import {
   onIonViewWillEnter,
   onIonViewDidLeave,
 } from '@ionic/vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import {
@@ -111,6 +135,9 @@ import {
   useDeepLinkApi,
   useFungibleTokens,
   useMultisigAccounts,
+  useSuperheroId,
+  useAddressBook,
+  useModals,
 } from '@/composables';
 import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
@@ -131,6 +158,8 @@ import buyBackground from '@/image/dashboard/buy-ae.webp';
 import chainNameBackground from '@/image/dashboard/chain-name.webp';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
 import OpenTransferReceiveModalBtn from '@/popup/components/OpenTransferReceiveModalBtn.vue';
+import { handleUnknownError } from '@/utils';
+// import BtnPill from '../components/buttons/BtnPill.vue';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -144,11 +173,14 @@ export default defineComponent({
     LatestTransactionsCard,
     OpenTransferReceiveModalBtn,
     OpenTransferSendModalBtn,
+    // BtnPill,
   },
   setup() {
     const pageIsActive = ref(true);
+    const { t } = useI18n();
 
     const route = useRoute();
+    const isRestoring = ref(false);
 
     const {
       accounts,
@@ -160,6 +192,15 @@ export default defineComponent({
       setActiveAccountByAddressAndProtocol,
     } = useAccounts();
     const { multisigAccounts } = useMultisigAccounts();
+    const { addressBook } = useAddressBook();
+    const {
+      deployContract,
+      hasSuperheroId,
+      syncAddressBook,
+      loadAddressBook,
+      loadSettings,
+    } = useSuperheroId();
+    const { openDefaultModal } = useModals();
 
     const { accountsTotalBalance } = useBalances();
     const { accountsTotalTokenBalance } = useFungibleTokens();
@@ -189,6 +230,37 @@ export default defineComponent({
     onIonViewDidLeave(() => {
       pageIsActive.value = false;
     });
+
+    async function onDeployContract() {
+      try {
+        const ct = await deployContract();
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.deployedMsg', { ct }) });
+      } catch (e) {
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.deployFailed') });
+        handleUnknownError(e);
+      }
+    }
+
+    async function onConnectSuperheroId() {
+      isRestoring.value = true;
+      try {
+        await loadAddressBook();
+        await loadSettings();
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.restoreMsg') });
+      } catch (e) {
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.connectFailed') });
+        handleUnknownError(e);
+      } finally { isRestoring.value = false; }
+    }
+
+    async function onCreateSuperheroId() {
+      try {
+        await syncAddressBook(JSON.stringify(addressBook.value));
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.createdMsg') });
+      } catch (e) {
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('dashboard.superheroId.createFailed') });
+      }
+    }
 
     return {
       DASHBOARD_CARD_ID,
@@ -222,6 +294,11 @@ export default defineComponent({
       totalBalance,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddressAndProtocol,
+      hasSuperheroId,
+      isRestoring,
+      onDeployContract,
+      onConnectSuperheroId,
+      onCreateSuperheroId,
     };
   },
 });

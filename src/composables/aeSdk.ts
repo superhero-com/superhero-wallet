@@ -11,6 +11,7 @@ import {
   METHODS,
   RPC_STATUS,
   Encoded,
+  CompilerHttp,
 } from '@aeternity/aepp-sdk';
 
 import type {
@@ -144,6 +145,7 @@ export function useAeSdk() {
         }],
         id: APP_NAME,
         type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
+        onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
         onConnection(aeppId, params, origin) {
           aeppInfo[aeppId] = { ...params, origin };
         },
