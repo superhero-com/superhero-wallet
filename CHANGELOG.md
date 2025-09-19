@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.8.0...v2.8.1) (2025-09-19)
+
+
+### Maintenance
+
+* do not add hashes into files names ([acacdda](https://github.com/Superhero-com/superhero-wallet/commit/acacdda3c58e40d4e9dd578fdeab104d610cf819))
+* include bundle analize in the release artifacts ([6849a54](https://github.com/Superhero-com/superhero-wallet/commit/6849a54207b304a548da37f03a4a18f71a4fb385))
+* support a reviewer-friendly, deterministic build with provenance ([c61fee4](https://github.com/Superhero-com/superhero-wallet/commit/c61fee469f645cae820514559a18d8030f285cea))
+
 ## [2.8.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.7.0...v2.8.0) (2025-09-15)
 
 
