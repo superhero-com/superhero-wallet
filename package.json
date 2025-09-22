@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "build:extension": "npm run build:extension:chrome && npm run build:extension:ff",
     "build:extension:ff": "cross-env PLATFORM=extension IS_FIREFOX_EXT=true vue-cli-service build",
     "build:extension:chrome": "cross-env PLATFORM=extension vue-cli-service build",
+    "build:review:ff": "cross-env PLATFORM=extension IS_FIREFOX_EXT=true REVIEW_BUILD=true node scripts/build-review.js",
     "build:web": "cross-env PLATFORM=web ionic build",
     "build-zip": "node scripts/build-zip.js",
     "serve": "cross-env PLATFORM=web ionic serve --port=8080",
@@ -159,7 +160,8 @@
     "ts-jest": "^27.1.5",
     "typescript": "^4.9.5",
     "vue-cli-plugin-browser-extension": "npm:@rhilip/vue-cli-plugin-browser-extension@^0.27.0",
-    "xml-js": "^1.6.11"
+    "xml-js": "^1.6.11",
+    "webpack-bundle-analyzer": "^4.10.1"
   },
   "overrides": {
     "proxy-agent": "^6.0.0",
