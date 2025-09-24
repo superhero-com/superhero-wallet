@@ -63,52 +63,62 @@
     </template>
 
     <template v-if="!isSelector">
-      <div class="divider" />
-
-      <!-- Protocol Filters -->
-      <HorizontalScroll class="protocol-filters">
-        <BtnFilter
-          v-for="protocol in PROTOCOL_LIST"
-          :key="protocol"
-          :data-cy="`${protocol}-filter`"
-          class="filter-btn"
-          :class="{ active: protocol === protocolFilter }"
-          @click="setProtocolFilter(protocol)"
-        >
-          <IconWrapper
-            :protocol-icon="protocol"
-            icon-size="rg"
-          />
-        </BtnFilter>
-      </HorizontalScroll>
+      <!-- Single protocol filter opening modal -->
+      <BtnFilter
+        class="filter-btn protocol-filter-single"
+        :class="{ active: !!protocolFilter }"
+        data-cy="protocol-filter"
+        @click="openProtocolSelector"
+      >
+        <template v-if="protocolFilter">
+          <span class="left">
+            <IconWrapper
+              :protocol-icon="protocolFilter"
+              icon-size="rg"
+            />
+            {{ getProtocolName(protocolFilter) }}
+          </span>
+          <ChevronDownIcon class="chevron" />
+        </template>
+        <template v-else>
+          <span class="left">{{ protocolFilterDefaultText }}</span>
+          <ChevronDownIcon class="chevron" />
+        </template>
+      </BtnFilter>
     </template>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import { ACCOUNT_SELECT_TYPE_FILTER, PROTOCOL_LIST } from '@/constants';
-import { useAccountSelector } from '@/composables';
+import { ACCOUNT_SELECT_TYPE_FILTER, MODAL_PROTOCOL_SELECT } from '@/constants';
+import { useAccountSelector, useModals } from '@/composables';
+import type { Protocol } from '@/types';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import BtnFilter from '@/popup/components/buttons/BtnFilter.vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
+import ChevronDownIcon from '@/icons/chevron-down.svg?vue-component';
 
 import FavoritesIcon from '@/icons/star-full.svg?vue-component';
 import HistoryIcon from '@/icons/history.svg?vue-component';
-import HorizontalScroll from '../HorizontalScroll.vue';
+// HorizontalScroll is no longer needed for single filter button
 
 export default defineComponent({
   components: {
     BtnFilter,
     IconWrapper,
-    HorizontalScroll,
+    ChevronDownIcon,
   },
   props: {
     isSelector: Boolean,
     hasBookmarkedEntries: Boolean,
   },
   setup() {
+    const { t } = useI18n();
+    const { openModal } = useModals();
     const {
       accountSelectType,
       protocolFilter,
@@ -116,6 +126,21 @@ export default defineComponent({
       setProtocolFilter,
       clearFilters,
     } = useAccountSelector();
+
+    async function openProtocolSelector() {
+      const selected = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
+        title: t('modals.createAccount.title'),
+        subtitle: t('modals.createAccount.generateOrImport'),
+        resolve: (protocol: Protocol) => protocol,
+      });
+      if (selected) setProtocolFilter(selected);
+    }
+
+    function getProtocolName(protocol: Protocol) {
+      return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
+    }
+
+    const protocolFilterDefaultText = t('pages.addressBook.filterByBlockchain', 'Filter by blockchain');
 
     return {
       accountSelectType,
@@ -125,9 +150,12 @@ export default defineComponent({
       setProtocolFilter,
       clearFilters,
 
+      openProtocolSelector,
+      getProtocolName,
+      protocolFilterDefaultText,
+
       FavoritesIcon,
       HistoryIcon,
-      PROTOCOL_LIST,
       ACCOUNT_SELECT_TYPE_FILTER,
     };
   },
@@ -143,14 +171,35 @@ export default defineComponent({
   width: 100%;
   gap: 8px;
 
-  .divider {
-    border-left: 1px solid rgba($color-white, 0.15);
-  }
-
   .protocol-filters {
     display: flex;
     gap: 8px;
     overflow-y: scroll;
+  }
+
+  .protocol-filter-single {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    justify-content: space-between;
+    max-width: none;
+
+    .left {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chevron {
+      flex-shrink: 0;
+      width: 8px !important;
+      height: 5px !important;
+      opacity: 0.75;
+    }
   }
 }
 </style>
