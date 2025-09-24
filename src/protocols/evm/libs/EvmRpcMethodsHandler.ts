@@ -355,6 +355,7 @@ export async function handleEvmRpcMethod(
 
   if (
     method !== ETH_RPC_WALLET_EVENTS.chainChanged
+    && method !== ETH_RPC_WALLET_EVENTS.accountsChanged
     && Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
   ) {
     const apiUrl = predefined.middlewareUrl;
