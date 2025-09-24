@@ -24,7 +24,7 @@
             class="account-select-input"
             unstyled
             account-select
-            @update:model-value="(address: string) => $emit('select-account', address)"
+            @update:model-value="(address) => $emit('select-account', address)"
           >
             <template #current-text>
               <div class="account-number">

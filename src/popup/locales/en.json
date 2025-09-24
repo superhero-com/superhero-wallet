@@ -736,7 +736,9 @@
       "filters":  {
         "addressBook": "Address Book",
         "own": "Own",
-        "recent": "Recent"
+        "recent": "Recent",
+        "filterByBlockchain": "Filter by blockchain",
+        "filterByBlockchainSubtitle": "Show addresses only for the selected blockchain protocol"
       }
     },
     "secureLogin": {

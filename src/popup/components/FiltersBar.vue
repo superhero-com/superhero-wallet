@@ -1,30 +1,57 @@
 <template>
-  <div class="address-book-filters">
-    <!-- All/Bookmarked Filters -->
-    <BtnFilter
-      v-if="!isSelector"
-      :is-active="(
-        accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.addressBook
-        && (!protocolFilter || isSelector)
-      )"
-      :text="$t('common.all')"
-      data-cy="all-filter"
-      @click="clearFilters(!isSelector)"
-    />
+  <div class="filters-bar">
+    <!-- Address Book layout: left: All + star; right: protocol selector -->
+    <template v-if="!isSelector">
+      <div class="left-stack">
+        <BtnFilter
+          :is-active="(
+            accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.addressBook
+            && (!protocolFilter || isSelector)
+          )"
+          :text="$t('common.all')"
+          data-cy="all-filter"
+          @click="onClickAll"
+        />
 
-    <BtnFilter
-      v-if="hasBookmarkedEntries || !isSelector"
-      :is-active="accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.bookmarked"
-      data-cy="bookmarked-filter"
-      @click="() => setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.bookmarked, !isSelector)"
-    >
-      <IconWrapper
-        :icon="FavoritesIcon"
-        icon-size="rg"
-      />
-    </BtnFilter>
+        <BtnFilter
+          v-if="showBookmark && (hasBookmarkedEntries || !isSelector)"
+          :is-active="accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.bookmarked"
+          data-cy="bookmarked-filter"
+          @click="() => setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.bookmarked, !isSelector)"
+        >
+          <IconWrapper
+            :icon="FavoritesIcon"
+            icon-size="rg"
+          />
+        </BtnFilter>
+      </div>
 
-    <template v-if="isSelector">
+      <!-- Single protocol filter opening modal -->
+      <BtnFilter
+        class="filter-btn protocol-filter-single"
+        :class="{ active: !!protocolFilter }"
+        data-cy="protocol-filter"
+        @click="openProtocolSelector"
+      >
+        <template v-if="protocolFilter">
+          <span class="left">
+            <IconWrapper
+              :protocol-icon="protocolFilter"
+              icon-size="rg"
+            />
+            {{ getProtocolName(protocolFilter) }}
+          </span>
+          <ChevronDownIcon class="chevron" />
+        </template>
+        <template v-else>
+          <span class="left">{{ protocolFilterDefaultText }}</span>
+          <ChevronDownIcon class="chevron" />
+        </template>
+      </BtnFilter>
+    </template>
+
+    <!-- Selector layout: three horizontal filters -->
+    <template v-else>
       <BtnFilter
         :is-active="(
           accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.owned
@@ -61,31 +88,6 @@
         {{ $t('pages.addressBook.filters.recent') }}
       </BtnFilter>
     </template>
-
-    <template v-if="!isSelector">
-      <!-- Single protocol filter opening modal -->
-      <BtnFilter
-        class="filter-btn protocol-filter-single"
-        :class="{ active: !!protocolFilter }"
-        data-cy="protocol-filter"
-        @click="openProtocolSelector"
-      >
-        <template v-if="protocolFilter">
-          <span class="left">
-            <IconWrapper
-              :protocol-icon="protocolFilter"
-              icon-size="rg"
-            />
-            {{ getProtocolName(protocolFilter) }}
-          </span>
-          <ChevronDownIcon class="chevron" />
-        </template>
-        <template v-else>
-          <span class="left">{{ protocolFilterDefaultText }}</span>
-          <ChevronDownIcon class="chevron" />
-        </template>
-      </BtnFilter>
-    </template>
   </div>
 </template>
 
@@ -104,7 +106,6 @@ import ChevronDownIcon from '@/icons/chevron-down.svg?vue-component';
 
 import FavoritesIcon from '@/icons/star-full.svg?vue-component';
 import HistoryIcon from '@/icons/history.svg?vue-component';
-// HorizontalScroll is no longer needed for single filter button
 
 export default defineComponent({
   components: {
@@ -115,8 +116,10 @@ export default defineComponent({
   props: {
     isSelector: Boolean,
     hasBookmarkedEntries: Boolean,
+    showBookmark: Boolean,
   },
-  setup() {
+  emits: ['filters-cleared'],
+  setup(props, { emit }) {
     const { t } = useI18n();
     const { openModal } = useModals();
     const {
@@ -129,8 +132,8 @@ export default defineComponent({
 
     async function openProtocolSelector() {
       const selected = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
-        title: t('modals.createAccount.title'),
-        subtitle: t('modals.createAccount.generateOrImport'),
+        title: t('pages.addressBook.filters.filterByBlockchain'),
+        subtitle: t('pages.addressBook.filters.filterByBlockchainSubtitle'),
         resolve: (protocol: Protocol) => protocol,
       });
       if (selected) setProtocolFilter(selected);
@@ -141,6 +144,12 @@ export default defineComponent({
     }
 
     const protocolFilterDefaultText = t('pages.addressBook.filterByBlockchain', 'Filter by blockchain');
+
+    function onClickAll() {
+      clearFilters(!props.isSelector);
+      // eslint-disable-next-line vue/custom-event-name-casing
+      (emit as any)('filters-cleared');
+    }
 
     return {
       accountSelectType,
@@ -153,6 +162,7 @@ export default defineComponent({
       openProtocolSelector,
       getProtocolName,
       protocolFilterDefaultText,
+      onClickAll,
 
       FavoritesIcon,
       HistoryIcon,
@@ -166,10 +176,19 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
 
-.address-book-filters {
+.filters-bar {
   display: flex;
   width: 100%;
   gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+
+  .left-stack {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    flex-shrink: 0;
+  }
 
   .protocol-filters {
     display: flex;

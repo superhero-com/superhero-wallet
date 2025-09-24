@@ -10,10 +10,11 @@
         />
       </Transition>
 
-      <AddressBookFilters
+      <FiltersBar
         v-if="!isSelector || !searchQuery"
         :is-selector="isSelector"
         :has-bookmarked-entries="hasBookmarkedEntries"
+        show-bookmark
       />
     </IonHeader>
 
@@ -49,7 +50,7 @@
           :style="bgColorStyle(isOwnAddress, address)"
           :idx="index"
           data-cy="address-book-item"
-          @click="selectAddress(nameAddress!, address)"
+          @click="selectAddress(nameAddress, address)"
         >
           <AccountInfo
             :account="{ address, protocol }"
@@ -95,7 +96,7 @@ import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { tg } from '@/popup/plugins/i18n';
 import InputSearch from '@/popup/components/InputSearch.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
-import AddressBookFilters from '@/popup/components/AddressBook/AddressBookFilters.vue';
+import FiltersBar from '@/popup/components/FiltersBar.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
 
 export default defineComponent({
@@ -103,7 +104,7 @@ export default defineComponent({
     IonHeader,
     IonContent,
     AccountInfo,
-    AddressBookFilters,
+    FiltersBar,
     InputSearch,
     PanelItem,
   },
