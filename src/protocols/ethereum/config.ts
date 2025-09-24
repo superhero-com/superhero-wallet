@@ -128,4 +128,5 @@ export const ETH_RPC_METHODS = {
 
 export const ETH_RPC_WALLET_EVENTS = {
   chainChanged: 'chainChanged',
+  accountsChanged: 'accountsChanged',
 } as const;

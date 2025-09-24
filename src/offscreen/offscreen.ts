@@ -56,6 +56,45 @@ watch(activeNetworkName, async (newNetworkName, oldNetworkName) => {
   }
 });
 
+// Propagate EIP-1193 accountsChanged when the active EVM account changes
+watch(activeAccount, async (newVal, oldVal) => {
+  try {
+    // Only handle EVM protocols
+    if (!newVal || !EVM_PROTOCOLS.includes(newVal.protocol)) return;
+    const oldAddress = (oldVal && EVM_PROTOCOLS.includes(oldVal.protocol))
+      ? oldVal.address
+      : undefined;
+    if (oldAddress === newVal.address) return;
+
+    const accounts = newVal.address ? [newVal.address] : [];
+
+    if (IS_FIREFOX) {
+      const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+      if (tab?.id) {
+        browser.tabs.sendMessage(tab.id, {
+          superheroWalletApproved: true,
+          method: ETH_RPC_WALLET_EVENTS.accountsChanged,
+          result: accounts,
+          type: 'result',
+        });
+      }
+    } else {
+      browser.runtime.sendMessage<IBackgroundMessageData>({
+        target: 'background',
+        method: ETH_RPC_WALLET_EVENTS.accountsChanged,
+        params: {
+          rpcMethodParams: {
+            result: accounts,
+          },
+        },
+      });
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('Failed to emit accountsChanged', e);
+  }
+});
+
 // If browser is FF, load the redirectRule script because background is not loaded from the manifest
 // in FF we have to use the offscreen.html as background page
 if (IS_FIREFOX) {
