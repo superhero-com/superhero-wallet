@@ -44,6 +44,7 @@
     "priceNotAvailable": "price: n/a",
     "receive": "Receive",
     "search": "Search",
+    "searchForBlockchain": "Search for blockchain",
     "seconds": "{n} seconds | {n} second | {n} seconds",
     "secondsShort": "{n} s",
     "sell": "Sell",
