@@ -162,6 +162,22 @@
     "latestTransactionCard": {
       "title": "Latest transactions"
     },
+    "superheroId": {
+      "title": "Superhero ID",
+      "createDescription": "Create your Superhero ID to store your settings to the blockchain",
+      "connectDescription": "Connect to restore your settings from the blockchain",
+      "createBtn": "Create",
+      "connectBtn": "Connect",
+      "createdMsg": "Created Superhero ID.",
+      "createFailed": "Create failed",
+      "connectFailed": "Connection to Superhero ID contract failed",
+      "restoreMsg": "Your address book and preferences have been restored",
+      "deployFailed": "Deploy failed",
+      "deployedMsg": "Deployed: {ct}",
+      "syncSettingsBtn": "Sync Settings",
+      "settingsSynced": "Settings synced",
+      "settingsSyncFailed": "Settings sync failed"
+    },
     "pendingMultisigCard": {
       "title": "Pending multisig transaction"
     }
@@ -736,6 +752,9 @@
         "addressBook": "Address Book",
         "own": "Own",
         "recent": "Recent"
+      },
+      "superheroId": {
+        "synced": "Address Book Sync with SH ID completed"
       }
     },
     "secureLogin": {

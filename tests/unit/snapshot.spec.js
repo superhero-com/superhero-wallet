@@ -92,6 +92,10 @@ jest.mock('../../src/composables', () => ({
     switchNetwork: jest.fn(),
     deleteCustomNetwork: jest.fn(),
   })),
+  useSuperheroId: jest.fn(() => ({
+    hasSuperheroId: { value: false },
+    syncSettings: jest.fn(),
+  })),
 }));
 jest.mock('@/utils', () => ({
   fetchJson: jest.fn(() => ({})),

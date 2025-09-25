@@ -24,6 +24,14 @@
             :icon="ExportIcon"
             @click="exportAddressBook()"
           />
+          <BtnBox
+            v-if="hasSuperheroId"
+            data-cy="sync-address-book"
+            :text="isSyncing ? 'Syncing…' : 'Sync'"
+            :disabled="isSyncing"
+            :icon="ExportIcon"
+            @click="onSyncAddressBook"
+          />
         </div>
       </Transition>
 
@@ -35,16 +43,22 @@
 <script lang="ts">
 import { IonPage } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { ROUTE_ADDRESS_BOOK_ADD } from '@/popup/router/routeNames';
-import { useAddressBook } from '@/composables';
-
+import {
+  useAddressBook,
+  useModals,
+  useAccounts,
+  useSuperheroId,
+} from '@/composables';
 import AddressBookList from '@/popup/components/AddressBook/AddressBookList.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 
 import AddIcon from '@/icons/plus-circle.svg?vue-component';
 import ImportIcon from '@/icons/import-address-book.svg?vue-component';
 import ExportIcon from '@/icons/export-address-book.svg?vue-component';
+import { handleUnknownError } from '@/utils';
 
 export default defineComponent({
   components: {
@@ -54,13 +68,36 @@ export default defineComponent({
   },
   setup() {
     const hideButtons = ref(false);
+    const { t } = useI18n();
 
-    const { exportAddressBook, importAddressBook } = useAddressBook();
+    const { exportAddressBook, importAddressBook, addressBook } = useAddressBook();
+    const { openDefaultModal } = useModals();
+    const { aeAccounts } = useAccounts();
+    const { syncAddressBook, hasSuperheroId } = useSuperheroId();
+
+    const isSyncing = ref(false);
+
+    async function onSyncAddressBook() {
+      try {
+        isSyncing.value = true;
+        const addr = aeAccounts.value?.[0]?.address as `ak_${string}`;
+        if (!addr) throw new Error('No æternity account');
+        await syncAddressBook(JSON.stringify(addressBook.value));
+        openDefaultModal({ title: t('dashboard.superheroId.title'), msg: t('pages.addressBook.superheroId.synced') });
+      } catch (e) {
+        handleUnknownError(e);
+      } finally {
+        isSyncing.value = false;
+      }
+    }
 
     return {
       hideButtons,
       exportAddressBook,
       importAddressBook,
+      onSyncAddressBook,
+      hasSuperheroId,
+      isSyncing,
       AddIcon,
       ImportIcon,
       ExportIcon,

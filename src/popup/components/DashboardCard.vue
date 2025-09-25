@@ -13,7 +13,9 @@
       :href="href"
       :to="to"
       :variant="variant"
+      :disabled="disabled"
       inline
+      @click="$emit('click')"
     />
   </Card>
 </template>
@@ -30,10 +32,12 @@ export default defineComponent({
     BtnMain,
     Card,
   },
+  emits: ['click'],
   props: {
     title: { type: String, required: true },
     description: { type: String, required: true },
     btnText: { type: String, required: true },
+    disabled: { type: Boolean, default: false },
     background: { type: String, default: null },
     variant: { type: String as PropType<BtnVariant>, default: 'secondary' },
     href: { type: String, default: null },

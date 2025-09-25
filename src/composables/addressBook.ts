@@ -143,7 +143,7 @@ export const useAddressBook = createCustomScopedComposable(() => {
     Object.assign(savedEntry, entry);
   }
 
-  function addAddressBookEntriesFromJson(json: string) {
+  function addAddressBookEntriesFromJson(json: string, showModal = true) {
     try {
       const newEntries: IAddressBookEntry[] = JSON.parse(json);
       const totalEntries = Object.keys(newEntries).length;
@@ -162,11 +162,13 @@ export const useAddressBook = createCustomScopedComposable(() => {
         }
       });
 
-      openModal(MODAL_ADDRESS_BOOK_IMPORT, {
-        totalEntries,
-        successfulEntriesCount,
-        existingEntriesCount,
-      });
+      if (showModal) {
+        openModal(MODAL_ADDRESS_BOOK_IMPORT, {
+          totalEntries,
+          successfulEntriesCount,
+          existingEntriesCount,
+        });
+      }
     } catch (error) {
       handleUnknownError(error);
     }
@@ -216,5 +218,6 @@ export const useAddressBook = createCustomScopedComposable(() => {
     toggleBookmarkAddressBookEntry,
     exportAddressBook,
     importAddressBook,
+    addAddressBookEntriesFromJson,
   };
 });

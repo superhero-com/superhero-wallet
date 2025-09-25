@@ -1,0 +1,90 @@
+[
+  {
+    "namespace": {
+      "name": "String",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "Option",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "Map",
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "name": "SuperheroID",
+      "kind": "contract_main",
+      "payable": false,
+      "event": { "variant": [] },
+      "state": {
+        "record": [
+          {
+            "name": "data",
+            "type": { "map": ["address", { "map": ["string", "string"] }] }
+          }
+        ]
+      },
+      "functions": [
+        {
+          "arguments": [],
+          "name": "init",
+          "payable": false,
+          "returns": "SuperheroData.state",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "key", "type": "string" },
+            { "name": "value", "type": "string" }
+          ],
+          "name": "set_data",
+          "payable": false,
+          "returns": { "tuple": [] },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            { "name": "key", "type": "string" }
+          ],
+          "name": "get_data",
+          "payable": false,
+          "returns": { "option": ["string"] },
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "has_data",
+          "payable": false,
+          "returns": "bool",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "key", "type": "string" }
+          ],
+          "name": "has_key",
+          "payable": false,
+          "returns": "bool",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            { "name": "key", "type": "string" }
+          ],
+          "name": "delete_key",
+          "payable": false,
+          "returns": { "tuple": [] },
+          "stateful": true
+        }
+      ],
+      "typedefs": []
+    }
+  }
+]

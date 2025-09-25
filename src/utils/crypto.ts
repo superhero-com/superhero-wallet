@@ -112,3 +112,17 @@ export async function importEncryptionKey(exportedKey: Uint8Array): Promise<Cryp
   );
   return key;
 }
+
+/**
+ * Derive/import an AES-GCM key from an account secret key.
+ * Uses SHA-256(secret[0..32]) as raw AES key material.
+ */
+export async function importAesKeyFromSecret(secret: Uint8Array | string): Promise<CryptoKey> {
+  const secretBytes: Uint8Array = typeof secret === 'string'
+    ? Uint8Array.from(secret.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)))
+    : secret;
+  const seed = secretBytes.slice(0, 32);
+  const digest = await (globalThis.crypto.subtle as SubtleCrypto).digest('SHA-256', seed);
+  const keyBytes = new Uint8Array(digest);
+  return importEncryptionKey(keyBytes);
+}
