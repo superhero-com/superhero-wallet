@@ -22,8 +22,8 @@ import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 
 export function buildIabOptions(): string {
   const opts = [
-    'location=yes',
-    'hideurlbar=no',
+    'location=no',
+    'hideurlbar=yes',
     'hardwareback=yes',
     'hidden=no',
     'beforeload=yes',
@@ -69,11 +69,11 @@ export function useInAppBrowser() {
     } catch (_) { /* noop */ }
   }
 
-  function injectProviderShim() {
+  function injectProviderShim(addOverlay: boolean) {
     if (!inAppBrowserRef.value) return;
     const code = `
       (function(){
-        if (window.superheroInjected) return;
+        if (window.superheroInjected) { try { var eth = window.ethereum; if (eth) { var info = { uuid: '010f6849-a205-46a9-a721-c6ca943d479a', name: 'Superhero Wallet', icon: 'data:image/svg+xml,%3Csvg%20data-v-d6e638c8%3D%22%22%20viewBox%3D%220%200%2034%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20class%3D%22icon%20home-icon%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M0%208.09196L9.00282%200H24.9972L34%208.09196L17.0479%2024L0%208.09196ZM10.0085%202.48276H14.893L25.3324%2012.7356L17%2020.5517L3.73521%208.13794L10.0085%202.48276Z%22%20fill%3D%22%231161fe%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E', rdns: 'com.superhero.wallet' }; var announce=function(){ try{ window.dispatchEvent(new CustomEvent('eip6963:announceProvider', { detail: { info: info, provider: eth } })); }catch(_){}}; window.addEventListener('eip6963:requestProvider', announce); announce(); } } catch(_){ } return; }
         window.superheroInjected = true;
         const listeners = {};
         function emit(event, data){ (listeners[event]||[]).forEach((fn)=>{ try{ fn(data);}catch(_){} }); }
@@ -89,7 +89,7 @@ export function useInAppBrowser() {
             try {
               var data = (typeof msg === 'string') ? JSON.parse(msg) : msg;
               window.dispatchEvent(new MessageEvent('message', { data }));
-            } catch(_){}
+            } catch(_){ }
           };
         } catch(_){ }
         const req = async ({ method, params }) => new Promise((resolve, reject)=>{
@@ -151,6 +151,17 @@ export function useInAppBrowser() {
         });
         window.dispatchEvent(new Event('ethereum#initialized'));
         try {
+          var info = {
+            uuid: '010f6849-a205-46a9-a721-c6ca943d479a',
+            name: 'Superhero Wallet',
+            icon: 'data:image/svg+xml,%3Csvg%20data-v-d6e638c8%3D%22%22%20viewBox%3D%220%200%2034%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20class%3D%22icon%20home-icon%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M0%208.09196L9.00282%200H24.9972L34%208.09196L17.0479%2024L0%208.09196ZM10.0085%202.48276H14.893L25.3324%2012.7356L17%2020.5517L3.73521%208.13794L10.0085%202.48276Z%22%20fill%3D%22%231161fe%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E',
+            rdns: 'com.superhero.wallet',
+          };
+          var announce = function(){ try { window.dispatchEvent(new CustomEvent('eip6963:announceProvider', { detail: { info: info, provider: ethereum } })); } catch(_){} };
+          window.addEventListener('eip6963:requestProvider', announce);
+          announce();
+        } catch(_){ }
+        try {
           var __shw_aex2_ready_interval = setInterval(function(){
             if (document && document.readyState === 'complete') {
               try { clearInterval(__shw_aex2_ready_interval); } catch(_){}
@@ -158,8 +169,8 @@ export function useInAppBrowser() {
             }
           }, 10);
         } catch(_){ }
-        // Lightweight address bar overlay
-        try {
+        // Lightweight address bar overlay (only when requested)
+        try { if (${addOverlay ? 'true' : 'false'}) {
           var bar = document.querySelector('#__shw_addr_bar__');
           if (!bar) {
             bar = document.createElement('div');
@@ -169,40 +180,62 @@ export function useInAppBrowser() {
             bar.style.right = '0';
             bar.style.top = '0';
             bar.style.zIndex = '999999999';
-            bar.style.background = 'rgba(17,97,254,0.95)';
+            bar.style.background = 'rgba(20,20,20,0.92)';
+            bar.style.borderBottom = '1px solid rgba(255,255,255,0.08)';
             bar.style.padding = '8px env(safe-area-inset-right) 8px env(safe-area-inset-left)';
             bar.style.display = 'flex';
             bar.style.alignItems = 'center';
             bar.style.gap = '6px';
-            bar.style.backdropFilter = 'saturate(120%) blur(6px)';
+            bar.style.backdropFilter = 'saturate(120%) blur(10px)';
             var input = document.createElement('input');
             input.id = '__shw_addr_input__';
             input.type = 'url';
             input.style.flex = '1';
             input.style.height = '32px';
-            input.style.borderRadius = '6px';
-            input.style.border = 'none';
-            input.style.padding = '0 10px';
+            input.style.borderRadius = '10px';
+            input.style.border = '1px solid rgba(255,255,255,0.12)';
+            input.style.padding = '0 12px';
             input.style.outline = 'none';
+            input.style.background = 'rgba(19,19,19,0.85)';
+            input.style.color = '#fff';
+            input.style.boxShadow = '0 2px 6px rgba(0,0,0,0.25) inset';
             input.value = location.href;
             input.placeholder = 'Enter URL';
             input.addEventListener('keydown', function(e){
               try {
                 if (e.key === 'Enter') {
                   var val = input.value || '';
-                  if (!/^https?:///i.test(val)) val = 'https://' + val;
+                  var lc = (val || '').toLowerCase();
+                  if (!(lc.startsWith('http://') || lc.startsWith('https://'))) val = 'https://' + val;
                   location.href = val;
                 }
               } catch(_){ }
             });
             bar.appendChild(input);
+            var closeBtn = document.createElement('button');
+            closeBtn.id = '__shw_addr_close__';
+            closeBtn.textContent = '×';
+            closeBtn.title = 'Close';
+            closeBtn.style.height = '32px';
+            closeBtn.style.width = '32px';
+            closeBtn.style.border = '1px solid rgba(255,255,255,0.12)';
+            closeBtn.style.borderRadius = '10px';
+            closeBtn.style.background = 'transparent';
+            closeBtn.style.color = '#fff';
+            closeBtn.style.fontSize = '22px';
+            closeBtn.style.lineHeight = '22px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.marginLeft = '6px';
+            closeBtn.addEventListener('click', function(){ try { postToApp({ __shw: true, type: 'close-iab' }); } catch(_) { } });
+            bar.appendChild(closeBtn);
             document.documentElement.style.paddingTop = '48px';
             document.body.style.paddingTop = '48px';
             document.body.appendChild(bar);
             window.addEventListener('hashchange', function(){ try { input.value = location.href; } catch(_){ } });
             window.addEventListener('popstate', function(){ try { input.value = location.href; } catch(_){ } });
           }
-        } catch(_){ }
+        } }
+        catch(_){ }
       })();
     `;
     inAppBrowserRef.value.executeScript({ code });
@@ -255,7 +288,8 @@ export function useInAppBrowser() {
     currentUrl.value = url;
 
     iab.addEventListener('loadstop', () => {
-      injectProviderShim();
+      const addOverlay = opts.includes('location=no');
+      injectProviderShim(addOverlay);
       attachBridge();
     });
 
@@ -286,6 +320,12 @@ export function useInAppBrowser() {
     iab.addEventListener('message', async (event: any) => {
       let data: any;
       try { data = typeof event?.data === 'string' ? JSON.parse(event.data) : (event?.data || {}); } catch (_) { data = event?.data || {}; }
+      if (data?.__shw && data.type === 'close-iab') {
+        try { inAppBrowserRef.value?.close(); } catch (_) { /* noop */ }
+        inAppBrowserRef.value = undefined;
+        isOpen.value = false;
+        return;
+      }
       if (data?.__shw && data.type === 'aex2-ready') {
         try {
           const sdk = await getAeSdk();
