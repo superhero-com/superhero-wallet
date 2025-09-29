@@ -8,7 +8,7 @@ import {
   POPUP_TYPE_ACCOUNT_LIST,
 } from '../../../src/constants';
 import { STUB_POPUP_PROPS, STUB_TX_PARAMS } from '../../../src/constants/stubs';
-import locale from '../../../src/popup/locales/en.json';
+import locale from '../../../src/popup/locales/en-US.json';
 
 const popups = [
   POPUP_TYPE_CONNECT,
