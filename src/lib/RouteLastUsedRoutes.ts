@@ -37,7 +37,8 @@ export const RouteLastUsedRoutes = (() => {
       if ((to.meta as WalletRouteMeta | undefined)?.notPersist) {
         WalletStorage.remove(lastRouteKey);
       } else {
-        const routeInfo: ILastRouteInfo = { path: to.path, time: dayjs().toISOString() };
+        // Store fullPath to preserve query and hash parameters across reloads
+        const routeInfo: ILastRouteInfo = { path: to.fullPath, time: dayjs().toISOString() };
         WalletStorage.set(lastRouteKey, routeInfo);
       }
     });
