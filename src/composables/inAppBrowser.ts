@@ -23,6 +23,7 @@ import type { WalletConnectUri } from '@/composables';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
 import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import { isIabDappActive } from '@/composables/iabState';
 
 export function buildIabOptions(): string {
   const opts = [
@@ -344,6 +345,7 @@ export function useInAppBrowser() {
     if (!iab) return;
     inAppBrowserRef.value = iab;
     isOpen.value = true;
+    isIabDappActive.value = false;
     currentUrl.value = url;
 
     iab.addEventListener('loadstop', () => {
@@ -352,6 +354,8 @@ export function useInAppBrowser() {
       let origin: string | undefined;
       try { origin = new URL(currentUrl.value || '').origin; } catch (_) { origin = undefined; }
       attachBridge(origin);
+      // Mark IAB dapp session active after bridge attaches
+      isIabDappActive.value = true;
     });
 
     iab.addEventListener('beforeload', (event: any) => {
@@ -538,6 +542,7 @@ export function useInAppBrowser() {
     iab.addEventListener('exit', async () => {
       inAppBrowserRef.value = undefined;
       isOpen.value = false;
+      isIabDappActive.value = false;
       emitEthereumEvent('disconnect', { code: 4001, message: 'User closed in-app browser' });
       try {
         if (iabShareWalletInfoInterval.value) clearInterval(iabShareWalletInfoInterval.value);
