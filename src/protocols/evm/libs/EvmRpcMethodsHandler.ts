@@ -226,10 +226,9 @@ export async function handleEvmRpcMethod(
     }
   }
   if (method === ETH_RPC_METHODS.getChainId) {
-    const res = {
+    return {
       result: `0x${BigInt((networks.value[activeNetwork.value.name].protocols[protocol] as any).chainId).toString(16)}`,
     };
-    return res;
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
     // Support both EIP-3326 param shapes and hex/decimal chainIds
@@ -431,6 +430,10 @@ export async function handleEvmRpcMethod(
           ...(Array.isArray(params) ? {} : (params as any)),
         });
       if (!response || !String(response.message || '').startsWith('OK')) {
+        // For estimateGas, provide a safe fallback instead of erroring
+        if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas) {
+          return { result: '0x493e0' }; // 300000
+        }
         return getUnknownError(typeof response?.result === 'string' ? response.result : 'Unknown error');
       }
       return { result: response.result };
