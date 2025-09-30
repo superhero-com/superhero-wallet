@@ -1,7 +1,11 @@
 import {
   ref, watch, onMounted, onUnmounted,
 } from 'vue';
-import { BrowserWindowMessageConnection, RPC_STATUS } from '@aeternity/aepp-sdk';
+import {
+  BrowserWindowMessageConnection,
+  RPC_STATUS,
+  MESSAGE_DIRECTION,
+} from '@aeternity/aepp-sdk';
 import {
   IS_MOBILE_APP,
   PROTOCOLS,
@@ -40,6 +44,9 @@ export function useInAppBrowser() {
   const iabShareWalletInfoInterval = ref<NodeJS.Timeout>();
   const currentUrl = ref<string>('');
   const isOpen = ref<boolean>(false);
+  // Track EIP-1193 connect emission and last accounts to avoid event loops
+  let iabConnectEmitted = false;
+  let iabLastAccountsKey = '';
 
   const { getAeSdk } = useAeSdk();
   const { modalsOpen } = useModals();
@@ -47,6 +54,7 @@ export function useInAppBrowser() {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
   const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
   const { connect } = useWalletConnect();
+  // Permissions not required in the core AEX-2 bridge path
 
   function hide() {
     try { inAppBrowserRef.value?.hide(); } catch (_) { /* noop */ }
@@ -77,7 +85,10 @@ export function useInAppBrowser() {
         window.superheroInjected = true;
         const listeners = {};
         function emit(event, data){ (listeners[event]||[]).forEach((fn)=>{ try{ fn(data);}catch(_){} }); }
-        function on(event, fn){ listeners[event] = listeners[event]||[]; listeners[event].push(fn); }
+        function on(event, fn){
+          listeners[event] = listeners[event]||[];
+          if (!listeners[event].includes(fn)) listeners[event].push(fn);
+        }
         function removeListener(event, fn){ listeners[event] = (listeners[event]||[]).filter(f=>f!==fn); }
         function postToApp(msg){
           try { window.cordova_iab.postMessage(JSON.stringify(msg)); return; } catch(_){ }
@@ -135,6 +146,17 @@ export function useInAppBrowser() {
         };
         Object.defineProperty(window, 'ethereum', { get(){ return ethereum; } });
         try { window.web3 = { currentProvider: ethereum, accounts: [] }; } catch(_){ }
+        // Forward AEX-2 postMessage traffic from page -> app (Cordova IAB)
+        // so the wallet bridge in the host app can receive and process it.
+        // Important: forward ONLY "to_waellet" (aepp -> wallet) to avoid loops.
+        try {
+          window.addEventListener('message', function(e){
+            try {
+              var msg = (typeof e.data === 'string') ? JSON.parse(e.data) : (e.data || {});
+              if (msg && msg.type === 'to_waellet') { postToApp(msg); }
+            } catch(_){ }
+          });
+        } catch(_){ }
         window.addEventListener('message', (e)=>{
           try {
             const msg = (typeof e.data === 'string') ? JSON.parse(e.data) : (e.data || {});
@@ -241,7 +263,11 @@ export function useInAppBrowser() {
     inAppBrowserRef.value.executeScript({ code });
   }
 
-  function attachBridge() {
+  let lastProxyTarget: any;
+  let lastOrigin: string | undefined;
+  // Queue raw AEX-2 payloads until the proxy target and origin are ready
+  const pendingAex2Events: any[] = [];
+  function attachBridge(origin?: string) {
     (async () => {
       try {
         const sdk = await getAeSdk();
@@ -253,15 +279,48 @@ export function useInAppBrowser() {
           try { clearInterval(iabShareWalletInfoInterval.value); } catch (_) { /* noop */ }
           iabShareWalletInfoInterval.value = undefined as any;
         }
-        const proxyTarget = {
+        const proxyTarget: any = {
+          _listener: undefined as any,
+          addEventListener: (event: string, fn: any) => {
+            if (event === 'message') { proxyTarget._listener = fn; }
+          },
+          removeEventListener: (event: string) => {
+            if (event === 'message') proxyTarget._listener = undefined;
+          },
           postMessage: (msg: any) => {
             try {
+              // Post raw SDK message back into the page; SDK connection handles AEX-2 envelopes
               inAppBrowserRef.value.executeScript({ code: `window.postMessage(${JSON.stringify(msg)}, '*')` });
             } catch (_) { /* noop */ }
           },
-        } as any;
-        const connection = new BrowserWindowMessageConnection({ target: proxyTarget });
+          // Provide a window-like postMessage surface for SDK checks
+          postMessageToTarget: (m: any) => {
+            try { inAppBrowserRef.value.executeScript({ code: `window.postMessage(${JSON.stringify(m)}, '*')` }); } catch (_) { /* noop */ }
+          },
+          // Provide browser-like postMessage for SDK validation, no-op implementation
+          postMessageOrigin: '*',
+          location: { origin: origin || '*' },
+        };
+        lastProxyTarget = proxyTarget;
+        lastOrigin = origin;
+        // Flush any queued AEX-2 payloads captured before the bridge was ready
+        try {
+          while (pendingAex2Events.length) {
+            const payload = pendingAex2Events.shift();
+            const evt = { data: payload, origin: lastOrigin, source: proxyTarget } as any;
+            (lastProxyTarget as any)?._listener?.(evt);
+          }
+        } catch (_) { /* noop */ }
+        const connection = new BrowserWindowMessageConnection({
+          target: proxyTarget,
+          self: proxyTarget,
+          origin,
+          sendDirection: MESSAGE_DIRECTION.to_aepp,
+          receiveDirection: MESSAGE_DIRECTION.to_waellet,
+        });
         iabAex2ClientId.value = sdk.addRpcClient(connection);
+        // noop
+        try { sdk.shareWalletInfo(iabAex2ClientId.value); } catch (_) { /* noop */ }
         iabShareWalletInfoInterval.value = executeAndSetInterval(() => {
           try {
             const rpcClient = (sdk as any)._getClient(iabAex2ClientId.value);
@@ -290,7 +349,9 @@ export function useInAppBrowser() {
     iab.addEventListener('loadstop', () => {
       const addOverlay = opts.includes('location=no');
       injectProviderShim(addOverlay);
-      attachBridge();
+      let origin: string | undefined;
+      try { origin = new URL(currentUrl.value || '').origin; } catch (_) { origin = undefined; }
+      attachBridge(origin);
     });
 
     iab.addEventListener('beforeload', (event: any) => {
@@ -315,34 +376,79 @@ export function useInAppBrowser() {
       }
       currentUrl.value = nextUrl;
       try { inAppBrowserRef.value._loadAfterBeforeload(nextUrl); } catch (_) { /* noop */ }
+      // If origin changed, reattach bridge so SDK sees correct origin context
+      try {
+        const newOrigin = new URL(nextUrl).origin;
+        if (newOrigin && newOrigin !== lastOrigin) {
+          attachBridge(newOrigin);
+        }
+      } catch (_) { /* noop */ }
     });
 
     iab.addEventListener('message', async (event: any) => {
+      // noop
       let data: any;
-      try { data = typeof event?.data === 'string' ? JSON.parse(event.data) : (event?.data || {}); } catch (_) { data = event?.data || {}; }
-      if (data?.__shw && data.type === 'close-iab') {
+      try {
+        // Accept incoming messages without unwrapping; handlers below route by shape
+        data = typeof event?.data === 'string' ? JSON.parse(event.data) : (event?.data || {});
+      } catch (_) { data = event?.data || {}; }
+      if ((data?.__shw && data.type === 'close-iab') || (data && data.type === 'close-iab')) {
         try { inAppBrowserRef.value?.close(); } catch (_) { /* noop */ }
         inAppBrowserRef.value = undefined;
         isOpen.value = false;
         return;
       }
-      if (data?.__shw && data.type === 'aex2-ready') {
+      if (data && data.type && (data.type === 'to_waellet' || data.type === 'to_aepp')) {
+        // Deliver raw AEX-2 envelope directly into SDK listener
         try {
-          const sdk = await getAeSdk();
-          if (iabAex2ClientId.value) sdk.shareWalletInfo(iabAex2ClientId.value);
+          const evt = { data, origin: lastOrigin || '*', source: lastProxyTarget } as any;
+          // Invoke SDK-attached handler if present
+          try {
+            (lastProxyTarget as any)?._listener?.(evt);
+          } catch (_) { /* noop */ }
+          // Also dispatch a real MessageEvent on window and include source=proxyTarget
+          try {
+            const me = new MessageEvent('message', { data, origin: evt.origin, source: lastProxyTarget } as any);
+            window.dispatchEvent(me);
+          } catch (_) { /* noop */ }
+          if (!lastProxyTarget) pendingAex2Events.push(data);
         } catch (_) { /* noop */ }
         return;
       }
-      if (data?.__shw && data.type === 'aex2' && data.payload) {
-        try { window.dispatchEvent(new MessageEvent('message', { data: data.payload })); } catch (_) { /* noop */ }
+      if (data?.__shw && data.type === 'aex2-ready') {
+        try {
+          const sdk = await getAeSdk();
+          if (iabAex2ClientId.value) {
+            sdk.shareWalletInfo(iabAex2ClientId.value);
+          }
+        } catch (_) { /* noop */ }
         return;
       }
       if (!data?.__shw) return;
       if (data.type === 'rpc-request') {
         const { method, params, requestId } = data;
         try {
-          const { result, error } = await handleEvmRpcMethod(url, method as any, params as any);
-          if (error) throw error;
+          const { result, error } = await handleEvmRpcMethod(
+            currentUrl.value,
+            method as any,
+            params as any,
+          );
+          // Guard against accidental string errors leaking as results (e.g. 'Error! ...')
+          const strRes = typeof result === 'string' ? result : undefined;
+          const isErrorLike = strRes ? /^error!?/i.test(strRes) : false;
+          const isHex = (v: any) => typeof v === 'string' && /^0x[0-9a-fA-F]+$/.test(v);
+          const expectsHex = (
+            method === 'eth_gasPrice'
+            || method === 'eth_blockNumber'
+            || method === 'eth_getTransactionCount'
+            || method === 'eth_chainId'
+            || method === 'eth_getBalance'
+          );
+          if (error || isErrorLike || (expectsHex && result != null && !isHex(result))) {
+            const errMsg = error?.message || strRes || 'Unknown error';
+            const errCode = error?.code || -32603;
+            throw Object.assign(new Error(errMsg), { code: errCode });
+          }
           inAppBrowserRef.value.executeScript({
             code: `window.postMessage(${JSON.stringify({
               __shw: true, type: 'rpc-result', requestId, result: (result ?? null),
@@ -350,23 +456,32 @@ export function useInAppBrowser() {
           });
           if (method === 'eth_requestAccounts' && Array.isArray(result) && result.length) {
             try {
-              const chain = await handleEvmRpcMethod(url, 'eth_chainId' as any, {} as any);
-              const chainIdHex = chain?.result || '0x0';
-              inAppBrowserRef.value.executeScript({
-                code: `window.postMessage(${JSON.stringify({
-                  __shw: true, type: 'event', event: 'accountsChanged', payload: result,
-                })}, '*')`,
-              });
-              inAppBrowserRef.value.executeScript({
-                code: `window.postMessage(${JSON.stringify({
-                  __shw: true, type: 'event', event: 'connect', payload: { chainId: chainIdHex },
-                })}, '*')`,
-              });
+              // Emit accountsChanged only if changed
+              const key = JSON.stringify(result);
+              if (key !== iabLastAccountsKey) {
+                iabLastAccountsKey = key;
+                inAppBrowserRef.value.executeScript({
+                  code: `window.postMessage(${JSON.stringify({
+                    __shw: true, type: 'event', event: 'accountsChanged', payload: result,
+                  })}, '*')`,
+                });
+              }
+              // Emit connect only once per IAB session to avoid loops
+              if (!iabConnectEmitted) {
+                const chain = await handleEvmRpcMethod(currentUrl.value, 'eth_chainId' as any, {} as any);
+                const chainIdHex = chain?.result || '0x0';
+                inAppBrowserRef.value.executeScript({
+                  code: `window.postMessage(${JSON.stringify({
+                    __shw: true, type: 'event', event: 'connect', payload: { chainId: chainIdHex },
+                  })}, '*')`,
+                });
+                iabConnectEmitted = true;
+              }
             } catch (_) { /* noop */ }
           }
           if (method === 'wallet_requestPermissions') {
             try {
-              const { result: permissions } = await handleEvmRpcMethod(url, 'wallet_getPermissions' as any, {} as any);
+              const { result: permissions } = await handleEvmRpcMethod(currentUrl.value, 'wallet_getPermissions' as any, {} as any);
               inAppBrowserRef.value.executeScript({
                 code: `window.postMessage(${JSON.stringify({
                   __shw: true, type: 'event', event: 'permissionsChanged', payload: permissions,
@@ -408,7 +523,16 @@ export function useInAppBrowser() {
         if (iabShareWalletInfoInterval.value) clearInterval(iabShareWalletInfoInterval.value);
       } catch (_) { /* noop */ }
       iabShareWalletInfoInterval.value = undefined as any;
-      try { const sdk = await getAeSdk(); if (iabAex2ClientId.value) sdk.removeRpcClient(iabAex2ClientId.value); } catch (_) { /* noop */ } finally { iabAex2ClientId.value = ''; }
+      try {
+        const sdk = await getAeSdk();
+        if (iabAex2ClientId.value) {
+          sdk.removeRpcClient(iabAex2ClientId.value);
+        }
+      } catch (_) {
+        /* noop */
+      } finally {
+        iabAex2ClientId.value = '';
+      }
     });
 
     iab.addEventListener('exit', async () => {
@@ -419,7 +543,16 @@ export function useInAppBrowser() {
         if (iabShareWalletInfoInterval.value) clearInterval(iabShareWalletInfoInterval.value);
       } catch (_) { /* noop */ }
       iabShareWalletInfoInterval.value = undefined as any;
-      try { const sdk = await getAeSdk(); if (iabAex2ClientId.value) sdk.removeRpcClient(iabAex2ClientId.value); } catch (_) { /* noop */ } finally { iabAex2ClientId.value = ''; }
+      try {
+        const sdk = await getAeSdk();
+        if (iabAex2ClientId.value) {
+          sdk.removeRpcClient(iabAex2ClientId.value);
+        }
+      } catch (_) {
+        /* noop */
+      } finally {
+        iabAex2ClientId.value = '';
+      }
     });
   }
 
@@ -483,10 +616,14 @@ export function useInAppBrowser() {
 
   onUnmounted(() => {
     try {
-      if (iabShareWalletInfoInterval.value) clearInterval(iabShareWalletInfoInterval.value);
+      if (iabShareWalletInfoInterval.value) {
+        clearInterval(iabShareWalletInfoInterval.value);
+      }
     } catch (_) { /* noop */ }
     iabShareWalletInfoInterval.value = undefined as any;
-    try { inAppBrowserRef.value?.close(); } catch (_) { /* noop */ }
+    try {
+      inAppBrowserRef.value?.close();
+    } catch (_) { /* noop */ }
     inAppBrowserRef.value = undefined;
   });
 

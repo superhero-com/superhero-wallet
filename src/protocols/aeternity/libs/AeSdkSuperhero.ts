@@ -69,7 +69,9 @@ export class AeSdkSuperhero extends AeSdkWallet {
       id: this.id,
       name: this.name,
       networkId: await this.api.getNetworkId(),
-      origin: undefined as any,
+      // Use wildcard origin to allow aepps inside InAppBrowser to accept the wallet
+      // (matches SDK default when running under file://)
+      origin: '*',
       type: this._type as any,
     };
   }

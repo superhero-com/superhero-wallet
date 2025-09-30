@@ -138,10 +138,15 @@ export async function decodeTxData(
     // then we are not able to decode the method name and get the parameters
     const methodSignature = txData.slice(0, 10);
     const method = contractInstance.options.jsonInterface
-      .find((m) => m.signature === methodSignature);
-
-    const params = contractInstance.decodeMethodData(txData);
-
+      .find((m) => (m as any).signature === methodSignature);
+    if (!method) {
+      return undefined;
+    }
+    // Some providers/versions may not expose decodeMethodData; guard its usage
+    if (typeof (contractInstance as any).decodeMethodData !== 'function') {
+      return undefined;
+    }
+    const params = (contractInstance as any).decodeMethodData(txData);
     return {
       functionName: (method as any).name,
       args: params as Dictionary,

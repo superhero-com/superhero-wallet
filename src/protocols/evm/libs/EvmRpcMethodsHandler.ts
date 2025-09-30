@@ -7,8 +7,8 @@ import {
   hexToString,
 } from 'web3-utils';
 import { sign } from 'web3-eth-accounts';
-import Web3Eth, { getBlock } from 'web3-eth';
-import { DEFAULT_RETURN_FORMAT } from 'web3-types';
+import Web3Eth, { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
+import { DEFAULT_RETURN_FORMAT, FMT_BYTES, FMT_NUMBER } from 'web3-types';
 import { isEmpty } from 'lodash-es';
 
 import type { IModalProps, Protocol } from '@/types';
@@ -209,17 +209,27 @@ export async function handleEvmRpcMethod(
   if (method === ETH_RPC_METHODS.getBalance) {
     let balance: string;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const addressParam = Array.isArray(params) ? (params as any)[0] : (params as any)?.address;
     try {
-      balance = await adapter.fetchBalance(toChecksumAddress(params?.address!));
+      balance = await adapter.fetchBalance(toChecksumAddress(addressParam!));
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    return { result: balance ? toWei(balance, 'ether') : 0 };
+    try {
+      const weiStr = balance ? toWei(balance, 'ether') : '0';
+      const hex = Number.isSafeInteger(Number(weiStr))
+        ? `0x${Number(weiStr).toString(16)}`
+        : `0x${(BigInt as any)(weiStr).toString(16)}`;
+      return { result: hex };
+    } catch (e: any) {
+      return getUnknownError(e.message || 'Failed to format balance');
+    }
   }
   if (method === ETH_RPC_METHODS.getChainId) {
-    return {
+    const res = {
       result: `0x${BigInt((networks.value[activeNetwork.value.name].protocols[protocol] as any).chainId).toString(16)}`,
     };
+    return res;
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
     // Support both EIP-3326 param shapes and hex/decimal chainIds
@@ -252,7 +262,13 @@ export async function handleEvmRpcMethod(
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    return { result: currentBlock?.number.toString() };
+    const num = (currentBlock && typeof currentBlock.number !== 'undefined')
+      ? currentBlock.number
+      : 0;
+    const hex = Number.isSafeInteger(Number(num))
+      ? `0x${Number(num).toString(16)}`
+      : `0x${(BigInt as any)(num).toString(16)}`;
+    return { result: hex };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
@@ -263,35 +279,50 @@ export async function handleEvmRpcMethod(
 
     const url = aepp;
 
+    const p = (Array.isArray(params) ? (params as any)[0] : (params as any)) || ({} as any);
     let estimatedGas = null as any;
     try {
-      estimatedGas = params?.gas ? null : (await new EtherscanService(
-        predefined.middlewareUrl,
-        chainId,
-      )
-        .fetchFromApi({
+      if (!p?.gas) {
+        let valueHex = '0x0';
+        if (p?.value != null) {
+          const valueStr = String(p.value);
+          valueHex = valueStr.startsWith('0x')
+            ? valueStr
+            : `0x${(BigInt as any)(valueStr).toString(16)}`;
+        }
+        const estimateResp = await new EtherscanService(
+          predefined.middlewareUrl,
+          chainId,
+        ).fetchFromApi({
           module: 'proxy',
           action: 'eth_estimateGas',
-          to: params.to,
-          value: `0x${Number(params.value || 0).toString(16)}`,
-          data: params.data || '0x',
-        }))?.result;
+          from: toChecksumAddress(p.from!),
+          to: p.to,
+          value: valueHex,
+          data: p.data || '0x',
+        });
+        if (!estimateResp || !String(estimateResp.message || '').startsWith('OK') || !estimateResp.result) {
+          throw new Error(typeof estimateResp?.result === 'string' ? estimateResp.result : 'Failed to estimate gas');
+        }
+        estimatedGas = estimateResp.result;
+      }
     } catch (_) {
       // fall back to a conservative gas limit if estimation API fails
-      estimatedGas = '0x5208'; // 21000
+      const isContractCall = !!(p?.data && p.data !== '0x');
+      estimatedGas = isContractCall ? '0x493e0' : '0x5208'; // 300000 for contract calls, 21000 for transfers
     }
 
-    const gasHexOrNum = params?.gas ?? estimatedGas;
+    const gasHexOrNum = p?.gas ?? estimatedGas;
     const gas = Number(gasHexOrNum);
-    const senderId = toChecksumAddress(params.from!);
-    const recipientId = toChecksumAddress(params.to!);
-    const isCoinTransfer = !params.data;
+    const senderId = toChecksumAddress(p.from!);
+    const recipientId = toChecksumAddress(p.to!);
+    const isCoinTransfer = !p.data;
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol,
       app: { href: url, host: url ? new URL(url).hostname : '', name: name || url },
       tx: {
-        amount: params.value ? +fromWei(params.value, 'ether') : 0,
+        amount: p.value ? +fromWei(p.value, 'ether') : 0,
         fee: gas * +(maxFeePerGas.value || 0),
         gas,
         contractId: (isCoinTransfer) ? getProtocolCoinContractId(protocol) : recipientId,
@@ -299,7 +330,7 @@ export async function handleEvmRpcMethod(
         tag,
         senderId,
         recipientId,
-        data: params.data,
+        data: p.data,
       },
       fromAccount: senderId,
     };
@@ -312,13 +343,10 @@ export async function handleEvmRpcMethod(
     if (permitted) {
       if (adapter?.transferPreparedTransaction) {
         try {
-          const actionResult = await adapter.transferPreparedTransaction({
-            ...params,
-            gas: gasHexOrNum,
-          });
-          return actionResult?.hash
-            ? { result: actionResult?.hash }
-            : getUnknownError('Failed to sign and send transaction');
+          const actionParams = { ...p, gas: gasHexOrNum } as any;
+          const actionResult = await adapter.transferPreparedTransaction(actionParams);
+          if (!actionResult?.hash) return getUnknownError('Failed to sign and send transaction');
+          return { result: actionResult.hash };
         } catch (error: any) {
           return getUnknownError(error.message);
         }
@@ -368,16 +396,44 @@ export async function handleEvmRpcMethod(
     const apiUrl = predefined.middlewareUrl;
     let response: EtherscanDefaultResponse | null;
     try {
+      // If we can, serve directly from node to avoid Etherscan limitations
+      // eth_getTransactionByHash
+      if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionByHash) {
+        const txhash = Array.isArray(params)
+          ? (params as any)[0]
+          : (params as any)?.txhash || (params as any)?.hash;
+        const web3 = new Web3Eth(nodeUrl);
+        const tx = txhash
+          ? await getTransaction(web3, txhash, { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX })
+          : null;
+        if (tx) return { result: tx };
+      }
+      // eth_getTransactionReceipt
+      if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionReceipt) {
+        const txhash = Array.isArray(params)
+          ? (params as any)[0]
+          : (params as any)?.txhash || (params as any)?.hash;
+        const web3 = new Web3Eth(nodeUrl);
+        const rc = txhash
+          ? await getTransactionReceipt(
+            web3,
+            txhash,
+            { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX },
+          )
+          : null;
+        if (rc) return { result: rc };
+      }
+      // Fallback to Etherscan for other proxy calls
       response = await new EtherscanService(apiUrl, chainId)
         .fetchFromApi({
           module: 'proxy',
           action: method,
-          ...params,
+          ...(Array.isArray(params) ? {} : (params as any)),
         });
-      if (!response?.message?.startsWith('OK')) {
-        getUnknownError(response?.result || 'Unknown error');
+      if (!response || !String(response.message || '').startsWith('OK')) {
+        return getUnknownError(typeof response?.result === 'string' ? response.result : 'Unknown error');
       }
-      return { result: response?.result };
+      return { result: response.result };
     } catch (error: any) {
       return getUnknownError(error.message);
     }
