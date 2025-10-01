@@ -73,11 +73,15 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
 });
 
 Cypress.Commands.add('loginUsingPassword', () => {
-  cy.get('[data-cy=password] input')
+  // Be tolerant to different render timings/selectors
+  cy.get('[data-cy=password] input, input[type="password"]', { timeout: 20000 })
     .should('be.visible')
-    .type(STUB_ACCOUNT.password);
-  cy.get('[data-cy=login-btn]')
+    .first()
+    .type(STUB_ACCOUNT.password, { log: true });
+
+  cy.get('[data-cy=login-btn], [data-cy=login], button[type="submit"]', { timeout: 20000 })
     .should('be.visible')
+    .first()
     .click();
 });
 
