@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { uniqBy, isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Contract, Encoding, Tag } from '@aeternity/aepp-sdk';
@@ -47,6 +47,12 @@ const defaultTokensAvailable = useStorageRef<ProtocolRecord<AssetList>>(
 );
 
 /**
+ * Ephemeral (in-memory) list of available tokens per protocol.
+ * Used to avoid persisting large lists (notably Aeternity) into localStorage.
+ */
+const ephemeralTokensAvailable = ref<ProtocolRecord<AssetList>>({});
+
+/**
  * List of user account's token asset balances.
  */
 const tokenBalances = useStorageRef<ITokenBalance[]>(
@@ -90,7 +96,10 @@ const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
 
   return Object.values(PROTOCOLS).reduce((allTokens, protocol) => {
     allTokens[protocol] = {
+      // Persisted tokens
       ...(defaultTokensAvailable.value[protocol] ?? {}),
+      // Ephemeral tokens (e.g., Aeternity full list)
+      ...(ephemeralTokensAvailable.value[protocol] ?? {}),
       ...customTokensAvailable[protocol],
     };
     return allTokens;
@@ -183,12 +192,15 @@ export function useFungibleTokens() {
     const currentNetworkName = activeNetwork.value.name;
     // for each promise check if it returned null, if so, use cached data
     // because it means that we couldn't fetch new data
-    const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).map(
-      (protocolTokens, index) => (
-        protocolTokens
-        || Object.values(defaultTokensAvailable.value[protocolsInUse.value[index]] || {})
-      ),
-    ).flat();
+    const results = await Promise.all(tokensFetchPromises);
+    const tokensByProtocol: ProtocolRecord<IToken[]> = {} as any;
+    results.forEach((protocolTokens, index) => {
+      const protocol = protocolsInUse.value[index];
+      const persistedFallback = Object.values(defaultTokensAvailable.value[protocol] || {});
+      const ephemeralFallback = Object.values(ephemeralTokensAvailable.value[protocol] || {});
+      tokensByProtocol[protocol] = (protocolTokens as IToken[] | null)
+        || (protocol === PROTOCOLS.aeternity ? ephemeralFallback : persistedFallback);
+    });
 
     // This is necessary in case the user switches between networks faster,
     // than the available tokens are returned (limitations of the free Ethereum middleware)
@@ -196,14 +208,19 @@ export function useFungibleTokens() {
       return;
     }
 
-    defaultTokensAvailable.value = tokens.reduce((accumulator, token) => {
-      const { contractId, protocol } = token;
-      if (!accumulator[protocol]) {
-        accumulator[protocol] = {} as AssetList;
-      }
-      accumulator[protocol]![contractId] = token;
-      return accumulator;
-    }, {} as typeof defaultTokensAvailable.value);
+    // Store fetched tokens per protocol
+    Object.entries(tokensByProtocol).forEach(([protocol, tokens]) => {
+      const pr = protocol as Protocol;
+      const target = pr === PROTOCOLS.aeternity
+        ? ephemeralTokensAvailable
+        : defaultTokensAvailable;
+      const currentMap = (target.value[pr] ?? {}) as AssetList;
+      const nextMap = (tokens as IToken[]).reduce((acc, token) => {
+        acc[token.contractId] = token;
+        return acc;
+      }, { ...currentMap } as AssetList);
+      target.value[pr] = nextMap;
+    });
 
     lastAvailableTokensLoadTime.value = Date.now();
   }
@@ -370,6 +387,7 @@ export function useFungibleTokens() {
       if (newMiddlewareUrl !== oldMiddlewareUrl) {
         tokenBalances.value = [];
         defaultTokensAvailable.value = {};
+        ephemeralTokensAvailable.value = {};
         lastAvailableTokensLoadTime.value = 0;
         await loadTokenBalances();
       }
