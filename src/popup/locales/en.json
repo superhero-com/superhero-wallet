@@ -44,6 +44,7 @@
     "priceNotAvailable": "price: n/a",
     "receive": "Receive",
     "search": "Search",
+    "searchForBlockchain": "Search for blockchain",
     "seconds": "{n} seconds | {n} second | {n} seconds",
     "secondsShort": "{n} s",
     "sell": "Sell",
@@ -735,7 +736,9 @@
       "filters":  {
         "addressBook": "Address Book",
         "own": "Own",
-        "recent": "Recent"
+        "recent": "Recent",
+        "filterByBlockchain": "Filter by blockchain",
+        "filterByBlockchainSubtitle": "Show addresses only for the selected blockchain protocol"
       }
     },
     "secureLogin": {
