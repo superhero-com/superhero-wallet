@@ -59,6 +59,18 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
           }
         });
         break;
+      case 'accountsChanged':
+        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
+          if (tab.id) {
+            browser.tabs.sendMessage(tab.id, {
+              superheroWalletApproved: true,
+              method: msg.method,
+              result: msg.params?.rpcMethodParams?.result,
+              type: 'result',
+            });
+          }
+        });
+        break;
       case 'openPopup':
         openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
           sendResponse(popupConfig);

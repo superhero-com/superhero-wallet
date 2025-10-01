@@ -100,7 +100,10 @@ const runContentScript = () => {
     false,
   );
   browser.runtime.onMessage.addListener(({ method, result }: any): undefined => {
-    if (method === ETH_RPC_WALLET_EVENTS.chainChanged) {
+    if (
+      method === ETH_RPC_WALLET_EVENTS.chainChanged
+      || method === ETH_RPC_WALLET_EVENTS.accountsChanged
+    ) {
       Object.entries(connectedDapps).forEach(([origin, source]) => {
         source.postMessage({
           jsonrpc: '2.0',
