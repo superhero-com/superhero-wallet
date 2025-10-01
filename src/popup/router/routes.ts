@@ -5,6 +5,7 @@ import {
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
 } from '@/constants';
+import { useWalletConnect, type WalletConnectUri } from '@/composables';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -796,6 +797,35 @@ export const routes: WalletAppRouteConfig[] = [
       title: 'signMessage',
       notPersist: true,
       hideHeader: true,
+    },
+  },
+  {
+    // Web deep link equivalent to native wc:// handler
+    name: 'wc',
+    path: '/wc',
+    component: Index,
+    meta: {
+      notPersist: true,
+      hideHeader: true,
+    },
+    beforeEnter: async (to, from, next) => {
+      const { connect, wcSession } = useWalletConnect();
+      const uriParam = to.query.uri as string | undefined;
+
+      if (!uriParam) {
+        next({ name: ROUTE_NOT_FOUND });
+        return;
+      }
+
+      try {
+        if (!wcSession.value) {
+          await connect(uriParam as WalletConnectUri, true);
+        }
+      } catch {
+        // Let the error modal from connect handle user feedback
+      }
+
+      next({ name: ROUTE_ACCOUNT });
     },
   },
   {
