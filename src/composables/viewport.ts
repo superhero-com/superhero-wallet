@@ -24,16 +24,16 @@ export const useViewport = () => {
   }
 
   function onViewportScroll(onScrollMethod: OnViewportScrollCallback) {
-    if (viewportElement.value) {
-      viewportElement.value.addEventListener('scroll', () => viewportScroll(onScrollMethod));
-    }
-    window.addEventListener('scroll', () => viewportScroll(onScrollMethod));
+    const handler = () => viewportScroll(onScrollMethod);
+    const target = viewportElement.value ?? window;
+    // Prefer passive listener to avoid layout thrash
+    target.addEventListener('scroll', handler as EventListener, { passive: true } as any);
+
     onBeforeUnmount(() => {
-      if (viewportElement.value) {
-        viewportElement.value.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
+      target.removeEventListener('scroll', handler as EventListener);
+      if (viewportElement.value === target) {
         viewportElement.value = undefined;
       }
-      window.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
     });
   }
 

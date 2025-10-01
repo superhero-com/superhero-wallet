@@ -23,16 +23,19 @@
     <InfiniteScroll
       class="list"
       data-cy="list"
-      @load-more="pageNumber += 1"
+      :virtual="true"
+      :items="accountAssetsToDisplay"
+      :key-extractor="assetKey"
     >
-      <AssetListItem
-        v-for="asset in accountAssetsToDisplay"
-        :key="asset.contractId"
-        :asset="asset"
-        :selected="isAssetSelected(asset)"
-        prevent-navigation
-        @click="resolve(asset)"
-      />
+      <template #default="{ item }">
+        <AssetListItem
+          :key="item.contractId"
+          :asset="item"
+          :selected="isAssetSelected(item)"
+          prevent-navigation
+          @click="resolve(item)"
+        />
+      </template>
     </InfiniteScroll>
   </Modal>
 </template>
@@ -53,7 +56,6 @@ import type {
   ResolveCallback,
 } from '@/types';
 import { useAccountAssetsList, useFungibleTokens } from '@/composables';
-import { ASSETS_PER_PAGE } from '@/constants';
 
 import Modal from '../Modal.vue';
 import AssetListItem from '../Assets/AssetListItem.vue';
@@ -96,8 +98,7 @@ export default defineComponent({
       (props.protocol)
         ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
         : accountAssetsFiltered.value
-    )
-      .slice(0, pageNumber.value * ASSETS_PER_PAGE));
+    ));
 
     function isAssetSelected(token: IAsset): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
@@ -121,6 +122,7 @@ export default defineComponent({
       pageNumber,
       searchTerm,
       isAssetSelected,
+      assetKey: (a: IAsset) => a.contractId,
     };
   },
 });
