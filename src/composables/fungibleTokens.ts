@@ -66,6 +66,11 @@ const lastAvailableTokensLoadTime = useStorageRef<number>(
 );
 
 /**
+ * Loading state for available tokens fetch per session.
+ */
+const isAvailableTokensLoading = ref(false);
+
+/**
  * List of all fungible tokens available on user's protocols.
  * Includes tokens from the user's account that are not on the main list.
  */
@@ -186,43 +191,48 @@ export function useFungibleTokens() {
     if (Date.now() - lastAvailableTokensLoadTime.value < 1000 * 60) {
       return;
     }
-    const tokensFetchPromises = protocolsInUse.value.map(
-      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens?.(),
-    );
-    const currentNetworkName = activeNetwork.value.name;
-    // for each promise check if it returned null, if so, use cached data
-    // because it means that we couldn't fetch new data
-    const results = await Promise.all(tokensFetchPromises);
-    const tokensByProtocol: ProtocolRecord<IToken[]> = {} as any;
-    results.forEach((protocolTokens, index) => {
-      const protocol = protocolsInUse.value[index];
-      const persistedFallback = Object.values(defaultTokensAvailable.value[protocol] || {});
-      const ephemeralFallback = Object.values(ephemeralTokensAvailable.value[protocol] || {});
-      tokensByProtocol[protocol] = (protocolTokens as IToken[] | null)
+    isAvailableTokensLoading.value = true;
+    try {
+      const tokensFetchPromises = protocolsInUse.value.map(
+        (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens?.(),
+      );
+      const currentNetworkName = activeNetwork.value.name;
+      // for each promise check if it returned null, if so, use cached data
+      // because it means that we couldn't fetch new data
+      const results = await Promise.all(tokensFetchPromises);
+      const tokensByProtocol: ProtocolRecord<IToken[]> = {} as any;
+      results.forEach((protocolTokens, index) => {
+        const protocol = protocolsInUse.value[index];
+        const persistedFallback = Object.values(defaultTokensAvailable.value[protocol] || {});
+        const ephemeralFallback = Object.values(ephemeralTokensAvailable.value[protocol] || {});
+        tokensByProtocol[protocol] = (protocolTokens as IToken[] | null)
         || (protocol === PROTOCOLS.aeternity ? ephemeralFallback : persistedFallback);
-    });
+      });
 
-    // This is necessary in case the user switches between networks faster,
-    // than the available tokens are returned (limitations of the free Ethereum middleware)
-    if (currentNetworkName !== activeNetwork.value.name) {
-      return;
+      // This is necessary in case the user switches between networks faster,
+      // than the available tokens are returned (limitations of the free Ethereum middleware)
+      if (currentNetworkName !== activeNetwork.value.name) {
+        return;
+      }
+
+      // Store fetched tokens per protocol
+      Object.entries(tokensByProtocol).forEach(([protocol, tokens]) => {
+        const pr = protocol as Protocol;
+        const target = pr === PROTOCOLS.aeternity
+          ? ephemeralTokensAvailable
+          : defaultTokensAvailable;
+        const currentMap = (target.value[pr] ?? {}) as AssetList;
+        const nextMap = (tokens as IToken[]).reduce((acc, token) => {
+          acc[token.contractId] = token;
+          return acc;
+        }, { ...currentMap } as AssetList);
+        target.value[pr] = nextMap;
+      });
+
+      lastAvailableTokensLoadTime.value = Date.now();
+    } finally {
+      isAvailableTokensLoading.value = false;
     }
-
-    // Store fetched tokens per protocol
-    Object.entries(tokensByProtocol).forEach(([protocol, tokens]) => {
-      const pr = protocol as Protocol;
-      const target = pr === PROTOCOLS.aeternity
-        ? ephemeralTokensAvailable
-        : defaultTokensAvailable;
-      const currentMap = (target.value[pr] ?? {}) as AssetList;
-      const nextMap = (tokens as IToken[]).reduce((acc, token) => {
-        acc[token.contractId] = token;
-        return acc;
-      }, { ...currentMap } as AssetList);
-      target.value[pr] = nextMap;
-    });
-
-    lastAvailableTokensLoadTime.value = Date.now();
   }
 
   async function loadTokenBalances() {
@@ -398,6 +408,7 @@ export function useFungibleTokens() {
     accountsTotalTokenBalance,
     tokenBalances,
     tokensAvailable,
+    isAvailableTokensLoading,
     createOrChangeAllowance,
     loadSingleToken,
     getAccountTokenBalance,
