@@ -8,7 +8,7 @@ import {
 } from 'web3-utils';
 import { sign } from 'web3-eth-accounts';
 import Web3Eth, { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
-import { DEFAULT_RETURN_FORMAT, FMT_BYTES, FMT_NUMBER } from 'web3-types';
+import { FMT_BYTES, FMT_NUMBER } from 'web3-types';
 import { isEmpty } from 'lodash-es';
 
 import type { IModalProps, Protocol } from '@/types';
@@ -91,6 +91,40 @@ function parseCaipChainId(chainIdOrCaip?: string): string | undefined {
   return chainIdOrCaip.startsWith('0x')
     ? BigInt(chainIdOrCaip).toString(10)
     : chainIdOrCaip;
+}
+
+function normalizeValueToHex(value?: unknown): string {
+  try {
+    if (value == null) return '0x0';
+    if (typeof value === 'bigint') return `0x${(value as bigint).toString(16)}`;
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value) || value < 0) return '0x0';
+      return `0x${(BigInt as any)(Math.trunc(value)).toString(16)}`;
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return '0x0';
+      if (/^0x[0-9a-fA-F]+$/.test(trimmed)) return trimmed;
+      if (/^\d+$/.test(trimmed)) return `0x${(BigInt as any)(trimmed).toString(16)}`;
+      const sci = trimmed.match(/^(\d+)e(\d+)$/i);
+      if (sci) {
+        const base = (BigInt as any)(sci[1]);
+        const exp = (BigInt as any)(sci[2]);
+        return `0x${(base * ((BigInt as any)(10) ** exp)).toString(16)}`;
+      }
+      return '0x0';
+    }
+    const anyVal: any = value as any;
+    if (anyVal?.toHexString && typeof anyVal.toHexString === 'function') {
+      const hex = anyVal.toHexString();
+      return hex.startsWith('0x') ? hex : `0x${String(hex)}`;
+    }
+    if (anyVal?.toString && typeof anyVal.toString === 'function') {
+      const str = anyVal.toString(10);
+      if (/^\d+$/.test(str)) return `0x${(BigInt as any)(str).toString(16)}`;
+    }
+  } catch (_) { /* noop */ }
+  return '0x0';
 }
 
 function selectProtocolByChainId(targetChainId?: string): Protocol {
@@ -257,16 +291,25 @@ export async function handleEvmRpcMethod(
     let currentBlock;
 
     try {
-      currentBlock = await getBlock(new Web3Eth(nodeUrl), 'latest', true, DEFAULT_RETURN_FORMAT);
+      currentBlock = await getBlock(
+        new Web3Eth(nodeUrl),
+        'latest',
+        true,
+        { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX },
+      );
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    const num = (currentBlock && typeof currentBlock.number !== 'undefined')
-      ? currentBlock.number
-      : 0;
-    const hex = Number.isSafeInteger(Number(num))
-      ? `0x${Number(num).toString(16)}`
-      : `0x${(BigInt as any)(num).toString(16)}`;
+    let hex = '0x0';
+    if (currentBlock && currentBlock.number != null) {
+      const blockNumber: any = currentBlock.number as any;
+      if (typeof blockNumber === 'string') {
+        hex = blockNumber.startsWith('0x') ? blockNumber : `0x${blockNumber}`;
+      } else {
+        const integerBlockNumber = Math.trunc(blockNumber as number);
+        hex = `0x${(BigInt as any)(integerBlockNumber).toString(16)}`;
+      }
+    }
     return { result: hex };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
@@ -282,13 +325,7 @@ export async function handleEvmRpcMethod(
     let estimatedGas = null as any;
     try {
       if (!p?.gas) {
-        let valueHex = '0x0';
-        if (p?.value != null) {
-          const valueStr = String(p.value);
-          valueHex = valueStr.startsWith('0x')
-            ? valueStr
-            : `0x${(BigInt as any)(valueStr).toString(16)}`;
-        }
+        const valueHex = normalizeValueToHex(p?.value);
         const estimateResp = await new EtherscanService(
           predefined.middlewareUrl,
           chainId,
