@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.8.1...v2.9.0) (2025-10-07)
+
+
+### Features
+
+* **address-book:** add ability to sort by chain ([73ba0b4](https://github.com/Superhero-com/superhero-wallet/commit/73ba0b4e07a7003bdfe93366e1e021f16ee1884c))
+* be able to search a protocol ([817a8f1](https://github.com/Superhero-com/superhero-wallet/commit/817a8f108ae91ce10df18bc4f0f8562e61edc809))
+* collapse AccountDetailsBase header on transaction list scroll ([3ad4bc8](https://github.com/Superhero-com/superhero-wallet/commit/3ad4bc8c974fb7596c3a18052244d7503b9a3393))
+* **evm:** propogate active account to the dApp ([0bd90db](https://github.com/Superhero-com/superhero-wallet/commit/0bd90dbebf497954901bbc09ae8f376fe555aa1b))
+* search by input and chain in account selector ([8be540f](https://github.com/Superhero-com/superhero-wallet/commit/8be540f359cbcbe03e312928958b38be399b09a3))
+* show spinner in AssetSelector on tokens loading ([97f6470](https://github.com/Superhero-com/superhero-wallet/commit/97f6470b38f181b357530aa50776f022297f21be))
+* update Chinese translation ([66b641c](https://github.com/Superhero-com/superhero-wallet/commit/66b641c9a61881b9c1471574347467e14edbb79d))
+* **wallet-connect:** propagate account change ([9b819e8](https://github.com/Superhero-com/superhero-wallet/commit/9b819e80aab1652fe367ca2d578e24702243ac61))
+
+
+### Bug Fixes
+
+* webApp wallet connect link redirection ([ea87fb5](https://github.com/Superhero-com/superhero-wallet/commit/ea87fb56fe1d9838f063ef9eda0cd5d79fd5eecc))
+
+
+### Maintenance
+
+* enable transitions on chrome ([61ebb72](https://github.com/Superhero-com/superhero-wallet/commit/61ebb72bf7467270d9b9052dc6773a88f018a0b9))
+
+
+### Tests
+
+* add several walletConnect tests ([9c7061b](https://github.com/Superhero-com/superhero-wallet/commit/9c7061be1fa2942a748f64d9d7715b7c27dd469f))
+* be able to login using password ([bb9d89a](https://github.com/Superhero-com/superhero-wallet/commit/bb9d89a50ba6c9feb51393f3f77b16ef821b1f90))
+
+
+### Performance
+
+* do not store all aeternity tokens in localStorage ([6f2c99a](https://github.com/Superhero-com/superhero-wallet/commit/6f2c99aa1ec1d39e66e4b4ef6a51ced125c74ffb))
+* optimize infiniteScroll component ([abc1f9b](https://github.com/Superhero-com/superhero-wallet/commit/abc1f9ba824637961cf8c719a2020b0eb69ca6be))
+
 ### [2.8.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.8.0...v2.8.1) (2025-09-19)
 
 
