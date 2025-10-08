@@ -241,22 +241,62 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.getBalance) {
-    let balance: string;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
-    const addressParam = Array.isArray(params) ? (params as any)[0] : (params as any)?.address;
+    // Robust address extraction supporting [addr, tag] or { address } shapes
+    const addressParamRaw = Array.isArray(params)
+      ? (params as any)[0]
+      : (params as any)?.address
+        ?? (
+          Array.isArray((params as any)?.params)
+            ? (params as any).params[0]
+            : undefined
+        );
+
+    if (!addressParamRaw || typeof addressParamRaw !== 'string') {
+      return { error: { code: -32602, message: 'Invalid params: address is required' } };
+    }
+
+    let checksumAddress: string;
     try {
-      balance = await adapter.fetchBalance(toChecksumAddress(addressParam!));
+      checksumAddress = toChecksumAddress(addressParamRaw);
+    } catch (_) {
+      return { error: { code: -32602, message: 'Invalid params: malformed address' } };
+    }
+
+    let balanceRaw: string | undefined;
+    try {
+      balanceRaw = await adapter.fetchBalance(checksumAddress);
     } catch (error: any) {
       return getUnknownError(error.message);
     }
+
     try {
-      const weiStr = balance ? toWei(balance, 'ether') : '0';
-      const hex = Number.isSafeInteger(Number(weiStr))
-        ? `0x${Number(weiStr).toString(16)}`
-        : `0x${(BigInt as any)(weiStr).toString(16)}`;
+      // Normalize balance to a decimal wei string
+      const normalizeToWeiString = (value?: string): string => {
+        if (!value) return '0';
+        const trimmed = value.trim();
+        if (!trimmed) return '0';
+        // If already hex (assume hex wei)
+        if (/^0x[0-9a-fA-F]+$/.test(trimmed)) {
+          return (BigInt as any)(trimmed).toString(10);
+        }
+        // If pure digits (decimal wei)
+        if (/^\d+$/.test(trimmed)) {
+          return trimmed;
+        }
+        // Otherwise, treat as ether with decimals (e.g., '0.1234')
+        try {
+          return toWei(trimmed, 'ether');
+        } catch (_) {
+          throw new Error('Malformed balance value');
+        }
+      };
+
+      const weiStr = normalizeToWeiString(balanceRaw);
+      const hex = `0x${(BigInt as any)(weiStr).toString(16)}`;
       return { result: hex };
     } catch (e: any) {
-      return getUnknownError(e.message || 'Failed to format balance');
+      return getUnknownError(e?.message || 'Failed to format balance');
     }
   }
   if (method === ETH_RPC_METHODS.getChainId) {
@@ -266,8 +306,19 @@ export async function handleEvmRpcMethod(
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
     // Support both EIP-3326 param shapes and hex/decimal chainIds
-    const requestedParam = (params as any)?.chainId
-      ?? (Array.isArray(params) ? (params as any)?.[0]?.chainId : undefined);
+    const pickChainIdParam = (p: any): unknown => {
+      if (p == null) return undefined;
+      if (typeof p === 'string' || typeof p === 'number' || typeof p === 'bigint') return p;
+      const direct = p?.chainId ?? p?.params?.[0]?.chainId ?? p?.params?.[0];
+      if (direct != null) return direct;
+      if (Array.isArray(p)) {
+        const first = p[0];
+        if (first == null) return undefined;
+        return typeof first === 'object' ? (first?.chainId ?? first) : first;
+      }
+      return undefined;
+    };
+    const requestedParam = pickChainIdParam(params);
     if (!requestedParam) {
       return { error: { code: -32602, message: 'Invalid params: chainId is required' } };
     }
@@ -322,6 +373,7 @@ export async function handleEvmRpcMethod(
     const url = aepp;
 
     const p = (Array.isArray(params) ? (params as any)[0] : (params as any)) || ({} as any);
+    const senderAddress = p?.from || getLastActiveProtocolAccount(protocol)?.address;
     let estimatedGas = null as any;
     try {
       if (!p?.gas) {
@@ -332,8 +384,8 @@ export async function handleEvmRpcMethod(
         ).fetchFromApi({
           module: 'proxy',
           action: 'eth_estimateGas',
-          from: toChecksumAddress(p.from!),
-          to: p.to,
+          ...(senderAddress ? { from: toChecksumAddress(senderAddress) } : {}),
+          ...(p?.to ? { to: p.to } : {}),
           value: valueHex,
           data: p.data || '0x',
         });
@@ -350,9 +402,15 @@ export async function handleEvmRpcMethod(
 
     const gasHexOrNum = p?.gas ?? estimatedGas;
     const gas = Number(gasHexOrNum);
-    const senderId = toChecksumAddress(p.from!);
-    const recipientId = toChecksumAddress(p.to!);
+    if (!senderAddress) {
+      return { error: { code: -32602, message: 'Invalid params: "from" address is required' } };
+    }
+    const senderId = toChecksumAddress(senderAddress);
+    const recipientId = p?.to ? toChecksumAddress(p.to) : undefined as any;
     const isCoinTransfer = !p.data;
+    if (isCoinTransfer && !p?.to) {
+      return { error: { code: -32602, message: 'Invalid params: "to" address is required for transfers' } };
+    }
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol,
