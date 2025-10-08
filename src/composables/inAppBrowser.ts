@@ -12,6 +12,7 @@ import {
 } from '@/constants';
 import {
   executeAndSetInterval,
+  isEvm,
 } from '@/utils';
 import {
   useAeSdk,
@@ -305,13 +306,13 @@ export function useInAppBrowser() {
         lastProxyTarget = proxyTarget;
         lastOrigin = origin;
         // Flush any queued AEX-2 payloads captured before the bridge was ready
-        try {
-          while (pendingAex2Events.length) {
-            const payload = pendingAex2Events.shift();
+        while (pendingAex2Events.length) {
+          const payload = pendingAex2Events.shift();
+          try {
             const evt = { data: payload, origin: lastOrigin, source: proxyTarget } as any;
             (lastProxyTarget as any)?._listener?.(evt);
-          }
-        } catch (_) { /* noop */ }
+          } catch (_) { /* noop */ }
+        }
         const connection = new BrowserWindowMessageConnection({
           target: proxyTarget,
           self: proxyTarget,
@@ -345,6 +346,9 @@ export function useInAppBrowser() {
     if (!iab) return;
     inAppBrowserRef.value = iab;
     isOpen.value = true;
+    // reset session-scoped flags on new open
+    iabConnectEmitted = false;
+    iabLastAccountsKey = '';
     isIabDappActive.value = false;
     currentUrl.value = url;
 
@@ -400,6 +404,22 @@ export function useInAppBrowser() {
         try { inAppBrowserRef.value?.close(); } catch (_) { /* noop */ }
         inAppBrowserRef.value = undefined;
         isOpen.value = false;
+        isIabDappActive.value = false;
+        // cleanup interval and rpc client like in 'exit'
+        try {
+          if (iabShareWalletInfoInterval.value) clearInterval(iabShareWalletInfoInterval.value);
+        } catch (_) { /* noop */ }
+        iabShareWalletInfoInterval.value = undefined as any;
+        try {
+          const sdk = await getAeSdk();
+          if (iabAex2ClientId.value) {
+            sdk.removeRpcClient(iabAex2ClientId.value);
+          }
+        } catch (_) {
+          /* noop */
+        } finally {
+          iabAex2ClientId.value = '';
+        }
         return;
       }
       if (data && data.type && (data.type === 'to_waellet' || data.type === 'to_aepp')) {
@@ -472,14 +492,33 @@ export function useInAppBrowser() {
               }
               // Emit connect only once per IAB session to avoid loops
               if (!iabConnectEmitted) {
-                const chain = await handleEvmRpcMethod(currentUrl.value, 'eth_chainId' as any, {} as any);
-                const chainIdHex = chain?.result || '0x0';
-                inAppBrowserRef.value.executeScript({
-                  code: `window.postMessage(${JSON.stringify({
-                    __shw: true, type: 'event', event: 'connect', payload: { chainId: chainIdHex },
-                  })}, '*')`,
-                });
-                iabConnectEmitted = true;
+                // Try to resolve chainId via RPC; if it fails, fall back to active network setting
+                let chainIdHex = '0x0';
+                try {
+                  const chain = await handleEvmRpcMethod(currentUrl.value, 'eth_chainId' as any, {} as any);
+                  const rpcChainHex = chain?.result;
+                  if (typeof rpcChainHex === 'string' && /^0x[0-9a-fA-F]+$/.test(rpcChainHex)) {
+                    chainIdHex = rpcChainHex;
+                  }
+                } catch (_) { /* noop - will use fallback below */ }
+                if (chainIdHex === '0x0') {
+                  try {
+                    const { protocol } = activeAccount.value;
+                    const chainDec = protocol === PROTOCOLS.bnb
+                      ? bnbActiveNetworkSettings.value.chainId
+                      : ethActiveNetworkSettings.value.chainId;
+                    if (chainDec != null) chainIdHex = `0x${BigInt(chainDec).toString(16)}`;
+                  } catch (_) { /* noop */ }
+                }
+                try {
+                  inAppBrowserRef.value.executeScript({
+                    code: `window.postMessage(${JSON.stringify({
+                      __shw: true, type: 'event', event: 'connect', payload: { chainId: chainIdHex },
+                    })}, '*')`,
+                  });
+                  // Set the flag only after successful emission
+                  iabConnectEmitted = true;
+                } catch (_) { /* noop - keep flag false to allow retry on next accounts request */ }
               }
             } catch (_) { /* noop */ }
           }
@@ -594,8 +633,8 @@ export function useInAppBrowser() {
       protocol: activeAccount.value.protocol,
     }), ({ addr, protocol }) => {
       if (!inAppBrowserRef.value) return;
-      const isEvm = protocol === PROTOCOLS.ethereum || protocol === PROTOCOLS.bnb;
-      emitEthereumEvent('accountsChanged', isEvm && addr ? [addr] : []);
+      const isEvmProtocol = isEvm(protocol as any);
+      emitEthereumEvent('accountsChanged', isEvmProtocol && addr ? [addr] : []);
     }, { immediate: true });
 
     // chainChanged events (throttled)
