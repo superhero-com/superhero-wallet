@@ -1,0 +1,1410 @@
+{
+  "common": {
+    "activeAccount": "活跃账户",
+    "address": "地址",
+    "allow": "允许",
+    "name": "名称",
+    "addressCopied": "已复制",
+    "all": "全部",
+    "allAddresses": "所有账户地址",
+    "amount": "金额",
+    "balanceUnavailable": "无法加载余额。",
+    "buy": "购买",
+    "by": "由",
+    "callData": "调用数据",
+    "cancel": "取消",
+    "confirm": "确认",
+    "connect": "连接",
+    "connected": "已连接",
+    "connecting": "正在连接...",
+    "connectingAs": "正在以以下身份连接",
+    "connectionFailed": "连接失败。",
+    "contractId": "合约 ID",
+    "notNow": "暂不",
+    "copy": "复制",
+    "dapp": "dApp",
+    "days": "{n} 天 | {n} 天 | {n} 天",
+    "disconnect": "断开连接",
+    "disconnecting": "正在断开连接...",
+    "edit": "编辑",
+    "faucet": "水龙头",
+    "fellowSuperhero": "超级英雄同伴",
+    "hashCopied": "哈希已复制",
+    "hours": "{n} 小时 | {n} 小时 | {n} 小时",
+    "hoursShort": "{n} 小时",
+    "key": "密钥",
+    "minutes": "{n} 分钟 | {n} 分钟 | {n} 分钟",
+    "minutesShort": "{n} 分 | {n} 分 | {n} 分",
+    "next": "下一步",
+    "nonce": "随机数",
+    "noProtocolAccountFound": "未找到 {protocolName} 账户。请先在钱包中添加一个 {protocolName} 账户。",
+    "of": "/",
+    "ok": "好的",
+    "pending": "处理中...",
+    "priceNotAvailable": "价格：不可用",
+    "receive": "接收",
+    "search": "搜索",
+    "searchForBlockchain": "搜索区块链",
+    "seconds": "{n} 秒 | {n} 秒 | {n} 秒",
+    "secondsShort": "{n} 秒",
+    "sell": "出售",
+    "send": "发送",
+    "sign": "签名",
+    "smartContract": "智能合约",
+    "status": "状态",
+    "swap": "兑换",
+    "browser": "浏览器",
+    "title": "Superhero 钱包",
+    "total": "合计",
+    "tx": "交易",
+    "unknown": "未知",
+    "unrecognized": "无法识别",
+    "you": "你",
+    "verifying": "正在验证...",
+    "max": "最大",
+    "tokens": "代币",
+    "on": "开",
+    "off": "关",
+    "share": "分享",
+    "transferSpeed": {
+      "fast": "快",
+      "medium": "中",
+      "slow": "慢"
+    },
+    "actionMayTakeFewMoments": "这可能需要一点时间。",
+    "backToHome": "前往仪表盘",
+    "scan": "扫描"
+  },
+  "connectionStatus": {
+    "offline": {
+      "statusMessage": "离线。请联网以获得实时数据。",
+      "title": "离线",
+      "description": "你当前处于离线状态。发送资产、获取余额、交易历史、多签保管库及 .chain 名称等部分功能暂不可用。<p> 请联网以获取实时数据！</p>"
+    },
+    "node": {
+      "error": {
+        "statusMessage": "无法连接到所选节点。",
+        "title": "无法获取网络 ID",
+        "description": "Superhero 钱包目前无法获取该网络 ID。<p> 请稍后再次尝试添加该网络。 </p>"
+      },
+      "connecting": "正在连接到节点...",
+      "connected": "已连接！"
+    },
+    "middleware": {
+      "error": {
+        "title": "中间件离线。",
+        "description": "发送资产、获取余额、交易历史、多签保管库及 .chain 名称等部分功能可能暂不可用。"
+      },
+      "syncing": {
+        "statusMessage": "中间件同步中...",
+        "title": "中间件正在同步",
+        "description": "Superhero 钱包中间件正在同步。<p> 所有钱包功能均可使用，但余额等数据可能过期，交易可能较平常更久处于待确认状态。 </p><p> 最新数据将很快可用。 </p>"
+      }
+    },
+    "multisig": {
+      "statusMessage": "多签后端暂时故障。",
+      "title": "多签后端故障",
+      "description": "由于后端临时故障，多签保管库当前可能无法访问。<p> 如果你正在尝试访问多签保管库，请稍后再试。 </p>"
+    },
+    "etherscan": {
+      "statusMessage": "Etherscan 服务不可用。",
+      "title": "Etherscan 服务不可用",
+      "description": "目前以太坊网络上的交易历史与交易详情等功能可能无法正常运行。"
+    },
+    "backend": {
+      "statusMessage": "后端临时故障。",
+      "title": "后端故障",
+      "description": "由于后端临时故障，设置默认名称、打赏相关功能以及多签保管库等可能暂不可用。<p> 除了暂时无法获取与展示“领取打赏”交易外，其余交易历史仍可访问。 </p>"
+    },
+    "aeternityBackend": {
+      "statusMessage": "æternity 后端临时故障。",
+      "title": "æternity 后端故障",
+      "description": "由于 æternity 后端临时故障，设置默认名称与打赏相关功能可能暂不可用。<p> 除了暂时无法获取与展示“领取打赏”交易外，其余交易历史仍可访问。 </p>"
+    },
+    "currencies": {
+      "statusMessage": "无法更新资产法币价值。",
+      "title": "无法获取资产法币价值",
+      "description": "由于第三方 API 调用次数达到限制，Superhero 钱包暂时无法正确获取并显示资产最新法币价值。<p></p>可在 <a> CoinGecko </a> 查看实时价格"
+    }
+  },
+  "dashboard": {
+    "selectAccount": "选择活跃账户",
+    "receiveCard": {
+      "description": "从现有钱包",
+      "descriptionMultisig": "到多签保管库"
+    },
+    "sendCard": {
+      "description": "向他人发送资产"
+    },
+    "proposeCard": {
+      "title": "提议交易",
+      "description": "给其他签名人"
+    },
+    "backUpCard": {
+      "title": "备份你的助记词",
+      "description": "备份助记词以便恢复钱包，避免资金损失。",
+      "button": "立即备份"
+    },
+    "daeppBrowserCard": {
+      "title": "浏览 æ 生态",
+      "description": "使用内置浏览器在钱包中探索 æpps。",
+      "button": "浏览"
+    },
+    "buyCard": {
+      "title": "购买 AE",
+      "description": "通过 Simplex 使用信用卡或银行账户购买 æternity 代币。",
+      "button": "购买 AE"
+    },
+    "nameCard": {
+      "title": "认领你的 .chain 名称",
+      "description": "为你的账户获取易读名称，并用其接收资金。",
+      "button": "认领名称"
+    },
+    "latestTransactionCard": {
+      "title": "最新交易"
+    },
+    "pendingMultisigCard": {
+      "title": "待处理的多签交易"
+    }
+  },
+  "multisig": {
+    "backToMainAccounts": "返回主账户",
+    "showMultisigVaults": "显示多签保管库",
+    "consensus": "共识",
+    "signatureRequested": "需要你的签名。",
+    "transactionSigned": "你已签署该交易。",
+    "transactionReady": "交易已准备好发送。",
+    "multisigVault": "多签保管库",
+    "address": "多签保管库地址",
+    "version": "合约版本",
+    "currentNonce": "当前随机数",
+    "authorizedSigners": "授权签名人",
+    "explorerLink": "在区块链浏览器中查看智能合约",
+    "consensusPending": "共识待定",
+    "multisigVaultCreationFailed": "多签创建失败",
+    "creatingAccount": "正在创建账户（为交易付费）",
+    "approved": "已批准",
+    "waitingToBeSent": "等待发送...",
+    "scanAddress": "扫描 æternity 地址"
+  },
+  "modals": {
+    "createAccount": {
+      "title": "添加账户",
+      "titleMultisig": "添加多签保管库",
+      "msgMultisig": "生成新的多签账户地址并将其添加到你的钱包。",
+      "generateOrImport": "生成新账户地址或导入账户。",
+      "btnSubtitle": "从你的助记词派生另一个账户",
+      "addProtocolAccount": "添加 {name} 账户",
+      "privateKeyTitle": "用私钥导入",
+      "privateKeySubtitle": "使用账户私钥导入账户"
+    },
+    "transaction-failed": {
+      "title": "交易失败",
+      "msg": "我们无法处理此交易。请稍后再试。",
+      "dustError": "交易因尘埃 UTXO 错误被网络拒绝。{'<'}br /{'>'} {'<'}br /{'>'} 请尝试在选择较低手续费档位的情况下使用“最大金额”功能发送，或者在全部转出前先为账户充值。"
+    },
+    "required": {
+      "msg": "请填写所有字段。"
+    },
+    "payloadInfo": {
+      "title": "消息载荷",
+      "msg": "载荷是由发送方编写并随区块链交易发送给接收方的可选公开消息。{'<'}br /{'>'}{'<'}br /{'>'}载荷可作为附加的交易标识、目标标签（某些中心化交易所在充值时要求）或用于提供任何补充信息的自由文本。"
+    },
+    "payloadForm": {
+      "title": "添加载荷（可选）",
+      "desc": "随交易发送一条公开消息，约每个字符 0.00000002 AE。",
+      "label": "载荷消息",
+      "doneBtn": "完成"
+    },
+    "privateKeyExport": {
+      "title": "显示账户私钥",
+      "warning": "切勿与任何人分享你的账户私钥，否则对方将能完全控制你的账户与资金！",
+      "helpMsg": "可以导出账户私钥，以便将此特定账户导入到支持相同功能的其他钱包中。<p> 使用私钥导入到你钱包的账户无法通过你的助记词恢复，只能通过此私钥恢复。请确保安全保存此类账户的私钥。</p><p> 切勿将你的私钥分享给任何人，因为它可提供对你的账户与资金的完全控制！</p>",
+      "mainBtnText": "显示私钥",
+      "copyBtnText": "复制私钥"
+    },
+    "privateKeyImport": {
+      "title": "导入 {protocol} 账户",
+      "subtitle": "请在下方输入你的私钥以将账户导入 Superhero 钱包。",
+      "privateKey": "私钥",
+      "placeholder": "在此输入或粘贴你的私钥",
+      "invalidPrivateKey": "这不是有效的 {protocol} 账户私钥。",
+      "privateKeyExist": "该账户已在你的钱包中。",
+      "helpTitle": "账户私钥",
+      "helpMsg": "使用私钥导入到你钱包的账户无法通过你的助记词恢复，只能通过此私钥恢复。请确保安全备份此类账户的私钥。 <p> 切勿与任何人分享你的私钥，因为它可提供对你的账户与资金的完全控制！ </p>",
+      "btnText": "导入账户"
+    },
+    "name-exist": {
+      "msg": "该名称已被注册。"
+    },
+    "insufficient-balance": {
+      "msg": "你的余额不足以完成此交易。"
+    },
+    "vaultLowBalance": {
+      "title": "保管库余额不足",
+      "msg": "保管库资金不足，无法支付此交易（提议金额 + 网络手续费）。"
+    },
+    "accountLowBalance": {
+      "title": "资金不足",
+      "msg": "你的签名账户中 AE 不足以{action}此交易。"
+    },
+    "createMultisigAccount": {
+      "title": "创建新的多签保管库",
+      "btnText": "创建多签保管库",
+      "btnSubtitle": "用多个账户共同管理资金",
+      "signer": "签名人",
+      "signerInputPlaceholder": "签名人账户地址",
+      "addSigner": "添加签名人",
+      "selectAccount": "选择一个账户",
+      "addSignerHelpMsg": "每笔多签交易都需要预设数量的授权账户签名确认。{'<'}br /{'>'}{'<'}br /{'>'}作为多签保管库的创建者，你可以确定授权签名人，并设置交易确认所需的共识数。",
+      "consensusRequiredDesc": "交易确认所需共识：",
+      "consensusRequiredContent": "共 {0} 个签名",
+      "consensusRequiredHelpTitle": "所需共识",
+      "consensusRequiredHelpMsg": "作为多签保管库的创建者，你可以确定授权签名人并设置交易确认所需的签名数量。",
+      "createMultisigVault": "创建保管库",
+      "errorDuplicatingSigner": "同一账户地址不能重复添加为签名人。",
+      "errorDuplicatingInputMessage": "重复的账户地址",
+      "errorNotEnoughBalanceToCreateVault": "该账户余额不足。创建多签保管库至少需要 {0}。"
+    },
+    "creatingMultisigAccount": {
+      "title": "创建保管库进度",
+      "btnText": "前往钱包仪表盘",
+      "vaultAccessibleMessage": "多签保管库已成功添加到你的钱包仪表盘。",
+      "vaultCreatedMessage": "你可以前往钱包仪表盘。",
+      "vaultCreatedMessageSub": "其他授权签名人将在短时间内看到你新创建的多签保管库（通常需要一两分钟）。",
+      "preparingMultisigVault": "正在准备多签保管库",
+      "deployingSmartContract": "正在部署智能合约",
+      "creatingMultisigVault": "正在创建多签保管库账户",
+      "addingToWallet": "正在将多签保管库添加到钱包",
+      "addingToWalletCard": "正在添加到钱包...",
+      "syncingVault": "正在同步多签保管库",
+      "takingLong": "此步骤可能需要一点时间。",
+      "syncing": "正在同步..."
+    },
+    "consensusInfo": {
+      "title": "多签共识",
+      "subtitle": " X/Y of Z",
+      "firstPoint": "{'<'}strong{'>'}X ={'<'}/strong{'>'} 已签名账户数；",
+      "secondPoint": "{'<'}strong{'>'}Y ={'<'}/strong{'>'} 批准交易所需签名数量；",
+      "thirdPoint": "{'<'}strong{'>'}Z ={'<'}/strong{'>'} 授权签名人总数。",
+      "description": "若 {'<'}strong{'>'}X=Y{'<'}/strong{'>'} 则多签共识已达成。交易提案已获批准，任何授权签名人均可发送该交易。"
+    },
+    "verify": {
+      "title": "验证你的 URL",
+      "msg": "请确保你要领取打赏的网站上添加了你的 Superhero 钱包账户公开地址或 .chain 名称。"
+    },
+    "recipient": {
+      "title": "发送加密货币",
+      "ae-sub-header": "至公开地址或 .chain 名称",
+      "sub-header": "至公开的 {protocolName} 地址",
+      "msg": {
+        "publicAddress": {
+          "title": "发送至公开地址",
+          "msg": "{0} 扫描二维码或手动输入收款账户地址。"
+        },
+        "chain": {
+          "title": "发送至 .chain 名称",
+          "linkTitle": "认领你自己的 .chain 名称",
+          "msg": "{0} AENS 名称是以 .chain 结尾、指向收款账户的人性化昵称。发送资金前，请确保收款人仍为该名称的所有者。"
+        },
+        "multiple": {
+          "title": "发送给多个收款人",
+          "msg": "{0} 你可以将所选数量的代币或通证发送至多个地址和/或 .chain 名称，使用逗号或空格分隔。"
+        }
+      }
+    },
+    "readMore": {
+      "msg": "{0} 了解有关打赏与领取加密货币打赏的更多信息。",
+      "linkTitle": "阅读更多"
+    },
+    "verified": {
+      "title": "已验证 URL",
+      "msg": "Superhero 钱包识别此 URL 为已验证。这意味着在网页上找到了 æternity 区块链账户地址，其所有者可以领取打赏。"
+    },
+    "not-verified": {
+      "title": "未验证 URL",
+      "msg": "这意味着我们未能在该 URL 找到 æternity 区块链账户地址。URL 所有者一旦在网页中添加其账户地址，便可领取所有累计的打赏。"
+    },
+    "blacklisted": {
+      "title": "不可访问的 URL",
+      "msg": "Superhero 钱包可对任何公开 URL 打赏。目前需要登录才能查看信息的网页尚不能被打赏。"
+    },
+    "not-secure": {
+      "title": "不安全的 URL",
+      "msg": "Superhero 钱包将 HTTP 站点标记为“Not secure（不安全）”——请仅使用 HTTPS 的 URL。HTTPS 中的 S 代表“安全”。TLS（或 SSL）证书证明服务器确为网站的合法主机。使用 HTTPS 的网站对用户和网站所有者都更可信且更安全。"
+    },
+    "error-log": {
+      "title": "出现了问题",
+      "sub-title": "做一个超级英雄！",
+      "content": "请提供你遇到的错误的更多信息，以便我们改进我们的超能力。不会收集任何个人数据。",
+      "create-report": "创建报告"
+    },
+    "donate-errors": {
+      "title": "你的错误报告已发送",
+      "msg": "感谢你成为如此乐于助人的超级英雄！"
+    },
+    "donate-errors-error": {
+      "title": "你的错误报告未发送",
+      "msg": "发送错误报告时出现了问题。"
+    },
+    "invalid-qr-code": {
+      "msg": "扫描的二维码无效。"
+    },
+    "confirmTransactionSign": {
+      "recipientId": "接收者 ID",
+      "commitmentId": "承诺 ID",
+      "nameFee": "名称费用",
+      "nameId": "名称 ID",
+      "pointers": "指针",
+      "data-sign": "需要签名的数据",
+      "functionName": "函数名",
+      "arguments": "参数",
+      "superheroChat": "Superhero 聊天",
+      "senderReplaced": "你的活跃钱包账户将作为该交易的发送者。",
+      "unableToExecute": "无法执行此交易。",
+      "confirmSigning": "希望你确认一笔交易。",
+      "notEnoughAE": "你的 AE 余额不足以支付此交易。",
+      "paidByDapp": "仅当 dapp 支付交易与 gas 费用时才会执行。"
+    },
+    "confirm-raw-sign": {
+      "title": "签名原始交易",
+      "warning": {
+        "title": "交易警告",
+        "content": "交易数据已损坏或 Superhero 钱包尚不支持此类交易。签名可能导致意外结果，包括资金损失或其他恶意影响。{0}{0}请谨慎操作，仅在你信任该 aepp 及其所有者时签名数据。"
+      }
+    },
+    "confirmUnsafeSign": {
+      "heading": "希望你签名数据。",
+      "superheroChatJwtSign": "希望你签名一条消息以登录。",
+      "title": "签名数据",
+      "typeJwt": "JSON Web Token (JWT)",
+      "typeUnknown": "数据类型未知。",
+      "type": "类型",
+      "warning": "仅在你信任该 dapp 及其所有者时签名数据。"
+    },
+    "qrCodeReader": {
+      "grantPermission": "授予相机权限",
+      "scanQr": "扫描二维码",
+      "noWebcam": "未检测到相机",
+      "noWebcamSubtitle": "请启用你的设备相机并检查其是否正常工作。",
+      "subtitle": "允许 Superhero 钱包访问你的相机以扫描二维码。",
+      "settings": "设置",
+      "qrCodeHasMultipleFragments": "要签名此交易，你需要扫描多个二维码。请将相机对准变化的二维码，直到全部扫描完成。",
+      "scanningProgress": "已扫描"
+    },
+    "name-pointers-help": {
+      "title": "名称指针",
+      "msg": "名称指针将 .chain 名称与账户地址关联，使该名称成为该地址的人性化别名。"
+    },
+    "auctions-help": {
+      "title": "拍卖与竞价",
+      "msg": "如果你的 .chain 名称{'<'}strong{'>'}不超过 12 个字符{'<'}/strong{'>'}，则需要通过拍卖竞价获得。要赢得竞拍，只需在拍卖结束时保持最高出价即可！如果有人出价超过你——你的全部资金将自动返还。{'<'}br /{'>'}{'<'}br /{'>'}拍卖周期与初始费用会随名称长度变化——名称越短，费用越高、周期越长。"
+    },
+    "nameAutoExtendHelp": {
+      "title": "自动延长名称",
+      "msg": "为鼓励积极使用 .chain 名称，其所有权默认具有时间限制。{'<'}br /{'>'}{'<'}br /{'>'} 选择自动延长选项可确保你不会失去 .chain 名称的所有权。{'<'}br /{'>'}{'<'}br /{'>'} 你的 .chain 名称将以一次简单的名称更新交易成本自动延长（由于 æternity 区块链的超低交易费用，费用不到一分钱）。"
+    },
+    "receive": {
+      "funds": "资金",
+      "title": "接收 {name} 到公开地址",
+      "requestAmount": "请求特定金额（可选）",
+      "copied": "已复制！",
+      "shareTextNoAmount": "我的 {protocolName} 地址：{address} 或使用 Superhero 钱包发送：{walletLink}",
+      "shareTextWithAmount": "请求 {amount} {coinSymbol}。发送到 {protocolName} 地址：{address} 或使用 Superhero 钱包发送：{walletLink}"
+    },
+    "receiveMultisig": {
+      "title": "接收资金到多签保管库"
+    },
+    "send": {
+      "sendTitle": "发送资金",
+      "sendAsset": "发送 {name}",
+      "reviewTitle": "审核交易",
+      "recipientLabel": "收款人",
+      "recipientPlaceholder": "输入公开地址或 .chain 名称",
+      "recipientPlaceholderUrl": "输入公开地址、.chain 名称或 URL",
+      "recipientPlaceholderProtocol": "输入 {name} 地址",
+      "recipientPlaceholderENS": "或 ENS 名称",
+      "transactionSpeed": "交易速度",
+      "transactionWillBeCompleted": "交易将在 ≈{time} 内完成。",
+      "payload": "载荷"
+    },
+    "multisigTxProposal": {
+      "title": "多签交易提案",
+      "multisigVault": "多签保管库",
+      "amount": "提议金额",
+      "signingAddress": "签名地址",
+      "signingAccount": "签名账户",
+      "fee": "提案交易费用",
+      "proposeAndApprove": "提议并批准",
+      "tokenWarning": "多签交易当前仅支持 AE 代币。"
+    },
+    "wrongNetwork": {
+      "title": "网络不一致",
+      "msg": "此操作在不同的网络上发起。请在钱包设置中切换到 {0} 后继续。",
+      "button": "关闭"
+    },
+    "accountDetails": {
+      "assets": "资产",
+      "assetsNotAvailable": "离线时无法访问资产。",
+      "transactions": "交易",
+      "transactionsNotAvailable": "离线时无法访问交易。",
+      "names": "名称",
+      "namesNotAvailable": "离线时无法访问名称。",
+      "details": "详情"
+    },
+    "claimGiftCard": {
+      "title": "兑换礼品卡",
+      "balance": "剩余卡内余额",
+      "amount": "兑换金额",
+      "redeem": "兑换",
+      "redeemPartially": "部分兑换",
+      "redeemFull": "全部兑换",
+      "redeemedBy": "{0} 兑换者",
+      "alreadyRedeemed": "此礼品卡已被兑换。"
+    },
+    "appsBrowserError": {
+      "title": "需要 æternity 账户以浏览 æ 生态",
+      "createAccount":"创建账户"
+    }
+  },
+  "airGap": {
+    "title": "AirGap",
+    "importAccount": {
+      "btnText": "导入 AirGap 账户",
+      "btnSubtitle": "与 AirGap Vault 同步",
+      "scanDescription": "扫描来自 AirGap Vault 的二维码以配对钱包并导入账户。",
+      "importConfirmDialog": {
+        "title": "从 AirGap 导入账户",
+        "description": "扫描 AirGap Vault 生成的二维码或将其复制/粘贴到此处以导入账户。请确保 AirGap 设置为使用二维码 V3。",
+        "importAccount": "导入账户",
+        "noAccountsFound": "未找到任何账户。"
+      }
+    },
+    "signMessageErrorModal": {
+      "title": "签名消息失败",
+      "msg": "此操作当前无法完成，因为需要使用你的 AirGap 账户签名一条消息。{'<'}br /{'>'}{'<'}br /{'>'}AirGap 账户目前不支持消息签名。"
+    },
+    "send": {
+      "title": "从 AirGap 账户发送资金",
+      "reviewTitle": "签名交易",
+      "reviewSubtitle": "扫描下方二维码或将其复制/粘贴到你的 AirGap Vault 以签名交易。点击“下一步”继续。"
+    },
+    "broadcast": {
+      "title": "广播交易",
+      "subtitle": "扫描 AirGap Vault 生成的二维码或将其复制/粘贴到此处以广播已签名交易。请确保 AirGap 设置为使用二维码 V3。",
+      "backToQr": "返回二维码"
+    },
+    "syncCode": {
+      "inputLabel": "来自 AirGap Vault 的代码",
+      "inputPlaceholder": "例如 airgap-wallet://?ur=HDIMC..."
+    },
+    "scan": {
+      "title": "扫描来自 AirGap Vault 的二维码以签名交易。",
+      "help": {
+        "title": "签名并发送 AirGap 交易",
+        "msg": "要在 Superhero 钱包中签名并广播 AirGap 交易，请按照 3 个简单步骤进行： {'<'}br /{'>'}{'<'}br /{'>'}{'<'}ol{'>'}{'<'}li {'>'}使用你的 AirGap Vault 扫描由 Superhero 钱包生成的二维码。{'<'}br /{'>'}{'<'}br /{'>'}或者，你可以复制 Superhero 钱包中的代码并粘贴到 AirGap Vault 中。 {'<'}/li {'>'}{'<'}li {'>'}在 AirGap Vault 中签名交易。AirGap Vault 将生成另一个二维码。{'<'}br /{'>'}{'<'}br /{'>'}确保 AirGap 设置为使用二维码 V3。{'<'}/li {'>'}{'<'}li {'>'}使用 Superhero 钱包扫描 AirGap Vault 生成的二维码并确认广播交易。{'<'}br /{'>'}{'<'}br /{'>'}或者，你可以从 AirGap Vault 复制代码，粘贴到 Superhero 钱包，然后广播交易。{'<'}/li {'>'}{'<'}/ol{'>'}"
+      }
+    }
+  },
+  "ledger": {
+    "title": "Ledger",
+    "importAccounts": {
+      "title": "连接 Ledger 设备",
+      "subtitle": "导入并管理 Ledger 账户。",
+      "connected": "Ledger 设备已连接",
+      "subtitleConnected": "导入或创建账户",
+      "sendingRequest": "正在向你的 Ledger 硬件钱包发送请求",
+      "connectionError": "连接超时。请确保 Ledger 硬件钱包正确插入并重试。",
+      "importAccounts": "导入账户",
+      "discoverAccountsTitle": "导入曾有活动的账户。",
+      "nothingDiscovered": "未发现有过活动的 Ledger 账户。",
+      "deriveAccount": "派生账户 #",
+      "deriveAccountTitle": "从你的 Ledger 种子派生新账户。你可以使用自定义账户索引号。",
+      "createAccount": "创建账户",
+      "createNewAccount": "创建新账户",
+      "selectAll": "全选",
+      "usbGuide1": "将 Ledger 插入 USB 接口。",
+      "usbGuide2": "在 Ledger 上打开 æternity 应用。",
+      "usbGuide3": "点击下方按钮进行连接。"
+    },
+    "sign": {
+      "title": "在设备上确认此操作",
+      "subtitle": "于你的 Ledger 设备",
+      "confirm": "你需要在硬件钱包上确认此操作。",
+      "unlock": "请确保设备已解锁且 æternity 应用处于激活状态。"
+    },
+    "accountCreate": {
+      "title": "添加 Ledger 账户",
+      "subtitle": "连接 Ledger 硬件钱包"
+    }
+  },
+  "filters": {
+    "out": "转出",
+    "in": "转入",
+    "dex": "DEX",
+    "date": "日期",
+    "tips": "打赏",
+    "bid": "出价",
+    "soonest": "最先结束",
+    "length": "名称长度"
+  },
+  "transaction": {
+    "fee": "交易费用",
+    "estimatedFee": "预估交易费用",
+    "estimatedGasUsed": "预估 Gas 用量",
+    "maxFee": "最大交易费用",
+    "advancedDetails": "高级交易详情",
+    "rawData": "原始",
+    "decoded": "已解码",
+    "decodingDataFailed": "无法解码交易数据。",
+    "data": "交易数据",
+    "gasCost": "Gas 成本",
+    "gasLimit": "Gas 上限",
+    "proposalEstimatedGasUsed": "提案预估 Gas 用量",
+    "proposalGasCost": "提案 Gas 成本",
+    "proposalTransactionFee": "提案交易费用",
+    "proposalTotal": "提案合计",
+    "type": {
+      "spendTx": "转账",
+      "contractCreateTx": "创建合约",
+      "contractCallTx": "调用合约",
+      "namePreclaimTx": "名称预申领",
+      "nameClaimTx": "认领名称",
+      "nameUpdateTx": "更新名称",
+      "nameTransferTx": "转移名称",
+      "nameRevokeTx": "撤销名称",
+      "oracleRegisterTx": "注册预言机",
+      "oracleExtendTx": "延长预言机",
+      "oraclePostQueryTx": "提交预言机查询",
+      "oracleRespondTx": "预言机响应",
+      "channelCloseSoloTx": "通道单方关闭",
+      "channelSlashTx": "通道惩罚",
+      "channelSettleTx": "通道结算",
+      "channelSnapshotSoloTx": "通道单方快照",
+      "payingForTx": "代付交易",
+      "gaMetaTx": "GA 元交易",
+      "gaAttachTx": "GA 附加交易",
+      "multisigProposal": "多签提案",
+      "sentTx": "发送中",
+      "receivedTx": "接收中",
+      "multisigVaultCreated": "已创建多签保管库",
+      "transactionFeePaidBy": "交易费用支付方",
+      "transactionFeePaid": "交易费用已支付",
+      "createMultisigVault": "创建多签保管库"
+    },
+    "listType": {
+      "sentTx": "已发送",
+      "receivedTx": "已接收",
+      "namePreclaimTx": "已预申领名称",
+      "nameClaimTx": "已认领名称",
+      "nameUpdateTx": "已更新名称",
+      "nameTransferTx": "已转移名称",
+      "nameRevokeTx": "已撤销名称",
+      "tipSent": "已打赏",
+      "tipReceived": "收到打赏"
+    },
+    "dexType": {
+      "provideLiquidity": "已提供流动性",
+      "removeLiquidity": "已移除流动性",
+      "allowToken": "授权代币",
+      "changeAllowance": "授权代币",
+      "transferAllowance": "授权代币",
+      "deposit": "存入",
+      "withdraw": "提取",
+      "pool": "资金池"
+    },
+    "spendType": {
+      "out": "转出",
+      "in": "转入"
+    },
+    "function": {
+      "propose": "提议交易",
+      "revoke": "撤销交易",
+      "refuse": "不批准交易",
+      "confirm": "批准交易",
+      "tip_token": "tip_token",
+      "retip_token": "retip_token"
+    },
+    "overview": {
+      "aens": "AENS",
+      "contractCreate": "创建合约",
+      "accountAddress": "账户地址",
+      "superheroDex": "Superhero DEX"
+    },
+    "returnType": {
+      "abort": "失败",
+      "revert": "已回滚"
+    },
+    "tokenSale": {
+      "tag": "代币销售",
+      "createToken": "创建代币",
+      "createdToken": "已创建代币",
+      "tokenName": "代币名称",
+      "bought": "已买入",
+      "sold": "已卖出"
+    }
+  },
+  "pages": {
+    "titles": {
+      "settings": "钱包设置",
+      "language": "语言",
+      "about": "关于",
+      "sendTip": "发送打赏",
+      "terms": "Terms of Use",
+      "privacy": "Privacy Policy",
+      "currency": "货币",
+      "notifications": "通知",
+      "auction": "竞价",
+      "more": "更多",
+      "networks": "网络",
+      "permissionsSettings": "权限",
+      "permissionsEdit": "编辑权限",
+      "permissionsAdd": "添加权限",
+      "commentNew": "添加评论",
+      "donateError": "捐赠数据",
+      "address": "发送地址",
+      "signMessage": "签名消息",
+      "signTransaction": "签名交易",
+      "giftCards": "礼品卡",
+      "txDetails": "交易详情",
+      "tokenDetails": "代币详情",
+      "coinDetails": "币种详情",
+      "saveErrorsLog": "错误日志",
+      "resetWallet": "重置钱包",
+      "seedPhrase": "助记词",
+      "secureLogin": "安全登录",
+      "networkAdd": "添加自定义网络",
+      "networkEdit": "编辑网络",
+      "notFound": "未找到功能",
+      "multisigProposalDetails": "多签提案详情",
+      "appsBrowser": "浏览 æ 生态",
+      "addressBook": "地址簿",
+      "addressBookEdit": "编辑地址记录",
+      "addressBookAdd": "添加新地址",
+      "tokenSales": "代币销售"
+    },
+    "errors-log-settings": {
+      "description": "<p>Superhero 钱包可以在你的设备上维护错误日志文件，记录最近 {0} 次遇到的错误。</p><p>错误日志可导出为 JSON 格式，以便调试或支持协助。</p>",
+      "keepErrorLog": "保留错误日志",
+      "exportErrorLog": "导出错误日志",
+      "disableDialog": {
+        "title": "禁用错误日志",
+        "subtitle": "并导出收集的数据",
+        "msg": "你将要禁用 Superhero 钱保留错误日志。这将删除存储中的所有历史错误数据。",
+        "question": "你想要导出错误日志并禁用该功能吗？",
+        "btnText": "导出并禁用"
+      }
+    },
+    "addressBook": {
+      "addAddress": "添加",
+      "importAddressBook": "导入",
+      "exportAddressBook": "导出",
+      "searchPlaceholder": "按名称或 {0} 地址搜索",
+      "scanTitle": "扫描你想添加的地址",
+      "selectRecipientAddress": "选择收款人的地址",
+      "selectSignerAddress": "选择签名人的地址",
+      "singleRecipient": "单个收款人",
+      "multipleRecipients": "多个收款人",
+      "useSelected": "使用所选",
+      "noRecords": {
+        "addressBook": "地址簿中没有记录。",
+        "blockchain": "当前所选区块链没有地址记录。",
+        "bookmarked": "没有已书签的地址记录。",
+        "recent": "没有最近的收款人。",
+        "search": "未找到与你的搜索查询匹配的地址记录。"
+      },
+      "entry": {
+        "delete": "删除地址记录",
+        "customName": "自定义名称",
+        "bookmark": "书签",
+        "bookmarked": "已加书签",
+        "namePlaceholder": "输入自定义名称",
+        "addressPlaceholder": "输入公开区块链地址"
+      },
+      "import": {
+        "title": "正在导入记录",
+        "subtitle": "到钱包地址簿",
+        "importing": "导入中",
+        "success": "导入成功",
+        "failed": "导入失败",
+        "existing": "已存在"
+      },
+      "export": {
+        "title": "地址簿已导出",
+        "message": "地址簿已成功导出。 "
+      },
+      "filters":  {
+        "addressBook": "地址簿",
+        "own": "自己的",
+        "recent": "最近",
+        "filterByBlockchain": "按区块链筛选",
+        "filterByBlockchainSubtitle": "仅显示所选区块链协议的地址"
+      }
+    },
+    "secureLogin": {
+      "descriptionBiometric": "启用安全登录后，你可以使用移动设备的身份验证方式访问 Superhero 钱包应用。",
+      "descriptionPassword": "启用安全登录后，你可以设置自定义密码来解锁 Superhero 钱包。",
+      "enableSecureLogin": "启用安全登录",
+      "enablePasswordProtection": "启用密码安全登录",
+      "enableDeviceSecureLogin": "启用设备安全认证",
+      "autoLock": {
+        "title": "自动锁定钱包",
+        "descriptionPart1": "Superhero 钱包将在预设的不活动时间间隔后被锁定。",
+        "descriptionPart2": "你将被要求进行身份验证以解锁钱包并继续使用。"
+      },
+      "authenticationTimeout": "立即 | 不活动 {n} 分钟后 | 不活动 {n} 分钟后",
+      "available": {
+        "part1": "启用安全登录后，你可以使用移动设备的身份验证方式访问 Superhero 钱包应用。",
+        "part2": "你可以稍后在 Superhero 钱包设置中启用此功能。"
+      },
+      "unavailable": {
+        "part1": "Superhero 钱包支持使用你的移动设备身份验证方式进行安全登录。",
+        "part2": "你的移动设备当前未启用安全认证。现在要启用吗？"
+      },
+      "walletLocked": "钱包已锁定",
+      "walletLockedSubtitle": "点击屏幕登录！",
+      "lockWallet": "锁定钱包",
+      "enterPassword": "输入密码",
+      "toUnlock": "以解锁你的钱包",
+      "authFailed": "认证失败",
+      "authFailedSubtitle": "点击屏幕重试！",
+      "passwordStrength": {
+        "weak": "弱",
+        "medium": "中",
+        "strong": "强"
+      },
+      "login": {
+        "error": "你输入的密码不正确。",
+        "placeholder": "输入你的密码",
+        "label": "密码",
+        "unlock": "解锁",
+        "forgot": "忘记密码？"
+      }
+    },
+    "tokenSales": {
+      "heading": "你可以添加自定义代币销售工厂 URL。这将使 Superhero 钱包能够正确支持你偏好的 dApp 上的代币销售。",
+      "inputLabel": "代币销售 URL",
+      "inputPlaceholder": "输入自定义代币销售工厂 URL",
+      "addUrl": "添加 URL",
+      "helpTitle": "自定义代币销售 URL",
+      "helpSubtitle": "用于在不同 dApp 上管理代币销售",
+      "urlListLabel": "代币销售 URL",
+      "errorInvalidUrl": "请输入有效的代币销售工厂 URL。",
+      "errorUrlExists": "该代币销售 URL 已添加。",
+      "errorTimeout": "URL 连接超时。请稍后再试。"
+    },
+    "setPassword": {
+      "title": "设置密码",
+      "text": "以安全访问你的钱包",
+      "text-2": "请选择一个强密码，并确保记住或安全备份。",
+      "textRestoredWallet": "Superhero 钱包已更新，引入了更高的安全级别。建议你选择一个强密码，并确保记住它或安全备份。",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "输入强密码",
+      "confirmLabel": "确认密码",
+      "confirmPlaceholder": "重复你选择的密码",
+      "confirm": "设置密码",
+      "skip": "跳过密码",
+      "help": {
+        "title": "设置密码",
+        "text": "以安全访问 Superhero 钱包 {'<'}br /{'>'} {'<'}br /{'>'} 出于安全原因，建议你设置一个自定义密码，用于解锁你的钱包。 {'<'}br /{'>'} {'<'}br /{'>'} 如果你忘记了密码，唯一可以访问你的钱包和资金的方式是使用助记词（由 12 个或更多单词组成的助记词）来恢复你的账户并设置新密码。 {'<'}br /{'>'} {'<'}br /{'>'} 这就是为什么记住你的密码很重要，而备份助记词更为重要。"
+      }
+    },
+    "changePassword": {
+      "title": "更改密码",
+      "description": "你必须提供当前密码才能重置它。",
+      "currentPassword": "当前密码",
+      "currentPasswordPlaceholder": "输入当前密码",
+      "newPassword": "新密码",
+      "newPasswordPlaceholder": "输入强新密码",
+      "confirmNewPassword": "确认新密码",
+      "reset": "重置密码",
+      "success": "你的密码已成功重置。请记住你的新密码。"
+    },
+    "about": {
+      "terms": "Terms",
+      "privacyPolicy": "Privacy",
+      "reportBug": "报告错误",
+      "name": "名称",
+      "commit": "提交",
+      "software-version": "软件版本",
+      "sdk-version": "SDK 版本",
+      "middleware-version": "中间件版本",
+      "node-version": "节点版本"
+    },
+    "account": {
+      "heading": "账户",
+      "privateKey": "私钥 {protocol}",
+      "balance": "余额",
+      "secureYourAccount": "保护你的账户",
+      "backupNow": "立即备份",
+      "seedNotification": "欢迎使用 Superhero 钱包！请备份你的助记词！",
+      "backup": "备份",
+      "updateAvailable": "有可用更新",
+      "updateAvailableText": "商店中有新的钱包版本可下载",
+      "shareAddress": "分享你的公开地址"
+    },
+    "accounts": {
+      "addAccount": "添加账户",
+      "searchAccountsPlaceholder": "搜索账户",
+      "addAccountDescription": "向你的钱包添加账户以分别管理资金。"
+    },
+    "vaults": {
+      "addVault": "添加保管库",
+      "addVaultDescription": "向你的钱包添加多签保管库以用多个账户管理资金。"
+    },
+    "claim": {
+      "claim": "领取打赏",
+      "noZeroClaim": "该 URL 没有可领取的打赏。",
+      "ae": "AE 代币",
+      "claimed": " 领取请求已发送！ ",
+      "url": "URL",
+      "tipsOnUrl": "该 URL 上的打赏",
+      "urlNotExisting": "目前该 URL 没有打赏。",
+      "moreOracles": "没有足够的活跃预言机来验证你的领取请求。请稍后再试。",
+      "oracleFailed": "预言机服务检查领取失败。请稍后再试。"
+    },
+    "claimTips": {
+      "title": "领取打赏",
+      "header": "你需要在可以领取任何打赏之前验证 URL 的所有权。",
+      "urlToClaim": "从该 URL 领取打赏："
+    },
+    "notFound": {
+      "header": "迷失在太空中？",
+      "description": "本宇宙中找不到该功能。保持冷静并安全返回主页。",
+      "backToHome": "返回主页",
+      "reportBug": "报告错误"
+    },
+    "recentTransactions": {
+      "noTransactionsFound": "该账户没有最近交易。",
+      "unknownMode": "未知显示模式类型：",
+      "transactionListEnd": "该账户没有更早的交易了。"
+    },
+    "auctionBid": {
+      "current-highest-bid": "当前最高出价",
+      "ending-height": "结束高度"
+    },
+    "connectConfirm": {
+      "title": "与 Superhero 钱包连接",
+      "subTitle": "仅当你信任该 dApp 及其所有者时。",
+      "unknownSource": "未知来源",
+      "unknownUrl": "未知 URL",
+      "unknownOriginWarning": "请确保你了解请求来源。授予权限可能导致不希望的结果，包括资金损失。",
+      "websiteRequestConnect": "希望连接到你的钱包",
+      "noAccountsFoundLabel": "未找到 {0} 账户。",
+      "noAccountsFoundDescription": "要使用此 dApp，你需要先向钱包添加一个 {0} 账户。",
+      "permissionsHeader": "并获得以下权限：",
+      "addressLabel": "查看你的地址",
+      "addressRequest": "此 dApp 请求查看你当前账户地址的权限。",
+      "addressListLabel": "查看你的地址列表",
+      "addressListRequest": "此 dApp 请求查看你的账户地址列表的权限。",
+      "networkLabel": "使用可用网络",
+      "networkRequest": "此 dApp 请求使用你 Superhero 钱包中可用的网络：{'<'}br /{'>'}{'<'}br /{'>'}{'<'}ul{'>'}{'<'}li {'>'}主网{'<'}/li {'>'}{'<'}li {'>'}测试网{'<'}/li {'>'}{'<'}/ul{'>'}",
+      "transactionLabel": "提议交易",
+      "transactionRequest": "此 dApp 可能会提议交易。你负责确认它们。",
+      "rememberMe": "记住我",
+      "selectAccount": "选择用于连接的账户",
+      "ensureNetwork": "进行任何交易前，请确保 Superhero 钱包与 dApp 连接到相同网络。"
+    },
+    "fungible-tokens": {
+      "tokens": "代币 | 代币 | 代币",
+      "searchPlaceholder": "按代币名称或合约地址搜索",
+      "searchAssetsPlaceholder": "搜索资产",
+      "buyAe": "购买 AE",
+      "select-asset": "选择资产"
+    },
+    "token-details": {
+      "tip": "打赏",
+      "token-details": "代币详情",
+      "coin-details": "币种详情",
+      "token": "代币",
+      "name": "名称",
+      "coin": "币种",
+      "decimals": "小数位",
+      "total-supply": "总供应量",
+      "max-supply": "最大供应量",
+      "supply": "供应量",
+      "priceAe": "价格（AE）",
+      "price": "价格",
+      "volume": "总交易量",
+      "volumeDaily": "24 小时交易量",
+      "feeDaily": "24 小时手续费",
+      "market-cap": "市值",
+      "atl-change": "历史最低",
+      "ath-change": "历史最高",
+      "more": "更多",
+      "poolShare": "资金池份额",
+      "holders": "持有者",
+      "transactions": "交易",
+      "pooled": "质押量",
+      "daoBalance": "DAO 余额",
+      "ownerAddress": "DAO 地址",
+      "saleAddress": "销售地址",
+      "creatorAddress": "创建者地址",
+      "smartContract": "智能合约"
+    },
+    "more": {
+      "dex": "Superhero DEX"
+    },
+    "names": {
+      "balance-error": "你的账户余额不足以执行该交易。",
+      "pointer-added": "名称 {type} 成功！",
+      "auto-extend": "自动延长",
+      "tabs": {
+        "my-names": "我的名称",
+        "auctions": "拍卖",
+        "register": "注册名称"
+      },
+      "list": {
+        "default": "默认",
+        "default-make": "设为默认",
+        "valid-identifier-error": "请输入有效的 æternity 区块链标识符",
+        "no-names": "该账户没有 .chain 名称。是否现在注册一个？",
+        "register-name": "注册 .chain 名称",
+        "name-hash": "名称代码",
+        "pointers": "指针"
+      },
+      "details": {
+        "created-height": "创建高度",
+        "expires-height": "到期高度",
+        "set-pointer": "设置指针",
+        "address-placeholder": "输入 ak_, ct_, ok_, ch_"
+      },
+      "claim": {
+        "auto-extend": "自动延长名称",
+        "register-name": "注册 .chain 名称",
+        "name-placeholder": "输入 .chain 名称",
+        "button": "注册名称",
+        "button-price": "用 {0} AE 注册名称",
+        "short-names": {
+          "message": "{0} 的 .chain 名称所有权将通过拍卖由最高出价账户获得。",
+          "insertion": "少于 13 个字符"
+        }
+      },
+      "auctions": {
+        "length": "名称长度",
+        "bid": "出价",
+        "endsInApproxTime": "约在 {time} 后结束",
+        "no-auctions": ".chain 名称当前没有正在拍卖的。是否现在注册一个？",
+        "min-bid": "出价必须大于 {minBid} AE",
+        "bid-added": "出价添加成功",
+        "place-bid": "出价",
+        "bid-history": "出价历史",
+        "bids-on": "出价于"
+      }
+    },
+    "address": {
+      "connectingFailedTitle": "连接失败",
+      "connectingFailedMessage": "因未知原因连接失败。"
+    },
+    "jwtSign": {
+      "noPayload": "没有可签名的载荷。",
+      "wrongProtocol": "JWT 签名仅支持 æternity 账户。",
+      "signingFailedTitle": "JWT 签名失败",
+      "signingFailedMessage": "JWT 签名因未知原因失败。"
+    },
+    "signMessage": {
+      "signingFailedTitle": "消息签名失败",
+      "signingFailedMessage": "消息签名因未知原因失败。"
+    },
+    "languageSettings": {
+      "chooseLanguage": "选择 Superhero 钱包 UI 语言。"
+    },
+    "currencySettings": {
+      "chooseLanguage": "选择 Superhero 钱包法币换算。也可选择换算为 XAU（金）。"
+    },
+    "index": {
+      "term1": "我同意 Superhero ",
+      "termsAndConditions": "Terms of Use",
+      "heading": {
+        "message": "多链钱包，管理加密资产并畅游 {0} 与 {1} 世界。",
+        "web3": "web3",
+        "deFi": "DeFi"
+      },
+      "ready": "准备好了吗？",
+      "go": "开始！",
+      "platforms": {
+        "heading": "下载到你的设备",
+        "browser-extension": "浏览器扩展",
+        "mobile-app": "移动应用"
+      },
+      "webVersion": "或继续使用网页版",
+      "generateWallet": "创建新钱包",
+      "getStartedWithWallet": "开始使用 Superhero 钱包",
+      "importWallet": "恢复现有钱包",
+      "enterSeed": "使用助记词",
+      "seedPhrase": "助记词",
+      "enterSeedPhrase": "请按正确顺序输入你的助记词（以空格分隔）以恢复 Superhero 钱包。",
+      "importAccount": "恢复钱包",
+      "selectProtocol": "请选择要创建第一个钱包账户的区块链。",
+      "accountNotFound": "未找到账户。请再次检查你的助记词。",
+      "passwordWasNotSet": "未设置密码。请设置密码以继续。",
+      "invalidSeed": "你的助记词应由 12 个或更多以空格分隔的单词组成。",
+      "seedPlaceHolder": "在此输入或粘贴你的助记词",
+      "scanSeedPhrase": "扫描助记词",
+      "restoringAccounts": "正在恢复账户..."
+    },
+    "notifications": {
+      "superhero": "Superhero.com",
+      "commentOnComment": "回复了你的评论。",
+      "commentOnTip": "评论了你的打赏。",
+      "tipOnComment": "打赏了你的评论。",
+      "retipOnTip": "再次打赏了你的打赏。",
+      "claimOfTip": "领取了你的打赏。",
+      "claimOfRetip": "领取了你的二次打赏。",
+      "viewOnSuperhero": "在 Superhero.com 查看",
+      "goToStore": "前往商店",
+      "noNotifications": "你没有未读通知。"
+    },
+    "notificationSettings": {
+      "description": "钱包通知默认始终开启，你无法将其关闭。",
+      "description2": "你可以在下方选择来自社交平台 Superhero.com 的通知类型。",
+      "commentOnTip": "有人评论了你的打赏或帖子。",
+      "commentOnComment": "有人回复了你的评论。",
+      "retipOnTip": "有人二次打赏了你的打赏。",
+      "wallet": "钱包通知（始终开启）。",
+      "tipOnComment": "有人打赏了你的评论。",
+      "claimOfTip": "有人领取了你的打赏。",
+      "claimOfRetip": "有人领取了你的二次打赏。"
+    },
+    "seed-phrase-settings": {
+      "verifyYourSeedPhrase": "验证你的助记词！",
+      "compose-your-seed-phrase": "点击下方的单词 {0} 以组成你的助记词。",
+      "seedRecoverySmall": "你的秘密恢复短语（助记词）是由 12 个或更多单词组成的助记短语，可让你在任何设备上恢复并访问你的钱包账户。",
+      "seedRecoverySmall-2": "Superhero 钱包将你的助记词以加密形式安全地存储在本地存储中。",
+      "seedRecoverySmall-3": "切勿向任何人泄露助记词！",
+      "seedRecoverySmall-4": "确保你 {0} 在只有你能看到的纸张或文件中——但你永远不会丢失。",
+      "seedRecoverySmall-5": "丢失助记词意味着丢失对你钱包和所有账户资金的访问权限。",
+      "seedRecoverySmallBackItUp": "按正确的词序备份",
+      "seedRecoveryBtn": "显示助记词",
+      "copy": "复制到剪贴板",
+      "this-your-seed-phrase": "这是你的助记词。请妥善保管！",
+      "confirm-that-you-save-your-seed-phrase": "确认你已正确保存助记词。",
+      "in-correct-order": "以正确顺序",
+      "seed-phrase-correct": "助记词已验证！",
+      "seed-phrase-incorrect": "助记词单词顺序不正确。请重新输入你的助记词！"
+    },
+    "seedPhrase": {
+      "first": "第一",
+      "second": "第二",
+      "third": "第三",
+      "verifySeed": "验证你的助记词",
+      "doneThis": "我之前已验证过助记词",
+      "verify": "验证助记词",
+      "toDashboard": "返回仪表盘",
+      "backUpYourSeedPhrase": "将你的助记词 {0} 在只有你能看到的纸张或文件上备份。制作多个备份。请确保将助记词保存在安全的地方！",
+      "inCorrectOrder": "以正确顺序（12 个或更多单词）",
+      "toBeSureYouGotItRight": "为确保你记对了，你应该 {0} 点击下方按钮！",
+      "verifyYourSeedPhrase": "验证你的助记词"
+    },
+    "send": {
+      "title": "交易已提交",
+      "copy": "复制二维码",
+      "reviewtx": "查看交易",
+      "multicheckalert": "发送给多个收款人时请仔细核对",
+      "checkalert": "请仔细检查信息。",
+      "sender": "发送地址",
+      "recipient": "接收地址",
+      "receivingUrl": "接收 URL",
+      "show": "显示",
+      "hide": "隐藏",
+      "recipients": "收款人",
+      "sending": "正在发送",
+      "sentTo": "已成功发送至",
+      "sendingCryptoToUrl": "正在向 URL 发送打赏",
+      "tipInfo": "你的交易将在 {0} 上以 URL 打赏的形式公开显示",
+      "to": "至",
+      "messageUrlOwner": "给 URL 所有者留言（可选）",
+      "scanAddress": "扫描收款账户地址二维码以向其发送 {assetName}。",
+      "singleAccountLabel": "单笔转账金额",
+      "multipleAccountLabel": "全部转账金额"
+    },
+    "signTransaction": {
+      "reject": "拒绝",
+      "maxSpent": "最大花费",
+      "minReceived": "最少接收",
+      "from": "从",
+      "to": "到",
+      "approveUseOfToken": "批准使用代币",
+      "maximumDeposited": "最大存入",
+      "poolTokenSpent": "消耗的资金池代币",
+      "minimumWithdrawn": "最少提取"
+    },
+    "termsOfService": {
+      "section1Title": "1. 定义",
+      "section2Title": "2. 一般规定",
+      "section3Title": "3. 用户识别",
+      "section4Title": "4. 用户义务",
+      "section5Title": "5. 免责声明",
+      "section6Title": "6. 税费",
+      "section7Title": "7. 第三方平台",
+      "section8Title": "8. 许可",
+      "section9Title": "9. 知识产权",
+      "section10Title": "10. 修改",
+      "section11Title": "11. 最终条款"
+    },
+    "tipPage": {
+      "url": "发送打赏至",
+      "claimingExplanation": "通过 Superhero 钱包，一旦在页面上找到账户地址，URL 所有者便可领取所有打赏。",
+      "maxNoteLengthError": "请输入少于 280 个字符的消息。",
+      "minAmountError": "打赏金额应超过 0.01 美元的 AE。"
+    },
+    "transactionDetails": {
+      "poolFee": "资金池手续费",
+      "type": "类型",
+      "txHash": "交易哈希",
+      "transactions": "交易",
+      "explorer": "在区块链浏览器中查看交易",
+      "txName": "名称",
+      "name": "名称",
+      "nameSalt": "名称盐值",
+      "nameId": "名称 ID",
+      "advancedMode": "高级模式",
+      "blockHeight": "区块高度",
+      "signatures": "签名",
+      "nonce": "随机数",
+      "callData": "调用数据",
+      "gasUsed": "已用 Gas",
+      "gasPrice": "Gas 价格",
+      "code": "代码",
+      "abiV": "ABI 版本",
+      "vmV": "VM 版本",
+      "payload": "载荷",
+      "commitment": "承诺 ID",
+      "clientTtl": "客户端 TTL",
+      "nameTtl": "名称 TTL",
+      "pointerId": "指针 ID",
+      "pointerKey": "指针 Key",
+      "moreInfo": "更多信息",
+      "hash": "哈希",
+      "status": "状态",
+      "revert": "已回滚",
+      "revertInfo": "交易已回滚。所有状态已恢复到交易前的状态。",
+      "failed": "失败",
+      "reason": "原因",
+      "tipUrl": "被打赏的 URL",
+      "timestamp": "时间戳",
+      "poolTokenReceived": "获得的资金池代币",
+      "poolTokenSpent": "消耗的资金池代币",
+      "approveTokenUse": "已批准代币使用",
+      "deposited": "已存入",
+      "withdrawn": "已提取",
+      "rates": "汇率",
+      "swapRoute": "兑换路径",
+      "feePaidBy": "交易费支付方",
+      "vaultContractId": "保管库合约 ID"
+    },
+    "proposalDetails": {
+      "receivingAddress": "接收地址",
+      "proposedBy": "提议者",
+      "revoke": "撤销",
+      "revokeTransaction": "撤销交易提案",
+      "refuse": "不批准",
+      "sign": "批准",
+      "expiresAt": "到期高度",
+      "infoBox": {
+        "signatures": "个签名",
+        "signature": "个签名",
+        "expired": "交易提案已过期！",
+        "pending": "待达成共识：还需 {0} 个 {1} 才能批准该交易提案。",
+        "approved": "交易提案已获得所需数量授权签名人批准。任何授权签名人均可发送该交易。",
+        "revoked": "交易提案已被 {0}/{1} 名所需授权签名人不批准。 ",
+        "proposingAccountRevoked": "交易提案已被提议账户撤销。",
+        "justRevoked": "交易提案已被撤销。",
+        "completed": "交易已成功发送。"
+      },
+      "signDialog": {
+        "title": "批准交易提案",
+        "formSelectText": "签名账户",
+        "btnText": "批准",
+        "msg": "批准该交易提案？",
+        "cannotDoActionWithSelectedAccount": "无法使用所选账户批准该交易提案！",
+        "selectedAccountAlreadyDoneThisAction": "所选账户已签署该交易提案！"
+      },
+      "revokeDialog": {
+        "title": "撤销交易提案",
+        "formSelectText": "签名账户",
+        "btnText": "撤销提案",
+        "msg": "确定要撤销该交易提案吗？",
+        "cannotDoActionWithSelectedAccount": "无法使用所选账户撤销该交易！",
+        "selectedAccountAlreadyDoneThisAction": "所选账户已撤销该交易！"
+      },
+      "refuseDialog": {
+        "title": "不批准交易提案",
+        "formSelectText": "签名账户",
+        "btnText": "不批准",
+        "msg": "确定不批准该交易吗？",
+        "cannotDoActionWithSelectedAccount": "无法使用所选账户不批准该交易提案！",
+        "selectedAccountAlreadyDoneThisAction": "所选账户已不批准该交易提案！"
+      }
+    },
+    "popupMessageSign": {
+      "title": "签名消息",
+      "heading": "希望签名消息。",
+      "message": "消息"
+    },
+    "network": {
+      "connectToNetwork": "连接到网络",
+      "connectTo": "连接到 {name}",
+      "connectedTo": "已连接到 {name}",
+      "confirmDelete": "你确定要删除这个自定义网络吗？",
+      "listLabel": "在主网与测试网之间选择，或添加自定义节点连接。仅添加你信任的自定义网络，以避免恶意提供商。",
+      "formLabel": "在下方字段中填写自定义节点详情。请确保仅添加可信的自定义网络。",
+      "thirdPartyDetails": "以下网络详情由第三方提供。请确保你信任该网络提供者，以避免恶意行为导致资金损失。",
+      "addCustomNetwork": "添加自定义网络",
+      "addNetwork": "添加网络",
+      "apply": "应用",
+      "networkNamePlaceholder": "输入网络名称",
+      "networkNameLabel": "网络名称",
+      "networkUrlPlaceholder": "输入网络 URL",
+      "networkUrlLabel": "网络 URL",
+      "networkMiddlewarePlaceholder": "输入网络中间件 URL",
+      "networkMiddlewareLabel": "网络中间件",
+      "backendUrlPlaceholder": "输入打赏后端 URL",
+      "explorerUrlLabel": "浏览器",
+      "explorerUrlPlaceholder": "输入浏览器 URL",
+      "backendUrlLabel": "打赏后端",
+      "chainIdPlaceholder": "1",
+      "chainIdLabel": "链 ID（数字）",
+      "error": {
+        "networkExists": "该名称的网络已存在。"
+      },
+      "moreNetworks": "更多",
+      "viewAndManage": "查看并管理所有网络"
+    },
+    "donate-error": {
+      "error-report": "错误报告：",
+      "error-placeholder": "描述错误发生前你的操作（可选）。",
+      "data-collected": "已收集数据",
+      "browser": "浏览器版本",
+      "details": "技术细节：",
+      "donate": "捐赠数据"
+    },
+    "invite": {
+      "generate-link": "生成新的礼品卡",
+      "generate": "生成礼品卡",
+      "created-links": "礼品卡",
+      "top-up": "充值",
+      "collapse": "收起",
+      "claim": "收回",
+      "insufficient-balance": "余额不足",
+      "insufficient-invite-balance": "此邀请链接已过期，AE 代币已被领取。",
+      "tip-attached": "礼品卡金额",
+      "top-up-with": "充值方式",
+      "delete": "删除"
+    },
+    "permissions": {
+      "login": "不要请求登录",
+      "message-sign": "自动签名消息",
+      "addressList": "不要请求所有地址列表",
+      "daily-spending-limit": "无需询问的每日支出限额",
+      "spent-today": "今日已花费",
+      "left-today": "今日剩余",
+      "delete": "移除权限",
+      "add": "添加权限",
+      "add-description": "谨慎使用此功能，仅对你信任的平台启用。",
+      "description": "管理确认弹窗与每日支出限额。出于安全原因，仅对受信任平台（例如 {0} 及你的 localhost 环境）谨慎使用此功能。",
+      "custom-name": "自定义名称",
+      "enter-custom-name": "输入你选择的自定义名称",
+      "permissions-for-url": "URL 的权限",
+      "enter-url": "输入 URL"
+    },
+    "resetWallet": {
+      "title": "重置钱包",
+      "description": "此操作将从你的钱包中移除所有账户并删除本地存储。",
+      "description2": "在继续之前，请确保你已备份 {0} 和 {1} 记录。此操作不可撤销！",
+      "seedPhrase": "助记词",
+      "addressBook": "地址簿",
+      "subtitleResetPassword": "以设置新密码",
+      "subtitleResetWallet": "在继续之前请先备份。",
+      "warning-1": "此操作将从你的钱包中移除所有账户并删除本地存储。",
+      "warning-2ResetPassword": "如果你忘记了密码，恢复账户的唯一方式是使用助记词。",
+      "warning-2ResetWallet": "恢复账户的唯一方式是使用助记词或加密私钥以及你的密码。",
+      "warning-3": "继续之前请确保备份你的助记词和地址簿记录。",
+      "warning-4": "此操作不可撤销！",
+      "warningConfirm": "确定要继续吗？",
+      "reset": "重置"
+    },
+    "appsBrowser": {
+      "popularApps": "精选",
+      "recentApps": "最近访问",
+      "inputPlaceholder": "输入 URL"
+    },
+    "warningDappBrowser": {
+      "title": "你将访问\n第三方网站",
+      "warning": "Superhero 钱包对本网站或任何其他第三方网站的故障不承担责任，详见 Superhero 钱包 {0}。",
+      "warning2": "与本网站或任何其他第三方网站交互即表示你同意其 Terms 和 Privacy Policy。",
+      "decline": "拒绝"
+    }
+  },
+  "unknownDapp": {
+    "request": "未知 URL 希望你 {action}。",
+    "warning": "请确保你了解请求来源。{warning} 可能导致不希望的结果，包括资金损失。",
+    "signMessageAction": "签名一条消息",
+    "signMessageWarning": "签名此消息",
+    "allowAccessAction": "访问你的账户",
+    "allowAccessWarning": "允许访问",
+    "confirmTransactionAction": "确认一笔交易",
+    "confirmTransactionWarning": "确认此交易",
+    "signDataAction": "签名数据",
+    "signDataWarning": "签名此数据"
+  },
+  "dappActionBrowser": {
+    "refresh": {
+      "title": "刷新",
+      "description": "重新加载页面内容"
+    },
+    "bookmark": {
+      "title": "添加书签",
+      "description": "将此页面添加到收藏夹"
+    },
+    "share": {
+      "title": "分享",
+      "description": "将此页面分享给你的联系人"
+    }
+  },
+  "validation": {
+    "formInvalid": "上方一个或多个字段无效。请检查你输入的信息。",
+    "required": "该字段为必填项。",
+    "url": "无效 URL",
+    "address": "请输入有效的区块链地址或 .chain 名称。",
+    "numeric": "字段值应为数字。",
+    "name": "请输入有效的 .chain 名称。",
+    "nameRegisteredAddress": "无效的地址或 .chain 名称。",
+    "nameUnregistered": "此名称已被注册。",
+    "addressNotSameAs": "发件人与收件人地址相同。你即将把 {0} 发送到你自己的账户。",
+    "tokenToAnAddress": "当前仅可将 AEX-9 代币发送到地址。",
+    "airGapToAnAddress": "AirGap 账户不支持发送至 .chain 名称。",
+    "addressGeneric": "无效的 {protocol} 地址。",
+    "minValue": "金额必须不小于 {0}。",
+    "minValueExclusive": "金额必须大于 {0}。",
+    "enoughCoin": "{0} 余额不足以支付交易费用。",
+    "enoughAeSigner": "你的签名账户余额不足，无法提议交易。",
+    "maxLength": "该字段最多允许 {0} 个字符。",
+    "maxRecipients": "该字段最多允许 {0} 个收件人。",
+    "maxValue": "金额超过最大可用：{0}。",
+    "maxRedeem": "最大可兑换金额为 {0} AE。",
+    "maxValueVault": "金额超过保管库余额：{0}。",
+    "notToken": "当前不允许代币，请切换到 AE。",
+    "invalidAddressChainUrl": "无效的地址、.chain 名称或 URL。",
+    "invalidAddress": "无效的账户地址。",
+    "doesNotExceedDecimals": "金额小数位不应超过 {0} 位。",
+    "addressBookEntryExists": "此 {0} 已存在于你的地址簿中。",
+    "passwordMinLength": "密码至少需要 {0} 个字符。",
+    "passwordsMatch": "两次输入的密码不一致。"
+  },
+  "biometricAuth": {
+    "reason": "进行认证以访问你的钱包",
+    "fallbackTitle": "使用密码",
+    "title": "安全登录",
+    "subtitle": "使用生物识别登录"
+  },
+  "walletConnect": {
+    "modalTitle": "连接到以太坊 dapp",
+    "modalSubtitle": "扫描 WalletConnect 二维码或输入 URI 以连接到 dapp。",
+    "uriInputLabel": "WalletConnect URI",
+    "dappName": "名称",
+    "dappDescription": "描述",
+    "dappUrl": "URL",
+    "dappRequestedDisconnect": "dapp 请求断开连接。"
+  }
+}

@@ -21,44 +21,49 @@
       />
     </div>
     <div>
-      <slot
-        v-if="$slots.balance"
-        name="balance"
-      />
-      <BalanceInfo
-        v-else
-        :balance="balanceNumeric"
-        :protocol="activeAccount.protocol"
-        horizontal-offline-message
-      />
-
-      <HorizontalScroll
-        ref="buttonsScrollContainer"
-        class="buttons"
+      <div
+        class="collapsible-top"
+        :class="{ collapsed: isScrollEnabled }"
       >
-        <template v-if="!withoutDefaultButtons">
-          <OpenTransferReceiveModalBtn />
-          <OpenTransferSendModalBtn />
-          <OpenShareAddressModalBtn
-            :address="activeAccount.address"
-            :protocol="activeAccount.protocol"
-          />
-          <BtnBox
-            v-if="(
-              activeAccount.type !== ACCOUNT_TYPES.airGap
-              && activeAccount.type !== ACCOUNT_TYPES.ledger
-            )"
-            :text="$t('common.key')"
-            :icon="PrivateKeyIcon"
-            data-cy="export-private-key"
-            @click="exportPrivateKey()"
-          />
-        </template>
         <slot
-          v-if="$slots.buttons"
-          name="buttons"
+          v-if="$slots.balance"
+          name="balance"
         />
-      </HorizontalScroll>
+        <BalanceInfo
+          v-else
+          :balance="balanceNumeric"
+          :protocol="activeAccount.protocol"
+          horizontal-offline-message
+        />
+
+        <HorizontalScroll
+          ref="buttonsScrollContainer"
+          class="buttons"
+        >
+          <template v-if="!withoutDefaultButtons">
+            <OpenTransferReceiveModalBtn />
+            <OpenTransferSendModalBtn />
+            <OpenShareAddressModalBtn
+              :address="activeAccount.address"
+              :protocol="activeAccount.protocol"
+            />
+            <BtnBox
+              v-if="(
+                activeAccount.type !== ACCOUNT_TYPES.airGap
+                && activeAccount.type !== ACCOUNT_TYPES.ledger
+              )"
+              :text="$t('common.key')"
+              :icon="PrivateKeyIcon"
+              data-cy="export-private-key"
+              @click="exportPrivateKey()"
+            />
+          </template>
+          <slot
+            v-if="$slots.buttons"
+            name="buttons"
+          />
+        </HorizontalScroll>
+      </div>
 
       <div
         ref="headerEl"
@@ -67,7 +72,7 @@
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
-          :key="routeName!"
+          :key="routeName"
           :show-all-filter-options="activeAccount.protocol === PROTOCOLS.aeternity"
           :show-filters="isScrollEnabled"
         />
@@ -80,7 +85,7 @@
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
-          :animated="!IS_FIREFOX && !IS_TRANSITIONS_DISABLED"
+          :animated="!IS_FIREFOX"
           :animation="fadeAnimation"
         />
       </div>
@@ -103,7 +108,6 @@ import {
   ACCOUNT_TYPES,
   IS_MOBILE_APP,
   IS_FIREFOX,
-  IS_TRANSITIONS_DISABLED,
   MODAL_PRIVATE_KEY_EXPORT,
   PROTOCOLS,
 } from '@/constants';
@@ -226,7 +230,6 @@ export default defineComponent({
       exportPrivateKey,
       ACCOUNT_TYPES,
       IS_FIREFOX,
-      IS_TRANSITIONS_DISABLED,
       INITIAL_TABS_HEIGHT,
       PROTOCOLS,
     };
@@ -296,6 +299,18 @@ export default defineComponent({
       }
     }
 
+  }
+
+  .collapsible-top {
+    overflow: hidden;
+    transition: max-height 160ms ease, opacity 160ms ease, margin 160ms ease;
+    max-height: 500px; // large enough to fit balance + buttons
+  }
+
+  .collapsible-top.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
   }
 
   .header {

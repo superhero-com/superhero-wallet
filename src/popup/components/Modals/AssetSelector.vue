@@ -20,19 +20,29 @@
       />
     </template>
 
+    <div
+      v-if="showLoading"
+      class="spinner-wrap"
+    >
+      <AnimatedSpinner class="spinner" />
+    </div>
     <InfiniteScroll
+      v-else
       class="list"
       data-cy="list"
-      @load-more="pageNumber += 1"
+      :virtual="true"
+      :items="accountAssetsToDisplay"
+      :key-extractor="assetKey"
     >
-      <AssetListItem
-        v-for="asset in accountAssetsToDisplay"
-        :key="asset.contractId"
-        :asset="asset"
-        :selected="isAssetSelected(asset)"
-        prevent-navigation
-        @click="resolve(asset)"
-      />
+      <template #default="{ item }">
+        <AssetListItem
+          :key="item.contractId"
+          :asset="item"
+          :selected="isAssetSelected(item)"
+          prevent-navigation
+          @click="resolve(item)"
+        />
+      </template>
     </InfiniteScroll>
   </Modal>
 </template>
@@ -53,7 +63,7 @@ import type {
   ResolveCallback,
 } from '@/types';
 import { useAccountAssetsList, useFungibleTokens } from '@/composables';
-import { ASSETS_PER_PAGE } from '@/constants';
+import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 
 import Modal from '../Modal.vue';
 import AssetListItem from '../Assets/AssetListItem.vue';
@@ -69,6 +79,7 @@ export default defineComponent({
     Modal,
     InputSearch,
     InfiniteScroll,
+    AnimatedSpinner,
   },
   props: {
     resolve: {
@@ -85,7 +96,7 @@ export default defineComponent({
     const isFullyOpen = ref(false);
     const pageNumber = ref(1);
 
-    const { loadAvailableTokens } = useFungibleTokens();
+    const { loadAvailableTokens, isAvailableTokensLoading } = useFungibleTokens();
 
     const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
@@ -96,8 +107,9 @@ export default defineComponent({
       (props.protocol)
         ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
         : accountAssetsFiltered.value
-    )
-      .slice(0, pageNumber.value * ASSETS_PER_PAGE));
+    ));
+
+    const showLoading = computed(() => !props.withBalanceOnly && isAvailableTokensLoading.value);
 
     function isAssetSelected(token: IAsset): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
@@ -117,10 +129,12 @@ export default defineComponent({
 
     return {
       accountAssetsToDisplay,
+      showLoading,
       isFullyOpen,
       pageNumber,
       searchTerm,
       isAssetSelected,
+      assetKey: (a: IAsset) => a.contractId,
     };
   },
 });
@@ -139,6 +153,18 @@ export default defineComponent({
     margin-bottom: 0;
     line-height: 48px;
     text-align: left;
+  }
+
+  .spinner-wrap {
+    display: flex;
+    justify-content: center;
+    height: calc(100vh - 120px);
+    margin-top: 150px;
+
+    .spinner {
+      width: 100px;
+      height: 100px;
+    }
   }
 }
 </style>

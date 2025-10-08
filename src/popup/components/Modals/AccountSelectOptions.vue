@@ -17,6 +17,11 @@
       />
     </template>
 
+    <FiltersBar
+      class="filters"
+      @filters-cleared="searchPhrase = ''"
+    />
+
     <div class="items-list">
       <AccountSelectOptionsItem
         v-for="(option, index) in optionsFiltered"
@@ -36,6 +41,7 @@ import {
   defineComponent,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import type {
   AccountAddress,
@@ -44,13 +50,16 @@ import type {
   ResolveCallback,
 } from '@/types';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { useAccountSelector } from '@/composables';
 
 import Modal from '../Modal.vue';
 import AccountSelectOptionsItem from '../AccountSelectOptionsItem.vue';
 import FormSelectOptionsHeader from '../FormSelectOptionsHeader.vue';
+import FiltersBar from '../FiltersBar.vue';
 
 export default defineComponent({
   components: {
+    FiltersBar,
     FormSelectOptionsHeader,
     AccountSelectOptionsItem,
     Modal,
@@ -66,16 +75,40 @@ export default defineComponent({
   setup(props) {
     // TODO AIRGAP: implement multiple accounts selection
     const { getName } = useAeNames();
+    const { protocolFilter } = useAccountSelector();
 
     const searchPhrase = ref('');
 
-    const optionsFiltered = computed(() => (
-      props.options.filter(({ text, value }) => (
-        text.toLowerCase().includes(searchPhrase.value)
-        || value.toString().includes(searchPhrase.value)
-        || getName(value as AccountAddress).value.includes(searchPhrase.value)
-      ))
-    ));
+    const optionsFiltered = computed(() => {
+      const norm = (searchPhrase.value || '').toLowerCase().trim();
+      const base = norm
+        ? props.options.filter(({ text, value }) => (
+          text.toLowerCase().includes(norm)
+          || value.toString().toLowerCase().includes(norm)
+          || getName(value as AccountAddress).value
+            .toLowerCase()
+            .includes(norm)
+        ))
+        : props.options;
+
+      if (!protocolFilter.value) return base;
+
+      return base.filter(({ value }) => (
+        String(value).startsWith(`${protocolFilter.value}:`)
+        || String(value).includes(`:${protocolFilter.value}:`)
+      ));
+    });
+
+    watch(
+      protocolFilter,
+      () => {
+        // If user clears protocol (clicks All), ensure list resets even if search was empty
+        if (!protocolFilter.value && (searchPhrase.value || '') === '') {
+          // Trigger recompute via no-op assignment
+          searchPhrase.value = '';
+        }
+      },
+    );
 
     return {
       searchPhrase,
@@ -87,6 +120,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .account-select-options {
+  .filters {
+    padding: 0 8px 8px 8px;
+  }
+
   .items-list {
     display: flex;
     flex-direction: column;

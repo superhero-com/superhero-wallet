@@ -9,15 +9,19 @@
         <InfiniteScroll
           class="list"
           data-cy="list"
+          :virtual="true"
+          :items="filteredTransactions"
+          :key-extractor="txKey"
           @load-more="loadMore()"
         >
-          <TransactionListItem
-            v-for="transaction in filteredTransactions"
-            :key="transaction.hash"
-            :transaction="getTransaction(transaction)"
-            :multisig-transaction="getMultisigTransaction(transaction)"
-            :is-multisig="isMultisig"
-          />
+          <template #default="{ item }">
+            <TransactionListItem
+              :key="item.hash"
+              :transaction="getTransaction(item)"
+              :multisig-transaction="getMultisigTransaction(item)"
+              :is-multisig="isMultisig"
+            />
+          </template>
         </InfiniteScroll>
 
         <AnimatedSpinner
@@ -184,6 +188,9 @@ export default defineComponent({
         sortTransactionsByDate,
       ])(props.transactions),
     );
+    function txKey(item: ICommonTransaction) {
+      return (item as any).hash;
+    }
 
     function loadMore() {
       if (!props.isLoading) {
@@ -256,6 +263,7 @@ export default defineComponent({
       loadMore,
       innerScrollElem,
       filteredTransactions,
+      txKey,
       getMultisigTransaction,
       getTransaction,
     };

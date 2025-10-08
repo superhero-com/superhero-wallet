@@ -352,11 +352,12 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
    * Notify the DAPP about the active wallet account change.
    */
   function monitorActiveAccountAndNetwork() {
-    const unwatch = watch([activeAccount, activeNetwork], async ([newAccount]) => {
-      if (!EVM_PROTOCOLS.includes(newAccount.protocol)) {
-        return;
-      }
-      if (web3wallet && wcSession.value) {
+    const unwatch = watch(
+      [activeAccount, activeNetwork],
+      async ([newAccount], [oldAccount]) => {
+        if (!EVM_PROTOCOLS.includes(newAccount.protocol)) return;
+        if (!web3wallet || !wcSession.value) { unwatch(); return; }
+
         const { accounts, chains } = getFormattedAccountsAndChains();
 
         wcSession.value.namespaces[ETH_CHAIN_NAMESPACE].chains = chains;
@@ -364,16 +365,45 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
         try {
           const activeProtocols = (networks.value[activeNetwork.value.name].protocols as any);
-          const preferredChainId = `${ETH_CHAIN_NAMESPACE}:${activeProtocols[newAccount.protocol].chainId}`;
-          await web3wallet.emitSessionEvent({
-            topic: wcSession.value.topic,
-            event: {
-              name: 'accountsChanged',
-              data: [newAccount.address],
-            },
-            chainId: preferredChainId,
-          });
+          const preferredChainIdDec = activeProtocols[newAccount.protocol].chainId.toString();
+          const preferredChainId = `${ETH_CHAIN_NAMESPACE}:${preferredChainIdDec}`;
 
+          // Reorder accounts so the active address is first for every chain group
+          // Dapps (like Uniswap) often pick the first account for the chain they're using
+          const byChain: Record<string, string[]> = {};
+          accounts.forEach((acc) => {
+            const [, chainId] = acc.split(':');
+            if (!byChain[chainId]) byChain[chainId] = [];
+            byChain[chainId].push(acc);
+          });
+          const reorderedAccounts = Object.entries(byChain).flatMap(([chainId, accs]) => {
+            const target = `${ETH_CHAIN_NAMESPACE}:${chainId}:${newAccount.address}`;
+            const first = accs.filter((a) => a === target);
+            const rest = accs.filter((a) => a !== target);
+            return [...first, ...rest];
+          });
+          wcSession.value.namespaces[ETH_CHAIN_NAMESPACE].accounts = reorderedAccounts;
+
+          // Update session first so dapps relying on session_update pick the correct account
+          const { acknowledged } = await web3wallet.updateSession({
+            topic: wcSession.value.topic,
+            namespaces: wcSession.value.namespaces,
+          });
+          await acknowledged();
+
+          // Emit accountsChanged only when address actually changes
+          if (!oldAccount || oldAccount.address !== newAccount.address) {
+            await web3wallet.emitSessionEvent({
+              topic: wcSession.value.topic,
+              event: {
+                name: 'accountsChanged',
+                data: [newAccount.address],
+              },
+              chainId: preferredChainId,
+            });
+          }
+
+          // Keep chain in sync for the selected protocol
           await web3wallet.emitSessionEvent({
             topic: wcSession.value.topic,
             event: {
@@ -382,24 +412,11 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             },
             chainId: preferredChainId,
           });
-
-          const { acknowledged } = await web3wallet.updateSession({
-            topic: wcSession.value.topic,
-            namespaces: wcSession.value.namespaces,
-          });
-
-          // Even if the session update is acknowledged some DAPPS does not update the UI
-          // to match the change. For example Uniswap does not switch the account if user did it
-          // on the wallet side.
-          await acknowledged();
         } catch (error) {
           disconnect();
         }
-      } else {
-        unwatch();
-        disconnect();
-      }
-    });
+      },
+    );
   }
 
   /**
@@ -466,7 +483,11 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
                 [ETH_CHAIN_NAMESPACE]: {
                   accounts,
                   chains,
-                  events: uniq([...proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.events || [], 'accountsChanged']),
+                  events: uniq([
+                    ...proposal.requiredNamespaces[ETH_CHAIN_NAMESPACE]?.events || [],
+                    'accountsChanged',
+                    'chainChanged',
+                  ]),
                   methods,
                 },
               },

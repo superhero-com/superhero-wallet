@@ -75,5 +75,3 @@ export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY!;
 export const ETHPLORER_API_KEY = process.env.ETHPLORER_API_KEY!;
 
 export const WALLET_CONNECT_PROJECT_ID = process.env.WALLET_CONNECT_PROJECT_ID!;
-
-export const IS_TRANSITIONS_DISABLED = IS_CHROME_BASED && !IS_ANDROID && !IS_IOS;
