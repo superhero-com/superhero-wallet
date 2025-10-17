@@ -17,7 +17,7 @@ function main() {
   let commit = 'unknown';
   try {
     commit = run('git rev-parse HEAD');
-  } catch (_) {}
+  } catch (e) { commit = 'unknown'; }
 
   const pkgLockPath = path.resolve(process.cwd(), 'package-lock.json');
   const hasPkgLock = fs.existsSync(pkgLockPath);
@@ -43,21 +43,52 @@ function main() {
 
   // 4) Move stats to artifacts and copy dist output manifest-like listing
   const statsJson = path.resolve(process.cwd(), 'dist', 'stats.json');
-  const reportHtml = path.resolve(process.cwd(), 'dist', 'report.html');
-  const reportJson = path.resolve(process.cwd(), 'dist', 'report.json');
-  if (fs.existsSync(statsJson)) fs.copyFileSync(statsJson, path.join(provenanceDir, 'webpack.stats.json'));
-  if (fs.existsSync(reportHtml)) fs.copyFileSync(reportHtml, path.join(provenanceDir, 'webpack.report.html'));
-  if (fs.existsSync(reportJson)) fs.copyFileSync(reportJson, path.join(provenanceDir, 'webpack.report.json'));
+  const reportHtmlCandidates = [
+    path.resolve(process.cwd(), 'dist', 'report.html'),
+    path.resolve(process.cwd(), 'dist', 'extension', 'firefox', 'report.html'),
+  ];
+  const reportJsonCandidates = [
+    path.resolve(process.cwd(), 'dist', 'report.json'),
+    path.resolve(process.cwd(), 'dist', 'extension', 'firefox', 'report.json'),
+  ];
+
+  const statsDest = path.join(provenanceDir, 'webpack.stats.json');
+  const reportHtmlDest = path.join(provenanceDir, 'webpack.report.html');
+  const reportJsonDest = path.join(provenanceDir, 'webpack.report.json');
+
+  if (fs.existsSync(statsJson)) fs.copyFileSync(statsJson, statsDest);
+
+  function copyFirstExisting(candidates, dest) {
+    const removeIfUnderExtension = (srcPath) => {
+      const extensionDir = path.resolve(process.cwd(), 'dist', 'extension');
+      if (srcPath.startsWith(extensionDir)) {
+        try { fs.unlinkSync(srcPath); } catch (err) { console.warn('Could not remove analyzer file:', srcPath); }
+      }
+    };
+
+    let found = false;
+    candidates.some((src) => {
+      if (!fs.existsSync(src)) return false;
+      fs.copyFileSync(src, dest);
+      removeIfUnderExtension(src);
+      found = true;
+      return true;
+    });
+    return found;
+  }
+
+  copyFirstExisting(reportHtmlCandidates, reportHtmlDest);
+  copyFirstExisting(reportJsonCandidates, reportJsonDest);
   // Save a simple file list
   const distDir = path.resolve(process.cwd(), 'dist', 'extension', 'firefox');
   const list = [];
   function walk(dir) {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
       const full = path.join(dir, entry.name);
       const rel = path.relative(distDir, full).replace(/\\/g, '/');
       if (entry.isDirectory()) walk(full);
       else list.push(rel);
-    }
+    });
   }
   if (fs.existsSync(distDir)) walk(distDir);
   fs.writeFileSync(path.join(provenanceDir, 'dist-file-list.txt'), list.sort().join('\n'));
@@ -76,5 +107,3 @@ function main() {
 }
 
 main();
-
-
