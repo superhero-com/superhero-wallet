@@ -30,6 +30,7 @@ import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useDeepLinkApi } from '@/composables/deepLinkApi';
 import { useLedger } from '@/composables';
+import { isIabDappActive } from '@/composables/iabState';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { SEED_LENGTH } from '@/protocols/aeternity/config';
 import { usePermissions } from '@/composables/permissions';
@@ -108,7 +109,8 @@ export class AeAccountHdWallet extends MemoryAccount {
     } catch {
       tx = undefined;
     }
-    if (isDeepLinkUsed || IS_OFFSCREEN_TAB || IN_FRAME) {
+    // Ask permission if initiated by external contexts
+    if (isDeepLinkUsed || IS_OFFSCREEN_TAB || IN_FRAME || isIabDappActive.value) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.sign,
@@ -158,7 +160,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       });
     }
 
-    if (IS_OFFSCREEN_TAB || IN_FRAME) {
+    if (IS_OFFSCREEN_TAB || IN_FRAME || isIabDappActive.value) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
@@ -195,7 +197,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     aci: Parameters<AccountBase['signTypedData']>[1],
     options: Parameters<AccountBase['signTypedData']>[2] = {},
   ): Promise<Encoded.Signature> {
-    if (IS_OFFSCREEN_TAB || IN_FRAME) {
+    if (IS_OFFSCREEN_TAB || IN_FRAME || isIabDappActive.value) {
       const dataType = new TypeResolver().resolveType(aci);
       const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
       const {
@@ -235,7 +237,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let resolvedName;
     const { getMiddleware } = useAeMiddleware();
 
-    if (IS_OFFSCREEN_TAB || IN_FRAME) {
+    if (IS_OFFSCREEN_TAB || IN_FRAME || isIabDappActive.value) {
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -291,7 +293,10 @@ export class AeAccountHdWallet extends MemoryAccount {
       throw new Error('AirGap sign not implemented yet');
     }
 
-    if ((IN_FRAME || IS_OFFSCREEN_TAB) && !this.isSigningAlreadyConfirmed) {
+    if (
+      (IN_FRAME || IS_OFFSCREEN_TAB || isIabDappActive.value)
+      && !this.isSigningAlreadyConfirmed
+    ) {
       this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(

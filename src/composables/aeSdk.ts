@@ -24,6 +24,7 @@ import {
   IN_FRAME,
   IS_EXTENSION,
   IS_OFFSCREEN_TAB,
+  IS_MOBILE_APP,
   PROTOCOLS,
   RUNNING_IN_TESTS,
 } from '@/constants';
@@ -143,9 +144,18 @@ export function useAeSdk() {
           instance: nodeInstance!,
         }],
         id: APP_NAME,
-        type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
-        onConnection(aeppId, params, origin) {
+        type: (IS_EXTENSION || IS_OFFSCREEN_TAB || IS_MOBILE_APP)
+          ? WALLET_TYPE.extension
+          : WALLET_TYPE.window,
+        async onConnection(aeppId, params, origin) {
           aeppInfo[aeppId] = { ...params, origin };
+          // Proactively ask for address permission on mobile IAB to surface the connect modal
+          try {
+            if (IS_MOBILE_APP) {
+              const host = IS_OFFSCREEN_TAB ? aeppInfo[aeppId].origin : origin;
+              await checkOrAskPermission(METHODS.address, host);
+            }
+          } catch (_) { /* noop */ }
         },
         onDisconnect(aeppId) {
           delete aeppInfo[aeppId];

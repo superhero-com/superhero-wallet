@@ -84,6 +84,7 @@
     "bs58check": "^3.0.1",
     "camelcase-keys-deep": "^0.1.0",
     "capacitor-native-settings": "^7.0.2",
+    "cordova-plugin-inappbrowser": "^6.0.0",
     "cordova-plugin-screen-orientation": "^3.0.4",
     "dayjs": "^1.11.12",
     "detect-browser": "^5.3.0",

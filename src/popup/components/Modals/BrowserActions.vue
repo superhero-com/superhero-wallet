@@ -68,8 +68,7 @@ export default defineComponent({
       required: true,
     },
     reject: { type: Function as PropType<RejectCallback>, required: true },
-    selectedApp: { type: Object, required: true },
-    iframe: { type: Object, required: true },
+    selectedApp: { type: Object, default: () => null },
   },
   setup(props) {
     async function refreshIframeContent() {
@@ -77,7 +76,7 @@ export default defineComponent({
     }
 
     async function shareIframeContent() {
-      await invokeDeviceShare(props.selectedApp.url);
+      if (props.selectedApp?.url) await invokeDeviceShare(props.selectedApp.url);
       props.resolve();
     }
 

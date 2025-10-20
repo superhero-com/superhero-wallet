@@ -7,8 +7,8 @@ import {
   hexToString,
 } from 'web3-utils';
 import { sign } from 'web3-eth-accounts';
-import Web3Eth, { getBlock } from 'web3-eth';
-import { DEFAULT_RETURN_FORMAT } from 'web3-types';
+import Web3Eth, { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
+import { FMT_BYTES, FMT_NUMBER } from 'web3-types';
 import { isEmpty } from 'lodash-es';
 
 import type { IModalProps, Protocol } from '@/types';
@@ -91,6 +91,40 @@ function parseCaipChainId(chainIdOrCaip?: string): string | undefined {
   return chainIdOrCaip.startsWith('0x')
     ? BigInt(chainIdOrCaip).toString(10)
     : chainIdOrCaip;
+}
+
+function normalizeValueToHex(value?: unknown): string {
+  try {
+    if (value == null) return '0x0';
+    if (typeof value === 'bigint') return `0x${(value as bigint).toString(16)}`;
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value) || value < 0) return '0x0';
+      return `0x${(BigInt as any)(Math.trunc(value)).toString(16)}`;
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return '0x0';
+      if (/^0x[0-9a-fA-F]+$/.test(trimmed)) return trimmed;
+      if (/^\d+$/.test(trimmed)) return `0x${(BigInt as any)(trimmed).toString(16)}`;
+      const sci = trimmed.match(/^(\d+)e(\d+)$/i);
+      if (sci) {
+        const base = (BigInt as any)(sci[1]);
+        const exp = (BigInt as any)(sci[2]);
+        return `0x${(base * ((BigInt as any)(10) ** exp)).toString(16)}`;
+      }
+      return '0x0';
+    }
+    const anyVal: any = value as any;
+    if (anyVal?.toHexString && typeof anyVal.toHexString === 'function') {
+      const hex = anyVal.toHexString();
+      return hex.startsWith('0x') ? hex : `0x${String(hex)}`;
+    }
+    if (anyVal?.toString && typeof anyVal.toString === 'function') {
+      const str = anyVal.toString(10);
+      if (/^\d+$/.test(str)) return `0x${(BigInt as any)(str).toString(16)}`;
+    }
+  } catch (_) { /* noop */ }
+  return '0x0';
 }
 
 function selectProtocolByChainId(targetChainId?: string): Protocol {
@@ -207,14 +241,63 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.getBalance) {
-    let balance: string;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    // Robust address extraction supporting [addr, tag] or { address } shapes
+    const addressParamRaw = Array.isArray(params)
+      ? (params as any)[0]
+      : (params as any)?.address
+        ?? (
+          Array.isArray((params as any)?.params)
+            ? (params as any).params[0]
+            : undefined
+        );
+
+    if (!addressParamRaw || typeof addressParamRaw !== 'string') {
+      return { error: { code: -32602, message: 'Invalid params: address is required' } };
+    }
+
+    let checksumAddress: string;
     try {
-      balance = await adapter.fetchBalance(toChecksumAddress(params?.address!));
+      checksumAddress = toChecksumAddress(addressParamRaw);
+    } catch (_) {
+      return { error: { code: -32602, message: 'Invalid params: malformed address' } };
+    }
+
+    let balanceRaw: string | undefined;
+    try {
+      balanceRaw = await adapter.fetchBalance(checksumAddress);
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    return { result: balance ? toWei(balance, 'ether') : 0 };
+
+    try {
+      // Normalize balance to a decimal wei string
+      const normalizeToWeiString = (value?: string): string => {
+        if (!value) return '0';
+        const trimmed = value.trim();
+        if (!trimmed) return '0';
+        // If already hex (assume hex wei)
+        if (/^0x[0-9a-fA-F]+$/.test(trimmed)) {
+          return (BigInt as any)(trimmed).toString(10);
+        }
+        // If pure digits (decimal wei)
+        if (/^\d+$/.test(trimmed)) {
+          return trimmed;
+        }
+        // Otherwise, treat as ether with decimals (e.g., '0.1234')
+        try {
+          return toWei(trimmed, 'ether');
+        } catch (_) {
+          throw new Error('Malformed balance value');
+        }
+      };
+
+      const weiStr = normalizeToWeiString(balanceRaw);
+      const hex = `0x${(BigInt as any)(weiStr).toString(16)}`;
+      return { result: hex };
+    } catch (e: any) {
+      return getUnknownError(e?.message || 'Failed to format balance');
+    }
   }
   if (method === ETH_RPC_METHODS.getChainId) {
     return {
@@ -222,9 +305,27 @@ export async function handleEvmRpcMethod(
     };
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
-    const network = Object.values(networks.value)
+    // Support both EIP-3326 param shapes and hex/decimal chainIds
+    const pickChainIdParam = (p: any): unknown => {
+      if (p == null) return undefined;
+      if (typeof p === 'string' || typeof p === 'number' || typeof p === 'bigint') return p;
+      const direct = p?.chainId ?? p?.params?.[0]?.chainId ?? p?.params?.[0];
+      if (direct != null) return direct;
+      if (Array.isArray(p)) {
+        const first = p[0];
+        if (first == null) return undefined;
+        return typeof first === 'object' ? (first?.chainId ?? first) : first;
+      }
+      return undefined;
+    };
+    const requestedParam = pickChainIdParam(params);
+    if (!requestedParam) {
+      return { error: { code: -32602, message: 'Invalid params: chainId is required' } };
+    }
+    const requestedDec = parseCaipChainId(String(requestedParam));
+    const network = requestedDec && Object.values(networks.value)
       .find(({ protocols }) => (
-        (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
+        (protocols[protocol] as any).chainId === String(requestedDec)
       ));
     if (network) {
       switchNetwork(network.name);
@@ -233,7 +334,7 @@ export async function handleEvmRpcMethod(
     return {
       error: {
         code: 4902,
-        message: `Chain ${params?.chainId} is currently not supported`,
+        message: `Chain ${requestedDec ?? requestedParam} is currently not supported`,
       },
     };
   }
@@ -241,11 +342,26 @@ export async function handleEvmRpcMethod(
     let currentBlock;
 
     try {
-      currentBlock = await getBlock(new Web3Eth(nodeUrl), 'latest', true, DEFAULT_RETURN_FORMAT);
+      currentBlock = await getBlock(
+        new Web3Eth(nodeUrl),
+        'latest',
+        true,
+        { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX },
+      );
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    return { result: currentBlock?.number.toString() };
+    let hex = '0x0';
+    if (currentBlock && currentBlock.number != null) {
+      const blockNumber: any = currentBlock.number as any;
+      if (typeof blockNumber === 'string') {
+        hex = blockNumber.startsWith('0x') ? blockNumber : `0x${blockNumber}`;
+      } else {
+        const integerBlockNumber = Math.trunc(blockNumber as number);
+        hex = `0x${(BigInt as any)(integerBlockNumber).toString(16)}`;
+      }
+    }
+    return { result: hex };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
@@ -256,35 +372,51 @@ export async function handleEvmRpcMethod(
 
     const url = aepp;
 
+    const p = (Array.isArray(params) ? (params as any)[0] : (params as any)) || ({} as any);
+    const senderAddress = p?.from || getLastActiveProtocolAccount(protocol)?.address;
     let estimatedGas = null as any;
     try {
-      estimatedGas = params?.gas ? null : (await new EtherscanService(
-        predefined.middlewareUrl,
-        chainId,
-      )
-        .fetchFromApi({
+      if (!p?.gas) {
+        const valueHex = normalizeValueToHex(p?.value);
+        const estimateResp = await new EtherscanService(
+          predefined.middlewareUrl,
+          chainId,
+        ).fetchFromApi({
           module: 'proxy',
           action: 'eth_estimateGas',
-          to: params.to,
-          value: `0x${Number(params.value || 0).toString(16)}`,
-          data: params.data || '0x',
-        }))?.result;
+          ...(senderAddress ? { from: toChecksumAddress(senderAddress) } : {}),
+          ...(p?.to ? { to: p.to } : {}),
+          value: valueHex,
+          data: p.data || '0x',
+        });
+        if (!estimateResp || !String(estimateResp.message || '').startsWith('OK') || !estimateResp.result) {
+          throw new Error(typeof estimateResp?.result === 'string' ? estimateResp.result : 'Failed to estimate gas');
+        }
+        estimatedGas = estimateResp.result;
+      }
     } catch (_) {
       // fall back to a conservative gas limit if estimation API fails
-      estimatedGas = '0x5208'; // 21000
+      const isContractCall = !!(p?.data && p.data !== '0x');
+      estimatedGas = isContractCall ? '0x493e0' : '0x5208'; // 300000 for contract calls, 21000 for transfers
     }
 
-    const gasHexOrNum = params?.gas ?? estimatedGas;
+    const gasHexOrNum = p?.gas ?? estimatedGas;
     const gas = Number(gasHexOrNum);
-    const senderId = toChecksumAddress(params.from!);
-    const recipientId = toChecksumAddress(params.to!);
-    const isCoinTransfer = !params.data;
+    if (!senderAddress) {
+      return { error: { code: -32602, message: 'Invalid params: "from" address is required' } };
+    }
+    const senderId = toChecksumAddress(senderAddress);
+    const recipientId = p?.to ? toChecksumAddress(p.to) : undefined as any;
+    const isCoinTransfer = !p.data;
+    if (isCoinTransfer && !p?.to) {
+      return { error: { code: -32602, message: 'Invalid params: "to" address is required for transfers' } };
+    }
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol,
       app: { href: url, host: url ? new URL(url).hostname : '', name: name || url },
       tx: {
-        amount: params.value ? +fromWei(params.value, 'ether') : 0,
+        amount: p.value ? +fromWei(p.value, 'ether') : 0,
         fee: gas * +(maxFeePerGas.value || 0),
         gas,
         contractId: (isCoinTransfer) ? getProtocolCoinContractId(protocol) : recipientId,
@@ -292,7 +424,7 @@ export async function handleEvmRpcMethod(
         tag,
         senderId,
         recipientId,
-        data: params.data,
+        data: p.data,
       },
       fromAccount: senderId,
     };
@@ -305,13 +437,10 @@ export async function handleEvmRpcMethod(
     if (permitted) {
       if (adapter?.transferPreparedTransaction) {
         try {
-          const actionResult = await adapter.transferPreparedTransaction({
-            ...params,
-            gas: gasHexOrNum,
-          });
-          return actionResult?.hash
-            ? { result: actionResult?.hash }
-            : getUnknownError('Failed to sign and send transaction');
+          const actionParams = { ...p, gas: gasHexOrNum } as any;
+          const actionResult = await adapter.transferPreparedTransaction(actionParams);
+          if (!actionResult?.hash) return getUnknownError('Failed to sign and send transaction');
+          return { result: actionResult.hash };
         } catch (error: any) {
           return getUnknownError(error.message);
         }
@@ -361,16 +490,48 @@ export async function handleEvmRpcMethod(
     const apiUrl = predefined.middlewareUrl;
     let response: EtherscanDefaultResponse | null;
     try {
+      // If we can, serve directly from node to avoid Etherscan limitations
+      // eth_getTransactionByHash
+      if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionByHash) {
+        const txhash = Array.isArray(params)
+          ? (params as any)[0]
+          : (params as any)?.txhash || (params as any)?.hash;
+        const web3 = new Web3Eth(nodeUrl);
+        const tx = txhash
+          ? await getTransaction(web3, txhash, { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX })
+          : null;
+        if (tx) return { result: tx };
+      }
+      // eth_getTransactionReceipt
+      if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionReceipt) {
+        const txhash = Array.isArray(params)
+          ? (params as any)[0]
+          : (params as any)?.txhash || (params as any)?.hash;
+        const web3 = new Web3Eth(nodeUrl);
+        const rc = txhash
+          ? await getTransactionReceipt(
+            web3,
+            txhash,
+            { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX },
+          )
+          : null;
+        if (rc) return { result: rc };
+      }
+      // Fallback to Etherscan for other proxy calls
       response = await new EtherscanService(apiUrl, chainId)
         .fetchFromApi({
           module: 'proxy',
           action: method,
-          ...params,
+          ...(Array.isArray(params) ? {} : (params as any)),
         });
-      if (!response?.message?.startsWith('OK')) {
-        getUnknownError(response?.result || 'Unknown error');
+      if (!response || !String(response.message || '').startsWith('OK')) {
+        // For estimateGas, provide a safe fallback instead of erroring
+        if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas) {
+          return { result: '0x493e0' }; // 300000
+        }
+        return getUnknownError(typeof response?.result === 'string' ? response.result : 'Unknown error');
       }
-      return { result: response?.result };
+      return { result: response.result };
     } catch (error: any) {
       return getUnknownError(error.message);
     }
