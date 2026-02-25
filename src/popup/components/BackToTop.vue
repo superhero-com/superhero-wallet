@@ -27,6 +27,9 @@ import {
   defineComponent,
   ref,
 } from 'vue';
+import {
+  resolveScrollableElementWithRetry,
+} from '@/composables/viewport';
 import BtnPlain from './buttons/BtnPlain.vue';
 import Chevron from '../../icons/chevron.svg?vue-component';
 
@@ -41,25 +44,38 @@ export default defineComponent({
   setup() {
     const el = ref<HTMLElement>();
     const isVisible = ref(false);
+    const scrollContainer = ref<HTMLElement | null>(null);
+    let stopResolveRetry: (() => void) | undefined;
 
     function handleVisibility() {
-      if (!el.value?.parentNode) return;
-      isVisible.value = (el.value?.parentNode as HTMLElement)?.scrollTop > 800;
+      if (!scrollContainer.value) return;
+      isVisible.value = scrollContainer.value.scrollTop > 800;
     }
 
     function scrollTop() {
-      (el.value?.parentNode as HTMLElement)?.scrollTo({
+      scrollContainer.value?.scrollTo({
         top: 0,
         behavior: 'smooth',
       });
     }
 
     onMounted(() => {
-      el.value?.parentNode?.addEventListener('scroll', handleVisibility);
+      stopResolveRetry = resolveScrollableElementWithRetry(
+        el.value?.parentNode as Element | undefined,
+        (resolved) => {
+          const nextContainer = resolved as HTMLElement | null;
+          if (scrollContainer.value === nextContainer) return;
+          scrollContainer.value?.removeEventListener('scroll', handleVisibility);
+          scrollContainer.value = nextContainer;
+          scrollContainer.value?.addEventListener('scroll', handleVisibility);
+          handleVisibility();
+        },
+      );
     });
 
     onBeforeUnmount(() => {
-      el.value?.parentNode?.removeEventListener('scroll', handleVisibility);
+      stopResolveRetry?.();
+      scrollContainer.value?.removeEventListener('scroll', handleVisibility);
     });
 
     return {
