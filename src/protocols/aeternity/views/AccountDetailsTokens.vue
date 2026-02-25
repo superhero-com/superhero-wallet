@@ -35,6 +35,9 @@ import {
 import { throttle } from 'lodash-es';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
+import {
+  resolveScrollableElementWithRetry,
+} from '@/composables/viewport';
 
 import AssetList from '@/popup/components/Assets/AssetList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -59,15 +62,14 @@ export default defineComponent({
 
     const innerScrollElem = ref<HTMLElement>();
     const appInnerScrollTop = ref<number>(0);
+    const scrollContainer = ref<HTMLElement | null>(null);
+    let stopResolveRetry: (() => void) | undefined;
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => innerScrollElem.value?.parentElement,
     );
-
-    function throttledScroll() {
-      return throttle(() => {
-        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
-      }, 200);
-    }
+    const onScroll = throttle(() => {
+      appInnerScrollTop.value = scrollContainer.value?.scrollTop ?? 0;
+    }, 200);
 
     watch(
       appInnerScrollTop,
@@ -86,13 +88,21 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', throttledScroll());
-      }
+      stopResolveRetry = resolveScrollableElementWithRetry(
+        appInnerElem.value ?? undefined,
+        (resolved) => {
+          const nextContainer = resolved as HTMLElement | null;
+          if (scrollContainer.value === nextContainer) return;
+          scrollContainer.value?.removeEventListener('scroll', onScroll);
+          scrollContainer.value = nextContainer;
+          scrollContainer.value?.addEventListener('scroll', onScroll);
+        },
+      );
     });
 
     onBeforeUnmount(() => {
-      appInnerElem.value?.removeEventListener('scroll', throttledScroll());
+      stopResolveRetry?.();
+      scrollContainer.value?.removeEventListener('scroll', onScroll);
     });
 
     return {

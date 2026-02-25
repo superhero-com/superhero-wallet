@@ -78,6 +78,9 @@ import {
   useTransactionAndTokenFilter,
   useViewport,
 } from '@/composables';
+import {
+  resolveScrollableElementWithRetry,
+} from '@/composables/viewport';
 
 import {
   getInnerTransaction,
@@ -130,10 +133,15 @@ export default defineComponent({
 
     const innerScrollElem = ref<HTMLElement>();
     const appInnerScrollTop = ref<number>(0);
+    const scrollContainer = ref<HTMLElement | null>(null);
+    let stopResolveRetry: (() => void) | undefined;
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => innerScrollElem.value?.parentElement,
     );
+    const onScroll = throttle(() => {
+      appInnerScrollTop.value = scrollContainer.value?.scrollTop ?? 0;
+    }, 200);
 
     const searchPhraseLowerCase = computed(() => searchPhrase.value.toLocaleLowerCase());
 
@@ -228,12 +236,6 @@ export default defineComponent({
       }
     }
 
-    function throttledScroll() {
-      return throttle(() => {
-        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
-      }, 200);
-    }
-
     watch(
       appInnerScrollTop,
       (value) => setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT),
@@ -247,14 +249,22 @@ export default defineComponent({
     onMounted(() => {
       setScrollConf(false);
       initViewport(appInnerElem.value!);
-      if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', throttledScroll());
-      }
+      stopResolveRetry = resolveScrollableElementWithRetry(
+        appInnerElem.value ?? undefined,
+        (resolved) => {
+          const nextContainer = resolved as HTMLElement | null;
+          if (scrollContainer.value === nextContainer) return;
+          scrollContainer.value?.removeEventListener('scroll', onScroll);
+          scrollContainer.value = nextContainer;
+          scrollContainer.value?.addEventListener('scroll', onScroll);
+        },
+      );
     });
 
     onBeforeUnmount(() => {
       setScrollConf(false);
-      appInnerElem.value?.removeEventListener('scroll', throttledScroll());
+      stopResolveRetry?.();
+      scrollContainer.value?.removeEventListener('scroll', onScroll);
     });
 
     return {

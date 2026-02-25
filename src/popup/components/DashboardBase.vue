@@ -68,7 +68,11 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent } from 'vue';
+import {
+  PropType,
+  computed,
+  defineComponent,
+} from 'vue';
 import type {
   IAccount,
   IFormSelectOption,

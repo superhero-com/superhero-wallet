@@ -35,17 +35,19 @@
 
 html {
   &.is-extension {
-    // Fixes issue with extension not rendering properly
+    body {
+      position: unset;
+    }
+  }
+
+  &.is-extension.is-firefox {
+    // Fixes issue with extension not rendering properly in Firefox.
     // .tabs-inner & .ion-page classes are added by Ionic
     ion-tabs,
     .tabs-inner,
     ion-router-outlet,
     .ion-page {
       contain: layout style !important;
-    }
-
-    body {
-      position: unset;
     }
   }
 
@@ -128,6 +130,26 @@ ion-content {
     --padding-end: 0;
     --padding-start: 0;
     --padding-top: 0;
+  }
+}
+
+// Chromium-specific: use Ionic internal scroll element instead of host/nested scroll.
+@at-root html.is-chrome ion-content {
+  --overflow: auto;
+  overflow: hidden;
+}
+
+// Chromium-specific: keep the internal scroll part constrained to ion-content height.
+@at-root html.is-chrome ion-content::part(scroll) {
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }
 
@@ -342,10 +364,28 @@ hr {
 }
 
 .styled-scrollbar,
-.styled-scrollbar ion-content {
+.styled-scrollbar ion-content,
+.styled-scrollbar ion-content::part(scroll) {
   scrollbar-color: #{$color-scrollbar-thumb} transparent; // Firefox
   scrollbar-width: thin; // Firefox
   -ms-overflow-style: auto;
+
+  &::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+    height: 0;
+
+    &-thumb {
+      display: block;
+      background-color: $color-scrollbar-thumb;
+      border-radius: 4px;
+    }
+  }
+}
+
+// Keep styled scrollbars visible on Chromium when explicitly enabled.
+@at-root html.is-chrome .styled-scrollbar ion-content::part(scroll) {
+  scrollbar-width: thin;
 
   &::-webkit-scrollbar {
     display: block;
