@@ -78,9 +78,6 @@ import {
   useTransactionAndTokenFilter,
   useViewport,
 } from '@/composables';
-import {
-  resolveScrollableElementWithRetry,
-} from '@/composables/viewport';
 
 import {
   getInnerTransaction,
@@ -134,7 +131,6 @@ export default defineComponent({
     const innerScrollElem = ref<HTMLElement>();
     const appInnerScrollTop = ref<number>(0);
     const scrollContainer = ref<HTMLElement | null>(null);
-    let stopResolveRetry: (() => void) | undefined;
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => innerScrollElem.value?.parentElement,
@@ -246,24 +242,25 @@ export default defineComponent({
       () => checkLoadMore(),
     );
 
+    watch(
+      viewportElement,
+      (resolved) => {
+        const nextContainer = resolved as HTMLElement | null;
+        if (scrollContainer.value === nextContainer) return;
+        scrollContainer.value?.removeEventListener('scroll', onScroll);
+        scrollContainer.value = nextContainer;
+        scrollContainer.value?.addEventListener('scroll', onScroll);
+      },
+      { immediate: true },
+    );
+
     onMounted(() => {
       setScrollConf(false);
       initViewport(appInnerElem.value!);
-      stopResolveRetry = resolveScrollableElementWithRetry(
-        appInnerElem.value ?? undefined,
-        (resolved) => {
-          const nextContainer = resolved as HTMLElement | null;
-          if (scrollContainer.value === nextContainer) return;
-          scrollContainer.value?.removeEventListener('scroll', onScroll);
-          scrollContainer.value = nextContainer;
-          scrollContainer.value?.addEventListener('scroll', onScroll);
-        },
-      );
     });
 
     onBeforeUnmount(() => {
       setScrollConf(false);
-      stopResolveRetry?.();
       scrollContainer.value?.removeEventListener('scroll', onScroll);
     });
 
