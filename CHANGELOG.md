@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.0...v2.9.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* be able to scroll ([8f3a190](https://github.com/Superhero-com/superhero-wallet/commit/8f3a19013d98fc9db73a487972149f3d2715432b))
+
+
+### Maintenance
+
+* remove report.html from ff build ([de1883a](https://github.com/Superhero-com/superhero-wallet/commit/de1883aca6269e1acf1c02155eb38fea19ef2cfb))
+* run npm audit fix ([07e4cd1](https://github.com/Superhero-com/superhero-wallet/commit/07e4cd1a615f9cb0b3ae56e43931c86c94cff371))
+* update capacitor/ionic packages ([5a2eb39](https://github.com/Superhero-com/superhero-wallet/commit/5a2eb395ad09fd89647ba06b58083ac572b36a8a))
+
+
+### Performance
+
+* **transaction-list:** remove the second local scroll retry path ([22e4802](https://github.com/Superhero-com/superhero-wallet/commit/22e480258c174c6c8ab597c5a93998f5254661a5))
+
 ## [2.9.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.8.1...v2.9.0) (2025-10-07)
 
 
