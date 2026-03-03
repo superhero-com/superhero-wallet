@@ -178,17 +178,30 @@ if (IS_MOBILE_APP) {
         }
         return;
       }
-      const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepLinkUrl.origin === p);
-      if (!prefix) throw new Error(`Unknown url: ${deepLinkUrl.origin}`);
+      const isCustomSchemeLink = event.url.startsWith('superhero://')
+        || event.url.startsWith('superhero:/');
+      const isUniversalLink = deepLinkUrl.origin === APP_LINK_WEB;
+      if (!isCustomSchemeLink && !isUniversalLink) {
+        throw new Error(`Unknown url: ${deepLinkUrl.origin}`);
+      }
+
+      // `superhero://sign-transaction?...` treats `sign-transaction` as host.
+      const path = isCustomSchemeLink
+        ? (deepLinkUrl.pathname || `/${deepLinkUrl.host}`)
+        : deepLinkUrl.pathname;
 
       try {
+        setIsOpenUsingDeeplink(true);
         router.push({
-          path: deepLinkUrl.pathname,
+          path,
           hash: deepLinkUrl.hash,
           query: Object.fromEntries(deepLinkUrl.searchParams.entries()),
         });
       } catch (error: any) {
-        if (error.name !== 'NavigationDuplicated') throw error;
+        if (error.name !== 'NavigationDuplicated') {
+          setIsOpenUsingDeeplink(false);
+          throw error;
+        }
       }
     });
 

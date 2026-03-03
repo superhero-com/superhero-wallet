@@ -14,6 +14,42 @@ import { useModals } from '@/composables/modals';
 
 let isDeepLinkUsed = false;
 
+function openCallbackUrl(callbackUrl: string) {
+  if (!IS_MOBILE_APP) {
+    window.open(callbackUrl, '_self');
+    return;
+  }
+
+  if (!IS_IOS) {
+    window.open(callbackUrl, '_system');
+    return;
+  }
+
+  // iOS Safari sometimes resumes on a previous tab when using `_self`.
+  // Open externally first and use `_self` only if the page didn't background.
+  let canUseSelfFallback = true;
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      canUseSelfFallback = false;
+    }
+  };
+  const onPageHide = () => {
+    canUseSelfFallback = false;
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('pagehide', onPageHide);
+
+  window.open(callbackUrl, '_system');
+  setTimeout(() => {
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    window.removeEventListener('pagehide', onPageHide);
+
+    if (canUseSelfFallback && document.visibilityState === 'visible') {
+      window.open(callbackUrl, '_self');
+    }
+  }, 150);
+}
+
 export function useDeepLinkApi(
   { doNotInitializeRouter }: { doNotInitializeRouter?: boolean } = {},
 ) {
@@ -63,11 +99,7 @@ export function useDeepLinkApi(
      * TODO some more research to figure out the exact reason
      */
     setTimeout(() => {
-      if (IS_MOBILE_APP && !IS_IOS) {
-        window.open(callbackUrl, '_system');
-      } else {
-        window.open(callbackUrl, '_self');
-      }
+      openCallbackUrl(callbackUrl);
     }, IS_WEB ? 0 : 300);
   }
 
