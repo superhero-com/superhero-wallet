@@ -191,7 +191,6 @@ if (IS_MOBILE_APP) {
         : deepLinkUrl.pathname;
 
       try {
-        setIsOpenUsingDeeplink(true);
         router.push({
           path,
           hash: deepLinkUrl.hash,
@@ -199,7 +198,6 @@ if (IS_MOBILE_APP) {
         });
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') {
-          setIsOpenUsingDeeplink(false);
           throw error;
         }
       }
