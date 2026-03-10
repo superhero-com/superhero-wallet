@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.1...v2.9.2) (2026-03-10)
+
+
+### Bug Fixes
+
+* **ios:** open the callback url correctly ([f2c7ccc](https://github.com/Superhero-com/superhero-wallet/commit/f2c7ccce5b3ce40acf0b22e0871c983f14d1677c))
+* make is open using deep link wallet connect only ([d838545](https://github.com/Superhero-com/superhero-wallet/commit/d838545ea2b08e5a7d675fe9181cc3c1cae6b80e))
+* redirect using custom scheme link ([3f8b64c](https://github.com/Superhero-com/superhero-wallet/commit/3f8b64ce32794a91660f65b01f529ea6b287baa6))
+
 ### [2.9.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.0...v2.9.1) (2026-02-26)
 
 
