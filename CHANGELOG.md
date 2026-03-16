@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.2...v2.9.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* **android:** show correct status bar color ([776dd66](https://github.com/Superhero-com/superhero-wallet/commit/776dd66e6434b820fff811762393c421a56ccfdc))
+
+
+### Maintenance
+
+* **android:** support only 16 KB libraries ([ec7d3c9](https://github.com/Superhero-com/superhero-wallet/commit/ec7d3c9272f98efc00662920009816f4cb8e66c9))
+* **android:** update gradle version ([d1be844](https://github.com/Superhero-com/superhero-wallet/commit/d1be84459a7d6dd0aa2cebf6136001be508f95ad))
+
 ### [2.9.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.1...v2.9.2) (2026-03-10)
 
 
