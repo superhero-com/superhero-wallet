@@ -8,3 +8,4 @@ export * from './userDevices';
 export * from './airGap';
 export * from './crypto';
 export * from './session';
+export * from './systemBars';
