@@ -95,7 +95,6 @@
 
 <script lang="ts">
 import { IonRouterOutlet, useIonRouter } from '@ionic/vue';
-import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
@@ -111,6 +110,7 @@ import {
   MODAL_PRIVATE_KEY_EXPORT,
   PROTOCOLS,
 } from '@/constants';
+import { setMobileStatusBarColor } from '@/utils/systemBars';
 
 import {
   useAccounts,
@@ -201,18 +201,14 @@ export default defineComponent({
       }, 150);
 
       if (IS_MOBILE_APP) {
-        StatusBar.setBackgroundColor({
-          color: '#191919',
-        });
+        setMobileStatusBarColor('#191919');
       }
     });
 
     onBeforeUnmount(() => {
       resizeObserver.value?.disconnect();
       if (IS_MOBILE_APP) {
-        StatusBar.setBackgroundColor({
-          color: '#141414',
-        });
+        setMobileStatusBarColor('#141414');
       }
     });
 

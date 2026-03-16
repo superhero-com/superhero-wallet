@@ -1,3 +1,5 @@
+/// <reference types="@capawesome/capacitor-android-edge-to-edge-support" />
+
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -15,8 +17,12 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       useDialog: true,
     },
+    SystemBars: {
+      insetsHandling: 'disable',
+    },
     EdgeToEdge: {
-      backgroundColor: '#141414',
+      navigationBarColor: '#141414',
+      statusBarColor: '#141414',
     },
   },
 };

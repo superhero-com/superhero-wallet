@@ -80,6 +80,7 @@ import { WalletRouteMeta } from '@/types';
 import {
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
+  IS_ANDROID,
   IS_WEB,
   IS_IOS,
   IS_MOBILE_DEVICE,
@@ -90,6 +91,7 @@ import {
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
 } from '@/constants';
+import { setMobileStatusBarColor } from '@/utils/systemBars';
 import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
@@ -250,11 +252,11 @@ export default defineComponent({
       setHtmlBrowserClass();
 
       if (IS_MOBILE_APP) {
-        StatusBar.setOverlaysWebView({ overlay: false });
+        if (!IS_ANDROID) {
+          StatusBar.setOverlaysWebView({ overlay: false });
+        }
         StatusBar.setStyle({ style: Style.Dark });
-        StatusBar.setBackgroundColor({
-          color: '#141414',
-        });
+        setMobileStatusBarColor('#141414');
         window.screen.orientation?.lock?.('portrait');
       }
     });
