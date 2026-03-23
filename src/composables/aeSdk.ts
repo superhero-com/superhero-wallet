@@ -144,6 +144,8 @@ export function useAeSdk() {
         }],
         id: APP_NAME,
         type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
+        // TODO: the ttl is set to 0 to avoid the timeout error when blockchain experiencing issues
+        ttl: 0,
         onConnection(aeppId, params, origin) {
           aeppInfo[aeppId] = { ...params, origin };
         },
