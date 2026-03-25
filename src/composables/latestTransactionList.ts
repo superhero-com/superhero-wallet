@@ -6,7 +6,7 @@ import type {
   ICommonTransaction,
   ITransaction,
 } from '@/types';
-import { STORAGE_KEYS, TRANSACTION_CERTAINLY_MINED_TIME } from '@/constants';
+import { STORAGE_KEYS } from '@/constants';
 import {
   pipe,
   removeDuplicatedTransactions,
@@ -155,23 +155,9 @@ export function useLatestTransactionList() {
     loadAllLatestTransactions();
 
     /**
-     * Remove old pending transactions that we can consider as already mined.
-     * This prevents situation where user creates transaction and closes the app/extension
-     * immediately so the `waitTransactionMined` couldn't work properly.
+     * Refresh account transactions lists if any of the transactions is pending.
      */
     setInterval(() => {
-      Object.entries(accountsTransactionsPending.value)
-        .forEach(([accountAddress, transactionList]) => {
-          transactionList.forEach(({ hash, microTime }) => {
-            if (Date.now() - (microTime || 0) > TRANSACTION_CERTAINLY_MINED_TIME) {
-              removeAccountPendingTransactionByHash(accountAddress, hash);
-            }
-          });
-        });
-
-      /**
-       * Refresh account transactions lists if any of the transactions is pending.
-       */
       Object.entries(accountsTransactionsLatest.value)
         .forEach(([accountAddress, transactionList]) => {
           if (transactionList.some(({ pending }) => !!pending)) {
