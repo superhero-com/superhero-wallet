@@ -1,5 +1,8 @@
 <template>
-  <div class="accordion-item">
+  <div
+    class="accordion-item"
+    :class="`variant-${variant}`"
+  >
     <a
       class="accordion-label"
       data-cy="accordion-item-label"
@@ -24,9 +27,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 
 import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
+
+export const ACCORDION_ITEM_VARIANT = [
+  'default',
+  'muted',
+] as const;
+
+export type AccordionItemVariant = typeof ACCORDION_ITEM_VARIANT[number];
 
 export default defineComponent({
   components: {
@@ -34,6 +44,11 @@ export default defineComponent({
   },
   props: {
     label: { type: String, required: true },
+    variant: {
+      type: String as PropType<AccordionItemVariant>,
+      validator: (value: AccordionItemVariant) => ACCORDION_ITEM_VARIANT.includes(value),
+      default: ACCORDION_ITEM_VARIANT[0],
+    },
   },
   setup() {
     const isVisible = ref(false);
@@ -79,6 +94,22 @@ export default defineComponent({
       font-weight: 500;
       text-transform: uppercase;
       color: $color-success;
+    }
+  }
+
+  &.variant {
+    &-muted {
+      .accordion-label {
+        .accordion-label-text {
+          color: rgba($color-white, 0.75);
+        }
+
+        &:hover {
+          .accordion-label-text {
+            color: $color-white;
+          }
+        }
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ import { STUB_ACCOUNT } from '../../../src/constants/stubs';
 
 const recipientAddress = 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4';
 const amount = 0.1;
+const customFee = 0.00002;
 
 describe('Test cases for Send Modal', () => {
   it('Opens Send Modal, uses scan button, validates entered amount, reviews and sends', () => {
@@ -48,6 +49,24 @@ describe('Test cases for Send Modal', () => {
         cy.get('[data-cy=review-fee]').invoke('text').then((fee) => {
           const n2 = getNum(fee);
           cy.expect(BigNumber(n1).minus(n2).toNumber()).to.eq(amount);
+        });
+      })
+      .get('[data-cy=accordion-item-label]')
+      .contains('Advanced transaction details')
+      .click()
+      .get('[data-cy=advanced-fee-input] [data-cy=input]')
+      .clear()
+      .type(customFee.toString())
+      .get('[data-cy=review-total]')
+      .invoke('text')
+      .then((total) => {
+        const getNum = (s) => +/[+-]?([0-9]*[.])?[0-9]+/.exec(s)[0];
+        const totalNumber = getNum(total);
+        cy.get('[data-cy=review-fee]').invoke('text').then((fee) => {
+          const feeNumber = getNum(fee);
+          cy.expect(BigNumber(totalNumber).minus(feeNumber).toNumber())
+            .to.be.closeTo(amount, 0.0000001);
+          cy.expect(feeNumber).to.eq(customFee);
         });
       })
 

@@ -823,12 +823,15 @@ export interface TransferFormModel extends IFormModel {
   gasPrice?: number;
   gasUsed?: number;
   fee?: BigNumber;
+  estimatedFee?: BigNumber;
+  estimatedTotal?: number;
   total?: number;
   invoiceContract?: any;
   invoiceId?: any;
   note?: string;
   maxPriorityFeePerGas?: string;
   maxFeePerGas?: string;
+  nonce?: number;
   payload: string;
 }
 
@@ -837,6 +840,7 @@ export interface ITransferArgs {
   recipient: AccountAddress;
   selectedAsset: IAsset;
   nonce?: number;
+  fee?: string;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
