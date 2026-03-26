@@ -27,9 +27,9 @@
 import BigNumber from 'bignumber.js';
 import {
   defineComponent,
-  onMounted,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import {
   encode,
@@ -66,6 +66,7 @@ export default defineComponent({
   },
   setup(props) {
     const fragments = ref();
+    let updateRequestId = 0;
 
     const { nodeNetworkId, getAeSdk } = useAeSdk();
     const { activeAccount, isActiveAccountAirGap } = useAccounts();
@@ -76,7 +77,11 @@ export default defineComponent({
       copy(getURFromFragments(fragments.value));
     }
 
-    onMounted(async () => {
+    async function generateQrFragments() {
+      updateRequestId += 1;
+      const requestId = updateRequestId;
+      fragments.value = undefined;
+
       const aeSdk = await getAeSdk();
       const {
         amount: amountRaw,
@@ -88,7 +93,7 @@ export default defineComponent({
         || !recipients?.length
         || !selectedAsset
         || !isActiveAccountAirGap.value) {
-        return null;
+        return;
       }
 
       const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
@@ -101,15 +106,28 @@ export default defineComponent({
         recipientId: recipients[0],
         amount: new BigNumber(amount).toFixed().toString(),
         payload: encode(new TextEncoder().encode(props.transferData.payload), Encoding.Bytearray),
+        nonce: props.transferData.nonce,
+        fee: props.transferData.fee ? aeToAettos(props.transferData.fee) : undefined,
       });
 
-      fragments.value = await generateTransactionURDataFragments(
+      const nextFragments = await generateTransactionURDataFragments(
         activeAccount.value?.publicKey!,
         txRaw,
         nodeNetworkId.value!,
       );
-      return null;
-    });
+
+      if (requestId === updateRequestId) {
+        fragments.value = nextFragments;
+      }
+    }
+
+    watch(
+      () => props.transferData,
+      () => {
+        generateQrFragments();
+      },
+      { deep: true, immediate: true },
+    );
 
     return {
       fragments,

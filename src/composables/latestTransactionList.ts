@@ -1,12 +1,12 @@
 import { computed, ref, watch } from 'vue';
-import { isEqual, remove } from 'lodash-es';
+import { isEqual } from 'lodash-es';
 import type {
   AccountAddress,
   IAccount,
   ICommonTransaction,
   ITransaction,
 } from '@/types';
-import { STORAGE_KEYS, TRANSACTION_CERTAINLY_MINED_TIME } from '@/constants';
+import { STORAGE_KEYS } from '@/constants';
 import {
   pipe,
   removeDuplicatedTransactions,
@@ -66,13 +66,18 @@ export function useLatestTransactionList() {
   const { balances } = useBalances();
   const { tokenBalances } = useFungibleTokens();
 
-  function removeAccountPendingTransaction(address: AccountAddress, hash: string) {
-    accountsTransactionsPending.value[address] = remove(
-      accountsTransactionsPending.value[address],
-      (transaction) => hash === transaction.hash,
-    );
+  function removeAccountPendingTransactionByHash(address: AccountAddress, hash: string) {
+    accountsTransactionsPending.value[address] = (
+      accountsTransactionsPending.value[address] || []
+    ).filter((transaction) => hash !== transaction.hash);
   }
 
+  function removeAccountPendingTransactionByNonce(address: AccountAddress, nonce?: number) {
+    if (!nonce) return;
+    accountsTransactionsPending.value[address] = (
+      accountsTransactionsPending.value[address] || []
+    ).filter((transaction) => nonce !== transaction.tx?.nonce);
+  }
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const currentNetworkName = activeNetwork.value.name;
@@ -97,7 +102,12 @@ export function useLatestTransactionList() {
       ];
 
       if (accountsTransactionsPending.value[address]?.length) {
-        regularTransactions.forEach(({ hash }) => removeAccountPendingTransaction(address, hash));
+        regularTransactions.forEach(
+          ({ hash }) => removeAccountPendingTransactionByHash(address, hash),
+        );
+        regularTransactions.forEach(
+          (transaction) => removeAccountPendingTransactionByNonce(address, transaction.tx?.nonce),
+        );
       }
     }
 
@@ -134,7 +144,7 @@ export function useLatestTransactionList() {
           .waitTransactionMined(transaction.hash);
         loadAccountLatestTransactions(account);
       } finally {
-        removeAccountPendingTransaction(address, transaction.hash);
+        removeAccountPendingTransactionByHash(address, transaction.hash);
       }
     }
   }
@@ -145,23 +155,9 @@ export function useLatestTransactionList() {
     loadAllLatestTransactions();
 
     /**
-     * Remove old pending transactions that we can consider as already mined.
-     * This prevents situation where user creates transaction and closes the app/extension
-     * immediately so the `waitTransactionMined` couldn't work properly.
+     * Refresh account transactions lists if any of the transactions is pending.
      */
     setInterval(() => {
-      Object.entries(accountsTransactionsPending.value)
-        .forEach(([accountAddress, transactionList]) => {
-          transactionList.forEach(({ hash, microTime }) => {
-            if (Date.now() - (microTime || 0) > TRANSACTION_CERTAINLY_MINED_TIME) {
-              removeAccountPendingTransaction(accountAddress, hash);
-            }
-          });
-        });
-
-      /**
-       * Refresh account transactions lists if any of the transactions is pending.
-       */
       Object.entries(accountsTransactionsLatest.value)
         .forEach(([accountAddress, transactionList]) => {
           if (transactionList.some(({ pending }) => !!pending)) {

@@ -2582,7 +2582,7 @@ exports[`Pages TermsOfService 1`] = `
         , we consider this an explicit consent to the following: 
       </p>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2607,7 +2607,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2632,7 +2632,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2657,7 +2657,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2682,7 +2682,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2707,7 +2707,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2732,7 +2732,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2757,7 +2757,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2782,7 +2782,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2807,7 +2807,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"
@@ -2832,7 +2832,7 @@ exports[`Pages TermsOfService 1`] = `
         </transition-stub>
       </div>
       <div
-        class="accordion-item"
+        class="accordion-item variant-default"
       >
         <a
           class="accordion-label"

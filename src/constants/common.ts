@@ -547,9 +547,6 @@ export const ASSET_TYPES = {
   token: 'token',
 } as const;
 
-/** 10 minutes is the time we are 100% sure the transaction was mined */
-export const TRANSACTION_CERTAINLY_MINED_TIME = 600000;
-
 export const POLLING_INTERVAL_TRANSACTIONS = 15000;
 
 // toBase64Url(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' }))
