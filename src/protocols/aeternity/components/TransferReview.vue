@@ -7,7 +7,7 @@
     :amount-label="recipientsCount > 1 ? $t('pages.send.singleAccountLabel') : undefined"
     :fee-label="isMultisig ? $t('transaction.proposalTransactionFee') : undefined"
     :base-token-symbol="AE_SYMBOL"
-    :transfer-data="transferData"
+    :transfer-data="displayTransferData"
     :loading="loading"
     :show-fiat="showTotal"
     :protocol="PROTOCOLS.aeternity"
@@ -32,13 +32,13 @@
         class="multisig-account"
       >
         <AccountItem
-          :address="activeMultisigAccount?.gaAccountId!"
+          :address="activeMultisigAccount?.gaAccountId || ''"
           :protocol="PROTOCOLS.aeternity"
         />
       </div>
       <TransferQRCodeGenerator
         v-if="isActiveAccountAirGap && !isMultisig"
-        :transfer-data="transferData"
+        :transfer-data="displayTransferData"
       />
     </template>
 
@@ -128,7 +128,7 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData?.total!"
+            :amount="+(displayTransferData?.total || 0)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
             high-precision
@@ -137,6 +137,34 @@
         </template>
       </DetailsItem>
     </template>
+
+    <template #bottom>
+      <AccordionItem
+        v-if="isAdvancedSettingsAvailable"
+        class="advanced-settings"
+        :label="$t('transaction.advancedDetails')"
+        variant="muted"
+      >
+        <InputField
+          data-cy="advanced-fee-input"
+          :model-value="feeInput"
+          :label="$t('transaction.fee')"
+          type="number"
+          :message="feeInputMessage"
+          @update:modelValue="handleFeeInput"
+        />
+
+        <InputField
+          data-cy="advanced-nonce-input"
+          :model-value="nonceInput"
+          :label="$t('common.nonce')"
+          type="number"
+          integer
+          :message="nonceInputMessage"
+          @update:modelValue="handleNonceInput"
+        />
+      </AccordionItem>
+    </template>
   </TransferReviewBase>
 </template>
 
@@ -144,15 +172,22 @@
 import {
   computed,
   defineComponent,
+  onMounted,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Contract, Encoded, Tag } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
-import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
+import type {
+  IInputMessage,
+  TransferFormModel,
+  ITransaction,
+  ITransferArgs,
+} from '@/types';
 import { PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
@@ -180,13 +215,23 @@ import {
   TX_FUNCTIONS,
   AE_GET_META_TX_FEE,
 } from '@/protocols/aeternity/config';
-import { aeToAettos, aettosToAe } from '@/protocols/aeternity/helpers';
+import {
+  aeToAettos,
+  aettosToAe,
+  isAccountNotFoundError,
+} from '@/protocols/aeternity/helpers';
+import {
+  getAdjustedTransferTotal,
+  getNonceWarningMessageKey,
+} from '@/protocols/aeternity/helpers/transferReview';
 import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import TransferQRCodeGenerator from '@/popup/components/TransferQRCodeGenerator.vue';
+import AccordionItem from '@/popup/components/AccordionItem.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
+import InputField from '@/popup/components/InputField.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
 import Logger from '@/lib/logger';
@@ -194,6 +239,8 @@ import Logger from '@/lib/logger';
 export default defineComponent({
   name: 'AeTransferReview',
   components: {
+    AccordionItem,
+    InputField,
     TokenAmount,
     DetailsItem,
     TransferQRCodeGenerator,
@@ -212,13 +259,14 @@ export default defineComponent({
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
   },
+  emits: ['success', 'error', 'update:transferData'],
   setup(props, { emit }) {
     const router = useRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
     const { openCallbackOrGoHome } = useDeepLinkApi();
-    const { addAccountPendingTransaction } = useLatestTransactionList();
+    const { addAccountPendingTransaction, allLatestTransactions } = useLatestTransactionList();
     const { activeAccount, isActiveAccountAirGap } = useAccounts();
     const { getAeSdk } = useAeSdk();
     const {
@@ -237,8 +285,105 @@ export default defineComponent({
     } = useFungibleTokens();
 
     const loading = ref<boolean>(false);
+    const feeInput = ref(new BigNumber(props.transferData.fee || 0).toFixed());
+    const nonceInput = ref(props.transferData.nonce?.toString() || '');
+    const currentAccountNonce = ref<number | null>(props.transferData.nonce ?? null);
 
     const recipientsCount = computed(() => (props.transferData.addresses?.length || 1));
+    const isAdvancedSettingsAvailable = computed(() => (
+      !props.isMultisig
+      && !props.isAddressUrl
+      && props.transferData.invoiceId == null
+    ));
+    const minimumFee = computed(
+      () => new BigNumber(props.transferData.estimatedFee || props.transferData.fee || 0),
+    );
+    const enteredFee = computed(() => {
+      const value = new BigNumber(feeInput.value || NaN);
+      return value.isFinite() && value.isGreaterThan(0)
+        ? value
+        : null;
+    });
+    const selectedFee = computed(() => {
+      if (enteredFee.value?.isGreaterThanOrEqualTo(minimumFee.value)) {
+        return enteredFee.value;
+      }
+      return minimumFee.value;
+    });
+    const parsedNonce = computed<number | null>(() => {
+      if (!nonceInput.value.length || !/^\d+$/.test(nonceInput.value)) {
+        return null;
+      }
+      return Number(nonceInput.value);
+    });
+    const adjustedTotal = computed(() => {
+      const baseTotal = props.transferData.estimatedTotal ?? props.transferData.total;
+      return getAdjustedTransferTotal(
+        baseTotal,
+        minimumFee.value,
+        selectedFee.value,
+      ) ?? props.transferData.total;
+    });
+    const displayTransferData = computed<TransferFormModel>(() => ({
+      ...props.transferData,
+      fee: selectedFee.value,
+      nonce: parsedNonce.value ?? undefined,
+      total: adjustedTotal.value,
+    }));
+    const hasPendingTransactionWithSameNonce = computed(() => (
+      parsedNonce.value != null
+      && allLatestTransactions.value.some((transaction) => (
+        'transactionOwner' in transaction
+        && transaction.transactionOwner === activeAccount.value.address
+        && transaction.pending
+        && transaction.protocol === PROTOCOLS.aeternity
+        && transaction.tx?.nonce === parsedNonce.value
+      ))
+    ));
+    const feeInputMessage = computed<IInputMessage | undefined>(() => {
+      if (!enteredFee.value) {
+        return {
+          status: 'error',
+          text: t('transaction.advancedFeeInvalid'),
+        };
+      }
+      if (enteredFee.value.isLessThan(minimumFee.value)) {
+        return {
+          status: 'error',
+          text: t('transaction.advancedFeeTooLow'),
+        };
+      }
+      return undefined;
+    });
+    const nonceInputMessage = computed<IInputMessage | undefined>(() => {
+      if (parsedNonce.value == null || parsedNonce.value < 1) {
+        return {
+          status: 'error',
+          text: t('transaction.advancedNonceInvalid'),
+        };
+      }
+      const warningMessageKey = getNonceWarningMessageKey(
+        parsedNonce.value,
+        currentAccountNonce.value,
+        hasPendingTransactionWithSameNonce.value,
+      );
+      if (warningMessageKey) {
+        return {
+          status: 'warning',
+          text: warningMessageKey === 'replacement'
+            ? t('transaction.advancedNonceReplacementWarning')
+            : t('transaction.advancedNonceLowWarning'),
+        };
+      }
+      return undefined;
+    });
+    const hasAdvancedSettingsError = computed(() => (
+      isAdvancedSettingsAvailable.value
+      && (
+        feeInputMessage.value?.status === 'error'
+        || nonceInputMessage.value?.status === 'error'
+      )
+    ));
 
     const showTotal = computed(
       () => (
@@ -273,6 +418,50 @@ export default defineComponent({
         : 0,
     );
 
+    function emitTransferDataUpdate() {
+      if (!isAdvancedSettingsAvailable.value) {
+        return;
+      }
+
+      const nextFee = selectedFee.value.toFixed();
+      const currentFee = new BigNumber(props.transferData.fee || 0).toFixed();
+      const nextNonce = parsedNonce.value ?? undefined;
+      const currentNonce = props.transferData.nonce;
+      const nextTotal = adjustedTotal.value ?? undefined;
+      const currentTotal = props.transferData.total;
+
+      if (
+        currentFee === nextFee
+        && currentNonce === nextNonce
+        && currentTotal === nextTotal
+      ) {
+        return;
+      }
+
+      emit('update:transferData', displayTransferData.value);
+    }
+
+    function handleFeeInput(value: string) {
+      feeInput.value = value;
+    }
+
+    function handleNonceInput(value: string) {
+      nonceInput.value = value;
+    }
+
+    async function fetchCurrentAccountNonce() {
+      const aeSdk = await getAeSdk();
+      try {
+        const { nonce } = await aeSdk.api.getAccountByPubkey(activeAccount.value.address);
+        return nonce + 1;
+      } catch (error) {
+        if (isAccountNotFoundError(error)) {
+          return 1;
+        }
+        throw error;
+      }
+    }
+
     async function openTransactionFailedModal(msg: string) {
       await Logger.write({
         title: t('modals.transaction-failed.title'),
@@ -304,7 +493,7 @@ export default defineComponent({
     }
 
     async function transfer({
-      amount, recipient, selectedAsset, nonce,
+      amount, recipient, selectedAsset, nonce, fee,
     }: ITransferArgs): Promise<string | undefined> {
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
@@ -321,6 +510,7 @@ export default defineComponent({
             {
               waitMined: false,
               nonce,
+              fee,
             },
           );
         } else if (!isSelectedAssetAeCoin) {
@@ -334,6 +524,7 @@ export default defineComponent({
               // in case of custom AEX9 token, we need to pass it to avoid the error
               omitUnknown: true,
               nonce,
+              fee,
             },
           );
         } else {
@@ -342,6 +533,7 @@ export default defineComponent({
             payload: props.transferData.payload,
             waitMined: false,
             nonce,
+            fee,
           });
         }
 
@@ -360,7 +552,8 @@ export default defineComponent({
               function: TX_FUNCTIONS.transfer,
               recipientId: recipient,
               arguments: [],
-              fee: 0,
+              fee: Number(fee || 0),
+              nonce,
             },
           };
           addAccountPendingTransaction(activeAccount.value.address, transaction);
@@ -476,6 +669,10 @@ export default defineComponent({
     }
 
     async function submit(): Promise<void> {
+      if (hasAdvancedSettingsError.value) {
+        return;
+      }
+
       if (isActiveAccountAirGap.value && !props.isMultisig) {
         emit('success');
         return;
@@ -507,12 +704,13 @@ export default defineComponent({
         });
       } else {
         let hash;
-        const aeSdk = await getAeSdk();
-
-        let currentNonce = (await aeSdk.api.getAccountByPubkey(
-          activeAccount.value.address,
-        )).nonce + 1;
-          // eslint-disable-next-line no-restricted-syntax
+        const customFee = props.transferData.fee
+          ? aeToAettos(
+            new BigNumber(props.transferData.fee).dividedBy(recipients.length || 1),
+          )
+          : undefined;
+        let currentNonce = props.transferData.nonce || await fetchCurrentAccountNonce();
+        // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           // eslint-disable-next-line no-await-in-loop
           hash = await transfer({
@@ -520,6 +718,7 @@ export default defineComponent({
             recipient,
             selectedAsset,
             nonce: currentNonce,
+            fee: customFee,
           });
           currentNonce += 1;
         }
@@ -529,9 +728,34 @@ export default defineComponent({
       }
     }
 
+    watch(
+      [feeInput, nonceInput],
+      () => emitTransferDataUpdate(),
+    );
+
+    watch(
+      hasAdvancedSettingsError,
+      (value) => emit('error', value),
+      { immediate: true },
+    );
+
+    onMounted(async () => {
+      if (!isAdvancedSettingsAvailable.value) {
+        emit('error', false);
+        return;
+      }
+
+      currentAccountNonce.value = await fetchCurrentAccountNonce();
+      if (!nonceInput.value.length) {
+        nonceInput.value = currentAccountNonce.value.toString();
+      }
+      emitTransferDataUpdate();
+    });
+
     return {
       PROTOCOLS,
       recipientsCount,
+      displayTransferData,
       gasCost,
       isActiveAccountAirGap,
       activeMultisigAccount,
@@ -542,6 +766,13 @@ export default defineComponent({
       loading,
       headerTitle,
       headerSubtitle,
+      isAdvancedSettingsAvailable,
+      feeInput,
+      nonceInput,
+      feeInputMessage,
+      nonceInputMessage,
+      handleFeeInput,
+      handleNonceInput,
       showTotal,
       submit,
     };
@@ -571,6 +802,10 @@ export default defineComponent({
   .multisig-account {
     display: flex;
     justify-content: center;
+  }
+
+  .advanced-settings {
+    margin-top: 24px;
   }
 }
 </style>

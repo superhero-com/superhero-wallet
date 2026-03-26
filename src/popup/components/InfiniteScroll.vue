@@ -19,7 +19,13 @@
       <div class="vs-spacer" :style="{ height: bottomPadding }" />
     </div>
     <template v-else>
-      <slot />
+      <div
+        v-for="(item, i) in items || []"
+        :key="getKey(item, i)"
+        class="vs-row"
+      >
+        <slot :item="item" :index="i" />
+      </div>
     </template>
   </div>
 </template>

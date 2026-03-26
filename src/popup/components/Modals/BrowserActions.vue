@@ -94,3 +94,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.info {
+  margin-bottom: 16px;
+}
+</style>

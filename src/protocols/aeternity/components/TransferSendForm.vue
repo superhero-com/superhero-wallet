@@ -379,6 +379,8 @@ export default defineComponent({
         gasPrice: gasPrice.value,
         gasUsed: gasUsed.value,
         fee: fee.value as BigNumber,
+        estimatedFee: fee.value as BigNumber,
+        estimatedTotal: +total.value.toFixed(),
         total: +total.value.toFixed(),
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,

@@ -35,10 +35,10 @@
       v-else
       class="details-item receiving-addresses"
       data-cy="review-recipient"
-      :class="{ 'multiple-addresses': transferData.addresses?.length! > 1 }"
-      :expandable="transferData.addresses?.length! > 1"
+      :class="{ 'multiple-addresses': (transferData.addresses?.length || 0) > 1 }"
+      :expandable="(transferData.addresses?.length || 0) > 1"
       :label="`${$t('pages.send.show')} ${transferData.addresses?.length} ${$t('pages.send.recipients')}`"
-      :expanded-label="transferData.addresses?.length! > 1
+      :expanded-label="(transferData.addresses?.length || 0) > 1
         ? `${$t('pages.send.hide')} ${transferData.addresses?.length} ${$t('pages.send.recipients')}`
         : $t('pages.send.recipient')"
     >
@@ -114,6 +114,8 @@
       data-cy="review-payload"
       :payload="transferData.payload"
     />
+
+    <slot name="bottom" />
 
     <Loader v-if="loading" />
   </div>
