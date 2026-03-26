@@ -556,7 +556,6 @@
     "advancedDetails": "Advanced transaction details",
     "advancedFeeInvalid": "Enter a valid fee greater than 0.",
     "advancedFeeTooLow": "Fee must be at least the estimated minimum fee.",
-    "advancedFeeLowWarning": "Setting a fee below the estimated minimum may cause this transaction to be rejected or remain pending in the mempool.",
     "advancedNonceInvalid": "Enter a valid nonce greater than 0.",
     "advancedNonceLowWarning": "Setting a nonce lower than the current account nonce usually leads to rejection unless a transaction with that nonce is still pending in the mempool.",
     "advancedNonceReplacementWarning": "A pending transaction with this nonce may be replaced by this new transaction if you continue.",
