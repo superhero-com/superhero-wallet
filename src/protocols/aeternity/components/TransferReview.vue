@@ -705,9 +705,7 @@ export default defineComponent({
       } else {
         let hash;
         const customFee = props.transferData.fee
-          ? aeToAettos(
-            new BigNumber(props.transferData.fee).dividedBy(recipients.length || 1),
-          )
+          ? aeToAettos(new BigNumber(props.transferData.fee))
           : undefined;
         let currentNonce = props.transferData.nonce || await fetchCurrentAccountNonce();
         // eslint-disable-next-line no-restricted-syntax
