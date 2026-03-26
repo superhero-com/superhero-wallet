@@ -673,6 +673,8 @@ export default defineComponent({
         return;
       }
 
+      const effectiveTransferData = displayTransferData.value;
+
       if (isActiveAccountAirGap.value && !props.isMultisig) {
         emit('success');
         return;
@@ -683,7 +685,7 @@ export default defineComponent({
         addresses: recipients,
         selectedAsset,
         note,
-      } = props.transferData;
+      } = effectiveTransferData;
 
       if (!amountRaw || !recipients?.length || !selectedAsset) {
         return;
@@ -704,12 +706,12 @@ export default defineComponent({
         });
       } else {
         let hash;
-        const customFee = props.transferData.fee
+        const customFee = effectiveTransferData.fee
           ? aeToAettos(
-            new BigNumber(props.transferData.fee).dividedBy(recipients.length || 1),
+            new BigNumber(effectiveTransferData.fee).dividedBy(recipients.length || 1),
           )
           : undefined;
-        let currentNonce = props.transferData.nonce || await fetchCurrentAccountNonce();
+        let currentNonce = effectiveTransferData.nonce || await fetchCurrentAccountNonce();
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           // eslint-disable-next-line no-await-in-loop
