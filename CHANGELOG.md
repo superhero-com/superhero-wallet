@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.3...v2.9.4) (2026-03-26)
+
+
+### Features
+
+* **aeternity:** add advance transaction settings ([8455b71](https://github.com/Superhero-com/superhero-wallet/commit/8455b71db749f5d6ad2dc891fc5588c6eb2b8e7d))
+
+
+### Bug Fixes
+
+* **aeternity:** set custom fee correctly in multiple recipients flow ([7b8eede](https://github.com/Superhero-com/superhero-wallet/commit/7b8eedeab9e7bb50e198696df25fe5aa2b31e97b))
+* do not remove pending transaction after 10 minutes ([b75ef88](https://github.com/Superhero-com/superhero-wallet/commit/b75ef88c3e1e86aa0d44f7d5626d1c852b8c911d))
+* **infinite-scroll:** only render over actual items ([f34adcd](https://github.com/Superhero-com/superhero-wallet/commit/f34adcdc1bb2d9f71307b027e92a87a8d92b8ea1))
+* remove unused locale ([4d0d4b0](https://github.com/Superhero-com/superhero-wallet/commit/4d0d4b0b44c1295e605501a87a8bf4882f933acf))
+
+
+### Maintenance
+
+* adjust BrowserActions margins ([29cd26a](https://github.com/Superhero-com/superhero-wallet/commit/29cd26aaa866b9188b299067d23f5a81554685f0))
+* avoid transaction being removed from pool rapidly ([7018de7](https://github.com/Superhero-com/superhero-wallet/commit/7018de79c3e2503f5a69fff4d2fe66922786aac7))
+
 ### [2.9.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.2...v2.9.3) (2026-03-16)
 
 
