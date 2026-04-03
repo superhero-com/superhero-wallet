@@ -914,8 +914,13 @@
       "tokens": "Tokens | Token | Tokens",
       "searchPlaceholder": "Search by token name or contract address",
       "searchAssetsPlaceholder": "Search for assets",
+      "searching": "Looking up token...",
       "buyAe": "Buy AE",
-      "select-asset": "Select asset"
+      "select-asset": "Select asset",
+      "searchEmptyTitle": "No assets found",
+      "searchLimitationsMessage": "Search matches token names and symbols by prefix. Try the first letters of the token name or symbol, or paste the exact contract address to look up a token directly.",
+      "contractSearchEmptyTitle": "Token not found",
+      "contractSearchEmptyMessage": "We could not find a token for this contract address. Please check the address and try again."
     },
     "token-details": {
       "tip": "Tip",

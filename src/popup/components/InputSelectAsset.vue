@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { IAsset, IToken } from '@/types';
+import type { IAsset, IToken, Protocol } from '@/types';
 import { MODAL_ASSET_SELECTOR } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -30,6 +30,7 @@ export default defineComponent({
   },
   props: {
     value: { type: Object as PropType<IAsset>, default: null },
+    protocol: { type: String as PropType<Protocol>, default: null },
     disabled: Boolean,
     focused: Boolean,
     withBalanceOnly: Boolean,
@@ -54,6 +55,7 @@ export default defineComponent({
       if (!props.disabled) {
         openModal<AssetSelectorResolvedVal>(MODAL_ASSET_SELECTOR, {
           selectedToken: props.value,
+          protocol: props.protocol,
           withBalanceOnly: props.withBalanceOnly,
           resolve: (token) => token,
         })

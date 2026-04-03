@@ -22,6 +22,7 @@
         v-bind="$attrs"
         data-cy="select-asset"
         :value="currentAsset"
+        :protocol="protocol"
         :focused="focused"
         :with-balance-only="withBalanceOnly"
         @select-asset="handleAssetSelected($event)"

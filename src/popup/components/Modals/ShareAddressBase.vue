@@ -96,8 +96,10 @@
 import {
   computed,
   defineComponent,
+  onMounted,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Field } from 'vee-validate';
@@ -114,7 +116,7 @@ import {
   PROTOCOLS,
 } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
-import { useAccounts, useCopy } from '@/composables';
+import { useAccounts, useCopy, useFungibleTokens } from '@/composables';
 import { invokeDeviceShare } from '@/utils';
 import {
   AE_CONTRACT_ID,
@@ -166,6 +168,7 @@ export default defineComponent({
 
     const { activeAccount } = useAccounts();
     const { copied, copy } = useCopy();
+    const { loadSingleToken } = useFungibleTokens();
 
     const amount = ref<number | string>('');
     const selectedAsset = ref<IAsset | IToken | null>(null);
@@ -232,15 +235,25 @@ export default defineComponent({
       copy(accountAddressToCopy.value);
     }
 
-    (() => {
-      if (
-        !props.disableAssetSelection
-        && props.tokenContractId
-        && props.tokens[props.tokenContractId]
-      ) {
-        handleAssetChange(props.tokens[props.tokenContractId]);
+    watch(
+      () => props.tokenContractId ? props.tokens[props.tokenContractId] : null,
+      (token) => {
+        if (
+          !props.disableAssetSelection
+          && props.tokenContractId
+          && token
+        ) {
+          handleAssetChange(token);
+        }
+      },
+      { immediate: true },
+    );
+
+    onMounted(async () => {
+      if (!props.disableAssetSelection && props.tokenContractId) {
+        await loadSingleToken(props.tokenContractId, props.protocol);
       }
-    })();
+    });
 
     return {
       PROTOCOLS,

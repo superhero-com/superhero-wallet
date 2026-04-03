@@ -23,6 +23,7 @@ import type {
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
+  IPageableResponse,
   IToken,
   ITokenBalance,
   ITokenBalanceResponse,
@@ -272,12 +273,46 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
+    const firstPage = await this.fetchAvailableTokensPage();
+    return firstPage?.data || [];
+  }
+
+  private async fetchAex9TokensPage(
+    path: string,
+  ): Promise<IPageableResponse<IToken> | null> {
     const { fetchFromMiddleware } = useAeMiddleware();
-    const response: Omit<IToken, 'protocol'>[] = camelCaseKeysDeep(await fetchAllPages(
-      () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
-      fetchFromMiddleware,
-    ));
-    return (response || []).map((token) => ({ ...token, protocol: PROTOCOLS.aeternity }));
+    const response = camelCaseKeysDeep(
+      await fetchFromMiddleware(path),
+    ) as IPageableResponse<Omit<IToken, 'protocol'>> | null;
+
+    if (!response) {
+      return null;
+    }
+
+    return {
+      ...response,
+      data: (response.data || []).map((token) => ({ ...token, protocol: PROTOCOLS.aeternity })),
+    };
+  }
+
+  override async fetchAvailableTokensPage(
+    nextPageUrl?: string,
+  ): Promise<IPageableResponse<IToken> | null> {
+    return this.fetchAex9TokensPage(
+      nextPageUrl || '/v2/aex9?by=name&limit=100&direction=forward',
+    );
+  }
+
+  override async fetchAvailableTokensSearchPage(
+    searchTerm: string,
+    searchBy: 'name' | 'symbol',
+    nextPageUrl?: string,
+  ): Promise<IPageableResponse<IToken> | null> {
+    const searchPath = `/v2/aex9?by=${searchBy}&prefix=${encodeURIComponent(
+      searchTerm,
+    )}&limit=100&direction=forward`;
+
+    return this.fetchAex9TokensPage(nextPageUrl || searchPath);
   }
 
   override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {

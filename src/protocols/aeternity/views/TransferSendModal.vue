@@ -18,7 +18,7 @@
         :is-address-chain="isAddressChain"
         :is-address-url="isAddressUrl"
         @success="currentStepConfig.onSuccess"
-        @error="(val: any) => error = val"
+        @error="handleError"
       />
     </template>
   </TransferSendBase>
@@ -31,6 +31,7 @@ import {
   defineComponent,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -68,18 +69,19 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
     const { isAeNodeReady } = useAeSdk();
-    const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens, loadSingleToken } = useFungibleTokens();
     const { isActiveAccountAirGap } = useAccounts();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
+    const aeternityTokens = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
     const transferData = ref<TransferFormModel>({
       addresses: props.address ? [props.address] : [] as any[], // TODO change to string globally
       amount: props.amount,
       payload: props.payload,
       selectedAsset: (props.tokenContractId)
-        ? getProtocolAvailableTokens(PROTOCOLS.aeternity)[props.tokenContractId]
+        ? aeternityTokens.value[props.tokenContractId]
         : undefined,
     });
 
@@ -147,6 +149,10 @@ export default defineComponent({
       currentStep.value = TRANSFER_SEND_STEPS.form;
     }
 
+    function handleError(val: boolean) {
+      error.value = val;
+    }
+
     const steps: TransferSendStepConfigRegistry = {
       [TRANSFER_SEND_STEPS.form]: {
         component: TransferSendForm,
@@ -168,6 +174,43 @@ export default defineComponent({
 
     const currentStepConfig = computed(() => steps[currentStep.value]!);
 
+    watch(
+      () => props.tokenContractId,
+      async (contractId) => {
+        if (contractId) {
+          await loadSingleToken(contractId, PROTOCOLS.aeternity);
+        }
+      },
+      { immediate: true },
+    );
+
+    /**
+     * Do not overwrite a user-chosen asset when the token map refreshes (e.g. balance polling).
+     * Sync when the deeplink contract id prop changes, or selection is unset / matches that prop.
+     */
+    const lastSyncedTokenContractIdProp = ref<AssetContractId | null>(null);
+
+    watch(
+      [() => props.tokenContractId, aeternityTokens],
+      ([contractId, tokens]) => {
+        if (!contractId || !tokens[contractId]) {
+          return;
+        }
+        const token = tokens[contractId];
+        const propChanged = contractId !== lastSyncedTokenContractIdProp.value;
+        if (propChanged) {
+          lastSyncedTokenContractIdProp.value = contractId;
+          transferData.value.selectedAsset = token;
+          return;
+        }
+        const sel = transferData.value.selectedAsset?.contractId;
+        if (sel === undefined || sel === contractId) {
+          transferData.value.selectedAsset = token;
+        }
+      },
+      { immediate: true },
+    );
+
     return {
       TRANSFER_SEND_STEPS,
       PROTOCOLS,
@@ -183,6 +226,7 @@ export default defineComponent({
       customPrimaryButtonText,
       proceedToNextStep,
       editTransfer,
+      handleError,
     };
   },
 });

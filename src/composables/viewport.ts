@@ -99,6 +99,7 @@ export const useViewport = () => {
   let stopResolveRetry: (() => void) | undefined;
   let activeScrollTarget: (Element | Window) | undefined;
   let activeScrollHandler: EventListener | undefined;
+  let didInitViewport = false;
 
   const viewportScroll = debounce((callback: OnViewportScrollCallback) => {
     if (viewportElement.value) {
@@ -110,6 +111,7 @@ export const useViewport = () => {
   }, 50);
 
   function initViewport(scrollableElement: Element | undefined) {
+    didInitViewport = true;
     stopResolveRetry?.();
     stopResolveRetry = resolveScrollableElementWithRetry(
       scrollableElement,
@@ -138,7 +140,7 @@ export const useViewport = () => {
     activeScrollHandler = undefined;
     stopResolveRetry?.();
     stopResolveRetry = undefined;
-    if (viewportElement.value === currentTarget) {
+    if (didInitViewport && viewportElement.value === currentTarget) {
       viewportElement.value = undefined;
     }
   });
