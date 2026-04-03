@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { computed, Ref } from 'vue';
+import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
 
 import type {
   Balance,
@@ -107,8 +108,10 @@ export function useAccountAssetsList({
    * Filter the available assets with options provided for the composable and the search text
    */
   const accountAssetsFiltered = computed<IAsset[]>(() => {
-    const searchTermParsed = (searchTerm?.value || '').trim().toLowerCase();
-    const isSearchTermContract = searchTermParsed.startsWith('ct_');
+    const rawSearchTerm = (searchTerm?.value || '').trim();
+    const searchTermParsed = rawSearchTerm.toLowerCase();
+    const isSearchTermContract = accountProtocol.value === PROTOCOLS.aeternity
+      && isAddressValid(rawSearchTerm, Encoding.ContractAddress);
     const protocolCoinContractId = ProtocolAdapterFactory
       .getAdapter(accountProtocol.value)
       .coinContractId;
@@ -128,7 +131,7 @@ export function useAccountAssetsList({
         !searchTermParsed
         || symbol?.toLowerCase().includes(searchTermParsed)
         || name?.toLowerCase().includes(searchTermParsed)
-        || (isSearchTermContract && contractId?.toLowerCase().includes(searchTermParsed))
+        || (isSearchTermContract && contractId?.toLowerCase() === searchTermParsed)
       ));
   });
 

@@ -69,6 +69,7 @@ const lastAvailableTokensLoadTime = useStorageRef<number>(
  * Loading state for available tokens fetch per session.
  */
 const isAvailableTokensLoading = ref(false);
+const availableTokensNextPageUrls = ref<Partial<Record<Protocol, string | null>>>({});
 
 /**
  * List of all fungible tokens available on user's protocols.
@@ -132,6 +133,28 @@ async function loadSingleToken(contractId: string, protocol: Protocol) {
   }
 }
 
+function mergeTokensIntoList(
+  protocol: Protocol,
+  tokens: IToken[],
+  { reset = false }: { reset?: boolean } = {},
+) {
+  const target = protocol === PROTOCOLS.aeternity
+    ? ephemeralTokensAvailable
+    : defaultTokensAvailable;
+  const currentMap = reset ? {} as AssetList : (target.value[protocol] ?? {}) as AssetList;
+  const nextMap = tokens.reduce((acc, token) => {
+    acc[token.contractId] = token;
+    return acc;
+  }, { ...currentMap } as AssetList);
+  target.value[protocol] = nextMap;
+}
+
+interface LoadAvailableTokensOptions {
+  protocol?: Protocol;
+  loadMore?: boolean;
+  reset?: boolean;
+}
+
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
 let areTokenBalancesUpdating = false;
@@ -186,28 +209,77 @@ export function useFungibleTokens() {
       .find((tokenBalance) => tokenBalance.contractId === contractId);
   }
 
-  async function loadAvailableTokens() {
-    // Do not load tokens if the last load was less than a minute ago
-    if (Date.now() - lastAvailableTokensLoadTime.value < 1000 * 60) {
+  async function loadAvailableTokens({
+    protocol,
+    loadMore = false,
+    reset = false,
+  }: LoadAvailableTokensOptions = {}) {
+    const protocolsToLoad = protocol ? [protocol] : protocolsInUse.value;
+    const shouldThrottle = !loadMore && !reset && !protocol;
+
+    if (shouldThrottle && Date.now() - lastAvailableTokensLoadTime.value < 1000 * 60) {
       return;
     }
+
     isAvailableTokensLoading.value = true;
     try {
-      const tokensFetchPromises = protocolsInUse.value.map(
-        (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens?.(),
-      );
       const currentNetworkName = activeNetwork.value.name;
-      // for each promise check if it returned null, if so, use cached data
-      // because it means that we couldn't fetch new data
-      const results = await Promise.all(tokensFetchPromises);
-      const tokensByProtocol: ProtocolRecord<IToken[]> = {} as any;
-      results.forEach((protocolTokens, index) => {
-        const protocol = protocolsInUse.value[index];
-        const persistedFallback = Object.values(defaultTokensAvailable.value[protocol] || {});
-        const ephemeralFallback = Object.values(ephemeralTokensAvailable.value[protocol] || {});
-        tokensByProtocol[protocol] = (protocolTokens as IToken[] | null)
-        || (protocol === PROTOCOLS.aeternity ? ephemeralFallback : persistedFallback);
-      });
+      const results = await Promise.all(protocolsToLoad.map(async (protocolName) => {
+        const adapter = ProtocolAdapterFactory.getAdapter(protocolName);
+
+        if (adapter.fetchAvailableTokensPage) {
+          const hasLoadedAtLeastOnePage = (
+            availableTokensNextPageUrls.value[protocolName] !== undefined
+          );
+          const nextPageUrl = reset
+            ? undefined
+            : availableTokensNextPageUrls.value[protocolName];
+
+          if (loadMore && nextPageUrl === null) {
+            return {
+              protocol: protocolName,
+              paged: true,
+              data: null,
+              nextPageUrl,
+            };
+          }
+          if (!loadMore && hasLoadedAtLeastOnePage && !reset) {
+            return {
+              protocol: protocolName,
+              paged: true,
+              data: null,
+              nextPageUrl,
+            };
+          }
+
+          const response = await adapter.fetchAvailableTokensPage(nextPageUrl || undefined);
+
+          if (response == null) {
+            return {
+              protocol: protocolName,
+              paged: true,
+              data: null,
+              nextPageUrl: undefined,
+            };
+          }
+
+          return {
+            protocol: protocolName,
+            paged: true,
+            data: response.data || null,
+            nextPageUrl: response.next ?? null,
+          };
+        }
+
+        const persistedFallback = Object.values(defaultTokensAvailable.value[protocolName] || {});
+        const response = await adapter.fetchAvailableTokens?.();
+        return {
+          protocol: protocolName,
+          paged: false,
+          data: response || persistedFallback,
+          nextPageUrl: null,
+        };
+      }));
 
       // This is necessary in case the user switches between networks faster,
       // than the available tokens are returned (limitations of the free Ethereum middleware)
@@ -215,21 +287,43 @@ export function useFungibleTokens() {
         return;
       }
 
-      // Store fetched tokens per protocol
-      Object.entries(tokensByProtocol).forEach(([protocol, tokens]) => {
-        const pr = protocol as Protocol;
-        const target = pr === PROTOCOLS.aeternity
-          ? ephemeralTokensAvailable
-          : defaultTokensAvailable;
-        const currentMap = (target.value[pr] ?? {}) as AssetList;
-        const nextMap = (tokens as IToken[]).reduce((acc, token) => {
-          acc[token.contractId] = token;
-          return acc;
-        }, { ...currentMap } as AssetList);
-        target.value[pr] = nextMap;
+      let hasLoadedTokens = false;
+      results.forEach(({
+        protocol: protocolName,
+        paged,
+        data,
+        nextPageUrl,
+      }) => {
+        if (paged) {
+          if (nextPageUrl !== undefined) {
+            availableTokensNextPageUrls.value[protocolName] = nextPageUrl;
+          }
+          if (data !== null) {
+            hasLoadedTokens = true;
+          }
+          if (reset && data !== null) {
+            mergeTokensIntoList(
+              protocolName,
+              data.length ? data : [],
+              { reset: true },
+            );
+          } else if (!reset && data?.length) {
+            mergeTokensIntoList(protocolName, data, { reset: false });
+          }
+          return;
+        }
+
+        if (data !== null) {
+          hasLoadedTokens = true;
+        }
+        if (data?.length) {
+          mergeTokensIntoList(protocolName, data, { reset });
+        }
       });
 
-      lastAvailableTokensLoadTime.value = Date.now();
+      if (hasLoadedTokens) {
+        lastAvailableTokensLoadTime.value = Date.now();
+      }
     } finally {
       isAvailableTokensLoading.value = false;
     }
@@ -398,6 +492,7 @@ export function useFungibleTokens() {
         tokenBalances.value = [];
         defaultTokensAvailable.value = {};
         ephemeralTokensAvailable.value = {};
+        availableTokensNextPageUrls.value = {};
         lastAvailableTokensLoadTime.value = 0;
         await loadTokenBalances();
       }

@@ -196,6 +196,7 @@ export default defineComponent({
         recomputePrefix();
         updateVirtualRange();
       },
+      { immediate: true },
     );
 
     // Measure rows with ResizeObserver

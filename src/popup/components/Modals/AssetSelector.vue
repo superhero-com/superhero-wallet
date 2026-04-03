@@ -26,24 +26,57 @@
     >
       <AnimatedSpinner class="spinner" />
     </div>
-    <InfiniteScroll
-      v-else
-      class="list"
-      data-cy="list"
-      :virtual="true"
-      :items="accountAssetsToDisplay"
-      :key-extractor="assetKey"
+    <div
+      v-else-if="showSearchSpinner"
+      class="search-status"
     >
-      <template #default="{ item }">
-        <AssetListItem
-          :key="item.contractId"
-          :asset="item"
-          :selected="isAssetSelected(item)"
-          prevent-navigation
-          @click="resolve(item)"
-        />
-      </template>
-    </InfiniteScroll>
+      <AnimatedSpinner class="spinner spinner-sm" />
+      <span v-text="$t('pages.fungible-tokens.searching')" />
+    </div>
+    <div
+      v-else-if="showEmptyState"
+      class="empty-state"
+    >
+      <span
+        class="text-heading-6"
+        v-text="emptyStateTitle"
+      />
+      <span
+        class="text-body-2 text-muted"
+        v-text="emptyStateMessage"
+      />
+    </div>
+    <div
+      v-else
+      class="list-container"
+    >
+      <InfiniteScroll
+        :key="listKey"
+        class="list"
+        data-cy="list"
+        :virtual="shouldUseVirtualScroll"
+        :items="accountAssetsToDisplay"
+        :key-extractor="assetKey"
+        @load-more="handleLoadMore"
+      >
+        <template #default="{ item }">
+          <AssetListItem
+            :key="item.contractId"
+            :asset="item"
+            :selected="isAssetSelected(item)"
+            prevent-navigation
+            @click="resolve(item)"
+          />
+        </template>
+      </InfiniteScroll>
+      <div
+        v-if="showInlineSearchSpinner"
+        class="inline-search-status"
+      >
+        <AnimatedSpinner class="spinner spinner-inline" />
+        <span v-text="$t('pages.fungible-tokens.searching')" />
+      </div>
+    </div>
   </Modal>
 </template>
 
@@ -51,19 +84,31 @@
 import {
   computed,
   defineComponent,
+  onBeforeUnmount,
   onMounted,
   PropType,
   ref,
   watch,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { debounce, uniqBy } from 'lodash-es';
 import type {
   IAsset,
+  IToken,
   Protocol,
   RejectCallback,
   ResolveCallback,
 } from '@/types';
 import { useAccountAssetsList, useFungibleTokens } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
+import {
+  getAssetIdentityKey,
+  getAssetSelectorDisplayList,
+  getAssetSelectorListKey,
+  getAssetSelectorSearchMode,
+  resolveSearchNextPageUrl,
+} from './assetSelectorSearch';
 
 import Modal from '../Modal.vue';
 import AssetListItem from '../Assets/AssetListItem.vue';
@@ -92,49 +137,267 @@ export default defineComponent({
     withBalanceOnly: Boolean,
   },
   setup(props) {
+    const { t } = useI18n();
     const searchTerm = ref('');
-    const isFullyOpen = ref(false);
-    const pageNumber = ref(1);
+    const isSearching = ref(false);
+    const isRemotePrefixSearchPending = ref(false);
+    const remoteSearchResults = ref<IAsset[]>([]);
+    const searchNextPageUrls = ref<{ name?: string | null; symbol?: string | null }>({});
+    let searchRequestId = 0;
 
-    const { loadAvailableTokens, isAvailableTokensLoading } = useFungibleTokens();
+    const {
+      loadAvailableTokens,
+      loadSingleToken,
+      isAvailableTokensLoading,
+    } = useFungibleTokens();
 
     const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
       withBalanceOnly: props.withBalanceOnly,
     });
 
-    const accountAssetsToDisplay = computed(() => (
-      (props.protocol)
-        ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
-        : accountAssetsFiltered.value
+    const trimmedSearchTerm = computed(() => searchTerm.value.trim());
+    const searchMode = computed(() => getAssetSelectorSearchMode(
+      trimmedSearchTerm.value,
+      props.protocol,
+      props.withBalanceOnly,
+    ));
+    const isExactContractSearch = computed(() => searchMode.value === 'exact-contract');
+    const isRemotePrefixSearch = computed(() => searchMode.value === 'remote-prefix');
+
+    const accountAssetsToDisplay = computed(() => getAssetSelectorDisplayList(
+      accountAssetsFiltered.value,
+      remoteSearchResults.value,
+      props.protocol,
+      searchMode.value,
     ));
 
-    const showLoading = computed(() => !props.withBalanceOnly && isAvailableTokensLoading.value);
+    const shouldUseVirtualScroll = computed(
+      () => searchMode.value !== 'remote-prefix',
+    );
+    const listKey = computed(() => getAssetSelectorListKey(
+      props.protocol,
+      searchMode.value,
+      trimmedSearchTerm.value,
+    ));
+
+    const showLoading = computed(
+      () => !props.withBalanceOnly
+        && isAvailableTokensLoading.value
+        && !trimmedSearchTerm.value
+        && !accountAssetsToDisplay.value.length,
+    );
+
+    const showSearchSpinner = computed(
+      () => !!trimmedSearchTerm.value
+        && (isSearching.value || isRemotePrefixSearchPending.value)
+        && !accountAssetsToDisplay.value.length,
+    );
+
+    const showInlineSearchSpinner = computed(
+      () => !!trimmedSearchTerm.value
+        && isSearching.value
+        && !!accountAssetsToDisplay.value.length,
+    );
+
+    const showEmptyState = computed(
+      () => !!trimmedSearchTerm.value
+        && !showSearchSpinner.value
+        && !isRemotePrefixSearchPending.value
+        && !accountAssetsToDisplay.value.length,
+    );
+
+    const emptyStateTitle = computed(() => (
+      isExactContractSearch.value
+        ? t('pages.fungible-tokens.contractSearchEmptyTitle')
+        : t('pages.fungible-tokens.searchEmptyTitle')
+    ));
+
+    const emptyStateMessage = computed(() => (
+      isExactContractSearch.value
+        ? t('pages.fungible-tokens.contractSearchEmptyMessage')
+        : t('pages.fungible-tokens.searchLimitationsMessage')
+    ));
 
     function isAssetSelected(token: IAsset): boolean {
-      return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
+      return !!props.selectedToken
+        && getAssetIdentityKey(props.selectedToken) === getAssetIdentityKey(token);
     }
-    watch(
-      searchTerm,
-      () => {
-        pageNumber.value = 1;
-      },
-    );
+
+    function resetRemoteSearchState() {
+      remoteSearchResults.value = [];
+      searchNextPageUrls.value = {};
+    }
+
+    async function loadRemotePrefixSearchResults(
+      { loadMore = false }: { loadMore?: boolean } = {},
+    ) {
+      if (!props.protocol || !isRemotePrefixSearch.value) {
+        resetRemoteSearchState();
+        return;
+      }
+
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      if (!adapter.fetchAvailableTokensSearchPage) {
+        resetRemoteSearchState();
+        return;
+      }
+
+      if (
+        loadMore
+        && searchNextPageUrls.value.name === null
+        && searchNextPageUrls.value.symbol === null
+      ) {
+        return;
+      }
+
+      if (loadMore && isSearching.value) {
+        return;
+      }
+
+      const prevSearchNextPageUrls = { ...searchNextPageUrls.value };
+      if (!loadMore) {
+        searchNextPageUrls.value = {};
+      }
+
+      const currentSearchId = searchRequestId + 1;
+      searchRequestId = currentSearchId;
+      isSearching.value = true;
+      try {
+        const [nameResponse, symbolResponse] = await Promise.all(
+          (['name', 'symbol'] as const).map(async (searchBy) => {
+            const nextPageUrl = loadMore ? searchNextPageUrls.value[searchBy] : undefined;
+
+            if (loadMore && nextPageUrl === null) {
+              return null;
+            }
+
+            return adapter.fetchAvailableTokensSearchPage!(
+              trimmedSearchTerm.value,
+              searchBy,
+              nextPageUrl || undefined,
+            );
+          }),
+        );
+
+        if (searchRequestId !== currentSearchId) {
+          return;
+        }
+
+        searchNextPageUrls.value = {
+          name: resolveSearchNextPageUrl(
+            nameResponse,
+            prevSearchNextPageUrls.name,
+            loadMore,
+          ),
+          symbol: resolveSearchNextPageUrl(
+            symbolResponse,
+            prevSearchNextPageUrls.symbol,
+            loadMore,
+          ),
+        };
+
+        remoteSearchResults.value = uniqBy(
+          [
+            ...(loadMore ? remoteSearchResults.value : []),
+            ...((nameResponse?.data || []) as IToken[]),
+            ...((symbolResponse?.data || []) as IToken[]),
+          ],
+          'contractId',
+        );
+      } finally {
+        if (searchRequestId === currentSearchId) {
+          isSearching.value = false;
+        }
+      }
+    }
+
+    async function handleLoadMore() {
+      if (props.withBalanceOnly || !props.protocol) {
+        return;
+      }
+
+      if (isRemotePrefixSearch.value) {
+        await loadRemotePrefixSearchResults({ loadMore: true });
+        return;
+      }
+
+      if (isAvailableTokensLoading.value || trimmedSearchTerm.value) {
+        return;
+      }
+
+      await loadAvailableTokens({
+        protocol: props.protocol,
+        loadMore: true,
+      });
+    }
+
+    const handleSearchTermChangeDebounced = debounce(async () => {
+      isRemotePrefixSearchPending.value = false;
+      if (!isRemotePrefixSearch.value) {
+        return;
+      }
+
+      await loadRemotePrefixSearchResults();
+    }, 250);
+
+    watch(searchTerm, async (value) => {
+      const trimmedValue = value.trim();
+
+      if (!trimmedValue) {
+        handleSearchTermChangeDebounced.cancel();
+        searchRequestId += 1;
+        isSearching.value = false;
+        isRemotePrefixSearchPending.value = false;
+        resetRemoteSearchState();
+        return;
+      }
+
+      if (isExactContractSearch.value) {
+        handleSearchTermChangeDebounced.cancel();
+        isRemotePrefixSearchPending.value = false;
+        resetRemoteSearchState();
+        const currentSearchId = searchRequestId + 1;
+        searchRequestId = currentSearchId;
+        isSearching.value = true;
+        try {
+          await loadSingleToken(trimmedValue, props.protocol!);
+        } finally {
+          if (searchRequestId === currentSearchId) {
+            isSearching.value = false;
+          }
+        }
+        return;
+      }
+
+      isRemotePrefixSearchPending.value = isRemotePrefixSearch.value;
+      await handleSearchTermChangeDebounced();
+    });
+
+    onBeforeUnmount(() => {
+      handleSearchTermChangeDebounced.cancel();
+    });
 
     onMounted(() => {
       if (!props.withBalanceOnly) {
-        loadAvailableTokens();
+        loadAvailableTokens({ protocol: props.protocol });
       }
     });
 
     return {
       accountAssetsToDisplay,
       showLoading,
-      isFullyOpen,
-      pageNumber,
+      showSearchSpinner,
+      showInlineSearchSpinner,
+      showEmptyState,
       searchTerm,
+      emptyStateTitle,
+      emptyStateMessage,
+      shouldUseVirtualScroll,
+      listKey,
       isAssetSelected,
-      assetKey: (a: IAsset) => a.contractId,
+      handleLoadMore,
+      assetKey: getAssetIdentityKey,
     };
   },
 });
@@ -164,6 +427,45 @@ export default defineComponent({
     .spinner {
       width: 100px;
       height: 100px;
+    }
+  }
+
+  .search-status,
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 220px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .search-status {
+    .spinner-sm {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  .list-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .inline-search-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px 20px;
+    color: rgba(255, 255, 255, 0.75);
+
+    .spinner-inline {
+      width: 24px;
+      height: 24px;
     }
   }
 }

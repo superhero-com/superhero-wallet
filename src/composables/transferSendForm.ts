@@ -40,6 +40,7 @@ export function useTransferSendForm({
   const formModel = ref<TransferFormModel>(transferData);
   const invoiceId = ref(null);
   const invoiceContract = ref(null);
+  const pendingRouteQuery = ref<Dictionary>({});
 
   const route = useRoute();
   const router = useRouter();
@@ -102,6 +103,28 @@ export function useTransferSendForm({
     };
     await nextTick();
     Object.keys(updatedValues).forEach((field) => validateField(field));
+  }
+
+  function hasQueryParams(params: Dictionary = {}) {
+    return Object.keys(params).length > 0;
+  }
+
+  async function applyPendingRouteQuery() {
+    if (!hasQueryParams(pendingRouteQuery.value)) {
+      return;
+    }
+
+    await updateFormModelValues({
+      ...pendingRouteQuery.value,
+      token: pendingRouteQuery.value.token || formModel.value.selectedAsset?.contractId,
+    });
+
+    if (
+      !pendingRouteQuery.value.token
+      || formModel.value.selectedAsset?.contractId === pendingRouteQuery.value.token
+    ) {
+      pendingRouteQuery.value = {};
+    }
   }
 
   async function scanTransferQrCode() {
@@ -178,19 +201,31 @@ export function useTransferSendForm({
   onMounted(() => {
     watch(
       [activeAccount, () => route.query],
-      () => {
+      async () => {
         const { query } = route;
-        if (query && Object.keys(query).length > 0) {
+        if (query && hasQueryParams(query as Dictionary)) {
+          pendingRouteQuery.value = { ...(query as Dictionary) };
           formModel.value.addresses = undefined;
           router.replace({ query: {} });
         }
 
-        updateFormModelValues({
-          ...query,
-          token: query.token || formModel.value.selectedAsset?.contractId,
-        });
+        await applyPendingRouteQuery();
       },
       { deep: true, immediate: true },
+    );
+
+    watch(
+      () => {
+        const pendingToken = pendingRouteQuery.value.token;
+        return pendingToken
+          ? accountAssets.value.some(({ contractId }) => contractId === pendingToken)
+          : false;
+      },
+      async (isPendingTokenAvailable) => {
+        if (isPendingTokenAvailable) {
+          await applyPendingRouteQuery();
+        }
+      },
     );
   });
 
