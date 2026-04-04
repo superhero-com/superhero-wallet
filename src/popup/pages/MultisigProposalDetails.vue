@@ -478,6 +478,7 @@ export default defineComponent({
                 signTransaction: signingAccount.signTransaction.bind({
                   nodeNetworkId,
                   sign: signingAccount.sign,
+                  unsafeSign: signingAccount.unsafeSign,
                 }),
               },
               fromAccount: chosenAddress as any,

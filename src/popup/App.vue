@@ -104,8 +104,10 @@ import {
   useMultisigAccounts,
   useNotifications,
   useUi,
+  useTopHeaderData,
 } from '@/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Header from '@/popup/components/Header.vue';
 import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
@@ -146,6 +148,8 @@ export default defineComponent({
     const { restoreLanguage } = useLanguages();
     const { restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
+    const { claimPreclaimedNames } = useAeNames({ pollingDisabled: true });
+    const { topBlockHeight } = useTopHeaderData();
 
     const innerElement = ref<HTMLDivElement>();
     const isRouterReady = ref(false);
@@ -245,6 +249,11 @@ export default defineComponent({
       },
     );
 
+    watch(
+      topBlockHeight,
+      claimPreclaimedNames,
+      { immediate: true },
+    );
     initVisibilityListeners();
 
     onBeforeMount(async () => {
