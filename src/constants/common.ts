@@ -145,6 +145,7 @@ export const STORAGE_KEYS = {
   lastAvailableTokensLoadTime: 'last-available-tokens-load-time',
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
+  preclaimedNames: 'preclaimed-names',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
 

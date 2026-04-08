@@ -79,7 +79,6 @@ import {
   defineComponent,
   ref,
   computed,
-  nextTick,
 } from 'vue';
 import {
   AensName,
@@ -110,7 +109,6 @@ import {
   AE_COIN_PRECISION,
   AE_AENS_DOMAIN,
   AE_AENS_NAME_MAX_LENGTH,
-  AE_AENS_NAME_AUCTION_MAX_LENGTH,
 } from '@/protocols/aeternity/config';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
@@ -140,13 +138,9 @@ export default defineComponent({
 
     const { activeAccount } = useAccounts();
     const { openDefaultModal } = useModals();
-    const { getAeSdk } = useAeSdk();
+    const { getAeSdk, nodeNetworkId } = useAeSdk();
     const { isLoaderVisible, setLoaderVisible } = useUi();
-    const {
-      setPendingAutoExtendName,
-      updateOwnedNames,
-      updateNamePointer,
-    } = useAeNames();
+    const { addNameToClaimQueue, preclaimedNames } = useAeNames();
 
     const name = ref('');
     const autoExtend = ref(false);
@@ -185,6 +179,17 @@ export default defineComponent({
         setLoaderVisible(false);
         return;
       }
+      if (
+        preclaimedNames.value[nodeNetworkId.value!]
+        && Object.keys(preclaimedNames.value[nodeNetworkId.value!]).includes(fullName.value)
+      ) {
+        setLoaderVisible(false);
+        openDefaultModal({
+          title: t('modals.name-exist.title'),
+          msg: t('modals.name-already-preclaimed.msg'),
+        });
+        return;
+      }
 
       const aeSdk = await getAeSdk();
       const nameObj = new Name(fullName.value, aeSdk.getContext());
@@ -193,45 +198,19 @@ export default defineComponent({
       if (isNameRegistered) {
         setLoaderVisible(false);
         openDefaultModal({
-          title: t('modals.name-exist.msg'),
+          title: t('modals.name-exist.title'),
+          msg: t('modals.name-exist.msg'),
         });
       } else {
-        let claimTxHash;
-
-        try {
-          await nameObj.preclaim();
-          claimTxHash = (await nameObj.claim({ waitMined: false })).hash;
-          if (autoExtend.value) {
-            setPendingAutoExtendName(fullName.value);
-          }
-          await nextTick();
+        const isClaimQueued = await addNameToClaimQueue(
+          fullName.value,
+          activeAccount.value.address,
+          autoExtend.value,
+        );
+        setLoaderVisible(false);
+        if (isClaimQueued) {
+          name.value = '';
           router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
-        } catch (error: any) {
-          let msg = error.message;
-          if (msg.includes('is not enough to execute') || error.statusCode === 404) {
-            msg = t('pages.names.balance-error');
-          }
-          openDefaultModal({
-            icon: 'critical',
-            msg,
-          });
-          return;
-        } finally {
-          setLoaderVisible(false);
-        }
-
-        try {
-          await aeSdk.poll(claimTxHash);
-          if (AE_AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
-            await updateNamePointer({
-              name: fullName.value,
-              address: activeAccount.value.address,
-            });
-          }
-        } catch (error: any) {
-          openDefaultModal({ msg: error.message });
-        } finally {
-          updateOwnedNames();
         }
       }
     }

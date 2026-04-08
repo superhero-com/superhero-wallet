@@ -914,8 +914,13 @@
       "tokens": "代币 | 代币 | 代币",
       "searchPlaceholder": "按代币名称或合约地址搜索",
       "searchAssetsPlaceholder": "搜索资产",
+      "searching": "正在查找代币...",
       "buyAe": "购买 AE",
-      "select-asset": "选择资产"
+      "select-asset": "选择资产",
+      "searchEmptyTitle": "未找到资产",
+      "searchLimitationsMessage": "搜索会按代币名称或符号的前缀进行匹配。你可以尝试输入名称或符号的前几个字母，或者粘贴准确的合约地址来直接查找代币。",
+      "contractSearchEmptyTitle": "未找到代币",
+      "contractSearchEmptyMessage": "我们未能通过这个合约地址找到对应的代币。请检查地址后重试。"
     },
     "token-details": {
       "tip": "打赏",

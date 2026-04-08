@@ -4,6 +4,7 @@ import type {
   AdapterNetworkSettingList,
   AssetContractId,
   INetworkProtocolSettings,
+  IPageableResponse,
   ITransactionApiPaginationParams,
   ICoin,
   IFetchTransactionResult,
@@ -125,6 +126,14 @@ export abstract class BaseProtocolAdapter {
   ): Promise<any>;
 
   fetchAvailableTokens?(): Promise<IToken[] | null>;
+
+  fetchAvailableTokensPage?(nextPageUrl?: string): Promise<IPageableResponse<IToken> | null>;
+
+  fetchAvailableTokensSearchPage?(
+    searchTerm: string,
+    searchBy: 'name' | 'symbol',
+    nextPageUrl?: string,
+  ): Promise<IPageableResponse<IToken> | null>;
 
   fetchAccountTokenBalances?(address: AccountAddress): Promise<ITokenBalance[] | null>;
 

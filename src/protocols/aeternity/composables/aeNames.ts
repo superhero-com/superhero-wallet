@@ -4,6 +4,13 @@ import {
   ref,
   watch,
 } from 'vue';
+import {
+  AensName,
+  Encoded,
+  Name,
+} from '@aeternity/aepp-sdk';
+import { isEmpty, isEqual } from 'lodash-es';
+
 import type {
   ChainName,
   IName,
@@ -14,12 +21,13 @@ import type {
   IAuctionBid,
   AccountAddress,
 } from '@/types';
+
 import {
+  decryptedComputed,
   fetchAllPages,
   fetchJson,
   handleUnknownError,
 } from '@/utils';
-import { AensName, Encoded, Name } from '@aeternity/aepp-sdk';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   PROTOCOLS,
@@ -29,16 +37,19 @@ import Logger from '@/lib/logger';
 import {
   useAccounts,
   useAeSdk,
+  useAuth,
   useModals,
   useNetworks,
   useStorageRef,
+  useTopHeaderData,
 } from '@/composables';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-
-import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
+import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
+
 import { useAeNetworkSettings } from './aeNetworkSettings';
 import { useAeTippingBackend } from './aeTippingBackend';
 import { useAeMiddleware } from './aeMiddleware';
@@ -57,11 +68,41 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
+export const NAME_CLAIM_STATUS = {
+  preclaimed: 'preclaimed',
+  claimSubmitted: 'claim-submitted',
+  pointerUpdatePending: 'pointer-update-pending',
+} as const;
+
+type NameClaimStatus = typeof NAME_CLAIM_STATUS[keyof typeof NAME_CLAIM_STATUS];
+
+interface IPreclaimedName {
+  address: string;
+  name: AensName;
+  salt: number;
+  blockHeight: number;
+  autoExtend: boolean;
+  status: NameClaimStatus;
+  claimTxHash?: Encoded.TxHash;
+}
+
+interface aeNamesOptions {
+  pollingDisabled?: boolean;
+}
+
 type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
 let composableInitialized = false;
+let claimPreclaimedNamesPromise: Promise<void> | null = null;
+let preclaimedNamesEncryptionInitialized = false;
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
+const preclaimedNamesEncrypted = useStorageRef<string | null>(
+  null,
+  STORAGE_KEYS.preclaimedNames,
+  { enableSecureStorage: true },
+);
+const preclaimedNames = ref<Record<NetworkId, Record<AensName, IPreclaimedName>>>({});
 const pendingAutoExtendNames = ref<ChainName[]>([]);
 const areNamesFetching = ref(false);
 
@@ -84,19 +125,49 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
  * This composable allows for obtaining and storing the chain names for the current user addresses
  * and external addresses (for example when displaying transaction details).
  */
-export function useAeNames() {
-  const { aeAccounts, isLocalAccountAddress, getLastActiveProtocolAccount } = useAccounts();
+export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
+  const {
+    aeAccounts,
+    activeAccount,
+    isLocalAccountAddress,
+    getLastActiveProtocolAccount,
+  } = useAccounts();
   const { onNetworkChange } = useNetworks();
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
+  const { topBlockHeight } = useTopHeaderData();
 
   const {
     isMiddlewareReady,
     getMiddleware,
     fetchFromMiddlewareCamelCased,
   } = useAeMiddleware();
+
+  if (!preclaimedNamesEncryptionInitialized) {
+    preclaimedNamesEncryptionInitialized = true;
+    const { encryptionKey } = useAuth();
+    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}');
+
+    watch(decryptedStr, (str) => {
+      try {
+        const parsed = JSON.parse(str || '{}');
+        if (!isEqual(parsed, preclaimedNames.value)) {
+          preclaimedNames.value = parsed;
+        }
+      } catch {
+        preclaimedNames.value = {};
+      }
+    }, { immediate: true });
+
+    watch(preclaimedNames, (val) => {
+      const str = JSON.stringify(val);
+      if (decryptedStr.value !== str) {
+        decryptedStr.value = str;
+      }
+    }, { deep: true });
+  }
 
   function ensureExternalNameRegistryExists() {
     if (!externalNamesRegistry.value[nodeNetworkId.value!]) {
@@ -183,7 +254,81 @@ export function useAeNames() {
   }
 
   function setPendingAutoExtendName(name: ChainName) {
-    pendingAutoExtendNames.value.push(name);
+    if (!pendingAutoExtendNames.value.includes(name)) {
+      pendingAutoExtendNames.value.push(name);
+    }
+  }
+
+  function ensurePreclaimedNameRegistryExists(networkId: NetworkId) {
+    if (!preclaimedNames.value[networkId]) {
+      preclaimedNames.value[networkId] = {};
+    }
+  }
+
+  function upsertPreclaimedName(networkId: NetworkId, name: AensName, data: IPreclaimedName) {
+    ensurePreclaimedNameRegistryExists(networkId);
+    preclaimedNames.value[networkId][name] = data;
+  }
+
+  function patchPreclaimedName(
+    networkId: NetworkId,
+    name: AensName,
+    data: Partial<IPreclaimedName>,
+  ): IPreclaimedName | null {
+    const existingEntry = preclaimedNames.value[networkId]?.[name];
+    if (!existingEntry) {
+      return null;
+    }
+    preclaimedNames.value[networkId][name] = {
+      ...existingEntry,
+      ...data,
+    };
+    return preclaimedNames.value[networkId][name];
+  }
+
+  function removePreclaimedName(networkId: NetworkId, name: AensName) {
+    delete preclaimedNames.value[networkId]?.[name];
+    if (isEmpty(preclaimedNames.value[networkId])) {
+      delete preclaimedNames.value[networkId];
+    }
+  }
+
+  function getClaimOptions(address: AccountAddress) {
+    if (activeAccount.value.address === address) {
+      return {};
+    }
+
+    const signingAccount = new AeAccountHdWallet(nodeNetworkId);
+    return {
+      onAccount: {
+        address,
+        signTransaction: signingAccount.signTransaction.bind({
+          nodeNetworkId,
+          sign: signingAccount.sign,
+          unsafeSign: signingAccount.unsafeSign,
+        }),
+      },
+      fromAccount: address,
+    } as any;
+  }
+
+  async function createNameInstance(name: AensName, options = {}) {
+    const aeSdk = await getAeSdk();
+    return new Name(name, aeSdk.getContext(options));
+  }
+
+  function getClaimErrorMessage(error: any) {
+    if (error.message.includes('is not enough to execute') || error.statusCode === 404) {
+      return tg('pages.names.balance-error');
+    }
+    return error.message;
+  }
+
+  function openClaimErrorModal(error: any) {
+    openDefaultModal({
+      icon: 'critical',
+      msg: getClaimErrorMessage(error),
+    });
   }
 
   function fetchPendingNameClaimTransactions(address: AccountAddress) {
@@ -198,6 +343,11 @@ export function useAeNames() {
             owner: tx.accountId,
           })),
       );
+  }
+
+  async function getPendingNameClaimTransaction(address: AccountAddress, name: AensName) {
+    const pendingTransactions = await fetchPendingNameClaimTransactions(address) || [];
+    return pendingTransactions.find(({ name: pendingName }) => pendingName === name);
   }
 
   async function fetchAllNames(address: AccountAddress) {
@@ -260,18 +410,22 @@ export function useAeNames() {
       address,
       type = UPDATE_POINTER_ACTION.update,
     }: IUpdateNamePointerParams,
-  ) {
-    const aeSdk = await getAeSdk();
-    const nameObj = new Name(name, aeSdk.getContext());
+    options = {},
+  ): Promise<boolean> {
+    const nameObj = await createNameInstance(name, options);
     try {
       if (type === UPDATE_POINTER_ACTION.extend) {
-        await nameObj.extendTtl();
+        await nameObj.extendTtl(undefined, options);
       } else if (type === UPDATE_POINTER_ACTION.update) {
-        await nameObj.update({ account_pubkey: address }, { extendPointers: true });
+        await nameObj.update(
+          { account_pubkey: address },
+          { ...options, extendPointers: true },
+        );
       }
       openDefaultModal({
         msg: tg('pages.names.pointer-added', { type }),
       });
+      return true;
     } catch (error: any) {
       if (error.message.includes('Account not found')) {
         handleUnknownError(error);
@@ -282,7 +436,131 @@ export function useAeNames() {
             : error.message,
         });
       }
+      return false;
     }
+  }
+
+  async function addNameToClaimQueue(name: AensName, address: string, autoExtend: boolean) {
+    try {
+      const networkId = nodeNetworkId.value!;
+      const aeSdk = await getAeSdk();
+      const nameObj = await createNameInstance(name, getClaimOptions(address));
+      const { nameSalt } = await nameObj.preclaim();
+      const currentHeight = await aeSdk.getHeight();
+      upsertPreclaimedName(networkId, name, {
+        address,
+        name,
+        salt: nameSalt,
+        blockHeight: currentHeight,
+        autoExtend,
+        status: NAME_CLAIM_STATUS.preclaimed,
+      });
+      return true;
+    } catch (error: any) {
+      openClaimErrorModal(error);
+      return false;
+    }
+  }
+
+  async function claimName({
+    name,
+    address,
+    autoExtend,
+    salt,
+    blockHeight,
+    status,
+    claimTxHash,
+  }: IPreclaimedName) {
+    const aeSdk = await getAeSdk() as any;
+    const networkId = nodeNetworkId.value!;
+    let currentClaimTxHash = claimTxHash;
+
+    /**
+     * The claim transaction is intended to be executed in the next block after preclaim.
+     * To claim the name instantly and not block other transactions on this account,
+     * the claim transaction will be included in the next block.
+     */
+    if (
+      status === NAME_CLAIM_STATUS.preclaimed
+      && topBlockHeight.value < blockHeight + 1
+    ) {
+      return;
+    }
+
+    const claimOptions = getClaimOptions(address);
+    const nameObj = await createNameInstance(name, claimOptions);
+
+    if (status === NAME_CLAIM_STATUS.preclaimed) {
+      try {
+        const pendingClaimTransaction = await getPendingNameClaimTransaction(address, name);
+        currentClaimTxHash = pendingClaimTransaction?.hash
+          || (await nameObj.claim({ ...claimOptions, nameSalt: salt, waitMined: false })).hash;
+        patchPreclaimedName(networkId, name, {
+          status: NAME_CLAIM_STATUS.claimSubmitted,
+          claimTxHash: currentClaimTxHash,
+        });
+      } catch (error: any) {
+        removePreclaimedName(networkId, name);
+        openClaimErrorModal(error);
+        return;
+      }
+    }
+
+    if (!currentClaimTxHash) {
+      return;
+    }
+
+    if (status !== NAME_CLAIM_STATUS.pointerUpdatePending) {
+      try {
+        await aeSdk.poll(currentClaimTxHash);
+      } catch (error: any) {
+        removePreclaimedName(networkId, name);
+        openDefaultModal({ msg: error.message });
+        return;
+      }
+    }
+
+    if (AE_AENS_NAME_AUCTION_MAX_LENGTH < name.length) {
+      patchPreclaimedName(networkId, name, {
+        status: NAME_CLAIM_STATUS.pointerUpdatePending,
+        claimTxHash: currentClaimTxHash,
+      });
+      const isPointerUpdated = await updateNamePointer({ name, address }, claimOptions);
+      if (!isPointerUpdated) {
+        return;
+      }
+    }
+
+    if (autoExtend) {
+      setPendingAutoExtendName(name);
+    }
+    removePreclaimedName(networkId, name);
+    await updateOwnedNames();
+  }
+
+  async function processPreclaimedNamesQueue() {
+    // Ensure the `nodeNetworkId` is established
+    await getAeSdk();
+    if (isEmpty(preclaimedNames.value[nodeNetworkId.value!])) {
+      return;
+    }
+    const sortedPreclaimedNameArray = Object.values(preclaimedNames.value[nodeNetworkId.value!])
+      .sort((a, b) => a.blockHeight - b.blockHeight);
+    /* eslint-disable-next-line no-restricted-syntax */
+    for (const pendingName of sortedPreclaimedNameArray) {
+      // eslint-disable-next-line no-await-in-loop
+      await claimName(pendingName);
+    }
+  }
+
+  async function claimPreclaimedNames() {
+    if (!claimPreclaimedNamesPromise) {
+      claimPreclaimedNamesPromise = processPreclaimedNamesQueue()
+        .finally(() => {
+          claimPreclaimedNamesPromise = null;
+        });
+    }
+    return claimPreclaimedNamesPromise;
   }
 
   async function extendExpiringOwnedNames() {
@@ -321,9 +599,9 @@ export function useAeNames() {
     }
   }
 
-  initPollingWatcher(() => {
-    updateDefaultNames();
-  });
+  if (!pollingDisabled) {
+    initPollingWatcher(() => updateDefaultNames());
+  }
 
   if (!composableInitialized) {
     composableInitialized = true;
@@ -353,7 +631,10 @@ export function useAeNames() {
 
   return {
     ownedNames,
+    preclaimedNames,
     areNamesFetching,
+    addNameToClaimQueue,
+    claimPreclaimedNames,
     updateOwnedNames,
     resolvedChainNames,
     getName,
