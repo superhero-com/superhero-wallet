@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.4...v2.9.5) (2026-04-06)
+
+
+### Features
+
+* be able to claim several names one by one ([6d6c9df](https://github.com/Superhero-com/superhero-wallet/commit/6d6c9df9e3c94bde487b6e1cbb117c429668b812))
+
+
+### Bug Fixes
+
+* be able to sign multisig creation with not active account ([c3f8144](https://github.com/Superhero-com/superhero-wallet/commit/c3f8144f7c757b4a3b1bf78a446765832da84a8d))
+
+
+### Maintenance
+
+* run npm update ([f126eaa](https://github.com/Superhero-com/superhero-wallet/commit/f126eaa0ea6a55e6bb8ba8ca7f9c5f3ff30fa1b2))
+
+
+### Performance
+
+* optimize token search ([a9306ad](https://github.com/Superhero-com/superhero-wallet/commit/a9306ad506080ded49c272c4df08005790f25772))
+
+
+### Tests
+
+* disable tipping flow ([3ee3b8b](https://github.com/Superhero-com/superhero-wallet/commit/3ee3b8b86f988b3683172ab4111c421ab7c96338))
+* update snapshot test ([67b6828](https://github.com/Superhero-com/superhero-wallet/commit/67b6828ca8f45a5ac488e413c388e1348f7e300b))
+
 ### [2.9.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.3...v2.9.4) (2026-03-26)
 
 
