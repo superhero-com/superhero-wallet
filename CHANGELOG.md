@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.6](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.5...v2.9.6) (2026-04-08)
+
+
+### Maintenance
+
+* be able to build Android version correctly ([c3ed899](https://github.com/Superhero-com/superhero-wallet/commit/c3ed89931d3cb985dbe5df7a450f8d71183c5a58))
+
 ### [2.9.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.4...v2.9.5) (2026-04-06)
 
 
