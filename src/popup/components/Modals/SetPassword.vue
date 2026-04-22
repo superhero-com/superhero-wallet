@@ -116,7 +116,9 @@ import { defineComponent, PropType, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
+import { useAuth } from '@/composables/auth';
 import { getOrCreateDefaultPasswordSecret } from '@/composables/defaultPassword';
+import { handleUnknownError } from '@/utils';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -140,6 +142,7 @@ export default defineComponent({
     isRestoredWallet: Boolean,
   },
   setup(props) {
+    const { isUsingDefaultPassword } = useAuth();
     const password = ref('');
     const confirmPassword = ref('');
 
@@ -162,8 +165,16 @@ export default defineComponent({
      * wallet.
      */
     async function useDefaultPassword() {
-      const secret = await getOrCreateDefaultPasswordSecret();
-      props.resolve(secret);
+      try {
+        const secret = await getOrCreateDefaultPasswordSecret();
+        isUsingDefaultPassword.value = true;
+        props.resolve(secret);
+      } catch (error) {
+        handleUnknownError(error);
+        if (!props.isRestoredWallet) {
+          props.reject();
+        }
+      }
     }
 
     return {

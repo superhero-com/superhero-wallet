@@ -699,16 +699,20 @@ export function decryptedComputed(
     }
   }, { immediate: true });
 
-  if (IS_MOBILE_APP) {
-    options.onDecrypted?.(encryptedState.value);
-  }
-
-  return (IS_MOBILE_APP)
-    ? encryptedState // On mobile devices we are not encrypting states
-    : computed<string>({
-      get: () => decrypted.value,
-      set: setEncryptedState,
-    });
+  /**
+   * Removed the mobile plaintext bypass. Previously this function
+   * short-circuited for `IS_MOBILE_APP`, returning the raw encrypted ref
+   * and skipping the watch-based decrypt path entirely — which, combined
+   * with the absence of an `encryptionKey` on mobile, meant mnemonic,
+   * imported private keys, preclaimed names and secure-login timeout
+   * were persisted AS PLAINTEXT into SecureMobileStorage. They now use
+   * the same AES-GCM flow as extension/web, keyed by the per-install
+   * mobile-data-key loaded in `useAuth`.
+   */
+  return computed<string>({
+    get: () => decrypted.value,
+    set: setEncryptedState,
+  });
 }
 
 export async function exportFile(

@@ -10,6 +10,7 @@ import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/b
 import { wordlist } from '@scure/bip39/wordlists/english';
 
 import { tg as t } from '@/popup/plugins/i18n';
+import Logger from '@/lib/logger';
 import {
   AUTHENTICATION_TIMEOUTS,
   IS_EXTENSION,
@@ -29,25 +30,31 @@ import {
   excludeFalsy,
   generateEncryptionKey,
   generateSalt,
+  getOrCreateMobileEncryptionKey,
   getSessionEncryptionKey,
+  handleUnknownError,
   sessionEnd,
   sessionStart,
   watchUntilTruthy,
 } from '@/utils';
-import {
-  LEGACY_DEFAULT_PASSWORD,
-  getDefaultPasswordSecret,
-} from './defaultPassword';
 
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import migrateMnemonicMobileToSecureStorage from '@/migrations/010-mnemonic-mobile-to-secure-storage';
+import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
+import {
+  LEGACY_DEFAULT_PASSWORD,
+  clearDefaultPasswordSecret,
+  getDefaultPasswordSecret,
+  getOrCreateDefaultPasswordSecret,
+} from './defaultPassword';
 
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
+const CHECK_FOR_SESSION_KEY_TIMEOUT = 30000;
 const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
   ? AUTHENTICATION_TIMEOUTS[0]
   : AUTHENTICATION_TIMEOUTS[2];
@@ -96,6 +103,14 @@ export const useAuth = createCustomScopedComposable(() => {
         (IS_MOBILE_APP && IS_IOS) ? migrateMnemonicCordovaToIonic : null,
         migrateMnemonicVuexToComposable,
         (IS_MOBILE_APP) ? migrateMnemonicMobileToSecureStorage : null,
+        /**
+         * Encrypt legacy plaintext mnemonic on mobile with the
+         * per-install mobile encryption key. Order matters — this must
+         * run AFTER `migrateMnemonicMobileToSecureStorage` which moves
+         * the mnemonic into SecureMobileStorage, and BEFORE the ref's
+         * value is set so the reactive layer only ever sees ciphertext.
+         */
+        (IS_MOBILE_APP) ? migrateMobileSensitiveDataEncryption : null,
       ].filter(excludeFalsy),
       onRestored() {
         isMnemonicRestored.value = true;
@@ -123,6 +138,16 @@ export const useAuth = createCustomScopedComposable(() => {
     {
       backgroundSync: true,
       enableSecureStorage: true,
+      /**
+       * Migrate legacy plaintext secure-login-timeout blobs on
+       * mobile. The value is small (just a numeric string) but it still
+       * leaks "how impatient is this user" metadata via `adb backup`
+       * or a jailbroken Keychain dump — and more importantly, shares
+       * the same `decryptedComputed` plumbing as the other sensitive
+       * blobs. Omitting the migration here would trip the decrypt
+       * watcher on first launch.
+       */
+      migrations: IS_MOBILE_APP ? [migrateMobileSensitiveDataEncryption] : [],
     },
   );
 
@@ -140,7 +165,7 @@ export const useAuth = createCustomScopedComposable(() => {
    * loaded in the init IIFE below.
    */
   const isMnemonicEncrypted = computed(
-    () => !IS_MOBILE_APP && mnemonic.value && !validateMnemonic(mnemonic.value, wordlist),
+    () => !!mnemonic.value && !validateMnemonic(mnemonic.value, wordlist),
   );
   const mnemonicEncrypted = computed(() => isMnemonicEncrypted.value ? mnemonic.value : null);
   const mnemonicDecrypted = ref('');
@@ -195,7 +220,7 @@ export const useAuth = createCustomScopedComposable(() => {
     return key;
   }
 
-  async function setPassword(password: string) {
+  async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     /**
      * Derive the new key and ciphertext into local variables FIRST,
      * then commit all persistent state synchronously once every async
@@ -211,7 +236,7 @@ export const useAuth = createCustomScopedComposable(() => {
      */
     const newSalt = generateSalt();
     const newEncryptionKey = await generateEncryptionKey(password, newSalt);
-    const newMnemonicCiphertext = await encrypt(newEncryptionKey, mnemonicDecrypted.value);
+    const newMnemonicCiphertext = await encrypt(newEncryptionKey, plaintextToEncrypt);
     encryptionSalt.value = newSalt;
     setEncryptionKey(newEncryptionKey);
     mnemonic.value = newMnemonicCiphertext;
@@ -220,7 +245,20 @@ export const useAuth = createCustomScopedComposable(() => {
 
   async function setMnemonicAndInitializeAuthentication(newMnemonic: string, isRestored = false) {
     if (IS_MOBILE_APP) {
-      mnemonic.value = newMnemonic;
+      /**
+       * Mobile mnemonic is now stored encrypted with the
+       * per-install mobile encryption key, matching the extension/web
+       * encrypted-at-rest model. The key is loaded into `encryptionKey`
+       * here (if not already loaded by the init IIFE) so downstream
+       * `decryptedComputed` state — imported private keys, preclaimed
+       * names, secure-login timeout — is also encrypted via the shared
+       * reactive key.
+       */
+      if (!encryptionKey.value) {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      }
+      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
       if (await checkBiometricLoginAvailability()) {
         await openEnableBiometricLoginModal();
       }
@@ -229,15 +267,26 @@ export const useAuth = createCustomScopedComposable(() => {
       const password = await openSetPasswordModal(isRestored).catch(() => {
         throw new Error('Password was not set.');
       });
-      await setPassword(password);
-      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
+      await setPassword(password, newMnemonic);
+
       const storedSecret = await getDefaultPasswordSecret();
       if (storedSecret && storedSecret === password) {
         isUsingDefaultPassword.value = true;
       }
     }
-
     mnemonicDecrypted.value = newMnemonic;
+    /**
+     * The user just handed us a valid mnemonic (generated or restored) and we
+     * have written it to encrypted storage, so this session is authenticated.
+     * The extension/web path already set `isAuthenticated = true` transitively
+     * through `setPassword`, but the mobile path previously did not — and now
+     * that `isMnemonicEncrypted` is `true` on mobile as well, leaving the flag
+     * at `false` would let auth-gated guards observe an encrypted-looking
+     * mnemonic with `isAuthenticated === false`, redirecting the user straight
+     * back to a login flow for an install they just created. Asserting the
+     * flag once here covers both environments and is idempotent.
+     */
+    isAuthenticated.value = true;
   }
 
   /**
@@ -245,15 +294,22 @@ export const useAuth = createCustomScopedComposable(() => {
    */
   async function syncBackgroundEncryptionKey() {
     await new Promise<void>((resolve) => {
-      const interval = setInterval(async () => {
+      let interval: ReturnType<typeof setInterval>;
+      let timeout: ReturnType<typeof setTimeout>;
+      const finish = () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        resolve();
+      };
+      interval = setInterval(async () => {
         const sessionEncryptionKey = await getSessionEncryptionKey();
         if (sessionEncryptionKey) {
           mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonicEncrypted.value!);
           setEncryptionKey(sessionEncryptionKey);
-          clearInterval(interval);
-          resolve();
+          finish();
         }
       }, CHECK_FOR_SESSION_KEY_INTERVAL);
+      timeout = setTimeout(finish, CHECK_FOR_SESSION_KEY_TIMEOUT);
     });
   }
 
@@ -310,7 +366,7 @@ export const useAuth = createCustomScopedComposable(() => {
       return;
     }
     if (isAuthenticating.value) {
-      await watchUntilTruthy(isAuthenticated);
+      await watchUntilTruthy(() => !isAuthenticating.value || isAuthenticated.value);
       return;
     }
 
@@ -318,8 +374,64 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticating.value = true;
 
     if (IS_MOBILE_APP) {
+      /**
+       * Mobile state is now AES-GCM encrypted with the per-install
+       * mobile key. Make sure the key is in `encryptionKey` and that
+       * `mnemonicDecrypted` has been populated from the encrypted storage
+       * before we mark the user authenticated, otherwise downstream
+       * consumers observing `isAuthenticated` would race a still-encrypted
+       * mnemonic.
+       */
+      if (!encryptionKey.value) {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      }
+      if (isMnemonicEncrypted.value && !mnemonicDecrypted.value) {
+        try {
+          mnemonicDecrypted.value = await decrypt(encryptionKey.value!, mnemonic.value);
+        } catch (error) {
+          /**
+           * Decrypt can fail when the Keychain was cleared (fresh
+           * `mobile-data-key` no longer matches the ciphertext), when the
+           * device was restored from a backup that preserved app storage
+           * but not the Keychain, or when the blob is genuinely corrupt.
+           * In every one of these cases the mnemonic is unrecoverable
+           * from this install — we cannot derive `mnemonicSeed` and no
+           * account list will be populated.
+           *
+           * Previously this was silently swallowed and execution fell
+           * through to the else branch which unconditionally set
+           * `isAuthenticated.value = true`, leaving the UI in a "logged
+           * in" state with zero accounts, no error feedback, and no
+           * path forward. Surface the failure explicitly, clear the
+           * in-progress flag (no `try/finally` covers this branch
+           * because the subsequent biometric/else paths must be
+           * skipped entirely, not just unwound), and bail without
+           * authenticating.
+           */
+          handleUnknownError(error);
+          Logger.write({
+            title: 'Wallet data unreadable',
+            message: (
+              'Your encrypted wallet data could not be decrypted. '
+              + 'This usually means the device Keychain was cleared or the app '
+              + 'was restored from a backup that did not include it. Reinstall '
+              + 'the app and restore from your seed phrase to recover.'
+            ),
+            type: 'api-response',
+            modal: true,
+          });
+          isAuthenticating.value = false;
+          return;
+        }
+      }
       if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-        await openBiometricLoginModal();
+        try {
+          await openBiometricLoginModal();
+        } catch {
+          isAuthenticating.value = false;
+          return;
+        }
       } else {
         isAuthenticated.value = true;
       }
@@ -340,16 +452,13 @@ export const useAuth = createCustomScopedComposable(() => {
        *      value, so compromising this repository (or one user's
        *      storage) no longer reveals every other user's "default"
        *      password.
-       *   2. The legacy hardcoded `LEGACY_DEFAULT_PASSWORD` — used only
-       *      to keep older installs working without forcing them
-       *      into a password-reset flow. The value is isolated inside
-       *      `defaultPassword.ts` and not referenced from anywhere else.
-       *
-       * Legacy installs keep functioning but continue to use the
-       * hardcoded password until the user next toggles password
-       * protection in settings, at which point `setPasswordEnabled()`
-       * in `SecureLoginSettings.vue` transparently rotates onto a fresh
-       * random secret.
+       *   2. The legacy hardcoded `LEGACY_DEFAULT_PASSWORD` — accepted
+       *      only as an unlock-then-rotate fallback for installs that
+       *      were seeded under the pre-upgrade "skip password" flow.
+       *      Immediately after a successful legacy unlock we re-encrypt
+       *      the on-disk blobs under a freshly generated random secret
+       *      (see below), so the hardcoded string is never relied on
+       *      across sessions.
        *
        * Each attempt tolerates failure. `authenticateWithPassword`
        * can either return `false` (empty decryption result) OR throw
@@ -387,6 +496,35 @@ export const useAuth = createCustomScopedComposable(() => {
 
         if (!isAuthenticated.value && await tryDefaultPassword(LEGACY_DEFAULT_PASSWORD)) {
           isUsingDefaultPassword.value = true;
+          /**
+           * Transparently rotate legacy "skip password" installs off the
+           * hardcoded `testPassword123` sentinel the moment we unlock
+           * with it. We drop any stale stored secret first (defensive —
+           * if one existed, `storedSecret` would have worked above and
+           * we would not be on this path), then mint a new per-install
+           * 256-bit random secret and hand it to `setPassword`, which:
+           *   - generates a fresh `encryptionSalt`,
+           *   - derives a new AES-GCM key and publishes it on
+           *     `encryptionKey`, which triggers every `decryptedComputed`
+           *     watcher (imported private keys in `accounts.ts`,
+           *     preclaimed names in `aeNames.ts`, the secure-login
+           *     timeout above) to re-encrypt its ciphertext under the
+           *     new key,
+           *   - re-encrypts the mnemonic on top of that key.
+           * After this runs the on-disk state no longer depends on any
+           * value shipped in source, and subsequent launches take the
+           * `storedSecret` branch above.
+           */
+          try {
+            await clearDefaultPasswordSecret();
+            const rotatedSecret = await getOrCreateDefaultPasswordSecret();
+            await setPassword(rotatedSecret);
+          } catch (error) {
+            // Rotation is best-effort — a failure here still leaves the
+            // user authenticated under the legacy password, matching
+            // pre-fix behavior, and the next successful login will retry.
+            handleUnknownError(error);
+          }
         }
       }
 
@@ -437,10 +575,36 @@ export const useAuth = createCustomScopedComposable(() => {
   (async () => {
     checkBiometricLoginAvailability();
 
+    /**
+     * Load the per-install mobile encryption key as soon as the
+     * composable boots so `decryptedComputed` watchers (in `accounts.ts`,
+     * `aeNames.ts`, and for `secureLoginTimeout` above) have a real
+     * `encryptionKey` to work against — on mobile we now encrypt those
+     * blobs instead of passing them through plaintext via the old
+     * `IS_MOBILE_APP` bypass. The key-or-create is idempotent and shares
+     * an in-memory cache with the mnemonic-migration hook, so no second
+     * Keychain round-trip happens.
+     */
+    if (IS_MOBILE_APP && !encryptionKey.value) {
+      const mobileKey = await getOrCreateMobileEncryptionKey();
+      setEncryptionKey(mobileKey);
+    }
+
     await watchUntilTruthy(() => mnemonic.value);
 
     if (!isMnemonicEncrypted.value) {
       mnemonicDecrypted.value = mnemonic.value;
+    } else if (IS_MOBILE_APP && encryptionKey.value) {
+      /**
+       * Mirror the extension/web path — as soon as we have both
+       * the encrypted mnemonic and the mobile encryption key, decrypt
+       * into `mnemonicDecrypted` so `mnemonicSeed` and everything
+       * derived from it becomes available without waiting for
+       * `checkUserAuth` (which on mobile only gates the UI, not data).
+       */
+      try {
+        mnemonicDecrypted.value = await decrypt(encryptionKey.value, mnemonic.value);
+      } catch { /* NOOP — corrupted ciphertext will surface via auth flow */ }
     }
 
     if (!encryptionKey.value && IS_EXTENSION) {

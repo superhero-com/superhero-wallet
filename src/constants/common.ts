@@ -169,6 +169,14 @@ export const STORAGE_KEYS = {
    * the same "default password".
    */
   defaultPasswordSecret: 'default-password-secret',
+  /**
+   * Per-install 256-bit AES-GCM key (raw bytes, base64) that
+   * encrypts all sensitive state on mobile. The same key is loaded into
+   * the auth `encryptionKey` ref so `decryptedComputed` no longer needs
+   * the `IS_MOBILE_APP` bypass and every sensitive blob sits at rest in
+   * the Keychain as ciphertext rather than plaintext.
+   */
+  mobileDataKey: 'mobile-data-key',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [

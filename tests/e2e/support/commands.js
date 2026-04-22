@@ -74,8 +74,11 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
 });
 
 Cypress.Commands.add('loginUsingPassword', () => {
-  // Be tolerant to different render timings/selectors
-  cy.get('[data-cy=password] input, input[type="password"]', { timeout: 20000 })
+  // Be tolerant to different render timings/selectors (InputField uses data-cy=input)
+  cy.get(
+    '[data-cy=password] [data-cy=input], [data-cy=password] input, input[type="password"]',
+    { timeout: 30000 },
+  )
     .should('be.visible')
     .first()
     .type(TEST_ACCOUNT.password, { log: true });
@@ -96,6 +99,16 @@ Cypress.Commands.add('login', (options, route) => {
     const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
 
     cy.openPopup(async (contentWindow) => {
+      /**
+       * Full clear before seeding avoids stale keys from a prior test or
+       * `cy.login` chain leaving half-initialized state that skips the
+       * password modal or wedges `checkUserAuth`.
+       */
+      contentWindow.localStorage.clear();
+      if (contentWindow.sessionStorage) {
+        contentWindow.sessionStorage.clear();
+      }
+
       const dataToBeStored = {
         [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
         [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionResult,
