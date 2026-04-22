@@ -16,6 +16,7 @@ import {
   generateSalt,
   prepareStorageKey,
 } from '@/utils';
+import { TEST_ACCOUNT } from '../../fixtures/account';
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
   const { address } = STUB_ACCOUNT;
@@ -77,7 +78,7 @@ Cypress.Commands.add('loginUsingPassword', () => {
   cy.get('[data-cy=password] input, input[type="password"]', { timeout: 20000 })
     .should('be.visible')
     .first()
-    .type(STUB_ACCOUNT.password, { log: true });
+    .type(TEST_ACCOUNT.password, { log: true });
 
   cy.get('[data-cy=login-btn], [data-cy=login], button[type="submit"]', { timeout: 20000 })
     .should('be.visible')
@@ -88,8 +89,8 @@ Cypress.Commands.add('loginUsingPassword', () => {
 Cypress.Commands.add('login', (options, route) => {
   cy.then(async () => {
     const salt = generateSalt();
-    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, salt);
-    const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
+    const encryptionKey = await generateEncryptionKey(TEST_ACCOUNT.password, salt);
+    const mnemonicEncryptionResult = await encrypt(encryptionKey, TEST_ACCOUNT.mnemonic);
     return [mnemonicEncryptionResult, salt];
   }).then(([mnemonicEncryptionResult, salt]) => {
     const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};

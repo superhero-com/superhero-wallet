@@ -46,8 +46,9 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { ResolveCallback } from '@/types';
+import type { RejectCallback, ResolveCallback } from '@/types';
 import { useAuth } from '@/composables';
+import { RejectedByUserError } from '@/lib/errors';
 
 import Modal from '../Modal.vue';
 import IconBoxed from '../IconBoxed.vue';
@@ -62,6 +63,7 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
     force: Boolean,
   },
   setup(props) {
@@ -86,9 +88,11 @@ export default defineComponent({
     }
 
     function handleClose() {
-      if (isAuthenticated.value) {
+      if (isAuthenticated.value && !props.force) {
         props.resolve();
+        return;
       }
+      props.reject(new RejectedByUserError());
     }
 
     watch(isAuthenticated, (value) => {

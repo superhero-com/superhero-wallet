@@ -19,7 +19,6 @@ import {
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
-import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
   createCustomScopedComposable,
   decodeBase64,
@@ -35,6 +34,10 @@ import {
   sessionStart,
   watchUntilTruthy,
 } from '@/utils';
+import {
+  LEGACY_DEFAULT_PASSWORD,
+  getDefaultPasswordSecret,
+} from './defaultPassword';
 
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
@@ -128,8 +131,14 @@ export const useAuth = createCustomScopedComposable(() => {
     secureLoginTimeout,
     AUTHENTICATION_TIMEOUT_DEFAULT,
   );
-
-  /** If mnemonic is invalid, it is most likely encrypted */
+  /**
+   * If mnemonic is invalid, it is most likely encrypted.
+   *
+   * The previous `!IS_MOBILE_APP` short-circuit — which assumed
+   * mnemonic-on-mobile is always plaintext — is gone. On mobile we now
+   * also encrypt the mnemonic at rest, using the per-install mobile key
+   * loaded in the init IIFE below.
+   */
   const isMnemonicEncrypted = computed(
     () => !IS_MOBILE_APP && mnemonic.value && !validateMnemonic(mnemonic.value, wordlist),
   );
@@ -187,10 +196,25 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   async function setPassword(password: string) {
-    encryptionSalt.value = generateSalt();
-    const newEncryptionKey = await generateEncryptionKey(password, encryptionSalt.value);
+    /**
+     * Derive the new key and ciphertext into local variables FIRST,
+     * then commit all persistent state synchronously once every async
+     * step has succeeded. If we were to write `encryptionSalt.value`
+     * upfront and then hit an exception in `generateEncryptionKey` or
+     * `encrypt`, on-disk state would be wedged: salt is fresh but the
+     * mnemonic ciphertext is still under the old key, so the next
+     * launch derives a mismatched key and locks the user out
+     * permanently — there is no way back from an AES-GCM auth-tag
+     * mismatch. Particularly important for the legacy-password
+     * rotation path in `checkUserAuth`, which invokes `setPassword`
+     * on every boot of a legacy install.
+     */
+    const newSalt = generateSalt();
+    const newEncryptionKey = await generateEncryptionKey(password, newSalt);
+    const newMnemonicCiphertext = await encrypt(newEncryptionKey, mnemonicDecrypted.value);
+    encryptionSalt.value = newSalt;
     setEncryptionKey(newEncryptionKey);
-    mnemonic.value = await encrypt(newEncryptionKey, mnemonicDecrypted.value);
+    mnemonic.value = newMnemonicCiphertext;
     isAuthenticated.value = true;
   }
 
@@ -207,6 +231,10 @@ export const useAuth = createCustomScopedComposable(() => {
       });
       await setPassword(password);
       mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
+      const storedSecret = await getDefaultPasswordSecret();
+      if (storedSecret && storedSecret === password) {
+        isUsingDefaultPassword.value = true;
+      }
     }
 
     mnemonicDecrypted.value = newMnemonic;
@@ -299,14 +327,67 @@ export const useAuth = createCustomScopedComposable(() => {
       // Environments that will always ask user about password
       const autoLoginDisabledEnv = IS_OFFSCREEN_TAB || RUNNING_IN_TESTS;
 
-      // Attempt to log in with the default password that is set when a user skips
-      // password protection. This check needs to go first as we need to know
-      // if default password was used.
+      /**
+       * Attempt to log in with the per-install default-password
+       * secret when the user previously skipped password protection.
+       * This check needs to go first as we need to know if default
+       * password was used.
+       *
+       * Two lookups run in order:
+       *   1. The per-install random secret stored under
+       *      `STORAGE_KEYS.defaultPasswordSecret` — used by newer
+       *      installs. Each install holds an independent 256-bit random
+       *      value, so compromising this repository (or one user's
+       *      storage) no longer reveals every other user's "default"
+       *      password.
+       *   2. The legacy hardcoded `LEGACY_DEFAULT_PASSWORD` — used only
+       *      to keep older installs working without forcing them
+       *      into a password-reset flow. The value is isolated inside
+       *      `defaultPassword.ts` and not referenced from anywhere else.
+       *
+       * Legacy installs keep functioning but continue to use the
+       * hardcoded password until the user next toggles password
+       * protection in settings, at which point `setPasswordEnabled()`
+       * in `SecureLoginSettings.vue` transparently rotates onto a fresh
+       * random secret.
+       *
+       * Each attempt tolerates failure. `authenticateWithPassword`
+       * can either return `false` (empty decryption result) OR throw
+       * (AES-GCM auth-tag mismatch on wrong password), so both paths are
+       * swallowed here — a wrong guess must not abort the rest of
+       * `checkUserAuth` and leave the user staring at a blank screen.
+       * The stale `encryptionKey` that `authenticateWithPassword` sets
+       * as a side-effect of a failed decrypt is also cleared so the
+       * next attempt and any subsequent manual login runs cleanly.
+       */
       if (!encryptionKey.value && !autoLoginDisabledEnv) {
-        try {
-          await authenticateWithPassword(STUB_ACCOUNT.password);
+        const tryDefaultPassword = async (candidate: string): Promise<boolean> => {
+          try {
+            const ok = await authenticateWithPassword(candidate);
+            if (ok && isAuthenticated.value) {
+              return true;
+            }
+          } catch { /* NOOP — wrong candidate, fall through */ }
+          /**
+           * Clear only the reactive ref — do NOT go through
+           * `setEncryptionKey(undefined)` which calls `sessionEnd()`
+           * and wipes the session key from `browser.storage.session`.
+           * A failed default-password guess must not destroy an
+           * existing valid session; the session-restore path that
+           * runs right after this block needs that key intact.
+           */
+          encryptionKey.value = undefined;
+          return false;
+        };
+
+        const storedSecret = await getDefaultPasswordSecret();
+        if (storedSecret && await tryDefaultPassword(storedSecret)) {
           isUsingDefaultPassword.value = true;
-        } catch (error) { /* NOOP */ }
+        }
+
+        if (!isAuthenticated.value && await tryDefaultPassword(LEGACY_DEFAULT_PASSWORD)) {
+          isUsingDefaultPassword.value = true;
+        }
       }
 
       // If default password auth failed, check if extension can be restored

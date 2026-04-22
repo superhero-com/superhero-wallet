@@ -186,8 +186,12 @@ import { Form, Field } from 'vee-validate';
 
 import type { ComponentRef } from '@/types';
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
-import { STUB_ACCOUNT } from '@/constants/stubs';
 import { useAuth, useModals, useUi } from '@/composables';
+import {
+  clearDefaultPasswordSecret,
+  getDefaultPasswordSecret,
+  getOrCreateDefaultPasswordSecret,
+} from '@/composables/defaultPassword';
 
 import RadioButton from '@/popup/components/RadioButton.vue';
 import SwitchButton from '@/popup/components/SwitchButton.vue';
@@ -254,18 +258,43 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Toggling password protection on/off no longer pivots on
+     * the hardcoded `STUB_ACCOUNT.password`. When disabling, we generate
+     * (or reuse) a per-install 256-bit random secret; when enabling, we
+     * require the user to type a real password AND clear the stored
+     * random secret so nothing is left dangling. This function is also
+     * the natural rotation point for legacy wallets still encrypted
+     * with `LEGACY_DEFAULT_PASSWORD` — toggling off+on rotates them
+     * onto a fresh per-install secret through the `setPassword` call.
+     */
     async function setPasswordEnabled(val: boolean) {
-      let passwordToSet = STUB_ACCOUNT.password;
+      try {
+        if (val) {
+          /**
+           * Do NOT flip `isUsingDefaultPassword` to `false` before the password
+           * is actually set. `openSetPasswordModal()` can reject (user cancels
+           * the dialog), and this `catch` swallows the rejection — leaving the
+           * ref desynced from the on-disk state and producing knock-on UI bugs.
+           */
+          const passwordToSet = await openSetPasswordModal();
+          const defaultPasswordSecret = await getDefaultPasswordSecret();
+          await setPassword(passwordToSet);
 
-      if (val) {
-        try {
+          if (defaultPasswordSecret && passwordToSet === defaultPasswordSecret) {
+            isUsingDefaultPassword.value = true;
+            return;
+          }
+
           isUsingDefaultPassword.value = false;
-          passwordToSet = await openSetPasswordModal();
-        } catch (error) { /* NOOP */ }
-      }
+          await clearDefaultPasswordSecret();
+          return;
+        }
 
-      setPassword(passwordToSet);
-      isUsingDefaultPassword.value = (passwordToSet === STUB_ACCOUNT.password);
+        const passwordToSet = await getOrCreateDefaultPasswordSecret();
+        await setPassword(passwordToSet);
+        isUsingDefaultPassword.value = true;
+      } catch (error) { /* NOOP */ }
     }
 
     function msToMinutes(ms: number) {

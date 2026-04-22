@@ -24,7 +24,7 @@
     />
     <Form @submit="handleMainButtonClick()">
       <InputPassword
-        v-if="!privateKey && !IS_MOBILE_DEVICE && !isUsingDefaultPassword"
+        v-if="!privateKey && !IS_MOBILE_APP && !isUsingDefaultPassword"
         v-model="password"
         data-cy="password"
         autofocus
@@ -65,7 +65,7 @@
       <BtnMain
         :disabled="(
           (!password.length || isAuthenticating || isAuthFailed)
-          && !IS_MOBILE_DEVICE
+          && !IS_MOBILE_APP
           && !isUsingDefaultPassword
         )"
         :text="mainButtonText"
@@ -95,7 +95,7 @@ import {
   useModals,
   useUi,
 } from '@/composables';
-import { IS_MOBILE_DEVICE } from '@/constants';
+import { IS_MOBILE_APP } from '@/constants';
 
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
@@ -132,9 +132,14 @@ export default defineComponent({
     const privateKey = ref('');
 
     const { activeAccount } = useAccounts();
-    const { encryptionSalt, mnemonicEncrypted, isUsingDefaultPassword } = useAuth();
+    const {
+      checkBiometricLoginAvailability,
+      encryptionSalt,
+      mnemonicEncrypted,
+      isUsingDefaultPassword,
+    } = useAuth();
     const { copy, copied } = useCopy();
-    const { openBiometricLoginModal } = useModals();
+    const { openBiometricLoginModal, openConfirmModal } = useModals();
     const { isBiometricLoginEnabled } = useUi();
 
     const mainButtonText = computed(() => {
@@ -147,21 +152,57 @@ export default defineComponent({
       return t('modals.privateKeyExport.mainBtnText');
     });
 
+    /**
+     * Three-way re-auth gate before revealing the private key, mirroring
+     * the seed-phrase route guard in `router/routes.ts`:
+     *
+     *  - Mobile app with biometry available & enabled: force a fresh biometric
+     *    prompt so a user who just unlocked the app still has to confirm.
+     *  - Extension/web (including mobile web) with a real password: verify it by attempting the
+     *    mnemonic decryption (the catch below marks `isAuthFailed`).
+     *  - Everything else (mobile app with biometry off, or extension in
+     *    skip-password mode) has no strong re-auth available; fall back to
+     *    an explicit confirm prompt so the private key never surfaces
+     *    silently on a click-through. This closes the gap where the modal
+     *    previously revealed the key with no gate at all in those states.
+     */
     async function login() {
       if (isAuthenticating.value) {
         return;
       }
       isAuthenticating.value = true;
       try {
-        if (IS_MOBILE_DEVICE && isBiometricLoginEnabled.value) {
-          await openBiometricLoginModal({ force: true });
-        } else if (!isUsingDefaultPassword.value && !IS_MOBILE_DEVICE) {
-          const key = await generateEncryptionKey(password.value, encryptionSalt.value!);
-          await decrypt(key, mnemonicEncrypted.value!);
+        if (
+          IS_MOBILE_APP
+          && isBiometricLoginEnabled.value
+          && await checkBiometricLoginAvailability()
+        ) {
+          const authenticated = await openBiometricLoginModal({ force: true })
+            .then(() => true)
+            .catch(() => false);
+          if (!authenticated) {
+            return;
+          }
+        } else if (!isUsingDefaultPassword.value && !IS_MOBILE_APP) {
+          try {
+            const key = await generateEncryptionKey(password.value, encryptionSalt.value!);
+            await decrypt(key, mnemonicEncrypted.value!);
+          } catch {
+            isAuthFailed.value = true;
+            return;
+          }
+        } else {
+          const confirmed = await openConfirmModal({
+            title: t('modals.privateKeyExport.title'),
+            msg: t('modals.privateKeyExport.warning'),
+          })
+            .then(() => true)
+            .catch(() => false);
+          if (!confirmed) {
+            return;
+          }
         }
         privateKey.value = Buffer.from(activeAccount.value.secretKey).toString('hex');
-      } catch (error) {
-        isAuthFailed.value = true;
       } finally {
         isAuthenticating.value = false;
       }
@@ -181,7 +222,7 @@ export default defineComponent({
 
     return {
       PrivateKeyIcon,
-      IS_MOBILE_DEVICE,
+      IS_MOBILE_APP,
       activeAccount,
       copied,
       isAuthenticating,

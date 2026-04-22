@@ -98,7 +98,7 @@
 
         <PanelItem
           v-if="(
-            (isMnemonicEncrypted && !isUsingDefaultPassword)
+            (!IS_MOBILE_APP && isMnemonicEncrypted && !isUsingDefaultPassword)
             || (IS_MOBILE_APP && isBiometricLoginEnabled)
           )"
           :title="$t('pages.secureLogin.lockWallet')"

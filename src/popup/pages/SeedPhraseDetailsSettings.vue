@@ -10,6 +10,7 @@
           <p
             v-if="revealed"
             class="mnemonics-text"
+            data-cy="seed-phrase-mnemonic"
           >
             {{ mnemonicDecrypted }}
           </p>

@@ -5,6 +5,7 @@
         <PanelItem
           :to="{ name: ROUTE_SEED_PHRASE_SETTINGS }"
           :title="$t('pages.index.seedPhrase')"
+          data-cy="seed-phrase-settings"
         />
         <PanelItem
           :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
