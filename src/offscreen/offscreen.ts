@@ -2,6 +2,7 @@ import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
 import { watch } from 'vue';
 
+import type { Runtime } from 'webextension-polyfill';
 import type { IBackgroundMessageData } from '@/types';
 import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
@@ -113,7 +114,7 @@ const INTERNAL_ONLY_METHODS = new Set<string>([
 browser.runtime.onMessage.addListener(
   async (
     msg: IBackgroundMessageData,
-    sender: browser.Runtime.MessageSender,
+    sender: Runtime.MessageSender,
   ) => {
     if (msg?.target !== 'offscreen') return true;
 
