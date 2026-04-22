@@ -15,11 +15,11 @@ import Web3Eth, {
   NUMBER_DATA_FORMAT,
   getBalance,
   getTransaction,
-  sendSignedTransaction,
   getBlock,
   getTransactionReceipt,
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
+import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
@@ -390,7 +390,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const serializedTx = signedTx.serialize();
     const raw = `0x${Buffer.from(serializedTx).toString('hex')}`;
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
   }
 
@@ -477,7 +477,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const serializedTx = signedTx.serialize();
     const raw = `0x${Buffer.from(serializedTx).toString('hex')}`;
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
   }
 
@@ -670,7 +670,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
-    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
   }
 
