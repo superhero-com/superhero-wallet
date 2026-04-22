@@ -7,10 +7,14 @@
         </div>
 
         <CardMnemonic class="mnemonics">
-          <p class="mnemonics-text">
+          <p
+            v-if="revealed"
+            class="mnemonics-text"
+          >
             {{ mnemonicDecrypted }}
           </p>
           <BtnMain
+            v-if="revealed"
             variant="dark"
             class="copy-btn"
             big-icon
@@ -64,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
@@ -90,12 +94,17 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
+    const revealed = ref(false);
 
     const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
     const { mnemonicDecrypted } = useAuth();
     const { removeIsSeedBackedUpNotification } = useNotifications({
       requirePolling: false,
+    });
+
+    onMounted(() => {
+      revealed.value = true;
     });
 
     function markSeedPhraseAsBackedUp() {
@@ -108,6 +117,7 @@ export default defineComponent({
       CopyOutlined,
       CheckSuccessCircle,
       copied,
+      revealed,
       mnemonicDecrypted,
       copy,
       markSeedPhraseAsBackedUp,

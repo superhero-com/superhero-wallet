@@ -1,11 +1,18 @@
 import type { WalletAppRouteConfig } from '@/types';
 import {
+  IS_MOBILE_APP,
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
 } from '@/constants';
-import { useWalletConnect, type WalletConnectUri } from '@/composables';
+import {
+  useAuth,
+  useModals,
+  useUi,
+  useWalletConnect,
+  type WalletConnectUri,
+} from '@/composables';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -457,6 +464,58 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'seedPhrase',
       showHeaderNavigation: true,
+    },
+    beforeEnter: async (_to, _from, next) => {
+      const {
+        isUsingDefaultPassword,
+        checkBiometricLoginAvailability,
+      } = useAuth();
+      const { isBiometricLoginEnabled } = useUi();
+      const {
+        openConfirmModal,
+        openPasswordLoginModal,
+        openBiometricLoginModal,
+      } = useModals();
+
+      /**
+       * Re-authenticate before the seed phrase page can render its contents.
+       *
+       * Four branches, in priority order:
+       *  - Mobile + biometry available & enabled → require a fresh biometric
+       *    prompt (force=true) so a user who just unlocked the app still has
+       *    to confirm at the seed-phrase boundary.
+       *  - Mobile without biometry (or biometry disabled) → `openPasswordLoginModal`
+       *    does not apply here because on mobile the "password" may be the
+       *    per-install default secret; fall through to the
+       *    no-password confirmation so the screen is not wide open. This is
+       *    the same trade-off the rest of the mobile app makes.
+       *  - Default/skip-password (extension or mobile) → confirm-prompt only,
+       *    matching the rest of the default-password flow where no password
+       *    is available to re-enter.
+       *  - Password-protected extension/web → password re-entry.
+       */
+      try {
+        if (IS_MOBILE_APP) {
+          if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+            await openBiometricLoginModal({ force: true });
+          } else {
+            await openConfirmModal({
+              title: 'Seed Phrase',
+              msg: 'You are about to reveal your seed phrase. Make sure no one is watching your screen.',
+            });
+          }
+        } else if (isUsingDefaultPassword.value) {
+          await openConfirmModal({
+            title: 'Seed Phrase',
+            msg: 'You are about to reveal your seed phrase. Make sure no one is watching your screen.',
+          });
+        } else {
+          await openPasswordLoginModal();
+        }
+        next();
+      } catch {
+        next(false);
+      }
     },
   },
   {
