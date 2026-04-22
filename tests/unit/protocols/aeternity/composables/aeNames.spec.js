@@ -90,6 +90,18 @@ const createTestContext = ({
     })),
   }));
 
+  jest.doMock('@/composables/ui', () => ({
+    useUi: jest.fn(() => ({
+      saveErrorLog: ref(false),
+    })),
+  }));
+
+  jest.doMock('@/composables/modals', () => ({
+    useModals: jest.fn(() => ({
+      openDefaultModal,
+    })),
+  }));
+
   jest.doMock('@/composables/composablesHelpers', () => ({
     createPollingBasedOnMountedComponents: jest.fn(() => jest.fn()),
   }));
