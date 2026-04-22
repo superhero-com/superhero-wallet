@@ -24,7 +24,7 @@
     />
     <Form @submit="handleMainButtonClick()">
       <InputPassword
-        v-if="!privateKey && !IS_MOBILE_DEVICE"
+        v-if="!privateKey && !IS_MOBILE_DEVICE && !isUsingDefaultPassword"
         v-model="password"
         data-cy="password"
         autofocus
@@ -155,7 +155,7 @@ export default defineComponent({
       try {
         if (IS_MOBILE_DEVICE && isBiometricLoginEnabled.value) {
           await openBiometricLoginModal({ force: true });
-        } else if (!IS_MOBILE_DEVICE) {
+        } else if (!isUsingDefaultPassword.value && !IS_MOBILE_DEVICE) {
           const key = await generateEncryptionKey(password.value, encryptionSalt.value!);
           await decrypt(key, mnemonicEncrypted.value!);
         }
@@ -177,10 +177,6 @@ export default defineComponent({
       } else {
         login();
       }
-    }
-
-    if (isUsingDefaultPassword.value) {
-      privateKey.value = Buffer.from(activeAccount.value.secretKey).toString('hex');
     }
 
     return {
