@@ -57,7 +57,7 @@ export default defineComponent({
 
         const signature = await aeSdk.signMessage(message as string);
         const signatureHex = Buffer.from(signature).toString('hex');
-        openCallbackOrGoHome(true, { signature: signatureHex, address: aeSdk.address });
+        await openCallbackOrGoHome(true, { signature: signatureHex, address: aeSdk.address });
       } catch (error: any) {
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
@@ -69,7 +69,7 @@ export default defineComponent({
             modal: true,
           });
         }
-        openCallbackOrGoHome(false);
+        await openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }

@@ -620,11 +620,11 @@ export default defineComponent({
           },
         };
         addAccountPendingTransaction(activeAccount.value.address, transaction);
-        openCallbackOrGoHome(true);
+        await openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {
         await openTransactionFailedModal(error.message);
-        openCallbackOrGoHome(false);
+        await openCallbackOrGoHome(false);
 
         error.payload = { url: recipient };
       } finally {
