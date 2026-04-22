@@ -4,8 +4,11 @@ describe('background accountsChanged forwarding', () => {
   const queryMock = jest.fn().mockResolvedValue([{ id: 123 }]);
 
   beforeEach(() => {
+    sendMessageMock.mockClear();
+    queryMock.mockClear();
     (global as any).browser = {
       runtime: {
+        id: 'test-extension-id',
         onMessage: { addListener: jest.fn() },
         getURL: jest.fn(() => 'offscreen.html'),
         getContexts: jest.fn().mockResolvedValue([{}]),
@@ -35,7 +38,7 @@ describe('background accountsChanged forwarding', () => {
         method: 'accountsChanged',
         params: { rpcMethodParams: { result: ['0xabc'] } },
       },
-      null,
+      { id: 'test-extension-id' },
       jest.fn(),
     );
 
@@ -53,5 +56,37 @@ describe('background accountsChanged forwarding', () => {
       && args[1]?.result[0] === '0xabc'
       && args[1]?.type === 'result'
     ))).toBe(true);
+  });
+
+  it.each([
+    ['null sender', null],
+    ['undefined sender', undefined],
+    ['external extension sender', { id: 'some-other-extension-id' }],
+    ['content-script sender with no id', {}],
+  ])('drops accountsChanged when sender is %s', async (_label, sender) => {
+    jest.isolateModules(() => {
+      // eslint-disable-next-line global-require
+      require('@/background/index');
+    });
+
+    const listener = (
+      (global as any).browser.runtime.onMessage.addListener as jest.Mock
+    ).mock.calls[0][0];
+
+    const result = await listener(
+      {
+        target: 'background',
+        method: 'accountsChanged',
+        params: { rpcMethodParams: { result: ['0xbeef'] } },
+      },
+      sender,
+      jest.fn(),
+    );
+
+    expect(result).toBeUndefined();
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    expect(
+      ((global as any).browser.tabs.sendMessage as jest.Mock).mock.calls,
+    ).toHaveLength(0);
   });
 });

@@ -102,12 +102,32 @@ if (IS_FIREFOX) {
   registerInPageContentScript();
 }
 
+const INTERNAL_ONLY_METHODS = new Set<string>([
+  POPUP_METHODS.reload,
+  POPUP_METHODS.ledgerDeriveAccount,
+  POPUP_METHODS.ledgerDiscoverAccounts,
+  POPUP_METHODS.ledgerSignTransaction,
+  POPUP_METHODS.ledgerSignMessage,
+]);
+
 browser.runtime.onMessage.addListener(
-  async ({
-    method,
-    payload,
-    params: { aepp, rpcMethodParams = {} } = {},
-  }: IBackgroundMessageData) => {
+  async (
+    msg: IBackgroundMessageData,
+    sender: browser.Runtime.MessageSender,
+  ) => {
+    if (msg?.target !== 'offscreen') return true;
+
+    const {
+      method,
+      payload,
+      params: { aepp, rpcMethodParams = {} } = {},
+    } = msg;
+
+    const isInternal = sender?.id === browser.runtime.id;
+    if (method && INTERNAL_ONLY_METHODS.has(method) && !isInternal) {
+      return true;
+    }
+
     if (method === POPUP_METHODS.reload) {
       wallet.disconnect();
       window.location.reload();
