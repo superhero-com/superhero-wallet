@@ -13,6 +13,7 @@ import {
   useWalletConnect,
   type WalletConnectUri,
 } from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -500,14 +501,14 @@ export const routes: WalletAppRouteConfig[] = [
             await openBiometricLoginModal({ force: true });
           } else {
             await openConfirmModal({
-              title: 'Seed Phrase',
-              msg: 'You are about to reveal your seed phrase. Make sure no one is watching your screen.',
+              title: tg('pages.titles.seedPhrase'),
+              msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
             });
           }
         } else if (isUsingDefaultPassword.value) {
           await openConfirmModal({
-            title: 'Seed Phrase',
-            msg: 'You are about to reveal your seed phrase. Make sure no one is watching your screen.',
+            title: tg('pages.titles.seedPhrase'),
+            msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
           });
         } else {
           await openPasswordLoginModal();

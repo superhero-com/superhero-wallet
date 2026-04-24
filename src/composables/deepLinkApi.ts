@@ -13,6 +13,7 @@ import {
 } from '@/constants';
 import { useModals } from '@/composables/modals';
 import Logger from '@/lib/logger';
+import { tg } from '@/popup/plugins/i18n';
 
 let isDeepLinkUsed = false;
 
@@ -190,8 +191,10 @@ export function useDeepLinkApi(
     const parsedCallback = validateCallbackUrl(callbackUrl);
     if (!parsedCallback) {
       Logger.write({
-        title: 'Invalid deeplink callback',
-        message: `Refusing to redirect to "${callbackUrl}" — callback URLs must use http:// or https://.`,
+        title: tg('pages.deepLink.invalidCallbackTitle'),
+        message: tg('pages.deepLink.invalidCallbackMsg', {
+          url: callbackUrl,
+        }),
         type: 'api-response',
         modal: true,
       });
@@ -203,8 +206,10 @@ export function useDeepLinkApi(
       const { openConfirmModal } = useModals();
       try {
         await openConfirmModal({
-          title: 'Return to external site',
-          msg: `Send the result of this action back to "${parsedCallback.origin}"? Any data you just signed will be shared with this destination.`,
+          title: tg('pages.deepLink.externalCallbackTitle'),
+          msg: tg('pages.deepLink.externalCallbackMsg', {
+            origin: parsedCallback.origin,
+          }),
         });
       } catch {
         router?.replace({ name: ROUTE_ACCOUNT });

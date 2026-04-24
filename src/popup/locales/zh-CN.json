@@ -746,6 +746,12 @@
         "filterByBlockchainSubtitle": "仅显示所选区块链协议的地址"
       }
     },
+    "deepLink": {
+      "externalCallbackTitle": "返回到外部网站",
+      "externalCallbackMsg": "是否将本次操作的结果发送回「{origin}」？你刚刚签名的所有数据都将与该目标共享。",
+      "invalidCallbackTitle": "无效的深度链接回调",
+      "invalidCallbackMsg": "拒绝重定向到“{url}”。回调 URL 必须使用 http:// 或 https://。"
+    },
     "secureLogin": {
       "descriptionBiometric": "启用安全登录后，你可以使用移动设备的身份验证方式访问 Superhero 钱包应用。",
       "descriptionPassword": "启用安全登录后，你可以设置自定义密码来解锁 Superhero 钱包。",
@@ -1091,7 +1097,8 @@
       "confirm-that-you-save-your-seed-phrase": "确认你已正确保存助记词。",
       "in-correct-order": "以正确顺序",
       "seed-phrase-correct": "助记词已验证！",
-      "seed-phrase-incorrect": "助记词单词顺序不正确。请重新输入你的助记词！"
+      "seed-phrase-incorrect": "助记词单词顺序不正确。请重新输入你的助记词！",
+      "revealConfirmMsg": "你即将显示助记词。请确保没有他人在观看你的屏幕。"
     },
     "seedPhrase": {
       "first": "第一",
@@ -1401,6 +1408,10 @@
     "addressBookEntryExists": "此 {0} 已存在于你的地址簿中。",
     "passwordMinLength": "密码至少需要 {0} 个字符。",
     "passwordsMatch": "两次输入的密码不一致。"
+  },
+  "auth": {
+    "walletDataUnreadableTitle": "钱包数据无法读取",
+    "walletDataUnreadableMessage": "无法解密你的加密钱包数据。通常是因为设备钥匙串已被清空，或应用从未包含钥匙串的备份中恢复。请重新安装应用并使用助记词恢复。"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

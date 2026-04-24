@@ -265,7 +265,7 @@ export const useAuth = createCustomScopedComposable(() => {
     } else {
       const { openSetPasswordModal } = useModals();
       const password = await openSetPasswordModal(isRestored).catch(() => {
-        throw new Error('Password was not set.');
+        throw new Error(t('pages.index.passwordWasNotSet'));
       });
       await setPassword(password, newMnemonic);
 
@@ -411,13 +411,8 @@ export const useAuth = createCustomScopedComposable(() => {
            */
           handleUnknownError(error);
           Logger.write({
-            title: 'Wallet data unreadable',
-            message: (
-              'Your encrypted wallet data could not be decrypted. '
-              + 'This usually means the device Keychain was cleared or the app '
-              + 'was restored from a backup that did not include it. Reinstall '
-              + 'the app and restore from your seed phrase to recover.'
-            ),
+            title: t('auth.walletDataUnreadableTitle'),
+            message: t('auth.walletDataUnreadableMessage'),
             type: 'api-response',
             modal: true,
           });
