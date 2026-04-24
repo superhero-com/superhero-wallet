@@ -129,6 +129,41 @@ import TransactionDetails from '../../protocols/aeternity/views/TransactionDetai
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
 import JwtSign from '../pages/JwtSign.vue';
 
+async function requireSeedPhraseReauth() {
+  const {
+    isUsingDefaultPassword,
+    checkBiometricLoginAvailability,
+  } = useAuth();
+  const { isBiometricLoginEnabled } = useUi();
+  const {
+    openConfirmModal,
+    openPasswordLoginModal,
+    openBiometricLoginModal,
+  } = useModals();
+
+  if (IS_MOBILE_APP) {
+    if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+      await openBiometricLoginModal({ force: true });
+      return;
+    }
+    await openConfirmModal({
+      title: tg('pages.titles.seedPhrase'),
+      msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
+    });
+    return;
+  }
+
+  if (isUsingDefaultPassword.value) {
+    await openConfirmModal({
+      title: tg('pages.titles.seedPhrase'),
+      msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
+    });
+    return;
+  }
+
+  await openPasswordLoginModal();
+}
+
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
   {
@@ -467,52 +502,8 @@ export const routes: WalletAppRouteConfig[] = [
       showHeaderNavigation: true,
     },
     beforeEnter: async (_to, _from, next) => {
-      const {
-        isUsingDefaultPassword,
-        checkBiometricLoginAvailability,
-      } = useAuth();
-      const { isBiometricLoginEnabled } = useUi();
-      const {
-        openConfirmModal,
-        openPasswordLoginModal,
-        openBiometricLoginModal,
-      } = useModals();
-
-      /**
-       * Re-authenticate before the seed phrase page can render its contents.
-       *
-       * Four branches, in priority order:
-       *  - Mobile + biometry available & enabled → require a fresh biometric
-       *    prompt (force=true) so a user who just unlocked the app still has
-       *    to confirm at the seed-phrase boundary.
-       *  - Mobile without biometry (or biometry disabled) → `openPasswordLoginModal`
-       *    does not apply here because on mobile the "password" may be the
-       *    per-install default secret; fall through to the
-       *    no-password confirmation so the screen is not wide open. This is
-       *    the same trade-off the rest of the mobile app makes.
-       *  - Default/skip-password (extension or mobile) → confirm-prompt only,
-       *    matching the rest of the default-password flow where no password
-       *    is available to re-enter.
-       *  - Password-protected extension/web → password re-entry.
-       */
       try {
-        if (IS_MOBILE_APP) {
-          if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-            await openBiometricLoginModal({ force: true });
-          } else {
-            await openConfirmModal({
-              title: tg('pages.titles.seedPhrase'),
-              msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
-            });
-          }
-        } else if (isUsingDefaultPassword.value) {
-          await openConfirmModal({
-            title: tg('pages.titles.seedPhrase'),
-            msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
-          });
-        } else {
-          await openPasswordLoginModal();
-        }
+        await requireSeedPhraseReauth();
         next();
       } catch {
         next(false);
@@ -526,6 +517,14 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'seedPhrase',
       showHeaderNavigation: true,
+    },
+    beforeEnter: async (_to, _from, next) => {
+      try {
+        await requireSeedPhraseReauth();
+        next();
+      } catch {
+        next(false);
+      }
     },
   },
   {
