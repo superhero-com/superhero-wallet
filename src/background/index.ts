@@ -108,7 +108,7 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
         break;
     }
   }
-  return true;
+  return undefined;
 };
 
 browser.runtime.onMessage.addListener(handleMessage);

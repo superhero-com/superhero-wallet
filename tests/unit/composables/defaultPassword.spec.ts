@@ -96,3 +96,68 @@ describe('defaultPassword', () => {
     await expect(getDefaultPasswordSecret()).resolves.toBeNull();
   });
 });
+
+describe('defaultPassword on mobile', () => {
+  const secureStoreMock = new Map<string, any>();
+  const secureMobileStorageMock = {
+    get: jest.fn((key: string) => Promise.resolve(secureStoreMock.get(key) ?? null)),
+    set: jest.fn((key: string, value: any) => {
+      secureStoreMock.set(key, value);
+      return Promise.resolve();
+    }),
+    remove: jest.fn((key: string) => {
+      secureStoreMock.delete(key);
+      return Promise.resolve();
+    }),
+  };
+  const walletStorageMock = {
+    get: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.resetModules();
+    secureStoreMock.clear();
+    secureMobileStorageMock.get.mockClear();
+    secureMobileStorageMock.set.mockClear();
+    secureMobileStorageMock.remove.mockClear();
+    walletStorageMock.get.mockClear();
+    walletStorageMock.set.mockClear();
+    walletStorageMock.remove.mockClear();
+
+    jest.doMock('@/constants', () => ({
+      IS_MOBILE_APP: true,
+      STORAGE_KEYS: { defaultPasswordSecret: 'default-password-secret' },
+    }));
+    jest.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
+    jest.doMock('@/lib/SecureMobileStorage', () => ({
+      SecureMobileStorage: secureMobileStorageMock,
+    }));
+    jest.doMock('@/utils/crypto', () => ({
+      encodeBase64: (bytes: Uint8Array) => `b64(${bytes.length})`,
+    }));
+  });
+
+  it('uses SecureMobileStorage instead of WalletStorage', async () => {
+    // eslint-disable-next-line global-require
+    const defaultPassword = require('@/composables/defaultPassword');
+    const {
+      clearDefaultPasswordSecret,
+      getDefaultPasswordSecret,
+      getOrCreateDefaultPasswordSecret,
+    } = defaultPassword;
+
+    await expect(getDefaultPasswordSecret()).resolves.toBeNull();
+    const secret = await getOrCreateDefaultPasswordSecret();
+    await clearDefaultPasswordSecret();
+
+    expect(secret).toBe('b64(32)');
+    expect(secureMobileStorageMock.get).toHaveBeenCalledWith('default-password-secret');
+    expect(secureMobileStorageMock.set).toHaveBeenCalledWith('default-password-secret', 'b64(32)');
+    expect(secureMobileStorageMock.remove).toHaveBeenCalledWith('default-password-secret');
+    expect(walletStorageMock.get).not.toHaveBeenCalled();
+    expect(walletStorageMock.set).not.toHaveBeenCalled();
+    expect(walletStorageMock.remove).not.toHaveBeenCalled();
+  });
+});

@@ -89,4 +89,26 @@ describe('background accountsChanged forwarding', () => {
       ((global as any).browser.tabs.sendMessage as jest.Mock).mock.calls,
     ).toHaveLength(0);
   });
+
+  it.each([
+    ['message for another target', { target: 'offscreen', method: 'accountsChanged' }],
+    ['unknown background method', { target: 'background', method: 'unknownMethod' }],
+  ])('does not claim unhandled messages: %s', async (_label, msg) => {
+    jest.isolateModules(() => {
+      // eslint-disable-next-line global-require
+      require('@/background/index');
+    });
+
+    const listener = (
+      (global as any).browser.runtime.onMessage.addListener as jest.Mock
+    ).mock.calls[0][0];
+
+    const result = await listener(
+      msg,
+      { id: 'test-extension-id' },
+      jest.fn(),
+    );
+
+    expect(result).toBeUndefined();
+  });
 });

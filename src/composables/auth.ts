@@ -179,6 +179,7 @@ export const useAuth = createCustomScopedComposable(() => {
     updating: false,
     checked: false,
   });
+  const isAutoLockEnabled = computed(() => !IS_MOBILE_APP || isBiometricLoginEnabled.value);
 
   /**
    * Checks if biometric authentication is available on the device.
@@ -191,9 +192,12 @@ export const useAuth = createCustomScopedComposable(() => {
       await watchUntilTruthy(() => !biometricAuth.updating);
     } else if (!biometricAuth.checked || forceUpdate) {
       biometricAuth.updating = true;
-      biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
-      biometricAuth.checked = true;
-      biometricAuth.updating = false;
+      try {
+        biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
+        biometricAuth.checked = true;
+      } finally {
+        biometricAuth.updating = false;
+      }
     }
     if (!biometricAuth.available && isBiometricLoginEnabled.value) {
       setBiometricLoginEnabled(false);
@@ -221,6 +225,22 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
+    if (IS_MOBILE_APP) {
+      /**
+       * Mobile never uses a user/default password-derived PBKDF2 key for the
+       * mnemonic. All sensitive mobile state is encrypted with the per-install
+       * mobile data key; deriving and publishing a password key here would make
+       * subsequent boots try to decrypt password ciphertext with the mobile key.
+       */
+      if (!encryptionKey.value) {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      }
+      mnemonic.value = await encrypt(encryptionKey.value!, plaintextToEncrypt);
+      isAuthenticated.value = true;
+      return;
+    }
+
     /**
      * Derive the new key and ciphertext into local variables FIRST,
      * then commit all persistent state synchronously once every async
@@ -630,11 +650,18 @@ export const useAuth = createCustomScopedComposable(() => {
         // If session exists user needs to stay logged in
         if (!isAuthenticating.value) {
           const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
-          if (isSessionExpired || (!keepExtensionLoggedIn && IS_EXTENSION)) {
+          if (
+            (isSessionExpired && isAutoLockEnabled.value)
+            || (!keepExtensionLoggedIn && IS_EXTENSION)
+          ) {
             lockWallet();
           }
         }
       } else if (wasActive && !isActive) {
+        if (!isAutoLockEnabled.value) {
+          isSessionExpired = false;
+          return;
+        }
         expirationTimeout = setTimeout(
           () => {
             isSessionExpired = true;

@@ -748,9 +748,9 @@
     },
     "deepLink": {
       "externalCallbackTitle": "返回到外部网站",
-      "externalCallbackMsg": "是否将本次操作的结果发送回「{origin}」？你刚刚签名的所有数据都将与该目标共享。",
+      "externalCallbackMsg": "是否将本次操作的结果发送回「{url}」？你刚刚签名的所有数据都将与该目标共享。",
       "invalidCallbackTitle": "无效的深度链接回调",
-      "invalidCallbackMsg": "拒绝重定向到“{url}”。回调 URL 必须使用 http:// 或 https://。"
+      "invalidCallbackMsg": "拒绝重定向到“{url}”。回调 URL 必须使用 https://，或在本地开发主机上使用 http://。"
     },
     "secureLogin": {
       "descriptionBiometric": "启用安全登录后，你可以使用移动设备的身份验证方式访问 Superhero 钱包应用。",

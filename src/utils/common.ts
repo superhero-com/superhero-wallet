@@ -16,7 +16,6 @@ import { defer, isEqual, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
-import { LocationQuery } from 'vue-router';
 import type {
   AccountAddress,
   AssetContractId,
@@ -39,7 +38,6 @@ import type {
 import {
   ACCOUNT_TYPES,
   ADDRESS_GAP_LIMIT,
-  AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   EVM_PROTOCOLS,
@@ -534,14 +532,6 @@ export async function getLastNotEmptyAccountIndex(
   return lastNotEmptyIdx;
 }
 
-export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
-  const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
-
-  return [query['x-success'], query['x-cancel']].every(
-    (value) => value && (value as string).startsWith(slicedAggregatorUrl),
-  );
-}
-
 export function isAssetCoin(assetContractId: AssetContractId): boolean {
   return PROTOCOL_LIST.some(
     (protocol) => ProtocolAdapterFactory
@@ -678,7 +668,9 @@ export function decryptedComputed(
     try {
       // eslint-disable-next-line no-param-reassign
       encryptedState.value = await encrypt(key.value!, val);
-    } catch (e) { /* NOOP */ }
+    } catch (e) {
+      handleUnknownError(e);
+    }
     updating = false;
   }
 

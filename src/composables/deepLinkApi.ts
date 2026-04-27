@@ -3,9 +3,12 @@ import { useRoute, RouteLocationNormalized as Route } from 'vue-router';
 import { useIonRouter } from '@ionic/vue';
 
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
-import { checkIfSuperheroCallbackUrl } from '@/utils';
 import {
-  AGGREGATOR_URL,
+  checkIfSuperheroCallbackUrl,
+  isTrustedCallbackUrl,
+  validateCallbackUrl,
+} from '@/utils';
+import {
   IS_IOS,
   IS_MOBILE_APP,
   IS_WEB,
@@ -17,67 +20,28 @@ import { tg } from '@/popup/plugins/i18n';
 
 let isDeepLinkUsed = false;
 
-/**
- * Hostname of the built-in Superhero aggregator — extracted so we can
- * also recognize its subdomains (e.g. `chat.superhero.com`,
- * `wallet.superhero.com`) as trusted destinations, keeping the existing
- * first-party flows (tipping, chat JWT sign, wallet web build) from
- * triggering the external-site confirmation prompt that third-party
- * dApps correctly see.
- */
-const TRUSTED_CALLBACK_HOSTNAME = (() => {
-  try {
-    return new URL(AGGREGATOR_URL).hostname;
-  } catch {
-    return '';
+function normalizeCallbackTemplate(rawTemplate: string): string | null {
+  /**
+   * Vue Router usually returns already-decoded query values. Decoding such
+   * values again can turn intentional `%26` (data) into raw `&` (separator),
+   * corrupting callback payloads. Decode only when the template still looks
+   * URL-encoded (no visible scheme delimiter yet).
+   */
+  if (rawTemplate.includes('://')) {
+    return rawTemplate;
   }
-})();
-
-/**
- * Returns true for callbacks pointing at the Superhero aggregator itself
- * or any of its HTTPS subdomains. The `https:` check is essential —
- * matching hostname alone would let `http://superhero.com` (downgrade
- * attack) and any attacker-controlled origin that aliases the host
- * locally (hosts file, DNS hijack over Wi-Fi) slip through without a
- * prompt. All other origins still require explicit user approval.
- */
-function isTrustedCallbackUrl(url: URL): boolean {
-  if (!TRUSTED_CALLBACK_HOSTNAME || url.protocol !== 'https:') {
-    return false;
-  }
-  const { hostname } = url;
-  return (
-    hostname === TRUSTED_CALLBACK_HOSTNAME
-    || hostname.endsWith(`.${TRUSTED_CALLBACK_HOSTNAME}`)
-  );
-}
-
-/**
- * Callback redirects are only allowed back to ordinary web origins.
- * Opaque schemes (`myapp:`, `intent:`, `mailto:` and friends) are
- * intentionally rejected so signed data cannot be handed off to an
- * arbitrary native app / protocol handler.
- */
-const ALLOWED_CALLBACK_PROTOCOLS = new Set([
-  'http:',
-  'https:',
-]);
-
-/**
- * Parse a deeplink callback URL string (already template-expanded) and
- * validate it is a well-formed URL with an allowed web scheme.
- * Returns the parsed URL or null when the input is unsafe.
- */
-function validateCallbackUrl(rawUrl: string): URL | null {
   try {
-    const url = new URL(rawUrl);
-    if (!ALLOWED_CALLBACK_PROTOCOLS.has(url.protocol.toLowerCase())) {
-      return null;
-    }
-    return url;
+    return decodeURIComponent(rawTemplate);
   } catch {
     return null;
   }
+}
+
+function applyTemplateParams(template: string, templateParams: Record<string, string>): string {
+  return Object.entries(templateParams).reduce(
+    (url, [key, value]) => url.split(`{${key}}`).join(encodeURIComponent(value)),
+    template,
+  );
 }
 
 function openCallbackUrl(callbackUrl: string) {
@@ -126,8 +90,10 @@ export function useDeepLinkApi(
   const callbackOrigin = ref<URL | null>((() => {
     const xSuccess = route?.query['x-success'];
     if (!xSuccess) return null;
+    const normalized = normalizeCallbackTemplate(String(xSuccess));
+    if (!normalized) return null;
     try {
-      return new URL(decodeURIComponent(xSuccess as string));
+      return new URL(normalized);
     } catch {
       return null;
     }
@@ -166,17 +132,12 @@ export function useDeepLinkApi(
      * the user stuck on the signing page with no feedback. Treat a
      * malformed template the same as a missing one: redirect home.
      */
-    let decodedTemplate: string;
-    try {
-      decodedTemplate = decodeURIComponent(String(callbackUrlTemplate));
-    } catch {
+    const decodedTemplate = normalizeCallbackTemplate(String(callbackUrlTemplate));
+    if (!decodedTemplate) {
       router?.replace({ name: ROUTE_ACCOUNT });
       return;
     }
-    const callbackUrl = Object.entries(templateParams).reduce(
-      (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
-      decodedTemplate,
-    ) as string;
+    const callbackUrl = applyTemplateParams(decodedTemplate, templateParams);
 
     /**
      * Validate the (template-expanded) callback URL before handing it
@@ -190,7 +151,7 @@ export function useDeepLinkApi(
      */
     const parsedCallback = validateCallbackUrl(callbackUrl);
     if (!parsedCallback) {
-      Logger.write({
+      await Logger.write({
         title: tg('pages.deepLink.invalidCallbackTitle'),
         message: tg('pages.deepLink.invalidCallbackMsg', {
           url: callbackUrl,
@@ -209,6 +170,7 @@ export function useDeepLinkApi(
           title: tg('pages.deepLink.externalCallbackTitle'),
           msg: tg('pages.deepLink.externalCallbackMsg', {
             origin: parsedCallback.origin,
+            url: parsedCallback.toString(),
           }),
         });
       } catch {

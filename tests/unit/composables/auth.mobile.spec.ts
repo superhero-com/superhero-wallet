@@ -228,4 +228,333 @@ describe('useAuth mobile biometric login', () => {
     expect(openBiometricLoginModal).toHaveBeenCalledTimes(1);
     expect(auth.isAuthenticated.value).toBe(false);
   });
+
+  it('forces biometric verification even when the wallet is already authenticated', async () => {
+    const mnemonicRef = ref('encrypted-mnemonic');
+    const encryptionSaltRef = ref(null);
+    const secureLoginTimeoutRef = ref(null);
+    const isBiometricLoginEnabled = ref(false);
+    const authenticate = jest.fn().mockResolvedValue(undefined);
+
+    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+      BiometricAuth: {
+        authenticate,
+        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: true }),
+      },
+    }));
+    jest.doMock('@/constants', () => ({
+      AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
+      IS_EXTENSION: false,
+      IS_IOS: false,
+      IS_MOBILE_APP: true,
+      IS_OFFSCREEN_TAB: false,
+      RUNNING_IN_TESTS: false,
+      STORAGE_KEYS: {
+        mnemonic: 'mnemonic',
+        encryptionSalt: 'encryption-salt',
+        secureLoginTimeout: 'secure-login-timeout',
+      },
+    }));
+    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    jest.doMock('@/lib/logger', () => ({
+      __esModule: true,
+      default: { write: jest.fn() },
+    }));
+    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/composables/defaultPassword', () => ({
+      LEGACY_DEFAULT_PASSWORD: 'testPassword123',
+      clearDefaultPasswordSecret: jest.fn(),
+      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+    }));
+    jest.doMock('@/composables/ui', () => ({
+      useUi: () => ({
+        isBiometricLoginEnabled,
+        isAppActive: ref(true),
+        setBiometricLoginEnabled: jest.fn(),
+        setLoaderVisible: jest.fn(),
+      }),
+    }));
+    jest.doMock('@/composables/modals', () => ({
+      useModals: () => ({
+        openBiometricLoginModal: jest.fn(),
+        openPasswordLoginModal: jest.fn(),
+        openEnableBiometricLoginModal: jest.fn(),
+      }),
+    }));
+    jest.doMock('@/composables/storageRef', () => ({
+      useStorageRef: (_initialState, key, options = {}) => {
+        const byKey = {
+          mnemonic: mnemonicRef,
+          'encryption-salt': encryptionSaltRef,
+          'secure-login-timeout': secureLoginTimeoutRef,
+        };
+        options.onRestored?.(byKey[key]?.value ?? null);
+        return byKey[key] ?? ref(_initialState);
+      },
+    }));
+    jest.doMock('@/utils', () => ({
+      createCustomScopedComposable: (factory) => {
+        let value;
+        return () => {
+          if (!value) value = factory();
+          return value;
+        };
+      },
+      decodeBase64: jest.fn(),
+      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: jest.fn(() => ref('1000')),
+      encodeBase64: jest.fn(),
+      encrypt: jest.fn(),
+      excludeFalsy: Boolean,
+      generateEncryptionKey: jest.fn(),
+      generateSalt: jest.fn(),
+      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue({}),
+      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
+      handleUnknownError: jest.fn(),
+      sessionEnd: jest.fn(),
+      sessionStart: jest.fn(),
+      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+    }));
+
+    let auth;
+    jest.isolateModules(() => {
+      // eslint-disable-next-line global-require
+      auth = require('@/composables/auth').useAuth();
+    });
+
+    await auth.checkUserAuth();
+    expect(auth.isAuthenticated.value).toBe(true);
+
+    isBiometricLoginEnabled.value = true;
+    await auth.authenticateWithBiometry(true);
+
+    expect(authenticate).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not auto-lock on mobile app resume when biometric login is disabled', async () => {
+    const mnemonicRef = ref('encrypted-mnemonic');
+    const encryptionSaltRef = ref(null);
+    const secureLoginTimeoutRef = ref(null);
+    const isBiometricLoginEnabled = ref(false);
+    const isAppActive = ref(true);
+    const openBiometricLoginModal = jest.fn().mockResolvedValue(undefined);
+
+    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+      BiometricAuth: {
+        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: true }),
+      },
+    }));
+    jest.doMock('@/constants', () => ({
+      AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
+      IS_EXTENSION: false,
+      IS_IOS: false,
+      IS_MOBILE_APP: true,
+      IS_OFFSCREEN_TAB: false,
+      RUNNING_IN_TESTS: false,
+      STORAGE_KEYS: {
+        mnemonic: 'mnemonic',
+        encryptionSalt: 'encryption-salt',
+        secureLoginTimeout: 'secure-login-timeout',
+      },
+    }));
+    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    jest.doMock('@/lib/logger', () => ({
+      __esModule: true,
+      default: { write: jest.fn() },
+    }));
+    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/composables/defaultPassword', () => ({
+      LEGACY_DEFAULT_PASSWORD: 'testPassword123',
+      clearDefaultPasswordSecret: jest.fn(),
+      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+    }));
+    jest.doMock('@/composables/ui', () => ({
+      useUi: () => ({
+        isBiometricLoginEnabled,
+        isAppActive,
+        setBiometricLoginEnabled: jest.fn(),
+        setLoaderVisible: jest.fn(),
+      }),
+    }));
+    jest.doMock('@/composables/modals', () => ({
+      useModals: () => ({
+        openBiometricLoginModal,
+        openPasswordLoginModal: jest.fn(),
+        openEnableBiometricLoginModal: jest.fn(),
+      }),
+    }));
+    jest.doMock('@/composables/storageRef', () => ({
+      useStorageRef: (_initialState, key, options = {}) => {
+        const byKey = {
+          mnemonic: mnemonicRef,
+          'encryption-salt': encryptionSaltRef,
+          'secure-login-timeout': secureLoginTimeoutRef,
+        };
+        options.onRestored?.(byKey[key]?.value ?? null);
+        return byKey[key] ?? ref(_initialState);
+      },
+    }));
+    jest.doMock('@/utils', () => ({
+      createCustomScopedComposable: (factory) => {
+        let value;
+        return () => {
+          if (!value) value = factory();
+          return value;
+        };
+      },
+      decodeBase64: jest.fn(),
+      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: jest.fn(() => ref('1000')),
+      encodeBase64: jest.fn(),
+      encrypt: jest.fn(),
+      excludeFalsy: Boolean,
+      generateEncryptionKey: jest.fn(),
+      generateSalt: jest.fn(),
+      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue({}),
+      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
+      handleUnknownError: jest.fn(),
+      sessionEnd: jest.fn(),
+      sessionStart: jest.fn(),
+      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+    }));
+
+    jest.useFakeTimers();
+    try {
+      let auth;
+      jest.isolateModules(() => {
+        // eslint-disable-next-line global-require
+        auth = require('@/composables/auth').useAuth();
+      });
+
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+
+      isAppActive.value = false;
+      await nextTick();
+      jest.advanceTimersByTime(1000);
+      isAppActive.value = true;
+      await nextTick();
+      await Promise.resolve();
+
+      expect(openBiometricLoginModal).not.toHaveBeenCalled();
+      expect(auth.isAuthenticated.value).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps mnemonic encryption on the mobile data key when setPassword is called', async () => {
+    const mnemonicRef = ref('encrypted-mnemonic');
+    const encryptionSaltRef = ref(null);
+    const secureLoginTimeoutRef = ref(null);
+    const mobileKey = { type: 'mobile-key' };
+    const generateEncryptionKey = jest.fn();
+    const generateSalt = jest.fn();
+    const encrypt = jest.fn().mockResolvedValue('mobile-ciphertext');
+
+    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+      BiometricAuth: {
+        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: false }),
+      },
+    }));
+    jest.doMock('@/constants', () => ({
+      AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
+      IS_EXTENSION: false,
+      IS_IOS: false,
+      IS_MOBILE_APP: true,
+      IS_OFFSCREEN_TAB: false,
+      RUNNING_IN_TESTS: false,
+      STORAGE_KEYS: {
+        mnemonic: 'mnemonic',
+        encryptionSalt: 'encryption-salt',
+        secureLoginTimeout: 'secure-login-timeout',
+      },
+    }));
+    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    jest.doMock('@/lib/logger', () => ({
+      __esModule: true,
+      default: { write: jest.fn() },
+    }));
+    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
+    jest.doMock('@/composables/defaultPassword', () => ({
+      LEGACY_DEFAULT_PASSWORD: 'testPassword123',
+      clearDefaultPasswordSecret: jest.fn(),
+      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+    }));
+    jest.doMock('@/composables/ui', () => ({
+      useUi: () => ({
+        isBiometricLoginEnabled: ref(false),
+        isAppActive: ref(true),
+        setBiometricLoginEnabled: jest.fn(),
+        setLoaderVisible: jest.fn(),
+      }),
+    }));
+    jest.doMock('@/composables/modals', () => ({
+      useModals: () => ({
+        openBiometricLoginModal: jest.fn(),
+        openPasswordLoginModal: jest.fn(),
+        openEnableBiometricLoginModal: jest.fn(),
+      }),
+    }));
+    jest.doMock('@/composables/storageRef', () => ({
+      useStorageRef: (_initialState, key, options = {}) => {
+        const byKey = {
+          mnemonic: mnemonicRef,
+          'encryption-salt': encryptionSaltRef,
+          'secure-login-timeout': secureLoginTimeoutRef,
+        };
+        options.onRestored?.(byKey[key]?.value ?? null);
+        return byKey[key] ?? ref(_initialState);
+      },
+    }));
+    jest.doMock('@/utils', () => ({
+      createCustomScopedComposable: (factory) => {
+        let value;
+        return () => {
+          if (!value) value = factory();
+          return value;
+        };
+      },
+      decodeBase64: jest.fn(),
+      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: jest.fn(() => ref('1000')),
+      encodeBase64: jest.fn(),
+      encrypt,
+      excludeFalsy: Boolean,
+      generateEncryptionKey,
+      generateSalt,
+      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue(mobileKey),
+      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
+      handleUnknownError: jest.fn(),
+      sessionEnd: jest.fn(),
+      sessionStart: jest.fn(),
+      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+    }));
+
+    let auth;
+    jest.isolateModules(() => {
+      // eslint-disable-next-line global-require
+      auth = require('@/composables/auth').useAuth();
+    });
+
+    await Promise.resolve();
+    await auth.setPassword('user-password', 'plain mobile mnemonic');
+
+    expect(generateSalt).not.toHaveBeenCalled();
+    expect(generateEncryptionKey).not.toHaveBeenCalled();
+    expect(encrypt).toHaveBeenCalledWith(mobileKey, 'plain mobile mnemonic');
+    expect(mnemonicRef.value).toBe('mobile-ciphertext');
+  });
 });

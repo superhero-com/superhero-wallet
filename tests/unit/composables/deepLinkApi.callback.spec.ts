@@ -14,14 +14,39 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   const routerReplace = jest.fn();
   const loggerWrite = jest.fn();
   const windowOpen = jest.fn();
+  const openConfirmModalMock = jest.fn();
   let confirmModalImpl: () => Promise<void>;
   let route: { query: Record<string, string> };
+
+  const validateCallbackUrl = (rawUrl: string) => {
+    try {
+      const url = new URL(rawUrl);
+      if (url.protocol === 'https:') return url;
+      if (
+        url.protocol === 'http:'
+        && ['localhost', '0.0.0.0'].includes(url.hostname)
+      ) return url;
+      if (url.protocol === 'http:' && /^127(?:\.\d{1,3}){3}$/.test(url.hostname)) return url;
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const isTrustedCallbackUrl = (url: URL) => (
+    url.protocol === 'https:'
+    && (
+      url.hostname === 'superhero.com'
+      || url.hostname.endsWith('.superhero.com')
+    )
+  );
 
   const setup = () => {
     jest.resetModules();
     routerReplace.mockClear();
     loggerWrite.mockClear();
     windowOpen.mockClear();
+    openConfirmModalMock.mockClear();
 
     jest.doMock('vue-router', () => ({
       useRoute: () => route,
@@ -31,7 +56,11 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
       useIonRouter: () => ({ replace: routerReplace }),
     }));
     jest.doMock('@/popup/router/routeNames', () => ({ ROUTE_ACCOUNT: 'account' }));
-    jest.doMock('@/utils', () => ({ checkIfSuperheroCallbackUrl: () => false }));
+    jest.doMock('@/utils', () => ({
+      checkIfSuperheroCallbackUrl: () => false,
+      isTrustedCallbackUrl,
+      validateCallbackUrl,
+    }));
     jest.doMock('@/constants', () => ({
       AGGREGATOR_URL: 'https://superhero.com',
       IS_IOS: false,
@@ -42,7 +71,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     jest.doMock('@/composables/modals', () => ({
       useModals: () => ({
         openModal: jest.fn(),
-        openConfirmModal: jest.fn(() => confirmModalImpl()),
+        openConfirmModal: openConfirmModalMock,
       }),
     }));
     jest.doMock('@/lib/logger', () => ({
@@ -57,6 +86,9 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
         if (key === 'pages.deepLink.invalidCallbackMsg') {
           return `Localized invalid callback message: ${params.url}`;
         }
+        if (key === 'pages.deepLink.externalCallbackMsg') {
+          return `Localized external callback message: ${params.url}`;
+        }
         return key;
       },
     }));
@@ -69,6 +101,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
 
   beforeEach(() => {
     confirmModalImpl = () => Promise.resolve();
+    openConfirmModalMock.mockImplementation(() => confirmModalImpl());
     route = { query: {} };
     setup();
   });
@@ -176,6 +209,10 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     // should have been opened yet.
     await Promise.resolve();
     expect(windowOpen).not.toHaveBeenCalled();
+    expect(openConfirmModalMock).toHaveBeenCalledWith({
+      title: 'pages.deepLink.externalCallbackTitle',
+      msg: 'Localized external callback message: https://attacker.example/?s=SIG123',
+    });
 
     // User approves.
     resolveModal!();
@@ -246,9 +283,6 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   });
 
   it.each([
-    // Protocol downgrade on the trusted hostname must still prompt —
-    // otherwise a hostile network could strip TLS and scrape signed data.
-    'http://superhero.com/',
     // Suffix spoofing: same seven letters at the end, different owner.
     'https://evilsuperhero.com/',
     // Embedded hostname: `superhero.com` as a path / query / credential
@@ -272,6 +306,59 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     jest.useRealTimers();
   });
 
+  it('rejects non-loopback http callbacks without redirecting', async () => {
+    route = {
+      query: { 'x-success': encodeURIComponent('http://superhero.com/?s={signature}') },
+    };
+    setup();
+
+    // eslint-disable-next-line global-require
+    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
+
+    expect(loggerWrite).toHaveBeenCalledTimes(1);
+    expect(openConfirmModalMock).not.toHaveBeenCalled();
+    expect(windowOpen).not.toHaveBeenCalled();
+  });
+
+  it('allows loopback http callbacks but still requires confirmation', async () => {
+    jest.useFakeTimers();
+    confirmModalImpl = () => Promise.resolve();
+    route = {
+      query: { 'x-success': encodeURIComponent('http://localhost:3000/callback?s={signature}') },
+    };
+    setup();
+
+    // eslint-disable-next-line global-require
+    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
+    jest.runAllTimers();
+
+    expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
+    expect(windowOpen).toHaveBeenCalledWith('http://localhost:3000/callback?s=SIG123', '_self');
+    jest.useRealTimers();
+  });
+
+  it('does not double-decode already-decoded callback templates from router query', async () => {
+    jest.useFakeTimers();
+    confirmModalImpl = () => Promise.resolve();
+    route = {
+      // Simulates Vue Router already decoding the outer x-success parameter.
+      // `%26` is data inside payload and must stay encoded when redirected.
+      query: { 'x-success': 'http://localhost:3000/callback?payload=A%26B&sig={signature}' },
+    };
+    setup();
+    // eslint-disable-next-line global-require
+    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
+    jest.runAllTimers();
+    expect(windowOpen).toHaveBeenCalledWith(
+      'http://localhost:3000/callback?payload=A%26B&sig=SIG123',
+      '_self',
+    );
+    jest.useRealTimers();
+  });
+
   it('routes home without throwing when x-success contains malformed percent-encoding', async () => {
     route = { query: { 'x-success': '%ZZ' } };
     setup();
@@ -285,5 +372,54 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
 
     expect(routerReplace).toHaveBeenCalledWith({ name: 'account' });
     expect(windowOpen).not.toHaveBeenCalled();
+  });
+
+  it('substitutes template params as literals even when keys contain regex-special chars', async () => {
+    jest.useFakeTimers();
+    confirmModalImpl = () => Promise.resolve();
+    route = {
+      query: { 'x-success': encodeURIComponent('http://localhost:3000/callback?v={sig$}&name={name.with.dot}') },
+    };
+    setup();
+
+    // eslint-disable-next-line global-require
+    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    await useDeepLinkApi().openCallbackOrGoHome(true, {
+      sig$: 'abc123',
+      'name.with.dot': 'john/doe',
+    });
+    jest.runAllTimers();
+
+    expect(windowOpen).toHaveBeenCalledWith(
+      'http://localhost:3000/callback?v=abc123&name=john%2Fdoe',
+      '_self',
+    );
+    jest.useRealTimers();
+  });
+
+  it('awaits invalid-callback logger modal before redirecting home', async () => {
+    route = {
+      query: {
+        // eslint-disable-next-line no-script-url
+        'x-success': encodeURIComponent('javascript:alert(1)'),
+      },
+    };
+    setup();
+
+    let resolveLogger: () => void;
+    loggerWrite.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveLogger = resolve; }),
+    );
+
+    // eslint-disable-next-line global-require
+    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const openPromise = useDeepLinkApi().openCallbackOrGoHome(true);
+
+    await Promise.resolve();
+    expect(routerReplace).not.toHaveBeenCalled();
+
+    resolveLogger!();
+    await openPromise;
+    expect(routerReplace).toHaveBeenCalledWith({ name: 'account' });
   });
 });

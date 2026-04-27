@@ -35,6 +35,24 @@ describe('BiometricLogin', () => {
     expect(reject).toHaveBeenCalledTimes(1);
   });
 
+  it('runs biometry for a forced re-auth even when already authenticated', async () => {
+    const resolve = jest.fn();
+    const reject = jest.fn();
+    const wrapper = shallowMount(BiometricLogin, {
+      props: {
+        resolve,
+        reject,
+        force: true,
+      },
+    });
+
+    await wrapper.vm.initAuthenticate();
+
+    expect(mockAuthenticateWithBiometry).toHaveBeenCalledWith(true);
+    expect(resolve).toHaveBeenCalledTimes(1);
+    expect(reject).not.toHaveBeenCalled();
+  });
+
   it('still allows closing a non-forced modal when already authenticated', async () => {
     const resolve = jest.fn();
     const reject = jest.fn();
