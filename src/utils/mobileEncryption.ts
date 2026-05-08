@@ -1,11 +1,13 @@
 import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import {
+  AES_GCM_TAG_LENGTH_BYTES,
   decodeBase64,
   decrypt,
   encodeBase64,
   encrypt,
   importEncryptionKey,
+  IV_LENGTH,
 } from './crypto';
 
 const MOBILE_KEY_LENGTH = 32;
@@ -84,12 +86,14 @@ export async function tryDecryptWithMobileKey(value: string): Promise<string | n
 }
 
 /**
- * AES-GCM ciphertext as emitted by `crypto.encrypt()` is the base64 of
- * `[iv(12) || ciphertext(>=1) || tag(16)]`, so the smallest legal ciphertext
- * is 29 bytes → 40 base64 chars (with padding). Anything shorter is definitely
- * not a ciphertext blob from this pipeline.
+ * `encrypt()` returns base64 of `[iv(IV_LENGTH) || webCryptoGcmOutput]`, where
+ * `webCryptoGcmOutput` is ciphertext + {@link AES_GCM_TAG_LENGTH_BYTES}-byte
+ * tag (smallest Web Crypto output is tag-only for empty plaintext). Minimum
+ * binary size is therefore IV + tag bytes; anything shorter in base64 cannot
+ * be a blob from this pipeline.
  */
-const MIN_CIPHERTEXT_BASE64_LENGTH = 40;
+const MIN_CIPHERTEXT_BINARY_LENGTH = IV_LENGTH + AES_GCM_TAG_LENGTH_BYTES;
+const MIN_CIPHERTEXT_BASE64_LENGTH = Math.ceil(MIN_CIPHERTEXT_BINARY_LENGTH / 3) * 4;
 const BASE64_RE = /^[A-Za-z0-9+/]+={0,2}$/;
 const HEX_RE = /^(?:0x)?[0-9a-fA-F]+$/;
 

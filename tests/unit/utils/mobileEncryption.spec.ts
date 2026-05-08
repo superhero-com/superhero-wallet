@@ -40,13 +40,18 @@ describe('mobileEncryption', () => {
     jest.doMock('@/lib/SecureMobileStorage', () => ({
       SecureMobileStorage: secureMobileStorageMock,
     }));
-    jest.doMock('@/utils/crypto', () => ({
-      decodeBase64: (value: string) => Buffer.from(value, 'base64'),
-      decrypt: decryptMock,
-      encodeBase64: (bytes: Uint8Array) => Buffer.from(bytes).toString('base64'),
-      encrypt: encryptMock,
-      importEncryptionKey: importEncryptionKeyMock,
-    }));
+    jest.doMock('@/utils/crypto', () => {
+      const { IV_LENGTH, AES_GCM_TAG_LENGTH_BYTES } = jest.requireActual('@/utils/crypto');
+      return {
+        IV_LENGTH,
+        AES_GCM_TAG_LENGTH_BYTES,
+        decodeBase64: (value: string) => Buffer.from(value, 'base64'),
+        decrypt: decryptMock,
+        encodeBase64: (bytes: Uint8Array) => Buffer.from(bytes).toString('base64'),
+        encrypt: encryptMock,
+        importEncryptionKey: importEncryptionKeyMock,
+      };
+    });
 
     // eslint-disable-next-line global-require
     return require('@/utils/mobileEncryption');
@@ -85,7 +90,8 @@ describe('mobileEncryption', () => {
   it('leaves unreadable ciphertext-shaped values unchanged to avoid double wrapping', async () => {
     const { encryptMobileStateIfPlaintext } = loadModule();
     decryptMock.mockRejectedValue(new Error('wrong key'));
-    const ciphertextShaped = `${'A'.repeat(38)}==`;
+    /** Minimum base64 length for real `encrypt()` output (16-byte IV + 16-byte GCM tag). */
+    const ciphertextShaped = `${'A'.repeat(42)}==`;
 
     await expect(encryptMobileStateIfPlaintext(ciphertextShaped)).resolves.toBe(ciphertextShaped);
 
@@ -104,16 +110,16 @@ describe('mobileEncryption', () => {
     expect(encryptMock).toHaveBeenCalledWith(expect.any(Object), hexPrivateKey);
   });
 
-  it('documents that long base64-shaped legacy plaintext is preserved by the heuristic', async () => {
+  it('encrypts 40-char base64-shaped legacy plaintext (below min ciphertext size)', async () => {
     const { encryptMobileStateIfPlaintext } = loadModule();
     decryptMock.mockRejectedValue(new Error('wrong key'));
     const base64ShapedPlaintext = `${'Q'.repeat(38)}==`;
 
     await expect(encryptMobileStateIfPlaintext(base64ShapedPlaintext)).resolves.toBe(
-      base64ShapedPlaintext,
+      `encrypted:${base64ShapedPlaintext}`,
     );
 
-    expect(encryptMock).not.toHaveBeenCalled();
+    expect(encryptMock).toHaveBeenCalledWith(expect.any(Object), base64ShapedPlaintext);
   });
 
   it('does not cache a newly generated key when persisting it fails', async () => {

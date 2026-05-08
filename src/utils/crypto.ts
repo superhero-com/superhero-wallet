@@ -7,7 +7,13 @@ import { PASSWORD_ENCRYPTION_ALGO, IS_EXTENSION } from '@/constants';
  */
 const IS_EXTRACTABLE = !!IS_EXTENSION;
 const SALT_LENGTH = 16;
-const IV_LENGTH = 16;
+/** Prepended to every `encrypt()` payload before the AES-GCM ciphertext+tag. */
+export const IV_LENGTH = 16;
+/**
+ * Web Crypto AES-GCM uses a 128-bit authentication tag by default
+ * (`tagLength` omitted in `encrypt` / `decrypt`).
+ */
+export const AES_GCM_TAG_LENGTH_BYTES = 16;
 
 const subtleCrypto = globalThis?.crypto?.subtle;
 
