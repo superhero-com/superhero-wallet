@@ -670,15 +670,40 @@ export function decryptedComputed(
       encryptedState.value = await encrypt(key.value!, val);
     } catch (e) {
       handleUnknownError(e);
+    } finally {
+      updating = false;
     }
-    updating = false;
   }
 
   watch([key, encryptedState], async ([newKey, newState], [oldKey]) => {
     if (!updating) {
       try {
+        /**
+         * Key rotation: re-encrypt under `newKey`. Must not use `decrypted.value`
+         * — a prior watch tick may still be awaiting `decrypt` for the old key
+         * (e.g. legacy-password rotation in `checkUserAuth` where `setEncryptionKey`
+         * changes twice in quick succession), leaving the ref on `defaultVal` and
+         * destroying real data if we encrypt that. Always recover plaintext from
+         * the persisted ciphertext with the key that produced it.
+         */
         if (newKey && oldKey && !isEqual(newKey, oldKey) && newState) {
-          await setEncryptedState(decrypted.value);
+          let plaintext: string;
+          try {
+            plaintext = await decrypt(oldKey, newState);
+          } catch {
+            /**
+             * Another watch tick may already have rewritten `newState` with
+             * `newKey`. In that case the old-key decrypt throws, but data is
+             * already safe at rest; refresh local plaintext without writing.
+             */
+            plaintext = await decrypt(newKey, newState);
+            decrypted.value = plaintext;
+            options.onDecrypted?.(plaintext);
+            return;
+          }
+          decrypted.value = plaintext;
+          options.onDecrypted?.(plaintext);
+          await setEncryptedState(plaintext);
         } else if (newKey && newState) {
           decrypted.value = await decrypt(newKey, newState);
           options.onDecrypted?.(decrypted.value);
@@ -686,6 +711,7 @@ export function decryptedComputed(
           decrypted.value = defaultVal;
         }
       } catch (e) {
+        decrypted.value = defaultVal;
         handleUnknownError(e);
       }
     }
