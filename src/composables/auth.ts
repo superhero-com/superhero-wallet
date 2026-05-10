@@ -35,6 +35,7 @@ import {
   handleUnknownError,
   sessionEnd,
   sessionStart,
+  subscribeToSessionEncryptionKey,
   watchUntilTruthy,
 } from '@/utils';
 
@@ -311,9 +312,20 @@ export const useAuth = createCustomScopedComposable(() => {
 
   /**
    * Try to obtain the encryption key from extension's background process.
+   *
+   * Used exclusively from the offscreen tab. Concurrent invocations dedupe
+   * onto a single in-flight promise so that the salt watcher and the
+   * `browser.storage.session` change listener (set up below) cannot
+   * accumulate parallel `setInterval`s; without this guard, every wake-up
+   * would leak another timer that survives the bounded
+   * `CHECK_FOR_SESSION_KEY_TIMEOUT` budget.
    */
+  let backgroundEncryptionKeySync: Promise<void> | null = null;
   async function syncBackgroundEncryptionKey() {
-    await new Promise<void>((resolve) => {
+    if (backgroundEncryptionKeySync) {
+      return backgroundEncryptionKeySync;
+    }
+    backgroundEncryptionKeySync = new Promise<void>((resolve) => {
       let interval: ReturnType<typeof setInterval>;
       let timeout: ReturnType<typeof setTimeout>;
       const finish = () => {
@@ -323,14 +335,32 @@ export const useAuth = createCustomScopedComposable(() => {
       };
       interval = setInterval(async () => {
         const sessionEncryptionKey = await getSessionEncryptionKey();
-        if (sessionEncryptionKey) {
-          mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonicEncrypted.value!);
-          setEncryptionKey(sessionEncryptionKey);
-          finish();
+        /**
+         * Guard against `mnemonicEncrypted.value` not having been
+         * restored yet — when the salt watcher fires immediately after
+         * storage restore, the mnemonic ref is restored independently
+         * and may still be empty for one tick. Without the guard,
+         * `decrypt(key, null!)` would throw and `setEncryptionKey`
+         * would never be called.
+         */
+        if (sessionEncryptionKey && mnemonicEncrypted.value) {
+          try {
+            mnemonicDecrypted.value = await decrypt(
+              sessionEncryptionKey,
+              mnemonicEncrypted.value,
+            );
+            setEncryptionKey(sessionEncryptionKey);
+            finish();
+          } catch (error) {
+            handleUnknownError(error);
+          }
         }
       }, CHECK_FOR_SESSION_KEY_INTERVAL);
       timeout = setTimeout(finish, CHECK_FOR_SESSION_KEY_TIMEOUT);
+    }).finally(() => {
+      backgroundEncryptionKeySync = null;
     });
+    return backgroundEncryptionKeySync;
   }
 
   async function authenticateWithPassword(password: string): Promise<boolean> {
@@ -621,6 +651,18 @@ export const useAuth = createCustomScopedComposable(() => {
       encryptionSalt,
       () => syncBackgroundEncryptionKey(),
     );
+    /**
+     * The salt watcher above only fires when `encryptionSalt` changes —
+     * realistically once per password setup — and `syncBackgroundEncryptionKey`
+     * stops polling after `CHECK_FOR_SESSION_KEY_TIMEOUT`. Without an
+     * additional wake-up source, an offscreen tab that boots before the
+     * user authenticates would give up after 30 s and never recover the
+     * session key, leaving Ledger / WalletConnect / EVM RPC handlers
+     * unable to decrypt the mnemonic. Subscribe to the popup's
+     * `sessionStart()` write into `browser.storage.session` so the
+     * offscreen reacts the moment the user logs in, no matter how late.
+     */
+    subscribeToSessionEncryptionKey(syncBackgroundEncryptionKey);
   }
 
   /**
