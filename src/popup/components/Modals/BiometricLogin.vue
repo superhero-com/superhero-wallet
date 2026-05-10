@@ -65,6 +65,7 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     force: Boolean,
+    deferAuthStateUpdate: Boolean,
   },
   setup(props) {
     const isAuthCanceled = ref(false);
@@ -78,7 +79,10 @@ export default defineComponent({
       }
       isAuthenticating.value = true;
       try {
-        await authenticateWithBiometry(props.force);
+        await authenticateWithBiometry(
+          props.force,
+          { setAuthenticated: !props.deferAuthStateUpdate },
+        );
         props.resolve();
       } catch (error) {
         isAuthCanceled.value = true;

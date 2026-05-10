@@ -97,10 +97,7 @@
         </PanelItem>
 
         <PanelItem
-          v-if="(
-            (!IS_MOBILE_APP && isMnemonicEncrypted && !isUsingDefaultPassword)
-            || (IS_MOBILE_APP && isBiometricLoginEnabled)
-          )"
+          v-if="isLockWalletVisible"
           :title="$t('pages.secureLogin.lockWallet')"
           data-cy="lock-wallet"
           @click="lockWallet()"
@@ -115,7 +112,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+} from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 
 import {
@@ -175,14 +177,33 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
     const { addressBook } = useAddressBook();
-    const { isMnemonicEncrypted, isUsingDefaultPassword, lockWallet } = useAuth();
     const { isBiometricLoginEnabled } = useUi();
+    const {
+      checkBiometricLoginAvailability,
+      isMnemonicEncrypted,
+      isUsingDefaultPassword,
+      lockWallet,
+    } = useAuth();
+    const isBiometricLoginAvailable = ref(false);
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
     const activeAccountFaucetUrl = computed(
       () => (isActiveAccountAe.value) ? buildAeFaucetUrl(activeAccount.value.address) : null,
     );
     const addressBookCount = computed(() => Object.keys(addressBook.value).length.toString());
+    const isLockWalletVisible = computed(() => (
+      (!IS_MOBILE_APP && isMnemonicEncrypted.value && !isUsingDefaultPassword.value)
+      || (
+        IS_MOBILE_APP
+        && isMnemonicEncrypted.value
+        && isBiometricLoginAvailable.value
+        && isBiometricLoginEnabled.value
+      )
+    ));
+
+    onMounted(async () => {
+      isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
+    });
 
     return {
       AE_DEX_URL,
@@ -201,9 +222,7 @@ export default defineComponent({
       isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
-      isMnemonicEncrypted,
-      isBiometricLoginEnabled,
-      isUsingDefaultPassword,
+      isLockWalletVisible,
     };
   },
 });

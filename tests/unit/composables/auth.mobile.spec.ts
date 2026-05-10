@@ -229,12 +229,13 @@ describe('useAuth mobile biometric login', () => {
     expect(auth.isAuthenticated.value).toBe(false);
   });
 
-  it('forces biometric verification even when the wallet is already authenticated', async () => {
+  it('forces biometric verification even when biometric login is disabled', async () => {
     const mnemonicRef = ref('encrypted-mnemonic');
     const encryptionSaltRef = ref(null);
     const secureLoginTimeoutRef = ref(null);
     const isBiometricLoginEnabled = ref(false);
     const authenticate = jest.fn().mockResolvedValue(undefined);
+    const openBiometricLoginModal = jest.fn().mockResolvedValue(undefined);
 
     jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
@@ -280,7 +281,7 @@ describe('useAuth mobile biometric login', () => {
     }));
     jest.doMock('@/composables/modals', () => ({
       useModals: () => ({
-        openBiometricLoginModal: jest.fn(),
+        openBiometricLoginModal,
         openPasswordLoginModal: jest.fn(),
         openEnableBiometricLoginModal: jest.fn(),
       }),
@@ -329,10 +330,20 @@ describe('useAuth mobile biometric login', () => {
     await auth.checkUserAuth();
     expect(auth.isAuthenticated.value).toBe(true);
 
-    isBiometricLoginEnabled.value = true;
+    await auth.lockWallet();
+    expect(openBiometricLoginModal).toHaveBeenCalledWith({
+      force: true,
+      deferAuthStateUpdate: true,
+    });
+    expect(auth.isAuthenticated.value).toBe(true);
+
+    await auth.logout();
+    expect(auth.isAuthenticated.value).toBe(false);
+
     await auth.authenticateWithBiometry(true);
 
     expect(authenticate).toHaveBeenCalledTimes(1);
+    expect(auth.isAuthenticated.value).toBe(true);
   });
 
   it('does not auto-lock on mobile app resume when biometric login is disabled', async () => {

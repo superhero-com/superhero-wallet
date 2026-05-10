@@ -80,6 +80,7 @@ export const useAuth = createCustomScopedComposable(() => {
   } = useModals();
 
   let isSessionExpired = false;
+  let isManualMobileLockActive = false;
   let expirationTimeout: NodeJS.Timeout;
 
   /** Common state for both biometric or password protection */
@@ -379,13 +380,16 @@ export const useAuth = createCustomScopedComposable(() => {
     return true;
   }
 
-  async function authenticateWithBiometry(force = false): Promise<boolean> {
+  async function authenticateWithBiometry(
+    force = false,
+    { setAuthenticated = true }: { setAuthenticated?: boolean } = {},
+  ): Promise<boolean> {
     if (
       (
         !isAuthenticated.value
         || force
       )
-      && isBiometricLoginEnabled.value
+      && (isBiometricLoginEnabled.value || force)
       && await checkBiometricLoginAvailability()
     ) {
       return BiometricAuth.authenticate({
@@ -396,7 +400,12 @@ export const useAuth = createCustomScopedComposable(() => {
         androidTitle: t('biometricAuth.title'),
         androidSubtitle: t('biometricAuth.subtitle'),
         androidConfirmationRequired: false,
-      }).then(() => true);
+      }).then(() => {
+        if (setAuthenticated) {
+          isAuthenticated.value = true;
+        }
+        return true;
+      });
     }
     return true;
   }
@@ -431,14 +440,23 @@ export const useAuth = createCustomScopedComposable(() => {
           const mobileKey = await getOrCreateMobileEncryptionKey();
           setEncryptionKey(mobileKey);
         }
-        if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+        if (
+          (isBiometricLoginEnabled.value || isManualMobileLockActive)
+          && await checkBiometricLoginAvailability()
+        ) {
           try {
-            await openBiometricLoginModal();
+            await openBiometricLoginModal({
+              force: isManualMobileLockActive,
+              deferAuthStateUpdate: true,
+            });
+            isManualMobileLockActive = false;
           } catch {
             // User dismissed or failed the biometric prompt; keep the wallet locked.
             mnemonicDecrypted.value = '';
             return;
           }
+        } else if (isManualMobileLockActive) {
+          isManualMobileLockActive = false;
         }
         if (isMnemonicEncrypted.value) {
           try {
@@ -604,8 +622,11 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   async function lockWallet() {
+    if (IS_MOBILE_APP) {
+      isManualMobileLockActive = true;
+    }
     logout();
-    checkUserAuth();
+    await checkUserAuth();
   }
 
   /**

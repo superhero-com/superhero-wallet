@@ -48,7 +48,26 @@ describe('BiometricLogin', () => {
 
     await wrapper.vm.initAuthenticate();
 
-    expect(mockAuthenticateWithBiometry).toHaveBeenCalledWith(true);
+    expect(mockAuthenticateWithBiometry).toHaveBeenCalledWith(true, { setAuthenticated: true });
+    expect(resolve).toHaveBeenCalledTimes(1);
+    expect(reject).not.toHaveBeenCalled();
+  });
+
+  it('can defer the authenticated state update to the caller', async () => {
+    const resolve = jest.fn();
+    const reject = jest.fn();
+    const wrapper = shallowMount(BiometricLogin, {
+      props: {
+        resolve,
+        reject,
+        force: true,
+        deferAuthStateUpdate: true,
+      },
+    });
+
+    await wrapper.vm.initAuthenticate();
+
+    expect(mockAuthenticateWithBiometry).toHaveBeenCalledWith(true, { setAuthenticated: false });
     expect(resolve).toHaveBeenCalledTimes(1);
     expect(reject).not.toHaveBeenCalled();
   });
