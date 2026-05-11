@@ -7,6 +7,7 @@
       <Swiper
         ref="customSwiper"
         class="swiper"
+        :initial-slide="activeIdx"
         :slides-per-view="1.1"
         :space-between="8"
         :centered-slides="true"
@@ -127,19 +128,24 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const customSwiper = ref();
-    const currentIdx = ref(0);
+    const currentIdx = ref(props.activeIdx);
     const isSwiping = ref(false);
 
     const swiper = computed(() => customSwiper.value?.$el.swiper);
 
     async function setCurrentSlide(idx: number, slideSpeed?: number) {
-      if (idx > -1 && currentIdx.value !== idx) {
+      if (idx > -1) {
         await nextTick();
         await watchUntilTruthy(swiper);
-        const didSwipe = await swiper.value.slideTo(idx, slideSpeed);
-        if (!didSwipe) {
-          // Retry if slideTo fails
-          setTimeout(() => setCurrentSlide(idx, 0), 100);
+        if (swiper.value.activeIndex !== idx) {
+          const didSwipe = await swiper.value.slideTo(idx, slideSpeed);
+          if (!didSwipe) {
+            // Retry if slideTo fails
+            setTimeout(() => setCurrentSlide(idx, 0), 100);
+          }
+        }
+        if (currentIdx.value !== idx) {
+          currentIdx.value = idx;
         }
       }
     }
