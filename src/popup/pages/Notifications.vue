@@ -7,13 +7,13 @@
       >
         <InfiniteScroll
           v-if="notificationsToShow.length"
+          :items="notificationsToShow"
+          :key-extractor="notificationKey"
           @load-more="loadMoreNotifications"
         >
-          <NotificationItem
-            v-for="notification in notificationsToShow"
-            :key="notification.id"
-            :notification="notification"
-          />
+          <template #default="{ item }">
+            <NotificationItem :notification="item" />
+          </template>
         </InfiniteScroll>
         <p
           v-else
@@ -37,6 +37,7 @@ import {
 } from 'vue';
 import { IS_EXTENSION } from '@/constants';
 import { useViewport, useNotifications } from '@/composables';
+import type { INotification } from '@/types';
 
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
@@ -60,6 +61,10 @@ export default defineComponent({
       markAsReadAll,
     } = useNotifications({ requirePolling: true });
 
+    function notificationKey(notification: INotification, index: number) {
+      return notification.id ?? notification.createdAt ?? index;
+    }
+
     onMounted(async () => {
       initViewport(innerElement.value?.parentElement!);
       loadMoreNotifications();
@@ -81,6 +86,7 @@ export default defineComponent({
       notificationsToShow,
       loadMoreNotifications,
       markAsReadAll,
+      notificationKey,
     };
   },
 });

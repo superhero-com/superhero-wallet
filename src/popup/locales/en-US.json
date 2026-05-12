@@ -759,6 +759,12 @@
         "filterByBlockchainSubtitle": "Show addresses only for the selected blockchain protocol"
       }
     },
+    "deepLink": {
+      "externalCallbackTitle": "Return to external site",
+      "externalCallbackMsg": "Send the result of this action back to \"{url}\"? Any data you just signed will be shared with this destination.",
+      "invalidCallbackTitle": "Invalid deeplink callback",
+      "invalidCallbackMsg": "Refusing to redirect to \"{url}\". Callback URLs must use https://, or http:// for local development hosts."
+    },
     "secureLogin": {
       "descriptionBiometric": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",
       "descriptionPassword": "Enabling secure login will let you set a custom password to unlock Superhero Wallet with.",
@@ -1104,7 +1110,8 @@
       "confirm-that-you-save-your-seed-phrase": "Confirm that you got your seed phrase correctly.",
       "in-correct-order": "in the correct order",
       "seed-phrase-correct": "Seed phrase has been verified!",
-      "seed-phrase-incorrect": "Seed phrase words are not in the correct order. Please enter your seed phrase again!"
+      "seed-phrase-incorrect": "Seed phrase words are not in the correct order. Please enter your seed phrase again!",
+      "revealConfirmMsg": "You are about to reveal your seed phrase. Make sure no one is watching your screen."
     },
     "seedPhrase": {
       "first": "first",
@@ -1414,6 +1421,10 @@
     "addressBookEntryExists": "This {0} already exists in your address book.",
     "passwordMinLength": "Password must be at least {0} characters long.",
     "passwordsMatch": "Passwords do not match."
+  },
+  "auth": {
+    "walletDataUnreadableTitle": "Wallet data unreadable",
+    "walletDataUnreadableMessage": "Your encrypted wallet data could not be decrypted. This usually means the device Keychain was cleared or the app was restored from a backup that did not include it. Reinstall the app and restore from your seed phrase to recover."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

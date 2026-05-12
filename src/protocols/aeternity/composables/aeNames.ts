@@ -30,9 +30,11 @@ import {
 } from '@/utils';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
+  IS_MOBILE_APP,
   PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
+import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 import Logger from '@/lib/logger';
 import {
   useAccounts,
@@ -100,7 +102,14 @@ const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
 const preclaimedNamesEncrypted = useStorageRef<string | null>(
   null,
   STORAGE_KEYS.preclaimedNames,
-  { enableSecureStorage: true },
+  {
+    enableSecureStorage: true,
+    /**
+     * Migrate legacy plaintext preclaimed-names blobs into
+     * AES-GCM ciphertext keyed by the per-install mobile encryption key.
+     */
+    migrations: IS_MOBILE_APP ? [migrateMobileSensitiveDataEncryption] : [],
+  },
 );
 const preclaimedNames = ref<Record<NetworkId, Record<AensName, IPreclaimedName>>>({});
 const pendingAutoExtendNames = ref<ChainName[]>([]);

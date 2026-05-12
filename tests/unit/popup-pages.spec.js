@@ -67,6 +67,7 @@ jest.mock('../../src/composables', () => ({
     generateMnemonic: jest.fn(),
     setMnemonicAndInitializeAuthentication: jest.fn(),
     openEnableBiometricLoginModal: jest.fn(),
+    checkBiometricLoginAvailability: jest.fn(async () => false),
     isMnemonicEncrypted: { value: false },
     isUsingDefaultPassword: { value: true },
     lockWallet: jest.fn(),

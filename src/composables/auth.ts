@@ -10,6 +10,7 @@ import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/b
 import { wordlist } from '@scure/bip39/wordlists/english';
 
 import { tg as t } from '@/popup/plugins/i18n';
+import Logger from '@/lib/logger';
 import {
   AUTHENTICATION_TIMEOUTS,
   IS_EXTENSION,
@@ -19,7 +20,6 @@ import {
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
-import { STUB_ACCOUNT } from '@/constants/stubs';
 import {
   createCustomScopedComposable,
   decodeBase64,
@@ -30,21 +30,32 @@ import {
   excludeFalsy,
   generateEncryptionKey,
   generateSalt,
+  getOrCreateMobileEncryptionKey,
   getSessionEncryptionKey,
+  handleUnknownError,
   sessionEnd,
   sessionStart,
+  subscribeToSessionEncryptionKey,
   watchUntilTruthy,
 } from '@/utils';
 
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import migrateMnemonicMobileToSecureStorage from '@/migrations/010-mnemonic-mobile-to-secure-storage';
+import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
+import {
+  LEGACY_DEFAULT_PASSWORD,
+  clearDefaultPasswordSecret,
+  getDefaultPasswordSecret,
+  getOrCreateDefaultPasswordSecret,
+} from './defaultPassword';
 
 import { useUi } from './ui';
 import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
+const CHECK_FOR_SESSION_KEY_TIMEOUT = 30000;
 const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
   ? AUTHENTICATION_TIMEOUTS[0]
   : AUTHENTICATION_TIMEOUTS[2];
@@ -69,6 +80,7 @@ export const useAuth = createCustomScopedComposable(() => {
   } = useModals();
 
   let isSessionExpired = false;
+  let isManualMobileLockActive = false;
   let expirationTimeout: NodeJS.Timeout;
 
   /** Common state for both biometric or password protection */
@@ -93,6 +105,14 @@ export const useAuth = createCustomScopedComposable(() => {
         (IS_MOBILE_APP && IS_IOS) ? migrateMnemonicCordovaToIonic : null,
         migrateMnemonicVuexToComposable,
         (IS_MOBILE_APP) ? migrateMnemonicMobileToSecureStorage : null,
+        /**
+         * Encrypt legacy plaintext mnemonic on mobile with the
+         * per-install mobile encryption key. Order matters — this must
+         * run AFTER `migrateMnemonicMobileToSecureStorage` which moves
+         * the mnemonic into SecureMobileStorage, and BEFORE the ref's
+         * value is set so the reactive layer only ever sees ciphertext.
+         */
+        (IS_MOBILE_APP) ? migrateMobileSensitiveDataEncryption : null,
       ].filter(excludeFalsy),
       onRestored() {
         isMnemonicRestored.value = true;
@@ -120,6 +140,16 @@ export const useAuth = createCustomScopedComposable(() => {
     {
       backgroundSync: true,
       enableSecureStorage: true,
+      /**
+       * Migrate legacy plaintext secure-login-timeout blobs on
+       * mobile. The value is small (just a numeric string) but it still
+       * leaks "how impatient is this user" metadata via `adb backup`
+       * or a jailbroken Keychain dump — and more importantly, shares
+       * the same `decryptedComputed` plumbing as the other sensitive
+       * blobs. Omitting the migration here would trip the decrypt
+       * watcher on first launch.
+       */
+      migrations: IS_MOBILE_APP ? [migrateMobileSensitiveDataEncryption] : [],
     },
   );
 
@@ -128,10 +158,16 @@ export const useAuth = createCustomScopedComposable(() => {
     secureLoginTimeout,
     AUTHENTICATION_TIMEOUT_DEFAULT,
   );
-
-  /** If mnemonic is invalid, it is most likely encrypted */
+  /**
+   * If mnemonic is invalid, it is most likely encrypted.
+   *
+   * The previous `!IS_MOBILE_APP` short-circuit — which assumed
+   * mnemonic-on-mobile is always plaintext — is gone. On mobile we now
+   * also encrypt the mnemonic at rest, using the per-install mobile key
+   * loaded in the init IIFE below.
+   */
   const isMnemonicEncrypted = computed(
-    () => !IS_MOBILE_APP && mnemonic.value && !validateMnemonic(mnemonic.value, wordlist),
+    () => !!mnemonic.value && !validateMnemonic(mnemonic.value, wordlist),
   );
   const mnemonicEncrypted = computed(() => isMnemonicEncrypted.value ? mnemonic.value : null);
   const mnemonicDecrypted = ref('');
@@ -145,6 +181,7 @@ export const useAuth = createCustomScopedComposable(() => {
     updating: false,
     checked: false,
   });
+  const isAutoLockEnabled = computed(() => !IS_MOBILE_APP || isBiometricLoginEnabled.value);
 
   /**
    * Checks if biometric authentication is available on the device.
@@ -157,9 +194,12 @@ export const useAuth = createCustomScopedComposable(() => {
       await watchUntilTruthy(() => !biometricAuth.updating);
     } else if (!biometricAuth.checked || forceUpdate) {
       biometricAuth.updating = true;
-      biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
-      biometricAuth.checked = true;
-      biometricAuth.updating = false;
+      try {
+        biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
+        biometricAuth.checked = true;
+      } finally {
+        biometricAuth.updating = false;
+      }
     }
     if (!biometricAuth.available && isBiometricLoginEnabled.value) {
       setBiometricLoginEnabled(false);
@@ -186,47 +226,142 @@ export const useAuth = createCustomScopedComposable(() => {
     return key;
   }
 
-  async function setPassword(password: string) {
-    encryptionSalt.value = generateSalt();
-    const newEncryptionKey = await generateEncryptionKey(password, encryptionSalt.value);
+  async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
+    if (IS_MOBILE_APP) {
+      /**
+       * Mobile never uses a user/default password-derived PBKDF2 key for the
+       * mnemonic. All sensitive mobile state is encrypted with the per-install
+       * mobile data key; deriving and publishing a password key here would make
+       * subsequent boots try to decrypt password ciphertext with the mobile key.
+       */
+      if (!encryptionKey.value) {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      }
+      mnemonic.value = await encrypt(encryptionKey.value!, plaintextToEncrypt);
+      isAuthenticated.value = true;
+      return;
+    }
+
+    /**
+     * Derive the new key and ciphertext into local variables FIRST,
+     * then commit all persistent state synchronously once every async
+     * step has succeeded. If we were to write `encryptionSalt.value`
+     * upfront and then hit an exception in `generateEncryptionKey` or
+     * `encrypt`, on-disk state would be wedged: salt is fresh but the
+     * mnemonic ciphertext is still under the old key, so the next
+     * launch derives a mismatched key and locks the user out
+     * permanently — there is no way back from an AES-GCM auth-tag
+     * mismatch. Particularly important for the legacy-password
+     * rotation path in `checkUserAuth`, which invokes `setPassword`
+     * on every boot of a legacy install.
+     */
+    const newSalt = generateSalt();
+    const newEncryptionKey = await generateEncryptionKey(password, newSalt);
+    const newMnemonicCiphertext = await encrypt(newEncryptionKey, plaintextToEncrypt);
+    encryptionSalt.value = newSalt;
     setEncryptionKey(newEncryptionKey);
-    mnemonic.value = await encrypt(newEncryptionKey, mnemonicDecrypted.value);
+    mnemonic.value = newMnemonicCiphertext;
     isAuthenticated.value = true;
   }
 
   async function setMnemonicAndInitializeAuthentication(newMnemonic: string, isRestored = false) {
     if (IS_MOBILE_APP) {
-      mnemonic.value = newMnemonic;
+      /**
+       * Mobile mnemonic is now stored encrypted with the
+       * per-install mobile encryption key, matching the extension/web
+       * encrypted-at-rest model. The key is loaded into `encryptionKey`
+       * here (if not already loaded by the init IIFE) so downstream
+       * `decryptedComputed` state — imported private keys, preclaimed
+       * names, secure-login timeout — is also encrypted via the shared
+       * reactive key.
+       */
+      if (!encryptionKey.value) {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      }
+      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
       if (await checkBiometricLoginAvailability()) {
         await openEnableBiometricLoginModal();
       }
     } else {
       const { openSetPasswordModal } = useModals();
       const password = await openSetPasswordModal(isRestored).catch(() => {
-        throw new Error('Password was not set.');
+        throw new Error(t('pages.index.passwordWasNotSet'));
       });
-      await setPassword(password);
-      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
-    }
+      await setPassword(password, newMnemonic);
 
+      const storedSecret = await getDefaultPasswordSecret();
+      if (storedSecret && storedSecret === password) {
+        isUsingDefaultPassword.value = true;
+      }
+    }
     mnemonicDecrypted.value = newMnemonic;
+    /**
+     * The user just handed us a valid mnemonic (generated or restored) and we
+     * have written it to encrypted storage, so this session is authenticated.
+     * The extension/web path already set `isAuthenticated = true` transitively
+     * through `setPassword`, but the mobile path previously did not — and now
+     * that `isMnemonicEncrypted` is `true` on mobile as well, leaving the flag
+     * at `false` would let auth-gated guards observe an encrypted-looking
+     * mnemonic with `isAuthenticated === false`, redirecting the user straight
+     * back to a login flow for an install they just created. Asserting the
+     * flag once here covers both environments and is idempotent.
+     */
+    isAuthenticated.value = true;
   }
 
   /**
    * Try to obtain the encryption key from extension's background process.
+   *
+   * Used exclusively from the offscreen tab. Concurrent invocations dedupe
+   * onto a single in-flight promise so that the salt watcher and the
+   * `browser.storage.session` change listener (set up below) cannot
+   * accumulate parallel `setInterval`s; without this guard, every wake-up
+   * would leak another timer that survives the bounded
+   * `CHECK_FOR_SESSION_KEY_TIMEOUT` budget.
    */
+  let backgroundEncryptionKeySync: Promise<void> | null = null;
   async function syncBackgroundEncryptionKey() {
-    await new Promise<void>((resolve) => {
-      const interval = setInterval(async () => {
+    if (backgroundEncryptionKeySync) {
+      return backgroundEncryptionKeySync;
+    }
+    backgroundEncryptionKeySync = new Promise<void>((resolve) => {
+      let interval: ReturnType<typeof setInterval>;
+      let timeout: ReturnType<typeof setTimeout>;
+      const finish = () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        resolve();
+      };
+      interval = setInterval(async () => {
         const sessionEncryptionKey = await getSessionEncryptionKey();
-        if (sessionEncryptionKey) {
-          mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonicEncrypted.value!);
-          setEncryptionKey(sessionEncryptionKey);
-          clearInterval(interval);
-          resolve();
+        /**
+         * Guard against `mnemonicEncrypted.value` not having been
+         * restored yet — when the salt watcher fires immediately after
+         * storage restore, the mnemonic ref is restored independently
+         * and may still be empty for one tick. Without the guard,
+         * `decrypt(key, null!)` would throw and `setEncryptionKey`
+         * would never be called.
+         */
+        if (sessionEncryptionKey && mnemonicEncrypted.value) {
+          try {
+            mnemonicDecrypted.value = await decrypt(
+              sessionEncryptionKey,
+              mnemonicEncrypted.value,
+            );
+            setEncryptionKey(sessionEncryptionKey);
+            finish();
+          } catch (error) {
+            handleUnknownError(error);
+          }
         }
       }, CHECK_FOR_SESSION_KEY_INTERVAL);
+      timeout = setTimeout(finish, CHECK_FOR_SESSION_KEY_TIMEOUT);
+    }).finally(() => {
+      backgroundEncryptionKeySync = null;
     });
+    return backgroundEncryptionKeySync;
   }
 
   async function authenticateWithPassword(password: string): Promise<boolean> {
@@ -245,13 +380,16 @@ export const useAuth = createCustomScopedComposable(() => {
     return true;
   }
 
-  async function authenticateWithBiometry(force = false): Promise<boolean> {
+  async function authenticateWithBiometry(
+    force = false,
+    { setAuthenticated = true }: { setAuthenticated?: boolean } = {},
+  ): Promise<boolean> {
     if (
       (
         !isAuthenticated.value
         || force
       )
-      && isBiometricLoginEnabled.value
+      && (isBiometricLoginEnabled.value || force)
       && await checkBiometricLoginAvailability()
     ) {
       return BiometricAuth.authenticate({
@@ -263,7 +401,9 @@ export const useAuth = createCustomScopedComposable(() => {
         androidSubtitle: t('biometricAuth.subtitle'),
         androidConfirmationRequired: false,
       }).then(() => {
-        isAuthenticated.value = true;
+        if (setAuthenticated) {
+          isAuthenticated.value = true;
+        }
         return true;
       });
     }
@@ -282,66 +422,211 @@ export const useAuth = createCustomScopedComposable(() => {
       return;
     }
     if (isAuthenticating.value) {
-      await watchUntilTruthy(isAuthenticated);
+      await watchUntilTruthy(() => !isAuthenticating.value || isAuthenticated.value);
       return;
     }
 
     isUsingDefaultPassword.value = false;
     isAuthenticating.value = true;
 
-    if (IS_MOBILE_APP) {
-      if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
-        await openBiometricLoginModal();
-      } else {
-        isAuthenticated.value = true;
-      }
-    } else if (isMnemonicEncrypted.value) {
-      // Environments that will always ask user about password
-      const autoLoginDisabledEnv = IS_OFFSCREEN_TAB || RUNNING_IN_TESTS;
-
-      // Attempt to log in with the default password that is set when a user skips
-      // password protection. This check needs to go first as we need to know
-      // if default password was used.
-      if (!encryptionKey.value && !autoLoginDisabledEnv) {
-        try {
-          await authenticateWithPassword(STUB_ACCOUNT.password);
-          isUsingDefaultPassword.value = true;
-        } catch (error) { /* NOOP */ }
-      }
-
-      // If default password auth failed, check if extension can be restored
-      // by using data stored in the background process.
-      if (!encryptionKey.value && !autoLoginDisabledEnv && IS_EXTENSION) {
-        setLoaderVisible(true);
-        const sessionEncryptionKey = await getSessionEncryptionKey();
-        if (sessionEncryptionKey) {
-          setEncryptionKey(sessionEncryptionKey);
-          mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonic.value);
-          isAuthenticated.value = true;
+    try {
+      if (IS_MOBILE_APP) {
+        /**
+         * Mobile state is now AES-GCM encrypted with the per-install
+         * mobile key. Load the key before the biometric gate, but do not
+         * publish the decrypted mnemonic until the gate has succeeded.
+         */
+        if (!encryptionKey.value) {
+          const mobileKey = await getOrCreateMobileEncryptionKey();
+          setEncryptionKey(mobileKey);
         }
-        setLoaderVisible(false);
-      }
+        if (
+          (isBiometricLoginEnabled.value || isManualMobileLockActive)
+          && await checkBiometricLoginAvailability()
+        ) {
+          try {
+            await openBiometricLoginModal({
+              force: isManualMobileLockActive,
+              deferAuthStateUpdate: true,
+            });
+            isManualMobileLockActive = false;
+          } catch {
+            // User dismissed or failed the biometric prompt; keep the wallet locked.
+            mnemonicDecrypted.value = '';
+            return;
+          }
+        } else if (isManualMobileLockActive) {
+          isManualMobileLockActive = false;
+        }
+        if (isMnemonicEncrypted.value) {
+          try {
+            const decryptedMnemonic = await decrypt(encryptionKey.value!, mnemonic.value);
+            if (!decryptedMnemonic) {
+              return;
+            }
+            mnemonicDecrypted.value = decryptedMnemonic;
+          } catch (error) {
+            /**
+             * Decrypt can fail when the Keychain was cleared (fresh
+             * `mobile-data-key` no longer matches the ciphertext), when the
+             * device was restored from a backup that preserved app storage
+             * but not the Keychain, or when the blob is genuinely corrupt.
+             * In every one of these cases the mnemonic is unrecoverable
+             * from this install — we cannot derive `mnemonicSeed` and no
+             * account list will be populated.
+             *
+             * Previously this was silently swallowed and execution fell
+             * through to the else branch which unconditionally set
+             * `isAuthenticated.value = true`, leaving the UI in a "logged
+             * in" state with zero accounts, no error feedback, and no
+             * path forward. Surface the failure explicitly and bail
+             * without authenticating — the outer `finally` clears
+             * `isAuthenticating`.
+             */
+            handleUnknownError(error);
+            Logger.write({
+              title: t('auth.walletDataUnreadableTitle'),
+              message: t('auth.walletDataUnreadableMessage'),
+              type: 'api-response',
+              modal: true,
+            });
+            return;
+          }
+        } else {
+          mnemonicDecrypted.value = mnemonic.value;
+        }
+        isAuthenticated.value = true;
+      } else if (isMnemonicEncrypted.value) {
+        // Environments that will always ask user about password
+        const autoLoginDisabledEnv = IS_OFFSCREEN_TAB || RUNNING_IN_TESTS;
 
-      // Finally if other attempts failed, ask user for the password.
-      if (!encryptionKey.value) {
-        await openPasswordLoginModal();
+        /**
+         * Attempt to log in with the per-install default-password
+         * secret when the user previously skipped password protection.
+         * This check needs to go first as we need to know if default
+         * password was used.
+         *
+         * Two lookups run in order:
+         *   1. The per-install random secret stored under
+         *      `STORAGE_KEYS.defaultPasswordSecret` — used by newer
+         *      installs. Each install holds an independent 256-bit random
+         *      value, so compromising this repository (or one user's
+         *      storage) no longer reveals every other user's "default"
+         *      password.
+         *   2. The legacy hardcoded `LEGACY_DEFAULT_PASSWORD` — accepted
+         *      only as an unlock-then-rotate fallback for installs that
+         *      were seeded under the pre-upgrade "skip password" flow.
+         *      Immediately after a successful legacy unlock we re-encrypt
+         *      the on-disk blobs under a freshly generated random secret
+         *      (see below), so the hardcoded string is never relied on
+         *      across sessions.
+         *
+         * Each attempt tolerates failure. `authenticateWithPassword`
+         * can either return `false` (empty decryption result) OR throw
+         * (AES-GCM auth-tag mismatch on wrong password), so both paths are
+         * swallowed here — a wrong guess must not abort the rest of
+         * `checkUserAuth` and leave the user staring at a blank screen.
+         * The stale `encryptionKey` that `authenticateWithPassword` sets
+         * as a side-effect of a failed decrypt is also cleared so the
+         * next attempt and any subsequent manual login runs cleanly.
+         */
+        if (!encryptionKey.value && !autoLoginDisabledEnv) {
+          const tryDefaultPassword = async (candidate: string): Promise<boolean> => {
+            try {
+              const ok = await authenticateWithPassword(candidate);
+              if (ok && isAuthenticated.value) {
+                return true;
+              }
+            } catch { /* NOOP — wrong candidate, fall through */ }
+            /**
+             * Clear only the reactive ref — do NOT go through
+             * `setEncryptionKey(undefined)` which calls `sessionEnd()`
+             * and wipes the session key from `browser.storage.session`.
+             * A failed default-password guess must not destroy an
+             * existing valid session; the session-restore path that
+             * runs right after this block needs that key intact.
+             */
+            encryptionKey.value = undefined;
+            return false;
+          };
+
+          const storedSecret = await getDefaultPasswordSecret();
+          if (storedSecret && await tryDefaultPassword(storedSecret)) {
+            isUsingDefaultPassword.value = true;
+          }
+
+          if (!isAuthenticated.value && await tryDefaultPassword(LEGACY_DEFAULT_PASSWORD)) {
+            isUsingDefaultPassword.value = true;
+            /**
+             * Transparently rotate legacy "skip password" installs off the
+             * hardcoded `testPassword123` sentinel the moment we unlock
+             * with it. We drop any stale stored secret first (defensive —
+             * if one existed, `storedSecret` would have worked above and
+             * we would not be on this path), then mint a new per-install
+             * 256-bit random secret and hand it to `setPassword`, which:
+             *   - generates a fresh `encryptionSalt`,
+             *   - derives a new AES-GCM key and publishes it on
+             *     `encryptionKey`, which triggers every `decryptedComputed`
+             *     watcher (imported private keys in `accounts.ts`,
+             *     preclaimed names in `aeNames.ts`, the secure-login
+             *     timeout above) to re-encrypt its ciphertext under the
+             *     new key,
+             *   - re-encrypts the mnemonic on top of that key.
+             * After this runs the on-disk state no longer depends on any
+             * value shipped in source, and subsequent launches take the
+             * `storedSecret` branch above.
+             */
+            try {
+              await clearDefaultPasswordSecret();
+              const rotatedSecret = await getOrCreateDefaultPasswordSecret();
+              await setPassword(rotatedSecret);
+            } catch (error) {
+              // Rotation is best-effort — a failure here still leaves the
+              // user authenticated under the legacy password, matching
+              // pre-fix behavior, and the next successful login will retry.
+              handleUnknownError(error);
+            }
+          }
+        }
+
+        // If default password auth failed, check if extension can be restored
+        // by using data stored in the background process.
+        if (!encryptionKey.value && !autoLoginDisabledEnv && IS_EXTENSION) {
+          setLoaderVisible(true);
+          const sessionEncryptionKey = await getSessionEncryptionKey();
+          if (sessionEncryptionKey) {
+            setEncryptionKey(sessionEncryptionKey);
+            mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonic.value);
+            isAuthenticated.value = true;
+          }
+          setLoaderVisible(false);
+        }
+
+        // Finally if other attempts failed, ask user for the password.
+        if (!encryptionKey.value) {
+          await openPasswordLoginModal();
+        }
+      } else if (!isMnemonicEncrypted.value) {
+        // Migrate the unprotected mnemonic by forcing user to set the password and encrypt it
+        await setMnemonicAndInitializeAuthentication(mnemonic.value, true);
       }
-    } else if (!isMnemonicEncrypted.value) {
-      // Migrate the unprotected mnemonic by forcing user to set the password and encrypt it
-      await setMnemonicAndInitializeAuthentication(mnemonic.value, true);
+    } finally {
+      isAuthenticating.value = false;
     }
-
-    isAuthenticating.value = false;
   }
 
   async function logout() {
     setEncryptionKey(undefined);
+    mnemonicDecrypted.value = '';
     isAuthenticated.value = false;
   }
 
   async function lockWallet() {
+    if (IS_MOBILE_APP) {
+      isManualMobileLockActive = true;
+    }
     logout();
-    checkUserAuth();
+    await checkUserAuth();
   }
 
   /**
@@ -356,9 +641,24 @@ export const useAuth = createCustomScopedComposable(() => {
   (async () => {
     checkBiometricLoginAvailability();
 
+    /**
+     * Load the per-install mobile encryption key as soon as the
+     * composable boots so `decryptedComputed` watchers (in `accounts.ts`,
+     * `aeNames.ts`, and for `secureLoginTimeout` above) have a real
+     * `encryptionKey` to work against — on mobile we now encrypt those
+     * blobs instead of passing them through plaintext via the old
+     * `IS_MOBILE_APP` bypass. The key-or-create is idempotent and shares
+     * an in-memory cache with the mnemonic-migration hook, so no second
+     * Keychain round-trip happens.
+     */
+    if (IS_MOBILE_APP && !encryptionKey.value) {
+      const mobileKey = await getOrCreateMobileEncryptionKey();
+      setEncryptionKey(mobileKey);
+    }
+
     await watchUntilTruthy(() => mnemonic.value);
 
-    if (!isMnemonicEncrypted.value) {
+    if (!isMnemonicEncrypted.value && !IS_MOBILE_APP) {
       mnemonicDecrypted.value = mnemonic.value;
     }
 
@@ -372,6 +672,18 @@ export const useAuth = createCustomScopedComposable(() => {
       encryptionSalt,
       () => syncBackgroundEncryptionKey(),
     );
+    /**
+     * The salt watcher above only fires when `encryptionSalt` changes —
+     * realistically once per password setup — and `syncBackgroundEncryptionKey`
+     * stops polling after `CHECK_FOR_SESSION_KEY_TIMEOUT`. Without an
+     * additional wake-up source, an offscreen tab that boots before the
+     * user authenticates would give up after 30 s and never recover the
+     * session key, leaving Ledger / WalletConnect / EVM RPC handlers
+     * unable to decrypt the mnemonic. Subscribe to the popup's
+     * `sessionStart()` write into `browser.storage.session` so the
+     * offscreen reacts the moment the user logs in, no matter how late.
+     */
+    subscribeToSessionEncryptionKey(syncBackgroundEncryptionKey);
   }
 
   /**
@@ -401,11 +713,18 @@ export const useAuth = createCustomScopedComposable(() => {
         // If session exists user needs to stay logged in
         if (!isAuthenticating.value) {
           const keepExtensionLoggedIn = !!(await getSessionEncryptionKey());
-          if (isSessionExpired || (!keepExtensionLoggedIn && IS_EXTENSION)) {
+          if (
+            (isSessionExpired && isAutoLockEnabled.value)
+            || (!keepExtensionLoggedIn && IS_EXTENSION)
+          ) {
             lockWallet();
           }
         }
       } else if (wasActive && !isActive) {
+        if (!isAutoLockEnabled.value) {
+          isSessionExpired = false;
+          return;
+        }
         expirationTimeout = setTimeout(
           () => {
             isSessionExpired = true;

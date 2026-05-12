@@ -39,6 +39,7 @@
           class="button"
           extend
           :to="{ name: ROUTE_SEED_PHRASE_DETAILS }"
+          data-cy="reveal-seed-phrase"
         >
           {{ $t('pages.seed-phrase-settings.seedRecoveryBtn') }}
         </BtnMain>

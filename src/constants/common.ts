@@ -162,6 +162,21 @@ export const STORAGE_KEYS = {
   walletConnectSession: 'wallet-connect-session',
   addressBook: 'address-book',
   encryptionSalt: 'encryption-salt',
+  /**
+   * Per-install random secret used when the user opts out of
+   * password protection ("skip password" flow). Replaces the previous
+   * hardcoded `STUB_ACCOUNT.password` sentinel so no two installs share
+   * the same "default password".
+   */
+  defaultPasswordSecret: 'default-password-secret',
+  /**
+   * Per-install 256-bit AES-GCM key (raw bytes, base64) that
+   * encrypts all sensitive state on mobile. The same key is loaded into
+   * the auth `encryptionKey` ref so `decryptedComputed` no longer needs
+   * the `IS_MOBILE_APP` bypass and every sensitive blob sits at rest in
+   * the Keychain as ciphertext rather than plaintext.
+   */
+  mobileDataKey: 'mobile-data-key',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [

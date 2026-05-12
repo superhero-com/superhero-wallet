@@ -1,11 +1,19 @@
 import type { WalletAppRouteConfig } from '@/types';
 import {
+  IS_MOBILE_APP,
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
 } from '@/constants';
-import { useWalletConnect, type WalletConnectUri } from '@/composables';
+import {
+  useAuth,
+  useModals,
+  useUi,
+  useWalletConnect,
+  type WalletConnectUri,
+} from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -120,6 +128,41 @@ import TokenSalesSettings from '../pages/TokenSalesSettings.vue';
 import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
 import JwtSign from '../pages/JwtSign.vue';
+
+async function requireSeedPhraseReauth() {
+  const {
+    isUsingDefaultPassword,
+    checkBiometricLoginAvailability,
+  } = useAuth();
+  const { isBiometricLoginEnabled } = useUi();
+  const {
+    openConfirmModal,
+    openPasswordLoginModal,
+    openBiometricLoginModal,
+  } = useModals();
+
+  if (IS_MOBILE_APP) {
+    if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+      await openBiometricLoginModal({ force: true });
+      return;
+    }
+    await openConfirmModal({
+      title: tg('pages.titles.seedPhrase'),
+      msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
+    });
+    return;
+  }
+
+  if (isUsingDefaultPassword.value) {
+    await openConfirmModal({
+      title: tg('pages.titles.seedPhrase'),
+      msg: tg('pages.seed-phrase-settings.revealConfirmMsg'),
+    });
+    return;
+  }
+
+  await openPasswordLoginModal();
+}
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -458,6 +501,14 @@ export const routes: WalletAppRouteConfig[] = [
       title: 'seedPhrase',
       showHeaderNavigation: true,
     },
+    beforeEnter: async (_to, _from, next) => {
+      try {
+        await requireSeedPhraseReauth();
+        next();
+      } catch {
+        next(false);
+      }
+    },
   },
   {
     path: '/more/settings/seed-phrase/details/verify',
@@ -466,6 +517,14 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'seedPhrase',
       showHeaderNavigation: true,
+    },
+    beforeEnter: async (_to, _from, next) => {
+      try {
+        await requireSeedPhraseReauth();
+        next();
+      } catch {
+        next(false);
+      }
     },
   },
   {

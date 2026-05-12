@@ -274,7 +274,7 @@ class SuperheroWalletMessageListener {
         params: messageMethodAndParams.params,
         usingSuperheroWalletWithoutSigner: this.signerWindowEthereumRequest === undefined,
         requestId: pendingRequestId,
-      }, '*');
+      }, window.location.origin);
       return await future;
     } finally {
       this.outstandingRequests.delete(pendingRequestId);
@@ -579,6 +579,14 @@ class SuperheroWalletMessageListener {
       || typeof messageEvent.data !== 'object'
       || messageEvent.data === null
       || !('superheroWalletApproved' in messageEvent.data)
+    ) return;
+    if (
+      'origin' in messageEvent
+      && messageEvent.origin !== window.location.origin
+    ) return;
+    if (
+      'source' in messageEvent
+      && messageEvent.source !== window
     ) return;
     try {
       if (!('ethereum' in window) || !window.ethereum) throw new Error('window.ethereum missing');

@@ -118,7 +118,7 @@ export default defineComponent({
 
         postToCommentApi(respondChallenge);
 
-        openCallbackOrGoHome(true);
+        await openCallbackOrGoHome(true);
       } catch (e: any) {
         openDefaultModal({
           title: t('modals.transaction-failed.msg'),

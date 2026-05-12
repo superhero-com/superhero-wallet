@@ -219,7 +219,7 @@ export default defineComponent({
           },
         };
         addAccountPendingTransaction(account.address, transaction);
-        openCallbackOrGoHome(true);
+        await openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
           title: t('modals.transaction-failed.msg'),

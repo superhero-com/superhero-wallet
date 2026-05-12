@@ -85,7 +85,7 @@ export default defineComponent({
         // Sdk should be initialized in order to get a current networkId.
         await getAeSdk();
         const signedJwt = await signJwt(dataToSign, new AeAccountHdWallet(nodeNetworkId));
-        openCallbackOrGoHome(true, { 'signed-payload': signedJwt, address: signerAddress });
+        await openCallbackOrGoHome(true, { 'signed-payload': signedJwt, address: signerAddress });
       } catch (error: any) {
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
@@ -97,7 +97,7 @@ export default defineComponent({
             modal: true,
           });
         }
-        openCallbackOrGoHome(false);
+        await openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }

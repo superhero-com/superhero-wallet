@@ -7,7 +7,10 @@
         </div>
 
         <CardMnemonic class="mnemonics">
-          <p class="mnemonics-text">
+          <p
+            class="mnemonics-text"
+            data-cy="seed-phrase-mnemonic"
+          >
             {{ mnemonicDecrypted }}
           </p>
           <BtnMain

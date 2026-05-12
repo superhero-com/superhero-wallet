@@ -116,8 +116,9 @@ import { defineComponent, PropType, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { STUB_ACCOUNT } from '@/constants/stubs';
-import { useAuth } from '@/composables';
+import { useAuth } from '@/composables/auth';
+import { getOrCreateDefaultPasswordSecret } from '@/composables/defaultPassword';
+import { handleUnknownError } from '@/utils';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -142,7 +143,6 @@ export default defineComponent({
   },
   setup(props) {
     const { isUsingDefaultPassword } = useAuth();
-
     const password = ref('');
     const confirmPassword = ref('');
 
@@ -157,12 +157,24 @@ export default defineComponent({
     }
 
     /**
-     * Bypassing password protection means we will still encrypt some important data,
-     * but the stub password will be used for the encryption.
+     * "Skip password" still encrypts sensitive state, but the
+     * encryption password is now a per-install 256-bit random secret
+     * persisted to secure storage rather than the hardcoded stub that was
+     * committed in source. Each install holds an independent secret, so a
+     * repository leak no longer trivially unlocks every default-password
+     * wallet.
      */
-    function useDefaultPassword() {
-      props.resolve(STUB_ACCOUNT.password);
-      isUsingDefaultPassword.value = true;
+    async function useDefaultPassword() {
+      try {
+        const secret = await getOrCreateDefaultPasswordSecret();
+        isUsingDefaultPassword.value = true;
+        props.resolve(secret);
+      } catch (error) {
+        handleUnknownError(error);
+        if (!props.isRestoredWallet) {
+          props.reject();
+        }
+      }
     }
 
     return {

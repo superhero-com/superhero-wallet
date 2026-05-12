@@ -6,6 +6,7 @@ export * from './copy';
 export * from './connection';
 export * from './currencies';
 export * from './deepLinkApi';
+export * from './defaultPassword';
 export * from './invites';
 export * from './latestTransactionList';
 export * from './maxAmount';

@@ -16,10 +16,10 @@ import Web3Eth, {
   getBalance,
   getTransactionCount,
   getTransaction,
-  sendSignedTransaction,
   getBlock,
   getTransactionReceipt,
 } from 'web3-eth';
+import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
@@ -353,7 +353,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const serializedTx = signedTx.serialize();
     const web3Eth = this.getWeb3EthInstance();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, serializedTx);
 
     return { hash };
   }
@@ -431,7 +431,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const serializedTx = signedTx.serialize();
     const web3Eth = this.getWeb3EthInstance();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, serializedTx);
 
     return { hash };
   }
@@ -613,7 +613,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const serializedTx = signedTx.serialize();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
 
-    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, serializedTx);
 
     return { hash };
   }
