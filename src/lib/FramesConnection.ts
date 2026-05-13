@@ -3,6 +3,7 @@ import { executeAndSetInterval, handleUnknownError } from '@/utils';
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 
 const POLLING_INTERVAL = 3000;
+const PARENT_ORIGIN_QUERY_PARAM = 'parentOrigin';
 
 /**
  * Abstraction layer that allows to communicate between the wallet app running in an IFrame
@@ -20,17 +21,27 @@ export const FramesConnection = (() => {
   }
 
   function getParentOrigin(): string | undefined {
-    const ancestorOrigins = (window.location as Location & { ancestorOrigins?: DOMStringList })
-      .ancestorOrigins;
+    const { ancestorOrigins } = (window.location as Location & { ancestorOrigins?: DOMStringList });
     if (ancestorOrigins?.length) {
       return ancestorOrigins[0];
     }
 
-    if (!document.referrer) {
+    if (document.referrer) {
+      try {
+        return new URL(document.referrer).origin;
+      } catch {
+        // Continue to the explicit parent-origin hint fallback below.
+      }
+    }
+
+    const parentOrigin = new URLSearchParams(window.location.search)
+      .get(PARENT_ORIGIN_QUERY_PARAM);
+    if (!parentOrigin) {
       return undefined;
     }
     try {
-      return new URL(document.referrer).origin;
+      const { origin, protocol } = new URL(parentOrigin);
+      return ['http:', 'https:'].includes(protocol) ? origin : undefined;
     } catch {
       return undefined;
     }
