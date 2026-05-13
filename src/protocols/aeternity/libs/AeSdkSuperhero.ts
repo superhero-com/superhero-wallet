@@ -3,6 +3,7 @@
 import {
   AensName,
   AeSdkWallet,
+  METHODS,
   sendTransaction,
   spend,
   Encoded,
@@ -17,6 +18,8 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
   & {
     payload?: Encoded.Any; // support payload along with the transaction
   }
+
+type IWalletPresenceInfo = Pick<IWalletInfo, 'id' | 'name' | 'origin' | 'type'>;
 
 /**
  * Class extends `AeSdkWallet` from aepp-sdk-js
@@ -69,8 +72,25 @@ export class AeSdkSuperhero extends AeSdkWallet {
       id: this.id,
       name: this.name,
       networkId: await this.api.getNetworkId(),
-      origin: undefined as any,
+      origin: window.location.origin === 'file://' ? '*' : window.location.origin,
       type: this._type as any,
     };
+  }
+
+  getWalletPresenceInfo(): IWalletPresenceInfo {
+    return {
+      id: this.id,
+      name: this.name,
+      origin: window.location.origin === 'file://' ? '*' : window.location.origin,
+      type: this._type as any,
+    };
+  }
+
+  shareWalletInfo(clientId: string): Promise<void> {
+    (this as any)._getClient(clientId).rpc.notify(
+      METHODS.readyToConnect,
+      this.getWalletPresenceInfo(),
+    );
+    return Promise.resolve();
   }
 }
