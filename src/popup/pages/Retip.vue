@@ -62,7 +62,7 @@
           />
           <BtnMain
             wide
-            :disabled="!isTippingSupported || errorAmount"
+            :disabled="!isTippingSupported || !!errorAmount"
             :text="$t('common.confirm')"
             @click="sendTip"
           />

@@ -60,7 +60,7 @@
         <BtnMain
           class="btn-register"
           extend
-          :disabled="isLoaderVisible || !name || errorName"
+          :disabled="isLoaderVisible || !name || !!errorName"
           @click="claim"
         >
           {{
