@@ -239,7 +239,8 @@
       "msg": "This name is already registered."
     },
     "name-already-preclaimed": {
-      "msg": "Claim process for this name is already started."
+      "msg": "Claim process for this name is already started.",
+      "other-account": "Claim process for this name is already started by another account in your wallet."
     },
     "nameClaimInfo": {
       "title": "Name registration takes a few steps",
