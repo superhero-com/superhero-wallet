@@ -6,11 +6,11 @@
           v-slot="{ field, errorMessage }"
           name="name"
           :rules="{
-            enough_coin: totalNameClaimAmount.toString(),
             required: true,
             aens_name: true,
             aens_name_unregistered: true,
             max_len: maxNameLength,
+            enough_coin: totalNameClaimAmount.toString(),
           }"
         >
           <InputField

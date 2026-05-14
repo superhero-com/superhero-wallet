@@ -173,11 +173,26 @@ export default () => {
     UNREGISTERED: Symbol('name state: unregistered'),
     NOT_SAME: Symbol('name state: not same as provided'),
   };
+  type CheckNameRequest = {
+    name: string;
+    expectedNameState: ObjectValues<typeof NAME_STATES>;
+    comparedAddress?: string;
+    resolve: (value: boolean) => void;
+    reject: (reason?: unknown) => void;
+  };
 
   const updateBalancesThrottled = throttle(updateBalances, 1000, { trailing: false });
+  let latestCheckNameRequest: CheckNameRequest | null = null;
 
   const checkNameDebounced = debounce(
-    async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
+    async (request: CheckNameRequest) => {
+      const {
+        name,
+        expectedNameState,
+        comparedAddress,
+        resolve,
+        reject,
+      } = request;
       try {
         const dryAeSdk = await getDryAeSdk();
         const nameEntry = await dryAeSdk.api.getNameEntryByName(name);
@@ -197,6 +212,10 @@ export default () => {
             || expectedNameState === NAME_STATES.NOT_SAME,
           );
         }
+      } finally {
+        if (latestCheckNameRequest === request) {
+          latestCheckNameRequest = null;
+        }
       }
     },
     300,
@@ -206,7 +225,18 @@ export default () => {
   function checkName(expectedNameState: ObjectValues<typeof NAME_STATES>) {
     return (name: string, [comparedAddress]: string[]): Promise<boolean> => new Promise(
       (resolve, reject) => {
-        checkNameDebounced(name, expectedNameState, comparedAddress, { resolve, reject });
+        // Superseded field validations should not keep vee-validate pending while the user types.
+        latestCheckNameRequest?.resolve(true);
+        const request = {
+          name,
+          expectedNameState,
+          comparedAddress,
+          resolve,
+          reject,
+        };
+
+        latestCheckNameRequest = request;
+        checkNameDebounced(request);
       },
     );
   }
