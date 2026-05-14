@@ -210,6 +210,7 @@ export const TX_TAGS_AENS = new Set([
   Tag.NamePreclaimTx,
   Tag.NameRevokeTx,
   Tag.NameUpdateTx,
+  Tag.NameTransferTx,
 ]);
 
 export const TX_RETURN_TYPE_OK = 'ok';
