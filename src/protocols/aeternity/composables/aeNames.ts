@@ -374,6 +374,10 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return new Name(name, aeSdk.getContext(options));
   }
 
+  async function isNameRegistered(nameObj: Name) {
+    return nameObj.getState().then(() => true, () => false);
+  }
+
   function getClaimErrorMessage(error: any) {
     if (error.message.includes('is not enough to execute') || error.statusCode === 404) {
       return tg('pages.names.balance-error');
@@ -612,6 +616,16 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
 
     if (status === NAME_CLAIM_STATUS.preclaimed) {
       try {
+        if (await isNameRegistered(nameObj)) {
+          removePreclaimedName(networkId, name);
+          await updateOwnedNames();
+          openDefaultModal({
+            title: tg('modals.name-exist.title'),
+            msg: tg('modals.name-exist.msg'),
+          });
+          return;
+        }
+
         const pendingClaimTransaction = await getPendingNameClaimTransaction(address, name);
         currentClaimTxHash = pendingClaimTransaction?.hash
           || (await nameObj.claim({ ...claimOptions, nameSalt: salt, waitMined: false })).hash;
