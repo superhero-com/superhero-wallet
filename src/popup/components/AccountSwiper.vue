@@ -88,6 +88,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   nextTick,
   ref,
   watch,
@@ -130,19 +131,44 @@ export default defineComponent({
     const customSwiper = ref();
     const currentIdx = ref(props.activeIdx);
     const isSwiping = ref(false);
+    let restoreSyncFrame: number | null = null;
 
     const swiper = computed(() => customSwiper.value?.$el.swiper);
 
-    async function setCurrentSlide(idx: number, slideSpeed?: number) {
+    function clearRestoreSync() {
+      if (restoreSyncFrame) {
+        cancelAnimationFrame(restoreSyncFrame);
+        restoreSyncFrame = null;
+      }
+    }
+
+    function restoreSlidePosition(idx: number) {
+      const currentSwiper = swiper.value;
+      const slideTranslate = currentSwiper.slidesGrid?.[idx];
+      if (slideTranslate === undefined) return;
+
+      const translate = currentSwiper.rtlTranslate ? slideTranslate : -slideTranslate;
+      if (Math.abs(currentSwiper.translate - translate) <= 1) return;
+
+      currentSwiper.setTransition(0);
+      currentSwiper.setTranslate(translate);
+      currentSwiper.updateProgress(translate);
+      currentSwiper.updateSlidesClasses();
+    }
+
+    async function setCurrentSlide(idx: number, slideSpeed?: number, force = false) {
       if (idx > -1) {
         await nextTick();
         await watchUntilTruthy(swiper);
+        swiper.value.update();
         if (swiper.value.activeIndex !== idx) {
-          const didSwipe = await swiper.value.slideTo(idx, slideSpeed);
+          const didSwipe = await swiper.value.slideTo(idx, slideSpeed, !force);
           if (!didSwipe) {
             // Retry if slideTo fails
-            setTimeout(() => setCurrentSlide(idx, 0), 100);
+            setTimeout(() => setCurrentSlide(idx, 0, true), 50);
           }
+        } else if (force) {
+          restoreSlidePosition(idx);
         }
         if (currentIdx.value !== idx) {
           currentIdx.value = idx;
@@ -164,10 +190,39 @@ export default defineComponent({
       return getAddressColor(props.addressList[idx]);
     }
 
-    onMounted(() => {
-      if (props.activeIdx) {
-        setCurrentSlide(props.activeIdx, 0);
+    function syncToActiveAccount() {
+      setCurrentSlide(props.activeIdx, 0, true);
+    }
+
+    async function restoreActiveAccountPosition() {
+      clearRestoreSync();
+      await nextTick();
+      await watchUntilTruthy(swiper);
+      swiper.value.update();
+      if (swiper.value.activeIndex === props.activeIdx) {
+        restoreSlidePosition(props.activeIdx);
+      } else {
+        setCurrentSlide(props.activeIdx, 0, true);
       }
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) return;
+      clearRestoreSync();
+      restoreSyncFrame = requestAnimationFrame(() => {
+        restoreSyncFrame = null;
+        restoreActiveAccountPosition();
+      });
+    }
+
+    onMounted(() => {
+      syncToActiveAccount();
+      document.addEventListener('visibilitychange', onVisibilityChange);
+    });
+
+    onUnmounted(() => {
+      clearRestoreSync();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     });
 
     watch(
