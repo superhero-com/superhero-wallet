@@ -146,6 +146,7 @@ export const STORAGE_KEYS = {
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
   preclaimedNames: 'preclaimed-names',
+  pendingNameAutoExtendTxs: 'pending-name-auto-extend-txs',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
 

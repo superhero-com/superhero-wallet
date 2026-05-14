@@ -70,6 +70,17 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
+interface IPendingNameUpdateTransaction {
+  hash: Encoded.TxHash;
+  name: AensName;
+  owner: AccountAddress;
+}
+
+type PendingNameUpdateLookupResult = {
+  failed: boolean;
+  transactions: IPendingNameUpdateTransaction[];
+};
+
 export const NAME_CLAIM_STATUS = {
   preclaimed: 'preclaimed',
   claimSubmitted: 'claim-submitted',
@@ -88,6 +99,13 @@ interface IPreclaimedName {
   claimTxHash?: Encoded.TxHash;
 }
 
+interface IPendingAutoExtendTx {
+  address: AccountAddress;
+  name: AensName;
+  txHash: Encoded.TxHash;
+  createdAt: number;
+}
+
 interface aeNamesOptions {
   pollingDisabled?: boolean;
 }
@@ -96,6 +114,7 @@ type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
 let composableInitialized = false;
 let claimPreclaimedNamesPromise: Promise<void> | null = null;
+let extendExpiringOwnedNamesPromise: Promise<void> | null = null;
 let preclaimedNamesEncryptionInitialized = false;
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
@@ -113,6 +132,12 @@ const preclaimedNamesEncrypted = useStorageRef<string | null>(
 );
 const preclaimedNames = ref<Record<NetworkId, Record<AensName, IPreclaimedName>>>({});
 const pendingAutoExtendNames = ref<ChainName[]>([]);
+const pendingAutoExtendTxs = useStorageRef<
+Record<NetworkId, Record<AensName, IPendingAutoExtendTx>>
+>(
+  {},
+  STORAGE_KEYS.pendingNameAutoExtendTxs,
+);
 const areNamesFetching = ref(false);
 
 /**
@@ -302,6 +327,24 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
+  function ensurePendingAutoExtendTxRegistryExists(networkId: NetworkId) {
+    if (!pendingAutoExtendTxs.value[networkId]) {
+      pendingAutoExtendTxs.value[networkId] = {};
+    }
+  }
+
+  function upsertPendingAutoExtendTx(networkId: NetworkId, data: IPendingAutoExtendTx) {
+    ensurePendingAutoExtendTxRegistryExists(networkId);
+    pendingAutoExtendTxs.value[networkId][data.name] = data;
+  }
+
+  function removePendingAutoExtendTx(networkId: NetworkId, name: AensName) {
+    delete pendingAutoExtendTxs.value[networkId]?.[name];
+    if (isEmpty(pendingAutoExtendTxs.value[networkId])) {
+      delete pendingAutoExtendTxs.value[networkId];
+    }
+  }
+
   function getClaimOptions(address: AccountAddress) {
     if (activeAccount.value.address === address) {
       return {};
@@ -340,6 +383,15 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     });
   }
 
+  function logSilentError(error: any) {
+    Logger.write({
+      message: error?.message || String(error),
+      type: 'api-response',
+      info: error,
+      modal: false,
+    });
+  }
+
   function fetchPendingNameClaimTransactions(address: AccountAddress) {
     const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
     return aeternityAdapter.fetchPendingTransactions?.(address)
@@ -354,9 +406,50 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       );
   }
 
+  function fetchPendingNameUpdateTransactions(address: AccountAddress) {
+    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+    return aeternityAdapter.fetchPendingTransactions?.(address)
+      .then(
+        (transactions: ITransaction[]) => (transactions)
+          .filter(({ tx: { type } }) => type === 'NameUpdateTx')
+          .map(({ tx, hash }) => ({
+            hash,
+            name: tx.name as AensName,
+            owner: tx.accountId as AccountAddress,
+          }) as IPendingNameUpdateTransaction),
+      );
+  }
+
+  async function getPendingNameUpdateLookupResult(
+    address: AccountAddress,
+  ): Promise<PendingNameUpdateLookupResult> {
+    try {
+      return {
+        failed: false,
+        transactions: await fetchPendingNameUpdateTransactions(address) || [],
+      };
+    } catch (error: any) {
+      logSilentError(error);
+      return {
+        failed: true,
+        transactions: [],
+      };
+    }
+  }
+
   async function getPendingNameClaimTransaction(address: AccountAddress, name: AensName) {
     const pendingTransactions = await fetchPendingNameClaimTransactions(address) || [];
     return pendingTransactions.find(({ name: pendingName }) => pendingName === name);
+  }
+
+  async function sendAutoExtendTransaction(name: AensName, address: AccountAddress) {
+    const extendOptions = getClaimOptions(address);
+    const nameObj = await createNameInstance(name, extendOptions);
+    const response = await nameObj.extendTtl(undefined, {
+      ...extendOptions,
+      waitMined: false,
+    });
+    return response?.hash as Encoded.TxHash | undefined;
   }
 
   async function fetchAllNames(address: AccountAddress) {
@@ -572,18 +665,98 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return claimPreclaimedNamesPromise;
   }
 
-  async function extendExpiringOwnedNames() {
+  async function processExpiringOwnedNames() {
     const aeSdk = await getAeSdk();
+    const networkId = nodeNetworkId.value!;
+    const pendingTxsByName = pendingAutoExtendTxs.value[networkId] || {};
     const height = await aeSdk.getHeight();
-    await Promise.all(
-      ownedNames.value
-        .filter(({ autoExtend }) => autoExtend)
-        .filter(({ expiresAt }) => expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL)
-        .map(({ name }) => updateNamePointer({
+    const expiringNames = ownedNames.value
+      .filter(({ autoExtend, expiresAt, pending }) => (
+        autoExtend
+        && !pending
+        && expiresAt > height
+        && expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL
+      ));
+    const owners = [...new Set(expiringNames.map(({ owner }) => owner))];
+    const pendingUpdateLookupByOwner = await Promise.all(
+      owners.map(async (owner) => [
+        owner,
+        await getPendingNameUpdateLookupResult(owner as AccountAddress),
+      ] as const),
+    ).then(Object.fromEntries) as Record<AccountAddress, PendingNameUpdateLookupResult>;
+
+    const extensionResults = await Promise.all(expiringNames.map(async ({ name, owner }) => {
+      const pendingUpdateLookup = pendingUpdateLookupByOwner[owner];
+      if (pendingUpdateLookup?.failed) {
+        return false;
+      }
+
+      const pendingUpdatesForName = (pendingUpdateLookup?.transactions || [])
+        .filter(({ name: pendingName }) => pendingName === name);
+      const storedPendingTx = pendingTxsByName[name];
+
+      if (pendingUpdatesForName.length) {
+        const matchedPendingTx = pendingUpdatesForName
+          .find(({ hash }) => hash && (!storedPendingTx || hash === storedPendingTx.txHash))
+          || pendingUpdatesForName[0];
+        if (!matchedPendingTx.hash) {
+          return false;
+        }
+        upsertPendingAutoExtendTx(networkId, {
+          address: owner,
           name,
-          type: UPDATE_POINTER_ACTION.extend,
-        })),
-    );
+          txHash: matchedPendingTx.hash,
+          createdAt: Date.now(),
+        });
+        return false;
+      }
+
+      try {
+        const txHash = await sendAutoExtendTransaction(name, owner as AccountAddress);
+        if (!txHash) {
+          return false;
+        }
+        upsertPendingAutoExtendTx(networkId, {
+          address: owner as AccountAddress,
+          name,
+          txHash,
+          createdAt: Date.now(),
+        });
+        return true;
+      } catch (error: any) {
+        if (error.message.includes('Account not found')) {
+          handleUnknownError(error);
+        } else {
+          openDefaultModal({
+            msg: isInsufficientBalanceError(error)
+              ? tg('modals.insufficient-balance.msg')
+              : error.message,
+          });
+        }
+        return false;
+      }
+    }));
+
+    Object.keys(pendingTxsByName).forEach((name) => {
+      if (!expiringNames.some((ownedName) => ownedName.name === name)) {
+        removePendingAutoExtendTx(networkId, name as AensName);
+      }
+    });
+
+    if (extensionResults.some(Boolean)) {
+      await updateOwnedNames();
+    }
+  }
+
+  async function extendExpiringOwnedNames() {
+    if (!extendExpiringOwnedNamesPromise) {
+      extendExpiringOwnedNamesPromise = processExpiringOwnedNames()
+        .catch(logSilentError)
+        .finally(() => {
+          extendExpiringOwnedNamesPromise = null;
+        });
+    }
+    return extendExpiringOwnedNamesPromise;
   }
 
   /**
@@ -644,6 +817,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     areNamesFetching,
     addNameToClaimQueue,
     claimPreclaimedNames,
+    extendExpiringOwnedNames,
     updateOwnedNames,
     resolvedChainNames,
     getName,
