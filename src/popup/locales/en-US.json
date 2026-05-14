@@ -422,7 +422,7 @@
     },
     "nameAutoExtendHelp": {
       "title": "Autoextend name",
-      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)."
+      "msg": ".chain names expire unless they are renewed.{'<'}br /{'>'}{'<'}br /{'>'} Auto-extend helps keep your name active by sending a low-cost update transaction before expiry.{'<'}br /{'>'}{'<'}br /{'>'} Please keep this device awake and the wallet available when that transaction needs to be sent."
     },
     "receive": {
       "funds": "funds",
