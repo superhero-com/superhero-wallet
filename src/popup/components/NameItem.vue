@@ -19,6 +19,12 @@
           class="buttons"
         >
           <BtnPlain
+            v-if="isAlmostExpiring"
+            class="button-plain warning-label"
+            :text="$t('pages.names.list.expiring')"
+            @click="handleExpiringClick"
+          />
+          <BtnPlain
             v-show="canBeDefault"
             class="button-plain"
             :class="{ set: isDefault }"
@@ -76,7 +82,7 @@
           v-model="newPointer"
           class="input-address"
           :placeholder="$t('pages.names.details.address-placeholder')"
-          :message="nameError ? $t('pages.names.list.valid-identifier-error') : null"
+          :message="nameError ? $t('pages.names.list.valid-identifier-error') : undefined"
           code
         >
           <template #after>
@@ -143,6 +149,11 @@ import {
 import { useI18n } from 'vue-i18n';
 import { IName } from '@/types';
 import {
+  AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
+  MODAL_NAME_EXTEND_CONFIRM,
+} from '@/constants';
+import { RejectedByUserError } from '@/lib/errors';
+import {
   blocksToRelativeTime,
   handleUnknownError,
   postJson,
@@ -163,6 +174,7 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
 import Truncate from './Truncate.vue';
+import type { NameExtendConfirmResolveValue } from './Modals/NameExtendConfirm.vue';
 
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
@@ -183,7 +195,7 @@ export default defineComponent({
     nameEntry: { type: Object as PropType<IName>, required: true },
   },
   setup(props) {
-    const { openConfirmModal } = useModals();
+    const { openConfirmModal, openModal } = useModals();
     const { activeAccount } = useAccounts();
     const { t } = useI18n();
     const { topBlockHeight } = useTopHeaderData();
@@ -191,6 +203,9 @@ export default defineComponent({
       setAutoExtend,
       updateNamePointer,
       getName,
+      getNameExtendFee,
+      extendExpiringOwnedNames,
+      updateOwnedNames,
       setDefaultName,
     } = useAeNames();
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
@@ -227,6 +242,12 @@ export default defineComponent({
           return t('common.pending');
       }
     });
+    const isAlmostExpiring = computed(() => (
+      !props.nameEntry.pending
+      && !!props.nameEntry.expiresAt
+      && props.nameEntry.expiresAt > topBlockHeight.value
+      && props.nameEntry.expiresAt - topBlockHeight.value < AUTO_EXTEND_NAME_BLOCKS_INTERVAL
+    ));
 
     function expandAndShowInput() {
       expand.value = true;
@@ -283,6 +304,40 @@ export default defineComponent({
       setAutoExtend(props.nameEntry.name);
     }
 
+    async function handleExpiringClick() {
+      try {
+        if (props.nameEntry.autoExtend) {
+          await updateOwnedNames();
+          await extendExpiringOwnedNames();
+          return;
+        }
+
+        const { autoExtend } = await openModal<NameExtendConfirmResolveValue>(
+          MODAL_NAME_EXTEND_CONFIRM,
+          {
+            name: props.nameEntry.name,
+            fee: getNameExtendFee(props.nameEntry.name),
+            autoExtend: props.nameEntry.autoExtend,
+          },
+        );
+        const isExtended = await updateNamePointer({
+          name: props.nameEntry.name,
+          type: UPDATE_POINTER_ACTION.extend,
+        });
+
+        if (isExtended) {
+          if (autoExtend && !props.nameEntry.autoExtend) {
+            setAutoExtend(props.nameEntry.name);
+          }
+          await updateOwnedNames();
+        }
+      } catch (error: any) {
+        if (!(error instanceof RejectedByUserError)) {
+          handleUnknownError(error);
+        }
+      }
+    }
+
     async function setPointer() {
       if (!checkAddressOrChannel(newPointer.value)) {
         nameError.value = true;
@@ -308,6 +363,7 @@ export default defineComponent({
       nameError,
       expand,
       hasPointer,
+      isAlmostExpiring,
       isDefault,
       newPointer,
       pendingStatusLabel,
@@ -316,6 +372,7 @@ export default defineComponent({
       topBlockHeight,
       blocksToRelativeTime,
       expandAndShowInput,
+      handleExpiringClick,
       handleSetDefault,
       onExpandCollapse,
       toggleAutoExtend,
@@ -398,6 +455,13 @@ export default defineComponent({
         &.edit {
           background: rgba($color-primary, 0.15);
           color: $color-primary;
+        }
+
+        &.warning-label {
+          background: rgba($color-warning, 0.1);
+          color: $color-warning;
+          cursor: pointer;
+          margin-right: 4px;
         }
 
         &:not(:last-of-type) {

@@ -244,6 +244,13 @@
       "neverShowAgain": "不再显示",
       "button": "我明白了"
     },
+    "nameExtendConfirm": {
+      "title": "延长名称",
+      "description": "立即延长此 .chain 名称以保持其有效。",
+      "name": "名称",
+      "cost": "续期费用",
+      "autoExtend": "下次自动延长此名称"
+    },
     "insufficient-balance": {
       "msg": "你的余额不足以完成此交易。"
     },
@@ -980,6 +987,7 @@
       "list": {
         "default": "默认",
         "default-make": "设为默认",
+        "expiring": "到期中",
         "valid-identifier-error": "请输入有效的 æternity 区块链标识符",
         "no-names": "该账户没有 .chain 名称。是否现在注册一个？",
         "register-name": "注册 .chain 名称",

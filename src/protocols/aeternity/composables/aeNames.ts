@@ -6,8 +6,11 @@ import {
 } from 'vue';
 import {
   AensName,
+  buildTx,
   Encoded,
   Name,
+  Tag,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 
@@ -49,7 +52,7 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
-import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
 import { useAeNetworkSettings } from './aeNetworkSettings';
@@ -57,6 +60,8 @@ import { useAeTippingBackend } from './aeTippingBackend';
 import { useAeMiddleware } from './aeMiddleware';
 
 const POLLING_INTERVAL = 10000;
+const FEE_ESTIMATION_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
+const FEE_ESTIMATION_NONCE = 10000;
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -452,6 +457,19 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return response?.hash as Encoded.TxHash | undefined;
   }
 
+  function getNameExtendFee(name: AensName): number {
+    const tx = buildTx({
+      tag: Tag.NameUpdateTx,
+      accountId: FEE_ESTIMATION_ADDRESS,
+      nonce: FEE_ESTIMATION_NONCE,
+      nameId: name,
+      nameTtl: 50000,
+      clientTtl: 84600,
+      pointers: [],
+    });
+    return +aettosToAe(unpackTx(tx, Tag.NameUpdateTx).fee);
+  }
+
   async function fetchAllNames(address: AccountAddress) {
     const middleware = await getMiddleware();
 
@@ -821,6 +839,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     updateOwnedNames,
     resolvedChainNames,
     getName,
+    getNameExtendFee,
     getNameByNameHash,
     getNameAuction,
     getNameAuctionHighestBid,

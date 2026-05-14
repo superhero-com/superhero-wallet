@@ -368,6 +368,7 @@ export const MODAL_ERROR_LOG = 'error-log';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_HELP = 'help';
 export const MODAL_NAME_CLAIM_INFO = 'name-claim-info';
+export const MODAL_NAME_EXTEND_CONFIRM = 'name-extend-confirm';
 export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';

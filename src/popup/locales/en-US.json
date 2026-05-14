@@ -248,6 +248,13 @@
       "neverShowAgain": "Never show this again",
       "button": "I understand"
     },
+    "nameExtendConfirm": {
+      "title": "Extend name",
+      "description": "Extend this .chain name now to keep it active.",
+      "name": "Name",
+      "cost": "Renewal cost",
+      "autoExtend": "Auto-extend this name next time"
+    },
     "name-length": {
       "msg": "Names on SUPERHERO have to be a minimum of 13 characters."
     },
@@ -993,6 +1000,7 @@
       "list": {
         "default": "Default",
         "default-make": "Make default",
+        "expiring": "Expiring",
         "valid-identifier-error": "Enter valid aeternity blockchain identifier",
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",
         "register-name": "Register .chain name",
