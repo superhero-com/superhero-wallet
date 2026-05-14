@@ -111,6 +111,7 @@ import {
   AE_AENS_NAME_MAX_LENGTH,
 } from '@/protocols/aeternity/config';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { MODAL_NAME_CLAIM_INFO } from '@/constants';
 
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -137,9 +138,14 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { activeAccount } = useAccounts();
-    const { openDefaultModal } = useModals();
+    const { openDefaultModal, openModal } = useModals();
     const { getAeSdk, nodeNetworkId } = useAeSdk();
-    const { isLoaderVisible, setLoaderVisible } = useUi();
+    const {
+      isLoaderVisible,
+      isNameClaimInfoModalHidden,
+      setLoaderVisible,
+      setNameClaimInfoModalHidden,
+    } = useUi();
     const { addNameToClaimQueue, preclaimedNames } = useAeNames();
 
     const name = ref('');
@@ -202,6 +208,15 @@ export default defineComponent({
           msg: t('modals.name-exist.msg'),
         });
       } else {
+        if (!isNameClaimInfoModalHidden.value) {
+          setLoaderVisible(false);
+          const shouldHideInfoModal = await openModal<boolean>(MODAL_NAME_CLAIM_INFO);
+          if (shouldHideInfoModal) {
+            setNameClaimInfoModalHidden(true);
+          }
+          setLoaderVisible(true);
+        }
+
         const isClaimQueued = await addNameToClaimQueue(
           fullName.value,
           activeAccount.value.address,

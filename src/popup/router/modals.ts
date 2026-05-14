@@ -17,6 +17,7 @@ import {
   MODAL_ERROR_LOG,
   MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
+  MODAL_NAME_CLAIM_INFO,
   MODAL_MESSAGE_SIGN,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_MULTISIG_VAULT_CREATE,
@@ -97,6 +98,7 @@ import SetPassword from '@/popup/components/Modals/SetPassword.vue';
 import PasswordLogin from '@/popup/components/Modals/PasswordLogin.vue';
 import PrivateKeyImport from '@/popup/components/Modals/PrivateKeyImport.vue';
 import PermissionManager from '@/popup/components/Modals/PermissionManager.vue';
+import NameClaimInfo from '@/popup/components/Modals/NameClaimInfo.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -127,6 +129,9 @@ export default () => {
   });
   registerModal(MODAL_CONFIRM, {
     component: Confirm,
+  });
+  registerModal(MODAL_NAME_CLAIM_INFO, {
+    component: NameClaimInfo,
   });
   registerModal(MODAL_ERROR_LOG, {
     component: ErrorLog,

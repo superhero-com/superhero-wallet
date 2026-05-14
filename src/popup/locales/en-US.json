@@ -241,6 +241,13 @@
     "name-already-preclaimed": {
       "msg": "Claim process for this name is already started."
     },
+    "nameClaimInfo": {
+      "title": "Name registration takes a few steps",
+      "preclaim": "The wallet first sends a preclaim transaction, waits for one block, and then sends the claim transaction. This keeps your chosen name hidden until the claim is sent, helping protect it from front-running.",
+      "device": "Please keep this device available and unlock the wallet again within about 5 minutes. The wallet may need to send follow-up transactions to claim the name, set the pointer, and finish auto-extend setup.",
+      "neverShowAgain": "Never show this again",
+      "button": "I understand"
+    },
     "name-length": {
       "msg": "Names on SUPERHERO have to be a minimum of 13 characters."
     },
@@ -990,7 +997,12 @@
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",
         "register-name": "Register .chain name",
         "name-hash": "Name code",
-        "pointers": "Pointers"
+        "pointers": "Pointers",
+        "status": {
+          "preclaiming": "Preclaiming...",
+          "claiming": "Claiming...",
+          "setting-pointer": "Setting pointer..."
+        }
       },
       "details": {
         "created-height": "Created at height",

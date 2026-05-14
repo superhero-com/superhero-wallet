@@ -237,6 +237,13 @@
     "name-exist": {
       "msg": "该名称已被注册。"
     },
+    "nameClaimInfo": {
+      "title": "名称注册需要几个步骤",
+      "preclaim": "钱包会先发送预声明交易，等待一个区块后再发送声明交易。这样会在声明发送前隐藏你选择的名称，帮助防止被抢注或抢先提交。",
+      "device": "请保持此设备可用，并在约 5 分钟内再次解锁钱包。钱包可能还需要发送后续交易来声明名称、设置指针并完成自动延长设置。",
+      "neverShowAgain": "不再显示",
+      "button": "我明白了"
+    },
     "insufficient-balance": {
       "msg": "你的余额不足以完成此交易。"
     },
@@ -977,7 +984,12 @@
         "no-names": "该账户没有 .chain 名称。是否现在注册一个？",
         "register-name": "注册 .chain 名称",
         "name-hash": "名称代码",
-        "pointers": "指针"
+        "pointers": "指针",
+        "status": {
+          "preclaiming": "预声明中...",
+          "claiming": "声明中...",
+          "setting-pointer": "设置指针中..."
+        }
       },
       "details": {
         "created-height": "创建高度",

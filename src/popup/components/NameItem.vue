@@ -12,7 +12,7 @@
           class="pending"
         >
           <PendingIcon class="pending-icon" />
-          {{ $t('common.pending') }}
+          {{ pendingStatusLabel }}
         </div>
         <div
           v-else
@@ -154,7 +154,7 @@ import {
   useTopHeaderData,
 } from '@/composables';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
-import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { NAME_CLAIM_STATUS, useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
@@ -215,6 +215,18 @@ export default defineComponent({
       props.nameEntry?.pointers?.accountPubkey
       || Object.values(props.nameEntry?.pointers || {})[0]
     ));
+    const pendingStatusLabel = computed(() => {
+      switch (props.nameEntry.pendingStatus) {
+        case NAME_CLAIM_STATUS.preclaimed:
+          return t('pages.names.list.status.preclaiming');
+        case NAME_CLAIM_STATUS.claimSubmitted:
+          return t('pages.names.list.status.claiming');
+        case NAME_CLAIM_STATUS.pointerUpdatePending:
+          return t('pages.names.list.status.setting-pointer');
+        default:
+          return t('common.pending');
+      }
+    });
 
     function expandAndShowInput() {
       expand.value = true;
@@ -298,6 +310,7 @@ export default defineComponent({
       hasPointer,
       isDefault,
       newPointer,
+      pendingStatusLabel,
       pointerInput,
       showInput,
       topBlockHeight,

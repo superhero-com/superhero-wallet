@@ -63,6 +63,7 @@ export default defineComponent({
           ...preclaimedName,
           owner: preclaimedName.address,
           pending: true,
+          pendingStatus: preclaimedName.status,
         } as Partial<IName> as IName));
 
       return [
