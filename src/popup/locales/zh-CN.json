@@ -422,6 +422,11 @@
       "title": "自动延长名称",
       "msg": ".chain 名称若不续期会过期。{'<'}br /{'>'}{'<'}br /{'>'} 自动延长会在到期前发送一笔低成本更新交易，帮助你保持名称有效。{'<'}br /{'>'}{'<'}br /{'>'} 请在该交易需要发送时保持此设备处于唤醒状态，并确保钱包可用。"
     },
+    "nameTransfer": {
+      "title": "转移名称",
+      "msg": "将 {name} 转移到 {address}？你将失去此名称的所有权。",
+      "button": "转移"
+    },
     "receive": {
       "funds": "资金",
       "title": "接收 {name} 到公开地址",
@@ -993,6 +998,7 @@
         "default-make": "设为默认",
         "expiring": "到期中",
         "valid-identifier-error": "请输入有效的 æternity 区块链标识符",
+        "valid-transfer-address-error": "请输入另一个有效的账户地址",
         "no-names": "该账户没有 .chain 名称。是否现在注册一个？",
         "register-name": "注册 .chain 名称",
         "name-hash": "名称代码",
@@ -1000,14 +1006,17 @@
         "status": {
           "preclaiming": "预声明中...",
           "claiming": "声明中...",
-          "setting-pointer": "设置指针中..."
+          "setting-pointer": "设置指针中...",
+          "transferring": "转移中..."
         }
       },
       "details": {
         "created-height": "创建高度",
         "expires-height": "到期高度",
         "set-pointer": "设置指针",
-        "address-placeholder": "输入 ak_, ct_, ok_, ch_"
+        "transfer": "转移",
+        "address-placeholder": "输入 ak_, ct_, ok_, ch_",
+        "transfer-address-placeholder": "输入接收方 ak_"
       },
       "claim": {
         "auto-extend": "自动延长名称",

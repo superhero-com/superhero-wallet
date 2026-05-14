@@ -49,6 +49,13 @@
             :text="$t('pages.names.details.set-pointer')"
             @click="expandAndShowInput"
           />
+          <BtnPlain
+            v-show="expand"
+            class="button-plain"
+            :class="{ edit: showTransferInput }"
+            :text="$t('pages.names.details.transfer')"
+            @click="expandAndShowTransferInput"
+          />
           <BtnHelp
             v-if="expand && !hasPointer"
             :title="$t('modals.name-pointers-help.title')"
@@ -89,6 +96,25 @@
             <BtnPlain
               v-show="newPointer.length"
               @click="setPointer"
+            >
+              <Save class="input-address-icon" />
+            </BtnPlain>
+          </template>
+        </InputField>
+
+        <InputField
+          v-show="showTransferInput"
+          ref="transferInput"
+          v-model="transferAddress"
+          class="input-address"
+          :placeholder="$t('pages.names.details.transfer-address-placeholder')"
+          :message="transferAddressError ? $t('pages.names.list.valid-transfer-address-error') : undefined"
+          code
+        >
+          <template #after>
+            <BtnPlain
+              v-show="transferAddress.length"
+              @click="transferName"
             >
               <Save class="input-address-icon" />
             </BtnPlain>
@@ -138,6 +164,10 @@
 </template>
 
 <script lang="ts">
+import {
+  Encoding,
+  isAddressValid,
+} from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -205,6 +235,7 @@ export default defineComponent({
       getName,
       getNameExtendFee,
       extendExpiringOwnedNames,
+      ownedNames,
       updateOwnedNames,
       setDefaultName,
     } = useAeNames();
@@ -213,9 +244,13 @@ export default defineComponent({
 
     const expand = ref(false);
     const newPointer = ref<string>('');
+    const transferAddress = ref<string>('');
     const showInput = ref(false);
+    const showTransferInput = ref(false);
     const nameError = ref(false);
+    const transferAddressError = ref(false);
     const pointerInput = ref();
+    const transferInput = ref();
 
     const isDefault = computed(
       () => getName(activeAccount.value.address).value === props.nameEntry.name,
@@ -226,6 +261,17 @@ export default defineComponent({
     const canBeDefault = computed(
       (): boolean => props.nameEntry?.pointers?.accountPubkey === activeAccount.value.address,
     );
+    const fallbackDefaultName = computed(() => ownedNames.value.find(({
+      name,
+      owner,
+      pending,
+      pointers,
+    }) => (
+      name !== props.nameEntry.name
+      && owner === activeAccount.value.address
+      && !pending
+      && pointers?.accountPubkey === activeAccount.value.address
+    ))?.name);
     const addressOrFirstPointer = computed((): string | null => (
       props.nameEntry?.pointers?.accountPubkey
       || Object.values(props.nameEntry?.pointers || {})[0]
@@ -238,6 +284,8 @@ export default defineComponent({
           return t('pages.names.list.status.claiming');
         case NAME_CLAIM_STATUS.pointerUpdatePending:
           return t('pages.names.list.status.setting-pointer');
+        case NAME_CLAIM_STATUS.transferring:
+          return t('pages.names.list.status.transferring');
         default:
           return t('common.pending');
       }
@@ -252,20 +300,30 @@ export default defineComponent({
     function expandAndShowInput() {
       expand.value = true;
       showInput.value = !showInput.value;
+      showTransferInput.value = false;
       if (showInput.value) {
         nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
+      }
+    }
+
+    function expandAndShowTransferInput() {
+      expand.value = true;
+      showInput.value = false;
+      showTransferInput.value = !showTransferInput.value;
+      if (showTransferInput.value) {
+        nextTick(() => transferInput.value.$el.getElementsByClassName('input')[0].focus());
       }
     }
 
     function onExpandCollapse() {
       expand.value = !expand.value;
       showInput.value = false;
+      showTransferInput.value = false;
     }
 
-    async function handleSetDefault() {
+    async function updateDefaultName(name: IName['name']) {
       try {
         const { address } = activeAccount.value;
-        const { name } = props.nameEntry;
         const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
         const currentNetworkId = nodeNetworkId.value;
 
@@ -292,6 +350,10 @@ export default defineComponent({
       } catch (error: any) {
         handleUnknownError(error);
       }
+    }
+
+    async function handleSetDefault() {
+      await updateDefaultName(props.nameEntry.name);
     }
 
     async function toggleAutoExtend() {
@@ -352,9 +414,72 @@ export default defineComponent({
       showInput.value = false;
     }
 
+    async function transferName() {
+      const recipientAddress = transferAddress.value.trim();
+
+      if (
+        !isAddressValid(recipientAddress, Encoding.AccountAddress)
+        || recipientAddress === activeAccount.value.address
+      ) {
+        transferAddressError.value = true;
+        return;
+      }
+
+      try {
+        await openConfirmModal({
+          title: t('modals.nameTransfer.title'),
+          msg: t('modals.nameTransfer.msg', {
+            name: props.nameEntry.name,
+            address: recipientAddress,
+          }),
+          buttonMessage: t('modals.nameTransfer.button'),
+        });
+
+        const isTransferred = await updateNamePointer({
+          name: props.nameEntry.name,
+          address: recipientAddress,
+          type: UPDATE_POINTER_ACTION.transfer,
+        });
+
+        if (isTransferred) {
+          transferAddress.value = '';
+          showTransferInput.value = false;
+          expand.value = false;
+          await updateOwnedNames();
+
+          if (isDefault.value) {
+            if (fallbackDefaultName.value) {
+              await updateDefaultName(fallbackDefaultName.value);
+            } else {
+              await updateDefaultName('' as IName['name']);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (!(error instanceof RejectedByUserError)) {
+          handleUnknownError(error);
+        }
+      }
+    }
+
     watch(newPointer, () => {
       nameError.value = false;
     });
+
+    watch(transferAddress, () => {
+      transferAddressError.value = false;
+    });
+
+    watch(
+      () => props.nameEntry.pending,
+      (pending) => {
+        if (pending) {
+          expand.value = false;
+          showInput.value = false;
+          showTransferInput.value = false;
+        }
+      },
+    );
 
     return {
       activeAccount,
@@ -369,13 +494,19 @@ export default defineComponent({
       pendingStatusLabel,
       pointerInput,
       showInput,
+      showTransferInput,
       topBlockHeight,
+      transferAddress,
+      transferAddressError,
+      transferInput,
       blocksToRelativeTime,
       expandAndShowInput,
+      expandAndShowTransferInput,
       handleExpiringClick,
       handleSetDefault,
       onExpandCollapse,
       toggleAutoExtend,
+      transferName,
       setPointer,
     };
   },

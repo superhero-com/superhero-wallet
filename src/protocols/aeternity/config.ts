@@ -287,4 +287,5 @@ export const AE_TIPPING_CONTRACTS_TESTNET: AeTippingContractAddresses = {
 export const UPDATE_POINTER_ACTION = {
   update: 'update',
   extend: 'extend',
+  transfer: 'transfer',
 } as const;

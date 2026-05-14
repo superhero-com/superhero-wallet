@@ -4,6 +4,7 @@ const createTestContext = ({
   topBlockHeight = 100,
   preclaimedNames = {},
   pendingAutoExtendTxs = {},
+  pendingNameTransferTxs = {},
 } = {}) => {
   jest.resetModules();
 
@@ -19,6 +20,7 @@ const createTestContext = ({
   const namePreclaim = jest.fn().mockResolvedValue({ nameSalt: 123 });
   const nameClaim = jest.fn().mockResolvedValue({ hash: 'th_claim' });
   const nameGetState = jest.fn().mockRejectedValue(new Error('Name not found'));
+  const nameTransfer = jest.fn().mockResolvedValue({ hash: 'th_transfer' });
   const sdk = {
     getContext: jest.fn(() => ({})),
     poll: jest.fn().mockResolvedValue({}),
@@ -33,6 +35,7 @@ const createTestContext = ({
     Object.keys(preclaimedNames).length ? JSON.stringify(preclaimedNames) : '{}',
   ));
   storage.set('pending-name-auto-extend-txs', ref(pendingAutoExtendTxs));
+  storage.set('pending-name-transfer-txs', ref(pendingNameTransferTxs));
   storage.set('names-default', ref({}));
 
   jest.doMock('@aeternity/aepp-sdk', () => ({
@@ -51,6 +54,8 @@ const createTestContext = ({
       claim = nameClaim;
 
       getState = nameGetState;
+
+      transfer = nameTransfer;
     },
   }));
 
@@ -138,6 +143,7 @@ const createTestContext = ({
     UPDATE_POINTER_ACTION: {
       update: 'update',
       extend: 'extend',
+      transfer: 'transfer',
     },
     AE_AENS_NAME_AUCTION_MAX_LENGTH: 12 + '.chain'.length,
   }));
@@ -171,6 +177,7 @@ const createTestContext = ({
   return {
     aeNames,
     fetchPendingTransactions,
+    fetchAllPages,
     sdk,
     storage,
     openDefaultModal,
@@ -179,6 +186,7 @@ const createTestContext = ({
     nameClaim,
     nameGetState,
     nameExtendTtl,
+    nameTransfer,
     namePreclaim,
     nameUpdate,
   };
@@ -685,5 +693,117 @@ describe('useAeNames auto-extend', () => {
     sdk.getHeight.mockRejectedValueOnce(new Error('height failed'));
 
     await expect(aeNames.extendExpiringOwnedNames()).resolves.toBeUndefined();
+  });
+});
+
+describe('useAeNames name transfers', () => {
+  const middlewareName = (name, owner = 'ak_test') => ({
+    info: {
+      activeFrom: 1,
+      expireHeight: 150,
+      ownership: { current: owner },
+      pointers: { accountPubkey: owner },
+    },
+    name,
+    hash: `nm_${name}`,
+  });
+
+  it('stores a pending transfer transaction after submitting a transfer', async () => {
+    const {
+      aeNames,
+      nameTransfer,
+      storage,
+    } = createTestContext();
+
+    await aeNames.updateNamePointer({
+      name: 'transfer.chain',
+      address: 'ak_recipient',
+      type: 'transfer',
+    });
+
+    expect(nameTransfer).toHaveBeenCalledWith('ak_recipient', { waitMined: false });
+    expect(storage.get('pending-name-transfer-txs').value.ae_testnet['transfer.chain'])
+      .toMatchObject({
+        address: 'ak_test',
+        name: 'transfer.chain',
+        recipientAddress: 'ak_recipient',
+        txHash: 'th_transfer',
+      });
+  });
+
+  it('marks still-owned names as transferring while the transfer tx is pending', async () => {
+    const pendingName = 'transfer.chain';
+    const pendingTxHash = 'th_transfer_pending';
+    const {
+      aeNames,
+      fetchAllPages,
+      fetchPendingTransactions,
+    } = createTestContext({
+      pendingNameTransferTxs: {
+        ae_testnet: {
+          [pendingName]: {
+            address: 'ak_test',
+            name: pendingName,
+            recipientAddress: 'ak_recipient',
+            txHash: pendingTxHash,
+            createdAt: Date.now(),
+          },
+        },
+      },
+    });
+    fetchAllPages.mockResolvedValueOnce([middlewareName(pendingName)]);
+    fetchPendingTransactions
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{
+        hash: pendingTxHash,
+        tx: {
+          type: 'NameTransferTx',
+          accountId: 'ak_test',
+          name: pendingName,
+        },
+      }]);
+
+    await aeNames.updateOwnedNames();
+
+    expect(aeNames.ownedNames.value[0]).toMatchObject({
+      name: pendingName,
+      pending: true,
+      pendingStatus: 'transferring',
+    });
+  });
+
+  it('clears stale transfer state when the old owner still owns the name and tx is gone', async () => {
+    const pendingName = 'transfer.chain';
+    const {
+      aeNames,
+      fetchAllPages,
+      fetchPendingTransactions,
+      storage,
+    } = createTestContext({
+      pendingNameTransferTxs: {
+        ae_testnet: {
+          [pendingName]: {
+            address: 'ak_test',
+            name: pendingName,
+            recipientAddress: 'ak_recipient',
+            txHash: 'th_dropped_transfer',
+            createdAt: 1,
+          },
+        },
+      },
+    });
+    fetchAllPages.mockResolvedValueOnce([middlewareName(pendingName)]);
+    fetchPendingTransactions
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    await aeNames.updateOwnedNames();
+
+    expect(storage.get('pending-name-transfer-txs').value.ae_testnet).toBeUndefined();
+    expect(aeNames.ownedNames.value[0]).toMatchObject({
+      name: pendingName,
+      pending: false,
+      pendingStatus: undefined,
+    });
   });
 });

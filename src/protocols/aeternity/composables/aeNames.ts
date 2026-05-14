@@ -62,6 +62,7 @@ import { useAeMiddleware } from './aeMiddleware';
 const POLLING_INTERVAL = 10000;
 const FEE_ESTIMATION_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 const FEE_ESTIMATION_NONCE = 10000;
+const PENDING_NAME_TRANSFER_TX_MAX_AGE = 5 * 60 * 1000;
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -75,21 +76,24 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
-interface IPendingNameUpdateTransaction {
+type PendingNameTransactionType = 'NameUpdateTx' | 'NameTransferTx';
+
+interface IPendingNameTransaction {
   hash: Encoded.TxHash;
   name: AensName;
   owner: AccountAddress;
 }
 
-type PendingNameUpdateLookupResult = {
+type PendingNameLookupResult = {
   failed: boolean;
-  transactions: IPendingNameUpdateTransaction[];
+  transactions: IPendingNameTransaction[];
 };
 
 export const NAME_CLAIM_STATUS = {
   preclaimed: 'preclaimed',
   claimSubmitted: 'claim-submitted',
   pointerUpdatePending: 'pointer-update-pending',
+  transferring: 'transferring',
 } as const;
 
 type NameClaimStatus = typeof NAME_CLAIM_STATUS[keyof typeof NAME_CLAIM_STATUS];
@@ -108,6 +112,14 @@ interface IPendingAutoExtendTx {
   address: AccountAddress;
   name: AensName;
   txHash: Encoded.TxHash;
+  createdAt: number;
+}
+
+interface IPendingNameTransferTx {
+  address: AccountAddress;
+  name: AensName;
+  recipientAddress: AccountAddress;
+  txHash?: Encoded.TxHash;
   createdAt: number;
 }
 
@@ -142,6 +154,12 @@ Record<NetworkId, Record<AensName, IPendingAutoExtendTx>>
 >(
   {},
   STORAGE_KEYS.pendingNameAutoExtendTxs,
+);
+const pendingNameTransferTxs = useStorageRef<
+Record<NetworkId, Record<AensName, IPendingNameTransferTx>>
+>(
+  {},
+  STORAGE_KEYS.pendingNameTransferTxs,
 );
 const areNamesFetching = ref(false);
 
@@ -350,6 +368,24 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
+  function ensurePendingNameTransferTxRegistryExists(networkId: NetworkId) {
+    if (!pendingNameTransferTxs.value[networkId]) {
+      pendingNameTransferTxs.value[networkId] = {};
+    }
+  }
+
+  function upsertPendingNameTransferTx(networkId: NetworkId, data: IPendingNameTransferTx) {
+    ensurePendingNameTransferTxRegistryExists(networkId);
+    pendingNameTransferTxs.value[networkId][data.name] = data;
+  }
+
+  function removePendingNameTransferTx(networkId: NetworkId, name: AensName) {
+    delete pendingNameTransferTxs.value[networkId]?.[name];
+    if (isEmpty(pendingNameTransferTxs.value[networkId])) {
+      delete pendingNameTransferTxs.value[networkId];
+    }
+  }
+
   function getClaimOptions(address: AccountAddress) {
     if (activeAccount.value.address === address) {
       return {};
@@ -415,27 +451,31 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       );
   }
 
-  function fetchPendingNameUpdateTransactions(address: AccountAddress) {
+  function fetchPendingNameTransactions(
+    address: AccountAddress,
+    transactionType: PendingNameTransactionType,
+  ) {
     const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
     return aeternityAdapter.fetchPendingTransactions?.(address)
       .then(
         (transactions: ITransaction[]) => (transactions)
-          .filter(({ tx: { type } }) => type === 'NameUpdateTx')
+          .filter(({ tx: { type } }) => type === transactionType)
           .map(({ tx, hash }) => ({
             hash,
             name: tx.name as AensName,
             owner: tx.accountId as AccountAddress,
-          }) as IPendingNameUpdateTransaction),
+          }) as IPendingNameTransaction),
       );
   }
 
-  async function getPendingNameUpdateLookupResult(
+  async function getPendingNameLookupResult(
     address: AccountAddress,
-  ): Promise<PendingNameUpdateLookupResult> {
+    transactionType: PendingNameTransactionType,
+  ): Promise<PendingNameLookupResult> {
     try {
       return {
         failed: false,
-        transactions: await fetchPendingNameUpdateTransactions(address) || [],
+        transactions: await fetchPendingNameTransactions(address, transactionType) || [],
       };
     } catch (error: any) {
       logSilentError(error);
@@ -500,12 +540,80 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     try {
       areNamesFetching.value = true;
 
-      ownedNames.value = await Promise.all(
-        aeAccounts.value.map(({ address }) => Promise.all([
-          fetchPendingNameClaimTransactions(address),
-          fetchAllNames(address),
-        ])),
-      ).then((arr) => arr.flat(2)) as IName[];
+      const currentNetworkId = nodeNetworkId.value!;
+      const accountResults = await Promise.all(
+        aeAccounts.value.map(async ({ address }) => {
+          const [
+            pendingClaimTransactions,
+            accountNames,
+            pendingTransferLookup,
+          ] = await Promise.all([
+            fetchPendingNameClaimTransactions(address),
+            fetchAllNames(address),
+            getPendingNameLookupResult(address as AccountAddress, 'NameTransferTx'),
+          ]);
+          return {
+            address,
+            names: [
+              ...(pendingClaimTransactions || []),
+              ...(accountNames || []),
+            ] as IName[],
+            pendingTransferLookup,
+          };
+        }),
+      );
+      const names = accountResults.flatMap(({ names: accountNames }) => accountNames);
+      const pendingTransferLookupByOwner = Object.fromEntries(
+        accountResults.map(
+          ({ address, pendingTransferLookup }) => [address, pendingTransferLookup],
+        ),
+      ) as Record<AccountAddress, PendingNameLookupResult>;
+
+      Object.values(pendingNameTransferTxs.value[currentNetworkId] || {}).forEach(({
+        address,
+        createdAt,
+        name,
+        txHash,
+      }) => {
+        const isStillOwned = names.some(
+          (ownedName) => ownedName.owner === address && ownedName.name === name,
+        );
+
+        if (!isStillOwned) {
+          removePendingNameTransferTx(currentNetworkId, name);
+          return;
+        }
+
+        const pendingTransferLookup = pendingTransferLookupByOwner[address];
+        if (pendingTransferLookup?.failed) {
+          return;
+        }
+
+        const hasPendingTransferTx = (pendingTransferLookup?.transactions || [])
+          .some(({ hash, name: pendingName }) => (
+            pendingName === name
+            && (!txHash || hash === txHash)
+          ));
+        const isOldEnoughToClear = Date.now() - createdAt > PENDING_NAME_TRANSFER_TX_MAX_AGE;
+
+        if (!hasPendingTransferTx && isOldEnoughToClear) {
+          removePendingNameTransferTx(currentNetworkId, name);
+        }
+      });
+
+      const pendingTransfers = pendingNameTransferTxs.value[currentNetworkId] || {};
+      ownedNames.value = names.map((ownedName) => {
+        const pendingTransfer = pendingTransfers[ownedName.name];
+        const isTransferPending = pendingTransfer?.address === ownedName.owner;
+
+        return {
+          ...ownedName,
+          pending: ownedName.pending || isTransferPending,
+          pendingStatus: isTransferPending
+            ? NAME_CLAIM_STATUS.transferring
+            : ownedName.pendingStatus,
+        };
+      });
     } catch (error: any) {
       handleUnknownError(error);
     } finally {
@@ -545,6 +653,18 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
           { account_pubkey: address },
           { ...options, extendPointers: true },
         );
+      } else if (type === UPDATE_POINTER_ACTION.transfer) {
+        const response = await nameObj.transfer(address!, {
+          ...options,
+          waitMined: false,
+        });
+        upsertPendingNameTransferTx(nodeNetworkId.value!, {
+          address: activeAccount.value.address,
+          name,
+          recipientAddress: address!,
+          txHash: response?.hash as Encoded.TxHash | undefined,
+          createdAt: Date.now(),
+        });
       }
       openDefaultModal({
         msg: tg('pages.names.pointer-added', { type }),
@@ -713,9 +833,9 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     const pendingUpdateLookupByOwner = await Promise.all(
       owners.map(async (owner) => [
         owner,
-        await getPendingNameUpdateLookupResult(owner as AccountAddress),
+        await getPendingNameLookupResult(owner as AccountAddress, 'NameUpdateTx'),
       ] as const),
-    ).then(Object.fromEntries) as Record<AccountAddress, PendingNameUpdateLookupResult>;
+    ).then(Object.fromEntries) as Record<AccountAddress, PendingNameLookupResult>;
 
     const extensionResults = await Promise.all(expiringNames.map(async ({ name, owner }) => {
       const pendingUpdateLookup = pendingUpdateLookupByOwner[owner];

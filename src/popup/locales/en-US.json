@@ -432,6 +432,11 @@
       "title": "Autoextend name",
       "msg": ".chain names expire unless they are renewed.{'<'}br /{'>'}{'<'}br /{'>'} Auto-extend helps keep your name active by sending a low-cost update transaction before expiry.{'<'}br /{'>'}{'<'}br /{'>'} Please keep this device awake and the wallet available when that transaction needs to be sent."
     },
+    "nameTransfer": {
+      "title": "Transfer name",
+      "msg": "Transfer {name} to {address}? You will lose ownership of this name.",
+      "button": "Transfer"
+    },
     "receive": {
       "funds": "funds",
       "title": "Receive {name} to public address",
@@ -1003,6 +1008,7 @@
         "default-make": "Make default",
         "expiring": "Expiring",
         "valid-identifier-error": "Enter valid aeternity blockchain identifier",
+        "valid-transfer-address-error": "Enter a different valid account address",
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",
         "register-name": "Register .chain name",
         "name-hash": "Name code",
@@ -1010,14 +1016,17 @@
         "status": {
           "preclaiming": "Preclaiming...",
           "claiming": "Claiming...",
-          "setting-pointer": "Setting pointer..."
+          "setting-pointer": "Setting pointer...",
+          "transferring": "Transferring..."
         }
       },
       "details": {
         "created-height": "Created at height",
         "expires-height": "Expires at height",
         "set-pointer": "Set pointer",
-        "address-placeholder": "Enter ak_, ct_, ok_, ch_"
+        "transfer": "Transfer",
+        "address-placeholder": "Enter ak_, ct_, ok_, ch_",
+        "transfer-address-placeholder": "Enter recipient ak_"
       },
       "claim": {
         "auto-extend": "Auto extend name",
