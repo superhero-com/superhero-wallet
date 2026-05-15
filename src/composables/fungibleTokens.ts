@@ -155,7 +155,7 @@ interface LoadAvailableTokensOptions {
   reset?: boolean;
 }
 
-const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
+const tokenBalancesPooling = createPollingBasedOnMountedComponents(30000);
 
 let areTokenBalancesUpdating = false;
 
