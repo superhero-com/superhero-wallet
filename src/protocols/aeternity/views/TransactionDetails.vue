@@ -51,6 +51,32 @@
               />
 
               <DetailsItem
+                v-if="aensName"
+                :label="$t('pages.transactionDetails.name')"
+                :value="aensName"
+                class="aens-name"
+                data-cy="aens-name"
+              />
+
+              <DetailsItem
+                v-if="preclaimCommitment"
+                :label="$t('modals.confirmTransactionSign.commitmentId')"
+                class="aens-commitment"
+                data-cy="aens-commitment"
+                small
+              >
+                <template #value>
+                  <CopyText
+                    hide-icon
+                    :value="preclaimCommitment"
+                    :copied-text="$t('common.hashCopied')"
+                  >
+                    <span class="text-address">{{ splitAddress(preclaimCommitment) }}</span>
+                  </CopyText>
+                </template>
+              </DetailsItem>
+
+              <DetailsItem
                 v-if="tipUrl"
                 :label="$t('pages.transactionDetails.tipUrl')"
                 class="tip-url"
@@ -280,6 +306,8 @@ export default defineComponent({
       isTokenSale,
       isTokenSaleBuy,
       isTokenSaleFactory,
+      innerTx,
+      innerTxTag,
       outerTxTag,
       transactionAssets,
     } = useTransactionData({
@@ -306,6 +334,14 @@ export default defineComponent({
     const amountTotal = computed((): number => transaction.value
       ? getTxAmountTotal(transaction.value, direction.value, isTokenSaleBuy.value)
       : 0);
+    const aensName = computed(() => (
+      typeof innerTx.value?.name === 'string' ? innerTx.value.name : ''
+    ));
+    const preclaimCommitment = computed(() => (
+      innerTxTag.value === Tag.NamePreclaimTx
+        ? (innerTx.value?.commitmentId || (innerTx.value as ITx & { commitment_id?: string })?.commitment_id || '')
+        : ''
+    ));
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
 
@@ -427,6 +463,8 @@ export default defineComponent({
       isTokenSale,
       isTokenSaleFactory,
       getTransactionPayload,
+      aensName,
+      preclaimCommitment,
       tipUrl,
       tipLink,
       direction,
@@ -467,6 +505,22 @@ export default defineComponent({
     .link-button {
       display: block;
     }
+  }
+
+  .aens-name:deep() {
+    width: 100%;
+
+    .value {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  .aens-commitment:deep() {
+    width: 100%;
   }
 
   .row {

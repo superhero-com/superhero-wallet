@@ -30,7 +30,7 @@
           name="balance"
         />
         <BalanceInfo
-          v-else
+          v-else-if="activeAccount.protocol"
           :balance="balanceNumeric"
           :protocol="activeAccount.protocol"
           horizontal-offline-message
@@ -44,6 +44,7 @@
             <OpenTransferReceiveModalBtn />
             <OpenTransferSendModalBtn />
             <OpenShareAddressModalBtn
+              v-if="activeAccount.protocol"
               :address="activeAccount.address"
               :protocol="activeAccount.protocol"
             />

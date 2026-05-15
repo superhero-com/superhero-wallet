@@ -148,7 +148,10 @@ export default defineComponent({
     const { restoreLanguage } = useLanguages();
     const { restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
-    const { claimPreclaimedNames } = useAeNames({ pollingDisabled: true });
+    const {
+      claimPreclaimedNames,
+      extendExpiringOwnedNames,
+    } = useAeNames({ pollingDisabled: true });
     const { topBlockHeight } = useTopHeaderData();
 
     const innerElement = ref<HTMLDivElement>();
@@ -251,7 +254,12 @@ export default defineComponent({
 
     watch(
       topBlockHeight,
-      claimPreclaimedNames,
+      async () => {
+        await Promise.all([
+          claimPreclaimedNames(),
+          extendExpiringOwnedNames(),
+        ]);
+      },
       { immediate: true },
     );
     initVisibilityListeners();

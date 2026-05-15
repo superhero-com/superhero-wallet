@@ -239,7 +239,22 @@
       "msg": "This name is already registered."
     },
     "name-already-preclaimed": {
-      "msg": "Claim process for this name is already started."
+      "msg": "Claim process for this name is already started.",
+      "other-account": "Claim process for this name is already started by another account in your wallet."
+    },
+    "nameClaimInfo": {
+      "title": "Name registration takes a few steps",
+      "preclaim": "The wallet first sends a preclaim transaction, waits for one block, and then sends the claim transaction. This keeps your chosen name hidden until the claim is sent, helping protect it from front-running.",
+      "device": "Please keep this device available and unlock the wallet again within about 5 minutes. The wallet may need to send follow-up transactions to claim the name, set the pointer, and finish auto-extend setup.",
+      "neverShowAgain": "Never show this again",
+      "button": "I understand"
+    },
+    "nameExtendConfirm": {
+      "title": "Extend name",
+      "description": "Extend this .chain name now to keep it active.",
+      "name": "Name",
+      "cost": "Renewal cost",
+      "autoExtend": "Auto-extend this name next time"
     },
     "name-length": {
       "msg": "Names on SUPERHERO have to be a minimum of 13 characters."
@@ -415,7 +430,12 @@
     },
     "nameAutoExtendHelp": {
       "title": "Autoextend name",
-      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)."
+      "msg": ".chain names expire unless they are renewed.{'<'}br /{'>'}{'<'}br /{'>'} Auto-extend helps keep your name active by sending a low-cost update transaction before expiry.{'<'}br /{'>'}{'<'}br /{'>'} Please keep this device awake and the wallet available when that transaction needs to be sent."
+    },
+    "nameTransfer": {
+      "title": "Transfer name",
+      "msg": "Transfer {name} to {address}? You will lose ownership of this name.",
+      "button": "Transfer"
     },
     "receive": {
       "funds": "funds",
@@ -986,17 +1006,27 @@
       "list": {
         "default": "Default",
         "default-make": "Make default",
+        "expiring": "Expiring",
         "valid-identifier-error": "Enter valid aeternity blockchain identifier",
+        "valid-transfer-address-error": "Enter a different valid account address",
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",
         "register-name": "Register .chain name",
         "name-hash": "Name code",
-        "pointers": "Pointers"
+        "pointers": "Pointers",
+        "status": {
+          "preclaiming": "Preclaiming...",
+          "claiming": "Claiming...",
+          "setting-pointer": "Setting pointer...",
+          "transferring": "Transferring..."
+        }
       },
       "details": {
         "created-height": "Created at height",
         "expires-height": "Expires at height",
         "set-pointer": "Set pointer",
-        "address-placeholder": "Enter ak_, ct_, ok_, ch_"
+        "transfer": "Transfer",
+        "address-placeholder": "Enter ak_, ct_, ok_, ch_",
+        "transfer-address-placeholder": "Enter recipient ak_"
       },
       "claim": {
         "auto-extend": "Auto extend name",

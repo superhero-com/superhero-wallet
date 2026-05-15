@@ -632,6 +632,7 @@ export interface IName {
   name: AensName;
   owner: string;
   pending: Boolean;
+  pendingStatus?: string;
   pointers: Dictionary;
 }
 
@@ -943,6 +944,7 @@ export interface IOtherSettings {
   isSeedBackedUp?: boolean;
   saveErrorLog?: boolean;
   isBiometricLoginEnabled?: boolean;
+  isNameClaimInfoModalHidden?: boolean;
   secureLoginTimeout?: number;
 }
 
