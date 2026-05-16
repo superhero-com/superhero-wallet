@@ -59,10 +59,11 @@ import { useAeNetworkSettings } from './aeNetworkSettings';
 import { useAeTippingBackend } from './aeTippingBackend';
 import { useAeMiddleware } from './aeMiddleware';
 
-const POLLING_INTERVAL = 10000;
+const DEFAULT_NAMES_POLLING_INTERVAL = 20000;
 const FEE_ESTIMATION_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 const FEE_ESTIMATION_NONCE = 10000;
 const PENDING_NAME_TRANSFER_TX_MAX_AGE = 5 * 60 * 1000;
+const EXTERNAL_NAME_CACHE_TTL = 10 * 60 * 1000;
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -132,7 +133,19 @@ type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 let composableInitialized = false;
 let claimPreclaimedNamesPromise: Promise<void> | null = null;
 let extendExpiringOwnedNamesPromise: Promise<void> | null = null;
+let updateDefaultNamesPromise: Promise<void> | null = null;
 let preclaimedNamesEncryptionInitialized = false;
+
+/**
+ * In-memory cache + in-flight dedup for `updateExternalName` lookups.
+ * Many components call `getName(externalAddress)` on render (notification rows,
+ * tx details, address pickers) - without this, each render fires a request
+ * even though the data is already in `externalNamesRegistry`.
+ * Keys are scoped by `${networkId}:${address}` so values don't leak across
+ * network switches.
+ */
+const externalNameLastFetchTime = new Map<string, number>();
+const externalNameInFlight = new Map<string, Promise<void>>();
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
 const preclaimedNamesEncrypted = useStorageRef<string | null>(
@@ -175,7 +188,7 @@ const auctions = ref<Record<string, IAuction>>({});
 
 const resolvedChainNames = ref<Record<Encoded.Name, AensName>>({});
 
-const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+const initPollingWatcher = createPollingBasedOnMountedComponents(DEFAULT_NAMES_POLLING_INTERVAL);
 
 /**
  * Aeternity Blockchain allows to match a .chain name to the addresses (AENS service).
@@ -235,14 +248,45 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   async function updateExternalName(address: AccountAddress) {
     ensureExternalNameRegistryExists();
 
-    const { preferredChainName } = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`)
-      .catch(() => ({}));
+    const networkId = nodeNetworkId.value!;
+    const cacheKey = `${networkId}:${address}`;
 
-    if (preferredChainName) {
-      externalNamesRegistry.value[nodeNetworkId.value!][address] = preferredChainName;
-    } else {
-      delete externalNamesRegistry.value[nodeNetworkId.value!][address];
+    const inFlight = externalNameInFlight.get(cacheKey);
+    if (inFlight) {
+      return inFlight;
     }
+
+    const lastFetch = externalNameLastFetchTime.get(cacheKey) || 0;
+    if (Date.now() - lastFetch < EXTERNAL_NAME_CACHE_TTL) {
+      return undefined;
+    }
+
+    const promise = (async () => {
+      let response: { preferredChainName?: ChainName } | null;
+      try {
+        response = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`);
+      } catch {
+        return;
+      }
+
+      // Bail if the network changed mid-flight to avoid writing into the
+      // wrong network's registry.
+      if (nodeNetworkId.value !== networkId) {
+        return;
+      }
+
+      if (response?.preferredChainName) {
+        externalNamesRegistry.value[networkId][address] = response.preferredChainName;
+      } else {
+        delete externalNamesRegistry.value[networkId][address];
+      }
+      externalNameLastFetchTime.set(cacheKey, Date.now());
+    })().finally(() => {
+      externalNameInFlight.delete(cacheKey);
+    });
+
+    externalNameInFlight.set(cacheKey, promise);
+    return promise;
   }
 
   // This function returns computed value to have reactive state and show proper data after fetching
@@ -540,22 +584,50 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     try {
       areNamesFetching.value = true;
 
+      const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
       const currentNetworkId = nodeNetworkId.value!;
       const accountResults = await Promise.all(
         aeAccounts.value.map(async ({ address }) => {
-          const [
-            pendingClaimTransactions,
-            accountNames,
-            pendingTransferLookup,
-          ] = await Promise.all([
-            fetchPendingNameClaimTransactions(address),
+          // A single pending-transactions fetch per address; both the
+          // claim-pending and transfer-pending derived lists below are
+          // computed from it. Previously two separate requests were issued
+          // for the same data per account.
+          const [pendingResult, accountNames] = await Promise.all([
+            aeternityAdapter.fetchPendingTransactions?.(address)
+              .then((transactions: ITransaction[]) => ({
+                failed: false,
+                transactions: transactions || [],
+              }))
+              .catch((error: any) => {
+                logSilentError(error);
+                return { failed: true, transactions: [] as ITransaction[] };
+              }) ?? Promise.resolve({ failed: false, transactions: [] as ITransaction[] }),
             fetchAllNames(address),
-            getPendingNameLookupResult(address as AccountAddress, 'NameTransferTx'),
           ]);
+
+          const pendingClaimTransactions = pendingResult.transactions
+            .filter(({ tx: { type } }) => type === 'NameClaimTx')
+            .map(({ tx, ...otherTx }) => ({
+              ...otherTx,
+              ...tx,
+              owner: tx.accountId,
+            })) as unknown as IName[];
+
+          const pendingTransferLookup: PendingNameLookupResult = {
+            failed: pendingResult.failed,
+            transactions: pendingResult.transactions
+              .filter(({ tx: { type } }) => type === 'NameTransferTx')
+              .map(({ tx, hash }) => ({
+                hash,
+                name: tx.name as AensName,
+                owner: tx.accountId as AccountAddress,
+              }) as IPendingNameTransaction),
+          };
+
           return {
             address,
             names: [
-              ...(pendingClaimTransactions || []),
+              ...pendingClaimTransactions,
               ...(accountNames || []),
             ] as IName[],
             pendingTransferLookup,
@@ -621,8 +693,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
-  function updateDefaultNames() {
-    aeAccounts.value.map(async ({ address }) => {
+  async function processDefaultNamesUpdate() {
+    await Promise.all(aeAccounts.value.map(async ({ address }) => {
       const currentNodeId = nodeNetworkId.value;
       const response = await fetchJson(
         `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`,
@@ -633,7 +705,20 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       }
 
       setDefaultName({ address, name: response?.preferredChainName });
-    });
+    }));
+  }
+
+  async function updateDefaultNames() {
+    if (!updateDefaultNamesPromise) {
+      const updatePromise = processDefaultNamesUpdate()
+        .finally(() => {
+          if (updateDefaultNamesPromise === updatePromise) {
+            updateDefaultNamesPromise = null;
+          }
+        });
+      updateDefaultNamesPromise = updatePromise;
+    }
+    return updateDefaultNamesPromise;
   }
 
   async function updateNamePointer(
@@ -943,6 +1028,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     retrieveCachedChainNames();
 
     onNetworkChange(async () => {
+      externalNameLastFetchTime.clear();
+      updateDefaultNamesPromise = null;
       await Promise.all([
         updateOwnedNames(),
         updateDefaultNames(),

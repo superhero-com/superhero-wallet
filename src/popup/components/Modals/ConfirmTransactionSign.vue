@@ -822,7 +822,7 @@ export default defineComponent({
   }
 
   .advanced-transaction-details {
-    width:100%;
+    width: 100%;
   }
 }
 </style>

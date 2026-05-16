@@ -21,6 +21,15 @@ const POLLING_INTERVAL = 60000;
 
 const TIMEOUT_LIMIT = 5000;
 
+/**
+ * The per-account token-sales discovery is shared between every poll of
+ * `fetchAccountTokenBalances`. Re-fetching it on every cycle for every account
+ * (which is the same data) is wasteful. We throttle per (networkName, address).
+ */
+const PER_ACCOUNT_TOKEN_SALES_REFRESH_INTERVAL = 60_000;
+const lastTokenSalesByAccountRefreshTime = new Map<string, number>();
+const inFlightTokenSalesByAccount = new Map<string, Promise<void>>();
+
 let composableInitialized = false;
 
 interface TokenFactory {
@@ -169,22 +178,48 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
   }
 
   async function loadAllTokenSalesInfoByAccount(address: Encoded.AccountAddress) {
+    const currentNetworkName = activeNetwork.value.name;
+    const cacheKey = `${currentNetworkName}:${address}`;
+
+    // De-dupe in-flight fetches for the same (network, address) so that
+    // parallel calls share a single network round-trip.
+    const inFlight = inFlightTokenSalesByAccount.get(cacheKey);
+    if (inFlight) {
+      return inFlight;
+    }
+
+    // Skip if we refreshed this (network, address) pair recently. Token sales
+    // discovery for an account is essentially network-wide pricing data;
+    // refreshing it every 30s is wasteful; once per minute is plenty.
+    const lastRefresh = lastTokenSalesByAccountRefreshTime.get(cacheKey) || 0;
+    if (Date.now() - lastRefresh < PER_ACCOUNT_TOKEN_SALES_REFRESH_INTERVAL) {
+      return undefined;
+    }
+
     const tokenSalesUrls = [
       ...(activeNetwork.value.type !== NETWORK_TYPE_CUSTOM
         ? [AE_TOKEN_SALES_URLS[activeNetwork.value.type]]
         : []),
       ...(customTokenSalesUrls.value[activeNetwork.value.name] || []),
     ];
-    const currentNetworkName = activeNetwork.value.name;
-    const allTokenSalesInfo = await Promise.all(
-      tokenSalesUrls.map((url) => loadTokenSalesInfoByAccount(url, address)),
-    );
-    if (currentNetworkName !== activeNetwork.value.name) {
-      return;
-    }
-    allTokenSalesInfo.forEach((response) => {
-      tokenSales.value = uniqBy([...tokenSales.value, ...response], 'address');
+
+    const promise = (async () => {
+      const allTokenSalesInfo = await Promise.all(
+        tokenSalesUrls.map((url) => loadTokenSalesInfoByAccount(url, address)),
+      );
+      if (currentNetworkName !== activeNetwork.value.name) {
+        return;
+      }
+      allTokenSalesInfo.forEach((response) => {
+        tokenSales.value = uniqBy([...tokenSales.value, ...response], 'address');
+      });
+      lastTokenSalesByAccountRefreshTime.set(cacheKey, Date.now());
+    })().finally(() => {
+      inFlightTokenSalesByAccount.delete(cacheKey);
     });
+
+    inFlightTokenSalesByAccount.set(cacheKey, promise);
+    return promise;
   }
 
   async function validateTokenSalesUrl(url: string): Promise<{
@@ -242,6 +277,8 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
       if (network.name !== oldNetwork.name) {
         tokenSales.value = [];
         tokenFactories.value = [];
+        lastTokenSalesByAccountRefreshTime.clear();
+        inFlightTokenSalesByAccount.clear();
         await loadAllTokenFactoriesInfo();
       }
     });
