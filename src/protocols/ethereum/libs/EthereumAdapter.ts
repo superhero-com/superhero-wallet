@@ -190,7 +190,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override async isAccountUsed(address: AccountAddress): Promise<boolean> {
     const [balance, txCount] = await Promise.all([
-      await this.fetchBalance(address),
+      this.fetchBalance(address),
       this.getTransactionCount(address),
     ]);
 
