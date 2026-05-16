@@ -185,7 +185,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override async isAccountUsed(address: AccountAddress): Promise<boolean> {
     const [balance, txCount] = await Promise.all([
-      await this.fetchBalance(address),
+      this.fetchBalance(address),
       this.getTransactionCount(address),
     ]);
     return parseFloat(balance) > 0 || txCount > 0;
