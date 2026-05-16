@@ -273,7 +273,7 @@ export default defineComponent({
           StatusBar.setOverlaysWebView({ overlay: false });
         }
         StatusBar.setStyle({ style: Style.Dark });
-        setMobileStatusBarColor('#141414');
+        setMobileStatusBarColor(IS_ANDROID ? '#000000' : '#141414');
         window.screen.orientation?.lock?.('portrait');
       }
     });
@@ -299,6 +299,8 @@ export default defineComponent({
         setTimeout(() => {
           SplashScreen.hide({
             fadeOutDuration: 300,
+          }).finally(() => {
+            setMobileStatusBarColor('#141414');
           });
         }, 2000);
       }
