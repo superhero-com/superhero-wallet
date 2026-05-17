@@ -18,15 +18,33 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
+import { useRoute } from 'vue-router';
 import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
 import type { ICommonTransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { useMultisigAccounts, usePendingMultisigTransaction, useTransactionList } from '@/composables';
+import {
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_ASSETS,
+  ROUTE_MULTISIG_COIN,
+  ROUTE_MULTISIG_COIN_DETAILS,
+  ROUTE_MULTISIG_DETAILS_INFO,
+} from '@/popup/router/routeNames';
 
 import TransactionList from '../components/TransactionList.vue';
 
-let initialized = false;
+const ROUTE_GROUPS = [
+  [
+    ROUTE_MULTISIG_DETAILS,
+    ROUTE_MULTISIG_DETAILS_ASSETS,
+    ROUTE_MULTISIG_DETAILS_INFO,
+  ],
+  [
+    ROUTE_MULTISIG_COIN,
+    ROUTE_MULTISIG_COIN_DETAILS,
+  ],
+];
 
 export default defineComponent({
   components: {
@@ -34,8 +52,13 @@ export default defineComponent({
     TransactionList,
   },
   setup() {
+    const route = useRoute();
+    const currentRouteGroup = ROUTE_GROUPS.find((routeGroup) => (
+      routeGroup.includes(route.name as string)
+    )) || [];
     const { activeMultisigAccount } = useMultisigAccounts();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction();
+    let initialized = false;
 
     const {
       transactionsLoaded,
@@ -68,11 +91,15 @@ export default defineComponent({
       }
     });
 
-    // Fired only when leaving to different tab within the AccountDetails.
+    // Fired when leaving to a different tab within AccountDetails.
+    // During iOS swipe-back the page is still visible while leaving, so keep the list mounted
+    // to avoid an empty redraw/flicker; onUnmounted handles cleanup when leaving AccountDetails.
     onIonViewDidLeave(() => {
-      isPageActive.value = false;
-      stopTransactionListPolling();
-      initialized = false;
+      if (currentRouteGroup.includes(route.name as string)) {
+        isPageActive.value = false;
+        stopTransactionListPolling();
+        initialized = false;
+      }
     });
 
     // Fired when leaving the AccountDetails page.

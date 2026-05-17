@@ -16,16 +16,32 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
+import { useRoute } from 'vue-router';
 import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
 import {
   useAccounts,
   useTransactionList,
 } from '@/composables';
+import {
+  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_ASSETS,
+  ROUTE_ACCOUNT_DETAILS_NAMES,
+  ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+} from '@/popup/router/routeNames';
 
 import TransactionList from '@/popup/components/TransactionList.vue';
 
-let initialized = false;
+const ROUTE_GROUPS = [
+  [
+    ROUTE_ACCOUNT_DETAILS,
+    ROUTE_ACCOUNT_DETAILS_ASSETS,
+    ROUTE_ACCOUNT_DETAILS_NAMES,
+    ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+    ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+  ],
+];
 
 export default defineComponent({
   components: {
@@ -33,7 +49,12 @@ export default defineComponent({
     TransactionList,
   },
   setup() {
+    const route = useRoute();
+    const currentRouteGroup = ROUTE_GROUPS.find((routeGroup) => (
+      routeGroup.includes(route.name as string)
+    )) || [];
     const { activeAccount } = useAccounts();
+    let initialized = false;
 
     const {
       transactionsLoadedAndPending,
@@ -61,11 +82,15 @@ export default defineComponent({
       }
     });
 
-    // Fired only when leaving to different tab within the AccountDetails.
+    // Fired when leaving to a different tab within AccountDetails.
+    // During iOS swipe-back the page is still visible while leaving, so keep the list mounted
+    // to avoid an empty redraw/flicker; onUnmounted handles cleanup when leaving AccountDetails.
     onIonViewDidLeave(() => {
-      isPageActive.value = false;
-      stopTransactionListPolling();
-      initialized = false;
+      if (currentRouteGroup.includes(route.name as string)) {
+        isPageActive.value = false;
+        stopTransactionListPolling();
+        initialized = false;
+      }
     });
 
     // Fired when leaving the AccountDetails page.
