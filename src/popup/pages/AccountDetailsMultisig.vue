@@ -1,66 +1,56 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <AccountDetailsBase
-        v-if="activeMultisigAccount && isPageActive"
-        without-default-buttons
-      >
-        <template #account-info>
-          <AccountInfo
-            :account="convertMultisigAccountToAccount(activeMultisigAccount)"
-            is-multisig
-            show-protocol-icon
-            can-copy-address
-          />
-        </template>
+  <AccountDetailsBase
+    v-if="activeMultisigAccount"
+    without-default-buttons
+  >
+    <template #account-info>
+      <AccountInfo
+        :account="convertMultisigAccountToAccount(activeMultisigAccount)"
+        is-multisig
+        show-protocol-icon
+        can-copy-address
+      />
+    </template>
 
-        <template #balance>
-          <BalanceInfo
-            :balance="+(activeMultisigAccount.balance || 0)"
-            :protocol="PROTOCOLS.aeternity"
-          />
-        </template>
+    <template #balance>
+      <BalanceInfo
+        :balance="+(activeMultisigAccount.balance || 0)"
+        :protocol="PROTOCOLS.aeternity"
+      />
+    </template>
 
-        <template #buttons>
-          <OpenTransferReceiveModalBtn is-multisig />
-          <OpenTransferSendModalBtn
-            :disabled="!!pendingMultisigTransaction"
-            is-multisig
-          />
-          <OpenShareAddressModalBtn
-            :address="convertMultisigAccountToAccount(activeMultisigAccount).address!"
-            :protocol="PROTOCOLS.aeternity"
-          />
-          <BtnBox
-            v-if="UNFINISHED_FEATURES"
-            :icon="CreditCardIcon"
-            :text="$t('common.buy')"
-            :href="simplexLink"
-          />
-        </template>
+    <template #buttons>
+      <OpenTransferReceiveModalBtn is-multisig />
+      <OpenTransferSendModalBtn
+        :disabled="!!pendingMultisigTransaction"
+        is-multisig
+      />
+      <OpenShareAddressModalBtn
+        :address="convertMultisigAccountToAccount(activeMultisigAccount).address!"
+        :protocol="PROTOCOLS.aeternity"
+      />
+      <BtnBox
+        v-if="UNFINISHED_FEATURES"
+        :icon="CreditCardIcon"
+        :text="$t('common.buy')"
+        :href="simplexLink"
+      />
+    </template>
 
-        <template #navigation>
-          <AccountDetailsNavigation
-            :route-names="[
-              ROUTE_MULTISIG_DETAILS,
-              ROUTE_MULTISIG_DETAILS_INFO,
-              ROUTE_MULTISIG_DETAILS_ASSETS,
-            ]"
-          />
-        </template>
-      </AccountDetailsBase>
-    </IonContent>
-  </IonPage>
+    <template #navigation>
+      <AccountDetailsNavigation
+        :route-names="[
+          ROUTE_MULTISIG_DETAILS,
+          ROUTE_MULTISIG_DETAILS_INFO,
+          ROUTE_MULTISIG_DETAILS_ASSETS,
+        ]"
+      />
+    </template>
+  </AccountDetailsBase>
 </template>
 
 <script lang="ts">
-import {
-  IonContent,
-  IonPage,
-  onIonViewDidEnter,
-  onIonViewDidLeave,
-} from '@ionic/vue';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import {
@@ -91,12 +81,8 @@ export default defineComponent({
     BalanceInfo,
     AccountInfo,
     AccountDetailsBase,
-    IonPage,
-    IonContent,
   },
   setup() {
-    const isPageActive = ref(false);
-
     const { activeMultisigAccount } = useMultisigAccounts();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
@@ -106,14 +92,6 @@ export default defineComponent({
         : '',
     );
 
-    onIonViewDidEnter(() => {
-      isPageActive.value = true;
-    });
-
-    onIonViewDidLeave(() => {
-      isPageActive.value = false;
-    });
-
     return {
       UNFINISHED_FEATURES,
       PROTOCOLS,
@@ -121,7 +99,6 @@ export default defineComponent({
       ROUTE_MULTISIG_DETAILS_INFO,
       ROUTE_MULTISIG_DETAILS_ASSETS,
       activeMultisigAccount,
-      isPageActive,
       simplexLink,
       pendingMultisigTransaction,
       CreditCardIcon,

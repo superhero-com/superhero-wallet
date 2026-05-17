@@ -1,89 +1,88 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="token-sales-settings">
-        <p
-          class="text-description"
-          v-text="$t('pages.tokenSales.heading')"
-        />
+  <PageWrapper :page-title="$t('pages.titles.tokenSales')">
+    <div class="token-sales-settings">
+      <p
+        class="text-description"
+        v-text="$t('pages.tokenSales.heading')"
+      />
 
-        <InputField
-          v-model.trim="tokenSalesUrl"
-          :label="$t('pages.tokenSales.inputLabel')"
-          :placeholder="$t('pages.tokenSales.inputPlaceholder')"
-          type="url"
-          :message="error"
-          @input="error = ''"
-        />
-        <div class="buttons">
-          <BtnMain
-            variant="muted"
-            class="cancel-button"
-            :to="{ name: ROUTE_SETTINGS }"
-          >
-            {{ $t('common.cancel') }}
-          </BtnMain>
-          <BtnMain
-            wide
-            :disabled="!tokenSalesUrl || loading || !!error"
-            @click="addTokenSalesUrl()"
-          >
-            <IonSpinner
-              v-if="loading"
-              class="icon"
-              name="circular"
-            />
-            <PlusIcon
-              v-else
-              class="icon"
-            />
-
-            {{ $t('pages.tokenSales.addUrl') }}
-          </BtnMain>
-        </div>
-        <div
-          v-if="tokenSalesUrls.length"
-          class="url-list"
+      <InputField
+        v-model.trim="tokenSalesUrl"
+        :label="$t('pages.tokenSales.inputLabel')"
+        :placeholder="$t('pages.tokenSales.inputPlaceholder')"
+        type="url"
+        :message="error"
+        @input="error = ''"
+      />
+      <div class="buttons">
+        <BtnMain
+          variant="muted"
+          class="cancel-button"
+          :to="{ name: ROUTE_SETTINGS }"
         >
-          <h2
-            class="text-label"
-            v-text="$t('pages.tokenSales.urlListLabel')"
+          {{ $t('common.cancel') }}
+        </BtnMain>
+        <BtnMain
+          wide
+          :disabled="!tokenSalesUrl || loading || !!error"
+          @click="addTokenSalesUrl()"
+        >
+          <IonSpinner
+            v-if="loading"
+            class="icon"
+            name="circular"
           />
-          <div
-            v-for="url in tokenSalesUrls"
-            :key="url"
-            class="custom-url"
+          <PlusIcon
+            v-else
+            class="icon"
+          />
+
+          {{ $t('pages.tokenSales.addUrl') }}
+        </BtnMain>
+      </div>
+      <div
+        v-if="tokenSalesUrls.length"
+        class="url-list"
+      >
+        <h2
+          class="text-label"
+          v-text="$t('pages.tokenSales.urlListLabel')"
+        />
+        <div
+          v-for="url in tokenSalesUrls"
+          :key="url"
+          class="custom-url"
+        >
+          <LinkButton
+            :href="url"
+            is-external
+            variant="muted"
           >
-            <LinkButton
-              :href="url"
-              is-external
-              variant="muted"
-            >
-              <p
-                class="url"
-                v-text="url"
-              />
-            </LinkButton>
-            <BtnIcon
-              :icon="TrashIcon"
-              class="btn-icon"
-              @click="removeCustomTokenSalesUrl(url)"
+            <p
+              class="url"
+              v-text="url"
             />
-          </div>
+          </LinkButton>
+          <BtnIcon
+            :icon="TrashIcon"
+            class="btn-icon"
+            @click="removeCustomTokenSalesUrl(url)"
+          />
         </div>
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
-import { IonPage, IonContent, IonSpinner } from '@ionic/vue';
+import { IonSpinner } from '@ionic/vue';
 
 import { useNetworks } from '@/composables';
 import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 import { ROUTE_SETTINGS } from '@/popup/router/routeNames';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import InputField from '@/popup/components/InputField.vue';
 import LinkButton from '@/popup/components/LinkButton.vue';
@@ -94,8 +93,7 @@ import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 
 export default defineComponent({
   components: {
-    IonPage,
-    IonContent,
+    PageWrapper,
     InputField,
     BtnMain,
     LinkButton,

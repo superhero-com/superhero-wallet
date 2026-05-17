@@ -1,75 +1,73 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="seed-phrase-details">
-        <div class="text-heading-3">
-          {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
-        </div>
+  <PageWrapper :page-title="$t('pages.titles.seedPhrase')">
+    <div class="seed-phrase-details">
+      <div
+        class="text-heading-3"
+        v-text="$t('pages.seed-phrase-settings.this-your-seed-phrase')"
+      />
 
-        <CardMnemonic class="mnemonics">
-          <p
-            class="mnemonics-text"
-            data-cy="seed-phrase-mnemonic"
-          >
-            {{ mnemonicDecrypted }}
-          </p>
-          <BtnMain
-            variant="dark"
-            class="copy-btn"
-            big-icon
-            :icon="copied ? CheckSuccessCircle : CopyOutlined"
-            @click="copy(mnemonicDecrypted)"
-          >
-            <template v-if="!copied">
-              {{ $t('pages.seed-phrase-settings.copy') }}
-            </template>
-
-            <template v-else>
-              {{ $t('common.addressCopied') }}
-            </template>
-          </BtnMain>
-        </CardMnemonic>
-
-        <i18n-t
-          keypath="pages.seedPhrase.backUpYourSeedPhrase"
-          tag="p"
-          class="text-description"
-          scope="global"
+      <CardMnemonic class="mnemonics">
+        <p
+          class="mnemonics-text"
+          data-cy="seed-phrase-mnemonic"
         >
-          <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
-        </i18n-t>
-        <i18n-t
-          keypath="pages.seedPhrase.toBeSureYouGotItRight"
-          tag="p"
-          class="text-description"
-          scope="global"
+          {{ mnemonicDecrypted }}
+        </p>
+        <BtnMain
+          variant="dark"
+          class="copy-btn"
+          big-icon
+          :icon="copied ? CheckSuccessCircle : CopyOutlined"
+          @click="copy(mnemonicDecrypted)"
         >
-          <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
-        </i18n-t>
+          <template v-if="!copied">
+            {{ $t('pages.seed-phrase-settings.copy') }}
+          </template>
 
-        <div class="buttons">
-          <BtnMain
-            class="button"
-            extend
-            :text="$t('pages.seedPhrase.verifySeed')"
-            :to="{ name: ROUTE_SEED_PHRASE_VERIFY }"
-          />
-          <BtnMain
-            variant="muted"
-            extend
-            :text="$t('pages.seedPhrase.doneThis')"
-            @click="markSeedPhraseAsBackedUp()"
-          />
-        </div>
+          <template v-else>
+            {{ $t('common.addressCopied') }}
+          </template>
+        </BtnMain>
+      </CardMnemonic>
+
+      <i18n-t
+        keypath="pages.seedPhrase.backUpYourSeedPhrase"
+        tag="p"
+        class="text-description"
+        scope="global"
+      >
+        <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
+      </i18n-t>
+      <i18n-t
+        keypath="pages.seedPhrase.toBeSureYouGotItRight"
+        tag="p"
+        class="text-description"
+        scope="global"
+      >
+        <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
+      </i18n-t>
+
+      <div class="buttons">
+        <BtnMain
+          class="button"
+          extend
+          :text="$t('pages.seedPhrase.verifySeed')"
+          :to="{ name: ROUTE_SEED_PHRASE_VERIFY }"
+        />
+        <BtnMain
+          variant="muted"
+          extend
+          :text="$t('pages.seedPhrase.doneThis')"
+          @click="markSeedPhraseAsBackedUp()"
+        />
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent } from '@ionic/vue';
 import {
   useAuth,
   useCopy,
@@ -78,6 +76,7 @@ import {
 } from '@/composables';
 import { ROUTE_ACCOUNT, ROUTE_SEED_PHRASE_VERIFY } from '@/popup/router/routeNames';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CardMnemonic from '../components/CardMnemonic.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
@@ -86,9 +85,8 @@ import CheckSuccessCircle from '../../icons/check-mark-circle-outline.svg?vue-co
 export default defineComponent({
   name: 'SeedPhraseDetailsSettings',
   components: {
+    PageWrapper,
     BtnMain,
-    IonPage,
-    IonContent,
     CardMnemonic,
   },
   setup() {

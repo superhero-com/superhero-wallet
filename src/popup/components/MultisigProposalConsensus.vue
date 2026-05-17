@@ -84,7 +84,7 @@ import InfoBox, { InfoBoxType, INFO_BOX_TYPES } from './InfoBox.vue';
 import ConsensusLabel from './ConsensusLabel.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 
-import CheckCircle from '../../icons/circle-check-outlined.svg?vue-component';
+import CheckCircle from '../../icons/check-mark-circle.svg?vue-component';
 import CloseCircle from '../../icons/circle-close.svg?vue-component';
 
 export default defineComponent({

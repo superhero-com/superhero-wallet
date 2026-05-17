@@ -12,10 +12,6 @@ export interface WalletRouteMeta {
    */
   redirectIfNull?: string;
   /**
-   * Decide if the app header should be hidden
-   */
-  hideHeader?: boolean;
-  /**
    * Allow to see the page by unauthorized users
    */
   ifNotAuth?: boolean;
@@ -33,19 +29,9 @@ export interface WalletRouteMeta {
    */
   notPersist?: boolean;
   /**
-   * Part of the translation string that point to the translated page title
-   * 'pages.title[title]`
+   * Allow platform/default handlers to process hardware back instead of using page navigation.
    */
-  title?: string;
-  /**
-   * Decide if the header should display the logo and more button
-   * or the back and close buttons.
-   */
-  showHeaderNavigation?: boolean;
-  /**
-   * Decide if the header should hide back button
-   */
-  hideBackButton?: boolean;
+  useDefaultHardwareBackButton?: boolean;
   /**
    * Decide if the scrollbar should be visible to the user
    * @default: false

@@ -1,195 +1,190 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="transaction-details">
-        <template v-if="transaction && !transaction.incomplete">
-          <TransactionDetailsBase
-            :transaction="transaction"
-            :amount="amount"
-            :amount-total="amountTotal"
-            :fee="transactionFee"
-            :is-error-transaction="isErrorTransaction"
-            :payload="getTransactionPayload(transaction)!"
-            :show-header="!isAllowance"
-            :hide-amount-total="(
-              isDex
-              || isAllowance
-              || isAex9
-              || isTokenSale
-              || isTokenSaleFactory
-            )"
-            :hide-fiat="hideFiat"
-            :hash="hash"
+  <div class="transaction-details">
+    <template v-if="transaction && !transaction.incomplete">
+      <TransactionDetailsBase
+        :transaction="transaction"
+        :amount="amount"
+        :amount-total="amountTotal"
+        :fee="transactionFee"
+        :is-error-transaction="isErrorTransaction"
+        :payload="getTransactionPayload(transaction)"
+        :hide-amount-total="(
+          isDex
+          || isAllowance
+          || isAex9
+          || isTokenSale
+          || isTokenSaleFactory
+        )"
+        :hide-fiat="hideFiat"
+        :hash="hash"
+        :protocol="PROTOCOLS.aeternity"
+        :price="price"
+      >
+        <template #tokens>
+          <TransactionAssetRows
+            :assets="transactionAssets"
+            :error="isErrorTransaction"
+            :is-reversed="isDexPool"
             :protocol="PROTOCOLS.aeternity"
-            :price="price"
-          >
-            <template #tokens>
-              <TransactionAssetRows
-                :assets="transactionAssets"
-                :error="isErrorTransaction"
-                :is-reversed="isDexPool"
-                :protocol="PROTOCOLS.aeternity"
-                icon-size="rg"
-                multiple-rows
-              />
-            </template>
-
-            <template
-              v-if="isDexSwap || isTokenSale"
-              #swap-data
-            >
-              <SwapRates :transaction="transaction" />
-              <SwapRoute :transaction="transaction" />
-            </template>
-
-            <template #additional-content>
-              <TransactionDetailsPoolTokens
-                v-if="(isDexPool || isAllowance)"
-                :transaction="transaction"
-                :tokens="transactionAssets"
-                :reversed="isDexPool"
-              />
-
-              <DetailsItem
-                v-if="aensName"
-                :label="$t('pages.transactionDetails.name')"
-                :value="aensName"
-                class="aens-name"
-                data-cy="aens-name"
-              />
-
-              <DetailsItem
-                v-if="preclaimCommitment"
-                :label="$t('modals.confirmTransactionSign.commitmentId')"
-                class="aens-commitment"
-                data-cy="aens-commitment"
-                small
-              >
-                <template #value>
-                  <CopyText
-                    hide-icon
-                    :value="preclaimCommitment"
-                    :copied-text="$t('common.hashCopied')"
-                  >
-                    <span class="text-address">{{ splitAddress(preclaimCommitment) }}</span>
-                  </CopyText>
-                </template>
-              </DetailsItem>
-
-              <DetailsItem
-                v-if="tipUrl"
-                :label="$t('pages.transactionDetails.tipUrl')"
-                class="tip-url"
-                data-cy="tip-url"
-              >
-                <template #value>
-                  <CopyText :value="tipUrl">
-                    <LinkButton :href="tipLink">
-                      <Truncate
-                        :str="tipUrl"
-                        fixed
-                      />
-                    </LinkButton>
-                  </CopyText>
-                </template>
-              </DetailsItem>
-            </template>
-
-            <template #multisig-content>
-              <DetailsItem
-                v-if="multisigTransactionFeePaidBy"
-                :label="$t('pages.transactionDetails.feePaidBy')"
-                small
-              >
-                <div class="row payer-id">
-                  <Avatar
-                    :address="multisigTransactionFeePaidBy"
-                    size="sm"
-                  />
-                  <div>
-                    <DialogBox
-                      v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
-                      class="dialog-box"
-                      dense
-                      position="bottom"
-                    >
-                      {{ $t('common.you') }}
-                    </DialogBox>
-                    <CopyText
-                      hide-icon
-                      :value="multisigTransactionFeePaidBy"
-                      :copied-text="$t('common.addressCopied')"
-                    >
-                      <span class="text-address">
-                        {{ splitAddress(multisigTransactionFeePaidBy) }}
-                      </span>
-                    </CopyText>
-                  </div>
-                </div>
-              </DetailsItem>
-
-              <DetailsItem
-                v-if="multisigContractId"
-                :label="$t('pages.transactionDetails.vaultContractId')"
-                small
-              >
-                <div class="row">
-                  <Avatar
-                    :address="multisigContractId"
-                    size="sm"
-                  />
-                  <CopyText
-                    hide-icon
-                    :value="multisigContractId"
-                    :copied-text="$t('common.addressCopied')"
-                  >
-                    <span class="text-address">
-                      {{ splitAddress(multisigContractId) }}
-                    </span>
-                  </CopyText>
-                </div>
-              </DetailsItem>
-            </template>
-
-            <template #gas>
-              <DetailsItem
-                v-if="gasUsed"
-                :value="gasUsed"
-                :label="$t('pages.transactionDetails.gasUsed')"
-                data-cy="gas"
-              />
-              <DetailsItem
-                v-if="gasPrice"
-                :label="$t('pages.transactionDetails.gasPrice')"
-                data-cy="gas-price"
-              >
-                <template #value>
-                  <TokenAmount
-                    :amount="+aettosToAe(gasPrice)"
-                    :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOLS.aeternity"
-                  />
-                </template>
-              </DetailsItem>
-              <DetailsItem
-                v-if="gasCost"
-                :label="$t('transaction.gasCost')"
-                data-cy="gas-price"
-              >
-                <template #value>
-                  <TokenAmount
-                    :amount="+aettosToAe(gasCost)"
-                    :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOLS.aeternity"
-                  />
-                </template>
-              </DetailsItem>
-            </template>
-          </TransactionDetailsBase>
+            icon-size="rg"
+            multiple-rows
+          />
         </template>
-      </div>
-    </IonContent>
-  </IonPage>
+
+        <template
+          v-if="isDexSwap || isTokenSale"
+          #swap-data
+        >
+          <SwapRates :transaction="transaction" />
+          <SwapRoute :transaction="transaction" />
+        </template>
+
+        <template #additional-content>
+          <TransactionDetailsPoolTokens
+            v-if="(isDexPool || isAllowance)"
+            :transaction="transaction"
+            :tokens="transactionAssets"
+            :reversed="isDexPool"
+          />
+
+          <DetailsItem
+            v-if="aensName"
+            :label="$t('pages.transactionDetails.name')"
+            :value="aensName"
+            class="aens-name"
+            data-cy="aens-name"
+          />
+
+          <DetailsItem
+            v-if="preclaimCommitment"
+            :label="$t('modals.confirmTransactionSign.commitmentId')"
+            class="aens-commitment"
+            data-cy="aens-commitment"
+            small
+          >
+            <template #value>
+              <CopyText
+                hide-icon
+                :value="preclaimCommitment"
+                :copied-text="$t('common.hashCopied')"
+              >
+                <span class="text-address">{{ splitAddress(preclaimCommitment) }}</span>
+              </CopyText>
+            </template>
+          </DetailsItem>
+
+          <DetailsItem
+            v-if="tipUrl"
+            :label="$t('pages.transactionDetails.tipUrl')"
+            class="tip-url"
+            data-cy="tip-url"
+          >
+            <template #value>
+              <CopyText :value="tipUrl">
+                <LinkButton :href="tipLink">
+                  <Truncate
+                    :str="tipUrl"
+                    fixed
+                  />
+                </LinkButton>
+              </CopyText>
+            </template>
+          </DetailsItem>
+        </template>
+
+        <template #multisig-content>
+          <DetailsItem
+            v-if="multisigTransactionFeePaidBy"
+            :label="$t('pages.transactionDetails.feePaidBy')"
+            small
+          >
+            <div class="row payer-id">
+              <Avatar
+                :address="multisigTransactionFeePaidBy"
+                size="sm"
+              />
+              <div>
+                <DialogBox
+                  v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                  class="dialog-box"
+                  dense
+                  position="bottom"
+                >
+                  {{ $t('common.you') }}
+                </DialogBox>
+                <CopyText
+                  hide-icon
+                  :value="multisigTransactionFeePaidBy"
+                  :copied-text="$t('common.addressCopied')"
+                >
+                  <span class="text-address">
+                    {{ splitAddress(multisigTransactionFeePaidBy) }}
+                  </span>
+                </CopyText>
+              </div>
+            </div>
+          </DetailsItem>
+
+          <DetailsItem
+            v-if="multisigContractId"
+            :label="$t('pages.transactionDetails.vaultContractId')"
+            small
+          >
+            <div class="row">
+              <Avatar
+                :address="multisigContractId"
+                size="sm"
+              />
+              <CopyText
+                hide-icon
+                :value="multisigContractId"
+                :copied-text="$t('common.addressCopied')"
+              >
+                <span class="text-address">
+                  {{ splitAddress(multisigContractId) }}
+                </span>
+              </CopyText>
+            </div>
+          </DetailsItem>
+        </template>
+
+        <template #gas>
+          <DetailsItem
+            v-if="gasUsed"
+            :value="gasUsed"
+            :label="$t('pages.transactionDetails.gasUsed')"
+            data-cy="gas"
+          />
+          <DetailsItem
+            v-if="gasPrice"
+            :label="$t('pages.transactionDetails.gasPrice')"
+            data-cy="gas-price"
+          >
+            <template #value>
+              <TokenAmount
+                :amount="+aettosToAe(gasPrice)"
+                :symbol="AE_SYMBOL"
+                :protocol="PROTOCOLS.aeternity"
+              />
+            </template>
+          </DetailsItem>
+          <DetailsItem
+            v-if="gasCost"
+            :label="$t('transaction.gasCost')"
+            data-cy="gas-price"
+          >
+            <template #value>
+              <TokenAmount
+                :amount="+aettosToAe(gasCost)"
+                :symbol="AE_SYMBOL"
+                :protocol="PROTOCOLS.aeternity"
+              />
+            </template>
+          </DetailsItem>
+        </template>
+      </TransactionDetailsBase>
+    </template>
+  </div>
 </template>
 
 <script lang="ts">
@@ -203,7 +198,6 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
-import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ITransaction, ITx } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
@@ -259,8 +253,6 @@ export default defineComponent({
     CopyText,
     LinkButton,
     Truncate,
-    IonContent,
-    IonPage,
   },
   props: {
     multisigDashboard: Boolean,
