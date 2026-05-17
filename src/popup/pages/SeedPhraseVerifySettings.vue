@@ -173,6 +173,9 @@ export default defineComponent({
 
 .seed-phrase-verify-settings {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 
   &-body {
     padding: var(--screen-padding-x);
