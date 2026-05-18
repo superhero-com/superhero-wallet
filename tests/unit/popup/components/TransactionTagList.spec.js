@@ -39,7 +39,10 @@ const transactionLabels = {
     tg('transaction.type.spendTx'),
     tg('transaction.spendType.out'),
   ],
-  nameTransfer: [], // unsupported type
+  nameTransfer: [
+    AENS,
+    tg('transaction.type.nameTransferTx'),
+  ],
 };
 
 const testCases = [

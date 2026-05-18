@@ -14,7 +14,10 @@ export async function setMobileStatusBarColor(color: string) {
   if (!IS_MOBILE_APP) return;
 
   if (IS_ANDROID) {
-    await EdgeToEdge.setStatusBarColor({ color });
+    await Promise.all([
+      EdgeToEdge.setStatusBarColor({ color }),
+      EdgeToEdge.setNavigationBarColor({ color }),
+    ]);
     return;
   }
 

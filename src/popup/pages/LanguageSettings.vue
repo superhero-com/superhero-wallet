@@ -1,43 +1,41 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="language-settings">
-        <p class="text-description">
-          {{ $t('pages.languageSettings.chooseLanguage') }}
-        </p>
+  <PageWrapper :page-title="$t('pages.titles.language')">
+    <div class="language-settings">
+      <p
+        class="text-description"
+        v-text="$t('pages.languageSettings.chooseLanguage')"
+      />
 
-        <div class="languages">
-          <RadioButton
-            v-for="{ code, name } in languageList"
-            :key="code"
-            :value="activeLanguage === code"
-            :class="{ active: activeLanguage === code }"
-            class="language"
-            has-label-effect
-            @input="switchLanguage(code)"
-          >
-            {{ name }}
-            <span class="language-code">({{ code }})</span>
-          </RadioButton>
-        </div>
+      <div class="languages">
+        <RadioButton
+          v-for="{ code, name } in languageList"
+          :key="code"
+          :value="activeLanguage === code"
+          :class="{ active: activeLanguage === code }"
+          class="language"
+          has-label-effect
+          @input="switchLanguage(code)"
+        >
+          {{ name }}
+          <span class="language-code">({{ code }})</span>
+        </RadioButton>
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
 import { languages, SupportedLanguage } from '@/popup/plugins/i18n';
 import { useLanguages } from '@/composables';
 
+import PageWrapper from '../components/PageWrapper.vue';
 import RadioButton from '../components/RadioButton.vue';
 
 export default defineComponent({
   components: {
+    PageWrapper,
     RadioButton,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { activeLanguage, switchLanguage } = useLanguages();

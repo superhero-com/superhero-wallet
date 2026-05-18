@@ -4,7 +4,7 @@
     :class="{ recipient: isRecipient }"
   >
     <LinkButton
-      v-if="txParty.url || !isRecipient"
+      v-if="txParty.url"
       :href="txParty.url"
       class="name"
     >
@@ -13,6 +13,12 @@
         :str="txParty.name || txParty.label || $t('common.fellowSuperhero')"
       />
     </LinkButton>
+    <span
+      v-else-if="!isRecipient"
+      class="name"
+    >
+      <Truncate :str="txParty.name || txParty.label || $t('common.fellowSuperhero')" />
+    </span>
     <span
       v-else-if="txParty.wallet"
       class="wallet"

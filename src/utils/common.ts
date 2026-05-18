@@ -16,7 +16,6 @@ import { defer, isEqual, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
-import { LocationQuery } from 'vue-router';
 import type {
   AccountAddress,
   AssetContractId,
@@ -39,7 +38,6 @@ import type {
 import {
   ACCOUNT_TYPES,
   ADDRESS_GAP_LIMIT,
-  AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   EVM_PROTOCOLS,
@@ -534,14 +532,6 @@ export async function getLastNotEmptyAccountIndex(
   return lastNotEmptyIdx;
 }
 
-export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
-  const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
-
-  return [query['x-success'], query['x-cancel']].every(
-    (value) => value && (value as string).startsWith(slicedAggregatorUrl),
-  );
-}
-
 export function isAssetCoin(assetContractId: AssetContractId): boolean {
   return PROTOCOL_LIST.some(
     (protocol) => ProtocolAdapterFactory
@@ -678,15 +668,42 @@ export function decryptedComputed(
     try {
       // eslint-disable-next-line no-param-reassign
       encryptedState.value = await encrypt(key.value!, val);
-    } catch (e) { /* NOOP */ }
-    updating = false;
+    } catch (e) {
+      handleUnknownError(e);
+    } finally {
+      updating = false;
+    }
   }
 
   watch([key, encryptedState], async ([newKey, newState], [oldKey]) => {
     if (!updating) {
       try {
+        /**
+         * Key rotation: re-encrypt under `newKey`. Must not use `decrypted.value`
+         * — a prior watch tick may still be awaiting `decrypt` for the old key
+         * (e.g. legacy-password rotation in `checkUserAuth` where `setEncryptionKey`
+         * changes twice in quick succession), leaving the ref on `defaultVal` and
+         * destroying real data if we encrypt that. Always recover plaintext from
+         * the persisted ciphertext with the key that produced it.
+         */
         if (newKey && oldKey && !isEqual(newKey, oldKey) && newState) {
-          await setEncryptedState(decrypted.value);
+          let plaintext: string;
+          try {
+            plaintext = await decrypt(oldKey, newState);
+          } catch {
+            /**
+             * Another watch tick may already have rewritten `newState` with
+             * `newKey`. In that case the old-key decrypt throws, but data is
+             * already safe at rest; refresh local plaintext without writing.
+             */
+            plaintext = await decrypt(newKey, newState);
+            decrypted.value = plaintext;
+            options.onDecrypted?.(plaintext);
+            return;
+          }
+          decrypted.value = plaintext;
+          options.onDecrypted?.(plaintext);
+          await setEncryptedState(plaintext);
         } else if (newKey && newState) {
           decrypted.value = await decrypt(newKey, newState);
           options.onDecrypted?.(decrypted.value);
@@ -694,21 +711,26 @@ export function decryptedComputed(
           decrypted.value = defaultVal;
         }
       } catch (e) {
+        decrypted.value = defaultVal;
         handleUnknownError(e);
       }
     }
   }, { immediate: true });
 
-  if (IS_MOBILE_APP) {
-    options.onDecrypted?.(encryptedState.value);
-  }
-
-  return (IS_MOBILE_APP)
-    ? encryptedState // On mobile devices we are not encrypting states
-    : computed<string>({
-      get: () => decrypted.value,
-      set: setEncryptedState,
-    });
+  /**
+   * Removed the mobile plaintext bypass. Previously this function
+   * short-circuited for `IS_MOBILE_APP`, returning the raw encrypted ref
+   * and skipping the watch-based decrypt path entirely — which, combined
+   * with the absence of an `encryptionKey` on mobile, meant mnemonic,
+   * imported private keys, preclaimed names and secure-login timeout
+   * were persisted AS PLAINTEXT into SecureMobileStorage. They now use
+   * the same AES-GCM flow as extension/web, keyed by the per-install
+   * mobile-data-key loaded in `useAuth`.
+   */
+  return computed<string>({
+    get: () => decrypted.value,
+    set: setEncryptedState,
+  });
 }
 
 export async function exportFile(

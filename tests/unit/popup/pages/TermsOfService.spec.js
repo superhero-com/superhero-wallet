@@ -5,7 +5,11 @@ describe('TermsOfService', () => {
   it('opens and closes accordion', async () => {
     const wrapper = mount(TermsOfService, {
       global: {
-        stubs: { IonPage: false, IonContent: false },
+        stubs: {
+          IonPage: false,
+          IonContent: false,
+          PageWrapper: { template: '<div><slot /></div>' },
+        },
         mocks: { $t: () => 'Lorem ipsum' },
       },
     });

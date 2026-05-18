@@ -4,6 +4,7 @@ import type {
   AccountAddress,
   IAccount,
   ICommonTransaction,
+  ITokenBalance,
   ITransaction,
 } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
@@ -41,6 +42,16 @@ const accountsTransactionsPending = useStorageRef<AccountsTransactionList>(
 );
 
 const areLatestTransactionsUpdating = ref(false);
+
+function getTokenBalancesByAccountKey(tokenBalanceList: ITokenBalance[]) {
+  const result: Record<string, ITokenBalance[]> = {};
+  tokenBalanceList.forEach((tokenBalance) => {
+    const key = `${tokenBalance.protocol}:${tokenBalance.address}`;
+    result[key] ??= [];
+    result[key].push(tokenBalance);
+  });
+  return result;
+}
 
 /**
  * All pending and latest fetched transactions as a flat list sorted by date.
@@ -192,10 +203,16 @@ export function useLatestTransactionList() {
 
     watch(
       tokenBalances,
-      (oldTokens, newTokens) => {
-        if (!isEqual(oldTokens, newTokens)) {
-          loadAllLatestTransactions();
-        }
+      (newTokens, oldTokens) => {
+        const newTokensByAccount = getTokenBalancesByAccountKey(newTokens);
+        const oldTokensByAccount = getTokenBalancesByAccountKey(oldTokens);
+
+        accounts.value.forEach((account) => {
+          const key = `${account.protocol}:${account.address}`;
+          if (!isEqual(newTokensByAccount[key] || [], oldTokensByAccount[key] || [])) {
+            loadAccountLatestTransactions(account);
+          }
+        });
       },
       { deep: true },
     );

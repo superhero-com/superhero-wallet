@@ -12,7 +12,8 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
-      backgroundColor: '#141414',
+      backgroundColor: '#000000',
+      androidSplashResourceName: 'launch_screen',
       androidScaleType: 'CENTER_INSIDE',
       splashFullScreen: true,
       useDialog: true,
@@ -21,8 +22,8 @@ const config: CapacitorConfig = {
       insetsHandling: 'disable',
     },
     EdgeToEdge: {
-      navigationBarColor: '#141414',
-      statusBarColor: '#141414',
+      navigationBarColor: '#000000',
+      statusBarColor: '#000000',
     },
   },
 };

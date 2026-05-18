@@ -1,6 +1,10 @@
 <script>
 import { defineComponent, h } from 'vue';
 
+const escapeBareAmpersands = (raw = '') => raw
+  // Keep existing entities intact, escape only bare `&`.
+  .replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9A-Fa-f]+);)/g, '&amp;');
+
 const renderNodeContent = (createElement, node, option = null) => (!node.childNodes.length
   ? node.textContent
   : Array.from(node.childNodes)
@@ -33,7 +37,7 @@ export default defineComponent({
     return () => h('span', { class: attrs.class }, renderNodeContent(
       h,
       new DOMParser()
-        .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0],
+        .parseFromString(`<root>${escapeBareAmpersands(props.str || '')}</root>`, 'text/xml').childNodes[0],
       props.option,
     ));
   },

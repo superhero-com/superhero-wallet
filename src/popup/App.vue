@@ -5,9 +5,6 @@
     <IonPage
       id="app-wrapper"
       class="app-wrapper"
-      :class="{
-        'show-header': showHeader,
-      }"
     >
       <Loader v-if="isLoaderVisible && !isMobileQrScannerVisible" />
       <QrCodeReaderMobileOverlay />
@@ -16,8 +13,6 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header v-if="showHeader" />
-
         <!--
           Layer displayed under the password protection modal when content is not visible.
         -->
@@ -34,8 +29,8 @@
         <IonRouterOutlet
           v-show="showRouter"
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-          :class="{ 'show-header': showHeader, ios: IS_IOS }"
-          class="main"
+          :class="{ ios: IS_IOS }"
+          class="router-outlet"
         />
 
         <ConnectionStatus
@@ -62,6 +57,7 @@ import {
   IonRouterOutlet,
   IonApp,
   IonPage,
+  useBackButton,
 } from '@ionic/vue';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -76,7 +72,7 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { WalletRouteMeta } from '@/types';
+import { WalletRouteMeta } from '@/types/router';
 import {
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
@@ -103,30 +99,26 @@ import {
   useModals,
   useMultisigAccounts,
   useNotifications,
+  usePageNavigation,
   useUi,
   useTopHeaderData,
 } from '@/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
-import Header from '@/popup/components/Header.vue';
 import ConnectionStatus from '@/popup/components/ConnectionStatus.vue';
 import Loader from '@/popup/components/Loader.vue';
 import QrCodeReaderMobileOverlay from '@/popup/components/QrCodeReaderMobileOverlay.vue';
 
-import AppLogo from '@/icons/logo-small.svg?vue-component';
-
 export default defineComponent({
   name: 'App',
   components: {
-    Header,
     ConnectionStatus,
     QrCodeReaderMobileOverlay,
     IonApp,
     IonRouterOutlet,
     IonPage,
     Loader,
-    AppLogo,
   },
   setup() {
     const route = useRoute();
@@ -148,12 +140,14 @@ export default defineComponent({
     const { restoreLanguage } = useLanguages();
     const { restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
-    const { claimPreclaimedNames } = useAeNames({ pollingDisabled: true });
+    const {
+      claimPreclaimedNames,
+      extendExpiringOwnedNames,
+    } = useAeNames({ pollingDisabled: true });
     const { topBlockHeight } = useTopHeaderData();
+    const { navigateBack } = usePageNavigation();
 
     const innerElement = ref<HTMLDivElement>();
-    const isRouterReady = ref(false);
-
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
 
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
@@ -162,12 +156,6 @@ export default defineComponent({
       isAuthenticated.value
       || routeMeta.value?.ifNotAuthOnly
       || routeMeta.value?.ifNotAuth
-    ));
-
-    const showHeader = computed(() => (
-      !RUNNING_IN_POPUP
-      && isRouterReady.value
-      && !routeMeta.value?.hideHeader
     ));
 
     /**
@@ -251,9 +239,24 @@ export default defineComponent({
 
     watch(
       topBlockHeight,
-      claimPreclaimedNames,
+      async () => {
+        await Promise.all([
+          claimPreclaimedNames(),
+          extendExpiringOwnedNames(),
+        ]);
+      },
       { immediate: true },
     );
+
+    function handleHardwareBack(processNextHandler: () => void) {
+      if (routeMeta.value?.useDefaultHardwareBackButton) {
+        processNextHandler();
+        return;
+      }
+      navigateBack();
+    }
+
+    useBackButton(1, handleHardwareBack);
     initVisibilityListeners();
 
     onBeforeMount(async () => {
@@ -265,21 +268,12 @@ export default defineComponent({
           StatusBar.setOverlaysWebView({ overlay: false });
         }
         StatusBar.setStyle({ style: Style.Dark });
-        setMobileStatusBarColor('#141414');
+        setMobileStatusBarColor(IS_ANDROID ? '#000000' : '#141414');
         window.screen.orientation?.lock?.('portrait');
       }
     });
 
     onMounted(() => {
-      isRouterReady.value = false;
-      /**
-       * returned value from `useRoute` function will have an empty `meta`
-       * field on the initialization, after awaiting for `router.isReady()`
-       * correct `meta` info will be presented
-       */
-      router.isReady().then(() => {
-        isRouterReady.value = true;
-      });
       checkExtensionUpdates();
       restoreLanguage();
       restoreTransferSendForm();
@@ -291,6 +285,8 @@ export default defineComponent({
         setTimeout(() => {
           SplashScreen.hide({
             fadeOutDuration: 300,
+          }).finally(() => {
+            setMobileStatusBarColor('#141414');
           });
         }, 2000);
       }
@@ -320,7 +316,6 @@ export default defineComponent({
       isMobileQrScannerVisible,
       modalsOpen,
       showRouter,
-      showHeader,
       showScrollbar,
       innerElement,
     };
@@ -339,7 +334,7 @@ export default defineComponent({
   --screen-padding-x: 16px;
   --screen-border-radius: 0;
   --screen-bg-color: #{$color-bg-app};
-  --header-height: 0;
+  --header-height: 40px;
   --gap: 12px;
 
   &.disable-transitions * {
@@ -372,8 +367,7 @@ export default defineComponent({
       overflow-y: auto;
     }
 
-    .main {
-      margin-top: calc(var(--header-height) + env(safe-area-inset-top));
+    .router-outlet {
       padding-bottom: env(safe-area-inset-bottom);
       background-color: var(--screen-bg-color);
 
@@ -407,10 +401,6 @@ export default defineComponent({
       position: fixed;
       z-index: $z-index-header;
       bottom: 0;
-    }
-
-    &.show-header {
-      --header-height: 40px;
     }
   }
 

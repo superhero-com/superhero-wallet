@@ -2,6 +2,74 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.6...v2.10.0) (2026-05-18)
+
+
+### Features
+
+* add ability to prolong name ([7f7147f](https://github.com/Superhero-com/superhero-wallet/commit/7f7147f455b55907a07ecc829b9ad8272c412969))
+* app header transition tweaks ([e4f94d3](https://github.com/Superhero-com/superhero-wallet/commit/e4f94d31524340e640b1b0eea8e2cf1899635c8f))
+* be able to transfer a name ([38e4da0](https://github.com/Superhero-com/superhero-wallet/commit/38e4da0fc4f7b7fb5f11635156fe4f6b1b8c475c))
+* enrich name claim process information ([b9e5895](https://github.com/Superhero-com/superhero-wallet/commit/b9e589547d7421bf49921ceae8df9ec698e62b91))
+* **transaction-details:** enrich aens transactions ([ed9ad51](https://github.com/Superhero-com/superhero-wallet/commit/ed9ad51135d2042aa9dd73add211c7ab56b98f57))
+* use page wrapper in common pages ([9124736](https://github.com/Superhero-com/superhero-wallet/commit/912473617e2a61909db794dcd446bca714001fe0))
+
+
+### Bug Fixes
+
+* **account-switcher:** slide carousel to the active account on tab back active ([04dd8f0](https://github.com/Superhero-com/superhero-wallet/commit/04dd8f0d110693c629539d049284875bc4db6987))
+* **ae:** harden iframe wallet discovery and minimize announce payload ([39875bd](https://github.com/Superhero-com/superhero-wallet/commit/39875bde928adb20d51f51269cc96b4057e3c4bc))
+* **ae:** limit iframe wallet discovery to parent frame only ([dec9a9a](https://github.com/Superhero-com/superhero-wallet/commit/dec9a9a883754e5fd01cac4f338d389f09fc86b8))
+* allow to load only static stylesheets/fonts ([057e93a](https://github.com/Superhero-com/superhero-wallet/commit/057e93acb67eac999642e8739d7db811afc0fac0))
+* always recover plaintext from the stored blob with the key that encrypted it ([1b5f1fb](https://github.com/Superhero-com/superhero-wallet/commit/1b5f1fb16680fd7778d077f9ca1bf698aa21b77f))
+* be able to atuo-extend a name ([5042e61](https://github.com/Superhero-com/superhero-wallet/commit/5042e61be1729b487f122921bbcc97b55ae00527))
+* close postMessage-to-offscreen bridge that allowed arbitrary method execution ([bae19ff](https://github.com/Superhero-com/superhero-wallet/commit/bae19ff8376b37b1b159e74c182dc31fd7a06fab))
+* cover several edge cases ([8f6c469](https://github.com/Superhero-com/superhero-wallet/commit/8f6c469aed2d9e3e46ed5e5843b7f6cce373da1f))
+* do not hung forever on failed authentication ([7ba9b19](https://github.com/Superhero-com/superhero-wallet/commit/7ba9b197b6c10f7337a4389123d438fae9df500f))
+* do not pass incorrect prop type in BtnMain ([c6fc51b](https://github.com/Superhero-com/superhero-wallet/commit/c6fc51b39aa71e33a47d3a09f4f61911615d720d))
+* do not pass incorrect protocol type on initialization ([27c779a](https://github.com/Superhero-com/superhero-wallet/commit/27c779a9d9a6d949ea3f42ddddc04bbf31e047e2))
+* do not send claim transaction if the name is already registered ([ff928e9](https://github.com/Superhero-com/superhero-wallet/commit/ff928e905d0b7056b0ed14ea1be9c85082b19173))
+* **extension:** wake offscreen session sync when popup stores encryption key ([f4c2add](https://github.com/Superhero-com/superhero-wallet/commit/f4c2add398e546366795a958705577cdc4a9aebd))
+* initialize AccountSwiper on the active account instead of always starting at account 0 ([81c4c5e](https://github.com/Superhero-com/superhero-wallet/commit/81c4c5e0349a59db27d5f954cbc0934fb200807e))
+* keep transaction lists mounted during details swipe-back ([bfa6019](https://github.com/Superhero-com/superhero-wallet/commit/bfa60193f576d4c2c6ddca970343fc1e66959dce))
+* **mobile:** correct min base64 length for ciphertext migration heuristic ([5957440](https://github.com/Superhero-com/superhero-wallet/commit/595744087715550beef1db8272dd1b3ee33bd171))
+* **name:** do not stuck on name claim validation ([5ddcb62](https://github.com/Superhero-com/superhero-wallet/commit/5ddcb62df6b7dc2ceddce1dc93eb0e03422876c5))
+* require explicit user action to reveal private key in no-password mode ([ef2f882](https://github.com/Superhero-com/superhero-wallet/commit/ef2f882c0f7d937b86d4612b42eec52f6a9b8b40))
+* require re-authentication before revealing seed phrase ([c2d3402](https://github.com/Superhero-com/superhero-wallet/commit/c2d34024063bbccbd4ec2d31b8930358702eca2d))
+* **security:** drop wildcard externally_connectable ids and block iframe embedding ([4ee85f3](https://github.com/Superhero-com/superhero-wallet/commit/4ee85f35a5d8150890aa1318d8ca1ea38c0fc68e))
+* **security:** encrypt sensitive mobile state with per-install AES-GCM key ([a67910e](https://github.com/Superhero-com/superhero-wallet/commit/a67910eccee4ec09e72fc610ecdc3e1b31629200))
+* **security:** replace hardcoded default password with per-install secret ([c1d8753](https://github.com/Superhero-com/superhero-wallet/commit/c1d8753bd4954b61388066b32682f2b3c59d34c0))
+* **security:** scope inpage/inject postMessage to same origin and validate inbound origin ([9800d17](https://github.com/Superhero-com/superhero-wallet/commit/9800d1705559acd8fc3f5e353474fce29cb686e0))
+* **security:** surface EVM broadcast errors instead of fire-and-forget ([d8e5d1a](https://github.com/Superhero-com/superhero-wallet/commit/d8e5d1a842e0324605639d8f362c284dea7ad500))
+* **security:** validate and confirm deeplink callback URLs ([77dab31](https://github.com/Superhero-com/superhero-wallet/commit/77dab3156fcfbeade6c31e046e2ec9ecc940ab1e))
+* **security:** verify background runtime.onMessage sender is internal ([97b7dfd](https://github.com/Superhero-com/superhero-wallet/commit/97b7dfd609456c4ec9466e706f2e59ebad363b60))
+* seed-phrase verification button not fixed to bottom ([44b1f25](https://github.com/Superhero-com/superhero-wallet/commit/44b1f255dab98942633acf8f7628d1ba2853fe40))
+* show lock Wallet on mobile when the mnemonic is encrypted ([51665c4](https://github.com/Superhero-com/superhero-wallet/commit/51665c441fdbb36cd41436757e4f236fde220e68))
+* show notifications correctly ([54fad86](https://github.com/Superhero-com/superhero-wallet/commit/54fad860bf5630048c7bb688475737da5f414966))
+* show payload and nonce on the different rows in advanced transaction details ([ca549b6](https://github.com/Superhero-com/superhero-wallet/commit/ca549b6a5322cdb4325f5c9ba823d7211abb0d8c))
+* show splash screen correctly ([d780016](https://github.com/Superhero-com/superhero-wallet/commit/d7800164075e6c6c7dd1299467230f377d7b8d9a))
+
+
+### Tests
+
+* fix broken tests ([0c2356d](https://github.com/Superhero-com/superhero-wallet/commit/0c2356dd7babb53ca37f5fdc647a4a853ad2d217))
+
+
+### Performance
+
+* decrease amount of request per minute ([e8be799](https://github.com/Superhero-com/superhero-wallet/commit/e8be79939a898bf8adaa0c899f438f4e87214369))
+* optimize account discovery ([6d35a2d](https://github.com/Superhero-com/superhero-wallet/commit/6d35a2d691569d6f201b0825da25d5a08b554186))
+
+
+### Maintenance
+
+* align PayloadDetails design with other components ([6d79bd0](https://github.com/Superhero-com/superhero-wallet/commit/6d79bd09b1fd920502fda0b0eb5c9912cdf9f690))
+* do not allow user to claim already preclaimed names ([67f02fc](https://github.com/Superhero-com/superhero-wallet/commit/67f02fc35b2ca246c012e4a5b02243b3be7ca732))
+* explain that auto extend will work only if device is active ([df0fbe0](https://github.com/Superhero-com/superhero-wallet/commit/df0fbe0e6955120047a392f2d0644bdeda83c1be))
+* extract hardcoded locales ([a2966d5](https://github.com/Superhero-com/superhero-wallet/commit/a2966d5eac3a0f388c1fac1b142478fe6c7e1343))
+* remove header related meta properties from routes settings ([b916a53](https://github.com/Superhero-com/superhero-wallet/commit/b916a537496d2a42ca41c5cd4eab9bee1a03689f))
+* **transaction-info:** create link only for actual links ([ad6e2c3](https://github.com/Superhero-com/superhero-wallet/commit/ad6e2c3ab241a1e7b3bdd62cd3370be544c7f512))
+
 ### [2.9.6](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.5...v2.9.6) (2026-04-08)
 
 

@@ -210,6 +210,7 @@ export const TX_TAGS_AENS = new Set([
   Tag.NamePreclaimTx,
   Tag.NameRevokeTx,
   Tag.NameUpdateTx,
+  Tag.NameTransferTx,
 ]);
 
 export const TX_RETURN_TYPE_OK = 'ok';
@@ -287,4 +288,5 @@ export const AE_TIPPING_CONTRACTS_TESTNET: AeTippingContractAddresses = {
 export const UPDATE_POINTER_ACTION = {
   update: 'update',
   extend: 'extend',
+  transfer: 'transfer',
 } as const;

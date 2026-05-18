@@ -79,7 +79,6 @@ export default defineComponent({
       if (
         !props.transaction?.tx
         || props.transaction.pending
-        || outerTxTag.value === Tag.NameTransferTx // Unsupported type
       ) {
         return [];
       }

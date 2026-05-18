@@ -14,11 +14,11 @@ import Web3Eth, {
   NUMBER_DATA_FORMAT,
   getBalance,
   getTransaction,
-  sendSignedTransaction,
   getBlock,
   getTransactionReceipt,
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
+import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
 import { BIP32Factory } from 'bip32';
 
 import type {
@@ -152,7 +152,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
 
   override async isAccountUsed(address: AccountAddress): Promise<boolean> {
     const [balance, txCount] = await Promise.all([
-      await this.fetchBalance(address),
+      this.fetchBalance(address),
       this.getTransactionCount(address),
     ]);
     return parseFloat(balance) > 0 || txCount > 0;
@@ -422,7 +422,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
-    sendSignedTransaction(web3Eth, raw, DEFAULT_RETURN_FORMAT);
+    await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
   }
 

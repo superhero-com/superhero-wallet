@@ -13,6 +13,7 @@ import type {
 import {
   ACCOUNT_TYPES,
   ACCOUNT_TYPES_LIST,
+  IS_MOBILE_APP,
   MODAL_PROTOCOL_SELECT,
   PROTOCOL_LIST,
   PROTOCOLS,
@@ -28,6 +29,7 @@ import {
 } from '@/utils';
 import { tg } from '@/popup/plugins/i18n';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
+import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useStorageRef, useAuth, useModals } from '@/composables';
@@ -80,6 +82,12 @@ export const useAccounts = createCustomScopedComposable(() => {
     {
       backgroundSync: true,
       enableSecureStorage: true,
+      /**
+       * On mobile, re-encrypt legacy plaintext entries with the
+       * per-install mobile encryption key. No-op on extension/web and on
+       * already-ciphertext blobs (see migration for the detection logic).
+       */
+      migrations: IS_MOBILE_APP ? [migrateMobileSensitiveDataEncryption] : [],
       onRestored: () => {
         arePrivateKeysAccountsEncryptedRestored.value = true;
       },

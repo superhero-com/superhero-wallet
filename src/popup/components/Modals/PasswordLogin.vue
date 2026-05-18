@@ -72,6 +72,7 @@ import {
 
 import type { ResolveCallback } from '@/types';
 import { MODAL_RESET_WALLET } from '@/constants';
+import { decrypt, generateEncryptionKey } from '@/utils';
 import { useAuth, useModals, useAccounts } from '@/composables';
 
 import Modal from '@/popup/components/Modal.vue';
@@ -99,7 +100,12 @@ export default defineComponent({
     const isAuthenticating = ref(false);
     const password = ref('');
 
-    const { authenticateWithPassword, isAuthenticated } = useAuth();
+    const {
+      authenticateWithPassword,
+      isAuthenticated,
+      encryptionSalt,
+      mnemonicEncrypted,
+    } = useAuth();
     const { accountsRaw } = useAccounts();
     const { openModal } = useModals();
 
@@ -107,20 +113,43 @@ export default defineComponent({
       await openModal(MODAL_RESET_WALLET, {
         isResetPassword: true,
       });
-      // If there are no accounts wallet was reset
       if (accountsRaw.value.length === 0) {
         props.resolve();
       }
     }
 
+    /**
+     * Verify the password by deriving the key and attempting to
+     * decrypt the stored mnemonic. When the user is already
+     * authenticated (e.g. seed-phrase re-auth gate), the primary
+     * `authenticateWithPassword` short-circuits — so we must
+     * validate the password independently in that case.
+     */
+    async function verifyPassword(candidate: string): Promise<boolean> {
+      if (!encryptionSalt.value || !mnemonicEncrypted.value) return false;
+      try {
+        const key = await generateEncryptionKey(candidate, encryptionSalt.value);
+        await decrypt(key, mnemonicEncrypted.value);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     async function login() {
-      if (isAuthenticating.value || isAuthenticated.value) {
+      if (isAuthenticating.value) {
         return;
       }
       isAuthFailed.value = false;
       isAuthenticating.value = true;
       try {
-        await authenticateWithPassword(password.value);
+        if (isAuthenticated.value) {
+          if (!await verifyPassword(password.value)) {
+            throw new Error('wrong password');
+          }
+        } else {
+          await authenticateWithPassword(password.value);
+        }
         props.resolve();
       } catch (error) {
         isAuthFailed.value = true;

@@ -146,6 +146,8 @@ export const STORAGE_KEYS = {
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
   preclaimedNames: 'preclaimed-names',
+  pendingNameAutoExtendTxs: 'pending-name-auto-extend-txs',
+  pendingNameTransferTxs: 'pending-name-transfer-txs',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
 
@@ -162,6 +164,21 @@ export const STORAGE_KEYS = {
   walletConnectSession: 'wallet-connect-session',
   addressBook: 'address-book',
   encryptionSalt: 'encryption-salt',
+  /**
+   * Per-install random secret used when the user opts out of
+   * password protection ("skip password" flow). Replaces the previous
+   * hardcoded `STUB_ACCOUNT.password` sentinel so no two installs share
+   * the same "default password".
+   */
+  defaultPasswordSecret: 'default-password-secret',
+  /**
+   * Per-install 256-bit AES-GCM key (raw bytes, base64) that
+   * encrypts all sensitive state on mobile. The same key is loaded into
+   * the auth `encryptionKey` ref so `decryptedComputed` no longer needs
+   * the `IS_MOBILE_APP` bypass and every sensitive blob sits at rest in
+   * the Keychain as ciphertext rather than plaintext.
+   */
+  mobileDataKey: 'mobile-data-key',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -351,6 +368,8 @@ export const MODAL_DEFAULT = 'default';
 export const MODAL_ERROR_LOG = 'error-log';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_HELP = 'help';
+export const MODAL_NAME_CLAIM_INFO = 'name-claim-info';
+export const MODAL_NAME_EXTEND_CONFIRM = 'name-extend-confirm';
 export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
