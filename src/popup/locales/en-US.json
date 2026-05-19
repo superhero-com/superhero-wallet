@@ -783,7 +783,7 @@
       "externalCallbackTitle": "Return to external site",
       "externalCallbackMsg": "Send the result of this action back to \"{url}\"? Any data you just signed will be shared with this destination.",
       "invalidCallbackTitle": "Invalid deeplink callback",
-      "invalidCallbackMsg": "Refusing to redirect to \"{url}\". Callback URLs must use https://, or http:// for local development hosts."
+      "invalidCallbackMsg": "Refusing to redirect to \"{url}\". Callback URLs must use http://, https://, or a supported app scheme."
     },
     "secureLogin": {
       "descriptionBiometric": "Enabling secure login will let you access Superhero Wallet app using your mobile device authentication preferences.",

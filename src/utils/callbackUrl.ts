@@ -22,17 +22,6 @@ function getCallbackUrlString(value: LocationQuery[string]): string | null {
   return (typeof value === 'string' && value.length > 0) ? value : null;
 }
 
-function isLoopbackCallbackHost(hostname: string): boolean {
-  return (
-    hostname === 'localhost'
-    || hostname.endsWith('.localhost')
-    || hostname === '0.0.0.0'
-    || hostname === '::1'
-    || hostname === '[::1]'
-    || /^127(?:\.\d{1,3}){3}$/.test(hostname)
-  );
-}
-
 export function isTrustedCallbackUrl(url: URL): boolean {
   if (ALLOWED_NATIVE_CALLBACK_PROTOCOLS.has(url.protocol)) {
     return true;
@@ -62,10 +51,7 @@ export function validateCallbackUrl(rawUrl: LocationQuery[string]): URL | null {
     }
   }
 
-  if (url.protocol === 'https:') {
-    return url;
-  }
-  if (url.protocol === 'http:' && isLoopbackCallbackHost(url.hostname)) {
+  if (['https:', 'http:'].includes(url.protocol)) {
     return url;
   }
   if (ALLOWED_NATIVE_CALLBACK_PROTOCOLS.has(url.protocol)) {

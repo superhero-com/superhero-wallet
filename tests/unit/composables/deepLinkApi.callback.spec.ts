@@ -21,25 +21,23 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   const validateCallbackUrl = (rawUrl: string) => {
     try {
       const url = new URL(rawUrl);
-      if (url.protocol === 'https:') return url;
-      if (
-        url.protocol === 'http:'
-        && ['localhost', '0.0.0.0'].includes(url.hostname)
-      ) return url;
-      if (url.protocol === 'http:' && /^127(?:\.\d{1,3}){3}$/.test(url.hostname)) return url;
+      if (['https:', 'http:'].includes(url.protocol)) return url;
       return null;
     } catch {
       return null;
     }
   };
 
-  const isTrustedCallbackUrl = (url: URL) => (
-    url.protocol === 'https:'
-    && (
-      url.hostname === 'superhero.com'
-      || url.hostname.endsWith('.superhero.com')
-    )
-  );
+  const isTrustedCallbackUrl = (url: URL) => {
+    const parsed = validateCallbackUrl(url.toString());
+    return !!parsed && (
+      url.protocol === 'https:'
+      && (
+        url.hostname === 'superhero.com'
+        || url.hostname.endsWith('.superhero.com')
+      )
+    );
+  };
 
   const setup = () => {
     jest.resetModules();
@@ -306,7 +304,9 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     jest.useRealTimers();
   });
 
-  it('rejects non-loopback http callbacks without redirecting', async () => {
+  it('warns before redirecting to http callbacks', async () => {
+    jest.useFakeTimers();
+    confirmModalImpl = () => Promise.resolve();
     route = {
       query: { 'x-success': encodeURIComponent('http://superhero.com/?s={signature}') },
     };
@@ -315,17 +315,19 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     // eslint-disable-next-line global-require
     const { useDeepLinkApi } = require('@/composables/deepLinkApi');
     await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
+    jest.runAllTimers();
 
-    expect(loggerWrite).toHaveBeenCalledTimes(1);
-    expect(openConfirmModalMock).not.toHaveBeenCalled();
-    expect(windowOpen).not.toHaveBeenCalled();
+    expect(loggerWrite).not.toHaveBeenCalled();
+    expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
+    expect(windowOpen).toHaveBeenCalledWith('http://superhero.com/?s=SIG123', '_self');
+    jest.useRealTimers();
   });
 
-  it('allows loopback http callbacks but still requires confirmation', async () => {
+  it('warns before redirecting to localhost-style http callbacks', async () => {
     jest.useFakeTimers();
     confirmModalImpl = () => Promise.resolve();
     route = {
-      query: { 'x-success': encodeURIComponent('http://localhost:3000/callback?s={signature}') },
+      query: { 'x-success': encodeURIComponent('http://192.168.100.42:5173/callback?s={signature}') },
     };
     setup();
 
@@ -335,7 +337,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     jest.runAllTimers();
 
     expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
-    expect(windowOpen).toHaveBeenCalledWith('http://localhost:3000/callback?s=SIG123', '_self');
+    expect(windowOpen).toHaveBeenCalledWith('http://192.168.100.42:5173/callback?s=SIG123', '_self');
     jest.useRealTimers();
   });
 
