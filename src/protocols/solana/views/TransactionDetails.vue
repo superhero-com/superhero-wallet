@@ -1,27 +1,24 @@
 <template>
-  <div class="transaction-details">
-    <template v-if="transaction">
-      <TransactionDetailsBase
-        :transaction="transaction"
-        :amount="amount"
-        :amount-total="amountTotal"
-        :fee="fee"
-        :hash="hash"
+  <TransactionDetailsBase
+    class="transaction-details"
+    :transaction="transaction"
+    :amount="amount"
+    :amount-total="amountTotal"
+    :fee="fee"
+    :hash="hash"
+    :protocol="PROTOCOLS.solana"
+    :hide-amount-total="!isTransactionCoin"
+    :hide-fiat="!isTransactionCoin"
+  >
+    <template #tokens>
+      <TransactionAssetRows
+        :assets="transactionAssets"
         :protocol="PROTOCOLS.solana"
-        :hide-amount-total="!isTransactionCoin"
-        :hide-fiat="!isTransactionCoin"
-      >
-        <template #tokens>
-          <TransactionAssetRows
-            :assets="transactionAssets"
-            :protocol="PROTOCOLS.solana"
-            icon-size="rg"
-            multiple-rows
-          />
-        </template>
-      </TransactionDetailsBase>
+        icon-size="rg"
+        multiple-rows
+      />
     </template>
-  </div>
+  </TransactionDetailsBase>
 </template>
 
 <script lang="ts">

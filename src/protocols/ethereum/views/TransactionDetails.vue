@@ -1,6 +1,5 @@
 <template>
   <TransactionDetailsBase
-    v-if="transaction"
     class="transaction-details"
     :transaction="transaction"
     :amount="amount"

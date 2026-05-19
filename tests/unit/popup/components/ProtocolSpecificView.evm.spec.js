@@ -1,6 +1,9 @@
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import ProtocolSpecificView from '../../../../src/popup/components/ProtocolSpecificView.vue';
-import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '../../../../src/constants';
+import {
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_VIEW_TRANSFER_SEND,
+} from '../../../../src/constants';
 
 let mockActiveProtocol = 'ethereum';
 
@@ -25,6 +28,19 @@ jest.mock('@/protocols/ethereum/views', () => ({
   default: {
     AccountDetails: () => Promise.resolve({
       template: '<div data-cy="evm-account-details" />',
+    }),
+    TransferSendModal: () => Promise.resolve({
+      props: {
+        isMultisig: Boolean,
+        tokenContractId: String,
+      },
+      template: `
+        <div
+          data-cy="evm-transfer-send"
+          :data-is-multisig="String(isMultisig)"
+          :data-token-contract-id="tokenContractId"
+        />
+      `,
     }),
   },
 }));
@@ -56,5 +72,23 @@ describe('ProtocolSpecificView - EVM protocol mapping', () => {
       global: { stubs: ['InfoBox'] },
     });
     expect(wrapper.exists()).toBe(true);
+  });
+
+  it('forwards modal attributes to the protocol-specific view', async () => {
+    const wrapper = mount(ProtocolSpecificView, {
+      props: {
+        viewComponentName: PROTOCOL_VIEW_TRANSFER_SEND,
+      },
+      attrs: {
+        isMultisig: true,
+        tokenContractId: 'ct_test',
+      },
+      global: { stubs: ['InfoBox'] },
+    });
+    await flushPromises();
+
+    const modal = wrapper.find('[data-cy="evm-transfer-send"]');
+    expect(modal.attributes('data-is-multisig')).toBe('true');
+    expect(modal.attributes('data-token-contract-id')).toBe('ct_test');
   });
 });

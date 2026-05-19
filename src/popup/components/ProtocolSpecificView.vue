@@ -2,6 +2,7 @@
   <Component
     :is="componentToDisplay"
     v-if="viewComponentName"
+    v-bind="$attrs"
     :page-did-enter="pageDidEnter"
     :page-will-enter="pageWillEnter"
     :protocol="protocol"
