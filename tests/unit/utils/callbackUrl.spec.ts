@@ -41,7 +41,9 @@ describe('callback URL security helpers', () => {
     'http://localhost:3000/callback',
     'http://127.0.0.1:8080/callback',
     'http://0.0.0.0:8080/callback',
-  ])('allows loopback http callbacks for local development %s', (url) => {
+    'http://192.168.100.42:5173/callback',
+    'http://example.com/callback',
+  ])('allows http callbacks but does not trust them %s', (url) => {
     const { validateCallbackUrl, isTrustedCallbackUrl } = loadHelpers();
     const parsed = validateCallbackUrl(url);
 
@@ -61,7 +63,6 @@ describe('callback URL security helpers', () => {
   });
 
   it.each([
-    'http://example.com/callback',
     // eslint-disable-next-line no-script-url
     'javascript:alert(1)',
     'myapp://callback',
