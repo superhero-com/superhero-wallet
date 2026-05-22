@@ -27,14 +27,18 @@ export function useCoinMaxAmount({ formModel, fee }: CoinMaxAmountOptions) {
     const adapter = ProtocolAdapterFactory.getAdapter(formModel.value.selectedAsset?.protocol!);
     return formModel.value?.selectedAsset?.contractId === adapter.coinContractId;
   });
-  const selectedTokenBalance = computed(
-    () => new BigNumber(
-      toShiftedBigNumber(
-        formModel.value.selectedAsset?.amount!,
-        -(formModel.value.selectedAsset?.decimals || -0),
-      ) || 0,
-    ),
-  );
+
+  const selectedTokenBalance = computed(() => {
+    const asset = formModel.value.selectedAsset;
+    const rawAmount = asset?.amount;
+
+    if (rawAmount == null || rawAmount === '') {
+      return new BigNumber(0);
+    }
+
+    const shifted = toShiftedBigNumber(rawAmount, -(asset?.decimals ?? 0));
+    return shifted.isNaN() ? new BigNumber(0) : shifted;
+  });
 
   const max = computed(() => {
     if (balance.value && isCoin.value) {

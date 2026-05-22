@@ -42,7 +42,7 @@ import {
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
-import { useFungibleTokens } from '@/composables';
+import { useAccountAssetsList, useFungibleTokens } from '@/composables';
 
 import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
 import TransferReview from '../components/TransferReview.vue';
@@ -60,6 +60,7 @@ export default defineComponent({
   },
   setup(props) {
     const { getProtocolAvailableTokens } = useFungibleTokens();
+    const { accountAssets } = useAccountAssetsList();
 
     const ethTokensAvailable = computed(() => getProtocolAvailableTokens(props.protocol));
 
@@ -71,7 +72,8 @@ export default defineComponent({
       amount: props.amount,
       payload: props.payload,
       selectedAsset: (props.tokenContractId)
-        ? ethTokensAvailable.value[props.tokenContractId as keyof AssetList]
+        ? accountAssets.value.find(({ contractId }) => contractId === props.tokenContractId)
+          ?? ethTokensAvailable.value[props.tokenContractId as keyof AssetList]
         : undefined,
     });
 
