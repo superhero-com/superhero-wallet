@@ -80,7 +80,8 @@ export function useTransactionList({
 
   const transactionsLoadedAndPending = computed(() => uniqBy([
     ...transactionsPending.value,
-    ...(accountsTransactionsLatest.value[accountAddress] || []),
+    // Latest cache is account-wide; skip it on asset-specific lists.
+    ...(assetContractId ? [] : (accountsTransactionsLatest.value[accountAddress] || [])),
     ...transactionsLoaded.value,
   ].filter(({ protocol: transactionProtocol }) => transactionProtocol === protocol), 'hash'));
 
