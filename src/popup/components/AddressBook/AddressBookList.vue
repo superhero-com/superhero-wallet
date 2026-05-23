@@ -20,8 +20,7 @@
 
     <IonContent
       ref="scrollWrapperEl"
-      class="ion-padding"
-      :class="{ 'ion-content-bg': !isSelector }"
+      class="ion-padding address-book-content"
     >
       <div
         v-if="Object.keys(accountsFiltered).length"
@@ -224,6 +223,11 @@ export default defineComponent({
 
 .address-book-list {
   --border-width: 2px;
+
+  .address-book-content {
+    --background: var(--screen-bg-color, #{$color-bg-app});
+    background-color: var(--screen-bg-color, #{$color-bg-app});
+  }
 
   display: flex;
   flex-direction: column;
