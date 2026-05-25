@@ -14,10 +14,10 @@
   >
     <slot>
       <img
-        v-if="!isPlaceholder && srcUrl"
+        v-if="!isPlaceholder && avatarUrl"
         v-show="!isLoading"
         class="avatar-img"
-        :src="srcUrl"
+        :src="avatarUrl"
         alt="Avatar"
         @load="isLoading = false"
       >
@@ -31,15 +31,12 @@ import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
-  onMounted,
   PropType,
   ref,
 } from 'vue';
 
-import { checkImageAvailability, getAddressColor } from '@/utils';
+import { getAddressColor } from '@/utils';
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
-import { isContract } from '@/protocols/aeternity/helpers';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'] as const;
 export type AvatarSize = typeof SIZES[number];
@@ -68,9 +65,6 @@ export default defineComponent({
     isPlaceholder: Boolean,
   },
   setup(props) {
-    const { aeActiveNetworkSettings } = useAeNetworkSettings();
-
-    const profileImageAvailable = ref(false);
     const isLoading = ref(true);
 
     const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.address}`);
@@ -79,25 +73,9 @@ export default defineComponent({
       ? getAddressColor(props.address)
       : undefined);
 
-    const profileImageUrl = computed(() => (props.address === '' || isContract(props.address))
-      ? null
-      : `${aeActiveNetworkSettings.value.backendUrl}/profile/image/${props.address}`);
-
-    const srcUrl = computed(() => profileImageAvailable.value
-      ? profileImageUrl.value
-      : avatarUrl.value);
-
-    onMounted(async () => {
-      profileImageAvailable.value = (
-        !!profileImageUrl.value
-        && await checkImageAvailability(profileImageUrl.value)
-      );
-    });
-
     return {
-      srcUrl,
+      avatarUrl,
       calculatedColor,
-      profileImageAvailable,
       isLoading,
     };
   },
