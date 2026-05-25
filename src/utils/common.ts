@@ -101,18 +101,6 @@ export function calculateFontSize(amountValue: BigNumber | number | string) {
   return '12px';
 }
 
-/**
- * Check if the image is available by making a HEAD request.
- * Needed for Ionic because when using <img /> tag and the image is not available
- * the DOM ready event is not fired.
- */
-export function checkImageAvailability(url: string): Promise<boolean> {
-  // TODO: use { method: 'HEAD'} when backend will introduce a proper response in such case
-  return fetch(url)
-    .then((response) => !!response.ok)
-    .catch(() => false);
-}
-
 export function compareCaseInsensitive(str1?: string, str2?: string) {
   return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
 }
