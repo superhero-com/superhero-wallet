@@ -531,9 +531,10 @@ export const TRUSTED_DAPPS: {
     isFeatured: true,
   },
   {
-    name: 'Superhero Social',
+    name: 'Superhero.com',
     url: 'https://superhero.com',
     image: 'superhero-social.svg',
+    isFeatured: true,
   },
   {
     name: 'Superhero DEX',
