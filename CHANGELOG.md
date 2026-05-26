@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.10.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.10.0...v2.10.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **mobile:** be able to use deep link with security login enabled ([da4ed22](https://github.com/Superhero-com/superhero-wallet/commit/da4ed2260e219deffad21c55c64144ee8a8b3618))
+
 ## [2.10.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.9.6...v2.10.0) (2026-05-25)
 
 
