@@ -62,7 +62,7 @@ const {
 } = useAccounts();
 const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
-const { checkUserAuth } = useAuth();
+const { checkUserAuth, isAuthenticated } = useAuth();
 const { openModal, openConfirmModal } = useModals();
 
 RouteQueryActionsController.init(router);
@@ -170,12 +170,23 @@ if (IS_MOBILE_APP) {
 
       const deepLinkUrl = new URL(event.url);
       if (deepLinkUrl.origin === 'wc://' || event.url.startsWith('superhero://wc')) {
-        setIsOpenUsingDeeplink(true);
-        router.push({ name: ROUTE_ACCOUNT });
+        (async () => {
+          const uri = deepLinkUrl.searchParams.get('uri') as WalletConnectUri | null;
 
-        if (!wcSession.value) {
-          connect(deepLinkUrl.searchParams.get('uri') as WalletConnectUri, true);
-        }
+          setIsOpenUsingDeeplink(true);
+          try {
+            await router.push({ name: ROUTE_ACCOUNT });
+            await checkUserAuth();
+
+            if (!wcSession.value && isAuthenticated.value && isLoggedIn.value && uri) {
+              await connect(uri, true);
+            } else {
+              setIsOpenUsingDeeplink(false);
+            }
+          } catch {
+            setIsOpenUsingDeeplink(false);
+          }
+        })();
         return;
       }
       const isCustomSchemeLink = event.url.startsWith('superhero://')

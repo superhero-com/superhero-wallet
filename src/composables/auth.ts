@@ -81,6 +81,7 @@ export const useAuth = createCustomScopedComposable(() => {
 
   let isSessionExpired = false;
   let isManualMobileLockActive = false;
+  let sessionExpiresAt: number | null = null;
   let expirationTimeout: NodeJS.Timeout;
 
   /** Common state for both biometric or password protection */
@@ -226,6 +227,24 @@ export const useAuth = createCustomScopedComposable(() => {
     return key;
   }
 
+  function markAuthenticated() {
+    isSessionExpired = false;
+    sessionExpiresAt = null;
+    isAuthenticated.value = true;
+  }
+
+  function updateSessionExpiredFromDeadline() {
+    if (sessionExpiresAt !== null && Date.now() >= sessionExpiresAt) {
+      isSessionExpired = true;
+    }
+  }
+
+  async function logout() {
+    setEncryptionKey(undefined);
+    mnemonicDecrypted.value = '';
+    isAuthenticated.value = false;
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     if (IS_MOBILE_APP) {
       /**
@@ -239,7 +258,7 @@ export const useAuth = createCustomScopedComposable(() => {
         setEncryptionKey(mobileKey);
       }
       mnemonic.value = await encrypt(encryptionKey.value!, plaintextToEncrypt);
-      isAuthenticated.value = true;
+      markAuthenticated();
       return;
     }
 
@@ -262,7 +281,7 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionSalt.value = newSalt;
     setEncryptionKey(newEncryptionKey);
     mnemonic.value = newMnemonicCiphertext;
-    isAuthenticated.value = true;
+    markAuthenticated();
   }
 
   async function setMnemonicAndInitializeAuthentication(newMnemonic: string, isRestored = false) {
@@ -308,7 +327,7 @@ export const useAuth = createCustomScopedComposable(() => {
      * back to a login flow for an install they just created. Asserting the
      * flag once here covers both environments and is idempotent.
      */
-    isAuthenticated.value = true;
+    markAuthenticated();
   }
 
   /**
@@ -375,7 +394,7 @@ export const useAuth = createCustomScopedComposable(() => {
       }
 
       mnemonicDecrypted.value = decryptionResult;
-      isAuthenticated.value = true;
+      markAuthenticated();
     }
     return true;
   }
@@ -402,7 +421,7 @@ export const useAuth = createCustomScopedComposable(() => {
         androidConfirmationRequired: false,
       }).then(() => {
         if (setAuthenticated) {
-          isAuthenticated.value = true;
+          markAuthenticated();
         }
         return true;
       });
@@ -417,6 +436,18 @@ export const useAuth = createCustomScopedComposable(() => {
    */
   async function checkUserAuth(): Promise<any> {
     await watchUntilTruthy(isMnemonicRestored);
+    updateSessionExpiredFromDeadline();
+
+    if (
+      IS_MOBILE_APP
+      && mnemonic.value
+      && isAuthenticated.value
+      && isSessionExpired
+      && isAutoLockEnabled.value
+    ) {
+      isManualMobileLockActive = true;
+      await logout();
+    }
 
     if (!mnemonic.value || isAuthenticated.value) {
       return;
@@ -495,7 +526,7 @@ export const useAuth = createCustomScopedComposable(() => {
         } else {
           mnemonicDecrypted.value = mnemonic.value;
         }
-        isAuthenticated.value = true;
+        markAuthenticated();
       } else if (isMnemonicEncrypted.value) {
         // Environments that will always ask user about password
         const autoLoginDisabledEnv = IS_OFFSCREEN_TAB || RUNNING_IN_TESTS;
@@ -597,7 +628,7 @@ export const useAuth = createCustomScopedComposable(() => {
           if (sessionEncryptionKey) {
             setEncryptionKey(sessionEncryptionKey);
             mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonic.value);
-            isAuthenticated.value = true;
+            markAuthenticated();
           }
           setLoaderVisible(false);
         }
@@ -613,12 +644,6 @@ export const useAuth = createCustomScopedComposable(() => {
     } finally {
       isAuthenticating.value = false;
     }
-  }
-
-  async function logout() {
-    setEncryptionKey(undefined);
-    mnemonicDecrypted.value = '';
-    isAuthenticated.value = false;
   }
 
   async function lockWallet() {
@@ -709,6 +734,8 @@ export const useAuth = createCustomScopedComposable(() => {
 
       if (isActive && !wasActive) {
         clearInterval(expirationTimeout);
+        updateSessionExpiredFromDeadline();
+        sessionExpiresAt = null;
 
         // If session exists user needs to stay logged in
         if (!isAuthenticating.value) {
@@ -723,13 +750,20 @@ export const useAuth = createCustomScopedComposable(() => {
       } else if (wasActive && !isActive) {
         if (!isAutoLockEnabled.value) {
           isSessionExpired = false;
+          sessionExpiresAt = null;
+          return;
+        }
+        const expirationTimeoutMs = +secureLoginTimeoutDecrypted.value!;
+        sessionExpiresAt = Date.now() + expirationTimeoutMs;
+        if (expirationTimeoutMs <= 0) {
+          isSessionExpired = true;
           return;
         }
         expirationTimeout = setTimeout(
           () => {
             isSessionExpired = true;
           },
-          +secureLoginTimeoutDecrypted.value!,
+          expirationTimeoutMs,
         );
       }
     },
