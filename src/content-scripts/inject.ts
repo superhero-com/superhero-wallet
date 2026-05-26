@@ -57,7 +57,11 @@ const runContentScript = () => {
   window.addEventListener(
     'message',
     async (event) => {
-      if (event.data.type === 'result') {
+      const currentOrigin = window.location?.origin ?? window.origin;
+      if (event.origin !== currentOrigin || event.source !== window) {
+        return;
+      }
+      if (event.data?.type === 'result') {
         return;
       }
       let { method } = event.data;

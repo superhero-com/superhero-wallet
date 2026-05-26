@@ -1,65 +1,116 @@
-import { times } from 'lodash-es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
 import { executeAndSetInterval, handleUnknownError } from '@/utils';
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 
 const POLLING_INTERVAL = 3000;
+const PARENT_ORIGIN_QUERY_PARAM = 'parentOrigin';
 
 /**
  * Abstraction layer that allows to communicate between the wallet app running in an IFrame
  * and the parent dapps.
  */
 export const FramesConnection = (() => {
-  const connectedFrames = new Set();
   let initialized = false;
   let baseIntervalId: NodeJS.Timeout;
+  let clientIntervalId: NodeJS.Timeout;
+  let clientId: string | null = null;
+  let connectedParent: Window | null = null;
 
-  function getArrayOfAvailableFrames(): Window[] {
-    return [
-      window.parent,
-      ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
-    ];
+  function getParentFrame(): Window | null {
+    return window.parent === window ? null : window.parent;
+  }
+
+  function getParentOrigin(): string | undefined {
+    const { ancestorOrigins } = (window.location as Location & { ancestorOrigins?: DOMStringList });
+    if (ancestorOrigins?.length) {
+      return ancestorOrigins[0];
+    }
+
+    if (document.referrer) {
+      try {
+        return new URL(document.referrer).origin;
+      } catch {
+        // Continue to the explicit parent-origin hint fallback below.
+      }
+    }
+
+    const parentOrigin = new URLSearchParams(window.location.search)
+      .get(PARENT_ORIGIN_QUERY_PARAM);
+    if (!parentOrigin) {
+      return undefined;
+    }
+    try {
+      const { origin, protocol } = new URL(parentOrigin);
+      return ['http:', 'https:'].includes(protocol) ? origin : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  function removeClient(aeSdk: AeSdkSuperhero) {
+    clearInterval(clientIntervalId);
+    if (clientId) {
+      aeSdk.removeRpcClient(clientId);
+      clientId = null;
+    }
+    connectedParent = null;
   }
 
   function init(aeSdk: AeSdkSuperhero) {
     initialized = true;
     clearInterval(baseIntervalId);
+    removeClient(aeSdk);
 
     try {
       baseIntervalId = executeAndSetInterval(
-        () => getArrayOfAvailableFrames()
-          .filter((frame) => frame !== window)
-          .forEach((target) => {
-            if (connectedFrames.has(target)) {
-              return;
-            }
+        () => {
+          const parentFrame = getParentFrame();
 
-            connectedFrames.add(target);
-            const connection = new BrowserWindowMessageConnection({ target });
-            const originalConnect = connection.connect;
-            let intervalId: NodeJS.Timeout;
+          if (!parentFrame) {
+            removeClient(aeSdk);
+            return;
+          }
+          if (connectedParent === parentFrame) {
+            return;
+          }
 
-            connection.connect = function connect(onMessage: any) {
-              originalConnect.call(this, (data: any, origin: any, source: any) => {
-                if (source !== target) {
-                  return;
-                }
-                clearInterval(intervalId);
-                onMessage(data, origin, source);
-              }, () => {});
-            };
+          removeClient(aeSdk);
+          connectedParent = parentFrame;
 
-            const clientId = aeSdk.addRpcClient(connection);
+          const connection = new BrowserWindowMessageConnection({
+            target: parentFrame,
+            origin: getParentOrigin(),
+          });
+          const originalConnect = connection.connect;
 
-            intervalId = executeAndSetInterval(() => {
-              if (!getArrayOfAvailableFrames().includes(target)) {
-                clearInterval(intervalId);
-                aeSdk.removeRpcClient(clientId);
+          connection.connect = function connect(onMessage: any) {
+            originalConnect.call(this, (data: any, origin: any, source: any) => {
+              if (source !== parentFrame) {
                 return;
               }
-              aeSdk.shareWalletInfo(clientId);
-            }, 3000);
-          }),
+
+              /**
+               * If the parent origin wasn't available before the first wallet
+               * announcement, pin the connection to the origin that answered it.
+               */
+              if (!this.origin) {
+                this.origin = origin;
+              }
+              clearInterval(clientIntervalId);
+              onMessage(data, origin, source);
+            }, () => {});
+          };
+
+          clientId = aeSdk.addRpcClient(connection);
+
+          clientIntervalId = executeAndSetInterval(() => {
+            if (getParentFrame() !== parentFrame || !clientId) {
+              removeClient(aeSdk);
+              return;
+            }
+            aeSdk.shareWalletInfo(clientId);
+          }, POLLING_INTERVAL);
+        },
         POLLING_INTERVAL,
       );
     } catch (error: any) {
@@ -68,7 +119,9 @@ export const FramesConnection = (() => {
   }
 
   return {
-    initialized,
+    get initialized() {
+      return initialized;
+    },
     init,
   };
 })();

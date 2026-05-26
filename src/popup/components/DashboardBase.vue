@@ -1,5 +1,11 @@
 <template>
-  <div class="dashboard-base">
+  <PageWrapper
+    class="dashboard-base"
+  >
+    <template #header>
+      <DashboardHeader />
+    </template>
+
     <div class="dashboard-header">
       <div
         v-if="showHeader"
@@ -64,7 +70,7 @@
 
       <slot name="cards" />
     </div>
-  </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -84,15 +90,19 @@ import { useUi } from '@/composables';
 import { PROTOCOLS } from '@/constants';
 
 import DashboardCard from './DashboardCard.vue';
+import DashboardHeader from './DashboardHeader.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
 import FormSelect from './form/FormSelect.vue';
 import BtnPill from './buttons/BtnPill.vue';
 
 import WarningTriangleIcon from '../../icons/warning-triangle.svg?vue-component';
+import PageWrapper from './PageWrapper.vue';
 
 export default defineComponent({
   name: 'DashboardBase',
   components: {
+    PageWrapper,
+    DashboardHeader,
     BtnPill,
     DashboardCard,
     FormSelect,

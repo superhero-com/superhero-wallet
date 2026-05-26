@@ -186,6 +186,8 @@ export default defineComponent({
         case Tag.NamePreclaimTx:
         case Tag.NameClaimTx:
         case Tag.NameUpdateTx:
+        case Tag.NameTransferTx:
+        case Tag.NameRevokeTx:
           return {
             sender: ownershipAccount.value,
             recipient: {

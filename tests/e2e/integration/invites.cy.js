@@ -58,13 +58,14 @@ describe('Test cases for invite page', () => {
     cy.login({}, legacyInviteUrl)
       .get('.modal [data-cy=balance-info] .asset-fractional')
       .should('be.visible')
-      .get('[data-cy=redeem-main-btn')
+      .get('[data-cy=redeem-main-btn]')
       .should('be.visible');
 
+    cy.logout();
     cy.login({}, currentInviteUrl)
       .get('.modal [data-cy=balance-info] .asset-fractional')
       .should('be.visible')
-      .get('[data-cy=redeem-main-btn')
+      .get('[data-cy=redeem-main-btn]')
       .should('be.visible');
     /*
     cy.login()

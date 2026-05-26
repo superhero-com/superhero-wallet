@@ -5,20 +5,26 @@ const ANIMATION_DURATION = 100;
 
 export const fadeAnimation: IonAnimationBuilder = (
   baseEl: Element,
-  opts: { enteringEl: Element; leavingEl: Element },
+  opts: { enteringEl?: Element; leavingEl?: Element },
 ) => {
-  const enteringAnimation = createAnimation()
-    .addElement(opts.enteringEl)
-    .fromTo('opacity', 0, 1)
-    .duration(ANIMATION_DURATION);
+  const animation = createAnimation();
 
-  const leavingAnimation = createAnimation()
-    .addElement(opts.leavingEl)
-    .fromTo('opacity', 1, 0);
+  if (opts.enteringEl) {
+    const enteringAnimation = createAnimation()
+      .addElement(opts.enteringEl)
+      .fromTo('opacity', 0, 1)
+      .duration(ANIMATION_DURATION);
 
-  const animation = createAnimation()
-    .addAnimation(enteringAnimation)
-    .addAnimation(leavingAnimation);
+    animation.addAnimation(enteringAnimation);
+  }
+
+  if (opts.leavingEl) {
+    const leavingAnimation = createAnimation()
+      .addElement(opts.leavingEl)
+      .fromTo('opacity', 1, 0);
+
+    animation.addAnimation(leavingAnimation);
+  }
 
   return animation;
 };

@@ -3,7 +3,7 @@
   "description": "Superhero Wallet is a multi-blockchain wallet to manage crypto assets and navigate the web3 and DeFi space.",
   "manifest_version": 3,
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src * data:; font-src * data:; frame-src *; img-src * data:; style-src-elem * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+    "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src * data:; font-src 'self' data:; frame-src *; img-src * data:; style-src-elem 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; "
   },
   "permissions": [
     "storage",
@@ -67,8 +67,7 @@
     "default_path": "index.html"
   },
   "externally_connectable": {
-    "matches": ["https://wallet.superhero.com/*"],
-    "ids": ["*"]
+    "matches": ["https://wallet.superhero.com/*"]
   },
   "sidebar_action": {
     "default_title": "Superhero Wallet",

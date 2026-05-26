@@ -44,7 +44,7 @@
           </div>
 
           <BtnMain
-            :disabled="!!amountError || !amount || errorName"
+            :disabled="!!amountError || !amount || !!errorName"
             class="button"
             extend
             @click="bid"

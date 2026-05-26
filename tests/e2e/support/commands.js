@@ -16,6 +16,7 @@ import {
   generateSalt,
   prepareStorageKey,
 } from '@/utils';
+import { TEST_ACCOUNT } from '../../fixtures/account';
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
   const { address } = STUB_ACCOUNT;
@@ -73,11 +74,14 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
 });
 
 Cypress.Commands.add('loginUsingPassword', () => {
-  // Be tolerant to different render timings/selectors
-  cy.get('[data-cy=password] input, input[type="password"]', { timeout: 20000 })
+  // Be tolerant to different render timings/selectors (InputField uses data-cy=input)
+  cy.get(
+    '[data-cy=password] [data-cy=input], [data-cy=password] input, input[type="password"]',
+    { timeout: 30000 },
+  )
     .should('be.visible')
     .first()
-    .type(STUB_ACCOUNT.password, { log: true });
+    .type(TEST_ACCOUNT.password, { log: true });
 
   cy.get('[data-cy=login-btn], [data-cy=login], button[type="submit"]', { timeout: 20000 })
     .should('be.visible')
@@ -88,13 +92,23 @@ Cypress.Commands.add('loginUsingPassword', () => {
 Cypress.Commands.add('login', (options, route) => {
   cy.then(async () => {
     const salt = generateSalt();
-    const encryptionKey = await generateEncryptionKey(STUB_ACCOUNT.password, salt);
-    const mnemonicEncryptionResult = await encrypt(encryptionKey, STUB_ACCOUNT.mnemonic);
+    const encryptionKey = await generateEncryptionKey(TEST_ACCOUNT.password, salt);
+    const mnemonicEncryptionResult = await encrypt(encryptionKey, TEST_ACCOUNT.mnemonic);
     return [mnemonicEncryptionResult, salt];
   }).then(([mnemonicEncryptionResult, salt]) => {
     const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
 
     cy.openPopup(async (contentWindow) => {
+      /**
+       * Full clear before seeding avoids stale keys from a prior test or
+       * `cy.login` chain leaving half-initialized state that skips the
+       * password modal or wedges `checkUserAuth`.
+       */
+      contentWindow.localStorage.clear();
+      if (contentWindow.sessionStorage) {
+        contentWindow.sessionStorage.clear();
+      }
+
       const dataToBeStored = {
         [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
         [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionResult,

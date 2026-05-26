@@ -1,96 +1,98 @@
 <template>
-  <div
-    class="account-details"
-    :data-account-address="activeAccount.address"
-  >
-    <div class="account-info-wrapper">
-      <slot
-        v-if="$slots['account-info']"
-        name="account-info"
-      />
-      <AccountInfo
-        v-else
-        :account="activeAccount"
-        can-copy-address
-        show-protocol-icon
-      />
-      <BtnClose
-        data-cy="btn-close"
-        class="close-button"
-        @click="close"
-      />
-    </div>
-    <div>
-      <div
-        class="collapsible-top"
-        :class="{ collapsed: isScrollEnabled }"
-      >
-        <slot
-          v-if="$slots.balance"
-          name="balance"
-        />
-        <BalanceInfo
-          v-else
-          :balance="balanceNumeric"
-          :protocol="activeAccount.protocol"
-          horizontal-offline-message
-        />
-
-        <HorizontalScroll
-          ref="buttonsScrollContainer"
-          class="buttons"
-        >
-          <template v-if="!withoutDefaultButtons">
-            <OpenTransferReceiveModalBtn />
-            <OpenTransferSendModalBtn />
-            <OpenShareAddressModalBtn
-              :address="activeAccount.address"
-              :protocol="activeAccount.protocol"
-            />
-            <BtnBox
-              v-if="(
-                activeAccount.type !== ACCOUNT_TYPES.airGap
-                && activeAccount.type !== ACCOUNT_TYPES.ledger
-              )"
-              :text="$t('common.key')"
-              :icon="PrivateKeyIcon"
-              data-cy="export-private-key"
-              @click="exportPrivateKey()"
-            />
-          </template>
-          <slot
-            v-if="$slots.buttons"
-            name="buttons"
+  <PageWrapper hide-header>
+    <div
+      class="account-details-base"
+      :data-account-address="activeAccount.address"
+    >
+      <div class="account-info-wrapper">
+        <slot name="account-info">
+          <AccountInfo
+            :account="activeAccount"
+            can-copy-address
+            show-protocol-icon
           />
-        </HorizontalScroll>
-      </div>
+        </slot>
 
-      <div
-        ref="headerEl"
-        class="header"
-      >
-        <slot name="navigation" />
-
-        <TransactionAndTokenFilter
-          :key="routeName"
-          :show-all-filter-options="activeAccount.protocol === PROTOCOLS.aeternity"
-          :show-filters="isScrollEnabled"
+        <BtnClose
+          data-cy="btn-close"
+          class="close-button"
+          @click="close"
         />
       </div>
 
-      <div
-        class="tabs-content"
-        :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px` }"
-      >
-        <!-- We are disabling animations on FF because of a bug that causes flickering
-          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
-        <IonRouterOutlet
-          :animated="!IS_FIREFOX"
-          :animation="fadeAnimation"
-        />
+      <div>
+        <div
+          class="collapsible-top"
+          :class="{ collapsed: isScrollEnabled }"
+        >
+          <slot
+            v-if="$slots.balance"
+            name="balance"
+          />
+          <BalanceInfo
+            v-else-if="activeAccount.protocol"
+            :balance="balanceNumeric"
+            :protocol="activeAccount.protocol"
+            horizontal-offline-message
+          />
+
+          <HorizontalScroll
+            ref="buttonsScrollContainer"
+            class="buttons"
+          >
+            <template v-if="!withoutDefaultButtons">
+              <OpenTransferReceiveModalBtn />
+              <OpenTransferSendModalBtn />
+              <OpenShareAddressModalBtn
+                v-if="activeAccount.protocol"
+                :address="activeAccount.address"
+                :protocol="activeAccount.protocol"
+              />
+              <BtnBox
+                v-if="(
+                  activeAccount.type !== ACCOUNT_TYPES.airGap
+                  && activeAccount.type !== ACCOUNT_TYPES.ledger
+                )"
+                :text="$t('common.key')"
+                :icon="PrivateKeyIcon"
+                data-cy="export-private-key"
+                @click="exportPrivateKey()"
+              />
+            </template>
+            <slot
+              v-if="$slots.buttons"
+              name="buttons"
+            />
+          </HorizontalScroll>
+        </div>
+
+        <div
+          ref="headerEl"
+          class="header"
+        >
+          <slot name="navigation" />
+
+          <TransactionAndTokenFilter
+            :key="routeName"
+            :show-all-filter-options="activeAccount.protocol === PROTOCOLS.aeternity"
+            :show-filters="isScrollEnabled"
+          />
+        </div>
+
+        <div
+          class="tabs-content"
+          :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px` }"
+        >
+          <!-- We are disabling animations on FF because of a bug that causes flickering
+            see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+          <IonRouterOutlet
+            :animated="!IS_FIREFOX"
+            :animation="fadeAnimation"
+          />
+        </div>
       </div>
     </div>
-  </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -119,8 +121,9 @@ import {
   useUi,
   useScrollConfig,
 } from '@/composables';
-import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+import { fadeAnimation } from '@/popup/animations';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import OpenTransferSendModalBtn from '@/popup/components/OpenTransferSendModalBtn.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
@@ -138,6 +141,7 @@ const INITIAL_TABS_HEIGHT = 330;
 export default defineComponent({
   name: 'AccountDetailsBase',
   components: {
+    PageWrapper,
     AccountInfo,
     BalanceInfo,
     BtnBox,
@@ -164,7 +168,7 @@ export default defineComponent({
 
     const routerHeight = ref<string>();
     const headerEl = ref<HTMLDivElement>();
-    const resizeObserver = ref<ResizeObserver>();
+    let resizeObserver: ResizeObserver | undefined;
 
     const balanceNumeric = computed(() => balance.value.toNumber());
     const routeName = computed(() => route.name);
@@ -181,7 +185,8 @@ export default defineComponent({
     }
 
     function close() {
-      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push', popOutAnimation);
+      // Used to prevent animating the dashboard when switching the route
+      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push');
     }
 
     /**
@@ -189,8 +194,10 @@ export default defineComponent({
      * Tabs change height when filters are shown/hidden
      */
     function observeTabsHeight() {
-      resizeObserver.value = new ResizeObserver(calculateRouterHeight);
-      resizeObserver.value.observe(headerEl.value!);
+      if (headerEl.value) {
+        resizeObserver = new ResizeObserver(calculateRouterHeight);
+        resizeObserver.observe(headerEl.value!);
+      }
     }
 
     onMounted(() => {
@@ -206,7 +213,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      resizeObserver.value?.disconnect();
+      resizeObserver?.disconnect();
       if (IS_MOBILE_APP) {
         setMobileStatusBarColor('#141414');
       }
@@ -237,20 +244,16 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
 
-.account-details {
+.account-details-base {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
   --screen-bg-color: #{$color-bg-modal};
   --header-height: 64px;
 
-  position: relative;
-  top: env(safe-area-inset-top);
   background-color: $color-bg-4;
-  border-radius: $border-radius-app;
   min-height: 100%;
   height: 100%;
   color: $color-white;
-  box-shadow: 0 0 0 1px $color-border, 0 0 50px rgba($color-black, 0.6);
 
   @include mixins.mobile {
     min-height: 100vh;
@@ -294,7 +297,6 @@ export default defineComponent({
         min-width: 84px;
       }
     }
-
   }
 
   .collapsible-top {

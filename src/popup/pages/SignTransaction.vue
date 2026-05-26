@@ -71,7 +71,7 @@ export default defineComponent({
             msg: t('modals.wrongNetwork.msg', [networkId]),
             buttonMessage: t('modals.wrongNetwork.button'),
           });
-          openCallbackOrGoHome(false);
+          await openCallbackOrGoHome(false);
           return;
         }
 
@@ -96,9 +96,9 @@ export default defineComponent({
         if (broadcast) {
           const { txHash } = await aeSdk.api.postTransaction({ tx: signedTransaction });
           await aeSdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
-          openCallbackOrGoHome(true, { 'transaction-hash': txHash });
+          await openCallbackOrGoHome(true, { 'transaction-hash': txHash });
         } else {
-          openCallbackOrGoHome(true, { transaction: signedTransaction });
+          await openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
       } catch (error: any) {
         if (error instanceof RejectedByUserError) {
@@ -111,7 +111,7 @@ export default defineComponent({
             modal: true,
           });
         }
-        openCallbackOrGoHome(false);
+        await openCallbackOrGoHome(false);
       } finally {
         setIsDeepLinkUsed(false);
         setLoaderVisible(false);

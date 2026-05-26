@@ -2,8 +2,9 @@ import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
 import { watch } from 'vue';
 
+import type { Runtime } from 'webextension-polyfill';
 import type { IBackgroundMessageData } from '@/types';
-import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import type { EthRpcSupportedMethods, IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 
 import {
   IS_FIREFOX,
@@ -21,6 +22,7 @@ import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
+import { isAcceptedOffscreenSender } from './messageGuards';
 
 const { activeNetworkName, networks } = useNetworks();
 const { activeAccount } = useAccounts();
@@ -103,11 +105,18 @@ if (IS_FIREFOX) {
 }
 
 browser.runtime.onMessage.addListener(
-  async ({
-    method,
-    payload,
-    params: { aepp, rpcMethodParams = {} } = {},
-  }: IBackgroundMessageData) => {
+  (
+    msg: IBackgroundMessageData,
+    sender: Runtime.MessageSender,
+  ) => {
+    if (!isAcceptedOffscreenSender(msg, sender)) return undefined;
+
+    const {
+      method,
+      payload,
+      params: { aepp, rpcMethodParams = {} } = {},
+    } = msg;
+
     if (method === POPUP_METHODS.reload) {
       wallet.disconnect();
       window.location.reload();
@@ -134,10 +143,14 @@ browser.runtime.onMessage.addListener(
     }
 
     if (typeof aepp === 'string' && method) {
-      return handleEvmRpcMethod(aepp, method as EthRpcSupportedMethods, rpcMethodParams);
+      return handleEvmRpcMethod(
+        aepp,
+        method as EthRpcSupportedMethods,
+        rpcMethodParams as IEthRpcMethodParameters,
+      );
     }
 
-    return true;
+    return undefined;
   },
 );
 

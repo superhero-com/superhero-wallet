@@ -60,8 +60,8 @@ const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
     path: `/${ROUTE_WEB_IFRAME_POPUP}/${name}`,
     component: createIframeComponent(component),
     meta: {
+      useDefaultHardwareBackButton: true,
       notPersist: true,
-      hideHeader: true,
     },
   }))
   : [];

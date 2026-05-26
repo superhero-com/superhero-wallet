@@ -6,8 +6,11 @@ import {
 } from 'vue';
 import {
   AensName,
+  buildTx,
   Encoded,
   Name,
+  Tag,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 
@@ -30,9 +33,11 @@ import {
 } from '@/utils';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
+  IS_MOBILE_APP,
   PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
+import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 import Logger from '@/lib/logger';
 import {
   useAccounts,
@@ -47,14 +52,18 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
-import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
 import { useAeNetworkSettings } from './aeNetworkSettings';
 import { useAeTippingBackend } from './aeTippingBackend';
 import { useAeMiddleware } from './aeMiddleware';
 
-const POLLING_INTERVAL = 10000;
+const DEFAULT_NAMES_POLLING_INTERVAL = 20000;
+const FEE_ESTIMATION_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
+const FEE_ESTIMATION_NONCE = 10000;
+const PENDING_NAME_TRANSFER_TX_MAX_AGE = 5 * 60 * 1000;
+const EXTERNAL_NAME_CACHE_TTL = 10 * 60 * 1000;
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -68,10 +77,24 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
+type PendingNameTransactionType = 'NameUpdateTx' | 'NameTransferTx';
+
+interface IPendingNameTransaction {
+  hash: Encoded.TxHash;
+  name: AensName;
+  owner: AccountAddress;
+}
+
+type PendingNameLookupResult = {
+  failed: boolean;
+  transactions: IPendingNameTransaction[];
+};
+
 export const NAME_CLAIM_STATUS = {
   preclaimed: 'preclaimed',
   claimSubmitted: 'claim-submitted',
   pointerUpdatePending: 'pointer-update-pending',
+  transferring: 'transferring',
 } as const;
 
 type NameClaimStatus = typeof NAME_CLAIM_STATUS[keyof typeof NAME_CLAIM_STATUS];
@@ -86,6 +109,21 @@ interface IPreclaimedName {
   claimTxHash?: Encoded.TxHash;
 }
 
+interface IPendingAutoExtendTx {
+  address: AccountAddress;
+  name: AensName;
+  txHash: Encoded.TxHash;
+  createdAt: number;
+}
+
+interface IPendingNameTransferTx {
+  address: AccountAddress;
+  name: AensName;
+  recipientAddress: AccountAddress;
+  txHash?: Encoded.TxHash;
+  createdAt: number;
+}
+
 interface aeNamesOptions {
   pollingDisabled?: boolean;
 }
@@ -94,16 +132,48 @@ type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
 let composableInitialized = false;
 let claimPreclaimedNamesPromise: Promise<void> | null = null;
+let extendExpiringOwnedNamesPromise: Promise<void> | null = null;
+let updateDefaultNamesPromise: Promise<void> | null = null;
 let preclaimedNamesEncryptionInitialized = false;
+
+/**
+ * In-memory cache + in-flight dedup for `updateExternalName` lookups.
+ * Many components call `getName(externalAddress)` on render (notification rows,
+ * tx details, address pickers) - without this, each render fires a request
+ * even though the data is already in `externalNamesRegistry`.
+ * Keys are scoped by `${networkId}:${address}` so values don't leak across
+ * network switches.
+ */
+const externalNameLastFetchTime = new Map<string, number>();
+const externalNameInFlight = new Map<string, Promise<void>>();
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
 const preclaimedNamesEncrypted = useStorageRef<string | null>(
   null,
   STORAGE_KEYS.preclaimedNames,
-  { enableSecureStorage: true },
+  {
+    enableSecureStorage: true,
+    /**
+     * Migrate legacy plaintext preclaimed-names blobs into
+     * AES-GCM ciphertext keyed by the per-install mobile encryption key.
+     */
+    migrations: IS_MOBILE_APP ? [migrateMobileSensitiveDataEncryption] : [],
+  },
 );
 const preclaimedNames = ref<Record<NetworkId, Record<AensName, IPreclaimedName>>>({});
 const pendingAutoExtendNames = ref<ChainName[]>([]);
+const pendingAutoExtendTxs = useStorageRef<
+Record<NetworkId, Record<AensName, IPendingAutoExtendTx>>
+>(
+  {},
+  STORAGE_KEYS.pendingNameAutoExtendTxs,
+);
+const pendingNameTransferTxs = useStorageRef<
+Record<NetworkId, Record<AensName, IPendingNameTransferTx>>
+>(
+  {},
+  STORAGE_KEYS.pendingNameTransferTxs,
+);
 const areNamesFetching = ref(false);
 
 /**
@@ -118,7 +188,7 @@ const auctions = ref<Record<string, IAuction>>({});
 
 const resolvedChainNames = ref<Record<Encoded.Name, AensName>>({});
 
-const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+const initPollingWatcher = createPollingBasedOnMountedComponents(DEFAULT_NAMES_POLLING_INTERVAL);
 
 /**
  * Aeternity Blockchain allows to match a .chain name to the addresses (AENS service).
@@ -178,14 +248,45 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   async function updateExternalName(address: AccountAddress) {
     ensureExternalNameRegistryExists();
 
-    const { preferredChainName } = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`)
-      .catch(() => ({}));
+    const networkId = nodeNetworkId.value!;
+    const cacheKey = `${networkId}:${address}`;
 
-    if (preferredChainName) {
-      externalNamesRegistry.value[nodeNetworkId.value!][address] = preferredChainName;
-    } else {
-      delete externalNamesRegistry.value[nodeNetworkId.value!][address];
+    const inFlight = externalNameInFlight.get(cacheKey);
+    if (inFlight) {
+      return inFlight;
     }
+
+    const lastFetch = externalNameLastFetchTime.get(cacheKey) || 0;
+    if (Date.now() - lastFetch < EXTERNAL_NAME_CACHE_TTL) {
+      return undefined;
+    }
+
+    const promise = (async () => {
+      let response: { preferredChainName?: ChainName } | null;
+      try {
+        response = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`);
+      } catch {
+        return;
+      }
+
+      // Bail if the network changed mid-flight to avoid writing into the
+      // wrong network's registry.
+      if (nodeNetworkId.value !== networkId) {
+        return;
+      }
+
+      if (response?.preferredChainName) {
+        externalNamesRegistry.value[networkId][address] = response.preferredChainName;
+      } else {
+        delete externalNamesRegistry.value[networkId][address];
+      }
+      externalNameLastFetchTime.set(cacheKey, Date.now());
+    })().finally(() => {
+      externalNameInFlight.delete(cacheKey);
+    });
+
+    externalNameInFlight.set(cacheKey, promise);
+    return promise;
   }
 
   // This function returns computed value to have reactive state and show proper data after fetching
@@ -293,6 +394,42 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
+  function ensurePendingAutoExtendTxRegistryExists(networkId: NetworkId) {
+    if (!pendingAutoExtendTxs.value[networkId]) {
+      pendingAutoExtendTxs.value[networkId] = {};
+    }
+  }
+
+  function upsertPendingAutoExtendTx(networkId: NetworkId, data: IPendingAutoExtendTx) {
+    ensurePendingAutoExtendTxRegistryExists(networkId);
+    pendingAutoExtendTxs.value[networkId][data.name] = data;
+  }
+
+  function removePendingAutoExtendTx(networkId: NetworkId, name: AensName) {
+    delete pendingAutoExtendTxs.value[networkId]?.[name];
+    if (isEmpty(pendingAutoExtendTxs.value[networkId])) {
+      delete pendingAutoExtendTxs.value[networkId];
+    }
+  }
+
+  function ensurePendingNameTransferTxRegistryExists(networkId: NetworkId) {
+    if (!pendingNameTransferTxs.value[networkId]) {
+      pendingNameTransferTxs.value[networkId] = {};
+    }
+  }
+
+  function upsertPendingNameTransferTx(networkId: NetworkId, data: IPendingNameTransferTx) {
+    ensurePendingNameTransferTxRegistryExists(networkId);
+    pendingNameTransferTxs.value[networkId][data.name] = data;
+  }
+
+  function removePendingNameTransferTx(networkId: NetworkId, name: AensName) {
+    delete pendingNameTransferTxs.value[networkId]?.[name];
+    if (isEmpty(pendingNameTransferTxs.value[networkId])) {
+      delete pendingNameTransferTxs.value[networkId];
+    }
+  }
+
   function getClaimOptions(address: AccountAddress) {
     if (activeAccount.value.address === address) {
       return {};
@@ -317,6 +454,10 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return new Name(name, aeSdk.getContext(options));
   }
 
+  async function isNameRegistered(nameObj: Name) {
+    return nameObj.getState().then(() => true, () => false);
+  }
+
   function getClaimErrorMessage(error: any) {
     if (error.message.includes('is not enough to execute') || error.statusCode === 404) {
       return tg('pages.names.balance-error');
@@ -328,6 +469,15 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     openDefaultModal({
       icon: 'critical',
       msg: getClaimErrorMessage(error),
+    });
+  }
+
+  function logSilentError(error: any) {
+    Logger.write({
+      message: error?.message || String(error),
+      type: 'api-response',
+      info: error,
+      modal: false,
     });
   }
 
@@ -345,9 +495,67 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       );
   }
 
+  function fetchPendingNameTransactions(
+    address: AccountAddress,
+    transactionType: PendingNameTransactionType,
+  ) {
+    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+    return aeternityAdapter.fetchPendingTransactions?.(address)
+      .then(
+        (transactions: ITransaction[]) => (transactions)
+          .filter(({ tx: { type } }) => type === transactionType)
+          .map(({ tx, hash }) => ({
+            hash,
+            name: tx.name as AensName,
+            owner: tx.accountId as AccountAddress,
+          }) as IPendingNameTransaction),
+      );
+  }
+
+  async function getPendingNameLookupResult(
+    address: AccountAddress,
+    transactionType: PendingNameTransactionType,
+  ): Promise<PendingNameLookupResult> {
+    try {
+      return {
+        failed: false,
+        transactions: await fetchPendingNameTransactions(address, transactionType) || [],
+      };
+    } catch (error: any) {
+      logSilentError(error);
+      return {
+        failed: true,
+        transactions: [],
+      };
+    }
+  }
+
   async function getPendingNameClaimTransaction(address: AccountAddress, name: AensName) {
     const pendingTransactions = await fetchPendingNameClaimTransactions(address) || [];
     return pendingTransactions.find(({ name: pendingName }) => pendingName === name);
+  }
+
+  async function sendAutoExtendTransaction(name: AensName, address: AccountAddress) {
+    const extendOptions = getClaimOptions(address);
+    const nameObj = await createNameInstance(name, extendOptions);
+    const response = await nameObj.extendTtl(undefined, {
+      ...extendOptions,
+      waitMined: false,
+    });
+    return response?.hash as Encoded.TxHash | undefined;
+  }
+
+  function getNameExtendFee(name: AensName): number {
+    const tx = buildTx({
+      tag: Tag.NameUpdateTx,
+      accountId: FEE_ESTIMATION_ADDRESS,
+      nonce: FEE_ESTIMATION_NONCE,
+      nameId: name,
+      nameTtl: 50000,
+      clientTtl: 84600,
+      pointers: [],
+    });
+    return +aettosToAe(unpackTx(tx, Tag.NameUpdateTx).fee);
   }
 
   async function fetchAllNames(address: AccountAddress) {
@@ -376,12 +584,108 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     try {
       areNamesFetching.value = true;
 
-      ownedNames.value = await Promise.all(
-        aeAccounts.value.map(({ address }) => Promise.all([
-          fetchPendingNameClaimTransactions(address),
-          fetchAllNames(address),
-        ])),
-      ).then((arr) => arr.flat(2)) as IName[];
+      const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+      const currentNetworkId = nodeNetworkId.value!;
+      const accountResults = await Promise.all(
+        aeAccounts.value.map(async ({ address }) => {
+          // A single pending-transactions fetch per address; both the
+          // claim-pending and transfer-pending derived lists below are
+          // computed from it. Previously two separate requests were issued
+          // for the same data per account.
+          const [pendingResult, accountNames] = await Promise.all([
+            aeternityAdapter.fetchPendingTransactions?.(address)
+              .then((transactions: ITransaction[]) => ({
+                failed: false,
+                transactions: transactions || [],
+              }))
+              .catch((error: any) => {
+                logSilentError(error);
+                return { failed: true, transactions: [] as ITransaction[] };
+              }) ?? Promise.resolve({ failed: false, transactions: [] as ITransaction[] }),
+            fetchAllNames(address),
+          ]);
+
+          const pendingClaimTransactions = pendingResult.transactions
+            .filter(({ tx: { type } }) => type === 'NameClaimTx')
+            .map(({ tx, ...otherTx }) => ({
+              ...otherTx,
+              ...tx,
+              owner: tx.accountId,
+            })) as unknown as IName[];
+
+          const pendingTransferLookup: PendingNameLookupResult = {
+            failed: pendingResult.failed,
+            transactions: pendingResult.transactions
+              .filter(({ tx: { type } }) => type === 'NameTransferTx')
+              .map(({ tx, hash }) => ({
+                hash,
+                name: tx.name as AensName,
+                owner: tx.accountId as AccountAddress,
+              }) as IPendingNameTransaction),
+          };
+
+          return {
+            address,
+            names: [
+              ...pendingClaimTransactions,
+              ...(accountNames || []),
+            ] as IName[],
+            pendingTransferLookup,
+          };
+        }),
+      );
+      const names = accountResults.flatMap(({ names: accountNames }) => accountNames);
+      const pendingTransferLookupByOwner = Object.fromEntries(
+        accountResults.map(
+          ({ address, pendingTransferLookup }) => [address, pendingTransferLookup],
+        ),
+      ) as Record<AccountAddress, PendingNameLookupResult>;
+
+      Object.values(pendingNameTransferTxs.value[currentNetworkId] || {}).forEach(({
+        address,
+        createdAt,
+        name,
+        txHash,
+      }) => {
+        const isStillOwned = names.some(
+          (ownedName) => ownedName.owner === address && ownedName.name === name,
+        );
+
+        if (!isStillOwned) {
+          removePendingNameTransferTx(currentNetworkId, name);
+          return;
+        }
+
+        const pendingTransferLookup = pendingTransferLookupByOwner[address];
+        if (pendingTransferLookup?.failed) {
+          return;
+        }
+
+        const hasPendingTransferTx = (pendingTransferLookup?.transactions || [])
+          .some(({ hash, name: pendingName }) => (
+            pendingName === name
+            && (!txHash || hash === txHash)
+          ));
+        const isOldEnoughToClear = Date.now() - createdAt > PENDING_NAME_TRANSFER_TX_MAX_AGE;
+
+        if (!hasPendingTransferTx && isOldEnoughToClear) {
+          removePendingNameTransferTx(currentNetworkId, name);
+        }
+      });
+
+      const pendingTransfers = pendingNameTransferTxs.value[currentNetworkId] || {};
+      ownedNames.value = names.map((ownedName) => {
+        const pendingTransfer = pendingTransfers[ownedName.name];
+        const isTransferPending = pendingTransfer?.address === ownedName.owner;
+
+        return {
+          ...ownedName,
+          pending: ownedName.pending || isTransferPending,
+          pendingStatus: isTransferPending
+            ? NAME_CLAIM_STATUS.transferring
+            : ownedName.pendingStatus,
+        };
+      });
     } catch (error: any) {
       handleUnknownError(error);
     } finally {
@@ -389,8 +693,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
-  function updateDefaultNames() {
-    aeAccounts.value.map(async ({ address }) => {
+  async function processDefaultNamesUpdate() {
+    await Promise.all(aeAccounts.value.map(async ({ address }) => {
       const currentNodeId = nodeNetworkId.value;
       const response = await fetchJson(
         `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`,
@@ -401,7 +705,20 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       }
 
       setDefaultName({ address, name: response?.preferredChainName });
-    });
+    }));
+  }
+
+  async function updateDefaultNames() {
+    if (!updateDefaultNamesPromise) {
+      const updatePromise = processDefaultNamesUpdate()
+        .finally(() => {
+          if (updateDefaultNamesPromise === updatePromise) {
+            updateDefaultNamesPromise = null;
+          }
+        });
+      updateDefaultNamesPromise = updatePromise;
+    }
+    return updateDefaultNamesPromise;
   }
 
   async function updateNamePointer(
@@ -421,6 +738,18 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
           { account_pubkey: address },
           { ...options, extendPointers: true },
         );
+      } else if (type === UPDATE_POINTER_ACTION.transfer) {
+        const response = await nameObj.transfer(address!, {
+          ...options,
+          waitMined: false,
+        });
+        upsertPendingNameTransferTx(nodeNetworkId.value!, {
+          address: activeAccount.value.address,
+          name,
+          recipientAddress: address!,
+          txHash: response?.hash as Encoded.TxHash | undefined,
+          createdAt: Date.now(),
+        });
       }
       openDefaultModal({
         msg: tg('pages.names.pointer-added', { type }),
@@ -492,6 +821,16 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
 
     if (status === NAME_CLAIM_STATUS.preclaimed) {
       try {
+        if (await isNameRegistered(nameObj)) {
+          removePreclaimedName(networkId, name);
+          await updateOwnedNames();
+          openDefaultModal({
+            title: tg('modals.name-exist.title'),
+            msg: tg('modals.name-exist.msg'),
+          });
+          return;
+        }
+
         const pendingClaimTransaction = await getPendingNameClaimTransaction(address, name);
         currentClaimTxHash = pendingClaimTransaction?.hash
           || (await nameObj.claim({ ...claimOptions, nameSalt: salt, waitMined: false })).hash;
@@ -563,18 +902,98 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return claimPreclaimedNamesPromise;
   }
 
-  async function extendExpiringOwnedNames() {
+  async function processExpiringOwnedNames() {
     const aeSdk = await getAeSdk();
+    const networkId = nodeNetworkId.value!;
+    const pendingTxsByName = pendingAutoExtendTxs.value[networkId] || {};
     const height = await aeSdk.getHeight();
-    await Promise.all(
-      ownedNames.value
-        .filter(({ autoExtend }) => autoExtend)
-        .filter(({ expiresAt }) => expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL)
-        .map(({ name }) => updateNamePointer({
+    const expiringNames = ownedNames.value
+      .filter(({ autoExtend, expiresAt, pending }) => (
+        autoExtend
+        && !pending
+        && expiresAt > height
+        && expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL
+      ));
+    const owners = [...new Set(expiringNames.map(({ owner }) => owner))];
+    const pendingUpdateLookupByOwner = await Promise.all(
+      owners.map(async (owner) => [
+        owner,
+        await getPendingNameLookupResult(owner as AccountAddress, 'NameUpdateTx'),
+      ] as const),
+    ).then(Object.fromEntries) as Record<AccountAddress, PendingNameLookupResult>;
+
+    const extensionResults = await Promise.all(expiringNames.map(async ({ name, owner }) => {
+      const pendingUpdateLookup = pendingUpdateLookupByOwner[owner];
+      if (pendingUpdateLookup?.failed) {
+        return false;
+      }
+
+      const pendingUpdatesForName = (pendingUpdateLookup?.transactions || [])
+        .filter(({ name: pendingName }) => pendingName === name);
+      const storedPendingTx = pendingTxsByName[name];
+
+      if (pendingUpdatesForName.length) {
+        const matchedPendingTx = pendingUpdatesForName
+          .find(({ hash }) => hash && (!storedPendingTx || hash === storedPendingTx.txHash))
+          || pendingUpdatesForName[0];
+        if (!matchedPendingTx.hash) {
+          return false;
+        }
+        upsertPendingAutoExtendTx(networkId, {
+          address: owner,
           name,
-          type: UPDATE_POINTER_ACTION.extend,
-        })),
-    );
+          txHash: matchedPendingTx.hash,
+          createdAt: Date.now(),
+        });
+        return false;
+      }
+
+      try {
+        const txHash = await sendAutoExtendTransaction(name, owner as AccountAddress);
+        if (!txHash) {
+          return false;
+        }
+        upsertPendingAutoExtendTx(networkId, {
+          address: owner as AccountAddress,
+          name,
+          txHash,
+          createdAt: Date.now(),
+        });
+        return true;
+      } catch (error: any) {
+        if (error.message.includes('Account not found')) {
+          handleUnknownError(error);
+        } else {
+          openDefaultModal({
+            msg: isInsufficientBalanceError(error)
+              ? tg('modals.insufficient-balance.msg')
+              : error.message,
+          });
+        }
+        return false;
+      }
+    }));
+
+    Object.keys(pendingTxsByName).forEach((name) => {
+      if (!expiringNames.some((ownedName) => ownedName.name === name)) {
+        removePendingAutoExtendTx(networkId, name as AensName);
+      }
+    });
+
+    if (extensionResults.some(Boolean)) {
+      await updateOwnedNames();
+    }
+  }
+
+  async function extendExpiringOwnedNames() {
+    if (!extendExpiringOwnedNamesPromise) {
+      extendExpiringOwnedNamesPromise = processExpiringOwnedNames()
+        .catch(logSilentError)
+        .finally(() => {
+          extendExpiringOwnedNamesPromise = null;
+        });
+    }
+    return extendExpiringOwnedNamesPromise;
   }
 
   /**
@@ -609,6 +1028,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     retrieveCachedChainNames();
 
     onNetworkChange(async () => {
+      externalNameLastFetchTime.clear();
+      updateDefaultNamesPromise = null;
       await Promise.all([
         updateOwnedNames(),
         updateDefaultNames(),
@@ -635,9 +1056,11 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     areNamesFetching,
     addNameToClaimQueue,
     claimPreclaimedNames,
+    extendExpiringOwnedNames,
     updateOwnedNames,
     resolvedChainNames,
     getName,
+    getNameExtendFee,
     getNameByNameHash,
     getNameAuction,
     getNameAuctionHighestBid,

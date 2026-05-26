@@ -1,51 +1,42 @@
 <template>
-  <div
+  <DetailsItem
     v-if="payload && payload.length"
-    class="payload"
+    class="payload-details"
+    :class="{ 'has-actions': Boolean($slots.default) }"
+    :label="$t('modals.send.payload')"
+    :value="payload"
   >
-    <div class="payload-header">
-      <span
-        class="text-text"
-        v-text="$t('modals.send.payload')"
-      />
+    <template
+      v-if="$slots.default"
+      #label
+    >
       <slot />
-    </div>
-
-    <div
-      class="payload-text"
-      v-text="payload"
-    />
-  </div>
+    </template>
+  </DetailsItem>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+import DetailsItem from './DetailsItem.vue';
+
+export default defineComponent({
   name: 'PayloadDetails',
+  components: { DetailsItem },
   props: {
     payload: { type: String, default: '' },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables' as *;
-@use '@/styles/typography';
-
-.payload {
-  text-align: left;
-  width: 100%;
-
-  .payload-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
+.payload-details {
+  &:deep(.value) {
+    word-break: break-all;
   }
 
-  .payload-text {
-    @extend %face-sans-15-regular;
-
-    color: $color-white;
-    opacity: 0.85;
+  &.has-actions:deep(.label) {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

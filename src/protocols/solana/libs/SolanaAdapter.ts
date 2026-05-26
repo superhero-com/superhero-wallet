@@ -534,15 +534,14 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       try {
         const ix = tx?.transaction?.message?.instructions?.[0];
         const accIndex = ix?.accounts?.[1];
-        const key = tx?.transaction?.message?.accountKeys?.[accIndex];
-        return key?.toBase58?.();
+        return tx?.transaction?.message?.accountKeys?.[accIndex];
       } catch (e) {
         return undefined;
       }
     })();
 
     const firstIx = tx?.transaction?.message?.instructions?.[0];
-    const programIdBase58 = tx?.transaction?.message?.indexToProgramIds.get(
+    const programIdBase58 = tx?.transaction?.message?.indexToProgramIds?.get(
       firstIx?.programIdIndex,
     )?.toBase58?.();
     const isSystemTransfer = programIdBase58 === SystemProgram.programId.toBase58();
@@ -675,8 +674,8 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       microTime: tx?.blockTime ? tx.blockTime * 1000 : undefined,
       tx: {
         amount: finalAmountSol,
-        senderId: sysSender.toBase58(),
-        recipientId: sysRecipient.toBase58(),
+        senderId: sysSender?.toBase58?.() || '',
+        recipientId: sysRecipient?.toBase58?.() || '',
         ...(!isSystemTransfer ? { contractId: (programIdBase58 || SOL_CONTRACT_ID) } : {}),
         type: (isContractCall ? (Tag[Tag.ContractCallTx] as any) : (Tag[Tag.SpendTx] as any)),
         tag: (isContractCall ? Tag.ContractCallTx : Tag.SpendTx),

@@ -6,7 +6,8 @@ import { App, ComputedRef } from 'vue';
 import { IS_PRODUCTION, MAX_LOG_ENTRIES, STORAGE_KEYS } from '@/constants';
 import { exportFile } from '@/utils';
 import { tg as t } from '@/popup/plugins/i18n';
-import { useModals, useUi } from '@/composables';
+import { useModals } from '@/composables/modals';
+import { useUi } from '@/composables/ui';
 
 import { WalletStorage } from './WalletStorage';
 import { RejectedByUserError } from './errors';

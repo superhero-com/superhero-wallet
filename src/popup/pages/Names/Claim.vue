@@ -6,11 +6,11 @@
           v-slot="{ field, errorMessage }"
           name="name"
           :rules="{
-            enough_coin: totalNameClaimAmount.toString(),
             required: true,
             aens_name: true,
             aens_name_unregistered: true,
             max_len: maxNameLength,
+            enough_coin: totalNameClaimAmount.toString(),
           }"
         >
           <InputField
@@ -60,7 +60,7 @@
         <BtnMain
           class="btn-register"
           extend
-          :disabled="isLoaderVisible || !name || errorName"
+          :disabled="isLoaderVisible || !name || !!errorName"
           @click="claim"
         >
           {{
@@ -110,7 +110,8 @@ import {
   AE_AENS_DOMAIN,
   AE_AENS_NAME_MAX_LENGTH,
 } from '@/protocols/aeternity/config';
-import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { NAME_CLAIM_STATUS, useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { MODAL_NAME_CLAIM_INFO } from '@/constants';
 
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -137,9 +138,14 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { activeAccount } = useAccounts();
-    const { openDefaultModal } = useModals();
+    const { openDefaultModal, openModal } = useModals();
     const { getAeSdk, nodeNetworkId } = useAeSdk();
-    const { isLoaderVisible, setLoaderVisible } = useUi();
+    const {
+      isLoaderVisible,
+      isNameClaimInfoModalHidden,
+      setLoaderVisible,
+      setNameClaimInfoModalHidden,
+    } = useUi();
     const { addNameToClaimQueue, preclaimedNames } = useAeNames();
 
     const name = ref('');
@@ -148,6 +154,16 @@ export default defineComponent({
 
     const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
     const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
+    const queuedClaimInProgress = computed(() => {
+      const queuedClaim = preclaimedNames.value[nodeNetworkId.value!]?.[fullName.value];
+      return (
+        queuedClaim
+        && (
+          queuedClaim.status === NAME_CLAIM_STATUS.preclaimed
+          || queuedClaim.status === NAME_CLAIM_STATUS.claimSubmitted
+        )
+      ) ? queuedClaim : null;
+    });
 
     const totalNameClaimAmount = computed(() => !isNameValid.value
       ? BigNumber(0)
@@ -179,14 +195,13 @@ export default defineComponent({
         setLoaderVisible(false);
         return;
       }
-      if (
-        preclaimedNames.value[nodeNetworkId.value!]
-        && Object.keys(preclaimedNames.value[nodeNetworkId.value!]).includes(fullName.value)
-      ) {
+      if (queuedClaimInProgress.value) {
         setLoaderVisible(false);
         openDefaultModal({
           title: t('modals.name-exist.title'),
-          msg: t('modals.name-already-preclaimed.msg'),
+          msg: queuedClaimInProgress.value.address === activeAccount.value.address
+            ? t('modals.name-already-preclaimed.msg')
+            : t('modals.name-already-preclaimed.other-account'),
         });
         return;
       }
@@ -202,6 +217,15 @@ export default defineComponent({
           msg: t('modals.name-exist.msg'),
         });
       } else {
+        if (!isNameClaimInfoModalHidden.value) {
+          setLoaderVisible(false);
+          const shouldHideInfoModal = await openModal<boolean>(MODAL_NAME_CLAIM_INFO);
+          if (shouldHideInfoModal) {
+            setNameClaimInfoModalHidden(true);
+          }
+          setLoaderVisible(true);
+        }
+
         const isClaimQueued = await addNameToClaimQueue(
           fullName.value,
           activeAccount.value.address,

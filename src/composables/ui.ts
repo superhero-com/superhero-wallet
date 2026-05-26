@@ -59,6 +59,9 @@ export const useUi = createCustomScopedComposable(() => {
   const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
   const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
   const isBiometricLoginEnabled = computed(() => !!otherSettings.value.isBiometricLoginEnabled);
+  const isNameClaimInfoModalHidden = computed(
+    () => !!otherSettings.value.isNameClaimInfoModalHidden,
+  );
 
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
     if (homeRouteName.value !== routeName) {
@@ -102,6 +105,10 @@ export const useUi = createCustomScopedComposable(() => {
     otherSettings.value.isBiometricLoginEnabled = val;
   }
 
+  function setNameClaimInfoModalHidden(val: boolean) {
+    otherSettings.value.isNameClaimInfoModalHidden = val;
+  }
+
   function initVisibilityListeners() {
     handleVisibilityChange();
     onMounted(() => {
@@ -129,6 +136,7 @@ export const useUi = createCustomScopedComposable(() => {
     isSeedBackedUp,
     saveErrorLog,
     isBiometricLoginEnabled,
+    isNameClaimInfoModalHidden,
     initVisibilityListeners,
     setCardHidden,
     setBackedUpSeed,
@@ -139,5 +147,6 @@ export const useUi = createCustomScopedComposable(() => {
     setLoaderVisible,
     resetUiSettings,
     setBiometricLoginEnabled,
+    setNameClaimInfoModalHidden,
   };
 });

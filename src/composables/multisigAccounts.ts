@@ -44,9 +44,18 @@ export interface MultisigAccountsOptions {
 
 let multisigContractInstances: Dictionary<Contract<SimpleGAMultiSigContractApi>> = {};
 let composableInitialized = false;
+let multisigAccountsUpdatePromise: Promise<void> | null = null;
+let lastAllMultisigBalancesRefreshTime = 0;
+let lastAllMultisigConsensusRefreshTime = 0;
+let lastMultisigBackendListRefreshTime = 0;
+let cachedMultisigBackendList: IMultisigAccountResponse[] = [];
+let cachedMultisigBackendListAccountCount = 0;
 const isMultisigBackendUnavailable = ref(false);
 
 const POLLING_INTERVAL = 12000;
+const ALL_MULTISIG_BALANCES_REFRESH_INTERVAL = 60000;
+const ALL_MULTISIG_CONSENSUS_REFRESH_INTERVAL = 60000;
+const MULTISIG_BACKEND_LIST_REFRESH_INTERVAL = 60000;
 
 const multisigAccounts = useStorageRef<IMultisigAccount[]>(
   [],
@@ -114,6 +123,9 @@ export function useMultisigAccounts({
 
   function addPendingMultisigAccount(multisigAccount: IMultisigAccount) {
     pendingMultisigAccounts.value.push(multisigAccount);
+    // The newly created vault won't be in the cached backend list yet,
+    // so invalidate the cache to force the next poll to discover it.
+    lastMultisigBackendListRefreshTime = 0;
   }
 
   // TODO the account details should not store the transaction data
@@ -148,11 +160,17 @@ export function useMultisigAccounts({
   /**
    * Get extended data for a multisig account
    */
-  async function getMultisigAccountInfo({
-    contractId,
-    gaAccountId,
-    ...otherMultisigData
-  }: IMultisigAccountResponse): Promise<IMultisigAccount> {
+  async function getMultisigAccountInfo(
+    {
+      contractId,
+      gaAccountId,
+      ...otherMultisigData
+    }: IMultisigAccountResponse,
+    {
+      refreshBalance = false,
+      refreshConsensus = false,
+    }: { refreshBalance?: boolean; refreshConsensus?: boolean } = {},
+  ): Promise<IMultisigAccount> {
     const dryAeSdk = await getDryAeSdk();
     try {
       if (!multisigContractInstances[contractId]) {
@@ -168,6 +186,22 @@ export function useMultisigAccounts({
 
       const currentAccount = multisigAccounts.value
         .find((account) => account.contractId === contractId);
+      // The active vault and any vault that we already know has a pending tx
+      // need fresh data on every poll so the UI feels responsive.
+      const isActiveOrPending = (
+        gaAccountId === activeMultisigAccountId.value
+        || !!currentAccount?.hasPendingTransaction
+      );
+      const shouldRefreshBalance = (
+        refreshBalance
+        || !currentAccount
+        || isActiveOrPending
+      );
+      const shouldRefreshConsensus = (
+        refreshConsensus
+        || !currentAccount
+        || isActiveOrPending
+      );
 
       const [
         nonce,
@@ -184,11 +218,32 @@ export function useMultisigAccounts({
         currentAccount?.signers
           ? { decodedResult: currentAccount.signers }
           : contractInstance.get_signers(),
-        contractInstance.get_consensus_info(),
-        gaAccountId ? dryAeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
+        shouldRefreshConsensus
+          ? contractInstance.get_consensus_info()
+          : null,
+        (shouldRefreshBalance && gaAccountId)
+          ? dryAeSdk
+            .getBalance(gaAccountId as Encoded.AccountAddress)
+            .then((value) => toShiftedBigNumber(value, -AE_COIN_PRECISION))
+          : currentAccount?.balance || new BigNumber(0),
       ]));
 
-      const decodedConsensus = consensusResult.decodedResult;
+      // When consensus is not refreshed we keep the previously stored consensus
+      // fields from `currentAccount` and only update the cheap, account-specific
+      // values (nonce, signers, balance).
+      if (!consensusResult && currentAccount) {
+        return {
+          ...currentAccount,
+          ...otherMultisigData,
+          contractId,
+          gaAccountId,
+          nonce: Number(nonce.decodedResult),
+          signers: signers.decodedResult,
+          balance,
+        };
+      }
+
+      const decodedConsensus = consensusResult!.decodedResult;
       const txHash = decodedConsensus.tx_hash;
       const consensus: IMultisigConsensus = camelCaseKeysDeep(decodedConsensus);
 
@@ -204,7 +259,7 @@ export function useMultisigAccounts({
         gaAccountId,
         nonce: Number(nonce.decodedResult),
         signers: signers.decodedResult,
-        balance: toShiftedBigNumber(balance, -AE_COIN_PRECISION),
+        balance,
         hasPendingTransaction,
         txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
       };
@@ -222,7 +277,13 @@ export function useMultisigAccounts({
     }
   }
 
-  async function getAllMultisigAccountsInfo(rawMultisigData: IMultisigAccountResponse[]) {
+  async function getAllMultisigAccountsInfo(
+    rawMultisigData: IMultisigAccountResponse[],
+    {
+      refreshBalances = false,
+      refreshConsensus = false,
+    }: { refreshBalances?: boolean; refreshConsensus?: boolean } = {},
+  ) {
     const currentNetworkName = activeNetwork.value.name;
     /**
      * Splitting the rawMultisigData is required to not overload the node
@@ -238,7 +299,10 @@ export function useMultisigAccounts({
       }
       // Process each nested array sequentially
       const promises = nestedArray.map(
-        (rawData: IMultisigAccountResponse) => getMultisigAccountInfo(rawData),
+        (rawData: IMultisigAccountResponse) => getMultisigAccountInfo(
+          rawData,
+          { refreshBalance: refreshBalances, refreshConsensus },
+        ),
       );
       /* eslint-disable no-await-in-loop */
       const arrayResults = await Promise.all(promises) as IMultisigAccount[];
@@ -275,21 +339,42 @@ export function useMultisigAccounts({
   /**
    * Refresh the list of the multisig accounts.
    */
-  async function updateMultisigAccounts() {
+  async function processMultisigAccountsUpdate() {
+    const networkAtStart = activeNetwork.value.name;
     /**
-     * Establish the list of multisig accounts used by the regular accounts
+     * Establish the list of multisig accounts used by the regular accounts.
+     * The backend list rarely changes (a new vault appears only when one is
+     * created/added) so it's cached and only refreshed at most every
+     * MULTISIG_BACKEND_LIST_REFRESH_INTERVAL. The cache is also invalidated
+     * when the number of AE accounts changes (e.g. user adds an account).
      */
     let rawMultisigData: IMultisigAccountResponse[] = [];
-    try {
-      await Promise.all(aeAccounts.value.map(async ({ address }) => rawMultisigData.push(
-        ...(await fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/${address}`)),
-      )));
-      isMultisigBackendUnavailable.value = false;
-    } catch {
-      isMultisigBackendUnavailable.value = true;
-    }
+    const aeAccountCount = aeAccounts.value.length;
+    const shouldRefreshBackendList = (
+      Date.now() - lastMultisigBackendListRefreshTime > MULTISIG_BACKEND_LIST_REFRESH_INTERVAL
+      || cachedMultisigBackendListAccountCount !== aeAccountCount
+    );
 
-    rawMultisigData = uniqBy(rawMultisigData, 'contractId');
+    if (shouldRefreshBackendList) {
+      try {
+        await Promise.all(aeAccounts.value.map(async ({ address }) => rawMultisigData.push(
+          ...(await fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/${address}`)),
+        )));
+        if (activeNetwork.value.name !== networkAtStart) {
+          return;
+        }
+        isMultisigBackendUnavailable.value = false;
+        rawMultisigData = uniqBy(rawMultisigData, 'contractId');
+        cachedMultisigBackendList = rawMultisigData;
+        cachedMultisigBackendListAccountCount = aeAccountCount;
+        lastMultisigBackendListRefreshTime = Date.now();
+      } catch {
+        isMultisigBackendUnavailable.value = true;
+        rawMultisigData = cachedMultisigBackendList;
+      }
+    } else {
+      rawMultisigData = cachedMultisigBackendList;
+    }
 
     function isSignatureRequested(account: IMultisigAccount) {
       return (
@@ -301,7 +386,23 @@ export function useMultisigAccounts({
       );
     }
 
-    const allMultisigAccountsInfo = await getAllMultisigAccountsInfo(rawMultisigData);
+    const shouldRefreshAllBalances = (
+      Date.now() - lastAllMultisigBalancesRefreshTime > ALL_MULTISIG_BALANCES_REFRESH_INTERVAL
+    );
+    const shouldRefreshAllConsensus = (
+      Date.now() - lastAllMultisigConsensusRefreshTime > ALL_MULTISIG_CONSENSUS_REFRESH_INTERVAL
+    );
+    const allMultisigAccountsInfo = await getAllMultisigAccountsInfo(
+      rawMultisigData,
+      {
+        refreshBalances: shouldRefreshAllBalances,
+        refreshConsensus: shouldRefreshAllConsensus,
+      },
+    );
+
+    if (activeNetwork.value.name !== networkAtStart) {
+      return;
+    }
 
     const result: IMultisigAccount[] = allMultisigAccountsInfo
       .filter(Boolean)
@@ -336,6 +437,26 @@ export function useMultisigAccounts({
     }
 
     removeDuplicatesFromPendingAccounts();
+
+    if (shouldRefreshAllBalances) {
+      lastAllMultisigBalancesRefreshTime = Date.now();
+    }
+    if (shouldRefreshAllConsensus) {
+      lastAllMultisigConsensusRefreshTime = Date.now();
+    }
+  }
+
+  async function updateMultisigAccounts() {
+    if (!multisigAccountsUpdatePromise) {
+      const updatePromise = processMultisigAccountsUpdate()
+        .finally(() => {
+          if (multisigAccountsUpdatePromise === updatePromise) {
+            multisigAccountsUpdatePromise = null;
+          }
+        });
+      multisigAccountsUpdatePromise = updatePromise;
+    }
+    return multisigAccountsUpdatePromise;
   }
 
   function fetchAdditionalInfo() {
@@ -361,8 +482,17 @@ export function useMultisigAccounts({
     onNetworkChange(() => {
       multisigAccounts.value = [];
       activeMultisigAccountId.value = '';
-      updateMultisigAccounts();
       multisigContractInstances = {};
+      cachedMultisigBackendList = [];
+      cachedMultisigBackendListAccountCount = 0;
+      lastMultisigBackendListRefreshTime = 0;
+      lastAllMultisigBalancesRefreshTime = 0;
+      lastAllMultisigConsensusRefreshTime = 0;
+      // Drop the in-flight dedup reference so the next `updateMultisigAccounts()`
+      // call starts a fresh fetch for the new network instead of awaiting a stale
+      // run that may still complete and overwrite the reset timestamps or state.
+      multisigAccountsUpdatePromise = null;
+      updateMultisigAccounts();
     });
   }
 

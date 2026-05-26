@@ -30,10 +30,25 @@ import {
   useMultisigAccounts,
   useTransactionList,
 } from '@/composables';
+import {
+  ROUTE_COIN,
+  ROUTE_COIN_DETAILS,
+  ROUTE_TOKEN,
+  ROUTE_TOKEN_DETAILS,
+} from '@/popup/router/routeNames';
 
 import TransactionList from '@/popup/components/TransactionList.vue';
 
-let initialized = false;
+const ROUTE_GROUPS = [
+  [
+    ROUTE_COIN,
+    ROUTE_COIN_DETAILS,
+  ],
+  [
+    ROUTE_TOKEN,
+    ROUTE_TOKEN_DETAILS,
+  ],
+];
 
 export default defineComponent({
   name: 'AssetDetailsTransactions',
@@ -43,7 +58,11 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
+    const currentRouteGroup = ROUTE_GROUPS.find((routeGroup) => (
+      routeGroup.includes(route.name as string)
+    )) || [];
     const assetContractId = route.params.id as AssetContractId;
+    let initialized = false;
 
     const { sharedAssetDetails } = useAssetDetails();
     const { activeAccount } = useAccounts();
@@ -76,7 +95,7 @@ export default defineComponent({
       protocol: (isMultisig.value) ? PROTOCOLS.aeternity : activeAccount.value.protocol,
     });
 
-    // Fired when accessing the page both as tab and whole AccountDetails page.
+    // Fired when accessing the page both as tab and whole AssetDetails page.
     onIonViewDidEnter(() => {
       isPageActive.value = true;
       // IonRouterOutlet re-renders the page twice
@@ -87,14 +106,18 @@ export default defineComponent({
       }
     });
 
-    // Fired only when leaving to different tab within the AccountDetails.
+    // Fired when leaving to a different tab within AssetDetails.
+    // During iOS swipe-back the page is still visible while leaving, so keep the list mounted
+    // to avoid an empty redraw/flicker; onUnmounted handles cleanup when leaving AssetDetails.
     onIonViewDidLeave(() => {
-      isPageActive.value = false;
-      stopTransactionListPolling();
-      initialized = false;
+      if (currentRouteGroup.includes(route.name as string)) {
+        isPageActive.value = false;
+        stopTransactionListPolling();
+        initialized = false;
+      }
     });
 
-    // Fired when leaving the AccountDetails page.
+    // Fired when leaving the AssetDetails page.
     onUnmounted(() => {
       isPageActive.value = false;
       stopTransactionListPolling();

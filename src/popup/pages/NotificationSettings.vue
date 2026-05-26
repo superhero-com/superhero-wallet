@@ -1,44 +1,41 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="notification-settings">
-        <p class="text-description">
-          {{ $t('pages.notificationSettings.description') }}
-        </p>
-        <p class="text-description">
-          {{ $t('pages.notificationSettings.description2') }}
-        </p>
+  <PageWrapper :page-title="$t('pages.titles.notifications')">
+    <div class="notification-settings">
+      <p class="text-description">
+        {{ $t('pages.notificationSettings.description') }}
+      </p>
+      <p class="text-description">
+        {{ $t('pages.notificationSettings.description2') }}
+      </p>
 
-        <div class="switches">
-          <SwitchButton
-            v-for="(label, type) in notificationTypeLabels"
-            :key="type"
-            :disabled="type === NOTIFICATION_TYPES.wallet"
-            :model-value="isNotificationTypeAllowed(type)"
-            :label="label"
-            @update:modelValue="toggleNotificationsSetting(type)"
-          />
-        </div>
+      <div class="switches">
+        <SwitchButton
+          v-for="(label, type) in notificationTypeLabels"
+          :key="type"
+          :disabled="type === NOTIFICATION_TYPES.wallet"
+          :model-value="isNotificationTypeAllowed(type)"
+          :label="label"
+          @update:modelValue="toggleNotificationsSetting(type)"
+        />
       </div>
-    </IonContent>
-  </IonPage>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
 import { useI18n } from 'vue-i18n';
 import type { NotificationType } from '@/types';
 import { NOTIFICATION_TYPES } from '@/constants';
 import { useNotifications } from '@/composables';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import SwitchButton from '@/popup/components/SwitchButton.vue';
 
 export default defineComponent({
   components: {
+    PageWrapper,
     SwitchButton,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { t } = useI18n();

@@ -1,103 +1,99 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="token-container">
-        <div class="token-content">
-          <div class="top">
-            <Tokens
-              :tokens="tokens"
-              :symbol-length="22"
-              :icon-size="ICON_SIZES.xxl"
-              full-symbol
-              vertical
-            />
+  <PageWrapper
+    :page-title="(isCoin) ? $t('pages.titles.coinDetails') : $t('pages.titles.tokenDetails')"
+  >
+    <div class="token-container">
+      <div class="token-content">
+        <div class="top">
+          <Tokens
+            :tokens="tokens"
+            :symbol-length="22"
+            :icon-size="ICON_SIZES.xxl"
+            full-symbol
+            vertical
+          />
 
-            <TokenAmount
-              class="token-amount"
-              hide-symbol
-              vertical
-              large
-              :protocol="currentActiveProtocol"
-              :amount="assetBalance"
-              :hide-fiat="hideFiat"
-              :price="fungibleTokenBalance?.price"
-            />
-          </div>
-
-          <div class="token-actions">
-            <OpenTransferReceiveModalBtn
-              :is-multisig="isMultisig"
-              :token-contract-id="fungibleToken?.contractId"
-            />
-            <OpenTransferSendModalBtn
-              :is-multisig="isMultisig"
-              :disabled="isMultisig && !!pendingMultisigTransaction"
-              :token-contract-id="fungibleToken?.contractId"
-            />
-            <BtnBox
-              v-if="isAeCoin && isNodeMainnet && UNFINISHED_FEATURES"
-              :text="$t('common.buy')"
-              :icon="BuyIcon"
-              :href="activeAccountSimplexLink"
-            />
-            <BtnBox
-              v-else-if="isAeCoin && isNodeTestnet"
-              :text="$t('common.faucet')"
-              :icon="FaucetIcon"
-              :href="activeAccountFaucetUrl"
-            />
-            <BtnBox
-              v-else-if="(
-                !IS_IOS
-                && (isNodeMainnet || isNodeTestnet)
-                && currentActiveProtocol === PROTOCOLS.aeternity
-              )"
-              :text="$t('common.swap')"
-              :icon="SwapIcon"
-              :href="AE_DEX_URL"
-            />
-          </div>
-
-          <div
-            ref="stickyTabsWrapperEl"
-            class="sticky-tabs-wrapper"
-          >
-            <Tabs>
-              <Tab
-                v-for="tab in tabs"
-                :key="tab.routeName"
-                :exact-path="tab.exact"
-                :to="{ name: tab.routeName, params: route.params }"
-                :text="tab.text"
-              />
-            </Tabs>
-            <TransactionAndTokenFilter
-              :key="routeName?.toString()"
-              :show-filters="showFilterBar"
-              :show-all-filter-options="!isAeCoin && currentActiveProtocol === PROTOCOLS.aeternity"
-            />
-          </div>
+          <TokenAmount
+            class="token-amount"
+            hide-symbol
+            vertical
+            large
+            :protocol="currentActiveProtocol"
+            :amount="assetBalance"
+            :hide-fiat="hideFiat"
+            :price="fungibleTokenBalance?.price"
+          />
         </div>
-        <!-- We are disabling animations on FF because of a bug that causes flickering
-          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
-        <IonRouterOutlet
-          :animated="!IS_FIREFOX"
-          :animation="fadeAnimation"
-          class="token-router"
-          :style="{ height: routerHeight || '350px' }"
-        />
+
+        <div class="token-actions">
+          <OpenTransferReceiveModalBtn
+            :is-multisig="isMultisig"
+            :token-contract-id="fungibleToken?.contractId"
+          />
+          <OpenTransferSendModalBtn
+            :is-multisig="isMultisig"
+            :disabled="isMultisig && !!pendingMultisigTransaction"
+            :token-contract-id="fungibleToken?.contractId"
+          />
+          <BtnBox
+            v-if="isAeCoin && isNodeMainnet && UNFINISHED_FEATURES"
+            :text="$t('common.buy')"
+            :icon="BuyIcon"
+            :href="activeAccountSimplexLink"
+          />
+          <BtnBox
+            v-else-if="isAeCoin && isNodeTestnet"
+            :text="$t('common.faucet')"
+            :icon="FaucetIcon"
+            :href="activeAccountFaucetUrl"
+          />
+          <BtnBox
+            v-else-if="(
+              !IS_IOS
+              && (isNodeMainnet || isNodeTestnet)
+              && currentActiveProtocol === PROTOCOLS.aeternity
+            )"
+            :text="$t('common.swap')"
+            :icon="SwapIcon"
+            :href="AE_DEX_URL"
+          />
+        </div>
+
+        <div
+          ref="stickyTabsWrapperEl"
+          class="sticky-tabs-wrapper"
+        >
+          <Tabs>
+            <Tab
+              v-for="tab in tabs"
+              :key="tab.routeName"
+              :exact-path="tab.exact"
+              :to="{ name: tab.routeName, params: route.params }"
+              :text="tab.text"
+            />
+          </Tabs>
+          <TransactionAndTokenFilter
+            :key="routeName?.toString()"
+            :show-filters="showFilterBar"
+            :show-all-filter-options="!isAeCoin && currentActiveProtocol === PROTOCOLS.aeternity"
+          />
+        </div>
       </div>
-    </IonContent>
-  </IonPage>
+
+      <!-- We are disabling animations on FF because of a bug that causes flickering
+        see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+      <IonRouterOutlet
+        :animated="!IS_FIREFOX"
+        :animation="fadeAnimation"
+        class="token-router"
+        :style="{ height: routerHeight || '350px' }"
+      />
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import {
-  IonPage,
-  IonRouterOutlet,
-  IonContent,
-  onIonViewDidLeave,
-} from '@ionic/vue';
+import { IonRouterOutlet, onIonViewDidLeave } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -149,6 +145,7 @@ import {
   isContract,
 } from '@/protocols/aeternity/helpers';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import Tokens from '../../components/Tokens.vue';
@@ -165,6 +162,7 @@ import FaucetIcon from '../../../icons/faucet.svg?vue-component';
 export default defineComponent({
   name: 'AssetDetails',
   components: {
+    PageWrapper,
     TransactionAndTokenFilter,
     TokenAmount,
     BtnBox,
@@ -173,8 +171,6 @@ export default defineComponent({
     Tab,
     OpenTransferReceiveModalBtn,
     OpenTransferSendModalBtn,
-    IonPage,
-    IonContent,
     IonRouterOutlet,
   },
   setup() {

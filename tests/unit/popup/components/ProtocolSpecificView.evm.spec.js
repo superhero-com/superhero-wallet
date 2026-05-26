@@ -1,23 +1,61 @@
-/* eslint-disable global-require */
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import ProtocolSpecificView from '../../../../src/popup/components/ProtocolSpecificView.vue';
-import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '../../../../src/constants';
+import {
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_VIEW_TRANSFER_SEND,
+} from '../../../../src/constants';
+
+let mockActiveProtocol = 'ethereum';
 
 jest.mock('vue-router', () => ({
   useRoute: () => ({ meta: {}, params: {} }),
   useRouter: () => ({ replace: jest.fn() }),
 }));
 
-jest.mock('../../../../src/composables', () => {
-  const { PROTOCOLS } = require('../../../../src/constants');
-  return {
-    useAccounts: () => ({ activeAccount: { value: { protocol: PROTOCOLS.ethereum } } }),
-    useNetworks: () => ({ activeNetwork: { value: { type: 'mainnet' } } }),
-    useUi: () => ({ saveErrorLog: { value: false } }),
-  };
-});
+jest.mock('@ionic/vue', () => ({
+  IonRouterOutlet: { template: '<div><slot /></div>' },
+  IonPage: { template: '<div><slot /></div>' },
+  isPlatform: jest.fn(() => false),
+  useIonRouter: () => ({ navigate: jest.fn() }),
+  onIonViewDidEnter: jest.fn(),
+  onIonViewDidLeave: jest.fn(),
+  onIonViewWillEnter: jest.fn(),
+  onIonViewWillLeave: jest.fn(),
+}));
+
+jest.mock('@/protocols/ethereum/views', () => ({
+  __esModule: true,
+  default: {
+    AccountDetails: () => Promise.resolve({
+      template: '<div data-cy="evm-account-details" />',
+    }),
+    TransferSendModal: () => Promise.resolve({
+      props: {
+        isMultisig: Boolean,
+        tokenContractId: String,
+      },
+      template: `
+        <div
+          data-cy="evm-transfer-send"
+          :data-is-multisig="String(isMultisig)"
+          :data-token-contract-id="tokenContractId"
+        />
+      `,
+    }),
+  },
+}));
+
+jest.mock('../../../../src/composables', () => ({
+  useAccounts: () => ({ activeAccount: { value: { protocol: mockActiveProtocol } } }),
+  useNetworks: () => ({ activeNetwork: { value: { type: 'mainnet' } } }),
+  useUi: () => ({ saveErrorLog: { value: false } }),
+}));
 
 describe('ProtocolSpecificView - EVM protocol mapping', () => {
+  beforeEach(() => {
+    mockActiveProtocol = 'ethereum';
+  });
+
   it('mounts for ethereum active account', async () => {
     const wrapper = mount(ProtocolSpecificView, {
       props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
@@ -27,21 +65,30 @@ describe('ProtocolSpecificView - EVM protocol mapping', () => {
   });
 
   it('mounts for bnb active account (shares ethereum views)', async () => {
-    jest.isolateModules(() => {
-      jest.doMock('../../../../src/composables', () => {
-        const { PROTOCOLS } = require('../../../../src/constants');
-        return {
-          useAccounts: () => ({ activeAccount: { value: { protocol: PROTOCOLS.bnb } } }),
-          useNetworks: () => ({ activeNetwork: { value: { type: 'mainnet' } } }),
-          useUi: () => ({ saveErrorLog: { value: false } }),
-        };
-      });
-      const Comp = require('../../../../src/popup/components/ProtocolSpecificView.vue').default;
-      const wrapper = mount(Comp, {
-        props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
-        global: { stubs: ['InfoBox'] },
-      });
-      expect(wrapper.exists()).toBe(true);
+    mockActiveProtocol = 'bnb';
+
+    const wrapper = mount(ProtocolSpecificView, {
+      props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
+      global: { stubs: ['InfoBox'] },
     });
+    expect(wrapper.exists()).toBe(true);
+  });
+
+  it('forwards modal attributes to the protocol-specific view', async () => {
+    const wrapper = mount(ProtocolSpecificView, {
+      props: {
+        viewComponentName: PROTOCOL_VIEW_TRANSFER_SEND,
+      },
+      attrs: {
+        isMultisig: true,
+        tokenContractId: 'ct_test',
+      },
+      global: { stubs: ['InfoBox'] },
+    });
+    await flushPromises();
+
+    const modal = wrapper.find('[data-cy="evm-transfer-send"]');
+    expect(modal.attributes('data-is-multisig')).toBe('true');
+    expect(modal.attributes('data-token-contract-id')).toBe('ct_test');
   });
 });

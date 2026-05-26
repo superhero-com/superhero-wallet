@@ -1,61 +1,61 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="settings">
-        <PanelItem
-          :to="{ name: ROUTE_SEED_PHRASE_SETTINGS }"
-          :title="$t('pages.index.seedPhrase')"
-        />
-        <PanelItem
-          :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
-          :info="secureLoginSettingsInfo"
-          :title="$t('pages.titles.secureLogin')"
-        />
-        <PanelItem
-          :to="{ name: ROUTE_NETWORK_SETTINGS }"
-          :title="$t('pages.titles.networks')"
-          :info="activeNetwork.name"
-          data-cy="networks-settings"
-        />
-        <PanelItem
-          :to="{ name: ROUTE_TOKEN_SALES }"
-          :title="$t('pages.titles.tokenSales')"
-          data-cy="token-sales"
-        />
-        <PanelItem
-          :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
-          :title="$t('pages.titles.permissionsSettings')"
-        />
-        <PanelItem
-          v-if="protocolsInUse.includes(PROTOCOLS.aeternity)"
-          :to="{ name: 'notification-settings' }"
-          :title="$t('pages.titles.notifications')"
-        />
-        <PanelItem
-          :to="{ name: 'settings-language' }"
-          :title="$t('pages.titles.language')"
-        />
-        <PanelItem
-          :to="{ name: 'settings-currency' }"
-          :title="$t('pages.titles.currency')"
-          :info="activeCurrency"
-        />
-        <PanelItem
-          :to="{ name: 'settings-errors-log' }"
-          :title="$t('pages.titles.saveErrorsLog')"
-          :info="saveErrorLog ? $t('common.on') : $t('common.off')"
-        />
-        <PanelItem
-          :to="{ name: 'settings-reset-wallet' }"
-          :title="$t('pages.titles.resetWallet')"
-        />
-      </div>
-    </IonContent>
-  </IonPage>
+  <PageWrapper
+    :page-title="$t('pages.titles.settings')"
+  >
+    <div class="settings">
+      <PanelItem
+        :to="{ name: ROUTE_SEED_PHRASE_SETTINGS }"
+        :title="$t('pages.index.seedPhrase')"
+        data-cy="seed-phrase-settings"
+      />
+      <PanelItem
+        :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
+        :info="secureLoginSettingsInfo"
+        :title="$t('pages.titles.secureLogin')"
+      />
+      <PanelItem
+        :to="{ name: ROUTE_NETWORK_SETTINGS }"
+        :title="$t('pages.titles.networks')"
+        :info="activeNetwork.name"
+        data-cy="networks-settings"
+      />
+      <PanelItem
+        :to="{ name: ROUTE_TOKEN_SALES }"
+        :title="$t('pages.titles.tokenSales')"
+        data-cy="token-sales"
+      />
+      <PanelItem
+        :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
+        :title="$t('pages.titles.permissionsSettings')"
+      />
+      <PanelItem
+        v-if="protocolsInUse.includes(PROTOCOLS.aeternity)"
+        :to="{ name: 'notification-settings' }"
+        :title="$t('pages.titles.notifications')"
+      />
+      <PanelItem
+        :to="{ name: 'settings-language' }"
+        :title="$t('pages.titles.language')"
+      />
+      <PanelItem
+        :to="{ name: 'settings-currency' }"
+        :title="$t('pages.titles.currency')"
+        :info="activeCurrency"
+      />
+      <PanelItem
+        :to="{ name: 'settings-errors-log' }"
+        :title="$t('pages.titles.saveErrorsLog')"
+        :info="saveErrorLog ? $t('common.on') : $t('common.off')"
+      />
+      <PanelItem
+        :to="{ name: 'settings-reset-wallet' }"
+        :title="$t('pages.titles.resetWallet')"
+      />
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -74,14 +74,14 @@ import {
   ROUTE_TOKEN_SALES,
 } from '@/popup/router/routeNames';
 
+import PageWrapper from '@/popup/components/PageWrapper.vue';
 import PanelItem from '@/popup/components/PanelItem.vue';
 
 export default defineComponent({
   name: 'Settings',
   components: {
+    PageWrapper,
     PanelItem,
-    IonPage,
-    IonContent,
   },
   setup() {
     const { t } = useI18n();

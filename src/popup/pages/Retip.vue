@@ -1,79 +1,76 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="retip">
-        <BalanceInfo
-          :balance="numericBalance"
+  <PageWrapper :page-title="$t('pages.titles.sendTip')">
+    <div class="retip">
+      <BalanceInfo
+        :balance="numericBalance"
+        :protocol="PROTOCOLS.aeternity"
+      />
+
+      <DetailsItem
+        v-if="tip.url"
+        class="url-info"
+        :label="$t('pages.tipPage.url')"
+      >
+        <a
+          :href="tip.url"
+          class="url"
+          v-text="tip.url"
+        />
+        <UrlStatus
+          v-if="urlStatus"
+          :status="urlStatus"
+        />
+      </DetailsItem>
+
+      <Field
+        v-slot="{ field, errorMessage }"
+        name="amount"
+        :rules="{
+          required: true,
+          min_value_exclusive: 0,
+          does_not_exceed_decimals: formModel?.selectedAsset?.decimals,
+          ae_min_tip_amount: true,
+          ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+          enough_coin: fee.toString(),
+        }"
+      >
+        <InputAmount
+          v-bind="field"
+          v-model="formModel.amount"
+          name="amount"
+          class="amount-input"
+          readonly
+          :message="errorMessage"
           :protocol="PROTOCOLS.aeternity"
         />
+      </Field>
 
-        <DetailsItem
-          v-if="tip.url"
-          class="url-info"
-          :label="$t('pages.tipPage.url')"
-        >
-          <a
-            :href="tip.url"
-            class="url"
-            v-text="tip.url"
-          />
-          <UrlStatus
-            v-if="urlStatus"
-            :status="urlStatus"
-          />
-        </DetailsItem>
-
-        <Field
-          v-slot="{ field, errorMessage }"
-          name="amount"
-          :rules="{
-            required: true,
-            min_value_exclusive: 0,
-            does_not_exceed_decimals: formModel?.selectedAsset?.decimals,
-            ae_min_tip_amount: true,
-            ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-            enough_coin: fee.toString(),
-          }"
-        >
-          <InputAmount
-            v-bind="field"
-            v-model="formModel.amount"
-            name="amount"
-            class="amount-input"
-            readonly
-            :message="errorMessage"
-            :protocol="PROTOCOLS.aeternity"
-          />
-        </Field>
-
-        <div
-          v-if="tip.title"
-          class="tip-note-preview"
-        >
-          {{ tip.title }}
-        </div>
-
-        <div class="button-wrapper">
-          <BtnMain
-            variant="muted"
-            extra-padded
-            :text="$t('common.cancel')"
-            @click="openCallbackOrGoHome(false)"
-          />
-          <BtnMain
-            wide
-            :disabled="!isTippingSupported || errorAmount"
-            :text="$t('common.confirm')"
-            @click="sendTip"
-          />
-        </div>
+      <div
+        v-if="tip.title"
+        class="tip-note-preview"
+      >
+        {{ tip.title }}
       </div>
-    </IonContent>
-  </IonPage>
+
+      <div class="button-wrapper">
+        <BtnMain
+          variant="muted"
+          extra-padded
+          :text="$t('common.cancel')"
+          @click="openCallbackOrGoHome(false)"
+        />
+        <BtnMain
+          wide
+          :disabled="!isTippingSupported || !!errorAmount"
+          :text="$t('common.confirm')"
+          @click="sendTip"
+        />
+      </div>
+    </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onMounted,
@@ -108,6 +105,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOLS } from '@/constants';
 import { useAeTippingBackend, useAeTippingUrls } from '@/protocols/aeternity/composables';
 
+import PageWrapper from '../components/PageWrapper.vue';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -122,8 +120,7 @@ export default defineComponent({
     BtnMain,
     BalanceInfo,
     Field,
-    IonPage,
-    IonContent,
+    PageWrapper,
     DetailsItem,
   },
   setup() {
@@ -219,7 +216,7 @@ export default defineComponent({
           },
         };
         addAccountPendingTransaction(account.address, transaction);
-        openCallbackOrGoHome(true);
+        await openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
           title: t('modals.transaction-failed.msg'),

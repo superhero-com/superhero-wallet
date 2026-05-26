@@ -80,8 +80,17 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
         storage.set(storageKey, restoredValue);
       }
     }
-    onRestored?.(restoredValue == null ? restoredValue as T : await serializer.read(restoredValue));
+    /**
+     * `onRestored` must run after `setLocalState` so reactive refs (e.g. mnemonic)
+     * are populated before guards like `checkUserAuth` observe `isMnemonicRestored`.
+     * Previously `onRestored` fired first, which could leave `mnemonic.value` empty
+     * while `isMnemonicRestored` was already true — skipping the password modal and
+     * breaking flows such as deep links / e2e `cy.login(..., '/invite/...')`.
+     */
     await setLocalState(restoredValue);
+    onRestored?.(
+      restoredValue == null ? restoredValue as T : state.value,
+    );
 
     /**
      * Synchronize the state value with the storage.

@@ -35,9 +35,20 @@ export const STUB_TIPPING_CONTRACT_ID_V1 = 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXho
 export const STUB_TIPPING_CONTRACT_ID_V2 = 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu';
 export const STUB_TIP_NOTE = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vel interdum ligula, non consequat libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nullam congue, nibh non malesuada ornare, ante metus tempor dui, a ultrices ante ut.';
 
+/**
+ * Placeholder account data used for popup/prop templates and fee estimation.
+ *
+ * SECURITY: the `mnemonic` and `password` fields that previously
+ * lived here have been moved to `tests/fixtures/account.js`. They were used
+ * exclusively by the test suites yet were bundled into every production
+ * build, effectively publishing a real BIP-39 seed and its hardcoded
+ * encryption password to anyone with read access to this repository. Any
+ * wallet ever seeded from the old phrase should be considered compromised.
+ *
+ * Only public addresses remain — they are non-sensitive and are used for UI
+ * templating (e.g., rendering sample transactions in the popup preview).
+ */
 export const STUB_ACCOUNT = {
-  mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
-  password: 'testPassword123',
   addressAeternity: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
   addressBitcoinTestnet: 'tb1qqhzkgwgjcyr5a7h3r5ayxxs3n6e620plpx58wv',
   addressEthereum: '0x909C407d6FD235DE14db97e2234fCB71E99d6E1c',

@@ -52,7 +52,7 @@ export default defineComponent({
 
         // Sdk should be initialized in order to get a current networkId.
         await getAeSdk();
-        openCallbackOrGoHome(true, {
+        await openCallbackOrGoHome(true, {
           address: activeAccount.value.address,
           networkId: nodeNetworkId.value!,
         });
@@ -67,7 +67,7 @@ export default defineComponent({
             modal: true,
           });
         }
-        openCallbackOrGoHome(false);
+        await openCallbackOrGoHome(false);
       } finally {
         setLoaderVisible(false);
       }

@@ -67,6 +67,7 @@ jest.mock('../../src/composables', () => ({
     generateMnemonic: jest.fn(),
     setMnemonicAndInitializeAuthentication: jest.fn(),
     openEnableBiometricLoginModal: jest.fn(),
+    checkBiometricLoginAvailability: jest.fn(async () => false),
     isMnemonicEncrypted: { value: false },
     isUsingDefaultPassword: { value: true },
     lockWallet: jest.fn(),
@@ -220,6 +221,9 @@ describe.each(testCases)('Pages', (test) => {
           $tm: () => 'locale-specific-text',
         },
         stubs: {
+          PageWrapper: {
+            template: '<div><slot /></div>',
+          },
           RouterLink: RouterLinkStub,
           'i18n-t': {
             template: '<span />',

@@ -1,32 +1,24 @@
 <template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <div class="transaction-details">
-        <template v-if="transaction">
-          <TransactionDetailsBase
-            :transaction="transaction"
-            :amount="amount"
-            :amount-total="amountTotal"
-            :fee="fee"
-            :hash="hash"
-            :protocol="PROTOCOLS.solana"
-            :hide-amount-total="!isTransactionCoin"
-            :hide-fiat="!isTransactionCoin"
-            show-header
-          >
-            <template #tokens>
-              <TransactionAssetRows
-                :assets="transactionAssets"
-                :protocol="PROTOCOLS.solana"
-                icon-size="rg"
-                multiple-rows
-              />
-            </template>
-          </TransactionDetailsBase>
-        </template>
-      </div>
-    </IonContent>
-  </IonPage>
+  <TransactionDetailsBase
+    class="transaction-details"
+    :transaction="transaction"
+    :amount="amount"
+    :amount-total="amountTotal"
+    :fee="fee"
+    :hash="hash"
+    :protocol="PROTOCOLS.solana"
+    :hide-amount-total="!isTransactionCoin"
+    :hide-fiat="!isTransactionCoin"
+  >
+    <template #tokens>
+      <TransactionAssetRows
+        :assets="transactionAssets"
+        :protocol="PROTOCOLS.solana"
+        icon-size="rg"
+        multiple-rows
+      />
+    </template>
+  </TransactionDetailsBase>
 </template>
 
 <script lang="ts">
@@ -39,7 +31,6 @@ import {
   watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonContent, IonPage } from '@ionic/vue';
 
 import type { AccountAddress, ICommonTransaction, ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
@@ -62,8 +53,6 @@ export default defineComponent({
   components: {
     TransactionDetailsBase,
     TransactionAssetRows,
-    IonContent,
-    IonPage,
   },
   setup() {
     const router = useRouter();

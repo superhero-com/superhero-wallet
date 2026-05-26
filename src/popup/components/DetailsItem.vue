@@ -147,11 +147,22 @@ export default defineComponent({
     }
 
     > .value {
+      flex-direction: column;
+      align-items: stretch;
+      flex-wrap: nowrap;
       margin-top: 10px;
       padding: 8px 12px;
       background: $color-border;
       border: 1px solid $color-border-hover;
       border-radius: 6px;
+
+      .details-item {
+        width: 100%;
+
+        .value {
+          word-break: break-all;
+        }
+      }
     }
 
     &.expanded {

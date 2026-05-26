@@ -1,26 +1,20 @@
 <template>
-  <IonPage>
-    <IonContent class="account-ion-content">
-      <AccountDetailsBase
-        v-if="pageDidEnter"
-        class="account-details"
-      >
-        <template #navigation>
-          <AccountDetailsNavigation
-            :route-names="[
-              ROUTE_ACCOUNT_DETAILS,
-              ROUTE_ACCOUNT_DETAILS_ASSETS,
-            ]"
-          />
-        </template>
-      </AccountDetailsBase>
-    </IonContent>
-  </IonPage>
+  <AccountDetailsBase
+    class="account-details-ethereum"
+  >
+    <template #navigation>
+      <AccountDetailsNavigation
+        :route-names="[
+          ROUTE_ACCOUNT_DETAILS,
+          ROUTE_ACCOUNT_DETAILS_ASSETS,
+        ]"
+      />
+    </template>
+  </AccountDetailsBase>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonContent, IonPage } from '@ionic/vue';
 import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS, ROUTE_ACCOUNT_DETAILS_ASSETS } from '@/popup/router/routeNames';
 
@@ -31,12 +25,7 @@ export default defineComponent({
   name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
   components: {
     AccountDetailsBase,
-    IonPage,
-    IonContent,
     AccountDetailsNavigation,
-  },
-  props: {
-    pageDidEnter: Boolean,
   },
   setup() {
     return {
@@ -46,12 +35,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '@/styles/variables' as *;
-
-.account-ion-content {
-  overflow: hidden;
-  background-color: $color-bg-4;
-}
-</style>
