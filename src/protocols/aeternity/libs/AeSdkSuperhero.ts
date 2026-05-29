@@ -68,10 +68,16 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   async getWalletInfo(): Promise<IWalletInfo> {
+    // Prefer the network id resolved during node setup. Falling back to
+    // `this.api.getNetworkId()` only when it is missing avoids crashing the
+    // connection flow when the node status couldn't be fetched yet (e.g. right
+    // after a fresh browser start), in which case `this.api` may be unavailable.
+    const networkId = this.nodeNetworkId.value
+      ?? (this.isNodeConnected() ? await this.api.getNetworkId() : undefined);
     return {
       id: this.id,
       name: this.name,
-      networkId: await this.api.getNetworkId(),
+      networkId: networkId as IWalletInfo['networkId'],
       origin: window.location.origin === 'file://' ? '*' : window.location.origin,
       type: this._type as any,
     };
