@@ -234,9 +234,12 @@ export const useAccounts = createCustomScopedComposable(() => {
       return activeAccount.value;
     }
     const lastUsedGlobalIdx = protocolLastActiveGlobalIdx.value[protocol];
-    return (lastUsedGlobalIdx)
-      ? getAccountByGlobalIdx(lastUsedGlobalIdx)
-      : accounts.value.find((account) => account.protocol === protocol);
+    // The stored index can be stale or not yet resolvable (e.g. while accounts
+    // are still being restored after the extension is re-enabled). Fall back to
+    // the first account of the protocol so callers don't receive `undefined`
+    // when accounts for the protocol actually exist.
+    return (lastUsedGlobalIdx ? getAccountByGlobalIdx(lastUsedGlobalIdx) : undefined)
+      ?? accounts.value.find((account) => account.protocol === protocol);
   }
 
   function getLastProtocolAccount(protocol: Protocol): IAccount | undefined {

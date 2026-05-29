@@ -92,7 +92,7 @@ export function useAeSdk() {
    * Create Node instance and get connection status
    */
   async function createNodeInstance(url: string) {
-    let nodeInstance;
+    let nodeInstance: Node | null = null;
     isAeNodeReady.value = false;
     isAeNodeError.value = false;
     isAeNodeConnecting.value = true;
@@ -101,11 +101,17 @@ export function useAeSdk() {
       nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
       isAeNodeReady.value = true;
     } catch (error) {
+      // Only the initial status request failed (e.g. the network stack is not
+      // ready yet right after a fresh browser start). The `Node` instance itself
+      // is still valid and its requests will succeed once connectivity is back,
+      // so we must keep it. Returning `null` here would put a `null` node into
+      // the SDK pool and make `aeSdk.api` null, which crashes dApp connection
+      // (`getWalletInfo` -> `api.getNetworkId()`) before any modal can appear.
       nodeNetworkId.value = undefined;
       isAeNodeError.value = true;
-      return null;
+    } finally {
+      isAeNodeConnecting.value = false;
     }
-    isAeNodeConnecting.value = false;
     return nodeInstance;
   }
 
@@ -154,15 +160,32 @@ export function useAeSdk() {
         },
         async onSubscription(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
-          const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
+          const host = IS_OFFSCREEN_TAB ? aepp?.origin : origin;
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
-            return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
+            // The offscreen document may still be restoring accounts (e.g. right
+            // after the extension is re-enabled), so wait for the active account
+            // to become available before reading its address. Without this guard
+            // a missing account crashes the offscreen document and the dApp never
+            // connects even though the user confirmed access.
+            try {
+              await Promise.race([
+                watchUntilTruthy(() => getLastActiveProtocolAccount(PROTOCOLS.aeternity)),
+                new Promise((_resolve, reject) => { setTimeout(reject, 5000); }),
+              ]);
+            } catch (error) {
+              // Intentionally ignoring the timeout; handled by the guard below.
+            }
+            const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+            if (!account) {
+              return Promise.reject(new RpcRejectedByUserError());
+            }
+            return account.address;
           }
           return Promise.reject(new RpcRejectedByUserError());
         },
         async onAskAccounts(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
-          const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
+          const host = IS_OFFSCREEN_TAB ? aepp?.origin : origin;
           if (await checkOrAskPermission(METHODS.address, host)) {
             return accountsAddressList.value;
           }
