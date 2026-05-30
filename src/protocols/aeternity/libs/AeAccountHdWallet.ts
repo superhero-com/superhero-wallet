@@ -29,7 +29,7 @@ import { handleUnknownError, isAccountAirGap } from '@/utils';
 import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useDeepLinkApi } from '@/composables/deepLinkApi';
-import { useLedger } from '@/composables';
+import { useAeSdk, useLedger } from '@/composables';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { SEED_LENGTH } from '@/protocols/aeternity/config';
 import { usePermissions } from '@/composables/permissions';
@@ -75,6 +75,13 @@ export class AeAccountHdWallet extends MemoryAccount {
     txBase64: Encoded.Transaction,
     options: Parameters<AccountBase['signTransaction']>[1] & InternalOptions,
   ): Promise<Encoded.Transaction> {
+    if (!this.nodeNetworkId.value) {
+      // The initial node status request may have failed (e.g. no connectivity
+      // right after a fresh browser start), leaving `nodeNetworkId` empty even
+      // though the node is now reachable. Try to recover it before giving up so
+      // signing works without forcing the user to switch networks.
+      await useAeSdk().ensureNodeNetworkId();
+    }
     if (!this.nodeNetworkId.value) {
       throw new Error('Not connected to any network');
     }
@@ -270,6 +277,10 @@ export class AeAccountHdWallet extends MemoryAccount {
       if (!permissionGranted) {
         throw new RpcRejectedByUserError();
       }
+    }
+
+    if (!this.nodeNetworkId.value) {
+      await useAeSdk().ensureNodeNetworkId();
     }
 
     this.isSigningAlreadyConfirmed = true;

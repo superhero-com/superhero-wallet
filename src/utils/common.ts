@@ -461,21 +461,55 @@ export function truncateString(text: string, maxLength: number) {
     : '';
 }
 
+export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable<T>>;
+export function watchUntilTruthy<T>(
+  getter: WatchSource<T>,
+  timeout: number,
+): Promise<NonNullable<T> | undefined>;
 /**
  * Watch for the getter to be truthy with the use of the compositionApi.
+ * When `timeout` (in ms) is provided, the promise resolves with `undefined`
+ * once it elapses and the underlying watcher is stopped. This prevents leaking
+ * watchers when waiting for a value that may never become truthy.
  */
-export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable<T>> {
+export function watchUntilTruthy<T>(
+  getter: WatchSource<T>,
+  timeout?: number,
+): Promise<NonNullable<T> | undefined> {
   return new Promise((resolve) => {
-    const unwatch = watch(
+    let settled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // `unwatch` is referenced before assignment, but `finish` only invokes it
+    // asynchronously via `defer`, by which point `watch()` has returned.
+    let unwatch: (() => void) | undefined;
+
+    const finish = (value: NonNullable<T> | undefined) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+      resolve(value);
+      defer(() => unwatch?.());
+    };
+
+    unwatch = watch(
       getter,
       (value) => {
         if (value) {
-          resolve(value as NonNullable<T>);
-          defer(() => unwatch());
+          finish(value as NonNullable<T>);
         }
       },
       { immediate: true },
     );
+
+    // The immediate watcher may already have settled the promise above; only
+    // arm the timeout when still pending so the fast path leaves no timer alive.
+    if (timeout !== undefined && !settled) {
+      timer = setTimeout(() => finish(undefined), timeout);
+    }
   });
 }
 
