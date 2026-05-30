@@ -39,7 +39,7 @@ import {
 } from '@/types';
 import { ICON_SIZES, PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
+import { getAvatarDataUrl } from '@/utils';
 
 import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
@@ -95,8 +95,7 @@ export default defineComponent({
     const isSolana = computed(() => contractId.value === PROTOCOLS.solana);
 
     function getTokenPlaceholderUrl(token: ITokenResolved) {
-      // TODO Should not be protocol specific
-      return `${AE_AVATAR_URL}${token.contractId}`;
+      return getAvatarDataUrl(token.contractId || '');
     }
 
     return {

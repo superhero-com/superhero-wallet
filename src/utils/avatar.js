@@ -1,4 +1,6 @@
 /* eslint-disable */
+import { toSvg } from 'jdenticon';
+
 // Helper methods from https://github.com/dmester/jdenticon/blob/master/dist/jdenticon-module.js
 
 /**
@@ -236,17 +238,50 @@ function isValidHash(hashCandidate) {
   return /^[0-9a-f]{11,}$/i.test(hashCandidate) && hashCandidate;
 }
 
+// Card/border accent colors (wallet UI)
 export const JDENTICON_CONFIG = {
   lightness: {
     color: 0.57,
-    grayscale: [0.47, 0.58]
+    grayscale: [0.47, 0.58],
   },
   saturation: {
     color: 0.83,
-    grayscale: 0.42
+    grayscale: 0.42,
   },
   backColor: '#12121bff',
 };
+
+// Avatar icons — matches https://avatars.superherowallet.com/
+// https://jdenticon.com/icon-designer.html?config=12121bff014a646428643264
+const AVATAR_JDENTICON_CONFIG = {
+  lightness: {
+    color: [0.4, 1.0],
+    grayscale: [0.5, 1.0],
+  },
+  saturation: {
+    color: 1.0,
+    grayscale: 1.0,
+  },
+  backColor: '#12121bff',
+};
+
+/**
+ * @param {string} value
+ * @param {number} [size=300]
+ * @returns {string}
+ */
+export function getAvatarSvg(value, size = 300) {
+  return toSvg(value || '', size, AVATAR_JDENTICON_CONFIG);
+}
+
+/**
+ * @param {string} value
+ * @param {number} [size=300]
+ * @returns {string}
+ */
+export function getAvatarDataUrl(value, size = 300) {
+  return `data:image/svg+xml,${encodeURIComponent(getAvatarSvg(value, size))}`;
+}
 
 /**
  * @param {string} color  Color value to parse. Currently hexadecimal strings on the format #rgb[a] and #rrggbb[aa] are supported.
