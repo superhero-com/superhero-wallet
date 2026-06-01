@@ -22,6 +22,15 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
 type IWalletPresenceInfo = Pick<IWalletInfo, 'id' | 'name' | 'origin' | 'type'>;
 
 /**
+ * The wallet-info shape required by the aepp-sdk RPC layer. Derived from the
+ * base method so we stay in sync with the SDK without a fragile deep import.
+ * Note its `networkId` is a required `string`: the dApp connection protocol
+ * mandates it, so `getWalletInfo` must satisfy that even though we may not have
+ * resolved a network id yet (see the cast below).
+ */
+type SdkWalletInfo = Awaited<ReturnType<AeSdkWallet['getWalletInfo']>>;
+
+/**
  * Class extends `AeSdkWallet` from aepp-sdk-js
  * provides flexibility to manage the accounts the way wallet would like to handle
  */
@@ -67,20 +76,32 @@ export class AeSdkSuperhero extends AeSdkWallet {
     return super.spend(amount, recipientId, options);
   }
 
-  async getWalletInfo(): Promise<IWalletInfo> {
-    // Prefer the network id resolved during node setup. Falling back to
-    // `this.api.getNetworkId()` only when it is missing avoids crashing the
-    // connection flow when the node status couldn't be fetched yet (e.g. right
-    // after a fresh browser start), in which case `this.api` may be unavailable.
-    const networkId = this.nodeNetworkId.value
-      ?? (this.isNodeConnected() ? await this.api.getNetworkId() : undefined);
-    return {
+  async getWalletInfo(): Promise<SdkWalletInfo> {
+    // Prefer the network id resolved during node setup. Fall back to
+    // `this.api.getNetworkId()` only when it is missing, and tolerate that
+    // request failing: the node may be selected but momentarily unreachable
+    // (e.g. right after a fresh browser start). Letting it throw here would
+    // reject wallet info retrieval and break the dApp connection flow this
+    // fallback is meant to stabilize.
+    let networkId = this.nodeNetworkId.value;
+    if (!networkId && this.isNodeConnected()) {
+      try {
+        networkId = await this.api.getNetworkId();
+      } catch (error) {
+        networkId = undefined;
+      }
+    }
+    const walletInfo: IWalletInfo = {
       id: this.id,
       name: this.name,
       networkId: networkId as IWalletInfo['networkId'],
       origin: window.location.origin === 'file://' ? '*' : window.location.origin,
       type: this._type as any,
     };
+    // The RPC contract requires `networkId: string`; during the brief startup
+    // window it may still be `undefined`. Cast here at the single wire boundary
+    // rather than weakening the SDK type for every caller.
+    return walletInfo as SdkWalletInfo;
   }
 
   getWalletPresenceInfo(): IWalletPresenceInfo {
