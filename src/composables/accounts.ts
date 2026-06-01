@@ -109,10 +109,17 @@ export const useAccounts = createCustomScopedComposable(() => {
     },
   );
 
+  const isActiveAccountGlobalIdxRestored = ref(false);
+
   const activeAccountGlobalIdx = useStorageRef<number>(
     0,
     STORAGE_KEYS.activeAccountGlobalIdx,
-    { backgroundSync: true },
+    {
+      backgroundSync: true,
+      onRestored: () => {
+        isActiveAccountGlobalIdxRestored.value = true;
+      },
+    },
   );
 
   const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>(
@@ -230,13 +237,28 @@ export const useAccounts = createCustomScopedComposable(() => {
    * related to protocol different than the current account is using.
    */
   function getLastActiveProtocolAccount(protocol: Protocol): IAccount | undefined {
-    if (activeAccount.value.protocol === protocol) {
+    // `activeAccountGlobalIdx` defaults to 0 and is only trustworthy once its
+    // persisted value has been restored. Until then `activeAccount` may point at
+    // account 0, which could expose the wrong address to a dApp (e.g. in the
+    // offscreen document during restore) if account 0 happens to match the
+    // requested protocol. Only short-circuit to the active account once the
+    // stored index has settled; otherwise fall through to the resolvable
+    // last-active index below.
+    if (isActiveAccountGlobalIdxRestored.value && activeAccount.value.protocol === protocol) {
       return activeAccount.value;
     }
     const lastUsedGlobalIdx = protocolLastActiveGlobalIdx.value[protocol];
-    return (lastUsedGlobalIdx)
-      ? getAccountByGlobalIdx(lastUsedGlobalIdx)
-      : accounts.value.find((account) => account.protocol === protocol);
+    if (lastUsedGlobalIdx) {
+      // A specific account was last active for this protocol. Return it only
+      // once it can be resolved; while accounts are still being restored (e.g.
+      // after the extension is re-enabled) this is briefly `undefined`. Callers
+      // should wait for it rather than be handed a different account, otherwise
+      // dApps could be exposed the wrong address on multi-account wallets.
+      return getAccountByGlobalIdx(lastUsedGlobalIdx);
+    }
+    // No account was ever marked active for this protocol (e.g. first use), so
+    // default to the first account of the protocol.
+    return accounts.value.find((account) => account.protocol === protocol);
   }
 
   function getLastProtocolAccount(protocol: Protocol): IAccount | undefined {

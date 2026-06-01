@@ -853,7 +853,11 @@ export type StorageKeysInput = string | string[];
 export interface IWalletInfo {
   id: string;
   name: string;
-  networkId: NetworkId;
+  /**
+   * May be `undefined` when the node status could not be resolved yet (e.g.
+   * right after a fresh browser start). See `AeSdkSuperhero.getWalletInfo`.
+   */
+  networkId?: NetworkId;
   origin: any;
   type: any;
 }

@@ -15,28 +15,22 @@
     <slot>
       <img
         v-if="!isPlaceholder && avatarUrl"
-        v-show="!isLoading"
         class="avatar-img"
         :src="avatarUrl"
         alt="Avatar"
-        @load="isLoading = false"
       >
-      <ion-skeleton-text v-if="isLoading" animated />
     </slot>
   </div>
 </template>
 
 <script lang="ts">
-import { IonSkeletonText } from '@ionic/vue';
 import {
   computed,
   defineComponent,
   PropType,
-  ref,
 } from 'vue';
 
-import { getAddressColor } from '@/utils';
-import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
+import { getAddressColor, getAvatarDataUrl } from '@/utils';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'] as const;
 export type AvatarSize = typeof SIZES[number];
@@ -45,9 +39,6 @@ const VARIANTS = ['primary', 'grey'] as const;
 type AvatarVariant = typeof VARIANTS[number];
 
 export default defineComponent({
-  components: {
-    IonSkeletonText,
-  },
   props: {
     address: { type: String, default: '' },
     name: { type: String, default: null },
@@ -65,9 +56,9 @@ export default defineComponent({
     isPlaceholder: Boolean,
   },
   setup(props) {
-    const isLoading = ref(true);
-
-    const avatarUrl = computed(() => `${AE_AVATAR_URL}${props.address}`);
+    const avatarUrl = computed(() => (
+      props.address ? getAvatarDataUrl(props.address) : ''
+    ));
 
     const calculatedColor = computed(() => (props.address)
       ? getAddressColor(props.address)
@@ -76,7 +67,6 @@ export default defineComponent({
     return {
       avatarUrl,
       calculatedColor,
-      isLoading,
     };
   },
 });
@@ -161,15 +151,6 @@ $size-xl: 56px;
 
   &.borderless {
     border: none;
-  }
-
-  ion-skeleton-text {
-    --border-radius: 16px;
-    --background: rgba(#{$color-white-rgb}, 0.1);
-    --background-rgb: #{$color-white-rgb};
-    width: 100%;
-    height: 100%;
-    margin: 0;
   }
 }
 </style>

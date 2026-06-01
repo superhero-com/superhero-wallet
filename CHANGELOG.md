@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.10.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.10.1...v2.10.2) (2026-05-30)
+
+
+### Bug Fixes
+
+* be able to connect wallet when browser initialize ([ac648ed](https://github.com/Superhero-com/superhero-wallet/commit/ac648eddfc5dad820eec71c9fbbab778b8b74aec))
+* stabilize dApp connect and signing after slow browser/node startup ([d3a64be](https://github.com/Superhero-com/superhero-wallet/commit/d3a64be22dae3bf1015b52331d229f9cebcce294))
+
+
+### Performance
+
+* avoid avatars unavailability ([6898520](https://github.com/Superhero-com/superhero-wallet/commit/689852055b2f43c2bbacaf0f0b490df8d71ac837))
+
 ### [2.10.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.10.0...v2.10.1) (2026-05-26)
 
 

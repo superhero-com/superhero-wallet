@@ -7,6 +7,7 @@ import {
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
+  RpcInternalError,
   RpcMethodNotFoundError,
   METHODS,
   RPC_STATUS,
@@ -47,6 +48,12 @@ type OnAeppConnectionParams = Parameters<
   ConstructorParameters<typeof AeSdkSuperhero>[0]['onConnection']
 >[1];
 type AeppInfoData = OnAeppConnectionParams & { origin: string };
+
+/**
+ * Max time to wait for the active account to be restored before answering a
+ * dApp subscription request (e.g. in the long-lived offscreen document).
+ */
+const ACCOUNT_RESTORE_TIMEOUT = 5000;
 
 let composableInitialized = false;
 let aeSdk: AeSdkSuperhero;
@@ -92,7 +99,7 @@ export function useAeSdk() {
    * Create Node instance and get connection status
    */
   async function createNodeInstance(url: string) {
-    let nodeInstance;
+    let nodeInstance: Node | null = null;
     isAeNodeReady.value = false;
     isAeNodeError.value = false;
     isAeNodeConnecting.value = true;
@@ -101,12 +108,41 @@ export function useAeSdk() {
       nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
       isAeNodeReady.value = true;
     } catch (error) {
+      // Only the initial status request failed (e.g. the network stack is not
+      // ready yet right after a fresh browser start). The `Node` instance itself
+      // is still valid and its requests will succeed once connectivity is back,
+      // so we must keep it. Returning `null` here would put a `null` node into
+      // the SDK pool and make `aeSdk.api` null, which crashes dApp connection
+      // (`getWalletInfo` -> `api.getNetworkId()`) before any modal can appear.
       nodeNetworkId.value = undefined;
       isAeNodeError.value = true;
-      return null;
+    } finally {
+      isAeNodeConnecting.value = false;
     }
-    isAeNodeConnecting.value = false;
     return nodeInstance;
+  }
+
+  /**
+   * Re-resolve the node network id when the initial `getStatus` request failed
+   * (e.g. the network stack was not ready right after a fresh browser start).
+   * The node instance is kept in the pool and becomes usable once connectivity
+   * is restored, but `nodeNetworkId` would otherwise stay empty until the user
+   * switches networks, permanently breaking signing ("Not connected to any
+   * network"). The SDK `Node` does not cache failed status requests, so asking
+   * it again here recovers the network id without requiring a network switch.
+   */
+  async function ensureNodeNetworkId(): Promise<NetworkId | undefined> {
+    if (nodeNetworkId.value || isAeNodeConnecting.value || !aeSdk?.isNodeConnected()) {
+      return nodeNetworkId.value;
+    }
+    try {
+      nodeNetworkId.value = (await aeSdk.api.getNetworkId()) as NetworkId;
+      isAeNodeReady.value = true;
+      isAeNodeError.value = false;
+    } catch (error) {
+      isAeNodeError.value = true;
+    }
+    return nodeNetworkId.value;
   }
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
@@ -154,16 +190,42 @@ export function useAeSdk() {
         },
         async onSubscription(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
-          const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
+          // In the offscreen document `onSubscription` may run before
+          // `onConnection` populates `aeppInfo`, so fall back to the `origin`
+          // argument to avoid running the permission check with an undefined host.
+          const host = (IS_OFFSCREEN_TAB ? aepp?.origin : origin) ?? origin;
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
-            return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
+            // The offscreen document may still be restoring accounts (e.g. right
+            // after the extension is re-enabled), so wait (bounded) for the active
+            // account to become available before reading its address. The timeout
+            // stops the underlying watcher so repeated connect attempts in the
+            // long-lived offscreen document don't leak watchers.
+            const account = await watchUntilTruthy(
+              () => getLastActiveProtocolAccount(PROTOCOLS.aeternity),
+              ACCOUNT_RESTORE_TIMEOUT,
+            );
+            if (!account) {
+              // The account is not available yet (slow restore or none exists).
+              // This is a transient/internal wallet state, not an explicit user
+              // denial, so report it as such instead of `RpcRejectedByUserError`.
+              return Promise.reject(new RpcInternalError());
+            }
+            return account.address;
           }
           return Promise.reject(new RpcRejectedByUserError());
         },
         async onAskAccounts(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
-          const host = IS_OFFSCREEN_TAB ? aepp.origin : origin;
+          const host = (IS_OFFSCREEN_TAB ? aepp?.origin : origin) ?? origin;
           if (await checkOrAskPermission(METHODS.address, host)) {
+            // Accounts may still be restoring in the long-lived offscreen
+            // document, so wait (bounded) for the list to be populated before
+            // answering. Without this a dApp listing accounts during a slow
+            // restore could receive an empty list.
+            await watchUntilTruthy(
+              () => accountsAddressList.value.length,
+              ACCOUNT_RESTORE_TIMEOUT,
+            );
             return accountsAddressList.value;
           }
           return Promise.reject(new RpcRejectedByUserError());
@@ -284,6 +346,7 @@ export function useAeSdk() {
     setAeNodeError,
     fetchRespondChallenge,
     createNodeInstance,
+    ensureNodeNetworkId,
     disconnectDapps,
     waitTransactionMined,
   };
