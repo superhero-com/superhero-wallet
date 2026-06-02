@@ -68,9 +68,14 @@ export function useAirGap() {
     }
   }
 
-  async function deserializeData(data: string) {
+  async function deserializeData(data: string): Promise<IACMessageDefinitionObjectV3[]> {
     const localSerializer = await getSerializer();
-    return localSerializer.deserialize(data);
+    // Since @airgap/serializer 0.13.4x, `deserialize` resolves to
+    // `{ deserialize, skippedPayload }` where each entry is a `Result`
+    // (`{ ok: true, value } | { ok: false, error }`). Unwrap the successful
+    // messages and silently drop any payloads that failed to deserialize.
+    const { deserialize } = await localSerializer.deserialize(data);
+    return deserialize.flatMap((result) => (result.ok ? [result.value] : []));
   }
 
   /**
