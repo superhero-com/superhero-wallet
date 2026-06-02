@@ -29,7 +29,7 @@ function main() {
     fs.copyFileSync(pkgLockPath, path.join(provenanceDir, 'package-lock.json'));
   }
 
-  // 2) Deterministic chunk/asset names are enforced in vite.config.ts for the
+  // 2) Deterministic chunk/asset names are enforced in vite.config.mts for the
   //    extension (un-hashed). REVIEW_BUILD also stabilizes env-driven values.
   process.env.NODE_ENV = 'production';
   process.env.REVIEW_BUILD = 'true';

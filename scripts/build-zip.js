@@ -112,7 +112,7 @@ const main = () => {
     { type: 'file', src: path.join(__dirname, '../package.json'), dest: 'package.json' },
     { type: 'file', src: path.join(__dirname, '../package-lock.json'), dest: 'package-lock.json' },
     { type: 'dir', src: path.join(__dirname, '../build'), dest: 'build' },
-    { type: 'file', src: path.join(__dirname, '../vite.config.ts'), dest: 'vite.config.ts' },
+    { type: 'file', src: path.join(__dirname, '../vite.config.mts'), dest: 'vite.config.mts' },
     { type: 'file', src: path.join(__dirname, '../vitest.config.ts'), dest: 'vitest.config.ts' },
     { type: 'file', src: path.join(__dirname, '../index.html'), dest: 'index.html' },
     { type: 'file', src: path.join(__dirname, '../tsconfig.json'), dest: 'tsconfig.json' },

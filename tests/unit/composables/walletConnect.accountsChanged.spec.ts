@@ -15,7 +15,9 @@ vi.mock('@reown/walletkit', () => ({
   },
 }));
 
-vi.mock('@walletconnect/core', () => ({ Core: vi.fn().mockImplementation(() => ({})) }));
+// `Core` is instantiated with `new`; Vitest 4 requires a constructable
+// implementation (an arrow function is not a constructor).
+vi.mock('@walletconnect/core', () => ({ Core: vi.fn(function Core() {}) }));
 
 let activeAccountRef: any;
 

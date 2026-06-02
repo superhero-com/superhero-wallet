@@ -53,7 +53,15 @@ describe('offscreen wallet connections', () => {
     vi.doMock('vue', () => ({ watch: vi.fn() }));
     vi.doMock('@/utils', () => ({ getCleanModalOptions: vi.fn((params) => params) }));
     vi.doMock('@aeternity/aepp-sdk', () => ({
-      BrowserRuntimeConnection: vi.fn().mockImplementation(({ port }) => ({ port })),
+      // Production code calls `new BrowserRuntimeConnection(...)`. Vitest 4 invokes
+      // mock implementations with construct semantics, so the implementation must be
+      // a constructable function (an arrow function is not).
+      BrowserRuntimeConnection: vi.fn().mockImplementation(function BrowserRuntimeConnection(
+        this: any,
+        { port }: any,
+      ) {
+        this.port = port;
+      }),
     }));
     vi.doMock('@/background/bgPopupHandler', () => ({ setSessionTimeout: vi.fn() }));
     vi.doMock('@/composables', () => ({

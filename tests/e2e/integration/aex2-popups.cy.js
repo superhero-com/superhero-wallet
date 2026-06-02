@@ -51,7 +51,9 @@ describe('Tests cases for AEX-2 popups', () => {
       .get('[data-cy=warning]')
       .should('be.visible')
       .get('[data-cy=popup-aex2] > .container')
-      .scrollTo('bottom')
+      // Cypress 15 errors when scrollTo targets a non-scrollable element;
+      // ensureScrollable:false restores the lenient pre-15 no-op behavior.
+      .scrollTo('bottom', { ensureScrollable: false })
       .get('[data-cy=data]')
       .should('be.visible')
       .should('contain', props2.txBase64)

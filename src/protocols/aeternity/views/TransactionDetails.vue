@@ -504,7 +504,6 @@ export default defineComponent({
       width: 100%;
       max-width: 100%;
       overflow-wrap: anywhere;
-      word-break: break-word;
     }
   }
 

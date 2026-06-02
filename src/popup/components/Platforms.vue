@@ -116,7 +116,7 @@ export default {
 
   font-size: 15px;
   background-color: var(--screen-bg-color);
-  word-break: break-word;
+  overflow-wrap: anywhere;
 
   .heading {
     @extend %face-sans-16-semi-bold;

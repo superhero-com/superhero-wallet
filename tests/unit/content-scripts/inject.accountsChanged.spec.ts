@@ -36,6 +36,12 @@ describe('inject.ts accountsChanged propagation', () => {
     vi.spyOn(window, 'addEventListener');
     vi.spyOn(window, 'postMessage').mockImplementation(postMessageSpy);
 
+    // inject.ts polls `document.readyState` via setInterval at module load.
+    // These tests don't exercise that path, and a leaked interval would fire
+    // after the jsdom environment is torn down (`document is not defined`),
+    // crashing the worker. Stub it out so no real timer is scheduled.
+    vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>);
+
     // Load script
     vi.resetModules();
     await import('@/content-scripts/inject.ts');

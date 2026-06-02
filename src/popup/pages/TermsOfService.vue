@@ -892,7 +892,7 @@ export default defineComponent({
 
 .terms-of-service {
   padding: 0 16px;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   line-height: 20px;
   color: rgba($color-white, 0.85);
 

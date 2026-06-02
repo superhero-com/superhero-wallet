@@ -129,10 +129,12 @@ const createTestContext = async ({
   }));
 
   vi.doMock('@/protocols/aeternity/libs/AeAccountHdWallet', () => ({
-    AeAccountHdWallet: vi.fn(() => ({
-      sign: vi.fn(),
-      signTransaction: vi.fn(),
-    })),
+    // Constructed via `new AeAccountHdWallet(...)`; Vitest 4 requires a
+    // constructable implementation (an arrow function is not a constructor).
+    AeAccountHdWallet: vi.fn(function AeAccountHdWallet() {
+      this.sign = vi.fn();
+      this.signTransaction = vi.fn();
+    }),
   }));
 
   vi.doMock('@/protocols/aeternity/helpers', () => ({
