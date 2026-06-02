@@ -33,7 +33,8 @@ describe('mobileEncryption', () => {
     }));
     encryptMock.mockImplementation(async (_key, value) => `encrypted:${value}`);
 
-    vi.doMock('@/constants', () => ({
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
       IS_MOBILE_APP: true,
       STORAGE_KEYS: { mobileDataKey: 'mobile-data-key' },
     }));

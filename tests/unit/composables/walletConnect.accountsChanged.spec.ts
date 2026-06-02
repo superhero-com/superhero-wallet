@@ -23,7 +23,8 @@ describe('WalletConnect accountsChanged behavior', () => {
   beforeEach(async () => {
     vi.resetModules();
     // Mock constants and composables
-    vi.doMock('@/constants', () => ({
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
       APP_NAME: 'Superhero', APP_URL: 'superhero.com', EVM_PROTOCOLS: ['ethereum'], PROTOCOLS: { ethereum: 'ethereum' }, STORAGE_KEYS: { walletConnectSession: 'wc' }, WALLET_CONNECT_PROJECT_ID: 'pid',
     }));
     // Mock auth composable dependency chain

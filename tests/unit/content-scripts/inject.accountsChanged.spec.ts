@@ -15,26 +15,40 @@ describe('inject.ts accountsChanged propagation', () => {
       runtime: {
         onMessage: { addListener: vi.fn() },
         sendMessage: vi.fn().mockResolvedValue({}),
-        connect: vi.fn(() => ({ onDisconnect: { addListener: vi.fn() } })),
+        connect: vi.fn(() => ({
+          onMessage: { addListener: vi.fn() },
+          onDisconnect: { addListener: vi.fn() },
+          postMessage: vi.fn(),
+        })),
       },
     };
-    vi.doMock('webextension-polyfill', () => (global as any).browser, { virtual: true });
+    vi.doMock('webextension-polyfill', () => ({ default: (global as any).browser }), { virtual: true });
+
+    // Isolate inject.ts's own window-message handler: stub out the aepp-sdk
+    // connection proxy so it doesn't register a competing 'message' listener.
+    vi.doMock('@aeternity/aepp-sdk', async () => ({
+      ...(await vi.importActual('@aeternity/aepp-sdk')),
+      BrowserRuntimeConnection: vi.fn(),
+      BrowserWindowMessageConnection: vi.fn(),
+      connectionProxy: vi.fn(),
+    }));
 
     vi.spyOn(window, 'addEventListener');
     vi.spyOn(window, 'postMessage').mockImplementation(postMessageSpy);
 
     // Load script
-    // eslint-disable-next-line global-require, import/extensions
-    vi.resetModules(); (await import('@/content-scripts/inject.ts')); });
+    vi.resetModules();
+    await import('@/content-scripts/inject.ts');
 
     // Simulate an RPC request that will store the source under connectedDapps
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
     // Await the async handler to ensure connectedDapps is populated
-    return Promise.resolve().then(() => messageHandler({
+    await Promise.resolve().then(() => messageHandler({
       data: { method: 'eth_chainId', params: [] },
       origin,
       source: window,
     }));
+  });
 
   afterEach(async () => {
     vi.restoreAllMocks();

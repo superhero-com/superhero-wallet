@@ -30,7 +30,8 @@ const mockRoute = {
 const mockInitializeTransactionListPolling = vi.fn();
 const mockStopTransactionListPolling = vi.fn();
 
-vi.mock('@ionic/vue', () => ({
+vi.mock('@ionic/vue', async () => ({
+  ...(await vi.importActual('@ionic/vue')),
   IonPage: { name: 'IonPage', template: '<div><slot /></div>' },
   isPlatform: vi.fn(() => false),
   onIonViewDidEnter: vi.fn((callback) => {

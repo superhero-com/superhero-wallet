@@ -3,23 +3,27 @@ import { ref } from 'vue';
 import Notifications from '../../../../src/popup/pages/Notifications.vue';
 
 vi.mock('../../../../src/popup/components/NotificationItem.vue', () => ({
-  template: '<div data-cy="notification-item">{{ notification.title }}</div>',
-  props: ['notification'],
+  default: {
+    template: '<div data-cy="notification-item">{{ notification.title }}</div>',
+    props: ['notification'],
+  },
 }));
 
 vi.mock('../../../../src/popup/components/InfiniteScroll.vue', () => ({
-  props: ['items', 'keyExtractor'],
-  emits: ['load-more'],
-  template: `
-    <div>
-      <slot
-        v-for="(item, index) in items"
-        :key="keyExtractor(item, index)"
-        :item="item"
-        :index="index"
-      />
-    </div>
-  `,
+  default: {
+    props: ['items', 'keyExtractor'],
+    emits: ['load-more'],
+    template: `
+      <div>
+        <slot
+          v-for="(item, index) in items"
+          :key="keyExtractor(item, index)"
+          :item="item"
+          :index="index"
+        />
+      </div>
+    `,
+  },
 }));
 
 const mockLoadMoreNotifications = vi.fn();

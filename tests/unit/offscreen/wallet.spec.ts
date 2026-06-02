@@ -49,7 +49,7 @@ describe('offscreen wallet connections', () => {
       tabs: { reload: vi.fn() },
     };
 
-    vi.doMock('webextension-polyfill', () => (global as any).browser, { virtual: true });
+    vi.doMock('webextension-polyfill', () => ({ default: (global as any).browser }), { virtual: true });
     vi.doMock('vue', () => ({ watch: vi.fn() }));
     vi.doMock('@/utils', () => ({ getCleanModalOptions: vi.fn((params) => params) }));
     vi.doMock('@aeternity/aepp-sdk', () => ({
