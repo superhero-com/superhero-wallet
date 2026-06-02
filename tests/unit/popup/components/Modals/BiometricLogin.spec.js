@@ -2,10 +2,10 @@ import { shallowMount } from '@vue/test-utils';
 import { ref } from 'vue';
 import BiometricLogin from '../../../../../src/popup/components/Modals/BiometricLogin.vue';
 
-const mockAuthenticateWithBiometry = jest.fn();
+const mockAuthenticateWithBiometry = vi.fn();
 const mockIsAuthenticated = ref(true);
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAuth: () => ({
     authenticateWithBiometry: mockAuthenticateWithBiometry,
     isAuthenticated: mockIsAuthenticated,
@@ -19,8 +19,8 @@ describe('BiometricLogin', () => {
   });
 
   it('rejects a forced re-auth modal when the user closes it', async () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
+    const resolve = vi.fn();
+    const reject = vi.fn();
     const wrapper = shallowMount(BiometricLogin, {
       props: {
         resolve,
@@ -36,8 +36,8 @@ describe('BiometricLogin', () => {
   });
 
   it('runs biometry for a forced re-auth even when already authenticated', async () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
+    const resolve = vi.fn();
+    const reject = vi.fn();
     const wrapper = shallowMount(BiometricLogin, {
       props: {
         resolve,
@@ -54,8 +54,8 @@ describe('BiometricLogin', () => {
   });
 
   it('can defer the authenticated state update to the caller', async () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
+    const resolve = vi.fn();
+    const reject = vi.fn();
     const wrapper = shallowMount(BiometricLogin, {
       props: {
         resolve,
@@ -73,8 +73,8 @@ describe('BiometricLogin', () => {
   });
 
   it('still allows closing a non-forced modal when already authenticated', async () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
+    const resolve = vi.fn();
+    const reject = vi.fn();
     const wrapper = shallowMount(BiometricLogin, {
       props: {
         resolve,

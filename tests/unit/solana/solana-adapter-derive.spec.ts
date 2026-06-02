@@ -1,6 +1,4 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
-import { expect } from '@jest/globals';
-
 describe('SolanaAdapter - HD derivation', () => {
   const adapter = new SolanaAdapter();
 

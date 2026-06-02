@@ -1,35 +1,34 @@
 // @ts-nocheck
 describe('background accountsChanged forwarding', () => {
-  const sendMessageMock = jest.fn();
-  const queryMock = jest.fn().mockResolvedValue([{ id: 123 }]);
+  const sendMessageMock = vi.fn();
+  const queryMock = vi.fn().mockResolvedValue([{ id: 123 }]);
 
-  beforeEach(() => {
+  beforeEach(async () => {
     sendMessageMock.mockClear();
     queryMock.mockClear();
     (global as any).browser = {
       runtime: {
         id: 'test-extension-id',
-        onMessage: { addListener: jest.fn() },
-        getURL: jest.fn(() => 'offscreen.html'),
-        getContexts: jest.fn().mockResolvedValue([{}]),
-        offscreen: { createDocument: jest.fn().mockResolvedValue(undefined) },
-        onInstalled: { addListener: jest.fn() },
+        onMessage: { addListener: vi.fn() },
+        getURL: vi.fn(() => 'offscreen.html'),
+        getContexts: vi.fn().mockResolvedValue([{}]),
+        offscreen: { createDocument: vi.fn().mockResolvedValue(undefined) },
+        onInstalled: { addListener: vi.fn() },
       },
       tabs: { query: queryMock, sendMessage: sendMessageMock },
     } as any;
-    jest.doMock('@/background/utils', () => ({ registerInPageContentScript: jest.fn(), updateDynamicRules: jest.fn() }));
-    jest.resetModules();
+    vi.doMock('@/background/utils', () => ({ registerInPageContentScript: vi.fn(), updateDynamicRules: vi.fn() }));
+    vi.resetModules();
   });
 
   it('forwards accountsChanged to content script with correct payload', async () => {
     // re-require to bind listeners with mocked browser
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      require('@/background/index');
-    });
+      (await import('@/background/index'));
 
     const listener = (
-      (global as any).browser.runtime.onMessage.addListener as jest.Mock
+      (global as any).browser.runtime.onMessage.addListener as vi.Mock
     ).mock.calls[0][0];
 
     await listener(
@@ -39,15 +38,15 @@ describe('background accountsChanged forwarding', () => {
         params: { rpcMethodParams: { result: ['0xabc'] } },
       },
       { id: 'test-extension-id' },
-      jest.fn(),
+      vi.fn(),
     );
 
-    const queryCalls = ((global as any).browser.tabs.query as jest.Mock).mock.calls;
+    const queryCalls = ((global as any).browser.tabs.query as vi.Mock).mock.calls;
     expect(queryCalls.some((args: any[]) => (
       args[0]?.active === true && args[0]?.lastFocusedWindow === true
     ))).toBe(true);
 
-    const sendCalls = ((global as any).browser.tabs.sendMessage as jest.Mock).mock.calls;
+    const sendCalls = ((global as any).browser.tabs.sendMessage as vi.Mock).mock.calls;
     expect(sendCalls.some((args: any[]) => (
       args[0] === 123
       && args[1]?.superheroWalletApproved === true
@@ -64,13 +63,12 @@ describe('background accountsChanged forwarding', () => {
     ['external extension sender', { id: 'some-other-extension-id' }],
     ['content-script sender with no id', {}],
   ])('drops accountsChanged when sender is %s', async (_label, sender) => {
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      require('@/background/index');
-    });
+      (await import('@/background/index'));
 
     const listener = (
-      (global as any).browser.runtime.onMessage.addListener as jest.Mock
+      (global as any).browser.runtime.onMessage.addListener as vi.Mock
     ).mock.calls[0][0];
 
     const result = await listener(
@@ -80,13 +78,13 @@ describe('background accountsChanged forwarding', () => {
         params: { rpcMethodParams: { result: ['0xbeef'] } },
       },
       sender,
-      jest.fn(),
+      vi.fn(),
     );
 
     expect(result).toBeUndefined();
     await new Promise((resolve) => { setTimeout(resolve, 0); });
     expect(
-      ((global as any).browser.tabs.sendMessage as jest.Mock).mock.calls,
+      ((global as any).browser.tabs.sendMessage as vi.Mock).mock.calls,
     ).toHaveLength(0);
   });
 
@@ -94,19 +92,18 @@ describe('background accountsChanged forwarding', () => {
     ['message for another target', { target: 'offscreen', method: 'accountsChanged' }],
     ['unknown background method', { target: 'background', method: 'unknownMethod' }],
   ])('does not claim unhandled messages: %s', async (_label, msg) => {
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      require('@/background/index');
-    });
+      (await import('@/background/index'));
 
     const listener = (
-      (global as any).browser.runtime.onMessage.addListener as jest.Mock
+      (global as any).browser.runtime.onMessage.addListener as vi.Mock
     ).mock.calls[0][0];
 
     const result = await listener(
       msg,
       { id: 'test-extension-id' },
-      jest.fn(),
+      vi.fn(),
     );
 
     expect(result).toBeUndefined();

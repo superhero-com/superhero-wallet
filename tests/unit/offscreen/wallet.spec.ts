@@ -1,7 +1,7 @@
 // @ts-nocheck
 describe('offscreen wallet connections', () => {
-  let onConnectListener: jest.Mock;
-  let disconnectListener: jest.Mock;
+  let onConnectListener: vi.Mock;
+  let disconnectListener: vi.Mock;
   let aeSdk: any;
 
   function createPort() {
@@ -12,61 +12,61 @@ describe('offscreen wallet connections', () => {
         url: 'https://dapp.example',
       },
       onDisconnect: {
-        addListener: jest.fn((listener) => {
+        addListener: vi.fn((listener) => {
           disconnectListener = listener;
         }),
       },
-      onMessage: { addListener: jest.fn() },
+      onMessage: { addListener: vi.fn() },
     };
   }
 
   function mockDependencies() {
-    onConnectListener = jest.fn();
-    disconnectListener = jest.fn();
+    onConnectListener = vi.fn();
+    disconnectListener = vi.fn();
     aeSdk = {
       _clients: new Map([['client-id', {}]]),
-      addRpcClient: jest.fn(() => 'client-id'),
-      removeRpcClient: jest.fn((clientId) => {
+      addRpcClient: vi.fn(() => 'client-id'),
+      removeRpcClient: vi.fn((clientId) => {
         if (!aeSdk._clients.has(clientId)) {
           throw new Error(`RpcClient with id ${clientId} do not exist`);
         }
         aeSdk._clients.delete(clientId);
       }),
-      shareWalletInfo: jest.fn().mockResolvedValue(undefined),
-      _pushAccountsToApps: jest.fn(),
+      shareWalletInfo: vi.fn().mockResolvedValue(undefined),
+      _pushAccountsToApps: vi.fn(),
     };
 
     (global as any).browser = {
       runtime: {
         id: 'test-extension-id',
         onConnect: {
-          addListener: jest.fn((listener) => {
+          addListener: vi.fn((listener) => {
             onConnectListener = listener;
           }),
         },
-        sendMessage: jest.fn(),
+        sendMessage: vi.fn(),
       },
-      tabs: { reload: jest.fn() },
+      tabs: { reload: vi.fn() },
     };
 
-    jest.doMock('webextension-polyfill', () => (global as any).browser, { virtual: true });
-    jest.doMock('vue', () => ({ watch: jest.fn() }));
-    jest.doMock('@/utils', () => ({ getCleanModalOptions: jest.fn((params) => params) }));
-    jest.doMock('@aeternity/aepp-sdk', () => ({
-      BrowserRuntimeConnection: jest.fn().mockImplementation(({ port }) => ({ port })),
+    vi.doMock('webextension-polyfill', () => (global as any).browser, { virtual: true });
+    vi.doMock('vue', () => ({ watch: vi.fn() }));
+    vi.doMock('@/utils', () => ({ getCleanModalOptions: vi.fn((params) => params) }));
+    vi.doMock('@aeternity/aepp-sdk', () => ({
+      BrowserRuntimeConnection: vi.fn().mockImplementation(({ port }) => ({ port })),
     }));
-    jest.doMock('@/background/bgPopupHandler', () => ({ setSessionTimeout: jest.fn() }));
-    jest.doMock('@/composables', () => ({
+    vi.doMock('@/background/bgPopupHandler', () => ({ setSessionTimeout: vi.fn() }));
+    vi.doMock('@/composables', () => ({
       useAccounts: () => ({ activeAccount: { value: {} } }),
       useAeSdk: () => ({
         isAeSdkReady: { value: true },
-        getAeSdk: jest.fn().mockResolvedValue(aeSdk),
-        resetNode: jest.fn(),
+        getAeSdk: vi.fn().mockResolvedValue(aeSdk),
+        resetNode: vi.fn(),
       }),
       useAuth: () => ({ secureLoginTimeoutDecrypted: { value: '0' } }),
       useNetworks: () => ({ activeNetwork: { value: {} } }),
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       CONNECTION_TYPES: {
         OTHER: 'OTHER',
         POPUP: 'POPUP',
@@ -76,23 +76,22 @@ describe('offscreen wallet connections', () => {
       POPUP_ACTIONS: { getProps: 'getProps' },
       SESSION_METHODS: { setSessionTimeout: 'setSessionTimeout' },
     }));
-    jest.doMock('@/offscreen/popupHandler', () => ({
-      getPopup: jest.fn(),
-      removePopup: jest.fn(),
+    vi.doMock('@/offscreen/popupHandler', () => ({
+      getPopup: vi.fn(),
+      removePopup: vi.fn(),
     }));
   }
 
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
     mockDependencies();
   });
 
   it('ignores sdk-owned client removal on port disconnect', async () => {
     let wallet: any;
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      wallet = require('@/offscreen/wallet');
-    });
+      wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await onConnectListener(createPort());
 
@@ -107,10 +106,9 @@ describe('offscreen wallet connections', () => {
     aeSdk.shareWalletInfo.mockRejectedValueOnce(error);
 
     let wallet: any;
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      wallet = require('@/offscreen/wallet');
-    });
+      wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await expect(onConnectListener(createPort())).resolves.toBeUndefined();
 
@@ -121,14 +119,13 @@ describe('offscreen wallet connections', () => {
     const error: any = new Error('RpcClient with id client-id do not exist');
     error.name = 'UnknownRpcClientError';
     // Force the has() guard to pass so we actually reach the throwing call.
-    aeSdk._clients.has = jest.fn(() => true);
+    aeSdk._clients.has = vi.fn(() => true);
     aeSdk.removeRpcClient.mockImplementation(() => { throw error; });
 
     let wallet: any;
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      wallet = require('@/offscreen/wallet');
-    });
+      wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await onConnectListener(createPort());
 
@@ -138,14 +135,13 @@ describe('offscreen wallet connections', () => {
 
   it('re-throws unexpected errors thrown by removeRpcClient on disconnect', async () => {
     const error = new Error('something completely unexpected');
-    aeSdk._clients.has = jest.fn(() => true);
+    aeSdk._clients.has = vi.fn(() => true);
     aeSdk.removeRpcClient.mockImplementation(() => { throw error; });
 
     let wallet: any;
-    jest.isolateModules(() => {
+    vi.resetModules();
       // eslint-disable-next-line global-require
-      wallet = require('@/offscreen/wallet');
-    });
+      wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await onConnectListener(createPort());
 
@@ -154,12 +150,12 @@ describe('offscreen wallet connections', () => {
 
   describe('disconnect()', () => {
     function setupConnectedClient(overrides: Partial<{
-      sendMessage: jest.Mock;
-      disconnect: jest.Mock;
+      sendMessage: vi.Mock;
+      disconnect: vi.Mock;
       status: string;
     }> = {}) {
-      const sendMessage = overrides.sendMessage ?? jest.fn();
-      const disconnect = overrides.disconnect ?? jest.fn();
+      const sendMessage = overrides.sendMessage ?? vi.fn();
+      const disconnect = overrides.disconnect ?? vi.fn();
       const client = {
         status: overrides.status ?? 'CONNECTED',
         rpc: {
@@ -175,16 +171,15 @@ describe('offscreen wallet connections', () => {
     }
 
     it('ignores expected errors thrown by connection.sendMessage / disconnect', async () => {
-      const sendMessage = jest.fn(() => {
+      const sendMessage = vi.fn(() => {
         throw new Error('Attempting to use a disconnected port object');
       });
       setupConnectedClient({ sendMessage });
 
       let wallet: any;
-      jest.isolateModules(() => {
+      vi.resetModules();
         // eslint-disable-next-line global-require
-        wallet = require('@/offscreen/wallet');
-      });
+        wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
 
       await expect(wallet.disconnect()).resolves.toBeUndefined();
@@ -196,14 +191,13 @@ describe('offscreen wallet connections', () => {
       setupConnectedClient({ status: 'DISCONNECTED' });
       const error: any = new Error('RpcClient with id client-id do not exist');
       error.name = 'UnknownRpcClientError';
-      aeSdk._clients.has = jest.fn(() => true);
+      aeSdk._clients.has = vi.fn(() => true);
       aeSdk.removeRpcClient.mockImplementation(() => { throw error; });
 
       let wallet: any;
-      jest.isolateModules(() => {
+      vi.resetModules();
         // eslint-disable-next-line global-require
-        wallet = require('@/offscreen/wallet');
-      });
+        wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
 
       await expect(wallet.disconnect()).resolves.toBeUndefined();
@@ -211,14 +205,13 @@ describe('offscreen wallet connections', () => {
     });
 
     it('re-throws unexpected errors from connection.sendMessage', async () => {
-      const sendMessage = jest.fn(() => { throw new Error('boom'); });
+      const sendMessage = vi.fn(() => { throw new Error('boom'); });
       setupConnectedClient({ sendMessage });
 
       let wallet: any;
-      jest.isolateModules(() => {
+      vi.resetModules();
         // eslint-disable-next-line global-require
-        wallet = require('@/offscreen/wallet');
-      });
+        wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
 
       await expect(wallet.disconnect()).rejects.toThrow('boom');

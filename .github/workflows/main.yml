@@ -29,7 +29,9 @@ jobs:
       - name: Install app dependencies
         run: npm ci
       - name: Build Ionic Vue android app
-        run: npm run build:android
+        run: |
+          npm run build:ionic
+          npx cap sync android
       - name: Build android apk
         run: cd android && ./gradlew assembleDebug
       - run: |

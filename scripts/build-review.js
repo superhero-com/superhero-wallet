@@ -29,57 +29,19 @@ function main() {
     fs.copyFileSync(pkgLockPath, path.join(provenanceDir, 'package-lock.json'));
   }
 
-  // 2) Ensure deterministic chunk/asset names (already enforced in vue.config.js for extension)
-  //    For review builds, we also disable any runtime salt if present via env flag.
+  // 2) Deterministic chunk/asset names are enforced in vite.config.ts for the
+  //    extension (un-hashed). REVIEW_BUILD also stabilizes env-driven values.
   process.env.NODE_ENV = 'production';
   process.env.REVIEW_BUILD = 'true';
-  process.env.PLATFORM = process.env.PLATFORM || 'extension';
   process.env.IS_FIREFOX_EXT = process.env.IS_FIREFOX_EXT || 'true';
 
-  // 3) Generate webpack stats.json
-  console.log('Generating build and webpack stats...');
-  // vue-cli-service supports --stats-json and --report (html+json)
-  run('npx vue-cli-service build --stats-json --report');
+  // 3) Run the Vite extension build (Firefox). The `html` pass emits a bundle
+  //    treemap + raw stats into artifacts/review via rollup-plugin-visualizer.
+  console.log('Generating build and bundle stats...');
+  run('node scripts/build-extension.mjs firefox');
 
-  // 4) Move stats to artifacts and copy dist output manifest-like listing
-  const statsJson = path.resolve(process.cwd(), 'dist', 'stats.json');
-  const reportHtmlCandidates = [
-    path.resolve(process.cwd(), 'dist', 'report.html'),
-    path.resolve(process.cwd(), 'dist', 'extension', 'firefox', 'report.html'),
-  ];
-  const reportJsonCandidates = [
-    path.resolve(process.cwd(), 'dist', 'report.json'),
-    path.resolve(process.cwd(), 'dist', 'extension', 'firefox', 'report.json'),
-  ];
-
-  const statsDest = path.join(provenanceDir, 'webpack.stats.json');
-  const reportHtmlDest = path.join(provenanceDir, 'webpack.report.html');
-  const reportJsonDest = path.join(provenanceDir, 'webpack.report.json');
-
-  if (fs.existsSync(statsJson)) fs.copyFileSync(statsJson, statsDest);
-
-  function copyFirstExisting(candidates, dest) {
-    const removeIfUnderExtension = (srcPath) => {
-      const extensionDir = path.resolve(process.cwd(), 'dist', 'extension');
-      if (srcPath.startsWith(extensionDir)) {
-        try { fs.unlinkSync(srcPath); } catch (err) { console.warn('Could not remove analyzer file:', srcPath); }
-      }
-    };
-
-    let found = false;
-    candidates.some((src) => {
-      if (!fs.existsSync(src)) return false;
-      fs.copyFileSync(src, dest);
-      removeIfUnderExtension(src);
-      found = true;
-      return true;
-    });
-    return found;
-  }
-
-  copyFirstExisting(reportHtmlCandidates, reportHtmlDest);
-  copyFirstExisting(reportJsonCandidates, reportJsonDest);
-  // Save a simple file list
+  // 4) The bundle treemap is written directly by the visualizer plugin to
+  //    artifacts/review/bundle-stats.html. Save a simple file list next.
   const distDir = path.resolve(process.cwd(), 'dist', 'extension', 'firefox');
   const list = [];
   function walk(dir) {

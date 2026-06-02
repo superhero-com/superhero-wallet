@@ -1,6 +1,4 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
-import { expect } from '@jest/globals';
-
 describe('SolanaAdapter - address validation basics', () => {
   const adapter = new SolanaAdapter();
 

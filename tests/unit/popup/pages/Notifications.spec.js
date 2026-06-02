@@ -2,12 +2,12 @@ import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import Notifications from '../../../../src/popup/pages/Notifications.vue';
 
-jest.mock('../../../../src/popup/components/NotificationItem.vue', () => ({
+vi.mock('../../../../src/popup/components/NotificationItem.vue', () => ({
   template: '<div data-cy="notification-item">{{ notification.title }}</div>',
   props: ['notification'],
 }));
 
-jest.mock('../../../../src/popup/components/InfiniteScroll.vue', () => ({
+vi.mock('../../../../src/popup/components/InfiniteScroll.vue', () => ({
   props: ['items', 'keyExtractor'],
   emits: ['load-more'],
   template: `
@@ -22,9 +22,9 @@ jest.mock('../../../../src/popup/components/InfiniteScroll.vue', () => ({
   `,
 }));
 
-const mockLoadMoreNotifications = jest.fn();
-const mockMarkAsReadAll = jest.fn();
-const mockInitViewport = jest.fn();
+const mockLoadMoreNotifications = vi.fn();
+const mockMarkAsReadAll = vi.fn();
+const mockInitViewport = vi.fn();
 const mockNotificationsToShow = ref([
   {
     createdAt: '2026-05-11T00:00:00.000Z',
@@ -36,11 +36,11 @@ const mockNotificationsToShow = ref([
   },
 ]);
 
-jest.mock('@/constants', () => ({
+vi.mock('@/constants', () => ({
   IS_EXTENSION: false,
 }));
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useNotifications: () => ({
     notificationsToShow: mockNotificationsToShow,
     loadMoreNotifications: mockLoadMoreNotifications,

@@ -1,20 +1,20 @@
 // @ts-nocheck
 describe('callback URL security helpers', () => {
-  const loadHelpers = () => {
-    jest.resetModules();
-    jest.doMock('@/constants', () => ({
+  const loadHelpers = async () => {
+    vi.resetModules();
+    vi.doMock('@/constants', () => ({
       AGGREGATOR_URL: 'https://superhero.com',
     }));
     // eslint-disable-next-line global-require
-    return require('@/utils/callbackUrl');
+    return (await import('@/utils/callbackUrl'));
   };
 
   it.each([
     'https://superhero.com/callback',
     'https://chat.superhero.com/callback',
     'https://deep.nested.superhero.com/callback',
-  ])('trusts the aggregator host and https subdomain %s', (url) => {
-    const { isTrustedCallbackUrl, validateCallbackUrl } = loadHelpers();
+  ])('trusts the aggregator host and https subdomain %s', async (url) => {
+    const { isTrustedCallbackUrl, validateCallbackUrl } = await loadHelpers();
     const parsed = validateCallbackUrl(url);
 
     expect(parsed).toBeInstanceOf(URL);
@@ -26,8 +26,8 @@ describe('callback URL security helpers', () => {
     'https://evilsuperhero.com/callback',
     'https://attacker.example/?next=https://superhero.com',
     'http://superhero.com/callback',
-  ])('does not trust spoofed or downgraded URL %s', (url) => {
-    const { isTrustedCallbackUrl, validateCallbackUrl } = loadHelpers();
+  ])('does not trust spoofed or downgraded URL %s', async (url) => {
+    const { isTrustedCallbackUrl, validateCallbackUrl } = await loadHelpers();
     const parsed = validateCallbackUrl(url);
 
     if (parsed) {
@@ -43,8 +43,8 @@ describe('callback URL security helpers', () => {
     'http://0.0.0.0:8080/callback',
     'http://192.168.100.42:5173/callback',
     'http://example.com/callback',
-  ])('allows http callbacks but does not trust them %s', (url) => {
-    const { validateCallbackUrl, isTrustedCallbackUrl } = loadHelpers();
+  ])('allows http callbacks but does not trust them %s', async (url) => {
+    const { validateCallbackUrl, isTrustedCallbackUrl } = await loadHelpers();
     const parsed = validateCallbackUrl(url);
 
     expect(parsed).toBeInstanceOf(URL);
@@ -54,8 +54,8 @@ describe('callback URL security helpers', () => {
   it.each([
     'superhero://wallet/callback?tx={transaction}',
     'wc:7f6e12@2?relay-protocol=irn&symKey=abc',
-  ])('allows registered native callback scheme %s', (url) => {
-    const { validateCallbackUrl, isTrustedCallbackUrl } = loadHelpers();
+  ])('allows registered native callback scheme %s', async (url) => {
+    const { validateCallbackUrl, isTrustedCallbackUrl } = await loadHelpers();
     const parsed = validateCallbackUrl(url);
 
     expect(parsed).toBeInstanceOf(URL);
@@ -68,14 +68,14 @@ describe('callback URL security helpers', () => {
     'myapp://callback',
     'not a url',
     '%ZZ',
-  ])('rejects unsafe callback URL %s', (url) => {
-    const { validateCallbackUrl } = loadHelpers();
+  ])('rejects unsafe callback URL %s', async (url) => {
+    const { validateCallbackUrl } = await loadHelpers();
 
     expect(validateCallbackUrl(url)).toBeNull();
   });
 
-  it('requires both success and cancel callbacks to be trusted Superhero URLs', () => {
-    const { checkIfSuperheroCallbackUrl } = loadHelpers();
+  it('requires both success and cancel callbacks to be trusted Superhero URLs', async () => {
+    const { checkIfSuperheroCallbackUrl } = await loadHelpers();
 
     expect(checkIfSuperheroCallbackUrl({
       'x-success': 'https://superhero.com/success',

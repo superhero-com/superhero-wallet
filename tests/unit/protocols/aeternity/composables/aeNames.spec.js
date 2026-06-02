@@ -1,32 +1,32 @@
 import { ref } from 'vue';
 
-const createTestContext = ({
+const createTestContext = async ({
   topBlockHeight = 100,
   preclaimedNames = {},
   pendingAutoExtendTxs = {},
   pendingNameTransferTxs = {},
 } = {}) => {
-  jest.resetModules();
+  vi.resetModules();
 
   const storage = new Map();
-  const openDefaultModal = jest.fn();
-  const handleUnknownError = jest.fn();
-  const fetchAllPages = jest.fn().mockResolvedValue([]);
-  const fetchJson = jest.fn().mockResolvedValue({});
-  const fetchPendingTransactions = jest.fn().mockResolvedValue([]);
-  const getNames = jest.fn().mockResolvedValue([]);
-  const nameExtendTtl = jest.fn().mockResolvedValue({ hash: 'th_extend' });
-  const nameUpdate = jest.fn().mockResolvedValue({});
-  const namePreclaim = jest.fn().mockResolvedValue({ nameSalt: 123 });
-  const nameClaim = jest.fn().mockResolvedValue({ hash: 'th_claim' });
-  const nameGetState = jest.fn().mockRejectedValue(new Error('Name not found'));
-  const nameTransfer = jest.fn().mockResolvedValue({ hash: 'th_transfer' });
+  const openDefaultModal = vi.fn();
+  const handleUnknownError = vi.fn();
+  const fetchAllPages = vi.fn().mockResolvedValue([]);
+  const fetchJson = vi.fn().mockResolvedValue({});
+  const fetchPendingTransactions = vi.fn().mockResolvedValue([]);
+  const getNames = vi.fn().mockResolvedValue([]);
+  const nameExtendTtl = vi.fn().mockResolvedValue({ hash: 'th_extend' });
+  const nameUpdate = vi.fn().mockResolvedValue({});
+  const namePreclaim = vi.fn().mockResolvedValue({ nameSalt: 123 });
+  const nameClaim = vi.fn().mockResolvedValue({ hash: 'th_claim' });
+  const nameGetState = vi.fn().mockRejectedValue(new Error('Name not found'));
+  const nameTransfer = vi.fn().mockResolvedValue({ hash: 'th_transfer' });
   const sdk = {
-    getContext: jest.fn(() => ({})),
-    poll: jest.fn().mockResolvedValue({}),
-    getHeight: jest.fn().mockResolvedValue(topBlockHeight),
+    getContext: vi.fn(() => ({})),
+    poll: vi.fn().mockResolvedValue({}),
+    getHeight: vi.fn().mockResolvedValue(topBlockHeight),
     api: {
-      getTopHeader: jest.fn().mockResolvedValue({ height: topBlockHeight }),
+      getTopHeader: vi.fn().mockResolvedValue({ height: topBlockHeight }),
     },
   };
 
@@ -38,7 +38,7 @@ const createTestContext = ({
   storage.set('pending-name-transfer-txs', ref(pendingNameTransferTxs));
   storage.set('names-default', ref({}));
 
-  jest.doMock('@aeternity/aepp-sdk', () => ({
+  vi.doMock('@aeternity/aepp-sdk', () => ({
     Name: class {
       constructor(name, context) {
         this.name = name;
@@ -59,87 +59,87 @@ const createTestContext = ({
     },
   }));
 
-  jest.doMock('@/utils', () => ({
-    decryptedComputed: jest.fn((_key, encryptedState) => encryptedState),
+  vi.doMock('@/utils', () => ({
+    decryptedComputed: vi.fn((_key, encryptedState) => encryptedState),
     fetchAllPages,
     fetchJson,
     handleUnknownError,
   }));
 
-  jest.doMock('@/composables', () => ({
-    useAccounts: jest.fn(() => ({
+  vi.doMock('@/composables', () => ({
+    useAccounts: vi.fn(() => ({
       aeAccounts: ref([{ address: 'ak_test' }]),
       activeAccount: ref({ address: 'ak_test' }),
-      isLocalAccountAddress: jest.fn(() => true),
-      getLastActiveProtocolAccount: jest.fn(() => ({ address: 'ak_test' })),
+      isLocalAccountAddress: vi.fn(() => true),
+      getLastActiveProtocolAccount: vi.fn(() => ({ address: 'ak_test' })),
     })),
-    useAeSdk: jest.fn(() => ({
+    useAeSdk: vi.fn(() => ({
       nodeNetworkId: ref('ae_testnet'),
-      getAeSdk: jest.fn().mockResolvedValue(sdk),
+      getAeSdk: vi.fn().mockResolvedValue(sdk),
     })),
-    useAuth: jest.fn(() => ({
+    useAuth: vi.fn(() => ({
       encryptionKey: ref('mock-encryption-key'),
     })),
-    useModals: jest.fn(() => ({
+    useModals: vi.fn(() => ({
       openDefaultModal,
     })),
-    useNetworks: jest.fn(() => ({
-      onNetworkChange: jest.fn(),
+    useNetworks: vi.fn(() => ({
+      onNetworkChange: vi.fn(),
     })),
-    useStorageRef: jest.fn((defaultValue, key) => {
+    useStorageRef: vi.fn((defaultValue, key) => {
       if (!storage.has(key)) {
         storage.set(key, ref(defaultValue));
       }
       return storage.get(key);
     }),
-    useTopHeaderData: jest.fn(() => ({
+    useTopHeaderData: vi.fn(() => ({
       topBlockHeight: ref(topBlockHeight),
     })),
-    useUi: jest.fn(() => ({
+    useUi: vi.fn(() => ({
       saveErrorLog: ref(false),
     })),
   }));
 
-  jest.doMock('@/composables/ui', () => ({
-    useUi: jest.fn(() => ({
+  vi.doMock('@/composables/ui', () => ({
+    useUi: vi.fn(() => ({
       saveErrorLog: ref(false),
     })),
   }));
 
-  jest.doMock('@/composables/modals', () => ({
-    useModals: jest.fn(() => ({
+  vi.doMock('@/composables/modals', () => ({
+    useModals: vi.fn(() => ({
       openDefaultModal,
     })),
   }));
 
-  jest.doMock('@/composables/composablesHelpers', () => ({
-    createPollingBasedOnMountedComponents: jest.fn(() => jest.fn()),
+  vi.doMock('@/composables/composablesHelpers', () => ({
+    createPollingBasedOnMountedComponents: vi.fn(() => vi.fn()),
   }));
 
-  jest.doMock('@/popup/plugins/i18n', () => ({
-    tg: jest.fn((key) => key),
+  vi.doMock('@/popup/plugins/i18n', () => ({
+    tg: vi.fn((key) => key),
   }));
 
-  jest.doMock('@/lib/ProtocolAdapterFactory', () => ({
+  vi.doMock('@/lib/ProtocolAdapterFactory', () => ({
     ProtocolAdapterFactory: {
-      getAdapter: jest.fn(() => ({
+      getAdapter: vi.fn(() => ({
         fetchPendingTransactions,
       })),
     },
   }));
 
-  jest.doMock('@/protocols/aeternity/libs/AeAccountHdWallet', () => ({
-    AeAccountHdWallet: jest.fn(() => ({
-      sign: jest.fn(),
-      signTransaction: jest.fn(),
+  vi.doMock('@/protocols/aeternity/libs/AeAccountHdWallet', () => ({
+    AeAccountHdWallet: vi.fn(() => ({
+      sign: vi.fn(),
+      signTransaction: vi.fn(),
     })),
   }));
 
-  jest.doMock('@/protocols/aeternity/helpers', () => ({
-    isInsufficientBalanceError: jest.fn(() => false),
+  vi.doMock('@/protocols/aeternity/helpers', () => ({
+    isInsufficientBalanceError: vi.fn(() => false),
   }));
 
-  jest.doMock('@/protocols/aeternity/config', () => ({
+  vi.doMock('@/protocols/aeternity/config', () => ({
     UPDATE_POINTER_ACTION: {
       update: 'update',
       extend: 'extend',
@@ -148,30 +148,30 @@ const createTestContext = ({
     AE_AENS_NAME_AUCTION_MAX_LENGTH: 12 + '.chain'.length,
   }));
 
-  jest.doMock('@/protocols/aeternity/composables/aeNetworkSettings', () => ({
-    useAeNetworkSettings: jest.fn(() => ({
+  vi.doMock('@/protocols/aeternity/composables/aeNetworkSettings', () => ({
+    useAeNetworkSettings: vi.fn(() => ({
       aeActiveNetworkSettings: ref({ backendUrl: 'https://example.test' }),
     })),
   }));
 
-  jest.doMock('@/protocols/aeternity/composables/aeTippingBackend', () => ({
-    useAeTippingBackend: jest.fn(() => ({
-      fetchCachedChainNames: jest.fn().mockResolvedValue(null),
+  vi.doMock('@/protocols/aeternity/composables/aeTippingBackend', () => ({
+    useAeTippingBackend: vi.fn(() => ({
+      fetchCachedChainNames: vi.fn().mockResolvedValue(null),
     })),
   }));
 
-  jest.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
-    useAeMiddleware: jest.fn(() => ({
+  vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
+    useAeMiddleware: vi.fn(() => ({
       isMiddlewareReady: ref(false),
-      getMiddleware: jest.fn().mockResolvedValue({
+      getMiddleware: vi.fn().mockResolvedValue({
         getNames,
       }),
-      fetchFromMiddlewareCamelCased: jest.fn(),
+      fetchFromMiddlewareCamelCased: vi.fn(),
     })),
   }));
 
   // eslint-disable-next-line global-require
-  const aeNamesModule = require('@/protocols/aeternity/composables/aeNames');
+  const aeNamesModule = (await import('@/protocols/aeternity/composables/aeNames'));
   const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
 
   return {
@@ -200,7 +200,7 @@ describe('useAeNames queued claims', () => {
       nameClaim,
       nameUpdate,
       sdk,
-    } = createTestContext({
+    } = await createTestContext({
       preclaimedNames: {
         ae_testnet: {
           [longName]: {
@@ -233,7 +233,7 @@ describe('useAeNames queued claims', () => {
       aeNames,
       nameUpdate,
       openDefaultModal,
-    } = createTestContext({
+    } = await createTestContext({
       preclaimedNames: {
         ae_testnet: {
           [longName]: {
@@ -262,7 +262,7 @@ describe('useAeNames queued claims', () => {
   it('processes the queued claims only once at a time', async () => {
     const longName = 'verylongsupername.chain';
     let resolveClaim;
-    const { aeNames, nameClaim, sdk } = createTestContext({
+    const { aeNames, nameClaim, sdk } = await createTestContext({
       preclaimedNames: {
         ae_testnet: {
           [longName]: {
@@ -300,7 +300,7 @@ describe('useAeNames queued claims', () => {
       nameClaim,
       nameUpdate,
       sdk,
-    } = createTestContext({
+    } = await createTestContext({
       preclaimedNames: {
         ae_testnet: {
           [longName]: {
@@ -337,7 +337,7 @@ describe('useAeNames queued claims', () => {
 
 describe('useAeNames auto-extend', () => {
   it('extends expiring owned names with auto-extend enabled', async () => {
-    const { aeNames, nameExtendTtl } = createTestContext({ topBlockHeight: 100 });
+    const { aeNames, nameExtendTtl } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: 'expiring.chain',
       owner: 'ak_test',
@@ -355,7 +355,7 @@ describe('useAeNames auto-extend', () => {
   });
 
   it('does not extend names when auto-extend is disabled', async () => {
-    const { aeNames, nameExtendTtl } = createTestContext({ topBlockHeight: 100 });
+    const { aeNames, nameExtendTtl } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: 'expiring.chain',
       owner: 'ak_test',
@@ -373,7 +373,7 @@ describe('useAeNames auto-extend', () => {
   });
 
   it('does not extend pending names', async () => {
-    const { aeNames, nameExtendTtl } = createTestContext({ topBlockHeight: 100 });
+    const { aeNames, nameExtendTtl } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: 'pending-transfer.chain',
       owner: 'ak_test',
@@ -392,7 +392,7 @@ describe('useAeNames auto-extend', () => {
   });
 
   it('does not extend already expired names from stale owned-name state', async () => {
-    const { aeNames, nameExtendTtl } = createTestContext({ topBlockHeight: 100 });
+    const { aeNames, nameExtendTtl } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: 'expired.chain',
       owner: 'ak_test',
@@ -416,7 +416,7 @@ describe('useAeNames auto-extend', () => {
       aeNames,
       fetchPendingTransactions,
       nameExtendTtl,
-    } = createTestContext({
+    } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
         ae_testnet: {
@@ -461,7 +461,7 @@ describe('useAeNames auto-extend', () => {
       fetchPendingTransactions,
       nameExtendTtl,
       storage,
-    } = createTestContext({ topBlockHeight: 100 });
+    } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: pendingName,
       owner: 'ak_test',
@@ -496,7 +496,7 @@ describe('useAeNames auto-extend', () => {
       fetchPendingTransactions,
       nameExtendTtl,
       storage,
-    } = createTestContext({
+    } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
         ae_testnet: {
@@ -532,7 +532,7 @@ describe('useAeNames auto-extend', () => {
 
   it('cleans stale pending auto-extend entries for non-expiring names', async () => {
     const pendingName = 'not-expiring.chain';
-    const { aeNames, storage } = createTestContext({
+    const { aeNames, storage } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
         ae_testnet: {
@@ -568,7 +568,7 @@ describe('useAeNames auto-extend', () => {
       fetchPendingTransactions,
       nameExtendTtl,
       storage,
-    } = createTestContext({
+    } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
         ae_testnet: {
@@ -606,7 +606,7 @@ describe('useAeNames auto-extend', () => {
       aeNames,
       fetchPendingTransactions,
       nameExtendTtl,
-    } = createTestContext({ topBlockHeight: 100 });
+    } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [
       {
         name: 'failed-lookup.chain',
@@ -645,7 +645,7 @@ describe('useAeNames auto-extend', () => {
       fetchPendingTransactions,
       nameExtendTtl,
       storage,
-    } = createTestContext({
+    } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
         ae_testnet: {
@@ -679,7 +679,7 @@ describe('useAeNames auto-extend', () => {
   });
 
   it('does not reject when the auto-extend pass has an unexpected setup failure', async () => {
-    const { aeNames, sdk } = createTestContext({ topBlockHeight: 100 });
+    const { aeNames, sdk } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: 'expiring.chain',
       owner: 'ak_test',
@@ -713,7 +713,7 @@ describe('useAeNames name transfers', () => {
       aeNames,
       nameTransfer,
       storage,
-    } = createTestContext();
+    } = await createTestContext();
 
     await aeNames.updateNamePointer({
       name: 'transfer.chain',
@@ -738,7 +738,7 @@ describe('useAeNames name transfers', () => {
       aeNames,
       fetchAllPages,
       fetchPendingTransactions,
-    } = createTestContext({
+    } = await createTestContext({
       pendingNameTransferTxs: {
         ae_testnet: {
           [pendingName]: {
@@ -779,7 +779,7 @@ describe('useAeNames name transfers', () => {
       fetchAllPages,
       fetchPendingTransactions,
       storage,
-    } = createTestContext({
+    } = await createTestContext({
       pendingNameTransferTxs: {
         ae_testnet: {
           [pendingName]: {

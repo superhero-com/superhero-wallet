@@ -1,8 +1,7 @@
-import { expect, jest } from '@jest/globals';
 import { DogecoinAdapter } from '../../../src/protocols/dogecoin/libs/DogecoinAdapter';
 import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '../../../src/constants';
 
-jest.mock('../../../src/composables/networks', () => ({
+vi.mock('../../../src/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {

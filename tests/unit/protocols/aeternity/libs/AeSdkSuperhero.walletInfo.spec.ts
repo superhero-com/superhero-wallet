@@ -1,23 +1,16 @@
-import {
-  describe,
-  expect,
-  it,
-  jest,
-} from '@jest/globals';
+const notify = vi.fn();
 
-const notify = jest.fn();
-
-jest.mock('@aeternity/aepp-sdk', () => ({
+vi.mock('@aeternity/aepp-sdk', () => ({
   AeSdkWallet: class {},
   METHODS: {
     readyToConnect: 'connection.announcePresence',
   },
-  sendTransaction: jest.fn(),
-  spend: jest.fn(),
+  sendTransaction: vi.fn(),
+  spend: vi.fn(),
 }));
 
 describe('AeSdkSuperhero wallet info sharing', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     notify.mockClear();
   });
 
@@ -32,12 +25,12 @@ describe('AeSdkSuperhero wallet info sharing', () => {
       _type: 'window',
       nodeNetworkId: { value: undefined },
       isNodeConnected: () => false,
-      _getClient: jest.fn(() => ({ rpc: { notify } })),
+      _getClient: vi.fn(() => ({ rpc: { notify } })),
       ...rest,
     });
     // `api` is a getter on AeSdkBase; define it explicitly on the stub.
     Object.defineProperty(sdk, 'api', {
-      value: apiOverride ?? { getNetworkId: jest.fn() },
+      value: apiOverride ?? { getNetworkId: vi.fn() },
       configurable: true,
     });
     return sdk;
@@ -58,7 +51,7 @@ describe('AeSdkSuperhero wallet info sharing', () => {
   });
 
   it('getWalletInfo prefers nodeNetworkId without calling the node', async () => {
-    const getNetworkId = jest.fn();
+    const getNetworkId = vi.fn();
     const sdk = await createSdkStub({
       nodeNetworkId: { value: 'ae_mainnet' },
       isNodeConnected: () => true,
@@ -72,7 +65,7 @@ describe('AeSdkSuperhero wallet info sharing', () => {
   });
 
   it('getWalletInfo falls back to api.getNetworkId when nodeNetworkId is missing', async () => {
-    const getNetworkId = jest.fn(async () => 'ae_uat');
+    const getNetworkId = vi.fn(async () => 'ae_uat');
     const sdk = await createSdkStub({
       nodeNetworkId: { value: undefined },
       isNodeConnected: () => true,
@@ -86,7 +79,7 @@ describe('AeSdkSuperhero wallet info sharing', () => {
   });
 
   it('getWalletInfo does not reject when api.getNetworkId fails', async () => {
-    const getNetworkId = jest.fn(async () => { throw new Error('node unreachable'); });
+    const getNetworkId = vi.fn(async () => { throw new Error('node unreachable'); });
     const sdk = await createSdkStub({
       nodeNetworkId: { value: undefined },
       isNodeConnected: () => true,

@@ -2,13 +2,11 @@ import { ref } from 'vue';
 import { useSolMaxAmount } from '@/protocols/solana/composables/solMaxAmount';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOLS } from '@/constants';
-import { expect, jest } from '@jest/globals';
-
-jest.mock('@/composables/balances', () => ({
+vi.mock('@/composables/balances', () => ({
   useBalances: () => ({ balance: { value: '10' } }),
 }));
 
-jest.mock('@/composables/networks', () => ({
+vi.mock('@/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {
@@ -19,18 +17,18 @@ jest.mock('@/composables/networks', () => ({
 }));
 
 // Provide a deterministic fee composable to avoid network calls and expose a stable fee ref
-jest.mock('@/protocols/solana/composables/solFeeCalculation', () => ({
+vi.mock('@/protocols/solana/composables/solFeeCalculation', () => ({
   useSolFeeCalculation: () => ({
     fee: ref(0.000005),
     feeSelectedIndex: ref(0),
     feeList: ref([]),
     maxFee: ref(0.000005),
-    updateFeeList: jest.fn(),
+    updateFeeList: vi.fn(),
   }),
 }));
 
 // Avoid hitting real network during fee calculation
-jest.mock('@solana/web3.js', () => ({
+vi.mock('@solana/web3.js', () => ({
   Connection: function MockConnection() {},
   LAMPORTS_PER_SOL: 1_000_000_000,
   PublicKey: function MockPublicKey() {},
@@ -44,7 +42,7 @@ jest.mock('@solana/web3.js', () => ({
 
 // Patch prototype methods to satisfy lints about class methods
 // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-const web3 = require('@solana/web3.js');
+const web3 = (await import('@solana/web3.js'));
 // eslint-disable-next-line no-param-reassign
 web3.Connection.prototype.getLatestBlockhash = () => Promise.resolve({ blockhash: 'hash' });
 // eslint-disable-next-line no-param-reassign

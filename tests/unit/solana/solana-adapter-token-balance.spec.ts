@@ -1,6 +1,4 @@
-import { expect, jest } from '@jest/globals';
-
-jest.mock('@/composables/networks', () => ({
+vi.mock('@/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: { value: { protocols: { solana: { nodeUrl: 'http://localhost', explorerUrl: '' } } } },
   }),
@@ -8,10 +6,10 @@ jest.mock('@/composables/networks', () => ({
 
 // Mock web3 connection and token list fetch
 // Mock token list fetchJson so adapter can map token metadata
-jest.mock('@/utils', () => ({
+vi.mock('@/utils', () => ({
   // Keep other utils mocks minimal; token metadata will be injected directly into adapter cache
   fetchJson: async () => ({ tokens: [] }),
-  getLastNotEmptyAccountIndex: jest.fn(),
+  getLastNotEmptyAccountIndex: vi.fn(),
 }));
 
 // Connection is created via adapter.getConnection; stub it to return parsed token accounts
@@ -28,9 +26,9 @@ function mockConnection() {
 describe('SolanaAdapter - fetchAccountTokenBalances', () => {
   it('returns parsed balances joined with token metadata', async () => {
     // eslint-disable-next-line global-require
-    const { SolanaAdapter } = require('@/protocols/solana/libs/SolanaAdapter');
+    const { SolanaAdapter } = (await import('@/protocols/solana/libs/SolanaAdapter'));
     const adapter = new SolanaAdapter();
-    jest.spyOn(adapter as any, 'getConnection').mockReturnValue(mockConnection());
+    vi.spyOn(adapter as any, 'getConnection').mockReturnValue(mockConnection());
     // Seed token metadata cache to avoid network and ensure name/symbol resolution
     (adapter as any).tokenListCache = [
       {

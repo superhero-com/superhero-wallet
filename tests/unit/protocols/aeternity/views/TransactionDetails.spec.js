@@ -42,15 +42,15 @@ const getTransactions = (hasError) => ({
   ],
 });
 
-jest.mock('vue-router', () => ({
-  useRouter: jest.fn(() => ({})),
-  useRoute: jest.fn(() => ({
+vi.mock('vue-router', () => ({
+  useRouter: vi.fn(() => ({})),
+  useRoute: vi.fn(() => ({
     params: { hash: '', transactionOwner: '' },
   })),
 }));
 
-jest.mock('../../../../../src/composables/transactionList.ts', () => ({
-  useTransactionList: jest.fn(() => ({
+vi.mock('../../../../../src/composables/transactionList.ts', () => ({
+  useTransactionList: vi.fn(() => ({
     transactionsLoaded: getTransactions(false),
   })),
 }));

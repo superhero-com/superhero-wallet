@@ -2,22 +2,22 @@
 describe('mobileEncryption', () => {
   const secureStoreMock = new Map<string, any>();
   const secureMobileStorageMock = {
-    get: jest.fn((key: string) => Promise.resolve(secureStoreMock.get(key) ?? null)),
-    set: jest.fn((key: string, value: any) => {
+    get: vi.fn((key: string) => Promise.resolve(secureStoreMock.get(key) ?? null)),
+    set: vi.fn((key: string, value: any) => {
       secureStoreMock.set(key, value);
       return Promise.resolve();
     }),
   };
-  const decryptMock = jest.fn();
-  const encryptMock = jest.fn();
-  const importEncryptionKeyMock = jest.fn();
-  const getRandomValuesMock = jest.fn((bytes: Uint8Array) => {
+  const decryptMock = vi.fn();
+  const encryptMock = vi.fn();
+  const importEncryptionKeyMock = vi.fn();
+  const getRandomValuesMock = vi.fn((bytes: Uint8Array) => {
     bytes.fill(7);
     return bytes;
   });
 
-  const loadModule = () => {
-    jest.resetModules();
+  const loadModule = async () => {
+    vi.resetModules();
     secureStoreMock.clear();
     secureMobileStorageMock.get.mockClear();
     secureMobileStorageMock.set.mockClear();
@@ -26,22 +26,22 @@ describe('mobileEncryption', () => {
     importEncryptionKeyMock.mockReset();
     getRandomValuesMock.mockClear();
 
-    jest.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(getRandomValuesMock);
+    vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(getRandomValuesMock);
 
     importEncryptionKeyMock.mockImplementation(async (bytes: Uint8Array) => ({
       byteLength: bytes.length,
     }));
     encryptMock.mockImplementation(async (_key, value) => `encrypted:${value}`);
 
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       IS_MOBILE_APP: true,
       STORAGE_KEYS: { mobileDataKey: 'mobile-data-key' },
     }));
-    jest.doMock('@/lib/SecureMobileStorage', () => ({
+    vi.doMock('@/lib/SecureMobileStorage', () => ({
       SecureMobileStorage: secureMobileStorageMock,
     }));
-    jest.doMock('@/utils/crypto', () => {
-      const { IV_LENGTH, AES_GCM_TAG_LENGTH_BYTES } = jest.requireActual('@/utils/crypto');
+    vi.doMock('@/utils/crypto', async () => {
+      const { IV_LENGTH, AES_GCM_TAG_LENGTH_BYTES } = await vi.importActual('@/utils/crypto');
       return {
         IV_LENGTH,
         AES_GCM_TAG_LENGTH_BYTES,
@@ -54,15 +54,15 @@ describe('mobileEncryption', () => {
     });
 
     // eslint-disable-next-line global-require
-    return require('@/utils/mobileEncryption');
+    return (await import('@/utils/mobileEncryption'));
   };
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+  afterEach(async () => {
+    vi.restoreAllMocks();
   });
 
   it('encrypts legacy plaintext with the per-install mobile key', async () => {
-    const { encryptMobileStateIfPlaintext } = loadModule();
+    const { encryptMobileStateIfPlaintext } = await loadModule();
     decryptMock.mockRejectedValue(new Error('not ciphertext'));
 
     await expect(encryptMobileStateIfPlaintext('seed words here')).resolves.toBe(
@@ -77,7 +77,7 @@ describe('mobileEncryption', () => {
   });
 
   it('leaves ciphertext encrypted with the current mobile key unchanged', async () => {
-    const { encryptMobileStateIfPlaintext } = loadModule();
+    const { encryptMobileStateIfPlaintext } = await loadModule();
     decryptMock.mockResolvedValue('plain text');
 
     await expect(encryptMobileStateIfPlaintext('current-ciphertext')).resolves.toBe(
@@ -88,7 +88,7 @@ describe('mobileEncryption', () => {
   });
 
   it('leaves unreadable ciphertext-shaped values unchanged to avoid double wrapping', async () => {
-    const { encryptMobileStateIfPlaintext } = loadModule();
+    const { encryptMobileStateIfPlaintext } = await loadModule();
     decryptMock.mockRejectedValue(new Error('wrong key'));
     /** Minimum base64 length for real `encrypt()` output (16-byte IV + 16-byte GCM tag). */
     const ciphertextShaped = `${'A'.repeat(42)}==`;
@@ -99,7 +99,7 @@ describe('mobileEncryption', () => {
   });
 
   it('does not misclassify hex private keys as ciphertext', async () => {
-    const { encryptMobileStateIfPlaintext } = loadModule();
+    const { encryptMobileStateIfPlaintext } = await loadModule();
     decryptMock.mockRejectedValue(new Error('not ciphertext'));
     const hexPrivateKey = 'a'.repeat(64);
 
@@ -111,7 +111,7 @@ describe('mobileEncryption', () => {
   });
 
   it('encrypts 40-char base64-shaped legacy plaintext (below min ciphertext size)', async () => {
-    const { encryptMobileStateIfPlaintext } = loadModule();
+    const { encryptMobileStateIfPlaintext } = await loadModule();
     decryptMock.mockRejectedValue(new Error('wrong key'));
     const base64ShapedPlaintext = `${'Q'.repeat(38)}==`;
 
@@ -123,7 +123,7 @@ describe('mobileEncryption', () => {
   });
 
   it('does not cache a newly generated key when persisting it fails', async () => {
-    const { getOrCreateMobileEncryptionKey } = loadModule();
+    const { getOrCreateMobileEncryptionKey } = await loadModule();
     secureMobileStorageMock.set
       .mockRejectedValueOnce(new Error('keychain locked'))
       .mockImplementationOnce((key: string, value: any) => {

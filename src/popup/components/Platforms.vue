@@ -34,13 +34,13 @@
           <PlatformIcon
             :href="APP_LINK_FIREFOX"
             :disabled="!IS_FIREFOX || IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/firefox.svg')"
+            :src="firefoxIcon"
             alt="Firefox"
           />
           <PlatformIcon
             :href="APP_LINK_CHROME"
             :disabled="IS_FIREFOX || IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/chrome.svg')"
+            :src="chromeIcon"
             alt="Chrome"
           />
         </div>
@@ -53,13 +53,13 @@
           <PlatformIcon
             :href="APP_LINK_IOS"
             :disabled="!IS_IOS || !IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/app-store.svg')"
+            :src="appStoreIcon"
             alt="App Store"
           />
           <PlatformIcon
             :href="APP_LINK_ANDROID"
             :disabled="IS_IOS || !IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/google-play.svg')"
+            :src="googlePlayIcon"
             alt="Google Play"
           />
         </div>
@@ -82,6 +82,10 @@ import {
   IS_MOBILE_DEVICE,
 } from '@/constants';
 import LinkButton from '@/popup/components/LinkButton.vue';
+import firefoxIcon from '../../icons/platforms/firefox.svg';
+import chromeIcon from '../../icons/platforms/chrome.svg';
+import appStoreIcon from '../../icons/platforms/app-store.svg';
+import googlePlayIcon from '../../icons/platforms/google-play.svg';
 import PlatformIcon from './PlatformIcon.vue';
 
 export default {
@@ -94,6 +98,10 @@ export default {
     APP_LINK_FIREFOX,
     APP_LINK_ANDROID,
     APP_LINK_IOS,
+    firefoxIcon,
+    chromeIcon,
+    appStoreIcon,
+    googlePlayIcon,
   }),
 };
 </script>

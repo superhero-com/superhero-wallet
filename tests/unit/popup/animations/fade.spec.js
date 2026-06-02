@@ -4,18 +4,18 @@ const mockAnimations = [];
 
 function mockCreateAnimation() {
   const animation = {
-    addElement: jest.fn(() => animation),
-    fromTo: jest.fn(() => animation),
-    duration: jest.fn(() => animation),
-    addAnimation: jest.fn(() => animation),
+    addElement: vi.fn(() => animation),
+    fromTo: vi.fn(() => animation),
+    duration: vi.fn(() => animation),
+    addAnimation: vi.fn(() => animation),
   };
 
   mockAnimations.push(animation);
   return animation;
 }
 
-jest.mock('@ionic/vue', () => ({
-  createAnimation: jest.fn(mockCreateAnimation),
+vi.mock('@ionic/vue', () => ({
+  createAnimation: vi.fn(mockCreateAnimation),
 }));
 
 describe('fadeAnimation', () => {

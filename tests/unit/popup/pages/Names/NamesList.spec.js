@@ -3,28 +3,28 @@ import { ref } from 'vue';
 
 import NamesList from '@/popup/pages/Names/NamesList.vue';
 
-jest.mock('@/utils', () => ({
-  executeAndSetInterval: jest.fn((callback) => {
+vi.mock('@/utils', () => ({
+  executeAndSetInterval: vi.fn((callback) => {
     callback();
     return 1;
   }),
 }));
 
-jest.mock('@/composables', () => ({
-  useAccounts: jest.fn(),
-  useAeSdk: jest.fn(),
-  useUi: jest.fn(),
+vi.mock('@/composables', () => ({
+  useAccounts: vi.fn(),
+  useAeSdk: vi.fn(),
+  useUi: vi.fn(),
 }));
 
-jest.mock('@/protocols/aeternity/composables/aeNames', () => ({
-  useAeNames: jest.fn(),
+vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
+  useAeNames: vi.fn(),
 }));
 
-const { useAccounts, useAeSdk, useUi } = require('@/composables');
-const { useAeNames } = require('@/protocols/aeternity/composables/aeNames');
+const { useAccounts, useAeSdk, useUi } = (await import('@/composables'));
+const { useAeNames } = (await import('@/protocols/aeternity/composables/aeNames'));
 
 describe('NamesList.vue', () => {
-  it('prefers the owned name entry when pointer update is still pending', () => {
+  it('prefers the owned name entry when pointer update is still pending', async () => {
     useUi.mockReturnValue({
       isAppActive: ref(true),
     });
@@ -59,7 +59,7 @@ describe('NamesList.vue', () => {
           },
         },
       }),
-      updateOwnedNames: jest.fn(),
+      updateOwnedNames: vi.fn(),
     });
 
     const wrapper = mount(NamesList, {

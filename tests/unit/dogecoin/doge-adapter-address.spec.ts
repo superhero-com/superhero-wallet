@@ -1,4 +1,3 @@
-import { expect } from '@jest/globals';
 import { DogecoinAdapter } from '../../../src/protocols/dogecoin/libs/DogecoinAdapter';
 
 describe('DogecoinAdapter - address basics', () => {

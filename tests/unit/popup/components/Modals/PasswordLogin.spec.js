@@ -1,17 +1,17 @@
 import { shallowMount } from '@vue/test-utils';
 import { ref as mockRef } from 'vue';
 
-const mockAuthenticateWithPassword = jest.fn();
-const mockGenerateEncryptionKey = jest.fn(async () => 'derived-key');
-const mockDecrypt = jest.fn();
-const mockResolve = jest.fn();
+const mockAuthenticateWithPassword = vi.fn();
+const mockGenerateEncryptionKey = vi.fn(async () => 'derived-key');
+const mockDecrypt = vi.fn();
+const mockResolve = vi.fn();
 
-jest.mock('@/utils', () => ({
+vi.mock('@/utils', () => ({
   decrypt: mockDecrypt,
   generateEncryptionKey: mockGenerateEncryptionKey,
 }));
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAccounts: () => ({
     accountsRaw: mockRef([]),
   }),
@@ -22,12 +22,12 @@ jest.mock('@/composables', () => ({
     mnemonicEncrypted: mockRef('ciphertext'),
   }),
   useModals: () => ({
-    openModal: jest.fn(),
+    openModal: vi.fn(),
   }),
 }));
 
 describe('PasswordLogin', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockAuthenticateWithPassword.mockReset();
     mockGenerateEncryptionKey.mockClear();
     mockDecrypt.mockReset();
@@ -38,7 +38,7 @@ describe('PasswordLogin', () => {
     mockDecrypt.mockRejectedValue(new Error('AES-GCM auth tag mismatch'));
 
     // eslint-disable-next-line global-require
-    const PasswordLogin = require('@/popup/components/Modals/PasswordLogin.vue').default;
+    const PasswordLogin = (await import('@/popup/components/Modals/PasswordLogin.vue')).default;
     const wrapper = shallowMount(PasswordLogin, {
       props: {
         resolve: mockResolve,

@@ -1,13 +1,13 @@
 // @ts-nocheck
-const mockSubtleDecrypt = jest.fn();
-const mockSubtleEncrypt = jest.fn();
-const mockGetRandomValues = jest.fn((bytes: Uint8Array) => {
+const mockSubtleDecrypt = vi.fn();
+const mockSubtleEncrypt = vi.fn();
+const mockGetRandomValues = vi.fn((bytes: Uint8Array) => {
   bytes.fill(0);
   return bytes;
 });
 
-function loadModule() {
-  jest.resetModules();
+async function loadModule() {
+  vi.resetModules();
   Object.defineProperty(globalThis, 'crypto', {
     configurable: true,
     value: {
@@ -21,9 +21,9 @@ function loadModule() {
   });
   return {
     // eslint-disable-next-line global-require
-    ...require('vue'),
+    ...(await import('vue')),
     // eslint-disable-next-line global-require
-    ...require('@/utils/common'),
+    ...(await import('@/utils/common')),
   };
 }
 
@@ -44,19 +44,19 @@ describe('decryptedComputed', () => {
   const newKey = { id: 'new-key' };
   let warnSpy;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockSubtleDecrypt.mockReset();
     mockSubtleEncrypt.mockReset();
     mockGetRandomValues.mockClear();
-    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     warnSpy.mockRestore();
   });
 
   it('re-encrypts persisted state when the key changes', async () => {
-    const { decryptedComputed, nextTick, ref } = loadModule();
+    const { decryptedComputed, nextTick, ref } = await loadModule();
     const key = ref(oldKey);
     const encryptedState = ref(ciphertext('old-ciphertext'));
     const decrypted = decryptedComputed(key, encryptedState, '');
@@ -87,10 +87,10 @@ describe('decryptedComputed', () => {
   });
 
   it('recovers when state is already encrypted with the new key during rotation', async () => {
-    const { decryptedComputed, nextTick, ref } = loadModule();
+    const { decryptedComputed, nextTick, ref } = await loadModule();
     const key = ref(oldKey);
     const encryptedState = ref(ciphertext('old-ciphertext'));
-    const onDecrypted = jest.fn();
+    const onDecrypted = vi.fn();
     const decrypted = decryptedComputed(key, encryptedState, '', { onDecrypted });
 
     mockSubtleDecrypt.mockImplementation(async (_algorithm, usedKey, encryptedBytes) => {
@@ -120,7 +120,7 @@ describe('decryptedComputed', () => {
   });
 
   it('clears stale local plaintext without overwriting storage when decryption is unrecoverable', async () => {
-    const { decryptedComputed, nextTick, ref } = loadModule();
+    const { decryptedComputed, nextTick, ref } = await loadModule();
     const key = ref(oldKey);
     const encryptedState = ref(ciphertext('old-ciphertext'));
     const decrypted = decryptedComputed(key, encryptedState, 'default');
@@ -145,7 +145,7 @@ describe('decryptedComputed', () => {
   });
 
   it('continues reacting to external storage changes after an encrypt failure', async () => {
-    const { decryptedComputed, nextTick, ref } = loadModule();
+    const { decryptedComputed, nextTick, ref } = await loadModule();
     const key = ref(newKey);
     const encryptedState = ref(ciphertext('initial-ciphertext'));
     const decrypted = decryptedComputed(key, encryptedState, 'default');

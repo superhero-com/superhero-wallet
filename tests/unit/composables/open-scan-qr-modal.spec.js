@@ -18,29 +18,29 @@ const qrCodeSource = async () => {
   }
 };
 
-jest.mock('vue-i18n', () => ({
-  useI18n: jest.fn(() => ({
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
     t: () => 'locale-specific-text',
   })),
 }));
 
-jest.mock('@/composables/transferSendHandler', () => ({
-  useTransferSendHandler: jest.fn(() => ({
+vi.mock('@/composables/transferSendHandler', () => ({
+  useTransferSendHandler: vi.fn(() => ({
     save: () => {},
   })),
 }));
 
-jest.mock('@/composables/accountAssetsList', () => ({
-  useAccountAssetsList: jest.fn(() => ({
+vi.mock('@/composables/accountAssetsList', () => ({
+  useAccountAssetsList: vi.fn(() => ({
     accountAssets: { value: [{ contractId: 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8' }] }, // STUB_TOKEN_CONTRACT_ADDRESS
   })),
 }));
 
-jest.mock('@/composables', () => ({
-  useModals: jest.fn(() => ({
+vi.mock('@/composables', () => ({
+  useModals: vi.fn(() => ({
     openScanQrModal: qrCodeSource,
   })),
-  useAccounts: jest.fn(() => ({
+  useAccounts: vi.fn(() => ({
     accounts: [],
   })),
 }));

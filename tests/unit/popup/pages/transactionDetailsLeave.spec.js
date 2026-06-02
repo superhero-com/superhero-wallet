@@ -27,31 +27,31 @@ const mockRoute = {
   params: { id: 'ae' },
 };
 
-const mockInitializeTransactionListPolling = jest.fn();
-const mockStopTransactionListPolling = jest.fn();
+const mockInitializeTransactionListPolling = vi.fn();
+const mockStopTransactionListPolling = vi.fn();
 
-jest.mock('@ionic/vue', () => ({
+vi.mock('@ionic/vue', () => ({
   IonPage: { name: 'IonPage', template: '<div><slot /></div>' },
-  isPlatform: jest.fn(() => false),
-  onIonViewDidEnter: jest.fn((callback) => {
+  isPlatform: vi.fn(() => false),
+  onIonViewDidEnter: vi.fn((callback) => {
     mockDidEnterCallback = callback;
   }),
-  onIonViewDidLeave: jest.fn((callback) => {
+  onIonViewDidLeave: vi.fn((callback) => {
     mockDidLeaveCallback = callback;
   }),
 }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRoute: () => mockRoute,
 }));
 
-jest.mock('@/lib/ProtocolAdapterFactory', () => ({
+vi.mock('@/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: {
-    getAdapter: jest.fn(() => ({ coinContractId: 'ae' })),
+    getAdapter: vi.fn(() => ({ coinContractId: 'ae' })),
   },
 }));
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAccounts: () => ({
     activeAccount: {
       value: {
@@ -80,7 +80,7 @@ jest.mock('@/composables', () => ({
     transactionsLoadedAndPending: { value: [] },
     isEndReached: { value: false },
     isLoading: { value: false },
-    loadCurrentPageTransactions: jest.fn(),
+    loadCurrentPageTransactions: vi.fn(),
     initializeTransactionListPolling: mockInitializeTransactionListPolling,
     stopTransactionListPolling: mockStopTransactionListPolling,
   }),
@@ -155,7 +155,7 @@ async function expectCachedRouteGroupSwitchInitializes(Component, {
 
 describe('transaction details leave behavior', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRoute.params = { id: 'ae' };
   });
 

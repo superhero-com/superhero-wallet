@@ -1,64 +1,64 @@
 import { mount } from '@vue/test-utils';
+import { computed as mockComputed, ref as mockRef } from 'vue';
 
-const mockPostJson = jest.fn();
-const mockHandleUnknownError = jest.fn();
-const mockOpenConfirmModal = jest.fn();
-const mockUpdateNamePointer = jest.fn();
-const mockUpdateOwnedNames = jest.fn();
-const mockFetchRespondChallenge = jest.fn();
-const mockSetDefaultName = jest.fn();
-const { computed: mockComputed, ref: mockRef } = jest.requireActual('vue');
+const mockPostJson = vi.fn();
+const mockHandleUnknownError = vi.fn();
+const mockOpenConfirmModal = vi.fn();
+const mockUpdateNamePointer = vi.fn();
+const mockUpdateOwnedNames = vi.fn();
+const mockFetchRespondChallenge = vi.fn();
+const mockSetDefaultName = vi.fn();
 let NameItem;
 
-jest.mock('@aeternity/aepp-sdk', () => ({
+vi.mock('@aeternity/aepp-sdk', () => ({
   Encoding: {
     AccountAddress: 'ak',
   },
-  isAddressValid: jest.fn(() => true),
+  isAddressValid: vi.fn(() => true),
 }));
 
-jest.mock('vue-i18n', () => ({
-  useI18n: jest.fn(() => ({
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
     t: (key, params) => (params ? `${key}${JSON.stringify(params)}` : key),
   })),
 }));
 
-jest.mock('@/utils', () => ({
-  blocksToRelativeTime: jest.fn(() => '1 day'),
+vi.mock('@/utils', () => ({
+  blocksToRelativeTime: vi.fn(() => '1 day'),
   handleUnknownError: mockHandleUnknownError,
   postJson: mockPostJson,
 }));
 
-jest.mock('@/composables', () => ({
-  useAccounts: jest.fn(() => ({
+vi.mock('@/composables', () => ({
+  useAccounts: vi.fn(() => ({
     activeAccount: mockRef({ address: 'ak_test' }),
   })),
-  useAeSdk: jest.fn(() => ({
+  useAeSdk: vi.fn(() => ({
     nodeNetworkId: mockRef('ae_testnet'),
     fetchRespondChallenge: mockFetchRespondChallenge,
   })),
-  useModals: jest.fn(() => ({
+  useModals: vi.fn(() => ({
     openConfirmModal: mockOpenConfirmModal,
-    openModal: jest.fn(),
+    openModal: vi.fn(),
   })),
-  useTopHeaderData: jest.fn(() => ({
+  useTopHeaderData: vi.fn(() => ({
     topBlockHeight: mockRef(100),
   })),
 }));
 
-jest.mock('@/protocols/aeternity/composables/aeNames', () => ({
+vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
   NAME_CLAIM_STATUS: {
     preclaimed: 'preclaimed',
     claimSubmitted: 'claim-submitted',
     pointerUpdatePending: 'pointer-update-pending',
     transferring: 'transferring',
   },
-  useAeNames: jest.fn(() => ({
-    setAutoExtend: jest.fn(),
+  useAeNames: vi.fn(() => ({
+    setAutoExtend: vi.fn(),
     updateNamePointer: mockUpdateNamePointer,
-    getName: jest.fn(() => mockComputed(() => 'default.chain')),
-    getNameExtendFee: jest.fn(() => 0.001),
-    extendExpiringOwnedNames: jest.fn(),
+    getName: vi.fn(() => mockComputed(() => 'default.chain')),
+    getNameExtendFee: vi.fn(() => 0.001),
+    extendExpiringOwnedNames: vi.fn(),
     ownedNames: mockRef([{
       name: 'default.chain',
       owner: 'ak_test',
@@ -70,17 +70,17 @@ jest.mock('@/protocols/aeternity/composables/aeNames', () => ({
   })),
 }));
 
-jest.mock('@/protocols/aeternity/composables', () => ({
-  useAeNetworkSettings: jest.fn(() => ({
+vi.mock('@/protocols/aeternity/composables', () => ({
+  useAeNetworkSettings: vi.fn(() => ({
     aeActiveNetworkSettings: mockRef({ backendUrl: 'https://backend.test' }),
   })),
 }));
 
-jest.mock('@/protocols/aeternity/helpers', () => ({
-  checkAddressOrChannel: jest.fn(() => true),
+vi.mock('@/protocols/aeternity/helpers', () => ({
+  checkAddressOrChannel: vi.fn(() => true),
 }));
 
-jest.mock('@/protocols/aeternity/config', () => ({
+vi.mock('@/protocols/aeternity/config', () => ({
   UPDATE_POINTER_ACTION: {
     update: 'update',
     extend: 'extend',
@@ -93,8 +93,8 @@ describe('NameItem', () => {
     ({ default: NameItem } = await import('@/popup/components/NameItem.vue'));
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     mockOpenConfirmModal.mockResolvedValue(undefined);
     mockUpdateNamePointer.mockResolvedValue(true);
     mockUpdateOwnedNames.mockResolvedValue(undefined);

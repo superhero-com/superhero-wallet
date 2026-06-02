@@ -1,6 +1,4 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
-import { expect, jest } from '@jest/globals';
-
 describe('SolanaAdapter - filter account asset transactions', () => {
   it('filters txs by contractId correctly', async () => {
     const adapter = new SolanaAdapter();
@@ -14,7 +12,7 @@ describe('SolanaAdapter - filter account asset transactions', () => {
       { tx: { contractId: 'TokenMintB' } },
     ] as any;
 
-    jest.spyOn(adapter, 'fetchAccountTransactions').mockResolvedValue({
+    vi.spyOn(adapter, 'fetchAccountTransactions').mockResolvedValue({
       regularTransactions: mixed as any,
       paginationParams: { nextPageUrl: 'abc' },
     } as any);

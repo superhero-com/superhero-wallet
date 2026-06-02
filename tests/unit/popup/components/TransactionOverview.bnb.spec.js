@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import TransactionOverview from '../../../../src/popup/components/TransactionOverview.vue';
 import { PROTOCOLS } from '../../../../src/constants';
 
-jest.mock('../../../../src/lib/ProtocolAdapterFactory', () => ({
+vi.mock('../../../../src/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: {
     getAdapter: () => ({
       getExplorer: () => ({
@@ -14,7 +14,7 @@ jest.mock('../../../../src/lib/ProtocolAdapterFactory', () => ({
   },
 }));
 
-jest.mock('../../../../src/composables', () => ({
+vi.mock('../../../../src/composables', () => ({
   useTransactionData: () => ({
     isDex: { value: false },
     innerTx: { value: { senderId: '0xsender', recipientId: '0xrecipient' } },
@@ -27,14 +27,14 @@ jest.mock('../../../../src/composables', () => ({
   useFungibleTokens: () => ({ getProtocolAvailableTokens: () => ({}) }),
 }));
 
-jest.mock('../../../../src/protocols/aeternity/composables/aeNames', () => ({
+vi.mock('../../../../src/protocols/aeternity/composables/aeNames', () => ({
   useAeNames: () => ({
     getName: () => ({ value: '' }),
-    getNameByNameHash: jest.fn(),
+    getNameByNameHash: vi.fn(),
   }),
 }));
 
-jest.mock('vue-i18n', () => ({ useI18n: () => ({ t: (k) => k }) }));
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (k) => k }) }));
 
 describe('TransactionOverview (BNB/EVM)', () => {
   it('renders sender and recipient addresses for EVM SpendTx', () => {

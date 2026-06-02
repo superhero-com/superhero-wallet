@@ -75,8 +75,12 @@ module.exports = {
       env: {
         jest: true,
       },
+      globals: {
+        // Vitest exposes `vi` (and the jest-compatible globals) when globals: true
+        vi: 'readonly',
+      },
       rules: {
-        // Allow using test-only deps like @jest/globals in unit tests
+        // Allow using test-only deps in unit tests
         'import/no-extraneous-dependencies': 'off',
       },
     },

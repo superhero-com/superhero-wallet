@@ -10,11 +10,11 @@ import Networks from '../../src/popup/pages/Networks.vue';
 import * as environment from '../../src/constants/environment';
 
 const OLD_ENV = process.env;
-const mockFetchMiddlewareStatus = jest.fn(async () => ({ mdwVersion: 'middleware-version' }));
+const mockFetchMiddlewareStatus = vi.fn(async () => ({ mdwVersion: 'middleware-version' }));
 
 beforeEach(() => {
-  jest.resetModules();
-  jest.clearAllMocks();
+  vi.resetModules();
+  vi.clearAllMocks();
   process.env = {
     ...OLD_ENV,
     npm_package_version: 'version-specific-text',
@@ -27,62 +27,62 @@ afterAll(() => {
   process.env = OLD_ENV;
 });
 
-jest.mock('vue-i18n', () => ({
-  useI18n: jest.fn(() => ({
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
     t: () => 'locale-specific-text',
   })),
 }));
 
-jest.mock('../../src/constants/environment', () => ({
+vi.mock('../../src/constants/environment', () => ({
   __esModule: true,
   IS_WEB: null,
   IN_FRAME: null,
   IS_MOBILE_DEVICE: false,
 }));
-jest.mock('../../src/composables', () => ({
-  useAccounts: jest.fn(() => ({
+vi.mock('../../src/composables', () => ({
+  useAccounts: vi.fn(() => ({
     accounts: [],
     isLoggedIn: { value: false },
     activeAccount: { value: { protocol: 'aeternity', address: 'ak_test' } },
     protocolsInUse: ['aeternity'],
-    addRawAccount: jest.fn(),
-    discoverAccounts: jest.fn(),
-    setActiveAccountByGlobalIdx: jest.fn(),
+    addRawAccount: vi.fn(),
+    discoverAccounts: vi.fn(),
+    setActiveAccountByGlobalIdx: vi.fn(),
   })),
-  useAeMiddleware: jest.fn(() => ({
-    fetchMiddlewareStatus: jest.fn(),
+  useAeMiddleware: vi.fn(() => ({
+    fetchMiddlewareStatus: vi.fn(),
   })),
-  useModals: jest.fn(() => ({
-    openModal: jest.fn(),
+  useModals: vi.fn(() => ({
+    openModal: vi.fn(),
   })),
-  useUi: jest.fn(() => ({
-    setLoaderVisible: jest.fn(),
-    loginTargetLocation: jest.fn(),
+  useUi: vi.fn(() => ({
+    setLoaderVisible: vi.fn(),
+    loginTargetLocation: vi.fn(),
     isBiometricLoginEnabled: { value: false },
     saveErrorLog: { value: false },
-    setSaveErrorLog: jest.fn(),
+    setSaveErrorLog: vi.fn(),
   })),
-  useAuth: jest.fn(() => ({
+  useAuth: vi.fn(() => ({
     mnemonic: { value: '' },
-    generateMnemonic: jest.fn(),
-    setMnemonicAndInitializeAuthentication: jest.fn(),
-    openEnableBiometricLoginModal: jest.fn(),
-    checkBiometricLoginAvailability: jest.fn(async () => false),
+    generateMnemonic: vi.fn(),
+    setMnemonicAndInitializeAuthentication: vi.fn(),
+    openEnableBiometricLoginModal: vi.fn(),
+    checkBiometricLoginAvailability: vi.fn(async () => false),
     isMnemonicEncrypted: { value: false },
     isUsingDefaultPassword: { value: true },
-    lockWallet: jest.fn(),
+    lockWallet: vi.fn(),
   })),
-  useAeSdk: jest.fn(() => ({
+  useAeSdk: vi.fn(() => ({
     isNodeMainnet: { value: false },
     isNodeTestnet: { value: true },
   })),
-  useAddressBook: jest.fn(() => ({
+  useAddressBook: vi.fn(() => ({
     addressBook: { value: {} },
   })),
-  useCurrencies: jest.fn(() => ({
+  useCurrencies: vi.fn(() => ({
     currentCurrencyInfo: { value: { code: 'usd', symbol: '$' } },
   })),
-  useNetworks: jest.fn(() => ({
+  useNetworks: vi.fn(() => ({
     activeNetwork: {
       name: 'Testnet',
       type: 'Testnet',
@@ -106,15 +106,15 @@ jest.mock('../../src/composables', () => ({
         },
       },
     ],
-    switchNetwork: jest.fn(),
-    deleteCustomNetwork: jest.fn(),
+    switchNetwork: vi.fn(),
+    deleteCustomNetwork: vi.fn(),
   })),
 }));
-jest.mock('../../src/protocols/aeternity/composables', () => ({
-  useAeMiddleware: jest.fn(() => ({
+vi.mock('../../src/protocols/aeternity/composables', () => ({
+  useAeMiddleware: vi.fn(() => ({
     fetchMiddlewareStatus: mockFetchMiddlewareStatus,
   })),
-  useAeNetworkSettings: jest.fn(() => ({
+  useAeNetworkSettings: vi.fn(() => ({
     aeActiveNetworkSettings: {
       value: {
         middlewareUrl: 'https://testnet.middleware.aeternity.io',
@@ -123,13 +123,13 @@ jest.mock('../../src/protocols/aeternity/composables', () => ({
     },
   })),
 }));
-jest.mock('@/utils', () => ({
-  fetchJson: jest.fn(() => ({})),
+vi.mock('@/utils', () => ({
+  fetchJson: vi.fn(() => ({})),
 }));
-jest.mock('vue-router', () => ({
-  useRouter: jest.fn(() => ({})),
+vi.mock('vue-router', () => ({
+  useRouter: vi.fn(() => ({})),
 }));
-jest.mock('detect-browser', () => ({
+vi.mock('detect-browser', () => ({
   detect: () => ({}),
 }));
 
