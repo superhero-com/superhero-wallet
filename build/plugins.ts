@@ -123,19 +123,43 @@ export function devProcessPolyfillPlugin(): Plugin {
 }
 
 /**
+ * Packages that make up the AirGap dependency tree (~1.5 MB). They are needed
+ * only for the AirGap import/sign flow, which `composables/airGap.ts` loads via
+ * dynamic `import()`. None of them has a static importer in `src`, so they are
+ * reachable only through that dynamic boundary — leaving them OUT of the forced
+ * `vendor` chunk lets Rollup move the whole subtree into an on-demand async
+ * chunk instead of the always-loaded `vendor` bundle.
+ */
+const LAZY_VENDOR_PACKAGES = [
+  'airgap-coin-lib',
+  '@airgap/',
+  '@polkadot/',
+  'libsodium',
+  'moment',
+  'ramda',
+];
+
+/**
  * Splits third-party dependencies out of the app bundle, replacing the old
  * webpack `splitChunks` config.
  *
- * IMPORTANT: all of node_modules goes into a SINGLE `vendor` chunk. The crypto
- * stack (sha.js / create-hash / bitcoinjs / secp256k1 …) ships as CommonJS with
- * lazy `require()` wrappers; splitting those interdependent modules across
- * multiple chunks separates a module's synthetic `exports` object from its
- * initializer and crashes at runtime ("Object.defineProperty called on
- * non-object"). Keeping every dependency together avoids cross-chunk CJS.
+ * IMPORTANT: nearly all of node_modules goes into a SINGLE `vendor` chunk. The
+ * crypto stack (sha.js / create-hash / bitcoinjs / secp256k1 …) ships as
+ * CommonJS with lazy `require()` wrappers; splitting those interdependent
+ * modules across multiple chunks separates a module's synthetic `exports`
+ * object from its initializer and crashes at runtime ("Object.defineProperty
+ * called on non-object"). Keeping every dependency together avoids cross-chunk
+ * CJS. The only exception is the AirGap tree (see `LAZY_VENDOR_PACKAGES`),
+ * which is dynamically imported and self-contained, so returning `undefined`
+ * lets Rollup code-split it out.
  */
 export function vendorManualChunks(id: string): string | undefined {
-  if (id.includes('node_modules')) return 'vendor';
-  return undefined;
+  if (!id.includes('node_modules')) return undefined;
+  const normalized = id.replace(/\\/g, '/');
+  if (LAZY_VENDOR_PACKAGES.some((pkg) => normalized.includes(`node_modules/${pkg}`))) {
+    return undefined;
+  }
+  return 'vendor';
 }
 
 /**
