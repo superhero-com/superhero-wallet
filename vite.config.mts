@@ -134,6 +134,18 @@ export default defineConfig(({ mode }) => {
     plugins.push(copyWebPlugin());
   }
 
+  // Temporary: `BUNDLE_ANALYZE=true` emits a treemap for any build (web included).
+  if (parseBool(process.env.BUNDLE_ANALYZE)) {
+    plugins.push(
+      visualizer({
+        filename: r('artifacts/bundle-stats.html'),
+        template: 'treemap',
+        gzipSize: true,
+        brotliSize: true,
+      }) as PluginOption,
+    );
+  }
+
   // Emit a bundle treemap + raw stats JSON for review/provenance builds.
   if (REVIEW_BUILD && isExtension && BUILD_STEP === 'html') {
     plugins.push(
