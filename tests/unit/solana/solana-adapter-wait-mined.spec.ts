@@ -1,4 +1,5 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
+
 vi.useFakeTimers();
 
 describe('SolanaAdapter - waitTransactionMined', () => {

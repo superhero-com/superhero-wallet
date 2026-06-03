@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { useSolMaxAmount } from '@/protocols/solana/composables/solMaxAmount';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOLS } from '@/constants';
+
 vi.mock('@/composables/balances', () => ({
   useBalances: () => ({ balance: { value: '10' } }),
 }));

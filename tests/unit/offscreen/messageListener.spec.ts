@@ -59,8 +59,8 @@ describe('offscreen message listener', () => {
 
   async function loadListener() {
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      (await import('@/offscreen/offscreen'));
+    // eslint-disable-next-line global-require
+    (await import('@/offscreen/offscreen'));
 
     return (
       (global as any).browser.runtime.onMessage.addListener as vi.Mock

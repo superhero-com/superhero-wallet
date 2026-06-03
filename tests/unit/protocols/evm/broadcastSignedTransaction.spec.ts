@@ -26,8 +26,7 @@ describe('broadcastSignedTransaction', () => {
       DEFAULT_RETURN_FORMAT: {},
     }));
 
-    // eslint-disable-next-line global-require
-    return (await import('@/protocols/evm/libs/broadcastSignedTransaction'));
+    return import('@/protocols/evm/libs/broadcastSignedTransaction');
   };
 
   afterEach(async () => {

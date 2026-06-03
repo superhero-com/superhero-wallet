@@ -1,4 +1,4 @@
-/* global describe, it, jest */
+/* global describe, it */
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
 import { PROTOCOLS } from '@/constants';
 

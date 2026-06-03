@@ -147,8 +147,8 @@ export function copyWebPlugin(): Plugin {
     name: 'sh:copy-web',
     apply: 'build',
     async closeBundle() {
-      const fs = await import('fs-extra');
-      await fs.default.copy('src/web', 'dist/web');
+      const fsExtra = await import('fs-extra');
+      await fsExtra.default.copy('src/web', 'dist/web');
     },
   };
 }

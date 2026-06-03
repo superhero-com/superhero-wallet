@@ -26,7 +26,9 @@ export function getDefine(opts: {
   platform: Platform;
   reviewBuild: boolean;
 }): Record<string, string> {
-  const { env, mode, platform, reviewBuild } = opts;
+  const {
+    env, mode, platform, reviewBuild,
+  } = opts;
 
   const RUNNING_IN_TESTS = parseBool(env.RUNNING_IN_TESTS);
   const UNFINISHED_FEATURES = parseBool(env.UNFINISHED_FEATURES);

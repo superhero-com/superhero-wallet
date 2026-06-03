@@ -1,4 +1,4 @@
-/* global describe, it, jest */
+/* global describe, it */
 // eslint-disable-next-line import/no-relative-packages
 import { SolanaAdapter } from '../../../src/protocols/solana/libs/SolanaAdapter';
 

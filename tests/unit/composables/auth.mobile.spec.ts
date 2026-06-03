@@ -95,10 +95,8 @@ describe('useAuth mobile biometric login', () => {
       watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    let auth;
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      auth = (await import('@/composables/auth')).useAuth();
+    const auth = (await import('@/composables/auth')).useAuth();
 
     await auth.checkUserAuth();
     await nextTick();
@@ -209,10 +207,7 @@ describe('useAuth mobile biometric login', () => {
       }),
     }));
 
-    let auth;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      auth = (await import('@/composables/auth')).useAuth();
+    const auth = (await import('@/composables/auth')).useAuth();
 
     const firstAuthCheck = auth.checkUserAuth();
     await waitFor(() => openBiometricLoginModal.mock.calls.length > 0);
@@ -319,10 +314,7 @@ describe('useAuth mobile biometric login', () => {
       watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    let auth;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      auth = (await import('@/composables/auth')).useAuth();
+    const auth = (await import('@/composables/auth')).useAuth();
 
     await auth.checkUserAuth();
     expect(auth.isAuthenticated.value).toBe(true);
@@ -436,10 +428,7 @@ describe('useAuth mobile biometric login', () => {
 
     vi.useFakeTimers();
     try {
-      let auth;
-      vi.resetModules();
-        // eslint-disable-next-line global-require
-        auth = (await import('@/composables/auth')).useAuth();
+      const auth = (await import('@/composables/auth')).useAuth();
 
       await auth.checkUserAuth();
       expect(auth.isAuthenticated.value).toBe(true);
@@ -550,10 +539,7 @@ describe('useAuth mobile biometric login', () => {
       watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    let auth;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      auth = (await import('@/composables/auth')).useAuth();
+    const auth = (await import('@/composables/auth')).useAuth();
 
     await Promise.resolve();
     await auth.setPassword('user-password', 'plain mobile mnemonic');

@@ -9,6 +9,7 @@ module.exports = {
   },
   env: {
     browser: true,
+    es2021: true,
   },
   extends: [
     'plugin:@intlify/vue-i18n/recommended',
@@ -82,6 +83,23 @@ module.exports = {
       rules: {
         // Allow using test-only deps in unit tests
         'import/no-extraneous-dependencies': 'off',
+      },
+    },
+    {
+      // Build/config/script tooling legitimately imports devDependencies and
+      // uses Node CommonJS patterns.
+      files: [
+        'build/**/*.{js,ts,mts}',
+        'config/**/*.{js,ts}',
+        'scripts/**/*.js',
+        '*.config.{js,ts,mts,cjs}',
+        'vitest.config.ts',
+        '.eslintrc.js',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+        'global-require': 'off',
+        'no-console': 'off',
       },
     },
   ],

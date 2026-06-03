@@ -17,7 +17,7 @@ vi.mock('@reown/walletkit', () => ({
 
 // `Core` is instantiated with `new`; Vitest 4 requires a constructable
 // implementation (an arrow function is not a constructor).
-vi.mock('@walletconnect/core', () => ({ Core: vi.fn(function Core() {}) }));
+vi.mock('@walletconnect/core', () => ({ Core: vi.fn(class Core {}) }));
 
 let activeAccountRef: any;
 
@@ -27,7 +27,12 @@ describe('WalletConnect accountsChanged behavior', () => {
     // Mock constants and composables
     vi.doMock('@/constants', async () => ({
       ...(await vi.importActual('@/constants')),
-      APP_NAME: 'Superhero', APP_URL: 'superhero.com', EVM_PROTOCOLS: ['ethereum'], PROTOCOLS: { ethereum: 'ethereum' }, STORAGE_KEYS: { walletConnectSession: 'wc' }, WALLET_CONNECT_PROJECT_ID: 'pid',
+      APP_NAME: 'Superhero',
+      APP_URL: 'superhero.com',
+      EVM_PROTOCOLS: ['ethereum'],
+      PROTOCOLS: { ethereum: 'ethereum' },
+      STORAGE_KEYS: { walletConnectSession: 'wc' },
+      WALLET_CONNECT_PROJECT_ID: 'pid',
     }));
     // Mock auth composable dependency chain
     vi.doMock('@/composables/auth', () => ({ useAuth: () => ({ isLoggedIn: { value: true }, secureLoginTimeoutDecrypted: { value: 0 } }) }));

@@ -5,8 +5,7 @@ describe('callback URL security helpers', () => {
     vi.doMock('@/constants', () => ({
       AGGREGATOR_URL: 'https://superhero.com',
     }));
-    // eslint-disable-next-line global-require
-    return (await import('@/utils/callbackUrl'));
+    return import('@/utils/callbackUrl');
   };
 
   it.each([

@@ -26,6 +26,7 @@ export function transformManifest(
   manifest: any,
   { isFirefox, unfinishedFeatures, version }: ManifestTransformOptions,
 ): any {
+  /* eslint-disable no-param-reassign -- intentional in-place transform of the manifest object */
   manifest.version = version;
 
   if (unfinishedFeatures) {
@@ -45,6 +46,7 @@ export function transformManifest(
     delete manifest.sidebar_action;
   }
 
+  /* eslint-enable no-param-reassign */
   return manifest;
 }
 

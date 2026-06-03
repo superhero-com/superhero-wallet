@@ -1,4 +1,5 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
+
 describe('SolanaAdapter - HD derivation', () => {
   const adapter = new SolanaAdapter();
 

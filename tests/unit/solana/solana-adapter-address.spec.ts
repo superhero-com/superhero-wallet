@@ -1,4 +1,5 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
+
 describe('SolanaAdapter - address validation basics', () => {
   const adapter = new SolanaAdapter();
 

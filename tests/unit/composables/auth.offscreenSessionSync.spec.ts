@@ -118,8 +118,8 @@ describe('useAuth offscreen session-key wake-up', () => {
     vi.useFakeTimers();
     try {
       vi.resetModules();
-        // eslint-disable-next-line global-require
-        (await import('@/composables/auth')).useAuth();
+      // eslint-disable-next-line global-require
+      (await import('@/composables/auth')).useAuth();
 
       // Wire-up assertion: the offscreen branch must register the listener
       // alongside the salt watcher.
@@ -234,8 +234,8 @@ describe('useAuth offscreen session-key wake-up', () => {
     }));
 
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      (await import('@/composables/auth')).useAuth();
+    // eslint-disable-next-line global-require
+    (await import('@/composables/auth')).useAuth();
 
     expect(subscribeToSessionEncryptionKey).not.toHaveBeenCalled();
   });
@@ -264,10 +264,8 @@ describe('subscribeToSessionEncryptionKey helper', () => {
       getSessionEncryptionKey: vi.fn(),
     }));
 
-    let subscribeToSessionEncryptionKey: any;
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      subscribeToSessionEncryptionKey = (await import('@/utils/session')).subscribeToSessionEncryptionKey;
+    const { subscribeToSessionEncryptionKey } = await import('@/utils/session');
 
     const callback = vi.fn();
     const teardown = subscribeToSessionEncryptionKey(callback);
@@ -307,10 +305,8 @@ describe('subscribeToSessionEncryptionKey helper', () => {
       getSessionEncryptionKey: vi.fn(),
     }));
 
-    let subscribeToSessionEncryptionKey: any;
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      subscribeToSessionEncryptionKey = (await import('@/utils/session')).subscribeToSessionEncryptionKey;
+    const { subscribeToSessionEncryptionKey } = await import('@/utils/session');
 
     const teardown = subscribeToSessionEncryptionKey(vi.fn());
     expect(typeof teardown).toBe('function');

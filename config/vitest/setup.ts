@@ -25,6 +25,7 @@ if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
   Object.defineProperty(globalThis, 'crypto', {
     value: {
       getRandomValues: (arr: any) => {
+        // eslint-disable-next-line no-param-reassign -- writes into the passed array
         for (let i = 0; i < arr.length; i += 1) arr[i] = 0;
         return arr;
       },

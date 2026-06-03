@@ -44,7 +44,7 @@ describe('inject.ts accountsChanged propagation', () => {
 
     // Load script
     vi.resetModules();
-    await import('@/content-scripts/inject.ts');
+    await import('@/content-scripts/inject');
 
     // Simulate an RPC request that will store the source under connectedDapps
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];

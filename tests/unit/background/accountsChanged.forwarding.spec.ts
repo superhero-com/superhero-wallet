@@ -24,8 +24,8 @@ describe('background accountsChanged forwarding', () => {
   it('forwards accountsChanged to content script with correct payload', async () => {
     // re-require to bind listeners with mocked browser
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      (await import('@/background/index'));
+    // eslint-disable-next-line global-require
+    (await import('@/background/index'));
 
     const listener = (
       (global as any).browser.runtime.onMessage.addListener as vi.Mock
@@ -64,8 +64,8 @@ describe('background accountsChanged forwarding', () => {
     ['content-script sender with no id', {}],
   ])('drops accountsChanged when sender is %s', async (_label, sender) => {
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      (await import('@/background/index'));
+    // eslint-disable-next-line global-require
+    (await import('@/background/index'));
 
     const listener = (
       (global as any).browser.runtime.onMessage.addListener as vi.Mock
@@ -93,8 +93,8 @@ describe('background accountsChanged forwarding', () => {
     ['unknown background method', { target: 'background', method: 'unknownMethod' }],
   ])('does not claim unhandled messages: %s', async (_label, msg) => {
     vi.resetModules();
-      // eslint-disable-next-line global-require
-      (await import('@/background/index'));
+    // eslint-disable-next-line global-require
+    (await import('@/background/index'));
 
     const listener = (
       (global as any).browser.runtime.onMessage.addListener as vi.Mock

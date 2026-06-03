@@ -54,8 +54,7 @@ describe('mobileEncryption', () => {
       };
     });
 
-    // eslint-disable-next-line global-require
-    return (await import('@/utils/mobileEncryption'));
+    return import('@/utils/mobileEncryption');
   };
 
   afterEach(async () => {

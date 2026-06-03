@@ -96,10 +96,7 @@ describe('offscreen wallet connections', () => {
   });
 
   it('ignores sdk-owned client removal on port disconnect', async () => {
-    let wallet: any;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      wallet = (await import('@/offscreen/wallet'));
+    const wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await onConnectListener(createPort());
 
@@ -113,10 +110,7 @@ describe('offscreen wallet connections', () => {
     const error = new Error('Attempting to use a disconnected port object');
     aeSdk.shareWalletInfo.mockRejectedValueOnce(error);
 
-    let wallet: any;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      wallet = (await import('@/offscreen/wallet'));
+    const wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await expect(onConnectListener(createPort())).resolves.toBeUndefined();
 
@@ -130,10 +124,7 @@ describe('offscreen wallet connections', () => {
     aeSdk._clients.has = vi.fn(() => true);
     aeSdk.removeRpcClient.mockImplementation(() => { throw error; });
 
-    let wallet: any;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      wallet = (await import('@/offscreen/wallet'));
+    const wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await onConnectListener(createPort());
 
@@ -146,10 +137,7 @@ describe('offscreen wallet connections', () => {
     aeSdk._clients.has = vi.fn(() => true);
     aeSdk.removeRpcClient.mockImplementation(() => { throw error; });
 
-    let wallet: any;
-    vi.resetModules();
-      // eslint-disable-next-line global-require
-      wallet = (await import('@/offscreen/wallet'));
+    const wallet = (await import('@/offscreen/wallet'));
     await wallet.init();
     await onConnectListener(createPort());
 
@@ -184,10 +172,7 @@ describe('offscreen wallet connections', () => {
       });
       setupConnectedClient({ sendMessage });
 
-      let wallet: any;
-      vi.resetModules();
-        // eslint-disable-next-line global-require
-        wallet = (await import('@/offscreen/wallet'));
+      const wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
 
       await expect(wallet.disconnect()).resolves.toBeUndefined();
@@ -202,10 +187,8 @@ describe('offscreen wallet connections', () => {
       aeSdk._clients.has = vi.fn(() => true);
       aeSdk.removeRpcClient.mockImplementation(() => { throw error; });
 
-      let wallet: any;
       vi.resetModules();
-        // eslint-disable-next-line global-require
-        wallet = (await import('@/offscreen/wallet'));
+      const wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
 
       await expect(wallet.disconnect()).resolves.toBeUndefined();
@@ -216,10 +199,7 @@ describe('offscreen wallet connections', () => {
       const sendMessage = vi.fn(() => { throw new Error('boom'); });
       setupConnectedClient({ sendMessage });
 
-      let wallet: any;
-      vi.resetModules();
-        // eslint-disable-next-line global-require
-        wallet = (await import('@/offscreen/wallet'));
+      const wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
 
       await expect(wallet.disconnect()).rejects.toThrow('boom');

@@ -42,7 +42,7 @@ const buildZip = (src, dist, zipFilename) => {
   return new Promise((resolve, reject) => {
     archive
       .directory(src, false)
-      .on('error', err => reject(err))
+      .on('error', (err) => reject(err))
       .pipe(stream);
 
     stream.on('close', () => resolve());
@@ -79,7 +79,9 @@ const runReviewBuildIfNeeded = () => {
     const hasDeps = fs.existsSync(path.join(reviewDir, 'dependencies.json'));
     const hasCommit = fs.existsSync(path.join(reviewDir, 'COMMIT_SHA.txt'));
     if (hasDeps && hasCommit) return; // already present
-  } catch (_) {}
+  } catch (_) {
+    // ignore — fall through and regenerate review artifacts
+  }
   console.info('Generating review artifacts...');
   execSync('npm run build:review:ff --silent', { stdio: 'inherit' });
 };
