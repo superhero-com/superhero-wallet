@@ -18,6 +18,7 @@ import {
   copyWebPlugin,
   stripWebOnlyHtmlPlugin,
   vendorManualChunks,
+  devProcessPolyfillPlugin,
 } from './build/plugins';
 
 const parseBool = (val?: string): boolean => (val ? JSON.parse(val) : false);
@@ -65,6 +66,7 @@ export default defineConfig(({ mode }) => {
     : { Buffer: true as const, global: true as const, process: true as const };
 
   const plugins: PluginOption[] = [
+    devProcessPolyfillPlugin(),
     svgVueComponentAlias(),
     vue(),
     svgLoader({

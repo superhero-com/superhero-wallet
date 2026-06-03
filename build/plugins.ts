@@ -81,6 +81,48 @@ export function stripWebOnlyHtmlPlugin(isWeb: boolean): Plugin {
 }
 
 /**
+ * Dev-server only. Vite's client `env.mjs` applies the `process.env.*` defines
+ * by doing `globalThis.process = globalThis.process || {}` and populating
+ * `.env` — creating a partial `process` with no `version`/`browser`. The node
+ * polyfill's per-module `globalThis.process = globalThis.process || shim` then
+ * keeps that partial (the shim, which has `version: ''`, never wins). CommonJS
+ * crypto deps (`create-hash` → `ripemd160` → `readable-stream`) read
+ * `process.version.slice(...)` at module-eval time and crash on `undefined`,
+ * blanking the app.
+ *
+ * Because `env.mjs` uses `||`, providing a complete `process` *before* it runs
+ * makes it merge `env` into ours instead. This is a non-module inline script
+ * injected at the very top of <head>, so it executes before the deferred
+ * `@vite/client` module. Production builds inline defines statically and use
+ * the real bundle polyfill, so this is `apply: 'serve'` only.
+ */
+export function devProcessPolyfillPlugin(): Plugin {
+  const script = '(function(){var g=globalThis,p=g.process=g.process||{};'
+    + 'if(!p.env)p.env={};'
+    + 'if(p.browser===undefined)p.browser=true;'
+    + "if(p.version===undefined)p.version='';"
+    + 'if(!p.versions)p.versions={};'
+    + "if(!p.platform)p.platform='browser';"
+    + "if(!p.title)p.title='browser';"
+    + 'if(!p.argv)p.argv=[];'
+    + "if(typeof p.nextTick!=='function')p.nextTick=function(c){var a=[].slice.call(arguments,1);"
+    + 'Promise.resolve().then(function(){c.apply(null,a)})};'
+    + "['on','addListener','once','off','removeListener','removeAllListeners','emit',"
+    + "'prependListener','prependOnceListener'].forEach(function(m){"
+    + "if(typeof p[m]!=='function')p[m]=function(){return p}});"
+    + "if(typeof p.listeners!=='function')p.listeners=function(){return[]};"
+    + "if(typeof p.cwd!=='function')p.cwd=function(){return'/'};"
+    + 'if(typeof p.umask!==\'function\')p.umask=function(){return 0};})();';
+  return {
+    name: 'sh:dev-process-polyfill',
+    apply: 'serve',
+    transformIndexHtml() {
+      return [{ tag: 'script', injectTo: 'head-prepend', children: script }];
+    },
+  };
+}
+
+/**
  * Splits third-party dependencies out of the app bundle, replacing the old
  * webpack `splitChunks` config.
  *
