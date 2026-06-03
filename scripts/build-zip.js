@@ -3,7 +3,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
+// archiver v8 is ESM and no longer exports a callable factory; use the
+// `ZipArchive` named export (`new ZipArchive(opts)`) instead of `archiver('zip', opts)`.
+const { ZipArchive } = require('archiver');
 const { execSync } = require('child_process');
 
 const DEST_DIR = [
@@ -36,7 +38,7 @@ const makeDestZipDirIfNotExists = () => {
 const buildZip = (src, dist, zipFilename) => {
   console.info(`Building ${zipFilename}...`);
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const stream = fs.createWriteStream(path.join(dist, zipFilename));
 
   return new Promise((resolve, reject) => {
@@ -53,7 +55,7 @@ const buildZip = (src, dist, zipFilename) => {
 const buildCompositeZip = (entries, dist, zipFilename) => {
   console.info(`Building ${zipFilename}...`);
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const stream = fs.createWriteStream(path.join(dist, zipFilename));
 
   return new Promise((resolve, reject) => {
