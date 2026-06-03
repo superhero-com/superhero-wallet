@@ -144,7 +144,7 @@
     "stylelint-config-recommended-scss": "17.0.1",
     "stylelint-config-recommended-vue": "~1.6.1",
     "stylelint-config-standard": "~40.0.0",
-    "stylelint-scss": "7.1.1",
+    "stylelint-scss": "7.2.0",
     "typescript": "^6.0.3",
     "vite": "^7.3.5",
     "vite-plugin-node-polyfills": "^0.24.0",
