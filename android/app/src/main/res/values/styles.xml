@@ -13,6 +13,10 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Capacitor 8.4's now-active SystemBars plugin paints the DecorView with
+             this windowBackground; on Android 15 edge-to-edge it shows through the
+             transparent navigation bar. Keep it dark so the nav bar isn't white. -->
+        <item name="android:windowBackground">#000000</item>
     </style>
 
 
@@ -22,5 +26,8 @@
       <item name="android:navigationBarColor">#000000</item>
       <item name="android:windowLightNavigationBar">false</item>
       <item name="android:background">@drawable/launch_screen</item>
+      <!-- Same as above: the activity keeps this theme after splash, and
+           SystemBars paints the DecorView with windowBackground. -->
+      <item name="android:windowBackground">#000000</item>
     </style>
 </resources>

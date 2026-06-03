@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 /**
  * Declaration for SVG files imported as Vue components.
  */

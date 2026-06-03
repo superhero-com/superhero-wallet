@@ -73,7 +73,20 @@ export default defineConfig(({ mode }) => {
       defaultImport: 'url',
       svgoConfig: {
         plugins: [
-          'preset-default',
+          {
+            name: 'preset-default',
+            params: {
+              overrides: {
+                // Keep transform-bearing groups intact. Both plugins otherwise
+                // dissolve `<g transform="matrix(...)">` wrappers and bake the
+                // matrix into child path data — which breaks SMIL animations
+                // like animated-spinner.svg, where `<animateTransform>` rotates
+                // around the coordinate system the group's matrix establishes.
+                collapseGroups: false,
+                moveGroupAttrsToElems: false,
+              },
+            },
+          },
           {
             name: 'addClassesToSVGElement',
             params: { classNames: ['icon'] },
@@ -101,12 +114,17 @@ export default defineConfig(({ mode }) => {
         version: JSON.parse(readFileSync(r('package.json'), 'utf-8')).version,
       }),
       flattenHtmlPlugin(),
+      // vite-plugin-static-copy v3+ appends the matched file's source directory
+      // to `dest` (e.g. `public/favicons/` ends up under `icons/`). `stripBase`
+      // removes those leading segments so the files land flat where the manifest
+      // expects them (`icons/icon_48.png`, etc.).
       viteStaticCopy({
         targets: [
-          { src: 'public/favicons/favicon-48.png', dest: 'icons', rename: 'icon_48.png' },
-          { src: 'public/favicons/favicon-128.png', dest: 'icons', rename: 'icon_128.png' },
-          { src: 'public/icons/cameraRequestPermission', dest: 'icons' },
-          { src: 'src/icons/logo.svg', dest: 'icons/cameraRequestPermission' },
+          { src: 'public/favicons/favicon-48.png', dest: 'icons', rename: { stripBase: true, name: 'icon_48.png' } },
+          { src: 'public/favicons/favicon-128.png', dest: 'icons', rename: { stripBase: true, name: 'icon_128.png' } },
+          // keep the `cameraRequestPermission` folder, drop the `public/icons/` prefix
+          { src: 'public/icons/cameraRequestPermission', dest: 'icons', rename: { stripBase: 2 } },
+          { src: 'src/icons/logo.svg', dest: 'icons/cameraRequestPermission', rename: { stripBase: true } },
         ],
       }),
     );
