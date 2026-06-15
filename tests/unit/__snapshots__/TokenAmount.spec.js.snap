@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TokenAmount should match the snapshot 1`] = `
+<span class="token-amount sent"><span><!----> <span class="amount">
+      111
+      <!----></span></span>
+<!----></span>
+`;

@@ -26,6 +26,7 @@ module.exports = {
     '<rootDir>/config/jest/setEnvVars.js',
     '<rootDir>/src/protocols/registerAdapters.ts',
   ],
+  collectCoverage: true,
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
     '^.+\\.vue$': '@vue/vue3-jest',

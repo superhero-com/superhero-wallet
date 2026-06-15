@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tokens should match the snapshot 1`] = `
+<span class="tokens rg vertical"><span class="icons"><img src="https://avatars.z52da5wt.xyz/2" title="test456" class="to-token border"> <img src="https://avatars.z52da5wt.xyz/1" title="test123" class="border pair"></span> <span class="symbols"><span class="symbol">
+      test1...
+    </span> <span class="separator">
+      /
+    </span> <span class="symbol">
+      test4...
+    </span></span></span>
+`;
