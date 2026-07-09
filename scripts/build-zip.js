@@ -88,20 +88,19 @@ const runReviewBuildIfNeeded = () => {
   execSync('npm run build:review:ff --silent', { stdio: 'inherit' });
 };
 
-const main = () => {
-  DEST_DIR.forEach((build) => {
-    const { name, version } = extractExtensionData();
+const main = async () => {
+  const { name, version } = extractExtensionData();
+
+  makeDestZipDirIfNotExists();
+
+  // Zip the release builds first — runReviewBuildIfNeeded() below rebuilds
+  // dist/extension/firefox in place, so it must not run until these reads finish.
+  await Promise.all(DEST_DIR.map((build) => {
     const zipFilename = `${name}-${build.name}-v${version}.zip`;
-
-    makeDestZipDirIfNotExists();
-
-    buildZip(build.dir, DEST_ZIP_DIR, zipFilename)
-      .then(() => console.info('OK'))
-      .catch(console.err);
-  });
+    return buildZip(build.dir, DEST_ZIP_DIR, zipFilename).then(() => console.info('OK'));
+  }));
 
   // Build source + provenance bundle for review/release
-  const { name, version } = extractExtensionData();
   runReviewBuildIfNeeded();
 
   const sourceEntries = [
@@ -130,10 +129,10 @@ const main = () => {
   ];
 
   const sourceZip = `${name}-source-with-provenance-v${version}.zip`;
-  makeDestZipDirIfNotExists();
-  buildCompositeZip(sourceEntries, DEST_ZIP_DIR, sourceZip)
-    .then(() => console.info('OK'))
-    .catch(console.err);
+  await buildCompositeZip(sourceEntries, DEST_ZIP_DIR, sourceZip).then(() => console.info('OK'));
 };
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
