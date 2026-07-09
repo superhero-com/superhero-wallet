@@ -45,23 +45,32 @@ const loadSerializerModule = () => {
   return serializerModulePromise;
 };
 
-let serializer: SerializerV3Instance;
+// Memoises the whole init — including schema registration — as a single
+// promise. Guarding on the resolved `serializer` value instead left a window,
+// while the lazy chunk above is loading, where two concurrent callers both
+// ran `SerializerV3.addSchema` and the second threw SCHEMA_ALREADY_EXISTS.
+let serializerPromise: Promise<SerializerV3Instance> | undefined;
 
 export function useAirGap() {
   async function getSerializer(): Promise<SerializerV3Instance> {
-    if (!serializer) {
-      const [{ AeternityModule }, { SerializerV3 }, { MainProtocolSymbols }] = await Promise.all([
-        loadAeternityModule(),
-        loadSerializerModule(),
-        loadCoinLib(),
-      ]);
-      const serializerV3Companion = await new AeternityModule().createV3SerializerCompanion();
-      serializerV3Companion.schemas.forEach((schema) => {
-        SerializerV3.addSchema(schema.type, schema.schema, MainProtocolSymbols.AE);
-      });
-      serializer = SerializerV3.getInstance();
+    if (!serializerPromise) {
+      serializerPromise = (async () => {
+        const [{ AeternityModule }, { SerializerV3 }, { MainProtocolSymbols }] = await Promise.all([
+          loadAeternityModule(),
+          loadSerializerModule(),
+          loadCoinLib(),
+        ]);
+        const serializerV3Companion = await new AeternityModule().createV3SerializerCompanion();
+        serializerV3Companion.schemas.forEach((schema) => {
+          SerializerV3.addSchema(schema.type, schema.schema, MainProtocolSymbols.AE);
+        });
+        return SerializerV3.getInstance();
+      })();
+      // Don't cache a rejected init — clear it so a later call can retry
+      // instead of returning the same failed promise for the rest of the session.
+      serializerPromise.catch(() => { serializerPromise = undefined; });
     }
-    return serializer;
+    return serializerPromise;
   }
   /**
    * Encodes an array of IACMessageDefinitionObjectV3 objects into a UR string.
