@@ -139,28 +139,27 @@ export default defineConfig(({ mode }) => {
     plugins.push(copyWebPlugin());
   }
 
+  // Extension builds run 4 separate `vite build` passes (html/sw/inject/inpage);
+  // only 'html' has the chunk graph worth analyzing — the others would just
+  // overwrite the same output file with a near-empty tree.
+  const canAnalyzeThisStep = !isExtension || BUILD_STEP === 'html';
+  const pushVisualizer = (filename: string) => plugins.push(
+    visualizer({
+      filename: r(filename),
+      template: 'treemap',
+      gzipSize: true,
+      brotliSize: true,
+    }) as PluginOption,
+  );
+
   // Temporary: `BUNDLE_ANALYZE=true` emits a treemap for any build (web included).
-  if (parseBool(process.env.BUNDLE_ANALYZE)) {
-    plugins.push(
-      visualizer({
-        filename: r('artifacts/bundle-stats.html'),
-        template: 'treemap',
-        gzipSize: true,
-        brotliSize: true,
-      }) as PluginOption,
-    );
+  if (canAnalyzeThisStep && parseBool(process.env.BUNDLE_ANALYZE)) {
+    pushVisualizer('artifacts/bundle-stats.html');
   }
 
   // Emit a bundle treemap + raw stats JSON for review/provenance builds.
-  if (REVIEW_BUILD && isExtension && BUILD_STEP === 'html') {
-    plugins.push(
-      visualizer({
-        filename: r('artifacts/review/bundle-stats.html'),
-        template: 'treemap',
-        gzipSize: true,
-        brotliSize: true,
-      }) as PluginOption,
-    );
+  if (canAnalyzeThisStep && REVIEW_BUILD && isExtension) {
+    pushVisualizer('artifacts/review/bundle-stats.html');
   }
 
   // Build inputs / output naming.
