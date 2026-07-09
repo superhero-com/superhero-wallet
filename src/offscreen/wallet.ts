@@ -16,10 +16,11 @@ import {
   useNetworks,
 } from '@/composables';
 import { setSessionTimeout } from '@/background/bgPopupHandler';
+import browser from 'webextension-polyfill';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 
-window.browser = require('webextension-polyfill');
+window.browser = browser;
 
 let isAeSdkBlocked = false;
 let connectionsQueue: Runtime.Port[] = [];

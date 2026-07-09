@@ -58,7 +58,7 @@
           v-for="link in invites"
           v-bind="link ?? null"
           :key="link.secretKey.toString()"
-          @loading="(val) => setLoaderVisible(val)"
+          @loading="setLoaderVisible"
         />
       </div>
     </div>

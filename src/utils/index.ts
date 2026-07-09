@@ -1,4 +1,5 @@
 export * from './avatar';
+export * from './dappIcons';
 export * from './common';
 export * from './callbackUrl';
 export * from './formatters';

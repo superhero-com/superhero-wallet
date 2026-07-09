@@ -1,12 +1,7 @@
 @use 'variables';
 
-@import '~@fontsource/ibm-plex-sans/300.css';
-@import '~@fontsource/ibm-plex-sans/400.css';
-@import '~@fontsource/ibm-plex-sans/400-italic.css';
-@import '~@fontsource/ibm-plex-sans/500.css';
-@import '~@fontsource/ibm-plex-sans/600.css';
-
-@import '~@fontsource/ibm-plex-mono/500.css';
+// Font face declarations are imported once from the JS entry (see src/popup/popup.ts)
+// instead of here, to avoid duplicating the @font-face CSS into every component.
 
 /**
  * Sans Serif

@@ -1,5 +1,4 @@
 import { mount } from '@vue/test-utils';
-import { expect, describe, it } from '@jest/globals';
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
 
@@ -8,9 +7,9 @@ import ConnectBase from '@/popup/pages/Popups/ConnectBase.vue';
 import { usePopupProps, useAccounts } from '@/composables';
 import { PROTOCOLS } from '@/constants';
 
-jest.mock('@/composables', () => ({
-  usePopupProps: jest.fn(),
-  useAccounts: jest.fn(),
+vi.mock('@/composables', () => ({
+  usePopupProps: vi.fn(),
+  useAccounts: vi.fn(),
 }));
 
 const i18n = createI18n({
@@ -21,29 +20,29 @@ const i18n = createI18n({
 
 function mountConnectWithPopupProps(popupProps: any = {}) {
   // @ts-ignore
-  (usePopupProps as jest.Mock).mockReturnValue({
+  (usePopupProps as vi.Mock).mockReturnValue({
     popupProps: { value: popupProps },
   });
 
   // Stub accounts composable minimal surface
-  const getLastActiveProtocolAccount = jest.fn((protocol) => (
+  const getLastActiveProtocolAccount = vi.fn((protocol) => (
     protocol === PROTOCOLS.aeternity
       ? {
         protocol, address: 'ak_ae', idx: 0, globalIdx: 0,
       }
       : undefined
   ));
-  const getAccountsSelectOptionsByProtocol = jest.fn((protocol) => (
+  const getAccountsSelectOptionsByProtocol = vi.fn((protocol) => (
     protocol === PROTOCOLS.aeternity
       ? [{ text: 'Æternity account 1', value: `${PROTOCOLS.aeternity}:ak_ae` }]
       : []
   ));
   // @ts-ignore
-  (useAccounts as jest.Mock).mockReturnValue({
+  (useAccounts as vi.Mock).mockReturnValue({
     getLastActiveProtocolAccount,
     getAccountsSelectOptionsByProtocol,
-    getAccountByProtocolAndAddress: jest.fn((p, a) => ({ protocol: p, address: a })),
-    setActiveAccountByAddressAndProtocol: jest.fn(),
+    getAccountByProtocolAndAddress: vi.fn((p, a) => ({ protocol: p, address: a })),
+    setActiveAccountByAddressAndProtocol: vi.fn(),
   });
 
   return mount(Connect, {

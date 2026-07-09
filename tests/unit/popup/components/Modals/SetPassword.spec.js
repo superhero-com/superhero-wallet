@@ -1,28 +1,28 @@
 import { shallowMount } from '@vue/test-utils';
 import { ref as mockRef } from 'vue';
 
-const mockResolve = jest.fn();
-const mockReject = jest.fn();
-const mockHandleUnknownError = jest.fn();
-const mockGetOrCreateDefaultPasswordSecret = jest.fn();
+const mockResolve = vi.fn();
+const mockReject = vi.fn();
+const mockHandleUnknownError = vi.fn();
+const mockGetOrCreateDefaultPasswordSecret = vi.fn();
 const mockIsUsingDefaultPassword = mockRef(false);
 
-jest.mock('@/composables/auth', () => ({
+vi.mock('@/composables/auth', () => ({
   useAuth: () => ({
     isUsingDefaultPassword: mockIsUsingDefaultPassword,
   }),
 }));
 
-jest.mock('@/composables/defaultPassword', () => ({
+vi.mock('@/composables/defaultPassword', () => ({
   getOrCreateDefaultPasswordSecret: mockGetOrCreateDefaultPasswordSecret,
 }));
 
-jest.mock('@/utils', () => ({
+vi.mock('@/utils', () => ({
   handleUnknownError: mockHandleUnknownError,
 }));
 
 describe('SetPassword', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockResolve.mockClear();
     mockReject.mockClear();
     mockHandleUnknownError.mockClear();
@@ -34,7 +34,7 @@ describe('SetPassword', () => {
     mockGetOrCreateDefaultPasswordSecret.mockResolvedValue('default-secret');
 
     // eslint-disable-next-line global-require
-    const SetPassword = require('@/popup/components/Modals/SetPassword.vue').default;
+    const SetPassword = (await import('@/popup/components/Modals/SetPassword.vue')).default;
     const wrapper = shallowMount(SetPassword, {
       props: {
         resolve: mockResolve,

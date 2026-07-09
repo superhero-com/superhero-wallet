@@ -7,8 +7,8 @@ import {
 import { STUB_TX_BASE_64 } from '../../../src/constants/stubs';
 import { AE_DEX_URL } from '../../../src/protocols/aeternity/config';
 
-const mockCreate = jest.fn(() => true);
-const mockGetUrl = jest.fn((text) => text);
+const mockCreate = vi.fn(() => true);
+const mockGetUrl = vi.fn((text) => text);
 
 const testAeppUrl = 'http://test.com';
 

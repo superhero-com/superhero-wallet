@@ -3,11 +3,19 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    // `baseUrl` is deprecated in TS6 but kept on purpose: Cypress's webpack
+    // preprocessor resolves the `@/*` alias from baseUrl+paths, so removing it
+    // breaks e2e module resolution. `ignoreDeprecations` silences the warning.
     "baseUrl": ".",
     "jsx": "preserve",
     "target": "ES6",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    // `bundler` resolution is correct for the Vite app + vue-tsc. Cypress's
+    // ts-node compiles e2e files as CommonJS, which falls back to the now-
+    // deprecated `node10` resolution; under TypeScript 6 that is a hard error
+    // (TS5107). Acknowledging the deprecation keeps both toolchains working.
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["src/*"]
     },
@@ -15,6 +23,10 @@
     "strictFunctionTypes": false,
     "skipLibCheck": true,
     "sourceMap": true,
+    // Explicit rootDir: TypeScript 6 (TS5011) requires it when `outDir` is set
+    // during an emitting compile. vue-tsc runs with --noEmit so never hits this,
+    // but Cypress's webpack ts-loader emits and does. "." covers src/ + tests/.
+    "rootDir": ".",
     "typeRoots": [
       "node_modules/@types",
       "node_modules/@aeternity/aepp-sdk/src/typings"

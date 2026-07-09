@@ -1,9 +1,8 @@
-import { expect } from '@jest/globals';
 import { DogecoinAdapter } from '../../../src/protocols/dogecoin/libs/DogecoinAdapter';
 import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET, PROTOCOLS } from '../../../src/constants';
 
 // default activeNetwork is MAINNET here to reflect default initialization
-jest.mock('../../../src/composables/networks', () => ({
+vi.mock('../../../src/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {

@@ -20,7 +20,7 @@ import BigNumber from 'bignumber.js';
 import { useEthFeeCalculation } from '../../../../../src/protocols/ethereum/composables/ethFeeCalculation';
 import { PROTOCOLS } from '../../../../../src/constants';
 
-jest.mock('web3-eth', () => {
+vi.mock('web3-eth', () => {
   const impl = function Web3Eth() {
     return {
       calculateFeeData: async () => ({
@@ -39,13 +39,13 @@ jest.mock('web3-eth', () => {
   };
 });
 
-jest.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
+vi.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: { value: { nodeUrl: 'https://rpc.example' } },
   }),
 }));
 
-jest.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
+vi.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: { value: { nodeUrl: 'https://bsc.rpc.example' } },
   }),

@@ -1,6 +1,12 @@
 ext {
-    minSdkVersion = 23
-    compileSdkVersion = 35
+    // minSdk 24 (Android 7.0) is required by @capacitor/camera 8.2's native
+    // dependency io.ionic.libs:ioncamera-android. Drops Android 6.0 (API 23).
+    minSdkVersion = 24
+    // compileSdk 36 is required by androidx.core 1.17.0 (pulled in transitively
+    // by Capacitor 8.4). Only the compile target is bumped — targetSdk stays 35
+    // so we don't opt into Android 16 runtime behavior changes. AGP 8.11.2 (see
+    // build.gradle) supports compileSdk 36, so no Gradle/AGP upgrade is needed.
+    compileSdkVersion = 36
     targetSdkVersion = 35
     androidxActivityVersion = '1.8.0'
     androidxAppCompatVersion = '1.6.1'

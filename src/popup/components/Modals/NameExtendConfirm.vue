@@ -117,7 +117,7 @@ export default defineComponent({
   }
 
   .name {
-    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   .auto-extend {

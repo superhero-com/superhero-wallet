@@ -132,7 +132,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
           tag: Tag.SpendTx,
           senderId: multisigVault.gaAccountId as Encoded.AccountAddress,
           recipientId: account.address as Encoded.AccountAddress,
-          amount,
+          amount: amount.toFixed(),
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
         });
         callResult = (await proposeTx(
@@ -181,7 +181,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
           tag: Tag.SpendTx,
           senderId: account.address as Encoded.AccountAddress,
           recipientId: account.address as Encoded.AccountAddress,
-          amount,
+          amount: amount.toFixed(),
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           ttl: await aeSdk.getHeight({ cached: true }) + 3,
         }),

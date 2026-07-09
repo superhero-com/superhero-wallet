@@ -4,37 +4,37 @@ import { mount } from '@vue/test-utils';
 // Share a single adapter instance across component and assertions
 const mockAdapter = {
   coinContractId: 'SOL',
-  spendBatch: jest.fn(async (_amount, recipients) => (
+  spendBatch: vi.fn(async (_amount, recipients) => (
     [{ hash: 'sig-batch', recipients }]
   )),
-  transferTokenBatch: jest.fn(async (_amount, recipients) => (
+  transferTokenBatch: vi.fn(async (_amount, recipients) => (
     [{ hash: 'sig-batch-token', recipients }]
   )),
 };
 
-jest.mock('vue-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
-jest.mock('vue-i18n', () => ({
-  useI18n: jest.fn(() => ({
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
     t: () => 'locale-specific-text',
   })),
 }));
 
-jest.mock('@/lib/ProtocolAdapterFactory', () => ({
+vi.mock('@/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: {
-    getAdapter: jest.fn(() => mockAdapter),
+    getAdapter: vi.fn(() => mockAdapter),
   },
 }));
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAccounts: () => ({
     activeAccount: { value: { address: 'SENDER', protocol: 'solana', name: 'Sender' } },
     getLastActiveProtocolAccount: () => ({ address: 'SENDER' }),
   }),
   useLatestTransactionList: () => ({
-    addAccountPendingTransaction: jest.fn(),
+    addAccountPendingTransaction: vi.fn(),
   }),
   useUi: () => ({
     homeRouteName: { value: 'home' },
@@ -42,7 +42,7 @@ jest.mock('@/composables', () => ({
 }));
 
 // Import component AFTER mocks
-const TransferReview = require('@/protocols/solana/components/TransferReview.vue').default;
+const TransferReview = (await import('@/protocols/solana/components/TransferReview.vue')).default;
 
 describe('Solana TransferReview - batch', () => {
   it('uses spendBatch when multiple recipients and SOL is selected', async () => {
@@ -64,7 +64,7 @@ describe('Solana TransferReview - batch', () => {
 
     await wrapper.vm.submit();
 
-    const { ProtocolAdapterFactory } = require('@/lib/ProtocolAdapterFactory');
+    const { ProtocolAdapterFactory } = (await import('@/lib/ProtocolAdapterFactory'));
     const adapter = ProtocolAdapterFactory.getAdapter();
     expect(adapter.spendBatch).toHaveBeenCalledTimes(1);
     expect(adapter.spendBatch).toHaveBeenCalledWith(1, ['REC1', 'REC2'], { fromAccount: 'SENDER' });
@@ -89,7 +89,7 @@ describe('Solana TransferReview - batch', () => {
 
     await wrapper.vm.submit();
 
-    const { ProtocolAdapterFactory } = require('@/lib/ProtocolAdapterFactory');
+    const { ProtocolAdapterFactory } = (await import('@/lib/ProtocolAdapterFactory'));
     const adapter = ProtocolAdapterFactory.getAdapter();
     expect(adapter.transferTokenBatch).toHaveBeenCalledTimes(1);
     expect(adapter.transferTokenBatch).toHaveBeenCalledWith('5', ['REC1', 'REC2', 'REC3'], 'TOKEN', { fromAccount: 'SENDER' });

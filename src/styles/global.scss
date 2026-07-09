@@ -179,7 +179,7 @@ a {
 
 p {
   margin: 0;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 
   &:not(:last-of-type) {
     margin-bottom: 8px;
@@ -222,7 +222,7 @@ hr {
   margin-top: 15px;
   margin-bottom: 30px;
   text-align: left;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .text {
@@ -244,7 +244,7 @@ hr {
     display: inline-block;
     letter-spacing: 0.13em;
     color: rgba($color-white, 0.75);
-    word-break: break-word;
+    overflow-wrap: anywhere;
     transition: 0.1s;
 
     @at-root a &:hover {

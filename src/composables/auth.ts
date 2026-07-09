@@ -7,7 +7,7 @@ import {
   watch,
 } from 'vue';
 import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';

@@ -12,10 +12,11 @@ import {
   ETH_RPC_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
+import browser from 'webextension-polyfill';
 
 const connectedDapps: Record<string, any> = {};
 
-window.browser = require('webextension-polyfill');
+window.browser = browser;
 
 const runContentScript = () => {
   const sendToOffscreen = (method: BackgroundMethod, params: any) => new Promise((resolve) => {

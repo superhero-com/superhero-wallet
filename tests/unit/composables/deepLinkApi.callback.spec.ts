@@ -11,10 +11,10 @@
  *   5. user rejection on that modal prevents the redirect.
  */
 describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', () => {
-  const routerReplace = jest.fn();
-  const loggerWrite = jest.fn();
-  const windowOpen = jest.fn();
-  const openConfirmModalMock = jest.fn();
+  const routerReplace = vi.fn();
+  const loggerWrite = vi.fn();
+  const windowOpen = vi.fn();
+  const openConfirmModalMock = vi.fn();
   let confirmModalImpl: () => Promise<void>;
   let route: { query: Record<string, string> };
 
@@ -40,43 +40,43 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   };
 
   const setup = () => {
-    jest.resetModules();
+    vi.resetModules();
     routerReplace.mockClear();
     loggerWrite.mockClear();
     windowOpen.mockClear();
     openConfirmModalMock.mockClear();
 
-    jest.doMock('vue-router', () => ({
+    vi.doMock('vue-router', () => ({
       useRoute: () => route,
       RouteLocationNormalized: class {},
     }));
-    jest.doMock('@ionic/vue', () => ({
+    vi.doMock('@ionic/vue', () => ({
       useIonRouter: () => ({ replace: routerReplace }),
     }));
-    jest.doMock('@/popup/router/routeNames', () => ({ ROUTE_ACCOUNT: 'account' }));
-    jest.doMock('@/utils', () => ({
+    vi.doMock('@/popup/router/routeNames', () => ({ ROUTE_ACCOUNT: 'account' }));
+    vi.doMock('@/utils', () => ({
       checkIfSuperheroCallbackUrl: () => false,
       isTrustedCallbackUrl,
       validateCallbackUrl,
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       AGGREGATOR_URL: 'https://superhero.com',
       IS_IOS: false,
       IS_MOBILE_APP: false,
       IS_WEB: true,
       MODAL_TRANSFER_SEND: 'transfer-send',
     }));
-    jest.doMock('@/composables/modals', () => ({
+    vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
-        openModal: jest.fn(),
+        openModal: vi.fn(),
         openConfirmModal: openConfirmModalMock,
       }),
     }));
-    jest.doMock('@/lib/logger', () => ({
+    vi.doMock('@/lib/logger', () => ({
       __esModule: true,
       default: { write: loggerWrite },
     }));
-    jest.doMock('@/popup/plugins/i18n', () => ({
+    vi.doMock('@/popup/plugins/i18n', () => ({
       tg: (key: string, params: Record<string, string> = {}) => {
         if (key === 'pages.deepLink.invalidCallbackTitle') {
           return 'Localized invalid callback title';
@@ -97,7 +97,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     });
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     confirmModalImpl = () => Promise.resolve();
     openConfirmModalMock.mockImplementation(() => confirmModalImpl());
     route = { query: {} };
@@ -114,7 +114,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     const api = useDeepLinkApi();
     await api.openCallbackOrGoHome(true);
 
@@ -143,7 +143,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true);
 
     expect(loggerWrite).toHaveBeenCalledTimes(1);
@@ -155,7 +155,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true);
 
     expect(loggerWrite).toHaveBeenCalledTimes(1);
@@ -163,7 +163,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   });
 
   it('redirects to the trusted aggregator origin without a confirmation prompt', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     route = {
       query: { 'x-success': encodeURIComponent('https://superhero.com/callback?a=1') },
     };
@@ -176,21 +176,21 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     };
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     const openPromise = useDeepLinkApi().openCallbackOrGoHome(true);
     await openPromise;
 
     // `setTimeout(() => openCallbackUrl(...), 0)` on IS_WEB=true path
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(loggerWrite).not.toHaveBeenCalled();
     expect(routerReplace).toHaveBeenCalledWith({ name: 'account' });
     expect(windowOpen).toHaveBeenCalledWith('https://superhero.com/callback?a=1', '_self');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('requires user confirmation for non-trusted origins before redirecting', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     let resolveModal: (v?: unknown) => void;
     confirmModalImpl = () => new Promise((resolve) => { resolveModal = resolve; });
 
@@ -200,7 +200,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     const openPromise = useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
 
     // At this point the composable is awaiting the confirm modal. Nothing
@@ -215,18 +215,18 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     // User approves.
     resolveModal!();
     await openPromise;
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     // The `{signature}` template must be substituted (URI-encoded) into the
     // callback URL that ultimately reaches `window.open`.
     expect(windowOpen).toHaveBeenCalledTimes(1);
     const [forwardedUrl] = windowOpen.mock.calls[0];
     expect(forwardedUrl).toContain('https://attacker.example/?s=SIG123');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('cancels the redirect when the user rejects the external-site confirmation', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     confirmModalImpl = () => Promise.reject(new Error('rejected-by-user'));
 
     route = {
@@ -235,14 +235,14 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     // Rejection must route the user home and skip `window.open` entirely.
     expect(routerReplace).toHaveBeenCalledWith({ name: 'account' });
     expect(windowOpen).not.toHaveBeenCalled();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('redirects home without logging or opening when no x-success query is present', async () => {
@@ -250,7 +250,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true);
 
     expect(loggerWrite).not.toHaveBeenCalled();
@@ -263,7 +263,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     'https://wallet.superhero.com/success',
     'https://deep.nested.superhero.com/a/b',
   ])('treats %s as trusted and skips the confirm prompt', async (trustedUrl) => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     route = { query: { 'x-success': encodeURIComponent(trustedUrl) } };
     setup();
     confirmModalImpl = () => {
@@ -271,13 +271,13 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     };
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(loggerWrite).not.toHaveBeenCalled();
     expect(windowOpen).toHaveBeenCalledWith(trustedUrl, '_self');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it.each([
@@ -288,7 +288,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     'https://attacker.example/?r=https://superhero.com',
     'https://superhero.com.attacker.example/',
   ])('still prompts for spoof-shaped URL %s', async (spoofedUrl) => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     let confirmCalled = 0;
     confirmModalImpl = () => { confirmCalled += 1; return Promise.resolve(); };
 
@@ -296,16 +296,16 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(confirmCalled).toBe(1);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('warns before redirecting to http callbacks', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     confirmModalImpl = () => Promise.resolve();
     route = {
       query: { 'x-success': encodeURIComponent('http://superhero.com/?s={signature}') },
@@ -313,18 +313,18 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(loggerWrite).not.toHaveBeenCalled();
     expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
     expect(windowOpen).toHaveBeenCalledWith('http://superhero.com/?s=SIG123', '_self');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('warns before redirecting to localhost-style http callbacks', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     confirmModalImpl = () => Promise.resolve();
     route = {
       query: { 'x-success': encodeURIComponent('http://192.168.100.42:5173/callback?s={signature}') },
@@ -332,17 +332,17 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
     expect(windowOpen).toHaveBeenCalledWith('http://192.168.100.42:5173/callback?s=SIG123', '_self');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not double-decode already-decoded callback templates from router query', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     confirmModalImpl = () => Promise.resolve();
     route = {
       // Simulates Vue Router already decoding the outer x-success parameter.
@@ -351,14 +351,14 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     };
     setup();
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true, { signature: 'SIG123' });
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(windowOpen).toHaveBeenCalledWith(
       'http://localhost:3000/callback?payload=A%26B&sig=SIG123',
       '_self',
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('routes home without throwing when x-success contains malformed percent-encoding', async () => {
@@ -366,7 +366,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     // The call MUST resolve (not reject). Previously a URIError thrown from
     // `decodeURIComponent` would propagate out as an unhandled rejection
     // since every caller invokes this function fire-and-forget.
@@ -377,7 +377,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   });
 
   it('substitutes template params as literals even when keys contain regex-special chars', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     confirmModalImpl = () => Promise.resolve();
     route = {
       query: { 'x-success': encodeURIComponent('http://localhost:3000/callback?v={sig$}&name={name.with.dot}') },
@@ -385,18 +385,18 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     setup();
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     await useDeepLinkApi().openCallbackOrGoHome(true, {
       sig$: 'abc123',
       'name.with.dot': 'john/doe',
     });
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(windowOpen).toHaveBeenCalledWith(
       'http://localhost:3000/callback?v=abc123&name=john%2Fdoe',
       '_self',
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('awaits invalid-callback logger modal before redirecting home', async () => {
@@ -414,7 +414,7 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
     );
 
     // eslint-disable-next-line global-require
-    const { useDeepLinkApi } = require('@/composables/deepLinkApi');
+    const { useDeepLinkApi } = (await import('@/composables/deepLinkApi'));
     const openPromise = useDeepLinkApi().openCallbackOrGoHome(true);
 
     await Promise.resolve();

@@ -5,11 +5,11 @@ describe('AeternityAdapter token pagination', () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     global.fetch = originalFetch;
   });
 

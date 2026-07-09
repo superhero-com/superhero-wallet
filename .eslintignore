@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-zip
+dist-stage
+www
+coverage
+
+# Build artifacts (review builds, zip artifacts)
+artifacts
+
+# Vendored Cordova plugins (third-party)
+plugins
+
+# Capacitor native projects (generated web assets / build output)
+android
+ios
+
+# Generated / vendored assets
+*.min.js

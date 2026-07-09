@@ -8,48 +8,48 @@
 describe('defaultPassword', () => {
   const storeMock = new Map<string, any>();
   const walletStorageMock = {
-    get: jest.fn((key: string) => Promise.resolve(storeMock.get(key) ?? null)),
-    set: jest.fn((key: string, value: any) => {
+    get: vi.fn((key: string) => Promise.resolve(storeMock.get(key) ?? null)),
+    set: vi.fn((key: string, value: any) => {
       storeMock.set(key, value);
       return Promise.resolve();
     }),
-    remove: jest.fn((key: string) => {
+    remove: vi.fn((key: string) => {
       storeMock.delete(key);
       return Promise.resolve();
     }),
   };
 
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
     storeMock.clear();
     walletStorageMock.get.mockClear();
     walletStorageMock.set.mockClear();
     walletStorageMock.remove.mockClear();
 
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       IS_MOBILE_APP: false,
       STORAGE_KEYS: { defaultPasswordSecret: 'default-password-secret' },
     }));
-    jest.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
-    jest.doMock('@/lib/SecureMobileStorage', () => ({
+    vi.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
+    vi.doMock('@/lib/SecureMobileStorage', () => ({
       SecureMobileStorage: {
-        get: jest.fn(), set: jest.fn(), remove: jest.fn(),
+        get: vi.fn(), set: vi.fn(), remove: vi.fn(),
       },
     }));
-    jest.doMock('@/utils/crypto', () => ({
+    vi.doMock('@/utils/crypto', () => ({
       encodeBase64: (bytes: Uint8Array) => `b64(${bytes.length})`,
     }));
   });
 
-  it('exposes the legacy hardcoded password as a migration fallback only', () => {
+  it('exposes the legacy hardcoded password as a migration fallback only', async () => {
     // eslint-disable-next-line global-require
-    const { LEGACY_DEFAULT_PASSWORD } = require('@/composables/defaultPassword');
+    const { LEGACY_DEFAULT_PASSWORD } = (await import('@/composables/defaultPassword'));
     expect(LEGACY_DEFAULT_PASSWORD).toBe('testPassword123');
   });
 
   it('returns null when no secret has been stored', async () => {
     // eslint-disable-next-line global-require
-    const { getDefaultPasswordSecret } = require('@/composables/defaultPassword');
+    const { getDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
     await expect(getDefaultPasswordSecret()).resolves.toBeNull();
     expect(walletStorageMock.get).toHaveBeenCalledWith('default-password-secret');
   });
@@ -57,13 +57,13 @@ describe('defaultPassword', () => {
   it('treats empty-string storage values as "no secret stored"', async () => {
     storeMock.set('default-password-secret', '');
     // eslint-disable-next-line global-require
-    const { getDefaultPasswordSecret } = require('@/composables/defaultPassword');
+    const { getDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
     await expect(getDefaultPasswordSecret()).resolves.toBeNull();
   });
 
   it('getOrCreate generates a fresh 256-bit random secret and persists it on first call', async () => {
     // eslint-disable-next-line global-require
-    const { getOrCreateDefaultPasswordSecret } = require('@/composables/defaultPassword');
+    const { getOrCreateDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
 
     const secret = await getOrCreateDefaultPasswordSecret();
 
@@ -77,7 +77,7 @@ describe('defaultPassword', () => {
   it('getOrCreate returns the persisted secret on subsequent calls without re-writing', async () => {
     storeMock.set('default-password-secret', 'existing-secret-value');
     // eslint-disable-next-line global-require
-    const { getOrCreateDefaultPasswordSecret } = require('@/composables/defaultPassword');
+    const { getOrCreateDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
 
     const secret = await getOrCreateDefaultPasswordSecret();
 
@@ -88,7 +88,7 @@ describe('defaultPassword', () => {
   it('clearDefaultPasswordSecret removes the stored secret', async () => {
     storeMock.set('default-password-secret', 'some-value');
     // eslint-disable-next-line global-require
-    const { clearDefaultPasswordSecret, getDefaultPasswordSecret } = require('@/composables/defaultPassword');
+    const { clearDefaultPasswordSecret, getDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
 
     await clearDefaultPasswordSecret();
 
@@ -100,24 +100,24 @@ describe('defaultPassword', () => {
 describe('defaultPassword on mobile', () => {
   const secureStoreMock = new Map<string, any>();
   const secureMobileStorageMock = {
-    get: jest.fn((key: string) => Promise.resolve(secureStoreMock.get(key) ?? null)),
-    set: jest.fn((key: string, value: any) => {
+    get: vi.fn((key: string) => Promise.resolve(secureStoreMock.get(key) ?? null)),
+    set: vi.fn((key: string, value: any) => {
       secureStoreMock.set(key, value);
       return Promise.resolve();
     }),
-    remove: jest.fn((key: string) => {
+    remove: vi.fn((key: string) => {
       secureStoreMock.delete(key);
       return Promise.resolve();
     }),
   };
   const walletStorageMock = {
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
   };
 
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
     secureStoreMock.clear();
     secureMobileStorageMock.get.mockClear();
     secureMobileStorageMock.set.mockClear();
@@ -126,22 +126,22 @@ describe('defaultPassword on mobile', () => {
     walletStorageMock.set.mockClear();
     walletStorageMock.remove.mockClear();
 
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       IS_MOBILE_APP: true,
       STORAGE_KEYS: { defaultPasswordSecret: 'default-password-secret' },
     }));
-    jest.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
-    jest.doMock('@/lib/SecureMobileStorage', () => ({
+    vi.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
+    vi.doMock('@/lib/SecureMobileStorage', () => ({
       SecureMobileStorage: secureMobileStorageMock,
     }));
-    jest.doMock('@/utils/crypto', () => ({
+    vi.doMock('@/utils/crypto', () => ({
       encodeBase64: (bytes: Uint8Array) => `b64(${bytes.length})`,
     }));
   });
 
   it('uses SecureMobileStorage instead of WalletStorage', async () => {
     // eslint-disable-next-line global-require
-    const defaultPassword = require('@/composables/defaultPassword');
+    const defaultPassword = (await import('@/composables/defaultPassword'));
     const {
       clearDefaultPasswordSecret,
       getDefaultPasswordSecret,

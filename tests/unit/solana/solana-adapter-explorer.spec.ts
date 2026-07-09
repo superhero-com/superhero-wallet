@@ -1,7 +1,6 @@
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
-import { expect } from '@jest/globals';
 
-jest.mock('@/composables/networks', () => ({
+vi.mock('@/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {

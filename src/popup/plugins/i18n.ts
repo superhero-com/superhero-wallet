@@ -22,13 +22,12 @@ export const i18n = createI18n({
   messages: { en },
 });
 
-// @ts-expect-error type coming from VueI18n is excessively deep and possibly infinite
 export const tg = i18n.global.t;
 
 export const languages: Record<SupportedLanguage, ILanguageConfig> = {
   [SUPPORTED_LANGUAGES['en-US']]: {
     name: 'English',
-    getMessages: () => en,
+    getMessages: () => Promise.resolve(en),
   },
   [SUPPORTED_LANGUAGES['zh-CN']]: {
     name: '中文（简体，中国）',

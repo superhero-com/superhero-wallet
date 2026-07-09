@@ -291,7 +291,7 @@ export default defineComponent({
   .apps-browser-list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 8px;
+    gap: 8px;
     align-items: flex-start;
     padding-top: 8px;
   }

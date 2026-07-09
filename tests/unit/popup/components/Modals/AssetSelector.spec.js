@@ -4,9 +4,9 @@ import { mount } from '@vue/test-utils';
 import AssetSelector from '../../../../../src/popup/components/Modals/AssetSelector.vue';
 import { PROTOCOLS } from '../../../../../src/constants';
 
-const mockLoadAvailableTokens = jest.fn(async () => {});
-const mockLoadSingleToken = jest.fn(async () => {});
-const mockFetchAvailableTokensSearchPage = jest.fn(async (_searchTerm, searchBy) => ({
+const mockLoadAvailableTokens = vi.fn(async () => {});
+const mockLoadSingleToken = vi.fn(async () => {});
+const mockFetchAvailableTokensSearchPage = vi.fn(async (_searchTerm, searchBy) => ({
   data: searchBy === 'name'
     ? [{
       protocol: PROTOCOLS.aeternity,
@@ -45,14 +45,14 @@ const flushPromises = async () => {
   await nextTick();
 };
 
-jest.mock('vue-i18n', () => ({
-  useI18n: jest.fn(() => ({
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
     t: (key) => key,
   })),
 }));
 
-jest.mock('@/composables', () => ({
-  useAccountAssetsList: jest.fn(({ searchTerm }) => ({
+vi.mock('@/composables', () => ({
+  useAccountAssetsList: vi.fn(({ searchTerm }) => ({
     accountAssetsFiltered: {
       get value() {
         const term = searchTerm.value.trim().toLowerCase();
@@ -66,16 +66,16 @@ jest.mock('@/composables', () => ({
       },
     },
   })),
-  useFungibleTokens: jest.fn(() => ({
+  useFungibleTokens: vi.fn(() => ({
     loadAvailableTokens: mockLoadAvailableTokens,
     loadSingleToken: mockLoadSingleToken,
     isAvailableTokensLoading: { value: false },
   })),
 }));
 
-jest.mock('@/lib/ProtocolAdapterFactory', () => ({
+vi.mock('@/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: {
-    getAdapter: jest.fn(() => ({
+    getAdapter: vi.fn(() => ({
       fetchAvailableTokensSearchPage: mockFetchAvailableTokensSearchPage,
     })),
   },
@@ -117,22 +117,22 @@ const AssetListItemStub = {
 
 describe('AssetSelector', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   function mountComponent() {
     return mount(AssetSelector, {
       props: {
-        resolve: jest.fn(),
-        reject: jest.fn(),
+        resolve: vi.fn(),
+        reject: vi.fn(),
         protocol: PROTOCOLS.aeternity,
       },
       global: {
@@ -164,7 +164,7 @@ describe('AssetSelector', () => {
     ]);
 
     await wrapper.find('input').setValue('alp');
-    jest.advanceTimersByTime(250);
+    vi.advanceTimersByTime(250);
     await flushPromises();
 
     expect(mockFetchAvailableTokensSearchPage).toHaveBeenCalledTimes(2);

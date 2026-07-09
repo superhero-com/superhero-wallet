@@ -333,9 +333,10 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
 
     if (!enough) throw new Error('Insufficient balance');
 
-    psbt.addOutput({ address: recipient, value: amountInSatoshi });
+    // bitcoinjs-lib 7 represents satoshi amounts as bigint.
+    psbt.addOutput({ address: recipient, value: BigInt(amountInSatoshi) });
     const change = total - amountInSatoshi - feeInSatoshi;
-    if (change > 0) psbt.addOutput({ address: options.address, value: change });
+    if (change > 0) psbt.addOutput({ address: options.address, value: BigInt(change) });
 
     const signer = ECPairFactory(ecc).fromPrivateKey(Buffer.from(options.secretKey));
     for (let i = 0; i < psbt.inputCount; i += 1) psbt.signInput(i, signer);

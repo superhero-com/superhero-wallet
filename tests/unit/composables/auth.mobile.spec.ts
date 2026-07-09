@@ -2,22 +2,22 @@
 import { ref, nextTick } from 'vue';
 
 describe('useAuth mobile biometric login', () => {
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
   });
 
   it('keeps the wallet locked when the biometric login prompt is dismissed', async () => {
     const mnemonicRef = ref('encrypted-mnemonic');
     const encryptionSaltRef = ref(null);
     const secureLoginTimeoutRef = ref(null);
-    const openBiometricLoginModal = jest.fn().mockRejectedValue(new Error('dismissed'));
+    const openBiometricLoginModal = vi.fn().mockRejectedValue(new Error('dismissed'));
 
-    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
-        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: true }),
+        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: true }),
       },
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
       IS_EXTENSION: false,
       IS_IOS: false,
@@ -30,37 +30,37 @@ describe('useAuth mobile biometric login', () => {
         secureLoginTimeout: 'secure-login-timeout',
       },
     }));
-    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
-    jest.doMock('@/lib/logger', () => ({
+    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    vi.doMock('@/lib/logger', () => ({
       __esModule: true,
-      default: { write: jest.fn() },
+      default: { write: vi.fn() },
     }));
-    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/composables/defaultPassword', () => ({
+    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/composables/defaultPassword', () => ({
       LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: jest.fn(),
-      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+      clearDefaultPasswordSecret: vi.fn(),
+      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
     }));
-    jest.doMock('@/composables/ui', () => ({
+    vi.doMock('@/composables/ui', () => ({
       useUi: () => ({
         isBiometricLoginEnabled: ref(true),
         isAppActive: ref(true),
-        setBiometricLoginEnabled: jest.fn(),
-        setLoaderVisible: jest.fn(),
+        setBiometricLoginEnabled: vi.fn(),
+        setLoaderVisible: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/modals', () => ({
+    vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
         openBiometricLoginModal,
-        openPasswordLoginModal: jest.fn(),
-        openEnableBiometricLoginModal: jest.fn(),
+        openPasswordLoginModal: vi.fn(),
+        openEnableBiometricLoginModal: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/storageRef', () => ({
+    vi.doMock('@/composables/storageRef', () => ({
       useStorageRef: (_initialState, key, options = {}) => {
         const byKey = {
           mnemonic: mnemonicRef,
@@ -71,7 +71,7 @@ describe('useAuth mobile biometric login', () => {
         return byKey[key] ?? ref(_initialState);
       },
     }));
-    jest.doMock('@/utils', () => ({
+    vi.doMock('@/utils', () => ({
       createCustomScopedComposable: (factory) => {
         let value;
         return () => {
@@ -79,27 +79,24 @@ describe('useAuth mobile biometric login', () => {
           return value;
         };
       },
-      decodeBase64: jest.fn(),
-      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
-      decryptedComputed: jest.fn(() => ref('1000')),
-      encodeBase64: jest.fn(),
-      encrypt: jest.fn(),
+      decodeBase64: vi.fn(),
+      decrypt: vi.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: vi.fn(() => ref('1000')),
+      encodeBase64: vi.fn(),
+      encrypt: vi.fn(),
       excludeFalsy: Boolean,
-      generateEncryptionKey: jest.fn(),
-      generateSalt: jest.fn(),
-      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue({}),
-      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
-      handleUnknownError: jest.fn(),
-      sessionEnd: jest.fn(),
-      sessionStart: jest.fn(),
-      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+      generateEncryptionKey: vi.fn(),
+      generateSalt: vi.fn(),
+      getOrCreateMobileEncryptionKey: vi.fn().mockResolvedValue({}),
+      getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
+      handleUnknownError: vi.fn(),
+      sessionEnd: vi.fn(),
+      sessionStart: vi.fn(),
+      watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    let auth;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      auth = require('@/composables/auth').useAuth();
-    });
+    vi.resetModules();
+    const auth = (await import('@/composables/auth')).useAuth();
 
     await auth.checkUserAuth();
     await nextTick();
@@ -113,7 +110,7 @@ describe('useAuth mobile biometric login', () => {
     const encryptionSaltRef = ref(null);
     const secureLoginTimeoutRef = ref(null);
     let rejectBiometricLogin: (error: Error) => void;
-    const openBiometricLoginModal = jest.fn(() => new Promise((_resolve, reject) => {
+    const openBiometricLoginModal = vi.fn(() => new Promise((_resolve, reject) => {
       rejectBiometricLogin = reject;
     }));
     const waitFor = (predicate: () => boolean): Promise<void> => (
@@ -123,12 +120,12 @@ describe('useAuth mobile biometric login', () => {
           .then(() => waitFor(predicate))
     );
 
-    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
-        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: true }),
+        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: true }),
       },
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
       IS_EXTENSION: false,
       IS_IOS: false,
@@ -141,37 +138,37 @@ describe('useAuth mobile biometric login', () => {
         secureLoginTimeout: 'secure-login-timeout',
       },
     }));
-    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
-    jest.doMock('@/lib/logger', () => ({
+    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    vi.doMock('@/lib/logger', () => ({
       __esModule: true,
-      default: { write: jest.fn() },
+      default: { write: vi.fn() },
     }));
-    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/composables/defaultPassword', () => ({
+    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/composables/defaultPassword', () => ({
       LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: jest.fn(),
-      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+      clearDefaultPasswordSecret: vi.fn(),
+      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
     }));
-    jest.doMock('@/composables/ui', () => ({
+    vi.doMock('@/composables/ui', () => ({
       useUi: () => ({
         isBiometricLoginEnabled: ref(true),
         isAppActive: ref(true),
-        setBiometricLoginEnabled: jest.fn(),
-        setLoaderVisible: jest.fn(),
+        setBiometricLoginEnabled: vi.fn(),
+        setLoaderVisible: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/modals', () => ({
+    vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
         openBiometricLoginModal,
-        openPasswordLoginModal: jest.fn(),
-        openEnableBiometricLoginModal: jest.fn(),
+        openPasswordLoginModal: vi.fn(),
+        openEnableBiometricLoginModal: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/storageRef', () => ({
+    vi.doMock('@/composables/storageRef', () => ({
       useStorageRef: (_initialState, key, options = {}) => {
         const byKey = {
           mnemonic: mnemonicRef,
@@ -182,7 +179,7 @@ describe('useAuth mobile biometric login', () => {
         return byKey[key] ?? ref(_initialState);
       },
     }));
-    jest.doMock('@/utils', () => ({
+    vi.doMock('@/utils', () => ({
       createCustomScopedComposable: (factory) => {
         let value;
         return () => {
@@ -190,31 +187,27 @@ describe('useAuth mobile biometric login', () => {
           return value;
         };
       },
-      decodeBase64: jest.fn(),
-      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
-      decryptedComputed: jest.fn(() => ref('1000')),
-      encodeBase64: jest.fn(),
-      encrypt: jest.fn(),
+      decodeBase64: vi.fn(),
+      decrypt: vi.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: vi.fn(() => ref('1000')),
+      encodeBase64: vi.fn(),
+      encrypt: vi.fn(),
       excludeFalsy: Boolean,
-      generateEncryptionKey: jest.fn(),
-      generateSalt: jest.fn(),
-      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue({}),
-      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
-      handleUnknownError: jest.fn(),
-      sessionEnd: jest.fn(),
-      sessionStart: jest.fn(),
-      watchUntilTruthy: jest.fn(async (source) => {
+      generateEncryptionKey: vi.fn(),
+      generateSalt: vi.fn(),
+      getOrCreateMobileEncryptionKey: vi.fn().mockResolvedValue({}),
+      getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
+      handleUnknownError: vi.fn(),
+      sessionEnd: vi.fn(),
+      sessionStart: vi.fn(),
+      watchUntilTruthy: vi.fn(async (source) => {
         const getValue = () => (typeof source === 'function' ? source() : source.value);
         await waitFor(() => !!getValue());
         return getValue();
       }),
     }));
 
-    let auth;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      auth = require('@/composables/auth').useAuth();
-    });
+    const auth = (await import('@/composables/auth')).useAuth();
 
     const firstAuthCheck = auth.checkUserAuth();
     await waitFor(() => openBiometricLoginModal.mock.calls.length > 0);
@@ -234,16 +227,16 @@ describe('useAuth mobile biometric login', () => {
     const encryptionSaltRef = ref(null);
     const secureLoginTimeoutRef = ref(null);
     const isBiometricLoginEnabled = ref(false);
-    const authenticate = jest.fn().mockResolvedValue(undefined);
-    const openBiometricLoginModal = jest.fn().mockResolvedValue(undefined);
+    const authenticate = vi.fn().mockResolvedValue(undefined);
+    const openBiometricLoginModal = vi.fn().mockResolvedValue(undefined);
 
-    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
         authenticate,
-        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: true }),
+        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: true }),
       },
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
       IS_EXTENSION: false,
       IS_IOS: false,
@@ -256,37 +249,37 @@ describe('useAuth mobile biometric login', () => {
         secureLoginTimeout: 'secure-login-timeout',
       },
     }));
-    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
-    jest.doMock('@/lib/logger', () => ({
+    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    vi.doMock('@/lib/logger', () => ({
       __esModule: true,
-      default: { write: jest.fn() },
+      default: { write: vi.fn() },
     }));
-    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/composables/defaultPassword', () => ({
+    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/composables/defaultPassword', () => ({
       LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: jest.fn(),
-      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+      clearDefaultPasswordSecret: vi.fn(),
+      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
     }));
-    jest.doMock('@/composables/ui', () => ({
+    vi.doMock('@/composables/ui', () => ({
       useUi: () => ({
         isBiometricLoginEnabled,
         isAppActive: ref(true),
-        setBiometricLoginEnabled: jest.fn(),
-        setLoaderVisible: jest.fn(),
+        setBiometricLoginEnabled: vi.fn(),
+        setLoaderVisible: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/modals', () => ({
+    vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
         openBiometricLoginModal,
-        openPasswordLoginModal: jest.fn(),
-        openEnableBiometricLoginModal: jest.fn(),
+        openPasswordLoginModal: vi.fn(),
+        openEnableBiometricLoginModal: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/storageRef', () => ({
+    vi.doMock('@/composables/storageRef', () => ({
       useStorageRef: (_initialState, key, options = {}) => {
         const byKey = {
           mnemonic: mnemonicRef,
@@ -297,7 +290,7 @@ describe('useAuth mobile biometric login', () => {
         return byKey[key] ?? ref(_initialState);
       },
     }));
-    jest.doMock('@/utils', () => ({
+    vi.doMock('@/utils', () => ({
       createCustomScopedComposable: (factory) => {
         let value;
         return () => {
@@ -305,27 +298,23 @@ describe('useAuth mobile biometric login', () => {
           return value;
         };
       },
-      decodeBase64: jest.fn(),
-      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
-      decryptedComputed: jest.fn(() => ref('1000')),
-      encodeBase64: jest.fn(),
-      encrypt: jest.fn(),
+      decodeBase64: vi.fn(),
+      decrypt: vi.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: vi.fn(() => ref('1000')),
+      encodeBase64: vi.fn(),
+      encrypt: vi.fn(),
       excludeFalsy: Boolean,
-      generateEncryptionKey: jest.fn(),
-      generateSalt: jest.fn(),
-      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue({}),
-      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
-      handleUnknownError: jest.fn(),
-      sessionEnd: jest.fn(),
-      sessionStart: jest.fn(),
-      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+      generateEncryptionKey: vi.fn(),
+      generateSalt: vi.fn(),
+      getOrCreateMobileEncryptionKey: vi.fn().mockResolvedValue({}),
+      getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
+      handleUnknownError: vi.fn(),
+      sessionEnd: vi.fn(),
+      sessionStart: vi.fn(),
+      watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    let auth;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      auth = require('@/composables/auth').useAuth();
-    });
+    const auth = (await import('@/composables/auth')).useAuth();
 
     await auth.checkUserAuth();
     expect(auth.isAuthenticated.value).toBe(true);
@@ -352,14 +341,14 @@ describe('useAuth mobile biometric login', () => {
     const secureLoginTimeoutRef = ref(null);
     const isBiometricLoginEnabled = ref(false);
     const isAppActive = ref(true);
-    const openBiometricLoginModal = jest.fn().mockResolvedValue(undefined);
+    const openBiometricLoginModal = vi.fn().mockResolvedValue(undefined);
 
-    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
-        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: true }),
+        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: true }),
       },
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
       IS_EXTENSION: false,
       IS_IOS: false,
@@ -372,37 +361,37 @@ describe('useAuth mobile biometric login', () => {
         secureLoginTimeout: 'secure-login-timeout',
       },
     }));
-    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
-    jest.doMock('@/lib/logger', () => ({
+    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    vi.doMock('@/lib/logger', () => ({
       __esModule: true,
-      default: { write: jest.fn() },
+      default: { write: vi.fn() },
     }));
-    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/composables/defaultPassword', () => ({
+    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/composables/defaultPassword', () => ({
       LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: jest.fn(),
-      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+      clearDefaultPasswordSecret: vi.fn(),
+      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
     }));
-    jest.doMock('@/composables/ui', () => ({
+    vi.doMock('@/composables/ui', () => ({
       useUi: () => ({
         isBiometricLoginEnabled,
         isAppActive,
-        setBiometricLoginEnabled: jest.fn(),
-        setLoaderVisible: jest.fn(),
+        setBiometricLoginEnabled: vi.fn(),
+        setLoaderVisible: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/modals', () => ({
+    vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
         openBiometricLoginModal,
-        openPasswordLoginModal: jest.fn(),
-        openEnableBiometricLoginModal: jest.fn(),
+        openPasswordLoginModal: vi.fn(),
+        openEnableBiometricLoginModal: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/storageRef', () => ({
+    vi.doMock('@/composables/storageRef', () => ({
       useStorageRef: (_initialState, key, options = {}) => {
         const byKey = {
           mnemonic: mnemonicRef,
@@ -413,7 +402,7 @@ describe('useAuth mobile biometric login', () => {
         return byKey[key] ?? ref(_initialState);
       },
     }));
-    jest.doMock('@/utils', () => ({
+    vi.doMock('@/utils', () => ({
       createCustomScopedComposable: (factory) => {
         let value;
         return () => {
@@ -421,36 +410,32 @@ describe('useAuth mobile biometric login', () => {
           return value;
         };
       },
-      decodeBase64: jest.fn(),
-      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
-      decryptedComputed: jest.fn(() => ref('1000')),
-      encodeBase64: jest.fn(),
-      encrypt: jest.fn(),
+      decodeBase64: vi.fn(),
+      decrypt: vi.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: vi.fn(() => ref('1000')),
+      encodeBase64: vi.fn(),
+      encrypt: vi.fn(),
       excludeFalsy: Boolean,
-      generateEncryptionKey: jest.fn(),
-      generateSalt: jest.fn(),
-      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue({}),
-      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
-      handleUnknownError: jest.fn(),
-      sessionEnd: jest.fn(),
-      sessionStart: jest.fn(),
-      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+      generateEncryptionKey: vi.fn(),
+      generateSalt: vi.fn(),
+      getOrCreateMobileEncryptionKey: vi.fn().mockResolvedValue({}),
+      getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
+      handleUnknownError: vi.fn(),
+      sessionEnd: vi.fn(),
+      sessionStart: vi.fn(),
+      watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      let auth;
-      jest.isolateModules(() => {
-        // eslint-disable-next-line global-require
-        auth = require('@/composables/auth').useAuth();
-      });
+      const auth = (await import('@/composables/auth')).useAuth();
 
       await auth.checkUserAuth();
       expect(auth.isAuthenticated.value).toBe(true);
 
       isAppActive.value = false;
       await nextTick();
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       isAppActive.value = true;
       await nextTick();
       await Promise.resolve();
@@ -458,7 +443,7 @@ describe('useAuth mobile biometric login', () => {
       expect(openBiometricLoginModal).not.toHaveBeenCalled();
       expect(auth.isAuthenticated.value).toBe(true);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -467,16 +452,16 @@ describe('useAuth mobile biometric login', () => {
     const encryptionSaltRef = ref(null);
     const secureLoginTimeoutRef = ref(null);
     const mobileKey = { type: 'mobile-key' };
-    const generateEncryptionKey = jest.fn();
-    const generateSalt = jest.fn();
-    const encrypt = jest.fn().mockResolvedValue('mobile-ciphertext');
+    const generateEncryptionKey = vi.fn();
+    const generateSalt = vi.fn();
+    const encrypt = vi.fn().mockResolvedValue('mobile-ciphertext');
 
-    jest.doMock('@aparajita/capacitor-biometric-auth', () => ({
+    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
-        checkBiometry: jest.fn().mockResolvedValue({ isAvailable: false }),
+        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: false }),
       },
     }));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/constants', () => ({
       AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
       IS_EXTENSION: false,
       IS_IOS: false,
@@ -489,37 +474,37 @@ describe('useAuth mobile biometric login', () => {
         secureLoginTimeout: 'secure-login-timeout',
       },
     }));
-    jest.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
-    jest.doMock('@/lib/logger', () => ({
+    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
+    vi.doMock('@/lib/logger', () => ({
       __esModule: true,
-      default: { write: jest.fn() },
+      default: { write: vi.fn() },
     }));
-    jest.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: jest.fn() }));
-    jest.doMock('@/composables/defaultPassword', () => ({
+    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
+    vi.doMock('@/composables/defaultPassword', () => ({
       LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: jest.fn(),
-      getDefaultPasswordSecret: jest.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: jest.fn().mockResolvedValue('secret'),
+      clearDefaultPasswordSecret: vi.fn(),
+      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
+      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
     }));
-    jest.doMock('@/composables/ui', () => ({
+    vi.doMock('@/composables/ui', () => ({
       useUi: () => ({
         isBiometricLoginEnabled: ref(false),
         isAppActive: ref(true),
-        setBiometricLoginEnabled: jest.fn(),
-        setLoaderVisible: jest.fn(),
+        setBiometricLoginEnabled: vi.fn(),
+        setLoaderVisible: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/modals', () => ({
+    vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
-        openBiometricLoginModal: jest.fn(),
-        openPasswordLoginModal: jest.fn(),
-        openEnableBiometricLoginModal: jest.fn(),
+        openBiometricLoginModal: vi.fn(),
+        openPasswordLoginModal: vi.fn(),
+        openEnableBiometricLoginModal: vi.fn(),
       }),
     }));
-    jest.doMock('@/composables/storageRef', () => ({
+    vi.doMock('@/composables/storageRef', () => ({
       useStorageRef: (_initialState, key, options = {}) => {
         const byKey = {
           mnemonic: mnemonicRef,
@@ -530,7 +515,7 @@ describe('useAuth mobile biometric login', () => {
         return byKey[key] ?? ref(_initialState);
       },
     }));
-    jest.doMock('@/utils', () => ({
+    vi.doMock('@/utils', () => ({
       createCustomScopedComposable: (factory) => {
         let value;
         return () => {
@@ -538,27 +523,23 @@ describe('useAuth mobile biometric login', () => {
           return value;
         };
       },
-      decodeBase64: jest.fn(),
-      decrypt: jest.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
-      decryptedComputed: jest.fn(() => ref('1000')),
-      encodeBase64: jest.fn(),
+      decodeBase64: vi.fn(),
+      decrypt: vi.fn().mockResolvedValue('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+      decryptedComputed: vi.fn(() => ref('1000')),
+      encodeBase64: vi.fn(),
       encrypt,
       excludeFalsy: Boolean,
       generateEncryptionKey,
       generateSalt,
-      getOrCreateMobileEncryptionKey: jest.fn().mockResolvedValue(mobileKey),
-      getSessionEncryptionKey: jest.fn().mockResolvedValue(null),
-      handleUnknownError: jest.fn(),
-      sessionEnd: jest.fn(),
-      sessionStart: jest.fn(),
-      watchUntilTruthy: jest.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
+      getOrCreateMobileEncryptionKey: vi.fn().mockResolvedValue(mobileKey),
+      getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
+      handleUnknownError: vi.fn(),
+      sessionEnd: vi.fn(),
+      sessionStart: vi.fn(),
+      watchUntilTruthy: vi.fn(async (source) => (typeof source === 'function' ? source() : source.value)),
     }));
 
-    let auth;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      auth = require('@/composables/auth').useAuth();
-    });
+    const auth = (await import('@/composables/auth')).useAuth();
 
     await Promise.resolve();
     await auth.setPassword('user-password', 'plain mobile mnemonic');

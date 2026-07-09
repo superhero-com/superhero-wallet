@@ -3,7 +3,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
+// archiver v8 is ESM and no longer exports a callable factory; use the
+// `ZipArchive` named export (`new ZipArchive(opts)`) instead of `archiver('zip', opts)`.
+const { ZipArchive } = require('archiver');
 const { execSync } = require('child_process');
 
 const DEST_DIR = [
@@ -36,13 +38,13 @@ const makeDestZipDirIfNotExists = () => {
 const buildZip = (src, dist, zipFilename) => {
   console.info(`Building ${zipFilename}...`);
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const stream = fs.createWriteStream(path.join(dist, zipFilename));
 
   return new Promise((resolve, reject) => {
     archive
       .directory(src, false)
-      .on('error', err => reject(err))
+      .on('error', (err) => reject(err))
       .pipe(stream);
 
     stream.on('close', () => resolve());
@@ -53,7 +55,7 @@ const buildZip = (src, dist, zipFilename) => {
 const buildCompositeZip = (entries, dist, zipFilename) => {
   console.info(`Building ${zipFilename}...`);
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const stream = fs.createWriteStream(path.join(dist, zipFilename));
 
   return new Promise((resolve, reject) => {
@@ -79,25 +81,26 @@ const runReviewBuildIfNeeded = () => {
     const hasDeps = fs.existsSync(path.join(reviewDir, 'dependencies.json'));
     const hasCommit = fs.existsSync(path.join(reviewDir, 'COMMIT_SHA.txt'));
     if (hasDeps && hasCommit) return; // already present
-  } catch (_) {}
+  } catch (_) {
+    // ignore — fall through and regenerate review artifacts
+  }
   console.info('Generating review artifacts...');
   execSync('npm run build:review:ff --silent', { stdio: 'inherit' });
 };
 
-const main = () => {
-  DEST_DIR.forEach((build) => {
-    const { name, version } = extractExtensionData();
+const main = async () => {
+  const { name, version } = extractExtensionData();
+
+  makeDestZipDirIfNotExists();
+
+  // Zip the release builds first — runReviewBuildIfNeeded() below rebuilds
+  // dist/extension/firefox in place, so it must not run until these reads finish.
+  await Promise.all(DEST_DIR.map((build) => {
     const zipFilename = `${name}-${build.name}-v${version}.zip`;
-
-    makeDestZipDirIfNotExists();
-
-    buildZip(build.dir, DEST_ZIP_DIR, zipFilename)
-      .then(() => console.info('OK'))
-      .catch(console.err);
-  });
+    return buildZip(build.dir, DEST_ZIP_DIR, zipFilename).then(() => console.info('OK'));
+  }));
 
   // Build source + provenance bundle for review/release
-  const { name, version } = extractExtensionData();
   runReviewBuildIfNeeded();
 
   const sourceEntries = [
@@ -111,10 +114,11 @@ const main = () => {
     { type: 'dir', src: path.join(__dirname, '../tests'), dest: 'tests' },
     { type: 'file', src: path.join(__dirname, '../package.json'), dest: 'package.json' },
     { type: 'file', src: path.join(__dirname, '../package-lock.json'), dest: 'package-lock.json' },
-    { type: 'file', src: path.join(__dirname, '../vue.config.js'), dest: 'vue.config.js' },
-    { type: 'file', src: path.join(__dirname, '../babel.config.js'), dest: 'babel.config.js' },
+    { type: 'dir', src: path.join(__dirname, '../build'), dest: 'build' },
+    { type: 'file', src: path.join(__dirname, '../vite.config.mts'), dest: 'vite.config.mts' },
+    { type: 'file', src: path.join(__dirname, '../vitest.config.ts'), dest: 'vitest.config.ts' },
+    { type: 'file', src: path.join(__dirname, '../index.html'), dest: 'index.html' },
     { type: 'file', src: path.join(__dirname, '../tsconfig.json'), dest: 'tsconfig.json' },
-    { type: 'file', src: path.join(__dirname, '../jest.config.js'), dest: 'jest.config.js' },
     { type: 'file', src: path.join(__dirname, '../cypress.config.js'), dest: 'cypress.config.js' },
     { type: 'file', src: path.join(__dirname, '../capacitor.config.ts'), dest: 'capacitor.config.ts' },
     { type: 'file', src: path.join(__dirname, '../ionic.config.json'), dest: 'ionic.config.json' },
@@ -125,10 +129,10 @@ const main = () => {
   ];
 
   const sourceZip = `${name}-source-with-provenance-v${version}.zip`;
-  makeDestZipDirIfNotExists();
-  buildCompositeZip(sourceEntries, DEST_ZIP_DIR, sourceZip)
-    .then(() => console.info('OK'))
-    .catch(console.err);
+  await buildCompositeZip(sourceEntries, DEST_ZIP_DIR, sourceZip).then(() => console.info('OK'));
 };
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

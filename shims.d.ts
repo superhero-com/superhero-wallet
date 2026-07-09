@@ -1,11 +1,26 @@
+/// <reference types="vite/client" />
+
 /**
  * Declaration for SVG files imported as Vue components.
  */
 declare module '*.svg?vue-component' {
-  import Vue, { VueConstructor } from 'vue';
+  import type { DefineComponent } from 'vue';
 
-  const content: VueConstructor<Vue>;
+  const content: DefineComponent<{}, {}, any>;
   export default content;
+}
+
+/**
+ * Declaration for SVG (and other assets) imported as a URL string.
+ */
+declare module '*.svg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.svg?url' {
+  const src: string;
+  export default src;
 }
 
 /**

@@ -1,8 +1,7 @@
-import { expect, jest } from '@jest/globals';
 import { DogecoinAdapter } from '../../../src/protocols/dogecoin/libs/DogecoinAdapter';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '../../../src/constants';
 
-jest.mock('../../../src/composables/networks', () => ({
+vi.mock('../../../src/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {
@@ -19,7 +18,7 @@ describe('DogecoinAdapter - balance and usage checks', () => {
   const adapter = new DogecoinAdapter();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('fetches balance from node and converts to DOGE', async () => {
@@ -28,7 +27,7 @@ describe('DogecoinAdapter - balance and usage checks', () => {
       mempool_stats: { funded_txo_sum: 200_000_000, spent_txo_sum: 100_000_000 },
     });
     // @ts-ignore - mock global
-    global.fetch = jest.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
     // fetchJson uses global.fetch under the hood in this codebase
 
     const bal = await adapter.fetchBalance('DAddress');
@@ -38,7 +37,7 @@ describe('DogecoinAdapter - balance and usage checks', () => {
   it('checks isAccountUsed by tx_count', async () => {
     const json = async () => ({ chain_stats: { tx_count: 2 } });
     // @ts-ignore - mock global
-    global.fetch = jest.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
 
     const used = await adapter.isAccountUsed('DAddress');
     expect(used).toBe(true);
@@ -46,7 +45,7 @@ describe('DogecoinAdapter - balance and usage checks', () => {
 
   it('isAccountUsed returns false on error', async () => {
     // @ts-ignore - mock global
-    global.fetch = jest.fn(() => Promise.reject(new Error('network error')));
+    global.fetch = vi.fn(() => Promise.reject(new Error('network error')));
     const used = await adapter.isAccountUsed('DAddress');
     expect(used).toBe(false);
   });
