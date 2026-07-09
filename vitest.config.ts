@@ -2,18 +2,21 @@ import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
+import { sharedAlias } from './build/sharedAlias';
+
 const r = (...p: string[]) => path.resolve(process.cwd(), ...p);
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: [
-      // SVGs imported as Vue components resolve to an empty component in tests.
-      // The whole id must be matched so it is fully replaced (not just the suffix).
-      { find: /^.+\.svg\?(?:vue-component|component)$/, replacement: r('config/jest/EmptySvg.vue') },
+      // SVGs imported as Vue components (`?vue-component`, see build/plugins.ts)
+      // resolve to an empty component in tests. The whole id must be matched
+      // so it is fully replaced (not just the suffix).
+      { find: /^.+\.svg\?vue-component$/, replacement: r('config/vitest/EmptySvg.vue') },
       { find: '@ledgerhq/devices/hid-framing', replacement: r('node_modules/@ledgerhq/devices/lib/hid-framing') },
-      { find: '@', replacement: r('src') },
-      { find: 'lodash', replacement: 'lodash-es' },
+      { find: '@', replacement: sharedAlias['@'] },
+      { find: 'lodash', replacement: sharedAlias.lodash },
     ],
   },
   test: {

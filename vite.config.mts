@@ -11,6 +11,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { getDefine, type Platform } from './build/env';
+import { sharedAlias } from './build/sharedAlias';
 import { manifestPlugin } from './build/manifest-plugin';
 import {
   svgVueComponentAlias,
@@ -181,8 +182,7 @@ export default defineConfig(({ mode }) => {
     publicDir: isExtension ? false : 'public',
     resolve: {
       alias: {
-        '@': r('src'),
-        lodash: 'lodash-es',
+        ...sharedAlias,
         'core-js-pure': 'core-js',
         vm: r('build/empty.js'),
       },

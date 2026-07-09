@@ -10,13 +10,6 @@ declare module '*.svg?vue-component' {
   export default content;
 }
 
-declare module '*.svg?component' {
-  import type { DefineComponent } from 'vue';
-
-  const content: DefineComponent<{}, {}, any>;
-  export default content;
-}
-
 /**
  * Declaration for SVG (and other assets) imported as a URL string.
  */
