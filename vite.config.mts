@@ -51,6 +51,11 @@ export default defineConfig(({ mode }) => {
   // Whether this build step produces a single self-contained IIFE bundle.
   const isSingleFileStep = isExtension && (BUILD_STEP === 'sw' || BUILD_STEP === 'inject' || BUILD_STEP === 'inpage');
 
+  // Set by the watch-mode orchestrator (scripts/build-extension.mjs) on the
+  // 'html' step's own watcher, once a one-off bootstrap build has already
+  // populated outDir — wiping it again would race the other steps' watchers.
+  const skipEmptyOutDir = parseBool(process.env.SKIP_EMPTY_OUT_DIR);
+
   // Maps a single-file build step to its [outputName, entryFile]. The output
   // name controls the emitted filename (js/<name>.js) — the SW must be
   // js/background.js to match the manifest.
@@ -210,7 +215,7 @@ export default defineConfig(({ mode }) => {
       outDir,
       target: 'es2022',
       sourcemap: isDev,
-      emptyOutDir: !isSingleFileStep,
+      emptyOutDir: !isSingleFileStep && !skipEmptyOutDir,
       assetsInlineLimit: 4096,
       modulePreload: isExtension ? false : undefined,
       commonjsOptions: { transformMixedEsModules: true },

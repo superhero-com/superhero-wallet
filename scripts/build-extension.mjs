@@ -19,7 +19,7 @@
  * Usage: node scripts/build-extension.mjs <chrome|firefox> [--watch]
  */
 
-import { spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 
 const browser = process.argv[2];
 const watch = process.argv.includes('--watch');
@@ -41,21 +41,75 @@ const steps = isFirefox
   ? ['html', 'inject', 'inpage']
   : ['html', 'sw', 'inject', 'inpage'];
 
-function runStep(step) {
-  console.info(`\n[build-extension:${browser}] step "${step}"...`);
+// Set only when we intentionally kill the watch children on shutdown, so their
+// signal-terminated exit (code === null) is treated as a clean stop rather than
+// a failure. Outside shutdown, a null exit code means the child was killed by a
+// signal (OOM, segfault) and must fail the build.
+let shuttingDown = false;
+
+/** Spawns a single `vite build` pass; returns the child plus a promise that
+ * settles when it exits (which, in watch mode, is only on kill/crash). */
+function runStep(step, { watch: stepWatch = false, skipEmptyOutDir = false } = {}) {
+  console.info(`\n[build-extension:${browser}] step "${step}"${stepWatch ? ' (watching)' : ''}...`);
   const args = ['vite', 'build'];
-  if (watch) args.push('--watch');
-  const result = spawnSync('npx', args, {
+  if (stepWatch) args.push('--watch');
+  const child = spawn('npx', args, {
     stdio: 'inherit',
     shell: true,
-    env: { ...baseEnv, BUILD_STEP: step },
+    env: {
+      ...baseEnv,
+      BUILD_STEP: step,
+      SKIP_EMPTY_OUT_DIR: skipEmptyOutDir ? 'true' : '',
+    },
   });
-  if (result.status !== 0) {
-    console.error(`[build-extension:${browser}] step "${step}" failed.`);
-    process.exit(result.status ?? 1);
-  }
+  const done = new Promise((resolve, reject) => {
+    child.on('exit', (code) => {
+      if (code === 0 || shuttingDown) resolve();
+      else reject(new Error(`[build-extension:${browser}] step "${step}" failed (exit ${code}).`));
+    });
+  });
+  return { child, done };
 }
 
-steps.forEach(runStep);
+async function main() {
+  // 'html' always runs first, one-off and non-watching, so the outDir
+  // (manifest, popup HTML, static assets) is fully populated before any
+  // other step — including html's own watcher — starts writing into it.
+  await runStep('html').done;
 
-console.info(`\n[build-extension:${browser}] done.`);
+  const rest = steps.filter((step) => step !== 'html');
+
+  if (!watch) {
+    // The remaining steps write disjoint single-file bundles and don't
+    // touch the outDir's other contents, so they can run concurrently.
+    await Promise.all(rest.map((step) => runStep(step).done));
+    console.info(`\n[build-extension:${browser}] done.`);
+    return;
+  }
+
+  // Watch mode: keep every step running concurrently for the rest of the
+  // session. 'html' skips its usual emptyOutDir here — the bootstrap build
+  // above already populated the dir, and the other steps may already be
+  // writing into it by the time html's watcher rebuilds.
+  const running = [
+    runStep('html', { watch: true, skipEmptyOutDir: true }),
+    ...rest.map((step) => runStep(step, { watch: true })),
+  ];
+
+  const stop = (code) => {
+    shuttingDown = true;
+    running.forEach(({ child }) => child.kill());
+    process.exit(code);
+  };
+  process.on('SIGINT', () => stop(0));
+  process.on('SIGTERM', () => stop(0));
+  running.forEach(({ done }) => done.catch((err) => {
+    console.error(err.message);
+    stop(1);
+  }));
+}
+
+main().catch((err) => {
+  console.error(err.message);
+  process.exit(1);
+});
