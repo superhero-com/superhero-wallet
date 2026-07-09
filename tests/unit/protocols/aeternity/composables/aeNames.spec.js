@@ -1,5 +1,45 @@
 import { ref } from 'vue';
 
+/**
+ * `useAeNames` is exercised against REAL `useStorageRef`/`localStorage`,
+ * `useNetworks`, `ProtocolAdapterFactory` (real adapter, `fetchPendingTransactions`
+ * spied per test - the actual network boundary), `@/protocols/aeternity/config`
+ * (plain constants), `@/protocols/aeternity/helpers`'s `isInsufficientBalanceError`
+ * (simple predicate), `@/protocols/aeternity/composables/aeNetworkSettings` and
+ * `aeTippingBackend` (both just route through the mocked `fetchJson` below), and
+ * real `tg()` i18n.
+ *
+ * Still mocked, since they're either the aeternity SDK/network boundary itself or
+ * genuinely heavy to run for real:
+ *   - `@aeternity/aepp-sdk`'s `Name` class (constructs/signs real transactions)
+ *   - `fetchAllPages`/`fetchJson` (`@/utils`) - the actual HTTP boundary
+ *   - `useAccounts`/`useAeSdk`/`useAuth`/`useModals`/`useTopHeaderData` - mocked by
+ *     their specific module path (never the `@/composables` barrel, which real
+ *     composables like `accounts.ts` also import `useAuth` from - overriding the
+ *     barrel would leak these fakes into code that isn't under test). Precise
+ *     control over "who is logged in"/node connection/current block height is
+ *     central to these test scenarios, not incidental
+ *   - `decryptedComputed` (`@/utils`) - kept as a pass-through; the AES-GCM round trip
+ *     for preclaimed names has its own dedicated coverage elsewhere and isn't the
+ *     focus of these tests
+ *   - `@/lib/logger` - side-effecting telemetry, plus it dodges `Logger.ts`'s own
+ *     direct (non-barrel) imports of `useUi`/`useModals`
+ *   - `AeAccountHdWallet` - real HD-wallet signing needs a real mnemonic seed
+ *   - `useAeMiddleware` - a real GraphQL/swagger client built from a fetched spec;
+ *     too heavy for what these tests need (deterministic `getNames()` results)
+ */
+
+/**
+ * `pendingAutoExtendTxs`/`pendingNameTransferTxs` are real `useStorageRef`s: a
+ * mutation (e.g. `upsertPendingNameTransferTx`) updates `.value` synchronously, but
+ * persisting that back to `localStorage` happens via the ref's own internal deep
+ * watcher, which settles a tick later. Reading raw storage back for assertions
+ * needs to wait for that.
+ */
+function flushAsync() {
+  return new Promise((resolve) => { setTimeout(resolve, 0); });
+}
+
 const createTestContext = async ({
   topBlockHeight = 100,
   preclaimedNames = {},
@@ -7,10 +47,9 @@ const createTestContext = async ({
   pendingNameTransferTxs = {},
 } = {}) => {
   vi.resetModules();
+  localStorage.clear();
 
-  const storage = new Map();
   const openDefaultModal = vi.fn();
-  const handleUnknownError = vi.fn();
   const fetchAllPages = vi.fn().mockResolvedValue([]);
   const fetchJson = vi.fn().mockResolvedValue({});
   const fetchPendingTransactions = vi.fn().mockResolvedValue([]);
@@ -30,160 +69,131 @@ const createTestContext = async ({
     },
   };
 
-  storage.set('names-owned', ref([]));
-  storage.set('preclaimed-names', ref(
-    Object.keys(preclaimedNames).length ? JSON.stringify(preclaimedNames) : '{}',
-  ));
-  storage.set('pending-name-auto-extend-txs', ref(pendingAutoExtendTxs));
-  storage.set('pending-name-transfer-txs', ref(pendingNameTransferTxs));
-  storage.set('names-default', ref({}));
+  // All `vi.doMock` calls must be registered here, before `registerAdapters` is
+  // imported below - it transitively loads the real `@/composables` barrel (and
+  // everything in it, including `aeNames.ts` and its dependencies), so mocking
+  // afterwards would be too late for this module generation.
+  vi.doMock('@aeternity/aepp-sdk', async () => {
+    const actual = await vi.importActual('@aeternity/aepp-sdk');
+    return {
+      ...actual,
+      // Constructed via `new Name(...)`; Vitest 4 requires a constructable
+      // implementation (an arrow function is not a constructor).
+      Name: class {
+        constructor(name, context) {
+          this.name = name;
+          this.context = context;
+        }
 
-  vi.doMock('@aeternity/aepp-sdk', () => ({
-    Name: class {
-      constructor(name, context) {
-        this.name = name;
-        this.context = context;
-      }
+        extendTtl = nameExtendTtl;
 
-      extendTtl = nameExtendTtl;
+        update = nameUpdate;
 
-      update = nameUpdate;
+        preclaim = namePreclaim;
 
-      preclaim = namePreclaim;
+        claim = nameClaim;
 
-      claim = nameClaim;
+        getState = nameGetState;
 
-      getState = nameGetState;
+        transfer = nameTransfer;
+      },
+    };
+  });
 
-      transfer = nameTransfer;
-    },
-  }));
+  vi.doMock('@/utils', async () => {
+    const actual = await vi.importActual('@/utils');
+    return {
+      ...actual,
+      decryptedComputed: (_key, encryptedState) => encryptedState,
+      fetchAllPages,
+      fetchJson,
+    };
+  });
 
-  vi.doMock('@/utils', () => ({
-    decryptedComputed: vi.fn((_key, encryptedState) => encryptedState),
-    fetchAllPages,
-    fetchJson,
-    handleUnknownError,
-  }));
-
-  vi.doMock('@/composables', () => ({
-    useAccounts: vi.fn(() => ({
+  // Mocked by their specific module path, NOT the `@/composables` barrel: the barrel
+  // is imported (for real) by plenty of other real composables (e.g. `accounts.ts`
+  // itself imports `useAuth` from the barrel) - overriding the barrel would leak
+  // these incomplete fakes into code that isn't under test here. `useNetworks` and
+  // `useStorageRef` are deliberately left real (see the file-level comment above).
+  vi.doMock('@/composables/accounts', () => ({
+    useAccounts: () => ({
       aeAccounts: ref([{ address: 'ak_test' }]),
       activeAccount: ref({ address: 'ak_test' }),
-      isLocalAccountAddress: vi.fn(() => true),
-      getLastActiveProtocolAccount: vi.fn(() => ({ address: 'ak_test' })),
-    })),
-    useAeSdk: vi.fn(() => ({
+      isLocalAccountAddress: () => true,
+      getLastActiveProtocolAccount: () => ({ address: 'ak_test' }),
+    }),
+  }));
+  vi.doMock('@/composables/aeSdk', () => ({
+    useAeSdk: () => ({
       nodeNetworkId: ref('ae_testnet'),
       getAeSdk: vi.fn().mockResolvedValue(sdk),
-    })),
-    useAuth: vi.fn(() => ({
-      encryptionKey: ref('mock-encryption-key'),
-    })),
-    useModals: vi.fn(() => ({
-      openDefaultModal,
-    })),
-    useNetworks: vi.fn(() => ({
-      onNetworkChange: vi.fn(),
-    })),
-    useStorageRef: vi.fn((defaultValue, key) => {
-      if (!storage.has(key)) {
-        storage.set(key, ref(defaultValue));
-      }
-      return storage.get(key);
     }),
-    useTopHeaderData: vi.fn(() => ({
-      topBlockHeight: ref(topBlockHeight),
-    })),
-    useUi: vi.fn(() => ({
-      saveErrorLog: ref(false),
-    })),
   }));
-
-  vi.doMock('@/composables/ui', () => ({
-    useUi: vi.fn(() => ({
-      saveErrorLog: ref(false),
-    })),
+  vi.doMock('@/composables/auth', () => ({
+    useAuth: () => ({ encryptionKey: ref('irrelevant-key-decryptedComputed-is-a-passthrough') }),
   }));
-
   vi.doMock('@/composables/modals', () => ({
-    useModals: vi.fn(() => ({
-      openDefaultModal,
-    })),
+    useModals: () => ({ openDefaultModal }),
+  }));
+  vi.doMock('@/composables/topHeader', () => ({
+    useTopHeaderData: () => ({ topBlockHeight: ref(topBlockHeight) }),
   }));
 
-  vi.doMock('@/composables/composablesHelpers', () => ({
-    createPollingBasedOnMountedComponents: vi.fn(() => vi.fn()),
-  }));
-
-  vi.doMock('@/popup/plugins/i18n', () => ({
-    tg: vi.fn((key) => key),
-  }));
-
-  vi.doMock('@/lib/ProtocolAdapterFactory', () => ({
-    ProtocolAdapterFactory: {
-      getAdapter: vi.fn(() => ({
-        fetchPendingTransactions,
-      })),
-    },
+  vi.doMock('@/lib/logger', () => ({
+    __esModule: true,
+    default: { write: vi.fn() },
   }));
 
   vi.doMock('@/protocols/aeternity/libs/AeAccountHdWallet', () => ({
-    // Constructed via `new AeAccountHdWallet(...)`; Vitest 4 requires a
-    // constructable implementation (an arrow function is not a constructor).
     AeAccountHdWallet: vi.fn(function AeAccountHdWallet() {
       this.sign = vi.fn();
       this.signTransaction = vi.fn();
     }),
   }));
 
-  vi.doMock('@/protocols/aeternity/helpers', () => ({
-    isInsufficientBalanceError: vi.fn(() => false),
-  }));
-
-  vi.doMock('@/protocols/aeternity/config', () => ({
-    UPDATE_POINTER_ACTION: {
-      update: 'update',
-      extend: 'extend',
-      transfer: 'transfer',
-    },
-    AE_AENS_NAME_AUCTION_MAX_LENGTH: 12 + '.chain'.length,
-  }));
-
-  vi.doMock('@/protocols/aeternity/composables/aeNetworkSettings', () => ({
-    useAeNetworkSettings: vi.fn(() => ({
-      aeActiveNetworkSettings: ref({ backendUrl: 'https://example.test' }),
-    })),
-  }));
-
-  vi.doMock('@/protocols/aeternity/composables/aeTippingBackend', () => ({
-    useAeTippingBackend: vi.fn(() => ({
-      fetchCachedChainNames: vi.fn().mockResolvedValue(null),
-    })),
-  }));
-
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
-    useAeMiddleware: vi.fn(() => ({
+    useAeMiddleware: () => ({
       isMiddlewareReady: ref(false),
-      getMiddleware: vi.fn().mockResolvedValue({
-        getNames,
-      }),
+      getMiddleware: vi.fn().mockResolvedValue({ getNames }),
       fetchFromMiddlewareCamelCased: vi.fn(),
-    })),
+    }),
   }));
 
-  // eslint-disable-next-line global-require
-  const aeNamesModule = (await import('@/protocols/aeternity/composables/aeNames'));
+  // Seed real `localStorage` BEFORE `registerAdapters` (below) is imported.
+  // `AeternityAdapter` -> the aeternity composables barrel -> `aeTokenSales.ts`
+  // imports `useNetworks` from the `@/composables` barrel, which transitively
+  // (via `accountSelector.ts`) evaluates `aeNames.ts` itself - its module-level
+  // `useStorageRef`s call `storage.get()` (and settle) the moment that happens,
+  // not when this file later `import()`s `aeNames.ts` directly. Seeding has to
+  // happen before that first, incidental load, or it's too late.
+  const { WalletStorage } = await import('@/lib/WalletStorage');
+  const { STORAGE_KEYS } = await import('@/constants');
+  if (Object.keys(preclaimedNames).length) {
+    // `decryptedComputed` is a passthrough above, so the "encrypted" storage
+    // slot just holds the plain JSON string aeNames.ts expects to decode.
+    WalletStorage.set(STORAGE_KEYS.preclaimedNames, JSON.stringify(preclaimedNames));
+  }
+  WalletStorage.set(STORAGE_KEYS.pendingNameAutoExtendTxs, pendingAutoExtendTxs);
+  WalletStorage.set(STORAGE_KEYS.pendingNameTransferTxs, pendingNameTransferTxs);
+
+  await import('@/protocols/registerAdapters');
+
+  const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+  const adapter = ProtocolAdapterFactory.getAdapter('aeternity');
+  vi.spyOn(adapter, 'fetchPendingTransactions').mockImplementation(fetchPendingTransactions);
+
+  const aeNamesModule = await import('@/protocols/aeternity/composables/aeNames');
   const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+
+  // Let every storageRef finish restoring from localStorage before the test drives it.
+  await new Promise((resolve) => { setTimeout(resolve, 0); });
 
   return {
     aeNames,
     fetchPendingTransactions,
     fetchAllPages,
     sdk,
-    storage,
     openDefaultModal,
-    handleUnknownError,
     NAME_CLAIM_STATUS: aeNamesModule.NAME_CLAIM_STATUS,
     nameClaim,
     nameGetState,
@@ -191,6 +201,8 @@ const createTestContext = async ({
     nameTransfer,
     namePreclaim,
     nameUpdate,
+    getPendingAutoExtendTxs: () => WalletStorage.get(STORAGE_KEYS.pendingNameAutoExtendTxs),
+    getPendingNameTransferTxs: () => WalletStorage.get(STORAGE_KEYS.pendingNameTransferTxs),
   };
 };
 
@@ -462,7 +474,7 @@ describe('useAeNames auto-extend', () => {
       aeNames,
       fetchPendingTransactions,
       nameExtendTtl,
-      storage,
+      getPendingAutoExtendTxs,
     } = await createTestContext({ topBlockHeight: 100 });
     aeNames.ownedNames.value = [{
       name: pendingName,
@@ -486,7 +498,7 @@ describe('useAeNames auto-extend', () => {
     await aeNames.extendExpiringOwnedNames();
 
     expect(nameExtendTtl).not.toHaveBeenCalled();
-    expect(storage.get('pending-name-auto-extend-txs').value.ae_testnet[pendingName]).toMatchObject({
+    expect(getPendingAutoExtendTxs().ae_testnet[pendingName]).toMatchObject({
       txHash: pendingTxHash,
     });
   });
@@ -497,7 +509,7 @@ describe('useAeNames auto-extend', () => {
       aeNames,
       fetchPendingTransactions,
       nameExtendTtl,
-      storage,
+      getPendingAutoExtendTxs,
     } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
@@ -527,14 +539,14 @@ describe('useAeNames auto-extend', () => {
     await aeNames.extendExpiringOwnedNames();
 
     expect(nameExtendTtl).toHaveBeenCalledTimes(1);
-    expect(storage.get('pending-name-auto-extend-txs').value.ae_testnet[pendingName]).toMatchObject({
+    expect(getPendingAutoExtendTxs().ae_testnet[pendingName]).toMatchObject({
       txHash: 'th_retry',
     });
   });
 
   it('cleans stale pending auto-extend entries for non-expiring names', async () => {
     const pendingName = 'not-expiring.chain';
-    const { aeNames, storage } = await createTestContext({
+    const { aeNames, getPendingAutoExtendTxs } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
         ae_testnet: {
@@ -560,7 +572,7 @@ describe('useAeNames auto-extend', () => {
 
     await aeNames.extendExpiringOwnedNames();
 
-    expect(storage.get('pending-name-auto-extend-txs').value.ae_testnet).toBeUndefined();
+    expect(getPendingAutoExtendTxs().ae_testnet).toBeUndefined();
   });
 
   it('does not reject or resend when pending transaction lookup fails', async () => {
@@ -569,7 +581,7 @@ describe('useAeNames auto-extend', () => {
       aeNames,
       fetchPendingTransactions,
       nameExtendTtl,
-      storage,
+      getPendingAutoExtendTxs,
     } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
@@ -598,7 +610,7 @@ describe('useAeNames auto-extend', () => {
     await expect(aeNames.extendExpiringOwnedNames()).resolves.toBeUndefined();
 
     expect(nameExtendTtl).not.toHaveBeenCalled();
-    expect(storage.get('pending-name-auto-extend-txs').value.ae_testnet[pendingName]).toMatchObject({
+    expect(getPendingAutoExtendTxs().ae_testnet[pendingName]).toMatchObject({
       txHash: 'th_lookup_unknown',
     });
   });
@@ -646,7 +658,7 @@ describe('useAeNames auto-extend', () => {
       aeNames,
       fetchPendingTransactions,
       nameExtendTtl,
-      storage,
+      getPendingAutoExtendTxs,
     } = await createTestContext({
       topBlockHeight: 100,
       pendingAutoExtendTxs: {
@@ -675,7 +687,7 @@ describe('useAeNames auto-extend', () => {
 
     await aeNames.extendExpiringOwnedNames();
 
-    expect(storage.get('pending-name-auto-extend-txs').value.ae_testnet[pendingName]).toMatchObject({
+    expect(getPendingAutoExtendTxs().ae_testnet[pendingName]).toMatchObject({
       txHash: 'th_old_pending',
     });
   });
@@ -714,7 +726,7 @@ describe('useAeNames name transfers', () => {
     const {
       aeNames,
       nameTransfer,
-      storage,
+      getPendingNameTransferTxs,
     } = await createTestContext();
 
     await aeNames.updateNamePointer({
@@ -722,9 +734,10 @@ describe('useAeNames name transfers', () => {
       address: 'ak_recipient',
       type: 'transfer',
     });
+    await flushAsync();
 
     expect(nameTransfer).toHaveBeenCalledWith('ak_recipient', { waitMined: false });
-    expect(storage.get('pending-name-transfer-txs').value.ae_testnet['transfer.chain'])
+    expect(getPendingNameTransferTxs().ae_testnet['transfer.chain'])
       .toMatchObject({
         address: 'ak_test',
         name: 'transfer.chain',
@@ -780,7 +793,7 @@ describe('useAeNames name transfers', () => {
       aeNames,
       fetchAllPages,
       fetchPendingTransactions,
-      storage,
+      getPendingNameTransferTxs,
     } = await createTestContext({
       pendingNameTransferTxs: {
         ae_testnet: {
@@ -800,8 +813,9 @@ describe('useAeNames name transfers', () => {
       .mockResolvedValueOnce([]);
 
     await aeNames.updateOwnedNames();
+    await flushAsync();
 
-    expect(storage.get('pending-name-transfer-txs').value.ae_testnet).toBeUndefined();
+    expect(getPendingNameTransferTxs().ae_testnet).toBeUndefined();
     expect(aeNames.ownedNames.value[0]).toMatchObject({
       name: pendingName,
       pending: false,
