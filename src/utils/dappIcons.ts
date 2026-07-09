@@ -11,9 +11,13 @@
 // is `{}` and the call throws at module init — the guard keeps that import safe.
 let dappIcons: Record<string, string> = {};
 try {
+  // `?no-inline` keeps these out of the always-loaded main chunk as emitted
+  // files — without it, every icon under `assetsInlineLimit` (4096 bytes, and
+  // all of these are) gets base64-inlined into the eagerly-evaluated glob
+  // result, even though they're only used in the in-app browser views.
   dappIcons = import.meta.glob('@/icons/dapp/*', {
     eager: true,
-    query: '?url',
+    query: '?url&no-inline',
     import: 'default',
   }) as Record<string, string>;
 } catch {
