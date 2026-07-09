@@ -12,259 +12,147 @@
  * The fix wires `browser.storage.session.onChanged` as a second wake-up
  * source via `subscribeToSessionEncryptionKey`. This test asserts that
  * subscription is registered when running in the offscreen context and
- * that triggering the listener restarts the sync.
+ * that triggering the listener restarts the sync — using REAL crypto
+ * (`@/utils/crypto`) and REAL `useStorageRef`/`useUi`/`useModals`. The only
+ * thing mocked is `@/offscreen/popupHandler`'s `getSessionEncryptionKey`,
+ * the actual cross-context messaging boundary that can't run for real
+ * without a live background script, plus `@/constants` (to force the
+ * offscreen-tab flags jsdom has no real equivalent for) and `@/lib/logger`
+ * (side-effecting telemetry, irrelevant here).
  */
-import { ref } from 'vue';
+const getSessionEncryptionKeyOffscreenMock = vi.fn();
 
-describe('useAuth offscreen session-key wake-up', () => {
-  beforeEach(async () => {
-    vi.resetModules();
-  });
-
-  it('subscribes to session-key updates and restarts the sync on storage change', async () => {
-    const subscribeToSessionEncryptionKey = vi.fn();
-    const getSessionEncryptionKey = vi.fn().mockResolvedValue(null);
-
-    const mnemonicRef = ref('encrypted-mnemonic-blob');
-    const encryptionSaltRef = ref(null);
-    const secureLoginTimeoutRef = ref(null);
-
-    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
-      BiometricAuth: {
-        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: false }),
-      },
-    }));
-    vi.doMock('@/constants', () => ({
-      AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
+function mockConstants(overrides) {
+  vi.doMock('@/constants', async () => {
+    const actual = await vi.importActual('@/constants');
+    return {
+      ...actual,
+      IS_MOBILE_APP: false,
       IS_EXTENSION: false,
       IS_IOS: false,
-      IS_MOBILE_APP: false,
       IS_OFFSCREEN_TAB: true,
       RUNNING_IN_TESTS: false,
-      STORAGE_KEYS: {
-        mnemonic: 'mnemonic',
-        encryptionSalt: 'encryption-salt',
-        secureLoginTimeout: 'secure-login-timeout',
-      },
+      ...overrides,
+    };
+  });
+}
+
+describe('useAuth offscreen session-key wake-up', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    getSessionEncryptionKeyOffscreenMock.mockReset().mockResolvedValue(null);
+
+    // Registered before any dynamic import below - `registerAdapters` (vitest's
+    // global setup file) transitively loads the real `@/composables` barrel first,
+    // so mocking these afterwards would be too late for this module generation.
+    vi.doMock('@/offscreen/popupHandler', () => ({
+      getSessionEncryptionKey: (...args) => getSessionEncryptionKeyOffscreenMock(...args),
     }));
-    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
     vi.doMock('@/lib/logger', () => ({
       __esModule: true,
       default: { write: vi.fn() },
     }));
-    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/composables/defaultPassword', () => ({
-      LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: vi.fn(),
-      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
-    }));
-    vi.doMock('@/composables/ui', () => ({
-      useUi: () => ({
-        isBiometricLoginEnabled: ref(false),
-        isAppActive: ref(true),
-        setBiometricLoginEnabled: vi.fn(),
-        setLoaderVisible: vi.fn(),
-      }),
-    }));
-    vi.doMock('@/composables/modals', () => ({
-      useModals: () => ({
-        openBiometricLoginModal: vi.fn(),
-        openPasswordLoginModal: vi.fn(),
-        openEnableBiometricLoginModal: vi.fn(),
-      }),
-    }));
-    vi.doMock('@/composables/storageRef', () => ({
-      useStorageRef: (_initialState: any, key: string, options: any = {}) => {
-        const byKey: Record<string, any> = {
-          mnemonic: mnemonicRef,
-          'encryption-salt': encryptionSaltRef,
-          'secure-login-timeout': secureLoginTimeoutRef,
-        };
-        options.onRestored?.(byKey[key]?.value ?? null);
-        return byKey[key] ?? ref(_initialState);
-      },
-    }));
-    vi.doMock('@/utils', () => ({
-      createCustomScopedComposable: (factory: any) => {
-        let value: any;
-        return () => {
-          if (!value) value = factory();
-          return value;
-        };
-      },
-      decodeBase64: vi.fn(),
-      decrypt: vi.fn().mockResolvedValue('decrypted'),
-      decryptedComputed: vi.fn(() => ref('1000')),
-      encodeBase64: vi.fn(),
-      encrypt: vi.fn(),
-      excludeFalsy: Boolean,
-      generateEncryptionKey: vi.fn(),
-      generateSalt: vi.fn(),
-      getOrCreateMobileEncryptionKey: vi.fn(),
-      getSessionEncryptionKey,
-      handleUnknownError: vi.fn(),
-      sessionEnd: vi.fn(),
-      sessionStart: vi.fn(),
-      subscribeToSessionEncryptionKey,
-      watchUntilTruthy: vi.fn(async (source: any) => (
-        typeof source === 'function' ? source() : source.value
-      )),
-    }));
+    mockConstants();
+
+    // Extend (not replace) the global `browser` stub with `storage.onChanged`,
+    // needed by the real `subscribeToSessionEncryptionKey` - keeps `runtime`/
+    // `storage.local` from `config/vitest/setup.ts` intact.
+    globalThis.browser.storage.onChanged = { addListener: vi.fn(), removeListener: vi.fn() };
+  });
+
+  it('subscribes to session-key updates and restarts the sync on storage change', async () => {
+    const { useAuth } = await import('@/composables/auth');
+    const auth = useAuth();
+
+    const { addListener } = globalThis.browser.storage.onChanged;
+    expect(addListener).toHaveBeenCalledTimes(1);
+    const onSessionKeyChanged = addListener.mock.calls[0][0];
 
     vi.useFakeTimers();
     try {
-      vi.resetModules();
-      // eslint-disable-next-line global-require
-      (await import('@/composables/auth')).useAuth();
+      // Drive the salt watcher: setting `encryptionSalt` kicks off the first,
+      // bounded (30s) poll.
+      auth.encryptionSalt.value = new Uint8Array([1, 2, 3]);
 
-      // Wire-up assertion: the offscreen branch must register the listener
-      // alongside the salt watcher.
-      expect(subscribeToSessionEncryptionKey).toHaveBeenCalledTimes(1);
-      const onSessionKey = subscribeToSessionEncryptionKey.mock.calls[0][0];
-      expect(typeof onSessionKey).toBe('function');
+      await vi.advanceTimersByTimeAsync(30000); // exhausts CHECK_FOR_SESSION_KEY_TIMEOUT
 
-      // The callback must restart the sync — i.e. begin polling
-      // `getSessionEncryptionKey` again — even after the original
-      // salt-driven poll has already given up.
-      onSessionKey();
-      vi.advanceTimersByTime(5000);
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(getSessionEncryptionKey).toHaveBeenCalled();
+      getSessionEncryptionKeyOffscreenMock.mockClear();
+
+      // Simulate the popup writing the session key into browser.storage.session -
+      // the secondary wake-up source must restart polling even though the first
+      // poll already gave up.
+      onSessionKeyChanged({ exportedEncryptionKey: { newValue: 'abc' } }, 'session');
+      await vi.advanceTimersByTimeAsync(5000); // CHECK_FOR_SESSION_KEY_INTERVAL
+
+      expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }
   });
 
+  it('recovers the encryption key and decrypts the mnemonic once the popup publishes a session key', async () => {
+    const { useAuth } = await import('@/composables/auth');
+    const auth = useAuth();
+
+    const { generateSalt, encrypt, importEncryptionKey } = await import('@/utils/crypto');
+    const salt = generateSalt();
+    // Raw AES-256 key bytes, as if generated by the popup and shipped to the
+    // offscreen tab via `browser.storage.session` (that's what `sessionStart()`/
+    // `getSessionEncryptionKey()` actually transmit - `exportEncryptionKey()` only
+    // works on a key generated as extractable, which requires `IS_EXTENSION` true;
+    // this test's `@/constants` mock forces `IS_EXTENSION` false to simulate the
+    // *offscreen* side importing it instead).
+    const rawKeyBytes = globalThis.crypto.getRandomValues(new Uint8Array(32));
+    const key = await importEncryptionKey(rawKeyBytes);
+    const plaintext = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+    const ciphertext = await encrypt(key, plaintext);
+    const exportedKeyBase64 = Buffer.from(rawKeyBytes).toString('base64');
+
+    auth.mnemonic.value = ciphertext;
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(exportedKeyBase64);
+
+    vi.useFakeTimers();
+    auth.encryptionSalt.value = salt; // triggers the salt-driven poll
+    await vi.advanceTimersByTimeAsync(5000); // first CHECK_FOR_SESSION_KEY_INTERVAL tick
+    // `decrypt()`'s native WebCrypto call settles via a real Node microtask/threadpool
+    // completion rather than a fake timer - switch back to real timers and give it an
+    // actual tick to resolve before asserting.
+    vi.useRealTimers();
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+    expect(auth.mnemonicDecrypted.value).toBe(plaintext);
+    expect(auth.encryptionKey.value).toBeTruthy();
+  });
+
   it('does not subscribe when not running in the offscreen tab', async () => {
-    const subscribeToSessionEncryptionKey = vi.fn();
+    mockConstants({ IS_OFFSCREEN_TAB: false });
 
-    const mnemonicRef = ref('');
-    const encryptionSaltRef = ref(null);
-    const secureLoginTimeoutRef = ref(null);
+    const { useAuth } = await import('@/composables/auth');
+    useAuth();
 
-    vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
-      BiometricAuth: {
-        checkBiometry: vi.fn().mockResolvedValue({ isAvailable: false }),
-      },
-    }));
-    vi.doMock('@/constants', () => ({
-      AUTHENTICATION_TIMEOUTS: [1000, 5000, 10000],
-      IS_EXTENSION: false,
-      IS_IOS: false,
-      IS_MOBILE_APP: false,
-      IS_OFFSCREEN_TAB: false,
-      RUNNING_IN_TESTS: false,
-      STORAGE_KEYS: {
-        mnemonic: 'mnemonic',
-        encryptionSalt: 'encryption-salt',
-        secureLoginTimeout: 'secure-login-timeout',
-      },
-    }));
-    vi.doMock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
-    vi.doMock('@/lib/logger', () => ({
-      __esModule: true,
-      default: { write: vi.fn() },
-    }));
-    vi.doMock('@/migrations/002-mnemonic-vuex-to-composable', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/migrations/008-mnemonic-cordova-to-ionic', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/migrations/010-mnemonic-mobile-to-secure-storage', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/migrations/011-mobile-sensitive-data-encryption', () => ({ __esModule: true, default: vi.fn() }));
-    vi.doMock('@/composables/defaultPassword', () => ({
-      LEGACY_DEFAULT_PASSWORD: 'testPassword123',
-      clearDefaultPasswordSecret: vi.fn(),
-      getDefaultPasswordSecret: vi.fn().mockResolvedValue(null),
-      getOrCreateDefaultPasswordSecret: vi.fn().mockResolvedValue('secret'),
-    }));
-    vi.doMock('@/composables/ui', () => ({
-      useUi: () => ({
-        isBiometricLoginEnabled: ref(false),
-        isAppActive: ref(true),
-        setBiometricLoginEnabled: vi.fn(),
-        setLoaderVisible: vi.fn(),
-      }),
-    }));
-    vi.doMock('@/composables/modals', () => ({
-      useModals: () => ({
-        openBiometricLoginModal: vi.fn(),
-        openPasswordLoginModal: vi.fn(),
-        openEnableBiometricLoginModal: vi.fn(),
-      }),
-    }));
-    vi.doMock('@/composables/storageRef', () => ({
-      useStorageRef: (_initialState: any, key: string, options: any = {}) => {
-        const byKey: Record<string, any> = {
-          mnemonic: mnemonicRef,
-          'encryption-salt': encryptionSaltRef,
-          'secure-login-timeout': secureLoginTimeoutRef,
-        };
-        options.onRestored?.(byKey[key]?.value ?? null);
-        return byKey[key] ?? ref(_initialState);
-      },
-    }));
-    vi.doMock('@/utils', () => ({
-      createCustomScopedComposable: (factory: any) => {
-        let value: any;
-        return () => {
-          if (!value) value = factory();
-          return value;
-        };
-      },
-      decodeBase64: vi.fn(),
-      decrypt: vi.fn(),
-      decryptedComputed: vi.fn(() => ref('1000')),
-      encodeBase64: vi.fn(),
-      encrypt: vi.fn(),
-      excludeFalsy: Boolean,
-      generateEncryptionKey: vi.fn(),
-      generateSalt: vi.fn(),
-      getOrCreateMobileEncryptionKey: vi.fn(),
-      getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
-      handleUnknownError: vi.fn(),
-      sessionEnd: vi.fn(),
-      sessionStart: vi.fn(),
-      subscribeToSessionEncryptionKey,
-      watchUntilTruthy: vi.fn(async (source: any) => (
-        typeof source === 'function' ? source() : source.value
-      )),
-    }));
-
-    vi.resetModules();
-    // eslint-disable-next-line global-require
-    (await import('@/composables/auth')).useAuth();
-
-    expect(subscribeToSessionEncryptionKey).not.toHaveBeenCalled();
+    expect(globalThis.browser.storage.onChanged.addListener).not.toHaveBeenCalled();
   });
 });
 
 describe('subscribeToSessionEncryptionKey helper', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.resetModules();
+
+    vi.doMock('@/constants', async () => {
+      const actual = await vi.importActual('@/constants');
+      return {
+        ...actual, CONNECTION_TYPES: { SESSION: 'session' }, IS_EXTENSION: false, IS_OFFSCREEN_TAB: true,
+      };
+    });
+    vi.doMock('@/offscreen/popupHandler', () => ({ getSessionEncryptionKey: vi.fn() }));
   });
 
   it('only invokes the callback for session-area writes with a truthy newValue', async () => {
     const addListener = vi.fn();
     const removeListener = vi.fn();
-    (global as any).browser = {
-      storage: {
-        onChanged: { addListener, removeListener },
-      },
-    };
+    globalThis.browser.storage.onChanged = { addListener, removeListener };
 
-    vi.doMock('@/constants', () => ({
-      CONNECTION_TYPES: { SESSION: 'session' },
-      IS_EXTENSION: false,
-      IS_OFFSCREEN_TAB: true,
-    }));
-    vi.doMock('@/offscreen/popupHandler', () => ({
-      getSessionEncryptionKey: vi.fn(),
-    }));
-
-    vi.resetModules();
     const { subscribeToSessionEncryptionKey } = await import('@/utils/session');
 
     const callback = vi.fn();
@@ -294,18 +182,8 @@ describe('subscribeToSessionEncryptionKey helper', () => {
   });
 
   it('returns a no-op when storage.onChanged is unavailable', async () => {
-    (global as any).browser = { storage: {} };
+    globalThis.browser.storage.onChanged = undefined;
 
-    vi.doMock('@/constants', () => ({
-      CONNECTION_TYPES: { SESSION: 'session' },
-      IS_EXTENSION: false,
-      IS_OFFSCREEN_TAB: true,
-    }));
-    vi.doMock('@/offscreen/popupHandler', () => ({
-      getSessionEncryptionKey: vi.fn(),
-    }));
-
-    vi.resetModules();
     const { subscribeToSessionEncryptionKey } = await import('@/utils/session');
 
     const teardown = subscribeToSessionEncryptionKey(vi.fn());
