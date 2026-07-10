@@ -165,6 +165,7 @@
 
 <script lang="ts">
 import {
+  Encoded,
   Encoding,
   isAddressValid,
 } from '@aeternity/aepp-sdk';
@@ -177,6 +178,7 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { IName } from '@/types';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
@@ -186,7 +188,6 @@ import { RejectedByUserError } from '@/lib/errors';
 import {
   blocksToRelativeTime,
   handleUnknownError,
-  postJson,
 } from '@/utils';
 import {
   useAccounts,
@@ -196,7 +197,7 @@ import {
 } from '@/composables';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
 import { NAME_CLAIM_STATUS, useAeNames } from '@/protocols/aeternity/composables/aeNames';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeAddressLinkBackend } from '@/protocols/aeternity/composables';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
 import InputField from './InputField.vue';
@@ -232,15 +233,15 @@ export default defineComponent({
     const {
       setAutoExtend,
       updateNamePointer,
-      getName,
+      getDefaultName,
       getNameExtendFee,
       extendExpiringOwnedNames,
       ownedNames,
       updateOwnedNames,
-      setDefaultName,
+      setDefaultNameOptimistic,
     } = useAeNames();
-    const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { nodeNetworkId, fetchRespondChallenge } = useAeSdk();
+    const { linkPreferredAensName, unlinkPreferredAensName } = useAeAddressLinkBackend();
+    const { nodeNetworkId } = useAeSdk();
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -252,8 +253,11 @@ export default defineComponent({
     const pointerInput = ref();
     const transferInput = ref();
 
+    // Compares against the explicitly linked default, not `getName`: the latter falls
+    // back to the last claimed name, which would otherwise mark a name as "default"
+    // (and disable the button) while no default is actually set on-chain.
     const isDefault = computed(
-      () => getName(activeAccount.value.address).value === props.nameEntry.name,
+      () => getDefaultName(activeAccount.value.address).value === props.nameEntry.name,
     );
     const hasPointer = computed(
       (): boolean => !!props.nameEntry.pointers?.accountPubkey,
@@ -324,29 +328,24 @@ export default defineComponent({
     async function updateDefaultName(name: IName['name']) {
       try {
         const { address } = activeAccount.value;
-        const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
         const currentNetworkId = nodeNetworkId.value;
 
-        const response = await postJson(url, {
-          body: {
-            preferredChainName: name,
-          },
-        });
-
-        let respondChallenge;
-        try {
-          respondChallenge = await fetchRespondChallenge(response);
-        } catch (error: any) {
-          handleUnknownError(error);
-          return;
+        // Set/clear the preferred `.chain` name through the Superhero API: the
+        // wallet signs a backend-issued challenge to prove ownership and the
+        // backend broadcasts (and pays for) the on-chain AddressLink transaction.
+        if (name) {
+          await linkPreferredAensName(address as Encoded.AccountAddress, name);
+        } else {
+          await unlinkPreferredAensName(address as Encoded.AccountAddress);
         }
-        await postJson(url, { body: respondChallenge });
 
         if (currentNetworkId !== nodeNetworkId.value) {
           return;
         }
 
-        setDefaultName({ address, name });
+        // Apply optimistically and mark pending so the on-chain poll does not
+        // revert it before the backend-sponsored transaction is mined.
+        setDefaultNameOptimistic({ address, name });
       } catch (error: any) {
         handleUnknownError(error);
       }

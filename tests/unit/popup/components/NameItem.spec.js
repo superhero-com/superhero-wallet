@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
 import { computed as mockComputed, ref as mockRef } from 'vue';
 
-const mockPostJson = vi.fn();
 const mockHandleUnknownError = vi.fn();
 const mockOpenConfirmModal = vi.fn();
 const mockUpdateNamePointer = vi.fn();
 const mockUpdateOwnedNames = vi.fn();
-const mockFetchRespondChallenge = vi.fn();
-const mockSetDefaultName = vi.fn();
+const mockLinkPreferredAensName = vi.fn();
+const mockUnlinkPreferredAensName = vi.fn();
+const mockSetDefaultNameOptimistic = vi.fn();
 let NameItem;
 
 vi.mock('@aeternity/aepp-sdk', () => ({
@@ -26,7 +26,6 @@ vi.mock('vue-i18n', () => ({
 vi.mock('@/utils', () => ({
   blocksToRelativeTime: vi.fn(() => '1 day'),
   handleUnknownError: mockHandleUnknownError,
-  postJson: mockPostJson,
 }));
 
 vi.mock('@/composables', () => ({
@@ -35,7 +34,6 @@ vi.mock('@/composables', () => ({
   })),
   useAeSdk: vi.fn(() => ({
     nodeNetworkId: mockRef('ae_testnet'),
-    fetchRespondChallenge: mockFetchRespondChallenge,
   })),
   useModals: vi.fn(() => ({
     openConfirmModal: mockOpenConfirmModal,
@@ -56,7 +54,7 @@ vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
   useAeNames: vi.fn(() => ({
     setAutoExtend: vi.fn(),
     updateNamePointer: mockUpdateNamePointer,
-    getName: vi.fn(() => mockComputed(() => 'default.chain')),
+    getDefaultName: vi.fn(() => mockComputed(() => 'default.chain')),
     getNameExtendFee: vi.fn(() => 0.001),
     extendExpiringOwnedNames: vi.fn(),
     ownedNames: mockRef([{
@@ -66,13 +64,14 @@ vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
       pointers: { accountPubkey: 'ak_test' },
     }]),
     updateOwnedNames: mockUpdateOwnedNames,
-    setDefaultName: mockSetDefaultName,
+    setDefaultNameOptimistic: mockSetDefaultNameOptimistic,
   })),
 }));
 
 vi.mock('@/protocols/aeternity/composables', () => ({
-  useAeNetworkSettings: vi.fn(() => ({
-    aeActiveNetworkSettings: mockRef({ backendUrl: 'https://backend.test' }),
+  useAeAddressLinkBackend: vi.fn(() => ({
+    linkPreferredAensName: mockLinkPreferredAensName,
+    unlinkPreferredAensName: mockUnlinkPreferredAensName,
   })),
 }));
 
@@ -98,8 +97,8 @@ describe('NameItem', () => {
     mockOpenConfirmModal.mockResolvedValue(undefined);
     mockUpdateNamePointer.mockResolvedValue(true);
     mockUpdateOwnedNames.mockResolvedValue(undefined);
-    mockFetchRespondChallenge.mockResolvedValue({ signed: true });
-    mockPostJson.mockResolvedValue({ challenge: true });
+    mockLinkPreferredAensName.mockResolvedValue('th_link');
+    mockUnlinkPreferredAensName.mockResolvedValue('th_unlink');
   });
 
   it('clears the backend default name when transferring the default without a fallback', async () => {
@@ -139,15 +138,47 @@ describe('NameItem', () => {
       address: 'ak_recipient',
       type: 'transfer',
     });
-    expect(mockPostJson).toHaveBeenNthCalledWith(1, 'https://backend.test/profile/ak_test', {
-      body: {
-        preferredChainName: '',
+    // Clearing the default name uses the signed unlink flow, not a link.
+    expect(mockUnlinkPreferredAensName).toHaveBeenCalledWith('ak_test');
+    expect(mockLinkPreferredAensName).not.toHaveBeenCalled();
+    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledWith({ address: 'ak_test', name: '' });
+    expect(mockHandleUnknownError).not.toHaveBeenCalled();
+  });
+
+  it('sets the default name through the signed link flow', async () => {
+    const wrapper = mount(NameItem, {
+      props: {
+        nameEntry: {
+          name: 'default.chain',
+          owner: 'ak_test',
+          pending: false,
+          pointers: { accountPubkey: 'ak_test' },
+          createdAtHeight: 1,
+          expiresAt: 150,
+          autoExtend: false,
+          hash: 'nm_default',
+        },
+      },
+      global: {
+        stubs: {
+          BtnHelp: true,
+          BtnPlain: true,
+          DetailsItem: true,
+          InputField: true,
+          Truncate: true,
+          Transition: false,
+        },
+        mocks: {
+          $t: (key) => key,
+        },
       },
     });
-    expect(mockFetchRespondChallenge).toHaveBeenCalledWith({ challenge: true });
-    expect(mockPostJson).toHaveBeenNthCalledWith(2, 'https://backend.test/profile/ak_test', {
-      body: { signed: true },
-    });
+
+    await wrapper.vm.handleSetDefault();
+
+    expect(mockLinkPreferredAensName).toHaveBeenCalledWith('ak_test', 'default.chain');
+    expect(mockUnlinkPreferredAensName).not.toHaveBeenCalled();
+    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledWith({ address: 'ak_test', name: 'default.chain' });
     expect(mockHandleUnknownError).not.toHaveBeenCalled();
   });
 });

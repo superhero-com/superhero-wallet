@@ -139,6 +139,7 @@ export const STORAGE_KEYS = {
   multisigAccountsPending: 'multisig-pending',
   activeMultisigAccount: 'active-multisig-account',
   namesOwned: 'names-owned',
+  namesOwnedNetworkId: 'names-owned-network-id',
   namesDefault: 'names-default',
   notificationsSettings: 'notifications-settings',
   lastRoute: 'last-route',
@@ -148,6 +149,7 @@ export const STORAGE_KEYS = {
   preclaimedNames: 'preclaimed-names',
   pendingNameAutoExtendTxs: 'pending-name-auto-extend-txs',
   pendingNameTransferTxs: 'pending-name-transfer-txs',
+  pendingDefaultNames: 'pending-default-names',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
 
