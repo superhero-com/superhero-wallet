@@ -6,6 +6,7 @@ import Connect from '@/popup/pages/Popups/Connect.vue';
 import ConnectBase from '@/popup/pages/Popups/ConnectBase.vue';
 import { usePopupProps, useAccounts } from '@/composables';
 import { PROTOCOLS } from '@/constants';
+import en from '@/popup/locales/en-US.json';
 
 vi.mock('@/composables', () => ({
   usePopupProps: vi.fn(),
@@ -15,7 +16,7 @@ vi.mock('@/composables', () => ({
 const i18n = createI18n({
   legacy: false,
   locale: 'en',
-  messages: { en: {} },
+  messages: { en },
 });
 
 function mountConnectWithPopupProps(popupProps: any = {}) {
