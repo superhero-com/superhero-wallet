@@ -38,6 +38,11 @@ export default defineConfig({
           '@stencil/core',
           'ionicons',
           'swiper',
+          // Keeps @capacitor/core's plugin registry inside Vite's per-file module
+          // graph instead of Node's process-wide require cache, so a worker reused
+          // across spec files doesn't see `registerPlugin('NavigationBar')` (called
+          // as a side effect of importing `@/utils/systemBars`) as a re-registration.
+          '@capacitor/core',
         ],
       },
     },

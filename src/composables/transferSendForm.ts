@@ -102,7 +102,7 @@ export function useTransferSendForm({
       ...updatedValues,
     };
     await nextTick();
-    Object.keys(updatedValues).forEach((field) => validateField(field));
+    Object.keys(updatedValues).forEach((field) => validateField(field, { warn: false }));
   }
 
   function hasQueryParams(params: Dictionary = {}) {

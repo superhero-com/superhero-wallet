@@ -17,15 +17,24 @@ vi.mock('@/composables/networks', () => ({
   }),
 }));
 
-// Provide a deterministic fee composable to avoid network calls and expose a stable fee ref
+const { updateFeeListMock } = vi.hoisted(() => ({ updateFeeListMock: vi.fn() }));
+
+// Deterministic fee composable that mirrors the real one's timing: `fee` starts at 0
+// and only becomes non-zero once `updateFeeList()` is called. This is what lets the
+// tests below detect a regression where `useSolMaxAmount` forgets to prime the fee on
+// setup (which would leave `max` overstated by the fee headroom until a field edit).
 vi.mock('@/protocols/solana/composables/solFeeCalculation', () => ({
-  useSolFeeCalculation: () => ({
-    fee: ref(0.000005),
-    feeSelectedIndex: ref(0),
-    feeList: ref([]),
-    maxFee: ref(0.000005),
-    updateFeeList: vi.fn(),
-  }),
+  useSolFeeCalculation: () => {
+    const fee = ref(0);
+    updateFeeListMock.mockImplementation(() => { fee.value = 0.000005; });
+    return {
+      fee,
+      feeSelectedIndex: ref(0),
+      feeList: ref([]),
+      maxFee: fee,
+      updateFeeList: updateFeeListMock,
+    };
+  },
 }));
 
 // Avoid hitting real network during fee calculation
@@ -49,14 +58,22 @@ web3.Connection.prototype.getLatestBlockhash = () => Promise.resolve({ blockhash
 // eslint-disable-next-line no-param-reassign
 web3.Connection.prototype.getFeeForMessage = () => Promise.resolve({ value: 5000 });
 
+function makeSolForm() {
+  const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.solana);
+  return ref({
+    amount: '0',
+    selectedAsset: { contractId: adapter.coinContractId, decimals: adapter.coinPrecision },
+    addresses: ['A', 'B'],
+  } as any);
+}
+
 describe('Solana composables - useSolMaxAmount', () => {
+  beforeEach(() => {
+    updateFeeListMock.mockClear();
+  });
+
   it('computes max for SOL asset subtracting estimated fee and supports multiple recipients', async () => {
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.solana);
-    const form = ref({
-      amount: '0',
-      selectedAsset: { contractId: adapter.coinContractId, decimals: adapter.coinPrecision },
-      addresses: ['A', 'B'],
-    } as any);
+    const form = makeSolForm();
 
     const { max } = useSolMaxAmount(form as any) as any;
     // With mocked fee of 0.000005 SOL, two recipients => each half of (10 - fee)
@@ -66,5 +83,18 @@ describe('Solana composables - useSolMaxAmount', () => {
     // If token selected, returns token balance unaffected by fee
     form.value.selectedAsset = { contractId: 'TokenMint', decimals: 6, amount: '1000000' } as any;
     expect(max.value).toBe('1');
+  });
+
+  it('primes the fee on setup so max excludes fee headroom before any field edit', () => {
+    const form = makeSolForm();
+
+    const { max } = useSolMaxAmount(form as any) as any;
+
+    // The fee must be fetched immediately, not only after a formModel change.
+    expect(updateFeeListMock).toHaveBeenCalled();
+    // With the fee applied, per-recipient max is strictly below balance/recipients (10/2).
+    // If the setup fetch is dropped, fee stays 0 and this would be exactly 5.
+    expect(Number(max.value)).toBeLessThan(5);
+    expect(Number(max.value)).toBeGreaterThan(4.999);
   });
 });

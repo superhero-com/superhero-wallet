@@ -1,5 +1,5 @@
 import {
-  Ref, computed, watch, onMounted,
+  Ref, computed, watch,
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import type { IFormModel } from '@/types';
@@ -43,7 +43,12 @@ export function useSolMaxAmount(formModel: Ref<IFormModel>) {
 
   const debouncedUpdateFee = debounce(() => updateFeeList(), 500);
 
-  onMounted(() => { updateFeeList(); });
+  // Populate the fee immediately so `max` (balance - fee) is correct on first render,
+  // e.g. right after opening the send modal or pressing "max" before editing any field.
+  // Called directly at setup rather than from `onMounted` so it also runs when the
+  // composable is used outside a mounted component (and avoids the "onMounted with no
+  // active component instance" warning when unit-tested directly).
+  updateFeeList();
 
   watch(
     () => [formModel.value?.selectedAsset, formModel.value?.addresses, formModel.value?.amount],
