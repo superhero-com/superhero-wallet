@@ -116,10 +116,14 @@ describe('useAuth offscreen session-key wake-up', () => {
     auth.encryptionSalt.value = salt; // triggers the salt-driven poll
     await vi.advanceTimersByTimeAsync(5000); // first CHECK_FOR_SESSION_KEY_INTERVAL tick
     // `decrypt()`'s native WebCrypto call settles via a real Node microtask/threadpool
-    // completion rather than a fake timer - switch back to real timers and give it an
-    // actual tick to resolve before asserting.
+    // completion rather than a fake timer - switch back to real timers and poll until
+    // it resolves, since a single tick isn't reliably enough under CI/suite-wide load.
     vi.useRealTimers();
-    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    await vi.waitFor(() => {
+      if (!auth.mnemonicDecrypted.value) {
+        throw new Error('mnemonic not decrypted yet');
+      }
+    });
 
     expect(auth.mnemonicDecrypted.value).toBe(plaintext);
     expect(auth.encryptionKey.value).toBeTruthy();
