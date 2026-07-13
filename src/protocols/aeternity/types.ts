@@ -15,7 +15,8 @@ export type AeNetworkProtocolSettings =
  */
 export type AeNetworkProtocolPredefinedSettings =
   | 'explorerUrl'
-  | 'multisigBackendUrl';
+  | 'multisigBackendUrl'
+  | 'superheroApiUrl';
 
 export type IAeNetworkSettings = INetworkProtocolSettings<AeNetworkProtocolSettings>;
 
@@ -49,6 +50,34 @@ export interface AeTippingContracts {
 export interface AeTippingContractAddresses {
   tippingV1?: Encoded.ContractAddress;
   tippingV2?: Encoded.ContractAddress;
+}
+
+export interface AeAddressLinkContractApi extends ContractMethodsBase {
+  get_link: (addr: Encoded.AccountAddress, provider: string) => string | undefined;
+  get_links: (addr: Encoded.AccountAddress) => Map<string, string>;
+}
+
+/**
+ * Response of the Superhero API `.../claim` address-link endpoints. The wallet
+ * signs `message` to prove ownership; the backend then broadcasts (and pays for)
+ * the on-chain `link` transaction on `.../submit`.
+ */
+export interface AeAddressLinkClaimResponse {
+  message: string;
+  nonce: number;
+  value: string;
+  verification_token: string;
+}
+
+/** Response of the Superhero API `.../unclaim` address-link endpoints. */
+export interface AeAddressLinkUnclaimResponse {
+  message: string;
+  nonce: number;
+}
+
+/** Response of the Superhero API `.../submit` address-link endpoints. */
+export interface AeAddressLinkSubmitResponse {
+  txHash: string;
 }
 
 export interface AeDecodedCallData {

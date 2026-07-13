@@ -1,4 +1,4 @@
-import { Encoding, Tag } from '@aeternity/aepp-sdk';
+import { Encoded, Encoding, Tag } from '@aeternity/aepp-sdk';
 import type {
   DexFunctionType,
   IDefaultNetworkTypeData,
@@ -59,10 +59,12 @@ export const AE_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://aescan.io',
     multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.service.aepps.com',
+    superheroApiUrl: 'https://api.superhero.com',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://testnet.aescan.io',
     multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.service.aepps.com',
+    superheroApiUrl: 'https://testnet.api.dev.tokensale.org',
   },
 };
 
@@ -282,6 +284,22 @@ export const AE_TIPPING_CONTRACTS_MAINNET: AeTippingContractAddresses = {
 export const AE_TIPPING_CONTRACTS_TESTNET: AeTippingContractAddresses = {
   tippingV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
   tippingV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
+};
+
+/**
+ * Provider key under which the AddressLink contract stores an account's
+ * preferred `.chain` name (formerly served by the tipping backend as
+ * `preferredChainName`).
+ */
+export const AE_ADDRESS_LINK_PREFERRED_NAME_PROVIDER = 'prefaens';
+
+/**
+ * AddressLink contract deployments per network type. Used to resolve accounts'
+ * preferred (default) `.chain` names on-chain instead of via the backend.
+ */
+export const AE_ADDRESS_LINK_CONTRACTS: Partial<Record<string, Encoded.ContractAddress>> = {
+  [NETWORK_TYPE_MAINNET]: 'ct_2rxYHp3GThDMMCoYZbFdjgUAeiKwFMhQ72ohYFt463t1A53knS',
+  [NETWORK_TYPE_TESTNET]: 'ct_Fdw5ftxSS3asjXrt7fnTwSgzFBxV7kKkgtQPCZpkDyYAwGDUt',
 };
 
 export const UPDATE_POINTER_ACTION = {

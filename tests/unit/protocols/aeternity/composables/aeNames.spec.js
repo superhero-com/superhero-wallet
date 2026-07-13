@@ -123,9 +123,12 @@ const createTestContext = async ({
       getLastActiveProtocolAccount: () => ({ address: 'ak_test' }),
     }),
   }));
+  // A single shared ref (not a fresh one per `useAeSdk()` call) so tests can switch
+  // the active network and have the composable observe it.
+  const nodeNetworkId = ref('ae_testnet');
   vi.doMock('@/composables/aeSdk', () => ({
     useAeSdk: () => ({
-      nodeNetworkId: ref('ae_testnet'),
+      nodeNetworkId,
       getAeSdk: vi.fn().mockResolvedValue(sdk),
     }),
   }));
@@ -157,6 +160,13 @@ const createTestContext = async ({
       getMiddleware: vi.fn().mockResolvedValue({ getNames }),
       fetchFromMiddlewareCamelCased: vi.fn(),
     }),
+  }));
+
+  // The preferred (default) name now comes from the on-chain AddressLink contract.
+  // Mock the reader so default-name polling is deterministic and offline.
+  const getPreferredName = vi.fn().mockResolvedValue(undefined);
+  vi.doMock('@/protocols/aeternity/composables/aeAddressLinkContract', () => ({
+    useAeAddressLinkContract: () => ({ getPreferredName }),
   }));
 
   // Seed real `localStorage` BEFORE `registerAdapters` (below) is imported.
@@ -192,6 +202,8 @@ const createTestContext = async ({
     aeNames,
     fetchPendingTransactions,
     fetchAllPages,
+    getPreferredName,
+    nodeNetworkId,
     sdk,
     openDefaultModal,
     NAME_CLAIM_STATUS: aeNamesModule.NAME_CLAIM_STATUS,
@@ -821,5 +833,142 @@ describe('useAeNames name transfers', () => {
       pending: false,
       pendingStatus: undefined,
     });
+  });
+});
+
+describe('useAeNames default (preferred) names', () => {
+  it('keeps an optimistic default name while its link tx is still unmined', async () => {
+    const { aeNames, getPreferredName } = await createTestContext();
+    // The link tx has been broadcast but not mined, so the chain still has no name.
+    getPreferredName.mockResolvedValue(undefined);
+
+    aeNames.setDefaultNameOptimistic({ address: 'ak_test', name: 'new.chain' });
+    await aeNames.updateDefaultNames();
+
+    // Polling must not revert the optimistic value to the stale chain state.
+    expect(aeNames.getName('ak_test').value).toBe('new.chain');
+  });
+
+  it('adopts the chain value and stops protecting once the change is mined', async () => {
+    const { aeNames, getPreferredName } = await createTestContext();
+    aeNames.setDefaultNameOptimistic({ address: 'ak_test', name: 'new.chain' });
+
+    // Tx mined: the chain now returns the name, so the pending marker is cleared.
+    getPreferredName.mockResolvedValue('new.chain');
+    await aeNames.updateDefaultNames();
+    expect(aeNames.getName('ak_test').value).toBe('new.chain');
+
+    // With protection gone, a later chain change (e.g. name removed) is applied.
+    getPreferredName.mockResolvedValue(undefined);
+    await aeNames.updateDefaultNames();
+    expect(aeNames.getName('ak_test').value).toBe('');
+  });
+
+  it('clears the optimistic default name immediately and keeps it cleared while unmined', async () => {
+    const { aeNames, getPreferredName } = await createTestContext();
+    // Chain still reports the old name because the unlink tx is not mined yet.
+    getPreferredName.mockResolvedValue('old.chain');
+
+    aeNames.setDefaultNameOptimistic({ address: 'ak_test', name: '' });
+    expect(aeNames.getName('ak_test').value).toBe('');
+
+    await aeNames.updateDefaultNames();
+    expect(aeNames.getName('ak_test').value).toBe('');
+  });
+});
+
+describe('useAeNames last-claimed-name fallback', () => {
+  /** Middleware-shaped name; `activeFrom` becomes the claim height (`createdAtHeight`). */
+  const middlewareName = (name, activeFrom, owner = 'ak_test') => ({
+    info: {
+      activeFrom,
+      expireHeight: 50000,
+      ownership: { current: owner },
+      pointers: { accountPubkey: owner },
+    },
+    name,
+    hash: `nm_${name}`,
+  });
+
+  /**
+   * Names are published through `updateOwnedNames` (rather than assigned onto
+   * `ownedNames` directly) so they get tagged with the network they belong to -
+   * which is exactly what the fallback checks before using them.
+   */
+  const publishOwnedNames = async ({ aeNames, fetchAllPages }, names) => {
+    fetchAllPages.mockResolvedValueOnce(names);
+    await aeNames.updateOwnedNames();
+  };
+
+  it('falls back to the most recently claimed name when no default is set', async () => {
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [
+      middlewareName('older.chain', 10),
+      middlewareName('newest.chain', 30),
+      middlewareName('middle.chain', 20),
+    ]);
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('newest.chain');
+    // The fallback is a display convenience - no default is actually linked on-chain.
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('');
+  });
+
+  it('prefers the linked default name over the last claimed name', async () => {
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [middlewareName('newest.chain', 30)]);
+    ctx.getPreferredName.mockResolvedValue('preferred.chain');
+
+    await ctx.aeNames.updateDefaultNames();
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('preferred.chain');
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('preferred.chain');
+  });
+
+  it('ignores names that are not confirmed on-chain yet', async () => {
+    const ctx = await createTestContext();
+    // A newer, still-pending claim must not win over the confirmed name.
+    ctx.fetchPendingTransactions.mockResolvedValueOnce([{
+      hash: 'th_claiming',
+      pending: true,
+      tx: { type: 'NameClaimTx', accountId: 'ak_test', name: 'claiming.chain' },
+    }]);
+    await publishOwnedNames(ctx, [middlewareName('confirmed.chain', 10)]);
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('confirmed.chain');
+  });
+
+  it('does not leak one account\'s claimed name to another account', async () => {
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [middlewareName('other.chain', 30, 'ak_other')]);
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('');
+  });
+
+  it('stops using the previous network\'s claimed names after a network switch', async () => {
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [middlewareName('testnet-only.chain', 30)]);
+    expect(ctx.aeNames.getName('ak_test').value).toBe('testnet-only.chain');
+
+    ctx.nodeNetworkId.value = 'ae_mainnet';
+
+    // The names still cached in memory belong to testnet - they must not show here.
+    expect(ctx.aeNames.getName('ak_test').value).toBe('');
+  });
+
+  it('does not publish names fetched for a network that is no longer active', async () => {
+    const ctx = await createTestContext();
+    let resolveNames;
+    ctx.fetchAllPages.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveNames = resolve;
+    }));
+
+    const update = ctx.aeNames.updateOwnedNames();
+    await flushAsync(); // let the fetch actually start before switching
+    ctx.nodeNetworkId.value = 'ae_mainnet'; // switched while the fetch was in flight
+    resolveNames([middlewareName('testnet-only.chain', 30)]);
+    await update;
+
+    expect(ctx.aeNames.ownedNames.value).toEqual([]);
+    expect(ctx.aeNames.getName('ak_test').value).toBe('');
   });
 });

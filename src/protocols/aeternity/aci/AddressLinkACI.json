@@ -1,0 +1,544 @@
+[
+  {
+    "namespace": {
+      "name": "ListInternal",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "List",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "String",
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "event": {
+        "variant": [
+          {
+            "ProviderRegistered": [
+              "address",
+              "string"
+            ]
+          },
+          {
+            "Link": [
+              "address",
+              "string"
+            ]
+          },
+          {
+            "Unlink": [
+              "address",
+              "string"
+            ]
+          },
+          {
+            "PrincipalLink": [
+              "address",
+              "string"
+            ]
+          },
+          {
+            "PrincipalUnlink": [
+              "address",
+              "string"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "arguments": [],
+          "name": "init",
+          "payable": false,
+          "returns": "AddressLink.state",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "provider",
+              "type": "string"
+            }
+          ],
+          "name": "register_provider",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "addr",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "int"
+            },
+            {
+              "name": "sig",
+              "type": "signature"
+            }
+          ],
+          "name": "link",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "addr",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "int"
+            },
+            {
+              "name": "sig",
+              "type": "signature"
+            }
+          ],
+          "name": "unlink",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "principal",
+              "type": "string"
+            },
+            {
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "int"
+            },
+            {
+              "name": "sig",
+              "type": "signature"
+            }
+          ],
+          "name": "link_principal",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "principal",
+              "type": "string"
+            },
+            {
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "int"
+            },
+            {
+              "name": "sig",
+              "type": "signature"
+            }
+          ],
+          "name": "unlink_principal",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "did",
+              "type": "string"
+            },
+            {
+              "name": "controller",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "int"
+            },
+            {
+              "name": "sig",
+              "type": "signature"
+            }
+          ],
+          "name": "link_did",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "did",
+              "type": "string"
+            },
+            {
+              "name": "controller",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "int"
+            },
+            {
+              "name": "sig",
+              "type": "signature"
+            }
+          ],
+          "name": "unlink_did",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "addr",
+              "type": "address"
+            }
+          ],
+          "name": "get_nonce",
+          "payable": false,
+          "returns": "int",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "principal",
+              "type": "string"
+            },
+            {
+              "name": "signer",
+              "type": "address"
+            }
+          ],
+          "name": "get_nonce_principal",
+          "payable": false,
+          "returns": "int",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "did",
+              "type": "string"
+            },
+            {
+              "name": "controller",
+              "type": "address"
+            }
+          ],
+          "name": "get_nonce_did",
+          "payable": false,
+          "returns": "int",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "provider",
+              "type": "string"
+            }
+          ],
+          "name": "get_provider_owner",
+          "payable": false,
+          "returns": {
+            "option": [
+              "address"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "addr",
+              "type": "address"
+            }
+          ],
+          "name": "get_links",
+          "payable": false,
+          "returns": {
+            "map": [
+              "string",
+              "string"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "principal",
+              "type": "string"
+            },
+            {
+              "name": "signer",
+              "type": "address"
+            }
+          ],
+          "name": "get_links_principal",
+          "payable": false,
+          "returns": {
+            "map": [
+              "string",
+              "string"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "did",
+              "type": "string"
+            },
+            {
+              "name": "controller",
+              "type": "address"
+            }
+          ],
+          "name": "get_links_did",
+          "payable": false,
+          "returns": {
+            "map": [
+              "string",
+              "string"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "addr",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            }
+          ],
+          "name": "get_link",
+          "payable": false,
+          "returns": {
+            "option": [
+              "string"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "principal",
+              "type": "string"
+            },
+            {
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            }
+          ],
+          "name": "get_link_principal",
+          "payable": false,
+          "returns": {
+            "option": [
+              "string"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "did",
+              "type": "string"
+            },
+            {
+              "name": "controller",
+              "type": "address"
+            },
+            {
+              "name": "provider",
+              "type": "string"
+            }
+          ],
+          "name": "get_link_did",
+          "payable": false,
+          "returns": {
+            "option": [
+              "string"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "provider",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "name": "resolve",
+          "payable": false,
+          "returns": {
+            "option": [
+              "address"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "principal",
+              "type": "string"
+            }
+          ],
+          "name": "resolve_signer",
+          "payable": false,
+          "returns": {
+            "option": [
+              "address"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "did",
+              "type": "string"
+            }
+          ],
+          "name": "resolve_did_controller",
+          "payable": false,
+          "returns": {
+            "option": [
+              "address"
+            ]
+          },
+          "stateful": false
+        }
+      ],
+      "kind": "contract_main",
+      "name": "AddressLink",
+      "payable": false,
+      "state": {
+        "record": [
+          {
+            "name": "providers",
+            "type": {
+              "map": [
+                "string",
+                "address"
+              ]
+            }
+          },
+          {
+            "name": "links",
+            "type": {
+              "map": [
+                "address",
+                {
+                  "map": [
+                    "string",
+                    "string"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "reverse",
+            "type": {
+              "map": [
+                "string",
+                {
+                  "map": [
+                    "string",
+                    "address"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "nonce_seq",
+            "type": {
+              "map": [
+                "address",
+                "int"
+              ]
+            }
+          }
+        ]
+      },
+      "typedefs": []
+    }
+  }
+]
