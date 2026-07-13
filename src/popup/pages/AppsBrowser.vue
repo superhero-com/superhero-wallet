@@ -264,18 +264,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
-@use '@/styles/mixins';
 
 .apps-browser {
   height: 100%;
 
   &.app-selected {
-    height: 100vh;
+    // Fill the content area exactly. Using viewport/extension height here would
+    // exceed it by the fixed header's height and make the whole page scrollable.
+    height: 100%;
     overflow: hidden;
-
-    @include mixins.desktop {
-      height: $extension-height;
-    }
   }
 
   .input-url {
