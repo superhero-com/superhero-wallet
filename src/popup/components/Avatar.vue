@@ -17,7 +17,7 @@
         v-if="!isPlaceholder && avatarUrl"
         class="avatar-img"
         :src="avatarUrl"
-        alt="Avatar"
+        :alt="$t('common.altAvatar')"
       >
     </slot>
   </div>

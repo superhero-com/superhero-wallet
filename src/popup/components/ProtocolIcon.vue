@@ -37,7 +37,7 @@
     src="../../icons/coin/solana.svg"
     class="protocol-icon"
     :class="[iconSize]"
-    alt="Solana"
+    :alt="$t('common.altSolana')"
   />
 </template>
 

@@ -32,7 +32,7 @@
       >
         <template #icon>
           <Avatar size="rg" borderless>
-            <img v-if="dappIcon" :src="dappIcon" class="dapp-logo" alt="DAPP logo" />
+            <img v-if="dappIcon" :src="dappIcon" class="dapp-logo" :alt="$t('pages.connectConfirm.dappLogoAlt')" />
             <DappIcon v-else class="dapp-icon" />
           </Avatar>
         </template>
@@ -96,7 +96,7 @@
           <div v-for="(accessName, index) in accessList" :key="index">
             <div class="label">
               <CheckMark class="icon" />
-              {{ accessLabels[accessName]?.label || 'Unknown' }}
+              {{ accessLabels[accessName]?.label || $t('common.unknown') }}
             </div>
             <TemplateRenderer
               class="description"

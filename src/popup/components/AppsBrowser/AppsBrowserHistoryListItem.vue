@@ -9,7 +9,7 @@
         v-if="image"
         :src="imageUrl"
         class="app-image"
-        alt="Dapp favicon"
+        :alt="$t('common.altDappFavicon')"
       >
       <IconWrapper
         v-else

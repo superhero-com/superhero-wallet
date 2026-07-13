@@ -4,7 +4,7 @@
       v-if="modelValue"
       :value="modelValue"
       class="number-select-input"
-      aria-label="choose number"
+      :aria-label="$t('common.chooseNumber')"
       @change="$emit('update:modelValue', +($event?.target as HTMLInputElement).value)"
     >
       <option
