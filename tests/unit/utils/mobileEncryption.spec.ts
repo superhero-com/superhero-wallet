@@ -1,140 +1,181 @@
 // @ts-nocheck
+/**
+ * `mobileEncryption` exists to answer one question about a stored blob: "is this
+ * already ciphertext I can read, or is it legacy plaintext that needs encrypting?"
+ * That decision is driven by whether a REAL `decrypt()` succeeds and by whether the
+ * value looks like REAL `encrypt()` output — so this spec runs the real AES-GCM
+ * (`@/utils/crypto` over Node's WebCrypto) and the real `SecureMobileStorage`
+ * (whose web implementation is plain `localStorage` — see `SecureStorageWeb`).
+ *
+ * A previous version mocked `@/utils/crypto`, replacing `encrypt` with
+ * `` `encrypted:${value}` `` string concatenation. That made the tests vacuous: the
+ * fake output is not even base64, so `looksLikeCiphertext()` — the heuristic that
+ * prevents double-wrapping (and thus permanent data loss) — was never once evaluated
+ * against a real ciphertext blob.
+ *
+ * The ONLY mock left is `IS_MOBILE_APP: true`, an environment fact that cannot be
+ * derived in a jsdom test run (`process.env.PLATFORM` is unset).
+ */
 describe('mobileEncryption', () => {
-  const secureStoreMock = new Map<string, any>();
-  const secureMobileStorageMock = {
-    get: vi.fn((key: string) => Promise.resolve(secureStoreMock.get(key) ?? null)),
-    set: vi.fn((key: string, value: any) => {
-      secureStoreMock.set(key, value);
-      return Promise.resolve();
-    }),
+  const loadModule = async ({ isMobileApp = true } = {}) => {
+    vi.resetModules();
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...(await importOriginal()),
+      IS_MOBILE_APP: isMobileApp,
+    }));
+
+    const mod = await import('@/utils/mobileEncryption');
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    return { ...mod, SecureMobileStorage };
   };
-  const decryptMock = vi.fn();
-  const encryptMock = vi.fn();
-  const importEncryptionKeyMock = vi.fn();
-  const getRandomValuesMock = vi.fn((bytes: Uint8Array) => {
-    bytes.fill(7);
-    return bytes;
+
+  /** Re-import with module state reset but storage retained — i.e. an app restart. */
+  const restartApp = () => loadModule();
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
   });
 
-  const loadModule = async () => {
-    vi.resetModules();
-    secureStoreMock.clear();
-    secureMobileStorageMock.get.mockClear();
-    secureMobileStorageMock.set.mockClear();
-    decryptMock.mockReset();
-    encryptMock.mockReset();
-    importEncryptionKeyMock.mockReset();
-    getRandomValuesMock.mockClear();
+  describe('encryptMobileStateIfPlaintext', () => {
+    it('encrypts legacy plaintext into real ciphertext that decrypts back to the original', async () => {
+      const { encryptMobileStateIfPlaintext, tryDecryptWithMobileKey } = await loadModule();
+      const plaintext = 'abandon abandon abandon about';
 
-    vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(getRandomValuesMock);
+      const ciphertext = await encryptMobileStateIfPlaintext(plaintext);
 
-    importEncryptionKeyMock.mockImplementation(async (bytes: Uint8Array) => ({
-      byteLength: bytes.length,
-    }));
-    encryptMock.mockImplementation(async (_key, value) => `encrypted:${value}`);
-
-    vi.doMock('@/constants', async () => ({
-      ...(await vi.importActual('@/constants')),
-      IS_MOBILE_APP: true,
-      STORAGE_KEYS: { mobileDataKey: 'mobile-data-key' },
-    }));
-    vi.doMock('@/lib/SecureMobileStorage', () => ({
-      SecureMobileStorage: secureMobileStorageMock,
-    }));
-    vi.doMock('@/utils/crypto', async () => {
-      const { IV_LENGTH, AES_GCM_TAG_LENGTH_BYTES } = await vi.importActual('@/utils/crypto');
-      return {
-        IV_LENGTH,
-        AES_GCM_TAG_LENGTH_BYTES,
-        decodeBase64: (value: string) => Buffer.from(value, 'base64'),
-        decrypt: decryptMock,
-        encodeBase64: (bytes: Uint8Array) => Buffer.from(bytes).toString('base64'),
-        encrypt: encryptMock,
-        importEncryptionKey: importEncryptionKeyMock,
-      };
+      expect(ciphertext).not.toBe(plaintext);
+      // Real round-trip through AES-GCM — the whole point of the module.
+      await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe(plaintext);
     });
 
-    return import('@/utils/mobileEncryption');
-  };
+    it('is idempotent: re-encrypting its own output returns it unchanged', async () => {
+      const { encryptMobileStateIfPlaintext, tryDecryptWithMobileKey } = await loadModule();
+      const plaintext = 'abandon abandon abandon about';
 
-  afterEach(async () => {
-    vi.restoreAllMocks();
+      const once = await encryptMobileStateIfPlaintext(plaintext);
+      const twice = await encryptMobileStateIfPlaintext(once);
+
+      expect(twice).toBe(once);
+      await expect(tryDecryptWithMobileKey(twice)).resolves.toBe(plaintext);
+    });
+
+    it('passes empty values through untouched', async () => {
+      const { encryptMobileStateIfPlaintext } = await loadModule();
+
+      await expect(encryptMobileStateIfPlaintext('')).resolves.toBe('');
+    });
+
+    /**
+     * The data-loss guard. After a Keychain wipe the old ciphertext is no longer
+     * decryptable, but it must NOT be treated as plaintext and wrapped in a second
+     * layer of encryption — that would destroy any chance of recovery. This only
+     * means something when `looksLikeCiphertext()` is fed a genuine `encrypt()` blob,
+     * which is exactly what the previously-mocked crypto made impossible to check.
+     */
+    it('leaves ciphertext from a rotated/wiped key unchanged instead of double-wrapping it', async () => {
+      const first = await loadModule();
+      const ciphertext = await first.encryptMobileStateIfPlaintext('critical seed phrase');
+
+      // Simulate a Keychain wipe: drop the mobile key, keep the encrypted blob.
+      await first.SecureMobileStorage.remove('mobile-data-key');
+
+      const afterWipe = await restartApp();
+      // The new install mints a different key, so this blob is undecryptable now...
+      await expect(afterWipe.tryDecryptWithMobileKey(ciphertext)).resolves.toBeNull();
+      // ...and must therefore be returned untouched, not re-encrypted.
+      await expect(afterWipe.encryptMobileStateIfPlaintext(ciphertext)).resolves.toBe(ciphertext);
+    });
+
+    it('does not misclassify a 64-char hex private key as ciphertext', async () => {
+      const { encryptMobileStateIfPlaintext, tryDecryptWithMobileKey } = await loadModule();
+      // 64 hex chars are a subset of the base64 alphabet and satisfy the length /
+      // modulo-4 checks, so without the explicit hex exclusion this would be
+      // mistaken for ciphertext and silently left unencrypted.
+      const hexPrivateKey = 'a'.repeat(64);
+
+      const result = await encryptMobileStateIfPlaintext(hexPrivateKey);
+
+      expect(result).not.toBe(hexPrivateKey);
+      await expect(tryDecryptWithMobileKey(result)).resolves.toBe(hexPrivateKey);
+    });
+
+    it('encrypts base64-shaped plaintext that is too short to be a real ciphertext', async () => {
+      const { encryptMobileStateIfPlaintext, tryDecryptWithMobileKey } = await loadModule();
+      // 40 chars — below the 44-char minimum for base64(16-byte IV + 16-byte GCM tag).
+      const shortBase64Shaped = `${'Q'.repeat(38)}==`;
+
+      const result = await encryptMobileStateIfPlaintext(shortBase64Shaped);
+
+      expect(result).not.toBe(shortBase64Shaped);
+      await expect(tryDecryptWithMobileKey(result)).resolves.toBe(shortBase64Shaped);
+    });
   });
 
-  it('encrypts legacy plaintext with the per-install mobile key', async () => {
-    const { encryptMobileStateIfPlaintext } = await loadModule();
-    decryptMock.mockRejectedValue(new Error('not ciphertext'));
+  describe('tryDecryptWithMobileKey', () => {
+    it('returns null for values that are not decryptable with the mobile key', async () => {
+      const { tryDecryptWithMobileKey } = await loadModule();
 
-    await expect(encryptMobileStateIfPlaintext('seed words here')).resolves.toBe(
-      'encrypted:seed words here',
-    );
-
-    expect(secureMobileStorageMock.set).toHaveBeenCalledWith(
-      'mobile-data-key',
-      Buffer.from(new Uint8Array(32).fill(7)).toString('base64'),
-    );
-    expect(encryptMock).toHaveBeenCalledWith(expect.any(Object), 'seed words here');
+      await expect(tryDecryptWithMobileKey('plain text, not ciphertext')).resolves.toBeNull();
+      await expect(tryDecryptWithMobileKey(`${'A'.repeat(42)}==`)).resolves.toBeNull();
+    });
   });
 
-  it('leaves ciphertext encrypted with the current mobile key unchanged', async () => {
-    const { encryptMobileStateIfPlaintext } = await loadModule();
-    decryptMock.mockResolvedValue('plain text');
+  describe('getOrCreateMobileEncryptionKey', () => {
+    it('refuses to mint a key when not running as the mobile app', async () => {
+      const { getOrCreateMobileEncryptionKey } = await loadModule({ isMobileApp: false });
 
-    await expect(encryptMobileStateIfPlaintext('current-ciphertext')).resolves.toBe(
-      'current-ciphertext',
-    );
+      await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow(/only be called on mobile/);
+    });
 
-    expect(encryptMock).not.toHaveBeenCalled();
-  });
+    it('persists the key once, reuses it in-memory, and reloads it after a restart', async () => {
+      const {
+        getOrCreateMobileEncryptionKey,
+        encryptMobileStateIfPlaintext,
+        SecureMobileStorage,
+      } = await loadModule();
+      const setSpy = vi.spyOn(SecureMobileStorage, 'set');
 
-  it('leaves unreadable ciphertext-shaped values unchanged to avoid double wrapping', async () => {
-    const { encryptMobileStateIfPlaintext } = await loadModule();
-    decryptMock.mockRejectedValue(new Error('wrong key'));
-    /** Minimum base64 length for real `encrypt()` output (16-byte IV + 16-byte GCM tag). */
-    const ciphertextShaped = `${'A'.repeat(42)}==`;
+      const key = await getOrCreateMobileEncryptionKey();
+      expect(key.algorithm.name).toBe('AES-GCM');
 
-    await expect(encryptMobileStateIfPlaintext(ciphertextShaped)).resolves.toBe(ciphertextShaped);
+      // Second call is served from the in-memory cache — no extra Keychain write.
+      await expect(getOrCreateMobileEncryptionKey()).resolves.toBe(key);
+      expect(setSpy).toHaveBeenCalledTimes(1);
 
-    expect(encryptMock).not.toHaveBeenCalled();
-  });
+      // The SAME key material must come back after a restart, or data encrypted in
+      // this session would be unreadable in the next one.
+      const ciphertext = await encryptMobileStateIfPlaintext('survives restart');
+      const restarted = await restartApp();
+      await expect(restarted.tryDecryptWithMobileKey(ciphertext)).resolves.toBe('survives restart');
+    });
 
-  it('does not misclassify hex private keys as ciphertext', async () => {
-    const { encryptMobileStateIfPlaintext } = await loadModule();
-    decryptMock.mockRejectedValue(new Error('not ciphertext'));
-    const hexPrivateKey = 'a'.repeat(64);
+    /**
+     * Persist-before-cache. If a failed Keychain write still published the key into
+     * the module cache, that key would encrypt fresh state and then vanish on restart,
+     * making the state permanently unrecoverable.
+     */
+    it('does not cache an un-persisted key when the Keychain write fails', async () => {
+      const {
+        getOrCreateMobileEncryptionKey,
+        encryptMobileStateIfPlaintext,
+        SecureMobileStorage,
+      } = await loadModule();
+      const setSpy = vi.spyOn(SecureMobileStorage, 'set')
+        .mockRejectedValueOnce(new Error('keychain locked'));
 
-    await expect(encryptMobileStateIfPlaintext(hexPrivateKey)).resolves.toBe(
-      `encrypted:${hexPrivateKey}`,
-    );
+      await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow('keychain locked');
 
-    expect(encryptMock).toHaveBeenCalledWith(expect.any(Object), hexPrivateKey);
-  });
+      // A retry mints a fresh key and persists it for real (spy falls through).
+      const key = await getOrCreateMobileEncryptionKey();
+      expect(key.algorithm.name).toBe('AES-GCM');
+      expect(setSpy).toHaveBeenCalledTimes(2);
 
-  it('encrypts 40-char base64-shaped legacy plaintext (below min ciphertext size)', async () => {
-    const { encryptMobileStateIfPlaintext } = await loadModule();
-    decryptMock.mockRejectedValue(new Error('wrong key'));
-    const base64ShapedPlaintext = `${'Q'.repeat(38)}==`;
-
-    await expect(encryptMobileStateIfPlaintext(base64ShapedPlaintext)).resolves.toBe(
-      `encrypted:${base64ShapedPlaintext}`,
-    );
-
-    expect(encryptMock).toHaveBeenCalledWith(expect.any(Object), base64ShapedPlaintext);
-  });
-
-  it('does not cache a newly generated key when persisting it fails', async () => {
-    const { getOrCreateMobileEncryptionKey } = await loadModule();
-    secureMobileStorageMock.set
-      .mockRejectedValueOnce(new Error('keychain locked'))
-      .mockImplementationOnce((key: string, value: any) => {
-        secureStoreMock.set(key, value);
-        return Promise.resolve();
-      });
-
-    await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow('keychain locked');
-    await expect(getOrCreateMobileEncryptionKey()).resolves.toEqual({ byteLength: 32 });
-
-    expect(importEncryptionKeyMock).toHaveBeenCalledTimes(2);
-    expect(secureMobileStorageMock.set).toHaveBeenCalledTimes(2);
+      // Whatever key we ended up holding must be the one on disk: anything encrypted
+      // now has to still be readable after a restart.
+      const ciphertext = await encryptMobileStateIfPlaintext('must survive');
+      const restarted = await restartApp();
+      await expect(restarted.tryDecryptWithMobileKey(ciphertext)).resolves.toBe('must survive');
+    });
   });
 });
