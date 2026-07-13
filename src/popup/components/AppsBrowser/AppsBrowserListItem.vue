@@ -8,7 +8,7 @@
         v-if="imageUrl"
         :src="imageUrl"
         class="app-image"
-        alt="Dapp favicon"
+        :alt="$t('common.altDappFavicon')"
       >
     </div>
     <div

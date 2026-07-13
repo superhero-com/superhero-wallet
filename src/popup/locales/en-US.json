@@ -3,7 +3,17 @@
     "activeAccount": "Active account",
     "address": "Address",
     "allow": "Allow",
+    "altAppStore": "App Store",
+    "altAssetImage": "Asset image",
+    "altAvatar": "Avatar",
+    "altChrome": "Chrome",
+    "altDappFavicon": "Dapp favicon",
+    "altFirefox": "Firefox",
+    "altGooglePlay": "Google Play",
+    "altSolana": "Solana",
+    "chooseNumber": "choose number",
     "name": "Name",
+    "notAvailable": "N/A",
     "addressCopied": "Copied",
     "all": "All",
     "allAddresses": "All account addresses",
@@ -33,6 +43,7 @@
     "hours": "{n} hours | {n} hour | {n} hours",
     "hoursShort": "{n} h",
     "key": "Key",
+    "missingComponentName": "Missing component name",
     "minutes": "{n} minutes | {n} minute | {n} minutes",
     "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
@@ -418,7 +429,8 @@
       "subtitle": "Allow Superhero Wallet to access your camera in order to scan QR codes.",
       "settings": "Settings",
       "qrCodeHasMultipleFragments": "In order to sign this transaction you need to scan multiple QR codes. Keep your camera focused on the changing QRs until all codes have been scanned.",
-      "scanningProgress": "scanned"
+      "scanningProgress": "scanned",
+      "scanningVideoTitle": "Scanning Qr Code"
     },
     "name-pointers-help": {
       "title": "Name pointers",
@@ -916,7 +928,8 @@
       "header": "Lost in space?",
       "description": "The feature could not be found in this Universe. Keep calm and safely fly back home.",
       "backToHome": "Return home",
-      "reportBug": "Report a bug"
+      "reportBug": "Report a bug",
+      "imageAlt": "Feature not found"
     },
     "recentTransactions": {
       "noTransactionsFound": "There are no recent transactions for this account.",
@@ -947,7 +960,8 @@
       "transactionRequest": "This dApp may propose transactions. You are in charge of confirming them.",
       "rememberMe": "Remember me",
       "selectAccount": "Select account to connect with",
-      "ensureNetwork": "Kindly ensure that Superhero Wallet and dApp are connected to the same network before making any transaction."
+      "ensureNetwork": "Kindly ensure that Superhero Wallet and dApp are connected to the same network before making any transaction.",
+      "dappLogoAlt": "DAPP logo"
     },
     "fungible-tokens": {
       "tokens": "Tokens | Token | Tokens",
@@ -1387,7 +1401,8 @@
     "appsBrowser": {
       "popularApps": "Featured",
       "recentApps": "Latest visited",
-      "inputPlaceholder": "Enter URL"
+      "inputPlaceholder": "Enter URL",
+      "iframeTitle": "Selected app"
     },
     "warningDappBrowser": {
       "title": "You are going to visit a \n third-party website",

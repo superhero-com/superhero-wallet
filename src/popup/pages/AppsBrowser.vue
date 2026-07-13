@@ -70,7 +70,7 @@
       <iframe
         v-else
         ref="iframeEl"
-        title="selectedApp"
+        :title="$t('pages.appsBrowser.iframeTitle')"
         class="apps-browser-iframe"
         :src="selectedApp.url"
         @load="onAppLoaded()"

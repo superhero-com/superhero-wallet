@@ -11,14 +11,14 @@
         <img
           :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/app-store-mobile.svg"
-          alt="App Store"
+          :alt="$t('common.altAppStore')"
         >
       </LinkButton>
       <LinkButton :href="APP_LINK_ANDROID">
         <img
           :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/google-play-mobile.svg"
-          alt="Google Play"
+          :alt="$t('common.altGooglePlay')"
         >
       </LinkButton>
     </div>
@@ -35,13 +35,13 @@
             :href="APP_LINK_FIREFOX"
             :disabled="!IS_FIREFOX || IS_MOBILE_DEVICE"
             :src="firefoxIcon"
-            alt="Firefox"
+            :alt="$t('common.altFirefox')"
           />
           <PlatformIcon
             :href="APP_LINK_CHROME"
             :disabled="IS_FIREFOX || IS_MOBILE_DEVICE"
             :src="chromeIcon"
-            alt="Chrome"
+            :alt="$t('common.altChrome')"
           />
         </div>
       </div>
@@ -54,13 +54,13 @@
             :href="APP_LINK_IOS"
             :disabled="!IS_IOS || !IS_MOBILE_DEVICE"
             :src="appStoreIcon"
-            alt="App Store"
+            :alt="$t('common.altAppStore')"
           />
           <PlatformIcon
             :href="APP_LINK_ANDROID"
             :disabled="IS_IOS || !IS_MOBILE_DEVICE"
             :src="googlePlayIcon"
-            alt="Google Play"
+            :alt="$t('common.altGooglePlay')"
           />
         </div>
       </div>

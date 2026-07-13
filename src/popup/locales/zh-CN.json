@@ -3,7 +3,17 @@
     "activeAccount": "活跃账户",
     "address": "地址",
     "allow": "允许",
+    "altAppStore": "App Store",
+    "altAssetImage": "资产图片",
+    "altAvatar": "头像",
+    "altChrome": "Chrome",
+    "altDappFavicon": "Dapp 图标",
+    "altFirefox": "Firefox",
+    "altGooglePlay": "Google Play",
+    "altSolana": "Solana",
+    "chooseNumber": "选择数字",
     "name": "名称",
+    "notAvailable": "不可用",
     "addressCopied": "已复制",
     "all": "全部",
     "allAddresses": "所有账户地址",
@@ -33,6 +43,7 @@
     "hours": "{n} 小时 | {n} 小时 | {n} 小时",
     "hoursShort": "{n} 小时",
     "key": "密钥",
+    "missingComponentName": "缺少组件名称",
     "minutes": "{n} 分钟 | {n} 分钟 | {n} 分钟",
     "minutesShort": "{n} 分 | {n} 分 | {n} 分",
     "next": "下一步",
@@ -235,6 +246,7 @@
       "btnText": "导入账户"
     },
     "name-exist": {
+      "title": "名称注册错误",
       "msg": "该名称已被注册。"
     },
     "name-already-preclaimed": {
@@ -254,6 +266,15 @@
       "name": "名称",
       "cost": "续期费用",
       "autoExtend": "下次自动延长此名称"
+    },
+    "name-length": {
+      "msg": "SUPERHERO 上的名称长度必须至少为 13 个字符。"
+    },
+    "incorrect-address": {
+      "msg": "请确保你输入了有效的公共地址。"
+    },
+    "incorrect-amount": {
+      "msg": "请确保你输入了有效的金额。"
     },
     "insufficient-balance": {
       "msg": "你的余额不足以完成此交易。"
@@ -408,7 +429,8 @@
       "subtitle": "允许 Superhero 钱包访问你的相机以扫描二维码。",
       "settings": "设置",
       "qrCodeHasMultipleFragments": "要签名此交易，你需要扫描多个二维码。请将相机对准变化的二维码，直到全部扫描完成。",
-      "scanningProgress": "已扫描"
+      "scanningProgress": "已扫描",
+      "scanningVideoTitle": "正在扫描二维码"
     },
     "name-pointers-help": {
       "title": "名称指针",
@@ -906,7 +928,8 @@
       "header": "迷失在太空中？",
       "description": "本宇宙中找不到该功能。保持冷静并安全返回主页。",
       "backToHome": "返回主页",
-      "reportBug": "报告错误"
+      "reportBug": "报告错误",
+      "imageAlt": "未找到功能"
     },
     "recentTransactions": {
       "noTransactionsFound": "该账户没有最近交易。",
@@ -937,7 +960,8 @@
       "transactionRequest": "此 dApp 可能会提议交易。你负责确认它们。",
       "rememberMe": "记住我",
       "selectAccount": "选择用于连接的账户",
-      "ensureNetwork": "进行任何交易前，请确保 Superhero 钱包与 dApp 连接到相同网络。"
+      "ensureNetwork": "进行任何交易前，请确保 Superhero 钱包与 dApp 连接到相同网络。",
+      "dappLogoAlt": "DAPP 图标"
     },
     "fungible-tokens": {
       "tokens": "代币 | 代币 | 代币",
@@ -1377,7 +1401,8 @@
     "appsBrowser": {
       "popularApps": "精选",
       "recentApps": "最近访问",
-      "inputPlaceholder": "输入 URL"
+      "inputPlaceholder": "输入 URL",
+      "iframeTitle": "已选择的应用"
     },
     "warningDappBrowser": {
       "title": "你将访问\n第三方网站",
