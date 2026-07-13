@@ -2,6 +2,18 @@ import { tg } from '@/popup/plugins/i18n';
 import { AE_NETWORK_TESTNET_ID } from '@/protocols/aeternity/config';
 import { STUB_ACCOUNT, STUB_TX_BASE_64 } from '@/constants/stubs';
 
+/**
+ * A self-send SpendTx for `STUB_ACCOUNT.addressAeternity` (the account
+ * `cy.login` seeds the wallet with), signed with its key over `ae_uat`. Unlike
+ * the old fixture this replaces, its sender is an account the wallet actually
+ * holds, so the confirmation modal's account switcher does not need the
+ * rebuild opt-in to sign it. Regenerate both strings together if this ever
+ * needs to change - the signed one is not derivable from the unsigned one
+ * without the test mnemonic's private key (see `tests/fixtures/account.js`).
+ */
+const unsignedSelfSendTx = 'tx_+FEMAaEB3CgyWh2tdZqs4BJVyb/oKE3hK81oYzteWEKnjfZSZ2ehAdwoMlodrXWarOASVcm/6ChN4SvNaGM7XlhCp432UmdnC4YPJvVhyAAAE4AUsSgX';
+const signedSelfSendTxUrlEncoded = 'tx_%2BJsLAfhCuECUph66Lnu%2Fbt4T7nN5kUw8DCbM8X3a38nbxe1tVfXQZGm9DafyiATnE%2FpQkaWRCTS7kbIwKLUqHYCRZOg4M8sKuFP4UQwBoQHcKDJaHa11mqzgElXJv%2BgoTeErzWhjO15YQqeN9lJnZ6EB3CgyWh2tdZqs4BJVyb%2FoKE3hK81oYzteWEKnjfZSZ2cLhg8m9WHIAAATgGntHBY%3D';
+
 const callbackUrl = encodeURIComponent('http://localhost');
 const encodedContractCallTx = encodeURIComponent('tx_+HQrAaEBbLQV9y00r/WCZ4XWrEVDpdiLPiLx2282rdKA1dkRTlmCA7yhBWuJbvnfcBIKpR/IbC+ywuM9P7fvmDFNerFKykCB+M1qA4al2v8FcAAAhzcV8VZnVACDGBf4hDuaygCQKxEV1igBG2+HI4byb8D/wPOLADU=');
 const encodedUnknownTx = encodeURIComponent('tx_+FKB/wGhAcqjxWnZkJOLBrcg4qrqLAGciiTZoXqyjoYXlSBGEywioQHKo8Vp2ZCTiwa3IOKq6iwBnIok2aF6so6GF5UgRhMsIguGDyb1YcgAABOAFw87cw==');
@@ -20,7 +32,7 @@ describe('Test cases for deeplinks', () => {
   it('Signs transaction and verifies signature', () => {
     cy.login(
       {},
-      `/sign-transaction?transaction=${encodeURIComponent(STUB_TX_BASE_64)}&networkId=ae_uat`
+      `/sign-transaction?transaction=${encodeURIComponent(unsignedSelfSendTx)}&networkId=ae_uat`
       + `&x-success=${encodedTestDeploymentUrl}%2Faccount%3F%7Btransaction%7D`
       + `&x-cancel=${encodedTestDeploymentUrl}`,
     )
@@ -31,9 +43,11 @@ describe('Test cases for deeplinks', () => {
       .get('[data-cy=label]')
       .eq(1)
       .should('be.visible')
-      .should('contain', tg('transaction.spendType.in'))
-      .splittedStringToBeEqual('[data-cy=sender] [data-cy=address]', 'ak_2YFAH6kk1ZqTJcAtp7fupGqP9gK8KfPmQVCUuM4gSmzMSczaGc')
-      .splittedStringToBeEqual('[data-cy=recipient] [data-cy=address]', 'ak_2YFAH6kk1ZqTJcAtp7fupGqP9gK8KfPmQVCUuM4gSmzMSczaGc')
+      // The wallet's own account is both sender and recipient (it is signing
+      // its own tx), so the direction - derived from `senderId` - is "out".
+      .should('contain', tg('transaction.spendType.out'))
+      .splittedStringToBeEqual('[data-cy=sender] [data-cy=address]', STUB_ACCOUNT.addressAeternity)
+      .splittedStringToBeEqual('[data-cy=recipient] [data-cy=address]', STUB_ACCOUNT.addressAeternity)
       .get('[data-cy=accept]')
       .click()
       .get('[data-cy=to-confirm]')
@@ -42,7 +56,7 @@ describe('Test cases for deeplinks', () => {
       .should('not.contain', '/sign-transaction')
       .url()
       .then((url) => {
-        expect(url.split('?')[1]).to.equal('tx_%2BJsLAfhCuECWzpMfRK1jZkRzF9%2BO%2BkLl8IkeJmTsDc2KKATrF745bg91rWb3l0HcS3ks6DKgtwvLWgg5%2BPiJ1gQpgF1yYlgLuFP4UQwBoQHKo8Vp2ZCTiwa3IOKq6iwBnIok2aF6so6GF5UgRhMsIqEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCILhg8m9WHIAAATgHk6x1k%3D');
+        expect(url.split('?')[1]).to.equal(signedSelfSendTxUrlEncoded);
       });
   });
 

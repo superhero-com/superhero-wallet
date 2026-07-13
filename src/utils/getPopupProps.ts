@@ -87,7 +87,9 @@ export async function getPopupProps(): Promise<IPopupProps> {
 
   let resolved = false;
 
-  const resolve = async () => internalPostMessage({ type: POPUP_ACTIONS.resolve });
+  const resolve = async (payload?: any) => (
+    internalPostMessage({ type: POPUP_ACTIONS.resolve, payload })
+  );
   const reject = async () => internalPostMessage({ type: POPUP_ACTIONS.reject });
 
   const unloadHandler = () => {
