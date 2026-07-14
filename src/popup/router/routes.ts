@@ -434,12 +434,19 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings/seed-phrase/details',
     name: ROUTE_SEED_PHRASE_DETAILS,
     component: () => import('../pages/SeedPhraseDetailsSettings.vue'),
-    beforeEnter: async (_to, _from, next) => {
+    beforeEnter: async (_to, from, next) => {
       try {
         await requireSeedPhraseReauth();
         next();
       } catch {
-        next(false);
+        // `next(false)` would leave the router with no matched route (and thus a blank
+        // page) when this route is entered directly, e.g. on a hard refresh, since there
+        // is no previous in-app route to fall back to.
+        if (from.matched.length) {
+          next(false);
+        } else {
+          next({ name: ROUTE_ACCOUNT });
+        }
       }
     },
   },
@@ -447,12 +454,17 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings/seed-phrase/details/verify',
     name: ROUTE_SEED_PHRASE_VERIFY,
     component: () => import('../pages/SeedPhraseVerifySettings.vue'),
-    beforeEnter: async (_to, _from, next) => {
+    beforeEnter: async (_to, from, next) => {
       try {
         await requireSeedPhraseReauth();
         next();
       } catch {
-        next(false);
+        // See comment in the `ROUTE_SEED_PHRASE_DETAILS` guard above.
+        if (from.matched.length) {
+          next(false);
+        } else {
+          next({ name: ROUTE_ACCOUNT });
+        }
       }
     },
   },
