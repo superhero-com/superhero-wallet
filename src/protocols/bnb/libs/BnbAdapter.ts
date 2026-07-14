@@ -197,7 +197,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     return Number(txCount);
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {

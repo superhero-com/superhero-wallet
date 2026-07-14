@@ -197,7 +197,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return (parseFloat(balance) > 0 || txCount > 0);
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {

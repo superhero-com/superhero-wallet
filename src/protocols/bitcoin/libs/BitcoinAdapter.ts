@@ -191,7 +191,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return !!chainFunded;
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
@@ -213,6 +213,11 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: child.publicKey,
       address: address!,
     };
+  }
+
+  protected override getHdWalletDerivationCacheKeyExtras(): string[] {
+    const { activeNetwork } = useNetworks();
+    return [activeNetwork.value.type];
   }
 
   override resolveAccountRaw(
