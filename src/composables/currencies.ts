@@ -55,6 +55,13 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 
 const isCurrenciesUnavailable = ref(false);
 
+/**
+ * `Intl.NumberFormat` construction is expensive; `formatCurrency` runs 1-3x per
+ * visible row on every list render, so a fresh instance per call is wasteful.
+ * Cache one formatter per currency code instead (there are only a handful).
+ */
+const numberFormatCache = new Map<CurrencyCode, Intl.NumberFormat>();
+
 export function useCurrencies({
   pollingDisabled = false,
 }: UseCurrenciesOptions = {}) {
@@ -153,10 +160,16 @@ export function useCurrencies({
    *   eg.: "23 789,98 £", "$ 25.269,00"
    */
   function formatCurrency(value: number): string {
-    return new Intl.NumberFormat(
-      DEFAULT_LOCALE,
-      { style: 'currency', currencyDisplay: 'code', currency: currentCurrencyCode.value },
-    ).format(value);
+    const code = currentCurrencyCode.value;
+    let formatter = numberFormatCache.get(code);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(
+        DEFAULT_LOCALE,
+        { style: 'currency', currencyDisplay: 'code', currency: code },
+      );
+      numberFormatCache.set(code, formatter);
+    }
+    return formatter.format(value);
   }
 
   /**
