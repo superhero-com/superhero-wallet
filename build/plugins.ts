@@ -129,6 +129,10 @@ export function devProcessPolyfillPlugin(): Plugin {
  * reachable only through that dynamic boundary — leaving them OUT of the forced
  * `vendor` chunk lets Rollup move the whole subtree into an on-demand async
  * chunk instead of the always-loaded `vendor` bundle.
+ *
+ * `swagger-client` (+ its `@swagger-api/*` dependencies) is the same shape: its
+ * sole consumer, `lib/swagger.js`'s `genSwaggerClient`, loads it via dynamic
+ * `import()` and has no other static importer in `src`.
  */
 const LAZY_VENDOR_PACKAGES = [
   'airgap-coin-lib',
@@ -137,6 +141,8 @@ const LAZY_VENDOR_PACKAGES = [
   'libsodium',
   'moment',
   'ramda',
+  'swagger-client',
+  '@swagger-api/',
 ];
 
 /**
