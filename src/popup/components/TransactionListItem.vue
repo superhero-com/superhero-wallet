@@ -53,8 +53,6 @@
 import {
   computed,
   defineComponent,
-  onBeforeUnmount,
-  onMounted,
   PropType,
   ref,
 } from 'vue';
@@ -67,7 +65,6 @@ import type {
 import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
   amountRounded,
-  executeAndSetInterval,
   formatDate,
   formatTime,
   relativeTimeTo,
@@ -76,6 +73,7 @@ import {
   useCurrencies,
   useTransactionData,
 } from '@/composables';
+import { useTimestampTick } from '@/composables/timestampTick';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
@@ -105,7 +103,6 @@ export default defineComponent({
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
-    let timerInterval: NodeJS.Timeout;
     const transactionDate = ref();
 
     const currentTransaction = computed(
@@ -168,16 +165,10 @@ export default defineComponent({
       );
     });
 
-    onMounted(() => {
-      timerInterval = executeAndSetInterval(() => {
-        transactionDate.value = (props.transaction?.microTime)
-          ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
-          : undefined;
-      }, 5000);
-    });
-
-    onBeforeUnmount(() => {
-      clearInterval(timerInterval);
+    useTimestampTick(() => {
+      transactionDate.value = (props.transaction?.microTime)
+        ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
+        : undefined;
     });
 
     return {
