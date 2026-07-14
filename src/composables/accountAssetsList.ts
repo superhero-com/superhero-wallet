@@ -69,8 +69,20 @@ export function useAccountAssetsList({
     () => getProtocolAvailableTokens(accountProtocol.value),
   );
 
-  const accountTokenBalancesContractIds = computed(
-    () => accountTokenBalances.value.map(({ contractId }) => contractId),
+  /**
+   * `Map`/`Set` lookups instead of `.find()`/`.includes()` scans: available
+   * tokens can number in the hundreds, and `accountAssetsFiltered` re-derives
+   * on every keystroke of the asset search box, so an O(n*m) scan per
+   * available token became a user-visible input lag.
+   */
+  const accountTokenBalancesByContractId = computed(
+    () => new Map(
+      accountTokenBalances.value.map((tokenBalance) => [tokenBalance.contractId, tokenBalance]),
+    ),
+  );
+
+  const accountTokenBalancesContractIdSet = computed(
+    () => new Set(accountTokenBalances.value.map(({ contractId }) => contractId)),
   );
 
   /**
@@ -90,8 +102,7 @@ export function useAccountAssetsList({
       ? []
       : Object.entries(accountAvailableTokens.value)
         .map(([contractId, tokenData]) => {
-          const singleBalance = accountTokenBalances.value
-            .find((tokenBalance) => tokenBalance.contractId === contractId);
+          const singleBalance = accountTokenBalancesByContractId.value.get(contractId);
           if (singleBalance) {
             return { ...tokenData, ...singleBalance };
           }
@@ -120,7 +131,7 @@ export function useAccountAssetsList({
       .filter(({ contractId }) => (
         !ownedOnly
         || contractId === protocolCoinContractId
-        || accountTokenBalancesContractIds.value.includes(contractId)
+        || accountTokenBalancesContractIdSet.value.has(contractId)
       ))
       .filter(({ contractId, convertedBalance }) => (
         !withBalanceOnly
