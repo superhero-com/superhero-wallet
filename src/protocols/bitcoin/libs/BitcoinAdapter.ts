@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { BIP32Factory } from 'bip32';
 import {
   payments,
