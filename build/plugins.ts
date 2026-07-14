@@ -133,6 +133,12 @@ export function devProcessPolyfillPlugin(): Plugin {
  * `swagger-client` (+ its `@swagger-api/*` dependencies) is the same shape: its
  * sole consumer, `lib/swagger.js`'s `genSwaggerClient`, loads it via dynamic
  * `import()` and has no other static importer in `src`.
+ *
+ * WalletConnect (`@walletconnect/*`, `@reown/`) is also the same shape:
+ * `composables/walletConnect.ts` loads `@walletconnect/core`, `@reown/walletkit`
+ * AND `@walletconnect/utils` all via dynamic `import()` inside `initWeb3wallet`;
+ * only type-only imports of `@walletconnect/types`/`@reown/walletkit` remain
+ * static (erased at compile time, so they don't pull in runtime code).
  */
 const LAZY_VENDOR_PACKAGES = [
   'airgap-coin-lib',
@@ -143,6 +149,8 @@ const LAZY_VENDOR_PACKAGES = [
   'ramda',
   'swagger-client',
   '@swagger-api/',
+  '@walletconnect/',
+  '@reown/',
 ];
 
 /**
