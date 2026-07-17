@@ -161,14 +161,12 @@ describe('useMaxAmount', () => {
     expect(result.max.value).toBe('0');
   });
 
-  // BUG: `.decimalPlaces(decimals)` in maxAmount.ts (line 75) is called without an
-  // explicit rounding mode, so it uses BigNumber.js's global default (ROUND_HALF_UP).
-  // balance 1.56 - fee 0.5 = 1.06 exactly; the *actual* spendable amount at 1 decimal is
-  // 1.0 (flooring), but ROUND_HALF_UP rounds 1.06 -> 1.1, which is MORE than the wallet
-  // can actually send (1.1 + 0.5 fee = 1.6 > 1.56 balance) - guaranteed to fail broadcast
-  // as "insufficient funds". Same root cause as coinMaxAmount.spec.ts's equivalent case.
-  // See TEST_IMPROVEMENT_PLAN.md "Potential bugs found" #1.
-  it.fails('max is floored (not rounded) to the asset decimals', async () => {
+  // `.decimalPlaces(decimals, BigNumber.ROUND_DOWN)` in maxAmount.ts floors rather than
+  // rounds: balance 1.56 - fee 0.5 = 1.06 exactly; the actual spendable amount at 1
+  // decimal is 1.0. Rounding up here would offer a "max" the wallet can't actually send
+  // (1.1 + 0.5 fee = 1.6 > 1.56 balance). Same fix as coinMaxAmount.spec.ts's equivalent
+  // case.
+  it('max is floored (not rounded) to the asset decimals', async () => {
     const { useMaxAmount } = await setup({ balance: '1.56' });
     mockFeeAe('0.5');
     const formModel = makeFormModel({ decimals: 1, addressesCount: 1 });
@@ -176,20 +174,15 @@ describe('useMaxAmount', () => {
     const result = useMaxAmount({ formModel, multisigVault: MULTISIG_VAULT });
     await waitForFee(result);
 
-    expect(result.max.value).toBe('1'); // actual: '1.1'
+    expect(result.max.value).toBe('1');
   });
 
-  // BUG: for a multisig-vault proposal, `fee.value` is set to `tx.fee x recipientsCount`
-  // (maxAmount.ts ~line 164), but the `max` computed *also* multiplies `fee.value` by
-  // `recipientsCount` again (line 73). For N>1 recipients this double-charges the fee
-  // (effectively fee x N^2 instead of fee x N), understating the real max-sendable amount.
+  // For a multisig-vault proposal, `fee.value` is set to the PER-TX fee (`tx.fee`,
+  // un-multiplied), and the `max` computed multiplies it by `recipientsCount` exactly
+  // once - matching the plain (non-multisig) send path's convention.
   // balance 3 AE, per-tx fee 0.0001 AE, N=3 recipients:
-  //   expected (fee x N once):  (3 - 0.0001*3) / 3 = 2.9997 / 3 = 0.9999 AE
-  //   actual   (fee x N twice): (3 - 0.0003*3) / 3 = 2.9991 / 3 = 0.9997 AE
-  // Scoped to the multisig + multi-recipient combination specifically - the plain
-  // (non-multisig) send path does not pre-multiply fee.value, so it isn't affected.
-  // See TEST_IMPROVEMENT_PLAN.md "Potential bugs found" #3.
-  it.fails('multisig multi-recipient fee scales linearly with recipient count', async () => {
+  //   (3 - 0.0001*3) / 3 = 2.9997 / 3 = 0.9999 AE
+  it('multisig multi-recipient fee scales linearly with recipient count', async () => {
     const { useMaxAmount } = await setup({ balance: '3' });
     const n = mockFeeAe('0.0001', 3);
     const formModel = makeFormModel({ decimals: 4, addressesCount: n });
@@ -197,7 +190,7 @@ describe('useMaxAmount', () => {
     const result = useMaxAmount({ formModel, multisigVault: MULTISIG_VAULT });
     await waitForFee(result);
 
-    expect(result.max.value).toBe('0.9999'); // actual: '0.9997'
+    expect(result.max.value).toBe('0.9999');
   });
 
   it('token (non-coin) max ignores an already-computed AE fee', async () => {

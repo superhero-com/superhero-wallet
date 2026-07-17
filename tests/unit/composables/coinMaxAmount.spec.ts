@@ -126,20 +126,17 @@ describe('useCoinMaxAmount', () => {
     expect(max.value).toBe('0.000001');
   });
 
-  // BUG: `.decimalPlaces(decimals)` in coinMaxAmount.ts (line 48) is called without an
-  // explicit rounding mode, so it uses BigNumber.js's global default (ROUND_HALF_UP).
-  // balance 1.56 - fee 0.5 = 1.06 exactly; the *actual* spendable amount at 1 decimal
-  // is 1.0 (flooring), but ROUND_HALF_UP rounds 1.06 -> 1.1, which is MORE than the
-  // wallet can actually send (1.1 + 0.5 fee = 1.6 > 1.56 balance) - a max-amount that
-  // is guaranteed to fail broadcast as "insufficient funds". See TEST_IMPROVEMENT_PLAN.md
-  // "Potential bugs found" #1.
-  it.fails('max is floored (not rounded) to the asset decimals', async () => {
+  // `.decimalPlaces(decimals, BigNumber.ROUND_DOWN)` in coinMaxAmount.ts floors rather
+  // than rounds: balance 1.56 - fee 0.5 = 1.06 exactly; the actual spendable amount at
+  // 1 decimal is 1.0. Rounding up here would offer a "max" the wallet can't actually
+  // send (1.1 + 0.5 fee = 1.6 > 1.56 balance).
+  it('max is floored (not rounded) to the asset decimals', async () => {
     const { useCoinMaxAmount, feeRef } = await setup({ balance: '1.56', fee: '0.5' });
     const formModel = makeFormModel({ decimals: 1, addressesCount: 1 });
 
     const { max } = useCoinMaxAmount({ formModel, fee: feeRef });
 
-    expect(max.value).toBe('1'); // actual: '1.1'
+    expect(max.value).toBe('1');
   });
 
   it('token (non-coin) max ignores the native-coin fee entirely', async () => {
@@ -158,12 +155,10 @@ describe('useCoinMaxAmount', () => {
     expect(max.value).toBe('100');
   });
 
-  // Secondary finding (not part of the "ignores coin fee" case but discovered while
-  // testing it): unlike the coin branch, the token branch never divides by the
-  // recipient count. With 2 recipients, filling each amount field with the FULL token
-  // balance would request 2x the wallet's actual token balance on submit. See
-  // TEST_IMPROVEMENT_PLAN.md "Potential bugs found" #2.
-  it.fails('token max is split across multiple recipients like the coin branch', async () => {
+  // Like the coin branch, the token branch divides by the recipient count. With 2
+  // recipients, each amount field should offer half the token balance, not the full
+  // balance (which would request 2x the wallet's actual token balance on submit).
+  it('token max is split across multiple recipients like the coin branch', async () => {
     const { useCoinMaxAmount, feeRef } = await setup({ balance: '0', fee: '0' });
     const formModel = makeFormModel({
       decimals: 6,
@@ -174,6 +169,6 @@ describe('useCoinMaxAmount', () => {
 
     const { max } = useCoinMaxAmount({ formModel, fee: feeRef });
 
-    expect(max.value).toBe('50'); // actual: '100'
+    expect(max.value).toBe('50');
   });
 });
