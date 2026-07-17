@@ -408,7 +408,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
-    const gasLimit = await contract.methods.transfer(recipient, hexAmount).estimateGas();
+    const estimatedGas = await contract.methods.transfer(recipient, hexAmount).estimateGas();
+    // `estimateGas` is exact for the chain state at estimation time, but an ERC-20
+    // transfer's gas can rise by mining time (e.g. first-time recipient storage
+    // writes, allowance bookkeeping). An underestimate reverts out-of-gas with the
+    // fee already spent, so add a 15% headroom - the usual wallet safety margin.
+    const gasLimit = (BigInt(estimatedGas) * 115n) / 100n;
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {

@@ -333,10 +333,11 @@ describe('EthereumAdapter - transferToken (ERC-20 decimals math)', () => {
     expect(BigInt(contractMockState.transferCalls[0].amount)).toBe(5n);
   });
 
-  // The tx's `gasLimit` must reflect `contract.methods.transfer(...).estimateGas()`
-  // — a reasonable wallet user expects the gas limit to match the estimated cost
-  // of the call, not an unrelated value.
-  it('uses the estimated gas as the gas limit, not the tx nonce', async () => {
+  // The tx's `gasLimit` must be derived from `contract.methods.transfer(...)
+  // .estimateGas()` — plus a 15% safety headroom so a token transfer whose gas
+  // rises between estimation and mining doesn't revert out-of-gas — and never the
+  // tx nonce or another unrelated value.
+  it('uses the estimated gas (plus headroom) as the gas limit, not the tx nonce', async () => {
     contractMockState.decimals = 18;
     contractMockState.estimateGas = 65000;
     web3EthMockState.txCount = 3;
@@ -350,7 +351,8 @@ describe('EthereumAdapter - transferToken (ERC-20 decimals math)', () => {
     });
     const txData = fromTxDataSpy.mock.calls[0][0] as any;
 
-    expect(BigInt(txData.gasLimit)).toBe(65000n);
+    // 65000 * 115 / 100
+    expect(BigInt(txData.gasLimit)).toBe(74750n);
   });
 
   it('broadcasts the signed token transfer and returns its hash', async () => {
