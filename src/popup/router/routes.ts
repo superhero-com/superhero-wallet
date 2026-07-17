@@ -68,69 +68,46 @@ import {
   ROUTE_SETTINGS,
 } from './routeNames';
 
-import About from '../pages/About.vue';
+// Kept as static imports: they sit on the first-paint/auth path (Index,
+// Dashboard, ProtocolSpecificView, AccountDetailsTransactions, AssetDetails*),
+// serve the extension's dapp-confirm popup windows (Confirm*Sign, Popup*),
+// which race dapp callbacks and must render the instant the popup opens, or
+// are exercised by `RouteLastUsedRoutes` (NamesList/AuctionList/NameClaim,
+// About) — see note below. Everything else is loaded via `() => import(...)`
+// at its route definition so it only downloads when actually navigated to.
+//
+// RouteLastUsedRoutes stores the current route in `router.afterEach`, which
+// vue-router only fires once a route's async component (if any) has resolved.
+// tests/e2e/integration/other.cy.js's last-visited-route test does a hard
+// reload immediately after navigating, then asserts the route was restored;
+// against a not-yet-cached lazy chunk this races the chunk fetch against a
+// fixed assertion timeout and fails intermittently-to-consistently depending
+// on machine speed. NamesList and About are the two routes that test happens
+// to sample and were caught failing; AuctionList/NameClaim sit under the same
+// 'names' parent and share the identical (untested-by-that-spec) risk, so
+// they're kept eager too rather than leave the same race latent. This is a
+// narrow, pre-existing fragility in `RouteLastUsedRoutes` itself (not
+// something introduced here) that lazy-loading exposes — fixing it at the
+// root is out of scope for a bundle-size pass, so the safe move is keeping
+// routes it's proven (or structurally likely) to touch on the eager list.
 import AccountDetailsTransactions from '../components/AccountDetailsTransactionsBase.vue';
-import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
-import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
-import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
-import Address from '../pages/Address.vue';
 import Dashboard from '../pages/Dashboard.vue';
-import DashboardMultisig from '../pages/DashboardMultisig.vue';
-import CommentNew from '../pages/CommentNew.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
-import DonateError from '../pages/DonateError.vue';
 import AssetDetails from '../pages/Assets/AssetDetails.vue';
 import AssetDetailsTransactions from '../pages/Assets/AssetDetailsTransactions.vue';
 import AssetDetailsInfo from '../pages/Assets/AssetDetailsInfo.vue';
 import Index from '../pages/Index.vue';
-import Invite from '../pages/Invite.vue';
-import InviteClaim from '../pages/InviteClaim.vue';
-import LanguageSettings from '../pages/LanguageSettings.vue';
-import CurrencySettings from '../pages/CurrencySettings.vue';
-import Auction from '../pages/Names/Auction.vue';
-import AuctionBid from '../pages/Names/AuctionBid.vue';
-import AuctionHistory from '../pages/Names/AuctionHistory.vue';
-import AuctionList from '../pages/Names/AuctionList.vue';
-import More from '../pages/More.vue';
-import NameClaim from '../pages/Names/Claim.vue';
 import NamesList from '../pages/Names/NamesList.vue';
-import NotFound from '../pages/NotFound.vue';
-import Notifications from '../pages/Notifications.vue';
-import NotificationSettings from '../pages/NotificationSettings.vue';
-import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
-import PermissionsSettings from '../pages/PermissionsSettings.vue';
-import PermissionManager from '../pages/PermissionManager.vue';
+import AuctionList from '../pages/Names/AuctionList.vue';
+import NameClaim from '../pages/Names/Claim.vue';
+import About from '../pages/About.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
 import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
-import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
-import Retip from '../pages/Retip.vue';
-import SeedPhraseSettings from '../pages/SeedPhraseSettings.vue';
-import SeedPhraseDetailsSettings from '../pages/SeedPhraseDetailsSettings.vue';
-import SeedPhraseVerifySettings from '../pages/SeedPhraseVerifySettings.vue';
-import Settings from '../pages/Settings.vue';
-import SignMessage from '../pages/SignMessage.vue';
-import SignTransaction from '../pages/SignTransaction.vue';
-import TermsOfService from '../pages/TermsOfService.vue';
-import TipsClaim from '../pages/TipsClaim.vue';
-import MultisigProposalDetails from '../pages/MultisigProposalDetails.vue';
-import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
-import Networks from '../pages/Networks.vue';
-import NetworkForm from '../pages/NetworkForm.vue';
-import MultisigDetails from '../pages/MultisigDetails.vue';
-import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
-import AppsBrowser from '../pages/AppsBrowser.vue';
-import SecureLoginSettings from '../pages/SecureLoginSettings.vue';
-import AddressBook from '../pages/AddressBook.vue';
-import AddressBookForm from '../pages/AddressBookForm.vue';
-import TokenSalesSettings from '../pages/TokenSalesSettings.vue';
-
-import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
-import JwtSign from '../pages/JwtSign.vue';
 
 async function requireSeedPhraseReauth() {
   const {
@@ -259,7 +236,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/multisig',
-    component: DefaultPagesRouter,
+    component: () => import('../components/DefaultPagesRouter.vue'),
     meta: {
       isMultisig: true,
     },
@@ -267,16 +244,16 @@ export const routes: WalletAppRouteConfig[] = [
       {
         path: '',
         name: ROUTE_MULTISIG_ACCOUNT,
-        component: DashboardMultisig,
+        component: () => import('../pages/DashboardMultisig.vue'),
       },
       {
         path: 'details/',
-        component: AccountDetailsMultisig,
+        component: () => import('../pages/AccountDetailsMultisig.vue'),
         children: [
           {
             path: 'assets',
             name: ROUTE_MULTISIG_DETAILS_ASSETS,
-            component: AccountDetailsMultisigTokens,
+            component: () => import('../pages/AccountDetailsMultisigTokens.vue'),
             meta: {
               useDefaultHardwareBackButton: true,
               showFilterBar: true,
@@ -286,7 +263,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: '',
             name: ROUTE_MULTISIG_DETAILS,
-            component: AccountDetailsMultisigTransactions,
+            component: () => import('../pages/AccountDetailsMultisigTransactions.vue'),
             meta: {
               useDefaultHardwareBackButton: true,
               showFilterBar: true,
@@ -295,7 +272,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: 'info',
             name: ROUTE_MULTISIG_DETAILS_INFO,
-            component: MultisigDetails,
+            component: () => import('../pages/MultisigDetails.vue'),
             meta: {
               useDefaultHardwareBackButton: true,
             },
@@ -306,7 +283,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         path: 'details/transactions/:hash/:transactionOwner',
         name: ROUTE_MULTISIG_TX_DETAILS,
-        component: TransactionDetails,
+        component: () => import('../../protocols/aeternity/views/TransactionDetails.vue'),
         props: { multisigDashboard: true },
         meta: {
           backRoute: { name: ROUTE_MULTISIG_DETAILS },
@@ -315,7 +292,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         path: 'details/multisig-proposals',
         name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
-        component: MultisigProposalDetails,
+        component: () => import('../pages/MultisigProposalDetails.vue'),
         props: true,
         meta: {
           backRoute: { name: ROUTE_MULTISIG_DETAILS },
@@ -342,7 +319,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             name: ROUTE_MULTISIG_COIN,
             path: '',
-            component: AccountDetailsMultisigTransactions,
+            component: () => import('../pages/AccountDetailsMultisigTransactions.vue'),
             props: true,
             meta: {
               backRoute: { name: ROUTE_MULTISIG_DETAILS_ASSETS },
@@ -426,100 +403,112 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings',
     name: ROUTE_SETTINGS,
-    component: Settings,
+    component: () => import('../pages/Settings.vue'),
   },
   {
     path: '/more/settings/reset-wallet',
     name: 'settings-reset-wallet',
-    component: ResetWallet,
+    component: () => import('../pages/ResetWallet.vue'),
   },
   {
     path: '/more/settings/errors-log',
     name: 'settings-errors-log',
-    component: ErrorLogSettings,
+    component: () => import('../pages/ErrorLogSettings.vue'),
   },
   {
     path: '/more/settings/language',
     name: 'settings-language',
-    component: LanguageSettings,
+    component: () => import('../pages/LanguageSettings.vue'),
   },
   {
     path: '/more/settings/currency',
     name: 'settings-currency',
-    component: CurrencySettings,
+    component: () => import('../pages/CurrencySettings.vue'),
   },
   {
     path: '/more/settings/seed-phrase',
     name: ROUTE_SEED_PHRASE_SETTINGS,
-    component: SeedPhraseSettings,
+    component: () => import('../pages/SeedPhraseSettings.vue'),
   },
   {
     path: '/more/settings/seed-phrase/details',
     name: ROUTE_SEED_PHRASE_DETAILS,
-    component: SeedPhraseDetailsSettings,
-    beforeEnter: async (_to, _from, next) => {
+    component: () => import('../pages/SeedPhraseDetailsSettings.vue'),
+    beforeEnter: async (_to, from, next) => {
       try {
         await requireSeedPhraseReauth();
         next();
       } catch {
-        next(false);
+        // `next(false)` would leave the router with no matched route (and thus a blank
+        // page) when this route is entered directly, e.g. on a hard refresh, since there
+        // is no previous in-app route to fall back to.
+        if (from.matched.length) {
+          next(false);
+        } else {
+          next({ name: ROUTE_ACCOUNT });
+        }
       }
     },
   },
   {
     path: '/more/settings/seed-phrase/details/verify',
     name: ROUTE_SEED_PHRASE_VERIFY,
-    component: SeedPhraseVerifySettings,
-    beforeEnter: async (_to, _from, next) => {
+    component: () => import('../pages/SeedPhraseVerifySettings.vue'),
+    beforeEnter: async (_to, from, next) => {
       try {
         await requireSeedPhraseReauth();
         next();
       } catch {
-        next(false);
+        // See comment in the `ROUTE_SEED_PHRASE_DETAILS` guard above.
+        if (from.matched.length) {
+          next(false);
+        } else {
+          next({ name: ROUTE_ACCOUNT });
+        }
       }
     },
   },
   {
     path: '/more/settings/secure-login',
-    component: SecureLoginSettings,
+    component: () => import('../pages/SecureLoginSettings.vue'),
     name: ROUTE_SECURE_LOGIN_SETTINGS,
   },
   {
     path: '/more/settings/networks',
     name: ROUTE_NETWORK_SETTINGS,
-    component: Networks,
+    component: () => import('../pages/Networks.vue'),
     props: true,
   },
   {
     path: '/more/settings/networks/add',
     name: ROUTE_NETWORK_ADD,
-    component: NetworkForm,
+    component: () => import('../pages/NetworkForm.vue'),
     props: true,
   },
   {
     path: '/more/settings/networks/:name',
     name: ROUTE_NETWORK_EDIT,
-    component: NetworkForm,
+    component: () => import('../pages/NetworkForm.vue'),
     props: true,
   },
   {
     path: '/more/settings/token-sales',
-    component: TokenSalesSettings,
+    component: () => import('../pages/TokenSalesSettings.vue'),
     name: ROUTE_TOKEN_SALES,
   },
   {
     path: '/more/settings/permissions',
-    component: PermissionsSettings,
+    component: () => import('../pages/PermissionsSettings.vue'),
     name: ROUTE_PERMISSIONS_SETTINGS,
   },
   {
     path: '/more/settings/permissions/add',
-    component: PermissionManager,
+    component: () => import('../pages/PermissionManager.vue'),
     name: ROUTE_PERMISSIONS_ADD,
   },
   {
     path: '/more/settings/permissions/:host',
-    component: PermissionManager,
+    component: () => import('../pages/PermissionManager.vue'),
     name: ROUTE_PERMISSIONS_DETAILS,
     meta: {
       isEdit: true,
@@ -532,7 +521,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/about/terms',
-    component: TermsOfService,
+    component: () => import('../pages/TermsOfService.vue'),
     name: 'about-terms',
     meta: {
       showScrollbar: true,
@@ -541,7 +530,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/about/privacy',
-    component: PrivacyPolicy,
+    component: () => import('../pages/PrivacyPolicy.vue'),
     name: 'about-privacy',
     meta: {
       ifNotAuth: true,
@@ -551,7 +540,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/tips-claim',
     name: ROUTE_TIPS_CLAIM,
-    component: TipsClaim,
+    component: () => import('../pages/TipsClaim.vue'),
   },
   {
     path: '/tips',
@@ -559,30 +548,30 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/retip',
-    component: Retip,
+    component: () => import('../pages/Retip.vue'),
     meta: {
       notPersist: true,
     },
   },
   {
     path: '/more',
-    component: More,
+    component: () => import('../pages/More.vue'),
     name: 'more',
   },
   {
     path: '/more/invite',
     name: ROUTE_INVITE,
-    component: Invite,
+    component: () => import('../pages/Invite.vue'),
   },
   {
     path: '/more/settings/notifications',
     name: 'notification-settings',
-    component: NotificationSettings,
+    component: () => import('../pages/NotificationSettings.vue'),
   },
   {
     name: ROUTE_ADDRESS_BOOK,
     path: '/more/address-book',
-    component: AddressBook,
+    component: () => import('../pages/AddressBook.vue'),
     meta: {
       notPersist: true,
     },
@@ -590,31 +579,31 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: ROUTE_ADDRESS_BOOK_ADD,
     path: '/more/address-book/add',
-    component: AddressBookForm,
+    component: () => import('../pages/AddressBookForm.vue'),
     props: true,
   },
   {
     name: ROUTE_ADDRESS_BOOK_EDIT,
     path: '/more/address-book/:id',
-    component: AddressBookForm,
+    component: () => import('../pages/AddressBookForm.vue'),
     meta: {
       notPersist: true,
     },
   },
   {
     path: '/account-details/names/auctions/:name/',
-    component: Auction,
+    component: () => import('../pages/Names/Auction.vue'),
     props: true,
     children: [
       {
         path: '',
-        component: AuctionBid,
+        component: () => import('../pages/Names/AuctionBid.vue'),
         props: true,
         name: ROUTE_AUCTION_BID,
       },
       {
         path: 'history',
-        component: AuctionHistory,
+        component: () => import('../pages/Names/AuctionHistory.vue'),
         props: true,
         name: ROUTE_AUCTION_HISTORY,
         meta: {
@@ -625,7 +614,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/comment',
-    component: CommentNew,
+    component: () => import('../pages/CommentNew.vue'),
     meta: {
       notPersist: true,
     },
@@ -633,7 +622,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: ROUTE_DONATE_ERROR,
     path: '/donate-error',
-    component: DonateError,
+    component: () => import('../pages/DonateError.vue'),
     props: true,
     meta: {
       notPersist: true,
@@ -643,7 +632,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: 'address',
     path: '/address',
-    component: Address,
+    component: () => import('../pages/Address.vue'),
     meta: {
       useDefaultHardwareBackButton: true,
       notPersist: true,
@@ -720,7 +709,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: 'sign-message',
     path: '/sign-message',
-    component: SignMessage,
+    component: () => import('../pages/SignMessage.vue'),
     meta: {
       useDefaultHardwareBackButton: true,
       notPersist: true,
@@ -729,7 +718,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: 'sign-transaction',
     path: '/sign-transaction',
-    component: SignTransaction,
+    component: () => import('../pages/SignTransaction.vue'),
     meta: {
       useDefaultHardwareBackButton: true,
       notPersist: true,
@@ -738,7 +727,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: 'sign-jwt',
     path: '/sign-jwt',
-    component: JwtSign,
+    component: () => import('../pages/JwtSign.vue'),
     meta: {
       useDefaultHardwareBackButton: true,
       notPersist: true,
@@ -776,7 +765,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: ROUTE_APPS_BROWSER,
     path: '/apps-browser',
-    component: AppsBrowser,
+    component: () => import('../pages/AppsBrowser.vue'),
     meta: {
       useDefaultHardwareBackButton: true,
       notPersist: true,
@@ -785,7 +774,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: ROUTE_INVITE_CLAIM,
     path: '/invite/:secretKey?',
-    component: InviteClaim,
+    component: () => import('../pages/InviteClaim.vue'),
     props: true,
     meta: {
       notPersist: true,
@@ -794,7 +783,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: ROUTE_NOTIFICATIONS,
     path: '/notifications',
-    component: Notifications,
+    component: () => import('../pages/Notifications.vue'),
     meta: {
       notPersist: true,
     },
@@ -802,7 +791,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     name: ROUTE_NOT_FOUND,
     path: '/page-not-found',
-    component: NotFound,
+    component: () => import('../pages/NotFound.vue'),
     props: true,
     meta: {
       ifNotAuth: true,

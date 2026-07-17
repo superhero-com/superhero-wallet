@@ -50,57 +50,71 @@ import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
 } from '@/constants';
+import { defineAsyncComponent } from 'vue';
 import { useModals } from '@/composables';
 
-import NetworkSwitcherModal from '@/popup/components/Modals/NetworkSwitcherModal.vue';
-
-import ConfirmDisableErrorLog from '@/popup/components/Modals/ConfirmDisableErrorLog.vue';
-import AccountCreate from '@/popup/components/Modals/AccountCreate.vue';
+// Kept as static imports: MODAL_DEFAULT/MODAL_CONFIRM (used everywhere, must
+// feel instant), the auth modals (login hot path), and every modal flagged
+// `showInPopupIfWebFrame` below (they render as a real popup window a
+// connected dapp is actively waiting on, so a chunk-load delay is user-visible
+// at the worst possible moment). ProtocolSpecificView already resolves its
+// real content via `defineAsyncComponent` internally, so importing the thin
+// wrapper eagerly costs nothing. Everything else is wrapped in
+// `defineAsyncComponent(() => import(...))` so it only downloads when opened.
 import Default from '@/popup/components/Modals/Default.vue';
 import ProtocolSpecificView from '@/popup/components/ProtocolSpecificView.vue';
-import ProtocolSelect from '@/popup/components/Modals/ProtocolSelect.vue';
-import AccountImport from '@/popup/components/Modals/AccountImport.vue';
-import AccountSelectOptions from '@/popup/components/Modals/AccountSelectOptions.vue';
-import ClaimSuccess from '@/popup/components/Modals/ClaimSuccess.vue';
 import Confirm from '@/popup/components/Modals/Confirm.vue';
 import ConfirmConnect from '@/popup/pages/Popups/Connect.vue';
 import ConfirmAccountList from '@/popup/pages/Popups/AccountList.vue';
-
-import ErrorLog from '@/popup/components/Modals/ErrorLog.vue';
-import PrivateKeyExport from '@/popup/components/Modals/PrivateKeyExport.vue';
-import FormSelectOptions from '@/popup/components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '@/popup/components/Modals/ConfirmRawSign.vue';
 import ConfirmUnsafeSign from '@/popup/components/Modals/ConfirmUnsafeSign.vue';
-import QrCodeScanner from '@/popup/components/Modals/QrCodeScanner.vue';
-import Help from '@/popup/components/Modals/Help.vue';
-import AssetSelector from '@/popup/components/Modals/AssetSelector.vue';
-import ResetWallet from '@/popup/components/Modals/ResetWalletModal.vue';
-import RecipientInfo from '@/popup/components/Modals/RecipientInfo.vue';
-import ConsensusInfo from '@/popup/components/Modals/ConsensusInfo.vue';
-import PayloadForm from '@/popup/components/Modals/PayloadForm.vue';
-import ClaimGiftCard from '@/popup/components/Modals/ClaimGiftCard.vue';
-import MultisigVaultCreate from '@/popup/components/Modals/MultisigVaultCreate.vue';
-import WarningDappBrowser from '@/popup/components/Modals/WarningDappBrowser.vue';
-import MultisigProposalConfirmActions from '@/popup/components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '@/popup/pages/Popups/MessageSign.vue';
-import BrowserActions from '@/popup/components/Modals/BrowserActions.vue';
+import ClaimGiftCard from '@/popup/components/Modals/ClaimGiftCard.vue';
+import ConfirmDisableErrorLog from '@/popup/components/Modals/ConfirmDisableErrorLog.vue';
 import BiometricLogin from '@/popup/components/Modals/BiometricLogin.vue';
 import EnableBiometricLogin from '@/popup/components/Modals/EnableBiometricLogin.vue';
-import WalletConnect from '@/popup/components/Modals/WalletConnectModal.vue';
-import AirGapImportAccounts from '@/popup/components/Modals/AirGapImportAccounts.vue';
-import LedgerImportAccounts from '@/popup/components/Modals/LedgerImportAccounts.vue';
-import LedgerSign from '@/popup/pages/Popups/LedgerSign.vue';
-import SignAirGapTransaction from '@/popup/components/Modals/SignAirGapTransaction.vue';
-import AddressBookImport from '@/popup/components/Modals/AddressBookImport.vue';
-import ShareAddress from '@/popup/components/ShareAddress.vue';
-import AddressBookAccountSelector from '@/popup/components/Modals/AddressBookAccountSelector.vue';
 import SetPassword from '@/popup/components/Modals/SetPassword.vue';
 import PasswordLogin from '@/popup/components/Modals/PasswordLogin.vue';
-import PrivateKeyImport from '@/popup/components/Modals/PrivateKeyImport.vue';
-import PermissionManager from '@/popup/components/Modals/PermissionManager.vue';
-import NameClaimInfo from '@/popup/components/Modals/NameClaimInfo.vue';
-import NameExtendConfirm from '@/popup/components/Modals/NameExtendConfirm.vue';
+
+const NetworkSwitcherModal = defineAsyncComponent(() => import('@/popup/components/Modals/NetworkSwitcherModal.vue'));
+const AccountCreate = defineAsyncComponent(() => import('@/popup/components/Modals/AccountCreate.vue'));
+const ProtocolSelect = defineAsyncComponent(() => import('@/popup/components/Modals/ProtocolSelect.vue'));
+const AccountImport = defineAsyncComponent(() => import('@/popup/components/Modals/AccountImport.vue'));
+const AccountSelectOptions = defineAsyncComponent(() => import('@/popup/components/Modals/AccountSelectOptions.vue'));
+const ClaimSuccess = defineAsyncComponent(() => import('@/popup/components/Modals/ClaimSuccess.vue'));
+const ErrorLog = defineAsyncComponent(() => import('@/popup/components/Modals/ErrorLog.vue'));
+const PrivateKeyExport = defineAsyncComponent(() => import('@/popup/components/Modals/PrivateKeyExport.vue'));
+const FormSelectOptions = defineAsyncComponent(() => import('@/popup/components/Modals/FormSelectOptions.vue'));
+const QrCodeScanner = defineAsyncComponent(() => import('@/popup/components/Modals/QrCodeScanner.vue'));
+const Help = defineAsyncComponent(() => import('@/popup/components/Modals/Help.vue'));
+const AssetSelector = defineAsyncComponent(() => import('@/popup/components/Modals/AssetSelector.vue'));
+const ResetWallet = defineAsyncComponent(() => import('@/popup/components/Modals/ResetWalletModal.vue'));
+const RecipientInfo = defineAsyncComponent(() => import('@/popup/components/Modals/RecipientInfo.vue'));
+const ConsensusInfo = defineAsyncComponent(() => import('@/popup/components/Modals/ConsensusInfo.vue'));
+const PayloadForm = defineAsyncComponent(() => import('@/popup/components/Modals/PayloadForm.vue'));
+const MultisigVaultCreate = defineAsyncComponent(() => import('@/popup/components/Modals/MultisigVaultCreate.vue'));
+const WarningDappBrowser = defineAsyncComponent(() => import('@/popup/components/Modals/WarningDappBrowser.vue'));
+const MultisigProposalConfirmActions = defineAsyncComponent(
+  () => import('@/popup/components/Modals/MultisigProposalConfirmActions.vue'),
+);
+const BrowserActions = defineAsyncComponent(() => import('@/popup/components/Modals/BrowserActions.vue'));
+const WalletConnect = defineAsyncComponent(() => import('@/popup/components/Modals/WalletConnectModal.vue'));
+const AirGapImportAccounts = defineAsyncComponent(() => import('@/popup/components/Modals/AirGapImportAccounts.vue'));
+const LedgerImportAccounts = defineAsyncComponent(() => import('@/popup/components/Modals/LedgerImportAccounts.vue'));
+const LedgerSign = defineAsyncComponent(() => import('@/popup/pages/Popups/LedgerSign.vue'));
+const SignAirGapTransaction = defineAsyncComponent(
+  () => import('@/popup/components/Modals/SignAirGapTransaction.vue'),
+);
+const AddressBookImport = defineAsyncComponent(() => import('@/popup/components/Modals/AddressBookImport.vue'));
+const ShareAddress = defineAsyncComponent(() => import('@/popup/components/ShareAddress.vue'));
+const AddressBookAccountSelector = defineAsyncComponent(
+  () => import('@/popup/components/Modals/AddressBookAccountSelector.vue'),
+);
+const PrivateKeyImport = defineAsyncComponent(() => import('@/popup/components/Modals/PrivateKeyImport.vue'));
+const PermissionManager = defineAsyncComponent(() => import('@/popup/components/Modals/PermissionManager.vue'));
+const NameClaimInfo = defineAsyncComponent(() => import('@/popup/components/Modals/NameClaimInfo.vue'));
+const NameExtendConfirm = defineAsyncComponent(() => import('@/popup/components/Modals/NameExtendConfirm.vue'));
 
 export default () => {
   const { registerModal } = useModals();

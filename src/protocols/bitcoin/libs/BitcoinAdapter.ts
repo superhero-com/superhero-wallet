@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { BIP32Factory } from 'bip32';
 import {
   payments,
@@ -191,7 +191,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return !!chainFunded;
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
@@ -213,6 +213,11 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: child.publicKey,
       address: address!,
     };
+  }
+
+  protected override getHdWalletDerivationCacheKeyExtras(): string[] {
+    const { activeNetwork } = useNetworks();
+    return [activeNetwork.value.type];
   }
 
   override resolveAccountRaw(

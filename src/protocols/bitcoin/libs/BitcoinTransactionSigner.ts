@@ -1,4 +1,4 @@
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import ECPairFactory from 'ecpair';
 import { Signer } from 'bitcoinjs-lib';
 

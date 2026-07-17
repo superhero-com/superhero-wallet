@@ -96,14 +96,61 @@ export abstract class BaseProtocolAdapter {
   abstract isAccountUsed(address: AccountAddress): Promise<boolean>;
 
   /**
-   * Generate account from Mnemonic
+   * `getHdWalletAccountFromMnemonicSeed` memoization cache, keyed by seed
+   * object identity (safe because `mnemonicSeed` is a Vue `computed` and so
+   * keeps the same `Uint8Array` reference until the mnemonic actually
+   * changes) and then by a string key of accountIndex plus any extra state
+   * the protocol's derivation depends on (see
+   * `getHdWalletDerivationCacheKeyExtras`).
+   */
+  private hdWalletAccountCache = new WeakMap<Uint8Array, Map<string, IHdWalletAccount>>();
+
+  /**
+   * Generate account from Mnemonic. Memoized: derivation is a pure function
+   * of (seed, accountIndex, ...cache key extras), but re-deriving it is a
+   * full BIP32 seed expansion + path derivation, and the `accounts` computed
+   * (composables/accounts.ts) that calls this can recompute on every account
+   * list read -- polling loops included. Protocols implement the actual
+   * derivation in `deriveHdWalletAccountFromMnemonicSeed`.
    * @param seed 12 word seed array buffer
    * @param accountIndex Account Index in derivation path
    */
-  abstract getHdWalletAccountFromMnemonicSeed(
+  getHdWalletAccountFromMnemonicSeed(
+    seed: Uint8Array,
+    accountIndex: number,
+  ): IHdWalletAccount {
+    const cacheKey = [accountIndex, ...this.getHdWalletDerivationCacheKeyExtras()].join(':');
+
+    let accountsForSeed = this.hdWalletAccountCache.get(seed);
+    if (!accountsForSeed) {
+      accountsForSeed = new Map();
+      this.hdWalletAccountCache.set(seed, accountsForSeed);
+    }
+
+    let account = accountsForSeed.get(cacheKey);
+    if (!account) {
+      account = this.deriveHdWalletAccountFromMnemonicSeed(seed, accountIndex);
+      accountsForSeed.set(cacheKey, account);
+    }
+    return account;
+  }
+
+  protected abstract deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount;
+
+  /**
+   * Extra `getHdWalletAccountFromMnemonicSeed` cache-key components beyond
+   * (seed, accountIndex). Override when derivation reads additional reactive
+   * state, so a change in that state doesn't return a stale cached account --
+   * e.g. Bitcoin/Dogecoin's address encoding depends on the active network
+   * type (mainnet vs testnet), not just the seed and index.
+   */
+  // eslint-disable-next-line class-methods-use-this -- default no-op hook, overridden per protocol
+  protected getHdWalletDerivationCacheKeyExtras(): string[] {
+    return [];
+  }
 
   abstract resolveAccountRaw (
     rawAccount: IAccountRaw,

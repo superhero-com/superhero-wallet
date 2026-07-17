@@ -236,7 +236,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     }
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {

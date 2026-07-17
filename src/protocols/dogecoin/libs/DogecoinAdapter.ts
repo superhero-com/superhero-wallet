@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 // eslint-disable-next-line max-classes-per-file
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { BIP32Factory } from 'bip32';
 import {
   payments,
@@ -190,7 +190,7 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     } catch { return false; }
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
@@ -208,6 +208,11 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       publicKey: child.publicKey,
       address: address!,
     };
+  }
+
+  protected override getHdWalletDerivationCacheKeyExtras(): string[] {
+    const { activeNetwork } = useNetworks();
+    return [activeNetwork.value.type];
   }
 
   override resolveAccountRaw(

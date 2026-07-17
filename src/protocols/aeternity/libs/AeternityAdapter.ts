@@ -196,7 +196,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {

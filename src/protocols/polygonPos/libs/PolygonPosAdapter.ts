@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
 import { Contract } from 'web3-eth-contract';
@@ -195,7 +195,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     return Number(txCount);
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {

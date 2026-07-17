@@ -1,4 +1,4 @@
-import { isFQDN } from 'validator';
+import isFQDN from 'validator/es/lib/isFQDN';
 import { SEED_LENGTH } from '@/constants';
 import { toURL } from './formatters';
 

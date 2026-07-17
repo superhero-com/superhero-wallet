@@ -119,17 +119,22 @@ export function useTransactionList({
         return;
       }
 
+      // Collect every field update into one object so the `useStorageRef` deep
+      // watcher (and its JSON.stringify + localStorage write) fires once per
+      // page load instead of once per field.
+      const next = { ...state.value };
+
       if (objectHasNonEmptyProperties(paginationParams)) {
-        state.value.nextPagePaginationParams = paginationParams;
+        next.nextPagePaginationParams = paginationParams;
       } else {
-        state.value.isEndReached = true;
+        next.isEndReached = true;
       }
 
       if (
         regularTransactions?.length
         || pendingTransactions?.length
       ) {
-        state.value.transactionsLoaded = uniqBy(
+        next.transactionsLoaded = uniqBy(
           [
             ...(state.value.isInitialLoadDone ? state.value.transactionsLoaded : []),
             ...regularTransactions,
@@ -139,8 +144,10 @@ export function useTransactionList({
         );
       }
 
+      next.isInitialLoadDone = true;
+      state.value = next;
+
       isLoading.value = false;
-      state.value.isInitialLoadDone = true;
     }
   }
 
@@ -185,12 +192,15 @@ export function useTransactionList({
           regularTransactions?.length
           && regularTransactions?.[0]?.hash !== filteredLoadedTransactions?.[0]?.hash
         ) {
-          state.value.transactionsLoaded = [
-            ...regularTransactions,
-            ...(pendingTransactions || []),
-          ];
-          state.value.nextPagePaginationParams = paginationParams;
-          state.value.isEndReached = false;
+          state.value = {
+            ...state.value,
+            transactionsLoaded: [
+              ...regularTransactions,
+              ...(pendingTransactions || []),
+            ],
+            nextPagePaginationParams: paginationParams,
+            isEndReached: false,
+          };
         }
       }
     }, POLLING_INTERVAL_TRANSACTIONS);
