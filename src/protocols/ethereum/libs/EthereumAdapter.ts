@@ -401,16 +401,14 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     contract.setProvider(nodeUrl);
 
     const amountBN = new BigNumber(amount);
-    const hexAmount = bigIntToHex(BigInt(toWei(amountBN.toFixed(
-      Number(await contract.methods.decimals().call()),
-    ), 'ether')));
+    const tokenDecimals = Number(await contract.methods.decimals().call());
+    const hexAmount = bigIntToHex(BigInt(
+      amountBN.shiftedBy(tokenDecimals).toFixed(0, BigNumber.ROUND_DOWN),
+    ));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
-    const [gasLimit] = await Promise.all([
-      this.getTransactionCount(options.fromAccount),
-      contract.methods.transfer(recipient, hexAmount).estimateGas(),
-    ]);
+    const gasLimit = await contract.methods.transfer(recipient, hexAmount).estimateGas();
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {
@@ -578,7 +576,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const { nonce } = options;
     const { chainId } = ethActiveNetworkSettings.value;
 
-    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
+    const hexAmount = bigIntToHex(BigInt(toWei(new BigNumber(amount).toFixed(ETH_COIN_PRECISION), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 

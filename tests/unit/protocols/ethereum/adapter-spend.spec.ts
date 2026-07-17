@@ -193,16 +193,14 @@ describe('EthereumAdapter - spend (native ETH transfer, wei math)', () => {
   // 0.1 ETH must become exactly 100000000000000000 wei (0.1 * 10^18) with no
   // floating-point drift.
   //
-  // BUG (see TEST_IMPROVEMENT_PLAN.md "Potential bugs found" #1): `spend`'s public
-  // signature takes `amount: number`. A JS `number` cannot exactly represent many
-  // 18-decimal-precision decimal values (IEEE-754 double has ~15-17 significant
-  // decimal digits), so precision is already lost before `toFixed`/`toWei` ever
-  // run. Verified directly: `(0.1).toFixed(18)` => "0.100000000000000006", and
-  // `toWei((0.1).toFixed(18), 'ether')` => 100000000000000006n wei, not
-  // 100000000000000000n. This is a real bug, not a test assumption error:
-  // amounts must be exact integers, and using a float for a monetary value
-  // contradicts that standard. it.fails per the black-box protocol.
-  it.fails('produces exact wei value for 0.1 ETH', async () => {
+  // `spend`'s public signature still takes `amount: number`, so the value already
+  // went through one lossy number->string round trip before this test observes it;
+  // `constructAndSignTx` re-parses it through `new BigNumber(amount).toFixed(...)`
+  // rather than the JS-native `Number.prototype.toFixed`, which recovers the
+  // shortest decimal representation for amounts within ~15 significant digits.
+  // Amounts beyond that range still drift (see the full-precision test below) and
+  // need `amount` threaded as a string end-to-end across all adapters to fix.
+  it('produces exact wei value for 0.1 ETH', async () => {
     const adapter = new EthereumAdapter();
     await adapter.constructAndSignTx(0.1, RECIPIENT, {
       fromAccount: FROM_ACCOUNT,
@@ -211,7 +209,6 @@ describe('EthereumAdapter - spend (native ETH transfer, wei math)', () => {
       nonce: 0,
     });
     const txData = fromTxDataSpy.mock.calls[0][0] as any;
-    // Actual: 100000000000000006n (drift from the `number` amount type).
     expect(BigInt(txData.value)).toBe(100000000000000000n);
   });
 
@@ -307,15 +304,10 @@ describe('EthereumAdapter - transferToken (ERC-20 decimals math)', () => {
     expect(BigInt(contractMockState.transferCalls[0].amount)).toBe(100000000000000000n);
   });
 
-  // BUG (see TEST_IMPROVEMENT_PLAN.md "Potential bugs found" #2): `transferToken`
-  // computes `toWei(amountBN.toFixed(decimals), 'ether')`. `toFixed(decimals)`
-  // only controls the STRING's decimal-place count; `toWei(..., 'ether')` then
-  // always scales by 10^18 regardless of the token's actual decimals. For a
-  // 6-decimal (USDC-like) token, "1.5" tokens should become 1500000 (1.5 * 10^6),
-  // but the adapter produces 1500000000000000000 (1.5 * 10^18) — off by 10^12.
-  // This contradicts the ERC-20 standard ("use the token's own decimals()") cited
-  // in the task; it.fails per the black-box protocol, not adjusted.
-  it.fails('converts a 6-decimal (USDC-like) token amount using the TOKEN decimals, not 18', async () => {
+  // `transferToken` scales the amount by the token's own on-chain `decimals()`
+  // via `new BigNumber(amount).shiftedBy(decimals)`, not a fixed 18/'ether' unit.
+  // For a 6-decimal (USDC-like) token, "1.5" tokens becomes 1500000 (1.5 * 10^6).
+  it('converts a 6-decimal (USDC-like) token amount using the TOKEN decimals, not 18', async () => {
     contractMockState.decimals = 6;
     const adapter = new EthereumAdapter();
     await adapter.transferToken('1.5', RECIPIENT, TOKEN_CONTRACT, {
@@ -324,14 +316,12 @@ describe('EthereumAdapter - transferToken (ERC-20 decimals math)', () => {
       maxFeePerGas: '0.00000002',
       nonce: 0,
     });
-    // Actual: 1500000000000000000n (uses 'ether'/18-decimal scaling regardless of
-    // the token's on-chain decimals).
     expect(BigInt(contractMockState.transferCalls[0].amount)).toBe(1500000n);
   });
 
   // decimals = 0 is a legal ERC-20 edge case (whole-unit-only tokens): "5" tokens
   // must become integer amount 5, not 5 * 10^18.
-  it.fails('converts a 0-decimal token amount as a bare integer', async () => {
+  it('converts a 0-decimal token amount as a bare integer', async () => {
     contractMockState.decimals = 0;
     const adapter = new EthereumAdapter();
     await adapter.transferToken('5', RECIPIENT, TOKEN_CONTRACT, {
@@ -340,24 +330,13 @@ describe('EthereumAdapter - transferToken (ERC-20 decimals math)', () => {
       maxFeePerGas: '0.00000002',
       nonce: 0,
     });
-    // Actual: 5000000000000000000n (same 'ether'-scaling bug as above).
     expect(BigInt(contractMockState.transferCalls[0].amount)).toBe(5n);
   });
 
-  // BUG (see TEST_IMPROVEMENT_PLAN.md "Potential bugs found" #3): the adapter
-  // builds `gasLimit` from
-  //   const [gasLimit] = await Promise.all([
-  //     this.getTransactionCount(options.fromAccount),
-  //     contract.methods.transfer(recipient, hexAmount).estimateGas(),
-  //   ]);
-  // Array-destructuring index 0 takes the PENDING TX COUNT (nonce), not the
-  // estimateGas() result at index 1 — the actual gas estimate is silently
-  // discarded. A reasonable wallet user expects the gas limit on their tx to
-  // reflect the real estimated cost of the call, not an unrelated nonce value;
-  // sending a nonce-sized gas limit (e.g. 3) instead of a real estimate (e.g.
-  // 65000) would make the transaction fail on-chain (out of gas) or waste gas
-  // budget if the nonce happens to be larger. it.fails per the black-box protocol.
-  it.fails('uses the estimated gas as the gas limit, not the tx nonce', async () => {
+  // The tx's `gasLimit` must reflect `contract.methods.transfer(...).estimateGas()`
+  // — a reasonable wallet user expects the gas limit to match the estimated cost
+  // of the call, not an unrelated value.
+  it('uses the estimated gas as the gas limit, not the tx nonce', async () => {
     contractMockState.decimals = 18;
     contractMockState.estimateGas = 65000;
     web3EthMockState.txCount = 3;
@@ -371,7 +350,6 @@ describe('EthereumAdapter - transferToken (ERC-20 decimals math)', () => {
     });
     const txData = fromTxDataSpy.mock.calls[0][0] as any;
 
-    // Actual: gasLimit resolves to hex(3) (the tx nonce/count), not hex(65000).
     expect(BigInt(txData.gasLimit)).toBe(65000n);
   });
 
