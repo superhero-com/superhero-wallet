@@ -160,13 +160,24 @@ describe('useAccounts', () => {
 
     expect(accounts.accounts.value).toHaveLength(1);
     expect(accounts.accounts.value[0].protocol).toBe(PROTOCOLS.aeternity);
-    // NOTE: unlike the sibling `else` branch in the `accounts` computed (where
-    // `adapter.resolveAccountRaw` returns null for a REGISTERED protocol, which
-    // *does* `accountsRaw.value.splice(globalIdx, 1)`), the "protocol no longer
+    // Deliberate: unlike the sibling `else` branch in the `accounts` computed
+    // (where `adapter.resolveAccountRaw` returns null for a REGISTERED
+    // protocol - a genuinely corrupt entry - which *does*
+    // `accountsRaw.value.splice(globalIdx, 1)`), the "protocol no longer
     // registered" early `return null` does NOT prune the orphaned entry from
-    // `accountsRaw` - it only gets filtered out of the derived `accounts` list,
-    // every single computed run, forever. See the `it.fails` below and the
-    // "Potential bugs found" report entry.
+    // `accountsRaw`. This is intentional, not a bug: an unregistered protocol
+    // typically means the running build is simply missing that feature (a
+    // version rollback, or a dev on a branch without it yet), not that the
+    // user's account was ever invalid. Pruning it here would permanently
+    // delete the account the first time the app runs without that protocol.
+    // Keeping the entry dormant in storage (filtered out of the *computed*
+    // `accounts` list only) preserves it for when the protocol returns.
+    //
+    // Separately, the sibling branch's own splice above has a latent hazard:
+    // it indexes over the concatenated `[...accountsRaw, ...privateKeyAccountsRaw]`
+    // array but splices `accountsRaw` alone, so a private-key account that
+    // fails to resolve would splice the wrong element. Not covered here -
+    // needs its own test and fix.
     expect(accounts.accountsRaw.value).toHaveLength(2);
 
     // The stale index left over from the removed account is NOT self-healed by
@@ -178,31 +189,6 @@ describe('useAccounts', () => {
     accounts.setActiveAccountByGlobalIdx(accounts.activeAccountGlobalIdx.value);
     expect(accounts.activeAccountGlobalIdx.value).toBe(0);
     expect(accounts.activeAccount.value.protocol).toBe(PROTOCOLS.aeternity);
-  });
-
-  // Potential bug (see report / TEST_IMPROVEMENT_PLAN.md "Potential bugs found"):
-  // `accounts.ts`'s `accounts` computed has two "this raw entry didn't resolve"
-  // paths. One (`resolveAccountRaw` returning null for a *registered* protocol)
-  // splices the dead entry out of `accountsRaw`. The other (protocol not in
-  // `idxList`, i.e. no longer registered - the comment literally says "the
-  // protocol will be undefined, so we need to return null") does an early
-  // `return null` from the `.map()` callback and skips the splice entirely.
-  // The dead entry is filtered out of `accounts.value` every time, but never
-  // removed from persisted `accountsRaw`, so it (and any stale index pointing
-  // at it) lingers forever instead of being cleaned up like its sibling branch.
-  it.fails('orphaned accountsRaw entries for unregistered protocols are pruned like the resolveAccountRaw-failure branch', async () => {
-    seedAccountsRaw([
-      { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
-      { isRestored: true, protocol: 'ghostchain', type: ACCOUNT_TYPES.hdWallet },
-    ]);
-
-    const accounts = await boot();
-    await watchUntilTruthy(accounts.areAccountsRestored);
-    accounts.accounts.value.length; // force the `accounts` computed to evaluate
-    await flushAsync();
-    await flushAsync();
-
-    expect(accounts.accountsRaw.value).toHaveLength(1);
   });
 
   it('exposes no imported private-key accounts while encryptionKey is unset, even with ciphertext on disk', async () => {
