@@ -730,6 +730,20 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   accountIdx?: number;
 }
 
+/**
+ * Payload a sign confirmation modal resolves with, carrying the account the
+ * user picked in the switcher. This travels over the same channel used to
+ * gate `checkOrAskPermission` (in-process `Promise` resolution, or the
+ * popup<->offscreen message round trip), so it is available to the signer
+ * the instant permission is granted - unlike the active-account storage sync,
+ * which is not guaranteed to have propagated across browser contexts by then.
+ */
+export interface ISignModalResolution {
+  selectedAddress?: string;
+  /** The user opted into rebuilding the transaction for `selectedAddress`. */
+  rebuildForSelectedAccount?: boolean;
+}
+
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
 }

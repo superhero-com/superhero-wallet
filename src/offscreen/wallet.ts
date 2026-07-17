@@ -115,7 +115,7 @@ export async function init() {
             return;
           }
           if (msg.type && popup?.actions?.[msg.type]) {
-            popup.actions[msg.type]();
+            popup.actions[msg.type](msg.payload);
           }
         });
 

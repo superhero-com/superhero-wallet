@@ -163,8 +163,16 @@ export function usePermissions() {
   async function checkOrAskPermission(
     method: METHODS,
     fullUrl?: string,
-    modalProps: IModalProps = {},
+    modalPropsArg?: IModalProps,
+    /**
+     * Called with whatever the modal/popup resolves with - but only when a
+     * modal was actually shown. Never called on the standing-permission fast
+     * path below, where nothing is shown and nothing was chosen, so callers
+     * can use "was this called" to tell the two cases apart.
+     */
+    onModalResolved?: (payload: any) => void,
   ): Promise<boolean> {
+    const modalProps = modalPropsArg || {};
     let app: IAppData | undefined;
     let props = getCleanModalOptions<typeof modalProps>(modalProps);
     const { activeAccount } = useAccounts();
@@ -225,11 +233,12 @@ export function usePermissions() {
         } as any;
       }
 
-      await (
+      const resolvedWith = await (
         (IS_OFFSCREEN_TAB)
           ? openPopup(popup, app?.href, props)
           : openModal(modal, props)
       );
+      onModalResolved?.(resolvedWith);
       return true;
     } catch {
       return false;

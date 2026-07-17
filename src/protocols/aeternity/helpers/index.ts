@@ -5,10 +5,13 @@ import {
   Encoding,
   InvalidTxError,
   MemoryAccount,
+  TransactionError,
   Tag,
+  buildTx,
   decode,
   encode,
   formatAmount,
+  getTransactionSignerAddress,
   isAddressValid,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -383,4 +386,78 @@ export function getTxFunctionParsed(functionName?: TxFunction) {
  */
 export function getTxFunctionRaw(functionName?: TxFunction) {
   return functionName ? snakeCase(functionName) as TxFunctionRaw : undefined;
+}
+
+/**
+ * Find the field holding the address that has to sign the transaction.
+ *
+ * Every signable transaction names its signer in a different field (`senderId`
+ * on a SpendTx, `callerId` on a ContractCallTx, `ownerId` on a ContractCreateTx,
+ * `accountId` on the name transactions, ...). The SDK resolves it from the
+ * transaction schema, but does not expose that lookup, so instead of keeping a
+ * hand-written tag-to-field map in sync we locate the field by its value: it is
+ * the one holding the address the SDK reports as the signer.
+ *
+ * Transactions whose signer is bound to an identity rather than a plain account
+ * (an oracle, addressed as `ok_...`) have no such field and cannot be re-pointed
+ * at a different account.
+ */
+function getTransactionSignerKey(
+  txParams: Record<string, any>,
+  signerAddress: string,
+): string | undefined {
+  return Object.keys(txParams).find((key) => txParams[key] === signerAddress);
+}
+
+/**
+ * Whether the transaction's sender can be re-pointed at a different account.
+ */
+export function canRebuildTransactionForSigner(txBase64: Encoded.Transaction): boolean {
+  try {
+    const txParams = unpackTx(txBase64) as unknown as Record<string, any>;
+    // A signed (or generalized-account) transaction is not ours to re-point.
+    if (txParams.tag === Tag.SignedTx || txParams.tag === Tag.GaMetaTx) {
+      return false;
+    }
+    return !!getTransactionSignerKey(txParams, getTransactionSignerAddress(txBase64));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Rebuild a transaction so that it is sent by `signerAddress` instead of the
+ * account it was originally prepared for.
+ *
+ * The sender is part of the transaction, so a signature from any other account
+ * is rejected by the node. When the user deliberately picks a different account
+ * to sign with, the transaction has to be re-pointed at it and given a nonce
+ * valid for that account.
+ *
+ * Throws rather than returning a transaction that would still be signed by
+ * somebody else - a silently unchanged sender would produce a signature the
+ * node discards.
+ */
+export async function rebuildTransactionForSigner(
+  txBase64: Encoded.Transaction,
+  signerAddress: Encoded.AccountAddress,
+  fetchNextNonce: (address: Encoded.AccountAddress) => Promise<number>,
+): Promise<Encoded.Transaction> {
+  const txParams = unpackTx(txBase64) as unknown as Record<string, any>;
+  const signerKey = getTransactionSignerKey(txParams, getTransactionSignerAddress(txBase64));
+
+  if (!signerKey) {
+    throw new TransactionError(`Cannot re-point ${Tag[txParams.tag]} at another account`);
+  }
+
+  txParams[signerKey] = signerAddress;
+  txParams.nonce = await fetchNextNonce(signerAddress);
+
+  const rebuiltTx = buildTx(txParams as any);
+
+  if (getTransactionSignerAddress(rebuiltTx) !== signerAddress) {
+    throw new TransactionError('Rebuilt transaction is still signed by another account');
+  }
+
+  return rebuiltTx;
 }

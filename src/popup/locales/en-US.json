@@ -412,6 +412,13 @@
         "content": "Transaction data is either broken or Superhero Wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
       }
     },
+    "signAccountSelect": {
+      "label": "Sign with account",
+      "selectAccount": "Select account to sign with",
+      "preparedForOtherAccount": "This transaction is prepared for {0}. Signing it with another account will be rejected by the network.",
+      "preparedForMissingAccount": "This transaction is prepared for {0}, which is not available in this wallet.",
+      "rebuildForSelectedAccount": "Rebuild the transaction so it is sent by the selected account"
+    },
     "confirmUnsafeSign": {
       "heading": "would like you to sign data.",
       "superheroChatJwtSign": "would like you to sign a message in order to login.",

@@ -11,7 +11,7 @@
         $t('pages.popupMessageSign.title'),
       ]"
       :sender="sender"
-      :recipient="activeAccount"
+      :recipient="selectedAccount"
       :first-label-warning="isUnknownDapp"
     />
     <NoOriginWarning
@@ -27,6 +27,14 @@
       <span class="app-name">{{ sender.name }}</span>
       ({{ sender.address }}) {{ $t('pages.popupMessageSign.heading') }}
     </div>
+
+    <SignAccountSelect
+      :account="selectedAccount"
+      :protocol="protocol"
+      :label="$t('modals.signAccountSelect.label')"
+      class="sign-account-select"
+      @select="selectedAccount = $event"
+    />
 
     <DetailsItem
       :label="$t('pages.popupMessageSign.message')"
@@ -56,17 +64,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted } from 'vue';
+import { defineComponent, onUnmounted, ref } from 'vue';
 import {
   ACCOUNT_TYPES,
   MODAL_LEDGER_SIGN,
   PROTOCOLS,
   RUNNING_IN_POPUP,
 } from '@/constants';
+import type { IAccount, ISignModalResolution } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps, useModals } from '@/composables';
 
 import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
+import SignAccountSelect from '@/popup/components/SignAccountSelect.vue';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
@@ -81,9 +91,10 @@ export default defineComponent({
     DetailsItem,
     CopyText,
     NoOriginWarning,
+    SignAccountSelect,
   },
   setup() {
-    const { getLastActiveProtocolAccount } = useAccounts();
+    const { getLastActiveProtocolAccount, setActiveAccountByAddressAndProtocol } = useAccounts();
     const {
       isUnknownDapp,
       popupProps,
@@ -92,14 +103,23 @@ export default defineComponent({
     } = usePopupProps();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
-    const activeAccount = getLastActiveProtocolAccount(protocol);
+    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
 
     async function approve() {
       const { openModal } = useModals();
-      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.ledger) {
+      if (selectedAccount.value) {
+        setActiveAccountByAddressAndProtocol(
+          selectedAccount.value.address!,
+          selectedAccount.value.protocol,
+        );
+      }
+      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
         await openModal(MODAL_LEDGER_SIGN);
       }
-      popupProps.value?.resolve();
+      const modalResolution: ISignModalResolution = {
+        selectedAddress: selectedAccount.value?.address,
+      };
+      popupProps.value?.resolve(modalResolution);
     }
 
     function cancel() {
@@ -111,7 +131,8 @@ export default defineComponent({
     });
 
     return {
-      activeAccount,
+      protocol,
+      selectedAccount,
       isUnknownDapp,
       popupProps,
       sender,
