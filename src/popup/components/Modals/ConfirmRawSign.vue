@@ -193,6 +193,10 @@ export default defineComponent({
 
     const isSignerReplaceable = computed(() => (
       isSigningWithOtherAccount.value
+      // A payload whose signer this wallet does not hold is a co-sign request
+      // (multisig GA, a state-channel tx naming the counterparty, an already
+      // `SignedTx`): the exact bytes have to be signed as-is, never re-pointed.
+      && !isSignerAccountMissing.value
       && protocol === PROTOCOLS.aeternity
       && !!popupProps.value?.txBase64
       && canRebuildTransactionForSigner(popupProps.value.txBase64 as Encoded.Transaction)
@@ -200,6 +204,9 @@ export default defineComponent({
 
     const canSignWithSelectedAccount = computed(() => (
       !isSigningWithOtherAccount.value
+      // Co-sign case: the signer is outside this wallet, so there is nothing to
+      // rebuild - sign the raw bytes with the selected account, as v2.10.2 did.
+      || isSignerAccountMissing.value
       || (isSignerReplaceable.value && rebuildForSelectedAccount.value)
     ));
 

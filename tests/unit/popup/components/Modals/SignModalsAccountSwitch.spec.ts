@@ -278,6 +278,22 @@ describe('ConfirmRawSign account switcher', () => {
     }));
   });
 
+  it('lets a co-sign payload whose signer is not held be signed as-is', async () => {
+    // A payload prepared for an account this wallet does not hold (a multisig /
+    // state-channel co-sign, or an already-signed tx). v2.10.2 signed such raw
+    // bytes as-is; the switcher must not strand it on a disabled Confirm.
+    const ADDRESS_FOREIGN = AccountMemory.generate().address;
+    const wrapper = mountRawSign(buildSpendTxFor(ADDRESS_FOREIGN));
+
+    const select = wrapper.findComponent(SignAccountSelectStub);
+    // The signer is flagged missing and Confirm is enabled without any rebuild.
+    expect(select.props('signerAccountMissing')).toBe(true);
+    expect((wrapper.vm as any).canSignWithSelectedAccount).toBe(true);
+    // Re-pointing must not be offered - the exact bytes have to be signed.
+    expect((wrapper.vm as any).isSignerReplaceable).toBe(false);
+    expect(wrapper.find('[data-cy="rebuild-for-signer"]').exists()).toBe(false);
+  });
+
   it('hands the Air Gap device the rebuilt transaction', async () => {
     // Rebuilding actually encodes/decodes the address, so it must be a real one -
     // unlike `ADDRESS_ACTIVE`, which is only ever compared by identity elsewhere.

@@ -244,6 +244,7 @@ import {
   onMounted,
   onUnmounted,
   ref,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -458,11 +459,29 @@ export default defineComponent({
 
     /**
      * Signing with an account the transaction was not built for only produces a
-     * usable signature once the user opts into rebuilding it for that account.
+     * usable signature once the user opts into rebuilding it for that account -
+     * except for a co-sign payload whose signer this wallet does not hold and
+     * cannot re-point (an already-signed or generalized-account tx), which is
+     * signed as-is exactly as v2.10.2 did rather than stranding the user on a
+     * Confirm button that never enables.
      */
     const canSignWithSelectedAccount = computed(() => (
       !isSigningWithOtherAccount.value
+      || (isSignerAccountMissing.value && !isSignerChangeable.value)
       || (isSignerReplaceable.value && rebuildForSelectedAccount.value)
+    ));
+
+    /**
+     * The account whose balance actually funds the transaction: the selected one
+     * when the user opts into rebuilding for it, otherwise the account the
+     * transaction was built for. Verification has to follow this, not the
+     * mount-time account, or switching to a funded account would leave Confirm
+     * disabled on a stale check (and vice versa).
+     */
+    const effectiveSignerAddress = computed((): string | undefined => (
+      (isSignerReplaceable.value && rebuildForSelectedAccount.value)
+        ? selectedAccount.value?.address
+        : (popupProps.value?.fromAccount || originalSignerAddress.value)
     ));
 
     const transaction = ref<ITransaction>({
@@ -704,59 +723,78 @@ export default defineComponent({
     }
 
     /**
-     * Verifies aeternity transactions
+     * Verifies aeternity transactions.
+     *
+     * Re-runnable: the user can switch signing account after mount, so each call
+     * clears the previous result and re-checks against `effectiveSignerAddress`.
+     * A monotonic id makes a superseded run (an older account still resolving when
+     * a newer switch fires) drop its result instead of clobbering the current one.
      */
+    let verifyRunId = 0;
     async function verifyTransaction() {
-      if (popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity) {
-        try {
-          verifying.value = true;
-          const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(
-            (
-              popupProps.value?.fromAccount
-              || selectedAccount.value?.address
-              || activeAccount!.address
-            ) as Encoded.AccountAddress,
-          )
-            .catch((err) => {
-              if (!isNotFoundError(err)) {
-                handleUnknownError(err);
-              }
-              return 0;
-            });
-          // We've chosen the approach to trust the aepp itself in amount of gas,
-          // they think is needed
-          const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
-          executionCost.value = getAeFee(executionCostAettos);
+      if (!(popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity)) {
+        return;
+      }
+      verifyRunId += 1;
+      const runId = verifyRunId;
+      try {
+        verifying.value = true;
+        // Drop any result from a previous account/rebuild selection.
+        error.value = '';
+        dappBalanceError.value = false;
+        const sdk = await getAeSdk();
+        const signerAddress = (
+          effectiveSignerAddress.value || activeAccount!.address
+        ) as Encoded.AccountAddress;
+        const balance = await sdk.getBalance(signerAddress)
+          .catch((err) => {
+            if (!isNotFoundError(err)) {
+              handleUnknownError(err);
+            }
+            return 0;
+          });
+        if (runId !== verifyRunId) {
+          return;
+        }
+        // We've chosen the approach to trust the aepp itself in amount of gas,
+        // they think is needed
+        const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
+        executionCost.value = getAeFee(executionCostAettos);
 
-          if (new BigNumber(balance).isLessThan(executionCostAettos)) {
-            if (protocol === PROTOCOLS.aeternity && outerTxTag.value === Tag.ContractCallTx) {
-              dappBalanceError.value = true;
-            } else {
-              error.value = t('validation.enoughCoin');
-              return;
-            }
+        if (new BigNumber(balance).isLessThan(executionCostAettos)) {
+          if (protocol === PROTOCOLS.aeternity && outerTxTag.value === Tag.ContractCallTx) {
+            dappBalanceError.value = true;
+          } else {
+            error.value = t('validation.enoughCoin');
+            return;
           }
-          const txParams = unpackTx(popupProps.value.txBase64);
-          if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
-            const accountAddress = getTransactionSignerAddress(popupProps.value.txBase64);
-            txParams.nonce = (await sdk.api.getAccountByPubkey(accountAddress)).nonce + 1;
-            const dryRunResult = await sdk.txDryRun(buildTx(txParams), accountAddress);
-            gasPrice.value = dryRunResult.callObj?.gasPrice
-              ? +dryRunResult.callObj.gasPrice.toString()
-              : 0;
-            if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
-              error.value = new ContractByteArrayEncoder().decode(
-                dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
-              );
-            }
+        }
+        const txParams = unpackTx(popupProps.value.txBase64);
+        if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
+          txParams.nonce = (await sdk.api.getAccountByPubkey(signerAddress)).nonce + 1;
+          if (runId !== verifyRunId) {
+            return;
           }
-        } catch (e: any) {
-          if (!isNotFoundError(e)) {
-            handleUnknownError(e);
-            error.value = e.message;
+          const dryRunResult = await sdk.txDryRun(buildTx(txParams), signerAddress);
+          if (runId !== verifyRunId) {
+            return;
           }
-        } finally {
+          gasPrice.value = dryRunResult.callObj?.gasPrice
+            ? +dryRunResult.callObj.gasPrice.toString()
+            : 0;
+          if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
+            error.value = new ContractByteArrayEncoder().decode(
+              dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
+            );
+          }
+        }
+      } catch (e: any) {
+        if (runId === verifyRunId && !isNotFoundError(e)) {
+          handleUnknownError(e);
+          error.value = e.message;
+        }
+      } finally {
+        if (runId === verifyRunId) {
           verifying.value = false;
         }
       }
@@ -845,6 +883,13 @@ export default defineComponent({
     function setActiveTab(tabName: string) {
       activeTab.value = tabName;
     }
+
+    // Re-verify whenever the account that will actually sign changes, so the
+    // balance/dry-run check reflects the current selection instead of the
+    // mount-time account.
+    watch(effectiveSignerAddress, () => {
+      verifyTransaction();
+    });
 
     onMounted(async () => {
       if (popupProps.value) {
