@@ -78,10 +78,21 @@ describe('useAeAddressLinkContract', () => {
     expect(contractInitialize).not.toHaveBeenCalled();
   });
 
-  it('resolves custom networks to the testnet deployment', async () => {
+  it('treats custom networks as unsupported (no deployment, feature off)', async () => {
+    // Custom networks point at an arbitrary node that may lack the contract, so the
+    // feature is off there rather than forced onto the testnet deployment - which
+    // would throw on every read and clear users' stored defaults.
     const { composable } = await loadComposable({ networkType: 'custom' });
 
+    expect(composable.addressLinkContractAddress.value).toBeUndefined();
+    expect(composable.isAddressLinkSupported.value).toBe(false);
+  });
+
+  it('reports the feature as supported on a configured network', async () => {
+    const { composable } = await loadComposable({ networkType: 'testnet' });
+
     expect(composable.addressLinkContractAddress.value).toBe(CONTRACTS.testnet);
+    expect(composable.isAddressLinkSupported.value).toBe(true);
   });
 
   it('initializes the contract only once for concurrent reads', async () => {

@@ -165,8 +165,19 @@ const createTestContext = async ({
   // The preferred (default) name now comes from the on-chain AddressLink contract.
   // Mock the reader so default-name polling is deterministic and offline.
   const getPreferredName = vi.fn().mockResolvedValue(undefined);
+  // The AddressLink deployment exists on the default (mainnet/testnet) networks
+  // these tests run against; flip `.value` to false to exercise the unsupported
+  // (custom) network gate that skips the default-name sync.
+  const isAddressLinkSupported = ref(true);
   vi.doMock('@/protocols/aeternity/composables/aeAddressLinkContract', () => ({
-    useAeAddressLinkContract: () => ({ getPreferredName }),
+    useAeAddressLinkContract: () => ({ getPreferredName, isAddressLinkSupported }),
+  }));
+  // aeNames now also drives the backend-sponsored link/unlink flow; stub it so
+  // `changeDefaultName` never reaches the real HTTP/signing boundary.
+  const linkPreferredAensName = vi.fn().mockResolvedValue('th_stubbedLinkTxHash');
+  const unlinkPreferredAensName = vi.fn().mockResolvedValue('th_stubbedUnlinkTxHash');
+  vi.doMock('@/protocols/aeternity/composables/aeAddressLinkBackend', () => ({
+    useAeAddressLinkBackend: () => ({ linkPreferredAensName, unlinkPreferredAensName }),
   }));
 
   // Seed real `localStorage` BEFORE `registerAdapters` (below) is imported.
@@ -203,6 +214,9 @@ const createTestContext = async ({
     fetchPendingTransactions,
     fetchAllPages,
     getPreferredName,
+    isAddressLinkSupported,
+    linkPreferredAensName,
+    unlinkPreferredAensName,
     nodeNetworkId,
     sdk,
     openDefaultModal,
@@ -874,6 +888,62 @@ describe('useAeNames default (preferred) names', () => {
 
     await aeNames.updateDefaultNames();
     expect(aeNames.getName('ak_test').value).toBe('');
+  });
+});
+
+describe('useAeNames changeDefaultName (set/clear the preferred name)', () => {
+  it('sets the default via the signed link flow and applies it optimistically', async () => {
+    const ctx = await createTestContext();
+    ctx.getPreferredName.mockResolvedValue(undefined); // link tx not mined yet
+
+    await ctx.aeNames.changeDefaultName('picked.chain');
+
+    expect(ctx.linkPreferredAensName).toHaveBeenCalledWith('ak_test', 'picked.chain');
+    expect(ctx.unlinkPreferredAensName).not.toHaveBeenCalled();
+    // Visible immediately, before the on-chain poll reflects it.
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('picked.chain');
+    // The in-flight marker is released once the flow settles.
+    expect(ctx.aeNames.settingDefaultName.value).toBeNull();
+  });
+
+  it('clears the default via the signed unlink flow', async () => {
+    const ctx = await createTestContext();
+    ctx.aeNames.setDefaultNameOptimistic({ address: 'ak_test', name: 'old.chain' });
+
+    await ctx.aeNames.changeDefaultName('');
+
+    expect(ctx.unlinkPreferredAensName).toHaveBeenCalledWith('ak_test');
+    expect(ctx.linkPreferredAensName).not.toHaveBeenCalled();
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('');
+  });
+
+  it('drops a concurrent set-default (any row of the account) while one is in flight', async () => {
+    const ctx = await createTestContext();
+    let resolveLink;
+    ctx.linkPreferredAensName.mockReturnValue(new Promise((resolve) => { resolveLink = resolve; }));
+
+    const first = ctx.aeNames.changeDefaultName('one.chain');
+    // Competing calls that would race the contract's per-address nonce are ignored.
+    await ctx.aeNames.changeDefaultName('two.chain');
+    await ctx.aeNames.changeDefaultName('three.chain');
+    expect(ctx.aeNames.settingDefaultName.value).toMatchObject({ address: 'ak_test', name: 'one.chain' });
+
+    resolveLink('th_link');
+    await first;
+
+    expect(ctx.linkPreferredAensName).toHaveBeenCalledTimes(1);
+    expect(ctx.linkPreferredAensName).toHaveBeenCalledWith('ak_test', 'one.chain');
+    expect(ctx.aeNames.settingDefaultName.value).toBeNull();
+  });
+
+  it('does nothing on a network without an AddressLink deployment', async () => {
+    const ctx = await createTestContext();
+    ctx.isAddressLinkSupported.value = false;
+
+    await ctx.aeNames.changeDefaultName('picked.chain');
+
+    expect(ctx.linkPreferredAensName).not.toHaveBeenCalled();
+    expect(ctx.unlinkPreferredAensName).not.toHaveBeenCalled();
   });
 });
 

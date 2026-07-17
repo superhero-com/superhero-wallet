@@ -1,8 +1,7 @@
 import { computed } from 'vue';
 import { Contract, Encoded } from '@aeternity/aepp-sdk';
 
-import type { ChainName, NetworkTypeDefault } from '@/types';
-import { NETWORK_TYPE_CUSTOM, NETWORK_TYPE_TESTNET } from '@/constants';
+import type { ChainName } from '@/types';
 import { useAeSdk, useNetworks } from '@/composables';
 import AddressLinkACI from '@/protocols/aeternity/aci/AddressLinkACI.json';
 import type { AeAddressLinkContractApi } from '@/protocols/aeternity/types';
@@ -34,16 +33,18 @@ export function useAeAddressLinkContract() {
   const { activeNetwork } = useNetworks();
   const { getAeSdk } = useAeSdk();
 
+  // The AddressLink contract is only deployed on the built-in mainnet/testnet
+  // networks. Custom networks point at an arbitrary node (which may be a private
+  // devnet without the contract), so the feature is unavailable there rather than
+  // being forced onto the testnet deployment - talking to a contract that does
+  // not exist on the active chain would throw on every read and, worse, drive the
+  // preferred-name poll into clearing users' stored defaults.
   const addressLinkContractAddress = computed(
-    (): Encoded.ContractAddress | undefined => {
-      // Custom networks point at testnet infra (matching how the Superhero API URL
-      // is resolved), so read the preferred name from the testnet deployment there.
-      const networkType: NetworkTypeDefault = (activeNetwork.value.type === NETWORK_TYPE_CUSTOM)
-        ? NETWORK_TYPE_TESTNET
-        : activeNetwork.value.type;
-      return AE_ADDRESS_LINK_CONTRACTS[networkType];
-    },
+    (): Encoded.ContractAddress | undefined => AE_ADDRESS_LINK_CONTRACTS[activeNetwork.value.type],
   );
+
+  /** Whether the preferred-name AddressLink feature is available on the active network. */
+  const isAddressLinkSupported = computed((): boolean => !!addressLinkContractAddress.value);
 
   async function getAddressLinkContract(): Promise<Contract<AeAddressLinkContractApi> | undefined> {
     const contractAddress = addressLinkContractAddress.value;
@@ -105,6 +106,7 @@ export function useAeAddressLinkContract() {
 
   return {
     addressLinkContractAddress,
+    isAddressLinkSupported,
     getAddressLinkContract,
     getPreferredName,
   };
