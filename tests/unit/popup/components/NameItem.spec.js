@@ -149,14 +149,16 @@ describe('NameItem', () => {
     const wrapper = mount(NameItem, {
       props: {
         nameEntry: {
-          name: 'default.chain',
+          // Distinct from the `getDefaultName` mock's 'default.chain' so `isDefault`
+          // is false and the set-default guard doesn't block the call.
+          name: 'other.chain',
           owner: 'ak_test',
           pending: false,
           pointers: { accountPubkey: 'ak_test' },
           createdAtHeight: 1,
           expiresAt: 150,
           autoExtend: false,
-          hash: 'nm_default',
+          hash: 'nm_other',
         },
       },
       global: {
@@ -176,9 +178,54 @@ describe('NameItem', () => {
 
     await wrapper.vm.handleSetDefault();
 
-    expect(mockLinkPreferredAensName).toHaveBeenCalledWith('ak_test', 'default.chain');
+    expect(mockLinkPreferredAensName).toHaveBeenCalledWith('ak_test', 'other.chain');
     expect(mockUnlinkPreferredAensName).not.toHaveBeenCalled();
-    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledWith({ address: 'ak_test', name: 'default.chain' });
+    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledWith({ address: 'ak_test', name: 'other.chain' });
     expect(mockHandleUnknownError).not.toHaveBeenCalled();
+  });
+
+  it('ignores repeated clicks while a set-default request is in flight', async () => {
+    let resolveLink;
+    mockLinkPreferredAensName.mockReturnValue(new Promise((resolve) => {
+      resolveLink = resolve;
+    }));
+
+    const wrapper = mount(NameItem, {
+      props: {
+        nameEntry: {
+          name: 'other.chain',
+          owner: 'ak_test',
+          pending: false,
+          pointers: { accountPubkey: 'ak_test' },
+          createdAtHeight: 1,
+          expiresAt: 150,
+          autoExtend: false,
+          hash: 'nm_other',
+        },
+      },
+      global: {
+        stubs: {
+          BtnHelp: true,
+          BtnPlain: true,
+          DetailsItem: true,
+          InputField: true,
+          Truncate: true,
+          Transition: false,
+        },
+        mocks: {
+          $t: (key) => key,
+        },
+      },
+    });
+
+    const firstCall = wrapper.vm.handleSetDefault();
+    await wrapper.vm.handleSetDefault();
+    await wrapper.vm.handleSetDefault();
+
+    resolveLink('th_link');
+    await firstCall;
+
+    expect(mockLinkPreferredAensName).toHaveBeenCalledTimes(1);
+    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledTimes(1);
   });
 });

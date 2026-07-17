@@ -1027,6 +1027,7 @@
       "list": {
         "default": "Default",
         "default-make": "Make default",
+        "default-setting": "Setting…",
         "expiring": "Expiring",
         "valid-identifier-error": "Enter valid aeternity blockchain identifier",
         "valid-transfer-address-error": "Enter a different valid account address",

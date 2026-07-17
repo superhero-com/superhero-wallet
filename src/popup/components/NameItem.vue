@@ -27,14 +27,21 @@
           <BtnPlain
             v-show="canBeDefault"
             class="button-plain"
-            :class="{ set: isDefault }"
-            :disabled="isDefault"
-            :text="(isDefault)
-              ? $t('pages.names.list.default')
-              : $t('pages.names.list.default-make')
-            "
+            :class="{ set: isDefault, setting: isSettingDefault }"
+            :disabled="isDefault || isSettingDefault"
             @click="handleSetDefault"
-          />
+          >
+            <PendingIcon
+              v-if="isSettingDefault"
+              class="setting-icon"
+            />
+            {{ isSettingDefault
+              ? $t('pages.names.list.default-setting')
+              : (isDefault)
+                ? $t('pages.names.list.default')
+                : $t('pages.names.list.default-make')
+            }}
+          </BtnPlain>
           <BtnPlain
             v-show="expand"
             class="button-plain"
@@ -250,6 +257,7 @@ export default defineComponent({
     const showTransferInput = ref(false);
     const nameError = ref(false);
     const transferAddressError = ref(false);
+    const isSettingDefault = ref(false);
     const pointerInput = ref();
     const transferInput = ref();
 
@@ -352,7 +360,18 @@ export default defineComponent({
     }
 
     async function handleSetDefault() {
-      await updateDefaultName(props.nameEntry.name);
+      // Guard against repeated clicks while the backend-sponsored link tx is being
+      // requested/signed/submitted: without this each click fires a fresh link flow,
+      // producing several competing (and reverting) transactions.
+      if (isSettingDefault.value || isDefault.value) {
+        return;
+      }
+      isSettingDefault.value = true;
+      try {
+        await updateDefaultName(props.nameEntry.name);
+      } finally {
+        isSettingDefault.value = false;
+      }
     }
 
     async function toggleAutoExtend() {
@@ -489,6 +508,7 @@ export default defineComponent({
       hasPointer,
       isAlmostExpiring,
       isDefault,
+      isSettingDefault,
       newPointer,
       pendingStatusLabel,
       pointerInput,
@@ -580,6 +600,20 @@ export default defineComponent({
         &.set {
           background: rgba($color-warning, 0.1);
           color: $color-warning;
+        }
+
+        &.setting {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          background: rgba($color-warning, 0.1);
+          color: $color-warning;
+          cursor: progress;
+
+          .setting-icon {
+            width: 12px;
+            height: 12px;
+          }
         }
 
         &.edit {
