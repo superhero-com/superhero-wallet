@@ -103,13 +103,10 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       expect(checkTransactionSignLimit(HOST, { amount: 3 * ONE_AE_IN_AETTOS })).toBe(true);
     });
 
-    // See "Potential bugs found" report: BUG-1. `transactionSignSpent`/`transactionSignLimit`
-    // accounting uses plain JS `number` (IEEE-754 double), not BigNumber/BigInt. At the
-    // exact boundary, `3 + 1e-18 === 3` in JS floating point, so the smallest possible
-    // aeternity unit (1 aetto) of spend beyond an exactly-exhausted limit is silently
-    // swallowed by rounding and auto-signed without a confirmation modal - the ceiling is
-    // not actually hard at the smallest-unit boundary the plan mandates testing.
-    it.fails('refuses the smallest unit (1 aetto) of spend beyond an exactly-exhausted limit', () => {
+    // The accumulation and the limit comparison both happen in BigNumber, not plain JS
+    // `number` (IEEE-754 double), so the ceiling is hard even at the smallest possible
+    // aeternity unit (1 aetto) beyond an exactly-exhausted limit.
+    it('refuses the smallest unit (1 aetto) of spend beyond an exactly-exhausted limit', () => {
       const { addPermission, checkTransactionSignLimit } = usePermissions();
       addPermission(buildPermission({ transactionSignLimit: 3 }));
 
