@@ -27,6 +27,12 @@ export default defineConfig({
       r('src/protocols/registerAdapters.ts'),
     ],
     include: ['tests/unit/**/*.spec.{js,ts}'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,js,vue}'],
+      exclude: ['src/**/*.d.ts', 'src/icons/**', 'src/types/**'],
+      reporter: ['text-summary', 'lcov'],
+    },
     // Many third-party packages ship ESM that must be transformed.
     server: {
       deps: {

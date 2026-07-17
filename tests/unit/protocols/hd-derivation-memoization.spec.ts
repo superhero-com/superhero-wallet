@@ -63,4 +63,33 @@ describe('HD derivation memoization', () => {
     const mainnetAccountAgain = adapter.getHdWalletAccountFromMnemonicSeed(seed, 0);
     expect(mainnetAccountAgain.address).toBe(mainnetAccount.address);
   });
+
+  it('cache key includes the network: same seed + same account index on a different network is a cache MISS, never a stale hit', () => {
+    const adapter = new BitcoinAdapter();
+    const { switchNetwork } = useNetworks();
+    const deriveSpy = vi.spyOn(adapter as any, 'deriveHdWalletAccountFromMnemonicSeed');
+
+    switchNetwork(NETWORK_NAME_MAINNET);
+    const mainnetAccount = adapter.getHdWalletAccountFromMnemonicSeed(seed, 0);
+    expect(deriveSpy).toHaveBeenCalledTimes(1);
+
+    switchNetwork(NETWORK_NAME_TESTNET);
+    const testnetAccount = adapter.getHdWalletAccountFromMnemonicSeed(seed, 0);
+    // A second, independent derivation happened -- the testnet lookup was NOT
+    // served from the mainnet cache entry for the same (seed, index).
+    expect(deriveSpy).toHaveBeenCalledTimes(2);
+    // different object, not just a coincidentally-equal value
+    expect(testnetAccount).not.toBe(mainnetAccount);
+    expect(testnetAccount.address).not.toBe(mainnetAccount.address);
+
+    // Re-requesting mainnet now must hit its OWN cache entry (no extra derive
+    // call), proving both entries are keyed independently rather than one
+    // overwriting the other.
+    switchNetwork(NETWORK_NAME_MAINNET);
+    const mainnetAccountAgain = adapter.getHdWalletAccountFromMnemonicSeed(seed, 0);
+    expect(deriveSpy).toHaveBeenCalledTimes(2);
+    expect(mainnetAccountAgain).toBe(mainnetAccount);
+
+    deriveSpy.mockRestore();
+  });
 });
