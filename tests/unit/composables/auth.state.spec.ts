@@ -190,16 +190,14 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
     });
 
-    // BUG (documented, not fixed): the front-loaded derivation above only protects
-    // against a throw BEFORE any state is committed. `encryptionSalt.value` and
-    // `mnemonic.value` are two INDEPENDENT storage-backed refs, each persisted by
-    // its own fire-and-forget watcher (`useStorageRef`'s `setStorageState`, never
-    // awaited by the ref assignment that triggers it). If the salt write succeeds
-    // but the mnemonic write fails right after, on-disk state ends up with a NEW
-    // salt paired with the OLD ciphertext - undecryptable by EITHER password, not
-    // just decryptable-by-old-password as the plan/code-comment intend. See
-    // TEST_IMPROVEMENT_PLAN.md "Potential bugs found" for the write-up.
-    it.fails('BUG: a storage-write failure on the mnemonic key after the salt write already succeeded bricks the account (neither old nor new password decrypts)', async () => {
+    // `setPassword` commits the new salt+ciphertext PAIR to the underlying
+    // storage synchronously (with rollback on failure) before touching the
+    // reactive `encryptionSalt`/`mnemonic` refs. If the salt's write succeeds
+    // but the mnemonic's write then fails, the salt write is rolled back to its
+    // previous on-disk value and `setPassword` rejects - disk never ends up
+    // holding a NEW salt paired with the OLD ciphertext (which would be
+    // undecryptable by either password).
+    it('rolls back the salt and rejects when the mnemonic storage write fails after the salt write already succeeded', async () => {
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
 
@@ -210,8 +208,13 @@ describe('useAuth state machine branches', () => {
       const { composeStorageKeys } = await import('@/utils/common');
       const { STORAGE_KEYS } = await import('@/constants');
       const mnemonicComposedKey = composeStorageKeys(STORAGE_KEYS.mnemonic);
+      const saltComposedKey = composeStorageKeys(STORAGE_KEYS.encryptionSalt);
       const oldCiphertextOnDisk = localStorage.getItem(mnemonicComposedKey);
+      const oldSaltOnDisk = localStorage.getItem(saltComposedKey);
+      const saltRefBeforeFailure = auth.encryptionSalt.value;
+      const mnemonicRefBeforeFailure = auth.mnemonic.value;
       expect(oldCiphertextOnDisk).toBeTruthy();
+      expect(oldSaltOnDisk).toBeTruthy();
 
       // The mnemonic write throws (e.g. QuotaExceededError); the encryptionSalt
       // write is left untouched and succeeds normally.
@@ -222,31 +225,22 @@ describe('useAuth state machine branches', () => {
         return realSet(keys, value);
       });
 
-      // The failing write happens inside a fire-and-forget watcher (never awaited
-      // by `setPassword`), so it surfaces as a genuine unhandled rejection rather
-      // than a rejection of `setPassword` itself - capture it instead of letting it
-      // fail the whole test run.
-      const capturedRejections: unknown[] = [];
-      const onUnhandledRejection = (reason: unknown) => { capturedRejections.push(reason); };
-      process.on('unhandledRejection', onUnhandledRejection);
-      try {
-        await auth.setPassword('new-password'); // resolves fine - the failure is async
-        await nextTick();
-        await flushAsync();
-      } finally {
-        process.off('unhandledRejection', onUnhandledRejection);
-      }
+      await expect(auth.setPassword('new-password'))
+        .rejects.toThrow('simulated storage quota exceeded on mnemonic write');
+      await nextTick();
+      await flushAsync();
 
-      // Sanity: the injected failure actually fired (if this fails, the mock wiring
-      // is broken, not the bug under test).
-      expect(capturedRejections.length).toBeGreaterThan(0);
-      // The mnemonic write failed - on-disk ciphertext is still the OLD one.
+      // Disk still holds the OLD salt (rolled back) and the OLD ciphertext
+      // (never overwritten) - a consistent pair, not a mismatched one.
+      expect(localStorage.getItem(saltComposedKey)).toBe(oldSaltOnDisk);
       expect(localStorage.getItem(mnemonicComposedKey)).toBe(oldCiphertextOnDisk);
+      // The reactive refs were never assigned either - `setPassword` threw
+      // before reaching them.
+      expect(auth.encryptionSalt.value).toEqual(saltRefBeforeFailure);
+      expect(auth.mnemonic.value).toBe(mnemonicRefBeforeFailure);
 
       // Restore normal storage behavior before restarting - `useStorageRef`'s
-      // restore IIFE unconditionally writes migrated values back to storage on
-      // every boot, and that write-back must not also hit our injected failure
-      // (it would just be more unhandled-rejection noise, not part of the bug).
+      // restore IIFE writes the restored value back to storage on every boot.
       walletStorageSetMock.mockImplementation(
         (keys: any, value: any, realSet: any) => realSet(keys, value),
       );
@@ -256,14 +250,7 @@ describe('useAuth state machine branches', () => {
       const authRestarted = useAuthRestarted();
       await flushAsync();
 
-      // EXPECTED per TEST_IMPROVEMENT_PLAN.md Task 1.3: a mid-flow failure must
-      // leave on-disk state decryptable with the OLD password.
-      // ACTUAL: `encryptionSalt` was already rotated to the NEW salt (that write
-      // succeeded) before the mnemonic write failed, so the OLD ciphertext still on
-      // disk is now paired with a salt it was never encrypted under. Decrypting
-      // with the OLD password derives the wrong key against `encryptionSalt` and
-      // throws an AES-GCM auth-tag mismatch - the account is bricked, not merely
-      // "still on the old password".
+      // The account is NOT bricked: the old password still decrypts cleanly.
       const ok = await authRestarted.authenticateWithPassword('old-password');
       expect(ok).toBe(true);
       expect(authRestarted.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
