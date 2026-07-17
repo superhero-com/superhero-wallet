@@ -141,10 +141,9 @@ describe('BitcoinAdapter - constructAndSignTx (UTXO selection, dust, change, ove
 
   // Wallet-safety expectation: change AT OR ABOVE the dust threshold should
   // go back to the sender as a change output, not be silently swept into the
-  // fee. The implementation's condition is strictly `> DUST_AMOUNT`, so a
-  // change value of EXACTLY DUST_AMOUNT is (incorrectly) swept into the fee
-  // instead. See TEST_IMPROVEMENT_PLAN.md "Potential bugs found" entry #1.
-  it.fails('change exactly equal to the dust threshold is returned to the sender as a change output', async () => {
+  // fee. The implementation's condition is `>= DUST_AMOUNT`, so a change
+  // value of exactly DUST_AMOUNT is returned to the sender.
+  it('change exactly equal to the dust threshold is returned to the sender as a change output', async () => {
     const change = DUST_AMOUNT; // 546
     const tx = await construct(AMOUNT_SATS + FEE_SATS + change);
 
