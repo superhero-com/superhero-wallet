@@ -1236,16 +1236,26 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       await extendExpiringOwnedNames();
     });
 
+    // Load owned + default names as soon as the middleware is ready and accounts
+    // exist - and again whenever the account set changes - instead of only after a
+    // later change. This is what makes the last-claimed-name fallback appear in
+    // account cards app-wide (e.g. the dashboard carousel) without the user first
+    // opening the Names page, where it used to be the sole trigger. It stays
+    // cheap: `ownedNames`/`defaultNamesRegistry` are persisted storageRefs (so
+    // return visits render with no fetch), `updateDefaultNames` dedupes against
+    // its poll, and this fires on discrete events (startup, middleware ready,
+    // account change) rather than on an interval.
     watch(
-      aeAccounts,
-      async (val, oldVal) => {
-        if (isMiddlewareReady.value && val !== oldVal) {
+      [aeAccounts, isMiddlewareReady] as const,
+      async ([accounts, middlewareReady]) => {
+        if (middlewareReady && accounts.length) {
           await Promise.all([
             updateOwnedNames(),
             updateDefaultNames(),
           ]);
         }
       },
+      { immediate: true },
     );
   }
 

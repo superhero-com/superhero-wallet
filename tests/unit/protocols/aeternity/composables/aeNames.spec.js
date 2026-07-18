@@ -154,9 +154,12 @@ const createTestContext = async ({
     }),
   }));
 
+  // Controllable so tests can drive the "middleware became ready" transition that
+  // populates owned/default names on startup (the account-card path).
+  const isMiddlewareReady = ref(false);
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
     useAeMiddleware: () => ({
-      isMiddlewareReady: ref(false),
+      isMiddlewareReady,
       getMiddleware: vi.fn().mockResolvedValue({ getNames }),
       fetchFromMiddlewareCamelCased: vi.fn(),
     }),
@@ -189,6 +192,16 @@ const createTestContext = async ({
   // happen before that first, incidental load, or it's too late.
   const { WalletStorage } = await import('@/lib/WalletStorage');
   const { STORAGE_KEYS } = await import('@/constants');
+  // `localStorage` persists across `createTestContext` calls (only modules are
+  // reset), so a previous test's persisted default/owned names would be restored
+  // asynchronously into this context and could clobber the state this test sets -
+  // an intermittent, order-dependent flake. Remove those keys so the storageRef
+  // restore reads `null` and no-ops (see `setLocalState`), giving each context a
+  // clean, deterministic names registry.
+  WalletStorage.remove(STORAGE_KEYS.namesDefault);
+  WalletStorage.remove(STORAGE_KEYS.namesOwned);
+  WalletStorage.remove(STORAGE_KEYS.namesOwnedNetworkId);
+  WalletStorage.remove(STORAGE_KEYS.pendingDefaultNames);
   if (Object.keys(preclaimedNames).length) {
     // `decryptedComputed` is a passthrough above, so the "encrypted" storage
     // slot just holds the plain JSON string aeNames.ts expects to decode.
@@ -215,6 +228,7 @@ const createTestContext = async ({
     fetchAllPages,
     getPreferredName,
     isAddressLinkSupported,
+    isMiddlewareReady,
     linkPreferredAensName,
     unlinkPreferredAensName,
     nodeNetworkId,
@@ -992,6 +1006,22 @@ describe('useAeNames last-claimed-name fallback', () => {
 
     expect(ctx.aeNames.getName('ak_test').value).toBe('preferred.chain');
     expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('preferred.chain');
+  });
+
+  it('loads owned names once the middleware is ready, without opening the Names page', async () => {
+    // Middleware starts not-ready, so nothing has been fetched: an account card
+    // would show no name. This is the account-card carousel scenario.
+    const ctx = await createTestContext();
+    expect(ctx.aeNames.getName('ak_test').value).toBe('');
+
+    ctx.fetchAllPages.mockResolvedValueOnce([middlewareName('claimed.chain', 30)]);
+    // Middleware becoming ready must populate the fallback on its own - no explicit
+    // updateOwnedNames() call (that is what visiting the Names page used to do).
+    ctx.isMiddlewareReady.value = true;
+
+    await vi.waitFor(() => {
+      expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
+    });
   });
 
   it('ignores names that are not confirmed on-chain yet', async () => {
