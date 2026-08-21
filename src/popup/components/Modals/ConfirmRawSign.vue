@@ -107,6 +107,7 @@ import {
 } from '@/composables';
 import {
   canRebuildTransactionForSigner,
+  fetchAccountNextNonce,
   rebuildTransactionForSigner,
 } from '@/protocols/aeternity/helpers';
 
@@ -231,7 +232,7 @@ export default defineComponent({
       return rebuildTransactionForSigner(
         txBase64,
         selectedAccount.value.address as Encoded.AccountAddress,
-        async (address) => (await aeSdk.api.getAccountNextNonce(address)).nextNonce,
+        (address) => fetchAccountNextNonce(aeSdk.api, address),
       );
     }
 

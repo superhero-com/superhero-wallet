@@ -34,6 +34,7 @@ import { useAeSdk, useLedger } from '@/composables';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import {
   canRebuildTransactionForSigner,
+  fetchAccountNextNonce,
   rebuildTransactionForSigner,
 } from '@/protocols/aeternity/helpers';
 import { SEED_LENGTH } from '@/protocols/aeternity/config';
@@ -288,9 +289,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     return rebuildTransactionForSigner(
       txBase64,
       signerAddress,
-      // `getAccountByPubkey` 404s for an account that has never sent a
-      // transaction; the next-nonce endpoint returns 1 for it instead.
-      async (address) => (await aeSdk.api.getAccountNextNonce(address)).nextNonce,
+      (address) => fetchAccountNextNonce(aeSdk.api, address),
     );
   }
 

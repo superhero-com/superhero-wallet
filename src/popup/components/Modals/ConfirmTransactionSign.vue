@@ -300,6 +300,7 @@ import { AE_SYMBOL, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   canRebuildTransactionForSigner,
+  fetchAccountNextNonce,
   getAeFee,
   getTransactionTokenInfoResolver,
   rebuildTransactionForSigner,
@@ -679,7 +680,7 @@ export default defineComponent({
       return rebuildTransactionForSigner(
         txBase64,
         selectedAccount.value.address as Encoded.AccountAddress,
-        async (address) => (await aeSdk.api.getAccountNextNonce(address)).nextNonce,
+        (address) => fetchAccountNextNonce(aeSdk.api, address),
       );
     }
 
@@ -769,13 +770,28 @@ export default defineComponent({
             return;
           }
         }
-        const txParams = unpackTx(popupProps.value.txBase64);
+        // Verify what will actually be signed, re-pointed if the user opted in.
+        const txToVerify = (await getTransactionToSign()) ?? popupProps.value.txBase64;
+        if (runId !== verifyRunId) {
+          return;
+        }
+        const txParams = unpackTx(txToVerify);
         if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
-          txParams.nonce = (await sdk.api.getAccountByPubkey(signerAddress)).nonce + 1;
+          const dryRunAddress = getTransactionSignerAddress(txToVerify);
+          // Dry-run wants chain-nonce continuity, not the mempool-aware next nonce -
+          // that overshoots once a tx is pending (`tx_nonce_too_high_for_account`).
+          const { nonce } = await sdk.api.getAccountByPubkey(dryRunAddress)
+            .catch((err) => {
+              if (!isNotFoundError(err)) {
+                throw err;
+              }
+              return { nonce: 0 };
+            });
           if (runId !== verifyRunId) {
             return;
           }
-          const dryRunResult = await sdk.txDryRun(buildTx(txParams), signerAddress);
+          txParams.nonce = nonce + 1;
+          const dryRunResult = await sdk.txDryRun(buildTx(txParams), dryRunAddress);
           if (runId !== verifyRunId) {
             return;
           }

@@ -22,6 +22,7 @@ import {
   useUi,
   useAccounts,
 } from '@/composables';
+import { fetchAccountNextNonce } from '@/protocols/aeternity/helpers';
 import Logger from '@/lib/logger';
 
 export default defineComponent({
@@ -51,7 +52,7 @@ export default defineComponent({
 
         if (unpackedTx.tag === Tag.ContractCallTx || unpackedTx.tag === Tag.ContractCreateTx) {
           unpackedTx.callerId = callerId;
-          unpackedTx.nonce = (await aeSdk.api.getAccountByPubkey(callerId)).nonce + 1;
+          unpackedTx.nonce = await fetchAccountNextNonce(aeSdk.api, callerId);
         }
 
         return buildTx(unpackedTx);

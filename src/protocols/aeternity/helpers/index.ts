@@ -426,6 +426,24 @@ export function canRebuildTransactionForSigner(txBase64: Encoded.Transaction): b
 }
 
 /**
+ * Mempool-aware next nonce for `address`. The node 404s for an account that has
+ * never appeared on chain; the first nonce such an account can use is 1.
+ */
+export async function fetchAccountNextNonce(
+  api: { getAccountNextNonce: (a: Encoded.AccountAddress) => Promise<{ nextNonce: number }> },
+  address: Encoded.AccountAddress,
+): Promise<number> {
+  const { nextNonce } = await api.getAccountNextNonce(address)
+    .catch((error) => {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+      return { nextNonce: 1 };
+    });
+  return nextNonce;
+}
+
+/**
  * Rebuild a transaction so that it is sent by `signerAddress` instead of the
  * account it was originally prepared for.
  *
