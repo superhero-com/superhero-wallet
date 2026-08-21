@@ -2,6 +2,7 @@ import { computed } from 'vue';
 import { Contract, Encoded } from '@aeternity/aepp-sdk';
 
 import type { ChainName } from '@/types';
+import { NETWORK_TYPE_CUSTOM, NETWORK_TYPE_TESTNET } from '@/constants';
 import { useAeSdk, useNetworks } from '@/composables';
 import AddressLinkACI from '@/protocols/aeternity/aci/AddressLinkACI.json';
 import type { AeAddressLinkContractApi } from '@/protocols/aeternity/types';
@@ -31,17 +32,16 @@ let initializingAddress: Encoded.ContractAddress | undefined;
  */
 export function useAeAddressLinkContract() {
   const { activeNetwork } = useNetworks();
-  const { getAeSdk } = useAeSdk();
+  const { getAeSdk, isNodeTestnet } = useAeSdk();
 
-  // The AddressLink contract is only deployed on the built-in mainnet/testnet
-  // networks. Custom networks point at an arbitrary node (which may be a private
-  // devnet without the contract), so the feature is unavailable there rather than
-  // being forced onto the testnet deployment - talking to a contract that does
-  // not exist on the active chain would throw on every read and, worse, drive the
-  // preferred-name poll into clearing users' stored defaults.
-  const addressLinkContractAddress = computed(
-    (): Encoded.ContractAddress | undefined => AE_ADDRESS_LINK_CONTRACTS[activeNetwork.value.type],
-  );
+  // Custom networks qualify only when the node is the real testnet chain: the
+  // sponsoring backend is testnet-hardwired for them (see aeNetworkSettings).
+  const addressLinkContractAddress = computed((): Encoded.ContractAddress | undefined => {
+    const { type } = activeNetwork.value;
+    return AE_ADDRESS_LINK_CONTRACTS[
+      type === NETWORK_TYPE_CUSTOM && isNodeTestnet.value ? NETWORK_TYPE_TESTNET : type
+    ];
+  });
 
   /** Whether the preferred-name AddressLink feature is available on the active network. */
   const isAddressLinkSupported = computed((): boolean => !!addressLinkContractAddress.value);

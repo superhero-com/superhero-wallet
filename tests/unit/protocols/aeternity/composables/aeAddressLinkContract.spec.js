@@ -20,11 +20,13 @@ async function loadComposable({
   networkType = 'testnet',
   getLinkResult = { decodedResult: 'name.chain' },
   network,
+  isNodeTestnet: isNodeTestnetValue = false,
   contractInitialize: customInit,
 } = {}) {
   vi.resetModules();
 
   const activeNetwork = network || ref({ type: networkType });
+  const isNodeTestnet = ref(isNodeTestnetValue);
   const getContext = vi.fn(() => ({ ctx: true }));
   const getAeSdk = vi.fn().mockResolvedValue({ getContext });
   const getLink = vi.fn().mockResolvedValue(getLinkResult);
@@ -37,7 +39,7 @@ async function loadComposable({
     Contract: { initialize: contractInitialize },
   }));
   vi.doMock('@/composables', () => ({
-    useAeSdk: () => ({ getAeSdk }),
+    useAeSdk: () => ({ getAeSdk, isNodeTestnet }),
     useNetworks: () => ({ activeNetwork }),
   }));
   vi.doMock('@/protocols/aeternity/config', () => ({
@@ -52,6 +54,7 @@ async function loadComposable({
     getLink,
     getAeSdk,
     activeNetwork,
+    isNodeTestnet,
   };
 }
 
@@ -78,14 +81,39 @@ describe('useAeAddressLinkContract', () => {
     expect(contractInitialize).not.toHaveBeenCalled();
   });
 
-  it('treats custom networks as unsupported (no deployment, feature off)', async () => {
-    // Custom networks point at an arbitrary node that may lack the contract, so the
-    // feature is off there rather than forced onto the testnet deployment - which
-    // would throw on every read and clear users' stored defaults.
-    const { composable } = await loadComposable({ networkType: 'custom' });
+  it('treats a custom network on a non-testnet chain as unsupported', async () => {
+    // A private devnet lacks the contract entirely.
+    const { composable } = await loadComposable({
+      networkType: 'custom',
+      isNodeTestnet: false,
+    });
 
     expect(composable.addressLinkContractAddress.value).toBeUndefined();
     expect(composable.isAddressLinkSupported.value).toBe(false);
+  });
+
+  it('supports a custom network whose node is the real testnet', async () => {
+    const { composable } = await loadComposable({
+      networkType: 'custom',
+      isNodeTestnet: true,
+    });
+
+    expect(composable.addressLinkContractAddress.value).toBe(CONTRACTS.testnet);
+    expect(composable.isAddressLinkSupported.value).toBe(true);
+  });
+
+  it('turns the feature on when a custom network resolves as testnet after startup', async () => {
+    // The gate must be reactive: `isNodeTestnet` is false until the node status lands.
+    const { composable, isNodeTestnet } = await loadComposable({
+      networkType: 'custom',
+      isNodeTestnet: false,
+    });
+    expect(composable.isAddressLinkSupported.value).toBe(false);
+
+    isNodeTestnet.value = true;
+
+    expect(composable.addressLinkContractAddress.value).toBe(CONTRACTS.testnet);
+    expect(composable.isAddressLinkSupported.value).toBe(true);
   });
 
   it('reports the feature as supported on a configured network', async () => {
