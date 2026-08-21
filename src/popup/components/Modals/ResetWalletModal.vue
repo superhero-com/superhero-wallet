@@ -59,13 +59,14 @@
 import { defineComponent, PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { IS_MOBILE_APP } from '@/constants';
+import { IS_MOBILE_APP, PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
   useModals,
   useNetworks,
   usePermissions,
+  useTransactionList,
   useUi,
 } from '@/composables';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
@@ -98,6 +99,11 @@ export default defineComponent({
     const { resetPermissions } = usePermissions();
     const { closeAllModals } = useModals();
 
+    const { resetTransactionListState } = useTransactionList({
+      protocol: PROTOCOLS.aeternity,
+      accountAddress: null as any, // `any` use deliberately to force setting empty state
+    });
+
     async function onReset() {
       resetAccounts();
       resetNetworks();
@@ -105,6 +111,8 @@ export default defineComponent({
       disconnectDapps();
       resetPermissions();
       closeAllModals();
+      resetTransactionListState();
+      resetPermissions();
 
       WalletStorage.clear();
       if (IS_MOBILE_APP) {
@@ -117,7 +125,6 @@ export default defineComponent({
       await router.push({ name: ROUTE_INDEX });
 
       props.resolve();
-      window.location.reload();
     }
 
     return {

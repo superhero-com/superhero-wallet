@@ -85,7 +85,7 @@ export function useTransactionList({
     ...transactionsLoaded.value,
   ].filter(({ protocol: transactionProtocol }) => transactionProtocol === protocol), 'hash'));
 
-  function resetState() {
+  function resetTransactionListState() {
     state.value = {
       accountAddress,
       assetContractId,
@@ -154,7 +154,7 @@ export function useTransactionList({
   async function initializeTransactionListPolling() {
     if (!state.value.isInitialLoadDone || !transactionsLoaded.value.length) {
       if (state.value.isInitialLoadDone && !transactionsLoaded.value.length) {
-        resetState();
+        resetTransactionListState();
       }
       await loadCurrentPageTransactions();
       if (
@@ -215,7 +215,7 @@ export function useTransactionList({
     || state.value.assetContractId !== assetContractId
     || state.value.networkName !== activeNetwork.value.name
   ) {
-    resetState();
+    resetTransactionListState();
   }
 
   return {
@@ -227,5 +227,6 @@ export function useTransactionList({
     loadCurrentPageTransactions,
     initializeTransactionListPolling,
     stopTransactionListPolling,
+    resetTransactionListState,
   };
 }
