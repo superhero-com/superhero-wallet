@@ -27,6 +27,11 @@ export default defineConfig({
       r('src/protocols/registerAdapters.ts'),
     ],
     include: ['tests/unit/**/*.spec.{js,ts}'],
+    // Real crypto (PBKDF2, BIP32) and large mocked module graphs blow the 5s default
+    // on a loaded runner.
+    testTimeout: 20000,
+    // The heavy specs do that loading in `beforeAll`, which `testTimeout` does not govern.
+    hookTimeout: 20000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,js,vue}'],

@@ -217,5 +217,5 @@ describe('useMaxAmount', () => {
     // occurred), never `balance - fee`. If the AE fee leaked into the token branch, this
     // would instead reflect balance-minus-fee arithmetic (or throw on unrelated decimals).
     expect(result.max.value).toBe('0');
-  }, 3000);
+  });
 });

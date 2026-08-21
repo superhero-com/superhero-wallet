@@ -79,8 +79,5 @@ describe('WalletConnect accountsChanged behavior', () => {
     // Some WC utils may strip unrequested events; ensure events array exists
     expect(Array.isArray(ns.events)).toBe(true);
     expect(ns.accounts[0]).toBe('eip155:1:0xbbb');
-  // The lazily-imported WalletConnect stack pushes this well past the 5s default
-  // when the whole suite runs together (it passes in ~1.5s in isolation), so give
-  // it headroom rather than letting a slow import flake the run.
-  }, 15000);
+  });
 });
