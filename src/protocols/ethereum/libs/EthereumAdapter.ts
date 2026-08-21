@@ -20,6 +20,7 @@ import Web3Eth, {
   getTransactionReceipt,
 } from 'web3-eth';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
+import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
@@ -402,18 +403,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     const amountBN = new BigNumber(amount);
     const tokenDecimals = Number(await contract.methods.decimals().call());
-    const hexAmount = bigIntToHex(BigInt(
-      amountBN.shiftedBy(tokenDecimals).toFixed(0, BigNumber.ROUND_DOWN),
-    ));
+    const hexAmount = bigIntToHex(toTokenBaseUnits(amountBN, tokenDecimals));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
     const estimatedGas = await contract.methods.transfer(recipient, hexAmount).estimateGas();
-    // `estimateGas` is exact for the chain state at estimation time, but an ERC-20
-    // transfer's gas can rise by mining time (e.g. first-time recipient storage
-    // writes, allowance bookkeeping). An underestimate reverts out-of-gas with the
-    // fee already spent, so add a 15% headroom - the usual wallet safety margin.
-    const gasLimit = (BigInt(estimatedGas) * 115n) / 100n;
+    const gasLimit = withGasHeadroom(estimatedGas);
 
     // All values are in wei
     const txData: FeeMarketEIP1559TxData = {

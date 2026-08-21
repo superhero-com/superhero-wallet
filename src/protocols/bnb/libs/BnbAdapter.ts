@@ -20,6 +20,7 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
+import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
@@ -443,24 +444,19 @@ export class BnbAdapter extends BaseProtocolAdapter {
     contract.setProvider(nodeUrl);
 
     const amountBN = new BigNumber(amount);
-    const hexAmount = bigIntToHex(
-      BigInt(
-        toWei(
-          amountBN.toFixed(Number(await contract.methods.decimals().call())),
-          'ether',
-        ),
-      ),
-    );
+    const tokenDecimals = Number(await contract.methods.decimals().call());
+    const hexAmount = bigIntToHex(toTokenBaseUnits(amountBN, tokenDecimals));
 
     // Use node-provided gasPrice on BNB (no EIP-1559)
     const web3Eth = this.getWeb3EthInstance();
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
-    const [nonce, gasLimit] = await Promise.all([
+    const [nonce, estimatedGas] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas({ from: options.fromAccount }),
     ]);
+    const gasLimit = withGasHeadroom(estimatedGas);
 
     const txData: TxData = {
       nonce,

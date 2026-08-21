@@ -8,6 +8,7 @@ import BigNumber from 'bignumber.js';
 import { AccountAddress, Dictionary, ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { handleUnknownError } from '@/utils';
+import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { ERC20_ABI, ETH_CONTRACT_ID } from '../config';
 import { EthDecodedCallData } from '../types';
 import { EtherscanService } from '../libs/EtherscanService';
@@ -92,13 +93,14 @@ export async function getTokenTransferGasLimit(
   );
   contract.setProvider(nodeUrl);
 
-  const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(
-    Number(await contract.methods.decimals().call()),
-  ), 'ether')));
+  const tokenDecimals = Number(await contract.methods.decimals().call());
+  const hexAmount = bigIntToHex(toTokenBaseUnits(amount, tokenDecimals));
 
   const gasEstimation = await contract.methods.transfer(recipient, hexAmount)
     .estimateGas(undefined, { number: FMT_NUMBER.NUMBER, bytes: FMT_BYTES.HEX });
-  const roundedToNextThousand = Math.ceil(Number(gasEstimation / 1000)) * 1000;
+  // Same headroom the adapters apply - this is the fee the form validates against.
+  const gasWithHeadroom = Number(withGasHeadroom(gasEstimation));
+  const roundedToNextThousand = Math.ceil(gasWithHeadroom / 1000) * 1000;
   return roundedToNextThousand;
 }
 
