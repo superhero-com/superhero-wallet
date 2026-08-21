@@ -80,9 +80,32 @@ describe('Solana composables - useSolMaxAmount', () => {
     expect(Number(max.value)).toBeGreaterThan(4.999);
     expect(Number(max.value)).toBeLessThan(5.001);
 
-    // If token selected, returns token balance unaffected by fee
+    // The SOL fee is not taken from the token balance, but each recipient still
+    // receives the full amount, so max is balance / recipients.
     form.value.selectedAsset = { contractId: 'TokenMint', decimals: 6, amount: '1000000' } as any;
-    expect(max.value).toBe('1');
+    expect(max.value).toBe('0.5');
+  });
+
+  it('floors the token max to the token decimals when it does not divide evenly', () => {
+    // 1 / 3 must floor to the mint's 6 decimals.
+    const form = makeSolForm();
+    form.value.addresses = ['A', 'B', 'C'];
+    form.value.selectedAsset = { contractId: 'TokenMint', decimals: 6, amount: '1000000' } as any;
+
+    const { max } = useSolMaxAmount(form as any) as any;
+
+    expect(max.value).toBe('0.333333');
+  });
+
+  it('floors the max instead of rounding it up past the balance', () => {
+    // Native SOL branch: (10 - 0.000005) / 2 = 4.9999975 floors to 4.9; HALF_UP
+    // gives 5.0 - over balance.
+    const form = makeSolForm();
+    form.value.selectedAsset = { contractId: form.value.selectedAsset.contractId, decimals: 1 };
+
+    const { max } = useSolMaxAmount(form as any) as any;
+
+    expect(max.value).toBe('4.9');
   });
 
   it('primes the fee on setup so max excludes fee headroom before any field edit', () => {

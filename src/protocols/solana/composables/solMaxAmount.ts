@@ -28,15 +28,18 @@ export function useSolMaxAmount(formModel: Ref<IFormModel>) {
         perRecipient.isPositive()
           ? perRecipient
           : new BigNumber(0)
-      ).decimalPlaces(decimals).toString();
+      ).decimalPlaces(decimals, BigNumber.ROUND_DOWN).toString();
     }
-    // Token: return available token balance (shifted by decimals)
+    // Token: every recipient gets the same amount, so cap at balance / recipients.
     const sel = formModel.value?.selectedAsset;
     if (sel?.amount != null) {
       const tokenBalance = new BigNumber(
         toShiftedBigNumber(sel.amount as any, -(sel.decimals || 0)) || 0,
       );
-      return tokenBalance.toString();
+      return tokenBalance
+        .dividedBy(recipientsCount.value)
+        .decimalPlaces(sel.decimals || 0, BigNumber.ROUND_DOWN)
+        .toString();
     }
     return '0';
   });
