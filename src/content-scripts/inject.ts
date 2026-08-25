@@ -18,6 +18,20 @@ const connectedDapps: Record<string, any> = {};
 
 window.browser = browser;
 
+/**
+ * Frames sandboxed without `allow-same-origin` (and `file://` documents) have an
+ * opaque origin, which serializes to the literal string `'null'`. That value is
+ * not a valid `postMessage` target origin - the API only accepts a real origin,
+ * `'*'` or `'/'` - so every message the content script sends into such a frame
+ * throws a `SyntaxError`. It is also worthless as a dapp identity: permissions
+ * are keyed by host, so every sandboxed frame on the web would share the single
+ * `'null'` entry. Stay out of those frames entirely.
+ */
+const hasOpaqueOrigin = () => {
+  const origin = window.location?.origin ?? window.origin;
+  return !origin || origin === 'null';
+};
+
 const runContentScript = () => {
   const sendToOffscreen = (method: BackgroundMethod, params: any) => new Promise((resolve) => {
     browser.runtime
@@ -141,4 +155,6 @@ const runContentScript = () => {
   }, 10);
 };
 
-runContentScript();
+if (!hasOpaqueOrigin()) {
+  runContentScript();
+}
