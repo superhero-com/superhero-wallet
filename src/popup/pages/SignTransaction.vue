@@ -9,7 +9,7 @@ import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
-  buildTx, Encoded, Tag, unpackTx,
+  Encoded, rebuildUnpackedTx, Tag, unpackTx,
 } from '@aeternity/aepp-sdk';
 
 import { DEFAULT_WAITING_HEIGHT, PROTOCOLS } from '@/constants';
@@ -55,7 +55,10 @@ export default defineComponent({
           unpackedTx.nonce = await fetchAccountNextNonce(aeSdk.api, callerId);
         }
 
-        return buildTx(unpackedTx);
+        // Serialized back as it came in - only the caller and nonce above change. `buildTx`
+        // would re-price it against the parameters of the SDK release and reject a transaction
+        // built for a network running a lower minimum gas price.
+        return rebuildUnpackedTx(unpackedTx);
       }
 
       try {

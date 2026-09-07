@@ -19,18 +19,25 @@
  *    determinism/replay-safety property is exactly what this task must verify -
  *    mocking it away would make that assertion meaningless.
  *
- * `MULTISIG_TRANSACTION_EXPIRATION_HEIGHT` (480) and `GA_META_PARAMS`
- * (`{ fee: AE_GET_META_TX_FEE, gasPrice: 1e9 }`) are internal, non-exported
- * constants of the composable (src/composables/multisigTransactions.ts lines 35
- * and 38). They are duplicated here as literals; if they're ever renamed/changed
- * the corresponding assertions below must be updated too.
+ * `MULTISIG_TRANSACTION_EXPIRATION_HEIGHT` (480) is an internal, non-exported
+ * constant of the composable and is duplicated here as a literal; if it is ever
+ * renamed/changed the corresponding assertions below must be updated too.
+ *
+ * The GA meta params are no longer a constant: `useAeGaMetaParams` derives them
+ * from the minimum gas price the connected node reports. The SDK's
+ * `getCachedProtocolParameters` is exercised for real here - given a node double
+ * that has no protocol-parameters endpoints it falls back to the parameters of
+ * the SDK release, which is what `GA_META_PARAMS` below is built from.
  */
 import {
   buildTx,
+  ConsensusProtocolVersion,
+  defaultProtocolParameters,
   Tag,
   buildAuthTxHash as sdkBuildAuthTxHash,
 } from '@aeternity/aepp-sdk';
-import { AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
+import BigNumber from 'bignumber.js';
+import { AE_GA_META_TX_FEE_GAS } from '@/protocols/aeternity/config';
 import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 
 // Valid checksummed `ak_` addresses, reused from
@@ -41,13 +48,38 @@ const ADDRESS_A = 'ak_2dATVcZ9KJU5a8hdsVtTv21pYiGWiPbmVcU1Pz72FFqpk9pSRR';
 const ADDRESS_B = 'ak_21A27UVVt3hDkBE5J7rhhqnH5YNb4Y1dqo4PnSybrH85pnWo7E';
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
-const GA_META_PARAMS = { fee: AE_GET_META_TX_FEE, gasPrice: 1e9 };
+/**
+ * What `useAeGaMetaParams` resolves to against a node running the consensus
+ * parameters of the SDK release - the 1e9 gas price / 1e14 fee the wallet has
+ * always used. Both are strings: they are derived, not hardcoded any more.
+ */
+const GA_META_PARAMS = {
+  gasPrice: defaultProtocolParameters.minGasPrice.toString(),
+  fee: new BigNumber(defaultProtocolParameters.minGasPrice.toString())
+    .times(AE_GA_META_TX_FEE_GAS).toFixed(),
+};
 
 describe('buildAuthTxHash (real aeternity SDK function, not mocked)', () => {
-  // Only `getNodeInfo` is used by `buildAuthTxHash` itself; no real network call.
-  const fakeNode = {
-    getNodeInfo: async () => ({ nodeNetworkId: 'ae_uat', consensusProtocolVersion: 5 }),
-  };
+  /**
+   * `buildAuthTxHash` uses `getNodeInfo`, and asks the node for its protocol
+   * parameters to check the `gasPrice` against the consensus minimum. A double
+   * without those endpoints makes the SDK fall back to the parameters of its
+   * release, so no real network call happens either way.
+   */
+  function makeFakeNode(nodeNetworkId: string) {
+    return {
+      getNodeInfo: async () => ({
+        nodeNetworkId,
+        consensusProtocolVersion: ConsensusProtocolVersion.Ceres,
+      }),
+    };
+  }
+
+  const fakeNode = makeFakeNode('ae_uat');
+
+  // The fee and gas price are hashed into the auth data alongside the tx - the
+  // wallet always provides them, so the hashes asserted here are the real ones.
+  const authOptions = { ...GA_META_PARAMS, onNode: fakeNode as any };
 
   function buildSampleSpendTx(nonce: number) {
     return buildTx({
@@ -62,8 +94,8 @@ describe('buildAuthTxHash (real aeternity SDK function, not mocked)', () => {
   it('is deterministic: hashing the same encoded tx twice yields the same hash', async () => {
     const tx = buildSampleSpendTx(1);
 
-    const hash1 = await sdkBuildAuthTxHash(tx, { onNode: fakeNode as any });
-    const hash2 = await sdkBuildAuthTxHash(tx, { onNode: fakeNode as any });
+    const hash1 = await sdkBuildAuthTxHash(tx, authOptions);
+    const hash2 = await sdkBuildAuthTxHash(tx, authOptions);
 
     expect(Buffer.compare(hash1, hash2)).toBe(0);
   });
@@ -77,19 +109,25 @@ describe('buildAuthTxHash (real aeternity SDK function, not mocked)', () => {
     const txNonce1 = buildSampleSpendTx(1);
     const txNonce2 = buildSampleSpendTx(2);
 
-    const hash1 = await sdkBuildAuthTxHash(txNonce1, { onNode: fakeNode as any });
-    const hash2 = await sdkBuildAuthTxHash(txNonce2, { onNode: fakeNode as any });
+    const hash1 = await sdkBuildAuthTxHash(txNonce1, authOptions);
+    const hash2 = await sdkBuildAuthTxHash(txNonce2, authOptions);
 
     expect(Buffer.compare(hash1, hash2)).not.toBe(0);
   });
 
   it('CHANGES when the network id changes - prevents cross-network replay', async () => {
     const tx = buildSampleSpendTx(1);
-    const nodeMainnet = { getNodeInfo: async () => ({ nodeNetworkId: 'ae_mainnet', consensusProtocolVersion: 5 }) };
-    const nodeTestnet = { getNodeInfo: async () => ({ nodeNetworkId: 'ae_uat', consensusProtocolVersion: 5 }) };
+    const nodeMainnet = makeFakeNode('ae_mainnet');
+    const nodeTestnet = makeFakeNode('ae_uat');
 
-    const hashMainnet = await sdkBuildAuthTxHash(tx, { onNode: nodeMainnet as any });
-    const hashTestnet = await sdkBuildAuthTxHash(tx, { onNode: nodeTestnet as any });
+    const hashMainnet = await sdkBuildAuthTxHash(
+      tx,
+      { ...GA_META_PARAMS, onNode: nodeMainnet as any },
+    );
+    const hashTestnet = await sdkBuildAuthTxHash(
+      tx,
+      { ...GA_META_PARAMS, onNode: nodeTestnet as any },
+    );
 
     expect(Buffer.compare(hashMainnet, hashTestnet)).not.toBe(0);
   });
@@ -133,6 +171,11 @@ describe('useMultisigTransactions', () => {
     });
 
     mockAeSdk = {
+      // `useAeGaMetaParams` reads the minimum gas price off the connected node.
+      // An object without the protocol-parameters endpoints is what the SDK
+      // treats as a test double: it falls back to the parameters of its release
+      // without a request, which is what `GA_META_PARAMS` above is built from.
+      api: {},
       buildAuthTxHash: vi.fn().mockResolvedValue(PROPOSED_TX_HASH_BUFFER),
       getContext: vi.fn().mockReturnValue({ onAccount: 'context-account' }),
     };
@@ -218,6 +261,53 @@ describe('useMultisigTransactions', () => {
         expect.anything(),
         {},
       );
+    });
+  });
+
+  /**
+   * The backend re-derives the authentication hash to check that the stored transaction really is
+   * the one the hash stands for, and can only do that with the same GaMetaTx fee and gas price the
+   * wallet hashed with. Since those follow the connected node they have to travel with the request
+   * - left out, the backend guesses, guesses wrong on every network whose minimum is not the one
+   * the SDK used to hardcode, and answers 400.
+   */
+  describe('postSpendTx', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('sends the same fee and gas price the proposal was hashed with', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 204 });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { proposeTx, postSpendTx } = useMultisigTransactions();
+
+      const { proposeTxHash, gaMetaParams } = await proposeTx('tx_spend' as any, 'ct_contract' as any);
+      await postSpendTx('tx_spend', proposeTxHash, gaMetaParams);
+
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toMatch(/\/tx$/);
+      expect(init.method).toBe('post');
+      expect(JSON.parse(init.body)).toEqual({
+        hash: proposeTxHash,
+        tx: 'tx_spend',
+        ...GA_META_PARAMS,
+      });
+    });
+
+    it('reports a rejected write instead of letting it pass for a stored proposal', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: async () => ({ error: 'transaction not matching hash' }),
+      }));
+
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { postSpendTx } = useMultisigTransactions();
+
+      await expect(postSpendTx('tx_spend', 'aa'.repeat(32), GA_META_PARAMS))
+        .rejects.toThrow('transaction not matching hash');
     });
   });
 

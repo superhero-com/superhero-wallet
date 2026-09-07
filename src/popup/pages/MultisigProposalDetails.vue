@@ -149,7 +149,7 @@
             >
               <template #value>
                 <TokenAmount
-                  :amount="+aettosToAe(AE_GET_META_TX_FEE)"
+                  :amount="+aettosToAe(gaMetaParams.fee)"
                   :symbol="AE_SYMBOL"
                   :protocol="PROTOCOLS.aeternity"
                 />
@@ -293,7 +293,8 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
-import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG, AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
+import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   aettosToAe,
   getTransactionPayload,
@@ -346,6 +347,7 @@ export default defineComponent({
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { getTxAssetSymbol } = useFungibleTokens();
     const { nodeNetworkId } = useAeSdk();
+    const { gaMetaParams } = useAeGaMetaParams();
 
     const {
       activeMultisigAccount,
@@ -541,7 +543,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      AE_GET_META_TX_FEE,
+      gaMetaParams,
       PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,

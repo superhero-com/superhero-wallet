@@ -7,12 +7,12 @@ import {
   MemoryAccount,
   TransactionError,
   Tag,
-  buildTx,
   decode,
   encode,
   formatAmount,
   getTransactionSignerAddress,
   isAddressValid,
+  rebuildUnpackedTx,
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import type { Node } from '@aeternity/aepp-sdk';
@@ -471,7 +471,10 @@ export async function rebuildTransactionForSigner(
   txParams[signerKey] = signerAddress;
   txParams.nonce = await fetchNextNonce(signerAddress);
 
-  const rebuiltTx = buildTx(txParams as any);
+  // Only the signer and nonce above differ from the transaction that came in, so it is
+  // serialized as is. `buildTx` would re-price it against the parameters of the SDK release,
+  // which are not the ones a transaction built for another network was priced by.
+  const rebuiltTx = rebuildUnpackedTx(txParams as any);
 
   if (getTransactionSignerAddress(rebuiltTx) !== signerAddress) {
     throw new TransactionError('Rebuilt transaction is still signed by another account');

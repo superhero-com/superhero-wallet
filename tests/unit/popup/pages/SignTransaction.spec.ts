@@ -10,12 +10,14 @@ import { Tag } from '@aeternity/aepp-sdk';
 const CALLER = 'ak_2dATVcZ9KJU5a8hdsVtTv21pYiGWiPbmVcU1Pz72FFqpk9pSRR';
 
 const unpackTx = vi.fn(() => ({ tag: Tag.ContractCallTx, callerId: 'ak_dapp', nonce: 0 }));
-const buildTx = vi.fn((tx: any) => `tx_rebuilt:${tx.callerId}:${tx.nonce}`);
+// The page serializes the re-pointed transaction with `rebuildUnpackedTx`, not
+// `buildTx`: it already exists and must not be re-priced on the way back out.
+const rebuildUnpackedTx = vi.fn((tx: any) => `tx_rebuilt:${tx.callerId}:${tx.nonce}`);
 
 vi.mock('@aeternity/aepp-sdk', async (importOriginal) => ({
   ...await importOriginal<typeof import('@aeternity/aepp-sdk')>(),
   unpackTx: (...args: any[]) => unpackTx(...(args as [])),
-  buildTx: (...args: any[]) => buildTx(...(args as [any])),
+  rebuildUnpackedTx: (...args: any[]) => rebuildUnpackedTx(...(args as [any])),
 }));
 
 const getAccountNextNonce = vi.fn(async () => ({ nextNonce: 7 }));
@@ -65,7 +67,7 @@ describe('SignTransaction.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     unpackTx.mockReturnValue({ tag: Tag.ContractCallTx, callerId: 'ak_dapp', nonce: 0 });
-    buildTx.mockImplementation((tx: any) => `tx_rebuilt:${tx.callerId}:${tx.nonce}`);
+    rebuildUnpackedTx.mockImplementation((tx: any) => `tx_rebuilt:${tx.callerId}:${tx.nonce}`);
     signTransaction.mockImplementation(async (tx: string) => `sg_${tx}`);
     getAccountNextNonce.mockResolvedValue({ nextNonce: 7 });
     Object.assign(query, {

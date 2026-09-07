@@ -249,11 +249,11 @@ import {
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import {
-  buildTx,
   decode,
   Encoded,
   getExecutionCost,
   getTransactionSignerAddress,
+  rebuildUnpackedTx,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -791,7 +791,10 @@ export default defineComponent({
             return;
           }
           txParams.nonce = nonce + 1;
-          const dryRunResult = await sdk.txDryRun(buildTx(txParams), dryRunAddress);
+          // Dry-running the transaction as it is, with only the nonce swapped - re-pricing it
+          // here would both change what is verified and fail on a network whose minimum gas
+          // price is below the one of the SDK release.
+          const dryRunResult = await sdk.txDryRun(rebuildUnpackedTx(txParams), dryRunAddress);
           if (runId !== verifyRunId) {
             return;
           }

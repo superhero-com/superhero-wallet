@@ -62,7 +62,7 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+aettosToAe(AE_GET_META_TX_FEE)"
+            :amount="+aettosToAe(gaMetaParams.fee)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
             high-precision
@@ -213,8 +213,8 @@ import {
   AE_SYMBOL,
   AE_CONTRACT_ID,
   TX_FUNCTIONS,
-  AE_GET_META_TX_FEE,
 } from '@/protocols/aeternity/config';
+import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   aeToAettos,
   aettosToAe,
@@ -283,6 +283,7 @@ export default defineComponent({
     const {
       createOrChangeAllowance,
     } = useFungibleTokens();
+    const { gaMetaParams } = useAeGaMetaParams();
 
     const loading = ref<boolean>(false);
     const feeInput = ref(new BigNumber(props.transferData.fee || 0).toFixed());
@@ -643,7 +644,7 @@ export default defineComponent({
             props.transferData.payload || undefined,
           );
 
-          const { proposeTxHash } = await proposeTx(
+          const { proposeTxHash, gaMetaParams: proposedGaMetaParams } = await proposeTx(
             txToPropose,
             activeMultisigAccount.value.contractId,
           );
@@ -656,7 +657,7 @@ export default defineComponent({
             );
           }
 
-          await postSpendTx(txToPropose, proposeTxHash);
+          await postSpendTx(txToPropose, proposeTxHash, proposedGaMetaParams);
           await updateMultisigAccounts();
           emit('success');
           router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
@@ -764,7 +765,7 @@ export default defineComponent({
       aettosToAe,
       AE_SYMBOL,
       AE_CONTRACT_ID,
-      AE_GET_META_TX_FEE,
+      gaMetaParams,
       loading,
       headerTitle,
       headerSubtitle,

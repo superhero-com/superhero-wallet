@@ -79,7 +79,13 @@ export const AE_AENS_NAME_MAX_LENGTH = 63 + AE_AENS_DOMAIN.length;
 export const AE_AENS_NAME_AUCTION_MAX_LENGTH = 12 + AE_AENS_DOMAIN.length;
 export const AE_AENS_BID_MIN_RATIO = 1.05;
 
-export const AE_GET_META_TX_FEE = 1e14;
+/**
+ * Gas the wallet pays for in the `GaMetaTx` that wraps a multisig transaction. The fee itself is
+ * this multiplied by the lowest gas price the connected network mines at - see `useAeGaMetaParams`,
+ * which is where it should be read from. On a network running the default minimum it comes out at
+ * the 1e14 aettos the wallet has always used.
+ */
+export const AE_GA_META_TX_FEE_GAS = 1e5;
 
 /**
  * Estimated time we need to wait for the middleware to sync it's state
