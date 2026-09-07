@@ -156,7 +156,22 @@
     "@azure/logger": "1.1.4",
     "@azure/core-util": "1.11.0",
     "@azure/core-client": "1.9.3",
-    "@azure/core-rest-pipeline": "1.19.1"
+    "@azure/core-rest-pipeline": "1.19.1",
+    "@stablelib/ed25519": "^2.1.0",
+    "protobufjs": "^7.6.6",
+    "@metamask/utils": {
+      "uuid": "^11.1.1"
+    },
+    "jayson": {
+      "uuid": "^11.1.1"
+    },
+    "xcode": {
+      "uuid": "^11.1.1"
+    },
+    "@capacitor/assets": {
+      "sharp": "^0.35.4",
+      "@capacitor/cli": "$@capacitor/cli"
+    }
   },
   "standard-version": {
     "types": [
