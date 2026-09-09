@@ -346,6 +346,14 @@ export function prepareAccountSelectOptions(accountList: IAccount[] | IMultisigA
 }
 
 /**
+ * Read the plain address out of a `protocol:address` value produced by
+ * `prepareAccountSelectOptions`. Accepts a bare address as well.
+ */
+export function getAddressFromSelectOptionValue(value: any): AccountAddress {
+  return String(value ?? '').split(':').pop() as AccountAddress;
+}
+
+/**
  * Remove trailing slash and protocol from the url
  */
 export function prepareUrlToDisplay(url?: string) {

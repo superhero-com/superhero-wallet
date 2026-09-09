@@ -29,7 +29,7 @@
         persistent-default-text
         unstyled
         account-select
-        @select="chosenAccountAddress = $event"
+        @select="chosenAccountAddress = getAddressFromSelectOptionValue($event)"
       />
 
       <div>
@@ -91,7 +91,7 @@ import type {
   AccountAddress,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { prepareAccountSelectOptions } from '@/utils';
+import { getAddressFromSelectOptionValue, prepareAccountSelectOptions } from '@/utils';
 import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
@@ -132,9 +132,18 @@ export default defineComponent({
       pendingMultisigTxLocalSigners,
     } = usePendingMultisigTransaction();
 
-    const chosenAccountAddress = ref<AccountAddress>(
-      pendingMultisigTxLocalSigners.value[0].address,
-    );
+    /**
+     * Only the account that created the proposal is allowed to revoke it,
+     * so preselect it instead of the first local signer.
+     */
+    const defaultSigner = (
+      (props.action === TX_FUNCTIONS_MULTISIG.revoke)
+        ? pendingMultisigTxLocalSigners.value
+          .find(({ address }) => address === activeMultisigAccount.value?.proposedBy)
+        : undefined
+    ) ?? pendingMultisigTxLocalSigners.value[0];
+
+    const chosenAccountAddress = ref<AccountAddress>(defaultSigner?.address ?? '');
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),
@@ -192,6 +201,7 @@ export default defineComponent({
       activeMultisigAccount,
       confirmActionContent,
       actionHasError,
+      getAddressFromSelectOptionValue,
     };
   },
 });
