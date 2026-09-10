@@ -55,8 +55,19 @@ interface IPendingAirGapSignature {
 }
 
 /**
- * Tags that don't need permission if they are not called from an aepp
+ * Whether a signing request has to be confirmed by the user before the key is used.
+ *
+ * The wallet's own flows (sending from the transfer form, name claims, etc.)
+ * never set `aeppOrigin` and are confirmed by the UI that initiated them.
+ * Every request that came over the aepp RPC layer carries `aeppOrigin` - the
+ * SDK sets it in all of its `METHODS.*` handlers - regardless of where the
+ * wallet is running. That covers the in-app browser (the wallet is the parent
+ * of the dapp iframe, so it is neither offscreen nor in a frame) which the
+ * environment flags alone can never detect.
  */
+function isDappRequest(options?: { aeppOrigin?: string; [key: string]: any }): boolean {
+  return IS_OFFSCREEN_TAB || IN_FRAME || !!options?.aeppOrigin;
+}
 
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
@@ -159,7 +170,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       } catch {
         tx = undefined;
       }
-      const wasConfirmationAsked = isDeepLinkUsed || IS_OFFSCREEN_TAB || IN_FRAME;
+      const wasConfirmationAsked = isDeepLinkUsed || isDappRequest(options);
 
       /**
        * Filled in only when the confirmation modal actually ran and resolved -
@@ -299,7 +310,7 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Uint8Array> {
     let modalResolution: ISignModalResolution | undefined;
 
-    if (IS_OFFSCREEN_TAB || IN_FRAME) {
+    if (isDappRequest(options)) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
@@ -354,7 +365,7 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Encoded.Signature> {
     let modalResolution: ISignModalResolution | undefined;
 
-    if (IS_OFFSCREEN_TAB || IN_FRAME) {
+    if (isDappRequest(options)) {
       const dataType = new TypeResolver().resolveType(aci);
       const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
       const {
@@ -398,7 +409,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let modalResolution: ISignModalResolution | undefined;
     const { getMiddleware } = useAeMiddleware();
 
-    if (IS_OFFSCREEN_TAB || IN_FRAME) {
+    if (isDappRequest(options)) {
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -465,7 +476,7 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Uint8Array> {
     let modalResolution: ISignModalResolution | undefined;
 
-    if ((IN_FRAME || IS_OFFSCREEN_TAB) && !this.isSigningAlreadyConfirmed) {
+    if (isDappRequest(options) && !this.isSigningAlreadyConfirmed) {
       this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
