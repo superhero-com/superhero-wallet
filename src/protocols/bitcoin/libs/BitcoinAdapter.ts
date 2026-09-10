@@ -420,7 +420,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     });
 
     // Transfer the rest of the balance back to the senders address
-    if (totalBalance - (amountInSatoshi + feeInSatoshi) > DUST_AMOUNT) {
+    if (totalBalance - (amountInSatoshi + feeInSatoshi) >= DUST_AMOUNT) {
       psbt.addOutput({
         address: options.address,
         value: BigInt(totalBalance - amountInSatoshi - feeInSatoshi),

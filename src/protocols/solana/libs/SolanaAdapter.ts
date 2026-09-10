@@ -21,7 +21,7 @@ import { derivePath } from 'ed25519-hd-key';
 
 import { useAccounts } from '@/composables';
 import { useNetworks } from '@/composables/networks';
-import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
+import { NETWORK_TYPE_TESTNET, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -103,12 +103,11 @@ export class SolanaAdapter extends BaseProtocolAdapter {
 
   private async loadTokenList(): Promise<IToken[]> {
     const { activeNetwork } = useNetworks();
-    const isTestnet = activeNetwork.value.type === 'testnet';
 
     // For testnet, return empty list as testnet typically has very few tokens
-    // and the mainnet token list is not applicable
-    if (isTestnet) {
-      this.tokenListCache = [];
+    // and the mainnet token list is not applicable.
+    // The cache holds the mainnet list only, so it must not be touched here.
+    if (activeNetwork.value.type === NETWORK_TYPE_TESTNET) {
       return [];
     }
 
@@ -116,7 +115,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     try {
       const res: any = await fetchJson(SOL_TOKEN_LIST_URL);
       const tokens: any[] = res?.tokens || [];
-      this.tokenListCache = tokens.map((t) => ({
+      const tokenList = tokens.map((t) => ({
         contractId: t.address,
         name: t.name,
         symbol: t.symbol,
@@ -125,9 +124,15 @@ export class SolanaAdapter extends BaseProtocolAdapter {
         price: 0,
         image: t.logoURI,
       })) as IToken[];
-      return this.tokenListCache;
+      // Only cache a non-empty list so that an empty or malformed
+      // response is retried on the next call instead of being stored forever.
+      if (tokenList.length) {
+        this.tokenListCache = tokenList;
+      }
+      return tokenList;
     } catch (e) {
-      this.tokenListCache = [];
+      handleUnknownError(e);
+      // Do not cache the failure, the next call should retry the request.
       return [];
     }
   }

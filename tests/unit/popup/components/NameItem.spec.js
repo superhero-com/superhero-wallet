@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
-import { computed as mockComputed, ref as mockRef } from 'vue';
+import { computed as mockComputed, nextTick, ref as mockRef } from 'vue';
 
 const mockHandleUnknownError = vi.fn();
 const mockOpenConfirmModal = vi.fn();
 const mockUpdateNamePointer = vi.fn();
 const mockUpdateOwnedNames = vi.fn();
-const mockLinkPreferredAensName = vi.fn();
-const mockUnlinkPreferredAensName = vi.fn();
-const mockSetDefaultNameOptimistic = vi.fn();
+const mockChangeDefaultName = vi.fn();
+// Shared in-flight marker owned by the aeNames composable; tests drive `.value`.
+const mockSettingDefaultName = mockRef(null);
 let NameItem;
 
 vi.mock('@aeternity/aepp-sdk', () => ({
@@ -31,9 +31,6 @@ vi.mock('@/utils', () => ({
 vi.mock('@/composables', () => ({
   useAccounts: vi.fn(() => ({
     activeAccount: mockRef({ address: 'ak_test' }),
-  })),
-  useAeSdk: vi.fn(() => ({
-    nodeNetworkId: mockRef('ae_testnet'),
   })),
   useModals: vi.fn(() => ({
     openConfirmModal: mockOpenConfirmModal,
@@ -64,14 +61,12 @@ vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
       pointers: { accountPubkey: 'ak_test' },
     }]),
     updateOwnedNames: mockUpdateOwnedNames,
-    setDefaultNameOptimistic: mockSetDefaultNameOptimistic,
-  })),
-}));
-
-vi.mock('@/protocols/aeternity/composables', () => ({
-  useAeAddressLinkBackend: vi.fn(() => ({
-    linkPreferredAensName: mockLinkPreferredAensName,
-    unlinkPreferredAensName: mockUnlinkPreferredAensName,
+    // The set/clear-default flow (backend link/unlink + optimistic apply + the
+    // shared in-flight guard) now lives in the composable; the component just
+    // delegates. See `aeNames.spec.js` for that flow's own coverage.
+    changeDefaultName: mockChangeDefaultName,
+    settingDefaultName: mockSettingDefaultName,
+    isAddressLinkSupported: mockRef(true),
   })),
 }));
 
@@ -94,41 +89,45 @@ describe('NameItem', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockSettingDefaultName.value = null;
     mockOpenConfirmModal.mockResolvedValue(undefined);
     mockUpdateNamePointer.mockResolvedValue(true);
     mockUpdateOwnedNames.mockResolvedValue(undefined);
-    mockLinkPreferredAensName.mockResolvedValue('th_link');
-    mockUnlinkPreferredAensName.mockResolvedValue('th_unlink');
+    mockChangeDefaultName.mockResolvedValue(undefined);
   });
 
-  it('clears the backend default name when transferring the default without a fallback', async () => {
-    const wrapper = mount(NameItem, {
+  const STUBS = {
+    BtnHelp: true,
+    BtnPlain: true,
+    DetailsItem: true,
+    InputField: true,
+    Truncate: true,
+    Transition: false,
+  };
+
+  function mountNameItem(name, hash) {
+    return mount(NameItem, {
       props: {
         nameEntry: {
-          name: 'default.chain',
+          name,
           owner: 'ak_test',
           pending: false,
           pointers: { accountPubkey: 'ak_test' },
           createdAtHeight: 1,
           expiresAt: 150,
           autoExtend: false,
-          hash: 'nm_default',
+          hash,
         },
       },
       global: {
-        stubs: {
-          BtnHelp: true,
-          BtnPlain: true,
-          DetailsItem: true,
-          InputField: true,
-          Truncate: true,
-          Transition: false,
-        },
-        mocks: {
-          $t: (key) => key,
-        },
+        stubs: STUBS,
+        mocks: { $t: (key) => key },
       },
     });
+  }
+
+  it('delegates clearing the default to changeDefaultName when transferring without a fallback', async () => {
+    const wrapper = mountNameItem('default.chain', 'nm_default');
 
     wrapper.vm.transferAddress = 'ak_recipient';
     await wrapper.vm.transferName();
@@ -138,47 +137,38 @@ describe('NameItem', () => {
       address: 'ak_recipient',
       type: 'transfer',
     });
-    // Clearing the default name uses the signed unlink flow, not a link.
-    expect(mockUnlinkPreferredAensName).toHaveBeenCalledWith('ak_test');
-    expect(mockLinkPreferredAensName).not.toHaveBeenCalled();
-    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledWith({ address: 'ak_test', name: '' });
+    // No other owned name to fall back to, so the default is cleared.
+    expect(mockChangeDefaultName).toHaveBeenCalledWith('');
     expect(mockHandleUnknownError).not.toHaveBeenCalled();
   });
 
-  it('sets the default name through the signed link flow', async () => {
-    const wrapper = mount(NameItem, {
-      props: {
-        nameEntry: {
-          name: 'default.chain',
-          owner: 'ak_test',
-          pending: false,
-          pointers: { accountPubkey: 'ak_test' },
-          createdAtHeight: 1,
-          expiresAt: 150,
-          autoExtend: false,
-          hash: 'nm_default',
-        },
-      },
-      global: {
-        stubs: {
-          BtnHelp: true,
-          BtnPlain: true,
-          DetailsItem: true,
-          InputField: true,
-          Truncate: true,
-          Transition: false,
-        },
-        mocks: {
-          $t: (key) => key,
-        },
-      },
-    });
+  it('delegates setting the default to changeDefaultName', async () => {
+    // Distinct from the `getDefaultName` mock's 'default.chain' so `isDefault` is
+    // false and the click is not short-circuited.
+    const wrapper = mountNameItem('other.chain', 'nm_other');
 
     await wrapper.vm.handleSetDefault();
 
-    expect(mockLinkPreferredAensName).toHaveBeenCalledWith('ak_test', 'default.chain');
-    expect(mockUnlinkPreferredAensName).not.toHaveBeenCalled();
-    expect(mockSetDefaultNameOptimistic).toHaveBeenCalledWith({ address: 'ak_test', name: 'default.chain' });
+    expect(mockChangeDefaultName).toHaveBeenCalledWith('other.chain');
     expect(mockHandleUnknownError).not.toHaveBeenCalled();
+  });
+
+  it('reflects the shared in-flight marker: spinner on this row, disabled on the others', async () => {
+    const wrapper = mountNameItem('other.chain', 'nm_other');
+
+    expect(wrapper.vm.isSettingThisDefault).toBe(false);
+    expect(wrapper.vm.isSettingDefaultInProgress).toBe(false);
+
+    // A flow for THIS name spins this row (and disables it).
+    mockSettingDefaultName.value = { address: 'ak_test', name: 'other.chain' };
+    await nextTick();
+    expect(wrapper.vm.isSettingThisDefault).toBe(true);
+    expect(wrapper.vm.isSettingDefaultInProgress).toBe(true);
+
+    // A flow for a DIFFERENT name of the same account only disables this row.
+    mockSettingDefaultName.value = { address: 'ak_test', name: 'default.chain' };
+    await nextTick();
+    expect(wrapper.vm.isSettingThisDefault).toBe(false);
+    expect(wrapper.vm.isSettingDefaultInProgress).toBe(true);
   });
 });

@@ -768,6 +768,14 @@ class SuperheroWalletMessageListener {
 }
 
 function injectSuperheroWallet() {
+  // Frames sandboxed without `allow-same-origin` (and `file://` documents) have an
+  // opaque origin, which serializes to the literal string `'null'`. `postMessage`
+  // rejects that as a target origin - it only accepts a real origin, `'*'` or `'/'` -
+  // so every request this provider forwards would throw a `SyntaxError`. The
+  // content script stays out of those frames for the same reason, so nothing
+  // would answer us anyway. Do not advertise a wallet that cannot work there.
+  if (!window.location?.origin || window.location.origin === 'null') return;
+
   const superheroWalletMessageListener = new SuperheroWalletMessageListener();
   window.addEventListener('message', superheroWalletMessageListener.onMessage);
   window.dispatchEvent(new Event('ethereum#initialized'));

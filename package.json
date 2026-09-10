@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "2.10.2",
+  "version": "2.11.0",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "ISC",
@@ -28,6 +28,7 @@
     "watch:ff": "node scripts/build-extension.mjs firefox --watch",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
     "cy:run": "cypress run",
     "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true NODE_ENV=development start-server-and-test serve http://localhost:8080 cy:run",
     "test": "npm run test:unit && npm run test:e2e",
@@ -38,7 +39,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-calldata": "^1.9.1",
-    "@aeternity/aepp-sdk": "14.1.1",
+    "@aeternity/aepp-sdk": "15.0.0",
     "@aeternity/json-bigint": "^0.3.1",
     "@airgap/aeternity": "^0.13.46",
     "@airgap/serializer": "^0.13.46",
@@ -117,6 +118,7 @@
     "@types/webextension-polyfill": "^0.12.5",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-vue": "^6.0.7",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vue/eslint-config-airbnb": "^8.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/test-utils": "^2.4.10",
@@ -154,7 +156,22 @@
     "@azure/logger": "1.1.4",
     "@azure/core-util": "1.11.0",
     "@azure/core-client": "1.9.3",
-    "@azure/core-rest-pipeline": "1.19.1"
+    "@azure/core-rest-pipeline": "1.19.1",
+    "@stablelib/ed25519": "^2.1.0",
+    "protobufjs": "^7.6.6",
+    "@metamask/utils": {
+      "uuid": "^11.1.1"
+    },
+    "jayson": {
+      "uuid": "^11.1.1"
+    },
+    "xcode": {
+      "uuid": "^11.1.1"
+    },
+    "@capacitor/assets": {
+      "sharp": "^0.35.4",
+      "@capacitor/cli": "$@capacitor/cli"
+    }
   },
   "standard-version": {
     "types": [

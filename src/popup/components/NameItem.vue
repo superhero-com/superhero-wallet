@@ -27,14 +27,21 @@
           <BtnPlain
             v-show="canBeDefault"
             class="button-plain"
-            :class="{ set: isDefault }"
-            :disabled="isDefault"
-            :text="(isDefault)
-              ? $t('pages.names.list.default')
-              : $t('pages.names.list.default-make')
-            "
+            :class="{ set: isDefault, setting: isSettingThisDefault }"
+            :disabled="isDefault || isSettingDefaultInProgress"
             @click="handleSetDefault"
-          />
+          >
+            <PendingIcon
+              v-if="isSettingThisDefault"
+              class="setting-icon"
+            />
+            {{ isSettingThisDefault
+              ? $t('pages.names.list.default-setting')
+              : (isDefault)
+                ? $t('pages.names.list.default')
+                : $t('pages.names.list.default-make')
+            }}
+          </BtnPlain>
           <BtnPlain
             v-show="expand"
             class="button-plain"
@@ -165,7 +172,6 @@
 
 <script lang="ts">
 import {
-  Encoded,
   Encoding,
   isAddressValid,
 } from '@aeternity/aepp-sdk';
@@ -191,13 +197,11 @@ import {
 } from '@/utils';
 import {
   useAccounts,
-  useAeSdk,
   useModals,
   useTopHeaderData,
 } from '@/composables';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
 import { NAME_CLAIM_STATUS, useAeNames } from '@/protocols/aeternity/composables/aeNames';
-import { useAeAddressLinkBackend } from '@/protocols/aeternity/composables';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
 import InputField from './InputField.vue';
@@ -238,10 +242,10 @@ export default defineComponent({
       extendExpiringOwnedNames,
       ownedNames,
       updateOwnedNames,
-      setDefaultNameOptimistic,
+      changeDefaultName,
+      settingDefaultName,
+      isAddressLinkSupported,
     } = useAeNames();
-    const { linkPreferredAensName, unlinkPreferredAensName } = useAeAddressLinkBackend();
-    const { nodeNetworkId } = useAeSdk();
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -263,8 +267,19 @@ export default defineComponent({
       (): boolean => !!props.nameEntry.pointers?.accountPubkey,
     );
     const canBeDefault = computed(
-      (): boolean => props.nameEntry?.pointers?.accountPubkey === activeAccount.value.address,
+      (): boolean => isAddressLinkSupported.value
+        && props.nameEntry?.pointers?.accountPubkey === activeAccount.value.address,
     );
+    // This exact name row is the one whose default-name flow is running (shows the
+    // spinner); `isSettingDefaultInProgress` is true for every row of the account
+    // while any of its default-name flows runs (so the others stay disabled).
+    const isSettingThisDefault = computed(() => (
+      settingDefaultName.value?.address === activeAccount.value.address
+      && settingDefaultName.value?.name === props.nameEntry.name
+    ));
+    const isSettingDefaultInProgress = computed(() => (
+      settingDefaultName.value?.address === activeAccount.value.address
+    ));
     const fallbackDefaultName = computed(() => ownedNames.value.find(({
       name,
       owner,
@@ -325,34 +340,13 @@ export default defineComponent({
       showTransferInput.value = false;
     }
 
-    async function updateDefaultName(name: IName['name']) {
-      try {
-        const { address } = activeAccount.value;
-        const currentNetworkId = nodeNetworkId.value;
-
-        // Set/clear the preferred `.chain` name through the Superhero API: the
-        // wallet signs a backend-issued challenge to prove ownership and the
-        // backend broadcasts (and pays for) the on-chain AddressLink transaction.
-        if (name) {
-          await linkPreferredAensName(address as Encoded.AccountAddress, name);
-        } else {
-          await unlinkPreferredAensName(address as Encoded.AccountAddress);
-        }
-
-        if (currentNetworkId !== nodeNetworkId.value) {
-          return;
-        }
-
-        // Apply optimistically and mark pending so the on-chain poll does not
-        // revert it before the backend-sponsored transaction is mined.
-        setDefaultNameOptimistic({ address, name });
-      } catch (error: any) {
-        handleUnknownError(error);
-      }
-    }
-
     async function handleSetDefault() {
-      await updateDefaultName(props.nameEntry.name);
+      if (isDefault.value) {
+        return;
+      }
+      // The repeated-click / concurrent-row guard lives in `changeDefaultName`, so
+      // it is shared across every name row of the account rather than per-button.
+      await changeDefaultName(props.nameEntry.name);
     }
 
     async function toggleAutoExtend() {
@@ -447,11 +441,7 @@ export default defineComponent({
           await updateOwnedNames();
 
           if (isDefault.value) {
-            if (fallbackDefaultName.value) {
-              await updateDefaultName(fallbackDefaultName.value);
-            } else {
-              await updateDefaultName('' as IName['name']);
-            }
+            await changeDefaultName(fallbackDefaultName.value || '');
           }
         }
       } catch (error: any) {
@@ -489,6 +479,8 @@ export default defineComponent({
       hasPointer,
       isAlmostExpiring,
       isDefault,
+      isSettingThisDefault,
+      isSettingDefaultInProgress,
       newPointer,
       pendingStatusLabel,
       pointerInput,
@@ -580,6 +572,20 @@ export default defineComponent({
         &.set {
           background: rgba($color-warning, 0.1);
           color: $color-warning;
+        }
+
+        &.setting {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          background: rgba($color-warning, 0.1);
+          color: $color-warning;
+          cursor: progress;
+
+          .setting-icon {
+            width: 12px;
+            height: 12px;
+          }
         }
 
         &.edit {

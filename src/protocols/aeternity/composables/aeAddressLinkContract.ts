@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import { Contract, Encoded } from '@aeternity/aepp-sdk';
 
-import type { ChainName, NetworkTypeDefault } from '@/types';
+import type { ChainName } from '@/types';
 import { NETWORK_TYPE_CUSTOM, NETWORK_TYPE_TESTNET } from '@/constants';
 import { useAeSdk, useNetworks } from '@/composables';
 import AddressLinkACI from '@/protocols/aeternity/aci/AddressLinkACI.json';
@@ -32,18 +32,19 @@ let initializingAddress: Encoded.ContractAddress | undefined;
  */
 export function useAeAddressLinkContract() {
   const { activeNetwork } = useNetworks();
-  const { getAeSdk } = useAeSdk();
+  const { getAeSdk, isNodeTestnet } = useAeSdk();
 
-  const addressLinkContractAddress = computed(
-    (): Encoded.ContractAddress | undefined => {
-      // Custom networks point at testnet infra (matching how the Superhero API URL
-      // is resolved), so read the preferred name from the testnet deployment there.
-      const networkType: NetworkTypeDefault = (activeNetwork.value.type === NETWORK_TYPE_CUSTOM)
-        ? NETWORK_TYPE_TESTNET
-        : activeNetwork.value.type;
-      return AE_ADDRESS_LINK_CONTRACTS[networkType];
-    },
-  );
+  // Custom networks qualify only when the node is the real testnet chain: the
+  // sponsoring backend is testnet-hardwired for them (see aeNetworkSettings).
+  const addressLinkContractAddress = computed((): Encoded.ContractAddress | undefined => {
+    const { type } = activeNetwork.value;
+    return AE_ADDRESS_LINK_CONTRACTS[
+      type === NETWORK_TYPE_CUSTOM && isNodeTestnet.value ? NETWORK_TYPE_TESTNET : type
+    ];
+  });
+
+  /** Whether the preferred-name AddressLink feature is available on the active network. */
+  const isAddressLinkSupported = computed((): boolean => !!addressLinkContractAddress.value);
 
   async function getAddressLinkContract(): Promise<Contract<AeAddressLinkContractApi> | undefined> {
     const contractAddress = addressLinkContractAddress.value;
@@ -105,6 +106,7 @@ export function useAeAddressLinkContract() {
 
   return {
     addressLinkContractAddress,
+    isAddressLinkSupported,
     getAddressLinkContract,
     getPreferredName,
   };

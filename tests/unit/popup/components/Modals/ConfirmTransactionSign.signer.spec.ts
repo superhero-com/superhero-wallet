@@ -7,6 +7,7 @@ import {
   Tag,
   buildTx,
   getTransactionSignerAddress,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
@@ -79,6 +80,20 @@ const buildSpendTxFor = (senderId: Encoded.AccountAddress) => buildTx({
   payload: 'ba_Xfbg4g==',
 }) as Encoded.Transaction;
 
+/** A real ContractCallTx, encoded, called by `callerId`. */
+const buildContractCallTxFor = (callerId: Encoded.AccountAddress) => buildTx({
+  tag: Tag.ContractCallTx,
+  callerId,
+  nonce: 1,
+  contractId: 'ct_2rxYHp3GThDMMCoYZbFdjgUAeiKwFMhQ72ohYFt463t1A53knS',
+  abiVersion: 3,
+  fee: 200000000000000,
+  amount: 0,
+  gasLimit: 25000,
+  gasPrice: 1000000000,
+  callData: 'cb_KxFE1kQfP4oEp9E=',
+}) as Encoded.Transaction;
+
 vi.mock('@/composables', () => ({
   useAccounts: vi.fn(),
   useAeSdk: vi.fn(),
@@ -119,14 +134,44 @@ const CheckBoxStub = {
 let setActiveAccountByAddressAndProtocol: ReturnType<typeof vi.fn>;
 let resolve: ReturnType<typeof vi.fn>;
 let openModal: ReturnType<typeof vi.fn>;
+let txDryRun: ReturnType<typeof vi.fn>;
+let getAccountNextNonce: ReturnType<typeof vi.fn>;
+let getAccountByPubkey: ReturnType<typeof vi.fn>;
+let getBalance: ReturnType<typeof vi.fn>;
+
+/** The shape `isNotFoundError` matches - a node 404 for an account with no history. */
+const accountNotFound = Object.assign(new Error('Account not found'), { statusCode: 404 });
+
+/** Node answers, set per test before `mountModal`, which rebuilds the mocks. */
+const nodeState = {
+  accountNonce: 7,
+  nextNonce: 9,
+  accountError: null as Error | null,
+  nextNonceError: null as Error | null,
+};
 
 function mountModal(
   preparedFor: Encoded.AccountAddress = ADDRESS_PREPARED,
   popupPropsOverrides: Record<string, any> = {},
+  dryRunResult: any = undefined,
 ) {
   setActiveAccountByAddressAndProtocol = vi.fn();
   resolve = vi.fn();
   openModal = vi.fn(async () => undefined);
+  txDryRun = vi.fn(async () => dryRunResult);
+  getAccountNextNonce = vi.fn(async () => {
+    if (nodeState.nextNonceError) {
+      throw nodeState.nextNonceError;
+    }
+    return { nextNonce: nodeState.nextNonce };
+  });
+  getAccountByPubkey = vi.fn(async () => {
+    if (nodeState.accountError) {
+      throw nodeState.accountError;
+    }
+    return { nonce: nodeState.accountNonce };
+  });
+  getBalance = vi.fn(async () => '1000000000000000000000');
 
   // @ts-ignore
   (usePopupProps as vi.Mock).mockReturnValue({
@@ -159,12 +204,12 @@ function mountModal(
   // @ts-ignore
   (useAeSdk as vi.Mock).mockReturnValue({
     getAeSdk: vi.fn(async () => ({
-      getBalance: vi.fn(async () => '1000000000000000000000'),
+      getBalance,
       api: {
-        getAccountByPubkey: vi.fn(async () => ({ nonce: 1 })),
-        getAccountNextNonce: vi.fn(async () => ({ nextNonce: 2 })),
+        getAccountByPubkey,
+        getAccountNextNonce,
       },
-      txDryRun: vi.fn(),
+      txDryRun,
     })),
   });
 
@@ -428,5 +473,146 @@ describe('ConfirmTransactionSign.vue rebuilding for another signer', () => {
     const { txRaw } = airGapCall![1] as { txRaw: Encoded.Transaction };
     expect(txRaw).not.toBe((wrapper.vm as any).popupProps.txBase64);
     expect(getTransactionSignerAddress(txRaw)).toBe(ADDRESS_AIR_GAP);
+    // The other half of the split: what gets signed takes the mempool-aware
+    // next-nonce, never the chain nonce the dry run uses.
+    expect((unpackTx(txRaw) as any).nonce).toBe(9);
+  });
+});
+
+describe('ConfirmTransactionSign.vue contract-call verification', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Object.assign(
+      nodeState,
+      {
+        accountNonce: 7, nextNonce: 9, accountError: null, nextNonceError: null,
+      },
+    );
+  });
+
+  const DRY_RUN_OK = { callObj: { returnType: 'ok', gasPrice: 1000000000 } };
+
+  const mountContractCall = () => mountModal(
+    ADDRESS_PREPARED,
+    { txBase64: buildContractCallTxFor(ADDRESS_PREPARED) },
+    DRY_RUN_OK,
+  );
+
+  const lastDryRunTx = () => txDryRun.mock.calls.at(-1)![0] as Encoded.Transaction;
+  const lastDryRunAddress = () => txDryRun.mock.calls.at(-1)![1] as Encoded.AccountAddress;
+  const lastDryRunNonce = () => (unpackTx(lastDryRunTx()) as any).nonce;
+  // The real footer gate is `!!error || verifying || loading || !canSign...`, so read
+  // the button itself; the stub renders boolean props as attribute strings.
+  const isAcceptDisabled = (wrapper: any) => (
+    wrapper.find('[data-cy="accept"]').attributes('disabled') === 'true'
+  );
+
+  const optIntoRebuild = async (wrapper: any) => {
+    await findSelect(wrapper).vm.$emit('select', accountActive);
+    await findRebuild(wrapper).trigger('click');
+    await flushPromises();
+  };
+
+  it('simulates the dapp transaction as its own caller before any rebuild', async () => {
+    mountContractCall();
+    await flushPromises();
+
+    expect(txDryRun).toHaveBeenCalled();
+    expect(getTransactionSignerAddress(lastDryRunTx())).toBe(ADDRESS_PREPARED);
+    expect(lastDryRunAddress()).toBe(ADDRESS_PREPARED);
+    expect(getAccountByPubkey).toHaveBeenLastCalledWith(ADDRESS_PREPARED);
+  });
+
+  it('simulates the re-pointed transaction once the user opts into a rebuild', async () => {
+    const wrapper = mountContractCall();
+    await flushPromises();
+
+    await optIntoRebuild(wrapper);
+
+    expect(getTransactionSignerAddress(lastDryRunTx())).toBe(ADDRESS_ACTIVE);
+    expect(lastDryRunAddress()).toBe(ADDRESS_ACTIVE);
+    expect(getAccountByPubkey).toHaveBeenLastCalledWith(ADDRESS_ACTIVE);
+  });
+
+  it('dry-runs with the chain nonce, not the mempool-aware next nonce', async () => {
+    // Chain nonce 7 -> dry-run nonce 8; the next-nonce endpoint would say 9.
+    const wrapper = mountContractCall();
+    await flushPromises();
+
+    expect(lastDryRunNonce()).toBe(8);
+    expect((wrapper.vm as any).error).toBe('');
+    expect(isAcceptDisabled(wrapper)).toBe(false);
+  });
+
+  it('still dry-runs for an account that has never sent a transaction', async () => {
+    // No chain entry -> `getAccountByPubkey` 404s -> chain nonce 0 -> dry-run nonce 1.
+    nodeState.accountError = accountNotFound;
+
+    mountContractCall();
+    await flushPromises();
+
+    expect(txDryRun).toHaveBeenCalled();
+    expect(lastDryRunNonce()).toBe(1);
+  });
+
+  it('surfaces an account lookup failure that is not a 404', async () => {
+    nodeState.accountError = Object.assign(new Error('node unavailable'), { statusCode: 503 });
+
+    const wrapper = mountContractCall();
+    await flushPromises();
+
+    expect(txDryRun).not.toHaveBeenCalled();
+    expect((wrapper.vm as any).error).not.toBe('');
+    expect(isAcceptDisabled(wrapper)).toBe(true);
+  });
+
+  it('still verifies the rebuild for an account that has never sent a transaction', async () => {
+    // The rebuild fetches a next-nonce for the newly picked account, and the node
+    // 404s for one with no chain history. Letting that escape skipped the dry run
+    // entirely and left Confirm enabled, because the catch swallows a 404.
+    const wrapper = mountContractCall();
+    await flushPromises();
+    const dryRunsBeforeRebuild = txDryRun.mock.calls.length;
+
+    nodeState.nextNonceError = accountNotFound;
+
+    await optIntoRebuild(wrapper);
+
+    expect(txDryRun.mock.calls.length).toBeGreaterThan(dryRunsBeforeRebuild);
+    expect(getTransactionSignerAddress(lastDryRunTx())).toBe(ADDRESS_ACTIVE);
+    expect(isAcceptDisabled(wrapper)).toBe(false);
+  });
+
+  it('surfaces a next-nonce failure that is not a 404 instead of skipping the dry run', async () => {
+    const wrapper = mountContractCall();
+    await flushPromises();
+    const dryRunsBeforeRebuild = txDryRun.mock.calls.length;
+
+    nodeState.nextNonceError = Object.assign(new Error('node unavailable'), { statusCode: 503 });
+
+    await optIntoRebuild(wrapper);
+
+    expect(txDryRun.mock.calls.length).toBe(dryRunsBeforeRebuild);
+    expect((wrapper.vm as any).error).not.toBe('');
+    expect(isAcceptDisabled(wrapper)).toBe(true);
+  });
+
+  it('surfaces the revert and blocks Confirm when the rebuilt call would fail', async () => {
+    const wrapper = mountContractCall();
+    await flushPromises();
+    expect(isAcceptDisabled(wrapper)).toBe(false);
+
+    // Only the re-pointed call reverts - the dapp's original one still passes, so
+    // this can only be caught by verifying the transaction that will be signed.
+    txDryRun.mockImplementation(async (tx: Encoded.Transaction) => (
+      (getTransactionSignerAddress(tx) === ADDRESS_ACTIVE)
+        ? { callObj: { returnType: 'revert', returnValue: 'cb_KxFE1kQfP4oEp9E=' } }
+        : DRY_RUN_OK
+    ));
+
+    await optIntoRebuild(wrapper);
+
+    expect((wrapper.vm as any).error).not.toBe('');
+    expect(isAcceptDisabled(wrapper)).toBe(true);
   });
 });

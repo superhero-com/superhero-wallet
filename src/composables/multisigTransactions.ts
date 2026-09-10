@@ -20,10 +20,10 @@ import { PROTOCOLS } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
-  postJson,
 } from '@/utils';
-import { MULTISIG_SIMPLE_GA_BYTECODE, AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
+import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { type IAeGaMetaParams, useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
@@ -34,13 +34,11 @@ interface InternalOptions {
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
-// TODO: calculate gas price based on node demand
-const GA_META_PARAMS = { fee: AE_GET_META_TX_FEE, gasPrice: 1e9 };
-
 export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { getDryAeSdk, getAeSdk } = useAeSdk();
   const { fetchCurrentTopBlockHeight } = useTopHeaderData();
+  const { getGaMetaParams } = useAeGaMetaParams();
 
   async function buildSpendTx(
     senderId: Encoded.AccountAddress,
@@ -101,8 +99,28 @@ export function useMultisigTransactions() {
     return null;
   }
 
-  async function postSpendTx(tx: string, txHash: string) {
-    return postJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
+  /**
+   * Store the raw transaction a proposal was made for, so that co-signers can read back what they
+   * are asked to confirm - the contract itself only holds its authentication hash.
+   *
+   * The backend re-derives that hash to make sure `tx` is really the transaction `txHash` stands
+   * for, which it can only do with the same `GaMetaTx` fee and gas price the proposal was hashed
+   * with. Those follow the connected node rather than an SDK constant, so they are sent along
+   * instead of being left to the backend to guess.
+   */
+  async function postSpendTx(tx: string, txHash: string, gaMetaParams: IAeGaMetaParams) {
+    const response = await fetch(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx`, {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hash: txHash, tx, ...gaMetaParams }),
+    });
+
+    // A rejected write leaves the proposal on chain with no readable transaction behind it, so it
+    // must not pass for a completed proposal.
+    if (!response.ok) {
+      const { error } = await response.json().catch(() => ({ error: undefined }));
+      throw new Error(error ?? `Multisig backend responded ${response.status}`);
+    }
   }
 
   async function proposeTx(
@@ -110,10 +128,14 @@ export function useMultisigTransactions() {
     contractId: Encoded.ContractAddress,
     options?: any,
   ) {
-    const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
+    const [aeSdk, topBlockHeight, gaMetaParams] = await Promise.all([
+      getAeSdk(),
+      fetchCurrentTopBlockHeight(),
+      getGaMetaParams(),
+    ]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
 
-    const spendTxHash = await aeSdk.buildAuthTxHash(spendTx, GA_META_PARAMS);
+    const spendTxHash = await aeSdk.buildAuthTxHash(spendTx, gaMetaParams);
 
     const gaContractRpc = await Contract.initialize({
       ...aeSdk.getContext(),
@@ -129,6 +151,8 @@ export function useMultisigTransactions() {
 
     return {
       proposeTxHash: Buffer.from(spendTxHash).toString('hex'),
+      // Handed back so that `postSpendTx` can tell the backend which values to verify against
+      gaMetaParams,
       callResult,
     };
   }
@@ -169,7 +193,7 @@ export function useMultisigTransactions() {
     spendTx: Encoded.Transaction,
     nonce: number,
   ): Promise<any> {
-    const dryAeSdk = await getDryAeSdk();
+    const [dryAeSdk, gaMetaParams] = await Promise.all([getDryAeSdk(), getGaMetaParams()]);
     const gaContractRpc = await Contract.initialize({
       ...dryAeSdk.getContext(),
       aci: SimpleGAMultiSigAci,
@@ -178,7 +202,9 @@ export function useMultisigTransactions() {
     return dryAeSdk.sendTransaction(spendTx, {
       authData: {
         callData: gaContractRpc._calldata.encode(gaContractRpc._name, 'authorize', [nonce]),
-        ...GA_META_PARAMS,
+        // The same values `proposeTx` hashed into the proposal - the contract compares its stored
+        // hash against the one the node derives from this transaction, so they have to match.
+        ...gaMetaParams,
       },
       onAccount: new AccountGeneralized(accountId),
     });

@@ -206,19 +206,21 @@ export default defineConfig(({ mode }) => {
         'webextension-polyfill',
       ],
       esbuildOptions: {
-        // The old webpack/babel build downleveled to '> 0.25%, not dead, not ie 11'
-        // with core-js polyfills; that's gone, but syntax newer than the actual
-        // floor (Capacitor Android WebView defaults to 60+, iOS 15.5, extension
-        // manifest v3 Chrome 88+/Firefox 109+) can throw a parse-time SyntaxError
-        // and blank the whole app. es2020 covers that floor without the cost of a
-        // full legacy/polyfill toolchain for what's otherwise an evergreen-browser app.
+        // Keep in sync with `build.target` below so prebundled deps and the
+        // production output share one syntax floor.
         target: 'es2020',
         define: { global: 'globalThis' },
       },
     },
     build: {
       outDir,
-      target: 'es2022',
+      // The old webpack/babel build downleveled to '> 0.25%, not dead, not ie 11'
+      // with core-js polyfills; that's gone, but syntax newer than the actual
+      // floor (Capacitor Android WebView defaults to 60+, iOS 15.5, extension
+      // manifest v3 Chrome 88+/Firefox 109+) can throw a parse-time SyntaxError
+      // and blank the whole app. es2020 covers that floor without the cost of a
+      // full legacy/polyfill toolchain for what's otherwise an evergreen-browser app.
+      target: 'es2020',
       sourcemap: isDev,
       emptyOutDir: !isSingleFileStep && !skipEmptyOutDir,
       assetsInlineLimit: 4096,

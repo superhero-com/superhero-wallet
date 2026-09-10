@@ -145,8 +145,10 @@ const LAZY_VENDOR_PACKAGES = [
   '@airgap/',
   '@polkadot/',
   'libsodium',
+  'libsodium-wrappers',
   'moment',
   'ramda',
+  'ramda-adjunct',
   'swagger-client',
   '@swagger-api/',
   '@walletconnect/',
@@ -170,7 +172,13 @@ const LAZY_VENDOR_PACKAGES = [
 export function vendorManualChunks(id: string): string | undefined {
   if (!id.includes('node_modules')) return undefined;
   const normalized = id.replace(/\\/g, '/');
-  if (LAZY_VENDOR_PACKAGES.some((pkg) => normalized.includes(`node_modules/${pkg}`))) {
+  // Entries ending in `/` are scope prefixes and match as-is; bare package names
+  // must match a whole path segment, so `ramda` does not also swallow
+  // `ramda-adjunct`. Every id Rollup passes here is a file inside the package,
+  // so the trailing separator is always present.
+  if (LAZY_VENDOR_PACKAGES.some((pkg) => normalized.includes(
+    pkg.endsWith('/') ? `node_modules/${pkg}` : `node_modules/${pkg}/`,
+  ))) {
     return undefined;
   }
   return 'vendor';
@@ -179,6 +187,12 @@ export function vendorManualChunks(id: string): string | undefined {
 /**
  * Copies the `src/web` directory (nginx.conf, Dockerfile, root/ static assets)
  * into `dist/web` after the web build, replacing the old EventHooksPlugin step.
+ *
+ * Also copies the repo-root `icons/` set (icon-48.webp … icon-512.webp) into
+ * `dist/web/root/icons`. `nginx.conf` serves `root/` as the HTTP document
+ * root (`src/web/Dockerfile` does `COPY root /usr/share/nginx/html`), and
+ * `manifest.webmanifest` plus the Open Graph/Twitter meta tags in
+ * `index.html` reference these files at `/icons/*`.
  */
 export function copyWebPlugin(): Plugin {
   return {
@@ -187,6 +201,7 @@ export function copyWebPlugin(): Plugin {
     async closeBundle() {
       const fsExtra = await import('fs-extra');
       await fsExtra.default.copy('src/web', 'dist/web');
+      await fsExtra.default.copy('icons', 'dist/web/root/icons');
     },
   };
 }

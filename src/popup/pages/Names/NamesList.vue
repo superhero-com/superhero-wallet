@@ -73,7 +73,8 @@ export default defineComponent({
     });
 
     const id = executeAndSetInterval(() => {
-      if (isAppActive.value) {
+      // A fetch slower than the interval would otherwise stack full account fan-outs.
+      if (isAppActive.value && !areNamesFetching.value) {
         updateOwnedNames();
       }
     }, POLLING_INTERVAL);

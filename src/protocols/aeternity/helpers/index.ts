@@ -7,12 +7,12 @@ import {
   MemoryAccount,
   TransactionError,
   Tag,
-  buildTx,
   decode,
   encode,
   formatAmount,
   getTransactionSignerAddress,
   isAddressValid,
+  rebuildUnpackedTx,
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import type { Node } from '@aeternity/aepp-sdk';
@@ -426,6 +426,24 @@ export function canRebuildTransactionForSigner(txBase64: Encoded.Transaction): b
 }
 
 /**
+ * Mempool-aware next nonce for `address`. The node 404s for an account that has
+ * never appeared on chain; the first nonce such an account can use is 1.
+ */
+export async function fetchAccountNextNonce(
+  api: { getAccountNextNonce: (a: Encoded.AccountAddress) => Promise<{ nextNonce: number }> },
+  address: Encoded.AccountAddress,
+): Promise<number> {
+  const { nextNonce } = await api.getAccountNextNonce(address)
+    .catch((error) => {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+      return { nextNonce: 1 };
+    });
+  return nextNonce;
+}
+
+/**
  * Rebuild a transaction so that it is sent by `signerAddress` instead of the
  * account it was originally prepared for.
  *
@@ -453,7 +471,10 @@ export async function rebuildTransactionForSigner(
   txParams[signerKey] = signerAddress;
   txParams.nonce = await fetchNextNonce(signerAddress);
 
-  const rebuiltTx = buildTx(txParams as any);
+  // Only the signer and nonce above differ from the transaction that came in, so it is
+  // serialized as is. `buildTx` would re-price it against the parameters of the SDK release,
+  // which are not the ones a transaction built for another network was priced by.
+  const rebuiltTx = rebuildUnpackedTx(txParams as any);
 
   if (getTransactionSignerAddress(rebuiltTx) !== signerAddress) {
     throw new TransactionError('Rebuilt transaction is still signed by another account');

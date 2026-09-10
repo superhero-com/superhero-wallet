@@ -149,7 +149,7 @@
             >
               <template #value>
                 <TokenAmount
-                  :amount="+aettosToAe(AE_GET_META_TX_FEE)"
+                  :amount="+aettosToAe(gaMetaParams.fee)"
                   :symbol="AE_SYMBOL"
                   :protocol="PROTOCOLS.aeternity"
                 />
@@ -184,7 +184,7 @@
               </template>
             </DetailsItem>
           </div>
-          <div
+          <FixedScreenFooter
             v-if="!proposalCompleted && activeMultisigAccount.txHash"
             class="bottom-buttons"
           >
@@ -244,7 +244,7 @@
             >
               {{ $t('pages.proposalDetails.revokeTransaction') }}
             </BtnMain>
-          </div>
+          </FixedScreenFooter>
         </div>
       </template>
     </div>
@@ -293,7 +293,8 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
-import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG, AE_GET_META_TX_FEE } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
+import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   aettosToAe,
   getTransactionPayload,
@@ -305,6 +306,7 @@ import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet'
 import { type MultisigProposalConfirmActionVal } from '@/popup/components/Modals/MultisigProposalConfirmActions.vue';
 
 import PageWrapper from '@/popup/components/PageWrapper.vue';
+import FixedScreenFooter from '@/popup/components/FixedScreenFooter.vue';
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
@@ -323,6 +325,7 @@ import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 export default defineComponent({
   components: {
     PageWrapper,
+    FixedScreenFooter,
     PayloadDetails,
     TransactionAssetRows,
     MultisigProposalConsensus,
@@ -346,6 +349,7 @@ export default defineComponent({
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { getTxAssetSymbol } = useFungibleTokens();
     const { nodeNetworkId } = useAeSdk();
+    const { gaMetaParams } = useAeGaMetaParams();
 
     const {
       activeMultisigAccount,
@@ -541,7 +545,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      AE_GET_META_TX_FEE,
+      gaMetaParams,
       PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
@@ -580,6 +584,7 @@ export default defineComponent({
 .multisig-proposal-details {
   display: flex;
   flex-direction: column;
+  min-height: 100%;
 
   .spinner {
     align-self: center;
@@ -618,8 +623,10 @@ export default defineComponent({
   }
 
   .content {
+    @include mixins.flex(flex-start, stretch, column);
+
+    flex-grow: 1;
     background-color: $color-bg-4;
-    padding-bottom: 120px;
 
     .transaction-overview {
       padding: 16px 12px 8px;
@@ -678,22 +685,16 @@ export default defineComponent({
   }
 
   .bottom-buttons {
-    padding: var(--screen-padding-x);
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background:
-      linear-gradient(
-        180deg,
-        rgba($color-bg-4, 0) 0%,
-        rgba($color-bg-4, 0.8) 43.08%,
-        rgba($color-bg-4, 0.9) 90.79%
-      );
+    flex-direction: column;
+
+    // Match the cover to the details background instead of the app background
+    &::before {
+      background-color: $color-bg-4;
+      box-shadow: 0 -30px 20px $color-bg-4;
+    }
 
     .row {
       gap: 8px;
-      padding-bottom: 8px;
     }
   }
 }

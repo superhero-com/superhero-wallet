@@ -126,11 +126,9 @@ const createTestContext = async ({
   // A single shared ref (not a fresh one per `useAeSdk()` call) so tests can switch
   // the active network and have the composable observe it.
   const nodeNetworkId = ref('ae_testnet');
+  const getAeSdk = vi.fn().mockResolvedValue(sdk);
   vi.doMock('@/composables/aeSdk', () => ({
-    useAeSdk: () => ({
-      nodeNetworkId,
-      getAeSdk: vi.fn().mockResolvedValue(sdk),
-    }),
+    useAeSdk: () => ({ nodeNetworkId, getAeSdk }),
   }));
   vi.doMock('@/composables/auth', () => ({
     useAuth: () => ({ encryptionKey: ref('irrelevant-key-decryptedComputed-is-a-passthrough') }),
@@ -154,9 +152,12 @@ const createTestContext = async ({
     }),
   }));
 
+  // Controllable so tests can drive the "middleware became ready" transition that
+  // populates owned/default names on startup (the account-card path).
+  const isMiddlewareReady = ref(false);
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
     useAeMiddleware: () => ({
-      isMiddlewareReady: ref(false),
+      isMiddlewareReady,
       getMiddleware: vi.fn().mockResolvedValue({ getNames }),
       fetchFromMiddlewareCamelCased: vi.fn(),
     }),
@@ -165,8 +166,19 @@ const createTestContext = async ({
   // The preferred (default) name now comes from the on-chain AddressLink contract.
   // Mock the reader so default-name polling is deterministic and offline.
   const getPreferredName = vi.fn().mockResolvedValue(undefined);
+  // The AddressLink deployment exists on the default (mainnet/testnet) networks
+  // these tests run against; flip `.value` to false to exercise the unsupported
+  // (custom) network gate that skips the default-name sync.
+  const isAddressLinkSupported = ref(true);
   vi.doMock('@/protocols/aeternity/composables/aeAddressLinkContract', () => ({
-    useAeAddressLinkContract: () => ({ getPreferredName }),
+    useAeAddressLinkContract: () => ({ getPreferredName, isAddressLinkSupported }),
+  }));
+  // aeNames now also drives the backend-sponsored link/unlink flow; stub it so
+  // `changeDefaultName` never reaches the real HTTP/signing boundary.
+  const linkPreferredAensName = vi.fn().mockResolvedValue('th_stubbedLinkTxHash');
+  const unlinkPreferredAensName = vi.fn().mockResolvedValue('th_stubbedUnlinkTxHash');
+  vi.doMock('@/protocols/aeternity/composables/aeAddressLinkBackend', () => ({
+    useAeAddressLinkBackend: () => ({ linkPreferredAensName, unlinkPreferredAensName }),
   }));
 
   // Seed real `localStorage` BEFORE `registerAdapters` (below) is imported.
@@ -178,6 +190,16 @@ const createTestContext = async ({
   // happen before that first, incidental load, or it's too late.
   const { WalletStorage } = await import('@/lib/WalletStorage');
   const { STORAGE_KEYS } = await import('@/constants');
+  // `localStorage` persists across `createTestContext` calls (only modules are
+  // reset), so a previous test's persisted default/owned names would be restored
+  // asynchronously into this context and could clobber the state this test sets -
+  // an intermittent, order-dependent flake. Remove those keys so the storageRef
+  // restore reads `null` and no-ops (see `setLocalState`), giving each context a
+  // clean, deterministic names registry.
+  WalletStorage.remove(STORAGE_KEYS.namesDefault);
+  WalletStorage.remove(STORAGE_KEYS.namesOwned);
+  WalletStorage.remove(STORAGE_KEYS.namesOwnedNetworkId);
+  WalletStorage.remove(STORAGE_KEYS.pendingDefaultNames);
   if (Object.keys(preclaimedNames).length) {
     // `decryptedComputed` is a passthrough above, so the "encrypted" storage
     // slot just holds the plain JSON string aeNames.ts expects to decode.
@@ -203,6 +225,11 @@ const createTestContext = async ({
     fetchPendingTransactions,
     fetchAllPages,
     getPreferredName,
+    isAddressLinkSupported,
+    isMiddlewareReady,
+    getAeSdk,
+    linkPreferredAensName,
+    unlinkPreferredAensName,
     nodeNetworkId,
     sdk,
     openDefaultModal,
@@ -877,6 +904,147 @@ describe('useAeNames default (preferred) names', () => {
   });
 });
 
+describe('useAeNames changeDefaultName (set/clear the preferred name)', () => {
+  it('sets the default via the signed link flow and applies it optimistically', async () => {
+    const ctx = await createTestContext();
+    ctx.getPreferredName.mockResolvedValue(undefined); // link tx not mined yet
+
+    await ctx.aeNames.changeDefaultName('picked.chain');
+
+    expect(ctx.linkPreferredAensName).toHaveBeenCalledWith('ak_test', 'picked.chain');
+    expect(ctx.unlinkPreferredAensName).not.toHaveBeenCalled();
+    // Visible immediately, before the on-chain poll reflects it.
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('picked.chain');
+    // The in-flight marker is released once the flow settles.
+    expect(ctx.aeNames.settingDefaultName.value).toBeNull();
+  });
+
+  it('clears the default via the signed unlink flow', async () => {
+    const ctx = await createTestContext();
+    ctx.aeNames.setDefaultNameOptimistic({ address: 'ak_test', name: 'old.chain' });
+
+    await ctx.aeNames.changeDefaultName('');
+
+    expect(ctx.unlinkPreferredAensName).toHaveBeenCalledWith('ak_test');
+    expect(ctx.linkPreferredAensName).not.toHaveBeenCalled();
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('');
+  });
+
+  it('drops a concurrent set-default (any row of the account) while one is in flight', async () => {
+    const ctx = await createTestContext();
+    let resolveLink;
+    ctx.linkPreferredAensName.mockReturnValue(new Promise((resolve) => { resolveLink = resolve; }));
+
+    const first = ctx.aeNames.changeDefaultName('one.chain');
+    // Competing calls that would race the contract's per-address nonce are ignored.
+    await ctx.aeNames.changeDefaultName('two.chain');
+    await ctx.aeNames.changeDefaultName('three.chain');
+    expect(ctx.aeNames.settingDefaultName.value).toMatchObject({ address: 'ak_test', name: 'one.chain' });
+
+    resolveLink('th_link');
+    await first;
+
+    expect(ctx.linkPreferredAensName).toHaveBeenCalledTimes(1);
+    expect(ctx.linkPreferredAensName).toHaveBeenCalledWith('ak_test', 'one.chain');
+    expect(ctx.aeNames.settingDefaultName.value).toBeNull();
+  });
+
+  it('does nothing on a network without an AddressLink deployment', async () => {
+    const ctx = await createTestContext();
+    ctx.isAddressLinkSupported.value = false;
+
+    await ctx.aeNames.changeDefaultName('picked.chain');
+
+    expect(ctx.linkPreferredAensName).not.toHaveBeenCalled();
+    expect(ctx.unlinkPreferredAensName).not.toHaveBeenCalled();
+  });
+
+  /** Store a default via the poll, so the tests below start from a real stored value. */
+  const storeDefaultName = async (ctx, name) => {
+    ctx.getPreferredName.mockResolvedValue(name);
+    await ctx.aeNames.updateDefaultNames();
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe(name);
+  };
+
+  it('keeps stored defaults when polling a network without a deployment', async () => {
+    // No source of truth on such a network, so the poll must not run at all.
+    const ctx = await createTestContext();
+    await storeDefaultName(ctx, 'stored.chain');
+
+    ctx.isAddressLinkSupported.value = false;
+    ctx.getPreferredName.mockClear();
+    ctx.getPreferredName.mockResolvedValue(undefined);
+
+    await ctx.aeNames.updateDefaultNames();
+
+    expect(ctx.getPreferredName).not.toHaveBeenCalled();
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('stored.chain');
+  });
+
+  it('re-reads the deployment gate after the network switch settles', async () => {
+    // Mid-switch `isAddressLinkSupported` still reflects the network being left, so the
+    // gate has to be read after `getAeSdk()`; reading it before wrote `undefined`
+    // through and deleted the default stored for the network being joined.
+    const ctx = await createTestContext();
+    await storeDefaultName(ctx, 'stored.chain');
+
+    ctx.getPreferredName.mockClear();
+    ctx.getPreferredName.mockResolvedValue(undefined);
+    ctx.getAeSdk.mockImplementation(async () => {
+      ctx.isAddressLinkSupported.value = false;
+      return ctx.sdk;
+    });
+
+    await ctx.aeNames.updateDefaultNames();
+
+    expect(ctx.getPreferredName).not.toHaveBeenCalled();
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('stored.chain');
+  });
+
+  it('keeps stored defaults when the contract read fails', async () => {
+    const ctx = await createTestContext();
+    await storeDefaultName(ctx, 'stored.chain');
+
+    ctx.getPreferredName.mockRejectedValue(new Error('dry-run unavailable'));
+
+    await ctx.aeNames.updateDefaultNames();
+
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('stored.chain');
+  });
+
+  it('keeps the stored default when support drops mid-fetch, not just before it', async () => {
+    // The existing "re-reads the deployment gate" test above covers support dropping
+    // before `getPreferredName` is ever called. This covers it dropping *during* the
+    // call (the per-account loop only re-checks `nodeNetworkId`, not this flag) - a
+    // real window since each account does its own network round trip.
+    const ctx = await createTestContext();
+    await storeDefaultName(ctx, 'stored.chain');
+
+    ctx.getPreferredName.mockClear();
+    ctx.getPreferredName.mockImplementation(async () => {
+      ctx.isAddressLinkSupported.value = false;
+      return undefined;
+    });
+
+    await ctx.aeNames.updateDefaultNames();
+
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('stored.chain');
+  });
+
+  it('clears the stored default when the chain reports no preferred name', async () => {
+    // The other side of the coin: a successful read of an empty link is a genuine
+    // unlink and must still propagate, so the fix above cannot over-reach.
+    const ctx = await createTestContext();
+    await storeDefaultName(ctx, 'stored.chain');
+
+    ctx.getPreferredName.mockResolvedValue(undefined);
+
+    await ctx.aeNames.updateDefaultNames();
+
+    expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('');
+  });
+});
+
 describe('useAeNames last-claimed-name fallback', () => {
   /** Middleware-shaped name; `activeFrom` becomes the claim height (`createdAtHeight`). */
   const middlewareName = (name, activeFrom, owner = 'ak_test') => ({
@@ -922,6 +1090,131 @@ describe('useAeNames last-claimed-name fallback', () => {
 
     expect(ctx.aeNames.getName('ak_test').value).toBe('preferred.chain');
     expect(ctx.aeNames.getDefaultName('ak_test').value).toBe('preferred.chain');
+  });
+
+  it('lets the newest owned-name fetch win when an older one finishes last', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchAllPages.mockClear();
+
+    let releaseStale;
+    const staleDone = new Promise((resolve) => { releaseStale = resolve; });
+    ctx.fetchAllPages
+      .mockImplementationOnce(async () => {
+        await staleDone;
+        return [middlewareName('stale.chain', 10)];
+      })
+      .mockImplementationOnce(async () => [middlewareName('fresh.chain', 30)]);
+
+    const stale = ctx.aeNames.updateOwnedNames();
+    const fresh = ctx.aeNames.updateOwnedNames();
+    await fresh;
+    releaseStale();
+    await stale;
+
+    expect(ctx.fetchAllPages).toHaveBeenCalledTimes(2);
+    expect(ctx.aeNames.getName('ak_test').value).toBe('fresh.chain');
+  });
+
+  it('publishes each run that finishes newer than the last published one', async () => {
+    // The Names page polls every 10s regardless of whether a run is still going. Gating
+    // the publish on "no newer run exists" froze the list (and the spinner) for as long
+    // as the poll outpaced the fetch, because at completion a newer run always existed.
+    const ctx = await createTestContext();
+    ctx.fetchAllPages.mockClear();
+
+    let releaseFirst;
+    let releaseSecond;
+    const first = new Promise((resolve) => { releaseFirst = resolve; });
+    const second = new Promise((resolve) => { releaseSecond = resolve; });
+    ctx.fetchAllPages
+      .mockImplementationOnce(async () => {
+        await first;
+        return [middlewareName('first.chain', 10)];
+      })
+      .mockImplementationOnce(async () => {
+        await second;
+        return [middlewareName('second.chain', 30)];
+      });
+
+    const runA = ctx.aeNames.updateOwnedNames();
+    const runB = ctx.aeNames.updateOwnedNames();
+
+    releaseFirst();
+    await runA;
+    expect(ctx.aeNames.getName('ak_test').value).toBe('first.chain');
+    expect(ctx.aeNames.areNamesFetching.value).toBe(true);
+
+    releaseSecond();
+    await runB;
+    expect(ctx.aeNames.getName('ak_test').value).toBe('second.chain');
+    expect(ctx.aeNames.areNamesFetching.value).toBe(false);
+  });
+
+  it('clears the fetching flag when a run fails', async () => {
+    // The flag also gates the Names page poll, so leaking it true there stops the page
+    // refreshing for the rest of the session.
+    const ctx = await createTestContext();
+    ctx.fetchAllPages.mockRejectedValueOnce(new Error('middleware unreachable'));
+
+    await ctx.aeNames.updateOwnedNames();
+
+    expect(ctx.aeNames.areNamesFetching.value).toBe(false);
+  });
+
+  it('waits for the network id before the startup fetch, then fetches once', async () => {
+    // Fetching before the id resolves keys the whole result under `undefined`.
+    const ctx = await createTestContext();
+    ctx.nodeNetworkId.value = undefined;
+    ctx.fetchAllPages.mockClear();
+    ctx.fetchAllPages.mockResolvedValue([middlewareName('claimed.chain', 30)]);
+
+    ctx.isMiddlewareReady.value = true;
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    expect(ctx.fetchAllPages).not.toHaveBeenCalled();
+
+    ctx.nodeNetworkId.value = 'ae_testnet';
+
+    await vi.waitFor(() => {
+      expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
+    });
+    expect(ctx.fetchAllPages).toHaveBeenCalledTimes(1);
+  });
+
+  it('keys owned names to the network the switch settles on, not the one it left', async () => {
+    // A switch settles asynchronously; `getAeSdk` is what makes the fetch wait for it.
+    const ctx = await createTestContext();
+
+    let settleSwitch;
+    const switched = new Promise((resolve) => { settleSwitch = resolve; });
+    setTimeout(() => {
+      ctx.nodeNetworkId.value = 'ae_mainnet';
+      settleSwitch();
+    }, 0);
+    ctx.getAeSdk.mockImplementation(async () => { await switched; return ctx.sdk; });
+    ctx.fetchAllPages.mockImplementation(async () => {
+      await switched;
+      return [middlewareName('claimed.chain', 30)];
+    });
+
+    await ctx.aeNames.updateOwnedNames();
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
+  });
+
+  it('loads owned names once the middleware is ready, without opening the Names page', async () => {
+    // Middleware starts not-ready, so nothing has been fetched: an account card
+    // would show no name. This is the account-card carousel scenario.
+    const ctx = await createTestContext();
+    expect(ctx.aeNames.getName('ak_test').value).toBe('');
+
+    ctx.fetchAllPages.mockResolvedValueOnce([middlewareName('claimed.chain', 30)]);
+    // Middleware becoming ready must populate the fallback on its own - no explicit
+    // updateOwnedNames() call (that is what visiting the Names page used to do).
+    ctx.isMiddlewareReady.value = true;
+
+    await vi.waitFor(() => {
+      expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
+    });
   });
 
   it('ignores names that are not confirmed on-chain yet', async () => {

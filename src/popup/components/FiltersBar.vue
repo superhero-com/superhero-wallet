@@ -143,7 +143,7 @@ export default defineComponent({
       return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
 
-    const protocolFilterDefaultText = t('pages.addressBook.filterByBlockchain', 'Filter by blockchain');
+    const protocolFilterDefaultText = t('pages.addressBook.filters.filterByBlockchain', 'Filter by blockchain');
 
     function onClickAll() {
       clearFilters(!props.isSelector);

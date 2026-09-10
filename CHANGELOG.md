@@ -2,6 +2,113 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.11.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.10.2...v2.11.0) (2026-09-10)
+
+
+### Features
+
+* add account switcher in confirm modal ([fb58781](https://github.com/Superhero-com/superhero-wallet/commit/fb58781846afb987852fc41630fe7186eb46306f))
+* be able to set default name using new contract ([e7c7cbb](https://github.com/Superhero-com/superhero-wallet/commit/e7c7cbbdb30dc4a7d71487d71b239da116443d7a))
+
+
+### Bug Fixes
+
+* **aeternity:** keep the middleware client keyed to the network that built it ([f544f1e](https://github.com/Superhero-com/superhero-wallet/commit/f544f1edbe9d6481daafe09b79169255f16a6a87))
+* **aeternity:** stop losing account names on a network switch or node hiccup ([92defba](https://github.com/Superhero-com/superhero-wallet/commit/92defbacf040d02295a53efc86fa06641079fc47))
+* **aeternity:** verify the transaction that will actually be signed ([4374661](https://github.com/Superhero-com/superhero-wallet/commit/4374661f9c29ebb6036039ffc75fa4be118326aa))
+* await release zips before rebuilding the review extension ([f6fa89b](https://github.com/Superhero-com/superhero-wallet/commit/f6fa89bf09c59f3ecbb5e37372b29ec8c6dc52b7))
+* be able to leave seed phrase detail page on refresh ([b146028](https://github.com/Superhero-com/superhero-wallet/commit/b1460288f278fea8052ca0c4121c08c0ea0de67f))
+* **build:** copy repo-root icons/ into web dist output ([648ca71](https://github.com/Superhero-com/superhero-wallet/commit/648ca7159b4cd109fec8e503745ca69b5f952ad0))
+* correct ERC-20 amount scaling, gas limit and wei precision in EthereumAdapter ([703f244](https://github.com/Superhero-com/superhero-wallet/commit/703f244a1db816b8ca0d5e0f551c9c44a49628b7))
+* correct i18n key path for address book blockchain filter text ([50a2cc2](https://github.com/Superhero-com/superhero-wallet/commit/50a2cc2556f579efaca107d76f8f7c95bd043676))
+* dedupe shared aliases and remove dead Jest-era test fixtures ([8f1f02a](https://github.com/Superhero-com/superhero-wallet/commit/8f1f02a386f0b8e05f0c69c98e04a41f6be645b6))
+* disable the inAppBrowser window scrolling ([11b264d](https://github.com/Superhero-com/superhero-wallet/commit/11b264d39655c6585e297cf9ccb2e1b1b4194ae7))
+* **ethereum:** add gas headroom to ERC-20 transfers ([67f500f](https://github.com/Superhero-com/superhero-wallet/commit/67f500f1f7f4a2e27090d41cd6e72fc9cf9d6dc9))
+* **evm:** scale ERC-20 amounts by the token's decimals, not the chain's ([779a354](https://github.com/Superhero-com/superhero-wallet/commit/779a354eac29430721e9a9f2c6633624aef95009))
+* **extension:** stay out of frames with an opaque origin ([0352774](https://github.com/Superhero-com/superhero-wallet/commit/03527744151aa3e3a2b96c3f89cad2e7a53cd673))
+* **firefox:** be able to scroll ([650f1e4](https://github.com/Superhero-com/superhero-wallet/commit/650f1e4a4f53978891e3a1a5e5390b9d0314667c))
+* floor max-send amounts and stop double-charging fee across recipients ([7f7a723](https://github.com/Superhero-com/superhero-wallet/commit/7f7a7235c57bb3376f74b1eb60e32af17c178df4))
+* gate BUNDLE_ANALYZE to the html build step ([550da49](https://github.com/Superhero-com/superhero-wallet/commit/550da49a84adbd3f5d25dd04710ac5e7f8229369))
+* lower build target from es2022 to es2020 ([2d68f60](https://github.com/Superhero-com/superhero-wallet/commit/2d68f60181316da341c41895b6f3886479f955b5))
+* make setPassword's salt+mnemonic storage write atomic ([5a866ee](https://github.com/Superhero-com/superhero-wallet/commit/5a866eed1c11f3dfe91ab509f01886641a4b7904))
+* memoize AirGap serializer init as a single promise ([87e7e65](https://github.com/Superhero-com/superhero-wallet/commit/87e7e65998c3e24a7a4621940d6c6af256803223))
+* **multisig-proposal-details:** stick action buttons to the bottom ([99e7270](https://github.com/Superhero-com/superhero-wallet/commit/99e727069ecc819e2afdcac636b2a152cc0bb50b))
+* **multisig:** be able to revoke proposed transaction ([01b353e](https://github.com/Superhero-com/superhero-wallet/commit/01b353e323096d0149e306059d145533a46953c1))
+* **name:** do not allow to click Make Default multiple times ([c173d22](https://github.com/Superhero-com/superhero-wallet/commit/c173d22a038206be13cc40a7778b207e52c7a7cc))
+* **names:** guard concurrent default-name changes and gate AddressLink to supported networks ([2cfbe04](https://github.com/Superhero-com/superhero-wallet/commit/2cfbe046df305f32f23f6f9a8f83068f5632d6d3))
+* **names:** show account name in cards without visiting the Names page ([37e1a23](https://github.com/Superhero-com/superhero-wallet/commit/37e1a23d2624334485ab5c3cb6247c01f7411752))
+* **networks:** be able to show custom networks ([53f3d35](https://github.com/Superhero-com/superhero-wallet/commit/53f3d3589e01aeedf74a199e45ba7d5685480ff2))
+* remove duplicate spec file and duplicate npm scripts ([233d56f](https://github.com/Superhero-com/superhero-wallet/commit/233d56f2ac8cc33b6ea3c359e1bb11b555a4b86c))
+* return change output when it exactly equals the Bitcoin dust threshold ([17a0544](https://github.com/Superhero-com/superhero-wallet/commit/17a0544ba90b48f103c3eb7c2cff5f4e3d80cbc9))
+* show Avalanche icon correctly ([d69066a](https://github.com/Superhero-com/superhero-wallet/commit/d69066a4f08535df525a7da8b9a1ae8b554826a7))
+* **sign:** sign co-sign payloads as-is and re-verify balance on account switch ([1d0d76b](https://github.com/Superhero-com/superhero-wallet/commit/1d0d76b8114a1c3b88cc906db0da3a646903c001))
+* **solana:** floor the max amount and split the token max across recipients ([f413e2e](https://github.com/Superhero-com/superhero-wallet/commit/f413e2e76efe834be20e20401740954a796304f8))
+* **solana:** stop poisoning the token list cache with an empty list ([545ab2c](https://github.com/Superhero-com/superhero-wallet/commit/545ab2cff9e686d9d07257c5547d8485a0a1c5b5))
+* stop inlining dapp icons into the main chunk ([cc9ead0](https://github.com/Superhero-com/superhero-wallet/commit/cc9ead0edf9ec095664ceb864b74af5d2eea7203))
+* **truncate:** actually shrinks to the available space ([aef7739](https://github.com/Superhero-com/superhero-wallet/commit/aef7739c12d94e665966f61d5bf5884588b6d859))
+* unbreak npm run watch and parallelize extension build steps ([8438e10](https://github.com/Superhero-com/superhero-wallet/commit/8438e10a7f7aac32615b0badce1f495226ebbc9f))
+* use archiver v8 ZipArchive named export in build-zip ([a09df2a](https://github.com/Superhero-com/superhero-wallet/commit/a09df2af85a4a3ba38154dcee699b9708b17c058))
+* use BigNumber for the auto-sign daily spend-limit accounting ([2dcafd9](https://github.com/Superhero-com/superhero-wallet/commit/2dcafd93f413a52827572af9871aab3810012160))
+
+
+### Performance
+
+* batch transactionList state writes into one assignment per update ([f477921](https://github.com/Superhero-com/superhero-wallet/commit/f477921927bd3b9d9d004942ef1c62b8d283f1b5))
+* deep-import isFQDN instead of the validator barrel ([70ea078](https://github.com/Superhero-com/superhero-wallet/commit/70ea078ffe14fff3153c36bca561fc981829b553))
+* drop needless deep:true on balances/tokenBalances watchers ([4fa881e](https://github.com/Superhero-com/superhero-wallet/commit/4fa881e970cd741f4f20176353c08f1ff9aaf536))
+* lazy-load cold modals via defineAsyncComponent ([708360d](https://github.com/Superhero-com/superhero-wallet/commit/708360d226a69f04cd350d41ee7f34c1fbef5b7e))
+* lazy-load cold routes, keep hot/dapp-popup/reload-restore paths eager ([86173b8](https://github.com/Superhero-com/superhero-wallet/commit/86173b8ceaffbb408f03ae4b798d67920135ca35))
+* lazy-load swagger-client ([798ebf6](https://github.com/Superhero-com/superhero-wallet/commit/798ebf6898dc2d0298475bddbed9a469d18206e7))
+* lazy-load the AirGap dependency tree out of the vendor chunk ([2a44343](https://github.com/Superhero-com/superhero-wallet/commit/2a4434399ddac2cdf6c38b71c196c818951669e8))
+* make WalletConnect fully lazy, not just partially ([972acb8](https://github.com/Superhero-com/superhero-wallet/commit/972acb8424c62eabb6ce008ea935044b8c2c9a8f))
+* map/set lookups instead of find()/includes() scans in accountAssetsList ([cce692b](https://github.com/Superhero-com/superhero-wallet/commit/cce692bd59c79048ccce22efb81ef09e6a427d33))
+* memoize HD wallet key derivation per adapter ([8533ded](https://github.com/Superhero-com/superhero-wallet/commit/8533ded932ecf6a9760890dd2480cf4fc8006111))
+* memoize Intl.NumberFormat per currency code ([919adde](https://github.com/Superhero-com/superhero-wallet/commit/919adde14a99a75c4541b959b7d4b94c0744eff9))
+* replace tiny-secp256k1-asmjs with @bitcoinerlab/secp256k1 ([614f085](https://github.com/Superhero-com/superhero-wallet/commit/614f08566c916cb6a06629e27d40f44fef4fb8c1))
+* share one ticker across transaction rows instead of one setInterval each ([d05b1d2](https://github.com/Superhero-com/superhero-wallet/commit/d05b1d2924748d320c8ef77b39dac8a843d949d7))
+
+
+### Tests
+
+* add new crypto test ([26eecbb](https://github.com/Superhero-com/superhero-wallet/commit/26eecbb4058e16d07e9d024abfc1b19411479de7))
+* add several composable tests ([c6f1151](https://github.com/Superhero-com/superhero-wallet/commit/c6f115153bedb8961cdce00cdb73ea489515ae0f))
+* add unit coverage for the build/ flow (manifest, define, chunking) ([314c68f](https://github.com/Superhero-com/superhero-wallet/commit/314c68f765afe6190ed287c9f107cd06633baad6))
+* do not heavily rely on mocking in several tests ([ee6c590](https://github.com/Superhero-com/superhero-wallet/commit/ee6c590b15b72535a723ec053ac43bbb8029c7ba))
+* do not mock most of the test functionality ([8f46174](https://github.com/Superhero-com/superhero-wallet/commit/8f4617477749b05d7372a1130f4a0d6c6a71fa27))
+* document orphaned-account preservation in accounts.ts as intended ([1c51713](https://github.com/Superhero-com/superhero-wallet/commit/1c51713054c825775964f83194281d022de195c3))
+* enable get-tx-amount-total test and add more cases ([5045653](https://github.com/Superhero-com/superhero-wallet/commit/50456539ea4bfbf67a8042c3dad35831646e38b9))
+* fix blucky offscreen session sync ([97158c3](https://github.com/Superhero-com/superhero-wallet/commit/97158c39185c8067663cac2bb6745451c5026ff6))
+* fix e2e tests ([70a584b](https://github.com/Superhero-com/superhero-wallet/commit/70a584bcf19ccdae6896d2ecf10bcbb19744c31f))
+* fix unit test warnings ([65da451](https://github.com/Superhero-com/superhero-wallet/commit/65da451e9ef5d19345b6b8907ca253a5bf4e58a5))
+* give the unit suite a timeout that fits what it actually loads ([a671db8](https://github.com/Superhero-com/superhero-wallet/commit/a671db8e5d83ba2b13401183a4c52610e203190a))
+* improve test coverage ([43d9bd4](https://github.com/Superhero-com/superhero-wallet/commit/43d9bd4c80b6d834f56b8e42466ee8817a95b2c4))
+* lock HD derivation with golden vectors before touching key-derivation code ([6e58e97](https://github.com/Superhero-com/superhero-wallet/commit/6e58e97f48f6064783692b572b11eb39515ffda8))
+* **wallet-connect:** raise accountsChanged spec timeout to avoid full-suite flake ([49920f3](https://github.com/Superhero-com/superhero-wallet/commit/49920f3141b7fd9cf9fc67cb80bcaf25af3e2010))
+
+
+### Maintenance
+
+* actually set build target to es2020 ([1c53ac9](https://github.com/Superhero-com/superhero-wallet/commit/1c53ac9c56c9986c96ea518f2b45ba46c6a420da))
+* add BUNDLE_ANALYZE flag to emit a bundle treemap ([d402d4c](https://github.com/Superhero-com/superhero-wallet/commit/d402d4c1d283432500366cf0a35d548d4308a02d))
+* **android:** update target API level to 36 ([4f3b298](https://github.com/Superhero-com/superhero-wallet/commit/4f3b2984d1c4090aa1b6bc48d61c580537afb4a7))
+* **build:** anchor bare lazy-vendor names to a full path segment ([8ee1bdc](https://github.com/Superhero-com/superhero-wallet/commit/8ee1bdc3eea31c164d6ffc9349fbf6cb1057125b))
+* do not propogate warnings on validateField ([84a860d](https://github.com/Superhero-com/superhero-wallet/commit/84a860ddcfc22d3890fc86d72334acd91adaacc3))
+* extract missed wording ([0d41e46](https://github.com/Superhero-com/superhero-wallet/commit/0d41e46a95b83319a32d9edcc3a6f90f2bb09344))
+* fix dependency vulnerabilities ([55426f1](https://github.com/Superhero-com/superhero-wallet/commit/55426f10efdee7034010e3dd2fa87997e1b6b817))
+* fix lint vue ([18d3dfc](https://github.com/Superhero-com/superhero-wallet/commit/18d3dfc1e086d541e606ee94480124f2491ebc8d))
+* fix npm run serve ([9a13256](https://github.com/Superhero-com/superhero-wallet/commit/9a13256bd9cd0db9e5eeccf61e1042195e0a9a54))
+* fix the mobile build ([0d918f9](https://github.com/Superhero-com/superhero-wallet/commit/0d918f98e6ed21c23575071e0afbeffe84b01049))
+* fix unit tests ([e4cc5e5](https://github.com/Superhero-com/superhero-wallet/commit/e4cc5e50c3247f6266499c10c73ed64ba26cef81))
+* move project to vite ([7aabee9](https://github.com/Superhero-com/superhero-wallet/commit/7aabee9b087db5dc6f31fb011572ebd5ac47a6d5))
+* remove unnecessary env rewritting ([fe540bd](https://github.com/Superhero-com/superhero-wallet/commit/fe540bd670fcbe5b0bd8ed99caf54e922184898a))
+* remove unused dependencies ([60fda98](https://github.com/Superhero-com/superhero-wallet/commit/60fda98e22250bd961f5b9c5f1a67d2474802bcd))
+* run npm audit fix ([b402cad](https://github.com/Superhero-com/superhero-wallet/commit/b402cada3fbae1aeadb5708d49016a3f066163c6))
+* run npm audit fix ([dbb94e2](https://github.com/Superhero-com/superhero-wallet/commit/dbb94e20df08b656671f1780adcd0900b73c3c27))
+* run npm update ([cec3303](https://github.com/Superhero-com/superhero-wallet/commit/cec3303280991a6ab990f7ccd73b056bc691da35))
+* run npm update and fix airgap issues ([6818911](https://github.com/Superhero-com/superhero-wallet/commit/68189111493abb727238fdaac711a5246056d41a))
+* update dependencies and fix the issues ([fd90298](https://github.com/Superhero-com/superhero-wallet/commit/fd9029823ae9710ac8a04a75759374e2b09ce50c))
+* update sdk to 15.0.0 ([5712a32](https://github.com/Superhero-com/superhero-wallet/commit/5712a325e049c2ab526152072ea185b6d6827073))
+
 ### [2.10.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.10.1...v2.10.2) (2026-05-30)
 
 

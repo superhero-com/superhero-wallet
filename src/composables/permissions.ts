@@ -1,5 +1,6 @@
 import { METHODS } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 
 import type {
   IAppData,
@@ -126,13 +127,16 @@ export function usePermissions() {
       resetTransactionSignSpent(host);
     }
 
-    const totalCost = +aettosToAe(+amount + +fee + +nameFee);
-    const currentAmountSpent = (permissions.value[host].transactionSignSpent || 0) + totalCost;
-    if (currentAmountSpent > transactionSignLimit) {
+    const totalCost = new BigNumber(aettosToAe(
+      new BigNumber(amount).plus(fee).plus(nameFee),
+    ));
+    const currentAmountSpent = new BigNumber(permissions.value[host].transactionSignSpent || 0)
+      .plus(totalCost);
+    if (currentAmountSpent.isGreaterThan(transactionSignLimit)) {
       return false; // Transaction is out of the limit
     }
 
-    permissions.value[host].transactionSignSpent = currentAmountSpent;
+    permissions.value[host].transactionSignSpent = currentAmountSpent.toNumber();
     return true;
   }
 
