@@ -1,0 +1,1 @@
+import{e1 as e,_ as t}from"./index-D1QpMHd4.js";import{A as s}from"./AccountDetailsBase-DrBWhoEl.js";import{bv as c,bw as n,aK as a,bC as r}from"./vendor-CGgm8S23.js";const i=c({name:e,components:{AccountDetailsBase:s}});function p(_,m,l,f,u,A){const o=n("AccountDetailsBase");return a(),r(o,{class:"account-details-bitcoin"})}const D=t(i,[["render",p]]);export{D as default};
