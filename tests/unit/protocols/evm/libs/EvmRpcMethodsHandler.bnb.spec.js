@@ -1,25 +1,25 @@
 import { handleEvmRpcMethod } from '../../../../../src/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_METHODS } from '../../../../../src/protocols/ethereum/config';
 
-jest.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
+vi.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: { value: { chainId: '56', nodeUrl: 'https://bsc.rpc' } },
     bnbActiveNetworkPredefinedSettings: { value: { middlewareUrl: 'https://api.etherscan.io/v2/api ' } },
   }),
 }));
 
-jest.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
+vi.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: { value: { chainId: '1', nodeUrl: 'https://eth.rpc' } },
     ethActiveNetworkPredefinedSettings: { value: { middlewareUrl: 'https://api.etherscan.io/v2/api ' } },
   }),
 }));
 
-jest.mock('../../../../../src/composables', () => ({
+vi.mock('../../../../../src/composables', () => ({
   usePermissions: () => ({
     checkPermission: () => true,
-    checkOrAskPermission: jest.fn().mockResolvedValue(true),
-    removePermission: jest.fn(),
+    checkOrAskPermission: vi.fn().mockResolvedValue(true),
+    removePermission: vi.fn(),
   }),
   useAccounts: () => ({
     getLastActiveProtocolAccount: () => ({ address: '0x0000000000000000000000000000000000000001', protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
@@ -27,15 +27,15 @@ jest.mock('../../../../../src/composables', () => ({
   useNetworks: () => ({
     activeNetwork: { value: { name: 'Mainnet' } },
     networks: { value: { Mainnet: { protocols: { bnb: { chainId: '56' } } } } },
-    switchNetwork: jest.fn(),
+    switchNetwork: vi.fn(),
   }),
 }));
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   usePermissions: () => ({
     checkPermission: () => true,
-    checkOrAskPermission: jest.fn().mockResolvedValue(true),
-    removePermission: jest.fn(),
+    checkOrAskPermission: vi.fn().mockResolvedValue(true),
+    removePermission: vi.fn(),
   }),
   useAccounts: () => ({
     getLastActiveProtocolAccount: () => ({ address: '0x0000000000000000000000000000000000000001', protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
@@ -43,26 +43,26 @@ jest.mock('@/composables', () => ({
   useNetworks: () => ({
     activeNetwork: { value: { name: 'Mainnet' } },
     networks: { value: { Mainnet: { protocols: { bnb: { chainId: '56' } } } } },
-    switchNetwork: jest.fn(),
+    switchNetwork: vi.fn(),
   }),
 }), { virtual: true });
 
-jest.mock('../../../../../src/lib/ProtocolAdapterFactory', () => ({
+vi.mock('../../../../../src/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: {
     getAdapter: () => ({
-      fetchBalance: jest.fn().mockResolvedValue('1'),
-      transferPreparedTransaction: jest.fn().mockResolvedValue({ hash: '0xhash' }),
+      fetchBalance: vi.fn().mockResolvedValue('1'),
+      transferPreparedTransaction: vi.fn().mockResolvedValue({ hash: '0xhash' }),
     }),
   },
 }));
 
 // i18n mocking for components indirectly used (e.g., warnings)
-jest.mock('vue-i18n', () => ({
+vi.mock('vue-i18n', () => ({
   createI18n: () => ({ global: { t: (k) => k } }),
   useI18n: () => ({ t: (k) => k }),
 }));
 
-jest.mock('web3-eth', () => {
+vi.mock('web3-eth', () => {
   const impl = function Web3Eth() {
     return {
       getGasPrice: async () => '2000000000',
@@ -71,7 +71,7 @@ jest.mock('web3-eth', () => {
   return { __esModule: true, default: impl, Web3Eth: impl };
 });
 
-jest.mock('../../../../../src/protocols/ethereum/libs/EtherscanService', () => ({
+vi.mock('../../../../../src/protocols/ethereum/libs/EtherscanService', () => ({
   EtherscanService: class {
     // minimal API used in sendTransaction path for gas estimation
     // eslint-disable-next-line class-methods-use-this

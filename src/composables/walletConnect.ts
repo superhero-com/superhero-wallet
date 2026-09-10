@@ -1,7 +1,6 @@
 import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
 import type { WalletKit as IWeb3Wallet } from '@reown/walletkit';
-import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import {
   computed,
   reactive,
@@ -40,6 +39,13 @@ type SupportedRequestMethod =
 const isOpenUsingDeeplink = ref(false);
 let composableInitialized = false;
 let web3wallet: Awaited<ReturnType<typeof IWeb3Wallet.init>> | null;
+/**
+ * Populated by `initWeb3wallet`. Kept out of the static import graph so the
+ * WalletConnect tree stays in its own async chunk (see LAZY_VENDOR_PACKAGES).
+ * Every consumer below runs only after a session exists, so it is always set
+ * by the time it's read.
+ */
+let wcUtils: typeof import('@walletconnect/utils');
 
 const wcSession = useStorageRef<null | SessionTypes.Struct>(
   null,
@@ -107,10 +113,13 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     const [
       { Core },
       { WalletKit },
+      utils,
     ] = await Promise.all([
       import('@walletconnect/core'),
       import('@reown/walletkit'),
+      import('@walletconnect/utils'),
     ]);
+    wcUtils = utils;
 
     const core = new Core({
       projectId: WALLET_CONNECT_PROJECT_ID,
@@ -138,7 +147,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
       try {
         await web3wallet.disconnectSession({
           topic: wcSession.value.topic,
-          reason: getSdkError('USER_DISCONNECTED'),
+          reason: wcUtils.getSdkError('USER_DISCONNECTED'),
         });
       } catch { /* We don't care if session existed */ }
     }
@@ -477,7 +486,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
           wcSession.value = await web3wallet!.approveSession({
             id,
-            namespaces: buildApprovedNamespaces({
+            namespaces: wcUtils.buildApprovedNamespaces({
               proposal,
               supportedNamespaces: {
                 [ETH_CHAIN_NAMESPACE]: {
@@ -499,7 +508,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           monitorActiveAccountAndNetwork();
           closeAppIfOpenUsingDeeplink();
         } catch (error: any) {
-          web3wallet!.rejectSession({ id, reason: getSdkError('USER_REJECTED') });
+          web3wallet!.rejectSession({ id, reason: wcUtils.getSdkError('USER_REJECTED') });
           handleConnectionError(error);
         } finally {
           wcState.connecting = false;

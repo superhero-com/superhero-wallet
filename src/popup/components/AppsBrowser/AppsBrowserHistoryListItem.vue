@@ -9,7 +9,7 @@
         v-if="image"
         :src="imageUrl"
         class="app-image"
-        alt="Dapp favicon"
+        :alt="$t('common.altDappFavicon')"
       >
       <IconWrapper
         v-else
@@ -36,6 +36,7 @@
 import { computed, defineComponent } from 'vue';
 import IconWrapper from '@/popup/components/IconWrapper.vue';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
+import { getDappIconUrl } from '@/utils';
 
 export default defineComponent({
   name: 'AppsBrowserHistoryListItem',
@@ -49,14 +50,7 @@ export default defineComponent({
     image: { type: String, default: null },
   },
   setup(props) {
-    const imageUrl = computed(() => {
-      if (props.image) {
-        // eslint-disable-next-line global-require, import/no-dynamic-require
-        return require(`@/icons/dapp/${props.image}`);
-      }
-
-      return null;
-    });
+    const imageUrl = computed(() => getDappIconUrl(props.image));
 
     return {
       imageUrl,

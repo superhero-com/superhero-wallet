@@ -28,7 +28,6 @@ import type {
 import {
   decryptedComputed,
   fetchAllPages,
-  fetchJson,
   handleUnknownError,
 } from '@/utils';
 import {
@@ -55,7 +54,8 @@ import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protoc
 import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
-import { useAeNetworkSettings } from './aeNetworkSettings';
+import { useAeAddressLinkContract } from './aeAddressLinkContract';
+import { useAeAddressLinkBackend } from './aeAddressLinkBackend';
 import { useAeTippingBackend } from './aeTippingBackend';
 import { useAeMiddleware } from './aeMiddleware';
 
@@ -64,6 +64,12 @@ const FEE_ESTIMATION_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv
 const FEE_ESTIMATION_NONCE = 10000;
 const PENDING_NAME_TRANSFER_TX_MAX_AGE = 5 * 60 * 1000;
 const EXTERNAL_NAME_CACHE_TTL = 10 * 60 * 1000;
+/**
+ * How long an optimistically-applied default-name change is protected from being
+ * overwritten by the on-chain polling while its `link`/`unlink` transaction is
+ * still being mined. After this the chain value is treated as authoritative again.
+ */
+const PENDING_DEFAULT_NAME_MAX_AGE = 5 * 60 * 1000;
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -124,16 +130,30 @@ interface IPendingNameTransferTx {
   createdAt: number;
 }
 
+/**
+ * An optimistically-applied default (preferred) name change awaiting its on-chain
+ * `link`/`unlink` transaction. `name` is an empty string when the default is being
+ * cleared. Kept so polling does not revert the change before it is mined.
+ */
+interface IPendingDefaultName {
+  name: ChainName | '';
+  createdAt: number;
+}
+
 interface aeNamesOptions {
   pollingDisabled?: boolean;
 }
 
 type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
+type PendingDefaultNamesRegistry = Record<NetworkId, Record<AccountAddress, IPendingDefaultName>>;
 
 let composableInitialized = false;
 let claimPreclaimedNamesPromise: Promise<void> | null = null;
 let extendExpiringOwnedNamesPromise: Promise<void> | null = null;
 let updateDefaultNamesPromise: Promise<void> | null = null;
+let ownedNamesFetchGeneration = 0;
+let ownedNamesPublishedGeneration = 0;
+let ownedNamesFetchesInFlight = 0;
 let preclaimedNamesEncryptionInitialized = false;
 
 /**
@@ -148,6 +168,16 @@ const externalNameLastFetchTime = new Map<string, number>();
 const externalNameInFlight = new Map<string, Promise<void>>();
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
+/**
+ * The network `ownedNames` was last fetched for. `ownedNames` is a flat list (not
+ * keyed by network), so anything derived from it - notably the last-claimed-name
+ * fallback - must check this first, or it would surface the previous network's
+ * names in the window between a network switch and the refetch landing.
+ */
+const ownedNamesNetworkId = useStorageRef<NetworkId | null>(
+  null,
+  STORAGE_KEYS.namesOwnedNetworkId,
+);
 const preclaimedNamesEncrypted = useStorageRef<string | null>(
   null,
   STORAGE_KEYS.preclaimedNames,
@@ -181,10 +211,58 @@ const areNamesFetching = ref(false);
  */
 const defaultNamesRegistry = useStorageRef<NamesRegistry>({}, STORAGE_KEYS.namesDefault);
 /**
+ * Optimistically-applied default-name changes whose `link`/`unlink` transaction
+ * is still being mined, protecting them from being reverted by the on-chain poll.
+ */
+const pendingDefaultNames = useStorageRef<PendingDefaultNamesRegistry>(
+  {},
+  STORAGE_KEYS.pendingDefaultNames,
+);
+/**
+ * Most recently claimed name per owner address, used to display a name for accounts
+ * that have no preferred name linked on-chain.
+ *
+ * Derived from `ownedNames`, which is already fetched and cached for the names list,
+ * so the fallback costs no extra requests. Recomputed only when `ownedNames` changes
+ * (not per render), keeping the `getName` lookup O(1).
+ */
+const latestClaimedNames = computed((): Record<AccountAddress, ChainName> => {
+  const latest: Record<AccountAddress, { name: ChainName; height: number }> = {};
+
+  ownedNames.value.forEach(({
+    name,
+    owner,
+    pending,
+    createdAtHeight,
+  }) => {
+    // Skip names that aren't confirmed on-chain yet (pending claims/transfers).
+    if (!owner || pending) {
+      return;
+    }
+    const height = createdAtHeight ?? 0;
+    if (!latest[owner] || height > latest[owner].height) {
+      latest[owner] = { name, height };
+    }
+  });
+
+  return Object.fromEntries(
+    Object.entries(latest).map(([address, { name }]) => [address, name]),
+  );
+});
+/**
  * Stores default names for a certain external account addresses in selected network
  */
 const externalNamesRegistry = ref<NamesRegistry>({});
 const auctions = ref<Record<string, IAuction>>({});
+
+/**
+ * The account + name whose default-name (link/unlink) flow is currently in
+ * flight, shared across every `useAeNames` consumer (i.e. all name rows). While
+ * set, all "Make default" buttons for that account are disabled so two rows
+ * cannot start competing backend-sponsored transactions that race the contract's
+ * per-address nonce. `null` when no flow is running.
+ */
+const settingDefaultName = ref<{ address: AccountAddress; name: ChainName | '' } | null>(null);
 
 const resolvedChainNames = ref<Record<Encoded.Name, AensName>>({});
 
@@ -203,10 +281,11 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     getLastActiveProtocolAccount,
   } = useAccounts();
   const { onNetworkChange } = useNetworks();
-  const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
+  const { getPreferredName, isAddressLinkSupported } = useAeAddressLinkContract();
+  const { linkPreferredAensName, unlinkPreferredAensName } = useAeAddressLinkBackend();
   const { topBlockHeight } = useTopHeaderData();
 
   const {
@@ -246,6 +325,11 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   async function updateExternalName(address: AccountAddress) {
+    // No AddressLink deployment on the active network - nothing to resolve, and
+    // crucially nothing to clear either.
+    if (!isAddressLinkSupported.value) {
+      return undefined;
+    }
     ensureExternalNameRegistryExists();
 
     const networkId = nodeNetworkId.value!;
@@ -262,9 +346,9 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
 
     const promise = (async () => {
-      let response: { preferredChainName?: ChainName } | null;
+      let preferredName: ChainName | undefined;
       try {
-        response = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`);
+        preferredName = await getPreferredName(address as Encoded.AccountAddress);
       } catch {
         return;
       }
@@ -275,8 +359,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
         return;
       }
 
-      if (response?.preferredChainName) {
-        externalNamesRegistry.value[networkId][address] = response.preferredChainName;
+      if (preferredName) {
+        externalNamesRegistry.value[networkId][address] = preferredName;
       } else {
         delete externalNamesRegistry.value[networkId][address];
       }
@@ -289,6 +373,18 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return promise;
   }
 
+  /**
+   * The preferred (default) name explicitly linked on-chain for an address, with no
+   * fallback. Use this to tell whether a default is actually set (e.g. to decide if a
+   * name can still be made the default); use `getName` for display.
+   */
+  function getDefaultName(address?: AccountAddress): ComputedRef<ChainName | string> {
+    if (!address || !nodeNetworkId.value) {
+      return computed(() => '');
+    }
+    return computed(() => defaultNamesRegistry.value[nodeNetworkId.value!]?.[address] || '');
+  }
+
   // This function returns computed value to have reactive state and show proper data after fetching
   function getName(address?: AccountAddress): ComputedRef<ChainName | string> {
     if (!address || !nodeNetworkId.value) {
@@ -299,7 +395,19 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       isLocalAccountAddress(address)
       || getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address === address
     ) {
-      return computed(() => defaultNamesRegistry.value[nodeNetworkId.value!]?.[address] || '');
+      // Without a linked preferred name, fall back to the account's most recently
+      // claimed name so the account still displays a name instead of nothing. Only
+      // usable while `ownedNames` belongs to the active network - otherwise the
+      // previous network's names would leak through until the refetch lands.
+      return computed(() => (
+        defaultNamesRegistry.value[nodeNetworkId.value!]?.[address]
+        || (
+          (ownedNamesNetworkId.value === nodeNetworkId.value)
+            ? latestClaimedNames.value[address]
+            : undefined
+        )
+        || ''
+      ));
     }
 
     updateExternalName(address);
@@ -328,7 +436,9 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       .reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
   }
 
-  function setDefaultName({ address, name }: IAddressNamePair) {
+  function setDefaultName(
+    { address, name }: Partial<IAddressNamePair> & { address: AccountAddress },
+  ) {
     if (!nodeNetworkId.value) {
       return;
     }
@@ -340,6 +450,73 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       defaultNamesRegistry.value[nodeNetworkId.value][address] = name;
     } else {
       delete defaultNamesRegistry.value[nodeNetworkId.value][address];
+    }
+  }
+
+  function removePendingDefaultName(networkId: NetworkId, address: AccountAddress) {
+    delete pendingDefaultNames.value[networkId]?.[address];
+    if (isEmpty(pendingDefaultNames.value[networkId])) {
+      delete pendingDefaultNames.value[networkId];
+    }
+  }
+
+  /**
+   * Optimistically apply a default-name change (set or, with an empty `name`,
+   * clear) and record a pending marker so the on-chain poll does not revert it
+   * before the backend-sponsored `link`/`unlink` transaction is mined.
+   */
+  function setDefaultNameOptimistic(
+    { address, name }: { address: AccountAddress; name: ChainName | '' },
+  ) {
+    const networkId = nodeNetworkId.value;
+    if (!networkId) {
+      return;
+    }
+    if (!pendingDefaultNames.value[networkId]) {
+      pendingDefaultNames.value[networkId] = {};
+    }
+    pendingDefaultNames.value[networkId][address] = { name, createdAt: Date.now() };
+    setDefaultName({ address, name: name || undefined });
+  }
+
+  /**
+   * Set (or, with an empty `name`, clear) the active account's preferred `.chain`
+   * name through the backend-sponsored AddressLink flow, then apply it
+   * optimistically.
+   *
+   * The in-flight guard is shared across every name row (see `settingDefaultName`)
+   * so that a second "Make default" - on this or any other name of the same
+   * account - cannot start a competing link/unlink transaction while one is still
+   * being requested, signed and submitted.
+   */
+  async function changeDefaultName(name: ChainName | '') {
+    if (!isAddressLinkSupported.value || settingDefaultName.value) {
+      return;
+    }
+    const { address } = activeAccount.value;
+    settingDefaultName.value = { address, name };
+    try {
+      const currentNetworkId = nodeNetworkId.value;
+
+      // The wallet signs a backend-issued challenge to prove ownership and the
+      // backend broadcasts (and pays for) the on-chain AddressLink transaction.
+      if (name) {
+        await linkPreferredAensName(address as Encoded.AccountAddress, name);
+      } else {
+        await unlinkPreferredAensName(address as Encoded.AccountAddress);
+      }
+
+      if (currentNetworkId !== nodeNetworkId.value) {
+        return;
+      }
+
+      // Apply optimistically and mark pending so the on-chain poll does not revert
+      // it before the backend-sponsored transaction is mined.
+      setDefaultNameOptimistic({ address, name });
+    } catch (error: any) {
+      handleUnknownError(error);
+    } finally {
+      settingDefaultName.value = null;
     }
   }
 
@@ -580,9 +757,13 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }));
   }
 
-  async function updateOwnedNames() {
+  async function processOwnedNamesUpdate(generation: number) {
     try {
+      ownedNamesFetchesInFlight += 1;
       areNamesFetching.value = true;
+
+      // A switch resolves the new node asynchronously; snapshot the id only after it settles.
+      await getAeSdk();
 
       const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
       const currentNetworkId = nodeNetworkId.value!;
@@ -641,6 +822,17 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
         ),
       ) as Record<AccountAddress, PendingNameLookupResult>;
 
+      // Past this point the run owns the published list and the pending-transfer cleanup.
+      // `<=`, not `!==`: the 10s poll always starts a newer run, so requiring the
+      // newest would freeze both.
+      if (
+        generation <= ownedNamesPublishedGeneration
+        || nodeNetworkId.value !== currentNetworkId
+      ) {
+        return;
+      }
+      ownedNamesPublishedGeneration = generation;
+
       Object.values(pendingNameTransferTxs.value[currentNetworkId] || {}).forEach(({
         address,
         createdAt,
@@ -686,26 +878,67 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
             : ownedName.pendingStatus,
         };
       });
+      ownedNamesNetworkId.value = currentNetworkId;
     } catch (error: any) {
       handleUnknownError(error);
     } finally {
-      areNamesFetching.value = false;
+      ownedNamesFetchesInFlight -= 1;
+      areNamesFetching.value = ownedNamesFetchesInFlight > 0;
     }
   }
 
-  async function processDefaultNamesUpdate() {
-    await Promise.all(aeAccounts.value.map(async ({ address }) => {
-      const currentNodeId = nodeNetworkId.value;
-      const response = await fetchJson(
-        `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`,
-      ).catch(() => ({}));
+  /**
+   * Latest publish wins - awaiting this does not guarantee the caller its own result,
+   * as a newer run (e.g. the Names page poll) may publish first.
+   */
+  async function updateOwnedNames() {
+    ownedNamesFetchGeneration += 1;
+    return processOwnedNamesUpdate(ownedNamesFetchGeneration);
+  }
 
-      if (currentNodeId !== nodeNetworkId.value) {
+  async function processDefaultNamesUpdate() {
+    try {
+      // Settle the node first (see `processOwnedNamesUpdate`).
+      await getAeSdk();
+      // Without an AddressLink deployment on the active network there is no source
+      // of truth to sync against. Skip entirely rather than reading `undefined` and
+      // wiping the defaults the user has stored on supported networks.
+      if (!isAddressLinkSupported.value) {
         return;
       }
+      await Promise.all(aeAccounts.value.map(async ({ address }) => {
+        const currentNodeId = nodeNetworkId.value!;
+        let preferredName: ChainName | undefined;
+        try {
+          preferredName = await getPreferredName(address as Encoded.AccountAddress);
+        } catch (error) {
+          // A failed read is not "no preferred name" - writing it through would delete
+          // the user's stored default on any node hiccup.
+          return;
+        }
 
-      setDefaultName({ address, name: response?.preferredChainName });
-    }));
+        if (currentNodeId !== nodeNetworkId.value || !isAddressLinkSupported.value) {
+          return;
+        }
+
+        // An optimistic set/clear may still be waiting for its on-chain tx to mine.
+        // Until the chain reflects the change (or the marker expires) keep the
+        // optimistic value instead of reverting it to stale chain data.
+        const pending = pendingDefaultNames.value[currentNodeId]?.[address];
+        if (pending) {
+          const chainMatchesPending = (preferredName || '') === pending.name;
+          const isExpired = Date.now() - pending.createdAt > PENDING_DEFAULT_NAME_MAX_AGE;
+          if (!chainMatchesPending && !isExpired) {
+            return;
+          }
+          removePendingDefaultName(currentNodeId, address);
+        }
+
+        setDefaultName({ address, name: preferredName });
+      }));
+    } catch (error: any) {
+      handleUnknownError(error);
+    }
   }
 
   async function updateDefaultNames() {
@@ -1037,16 +1270,19 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       await extendExpiringOwnedNames();
     });
 
+    // Populate owned + default names once accounts, middleware and network id exist,
+    // so account cards show a name without opening the Names page.
     watch(
-      aeAccounts,
-      async (val, oldVal) => {
-        if (isMiddlewareReady.value && val !== oldVal) {
+      [aeAccounts, isMiddlewareReady, nodeNetworkId] as const,
+      async ([accounts, middlewareReady, networkId]) => {
+        if (middlewareReady && networkId && accounts.length) {
           await Promise.all([
             updateOwnedNames(),
             updateDefaultNames(),
           ]);
         }
       },
+      { immediate: true },
     );
   }
 
@@ -1060,6 +1296,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     updateOwnedNames,
     resolvedChainNames,
     getName,
+    getDefaultName,
     getNameExtendFee,
     getNameByNameHash,
     getNameAuction,
@@ -1069,5 +1306,10 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     setAuctionEntry,
     setPendingAutoExtendName,
     setDefaultName,
+    setDefaultNameOptimistic,
+    changeDefaultName,
+    settingDefaultName,
+    isAddressLinkSupported,
+    updateDefaultNames,
   };
 }

@@ -4,7 +4,7 @@
       <img
         class="image"
         :src="NotFoundImage"
-        alt="Feature not found"
+        :alt="$t('pages.notFound.imageAlt')"
       >
       <div
         class="text-heading-1 heading"

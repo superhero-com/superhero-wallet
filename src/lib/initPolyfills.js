@@ -1,11 +1,13 @@
 if (process.env.IS_EXTENSION) {
-  import('webextension-polyfill').then((webExtensionPolyfill) => {
-    try {
-      window.browser = webExtensionPolyfill;
-    } catch (error) {
-      browser = webExtensionPolyfill;
-    }
-  });
+  // In extension builds the bare `browser` global is provided everywhere by
+  // @rollup/plugin-inject (webextension-polyfill). Mirror it onto window /
+  // globalThis for code that reads `window.browser` explicitly. In the service
+  // worker `window` is undefined, so fall back to globalThis.
+  try {
+    window.browser = browser;
+  } catch (error) {
+    globalThis.browser = browser;
+  }
 } else {
   window.browser = {
     runtime: {

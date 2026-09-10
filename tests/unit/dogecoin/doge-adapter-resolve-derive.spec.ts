@@ -1,8 +1,7 @@
-import { expect, jest } from '@jest/globals';
 import { DogecoinAdapter } from '../../../src/protocols/dogecoin/libs/DogecoinAdapter';
 import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '../../../src/constants';
 
-jest.mock('../../../src/composables/networks', () => ({
+vi.mock('../../../src/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {
@@ -23,8 +22,9 @@ describe('DogecoinAdapter - resolveAccountRaw and derivation', () => {
     const acc0 = adapter.getHdWalletAccountFromMnemonicSeed(seed, 0);
     const acc1 = adapter.getHdWalletAccountFromMnemonicSeed(seed, 1);
     expect(acc0.address).toBeDefined();
-    expect(acc0.publicKey).toBeInstanceOf(Buffer);
-    expect(acc0.secretKey).toBeInstanceOf(Buffer);
+    // bip32 5 / bitcoinjs-lib 7 return keys as Uint8Array rather than Buffer.
+    expect(acc0.publicKey).toBeInstanceOf(Uint8Array);
+    expect(acc0.secretKey).toBeInstanceOf(Uint8Array);
     expect(acc0.address).not.toBe(acc1.address);
   });
 

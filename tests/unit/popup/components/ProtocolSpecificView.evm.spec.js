@@ -7,23 +7,23 @@ import {
 
 let mockActiveProtocol = 'ethereum';
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRoute: () => ({ meta: {}, params: {} }),
-  useRouter: () => ({ replace: jest.fn() }),
+  useRouter: () => ({ replace: vi.fn() }),
 }));
 
-jest.mock('@ionic/vue', () => ({
+vi.mock('@ionic/vue', () => ({
   IonRouterOutlet: { template: '<div><slot /></div>' },
   IonPage: { template: '<div><slot /></div>' },
-  isPlatform: jest.fn(() => false),
-  useIonRouter: () => ({ navigate: jest.fn() }),
-  onIonViewDidEnter: jest.fn(),
-  onIonViewDidLeave: jest.fn(),
-  onIonViewWillEnter: jest.fn(),
-  onIonViewWillLeave: jest.fn(),
+  isPlatform: vi.fn(() => false),
+  useIonRouter: () => ({ navigate: vi.fn() }),
+  onIonViewDidEnter: vi.fn(),
+  onIonViewDidLeave: vi.fn(),
+  onIonViewWillEnter: vi.fn(),
+  onIonViewWillLeave: vi.fn(),
 }));
 
-jest.mock('@/protocols/ethereum/views', () => ({
+vi.mock('@/protocols/ethereum/views', () => ({
   __esModule: true,
   default: {
     AccountDetails: () => Promise.resolve({
@@ -45,7 +45,7 @@ jest.mock('@/protocols/ethereum/views', () => ({
   },
 }));
 
-jest.mock('../../../../src/composables', () => ({
+vi.mock('../../../../src/composables', () => ({
   useAccounts: () => ({ activeAccount: { value: { protocol: mockActiveProtocol } } }),
   useNetworks: () => ({ activeNetwork: { value: { type: 'mainnet' } } }),
   useUi: () => ({ saveErrorLog: { value: false } }),

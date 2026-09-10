@@ -27,14 +27,21 @@
           <BtnPlain
             v-show="canBeDefault"
             class="button-plain"
-            :class="{ set: isDefault }"
-            :disabled="isDefault"
-            :text="(isDefault)
-              ? $t('pages.names.list.default')
-              : $t('pages.names.list.default-make')
-            "
+            :class="{ set: isDefault, setting: isSettingThisDefault }"
+            :disabled="isDefault || isSettingDefaultInProgress"
             @click="handleSetDefault"
-          />
+          >
+            <PendingIcon
+              v-if="isSettingThisDefault"
+              class="setting-icon"
+            />
+            {{ isSettingThisDefault
+              ? $t('pages.names.list.default-setting')
+              : (isDefault)
+                ? $t('pages.names.list.default')
+                : $t('pages.names.list.default-make')
+            }}
+          </BtnPlain>
           <BtnPlain
             v-show="expand"
             class="button-plain"
@@ -177,6 +184,7 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { IName } from '@/types';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
@@ -186,17 +194,14 @@ import { RejectedByUserError } from '@/lib/errors';
 import {
   blocksToRelativeTime,
   handleUnknownError,
-  postJson,
 } from '@/utils';
 import {
   useAccounts,
-  useAeSdk,
   useModals,
   useTopHeaderData,
 } from '@/composables';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
 import { NAME_CLAIM_STATUS, useAeNames } from '@/protocols/aeternity/composables/aeNames';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
 import InputField from './InputField.vue';
@@ -232,15 +237,15 @@ export default defineComponent({
     const {
       setAutoExtend,
       updateNamePointer,
-      getName,
+      getDefaultName,
       getNameExtendFee,
       extendExpiringOwnedNames,
       ownedNames,
       updateOwnedNames,
-      setDefaultName,
+      changeDefaultName,
+      settingDefaultName,
+      isAddressLinkSupported,
     } = useAeNames();
-    const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { nodeNetworkId, fetchRespondChallenge } = useAeSdk();
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -252,15 +257,29 @@ export default defineComponent({
     const pointerInput = ref();
     const transferInput = ref();
 
+    // Compares against the explicitly linked default, not `getName`: the latter falls
+    // back to the last claimed name, which would otherwise mark a name as "default"
+    // (and disable the button) while no default is actually set on-chain.
     const isDefault = computed(
-      () => getName(activeAccount.value.address).value === props.nameEntry.name,
+      () => getDefaultName(activeAccount.value.address).value === props.nameEntry.name,
     );
     const hasPointer = computed(
       (): boolean => !!props.nameEntry.pointers?.accountPubkey,
     );
     const canBeDefault = computed(
-      (): boolean => props.nameEntry?.pointers?.accountPubkey === activeAccount.value.address,
+      (): boolean => isAddressLinkSupported.value
+        && props.nameEntry?.pointers?.accountPubkey === activeAccount.value.address,
     );
+    // This exact name row is the one whose default-name flow is running (shows the
+    // spinner); `isSettingDefaultInProgress` is true for every row of the account
+    // while any of its default-name flows runs (so the others stay disabled).
+    const isSettingThisDefault = computed(() => (
+      settingDefaultName.value?.address === activeAccount.value.address
+      && settingDefaultName.value?.name === props.nameEntry.name
+    ));
+    const isSettingDefaultInProgress = computed(() => (
+      settingDefaultName.value?.address === activeAccount.value.address
+    ));
     const fallbackDefaultName = computed(() => ownedNames.value.find(({
       name,
       owner,
@@ -321,39 +340,13 @@ export default defineComponent({
       showTransferInput.value = false;
     }
 
-    async function updateDefaultName(name: IName['name']) {
-      try {
-        const { address } = activeAccount.value;
-        const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
-        const currentNetworkId = nodeNetworkId.value;
-
-        const response = await postJson(url, {
-          body: {
-            preferredChainName: name,
-          },
-        });
-
-        let respondChallenge;
-        try {
-          respondChallenge = await fetchRespondChallenge(response);
-        } catch (error: any) {
-          handleUnknownError(error);
-          return;
-        }
-        await postJson(url, { body: respondChallenge });
-
-        if (currentNetworkId !== nodeNetworkId.value) {
-          return;
-        }
-
-        setDefaultName({ address, name });
-      } catch (error: any) {
-        handleUnknownError(error);
-      }
-    }
-
     async function handleSetDefault() {
-      await updateDefaultName(props.nameEntry.name);
+      if (isDefault.value) {
+        return;
+      }
+      // The repeated-click / concurrent-row guard lives in `changeDefaultName`, so
+      // it is shared across every name row of the account rather than per-button.
+      await changeDefaultName(props.nameEntry.name);
     }
 
     async function toggleAutoExtend() {
@@ -448,11 +441,7 @@ export default defineComponent({
           await updateOwnedNames();
 
           if (isDefault.value) {
-            if (fallbackDefaultName.value) {
-              await updateDefaultName(fallbackDefaultName.value);
-            } else {
-              await updateDefaultName('' as IName['name']);
-            }
+            await changeDefaultName(fallbackDefaultName.value || '');
           }
         }
       } catch (error: any) {
@@ -490,6 +479,8 @@ export default defineComponent({
       hasPointer,
       isAlmostExpiring,
       isDefault,
+      isSettingThisDefault,
+      isSettingDefaultInProgress,
       newPointer,
       pendingStatusLabel,
       pointerInput,
@@ -581,6 +572,20 @@ export default defineComponent({
         &.set {
           background: rgba($color-warning, 0.1);
           color: $color-warning;
+        }
+
+        &.setting {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          background: rgba($color-warning, 0.1);
+          color: $color-warning;
+          cursor: progress;
+
+          .setting-icon {
+            width: 12px;
+            height: 12px;
+          }
         }
 
         &.edit {

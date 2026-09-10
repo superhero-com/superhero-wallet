@@ -12,7 +12,7 @@
     class="asset-icon"
     :class="[iconSize]"
     :title="asset?.name || asset?.symbol"
-    alt="Solana"
+    :alt="$t('common.altSolana')"
   >
   <img
     v-else
@@ -20,7 +20,7 @@
     :src="asset.image || getTokenPlaceholderUrl(asset)"
     :class="[iconSize, { 'is-placeholder': !asset?.image }]"
     :title="asset?.name || asset?.symbol"
-    alt="Asset image"
+    :alt="$t('common.altAssetImage')"
   >
 </template>
 

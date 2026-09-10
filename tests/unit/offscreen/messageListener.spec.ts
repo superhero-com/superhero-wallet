@@ -1,16 +1,16 @@
 // @ts-nocheck
 describe('offscreen message listener', () => {
-  const discoverAccountsMock = jest.fn();
+  const discoverAccountsMock = vi.fn();
 
   function mockOffscreenDependencies() {
     discoverAccountsMock.mockResolvedValue(['ledger-account']);
 
-    jest.doMock('vue', () => ({
-      watch: jest.fn(),
+    vi.doMock('vue', () => ({
+      watch: vi.fn(),
     }));
-    jest.doMock('@/lib/initPolyfills', () => ({}));
-    jest.doMock('@/protocols/registerAdapters', () => ({}));
-    jest.doMock('@/constants', () => ({
+    vi.doMock('@/lib/initPolyfills', () => ({}));
+    vi.doMock('@/protocols/registerAdapters', () => ({}));
+    vi.doMock('@/constants', () => ({
       IS_FIREFOX: false,
       POPUP_METHODS: {
         reload: 'reload',
@@ -22,63 +22,62 @@ describe('offscreen message listener', () => {
       PROTOCOLS: { ethereum: 'ethereum' },
       EVM_PROTOCOLS: ['ethereum'],
     }));
-    jest.doMock('@/composables', () => ({
-      useWalletConnect: jest.fn(),
+    vi.doMock('@/composables', () => ({
+      useWalletConnect: vi.fn(),
       useNetworks: () => ({
         activeNetworkName: { value: 'Mainnet' },
         networks: { value: {} },
       }),
       useLedger: () => ({
-        deriveAccount: jest.fn(),
+        deriveAccount: vi.fn(),
         discoverAccounts: discoverAccountsMock,
-        signTransaction: jest.fn(),
-        signMessage: jest.fn(),
+        signTransaction: vi.fn(),
+        signMessage: vi.fn(),
       }),
       useAccounts: () => ({
         activeAccount: { value: { protocol: 'ethereum' } },
       }),
     }));
-    jest.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
-      handleEvmRpcMethod: jest.fn(),
+    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
+      handleEvmRpcMethod: vi.fn(),
     }));
-    jest.doMock('@/protocols/ethereum/config', () => ({
+    vi.doMock('@/protocols/ethereum/config', () => ({
       ETH_RPC_WALLET_EVENTS: {
         chainChanged: 'chainChanged',
         accountsChanged: 'accountsChanged',
       },
     }));
-    jest.doMock('@/background/utils', () => ({
-      registerInPageContentScript: jest.fn(),
-      updateDynamicRules: jest.fn(),
+    vi.doMock('@/background/utils', () => ({
+      registerInPageContentScript: vi.fn(),
+      updateDynamicRules: vi.fn(),
     }));
-    jest.doMock('@/offscreen/wallet', () => ({
-      init: jest.fn(),
-      disconnect: jest.fn(),
+    vi.doMock('@/offscreen/wallet', () => ({
+      init: vi.fn(),
+      disconnect: vi.fn(),
     }));
   }
 
-  function loadListener() {
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('@/offscreen/offscreen');
-    });
+  async function loadListener() {
+    vi.resetModules();
+    // eslint-disable-next-line global-require
+    (await import('@/offscreen/offscreen'));
 
     return (
-      (global as any).browser.runtime.onMessage.addListener as jest.Mock
+      (global as any).browser.runtime.onMessage.addListener as vi.Mock
     ).mock.calls[0][0];
   }
 
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
     (global as any).browser = {
       runtime: {
         id: 'test-extension-id',
-        onMessage: { addListener: jest.fn() },
-        sendMessage: jest.fn(),
+        onMessage: { addListener: vi.fn() },
+        sendMessage: vi.fn(),
       },
       tabs: {
-        query: jest.fn(),
-        sendMessage: jest.fn(),
+        query: vi.fn(),
+        sendMessage: vi.fn(),
       },
     };
     mockOffscreenDependencies();
@@ -87,14 +86,14 @@ describe('offscreen message listener', () => {
   it.each([
     ['message for background', { target: 'background', method: 'accountsChanged' }],
     ['external sender', { target: 'offscreen', method: 'ledgerDiscoverAccounts' }, { id: 'other-extension-id' }],
-  ])('does not claim ignored messages: %s', (_label, msg, sender = { id: 'test-extension-id' }) => {
-    const listener = loadListener();
+  ])('does not claim ignored messages: %s', async (_label, msg, sender = { id: 'test-extension-id' }) => {
+    const listener = await loadListener();
 
     expect(listener(msg, sender)).toBeUndefined();
   });
 
-  it('does not claim accepted but unhandled offscreen messages', () => {
-    const listener = loadListener();
+  it('does not claim accepted but unhandled offscreen messages', async () => {
+    const listener = await loadListener();
 
     expect(listener(
       { target: 'offscreen', method: 'unknownMethod' },
@@ -103,7 +102,7 @@ describe('offscreen message listener', () => {
   });
 
   it('still returns responses for handled offscreen messages', async () => {
-    const listener = loadListener();
+    const listener = await loadListener();
 
     await expect(listener(
       { target: 'offscreen', method: 'ledgerDiscoverAccounts' },

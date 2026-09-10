@@ -7,10 +7,11 @@ import {
   watch,
 } from 'vue';
 import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';
+import { WalletStorage } from '@/lib/WalletStorage';
 import {
   AUTHENTICATION_TIMEOUTS,
   IS_EXTENSION,
@@ -278,6 +279,34 @@ export const useAuth = createCustomScopedComposable(() => {
     const newSalt = generateSalt();
     const newEncryptionKey = await generateEncryptionKey(password, newSalt);
     const newMnemonicCiphertext = await encrypt(newEncryptionKey, plaintextToEncrypt);
+    /**
+     * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
+     * persisted by its own fire-and-forget watcher — assigning both reactive
+     * refs below does not guarantee both storage writes land together. If the
+     * salt's write succeeded but the mnemonic's then failed (write quota,
+     * storage unavailable, etc.), disk would end up holding a NEW salt paired
+     * with the OLD mnemonic ciphertext — undecryptable with either the old or
+     * the new password, permanently.
+     *
+     * Commit the salt+ciphertext pair to the underlying storage synchronously
+     * here, with rollback on failure, BEFORE touching the reactive refs. On
+     * success this is a no-op duplicate of what the refs' watchers write right
+     * after (same keys, same serialized values); on failure the salt is rolled
+     * back and the error propagates instead of leaving a mismatched pair on
+     * disk.
+     */
+    const previousStoredSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    try {
+      WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(newSalt));
+      WalletStorage.set(STORAGE_KEYS.mnemonic, newMnemonicCiphertext);
+    } catch (error) {
+      if (previousStoredSalt === null) {
+        WalletStorage.remove(STORAGE_KEYS.encryptionSalt);
+      } else {
+        WalletStorage.set(STORAGE_KEYS.encryptionSalt, previousStoredSalt);
+      }
+      throw error;
+    }
     encryptionSalt.value = newSalt;
     setEncryptionKey(newEncryptionKey);
     mnemonic.value = newMnemonicCiphertext;

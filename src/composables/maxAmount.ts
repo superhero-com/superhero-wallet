@@ -72,10 +72,13 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
       const _max = balance.value
         .minus(BigNumber(fee.value).multipliedBy(recipientsCount.value))
         .dividedBy(recipientsCount.value)
-        .decimalPlaces(formModel.value.selectedAsset.decimals!);
+        .decimalPlaces(formModel.value.selectedAsset.decimals!, BigNumber.ROUND_DOWN);
       return (_max.isPositive() ? _max : 0).toString();
     }
-    return selectedTokenBalance.value.toString();
+    return selectedTokenBalance.value
+      .dividedBy(recipientsCount.value)
+      .decimalPlaces(selectedAssetDecimals.value, BigNumber.ROUND_DOWN)
+      .toString();
   });
 
   function getAccount() {
@@ -132,7 +135,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
           tag: Tag.SpendTx,
           senderId: multisigVault.gaAccountId as Encoded.AccountAddress,
           recipientId: account.address as Encoded.AccountAddress,
-          amount,
+          amount: amount.toFixed(),
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
         });
         callResult = (await proposeTx(
@@ -161,7 +164,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
       }
 
       if (callResult?.result) {
-        const aettosFee = (callResult.tx as any).fee * recipientsCount.value;
+        const aettosFee = (callResult.tx as any).fee;
         gasUsed.value = +callResult.result.gasUsed.toString();
         gasPrice.value = +aettosToAe(callResult.result.gasPrice.toString());
         total.value = new BigNumber(callResult.result.gasUsed ?? 0)
@@ -181,7 +184,7 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
           tag: Tag.SpendTx,
           senderId: account.address as Encoded.AccountAddress,
           recipientId: account.address as Encoded.AccountAddress,
-          amount,
+          amount: amount.toFixed(),
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           ttl: await aeSdk.getHeight({ cached: true }) + 3,
         }),

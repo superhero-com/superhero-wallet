@@ -1,10 +1,9 @@
-/* global describe, it, jest */
-import { expect } from '@jest/globals';
+/* global describe, it */
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
 import { PROTOCOLS } from '@/constants';
 
 // Default mocks at module level to avoid redefining properties via spyOn
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAccounts: () => ({
     getAccountByProtocolAndAddress: (addr: string) => ({
       address: addr,
@@ -14,7 +13,7 @@ jest.mock('@/composables', () => ({
   }),
 }));
 
-jest.mock('@/composables/networks', () => ({
+vi.mock('@/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: { value: { protocols: { solana: { nodeUrl: 'http://localhost', explorerUrl: '' } } } },
   }),
@@ -24,10 +23,10 @@ describe('SolanaAdapter - spend flow', () => {
   it('constructs and sends a transaction, returning a signature', async () => {
     const adapter = new SolanaAdapter();
     // Avoid hitting real web3: stub instance methods
-    jest.spyOn(adapter as any, 'constructAndSignTx').mockResolvedValue({
+    vi.spyOn(adapter as any, 'constructAndSignTx').mockResolvedValue({
       serialize: () => new Uint8Array([1, 2, 3]),
     } as any);
-    jest.spyOn(adapter as any, 'getConnection').mockReturnValue({
+    vi.spyOn(adapter as any, 'getConnection').mockReturnValue({
       sendRawTransaction: () => Promise.resolve('signature'),
     } as any);
 
@@ -39,13 +38,13 @@ describe('SolanaAdapter - spend flow', () => {
     const adapter = new SolanaAdapter();
     // Temporarily override getAccountByProtocolAndAddress behavior
     // eslint-disable-next-line global-require
-    const original = require('@/composables').useAccounts;
+    const original = (await import('@/composables')).useAccounts;
     // eslint-disable-next-line global-require
-    (require('@/composables') as any).useAccounts = () => ({
+    ((await import('@/composables')) as any).useAccounts = () => ({
       getAccountByProtocolAndAddress: () => ({ protocol: 'not-solana' }),
     });
     await expect(adapter.constructAndSignTx(1, 'R', { fromAccount: 'S' } as any)).rejects.toThrow();
     // eslint-disable-next-line global-require
-    (require('@/composables') as any).useAccounts = original;
+    ((await import('@/composables')) as any).useAccounts = original;
   });
 });

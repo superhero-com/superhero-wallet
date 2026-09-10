@@ -1,5 +1,5 @@
 import { validateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 import type { Migration } from '@/types';
 import { collectVuexState } from './migrationHelpers';
 

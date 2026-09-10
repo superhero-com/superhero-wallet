@@ -134,6 +134,8 @@ export default defineComponent({
 
   .container {
     position: relative;
+    flex-shrink: 1;
+    min-width: 0;
     overflow: hidden;
     white-space: nowrap;
 
@@ -174,6 +176,8 @@ export default defineComponent({
   }
 
   .domain {
+    flex-shrink: 0;
+    white-space: nowrap;
     word-break: keep-all;
   }
 

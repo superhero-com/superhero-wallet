@@ -45,10 +45,13 @@ export function useCoinMaxAmount({ formModel, fee }: CoinMaxAmountOptions) {
       const maxAmount = balance.value
         .minus(fee.value)
         .dividedBy(formModel.value.addresses?.length || 1)
-        .decimalPlaces(formModel.value.selectedAsset?.decimals!);
+        .decimalPlaces(formModel.value.selectedAsset?.decimals!, BigNumber.ROUND_DOWN);
       return (maxAmount.isPositive() ? maxAmount : 0).toString();
     }
-    return selectedTokenBalance.value.toString();
+    return selectedTokenBalance.value
+      .dividedBy(formModel.value.addresses?.length || 1)
+      .decimalPlaces(formModel.value.selectedAsset?.decimals ?? 0, BigNumber.ROUND_DOWN)
+      .toString();
   });
 
   return { max };

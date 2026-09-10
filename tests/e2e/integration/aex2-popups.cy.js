@@ -50,14 +50,19 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.openAex2Popup(POPUP_TYPE_RAW_SIGN)
       .get('[data-cy=warning]')
       .should('be.visible')
-      .get('[data-cy=popup-aex2] > .container')
-      .scrollTo('bottom')
-      .get('[data-cy=data]')
-      .should('be.visible')
-      .should('contain', props2.txBase64)
+      // The account switcher can push `data` (and, once the modal is scrolled
+      // to it, `sender` above) further apart than fits in the viewport, so
+      // `sender` is checked before scrolling down to `data` rather than after.
       .get('[data-cy=sender]')
       .should('be.visible')
-      .should('contain', props2.app.host);
+      .should('contain', props2.app.host)
+      .get('[data-cy=popup-aex2] > .container')
+      // Cypress 15 errors when scrollTo targets a non-scrollable element;
+      // ensureScrollable:false restores the lenient pre-15 no-op behavior.
+      .scrollTo('bottom', { ensureScrollable: false })
+      .get('[data-cy=data]')
+      .should('be.visible')
+      .should('contain', props2.txBase64);
 
     const props3 = STUB_POPUP_PROPS[POPUP_TYPE_ACCOUNT_LIST];
     cy.openAex2Popup(POPUP_TYPE_ACCOUNT_LIST)

@@ -146,7 +146,7 @@ export default defineComponent({
     user-select: none;
 
     &-total {
-      word-break: break-word;
+      overflow-wrap: anywhere;
 
       .focused & {
         color: rgba($color-white, 0.75);

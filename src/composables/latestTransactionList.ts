@@ -184,6 +184,10 @@ export function useLatestTransactionList() {
      * To avoid unnecessary data transfers, instead of polling data at intervals,
      * we only load account transactions when the account balance changes.
      */
+    // `balances`/`tokenBalances` are always reassigned wholesale (never
+    // mutated in place, verified repo-wide), so a shallow watch already
+    // fires on every change -- `deep: true` was only adding an O(n) traversal
+    // (including each BigNumber's internals) on every 8s/30s poll tick.
     watch(
       balances,
       (newBalances, oldBalances) => {
@@ -198,7 +202,6 @@ export function useLatestTransactionList() {
           }
         });
       },
-      { deep: true },
     );
 
     watch(
@@ -214,7 +217,6 @@ export function useLatestTransactionList() {
           }
         });
       },
-      { deep: true },
     );
 
     /**

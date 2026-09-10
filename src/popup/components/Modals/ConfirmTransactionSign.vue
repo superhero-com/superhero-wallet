@@ -21,6 +21,27 @@
         :action="$t('unknownDapp.confirmTransactionAction')"
         :warning="$t('unknownDapp.confirmTransactionWarning')"
       />
+
+      <SignAccountSelect
+        v-if="isSignerChangeable"
+        :account="selectedAccount"
+        :protocol="protocol"
+        :label="$t('modals.signAccountSelect.label')"
+        :original-address="originalSignerAddress"
+        :signer-account-missing="isSignerAccountMissing"
+        class="sign-account-select"
+        @select="selectedAccount = $event"
+      />
+
+      <CheckBox
+        v-if="isSignerReplaceable"
+        v-model="rebuildForSelectedAccount"
+        class="rebuild-for-signer"
+        data-cy="rebuild-for-signer"
+      >
+        {{ $t('modals.signAccountSelect.rebuildForSelectedAccount') }}
+      </CheckBox>
+
       <div
         v-if="appName || error"
         class="subtitle"
@@ -207,7 +228,7 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="!!error || verifying || loading"
+        :disabled="!!error || verifying || loading || !canSignWithSelectedAccount"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
@@ -223,15 +244,16 @@ import {
   onMounted,
   onUnmounted,
   ref,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import {
-  buildTx,
   decode,
   Encoded,
   getExecutionCost,
   getTransactionSignerAddress,
+  rebuildUnpackedTx,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -239,6 +261,8 @@ import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternit
 
 import JsonBig from '@/lib/json-big';
 import type {
+  IAccount,
+  ISignModalResolution,
   ITokenResolved,
   ITransaction,
   ITx,
@@ -275,8 +299,11 @@ import {
 import { AE_SYMBOL, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
+  canRebuildTransactionForSigner,
+  fetchAccountNextNonce,
   getAeFee,
   getTransactionTokenInfoResolver,
+  rebuildTransactionForSigner,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { decodeTxData } from '@/protocols/ethereum/helpers';
@@ -294,6 +321,8 @@ import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import TransactionCallDataDetails from '../TransactionCallDataDetails.vue';
 import NoOriginWarning from '../NoOriginWarning.vue';
+import SignAccountSelect from '../SignAccountSelect.vue';
+import CheckBox from '../CheckBox.vue';
 
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?vue-component';
 
@@ -326,6 +355,8 @@ export default defineComponent({
     TransactionDetailsPoolTokenRow,
     TransactionCallDataDetails,
     NoOriginWarning,
+    SignAccountSelect,
+    CheckBox,
     AnimatedSpinner,
   },
   setup() {
@@ -333,7 +364,11 @@ export default defineComponent({
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk();
-    const { getLastActiveProtocolAccount } = useAccounts();
+    const {
+      getLastActiveProtocolAccount,
+      getAccountByProtocolAndAddress,
+      setActiveAccountByAddressAndProtocol,
+    } = useAccounts();
     const { isUnknownDapp, popupProps, setPopupProps } = usePopupProps();
     const {
       loadSingleToken,
@@ -349,6 +384,107 @@ export default defineComponent({
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const activeAccount = getLastActiveProtocolAccount(protocol);
+
+    /**
+     * Address the transaction was built for. The sender is baked into the
+     * transaction, so this is the only account whose signature the node will
+     * accept - it is not necessarily the currently active account. A dapp may
+     * well have prepared the transaction (e.g. via a deep link) while a
+     * different account was active, or the user may have switched accounts in
+     * the meantime.
+     */
+    const originalSignerAddress = computed((): string | undefined => {
+      try {
+        if (popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity) {
+          return getTransactionSignerAddress(popupProps.value.txBase64);
+        }
+      } catch {
+        // Fall through to the best-effort values below.
+      }
+      return (
+        popupProps.value?.fromAccount
+        || (popupProps.value?.tx?.senderId as string | undefined)
+        || activeAccount?.address
+      );
+    });
+
+    /** The wallet account the transaction was built for, when we hold it. */
+    const originalSignerAccount = computed((): IAccount | undefined => (
+      originalSignerAddress.value
+        ? getAccountByProtocolAndAddress(protocol, originalSignerAddress.value)
+        : undefined
+    ));
+
+    /**
+     * Default to the account the transaction was built for rather than the
+     * active one, so that signing succeeds even when the user switched accounts
+     * after the dapp prepared the transaction.
+     */
+    const selectedAccount = ref<IAccount | undefined>(
+      originalSignerAccount.value ?? activeAccount,
+    );
+
+    /** The transaction was built for an account we do not hold. */
+    const isSignerAccountMissing = computed(() => !originalSignerAccount.value);
+
+    const rebuildForSelectedAccount = ref(false);
+
+    /**
+     * Whether the user can be offered a choice of signing account at all.
+     *
+     * The sender is part of the transaction, so honouring a different choice
+     * means re-pointing the transaction at it. Where the wallet cannot do that
+     * the signer is fixed, and offering a choice would strand the user on a
+     * Confirm button that never enables: on the EVM protocols the dapp's
+     * prepared transaction is signed as-is by its `senderId`, and some
+     * aeternity transactions (an oracle's, or an already signed one) name a
+     * signer that cannot be swapped either.
+     */
+    const isSignerChangeable = computed(() => (
+      protocol === PROTOCOLS.aeternity
+      && !!popupProps.value?.txBase64
+      && canRebuildTransactionForSigner(popupProps.value.txBase64 as Encoded.Transaction)
+    ));
+
+    /** The user picked an account other than the one the transaction was built for. */
+    const isSigningWithOtherAccount = computed(() => (
+      !!selectedAccount.value?.address
+      && !!originalSignerAddress.value
+      && selectedAccount.value.address !== originalSignerAddress.value
+    ));
+
+    /** The transaction has to be re-pointed before the selected account can sign it. */
+    const isSignerReplaceable = computed(() => (
+      isSignerChangeable.value && isSigningWithOtherAccount.value
+    ));
+
+    /**
+     * Signing with an account the transaction was not built for only produces a
+     * usable signature once the user opts into rebuilding it for that account -
+     * except for a co-sign payload whose signer this wallet does not hold and
+     * cannot re-point (an already-signed or generalized-account tx), which is
+     * signed as-is exactly as v2.10.2 did rather than stranding the user on a
+     * Confirm button that never enables.
+     */
+    const canSignWithSelectedAccount = computed(() => (
+      !isSigningWithOtherAccount.value
+      || (isSignerAccountMissing.value && !isSignerChangeable.value)
+      || (isSignerReplaceable.value && rebuildForSelectedAccount.value)
+    ));
+
+    /**
+     * The account whose balance actually funds the transaction: the selected one
+     * when the user opts into rebuilding for it, otherwise the account the
+     * transaction was built for. Verification has to follow this, not the
+     * mount-time account, or switching to a funded account would leave Confirm
+     * disabled on a stale check (and vice versa).
+     */
+    const effectiveSignerAddress = computed((): string | undefined => (
+      (isSignerReplaceable.value && rebuildForSelectedAccount.value)
+        ? selectedAccount.value?.address
+        : (popupProps.value?.fromAccount || originalSignerAddress.value)
+    ));
+
     const transaction = ref<ITransaction>({
       protocol,
       tx: popupProps.value?.tx || {},
@@ -523,11 +659,42 @@ export default defineComponent({
       }
     }
 
+    /**
+     * The transaction the selected account is actually being asked to sign.
+     *
+     * `AeAccountHdWallet` rebuilds it for the chosen signer on the way to the
+     * key, but the Air Gap device signs whatever this modal hands it, so it has
+     * to be given the rebuilt transaction rather than the one the dapp prepared.
+     */
+    async function getTransactionToSign(): Promise<Encoded.Transaction | undefined> {
+      const txBase64 = popupProps.value?.txBase64 as Encoded.Transaction | undefined;
+      if (
+        !txBase64
+        || !rebuildForSelectedAccount.value
+        || !isSignerReplaceable.value
+        || !selectedAccount.value?.address
+      ) {
+        return txBase64;
+      }
+      const aeSdk = await getAeSdk();
+      return rebuildTransactionForSigner(
+        txBase64,
+        selectedAccount.value.address as Encoded.AccountAddress,
+        (address) => fetchAccountNextNonce(aeSdk.api, address),
+      );
+    }
+
     async function confirm() {
-      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.airGap) {
+      if (selectedAccount.value) {
+        setActiveAccountByAddressAndProtocol(
+          selectedAccount.value.address!,
+          selectedAccount.value.protocol,
+        );
+      }
+      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
         const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
           MODAL_SIGN_AIR_GAP_TRANSACTION,
-          { txRaw: popupProps.value?.txBase64 },
+          { txRaw: await getTransactionToSign() },
         );
         if (signedTransaction) {
           browser.runtime.sendMessage({
@@ -537,10 +704,19 @@ export default defineComponent({
           });
         }
       }
-      if (RUNNING_IN_POPUP && activeAccount?.type === ACCOUNT_TYPES.ledger) {
+      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
         await openModal(MODAL_LEDGER_SIGN);
       }
-      popupProps.value?.resolve();
+      // Carried on the same round trip `checkOrAskPermission` already awaits, so
+      // the signer (which may run in a different browser context, e.g. the
+      // offscreen tab behind a real popup window) has the user's choice the
+      // instant it resumes - not whenever the active-account storage sync
+      // happens to catch up, which is not guaranteed to be before then.
+      const modalResolution: ISignModalResolution = {
+        selectedAddress: selectedAccount.value?.address,
+        rebuildForSelectedAccount: rebuildForSelectedAccount.value,
+      };
+      popupProps.value?.resolve(modalResolution);
     }
 
     function cancel() {
@@ -548,55 +724,96 @@ export default defineComponent({
     }
 
     /**
-     * Verifies aeternity transactions
+     * Verifies aeternity transactions.
+     *
+     * Re-runnable: the user can switch signing account after mount, so each call
+     * clears the previous result and re-checks against `effectiveSignerAddress`.
+     * A monotonic id makes a superseded run (an older account still resolving when
+     * a newer switch fires) drop its result instead of clobbering the current one.
      */
+    let verifyRunId = 0;
     async function verifyTransaction() {
-      if (popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity) {
-        try {
-          verifying.value = true;
-          const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(
-            (popupProps.value?.fromAccount || activeAccount!.address) as Encoded.AccountAddress,
-          )
+      if (!(popupProps.value?.txBase64 && protocol === PROTOCOLS.aeternity)) {
+        return;
+      }
+      verifyRunId += 1;
+      const runId = verifyRunId;
+      try {
+        verifying.value = true;
+        // Drop any result from a previous account/rebuild selection.
+        error.value = '';
+        dappBalanceError.value = false;
+        const sdk = await getAeSdk();
+        const signerAddress = (
+          effectiveSignerAddress.value || activeAccount!.address
+        ) as Encoded.AccountAddress;
+        const balance = await sdk.getBalance(signerAddress)
+          .catch((err) => {
+            if (!isNotFoundError(err)) {
+              handleUnknownError(err);
+            }
+            return 0;
+          });
+        if (runId !== verifyRunId) {
+          return;
+        }
+        // We've chosen the approach to trust the aepp itself in amount of gas,
+        // they think is needed
+        const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
+        executionCost.value = getAeFee(executionCostAettos);
+
+        if (new BigNumber(balance).isLessThan(executionCostAettos)) {
+          if (protocol === PROTOCOLS.aeternity && outerTxTag.value === Tag.ContractCallTx) {
+            dappBalanceError.value = true;
+          } else {
+            error.value = t('validation.enoughCoin');
+            return;
+          }
+        }
+        // Verify what will actually be signed, re-pointed if the user opted in.
+        const txToVerify = (await getTransactionToSign()) ?? popupProps.value.txBase64;
+        if (runId !== verifyRunId) {
+          return;
+        }
+        const txParams = unpackTx(txToVerify);
+        if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
+          const dryRunAddress = getTransactionSignerAddress(txToVerify);
+          // Dry-run wants chain-nonce continuity, not the mempool-aware next nonce -
+          // that overshoots once a tx is pending (`tx_nonce_too_high_for_account`).
+          const { nonce } = await sdk.api.getAccountByPubkey(dryRunAddress)
             .catch((err) => {
               if (!isNotFoundError(err)) {
-                handleUnknownError(err);
+                throw err;
               }
-              return 0;
+              return { nonce: 0 };
             });
-          // We've chosen the approach to trust the aepp itself in amount of gas,
-          // they think is needed
-          const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
-          executionCost.value = getAeFee(executionCostAettos);
-
-          if (new BigNumber(balance).isLessThan(executionCostAettos)) {
-            if (protocol === PROTOCOLS.aeternity && outerTxTag.value === Tag.ContractCallTx) {
-              dappBalanceError.value = true;
-            } else {
-              error.value = t('validation.enoughCoin');
-              return;
-            }
+          if (runId !== verifyRunId) {
+            return;
           }
-          const txParams = unpackTx(popupProps.value.txBase64);
-          if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
-            const accountAddress = getTransactionSignerAddress(popupProps.value.txBase64);
-            txParams.nonce = (await sdk.api.getAccountByPubkey(accountAddress)).nonce + 1;
-            const dryRunResult = await sdk.txDryRun(buildTx(txParams), accountAddress);
-            gasPrice.value = dryRunResult.callObj?.gasPrice
-              ? +dryRunResult.callObj.gasPrice.toString()
-              : 0;
-            if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
-              error.value = new ContractByteArrayEncoder().decode(
-                dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
-              );
-            }
+          txParams.nonce = nonce + 1;
+          // Dry-running the transaction as it is, with only the nonce swapped - re-pricing it
+          // here would both change what is verified and fail on a network whose minimum gas
+          // price is below the one of the SDK release.
+          const dryRunResult = await sdk.txDryRun(rebuildUnpackedTx(txParams), dryRunAddress);
+          if (runId !== verifyRunId) {
+            return;
           }
-        } catch (e: any) {
-          if (!isNotFoundError(e)) {
-            handleUnknownError(e);
-            error.value = e.message;
+          gasPrice.value = dryRunResult.callObj?.gasPrice
+            ? +dryRunResult.callObj.gasPrice.toString()
+            : 0;
+          if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
+            error.value = new ContractByteArrayEncoder().decode(
+              dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
+            );
           }
-        } finally {
+        }
+      } catch (e: any) {
+        if (runId === verifyRunId && !isNotFoundError(e)) {
+          handleUnknownError(e);
+          error.value = e.message;
+        }
+      } finally {
+        if (runId === verifyRunId) {
           verifying.value = false;
         }
       }
@@ -686,6 +903,13 @@ export default defineComponent({
       activeTab.value = tabName;
     }
 
+    // Re-verify whenever the account that will actually sign changes, so the
+    // balance/dry-run check reflects the current selection instead of the
+    // mount-time account.
+    watch(effectiveSignerAddress, () => {
+      verifyTransaction();
+    });
+
     onMounted(async () => {
       if (popupProps.value) {
         await loadContractInfo(popupProps.value?.tx?.contractId);
@@ -739,6 +963,13 @@ export default defineComponent({
       nameAeFee,
       popupProps,
       protocol,
+      selectedAccount,
+      originalSignerAddress,
+      isSignerAccountMissing,
+      isSignerChangeable,
+      isSignerReplaceable,
+      rebuildForSelectedAccount,
+      canSignWithSelectedAccount,
       singleToken,
       swapDirectionTranslation,
       swapTokenAmount,
@@ -786,6 +1017,12 @@ export default defineComponent({
 
   .transaction-overview {
     margin-bottom: 16px;
+  }
+
+  .rebuild-for-signer {
+    @extend %face-sans-15-medium;
+
+    margin-top: 8px;
   }
 
   .reason:deep() {

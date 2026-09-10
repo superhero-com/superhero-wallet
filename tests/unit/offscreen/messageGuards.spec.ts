@@ -1,15 +1,15 @@
 // @ts-nocheck
 describe('offscreen message guards', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     (global as any).browser = {
       runtime: { id: 'test-extension-id' },
     };
-    jest.resetModules();
+    vi.resetModules();
   });
 
-  it('accepts only offscreen-targeted messages from this extension', () => {
+  it('accepts only offscreen-targeted messages from this extension', async () => {
     // eslint-disable-next-line global-require
-    const { isAcceptedOffscreenSender } = require('@/offscreen/messageGuards');
+    const { isAcceptedOffscreenSender } = (await import('@/offscreen/messageGuards'));
 
     expect(isAcceptedOffscreenSender(
       { target: 'offscreen', method: 'eth_sendTransaction' },
@@ -23,9 +23,9 @@ describe('offscreen message guards', () => {
     ['sender without id', { target: 'offscreen' }, {}],
     ['wrong target', { target: 'background' }, { id: 'test-extension-id' }],
     ['missing message', undefined, { id: 'test-extension-id' }],
-  ])('rejects %s', (_label, msg, sender) => {
+  ])('rejects %s', async (_label, msg, sender) => {
     // eslint-disable-next-line global-require
-    const { isAcceptedOffscreenSender } = require('@/offscreen/messageGuards');
+    const { isAcceptedOffscreenSender } = (await import('@/offscreen/messageGuards'));
 
     expect(isAcceptedOffscreenSender(msg, sender)).toBe(false);
   });

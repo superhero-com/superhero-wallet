@@ -1,39 +1,39 @@
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { ref as mockRef } from 'vue';
 
-const mockGenerateEncryptionKey = jest.fn(async () => 'derived-key');
-const mockDecrypt = jest.fn(async () => 'decrypted mnemonic');
-const mockOpenBiometricLoginModal = jest.fn();
-const mockOpenConfirmModal = jest.fn();
+const mockGenerateEncryptionKey = vi.fn(async () => 'derived-key');
+const mockDecrypt = vi.fn(async () => 'decrypted mnemonic');
+const mockOpenBiometricLoginModal = vi.fn();
+const mockOpenConfirmModal = vi.fn();
 
-jest.mock('@/constants', () => ({
-  ...jest.requireActual('@/constants'),
+vi.mock('@/constants', async () => ({
+  ...(await vi.importActual('@/constants')),
   IS_MOBILE_APP: false,
 }));
 
-jest.mock('@/utils', () => ({
+vi.mock('@/utils', () => ({
   generateEncryptionKey: mockGenerateEncryptionKey,
   decrypt: mockDecrypt,
 }));
 
-jest.mock('vue-i18n', () => ({
+vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key) => key,
   }),
 }));
 
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAccounts: () => ({
     activeAccount: mockRef({ secretKey: 'abc123' }),
   }),
   useAuth: () => ({
-    checkBiometricLoginAvailability: jest.fn(),
+    checkBiometricLoginAvailability: vi.fn(),
     encryptionSalt: mockRef('salt'),
     mnemonicEncrypted: mockRef('ciphertext'),
     isUsingDefaultPassword: mockRef(false),
   }),
   useCopy: () => ({
-    copy: jest.fn(),
+    copy: vi.fn(),
     copied: mockRef(false),
   }),
   useModals: () => ({
@@ -46,7 +46,7 @@ jest.mock('@/composables', () => ({
 }));
 
 describe('PrivateKeyExport', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockGenerateEncryptionKey.mockClear();
     mockDecrypt.mockClear();
     mockOpenBiometricLoginModal.mockReset();
@@ -55,10 +55,10 @@ describe('PrivateKeyExport', () => {
 
   it('uses password re-auth on mobile web instead of falling back to confirm-only', async () => {
     // eslint-disable-next-line global-require
-    const PrivateKeyExport = require('../../../../../src/popup/components/Modals/PrivateKeyExport.vue').default;
+    const PrivateKeyExport = (await import('../../../../../src/popup/components/Modals/PrivateKeyExport.vue')).default;
     const wrapper = shallowMount(PrivateKeyExport, {
       props: {
-        resolve: jest.fn(),
+        resolve: vi.fn(),
       },
     });
 

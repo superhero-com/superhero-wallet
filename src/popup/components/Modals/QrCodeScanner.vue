@@ -62,7 +62,7 @@
           ref="qrCodeVideoEl"
           class="video"
         >
-          <track kind="captions" title="Scanning Qr Code" />
+          <track kind="captions" :title="$t('modals.qrCodeReader.scanningVideoTitle')" />
         </video>
       </div>
     </div>

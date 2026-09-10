@@ -1,7 +1,16 @@
 ext {
-    minSdkVersion = 23
-    compileSdkVersion = 35
-    targetSdkVersion = 35
+    // minSdk 24 (Android 7.0) is required by @capacitor/camera 8.2's native
+    // dependency io.ionic.libs:ioncamera-android. Drops Android 6.0 (API 23).
+    minSdkVersion = 24
+    // compileSdk 36 is required by androidx.core 1.17.0 (pulled in transitively
+    // by Capacitor 8.4). AGP 8.11.2 (see build.gradle) supports compileSdk 36, so
+    // no Gradle/AGP upgrade is needed.
+    compileSdkVersion = 36
+    // targetSdk 36 (Android 16) is required by Google Play. The one behavior
+    // change that affects this app is that fixed orientation is ignored on large
+    // screens; AndroidManifest.xml opts out of that with
+    // PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY.
+    targetSdkVersion = 36
     androidxActivityVersion = '1.8.0'
     androidxAppCompatVersion = '1.6.1'
     androidxCoordinatorLayoutVersion = '1.2.0'

@@ -9,7 +9,7 @@ import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
-  buildTx, Encoded, Tag, unpackTx,
+  Encoded, rebuildUnpackedTx, Tag, unpackTx,
 } from '@aeternity/aepp-sdk';
 
 import { DEFAULT_WAITING_HEIGHT, PROTOCOLS } from '@/constants';
@@ -22,6 +22,7 @@ import {
   useUi,
   useAccounts,
 } from '@/composables';
+import { fetchAccountNextNonce } from '@/protocols/aeternity/helpers';
 import Logger from '@/lib/logger';
 
 export default defineComponent({
@@ -51,10 +52,13 @@ export default defineComponent({
 
         if (unpackedTx.tag === Tag.ContractCallTx || unpackedTx.tag === Tag.ContractCreateTx) {
           unpackedTx.callerId = callerId;
-          unpackedTx.nonce = (await aeSdk.api.getAccountByPubkey(callerId)).nonce + 1;
+          unpackedTx.nonce = await fetchAccountNextNonce(aeSdk.api, callerId);
         }
 
-        return buildTx(unpackedTx);
+        // Serialized back as it came in - only the caller and nonce above change. `buildTx`
+        // would re-price it against the parameters of the SDK release and reject a transaction
+        // built for a network running a lower minimum gas price.
+        return rebuildUnpackedTx(unpackedTx);
       }
 
       try {

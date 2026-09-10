@@ -2,7 +2,7 @@ import { ProtocolAdapterFactory } from '../../../../../src/lib/ProtocolAdapterFa
 import { PROTOCOLS } from '../../../../../src/constants';
 import { BnbAdapter } from '../../../../../src/protocols/bnb/libs/BnbAdapter';
 
-jest.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
+vi.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: { value: { nodeUrl: 'https://bsc.rpc', chainId: '56', explorerUrl: 'https://bscscan.com' } },
     bnbActiveNetworkPredefinedSettings: {
@@ -14,12 +14,12 @@ jest.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () 
 }));
 
 // consolidated web3-eth mock with instance methods and exported fns
-jest.mock('web3-eth', () => {
-  const sendSignedTransaction = jest.fn();
-  const getBalance = jest.fn();
-  const getTransaction = jest.fn();
-  const getBlock = jest.fn();
-  const getTransactionReceipt = jest.fn();
+vi.mock('web3-eth', () => {
+  const sendSignedTransaction = vi.fn();
+  const getBalance = vi.fn();
+  const getTransaction = vi.fn();
+  const getBlock = vi.fn();
+  const getTransactionReceipt = vi.fn();
   const impl = function Web3Eth() {
     return {
       getGasPrice: async () => '2000000000',
@@ -39,7 +39,7 @@ jest.mock('web3-eth', () => {
   };
 });
 
-jest.mock('web3-eth-accounts', () => ({
+vi.mock('web3-eth-accounts', () => ({
   privateKeyToAddress: () => '0x0000000000000000000000000000000000000001',
   bigIntToHex: (n) => `0x${BigInt(n).toString(16)}`,
   privateKeyToPublicKey: () => new Uint8Array(33),
@@ -47,25 +47,25 @@ jest.mock('web3-eth-accounts', () => ({
   Common: { custom: () => ({}) },
 }));
 
-jest.mock('../../../../../src/composables', () => ({
+vi.mock('../../../../../src/composables', () => ({
   useAccounts: () => ({
     getAccountByProtocolAndAddress: () => ({ protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
   }),
 }));
 
 // ensure alias path is also mocked when code resolves via '@/composables'
-jest.mock('@/composables', () => ({
+vi.mock('@/composables', () => ({
   useAccounts: () => ({
     getAccountByProtocolAndAddress: () => ({ protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
   }),
 }), { virtual: true });
 
-jest.mock('../../../../../src/protocols/ethereum/composables/ethFeeCalculation', () => ({
-  useEthFeeCalculation: () => ({ updateFeeList: jest.fn() }),
+vi.mock('../../../../../src/protocols/ethereum/composables/ethFeeCalculation', () => ({
+  useEthFeeCalculation: () => ({ updateFeeList: vi.fn() }),
 }));
 
-jest.mock('web3-types', () => ({ DEFAULT_RETURN_FORMAT: 'json' }));
-jest.mock('web3-utils', () => ({
+vi.mock('web3-types', () => ({ DEFAULT_RETURN_FORMAT: 'json' }));
+vi.mock('web3-utils', () => ({
   toChecksumAddress: (a) => a,
   fromWei: (v) => v,
   toWei: (v) => v,

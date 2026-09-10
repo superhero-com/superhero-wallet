@@ -70,7 +70,7 @@
       <iframe
         v-else
         ref="iframeEl"
-        title="selectedApp"
+        :title="$t('pages.appsBrowser.iframeTitle')"
         class="apps-browser-iframe"
         :src="selectedApp.url"
         @load="onAppLoaded()"
@@ -264,18 +264,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
-@use '@/styles/mixins';
 
 .apps-browser {
   height: 100%;
 
   &.app-selected {
-    height: 100vh;
+    // Fill the content area exactly. Using viewport/extension height here would
+    // exceed it by the fixed header's height and make the whole page scrollable.
+    height: 100%;
     overflow: hidden;
-
-    @include mixins.desktop {
-      height: $extension-height;
-    }
   }
 
   .input-url {
@@ -291,7 +288,7 @@ export default defineComponent({
   .apps-browser-list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 8px;
+    gap: 8px;
     align-items: flex-start;
     padding-top: 8px;
   }

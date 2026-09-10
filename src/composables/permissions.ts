@@ -1,5 +1,6 @@
 import { METHODS } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 
 import type {
   IAppData,
@@ -126,13 +127,16 @@ export function usePermissions() {
       resetTransactionSignSpent(host);
     }
 
-    const totalCost = +aettosToAe(+amount + +fee + +nameFee);
-    const currentAmountSpent = (permissions.value[host].transactionSignSpent || 0) + totalCost;
-    if (currentAmountSpent > transactionSignLimit) {
+    const totalCost = new BigNumber(aettosToAe(
+      new BigNumber(amount).plus(fee).plus(nameFee),
+    ));
+    const currentAmountSpent = new BigNumber(permissions.value[host].transactionSignSpent || 0)
+      .plus(totalCost);
+    if (currentAmountSpent.isGreaterThan(transactionSignLimit)) {
       return false; // Transaction is out of the limit
     }
 
-    permissions.value[host].transactionSignSpent = currentAmountSpent;
+    permissions.value[host].transactionSignSpent = currentAmountSpent.toNumber();
     return true;
   }
 
@@ -163,8 +167,16 @@ export function usePermissions() {
   async function checkOrAskPermission(
     method: METHODS,
     fullUrl?: string,
-    modalProps: IModalProps = {},
+    modalPropsArg?: IModalProps,
+    /**
+     * Called with whatever the modal/popup resolves with - but only when a
+     * modal was actually shown. Never called on the standing-permission fast
+     * path below, where nothing is shown and nothing was chosen, so callers
+     * can use "was this called" to tell the two cases apart.
+     */
+    onModalResolved?: (payload: any) => void,
   ): Promise<boolean> {
+    const modalProps = modalPropsArg || {};
     let app: IAppData | undefined;
     let props = getCleanModalOptions<typeof modalProps>(modalProps);
     const { activeAccount } = useAccounts();
@@ -225,11 +237,12 @@ export function usePermissions() {
         } as any;
       }
 
-      await (
+      const resolvedWith = await (
         (IS_OFFSCREEN_TAB)
           ? openPopup(popup, app?.href, props)
           : openModal(modal, props)
       );
+      onModalResolved?.(resolvedWith);
       return true;
     } catch {
       return false;

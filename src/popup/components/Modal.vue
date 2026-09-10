@@ -217,7 +217,7 @@ export default defineComponent({
       font-size: 19px;
       line-height: 24px;
       font-weight: 500;
-      word-break: break-word;
+      overflow-wrap: anywhere;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -242,7 +242,7 @@ export default defineComponent({
       flex-direction: column;
       padding: var(--screen-padding-x);
       color: $color-grey-light;
-      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .close-button {

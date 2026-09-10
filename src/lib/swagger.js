@@ -1,4 +1,3 @@
-import SwaggerClient from 'swagger-client';
 import JsonBig from './json-big';
 
 // TODO: remove this file in favor of aeSdk 13's built-in way of wrapping middleware calls
@@ -51,6 +50,7 @@ export async function genSwaggerClient(
   } = {},
 ) {
   const jsonImp = disableBigNumbers ? JSON : JsonBig;
+  const { default: SwaggerClient } = await import('swagger-client');
 
   const [external, internal] = await Promise.all([specUrl, internalUrl].map((url) => {
     if (!url) return null;

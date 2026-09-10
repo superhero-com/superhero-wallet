@@ -1,5 +1,24 @@
+import { createApp, ref } from 'vue';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { STUB_ACCOUNT, STUB_CONTRACT_ADDRESS, STUB_TOKEN_CONTRACT_ADDRESS } from '@/constants/stubs';
+
+/**
+ * `useTransferSendForm` registers an `onMounted` hook (route-query watches) at its top
+ * level, so it needs a real component instance to attach to - calling it bare would warn
+ * "onMounted is called when there is no active component instance". Mounting a throwaway
+ * host component gives it one without pulling in the real router/DOM tree.
+ */
+function withSetup(composable) {
+  let result;
+  const app = createApp({
+    setup() {
+      result = composable();
+      return () => {};
+    },
+  });
+  app.mount(document.createElement('div'));
+  return result;
+}
 
 const testAmount = '11.111';
 const testInvoiceId = '232323123';
@@ -18,30 +37,46 @@ const qrCodeSource = async () => {
   }
 };
 
-jest.mock('vue-i18n', () => ({
-  useI18n: jest.fn(() => ({
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
     t: () => 'locale-specific-text',
   })),
 }));
 
-jest.mock('@/composables/transferSendHandler', () => ({
-  useTransferSendHandler: jest.fn(() => ({
+vi.mock('vue-router', () => ({
+  useRoute: vi.fn(() => ({ query: {} })),
+  useRouter: vi.fn(() => ({ replace: vi.fn() })),
+}));
+
+vi.mock('vee-validate', () => ({
+  useForm: vi.fn(() => ({
+    errors: { value: {} },
+    validate: vi.fn(),
+    validateField: vi.fn(),
+  })),
+}));
+
+vi.mock('@/composables/transferSendHandler', () => ({
+  useTransferSendHandler: vi.fn(() => ({
     save: () => {},
   })),
 }));
 
-jest.mock('@/composables/accountAssetsList', () => ({
-  useAccountAssetsList: jest.fn(() => ({
+vi.mock('@/composables/accountAssetsList', () => ({
+  useAccountAssetsList: vi.fn(() => ({
     accountAssets: { value: [{ contractId: 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8' }] }, // STUB_TOKEN_CONTRACT_ADDRESS
   })),
 }));
 
-jest.mock('@/composables', () => ({
-  useModals: jest.fn(() => ({
+vi.mock('@/composables', () => ({
+  useModals: vi.fn(() => ({
     openScanQrModal: qrCodeSource,
   })),
-  useAccounts: jest.fn(() => ({
+  useAccounts: vi.fn(() => ({
     accounts: [],
+    // Must be a real ref - `transferSendForm`'s onMounted watch uses it as a watch
+    // source, and Vue only accepts refs/reactive objects/getters there.
+    activeAccount: ref({}),
   })),
 }));
 
@@ -62,7 +97,7 @@ describe('scanTransferQrCode', () => {
     invoiceId,
     invoiceContract,
     scanTransferQrCode,
-  } = useTransferSendForm({ transferData, getSelectedAssetValue });
+  } = withSetup(() => useTransferSendForm({ transferData, getSelectedAssetValue }));
 
   it('parses address qr code', async () => {
     await scanTransferQrCode();

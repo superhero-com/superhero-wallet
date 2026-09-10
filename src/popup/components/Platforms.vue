@@ -11,14 +11,14 @@
         <img
           :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/app-store-mobile.svg"
-          alt="App Store"
+          :alt="$t('common.altAppStore')"
         >
       </LinkButton>
       <LinkButton :href="APP_LINK_ANDROID">
         <img
           :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/google-play-mobile.svg"
-          alt="Google Play"
+          :alt="$t('common.altGooglePlay')"
         >
       </LinkButton>
     </div>
@@ -34,14 +34,14 @@
           <PlatformIcon
             :href="APP_LINK_FIREFOX"
             :disabled="!IS_FIREFOX || IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/firefox.svg')"
-            alt="Firefox"
+            :src="firefoxIcon"
+            :alt="$t('common.altFirefox')"
           />
           <PlatformIcon
             :href="APP_LINK_CHROME"
             :disabled="IS_FIREFOX || IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/chrome.svg')"
-            alt="Chrome"
+            :src="chromeIcon"
+            :alt="$t('common.altChrome')"
           />
         </div>
       </div>
@@ -53,14 +53,14 @@
           <PlatformIcon
             :href="APP_LINK_IOS"
             :disabled="!IS_IOS || !IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/app-store.svg')"
-            alt="App Store"
+            :src="appStoreIcon"
+            :alt="$t('common.altAppStore')"
           />
           <PlatformIcon
             :href="APP_LINK_ANDROID"
             :disabled="IS_IOS || !IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/google-play.svg')"
-            alt="Google Play"
+            :src="googlePlayIcon"
+            :alt="$t('common.altGooglePlay')"
           />
         </div>
       </div>
@@ -82,6 +82,10 @@ import {
   IS_MOBILE_DEVICE,
 } from '@/constants';
 import LinkButton from '@/popup/components/LinkButton.vue';
+import firefoxIcon from '../../icons/platforms/firefox.svg';
+import chromeIcon from '../../icons/platforms/chrome.svg';
+import appStoreIcon from '../../icons/platforms/app-store.svg';
+import googlePlayIcon from '../../icons/platforms/google-play.svg';
 import PlatformIcon from './PlatformIcon.vue';
 
 export default {
@@ -94,6 +98,10 @@ export default {
     APP_LINK_FIREFOX,
     APP_LINK_ANDROID,
     APP_LINK_IOS,
+    firefoxIcon,
+    chromeIcon,
+    appStoreIcon,
+    googlePlayIcon,
   }),
 };
 </script>
@@ -108,7 +116,7 @@ export default {
 
   font-size: 15px;
   background-color: var(--screen-bg-color);
-  word-break: break-word;
+  overflow-wrap: anywhere;
 
   .heading {
     @extend %face-sans-16-semi-bold;

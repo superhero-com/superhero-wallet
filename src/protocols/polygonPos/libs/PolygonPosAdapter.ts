@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
 import { Contract } from 'web3-eth-contract';
@@ -20,6 +20,7 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
+import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
@@ -195,7 +196,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     return Number(txCount);
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
@@ -422,23 +423,18 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     contract.setProvider(nodeUrl);
 
     const amountBN = new BigNumber(amount);
-    const hexAmount = bigIntToHex(
-      BigInt(
-        toWei(
-          amountBN.toFixed(Number(await contract.methods.decimals().call())),
-          'ether',
-        ),
-      ),
-    );
+    const tokenDecimals = Number(await contract.methods.decimals().call());
+    const hexAmount = bigIntToHex(toTokenBaseUnits(amountBN, tokenDecimals));
 
     const web3Eth = this.getWeb3EthInstance();
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
-    const [nonce, gasLimit] = await Promise.all([
+    const [nonce, estimatedGas] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas({ from: options.fromAccount }),
     ]);
+    const gasLimit = withGasHeadroom(estimatedGas);
 
     const txData: TxData = {
       nonce,

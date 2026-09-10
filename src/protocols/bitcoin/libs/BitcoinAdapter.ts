@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { BIP32Factory } from 'bip32';
 import {
   payments,
@@ -191,7 +191,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return !!chainFunded;
   }
 
-  override getHdWalletAccountFromMnemonicSeed(
+  protected override deriveHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
@@ -213,6 +213,11 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: child.publicKey,
       address: address!,
     };
+  }
+
+  protected override getHdWalletDerivationCacheKeyExtras(): string[] {
+    const { activeNetwork } = useNetworks();
+    return [activeNetwork.value.type];
   }
 
   override resolveAccountRaw(
@@ -386,7 +391,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
           index: vout,
           witnessUtxo: {
             script: input!.script,
-            value,
+            // bitcoinjs-lib 7 represents satoshi amounts as bigint.
+            value: BigInt(value),
           },
         });
       } else {
@@ -410,14 +416,14 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     // Add recipient output
     psbt.addOutput({
       address: recipient,
-      value: amountInSatoshi,
+      value: BigInt(amountInSatoshi),
     });
 
     // Transfer the rest of the balance back to the senders address
-    if (totalBalance - (amountInSatoshi + feeInSatoshi) > DUST_AMOUNT) {
+    if (totalBalance - (amountInSatoshi + feeInSatoshi) >= DUST_AMOUNT) {
       psbt.addOutput({
         address: options.address,
-        value: totalBalance - amountInSatoshi - feeInSatoshi,
+        value: BigInt(totalBalance - amountInSatoshi - feeInSatoshi),
       });
     }
 

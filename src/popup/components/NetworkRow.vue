@@ -89,10 +89,8 @@ export default defineComponent({
     const networkSettingsToDisplay = computed(
       (): NetworkProtocolsSettings => Object.fromEntries(
         (Object.keys(props.network.protocols) as (keyof typeof props.network.protocols)[])
-          .map((protocol) => {
-            const settings = props.network.protocols[protocol];
-            return settings.nodeUrl ? [protocol, settings] : [];
-          }),
+          .filter((protocol) => props.network.protocols[protocol]?.nodeUrl)
+          .map((protocol) => [protocol, props.network.protocols[protocol]]),
       ),
     );
 

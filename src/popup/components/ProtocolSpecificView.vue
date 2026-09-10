@@ -10,7 +10,7 @@
   <div v-else>
     <InfoBox
       type="danger"
-      text="Missing component name"
+      :text="$t('common.missingComponentName')"
     />
   </div>
 </template>

@@ -14,7 +14,7 @@
         $t('modals.confirmUnsafeSign.title'),
       ]"
       :sender="sender"
-      :recipient="activeAccount"
+      :recipient="selectedAccount"
       :first-label-warning="isUnknownDapp"
     />
 
@@ -34,6 +34,14 @@
         ? $t('modals.confirmUnsafeSign.superheroChatJwtSign')
         : $t('modals.confirmUnsafeSign.heading') }}
     </DetailsItem>
+
+    <SignAccountSelect
+      :account="selectedAccount"
+      :protocol="protocol"
+      :label="$t('modals.signAccountSelect.label')"
+      class="sign-account-select"
+      @select="selectedAccount = $event"
+    />
 
     <span
       v-if="!isAeppChatSuperhero"
@@ -92,6 +100,7 @@ import {
   PROTOCOLS,
   SUPERHERO_CHAT_URLS,
 } from '@/constants';
+import type { IAccount, ISignModalResolution } from '@/types';
 import { fromBase64Url, handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
@@ -102,6 +111,7 @@ import BtnMain from '../buttons/BtnMain.vue';
 import DetailsItem from '../DetailsItem.vue';
 import CopyText from '../CopyText.vue';
 import NoOriginWarning from '../NoOriginWarning.vue';
+import SignAccountSelect from '../SignAccountSelect.vue';
 
 export default defineComponent({
   components: {
@@ -111,6 +121,7 @@ export default defineComponent({
     DetailsItem,
     CopyText,
     NoOriginWarning,
+    SignAccountSelect,
   },
   setup() {
     const {
@@ -119,7 +130,7 @@ export default defineComponent({
       sender,
       setPopupProps,
     } = usePopupProps();
-    const { getLastActiveProtocolAccount } = useAccounts();
+    const { getLastActiveProtocolAccount, setActiveAccountByAddressAndProtocol } = useAccounts();
 
     const isJwt = ref(false);
     const messageToDisplay = ref('');
@@ -144,10 +155,20 @@ export default defineComponent({
         .includes(`${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}`),
     );
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+    const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
+    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
 
     function confirm() {
-      popupProps.value?.resolve();
+      if (selectedAccount.value) {
+        setActiveAccountByAddressAndProtocol(
+          selectedAccount.value.address!,
+          selectedAccount.value.protocol,
+        );
+      }
+      const modalResolution: ISignModalResolution = {
+        selectedAddress: selectedAccount.value?.address,
+      };
+      popupProps.value?.resolve(modalResolution);
     }
 
     function cancel() {
@@ -161,7 +182,8 @@ export default defineComponent({
     return {
       confirm,
       cancel,
-      activeAccount,
+      protocol,
+      selectedAccount,
       isAeppChatSuperhero,
       isJwt,
       isUnknownDapp,

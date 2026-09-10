@@ -1,33 +1,29 @@
-import {
-  describe, expect, it, jest,
-} from '@jest/globals';
-
 const mockConnectionInstances: any[] = [];
-const mockExecuteAndSetInterval = jest.fn((handler: () => void) => {
+const mockExecuteAndSetInterval = vi.fn((handler: () => void) => {
   handler();
   return 1;
 });
 
-jest.mock('@aeternity/aepp-sdk', () => ({
-  BrowserWindowMessageConnection: jest.fn().mockImplementation(function MockConnection(
+vi.mock('@aeternity/aepp-sdk', () => ({
+  BrowserWindowMessageConnection: vi.fn().mockImplementation(function MockConnection(
     this: any,
     options: any,
   ) {
     this.origin = options.origin;
     this.options = options;
-    this.connect = jest.fn();
+    this.connect = vi.fn();
     mockConnectionInstances.push(this);
   }),
 }));
 
-jest.mock('@/utils', () => ({
+vi.mock('@/utils', () => ({
   executeAndSetInterval: mockExecuteAndSetInterval,
-  handleUnknownError: jest.fn(),
+  handleUnknownError: vi.fn(),
 }));
 
 describe('FramesConnection', () => {
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
     mockConnectionInstances.length = 0;
     mockExecuteAndSetInterval.mockClear();
     window.history.replaceState({}, '', '/');
@@ -50,9 +46,9 @@ describe('FramesConnection', () => {
 
     const { FramesConnection } = await import('@/lib/FramesConnection');
     const aeSdk = {
-      addRpcClient: jest.fn(() => 'client-id'),
-      removeRpcClient: jest.fn(),
-      shareWalletInfo: jest.fn(),
+      addRpcClient: vi.fn(() => 'client-id'),
+      removeRpcClient: vi.fn(),
+      shareWalletInfo: vi.fn(),
     };
 
     FramesConnection.init(aeSdk as any);
@@ -76,9 +72,9 @@ describe('FramesConnection', () => {
     const { FramesConnection } = await import('@/lib/FramesConnection');
 
     FramesConnection.init({
-      addRpcClient: jest.fn(() => 'client-id'),
-      removeRpcClient: jest.fn(),
-      shareWalletInfo: jest.fn(),
+      addRpcClient: vi.fn(() => 'client-id'),
+      removeRpcClient: vi.fn(),
+      shareWalletInfo: vi.fn(),
     } as any);
 
     expect(mockConnectionInstances[0].options).toMatchObject({

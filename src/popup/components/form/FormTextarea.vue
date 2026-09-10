@@ -131,7 +131,7 @@ export default defineComponent({
     padding: 0;
     color: $color-white;
     outline: none;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     line-height: var(--base-line-height);
     resize: none;
 

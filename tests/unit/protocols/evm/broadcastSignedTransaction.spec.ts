@@ -1,42 +1,41 @@
 // @ts-nocheck
 describe('broadcastSignedTransaction', () => {
-  const sendSignedTransactionMock = jest.fn();
+  const sendSignedTransactionMock = vi.fn();
 
   function createPromiEvent() {
     const handlers: Record<string, Function> = {};
     return {
-      on: jest.fn((event: string, handler: Function) => {
+      on: vi.fn((event: string, handler: Function) => {
         handlers[event] = handler;
         return this;
       }),
-      catch: jest.fn(),
+      catch: vi.fn(),
       emit: (event: string, payload?: unknown) => handlers[event]?.(payload),
     };
   }
 
-  const loadModule = () => {
-    jest.resetModules();
+  const loadModule = async () => {
+    vi.resetModules();
     sendSignedTransactionMock.mockReset();
-    jest.doMock('web3-eth', () => ({
+    vi.doMock('web3-eth', () => ({
       __esModule: true,
-      default: jest.fn(),
+      default: vi.fn(),
       sendSignedTransaction: sendSignedTransactionMock,
     }));
-    jest.doMock('web3-types', () => ({
+    vi.doMock('web3-types', () => ({
       DEFAULT_RETURN_FORMAT: {},
     }));
 
-    // eslint-disable-next-line global-require
-    return require('@/protocols/evm/libs/broadcastSignedTransaction');
+    return import('@/protocols/evm/libs/broadcastSignedTransaction');
   };
 
-  afterEach(() => {
-    jest.useRealTimers();
+  afterEach(async () => {
+    vi.useRealTimers();
   });
 
   it('resolves when the provider emits transactionHash', async () => {
     const promiEvent = createPromiEvent();
-    const { broadcastSignedTransaction } = loadModule();
+    const { broadcastSignedTransaction } = await loadModule();
     sendSignedTransactionMock.mockReturnValue(promiEvent);
 
     const promise = broadcastSignedTransaction({ provider: true }, '0xsigned');
@@ -48,7 +47,7 @@ describe('broadcastSignedTransaction', () => {
   it('rejects when the provider emits error', async () => {
     const promiEvent = createPromiEvent();
     const error = new Error('insufficient funds');
-    const { broadcastSignedTransaction } = loadModule();
+    const { broadcastSignedTransaction } = await loadModule();
     sendSignedTransactionMock.mockReturnValue(promiEvent);
 
     const promise = broadcastSignedTransaction({ provider: true }, '0xsigned');
@@ -58,20 +57,20 @@ describe('broadcastSignedTransaction', () => {
   });
 
   it('rejects when no transactionHash is emitted before the timeout', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const promiEvent = createPromiEvent();
-    const { broadcastSignedTransaction } = loadModule();
+    const { broadcastSignedTransaction } = await loadModule();
     sendSignedTransactionMock.mockReturnValue(promiEvent);
 
     const promise = broadcastSignedTransaction({ provider: true }, '0xsigned');
-    jest.advanceTimersByTime(45_000);
+    vi.advanceTimersByTime(45_000);
 
     await expect(promise).rejects.toThrow('timed out after 45000ms');
   });
 
   it('settles only once when multiple provider events fire', async () => {
     const promiEvent = createPromiEvent();
-    const { broadcastSignedTransaction } = loadModule();
+    const { broadcastSignedTransaction } = await loadModule();
     sendSignedTransactionMock.mockReturnValue(promiEvent);
 
     const promise = broadcastSignedTransaction({ provider: true }, '0xsigned');

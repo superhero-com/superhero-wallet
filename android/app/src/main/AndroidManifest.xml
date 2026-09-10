@@ -15,12 +15,23 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
         android:hardwareAccelerated="true">
+
+        <!-- Android 16 (targetSdk 36) ignores android:screenOrientation, aspect
+             ratio and resizability restrictions on displays whose smallest width
+             is >= 600dp. The wallet layout, and its drawable-port-* splash assets,
+             are portrait-only, so opt out to keep current behavior on tablets and
+             foldables. Google removes this opt-out for apps targeting SDK 37, so
+             the layout needs to become adaptive before the next target bump. -->
+        <property
+            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

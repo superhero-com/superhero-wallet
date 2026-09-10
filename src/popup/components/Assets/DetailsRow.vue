@@ -8,7 +8,7 @@
 
     <div class="text">
       <slot name="text">
-        {{ text }}
+        {{ text ?? $t('common.notAvailable') }}
       </slot>
     </div>
   </div>
@@ -18,7 +18,7 @@
 export default {
   props: {
     label: { type: String, default: null },
-    text: { type: [String, Number], default: 'N/A' },
+    text: { type: [String, Number], default: null },
   },
 };
 </script>

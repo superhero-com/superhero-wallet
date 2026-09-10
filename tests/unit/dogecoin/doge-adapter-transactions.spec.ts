@@ -1,8 +1,7 @@
-import { expect, jest } from '@jest/globals';
 import { DogecoinAdapter } from '../../../src/protocols/dogecoin/libs/DogecoinAdapter';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '../../../src/constants';
 
-jest.mock('../../../src/composables/networks', () => ({
+vi.mock('../../../src/composables/networks', () => ({
   useNetworks: () => ({
     activeNetwork: {
       value: {
@@ -19,7 +18,7 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
   const adapter = new DogecoinAdapter();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('normalizes account transactions and returns pagination params', async () => {
@@ -33,7 +32,7 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
       ],
     }];
     // @ts-ignore
-    global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve(list) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(list) })) as any;
 
     const res = await adapter.fetchAccountTransactions('Addr');
     expect(res.regularTransactions.length).toBe(1);
@@ -52,7 +51,7 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
       ],
     };
     // @ts-ignore
-    global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve(tx) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(tx) })) as any;
 
     const res = await adapter.fetchTransactionByHash('abc', 'S');
     expect(res.hash).toBe('abc');

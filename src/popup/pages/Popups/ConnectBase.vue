@@ -32,7 +32,7 @@
       >
         <template #icon>
           <Avatar size="rg" borderless>
-            <img v-if="dappIcon" :src="dappIcon" class="dapp-logo" alt="DAPP logo" />
+            <img v-if="dappIcon" :src="dappIcon" class="dapp-logo" :alt="$t('pages.connectConfirm.dappLogoAlt')" />
             <DappIcon v-else class="dapp-icon" />
           </Avatar>
         </template>
@@ -96,7 +96,7 @@
           <div v-for="(accessName, index) in accessList" :key="index">
             <div class="label">
               <CheckMark class="icon" />
-              {{ accessLabels[accessName]?.label || 'Unknown' }}
+              {{ accessLabels[accessName]?.label || $t('common.unknown') }}
             </div>
             <TemplateRenderer
               class="description"
@@ -164,7 +164,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { ConnectPermission, IAccount, Protocol } from '@/types';
-import { prepareUrlToDisplay } from '@/utils';
+import { getDappIconUrl, prepareUrlToDisplay } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import {
   CONNECT_PERMISSIONS,
@@ -317,8 +317,7 @@ export default defineComponent({
 
     const dappIcon = computed(
       () => (trustedDapp.value)
-        // eslint-disable-next-line global-require, import/no-dynamic-require
-        ? require(`@/icons/dapp/${trustedDapp.value.image}`)
+        ? getDappIconUrl(trustedDapp.value.image)
         : props.icon,
     );
 

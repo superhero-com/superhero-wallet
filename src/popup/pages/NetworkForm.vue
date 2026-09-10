@@ -224,7 +224,8 @@ export default defineComponent({
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         const settings = adapter.getNetworkSettings();
         newNetworkProtocols.value[protocol] = Object.fromEntries(settings
-          .map(({ key, defaultValue }) => defaultValue ? [key, defaultValue] : []));
+          .filter(({ defaultValue }) => defaultValue)
+          .map(({ key, defaultValue }) => [key, defaultValue]));
       });
     }
 

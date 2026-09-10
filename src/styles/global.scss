@@ -136,14 +136,19 @@ ion-router-outlet {
   }
 }
 
-// Chromium-specific: use Ionic internal scroll element instead of host/nested scroll.
-@at-root html.is-chrome ion-content {
+// Non-WebKit engines (Chromium & Firefox): scroll Ionic's internal scroll element
+// instead of the host/nested scroll. The host-overflow fallback below only works on
+// WebKit (iOS); on Gecko the projected content is clipped by the height-locked
+// `part="scroll"`, so the host never overflows and the page cannot scroll.
+@at-root html.is-chrome ion-content,
+  html.is-firefox ion-content {
   --overflow: auto;
   overflow: hidden;
 }
 
-// Chromium-specific: keep the internal scroll part constrained to ion-content height.
-@at-root html.is-chrome ion-content::part(scroll) {
+// Keep the internal scroll part constrained to ion-content height so it, not the host, scrolls.
+@at-root html.is-chrome ion-content::part(scroll),
+  html.is-firefox ion-content::part(scroll) {
   height: 100%;
   max-height: 100%;
   overflow-y: auto;
@@ -179,7 +184,7 @@ a {
 
 p {
   margin: 0;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 
   &:not(:last-of-type) {
     margin-bottom: 8px;
@@ -222,7 +227,7 @@ hr {
   margin-top: 15px;
   margin-bottom: 30px;
   text-align: left;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .text {
@@ -244,7 +249,7 @@ hr {
     display: inline-block;
     letter-spacing: 0.13em;
     color: rgba($color-white, 0.75);
-    word-break: break-word;
+    overflow-wrap: anywhere;
     transition: 0.1s;
 
     @at-root a &:hover {
@@ -386,8 +391,9 @@ hr {
   }
 }
 
-// Keep styled scrollbars visible on Chromium when explicitly enabled.
-@at-root html.is-chrome .styled-scrollbar ion-content::part(scroll) {
+// Keep styled scrollbars visible on Chromium & Firefox when explicitly enabled.
+@at-root html.is-chrome .styled-scrollbar ion-content::part(scroll),
+  html.is-firefox .styled-scrollbar ion-content::part(scroll) {
   scrollbar-width: thin;
 
   &::-webkit-scrollbar {

@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HD derivation golden vectors > AeternityAdapter 1`] = `"616b5f3266786368694c766e6a395641444d41584842694b50736143457354466568417370636d574a335a7a463370464b31684235"`;
+
+exports[`HD derivation golden vectors > AeternityAdapter 2`] = `"b1e8d64d9387e4849c853d5052e21f6dd8b29720c9b38f24b83fe4e9d057c9c8"`;
+
+exports[`HD derivation golden vectors > AvalancheAdapter (own coin type m/44'/9000'/i'/0/0) 1`] = `"0x9710407c5232F72880f25AA94b6896E62658Ef8C"`;
+
+exports[`HD derivation golden vectors > AvalancheAdapter (own coin type m/44'/9000'/i'/0/0) 2`] = `"0390642a4703ccc39bf1d94b1dc8feb6ad5c05e2054c34bbcea5808f0dafc43997"`;
+
+exports[`HD derivation golden vectors > AvalancheAdapter (own coin type m/44'/9000'/i'/0/0) 3`] = `"10fe100c75950b88378b9e6a2f37e92000fbfcd799a5ee172023e1bcf48c0470"`;
+
+exports[`HD derivation golden vectors > BitcoinAdapter (testnet) 1`] = `"02d644f3e7aeb4dced82ff01a797a70bb2b99c900d37568ac65fdf3355a07281e9"`;
+
+exports[`HD derivation golden vectors > BitcoinAdapter (testnet) 2`] = `"39a0fec9681727ab1bedf5029d280828a573d1601995e30eccf583358a1ba4fa"`;
+
+exports[`HD derivation golden vectors > BnbAdapter 1`] = `"03f096a5c1a6055d5f3565bc3d4bddeb2daf9ce57d7e6a2f157601a32abcb92442"`;
+
+exports[`HD derivation golden vectors > BnbAdapter 2`] = `"6d26aff212dc450c407fc22d3df353fc80e3f6a03bdd0fac021ecaa79a9a62e0"`;
+
+exports[`HD derivation golden vectors > DogecoinAdapter (testnet) 1`] = `"nacKKJssvyYjiU8KXKGCRtmVAoqihhnJMj"`;
+
+exports[`HD derivation golden vectors > DogecoinAdapter (testnet) 2`] = `"02b61d9109bfc35094984b2d5b4d5c8c6f60a6e328784ae5649934b799ee9f759e"`;
+
+exports[`HD derivation golden vectors > DogecoinAdapter (testnet) 3`] = `"4f15ed51c7146ce696ccd2a289cb1075650860e9c04fa73dcb587fead7369d17"`;
+
+exports[`HD derivation golden vectors > EthereumAdapter 1`] = `"03f096a5c1a6055d5f3565bc3d4bddeb2daf9ce57d7e6a2f157601a32abcb92442"`;
+
+exports[`HD derivation golden vectors > EthereumAdapter 2`] = `"6d26aff212dc450c407fc22d3df353fc80e3f6a03bdd0fac021ecaa79a9a62e0"`;
+
+exports[`HD derivation golden vectors > PolygonAdapter 1`] = `"03f096a5c1a6055d5f3565bc3d4bddeb2daf9ce57d7e6a2f157601a32abcb92442"`;
+
+exports[`HD derivation golden vectors > PolygonAdapter 2`] = `"6d26aff212dc450c407fc22d3df353fc80e3f6a03bdd0fac021ecaa79a9a62e0"`;
+
+exports[`HD derivation golden vectors > SolanaAdapter 1`] = `"KL798nyZhQS2iPbW47bcak2eg4aoJo72rNF4SWAGhLd"`;
+
+exports[`HD derivation golden vectors > SolanaAdapter 2`] = `"04b20ec12fb2ac9fe7d3b6542e36bf6078645c072826c9daefd9d4f2a2175ada"`;
+
+exports[`HD derivation golden vectors > SolanaAdapter 3`] = `"e20bacbbe0066f4f6aba0bfef007750caea27994d712180a3f8f6260ee67091204b20ec12fb2ac9fe7d3b6542e36bf6078645c072826c9daefd9d4f2a2175ada"`;
+
+exports[`HD derivation golden vectors > resolveAccountRaw private-key path stays stable (Bitcoin) 1`] = `"tb1qvux25709r4uw6rzc8wyl7wwecjdhrx0873q8sh"`;
+
+exports[`HD derivation golden vectors > resolveAccountRaw private-key path stays stable (Ethereum) 1`] = `"0x58DA990A8F4A3a6ca7cb6315d68a140105917352"`;
