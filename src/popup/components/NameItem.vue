@@ -303,6 +303,8 @@ export default defineComponent({
           return t('pages.names.list.status.claiming');
         case NAME_CLAIM_STATUS.pointerUpdatePending:
           return t('pages.names.list.status.setting-pointer');
+        case NAME_CLAIM_STATUS.claimed:
+          return t('pages.names.list.status.finalizing');
         case NAME_CLAIM_STATUS.transferring:
           return t('pages.names.list.status.transferring');
         default:
