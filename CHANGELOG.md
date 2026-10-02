@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.11.1...v2.11.2) (2026-10-02)
+
+
+### Features
+
+* show claimed names that are not yet retrieved from middleware ([b64801f](https://github.com/Superhero-com/superhero-wallet/commit/b64801ff719f62d7521e334160c415af3d4010eb))
+
+
+### Bug Fixes
+
+* do not show dialog box on top of action buttons ([199a780](https://github.com/Superhero-com/superhero-wallet/commit/199a7807f49620a54709e11947426c85a7b3abb6))
+
+
+### Maintenance
+
+* update sdk to 15.0.1 ([4821a0a](https://github.com/Superhero-com/superhero-wallet/commit/4821a0a5626cf52971bb298f5173b000121534d7))
+
 ### [2.11.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.11.0...v2.11.1) (2026-09-10)
 
 
