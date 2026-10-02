@@ -46,6 +46,7 @@ vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
     preclaimed: 'preclaimed',
     claimSubmitted: 'claim-submitted',
     pointerUpdatePending: 'pointer-update-pending',
+    claimed: 'claimed',
     transferring: 'transferring',
   },
   useAeNames: vi.fn(() => ({

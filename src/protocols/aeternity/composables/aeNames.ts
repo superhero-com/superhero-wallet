@@ -70,6 +70,12 @@ const EXTERNAL_NAME_CACHE_TTL = 10 * 60 * 1000;
  * still being mined. After this the chain value is treated as authoritative again.
  */
 const PENDING_DEFAULT_NAME_MAX_AGE = 5 * 60 * 1000;
+/**
+ * How long a claimed name is kept in the queue while waiting for the middleware to
+ * index it. The middleware normally catches up within a few minutes; past this the
+ * entry is dropped even if it never showed up, so it cannot linger forever.
+ */
+const CLAIMED_NAME_INDEXING_MAX_AGE = 5 * 60 * 1000;
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -100,6 +106,8 @@ export const NAME_CLAIM_STATUS = {
   preclaimed: 'preclaimed',
   claimSubmitted: 'claim-submitted',
   pointerUpdatePending: 'pointer-update-pending',
+  /** Claimed on-chain, but not yet indexed by the middleware the names list is read from. */
+  claimed: 'claimed',
   transferring: 'transferring',
 } as const;
 
@@ -113,6 +121,7 @@ interface IPreclaimedName {
   autoExtend: boolean;
   status: NameClaimStatus;
   claimTxHash?: Encoded.TxHash;
+  claimedAt?: number;
 }
 
 interface IPendingAutoExtendTx {
@@ -865,6 +874,23 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
         }
       });
 
+      // A claimed name stays queued (and listed as pending) until the middleware lists it.
+      Object.values(preclaimedNames.value[currentNetworkId] || {}).forEach(({
+        claimedAt,
+        name,
+        status,
+      }) => {
+        if (status !== NAME_CLAIM_STATUS.claimed) {
+          return;
+        }
+        const isIndexed = names.some((ownedName) => ownedName.name === name);
+        const isOldEnoughToClear = Date.now() - (claimedAt || 0) > CLAIMED_NAME_INDEXING_MAX_AGE;
+
+        if (isIndexed || isOldEnoughToClear) {
+          removePreclaimedName(currentNetworkId, name);
+        }
+      });
+
       const pendingTransfers = pendingNameTransferTxs.value[currentNetworkId] || {};
       ownedNames.value = names.map((ownedName) => {
         const pendingTransfer = pendingTransfers[ownedName.name];
@@ -1033,6 +1059,11 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     status,
     claimTxHash,
   }: IPreclaimedName) {
+    // Already on-chain - only waiting for the middleware (see `processOwnedNamesUpdate`).
+    if (status === NAME_CLAIM_STATUS.claimed) {
+      return;
+    }
+
     const aeSdk = await getAeSdk() as any;
     const networkId = nodeNetworkId.value!;
     let currentClaimTxHash = claimTxHash;
@@ -1106,7 +1137,19 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     if (autoExtend) {
       setPendingAutoExtendName(name);
     }
-    removePreclaimedName(networkId, name);
+    if (AE_AENS_NAME_AUCTION_MAX_LENGTH < name.length) {
+      // The middleware indexes the name minutes after it is mined, and the claim is
+      // no longer in the mempool either - dropping the entry now would make the name
+      // vanish from the list until then.
+      patchPreclaimedName(networkId, name, {
+        status: NAME_CLAIM_STATUS.claimed,
+        claimedAt: Date.now(),
+      });
+    } else {
+      // Auction names only become active once the auction ends, so there is nothing
+      // to wait for here.
+      removePreclaimedName(networkId, name);
+    }
     await updateOwnedNames();
   }
 

@@ -96,6 +96,37 @@ describe('NamesList.vue', () => {
     expect(renderedItems[0].text()).toBe('verylongsupername.chain|false');
   });
 
+  it('keeps showing a claimed name the middleware has not indexed yet', async () => {
+    useUi.mockReturnValue({ isAppActive: ref(true) });
+    useAccounts.mockReturnValue({ activeAccount: ref({ address: 'ak_test' }) });
+    useAeSdk.mockReturnValue({ nodeNetworkId: ref('ae_testnet') });
+    useAeNames.mockReturnValue({
+      areNamesFetching: ref(false),
+      ownedNames: ref([]),
+      preclaimedNames: ref({
+        ae_testnet: {
+          'verylongsupername.chain': {
+            address: 'ak_test',
+            name: 'verylongsupername.chain',
+            salt: 123,
+            blockHeight: 10,
+            autoExtend: false,
+            status: 'claimed',
+            claimTxHash: 'th_test',
+            claimedAt: Date.now(),
+          },
+        },
+      }),
+      updateOwnedNames: vi.fn(),
+    });
+
+    const wrapper = mountNamesList();
+
+    const renderedItems = wrapper.findAll('.name-item-stub');
+    expect(renderedItems).toHaveLength(1);
+    expect(renderedItems[0].text()).toBe('verylongsupername.chain|true');
+  });
+
   it('skips a poll tick while a fetch is still running, and resumes once it lands', async () => {
     // Runs do not coalesce, so an unguarded tick stacks a full account fan-out on top
     // of every one still going. The flag must also let the poll resume afterwards.
