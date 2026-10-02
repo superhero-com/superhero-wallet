@@ -33,6 +33,7 @@ import {
   buildTx,
   ConsensusProtocolVersion,
   defaultProtocolParameters,
+  getFloorGasPrice,
   Tag,
   buildAuthTxHash as sdkBuildAuthTxHash,
 } from '@aeternity/aepp-sdk';
@@ -54,15 +55,15 @@ const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
  * always used. Both are strings: they are derived, not hardcoded any more.
  */
 const GA_META_PARAMS = {
-  gasPrice: defaultProtocolParameters.minGasPrice.toString(),
-  fee: new BigNumber(defaultProtocolParameters.minGasPrice.toString())
+  gasPrice: getFloorGasPrice(defaultProtocolParameters).toString(),
+  fee: new BigNumber(getFloorGasPrice(defaultProtocolParameters).toString())
     .times(AE_GA_META_TX_FEE_GAS).toFixed(),
 };
 
 describe('buildAuthTxHash (real aeternity SDK function, not mocked)', () => {
   /**
    * `buildAuthTxHash` uses `getNodeInfo`, and asks the node for its protocol
-   * parameters to check the `gasPrice` against the consensus minimum. A double
+   * parameters to check the `gasPrice` against the floor it is mined at. A double
    * without those endpoints makes the SDK fall back to the parameters of its
    * release, so no real network call happens either way.
    */
