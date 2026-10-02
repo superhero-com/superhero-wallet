@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "2.11.1",
+  "version": "2.11.2",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "ISC",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-calldata": "^1.9.1",
-    "@aeternity/aepp-sdk": "15.0.0",
+    "@aeternity/aepp-sdk": "15.0.1",
     "@aeternity/json-bigint": "^0.3.1",
     "@airgap/aeternity": "^0.13.46",
     "@airgap/serializer": "^0.13.46",

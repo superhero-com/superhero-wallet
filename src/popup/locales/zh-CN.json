@@ -1032,6 +1032,7 @@
           "preclaiming": "预声明中...",
           "claiming": "声明中...",
           "setting-pointer": "设置指针中...",
+          "finalizing": "确认中...",
           "transferring": "转移中..."
         }
       },

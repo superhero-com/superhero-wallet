@@ -1,6 +1,11 @@
 import { ref } from 'vue';
 import BigNumber from 'bignumber.js';
-import { defaultProtocolParameters, getCachedProtocolParameters, type ProtocolParameters } from '@aeternity/aepp-sdk';
+import {
+  defaultProtocolParameters,
+  getCachedProtocolParameters,
+  getFloorGasPrice,
+  type ProtocolParameters,
+} from '@aeternity/aepp-sdk';
 
 import { handleUnknownError } from '@/utils';
 import { useAeSdk } from '@/composables/aeSdk';
@@ -14,7 +19,14 @@ export interface IAeGaMetaParams {
   gasPrice: string;
 }
 
-function buildGaMetaParams(gasPrice: string): IAeGaMetaParams {
+/**
+ * Priced at the lowest gas price a transaction gets mined at. The consensus minimum alone is not
+ * it: a node also refuses to pool anything under the minimum its miner is configured with, and on
+ * mainnet and testnet that miner minimum is a thousand times the consensus one. `getFloorGasPrice`
+ * is the same floor the SDK prices every other transaction against.
+ */
+function buildGaMetaParams(protocolParameters: ProtocolParameters): IAeGaMetaParams {
+  const gasPrice = getFloorGasPrice(protocolParameters).toString();
   return {
     gasPrice,
     fee: new BigNumber(gasPrice).times(AE_GA_META_TX_FEE_GAS).toFixed(),
@@ -22,20 +34,10 @@ function buildGaMetaParams(gasPrice: string): IAeGaMetaParams {
 }
 
 /**
- * The lowest gas price a transaction gets mined at. The consensus minimum alone is not it: a node
- * also refuses to pool anything under the minimum its miner is configured with, and on mainnet
- * and testnet that miner minimum is a thousand times the consensus one. This is the same floor
- * the SDK prices every other transaction against.
- */
-function minedGasPrice({ minGasPrice, minMinerGasPrice }: ProtocolParameters): string {
-  return (minMinerGasPrice > minGasPrice ? minMinerGasPrice : minGasPrice).toString();
-}
-
-/**
  * Values of a network running the consensus parameters the SDK was released with. Shown until the
  * connected node has answered, and used on a node that doesn't report its parameters.
  */
-const defaultGaMetaParams = buildGaMetaParams(minedGasPrice(defaultProtocolParameters));
+const defaultGaMetaParams = buildGaMetaParams(defaultProtocolParameters);
 
 const gaMetaParams = ref<IAeGaMetaParams>(defaultGaMetaParams);
 
@@ -66,7 +68,7 @@ export function useAeGaMetaParams() {
   async function getGaMetaParams(): Promise<IAeGaMetaParams> {
     const generation = networkGeneration;
     const aeSdk = await getAeSdk();
-    const params = buildGaMetaParams(minedGasPrice(await getCachedProtocolParameters(aeSdk.api)));
+    const params = buildGaMetaParams(await getCachedProtocolParameters(aeSdk.api));
     // The user switched networks while this was in flight - these values belong to the one left
     if (generation === networkGeneration) {
       gaMetaParams.value = params;

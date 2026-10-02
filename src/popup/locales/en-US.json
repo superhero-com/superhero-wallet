@@ -1039,6 +1039,7 @@
           "preclaiming": "Preclaiming...",
           "claiming": "Claiming...",
           "setting-pointer": "Setting pointer...",
+          "finalizing": "Finalizing...",
           "transferring": "Transferring..."
         }
       },

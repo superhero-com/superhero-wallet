@@ -37,7 +37,7 @@ export default defineComponent({
   @extend %face-sans-12-regular;
 
   position: relative;
-  z-index: 1;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

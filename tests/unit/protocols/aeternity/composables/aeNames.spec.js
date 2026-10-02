@@ -246,7 +246,18 @@ const createTestContext = async ({
 };
 
 describe('useAeNames queued claims', () => {
-  it('resumes submitted long-name claims and removes them after pointer update', async () => {
+  const middlewareName = (name, owner = 'ak_test') => ({
+    info: {
+      activeFrom: 1,
+      expireHeight: 50000,
+      ownership: { current: owner },
+      pointers: { accountPubkey: owner },
+    },
+    name,
+    hash: `nm_${name}`,
+  });
+
+  it('resumes submitted long-name claims and marks them claimed after pointer update', async () => {
     const longName = 'verylongsupername.chain';
     const {
       aeNames,
@@ -277,6 +288,133 @@ describe('useAeNames queued claims', () => {
       { account_pubkey: 'ak_test' },
       { extendPointers: true },
     );
+    expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+      status: 'claimed',
+      claimedAt: expect.any(Number),
+    });
+  });
+
+  it('keeps a claimed name listed until the middleware indexes it', async () => {
+    // The claim is mined and out of the mempool, but the middleware lags behind the
+    // node by minutes - dropping the queue entry then made the name vanish from the list.
+    const longName = 'verylongsupername.chain';
+    const { aeNames, fetchAllPages } = await createTestContext({
+      preclaimedNames: {
+        ae_testnet: {
+          [longName]: {
+            address: 'ak_test',
+            name: longName,
+            salt: 123,
+            blockHeight: 99,
+            autoExtend: false,
+            status: 'claim-submitted',
+            claimTxHash: 'th_existing',
+          },
+        },
+      },
+    });
+
+    await aeNames.claimPreclaimedNames();
+    expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+      status: 'claimed',
+    });
+
+    // Still not indexed on the next poll.
+    await aeNames.updateOwnedNames();
+    expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+      status: 'claimed',
+    });
+
+    fetchAllPages.mockResolvedValueOnce([middlewareName(longName)]);
+    await aeNames.updateOwnedNames();
+
+    expect(aeNames.preclaimedNames.value).toEqual({});
+    expect(aeNames.ownedNames.value).toEqual([
+      expect.objectContaining({ name: longName, owner: 'ak_test' }),
+    ]);
+  });
+
+  it('drops a claimed name the middleware never indexes after the max age', async () => {
+    const longName = 'verylongsupername.chain';
+    const { aeNames } = await createTestContext({
+      preclaimedNames: {
+        ae_testnet: {
+          [longName]: {
+            address: 'ak_test',
+            name: longName,
+            salt: 123,
+            blockHeight: 99,
+            autoExtend: false,
+            status: 'claimed',
+            claimTxHash: 'th_existing',
+            claimedAt: 1,
+          },
+        },
+      },
+    });
+
+    await aeNames.updateOwnedNames();
+
+    expect(aeNames.preclaimedNames.value).toEqual({});
+  });
+
+  it('does not process claimed names again', async () => {
+    const longName = 'verylongsupername.chain';
+    const {
+      aeNames,
+      nameClaim,
+      nameUpdate,
+      sdk,
+    } = await createTestContext({
+      preclaimedNames: {
+        ae_testnet: {
+          [longName]: {
+            address: 'ak_test',
+            name: longName,
+            salt: 123,
+            blockHeight: 99,
+            autoExtend: false,
+            status: 'claimed',
+            claimTxHash: 'th_existing',
+            claimedAt: Date.now(),
+          },
+        },
+      },
+    });
+
+    await aeNames.claimPreclaimedNames();
+
+    expect(nameClaim).not.toHaveBeenCalled();
+    expect(sdk.poll).not.toHaveBeenCalled();
+    expect(nameUpdate).not.toHaveBeenCalled();
+    expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+      status: 'claimed',
+    });
+  });
+
+  it('removes auction names from the queue right after the claim', async () => {
+    // Short names go to auction and are not active until it ends, so there is no
+    // indexing to wait for.
+    const shortName = 'short.chain';
+    const { aeNames, nameUpdate } = await createTestContext({
+      preclaimedNames: {
+        ae_testnet: {
+          [shortName]: {
+            address: 'ak_test',
+            name: shortName,
+            salt: 123,
+            blockHeight: 99,
+            autoExtend: false,
+            status: 'claim-submitted',
+            claimTxHash: 'th_existing',
+          },
+        },
+      },
+    });
+
+    await aeNames.claimPreclaimedNames();
+
+    expect(nameUpdate).not.toHaveBeenCalled();
     expect(aeNames.preclaimedNames.value).toEqual({});
   });
 
@@ -384,7 +522,9 @@ describe('useAeNames queued claims', () => {
       { account_pubkey: 'ak_test' },
       { extendPointers: true },
     );
-    expect(aeNames.preclaimedNames.value).toEqual({});
+    expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+      status: 'claimed',
+    });
   });
 });
 
