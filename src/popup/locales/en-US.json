@@ -1478,7 +1478,8 @@
   },
   "auth": {
     "walletDataUnreadableTitle": "Wallet data unreadable",
-    "walletDataUnreadableMessage": "Your encrypted wallet data could not be decrypted. This usually means the device Keychain was cleared or the app was restored from a backup that did not include it. Reinstall the app and restore from your seed phrase to recover."
+    "walletDataUnreadableMessage": "The encrypted wallet data on this device can't be decrypted. Reinstalling the app won't fix this. Reset the wallet, then restore it with your seed phrase. Your funds stay on the blockchain, but only your seed phrase can restore access to them.",
+    "walletDataUnreadableAction": "Reset wallet"
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

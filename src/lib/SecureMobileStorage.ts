@@ -5,8 +5,10 @@ import type { IWalletStorage } from './WalletStorage';
 
 SecureStorage.setDefaultKeychainAccess(KeychainAccess.whenUnlocked);
 
-interface ISecureWalletStorage extends Omit<IWalletStorage, 'get'> {
+interface ISecureWalletStorage extends Omit<IWalletStorage, 'get' | 'remove' | 'clear'> {
   get: <T = Record<string, any>>(keys: StorageKeysInput) => Promise<T | null>;
+  remove: (keys: StorageKeysInput) => Promise<void>;
+  clear: () => Promise<void>;
 }
 
 export const SecureMobileStorage: ISecureWalletStorage = {

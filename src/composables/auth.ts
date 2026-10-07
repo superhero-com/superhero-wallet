@@ -18,6 +18,7 @@ import {
   IS_IOS,
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
+  MODAL_RESET_WALLET,
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
@@ -75,12 +76,15 @@ export const useAuth = createCustomScopedComposable(() => {
   } = useUi();
   const {
     openBiometricLoginModal,
+    openConfirmModal,
+    openModal,
     openPasswordLoginModal,
     openEnableBiometricLoginModal,
   } = useModals();
 
   let isSessionExpired = false;
   let isManualMobileLockActive = false;
+  let isUnreadableWalletModalOpen = false;
   let sessionExpiresAt: number | null = null;
   let expirationTimeout: NodeJS.Timeout;
 
@@ -243,6 +247,36 @@ export const useAuth = createCustomScopedComposable(() => {
     setEncryptionKey(undefined);
     mnemonicDecrypted.value = '';
     isAuthenticated.value = false;
+  }
+
+  /**
+   * The stored mnemonic can't be decrypted on this device. Reinstalling doesn't help
+   * on iOS (the Keychain survives it), so offer the in-app reset instead.
+   */
+  function surfaceUnreadableWalletData(error: unknown) {
+    handleUnknownError(error);
+    Logger.write({
+      title: t('auth.walletDataUnreadableTitle'),
+      message: t('auth.walletDataUnreadableMessage'),
+      type: 'api-response',
+      modal: false,
+    });
+    // Every navigation re-runs `checkUserAuth`, so don't stack modals.
+    if (isUnreadableWalletModalOpen) {
+      return;
+    }
+    isUnreadableWalletModalOpen = true;
+    openConfirmModal({
+      title: t('auth.walletDataUnreadableTitle'),
+      msg: t('auth.walletDataUnreadableMessage'),
+      icon: 'critical',
+      buttonMessage: t('auth.walletDataUnreadableAction'),
+    })
+      .then(() => openModal(MODAL_RESET_WALLET))
+      .catch(() => { /* NOOP - dismissed */ })
+      .finally(() => {
+        isUnreadableWalletModalOpen = false;
+      });
   }
 
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
@@ -570,13 +604,7 @@ export const useAuth = createCustomScopedComposable(() => {
              * without authenticating — the outer `finally` clears
              * `isAuthenticating`.
              */
-            handleUnknownError(error);
-            Logger.write({
-              title: t('auth.walletDataUnreadableTitle'),
-              message: t('auth.walletDataUnreadableMessage'),
-              type: 'api-response',
-              modal: true,
-            });
+            surfaceUnreadableWalletData(error);
             return;
           }
         } else {

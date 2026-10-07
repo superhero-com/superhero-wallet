@@ -1471,7 +1471,8 @@
   },
   "auth": {
     "walletDataUnreadableTitle": "钱包数据无法读取",
-    "walletDataUnreadableMessage": "无法解密你的加密钱包数据。通常是因为设备钥匙串已被清空，或应用从未包含钥匙串的备份中恢复。请重新安装应用并使用助记词恢复。"
+    "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
+    "walletDataUnreadableAction": "重置钱包"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

@@ -5,12 +5,17 @@ describe('ResetWalletModal', () => {
   const originalBrowser = globalThis.browser;
   const originalLocation = window.location;
 
-  async function mountResetWallet({ isExtension, sendMessage = vi.fn(() => Promise.resolve()) }) {
+  async function mountResetWallet({
+    isExtension,
+    isMobileApp = false,
+    sendMessage = vi.fn(() => Promise.resolve()),
+    beforeMount = async () => {},
+  }) {
     vi.resetModules();
     vi.doMock('@/constants', async () => ({
       ...(await vi.importActual('@/constants')),
       IS_EXTENSION: isExtension,
-      IS_MOBILE_APP: false,
+      IS_MOBILE_APP: isMobileApp,
     }));
     vi.doMock('vue-router', () => ({ useRouter: () => ({ push: vi.fn() }) }));
     vi.doMock('@/composables', () => ({
@@ -27,6 +32,7 @@ describe('ResetWalletModal', () => {
       runtime: { sendMessage },
       storage: { local: { clear: vi.fn(() => Promise.resolve()) } },
     };
+    await beforeMount();
     return shallowMount(ResetWalletModal, {
       props: { resolve: vi.fn(), reject: vi.fn() },
       global: { mocks: { $t: (key) => key } },
@@ -78,5 +84,36 @@ describe('ResetWalletModal', () => {
 
     expect(globalThis.browser.runtime.sendMessage).not.toHaveBeenCalled();
     expect(window.location.reload).toHaveBeenCalled();
+  });
+
+  it('removes the wallet secrets on mobile before reloading, even when the native clear fails', async () => {
+    // jsdom's `localStorage.clear()` also wipes the web fallback, so record the native deletes.
+    const removedFromKeychain = new Set();
+    let removedBeforeReload;
+    window.location.reload = vi.fn(() => { removedBeforeReload = new Set(removedFromKeychain); });
+    const wrapper = await mountResetWallet({
+      isExtension: false,
+      isMobileApp: true,
+      async beforeMount() {
+        const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+        vi.spyOn(SecureMobileStorage, 'clear').mockRejectedValue(new Error('delete failed'));
+        vi.spyOn(SecureMobileStorage, 'remove').mockImplementation((key) => new Promise((resolve) => {
+          setTimeout(() => {
+            removedFromKeychain.add(key);
+            resolve();
+          });
+        }));
+      },
+    });
+    const { STORAGE_KEYS } = await import('@/constants');
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await wrapper.vm.onReset();
+
+    expect(removedBeforeReload).toEqual(new Set([
+      STORAGE_KEYS.mnemonic,
+      STORAGE_KEYS.mobileDataKey,
+      STORAGE_KEYS.privateKeyAccountsRaw,
+    ]));
   });
 });

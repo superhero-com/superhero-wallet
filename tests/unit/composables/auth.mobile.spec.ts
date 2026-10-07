@@ -8,7 +8,7 @@ import { nextTick } from 'vue';
  * is also plain `localStorage` under the hood). Only three things are mocked:
  *   - `@aparajita/capacitor-biometric-auth` - native hardware, unavailable in jsdom.
  *   - `@/composables/modals` - real modal *components* aren't mounted here, so the
- *     three modal openers `auth.ts` calls are stubbed to control resolve/reject timing.
+ *     modal openers `auth.ts` calls are stubbed to control resolve/reject timing.
  *   - `@/lib/logger` - side-effecting telemetry, irrelevant to what's under test.
  *   - `@/constants` - only to force `IS_MOBILE_APP`/`IS_EXTENSION`/etc, since jsdom has
  *     no real Ionic native platform to detect; every other constant stays real.
@@ -31,6 +31,8 @@ describe('useAuth on mobile', () => {
   let openBiometricLoginModalMock;
   let openPasswordLoginModalMock;
   let openEnableBiometricLoginModalMock;
+  let openConfirmModalMock;
+  let openModalMock;
   let loggerWriteMock;
 
   beforeEach(() => {
@@ -42,6 +44,9 @@ describe('useAuth on mobile', () => {
     openBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openPasswordLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openEnableBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
+    // Left unanswered unless a test resolves/rejects it.
+    openConfirmModalMock = vi.fn(() => new Promise(() => {}));
+    openModalMock = vi.fn().mockResolvedValue(undefined);
     loggerWriteMock = vi.fn();
 
     // All `vi.doMock` calls must be registered here, before any dynamic import below -
@@ -70,6 +75,8 @@ describe('useAuth on mobile', () => {
         openBiometricLoginModal: (...args) => openBiometricLoginModalMock(...args),
         openPasswordLoginModal: (...args) => openPasswordLoginModalMock(...args),
         openEnableBiometricLoginModal: (...args) => openEnableBiometricLoginModalMock(...args),
+        openConfirmModal: (...args) => openConfirmModalMock(...args),
+        openModal: (...args) => openModalMock(...args),
       }),
     }));
     vi.doMock('@/lib/logger', () => ({
@@ -241,24 +248,56 @@ describe('useAuth on mobile', () => {
     expect(auth.isAuthenticated.value).toBe(true);
   });
 
-  it('surfaces an error and stays locked when the persisted mnemonic cannot be decrypted with the current mobile key', async () => {
+  /** Leaves the mnemonic encrypted under a key that is no longer the stored one. */
+  async function bootWithMismatchedMobileKey() {
     const { auth: authGen1 } = await boot();
     await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
 
-    // Simulate a Keychain wipe: the mobile encryption key is gone, but the mnemonic
-    // ciphertext (encrypted under the OLD key) is still on disk.
     const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
     const { STORAGE_KEYS } = await import('@/constants');
-    await SecureMobileStorage.remove(STORAGE_KEYS.mobileDataKey);
+    const { encodeBase64 } = await import('@/utils/crypto');
+    await SecureMobileStorage.set(
+      STORAGE_KEYS.mobileDataKey,
+      encodeBase64(globalThis.crypto.getRandomValues(new Uint8Array(32))),
+    );
 
-    const { auth } = await restart(); // mints a NEW mobile key that won't match the old ciphertext
+    return restart();
+  }
+
+  it('stays locked and offers the wallet reset once when the stored mnemonic cannot be decrypted', async () => {
+    let confirmReset;
+    openConfirmModalMock.mockImplementation(() => new Promise((resolve) => {
+      confirmReset = resolve;
+    }));
+    const { auth } = await bootWithMismatchedMobileKey();
+    const { MODAL_RESET_WALLET } = await import('@/constants');
+
     await auth.checkUserAuth();
+    await auth.checkUserAuth(); // the next navigation
 
     expect(auth.isAuthenticated.value).toBe(false);
     expect(auth.mnemonicDecrypted.value).toBe('');
     expect(loggerWriteMock).toHaveBeenCalledWith(expect.objectContaining({
       type: 'api-response',
-      modal: true,
+      modal: false,
     }));
+    expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
+    expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({ icon: 'critical' }));
+
+    confirmReset();
+    await flushAsync();
+    expect(openModalMock).toHaveBeenCalledWith(MODAL_RESET_WALLET);
+  });
+
+  it('offers the wallet reset again on the next auth check after it was dismissed', async () => {
+    openConfirmModalMock.mockRejectedValueOnce(new Error('dismissed'));
+    const { auth } = await bootWithMismatchedMobileKey();
+
+    await auth.checkUserAuth();
+    await flushAsync();
+    await auth.checkUserAuth();
+
+    expect(openConfirmModalMock).toHaveBeenCalledTimes(2);
+    expect(openModalMock).not.toHaveBeenCalled();
   });
 });
