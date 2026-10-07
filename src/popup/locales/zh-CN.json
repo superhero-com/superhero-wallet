@@ -1116,7 +1116,10 @@
       "invalidSeed": "你的助记词应由 12 个或更多以空格分隔的单词组成。",
       "seedPlaceHolder": "在此输入或粘贴你的助记词",
       "scanSeedPhrase": "扫描助记词",
-      "restoringAccounts": "正在恢复账户..."
+      "restoringAccounts": "正在恢复账户...",
+      "replaceWalletTitle": "请先重置此设备上的钱包",
+      "replaceWalletMessage": "此设备上的钱包已锁定或无法读取。要创建或导入钱包，请先重置它。重置后，只能通过其助记词恢复该钱包。",
+      "replaceWalletConfirm": "重置钱包"
     },
     "notifications": {
       "superhero": "Superhero.com",

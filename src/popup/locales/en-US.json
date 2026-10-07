@@ -1123,7 +1123,10 @@
       "invalidSeed": "Your seed phrase should consist of 12 or more words separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here",
       "scanSeedPhrase": "Scan Seed Phrase",
-      "restoringAccounts": "Restoring accounts..."
+      "restoringAccounts": "Restoring accounts...",
+      "replaceWalletTitle": "Reset the wallet on this device first",
+      "replaceWalletMessage": "This device holds a wallet that is locked or can't be read. To create or import a wallet, reset this one first. After that, only its seed phrase can restore it.",
+      "replaceWalletConfirm": "Reset wallet"
     },
     "notifications": {
       "superhero": "Superhero.com",
