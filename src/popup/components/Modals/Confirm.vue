@@ -2,7 +2,7 @@
   <Default
     v-bind="{ ...$attrs, resolve }"
     class="confirm-modal"
-    icon="info"
+    :icon="icon"
     :msg="msg"
     :title="title"
     :close="cancel"
@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { RejectCallback, ResolveCallback } from '@/types';
+import type { RejectCallback, ResolveCallback, StatusIconType } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
 
 import Default from './Default.vue';
@@ -48,6 +48,7 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
+    icon: { type: String as PropType<StatusIconType>, default: 'info' },
     buttonMessage: { type: String, default: '' },
   },
   setup(props) {
