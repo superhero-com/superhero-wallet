@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { nextTick } from 'vue';
+import en from '@/popup/locales/en-US.json';
 
 /**
  * Exercises `useAuth`'s mobile biometric-login lifecycle against REAL crypto
@@ -20,6 +21,7 @@ import { nextTick } from 'vue';
  * carries over via the real, un-cleared `localStorage`, exactly like a real relaunch.
  */
 const VALID_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+const OTHER_VALID_MNEMONIC = 'legal winner thank year wave sausage worth useful legal winner thank yellow';
 
 function flushAsync() {
   return new Promise((resolve) => { setTimeout(resolve, 0); });
@@ -96,7 +98,9 @@ describe('useAuth on mobile', () => {
   async function restart() {
     vi.resetModules();
     const booted = await boot();
-    await flushAsync(); // let every storageRef finish restoring from localStorage
+    // Lets every storageRef restore from localStorage, unless the key reads back empty:
+    // then the mnemonic restore waits for the key retries (`checkUserAuth` waits for it).
+    await flushAsync();
     return booted;
   }
 
@@ -287,6 +291,51 @@ describe('useAuth on mobile', () => {
     confirmReset();
     await flushAsync();
     expect(openModalMock).toHaveBeenCalledWith(MODAL_RESET_WALLET);
+  });
+
+  it('keeps the stored key when it reads back empty, and unlocks once it reads again', async () => {
+    const { auth: authGen1 } = await boot();
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const storedKey = await SecureMobileStorage.get(STORAGE_KEYS.mobileDataKey);
+    await SecureMobileStorage.remove(STORAGE_KEYS.mobileDataKey);
+
+    const { auth } = await restart();
+    await auth.checkUserAuth();
+
+    expect(auth.isAuthenticated.value).toBe(false);
+    expect(await SecureMobileStorage.get(STORAGE_KEYS.mobileDataKey)).toBeNull();
+    expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+      msg: en.auth.walletKeyUnavailableMessage,
+    }));
+
+    await SecureMobileStorage.set(STORAGE_KEYS.mobileDataKey, storedKey);
+    const { auth: authAfterRelaunch } = await restart();
+    await authAfterRelaunch.checkUserAuth();
+
+    expect(authAfterRelaunch.isAuthenticated.value).toBe(true);
+    expect(authAfterRelaunch.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+  });
+
+  it('does not create a wallet over a stored one whose key reads back empty', async () => {
+    const { auth: authGen1 } = await boot();
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const storedKey = await SecureMobileStorage.get(STORAGE_KEYS.mobileDataKey);
+    await SecureMobileStorage.remove(STORAGE_KEYS.mobileDataKey);
+
+    const { auth } = await restart();
+    await auth.checkUserAuth();
+    await expect(auth.setMnemonicAndInitializeAuthentication(OTHER_VALID_MNEMONIC))
+      .rejects.toMatchObject({ name: 'MobileEncryptionKeyMissingError' });
+
+    await SecureMobileStorage.set(STORAGE_KEYS.mobileDataKey, storedKey);
+    const { auth: authAfterRelaunch } = await restart();
+    await authAfterRelaunch.checkUserAuth();
+
+    expect(authAfterRelaunch.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
   });
 
   it('offers the wallet reset again on the next auth check after it was dismissed', async () => {

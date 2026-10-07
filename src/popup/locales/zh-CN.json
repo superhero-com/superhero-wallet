@@ -1475,7 +1475,8 @@
   "auth": {
     "walletDataUnreadableTitle": "钱包数据无法读取",
     "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
-    "walletDataUnreadableAction": "重置钱包"
+    "walletDataUnreadableAction": "重置钱包",
+    "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

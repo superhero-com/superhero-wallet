@@ -1482,7 +1482,8 @@
   "auth": {
     "walletDataUnreadableTitle": "Wallet data unreadable",
     "walletDataUnreadableMessage": "The encrypted wallet data on this device can't be decrypted. Reinstalling the app won't fix this. Reset the wallet, then restore it with your seed phrase. Your funds stay on the blockchain, but only your seed phrase can restore access to them.",
-    "walletDataUnreadableAction": "Reset wallet"
+    "walletDataUnreadableAction": "Reset wallet",
+    "walletKeyUnavailableMessage": "The key that unlocks your wallet couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",
