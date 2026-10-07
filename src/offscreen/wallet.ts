@@ -98,7 +98,7 @@ const addAeppConnection = async (port: Runtime.Port) => {
 export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
-  const { secureLoginTimeoutDecrypted } = useAuth();
+  const { secureLoginTimeoutDecrypted, syncBackgroundEncryptionKey } = useAuth();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
@@ -136,6 +136,11 @@ export async function init() {
         break;
       }
       case CONNECTION_TYPES.SESSION: {
+        port.onMessage.addListener((msg: IBackgroundMessageData) => {
+          if (msg?.method === SESSION_METHODS.sessionKeyStored) {
+            syncBackgroundEncryptionKey();
+          }
+        });
         port.onDisconnect.addListener(async () => {
           if (IS_FIREFOX) {
             setSessionTimeout(+secureLoginTimeoutDecrypted.value!);

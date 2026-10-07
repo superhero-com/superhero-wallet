@@ -1,197 +1,169 @@
 // @ts-nocheck
-/**
- * Regression test for the offscreen session-key sync behaviour.
- *
- * `syncBackgroundEncryptionKey` polls for `CHECK_FOR_SESSION_KEY_TIMEOUT`
- * (30 s) and then unconditionally stops. The salt watcher that drives it
- * only fires when `encryptionSalt` changes — once per password setup. So
- * if the popup user takes longer than 30 s to enter their password, the
- * offscreen tab would never recover the session key and `encryptionKey`
- * would stay unset (breaking Ledger / WalletConnect / EVM RPC handlers).
- *
- * The fix wires `browser.storage.session.onChanged` as a second wake-up
- * source via `subscribeToSessionEncryptionKey`. This test asserts that
- * subscription is registered when running in the offscreen context and
- * that triggering the listener restarts the sync — using REAL crypto
- * (`@/utils/crypto`) and REAL `useStorageRef`/`useUi`/`useModals`. The only
- * thing mocked is `@/offscreen/popupHandler`'s `getSessionEncryptionKey`,
- * the actual cross-context messaging boundary that can't run for real
- * without a live background script, plus `@/constants` (to force the
- * offscreen-tab flags jsdom has no real equivalent for) and `@/lib/logger`
- * (side-effecting telemetry, irrelevant here).
- */
+const MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const getSessionEncryptionKeyOffscreenMock = vi.fn();
 
-function mockConstants(overrides) {
-  vi.doMock('@/constants', async () => {
-    const actual = await vi.importActual('@/constants');
+describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
+  let auth;
+  let crypto;
+
+  async function createSessionKey() {
+    const raw = globalThis.crypto.getRandomValues(new Uint8Array(32));
     return {
-      ...actual,
+      key: await crypto.importEncryptionKey(raw),
+      exported: Buffer.from(raw).toString('base64'),
+    };
+  }
+
+  async function encryptMnemonicWith(key) {
+    auth.mnemonic.value = await crypto.encrypt(key, MNEMONIC);
+  }
+
+  beforeEach(async () => {
+    vi.resetModules();
+    localStorage.clear();
+    getSessionEncryptionKeyOffscreenMock.mockReset().mockResolvedValue(null);
+    vi.doMock('@/offscreen/popupHandler', () => ({
+      getSessionEncryptionKey: (...args) => getSessionEncryptionKeyOffscreenMock(...args),
+    }));
+    vi.doMock('@/lib/logger', () => ({ __esModule: true, default: { write: vi.fn() } }));
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
       IS_MOBILE_APP: false,
       IS_EXTENSION: false,
       IS_IOS: false,
       IS_OFFSCREEN_TAB: true,
       RUNNING_IN_TESTS: false,
-      ...overrides,
-    };
-  });
-}
-
-describe('useAuth offscreen session-key wake-up', () => {
-  beforeEach(() => {
-    vi.resetModules();
-    localStorage.clear();
-    getSessionEncryptionKeyOffscreenMock.mockReset().mockResolvedValue(null);
-
-    // Registered before any dynamic import below - `registerAdapters` (vitest's
-    // global setup file) transitively loads the real `@/composables` barrel first,
-    // so mocking these afterwards would be too late for this module generation.
-    vi.doMock('@/offscreen/popupHandler', () => ({
-      getSessionEncryptionKey: (...args) => getSessionEncryptionKeyOffscreenMock(...args),
     }));
-    vi.doMock('@/lib/logger', () => ({
-      __esModule: true,
-      default: { write: vi.fn() },
-    }));
-    mockConstants();
 
-    // Extend (not replace) the global `browser` stub with `storage.onChanged`,
-    // needed by the real `subscribeToSessionEncryptionKey` - keeps `runtime`/
-    // `storage.local` from `config/vitest/setup.ts` intact.
-    globalThis.browser.storage.onChanged = { addListener: vi.fn(), removeListener: vi.fn() };
+    crypto = await import('@/utils/crypto');
+    const { useAuth } = await import('@/composables/auth');
+    auth = useAuth();
   });
 
-  it('subscribes to session-key updates and restarts the sync on storage change', async () => {
-    const { useAuth } = await import('@/composables/auth');
-    const auth = useAuth();
-
-    const { addListener } = globalThis.browser.storage.onChanged;
-    expect(addListener).toHaveBeenCalledTimes(1);
-    const onSessionKeyChanged = addListener.mock.calls[0][0];
-
-    vi.useFakeTimers();
-    try {
-      // Drive the salt watcher: setting `encryptionSalt` kicks off the first,
-      // bounded (30s) poll.
-      auth.encryptionSalt.value = new Uint8Array([1, 2, 3]);
-
-      await vi.advanceTimersByTimeAsync(30000); // exhausts CHECK_FOR_SESSION_KEY_TIMEOUT
-
-      getSessionEncryptionKeyOffscreenMock.mockClear();
-
-      // Simulate the popup writing the session key into browser.storage.session -
-      // the secondary wake-up source must restart polling even though the first
-      // poll already gave up.
-      onSessionKeyChanged({ exportedEncryptionKey: { newValue: 'abc' } }, 'session');
-      await vi.advanceTimersByTimeAsync(5000); // CHECK_FOR_SESSION_KEY_INTERVAL
-
-      expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalled();
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('recovers the encryption key and decrypts the mnemonic once the popup publishes a session key', async () => {
-    const { useAuth } = await import('@/composables/auth');
-    const auth = useAuth();
-
-    const { generateSalt, encrypt, importEncryptionKey } = await import('@/utils/crypto');
-    const salt = generateSalt();
-    // Raw AES-256 key bytes, as if generated by the popup and shipped to the
-    // offscreen tab via `browser.storage.session` (that's what `sessionStart()`/
-    // `getSessionEncryptionKey()` actually transmit - `exportEncryptionKey()` only
-    // works on a key generated as extractable, which requires `IS_EXTENSION` true;
-    // this test's `@/constants` mock forces `IS_EXTENSION` false to simulate the
-    // *offscreen* side importing it instead).
-    const rawKeyBytes = globalThis.crypto.getRandomValues(new Uint8Array(32));
-    const key = await importEncryptionKey(rawKeyBytes);
-    const plaintext = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-    const ciphertext = await encrypt(key, plaintext);
-    const exportedKeyBase64 = Buffer.from(rawKeyBytes).toString('base64');
-
-    auth.mnemonic.value = ciphertext;
-    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(exportedKeyBase64);
-
-    vi.useFakeTimers();
-    auth.encryptionSalt.value = salt; // triggers the salt-driven poll
-    await vi.advanceTimersByTimeAsync(5000); // first CHECK_FOR_SESSION_KEY_INTERVAL tick
-    // `decrypt()`'s native WebCrypto call settles via a real Node microtask/threadpool
-    // completion rather than a fake timer - switch back to real timers and poll until
-    // it resolves, since a single tick isn't reliably enough under CI/suite-wide load.
+  afterEach(() => {
     vi.useRealTimers();
-    await vi.waitFor(() => {
-      if (!auth.mnemonicDecrypted.value) {
-        throw new Error('mnemonic not decrypted yet');
-      }
-    });
+    vi.restoreAllMocks();
+  });
 
-    expect(auth.mnemonicDecrypted.value).toBe(plaintext);
+  it('decrypts the mnemonic with the published session key once the salt is restored', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(exported);
+
+    auth.encryptionSalt.value = crypto.generateSalt();
+
+    await vi.waitFor(() => expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC));
     expect(auth.encryptionKey.value).toBeTruthy();
   });
 
-  it('does not subscribe when not running in the offscreen tab', async () => {
-    mockConstants({ IS_OFFSCREEN_TAB: false });
+  it('tries right away instead of after the first poll interval', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(exported);
 
-    const { useAuth } = await import('@/composables/auth');
-    useAuth();
+    auth.syncBackgroundEncryptionKey();
 
-    expect(globalThis.browser.storage.onChanged.addListener).not.toHaveBeenCalled();
-  });
-});
-
-describe('subscribeToSessionEncryptionKey helper', () => {
-  beforeEach(() => {
-    vi.resetModules();
-
-    vi.doMock('@/constants', async () => {
-      const actual = await vi.importActual('@/constants');
-      return {
-        ...actual, CONNECTION_TYPES: { SESSION: 'session' }, IS_EXTENSION: false, IS_OFFSCREEN_TAB: true,
-      };
-    });
-    vi.doMock('@/offscreen/popupHandler', () => ({ getSessionEncryptionKey: vi.fn() }));
+    // Well under `CHECK_FOR_SESSION_KEY_INTERVAL` (5 s).
+    await vi.waitFor(() => expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC), { timeout: 1000 });
   });
 
-  it('only invokes the callback for session-area writes with a truthy newValue', async () => {
-    const addListener = vi.fn();
-    const removeListener = vi.fn();
-    globalThis.browser.storage.onChanged = { addListener, removeListener };
+  it('stops polling after the timeout, and a later login starts it again', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    vi.useFakeTimers();
 
-    const { subscribeToSessionEncryptionKey } = await import('@/utils/session');
+    auth.syncBackgroundEncryptionKey(); // offscreen boot, nobody logged in yet
+    await vi.advanceTimersByTimeAsync(30000); // `CHECK_FOR_SESSION_KEY_TIMEOUT`
+    getSessionEncryptionKeyOffscreenMock.mockClear();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(getSessionEncryptionKeyOffscreenMock).not.toHaveBeenCalled();
 
-    const callback = vi.fn();
-    const teardown = subscribeToSessionEncryptionKey(callback);
+    // A login long after: `decrypt` settles on real timers only.
+    vi.useRealTimers();
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(exported);
+    auth.syncBackgroundEncryptionKey();
 
-    expect(addListener).toHaveBeenCalledTimes(1);
-    const listener = addListener.mock.calls[0][0];
-
-    // Wrong area: ignored
-    listener({ exportedEncryptionKey: { newValue: 'k' } }, 'local');
-    expect(callback).not.toHaveBeenCalled();
-
-    // Right area, but session-end (newValue undefined): ignored
-    listener({ exportedEncryptionKey: { oldValue: 'k' } }, 'session');
-    expect(callback).not.toHaveBeenCalled();
-
-    // Right area, unrelated key: ignored
-    listener({ otherKey: { newValue: 'x' } }, 'session');
-    expect(callback).not.toHaveBeenCalled();
-
-    // Right area, right key, truthy newValue: invoked
-    listener({ exportedEncryptionKey: { newValue: 'k' } }, 'session');
-    expect(callback).toHaveBeenCalledTimes(1);
-
-    teardown();
-    expect(removeListener).toHaveBeenCalledWith(listener);
+    await vi.waitFor(() => expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC));
   });
 
-  it('returns a no-op when storage.onChanged is unavailable', async () => {
-    globalThis.browser.storage.onChanged = undefined;
+  it('restarts the timeout when requested again while polling', async () => {
+    vi.useFakeTimers();
+    auth.syncBackgroundEncryptionKey();
+    await vi.advanceTimersByTimeAsync(20000);
+    auth.syncBackgroundEncryptionKey(); // new deadline: 20 s + 30 s
 
-    const { subscribeToSessionEncryptionKey } = await import('@/utils/session');
+    await vi.advanceTimersByTimeAsync(20000); // past the first deadline
+    getSessionEncryptionKeyOffscreenMock.mockClear();
+    await vi.advanceTimersByTimeAsync(5000);
 
-    const teardown = subscribeToSessionEncryptionKey(vi.fn());
-    expect(typeof teardown).toBe('function');
-    expect(() => teardown()).not.toThrow();
+    expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalled();
+  });
+
+  it('retries at once when requested during an attempt that read storage too early', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    let finishFirstAttempt;
+    getSessionEncryptionKeyOffscreenMock
+      .mockReturnValueOnce(new Promise((resolve) => { finishFirstAttempt = resolve; }))
+      .mockResolvedValue(exported);
+    vi.useFakeTimers();
+
+    auth.syncBackgroundEncryptionKey(); // e.g. salt watcher
+    auth.syncBackgroundEncryptionKey(); // `sessionKeyStored` arrives meanwhile
+    finishFirstAttempt(null);
+
+    // `waitFor` advances fake time only by its polling interval, far below 5 s.
+    await vi.waitFor(() => expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC));
+  });
+
+  it('syncs again when requested during an attempt that succeeds', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    let finishFirstAttempt;
+    getSessionEncryptionKeyOffscreenMock
+      .mockReturnValueOnce(new Promise((resolve) => { finishFirstAttempt = resolve; }))
+      .mockResolvedValue(exported);
+
+    const syncing = auth.syncBackgroundEncryptionKey();
+    auth.syncBackgroundEncryptionKey(); // another login, possibly with a new key
+    finishFirstAttempt(exported);
+    await syncing;
+
+    expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the current encryptionKey object when the same key is synced again', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(exported);
+    await auth.syncBackgroundEncryptionKey();
+    const syncedKey = auth.encryptionKey.value;
+
+    await auth.syncBackgroundEncryptionKey();
+
+    expect(auth.encryptionKey.value).toBe(syncedKey);
+    expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC);
+  });
+
+  it('switches to a new key (password change) once the mnemonic is encrypted with it', async () => {
+    const first = await createSessionKey();
+    await encryptMnemonicWith(first.key);
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(first.exported);
+    await auth.syncBackgroundEncryptionKey();
+    const firstKey = auth.encryptionKey.value;
+
+    // The new key is published before the re-encrypted mnemonic reaches this tab.
+    const second = await createSessionKey();
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(second.exported);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    auth.syncBackgroundEncryptionKey();
+    await vi.waitFor(() => expect(warn).toHaveBeenCalled());
+    expect(auth.encryptionKey.value).toBe(firstKey);
+
+    await encryptMnemonicWith(second.key);
+    auth.encryptionSalt.value = crypto.generateSalt(); // synced along with the new mnemonic
+
+    await vi.waitFor(() => expect(auth.encryptionKey.value).not.toBe(firstKey));
+    expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC);
   });
 });

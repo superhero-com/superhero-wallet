@@ -1,7 +1,11 @@
 // @ts-nocheck
+import { ref } from 'vue';
+
 describe('offscreen wallet connections', () => {
   let onConnectListener: vi.Mock;
   let disconnectListener: vi.Mock;
+  let messageListener: vi.Mock;
+  let syncBackgroundEncryptionKey: vi.Mock;
   let aeSdk: any;
 
   function createPort() {
@@ -16,13 +20,19 @@ describe('offscreen wallet connections', () => {
           disconnectListener = listener;
         }),
       },
-      onMessage: { addListener: vi.fn() },
+      onMessage: {
+        addListener: vi.fn((listener) => {
+          messageListener = listener;
+        }),
+      },
     };
   }
 
   function mockDependencies() {
     onConnectListener = vi.fn();
     disconnectListener = vi.fn();
+    messageListener = vi.fn();
+    syncBackgroundEncryptionKey = vi.fn();
     aeSdk = {
       _clients: new Map([['client-id', {}]]),
       addRpcClient: vi.fn(() => 'client-id'),
@@ -50,7 +60,6 @@ describe('offscreen wallet connections', () => {
     };
 
     vi.doMock('webextension-polyfill', () => ({ default: (global as any).browser }), { virtual: true });
-    vi.doMock('vue', () => ({ watch: vi.fn() }));
     vi.doMock('@/utils', () => ({ getCleanModalOptions: vi.fn((params) => params) }));
     vi.doMock('@aeternity/aepp-sdk', () => ({
       // Production code calls `new BrowserRuntimeConnection(...)`. Vitest 4 invokes
@@ -65,24 +74,21 @@ describe('offscreen wallet connections', () => {
     }));
     vi.doMock('@/background/bgPopupHandler', () => ({ setSessionTimeout: vi.fn() }));
     vi.doMock('@/composables', () => ({
-      useAccounts: () => ({ activeAccount: { value: {} } }),
+      useAccounts: () => ({ activeAccount: ref({}) }),
       useAeSdk: () => ({
         isAeSdkReady: { value: true },
         getAeSdk: vi.fn().mockResolvedValue(aeSdk),
         resetNode: vi.fn(),
       }),
-      useAuth: () => ({ secureLoginTimeoutDecrypted: { value: '0' } }),
-      useNetworks: () => ({ activeNetwork: { value: {} } }),
+      useAuth: () => ({
+        secureLoginTimeoutDecrypted: { value: '0' },
+        syncBackgroundEncryptionKey,
+      }),
+      useNetworks: () => ({ activeNetwork: ref({}) }),
     }));
-    vi.doMock('@/constants', () => ({
-      CONNECTION_TYPES: {
-        OTHER: 'OTHER',
-        POPUP: 'POPUP',
-        SESSION: 'SESSION',
-      },
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
       IS_FIREFOX: false,
-      POPUP_ACTIONS: { getProps: 'getProps' },
-      SESSION_METHODS: { setSessionTimeout: 'setSessionTimeout' },
     }));
     vi.doMock('@/offscreen/popupHandler', () => ({
       getPopup: vi.fn(),
@@ -142,6 +148,45 @@ describe('offscreen wallet connections', () => {
     await onConnectListener(createPort());
 
     expect(() => disconnectListener()).toThrow('something completely unexpected');
+  });
+
+  describe('session port', () => {
+    function createSessionPort() {
+      const port = createPort();
+      port.name = 'SESSION';
+      port.sender.url = 'chrome-extension://test-extension-id/index.html';
+      return port;
+    }
+
+    it('syncs the session key once the popup reports it stored, ignoring other messages', async () => {
+      const { SESSION_METHODS } = await import('@/constants');
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      await onConnectListener(createSessionPort());
+      expect(syncBackgroundEncryptionKey).not.toHaveBeenCalled();
+
+      messageListener({ method: SESSION_METHODS.sessionKeyStored });
+      expect(syncBackgroundEncryptionKey).toHaveBeenCalledTimes(1);
+
+      messageListener({ method: 'somethingElse' });
+      messageListener(undefined);
+      expect(syncBackgroundEncryptionKey).toHaveBeenCalledTimes(1);
+    });
+
+    it('still starts the session timeout when the popup closes', async () => {
+      const { SESSION_METHODS } = await import('@/constants');
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      await onConnectListener(createSessionPort());
+
+      await disconnectListener();
+
+      expect((global as any).browser.runtime.sendMessage).toHaveBeenCalledWith({
+        target: 'background',
+        method: SESSION_METHODS.setSessionTimeout,
+        payload: 0,
+      });
+    });
   });
 
   describe('disconnect()', () => {
