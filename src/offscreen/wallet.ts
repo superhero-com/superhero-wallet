@@ -22,9 +22,6 @@ import { detectConnectionType } from './utils';
 
 window.browser = browser;
 
-let isAeSdkBlocked = false;
-let connectionsQueue: Runtime.Port[] = [];
-
 /**
  * Errors that surface when an aepp port is gone but our state still references it:
  * - `UnknownRpcClientError` / "RpcClient with id ... do not exist": the SDK's own
@@ -46,12 +43,18 @@ function isExpectedDisconnectedClientError(error: unknown): boolean {
 }
 
 const addAeppConnection = async (port: Runtime.Port) => {
-  const { getAeSdk } = useAeSdk();
+  const { getAeSdk, isAeSdkReady } = useAeSdk();
+  let isDisconnected = false;
+  // The port may close while `getAeSdk` waits for an SDK update.
+  const onDisconnectWhileWaiting = () => { isDisconnected = true; };
+  port.onDisconnect.addListener(onDisconnectWhileWaiting);
   const aeSdk = await getAeSdk();
+  port.onDisconnect.removeListener(onDisconnectWhileWaiting);
+  if (isDisconnected) return;
+
   const connection = new BrowserRuntimeConnection({ port, debug: false });
   const clientId = aeSdk.addRpcClient(connection);
   let shareWalletInfoInterval: NodeJS.Timeout | undefined;
-  let isDisconnected = false;
 
   const cleanup = () => {
     if (isDisconnected) return;
@@ -74,7 +77,7 @@ const addAeppConnection = async (port: Runtime.Port) => {
   };
 
   const shareWalletInfo = async () => {
-    if (isAeSdkBlocked || isDisconnected) return;
+    if (!isAeSdkReady.value || isDisconnected) return;
 
     try {
       await aeSdk.shareWalletInfo(clientId);
@@ -99,7 +102,7 @@ export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
   const { secureLoginTimeoutDecrypted, syncBackgroundEncryptionKey } = useAuth();
-  const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
+  const { getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port?.sender?.id !== browser.runtime.id) return;
@@ -123,15 +126,6 @@ export async function init() {
         break;
       }
       case CONNECTION_TYPES.OTHER: {
-        if (!isAeSdkReady.value) {
-          if (!connectionsQueue) connectionsQueue = [];
-          connectionsQueue.push(port as Runtime.Port);
-          port.onDisconnect.addListener(() => {
-            connectionsQueue = connectionsQueue.filter((p) => p !== port);
-          });
-          return;
-        }
-
         await addAeppConnection(port as Runtime.Port);
         break;
       }
@@ -160,20 +154,11 @@ export async function init() {
   });
   await getAeSdk();
 
-  connectionsQueue.forEach(addAeppConnection);
-  connectionsQueue = [];
-
   watch(
     activeNetwork,
-    async (newValue, oldValue) => {
-      if (isAeSdkBlocked || isEqual(newValue, oldValue)) {
-        return;
-      }
-      try {
-        isAeSdkBlocked = true;
-        await resetNode(oldValue, newValue);
-      } finally {
-        isAeSdkBlocked = false;
+    (newValue, oldValue) => {
+      if (!isEqual(newValue, oldValue)) {
+        resetNode(newValue);
       }
     },
   );

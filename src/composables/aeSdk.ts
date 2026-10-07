@@ -28,7 +28,7 @@ import {
   PROTOCOLS,
   RUNNING_IN_TESTS,
 } from '@/constants';
-import { watchUntilTruthy } from '@/utils';
+import { handleUnknownError, watchUntilTruthy } from '@/utils';
 import { FramesConnection } from '@/lib/FramesConnection';
 
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
@@ -57,10 +57,14 @@ const ACCOUNT_RESTORE_TIMEOUT = 5000;
 
 let composableInitialized = false;
 let aeSdk: AeSdkSuperhero;
+let aeSdkInitialization: Promise<void> | undefined;
+let latestNodeResetId = 0;
 
 const nodeNetworkId = ref<NetworkId>();
 
-const isAeSdkUpdating = ref(false);
+const isAeSdkInitializing = ref(false);
+const isNodeResetting = ref(false);
+const isAeSdkUpdating = computed(() => isAeSdkInitializing.value || isNodeResetting.value);
 const isAeNodeReady = ref(false);
 const isAeNodeConnecting = ref(false);
 const isAeNodeError = ref(false);
@@ -81,6 +85,13 @@ const dexContracts = computed(
   () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
 );
 
+function replaceNode(sdk: AeSdk, name: string, node: Node) {
+  sdk.pool.clear();
+  sdk.addNode(name, node);
+  // `AeSdkWallet.selectNode` is async and rejects when the node is down.
+  Promise.resolve(sdk.selectNode(name)).catch(handleUnknownError);
+}
+
 export function useAeSdk() {
   const {
     activeNetworkName,
@@ -95,18 +106,16 @@ export function useAeSdk() {
   const { checkOrAskPermission } = usePermissions();
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
-  /**
-   * Create Node instance and get connection status
-   */
-  async function createNodeInstance(url: string) {
+  /** Create Node instance and get connection status (stored only while `isCurrent()`). */
+  async function createNodeInstance(url: string, isCurrent = () => true) {
     let nodeInstance: Node | null = null;
+    let networkId: NetworkId | undefined;
     isAeNodeReady.value = false;
     isAeNodeError.value = false;
     isAeNodeConnecting.value = true;
     try {
       nodeInstance = new Node(url);
-      nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
-      isAeNodeReady.value = true;
+      networkId = (await nodeInstance.getStatus()).networkId;
     } catch (error) {
       // Only the initial status request failed (e.g. the network stack is not
       // ready yet right after a fresh browser start). The `Node` instance itself
@@ -114,9 +123,11 @@ export function useAeSdk() {
       // so we must keep it. Returning `null` here would put a `null` node into
       // the SDK pool and make `aeSdk.api` null, which crashes dApp connection
       // (`getWalletInfo` -> `api.getNetworkId()`) before any modal can appear.
-      nodeNetworkId.value = undefined;
-      isAeNodeError.value = true;
-    } finally {
+    }
+    if (isCurrent()) {
+      nodeNetworkId.value = networkId;
+      isAeNodeReady.value = !!networkId;
+      isAeNodeError.value = !networkId;
       isAeNodeConnecting.value = false;
     }
     return nodeInstance;
@@ -145,27 +156,45 @@ export function useAeSdk() {
     return nodeNetworkId.value;
   }
 
-  async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
-    isAeSdkUpdating.value = true;
-    const nodeInstance = await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl);
-    aeSdk.pool.delete(oldNetwork.name);
-    aeSdk.addNode(
-      newNetwork.name,
-      nodeInstance!,
-      true,
-    );
+  /** Of quick successive switches only the latest is applied. */
+  function resetNode(newNetwork: INetwork): Promise<void> {
+    latestNodeResetId += 1;
+    const resetId = latestNodeResetId;
+    const isCurrent = () => resetId === latestNodeResetId;
+    isNodeResetting.value = true;
 
-    if (dryAeSdk) {
-      dryAeSdk.pool.delete(oldNetwork.name);
-      // remove the new network if it exists to avoid errors
-      dryAeSdk.pool.delete(newNetwork.name);
-      dryAeSdk.addNode(newNetwork.name, nodeInstance!, true);
-    }
-    isAeSdkUpdating.value = false;
+    return (async () => {
+      try {
+        await aeSdkInitialization;
+        // `newNetwork` is missing while the active network is being removed.
+        if (!isCurrent() || !newNetwork) {
+          return;
+        }
+        const nodeInstance = await createNodeInstance(
+          newNetwork.protocols.aeternity.nodeUrl,
+          isCurrent,
+        );
+        if (!isCurrent()) {
+          return;
+        }
+        if (aeSdk) {
+          replaceNode(aeSdk, newNetwork.name, nodeInstance!);
+        }
+        if (dryAeSdk) {
+          replaceNode(dryAeSdk, newNetwork.name, nodeInstance!);
+        }
+      } catch (error) {
+        handleUnknownError(error);
+      } finally {
+        if (isCurrent()) {
+          isNodeResetting.value = false;
+        }
+      }
+    })();
   }
 
   async function initAeSdk() {
-    isAeSdkUpdating.value = true;
+    isAeSdkInitializing.value = true;
 
     await watchUntilTruthy(areNetworksRestored);
 
@@ -242,7 +271,7 @@ export function useAeSdk() {
       FramesConnection.init(aeSdk);
     }
 
-    isAeSdkUpdating.value = false;
+    isAeSdkInitializing.value = false;
   }
 
   /**
@@ -252,8 +281,11 @@ export function useAeSdk() {
   async function getAeSdk(): Promise<AeSdkSuperhero> {
     if (isAeSdkUpdating.value) {
       await watchUntilTruthy(() => !isAeSdkUpdating.value);
-    } else if (!aeSdk) {
-      await initAeSdk();
+    }
+    // Resets may run before the SDK exists.
+    if (!aeSdk) {
+      aeSdkInitialization ??= initAeSdk();
+      await aeSdkInitialization;
     }
     return aeSdk;
   }
@@ -315,8 +347,8 @@ export function useAeSdk() {
   if (!composableInitialized) {
     composableInitialized = true;
 
-    onNetworkChange((newNetwork, oldNetwork) => {
-      resetNode(oldNetwork, newNetwork);
+    onNetworkChange((newNetwork) => {
+      resetNode(newNetwork);
     });
 
     // Inform connected DAPPs about account change
