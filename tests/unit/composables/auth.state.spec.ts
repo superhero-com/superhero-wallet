@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { nextTick } from 'vue';
+import en from '@/popup/locales/en-US.json';
 
 /**
  * Targeted branch coverage for `useAuth`'s state machine, extending
@@ -52,6 +53,7 @@ describe('useAuth state machine branches', () => {
   let openBiometricLoginModalMock;
   let openPasswordLoginModalMock;
   let openEnableBiometricLoginModalMock;
+  let openConfirmModalMock;
   let loggerWriteMock;
   let walletStorageSetMock;
 
@@ -86,6 +88,7 @@ describe('useAuth state machine branches', () => {
     openBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openPasswordLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openEnableBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
+    openConfirmModalMock = vi.fn(() => new Promise(() => {}));
     loggerWriteMock = vi.fn();
     // Default: pure pass-through to the real WalletStorage.set implementation.
     // Individual tests may override this to inject a failure for one storage key.
@@ -108,6 +111,8 @@ describe('useAuth state machine branches', () => {
         openBiometricLoginModal: (...args) => openBiometricLoginModalMock(...args),
         openPasswordLoginModal: (...args) => openPasswordLoginModalMock(...args),
         openEnableBiometricLoginModal: (...args) => openEnableBiometricLoginModalMock(...args),
+        openConfirmModal: (...args) => openConfirmModalMock(...args),
+        openModal: vi.fn(),
       }),
     }));
     vi.doMock('@/lib/logger', () => ({
@@ -380,7 +385,11 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.mnemonicDecrypted.value).toBe('');
       expect(loggerWriteMock).toHaveBeenCalledWith(expect.objectContaining({
         type: 'api-response',
-        modal: true,
+        modal: false,
+      }));
+      // The key is intact, so this is the "can't decrypt" case, not "key unavailable".
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        msg: en.auth.walletDataUnreadableMessage,
       }));
     });
   });

@@ -1116,7 +1116,10 @@
       "invalidSeed": "你的助记词应由 12 个或更多以空格分隔的单词组成。",
       "seedPlaceHolder": "在此输入或粘贴你的助记词",
       "scanSeedPhrase": "扫描助记词",
-      "restoringAccounts": "正在恢复账户..."
+      "restoringAccounts": "正在恢复账户...",
+      "replaceWalletTitle": "请先重置此设备上的钱包",
+      "replaceWalletMessage": "此设备上的钱包已锁定或无法读取。要创建或导入钱包，请先重置它。重置后，只能通过其助记词恢复该钱包。",
+      "replaceWalletConfirm": "重置钱包"
     },
     "notifications": {
       "superhero": "Superhero.com",
@@ -1471,7 +1474,9 @@
   },
   "auth": {
     "walletDataUnreadableTitle": "钱包数据无法读取",
-    "walletDataUnreadableMessage": "无法解密你的加密钱包数据。通常是因为设备钥匙串已被清空，或应用从未包含钥匙串的备份中恢复。请重新安装应用并使用助记词恢复。"
+    "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
+    "walletDataUnreadableAction": "重置钱包",
+    "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

@@ -375,6 +375,8 @@ export const useAccounts = createCustomScopedComposable(() => {
   function resetAccounts() {
     mnemonic.value = '';
     accountsRaw.value = [];
+    // Ciphertext that can't be decrypted would keep `areAccountsReady` false.
+    accountsPrivateKeysEncrypted.value = null;
     activeAccountGlobalIdx.value = 0;
   }
 

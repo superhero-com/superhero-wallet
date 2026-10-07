@@ -18,6 +18,7 @@ import {
   IS_IOS,
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
+  MODAL_RESET_WALLET,
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
@@ -34,6 +35,7 @@ import {
   getOrCreateMobileEncryptionKey,
   getSessionEncryptionKey,
   handleUnknownError,
+  MobileEncryptionKeyMissingError,
   sessionEnd,
   sessionStart,
   watchUntilTruthy,
@@ -75,12 +77,15 @@ export const useAuth = createCustomScopedComposable(() => {
   } = useUi();
   const {
     openBiometricLoginModal,
+    openConfirmModal,
+    openModal,
     openPasswordLoginModal,
     openEnableBiometricLoginModal,
   } = useModals();
 
   let isSessionExpired = false;
   let isManualMobileLockActive = false;
+  let isUnreadableWalletModalOpen = false;
   let sessionExpiresAt: number | null = null;
   let expirationTimeout: NodeJS.Timeout;
 
@@ -243,6 +248,39 @@ export const useAuth = createCustomScopedComposable(() => {
     setEncryptionKey(undefined);
     mnemonicDecrypted.value = '';
     isAuthenticated.value = false;
+  }
+
+  /**
+   * The stored mnemonic can't be decrypted on this device, or its key can't be read.
+   * Reinstalling doesn't help on iOS (the Keychain survives it), so offer the in-app reset.
+   */
+  function surfaceUnreadableWalletData(error: unknown) {
+    const message = (error instanceof MobileEncryptionKeyMissingError)
+      ? t('auth.walletKeyUnavailableMessage')
+      : t('auth.walletDataUnreadableMessage');
+    handleUnknownError(error);
+    Logger.write({
+      title: t('auth.walletDataUnreadableTitle'),
+      message,
+      type: 'api-response',
+      modal: false,
+    });
+    // Every navigation re-runs `checkUserAuth`, so don't stack modals.
+    if (isUnreadableWalletModalOpen) {
+      return;
+    }
+    isUnreadableWalletModalOpen = true;
+    openConfirmModal({
+      title: t('auth.walletDataUnreadableTitle'),
+      msg: message,
+      icon: 'critical',
+      buttonMessage: t('auth.walletDataUnreadableAction'),
+    })
+      .then(() => openModal(MODAL_RESET_WALLET))
+      .catch(() => { /* NOOP - dismissed */ })
+      .finally(() => {
+        isUnreadableWalletModalOpen = false;
+      });
   }
 
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
@@ -524,8 +562,16 @@ export const useAuth = createCustomScopedComposable(() => {
          * publish the decrypted mnemonic until the gate has succeeded.
          */
         if (!encryptionKey.value) {
-          const mobileKey = await getOrCreateMobileEncryptionKey();
-          setEncryptionKey(mobileKey);
+          try {
+            const mobileKey = await getOrCreateMobileEncryptionKey();
+            setEncryptionKey(mobileKey);
+          } catch (error) {
+            if (!(error instanceof MobileEncryptionKeyMissingError)) {
+              throw error;
+            }
+            surfaceUnreadableWalletData(error);
+            return;
+          }
         }
         if (
           (isBiometricLoginEnabled.value || isManualMobileLockActive)
@@ -570,13 +616,7 @@ export const useAuth = createCustomScopedComposable(() => {
              * without authenticating — the outer `finally` clears
              * `isAuthenticating`.
              */
-            handleUnknownError(error);
-            Logger.write({
-              title: t('auth.walletDataUnreadableTitle'),
-              message: t('auth.walletDataUnreadableMessage'),
-              type: 'api-response',
-              modal: true,
-            });
+            surfaceUnreadableWalletData(error);
             return;
           }
         } else {
@@ -729,12 +769,19 @@ export const useAuth = createCustomScopedComposable(() => {
      * `encryptionKey` to work against — on mobile we now encrypt those
      * blobs instead of passing them through plaintext via the old
      * `IS_MOBILE_APP` bypass. The key-or-create is idempotent and shares
-     * an in-memory cache with the mnemonic-migration hook, so no second
-     * Keychain round-trip happens.
+     * an in-memory cache with the mnemonic-migration hook, so once the key
+     * is read no second Keychain round-trip happens.
      */
     if (IS_MOBILE_APP && !encryptionKey.value) {
-      const mobileKey = await getOrCreateMobileEncryptionKey();
-      setEncryptionKey(mobileKey);
+      try {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      } catch (error) {
+        // Reported by `checkUserAuth`.
+        if (!(error instanceof MobileEncryptionKeyMissingError)) {
+          throw error;
+        }
+      }
     }
 
     await watchUntilTruthy(() => mnemonic.value);

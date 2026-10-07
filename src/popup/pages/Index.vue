@@ -99,8 +99,9 @@ import {
   IS_WEB,
   MODAL_ACCOUNT_IMPORT,
   MODAL_PROTOCOL_SELECT,
+  MODAL_RESET_WALLET,
 } from '@/constants';
-import { watchUntilTruthy } from '@/utils';
+import { handleUnknownError, watchUntilTruthy } from '@/utils';
 import {
   useAccounts,
   useAuth,
@@ -135,18 +136,42 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
     } = useAccounts();
     const {
+      isAuthenticated,
       mnemonic,
       generateMnemonic,
       setMnemonicAndInitializeAuthentication,
     } = useAuth();
-    const { openModal } = useModals();
+    const { openConfirmModal, openModal } = useModals();
     const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
 
     let isWalletNew = false;
 
+    /**
+     * On mobile this page is also reachable with a locked or unreadable wallet stored.
+     * Replacing it in place would keep its imported accounts, so offer the reset instead.
+     * Resolves `true` when such a wallet is in the way.
+     */
+    async function offerResetOfLockedWallet(): Promise<boolean> {
+      if (!IS_MOBILE_APP || !mnemonic.value || isAuthenticated.value) {
+        return false;
+      }
+      await openConfirmModal({
+        title: t('pages.index.replaceWalletTitle'),
+        msg: t('pages.index.replaceWalletMessage'),
+        icon: 'warning',
+        buttonMessage: t('pages.index.replaceWalletConfirm'),
+      })
+        .then(() => openModal(MODAL_RESET_WALLET))
+        .catch(() => { /* NOOP - dismissed */ });
+      return true;
+    }
+
     async function createWallet() {
+      if (await offerResetOfLockedWallet()) {
+        return;
+      }
       isWalletNew = true;
 
       const selectedProtocol = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
@@ -167,6 +192,9 @@ export default defineComponent({
     }
 
     async function importWallet() {
+      if (await offerResetOfLockedWallet()) {
+        return;
+      }
       isWalletNew = true;
       await openModal(MODAL_ACCOUNT_IMPORT);
     }
@@ -177,14 +205,20 @@ export default defineComponent({
     onMounted(async () => {
       if (IS_IOS && IS_MOBILE_APP) {
         await watchUntilTruthy(mnemonic);
-        if (mnemonic.value && !isWalletNew) {
+        // A locked or unreadable wallet has no seed to discover accounts with.
+        if (mnemonic.value && !isWalletNew && isAuthenticated.value) {
           setLoaderVisible(true);
-          await discoverAccounts();
-          setActiveAccountByGlobalIdx(0);
-          if (isLoggedIn.value) {
-            router.push(loginTargetLocation.value);
+          try {
+            await discoverAccounts();
+            setActiveAccountByGlobalIdx(0);
+            if (isLoggedIn.value) {
+              router.push(loginTargetLocation.value);
+            }
+          } catch (error) {
+            handleUnknownError(error);
+          } finally {
+            setLoaderVisible(false);
           }
-          setLoaderVisible(false);
         }
       }
     });

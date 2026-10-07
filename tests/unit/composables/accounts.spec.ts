@@ -217,4 +217,29 @@ describe('useAccounts', () => {
     // (a locked wallet legitimately can't consider accounts fully ready).
     expect(accounts.areAccountsReady.value).toBe(false);
   });
+
+  it('becomes ready after a reset when the imported private keys cannot be decrypted', async () => {
+    seedAccountsRaw([
+      { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
+    ]);
+    await seedImportedEthAccount({
+      type: ACCOUNT_TYPES.privateKey,
+      isRestored: false,
+      protocol: PROTOCOLS.ethereum,
+      privateKey: Buffer.from(IMPORTED_ETH_PRIVATE_KEY_HEX, 'hex'),
+    });
+    encryptionKeyRef.value = await generateEncryptionKey('another-password', generateSalt());
+
+    const accounts = await boot();
+    await watchUntilTruthy(accounts.areAccountsRestored);
+    await flushAsync();
+    expect(accounts.areAccountsReady.value).toBe(false);
+
+    // The router guard waits for this, so the reset couldn't navigate away and reload.
+    accounts.resetAccounts();
+    await flushAsync();
+
+    expect(accounts.areAccountsReady.value).toBe(true);
+    expect(accounts.accounts.value).toEqual([]);
+  });
 });
