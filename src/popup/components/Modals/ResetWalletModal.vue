@@ -59,7 +59,7 @@
 import { defineComponent, PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { IS_MOBILE_APP } from '@/constants';
+import { IS_EXTENSION, IS_MOBILE_APP, POPUP_METHODS } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
@@ -117,6 +117,12 @@ export default defineComponent({
       await router.push({ name: ROUTE_INDEX });
 
       props.resolve();
+      if (IS_EXTENSION) {
+        // The offscreen tab still holds the old wallet's key and data in memory.
+        await browser.runtime
+          .sendMessage({ target: 'offscreen', method: POPUP_METHODS.reload })
+          .catch(() => {}); // no offscreen tab
+      }
       window.location.reload();
     }
 

@@ -36,7 +36,6 @@ import {
   handleUnknownError,
   sessionEnd,
   sessionStart,
-  subscribeToSessionEncryptionKey,
   watchUntilTruthy,
 } from '@/utils';
 
@@ -359,56 +358,84 @@ export const useAuth = createCustomScopedComposable(() => {
     markAuthenticated();
   }
 
-  /**
-   * Try to obtain the encryption key from extension's background process.
-   *
-   * Used exclusively from the offscreen tab. Concurrent invocations dedupe
-   * onto a single in-flight promise so that the salt watcher and the
-   * `browser.storage.session` change listener (set up below) cannot
-   * accumulate parallel `setInterval`s; without this guard, every wake-up
-   * would leak another timer that survives the bounded
-   * `CHECK_FOR_SESSION_KEY_TIMEOUT` budget.
-   */
-  let backgroundEncryptionKeySync: Promise<void> | null = null;
-  async function syncBackgroundEncryptionKey() {
-    if (backgroundEncryptionKeySync) {
-      return backgroundEncryptionKeySync;
+  async function restoreEncryptionKeyFromBackground(): Promise<boolean> {
+    try {
+      const sessionEncryptionKey = await getSessionEncryptionKey();
+      // Read once: a password change may replace it while we decrypt.
+      const ciphertext = mnemonicEncrypted.value;
+      if (!sessionEncryptionKey || !ciphertext) {
+        return false;
+      }
+      mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, ciphertext);
+      // Keep our object for the same key: `decryptedComputed` takes a new one for a rotation.
+      const isKeyUnchanged = !!encryptionKey.value && await decrypt(
+        encryptionKey.value,
+        ciphertext,
+      ).then(() => true, () => false);
+      if (!isKeyUnchanged) {
+        setEncryptionKey(sessionEncryptionKey);
+      }
+      return true;
+    } catch (error) {
+      handleUnknownError(error);
+      return false;
     }
-    backgroundEncryptionKeySync = new Promise<void>((resolve) => {
-      let interval: ReturnType<typeof setInterval>;
-      let timeout: ReturnType<typeof setTimeout>;
-      const finish = () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
+  }
+
+  let backgroundEncryptionKeySync: Promise<void> | null = null;
+  let backgroundEncryptionKeySyncDeadline = 0;
+  let isBackgroundEncryptionKeySyncRequested = false;
+  let wakeBackgroundEncryptionKeySync: (() => void) | undefined;
+
+  function waitForNextBackgroundEncryptionKeyAttempt(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      const timer = setTimeout(resolve, ms);
+      wakeBackgroundEncryptionKeySync = () => {
+        clearTimeout(timer);
         resolve();
       };
-      interval = setInterval(async () => {
-        const sessionEncryptionKey = await getSessionEncryptionKey();
-        /**
-         * Guard against `mnemonicEncrypted.value` not having been
-         * restored yet — when the salt watcher fires immediately after
-         * storage restore, the mnemonic ref is restored independently
-         * and may still be empty for one tick. Without the guard,
-         * `decrypt(key, null!)` would throw and `setEncryptionKey`
-         * would never be called.
-         */
-        if (sessionEncryptionKey && mnemonicEncrypted.value) {
-          try {
-            mnemonicDecrypted.value = await decrypt(
-              sessionEncryptionKey,
-              mnemonicEncrypted.value,
-            );
-            setEncryptionKey(sessionEncryptionKey);
-            finish();
-          } catch (error) {
-            handleUnknownError(error);
-          }
-        }
-      }, CHECK_FOR_SESSION_KEY_INTERVAL);
-      timeout = setTimeout(finish, CHECK_FOR_SESSION_KEY_TIMEOUT);
-    }).finally(() => {
-      backgroundEncryptionKeySync = null;
     });
+  }
+
+  async function pollBackgroundEncryptionKey() {
+    try {
+      for (;;) {
+        isBackgroundEncryptionKeySyncRequested = false;
+        // eslint-disable-next-line no-await-in-loop
+        const isRestored = await restoreEncryptionKeyFromBackground();
+        // Requested again during the attempt (e.g. a new key): retry right away.
+        if (!isBackgroundEncryptionKeySyncRequested) {
+          if (isRestored) {
+            return;
+          }
+          const remaining = backgroundEncryptionKeySyncDeadline - performance.now();
+          if (remaining <= 0) {
+            return;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          await waitForNextBackgroundEncryptionKeyAttempt(
+            Math.min(CHECK_FOR_SESSION_KEY_INTERVAL, remaining),
+          );
+          wakeBackgroundEncryptionKeySync = undefined;
+        }
+      }
+    } finally {
+      // In the tick the loop ends, so no request joins a finished loop.
+      backgroundEncryptionKeySync = null;
+    }
+  }
+
+  /**
+   * Offscreen tab only: polls the background for the session key until
+   * `CHECK_FOR_SESSION_KEY_TIMEOUT` after the latest call, which also triggers an attempt.
+   */
+  function syncBackgroundEncryptionKey(): Promise<void> {
+    backgroundEncryptionKeySyncDeadline = performance.now() + CHECK_FOR_SESSION_KEY_TIMEOUT;
+    isBackgroundEncryptionKeySyncRequested = true;
+    wakeBackgroundEncryptionKeySync?.();
+    if (!backgroundEncryptionKeySync) {
+      backgroundEncryptionKeySync = pollBackgroundEncryptionKey();
+    }
     return backgroundEncryptionKeySync;
   }
 
@@ -722,22 +749,11 @@ export const useAuth = createCustomScopedComposable(() => {
   })();
 
   if (IS_OFFSCREEN_TAB) {
+    // Later logins sync through the `CONNECTION_TYPES.SESSION` port (`offscreen/wallet.ts`).
     watch(
       encryptionSalt,
       () => syncBackgroundEncryptionKey(),
     );
-    /**
-     * The salt watcher above only fires when `encryptionSalt` changes —
-     * realistically once per password setup — and `syncBackgroundEncryptionKey`
-     * stops polling after `CHECK_FOR_SESSION_KEY_TIMEOUT`. Without an
-     * additional wake-up source, an offscreen tab that boots before the
-     * user authenticates would give up after 30 s and never recover the
-     * session key, leaving Ledger / WalletConnect / EVM RPC handlers
-     * unable to decrypt the mnemonic. Subscribe to the popup's
-     * `sessionStart()` write into `browser.storage.session` so the
-     * offscreen reacts the moment the user logs in, no matter how late.
-     */
-    subscribeToSessionEncryptionKey(syncBackgroundEncryptionKey);
   }
 
   /**
@@ -820,6 +836,7 @@ export const useAuth = createCustomScopedComposable(() => {
     logout,
     setMnemonicAndInitializeAuthentication,
     setPassword,
+    syncBackgroundEncryptionKey,
     updatePassword,
   };
 });
