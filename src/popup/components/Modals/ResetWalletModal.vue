@@ -119,7 +119,9 @@ export default defineComponent({
       props.resolve();
       if (IS_EXTENSION) {
         // The offscreen tab still holds the old wallet's key and data in memory.
-        browser.runtime.sendMessage({ target: 'offscreen', method: POPUP_METHODS.reload });
+        await browser.runtime
+          .sendMessage({ target: 'offscreen', method: POPUP_METHODS.reload })
+          .catch(() => {}); // no offscreen tab
       }
       window.location.reload();
     }

@@ -5,7 +5,7 @@ describe('ResetWalletModal', () => {
   const originalBrowser = globalThis.browser;
   const originalLocation = window.location;
 
-  async function resetWallet({ isExtension }) {
+  async function mountResetWallet({ isExtension, sendMessage = vi.fn(() => Promise.resolve()) }) {
     vi.resetModules();
     vi.doMock('@/constants', async () => ({
       ...(await vi.importActual('@/constants')),
@@ -24,14 +24,13 @@ describe('ResetWalletModal', () => {
     const { default: ResetWalletModal } = await import('@/popup/components/Modals/ResetWalletModal.vue');
     // Set after the import, which re-runs `initPolyfills` and replaces `browser`.
     globalThis.browser = {
-      runtime: { sendMessage: vi.fn(() => Promise.resolve()) },
+      runtime: { sendMessage },
       storage: { local: { clear: vi.fn(() => Promise.resolve()) } },
     };
-    const wrapper = shallowMount(ResetWalletModal, {
+    return shallowMount(ResetWalletModal, {
       props: { resolve: vi.fn(), reject: vi.fn() },
       global: { mocks: { $t: (key) => key } },
     });
-    await wrapper.vm.onReset();
   }
 
   beforeEach(() => {
@@ -46,18 +45,36 @@ describe('ResetWalletModal', () => {
     Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
   });
 
-  it('reloads the offscreen tab in the extension so it drops the old wallet', async () => {
-    await resetWallet({ isExtension: true });
+  it('reloads the offscreen tab in the extension before reloading itself', async () => {
+    let offscreenReloaded;
+    const sendMessage = vi.fn(() => new Promise((resolve) => { offscreenReloaded = resolve; }));
+    const wrapper = await mountResetWallet({ isExtension: true, sendMessage });
 
-    expect(globalThis.browser.runtime.sendMessage).toHaveBeenCalledWith({
+    const resetting = wrapper.vm.onReset();
+    await vi.waitFor(() => expect(sendMessage).toHaveBeenCalledWith({
       target: 'offscreen',
       method: 'reload',
-    });
+    }));
+    expect(window.location.reload).not.toHaveBeenCalled();
+
+    offscreenReloaded();
+    await resetting;
+    expect(window.location.reload).toHaveBeenCalled();
+  });
+
+  it('still reloads itself when no offscreen tab answers', async () => {
+    const sendMessage = vi.fn(() => Promise.reject(new Error('Receiving end does not exist')));
+    const wrapper = await mountResetWallet({ isExtension: true, sendMessage });
+
+    await wrapper.vm.onReset();
+
     expect(window.location.reload).toHaveBeenCalled();
   });
 
   it('does not message an offscreen tab outside the extension', async () => {
-    await resetWallet({ isExtension: false });
+    const wrapper = await mountResetWallet({ isExtension: false });
+
+    await wrapper.vm.onReset();
 
     expect(globalThis.browser.runtime.sendMessage).not.toHaveBeenCalled();
     expect(window.location.reload).toHaveBeenCalled();

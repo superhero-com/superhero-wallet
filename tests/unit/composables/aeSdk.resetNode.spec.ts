@@ -210,21 +210,28 @@ describe('useAeSdk().resetNode', () => {
     expect(composable.nodeNetworkId.value).toBe('ae_B');
   });
 
-  it('does not hand out a just created SDK before a pending switch is applied', async () => {
+  it('hands out an SDK created during a switch only once the switch is applied', async () => {
     const composable = useAeSdk();
     const creating = composable.getAeSdk();
+    await vi.waitFor(() => expect(statusRequests(NETWORKS.A)).toBe(1));
+    activeNetworkName.value = 'B';
     const switching = composable.resetNode(NETWORKS.B);
     respond(NETWORKS.A);
-    const aeSdk = await creating;
-
-    const sdkAfterSwitch = composable.getAeSdk();
     await vi.waitFor(() => expect(statusRequests(NETWORKS.B)).toBe(1));
+    const callers = [creating, composable.getAeSdk()];
+    let handedOut = 0;
+    callers.forEach((caller) => caller.then(() => { handedOut += 1; }));
+
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    expect(handedOut).toBe(0);
     expect(composable.isAeSdkReady.value).toBeFalsy();
 
     respond(NETWORKS.B);
     await switching;
-    await expect(sdkAfterSwitch).resolves.toBe(aeSdk);
-    expect(nodesOf(aeSdk).names).toEqual(['B']);
+    const [first, second] = await Promise.all(callers);
+    expect(second).toBe(first);
+    expect(nodesOf(first)).toEqual({ names: ['B'], selectedUrl: 'https://b.example' });
+    expect(composable.nodeNetworkId.value).toBe('ae_B');
   });
 
   it('creates one SDK for callers that waited for a switch made before it existed', async () => {
@@ -241,6 +248,22 @@ describe('useAeSdk().resetNode', () => {
     expect(second).toBe(first);
     expect(createdSdks).toEqual([first]);
     expect(nodesOf(first)).toEqual({ names: ['B'], selectedUrl: 'https://b.example' });
+  });
+
+  it('leaves a consistent node state when a switch without a network supersedes one in flight', async () => {
+    const { composable, aeSdk } = await createSdkOn(NETWORKS.A);
+
+    composable.resetNode(NETWORKS.B);
+    await vi.waitFor(() => expect(statusRequests(NETWORKS.B)).toBe(1));
+    await composable.resetNode(undefined);
+    respond(NETWORKS.B);
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+    expect(nodesOf(aeSdk).names).toEqual(['A']);
+    expect(composable.nodeNetworkId.value).toBe('ae_A');
+    expect(composable.isAeNodeConnecting.value).toBe(false);
+    expect(composable.isAeNodeReady.value).toBe(true);
+    expect(composable.isAeSdkReady.value).toBeTruthy();
   });
 
   it('switches the dry SDK used for multisig as well', async () => {

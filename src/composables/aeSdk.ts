@@ -188,6 +188,12 @@ export function useAeSdk() {
       } finally {
         if (isCurrent()) {
           isNodeResetting.value = false;
+          // Set by a superseded reset, and this one made no node.
+          if (isAeNodeConnecting.value) {
+            isAeNodeConnecting.value = false;
+            isAeNodeReady.value = !!nodeNetworkId.value;
+            isAeNodeError.value = !nodeNetworkId.value;
+          }
         }
       }
     })();
@@ -198,13 +204,15 @@ export function useAeSdk() {
 
     await watchUntilTruthy(areNetworksRestored);
 
+    // Read with the URL: a switch during the status request changes it.
+    const nodeName = activeNetworkName.value;
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
     aeSdk = new AeSdkSuperhero(
       {
         name: 'Superhero',
         nodes: [{
-          name: activeNetworkName.value,
+          name: nodeName,
           instance: nodeInstance!,
         }],
         id: APP_NAME,
@@ -279,13 +287,16 @@ export function useAeSdk() {
    * TODO: this probably could be replaced with a computed prop.
    */
   async function getAeSdk(): Promise<AeSdkSuperhero> {
-    if (isAeSdkUpdating.value) {
-      await watchUntilTruthy(() => !isAeSdkUpdating.value);
-    }
-    // Resets may run before the SDK exists.
-    if (!aeSdk) {
-      aeSdkInitialization ??= initAeSdk();
-      await aeSdkInitialization;
+    // A switch requested during the SDK creation is applied right after it.
+    while (isAeSdkUpdating.value || !aeSdk) {
+      if (isAeSdkUpdating.value) {
+        // eslint-disable-next-line no-await-in-loop
+        await watchUntilTruthy(() => !isAeSdkUpdating.value);
+      } else {
+        aeSdkInitialization ??= initAeSdk();
+        // eslint-disable-next-line no-await-in-loop
+        await aeSdkInitialization;
+      }
     }
     return aeSdk;
   }

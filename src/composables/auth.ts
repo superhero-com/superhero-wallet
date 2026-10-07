@@ -361,15 +361,16 @@ export const useAuth = createCustomScopedComposable(() => {
   async function restoreEncryptionKeyFromBackground(): Promise<boolean> {
     try {
       const sessionEncryptionKey = await getSessionEncryptionKey();
-      // The mnemonic is restored independently of the salt and may still be empty.
-      if (!sessionEncryptionKey || !mnemonicEncrypted.value) {
+      // Read once: a password change may replace it while we decrypt.
+      const ciphertext = mnemonicEncrypted.value;
+      if (!sessionEncryptionKey || !ciphertext) {
         return false;
       }
-      mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonicEncrypted.value);
+      mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, ciphertext);
       // Keep our object for the same key: `decryptedComputed` takes a new one for a rotation.
       const isKeyUnchanged = !!encryptionKey.value && await decrypt(
         encryptionKey.value,
-        mnemonicEncrypted.value,
+        ciphertext,
       ).then(() => true, () => false);
       if (!isKeyUnchanged) {
         setEncryptionKey(sessionEncryptionKey);

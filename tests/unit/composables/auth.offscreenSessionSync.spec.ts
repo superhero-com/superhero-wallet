@@ -145,6 +145,43 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC);
   });
 
+  it('keeps the current key when the mnemonic is re-encrypted during an attempt', async () => {
+    const { STORAGE_KEYS } = await import('@/constants');
+    const { WalletStorage } = await import('@/lib/WalletStorage');
+    const first = await createSessionKey();
+    await encryptMnemonicWith(first.key);
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(first.exported);
+    await auth.syncBackgroundEncryptionKey();
+    const firstKey = auth.encryptionKey.value;
+    auth.secureLoginTimeoutDecrypted.value = '600000';
+    await vi.waitFor(() => expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBeTruthy());
+    const storedTimeout = WalletStorage.get(STORAGE_KEYS.secureLoginTimeout);
+
+    // Password change: the new mnemonic arrives while this attempt decrypts with the old key.
+    const second = await createSessionKey();
+    const { subtle } = globalThis.crypto;
+    const decryptOriginal = subtle.decrypt.bind(subtle);
+    vi.spyOn(subtle, 'decrypt').mockImplementationOnce(async (...args) => {
+      await encryptMnemonicWith(second.key);
+      return decryptOriginal(...args);
+    });
+    await auth.syncBackgroundEncryptionKey();
+
+    // A new object of the old key would re-encrypt the secrets under the old password.
+    expect(auth.encryptionKey.value).toBe(firstKey);
+    await new Promise((resolve) => { setTimeout(resolve, 50); });
+    expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBe(storedTimeout);
+
+    // The new key arrives: the real rotation.
+    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(second.exported);
+    await auth.syncBackgroundEncryptionKey();
+    expect(auth.encryptionKey.value).not.toBe(firstKey);
+    await vi.waitFor(async () => {
+      const stored = WalletStorage.get(STORAGE_KEYS.secureLoginTimeout);
+      expect(await crypto.decrypt(second.key, stored)).toBe('600000');
+    });
+  });
+
   it('switches to a new key (password change) once the mnemonic is encrypted with it', async () => {
     const first = await createSessionKey();
     await encryptMnemonicWith(first.key);
