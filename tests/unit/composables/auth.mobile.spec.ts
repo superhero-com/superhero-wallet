@@ -338,6 +338,56 @@ describe('useAuth on mobile', () => {
     expect(authAfterRelaunch.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
   });
 
+  it('offers a reload instead of writing a new seed over one that failed to load', async () => {
+    const { auth: authGen1 } = await boot();
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const storedMnemonic = await SecureMobileStorage.get(STORAGE_KEYS.mnemonic);
+
+    // The seed reads back empty at startup, and can be read again later.
+    await SecureMobileStorage.remove(STORAGE_KEYS.mnemonic);
+    const { auth } = await restart();
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+    await SecureMobileStorage.set(STORAGE_KEYS.mnemonic, storedMnemonic);
+
+    const originalLocation = window.location;
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { ...originalLocation, reload },
+    });
+    openConfirmModalMock.mockResolvedValueOnce(undefined);
+    try {
+      await expect(auth.setMnemonicAndInitializeAuthentication(OTHER_VALID_MNEMONIC))
+        .rejects.toMatchObject({ name: 'StoredWalletFoundError' });
+      await flushAsync();
+      expect(reload).toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+    }
+
+    expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+      title: en.auth.storedWalletFoundTitle,
+    }));
+    expect(await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)).toBe(storedMnemonic);
+    const { auth: authAfterReload } = await restart();
+    await authAfterReload.checkUserAuth();
+    expect(authAfterReload.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+  });
+
+  it('replaces a loaded seed when a wallet is imported again', async () => {
+    const { auth: authGen1 } = await boot();
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    await authGen1.setMnemonicAndInitializeAuthentication(OTHER_VALID_MNEMONIC);
+
+    const { auth } = await restart();
+    await auth.checkUserAuth();
+
+    expect(openConfirmModalMock).not.toHaveBeenCalled();
+    expect(auth.mnemonicDecrypted.value).toBe(OTHER_VALID_MNEMONIC);
+  });
+
   it('offers the wallet reset again on the next auth check after it was dismissed', async () => {
     openConfirmModalMock.mockRejectedValueOnce(new Error('dismissed'));
     const { auth } = await bootWithMismatchedMobileKey();

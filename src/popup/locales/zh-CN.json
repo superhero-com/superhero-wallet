@@ -1119,7 +1119,9 @@
       "restoringAccounts": "正在恢复账户...",
       "replaceWalletTitle": "请先重置此设备上的钱包",
       "replaceWalletMessage": "此设备上的钱包已锁定或无法读取。要创建或导入钱包，请先重置它。重置后，只能通过其助记词恢复该钱包。",
-      "replaceWalletConfirm": "重置钱包"
+      "replaceWalletConfirm": "重置钱包",
+      "restoreIncompleteTitle": "部分账户可能缺失",
+      "restoreIncompleteText": "恢复此钱包时未能检查你的全部账户。请通过“添加账户”添加缺失的账户。"
     },
     "notifications": {
       "superhero": "Superhero.com",
@@ -1476,7 +1478,10 @@
     "walletDataUnreadableTitle": "钱包数据无法读取",
     "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
     "walletDataUnreadableAction": "重置钱包",
-    "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。"
+    "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
+    "storedWalletFoundTitle": "在此设备上找到钱包",
+    "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
+    "storedWalletFoundAction": "重新加载"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

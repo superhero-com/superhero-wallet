@@ -19,7 +19,12 @@
 import { ref } from 'vue';
 import { mnemonicToSeedSync } from '@scure/bip39';
 
-import { PROTOCOLS, ACCOUNT_TYPES, STORAGE_KEYS } from '@/constants';
+import {
+  PROTOCOLS,
+  ACCOUNT_TYPES,
+  MODAL_PROTOCOL_SELECT,
+  STORAGE_KEYS,
+} from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { watchUntilTruthy } from '@/utils';
 import { generateEncryptionKey, generateSalt, encrypt } from '@/utils/crypto';
@@ -48,6 +53,7 @@ describe('useAccounts', () => {
   let mnemonicSeedRef;
   let isMnemonicRestoredRef;
   let encryptionKeyRef;
+  let openModalMock;
 
   beforeEach(() => {
     vi.resetModules();
@@ -56,6 +62,14 @@ describe('useAccounts', () => {
     mnemonicSeedRef = ref(MNEMONIC_SEED);
     isMnemonicRestoredRef = ref(true);
     encryptionKeyRef = ref(undefined);
+    openModalMock = vi.fn().mockRejectedValue(new Error('No modals in this test'));
+    vi.doMock('@/composables/modals', async (importOriginal) => {
+      const actual = await importOriginal();
+      return {
+        ...actual,
+        useModals: () => ({ ...actual.useModals(), openModal: openModalMock }),
+      };
+    });
 
     // Must be registered before any dynamic import below - `registerAdapters` and the
     // `@/composables` barrel eagerly load `accounts.ts`, which imports `useAuth` from
@@ -241,5 +255,97 @@ describe('useAccounts', () => {
 
     expect(accounts.areAccountsReady.value).toBe(true);
     expect(accounts.accounts.value).toEqual([]);
+  });
+
+  describe('discoverAccounts', () => {
+    /**
+     * Every adapter reports `lastUsedIndex` (or none) once the returned `release` is called;
+     * the `stalled` ones never report.
+     */
+    async function stubDiscovery(lastUsedIndex, stalled = []) {
+      const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+      const { PROTOCOL_LIST } = await import('@/constants');
+      let release;
+      const released = new Promise((resolve) => { release = resolve; });
+      PROTOCOL_LIST.forEach((protocol) => {
+        vi.spyOn(ProtocolAdapterFactory.getAdapter(protocol), 'discoverLastUsedAccountIndex')
+          .mockImplementation(() => (stalled.includes(protocol)
+            ? new Promise(() => {})
+            : released.then(() => lastUsedIndex[protocol] ?? -1)));
+      });
+      return release;
+    }
+
+    it('waits for the discovery when no timeout is given', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsRestored);
+      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 0 });
+      let isSettled = false;
+      const discovering = accounts.discoverAccounts().finally(() => { isSettled = true; });
+
+      await flushAsync();
+      expect(isSettled).toBe(false);
+      release();
+
+      await expect(discovering).resolves.toBe(true);
+      expect(accounts.accounts.value.map(({ protocol }) => protocol))
+        .toEqual([PROTOCOLS.aeternity]);
+    });
+
+    it('adds the found accounts when the discovery finishes in time', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsRestored);
+      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 });
+      release();
+
+      await expect(accounts.discoverAccounts({ timeout: 1000 })).resolves.toBe(true);
+      expect(accounts.accounts.value.map(({ protocol }) => protocol))
+        .toEqual([PROTOCOLS.aeternity, PROTOCOLS.aeternity]);
+    });
+
+    it('adds nothing when it times out, even once the discovery finishes later', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsRestored);
+      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 });
+
+      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
+      release();
+      await flushAsync();
+
+      expect(accounts.accounts.value).toEqual([]);
+    });
+
+    it('asks for a protocol when a complete discovery finds nothing', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsRestored);
+      const release = await stubDiscovery({});
+      release();
+      openModalMock.mockResolvedValueOnce(PROTOCOLS.ethereum);
+
+      await expect(accounts.discoverAccounts({ timeout: 1000 })).resolves.toBe(true);
+      expect(openModalMock).toHaveBeenCalledWith(MODAL_PROTOCOL_SELECT, expect.anything());
+      expect(accounts.accounts.value.map(({ protocol }) => protocol))
+        .toEqual([PROTOCOLS.ethereum]);
+    });
+
+    it('does not ask for a protocol when the discovery that found nothing was cut short', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsRestored);
+      await stubDiscovery({});
+
+      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
+      expect(openModalMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps the protocols that finished when another one times out', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsRestored);
+      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 }, [PROTOCOLS.ethereum]);
+      release();
+
+      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
+      expect(accounts.accounts.value.map(({ protocol }) => protocol))
+        .toEqual([PROTOCOLS.aeternity, PROTOCOLS.aeternity]);
+    });
   });
 });

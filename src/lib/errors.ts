@@ -7,6 +7,14 @@ export class RejectedByUserError extends Error {
   }
 }
 
+/** A new seed was about to be written over one that is still stored on the device. */
+export class StoredWalletFoundError extends Error {
+  constructor() {
+    super('A wallet is still stored on this device');
+    this.name = this.constructor.name;
+  }
+}
+
 export class NoUserMediaPermissionError extends Error {
   constructor() {
     super('No UserMedia permission');

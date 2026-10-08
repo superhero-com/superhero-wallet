@@ -11,6 +11,8 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';
+import { StoredWalletFoundError } from '@/lib/errors';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { WalletStorage } from '@/lib/WalletStorage';
 import {
   AUTHENTICATION_TIMEOUTS,
@@ -283,6 +285,24 @@ export const useAuth = createCustomScopedComposable(() => {
       });
   }
 
+  /**
+   * On iOS the seed read at startup can come back empty while it is still stored.
+   * Writing a new one would replace it, so offer to reload and read it again.
+   */
+  async function assertNoUnloadedWalletStored() {
+    if (mnemonic.value || !await SecureMobileStorage.get<string>(STORAGE_KEYS.mnemonic)) {
+      return;
+    }
+    openConfirmModal({
+      title: t('auth.storedWalletFoundTitle'),
+      msg: t('auth.storedWalletFoundMessage'),
+      buttonMessage: t('auth.storedWalletFoundAction'),
+    })
+      .then(() => window.location.reload())
+      .catch(() => { /* NOOP - dismissed */ });
+    throw new StoredWalletFoundError();
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     if (IS_MOBILE_APP) {
       /**
@@ -361,6 +381,7 @@ export const useAuth = createCustomScopedComposable(() => {
        * names, secure-login timeout — is also encrypted via the shared
        * reactive key.
        */
+      await assertNoUnloadedWalletStored();
       if (!encryptionKey.value) {
         const mobileKey = await getOrCreateMobileEncryptionKey();
         setEncryptionKey(mobileKey);
