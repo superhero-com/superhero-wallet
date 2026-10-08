@@ -693,11 +693,11 @@ export function decryptedComputed(
   let updating = false;
   const decrypted = ref(defaultVal);
 
-  async function setEncryptedState(val: string) {
+  async function setEncryptedState(val: string, encryptionKey = key.value) {
     updating = true;
     try {
       // eslint-disable-next-line no-param-reassign
-      encryptedState.value = await encrypt(key.value!, val);
+      encryptedState.value = await encrypt(encryptionKey!, val);
     } catch (e) {
       handleUnknownError(e);
     } finally {
@@ -733,7 +733,8 @@ export function decryptedComputed(
           }
           decrypted.value = plaintext;
           options.onDecrypted?.(plaintext);
-          await setEncryptedState(plaintext);
+          // Under the key the salt on disk derives, even if a lock cleared `key` meanwhile.
+          await setEncryptedState(plaintext, newKey);
         } else if (newKey && newState) {
           decrypted.value = await decrypt(newKey, newState);
           options.onDecrypted?.(decrypted.value);
