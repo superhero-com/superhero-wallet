@@ -55,8 +55,10 @@ vi.mock('../../src/composables', () => ({
   useModals: vi.fn(() => ({
     openModal: vi.fn(),
   })),
+  useNotifications: vi.fn(() => ({
+    addWalletNotification: vi.fn(),
+  })),
   useUi: vi.fn(() => ({
-    setLoaderVisible: vi.fn(),
     loginTargetLocation: vi.fn(),
     isBiometricLoginEnabled: { value: false },
     saveErrorLog: { value: false },

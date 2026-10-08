@@ -329,26 +329,34 @@ export const useAccounts = createCustomScopedComposable(() => {
   /**
    * Establish the last used account index under the actual seed phrase for each of the protocols
    * and collect the raw accounts so they can be stored in the browser storage.
+   * Resolves `false` when `timeout` (ms) elapses first; nothing is added after that.
    */
-  async function discoverAccounts() {
+  async function discoverAccounts({ timeout }: { timeout?: number } = {}): Promise<boolean> {
     const ms = mnemonicSeed.value;
     if (ms == null) throw new Error('Can\'t discover accounts without mnemonic seed');
-    const lastUsedAccountIndexRegistry: number[] = await Promise.all(
-      PROTOCOL_LIST.map(
-        (protocol) => ProtocolAdapterFactory
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // One timer for all the protocols, so a stalled one doesn't discard the others.
+    const timedOut = timeout
+      ? new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), timeout); })
+      : null;
+    const lastUsedAccountIndexRegistry = await Promise.all(
+      PROTOCOL_LIST.map((protocol) => {
+        const discovery = ProtocolAdapterFactory
           .getAdapter(protocol)
-          .discoverLastUsedAccountIndex(ms),
-      ),
-    );
+          .discoverLastUsedAccountIndex(ms);
+        return timedOut ? Promise.race([discovery, timedOut]) : discovery;
+      }),
+    ).finally(() => clearTimeout(timer));
+    const isComplete = lastUsedAccountIndexRegistry.every((index) => index !== null);
 
     PROTOCOL_LIST.forEach((protocol, index) => {
-      for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
+      for (let i = 0; i <= (lastUsedAccountIndexRegistry[index] ?? -1); i += 1) {
         addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       }
     });
 
     // If no accounts was discovered user is asked to choose default protocol account.
-    if (!accountsAddressList.value.length) {
+    if (isComplete && !accountsRaw.value.length) {
       try {
         const protocol = await openModal<Protocol>(MODAL_PROTOCOL_SELECT, {
           title: tg('modals.createAccount.title'),
@@ -357,6 +365,7 @@ export const useAccounts = createCustomScopedComposable(() => {
         addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       } catch (error) { /* NOOP */ }
     }
+    return isComplete;
   }
 
   function getAccountIcon(type: AccountType) {
