@@ -1,4 +1,10 @@
-import { AUTHENTICATION_TIMEOUTS } from '@/constants';
+import { AUTHENTICATION_TIMEOUTS, STORAGE_KEYS } from '@/constants';
+import {
+  encrypt,
+  generateEncryptionKey,
+  generateSalt,
+  prepareStorageKey,
+} from '@/utils';
 import locale from '../../../src/popup/locales/en-US.json';
 import { TEST_ACCOUNT } from '../../fixtures/account';
 
@@ -29,6 +35,58 @@ describe('Test cases for login functionality', () => {
       .shouldRedirect('/settings', '/')
       .shouldRedirect('/transfer', '/')
       .shouldRedirect('/more/about/terms', '/more/about/terms');
+  });
+
+  // E.g. the app closed while a password change re-encrypted them.
+  it('opens the wallet when the imported accounts cannot be decrypted', () => {
+    cy.then(async () => {
+      const lostKey = await generateEncryptionKey('lost-password', generateSalt());
+      return encrypt(lostKey, '[]');
+    }).then((privateKeyAccountsRaw) => {
+      // One of them was the active account.
+      cy.login({ privateKeyAccountsRaw, activeAccountGlobalIdx: 1 });
+    });
+
+    cy.get('[data-cy=balance-info]')
+      .should('be.visible')
+      .urlEquals('/account');
+    cy.contains(locale.modals.unreadablePrivateKeyAccounts.title)
+      .should('not.exist');
+    cy.window()
+      .its('localStorage')
+      .invoke('getItem', prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx]))
+      .should('eq', '0');
+
+    // Importing a key offers to remove them first.
+    cy.get('[data-cy=bullet-switcher-add]')
+      .click()
+      .get('[data-cy=account-card-add]')
+      .click()
+      .get('[data-cy=btn-add-ethereum]')
+      .click()
+      .get('[data-cy=import-private-key]')
+      .click()
+      .get('[data-cy=field-private-key] textarea')
+      .type('aa'.repeat(32))
+      .get('[data-cy=btn-import]')
+      .click();
+    cy.contains('.modal', locale.modals.unreadablePrivateKeyAccounts.title)
+      .find('[data-cy=to-confirm]')
+      .click();
+    cy.window()
+      .its('localStorage')
+      .invoke('getItem', prepareStorageKey([STORAGE_KEYS.privateKeyAccountsRaw]))
+      .should('eq', 'null');
+
+    cy.get('[data-cy=btn-import]')
+      .click();
+    cy.get('[data-cy=btn-import]')
+      .should('not.exist');
+    cy.contains(
+      '[data-cy=account-name-number]',
+      locale.pages.account.privateKey.replace('{protocol}', 'Ethereum'),
+    )
+      .should('exist');
   });
 
   it('requires password re-authentication before revealing seed phrase', () => {

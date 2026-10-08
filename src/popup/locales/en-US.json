@@ -245,6 +245,11 @@
       "helpMsg": "An account imported into your wallet with private key cannot be restored with your seed phrase but with this private key only. Make sure you back up such accounts storing securely their private keys. <p> Never share your private key with anyone else as it provides full control over your account and funds! </p>",
       "btnText": "Import Account"
     },
+    "unreadablePrivateKeyAccounts": {
+      "title": "Imported accounts unreadable",
+      "msg": "The accounts you imported with a private key can't be decrypted on this device, and they can't be recovered here. Your seed phrase accounts are not affected, and all funds stay on the blockchain. To import accounts again, remove the unreadable ones. You'll need each account's private key to get it back.",
+      "btnText": "Remove imported accounts"
+    },
     "name-exist": {
       "title": "Name registration error",
       "msg": "This name is already registered."

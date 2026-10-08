@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { uniq } from 'lodash-es';
+import { pickBy, uniq } from 'lodash-es';
 
 import type {
   AccountAddress,
@@ -28,6 +28,8 @@ import {
   watchUntilTruthy,
 } from '@/utils';
 import { tg } from '@/popup/plugins/i18n';
+import { ImportedAccountsUnreadableError } from '@/lib/errors';
+import { WalletStorage } from '@/lib/WalletStorage';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 
@@ -53,13 +55,15 @@ export const useAccounts = createCustomScopedComposable(() => {
     mnemonic,
     mnemonicSeed,
     isMnemonicRestored,
+    isAuthenticated,
     encryptionKey,
   } = useAuth();
 
-  const { openModal } = useModals();
+  const { openModal, openConfirmModal } = useModals();
 
   const areAccountsRestored = ref(false);
   const arePrivateKeysAccountsDecrypted = ref(false);
+  const arePrivateKeysAccountsUnreadable = ref(false);
   const arePrivateKeysAccountsEncryptedRestored = ref(false);
 
   const accountsRaw = useStorageRef<IAccountRaw[]>(
@@ -105,6 +109,10 @@ export const useAccounts = createCustomScopedComposable(() => {
     {
       onDecrypted: () => {
         arePrivateKeysAccountsDecrypted.value = true;
+        arePrivateKeysAccountsUnreadable.value = false;
+      },
+      onDecryptFailed: () => {
+        arePrivateKeysAccountsUnreadable.value = true;
       },
     },
   );
@@ -129,8 +137,12 @@ export const useAccounts = createCustomScopedComposable(() => {
   );
 
   const arePrivateKeysAccountsRestored = computed(() => (
-    (arePrivateKeysAccountsEncryptedRestored.value && !accountsPrivateKeysEncrypted.value)
-    || (arePrivateKeysAccountsEncryptedRestored.value && arePrivateKeysAccountsDecrypted.value)
+    arePrivateKeysAccountsEncryptedRestored.value && (
+      !accountsPrivateKeysEncrypted.value
+      || arePrivateKeysAccountsDecrypted.value
+      // Otherwise the router guard waits forever and the app stays blank.
+      || arePrivateKeysAccountsUnreadable.value
+    )
   ));
 
   const privateKeyAccountsRaw = computed<IAccountRaw[]>(() => JSON.parse(accountsPrivateKeysDecrypted.value || '[]'));
@@ -254,7 +266,11 @@ export const useAccounts = createCustomScopedComposable(() => {
       // after the extension is re-enabled) this is briefly `undefined`. Callers
       // should wait for it rather than be handed a different account, otherwise
       // dApps could be exposed the wrong address on multi-account wallets.
-      return getAccountByGlobalIdx(lastUsedGlobalIdx);
+      const lastUsedAccount = getAccountByGlobalIdx(lastUsedGlobalIdx);
+      // An unreadable imported account never resolves, so don't keep callers waiting for it.
+      if (lastUsedAccount || !arePrivateKeysAccountsUnreadable.value) {
+        return lastUsedAccount;
+      }
     }
     // No account was ever marked active for this protocol (e.g. first use), so
     // default to the first account of the protocol.
@@ -315,7 +331,45 @@ export const useAccounts = createCustomScopedComposable(() => {
     return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
   }
 
+  /**
+   * Imported accounts the key can't decrypt are lost, e.g. when the app closed while a
+   * password change re-encrypted them. Removing them lets the user import again.
+   */
+  function offerToRemoveUnreadablePrivateKeyAccounts() {
+    openConfirmModal({
+      title: tg('modals.unreadablePrivateKeyAccounts.title'),
+      msg: tg('modals.unreadablePrivateKeyAccounts.msg'),
+      icon: 'critical',
+      buttonMessage: tg('modals.unreadablePrivateKeyAccounts.btnText'),
+    })
+      .then(() => {
+        if (!isAuthenticated.value || !arePrivateKeysAccountsUnreadable.value) {
+          return;
+        }
+        if (!IS_MOBILE_APP) {
+          // Popups get no storage events; the offscreen tab may have re-encrypted it meanwhile.
+          const stored = WalletStorage.get<string>(STORAGE_KEYS.privateKeyAccountsRaw);
+          if (stored && stored !== accountsPrivateKeysEncrypted.value) {
+            accountsPrivateKeysEncrypted.value = stored;
+            return;
+          }
+        }
+        accountsPrivateKeysEncrypted.value = null;
+        arePrivateKeysAccountsUnreadable.value = false;
+        // Imports reuse the removed accounts' indexes, possibly for another protocol.
+        protocolLastActiveGlobalIdx.value = pickBy(
+          protocolLastActiveGlobalIdx.value,
+          (globalIdx) => globalIdx! < accountsRaw.value.length,
+        );
+      })
+      .catch(() => { /* NOOP - dismissed */ });
+  }
+
   async function addPrivateKeyAccount(account: IAccountRaw): Promise<number> {
+    if (arePrivateKeysAccountsUnreadable.value) {
+      offerToRemoveUnreadablePrivateKeyAccounts();
+      throw new ImportedAccountsUnreadableError();
+    }
     const length = privateKeyAccountsRaw.value.length || 0;
     accountsPrivateKeysDecrypted.value = JSON.stringify([
       ...privateKeyAccountsRaw.value,
@@ -384,8 +438,8 @@ export const useAccounts = createCustomScopedComposable(() => {
   function resetAccounts() {
     mnemonic.value = '';
     accountsRaw.value = [];
-    // Ciphertext that can't be decrypted would keep `areAccountsReady` false.
     accountsPrivateKeysEncrypted.value = null;
+    arePrivateKeysAccountsUnreadable.value = false;
     activeAccountGlobalIdx.value = 0;
   }
 
