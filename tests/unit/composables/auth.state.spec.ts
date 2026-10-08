@@ -36,6 +36,7 @@ function flushAsync() {
 function makeSessionStorageStub() {
   const store: Record<string, unknown> = {};
   return {
+    store,
     get: vi.fn((key: string) => Promise.resolve({ [key]: store[key] })),
     set: vi.fn((obj: Record<string, unknown>) => {
       Object.assign(store, obj);
@@ -46,6 +47,25 @@ function makeSessionStorageStub() {
       return Promise.resolve();
     }),
   };
+}
+
+/**
+ * Extend (not replace) the global `browser` stub. `@/utils/session.ts` imports
+ * `@/offscreen/popupHandler`, whose first line imports `@/lib/initPolyfills` - which,
+ * outside an extension build, UNCONDITIONALLY overwrote `window.browser` with a reduced
+ * stub (no `runtime.connect`, no `storage.session`) the very first time this file's
+ * module graph loaded (via `registerAdapters`, before `beforeEach`'s mocks could apply).
+ * Mocking `@/offscreen/popupHandler` from then on prevents further stomping, but doesn't
+ * undo that first hit - so `runtime.connect` and `storage.session` are added back here.
+ */
+function installExtensionStubs() {
+  globalThis.browser.runtime.connect = vi.fn(() => ({
+    onMessage: { addListener: vi.fn() },
+    onDisconnect: { addListener: vi.fn() },
+    postMessage: vi.fn(),
+  }));
+  globalThis.browser.storage.session = makeSessionStorageStub();
+  return globalThis.browser.storage.session;
 }
 
 describe('useAuth state machine branches', () => {
@@ -383,21 +403,7 @@ describe('useAuth state machine branches', () => {
   describe('failed default-password guess (extension)', () => {
     it('clears only the reactive encryptionKey and does not call sessionEnd(), preserving a valid background session', async () => {
       mockConstants({ IS_EXTENSION: true });
-      // Extend (not replace) the global `browser` stub. `@/utils/session.ts`
-      // imports `@/offscreen/popupHandler`, whose first line imports
-      // `@/lib/initPolyfills` - which, outside an extension build, UNCONDITIONALLY
-      // overwrote `window.browser` with a reduced stub (no `runtime.connect`, no
-      // `storage.session`) the very first time this file's module graph loaded
-      // (via `registerAdapters`, before this `beforeEach`'s mocks could apply).
-      // Mocking `@/offscreen/popupHandler` from here on prevents further stomping,
-      // but doesn't undo that first hit - so `runtime.connect` and
-      // `storage.session` are added back explicitly here.
-      globalThis.browser.runtime.connect = vi.fn(() => ({
-        onMessage: { addListener: vi.fn() },
-        onDisconnect: { addListener: vi.fn() },
-        postMessage: vi.fn(),
-      }));
-      globalThis.browser.storage.session = makeSessionStorageStub();
+      installExtensionStubs();
 
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
@@ -438,6 +444,8 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.isAuthenticated.value).toBe(true);
       expect(authRestarted.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
       expect(authRestarted.isUsingDefaultPassword.value).toBe(false);
+      expect(authRestarted.encryptionKey.value).toBeDefined();
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
     });
   });
 
@@ -509,6 +517,78 @@ describe('useAuth state machine branches', () => {
       expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
         msg: en.auth.walletDataUnreadableMessage,
       }));
+    });
+  });
+
+  describe('stale session key (extension)', () => {
+    let session;
+
+    // The popup dies after the new mnemonic is saved but before its key reaches the session.
+    async function leaveStaleSessionKey() {
+      openSetPasswordModalMock.mockResolvedValue('old-password');
+      const { useAuth } = await import('@/composables/auth');
+      const auth = useAuth();
+      await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+      await flushAsync();
+      const staleKey = session.store.exportedEncryptionKey;
+      expect(staleKey).toBeDefined();
+
+      session.set.mockImplementationOnce(() => Promise.resolve());
+      await auth.updatePassword('old-password', 'new-password');
+      await flushAsync();
+      expect(session.store.exportedEncryptionKey).toBe(staleKey);
+    }
+
+    beforeEach(async () => {
+      mockConstants({ IS_EXTENSION: true });
+      session = installExtensionStubs();
+      // `handleUnknownError` reports the failed decrypt.
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await leaveStaleSessionKey();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function restart() {
+      vi.resetModules();
+      const { useAuth } = await import('@/composables/auth');
+      const { useUi } = await import('@/composables/ui');
+      const auth = useAuth();
+      // The boot-time `checkUserAuth` ends at the password modal.
+      await vi.waitFor(
+        () => expect(openPasswordLoginModalMock).toHaveBeenCalled(),
+        { timeout: 10000 },
+      );
+      return { auth, ui: useUi() };
+    }
+
+    it('falls back to the password modal without publishing a key that does not open the mnemonic', async () => {
+      session.set.mockClear();
+      const { auth, ui } = await restart();
+      expect(session.set).not.toHaveBeenCalled();
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(ui.isLoaderVisible.value).toBe(false);
+
+      expect(await auth.authenticateWithPassword('new-password')).toBe(true);
+      expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+    });
+
+    it('drops the stale key so later reopens go straight to the password modal', async () => {
+      await restart();
+      expect(session.store).toEqual({});
+
+      openPasswordLoginModalMock.mockClear();
+      await restart();
+    });
+
+    it('still falls back to the password modal when the stale key cannot be dropped', async () => {
+      session.remove.mockRejectedValueOnce(new Error('Storage unavailable'));
+      const { auth, ui } = await restart();
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(ui.isLoaderVisible.value).toBe(false);
     });
   });
 });

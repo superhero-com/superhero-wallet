@@ -751,13 +751,22 @@ export const useAuth = createCustomScopedComposable(() => {
         // by using data stored in the background process.
         if (!encryptionKey.value && !autoLoginDisabledEnv && IS_EXTENSION) {
           setLoaderVisible(true);
-          const sessionEncryptionKey = await getSessionEncryptionKey();
-          if (sessionEncryptionKey) {
-            setEncryptionKey(sessionEncryptionKey);
-            mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonic.value);
-            markAuthenticated();
+          try {
+            const sessionEncryptionKey = await getSessionEncryptionKey();
+            if (sessionEncryptionKey) {
+              // Decrypt first: a key that can't open the mnemonic must not be published.
+              const decryptedMnemonic = await decrypt(sessionEncryptionKey, mnemonic.value);
+              setEncryptionKey(sessionEncryptionKey);
+              mnemonicDecrypted.value = decryptedMnemonic;
+              markAuthenticated();
+            }
+          } catch (error) {
+            // Stale key, e.g. a password change cut off before the session write.
+            handleUnknownError(error);
+            await sessionEnd().catch(handleUnknownError);
+          } finally {
+            setLoaderVisible(false);
           }
-          setLoaderVisible(false);
         }
 
         // Finally if other attempts failed, ask user for the password.
