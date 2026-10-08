@@ -269,6 +269,15 @@ Cypress.Commands.add('openNetworks', () => {
     .urlEquals('/more/settings/networks');
 });
 
+Cypress.Commands.add('openSecureLoginSettings', () => {
+  cy.openPageMore()
+    .get('[data-cy=settings]')
+    .click()
+    .get('[data-cy=secure-login-settings]')
+    .click()
+    .urlEquals('/more/settings/secure-login');
+});
+
 /**
  * For the values of the `data-cy` for particular fields please go to `AeternityAdapter`
  * and look for `testId` within the `networkSettings`.

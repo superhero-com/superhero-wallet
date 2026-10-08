@@ -304,6 +304,10 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
+    // Empty while the wallet is locked, and encrypting that would replace the seed.
+    if (!plaintextToEncrypt) {
+      throw new Error('The wallet is locked, there is no mnemonic to encrypt');
+    }
     if (IS_MOBILE_APP) {
       /**
        * Mobile never uses a user/default password-derived PBKDF2 key for the
@@ -333,9 +337,15 @@ export const useAuth = createCustomScopedComposable(() => {
      * rotation path in `checkUserAuth`, which invokes `setPassword`
      * on every boot of a legacy install.
      */
+    const currentKey = encryptionKey.value;
     const newSalt = generateSalt();
     const newEncryptionKey = await generateEncryptionKey(password, newSalt);
     const newMnemonicCiphertext = await encrypt(newEncryptionKey, plaintextToEncrypt);
+    // Imported keys and other encrypted data follow only a direct key switch,
+    // so after a lock they would stay under a key the new salt makes underivable.
+    if (encryptionKey.value !== currentKey) {
+      throw new Error('The wallet got locked while setting the password');
+    }
     /**
      * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
      * persisted by its own fire-and-forget watcher — assigning both reactive
