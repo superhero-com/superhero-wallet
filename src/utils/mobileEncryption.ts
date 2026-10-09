@@ -9,11 +9,17 @@ import {
   importEncryptionKey,
   IV_LENGTH,
 } from './crypto';
+import { waitBeforeKeyReadRetry } from './waitBeforeKeyReadRetry';
 
 const MOBILE_KEY_LENGTH = 32;
-const KEY_READ_RETRY_DELAY = 200;
-const KEY_READ_ATTEMPTS = 2;
-const KEY_READ_ATTEMPTS_WITH_WALLET = 4;
+/**
+ * Waits (ms) before each retry of a key read that came back empty, 3 s in total.
+ * The iOS plugin reads through KeychainSwift, which returns `nil` for any Keychain error and
+ * sometimes instead of a stored value:
+ * https://github.com/evgenyneu/keychain-swift#known-critical-issue---call-to-action
+ * TODO: reconsider the secure storage plugin; one that rejects on read errors needs no retries.
+ */
+const KEY_READ_RETRY_DELAYS = [200, 400, 800, 1600];
 
 let cachedKey: CryptoKey | null = null;
 let pending: Promise<CryptoKey> | null = null;
@@ -85,20 +91,24 @@ async function isEncryptedWalletStored(): Promise<boolean> {
 }
 
 /** Resolves `null` when a new key should be minted. */
-async function readStoredKeyWithRetries(attempt = 1): Promise<CryptoKey | null> {
+async function readStoredKeyWithRetries(
+  retry = 0,
+  wasWalletSeen = false,
+): Promise<CryptoKey | null> {
   const storedKey = await readStoredKey();
   if (storedKey) {
     return storedKey;
   }
-  const isWalletStored = await isEncryptedWalletStored();
-  if (attempt >= (isWalletStored ? KEY_READ_ATTEMPTS_WITH_WALLET : KEY_READ_ATTEMPTS)) {
+  // The wallet can read back empty too, so once seen it counts as stored.
+  const isWalletStored = wasWalletSeen || await isEncryptedWalletStored();
+  if (retry >= KEY_READ_RETRY_DELAYS.length) {
     if (isWalletStored) {
       throw new MobileEncryptionKeyMissingError();
     }
     return null;
   }
-  await new Promise((resolve) => { setTimeout(resolve, KEY_READ_RETRY_DELAY); });
-  return readStoredKeyWithRetries(attempt + 1);
+  await waitBeforeKeyReadRetry(KEY_READ_RETRY_DELAYS[retry]);
+  return readStoredKeyWithRetries(retry + 1, isWalletStored);
 }
 
 /**

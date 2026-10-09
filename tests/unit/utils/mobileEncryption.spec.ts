@@ -226,6 +226,68 @@ describe('mobileEncryption', () => {
       await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe('critical seed phrase');
     });
 
+    /** The key reads back empty `keyMisses` times; the mnemonic only on its 2nd read. */
+    function flakeReads(SecureMobileStorage, keyMisses) {
+      const realGet = SecureMobileStorage.get;
+      let keyReads = 0;
+      let mnemonicReads = 0;
+      vi.spyOn(SecureMobileStorage, 'get').mockImplementation((key) => {
+        if (key === 'mobile-data-key') {
+          keyReads += 1;
+          if (keyReads <= keyMisses) return Promise.resolve(null);
+        }
+        if (key === 'mnemonic') {
+          mnemonicReads += 1;
+          if (mnemonicReads === 2) return Promise.resolve(null);
+        }
+        return realGet(key);
+      });
+      return realGet;
+    }
+
+    it('keeps the original key when the wallet also reads back empty on a retry', async () => {
+      const {
+        getOrCreateMobileEncryptionKey,
+        tryDecryptWithMobileKey,
+        SecureMobileStorage,
+        ciphertext,
+        storedKey,
+      } = await restartWithEncryptedWalletAndNoKey();
+      await SecureMobileStorage.set('mobile-data-key', storedKey);
+      const realGet = flakeReads(SecureMobileStorage, 2);
+
+      await getOrCreateMobileEncryptionKey();
+
+      expect(await realGet('mobile-data-key')).toBe(storedKey);
+      await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe('critical seed phrase');
+    });
+
+    it('does not mint a key when the wallet reads back empty after it was seen', async () => {
+      const {
+        getOrCreateMobileEncryptionKey,
+        MobileEncryptionKeyMissingError,
+        SecureMobileStorage,
+      } = await restartWithEncryptedWalletAndNoKey();
+      const realGet = flakeReads(SecureMobileStorage, Infinity);
+
+      await expect(getOrCreateMobileEncryptionKey())
+        .rejects.toBeInstanceOf(MobileEncryptionKeyMissingError);
+      expect(await realGet('mobile-data-key')).toBeNull();
+    });
+
+    it('reads an empty key five times, waiting longer each time, before creating one', async () => {
+      const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+      // Stubbed in the vitest setup.
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const getSpy = vi.spyOn(SecureMobileStorage, 'get');
+
+      await getOrCreateMobileEncryptionKey();
+
+      expect(getSpy.mock.calls.filter(([key]) => key === 'mobile-data-key')).toHaveLength(5);
+      expect(waitBeforeKeyReadRetry.mock.calls).toEqual([[200], [400], [800], [1600]]);
+    });
+
     it('mints a new key once the stored wallet is reset', async () => {
       const {
         getOrCreateMobileEncryptionKey,
