@@ -376,6 +376,36 @@ describe('useAuth on mobile', () => {
     expect(authAfterReload.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
   });
 
+  it('does not report a wallet as created when its seed fails to save, and saves it on retry', async () => {
+    const { auth } = await boot();
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const setItem = SecureMobileStorage.set;
+    const setSpy = vi.spyOn(SecureMobileStorage, 'set').mockImplementation((keys, value) => (
+      keys === STORAGE_KEYS.mnemonic
+        ? Promise.reject(new Error('Keychain write failed'))
+        : setItem(keys, value)
+    ));
+
+    await expect(auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC))
+      .rejects.toThrow('Keychain write failed');
+    await flushAsync();
+
+    expect(auth.isAuthenticated.value).toBe(false);
+    expect(auth.mnemonic.value).toBe('');
+    expect(auth.mnemonicDecrypted.value).toBe('');
+    expect(await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)).toBeNull();
+
+    setSpy.mockRestore();
+    await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+    expect(auth.isAuthenticated.value).toBe(true);
+    expect(await SecureMobileStorage.get(STORAGE_KEYS.mnemonic)).toBe(auth.mnemonic.value);
+    const { auth: authAfterRestart } = await restart();
+    await authAfterRestart.checkUserAuth();
+    expect(authAfterRestart.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+  });
+
   it('replaces a loaded seed when a wallet is imported again', async () => {
     const { auth: authGen1 } = await boot();
     await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);

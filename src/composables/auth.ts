@@ -303,6 +303,15 @@ export const useAuth = createCustomScopedComposable(() => {
     throw new StoredWalletFoundError();
   }
 
+  /**
+   * The storage watcher doesn't wait for its write, so a failed Keychain write
+   * would leave a wallet that looks created but is gone after a restart.
+   */
+  async function storeMobileMnemonic(ciphertext: string) {
+    await SecureMobileStorage.set(STORAGE_KEYS.mnemonic, ciphertext);
+    mnemonic.value = ciphertext;
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
@@ -319,7 +328,7 @@ export const useAuth = createCustomScopedComposable(() => {
         const mobileKey = await getOrCreateMobileEncryptionKey();
         setEncryptionKey(mobileKey);
       }
-      mnemonic.value = await encrypt(encryptionKey.value!, plaintextToEncrypt);
+      await storeMobileMnemonic(await encrypt(encryptionKey.value!, plaintextToEncrypt));
       markAuthenticated();
       return;
     }
@@ -396,7 +405,7 @@ export const useAuth = createCustomScopedComposable(() => {
         const mobileKey = await getOrCreateMobileEncryptionKey();
         setEncryptionKey(mobileKey);
       }
-      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
+      await storeMobileMnemonic(await encrypt(encryptionKey.value!, newMnemonic));
       if (await checkBiometricLoginAvailability()) {
         await openEnableBiometricLoginModal();
       }

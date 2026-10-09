@@ -22,11 +22,12 @@ import { StoredWalletFoundError } from '@/lib/errors';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 import en from '@/popup/locales/en-US.json';
 
+const platform = vi.hoisted(() => ({ isMobileApp: true }));
 vi.mock('@/constants', async (importOriginal) => ({
   ...(await importOriginal()),
   // Not iOS: stored wallets are opened on every platform.
   IS_IOS: false,
-  IS_MOBILE_APP: true,
+  get IS_MOBILE_APP() { return platform.isMobileApp; },
 }));
 vi.mock('@/composables', () => ({
   useAccounts: vi.fn(),
@@ -59,6 +60,7 @@ function mountIndex({
   activeIdx = 0,
   discoverAccounts = undefined,
   openConfirmModal = vi.fn().mockResolvedValue(undefined),
+  openModal = undefined,
   setMnemonicAndInitializeAuthentication = undefined,
 } = {}) {
   const state = {
@@ -79,7 +81,8 @@ function mountIndex({
       return true;
     }),
     openConfirmModal,
-    openModal: vi.fn((name) => Promise.resolve(
+    openDefaultModal: vi.fn().mockResolvedValue(undefined),
+    openModal: openModal ?? vi.fn((name) => Promise.resolve(
       name === MODAL_PROTOCOL_SELECT ? PROTOCOLS.aeternity : undefined,
     )),
     setActiveAccountByGlobalIdx: vi.fn((idx) => { state.activeIdx.value = idx; }),
@@ -106,6 +109,7 @@ function mountIndex({
   });
   useModals.mockReturnValue({
     openConfirmModal: deps.openConfirmModal,
+    openDefaultModal: deps.openDefaultModal,
     openModal: deps.openModal,
   });
   useNotifications.mockReturnValue({ addWalletNotification: deps.addWalletNotification });
@@ -142,6 +146,7 @@ function pendingDiscovery() {
 beforeEach(() => {
   routerPush.mockClear();
   currentRoute.value = { name: ROUTE_INDEX };
+  platform.isMobileApp = true;
 });
 
 describe('Index page with an unlocked wallet stored and no accounts', () => {
@@ -414,7 +419,7 @@ describe('Index page with no wallet loaded', () => {
   });
 
   it('stops creating when a wallet that failed to load turns out to be stored', async () => {
-    const { wrapper, addRawAccount } = mountIndex({
+    const { wrapper, addRawAccount, openDefaultModal } = mountIndex({
       mnemonic: '',
       setMnemonicAndInitializeAuthentication: vi.fn()
         .mockRejectedValue(new StoredWalletFoundError()),
@@ -424,14 +429,47 @@ describe('Index page with no wallet loaded', () => {
 
     expect(addRawAccount).not.toHaveBeenCalled();
     expect(routerPush).not.toHaveBeenCalled();
+    expect(openDefaultModal).not.toHaveBeenCalled();
   });
 
-  it('passes other failures of creating on', async () => {
-    const { wrapper } = mountIndex({
+  it('reports that the wallet was not saved and passes the failure on', async () => {
+    const { wrapper, addRawAccount, openDefaultModal } = mountIndex({
+      mnemonic: '',
+      setMnemonicAndInitializeAuthentication: vi.fn()
+        .mockRejectedValue(new Error('Keychain write failed')),
+    });
+
+    await expect(wrapper.vm.createWallet()).rejects.toThrow('Keychain write failed');
+
+    expect(openDefaultModal).toHaveBeenCalledWith({
+      icon: 'critical',
+      msg: en.pages.index.walletNotSaved,
+    });
+    expect(addRawAccount).not.toHaveBeenCalled();
+    expect(routerPush).not.toHaveBeenCalled();
+  });
+
+  it('reports nothing when the blockchain selection is dismissed', async () => {
+    const { wrapper, openDefaultModal, setMnemonicAndInitializeAuthentication } = mountIndex({
+      mnemonic: '',
+      openModal: vi.fn().mockRejectedValue(undefined),
+    });
+
+    await expect(wrapper.vm.createWallet()).rejects.toBeUndefined();
+
+    expect(setMnemonicAndInitializeAuthentication).not.toHaveBeenCalled();
+    expect(openDefaultModal).not.toHaveBeenCalled();
+  });
+
+  it('reports nothing on web, where it fails when the password is cancelled', async () => {
+    platform.isMobileApp = false;
+    const { wrapper, openDefaultModal } = mountIndex({
       mnemonic: '',
       setMnemonicAndInitializeAuthentication: vi.fn().mockRejectedValue(new Error('cancelled')),
     });
 
     await expect(wrapper.vm.createWallet()).rejects.toThrow('cancelled');
+
+    expect(openDefaultModal).not.toHaveBeenCalled();
   });
 });

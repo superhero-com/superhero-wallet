@@ -71,6 +71,7 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { isSeedLengthValid } from '@/utils';
+import { IS_MOBILE_APP } from '@/constants';
 import { StoredWalletFoundError } from '@/lib/errors';
 import {
   useAccounts,
@@ -143,7 +144,9 @@ export default defineComponent({
           props.resolve();
           return;
         }
-        error.value = t('pages.index.passwordWasNotSet');
+        error.value = IS_MOBILE_APP
+          ? t('pages.index.walletNotSaved')
+          : t('pages.index.passwordWasNotSet');
       } finally {
         discovering.value = false;
       }

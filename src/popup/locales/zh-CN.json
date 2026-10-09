@@ -1118,6 +1118,7 @@
       "selectProtocol": "请选择要创建第一个钱包账户的区块链。",
       "accountNotFound": "未找到账户。请再次检查你的助记词。",
       "passwordWasNotSet": "未设置密码。请设置密码以继续。",
+      "walletNotSaved": "无法在此设备上保存钱包。请重试。",
       "invalidSeed": "你的助记词应由 12 个或更多以空格分隔的单词组成。",
       "seedPlaceHolder": "在此输入或粘贴你的助记词",
       "scanSeedPhrase": "扫描助记词",

@@ -169,7 +169,7 @@ export default defineComponent({
       generateMnemonic,
       setMnemonicAndInitializeAuthentication,
     } = useAuth();
-    const { openConfirmModal, openModal } = useModals();
+    const { openConfirmModal, openDefaultModal, openModal } = useModals();
     const { addWalletNotification } = useNotifications();
     const { loginTargetLocation } = useUi();
 
@@ -270,7 +270,13 @@ export default defineComponent({
           subtitle: t('pages.index.selectProtocol'),
           resolve: (protocol: Protocol) => protocol,
         });
-        await setMnemonicAndInitializeAuthentication(generateMnemonic());
+        await setMnemonicAndInitializeAuthentication(generateMnemonic()).catch((error: unknown) => {
+          // Web mostly gets here on a cancelled password modal.
+          if (IS_MOBILE_APP && !(error instanceof StoredWalletFoundError)) {
+            openDefaultModal({ icon: 'critical', msg: t('pages.index.walletNotSaved') });
+          }
+          throw error;
+        });
         addRawAccount({
           isRestored: false,
           protocol: selectedProtocol,

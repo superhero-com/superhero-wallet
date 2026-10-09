@@ -13,6 +13,11 @@ import {
 import { StoredWalletFoundError } from '@/lib/errors';
 import en from '@/popup/locales/en-US.json';
 
+const platform = vi.hoisted(() => ({ isMobileApp: false }));
+vi.mock('@/constants', async (importOriginal) => ({
+  ...await importOriginal(),
+  get IS_MOBILE_APP() { return platform.isMobileApp; },
+}));
 vi.mock('@/composables', () => ({
   useAccounts: vi.fn(),
   useAuth: vi.fn(),
@@ -70,6 +75,7 @@ async function importSeed({
 
 beforeEach(() => {
   routerPush.mockClear();
+  platform.isMobileApp = false;
 });
 
 describe('AccountImport when a wallet that failed to load is stored', () => {
@@ -96,6 +102,18 @@ describe('AccountImport when a wallet that failed to load is stored', () => {
     expect(resolve).not.toHaveBeenCalled();
     expect(wrapper.text()).toContain(en.pages.index.passwordWasNotSet);
     expect(wrapper.find('[data-cy=close]').exists()).toBe(true);
+  });
+
+  it('reports that the wallet was not saved on mobile, which has no password', async () => {
+    platform.isMobileApp = true;
+    const { wrapper, resolve } = await importSeed({
+      setMnemonicAndInitializeAuthentication: vi.fn()
+        .mockRejectedValue(new Error('Keychain write failed')),
+    });
+
+    expect(resolve).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain(en.pages.index.walletNotSaved);
+    expect(wrapper.text()).not.toContain(en.pages.index.passwordWasNotSet);
   });
 });
 
