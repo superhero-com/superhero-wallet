@@ -7,8 +7,8 @@ android {
         applicationId "com.superhero.cordova"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21102
-        versionName "2.11.2"
+        versionCode 21103
+        versionName "2.11.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'arm64-v8a'

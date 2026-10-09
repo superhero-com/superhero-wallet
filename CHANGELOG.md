@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.3](https://github.com/Superhero-com/superhero-wallet/compare/v2.11.2...v2.11.3) (2026-10-09)
+
+
+### Bug Fixes
+
+* abort a password change that straddles a lock ([17d8a9a](https://github.com/Superhero-com/superhero-wallet/commit/17d8a9a23ca255866d05f1fd07bce64714cf8b51))
+* **aens:** use the current auction's bids and show auction tabs ([800dd80](https://github.com/Superhero-com/superhero-wallet/commit/800dd806be33bd70292c3dcfac0c2058fbe3063a))
+* **aeternity:** keep the SDK on the latest network across rapid node switches ([6cc1069](https://github.com/Superhero-com/superhero-wallet/commit/6cc106904e8655edc042e6a4e833d8eb9cf8ae30))
+* close the races left in offscreen key sync and node switching ([13a8b60](https://github.com/Superhero-com/superhero-wallet/commit/13a8b600cead2d12d718a7ec8be0ee5755bfe5ed))
+* don't let onboarding replace a seed still stored on the device ([5124e33](https://github.com/Superhero-com/superhero-wallet/commit/5124e3335f4a6145a01560855b8bbc43026189f7))
+* **ethereum:** don't scale gas prices with the recipients count ([8b93ebd](https://github.com/Superhero-com/superhero-wallet/commit/8b93ebdfc20e80528998fafe96835838af1c6e6e))
+* **extension:** detect opaque origin by window.origin ([5904574](https://github.com/Superhero-com/superhero-wallet/commit/5904574d9cf3f517ca281f8dab66968fdad5156e))
+* **extension:** let the offscreen tab take over late logins on Chrome ([43c99db](https://github.com/Superhero-com/superhero-wallet/commit/43c99db32b3379b56d9ff89d398b06ba3245bb68))
+* **extension:** let web pages reach only the EVM RPC methods of the offscreen tab ([37f7883](https://github.com/Superhero-com/superhero-wallet/commit/37f788322e11b3fde74996e37522c30f9b21f9bb))
+* fall back to the password modal when the session key is stale ([ff354f5](https://github.com/Superhero-com/superhero-wallet/commit/ff354f52e2677122ca7835bf7b81a9bb773d87ac))
+* **invites:** store an invite key before funding it ([34dd23a](https://github.com/Superhero-com/superhero-wallet/commit/34dd23a5369088abd2f3084620fa7250ef888144))
+* **mobile:** don't replace the encryption key when it reads back empty ([9c37743](https://github.com/Superhero-com/superhero-wallet/commit/9c37743c57dd551726061edb3e4affa408b297d1))
+* **mobile:** keep a wallet seen on an earlier key read as stored ([a50de9f](https://github.com/Superhero-com/superhero-wallet/commit/a50de9f7c95d04a9104ebc8096e9a1e4988bf238))
+* **mobile:** keep the start page usable with a locked or unreadable wallet ([f1165d9](https://github.com/Superhero-com/superhero-wallet/commit/f1165d9fb026a5266def4f6b23536f440926c73a))
+* **mobile:** offer a wallet reset when the stored mnemonic is unreadable ([ecc4971](https://github.com/Superhero-com/superhero-wallet/commit/ecc4971aebdb19014b3b76350fb2a6aace24a3c6))
+* **mobile:** retry an empty key read for 3 s before trusting it ([a40cf7b](https://github.com/Superhero-com/superhero-wallet/commit/a40cf7b0dcc4947efe337f779e6dd9d7d26e7f07))
+* **mobile:** save a new seed before reporting the wallet as created ([ecdf354](https://github.com/Superhero-com/superhero-wallet/commit/ecdf3548f010e2f2565bac9c5e624e1b4668bf5a))
+* open the wallet when imported accounts can't be decrypted ([d9671e8](https://github.com/Superhero-com/superhero-wallet/commit/d9671e8950bcdcad303d623108b19a78033e3ca6))
+* update Podfile to remove CordovaPlugins and upgrade dependencies ([d093b6b](https://github.com/Superhero-com/superhero-wallet/commit/d093b6b05308127068b7a9c11ba0ad98e0e2707e))
+
+
+### Maintenance
+
+* **modals:** declare the confirm modal's icon prop ([229c7cd](https://github.com/Superhero-com/superhero-wallet/commit/229c7cdde6250ab38b7cb86b516c79d9c7695186))
+
+
+### Tests
+
+* cover password change end to end ([763783d](https://github.com/Superhero-com/superhero-wallet/commit/763783df451609f04fdfc76c20539bc14dc84c1c))
+
 ### [2.11.2](https://github.com/Superhero-com/superhero-wallet/compare/v2.11.1...v2.11.2) (2026-10-02)
 
 
