@@ -106,6 +106,8 @@ Cypress.Commands.add('login', (options, route) => {
         isRestored: true,
         type: 'hd-wallet',
       }],
+      privateKeyAccountsRaw,
+      activeAccountGlobalIdx = 0,
     } = options || {};
 
     cy.openPopup(async (contentWindow) => {
@@ -130,7 +132,10 @@ Cypress.Commands.add('login', (options, route) => {
         [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
           [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
         },
-        [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: 0,
+        [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: activeAccountGlobalIdx,
+        ...privateKeyAccountsRaw && {
+          [prepareStorageKey([STORAGE_KEYS.privateKeyAccountsRaw])]: privateKeyAccountsRaw,
+        },
       };
 
       Object.entries(dataToBeStored).forEach(([key, data]) => {

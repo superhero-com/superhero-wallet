@@ -28,11 +28,13 @@ import {
 import { WalletStorage } from '@/lib/WalletStorage';
 import { watchUntilTruthy } from '@/utils';
 import { generateEncryptionKey, generateSalt, encrypt } from '@/utils/crypto';
+import en from '@/popup/locales/en-US.json';
 
 const VALID_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const MNEMONIC_SEED = mnemonicToSeedSync(VALID_MNEMONIC);
 // 32 bytes, well below the secp256k1 curve order - a valid Ethereum private key.
 const IMPORTED_ETH_PRIVATE_KEY_HEX = 'aa'.repeat(32);
+const SECOND_ETH_PRIVATE_KEY_HEX = 'bb'.repeat(32);
 
 function flushAsync() {
   return new Promise((resolve) => { setTimeout(resolve, 0); });
@@ -52,8 +54,10 @@ async function seedImportedEthAccount(rawAccount) {
 describe('useAccounts', () => {
   let mnemonicSeedRef;
   let isMnemonicRestoredRef;
+  let isAuthenticatedRef;
   let encryptionKeyRef;
   let openModalMock;
+  let openConfirmModalMock;
 
   beforeEach(() => {
     vi.resetModules();
@@ -61,13 +65,19 @@ describe('useAccounts', () => {
 
     mnemonicSeedRef = ref(MNEMONIC_SEED);
     isMnemonicRestoredRef = ref(true);
+    isAuthenticatedRef = ref(false);
     encryptionKeyRef = ref(undefined);
     openModalMock = vi.fn().mockRejectedValue(new Error('No modals in this test'));
+    openConfirmModalMock = vi.fn().mockRejectedValue(new Error('Dismissed'));
     vi.doMock('@/composables/modals', async (importOriginal) => {
       const actual = await importOriginal();
       return {
         ...actual,
-        useModals: () => ({ ...actual.useModals(), openModal: openModalMock }),
+        useModals: () => ({
+          ...actual.useModals(),
+          openModal: openModalMock,
+          openConfirmModal: openConfirmModalMock,
+        }),
       };
     });
 
@@ -79,6 +89,7 @@ describe('useAccounts', () => {
         mnemonic: ref(''),
         mnemonicSeed: mnemonicSeedRef,
         isMnemonicRestored: isMnemonicRestoredRef,
+        isAuthenticated: isAuthenticatedRef,
         encryptionKey: encryptionKeyRef,
       }),
     }));
@@ -232,29 +243,247 @@ describe('useAccounts', () => {
     expect(accounts.areAccountsReady.value).toBe(false);
   });
 
-  it('becomes ready after a reset when the imported private keys cannot be decrypted', async () => {
+  it('waits for a last active imported account instead of handing out another one of its protocol', async () => {
     seedAccountsRaw([
       { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
+      { isRestored: true, protocol: PROTOCOLS.ethereum, type: ACCOUNT_TYPES.hdWallet },
     ]);
-    await seedImportedEthAccount({
+    const key = await seedImportedEthAccount({
       type: ACCOUNT_TYPES.privateKey,
       isRestored: false,
       protocol: PROTOCOLS.ethereum,
       privateKey: Buffer.from(IMPORTED_ETH_PRIVATE_KEY_HEX, 'hex'),
     });
-    encryptionKeyRef.value = await generateEncryptionKey('another-password', generateSalt());
+    WalletStorage.set(STORAGE_KEYS.protocolLastActiveAccountIdx, { [PROTOCOLS.ethereum]: 2 });
 
     const accounts = await boot();
     await watchUntilTruthy(accounts.areAccountsRestored);
     await flushAsync();
-    expect(accounts.areAccountsReady.value).toBe(false);
+    expect(accounts.accounts.value).toHaveLength(2);
+    expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum)).toBeUndefined();
 
-    // The router guard waits for this, so the reset couldn't navigate away and reload.
-    accounts.resetAccounts();
-    await flushAsync();
+    encryptionKeyRef.value = key;
+    expect(await watchUntilTruthy(
+      () => accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum),
+      5000,
+    )).toMatchObject({ globalIdx: 2, type: ACCOUNT_TYPES.privateKey });
+  });
 
-    expect(accounts.areAccountsReady.value).toBe(true);
-    expect(accounts.accounts.value).toEqual([]);
+  describe('imported private keys that cannot be decrypted', () => {
+    const seedAccount = {
+      isRestored: true,
+      protocol: PROTOCOLS.aeternity,
+      type: ACCOUNT_TYPES.hdWallet,
+    };
+    const importedRaw = {
+      type: ACCOUNT_TYPES.privateKey,
+      isRestored: false,
+      protocol: PROTOCOLS.ethereum,
+      privateKey: Buffer.from(IMPORTED_ETH_PRIVATE_KEY_HEX, 'hex'),
+    };
+    const secondImportedRaw = {
+      ...importedRaw,
+      privateKey: Buffer.from(SECOND_ETH_PRIVATE_KEY_HEX, 'hex'),
+    };
+    let storedCiphertext;
+    let readingKey;
+    let currentKey;
+    let warnSpy;
+
+    beforeEach(() => {
+      // Each failed decrypt is reported.
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    /** Imported keys stored under a key whose salt is gone, e.g. a cut-off password change. */
+    async function bootUnreadable(seedAccounts = [seedAccount]) {
+      seedAccountsRaw(seedAccounts);
+      readingKey = await seedImportedEthAccount(importedRaw);
+      storedCiphertext = WalletStorage.get(STORAGE_KEYS.privateKeyAccountsRaw);
+      currentKey = await generateEncryptionKey('another-password', generateSalt());
+      encryptionKeyRef.value = currentKey;
+      isAuthenticatedRef.value = true;
+      const accounts = await boot();
+      expect(await watchUntilTruthy(accounts.areAccountsReady, 5000)).toBe(true);
+      return accounts;
+    }
+
+    function storedPrivateKeyAccounts() {
+      return WalletStorage.get(STORAGE_KEYS.privateKeyAccountsRaw);
+    }
+
+    function accountTypes(accounts) {
+      return accounts.accounts.value.map(({ type }) => type);
+    }
+
+    async function attemptImport(accounts) {
+      const { ImportedAccountsUnreadableError } = await import('@/lib/errors');
+      await expect(accounts.addPrivateKeyAccount(secondImportedRaw))
+        .rejects.toBeInstanceOf(ImportedAccountsUnreadableError);
+    }
+
+    /** Returns the click on the offer's remove button. */
+    function deferConfirm() {
+      let confirm;
+      openConfirmModalMock.mockImplementation(
+        () => new Promise((resolve) => { confirm = resolve; }),
+      );
+      return () => confirm();
+    }
+
+    it('opens the wallet with the seed accounts, and keeps the imported ones stored', async () => {
+      const accounts = await bootUnreadable();
+      await flushAsync();
+
+      expect(accounts.areAccountsReady.value).toBe(true);
+      expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet]);
+      expect(storedPrivateKeyAccounts()).toBe(storedCiphertext);
+      expect(openConfirmModalMock).not.toHaveBeenCalled();
+    });
+
+    it('hands out the first account of a protocol whose last active one is among them', async () => {
+      WalletStorage.set(STORAGE_KEYS.protocolLastActiveAccountIdx, { [PROTOCOLS.ethereum]: 2 });
+      const accounts = await bootUnreadable([
+        seedAccount,
+        { ...seedAccount, protocol: PROTOCOLS.ethereum },
+      ]);
+
+      expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum))
+        .toMatchObject({ globalIdx: 1, type: ACCOUNT_TYPES.hdWallet });
+    });
+
+    it('refuses to import a private key over them, and offers to remove them', async () => {
+      const accounts = await bootUnreadable();
+
+      await attemptImport(accounts);
+      await flushAsync();
+
+      expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        title: en.modals.unreadablePrivateKeyAccounts.title,
+        icon: 'critical',
+      }));
+      expect(storedPrivateKeyAccounts()).toBe(storedCiphertext);
+    });
+
+    it('removes them when confirmed, and imports work again after', async () => {
+      // The imported account, right after the seed one, was the last active one for Ethereum.
+      WalletStorage.set(STORAGE_KEYS.protocolLastActiveAccountIdx, {
+        [PROTOCOLS.aeternity]: 0,
+        [PROTOCOLS.ethereum]: 1,
+      });
+      openConfirmModalMock.mockResolvedValue(undefined);
+      const accounts = await bootUnreadable();
+
+      await attemptImport(accounts);
+      await flushAsync();
+      expect(storedPrivateKeyAccounts()).toBeNull();
+      expect(WalletStorage.get(STORAGE_KEYS.protocolLastActiveAccountIdx))
+        .toEqual({ [PROTOCOLS.aeternity]: 0 });
+
+      accounts.addRawAccount(seedAccount);
+      await accounts.addPrivateKeyAccount(secondImportedRaw);
+
+      expect(accountTypes(accounts))
+        .toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
+      expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum))
+        .toMatchObject({ protocol: PROTOCOLS.ethereum, type: ACCOUNT_TYPES.privateKey });
+    });
+
+    it('keeps them when the offer is dismissed, and offers again on the next import', async () => {
+      const accounts = await bootUnreadable();
+
+      await attemptImport(accounts);
+      await flushAsync();
+      await attemptImport(accounts);
+      await flushAsync();
+
+      expect(openConfirmModalMock).toHaveBeenCalledTimes(2);
+      expect(storedPrivateKeyAccounts()).toBe(storedCiphertext);
+      expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet]);
+    });
+
+    it('keeps them when the wallet got locked before the offer was confirmed', async () => {
+      const confirm = deferConfirm();
+      const accounts = await bootUnreadable();
+      await attemptImport(accounts);
+
+      // As `logout` does.
+      encryptionKeyRef.value = undefined;
+      isAuthenticatedRef.value = false;
+      confirm();
+      await flushAsync();
+
+      expect(storedPrivateKeyAccounts()).toBe(storedCiphertext);
+    });
+
+    it('keeps them when they became readable before the offer was confirmed', async () => {
+      const confirm = deferConfirm();
+      const accounts = await bootUnreadable();
+      await attemptImport(accounts);
+
+      encryptionKeyRef.value = readingKey;
+      expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+      confirm();
+      await flushAsync();
+
+      expect(storedPrivateKeyAccounts()).toBe(storedCiphertext);
+      expect(accounts.accounts.value).toHaveLength(2);
+    });
+
+    it('takes over the ones another context stored meanwhile instead of removing them', async () => {
+      const confirm = deferConfirm();
+      const accounts = await bootUnreadable();
+      await attemptImport(accounts);
+
+      // E.g. the offscreen tab re-encrypted them under the current key.
+      const rescued = await encrypt(currentKey, JSON.stringify([importedRaw]));
+      WalletStorage.set(STORAGE_KEYS.privateKeyAccountsRaw, rescued);
+      confirm();
+
+      expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+      expect(storedPrivateKeyAccounts()).toBe(rescued);
+    });
+
+    it('accepts imports when another context removed them before the offer was confirmed', async () => {
+      const confirm = deferConfirm();
+      const accounts = await bootUnreadable();
+      await attemptImport(accounts);
+
+      WalletStorage.set(STORAGE_KEYS.privateKeyAccountsRaw, null);
+      confirm();
+      await flushAsync();
+
+      await expect(accounts.addPrivateKeyAccount(secondImportedRaw)).resolves.toBe(1);
+    });
+
+    it('accepts imports again once a key that decrypts them arrives', async () => {
+      const accounts = await bootUnreadable();
+
+      encryptionKeyRef.value = readingKey;
+      expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+      await accounts.addPrivateKeyAccount(secondImportedRaw);
+
+      expect(accountTypes(accounts))
+        .toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey, ACCOUNT_TYPES.privateKey]);
+      expect(openConfirmModalMock).not.toHaveBeenCalled();
+    });
+
+    it('accepts imports again after a reset', async () => {
+      const accounts = await bootUnreadable();
+
+      accounts.resetAccounts();
+      await flushAsync();
+      expect(accounts.areAccountsReady.value).toBe(true);
+
+      accounts.addRawAccount(seedAccount);
+      await expect(accounts.addPrivateKeyAccount(secondImportedRaw)).resolves.toBe(1);
+      expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
+    });
   });
 
   describe('discoverAccounts', () => {

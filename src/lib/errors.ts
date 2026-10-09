@@ -15,6 +15,14 @@ export class StoredWalletFoundError extends Error {
   }
 }
 
+/** Adding an imported account now would replace the ones that can't be decrypted. */
+export class ImportedAccountsUnreadableError extends Error {
+  constructor() {
+    super('The imported accounts stored on this device cannot be decrypted');
+    this.name = this.constructor.name;
+  }
+}
+
 export class NoUserMediaPermissionError extends Error {
   constructor() {
     super('No UserMedia permission');
