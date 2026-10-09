@@ -4,14 +4,20 @@
  * as used by the Twitter/X embed) has an opaque origin that serializes to the
  * literal string `'null'`. `postMessage` rejects that as a target origin, so the
  * content script must not run in such a frame at all.
+ *
+ * `location.origin` comes from the URL and stays real in such a frame; only the
+ * document origin (`window.origin`) is opaque.
  */
 describe('inject.ts opaque origin frames', () => {
-  const stubLocation = (origin: string) => {
+  const URL_ORIGIN = 'https://platform.twitter.com';
+
+  const stubOrigin = (origin: string) => {
     vi.stubGlobal('location', {
       ...window.location,
-      origin,
-      href: origin === 'null' ? 'https://platform.twitter.com/embed/' : `${origin}/`,
+      origin: URL_ORIGIN,
+      href: `${URL_ORIGIN}/embed/Tweet.html`,
     });
+    vi.stubGlobal('origin', origin);
   };
 
   const loadInject = async (origin: string) => {
@@ -39,7 +45,7 @@ describe('inject.ts opaque origin frames', () => {
     // leaked interval would fire after the jsdom environment is torn down.
     vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>);
 
-    stubLocation(origin);
+    stubOrigin(origin);
     vi.resetModules();
     await import('@/content-scripts/inject');
   };
@@ -65,7 +71,7 @@ describe('inject.ts opaque origin frames', () => {
   });
 
   it('runs as usual on a real origin', async () => {
-    await loadInject('https://example.com');
+    await loadInject(URL_ORIGIN);
 
     expect(getMessageListener()).toBeDefined();
     expect((global as any).browser.runtime.onMessage.addListener).toHaveBeenCalled();
