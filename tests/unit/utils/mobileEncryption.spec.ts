@@ -275,6 +275,19 @@ describe('mobileEncryption', () => {
       expect(await realGet('mobile-data-key')).toBeNull();
     });
 
+    it('reads an empty key five times, waiting longer each time, before creating one', async () => {
+      const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+      // Stubbed in the vitest setup.
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const getSpy = vi.spyOn(SecureMobileStorage, 'get');
+
+      await getOrCreateMobileEncryptionKey();
+
+      expect(getSpy.mock.calls.filter(([key]) => key === 'mobile-data-key')).toHaveLength(5);
+      expect(waitBeforeKeyReadRetry.mock.calls).toEqual([[200], [400], [800], [1600]]);
+    });
+
     it('mints a new key once the stored wallet is reset', async () => {
       const {
         getOrCreateMobileEncryptionKey,
