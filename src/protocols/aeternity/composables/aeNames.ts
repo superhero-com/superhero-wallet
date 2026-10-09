@@ -13,11 +13,13 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 
 import type {
   ChainName,
   IName,
   ITransaction,
+  ITx,
   NetworkId,
   IAddressNamePair,
   IAuction,
@@ -51,7 +53,11 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
-import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import {
+  aettosToAe,
+  getInnerTransaction,
+  isInsufficientBalanceError,
+} from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
 import { useAeAddressLinkContract } from './aeAddressLinkContract';
@@ -301,6 +307,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     isMiddlewareReady,
     getMiddleware,
     fetchFromMiddlewareCamelCased,
+    fetchFromMiddlewareCamelCasedPrecise,
   } = useAeMiddleware();
 
   if (!preclaimedNamesEncryptionInitialized) {
@@ -443,6 +450,27 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return getNameAuction(name)
       ?.bids
       .reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
+  }
+
+  /**
+   * For an expired name that is auctioned again the middleware returns the previous
+   * owner's claims and activities, so only the auction itself has the current bids.
+   */
+  async function fetchNameAuction(name: string): Promise<IAuction> {
+    const { info } = await fetchFromMiddlewareCamelCasedPrecise(
+      `/v2/names/${name}/auction?expand=true`,
+    );
+    return {
+      expiration: info.auctionEnd,
+      bids: info.bids
+        .map(({ tx }: ITransaction) => getInnerTransaction(tx))
+        // A claim made by a contract call carries no bid amount
+        .filter((tx: ITx) => tx.type === Tag[Tag.NameClaimTx])
+        .map(({ accountId, nameFee }: ITx) => ({
+          accountId,
+          nameFee: new BigNumber(aettosToAe(nameFee!)),
+        })),
+    };
   }
 
   function setDefaultName(
@@ -1344,6 +1372,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     getNameByNameHash,
     getNameAuction,
     getNameAuctionHighestBid,
+    fetchNameAuction,
     updateNamePointer,
     setAutoExtend,
     setAuctionEntry,

@@ -155,11 +155,13 @@ const createTestContext = async ({
   // Controllable so tests can drive the "middleware became ready" transition that
   // populates owned/default names on startup (the account-card path).
   const isMiddlewareReady = ref(false);
+  const fetchFromMiddlewareCamelCasedPrecise = vi.fn();
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
     useAeMiddleware: () => ({
       isMiddlewareReady,
       getMiddleware: vi.fn().mockResolvedValue({ getNames }),
       fetchFromMiddlewareCamelCased: vi.fn(),
+      fetchFromMiddlewareCamelCasedPrecise,
     }),
   }));
 
@@ -224,6 +226,7 @@ const createTestContext = async ({
     aeNames,
     fetchPendingTransactions,
     fetchAllPages,
+    fetchFromMiddlewareCamelCasedPrecise,
     getPreferredName,
     isAddressLinkSupported,
     isMiddlewareReady,
@@ -1403,5 +1406,50 @@ describe('useAeNames last-claimed-name fallback', () => {
 
     expect(ctx.aeNames.ownedNames.value).toEqual([]);
     expect(ctx.aeNames.getName('ak_test').value).toBe('');
+  });
+});
+
+describe('useAeNames fetchNameAuction', () => {
+  const claimTx = (accountId, nameFee) => ({ type: 'NameClaimTx', accountId, nameFee });
+
+  it('takes the bids from the auction, not from the claims of the previous owner', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue({
+      name: 'test.chain',
+      status: 'auction',
+      info: {
+        auctionEnd: 1000,
+        // Newest first, as the middleware lists them
+        bids: [
+          { tx: claimTx('ak_carol', '500000000000000000001') },
+          {
+            tx: {
+              type: 'GAMetaTx',
+              gaId: 'ak_bob',
+              tx: { signatures: [], tx: claimTx('ak_bob', '400000000000000000000') },
+            },
+          },
+          { tx: { type: 'ContractCallTx', callerId: 'ak_dave' } },
+          { tx: claimTx('ak_alice', '352380000000000000000') },
+        ],
+      },
+      // The previous lifecycle, where the old claims belong
+      previous: [{ info: { claims: [{ tx: claimTx('ak_old', '900000000000000000000') }] } }],
+    });
+
+    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+
+    expect(ctx.fetchFromMiddlewareCamelCasedPrecise)
+      .toHaveBeenCalledWith('/v2/names/test.chain/auction?expand=true');
+    expect(auction.expiration).toBe(1000);
+    expect(auction.bids.map(({ accountId, nameFee }) => [accountId, nameFee.toFixed()]))
+      .toEqual([
+        ['ak_carol', '500.000000000000000001'],
+        ['ak_bob', '400'],
+        ['ak_alice', '352.38'],
+      ]);
+
+    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+    expect(ctx.aeNames.getNameAuctionHighestBid('test.chain').accountId).toBe('ak_carol');
   });
 });

@@ -37,9 +37,7 @@ import {
   watch,
   PropType,
 } from 'vue';
-import BigNumber from 'bignumber.js';
 import { useRoute, useRouter } from 'vue-router';
-import { produceNameId } from '@aeternity/aepp-sdk';
 
 import type { ChainName } from '@/types';
 
@@ -47,8 +45,6 @@ import { executeAndSetInterval } from '@/utils';
 import { ROUTE_AUCTION_BID, ROUTE_AUCTION_HISTORY } from '@/popup/router/routeNames';
 import { useUi } from '@/composables';
 import { fadeAnimation } from '@/popup/animations';
-import { aettosToAe } from '@/protocols/aeternity/helpers';
-import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { IS_FIREFOX } from '@/constants';
 
@@ -72,38 +68,17 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
 
-    const { getMiddleware } = useAeMiddleware();
     const { params: routeParams } = useRoute();
     const { isAppActive, isLoaderVisible, setLoaderVisible } = useUi();
-    const { setAuctionEntry } = useAeNames();
+    const { setAuctionEntry, fetchNameAuction } = useAeNames();
 
     setLoaderVisible(true);
 
     async function updateAuctionEntry() {
-      const middleware = await getMiddleware();
       try {
-        const nameId = produceNameId(props.name);
-        const [auctionInfo, accountActivities] = await Promise.all([
-          middleware.getName(props.name),
-          // TODO: show more than 100 bids
-          middleware.getAccountActivities(nameId, { limit: 100 }),
-        ]);
-
-        // https://github.com/aeternity/ae_mdw/issues/509
-        const { auctionEnd } = auctionInfo.auction ?? auctionInfo.info;
-
-        const bids = accountActivities.data
-          .filter(({ type }: any) => type === 'NameClaimEvent')
-          .filter(({ payload: { sourceTxType } }: any) => sourceTxType === 'NameClaimTx')
-          .map(({ payload: { tx: { accountId, nameFee } } }: any) => ({
-            nameFee: new BigNumber(aettosToAe(nameFee)),
-            accountId,
-          }));
-
         setAuctionEntry({
           name: props.name,
-          expiration: auctionEnd,
-          bids,
+          ...await fetchNameAuction(props.name),
         });
       } catch (error) {
         router.push({ name: ROUTE_AUCTION_BID });
@@ -142,12 +117,20 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 
 .auction {
+  // Fills the page so the router outlet can take the space below the tabs
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(#{$header-default-height} + env(safe-area-inset-top));
+
   &-tabs {
     padding-inline: var(--screen-padding-x);
   }
 
   &-router {
-    top: 8%;
+    position: relative;
+    flex: 1;
   }
 }
 </style>
