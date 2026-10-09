@@ -1,6 +1,11 @@
 import { TextEncoder, TextDecoder } from 'util';
 import { vi } from 'vitest';
 
+// Up to 3 s per fresh mobile key would slow down every mobile auth spec.
+vi.mock('@/utils/waitBeforeKeyReadRetry', () => ({
+  waitBeforeKeyReadRetry: vi.fn(() => Promise.resolve()),
+}));
+
 process.env.COMMIT_HASH = 'a1c1c5acc851c49248aad87088963f9ae5fb200e';
 process.env.SDK_VERSION = '13.0.0';
 

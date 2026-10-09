@@ -11,6 +11,8 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';
+import { StoredWalletFoundError } from '@/lib/errors';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { WalletStorage } from '@/lib/WalletStorage';
 import {
   AUTHENTICATION_TIMEOUTS,
@@ -18,6 +20,7 @@ import {
   IS_IOS,
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
+  MODAL_RESET_WALLET,
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
@@ -34,9 +37,9 @@ import {
   getOrCreateMobileEncryptionKey,
   getSessionEncryptionKey,
   handleUnknownError,
+  MobileEncryptionKeyMissingError,
   sessionEnd,
   sessionStart,
-  subscribeToSessionEncryptionKey,
   watchUntilTruthy,
 } from '@/utils';
 
@@ -76,12 +79,15 @@ export const useAuth = createCustomScopedComposable(() => {
   } = useUi();
   const {
     openBiometricLoginModal,
+    openConfirmModal,
+    openModal,
     openPasswordLoginModal,
     openEnableBiometricLoginModal,
   } = useModals();
 
   let isSessionExpired = false;
   let isManualMobileLockActive = false;
+  let isUnreadableWalletModalOpen = false;
   let sessionExpiresAt: number | null = null;
   let expirationTimeout: NodeJS.Timeout;
 
@@ -246,7 +252,71 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticated.value = false;
   }
 
+  /**
+   * The stored mnemonic can't be decrypted on this device, or its key can't be read.
+   * Reinstalling doesn't help on iOS (the Keychain survives it), so offer the in-app reset.
+   */
+  function surfaceUnreadableWalletData(error: unknown) {
+    const message = (error instanceof MobileEncryptionKeyMissingError)
+      ? t('auth.walletKeyUnavailableMessage')
+      : t('auth.walletDataUnreadableMessage');
+    handleUnknownError(error);
+    Logger.write({
+      title: t('auth.walletDataUnreadableTitle'),
+      message,
+      type: 'api-response',
+      modal: false,
+    });
+    // Every navigation re-runs `checkUserAuth`, so don't stack modals.
+    if (isUnreadableWalletModalOpen) {
+      return;
+    }
+    isUnreadableWalletModalOpen = true;
+    openConfirmModal({
+      title: t('auth.walletDataUnreadableTitle'),
+      msg: message,
+      icon: 'critical',
+      buttonMessage: t('auth.walletDataUnreadableAction'),
+    })
+      .then(() => openModal(MODAL_RESET_WALLET))
+      .catch(() => { /* NOOP - dismissed */ })
+      .finally(() => {
+        isUnreadableWalletModalOpen = false;
+      });
+  }
+
+  /**
+   * On iOS the seed read at startup can come back empty while it is still stored.
+   * Writing a new one would replace it, so offer to reload and read it again.
+   */
+  async function assertNoUnloadedWalletStored() {
+    if (mnemonic.value || !await SecureMobileStorage.get<string>(STORAGE_KEYS.mnemonic)) {
+      return;
+    }
+    openConfirmModal({
+      title: t('auth.storedWalletFoundTitle'),
+      msg: t('auth.storedWalletFoundMessage'),
+      buttonMessage: t('auth.storedWalletFoundAction'),
+    })
+      .then(() => window.location.reload())
+      .catch(() => { /* NOOP - dismissed */ });
+    throw new StoredWalletFoundError();
+  }
+
+  /**
+   * The storage watcher doesn't wait for its write, so a failed Keychain write
+   * would leave a wallet that looks created but is gone after a restart.
+   */
+  async function storeMobileMnemonic(ciphertext: string) {
+    await SecureMobileStorage.set(STORAGE_KEYS.mnemonic, ciphertext);
+    mnemonic.value = ciphertext;
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
+    // Empty while the wallet is locked, and encrypting that would replace the seed.
+    if (!plaintextToEncrypt) {
+      throw new Error('The wallet is locked, there is no mnemonic to encrypt');
+    }
     if (IS_MOBILE_APP) {
       /**
        * Mobile never uses a user/default password-derived PBKDF2 key for the
@@ -258,7 +328,7 @@ export const useAuth = createCustomScopedComposable(() => {
         const mobileKey = await getOrCreateMobileEncryptionKey();
         setEncryptionKey(mobileKey);
       }
-      mnemonic.value = await encrypt(encryptionKey.value!, plaintextToEncrypt);
+      await storeMobileMnemonic(await encrypt(encryptionKey.value!, plaintextToEncrypt));
       markAuthenticated();
       return;
     }
@@ -276,9 +346,15 @@ export const useAuth = createCustomScopedComposable(() => {
      * rotation path in `checkUserAuth`, which invokes `setPassword`
      * on every boot of a legacy install.
      */
+    const currentKey = encryptionKey.value;
     const newSalt = generateSalt();
     const newEncryptionKey = await generateEncryptionKey(password, newSalt);
     const newMnemonicCiphertext = await encrypt(newEncryptionKey, plaintextToEncrypt);
+    // Imported keys and other encrypted data follow only a direct key switch,
+    // so after a lock they would stay under a key the new salt makes underivable.
+    if (encryptionKey.value !== currentKey) {
+      throw new Error('The wallet got locked while setting the password');
+    }
     /**
      * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
      * persisted by its own fire-and-forget watcher — assigning both reactive
@@ -324,11 +400,12 @@ export const useAuth = createCustomScopedComposable(() => {
        * names, secure-login timeout — is also encrypted via the shared
        * reactive key.
        */
+      await assertNoUnloadedWalletStored();
       if (!encryptionKey.value) {
         const mobileKey = await getOrCreateMobileEncryptionKey();
         setEncryptionKey(mobileKey);
       }
-      mnemonic.value = await encrypt(encryptionKey.value!, newMnemonic);
+      await storeMobileMnemonic(await encrypt(encryptionKey.value!, newMnemonic));
       if (await checkBiometricLoginAvailability()) {
         await openEnableBiometricLoginModal();
       }
@@ -359,56 +436,84 @@ export const useAuth = createCustomScopedComposable(() => {
     markAuthenticated();
   }
 
-  /**
-   * Try to obtain the encryption key from extension's background process.
-   *
-   * Used exclusively from the offscreen tab. Concurrent invocations dedupe
-   * onto a single in-flight promise so that the salt watcher and the
-   * `browser.storage.session` change listener (set up below) cannot
-   * accumulate parallel `setInterval`s; without this guard, every wake-up
-   * would leak another timer that survives the bounded
-   * `CHECK_FOR_SESSION_KEY_TIMEOUT` budget.
-   */
-  let backgroundEncryptionKeySync: Promise<void> | null = null;
-  async function syncBackgroundEncryptionKey() {
-    if (backgroundEncryptionKeySync) {
-      return backgroundEncryptionKeySync;
+  async function restoreEncryptionKeyFromBackground(): Promise<boolean> {
+    try {
+      const sessionEncryptionKey = await getSessionEncryptionKey();
+      // Read once: a password change may replace it while we decrypt.
+      const ciphertext = mnemonicEncrypted.value;
+      if (!sessionEncryptionKey || !ciphertext) {
+        return false;
+      }
+      mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, ciphertext);
+      // Keep our object for the same key: `decryptedComputed` takes a new one for a rotation.
+      const isKeyUnchanged = !!encryptionKey.value && await decrypt(
+        encryptionKey.value,
+        ciphertext,
+      ).then(() => true, () => false);
+      if (!isKeyUnchanged) {
+        setEncryptionKey(sessionEncryptionKey);
+      }
+      return true;
+    } catch (error) {
+      handleUnknownError(error);
+      return false;
     }
-    backgroundEncryptionKeySync = new Promise<void>((resolve) => {
-      let interval: ReturnType<typeof setInterval>;
-      let timeout: ReturnType<typeof setTimeout>;
-      const finish = () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
+  }
+
+  let backgroundEncryptionKeySync: Promise<void> | null = null;
+  let backgroundEncryptionKeySyncDeadline = 0;
+  let isBackgroundEncryptionKeySyncRequested = false;
+  let wakeBackgroundEncryptionKeySync: (() => void) | undefined;
+
+  function waitForNextBackgroundEncryptionKeyAttempt(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      const timer = setTimeout(resolve, ms);
+      wakeBackgroundEncryptionKeySync = () => {
+        clearTimeout(timer);
         resolve();
       };
-      interval = setInterval(async () => {
-        const sessionEncryptionKey = await getSessionEncryptionKey();
-        /**
-         * Guard against `mnemonicEncrypted.value` not having been
-         * restored yet — when the salt watcher fires immediately after
-         * storage restore, the mnemonic ref is restored independently
-         * and may still be empty for one tick. Without the guard,
-         * `decrypt(key, null!)` would throw and `setEncryptionKey`
-         * would never be called.
-         */
-        if (sessionEncryptionKey && mnemonicEncrypted.value) {
-          try {
-            mnemonicDecrypted.value = await decrypt(
-              sessionEncryptionKey,
-              mnemonicEncrypted.value,
-            );
-            setEncryptionKey(sessionEncryptionKey);
-            finish();
-          } catch (error) {
-            handleUnknownError(error);
-          }
-        }
-      }, CHECK_FOR_SESSION_KEY_INTERVAL);
-      timeout = setTimeout(finish, CHECK_FOR_SESSION_KEY_TIMEOUT);
-    }).finally(() => {
-      backgroundEncryptionKeySync = null;
     });
+  }
+
+  async function pollBackgroundEncryptionKey() {
+    try {
+      for (;;) {
+        isBackgroundEncryptionKeySyncRequested = false;
+        // eslint-disable-next-line no-await-in-loop
+        const isRestored = await restoreEncryptionKeyFromBackground();
+        // Requested again during the attempt (e.g. a new key): retry right away.
+        if (!isBackgroundEncryptionKeySyncRequested) {
+          if (isRestored) {
+            return;
+          }
+          const remaining = backgroundEncryptionKeySyncDeadline - performance.now();
+          if (remaining <= 0) {
+            return;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          await waitForNextBackgroundEncryptionKeyAttempt(
+            Math.min(CHECK_FOR_SESSION_KEY_INTERVAL, remaining),
+          );
+          wakeBackgroundEncryptionKeySync = undefined;
+        }
+      }
+    } finally {
+      // In the tick the loop ends, so no request joins a finished loop.
+      backgroundEncryptionKeySync = null;
+    }
+  }
+
+  /**
+   * Offscreen tab only: polls the background for the session key until
+   * `CHECK_FOR_SESSION_KEY_TIMEOUT` after the latest call, which also triggers an attempt.
+   */
+  function syncBackgroundEncryptionKey(): Promise<void> {
+    backgroundEncryptionKeySyncDeadline = performance.now() + CHECK_FOR_SESSION_KEY_TIMEOUT;
+    isBackgroundEncryptionKeySyncRequested = true;
+    wakeBackgroundEncryptionKeySync?.();
+    if (!backgroundEncryptionKeySync) {
+      backgroundEncryptionKeySync = pollBackgroundEncryptionKey();
+    }
     return backgroundEncryptionKeySync;
   }
 
@@ -497,8 +602,16 @@ export const useAuth = createCustomScopedComposable(() => {
          * publish the decrypted mnemonic until the gate has succeeded.
          */
         if (!encryptionKey.value) {
-          const mobileKey = await getOrCreateMobileEncryptionKey();
-          setEncryptionKey(mobileKey);
+          try {
+            const mobileKey = await getOrCreateMobileEncryptionKey();
+            setEncryptionKey(mobileKey);
+          } catch (error) {
+            if (!(error instanceof MobileEncryptionKeyMissingError)) {
+              throw error;
+            }
+            surfaceUnreadableWalletData(error);
+            return;
+          }
         }
         if (
           (isBiometricLoginEnabled.value || isManualMobileLockActive)
@@ -543,13 +656,7 @@ export const useAuth = createCustomScopedComposable(() => {
              * without authenticating — the outer `finally` clears
              * `isAuthenticating`.
              */
-            handleUnknownError(error);
-            Logger.write({
-              title: t('auth.walletDataUnreadableTitle'),
-              message: t('auth.walletDataUnreadableMessage'),
-              type: 'api-response',
-              modal: true,
-            });
+            surfaceUnreadableWalletData(error);
             return;
           }
         } else {
@@ -653,13 +760,22 @@ export const useAuth = createCustomScopedComposable(() => {
         // by using data stored in the background process.
         if (!encryptionKey.value && !autoLoginDisabledEnv && IS_EXTENSION) {
           setLoaderVisible(true);
-          const sessionEncryptionKey = await getSessionEncryptionKey();
-          if (sessionEncryptionKey) {
-            setEncryptionKey(sessionEncryptionKey);
-            mnemonicDecrypted.value = await decrypt(sessionEncryptionKey, mnemonic.value);
-            markAuthenticated();
+          try {
+            const sessionEncryptionKey = await getSessionEncryptionKey();
+            if (sessionEncryptionKey) {
+              // Decrypt first: a key that can't open the mnemonic must not be published.
+              const decryptedMnemonic = await decrypt(sessionEncryptionKey, mnemonic.value);
+              setEncryptionKey(sessionEncryptionKey);
+              mnemonicDecrypted.value = decryptedMnemonic;
+              markAuthenticated();
+            }
+          } catch (error) {
+            // Stale key, e.g. a password change cut off before the session write.
+            handleUnknownError(error);
+            await sessionEnd().catch(handleUnknownError);
+          } finally {
+            setLoaderVisible(false);
           }
-          setLoaderVisible(false);
         }
 
         // Finally if other attempts failed, ask user for the password.
@@ -702,12 +818,19 @@ export const useAuth = createCustomScopedComposable(() => {
      * `encryptionKey` to work against — on mobile we now encrypt those
      * blobs instead of passing them through plaintext via the old
      * `IS_MOBILE_APP` bypass. The key-or-create is idempotent and shares
-     * an in-memory cache with the mnemonic-migration hook, so no second
-     * Keychain round-trip happens.
+     * an in-memory cache with the mnemonic-migration hook, so once the key
+     * is read no second Keychain round-trip happens.
      */
     if (IS_MOBILE_APP && !encryptionKey.value) {
-      const mobileKey = await getOrCreateMobileEncryptionKey();
-      setEncryptionKey(mobileKey);
+      try {
+        const mobileKey = await getOrCreateMobileEncryptionKey();
+        setEncryptionKey(mobileKey);
+      } catch (error) {
+        // Reported by `checkUserAuth`.
+        if (!(error instanceof MobileEncryptionKeyMissingError)) {
+          throw error;
+        }
+      }
     }
 
     await watchUntilTruthy(() => mnemonic.value);
@@ -722,22 +845,11 @@ export const useAuth = createCustomScopedComposable(() => {
   })();
 
   if (IS_OFFSCREEN_TAB) {
+    // Later logins sync through the `CONNECTION_TYPES.SESSION` port (`offscreen/wallet.ts`).
     watch(
       encryptionSalt,
       () => syncBackgroundEncryptionKey(),
     );
-    /**
-     * The salt watcher above only fires when `encryptionSalt` changes —
-     * realistically once per password setup — and `syncBackgroundEncryptionKey`
-     * stops polling after `CHECK_FOR_SESSION_KEY_TIMEOUT`. Without an
-     * additional wake-up source, an offscreen tab that boots before the
-     * user authenticates would give up after 30 s and never recover the
-     * session key, leaving Ledger / WalletConnect / EVM RPC handlers
-     * unable to decrypt the mnemonic. Subscribe to the popup's
-     * `sessionStart()` write into `browser.storage.session` so the
-     * offscreen reacts the moment the user logs in, no matter how late.
-     */
-    subscribeToSessionEncryptionKey(syncBackgroundEncryptionKey);
   }
 
   /**
@@ -820,6 +932,7 @@ export const useAuth = createCustomScopedComposable(() => {
     logout,
     setMnemonicAndInitializeAuthentication,
     setPassword,
+    syncBackgroundEncryptionKey,
     updatePassword,
   };
 });

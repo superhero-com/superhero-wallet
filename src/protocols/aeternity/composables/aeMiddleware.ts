@@ -15,6 +15,7 @@ import type {
 import { PROTOCOLS } from '@/constants';
 import { fetchJson, getActivityHash, watchUntilTruthy } from '@/utils';
 import { genSwaggerClient, mapObject } from '@/lib/swagger';
+import JsonBig from '@/lib/json-big';
 
 import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
 import { ACTIVITIES_TYPES, TX_FUNCTIONS } from '@/protocols/aeternity/config';
@@ -69,6 +70,18 @@ export function useAeMiddleware() {
 
   async function fetchFromMiddlewareCamelCased(path: string) {
     return fetchFromMiddleware(path).then(camelCaseKeysDeep);
+  }
+
+  /**
+   * Keeps integers too big for a JS number (e.g. aettos) as exact strings.
+   */
+  async function fetchFromMiddlewareCamelCasedPrecise(path: string) {
+    await watchUntilTruthy(aeActiveNetworkSettings);
+    const response = await fetch(`${aeActiveNetworkSettings.value.middlewareUrl}${path}`);
+    if (!response.ok) {
+      throw new Error(`Middleware responded with ${response.status} to ${path}`);
+    }
+    return camelCaseKeysDeep(JsonBig.parse(await response.text()));
   }
 
   async function fetchMiddlewareStatus(): Promise<IMiddlewareStatus> {
@@ -238,6 +251,7 @@ export function useAeMiddleware() {
     getMiddlewareRef,
     fetchFromMiddleware,
     fetchFromMiddlewareCamelCased,
+    fetchFromMiddlewareCamelCasedPrecise,
     fetchMiddlewareStatus,
     normalizeActivitiesStructure,
     normalizeMiddlewareTransactionStructure,

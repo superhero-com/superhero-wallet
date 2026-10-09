@@ -26,11 +26,11 @@ window.browser = browser;
  * throws a `SyntaxError`. It is also worthless as a dapp identity: permissions
  * are keyed by host, so every sandboxed frame on the web would share the single
  * `'null'` entry. Stay out of those frames entirely.
+ *
+ * Read `window.origin`, not `location.origin`: the latter comes from the URL, so a
+ * sandboxed `https://platform.twitter.com` frame still reports a real origin there.
  */
-const hasOpaqueOrigin = () => {
-  const origin = window.location?.origin ?? window.origin;
-  return !origin || origin === 'null';
-};
+const hasOpaqueOrigin = () => !window.origin || window.origin === 'null';
 
 const runContentScript = () => {
   const sendToOffscreen = (method: BackgroundMethod, params: any) => new Promise((resolve) => {
@@ -72,8 +72,7 @@ const runContentScript = () => {
   window.addEventListener(
     'message',
     async (event) => {
-      const currentOrigin = window.location?.origin ?? window.origin;
-      if (event.origin !== currentOrigin || event.source !== window) {
+      if (event.origin !== window.origin || event.source !== window) {
         return;
       }
       if (event.data?.type === 'result') {

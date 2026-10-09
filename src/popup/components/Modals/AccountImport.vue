@@ -2,8 +2,8 @@
   <Modal
     class="account-import-modal"
     from-bottom
-    has-close-button
-    @close="resolve"
+    :has-close-button="!discovering"
+    @close="close"
   >
     <div class="text-center">
       <p
@@ -71,6 +71,8 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { isSeedLengthValid } from '@/utils';
+import { IS_MOBILE_APP } from '@/constants';
+import { StoredWalletFoundError } from '@/lib/errors';
 import {
   useAccounts,
   useAuth,
@@ -136,10 +138,24 @@ export default defineComponent({
         await discoverAccounts();
         props.resolve();
         router.push(loginTargetLocation.value);
-      } catch {
-        error.value = t('pages.index.passwordWasNotSet');
+      } catch (e) {
+        // The user is offered to reload instead.
+        if (e instanceof StoredWalletFoundError) {
+          props.resolve();
+          return;
+        }
+        error.value = IS_MOBILE_APP
+          ? t('pages.index.walletNotSaved')
+          : t('pages.index.passwordWasNotSet');
       } finally {
         discovering.value = false;
+      }
+    }
+
+    /** The seed is stored by then; closing would leave it without accounts on the start page. */
+    function close() {
+      if (!discovering.value) {
+        props.resolve();
       }
     }
 
@@ -158,6 +174,7 @@ export default defineComponent({
       discovering,
       mnemonic,
       error,
+      close,
       importAccount,
       scanAccountQrCode,
     };

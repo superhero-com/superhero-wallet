@@ -774,7 +774,9 @@ function injectSuperheroWallet() {
   // so every request this provider forwards would throw a `SyntaxError`. The
   // content script stays out of those frames for the same reason, so nothing
   // would answer us anyway. Do not advertise a wallet that cannot work there.
-  if (!window.location?.origin || window.location.origin === 'null') return;
+  // `location.origin` comes from the URL and stays real in a sandboxed frame.
+  // Messaging still uses it: a page global named `origin` replaces `window.origin`.
+  if (!window.origin || window.origin === 'null') return;
 
   const superheroWalletMessageListener = new SuperheroWalletMessageListener();
   window.addEventListener('message', superheroWalletMessageListener.onMessage);

@@ -59,7 +59,13 @@
 import { defineComponent, PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { IS_MOBILE_APP } from '@/constants';
+import {
+  IS_EXTENSION,
+  IS_MOBILE_APP,
+  POPUP_METHODS,
+  STORAGE_KEYS,
+} from '@/constants';
+import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
   useAeSdk,
@@ -108,7 +114,14 @@ export default defineComponent({
 
       WalletStorage.clear();
       if (IS_MOBILE_APP) {
-        SecureMobileStorage.clear();
+        await SecureMobileStorage.clear().catch(handleUnknownError);
+        // The native clear stops at the first failed delete. Leftover ciphertext under a new
+        // key would leave the wallet unreadable, or stuck at startup for imported accounts.
+        await Promise.allSettled([
+          SecureMobileStorage.remove(STORAGE_KEYS.mnemonic),
+          SecureMobileStorage.remove(STORAGE_KEYS.mobileDataKey),
+          SecureMobileStorage.remove(STORAGE_KEYS.privateKeyAccountsRaw),
+        ]);
       }
 
       // TODO: Rethink this approach
@@ -117,6 +130,12 @@ export default defineComponent({
       await router.push({ name: ROUTE_INDEX });
 
       props.resolve();
+      if (IS_EXTENSION) {
+        // The offscreen tab still holds the old wallet's key and data in memory.
+        await browser.runtime
+          .sendMessage({ target: 'offscreen', method: POPUP_METHODS.reload })
+          .catch(() => {}); // no offscreen tab
+      }
       window.location.reload();
     }
 

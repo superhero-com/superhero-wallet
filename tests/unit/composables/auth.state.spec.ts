@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { nextTick } from 'vue';
+import en from '@/popup/locales/en-US.json';
 
 /**
  * Targeted branch coverage for `useAuth`'s state machine, extending
@@ -35,6 +36,7 @@ function flushAsync() {
 function makeSessionStorageStub() {
   const store: Record<string, unknown> = {};
   return {
+    store,
     get: vi.fn((key: string) => Promise.resolve({ [key]: store[key] })),
     set: vi.fn((obj: Record<string, unknown>) => {
       Object.assign(store, obj);
@@ -47,11 +49,31 @@ function makeSessionStorageStub() {
   };
 }
 
+/**
+ * Extend (not replace) the global `browser` stub. `@/utils/session.ts` imports
+ * `@/offscreen/popupHandler`, whose first line imports `@/lib/initPolyfills` - which,
+ * outside an extension build, UNCONDITIONALLY overwrote `window.browser` with a reduced
+ * stub (no `runtime.connect`, no `storage.session`) the very first time this file's
+ * module graph loaded (via `registerAdapters`, before `beforeEach`'s mocks could apply).
+ * Mocking `@/offscreen/popupHandler` from then on prevents further stomping, but doesn't
+ * undo that first hit - so `runtime.connect` and `storage.session` are added back here.
+ */
+function installExtensionStubs() {
+  globalThis.browser.runtime.connect = vi.fn(() => ({
+    onMessage: { addListener: vi.fn() },
+    onDisconnect: { addListener: vi.fn() },
+    postMessage: vi.fn(),
+  }));
+  globalThis.browser.storage.session = makeSessionStorageStub();
+  return globalThis.browser.storage.session;
+}
+
 describe('useAuth state machine branches', () => {
   let openSetPasswordModalMock;
   let openBiometricLoginModalMock;
   let openPasswordLoginModalMock;
   let openEnableBiometricLoginModalMock;
+  let openConfirmModalMock;
   let loggerWriteMock;
   let walletStorageSetMock;
 
@@ -86,6 +108,7 @@ describe('useAuth state machine branches', () => {
     openBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openPasswordLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openEnableBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
+    openConfirmModalMock = vi.fn(() => new Promise(() => {}));
     loggerWriteMock = vi.fn();
     // Default: pure pass-through to the real WalletStorage.set implementation.
     // Individual tests may override this to inject a failure for one storage key.
@@ -108,6 +131,8 @@ describe('useAuth state machine branches', () => {
         openBiometricLoginModal: (...args) => openBiometricLoginModalMock(...args),
         openPasswordLoginModal: (...args) => openPasswordLoginModalMock(...args),
         openEnableBiometricLoginModal: (...args) => openEnableBiometricLoginModalMock(...args),
+        openConfirmModal: (...args) => openConfirmModalMock(...args),
+        openModal: vi.fn(),
       }),
     }));
     vi.doMock('@/lib/logger', () => ({
@@ -169,7 +194,7 @@ describe('useAuth state machine branches', () => {
       const ciphertextBeforeFailure = auth.mnemonic.value;
       expect(auth.isMnemonicEncrypted.value).toBe(true);
 
-      await expect(auth.setPassword('new-password'))
+      await expect(auth.setPassword('new-password', VALID_MNEMONIC))
         .rejects.toThrow('simulated mid-flow crypto failure');
       await nextTick();
       await flushAsync();
@@ -225,7 +250,7 @@ describe('useAuth state machine branches', () => {
         return realSet(keys, value);
       });
 
-      await expect(auth.setPassword('new-password'))
+      await expect(auth.setPassword('new-password', VALID_MNEMONIC))
         .rejects.toThrow('simulated storage quota exceeded on mnemonic write');
       await nextTick();
       await flushAsync();
@@ -257,24 +282,128 @@ describe('useAuth state machine branches', () => {
     });
   });
 
+  describe('password change', () => {
+    // Not the default, so a timeout that can't be decrypted anymore shows up.
+    const SECURE_LOGIN_TIMEOUT = '900000';
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function readStorage(name: string) {
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { composeStorageKeys } = await import('@/utils/common');
+      return localStorage.getItem(composeStorageKeys(STORAGE_KEYS[name]));
+    }
+
+    async function createWallet() {
+      openSetPasswordModalMock.mockResolvedValue('old-password');
+      const { useAuth } = await import('@/composables/auth');
+      const auth = useAuth();
+      await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+      // Encrypted with the password key, like the imported private keys.
+      auth.secureLoginTimeoutDecrypted.value = SECURE_LOGIN_TIMEOUT;
+      await vi.waitFor(async () => expect(await readStorage('secureLoginTimeout')).toBeTruthy());
+      return auth;
+    }
+
+    async function expectReadableAfterRestart(password: string) {
+      vi.resetModules();
+      const { useAuth } = await import('@/composables/auth');
+      const auth = useAuth();
+      await flushAsync();
+
+      expect(await auth.authenticateWithPassword(password)).toBe(true);
+      expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+      await vi.waitFor(() => (
+        expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
+      ));
+    }
+
+    it('keeps the wallet data readable with the new password', async () => {
+      const auth = await createWallet();
+      const timeoutCiphertext = await readStorage('secureLoginTimeout');
+
+      await auth.updatePassword('old-password', 'new-password');
+      // A watcher re-encrypts it after the key switch.
+      await vi.waitFor(async () => (
+        expect(await readStorage('secureLoginTimeout')).not.toBe(timeoutCiphertext)
+      ));
+
+      await expectReadableAfterRestart('new-password');
+    });
+
+    it('keeps the wallet data readable when the wallet locks right after the change', async () => {
+      const auth = await createWallet();
+      const timeoutCiphertext = await readStorage('secureLoginTimeout');
+
+      await auth.updatePassword('old-password', 'new-password');
+      // The watcher is still re-encrypting under the new key.
+      await auth.lockWallet();
+      await vi.waitFor(async () => (
+        expect(await readStorage('secureLoginTimeout')).not.toBe(timeoutCiphertext)
+      ));
+
+      await expectReadableAfterRestart('new-password');
+    });
+
+    it('keeps the old password when the current password is wrong', async () => {
+      const auth = await createWallet();
+
+      await expect(auth.updatePassword('wrong-password', 'new-password')).rejects.toThrow();
+      expect(auth.isAuthenticated.value).toBe(true);
+
+      await expectReadableAfterRestart('old-password');
+    });
+
+    // Locking from inside the real key derivation lands the lock mid-change every time.
+    it.each([
+      ['checking the current password', 1],
+      ['deriving the new key', 2],
+    ])('keeps the old password when the wallet locks while %s', async (_, lockingDerivation) => {
+      const auth = await createWallet();
+      const { subtle } = globalThis.crypto;
+      const deriveKey = subtle.deriveKey.bind(subtle);
+      let derivationCount = 0;
+      let locking;
+      vi.spyOn(subtle, 'deriveKey').mockImplementation((...args) => {
+        derivationCount += 1;
+        if (derivationCount === lockingDerivation) {
+          locking = auth.lockWallet();
+        }
+        return deriveKey(...args);
+      });
+
+      await expect(auth.updatePassword('old-password', 'new-password')).rejects.toThrow('locked');
+      await locking;
+      expect(auth.isAuthenticated.value).toBe(false);
+
+      await expectReadableAfterRestart('old-password');
+    });
+
+    it('refuses to change the password while the wallet is locked', async () => {
+      const auth = await createWallet();
+      await auth.lockWallet();
+
+      await expect(auth.updatePassword('old-password', 'new-password')).rejects.toThrow('locked');
+
+      await expectReadableAfterRestart('old-password');
+    });
+
+    it('refuses to set a password while the wallet is locked', async () => {
+      const auth = await createWallet();
+      await auth.lockWallet();
+      const mnemonicCiphertext = await readStorage('mnemonic');
+
+      await expect(auth.setPassword('new-password')).rejects.toThrow('mnemonic');
+      expect(await readStorage('mnemonic')).toBe(mnemonicCiphertext);
+    });
+  });
+
   describe('failed default-password guess (extension)', () => {
     it('clears only the reactive encryptionKey and does not call sessionEnd(), preserving a valid background session', async () => {
       mockConstants({ IS_EXTENSION: true });
-      // Extend (not replace) the global `browser` stub. `@/utils/session.ts`
-      // imports `@/offscreen/popupHandler`, whose first line imports
-      // `@/lib/initPolyfills` - which, outside an extension build, UNCONDITIONALLY
-      // overwrote `window.browser` with a reduced stub (no `runtime.connect`, no
-      // `storage.session`) the very first time this file's module graph loaded
-      // (via `registerAdapters`, before this `beforeEach`'s mocks could apply).
-      // Mocking `@/offscreen/popupHandler` from here on prevents further stomping,
-      // but doesn't undo that first hit - so `runtime.connect` and
-      // `storage.session` are added back explicitly here.
-      globalThis.browser.runtime.connect = vi.fn(() => ({
-        onMessage: { addListener: vi.fn() },
-        onDisconnect: { addListener: vi.fn() },
-        postMessage: vi.fn(),
-      }));
-      globalThis.browser.storage.session = makeSessionStorageStub();
+      installExtensionStubs();
 
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
@@ -315,6 +444,8 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.isAuthenticated.value).toBe(true);
       expect(authRestarted.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
       expect(authRestarted.isUsingDefaultPassword.value).toBe(false);
+      expect(authRestarted.encryptionKey.value).toBeDefined();
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
     });
   });
 
@@ -380,8 +511,84 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.mnemonicDecrypted.value).toBe('');
       expect(loggerWriteMock).toHaveBeenCalledWith(expect.objectContaining({
         type: 'api-response',
-        modal: true,
+        modal: false,
       }));
+      // The key is intact, so this is the "can't decrypt" case, not "key unavailable".
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        msg: en.auth.walletDataUnreadableMessage,
+      }));
+    });
+  });
+
+  describe('stale session key (extension)', () => {
+    let session;
+
+    // The popup dies after the new mnemonic is saved but before its key reaches the session.
+    async function leaveStaleSessionKey() {
+      openSetPasswordModalMock.mockResolvedValue('old-password');
+      const { useAuth } = await import('@/composables/auth');
+      const auth = useAuth();
+      await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+      await flushAsync();
+      const staleKey = session.store.exportedEncryptionKey;
+      expect(staleKey).toBeDefined();
+
+      session.set.mockImplementationOnce(() => Promise.resolve());
+      await auth.updatePassword('old-password', 'new-password');
+      await flushAsync();
+      expect(session.store.exportedEncryptionKey).toBe(staleKey);
+    }
+
+    beforeEach(async () => {
+      mockConstants({ IS_EXTENSION: true });
+      session = installExtensionStubs();
+      // `handleUnknownError` reports the failed decrypt.
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await leaveStaleSessionKey();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function restart() {
+      vi.resetModules();
+      const { useAuth } = await import('@/composables/auth');
+      const { useUi } = await import('@/composables/ui');
+      const auth = useAuth();
+      // The boot-time `checkUserAuth` ends at the password modal.
+      await vi.waitFor(
+        () => expect(openPasswordLoginModalMock).toHaveBeenCalled(),
+        { timeout: 10000 },
+      );
+      return { auth, ui: useUi() };
+    }
+
+    it('falls back to the password modal without publishing a key that does not open the mnemonic', async () => {
+      session.set.mockClear();
+      const { auth, ui } = await restart();
+      expect(session.set).not.toHaveBeenCalled();
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(ui.isLoaderVisible.value).toBe(false);
+
+      expect(await auth.authenticateWithPassword('new-password')).toBe(true);
+      expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+    });
+
+    it('drops the stale key so later reopens go straight to the password modal', async () => {
+      await restart();
+      expect(session.store).toEqual({});
+
+      openPasswordLoginModalMock.mockClear();
+      await restart();
+    });
+
+    it('still falls back to the password modal when the stale key cannot be dropped', async () => {
+      session.remove.mockRejectedValueOnce(new Error('Storage unavailable'));
+      const { auth, ui } = await restart();
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(ui.isLoaderVisible.value).toBe(false);
     });
   });
 });

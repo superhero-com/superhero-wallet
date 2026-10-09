@@ -245,6 +245,11 @@
       "helpMsg": "An account imported into your wallet with private key cannot be restored with your seed phrase but with this private key only. Make sure you back up such accounts storing securely their private keys. <p> Never share your private key with anyone else as it provides full control over your account and funds! </p>",
       "btnText": "Import Account"
     },
+    "unreadablePrivateKeyAccounts": {
+      "title": "Imported accounts unreadable",
+      "msg": "The accounts you imported with a private key can't be decrypted on this device, and they can't be recovered here. Your seed phrase accounts are not affected, and all funds stay on the blockchain. To import accounts again, remove the unreadable ones. You'll need each account's private key to get it back.",
+      "btnText": "Remove imported accounts"
+    },
     "name-exist": {
       "title": "Name registration error",
       "msg": "This name is already registered."
@@ -1120,10 +1125,16 @@
       "selectProtocol": "Please select blockchain to create your first wallet account on.",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
       "passwordWasNotSet": "Password was not set. Please set a password to continue.",
+      "walletNotSaved": "The wallet couldn't be saved on this device. Please try again.",
       "invalidSeed": "Your seed phrase should consist of 12 or more words separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here",
       "scanSeedPhrase": "Scan Seed Phrase",
-      "restoringAccounts": "Restoring accounts..."
+      "restoringAccounts": "Restoring accounts...",
+      "replaceWalletTitle": "Reset the wallet on this device first",
+      "replaceWalletMessage": "This device holds a wallet that is locked or can't be read. To create or import a wallet, reset this one first. After that, only its seed phrase can restore it.",
+      "replaceWalletConfirm": "Reset wallet",
+      "restoreIncompleteTitle": "Some accounts may be missing",
+      "restoreIncompleteText": "Not all of your accounts could be checked while restoring this wallet. Add any missing ones with \"Add account\"."
     },
     "notifications": {
       "superhero": "Superhero.com",
@@ -1478,7 +1489,12 @@
   },
   "auth": {
     "walletDataUnreadableTitle": "Wallet data unreadable",
-    "walletDataUnreadableMessage": "Your encrypted wallet data could not be decrypted. This usually means the device Keychain was cleared or the app was restored from a backup that did not include it. Reinstall the app and restore from your seed phrase to recover."
+    "walletDataUnreadableMessage": "The encrypted wallet data on this device can't be decrypted. Reinstalling the app won't fix this. Reset the wallet, then restore it with your seed phrase. Your funds stay on the blockchain, but only your seed phrase can restore access to them.",
+    "walletDataUnreadableAction": "Reset wallet",
+    "walletKeyUnavailableMessage": "The key that unlocks your wallet couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
+    "storedWalletFoundTitle": "Wallet found on this device",
+    "storedWalletFoundMessage": "Your wallet couldn't be loaded when the app started, but it's still stored on this device. Reload the app to open it.",
+    "storedWalletFoundAction": "Reload"
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

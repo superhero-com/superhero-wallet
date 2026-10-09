@@ -1,8 +1,14 @@
 // @ts-nocheck
+import { nextTick, ref } from 'vue';
+
 describe('offscreen wallet connections', () => {
   let onConnectListener: vi.Mock;
   let disconnectListener: vi.Mock;
+  let messageListener: vi.Mock;
+  let syncBackgroundEncryptionKey: vi.Mock;
   let aeSdk: any;
+  let aeSdkComposable: any;
+  let activeNetwork;
 
   function createPort() {
     return {
@@ -15,14 +21,22 @@ describe('offscreen wallet connections', () => {
         addListener: vi.fn((listener) => {
           disconnectListener = listener;
         }),
+        removeListener: vi.fn(),
       },
-      onMessage: { addListener: vi.fn() },
+      onMessage: {
+        addListener: vi.fn((listener) => {
+          messageListener = listener;
+        }),
+      },
     };
   }
 
   function mockDependencies() {
     onConnectListener = vi.fn();
     disconnectListener = vi.fn();
+    messageListener = vi.fn();
+    syncBackgroundEncryptionKey = vi.fn();
+    activeNetwork = ref({});
     aeSdk = {
       _clients: new Map([['client-id', {}]]),
       addRpcClient: vi.fn(() => 'client-id'),
@@ -34,6 +48,11 @@ describe('offscreen wallet connections', () => {
       }),
       shareWalletInfo: vi.fn().mockResolvedValue(undefined),
       _pushAccountsToApps: vi.fn(),
+    };
+    aeSdkComposable = {
+      isAeSdkReady: { value: true },
+      getAeSdk: vi.fn().mockResolvedValue(aeSdk),
+      resetNode: vi.fn(),
     };
 
     (global as any).browser = {
@@ -50,7 +69,6 @@ describe('offscreen wallet connections', () => {
     };
 
     vi.doMock('webextension-polyfill', () => ({ default: (global as any).browser }), { virtual: true });
-    vi.doMock('vue', () => ({ watch: vi.fn() }));
     vi.doMock('@/utils', () => ({ getCleanModalOptions: vi.fn((params) => params) }));
     vi.doMock('@aeternity/aepp-sdk', () => ({
       // Production code calls `new BrowserRuntimeConnection(...)`. Vitest 4 invokes
@@ -65,24 +83,17 @@ describe('offscreen wallet connections', () => {
     }));
     vi.doMock('@/background/bgPopupHandler', () => ({ setSessionTimeout: vi.fn() }));
     vi.doMock('@/composables', () => ({
-      useAccounts: () => ({ activeAccount: { value: {} } }),
-      useAeSdk: () => ({
-        isAeSdkReady: { value: true },
-        getAeSdk: vi.fn().mockResolvedValue(aeSdk),
-        resetNode: vi.fn(),
+      useAccounts: () => ({ activeAccount: ref({}) }),
+      useAeSdk: () => aeSdkComposable,
+      useAuth: () => ({
+        secureLoginTimeoutDecrypted: { value: '0' },
+        syncBackgroundEncryptionKey,
       }),
-      useAuth: () => ({ secureLoginTimeoutDecrypted: { value: '0' } }),
-      useNetworks: () => ({ activeNetwork: { value: {} } }),
+      useNetworks: () => ({ activeNetwork }),
     }));
-    vi.doMock('@/constants', () => ({
-      CONNECTION_TYPES: {
-        OTHER: 'OTHER',
-        POPUP: 'POPUP',
-        SESSION: 'SESSION',
-      },
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
       IS_FIREFOX: false,
-      POPUP_ACTIONS: { getProps: 'getProps' },
-      SESSION_METHODS: { setSessionTimeout: 'setSessionTimeout' },
     }));
     vi.doMock('@/offscreen/popupHandler', () => ({
       getPopup: vi.fn(),
@@ -142,6 +153,122 @@ describe('offscreen wallet connections', () => {
     await onConnectListener(createPort());
 
     expect(() => disconnectListener()).toThrow('something completely unexpected');
+  });
+
+  describe('while the SDK is updating', () => {
+    it('connects an aepp whose port arrives during a node reset once the reset is done', async () => {
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+
+      // A node reset is running: `getAeSdk` only resolves once it is done.
+      let finishReset;
+      aeSdkComposable.isAeSdkReady.value = false;
+      aeSdkComposable.getAeSdk.mockReturnValueOnce(
+        new Promise((resolve) => { finishReset = resolve; }),
+      );
+      const connecting = onConnectListener(createPort());
+      await Promise.resolve();
+      expect(aeSdk.addRpcClient).not.toHaveBeenCalled();
+
+      aeSdkComposable.isAeSdkReady.value = true;
+      finishReset(aeSdk);
+      await connecting;
+
+      expect(aeSdk.addRpcClient).toHaveBeenCalledTimes(1);
+      expect(aeSdk.shareWalletInfo).toHaveBeenCalledWith('client-id');
+    });
+
+    it('does not add an aepp whose port closed while waiting for the SDK', async () => {
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      let finishReset;
+      aeSdkComposable.getAeSdk.mockReturnValueOnce(
+        new Promise((resolve) => { finishReset = resolve; }),
+      );
+
+      const connecting = onConnectListener(createPort());
+      disconnectListener(); // the aepp tab reloads meanwhile
+      finishReset(aeSdk);
+      await connecting;
+
+      expect(aeSdk.addRpcClient).not.toHaveBeenCalled();
+      expect(aeSdk.shareWalletInfo).not.toHaveBeenCalled();
+    });
+
+    it('does not announce the wallet until the SDK is ready, then keeps retrying', async () => {
+      vi.useFakeTimers();
+      try {
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+
+        aeSdkComposable.isAeSdkReady.value = false;
+        await onConnectListener(createPort());
+        expect(aeSdk.addRpcClient).toHaveBeenCalledTimes(1);
+        expect(aeSdk.shareWalletInfo).not.toHaveBeenCalled();
+
+        aeSdkComposable.isAeSdkReady.value = true;
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(aeSdk.shareWalletInfo).toHaveBeenCalledWith('client-id');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('passes every network change on to resetNode, even while a reset is running', async () => {
+      const wallet = (await import('@/offscreen/wallet'));
+      activeNetwork.value = { name: 'A' };
+      await wallet.init();
+      // Never-ending resets, so every change below arrives while one is running.
+      aeSdkComposable.resetNode.mockReturnValue(new Promise(() => {}));
+
+      activeNetwork.value = { name: 'B' };
+      await nextTick();
+      activeNetwork.value = { name: 'C' };
+      await nextTick();
+      activeNetwork.value = { name: 'C' }; // equal value: ignored
+      await nextTick();
+
+      expect(aeSdkComposable.resetNode.mock.calls).toEqual([[{ name: 'B' }], [{ name: 'C' }]]);
+    });
+  });
+
+  describe('session port', () => {
+    function createSessionPort() {
+      const port = createPort();
+      port.name = 'SESSION';
+      port.sender.url = 'chrome-extension://test-extension-id/index.html';
+      return port;
+    }
+
+    it('syncs the session key once the popup reports it stored, ignoring other messages', async () => {
+      const { SESSION_METHODS } = await import('@/constants');
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      await onConnectListener(createSessionPort());
+      expect(syncBackgroundEncryptionKey).not.toHaveBeenCalled();
+
+      messageListener({ method: SESSION_METHODS.sessionKeyStored });
+      expect(syncBackgroundEncryptionKey).toHaveBeenCalledTimes(1);
+
+      messageListener({ method: 'somethingElse' });
+      messageListener(undefined);
+      expect(syncBackgroundEncryptionKey).toHaveBeenCalledTimes(1);
+    });
+
+    it('still starts the session timeout when the popup closes', async () => {
+      const { SESSION_METHODS } = await import('@/constants');
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      await onConnectListener(createSessionPort());
+
+      await disconnectListener();
+
+      expect((global as any).browser.runtime.sendMessage).toHaveBeenCalledWith({
+        target: 'background',
+        method: SESSION_METHODS.setSessionTimeout,
+        payload: 0,
+      });
+    });
   });
 
   describe('disconnect()', () => {
