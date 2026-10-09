@@ -85,12 +85,16 @@ async function isEncryptedWalletStored(): Promise<boolean> {
 }
 
 /** Resolves `null` when a new key should be minted. */
-async function readStoredKeyWithRetries(attempt = 1): Promise<CryptoKey | null> {
+async function readStoredKeyWithRetries(
+  attempt = 1,
+  wasWalletSeen = false,
+): Promise<CryptoKey | null> {
   const storedKey = await readStoredKey();
   if (storedKey) {
     return storedKey;
   }
-  const isWalletStored = await isEncryptedWalletStored();
+  // The wallet can read back empty too, so once seen it counts as stored.
+  const isWalletStored = wasWalletSeen || await isEncryptedWalletStored();
   if (attempt >= (isWalletStored ? KEY_READ_ATTEMPTS_WITH_WALLET : KEY_READ_ATTEMPTS)) {
     if (isWalletStored) {
       throw new MobileEncryptionKeyMissingError();
@@ -98,7 +102,7 @@ async function readStoredKeyWithRetries(attempt = 1): Promise<CryptoKey | null> 
     return null;
   }
   await new Promise((resolve) => { setTimeout(resolve, KEY_READ_RETRY_DELAY); });
-  return readStoredKeyWithRetries(attempt + 1);
+  return readStoredKeyWithRetries(attempt + 1, isWalletStored);
 }
 
 /**
