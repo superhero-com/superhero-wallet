@@ -22,7 +22,8 @@ const MOBILE_KEY_LENGTH = 32;
 const KEY_READ_RETRY_DELAYS = [200, 400, 800, 1600];
 
 let cachedKey: CryptoKey | null = null;
-let pending: Promise<CryptoKey> | null = null;
+let pendingRead: Promise<CryptoKey | null> | null = null;
+let pendingCreation: Promise<CryptoKey> | null = null;
 
 /**
  * `encrypt()` returns base64 of `[iv(IV_LENGTH) || webCryptoGcmOutput]`, where
@@ -82,15 +83,12 @@ async function readStoredKey(): Promise<CryptoKey | null> {
 }
 
 async function isEncryptedWalletStored(): Promise<boolean> {
-  try {
-    const stored = await SecureMobileStorage.get<string | null>(STORAGE_KEYS.mnemonic);
-    return typeof stored === 'string' && looksLikeCiphertext(stored);
-  } catch {
-    return false;
-  }
+  // A failed read is not evidence that there is no wallet to protect.
+  const stored = await SecureMobileStorage.get<string | null>(STORAGE_KEYS.mnemonic);
+  return typeof stored === 'string' && looksLikeCiphertext(stored);
 }
 
-/** Resolves `null` when a new key should be minted. */
+/** Resolves `null` when no key or encrypted wallet could be read; this does not prove absence. */
 async function readStoredKeyWithRetries(
   retry = 0,
   wasWalletSeen = false,
@@ -111,57 +109,56 @@ async function readStoredKeyWithRetries(
   return readStoredKeyWithRetries(retry + 1, isWalletStored);
 }
 
-/**
- * Mobile-only, per-install AES-GCM key that encrypts sensitive
- * state at rest on top of the platform Keychain.
- *
- * Previously mobile state was stored as plaintext inside SecureMobileStorage
- * (the iOS Keychain / Android Keystore). Platform Keychain *is* a secure
- * at-rest store, but shipping app-level encryption on top means an attacker
- * must exfiltrate both the data blob AND the mobile-data-key blob — and
- * lays the groundwork for future biometric-bound key derivation.
- *
- * The key itself is generated once per install from `crypto.getRandomValues`
- * and persisted (raw bytes, base64) under `STORAGE_KEYS.mobileDataKey`.
- * Subsequent calls re-import it via `importEncryptionKey`, caching in-memory
- * to avoid repeated Keychain round-trips.
- *
- * A new key is never minted over a stored encrypted wallet; it has to be reset first.
- */
-export async function getOrCreateMobileEncryptionKey(): Promise<CryptoKey> {
+async function readMobileEncryptionKey(): Promise<CryptoKey | null> {
   if (!IS_MOBILE_APP) {
-    throw new Error('getOrCreateMobileEncryptionKey() must only be called on mobile');
+    throw new Error('Mobile encryption keys must only be called on mobile');
   }
   if (cachedKey) return cachedKey;
-  if (pending) return pending;
-
-  pending = (async () => {
-    const storedKey = await readStoredKeyWithRetries();
-    if (storedKey) {
-      cachedKey = storedKey;
-      return cachedKey;
-    }
-    const rawBytes = globalThis.crypto.getRandomValues(new Uint8Array(MOBILE_KEY_LENGTH));
-    const importedKey = await importEncryptionKey(rawBytes);
-    /**
-     * Persist BEFORE publishing the key into the module cache.
-     * If the Keychain write fails (rejects, device locked on iOS,
-     * out-of-quota, etc.), the caller will see the rejection and retry,
-     * while subsequent in-process callers will re-enter this branch and
-     * mint a new key instead of handing out the un-persisted one. A
-     * cached-but-unpersisted key would survive in memory just long
-     * enough to encrypt fresh state, then disappear at app restart —
-     * rendering that state permanently unrecoverable.
-     */
-    await SecureMobileStorage.set(STORAGE_KEYS.mobileDataKey, encodeBase64(rawBytes));
-    cachedKey = importedKey;
-    return cachedKey;
-  })();
-
+  if (!pendingRead) pendingRead = readStoredKeyWithRetries();
+  const read = pendingRead;
   try {
-    return await pending;
+    const key = await read;
+    if (key) cachedKey = key;
+    return key;
   } finally {
-    pending = null;
+    if (pendingRead === read) pendingRead = null;
+  }
+}
+
+/** Startup, unlock and decryption must never create a key after an ambiguous read. */
+export async function getMobileEncryptionKey(): Promise<CryptoKey> {
+  if (pendingCreation) return pendingCreation;
+  const key = await readMobileEncryptionKey();
+  if (!key) throw new MobileEncryptionKeyMissingError();
+  return key;
+}
+
+/**
+ * For explicit wallet creation/import and migration of known legacy plaintext only.
+ * iOS creates atomically: if the item already exists, use its key, never overwrite it.
+ */
+export async function getOrCreateMobileEncryptionKey(): Promise<CryptoKey> {
+  if (pendingCreation) return pendingCreation;
+  const key = await readMobileEncryptionKey();
+  if (key) return key;
+  if (!pendingCreation) {
+    pendingCreation = (async () => {
+      const rawBytes = globalThis.crypto.getRandomValues(new Uint8Array(MOBILE_KEY_LENGTH));
+      const candidate = encodeBase64(rawBytes);
+      const persisted = await SecureMobileStorage.getOrCreate(
+        STORAGE_KEYS.mobileDataKey,
+        candidate,
+      );
+      // Import the actual persisted value, which may be an existing key, only after success.
+      cachedKey = await importEncryptionKey(new Uint8Array(decodeBase64(persisted)));
+      return cachedKey;
+    })();
+  }
+  const creation = pendingCreation;
+  try {
+    return await creation;
+  } finally {
+    if (pendingCreation === creation) pendingCreation = null;
   }
 }
 
@@ -175,7 +172,7 @@ export async function getOrCreateMobileEncryptionKey(): Promise<CryptoKey> {
  */
 export async function tryDecryptWithMobileKey(value: string): Promise<string | null> {
   try {
-    const key = await getOrCreateMobileEncryptionKey();
+    const key = await getMobileEncryptionKey();
     return await decrypt(key, value);
   } catch {
     return null;

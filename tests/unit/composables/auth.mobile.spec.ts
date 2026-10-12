@@ -134,6 +134,37 @@ describe('useAuth on mobile', () => {
     expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
   });
 
+  it('preserves the key when all secure reads are empty at startup and unlocks after reads recover', async () => {
+    const { auth: first } = await boot();
+    await first.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    const { SecureMobileStorage: initialStorage } = await import('@/lib/SecureMobileStorage');
+    const originalKey = await initialStorage.get('mobile-data-key');
+    const originalMnemonic = await initialStorage.get('mnemonic');
+
+    vi.resetModules();
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const realGet = SecureMobileStorage.get;
+    const emptyReads = vi.spyOn(SecureMobileStorage, 'get').mockResolvedValue(null);
+    const setSpy = vi.spyOn(SecureMobileStorage, 'set');
+    const { auth } = await boot();
+    // Let the startup key-read retries finish (their delays are stubbed in setup).
+    await flushAsync();
+    await flushAsync();
+
+    expect(auth.isAuthenticated.value).toBe(false);
+    expect(setSpy.mock.calls.some(([key]) => key === 'mobile-data-key')).toBe(false);
+    expect(await realGet('mobile-data-key')).toBe(originalKey);
+    expect(await realGet('mnemonic')).toBe(originalMnemonic);
+
+    emptyReads.mockRestore();
+    setSpy.mockRestore();
+    const { auth: recovered, ui } = await restart();
+    ui.isAppActive.value = true;
+    await recovered.checkUserAuth();
+    expect(recovered.isAuthenticated.value).toBe(true);
+    expect(recovered.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+  });
+
   it('keeps the wallet locked when the biometric login prompt is dismissed', async () => {
     const { auth: authGen1, ui: uiGen1 } = await boot();
     uiGen1.setBiometricLoginEnabled(true);

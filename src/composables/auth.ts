@@ -34,6 +34,7 @@ import {
   excludeFalsy,
   generateEncryptionKey,
   generateSalt,
+  getMobileEncryptionKey,
   getOrCreateMobileEncryptionKey,
   getSessionEncryptionKey,
   handleUnknownError,
@@ -603,7 +604,7 @@ export const useAuth = createCustomScopedComposable(() => {
          */
         if (!encryptionKey.value) {
           try {
-            const mobileKey = await getOrCreateMobileEncryptionKey();
+            const mobileKey = await getMobileEncryptionKey();
             setEncryptionKey(mobileKey);
           } catch (error) {
             if (!(error instanceof MobileEncryptionKeyMissingError)) {
@@ -817,13 +818,13 @@ export const useAuth = createCustomScopedComposable(() => {
      * `aeNames.ts`, and for `secureLoginTimeout` above) have a real
      * `encryptionKey` to work against — on mobile we now encrypt those
      * blobs instead of passing them through plaintext via the old
-     * `IS_MOBILE_APP` bypass. The key-or-create is idempotent and shares
-     * an in-memory cache with the mnemonic-migration hook, so once the key
-     * is read no second Keychain round-trip happens.
+     * `IS_MOBILE_APP` bypass. This read never creates a key: empty key and
+     * mnemonic reads must not be mistaken for a new installation. Explicit
+     * creation and legacy plaintext migration share the same key cache.
      */
     if (IS_MOBILE_APP && !encryptionKey.value) {
       try {
-        const mobileKey = await getOrCreateMobileEncryptionKey();
+        const mobileKey = await getMobileEncryptionKey();
         setEncryptionKey(mobileKey);
       } catch (error) {
         // Reported by `checkUserAuth`.

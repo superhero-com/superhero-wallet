@@ -1,0 +1,86 @@
+diff --git a/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift b/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift
+index f7758df..801bb31 100644
+--- a/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift
++++ b/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift
+@@ -1,6 +1,7 @@
+ import Capacitor
+ import Foundation
+ import KeychainSwift
++import Security
+ 
+ @objc(SecureStorage)
+ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
+@@ -9,6 +10,7 @@ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
+   public let pluginMethods: [CAPPluginMethod] = [
+     .init(#selector(setSynchronizeKeychain)),
+     .init(#selector(internalSetItem)),
++    .init(#selector(internalGetOrCreateItem)),
+     .init(#selector(internalGetItem)),
+     .init(#selector(internalRemoveItem)),
+     .init(#selector(clearItemsWithPrefix)),
+@@ -41,6 +43,19 @@ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
+     }
+   }
+ 
++  // Insert-only: an ambiguous read must never replace an existing encryption key.
++  @objc func internalGetOrCreateItem(_ call: CAPPluginCall) {
++    guard let key = getKeyParam(from: call),
++          let data = getDataParam(from: call) else {
++      return
++    }
++
++    tryKeychainOp(call, getSyncParam(from: call)) {
++      let persisted = try getOrCreateData(data, withKey: key, access: getAccessParam(from: call))
++      call.resolve(["data": persisted])
++    }
++  }
++
+   @objc func internalGetItem(_ call: CAPPluginCall) {
+     guard let key = getKeyParam(from: call) else {
+       return
+@@ -160,6 +175,45 @@ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
+     }
+   }
+ 
++  func getOrCreateData(_ data: String, withKey key: String, access: KeychainSwiftAccessOptions?) throws -> String {
++    let accessibility: CFString
++    switch access ?? .accessibleWhenUnlocked {
++    case .accessibleWhenUnlocked:
++      accessibility = kSecAttrAccessibleWhenUnlocked
++    case .accessibleWhenUnlockedThisDeviceOnly:
++      accessibility = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
++    case .accessibleAfterFirstUnlock:
++      accessibility = kSecAttrAccessibleAfterFirstUnlock
++    case .accessibleAfterFirstUnlockThisDeviceOnly:
++      accessibility = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
++    case .accessibleWhenPasscodeSetThisDeviceOnly:
++      accessibility = kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
++    }
++
++    var query: [String: Any] = [
++      kSecClass as String: kSecClassGenericPassword,
++      kSecAttrAccount as String: key,
++      kSecValueData as String: Data(data.utf8),
++      kSecAttrAccessible as String: accessibility,
++      kSecAttrSynchronizable as String: keychain.synchronizable
++    ]
++    if let accessGroup = keychain.accessGroup {
++      query[kSecAttrAccessGroup as String] = accessGroup
++    }
++
++    // Unlike KeychainSwift.set, this never deletes or updates an existing item.
++    let status = SecItemAdd(query as CFDictionary, nil)
++    if status == errSecSuccess { return data }
++    guard status == errSecDuplicateItem else {
++      throw KeychainError(.osError, status: status)
++    }
++    guard let existing = keychain.get(key) else {
++      // A duplicate that cannot be read is an error, not permission to replace it.
++      throw KeychainError(.osError, status: keychain.lastResultCode)
++    }
++    return existing
++  }
++
+   func getData(withKey key: String) -> Any {
+     keychain.get(key) as Any
+   }
