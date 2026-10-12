@@ -1,5 +1,5 @@
 diff --git a/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift b/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift
-index f7758df..801bb31 100644
+index 7f8795b..3368426 100644
 --- a/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift
 +++ b/node_modules/@aparajita/capacitor-secure-storage/ios/Sources/SecureStoragePlugin/Plugin.swift
 @@ -1,6 +1,7 @@
@@ -17,7 +17,7 @@ index f7758df..801bb31 100644
 +    .init(#selector(internalGetOrCreateItem)),
      .init(#selector(internalGetItem)),
      .init(#selector(internalRemoveItem)),
-     .init(#selector(clearItemsWithPrefix)),
+     .init(#selector(internalClearItemsWithPrefix)),
 @@ -41,6 +43,19 @@ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
      }
    }
@@ -38,7 +38,7 @@ index f7758df..801bb31 100644
    @objc func internalGetItem(_ call: CAPPluginCall) {
      guard let key = getKeyParam(from: call) else {
        return
-@@ -160,6 +175,45 @@ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
+@@ -177,6 +192,45 @@ public class SecureStorage: CAPPlugin, CAPBridgedPlugin {
      }
    }
  

@@ -64,14 +64,22 @@ function looksLikeCiphertext(value: string): boolean {
 }
 
 /**
- * The key reads back empty while a wallet encrypted with it is stored. The iOS plugin
- * returns empty on any Keychain error, so this is most likely a failed read.
+ * The key could not be loaded or safely created. Empty reads and rejected native
+ * operations must leave existing data intact and follow the recoverable auth path.
  */
 export class MobileEncryptionKeyMissingError extends Error {
-  constructor() {
-    super('Mobile encryption key is missing while an encrypted wallet is stored');
+  readonly cause: unknown;
+
+  constructor(cause?: unknown) {
+    super('Mobile encryption key is unavailable');
     this.name = 'MobileEncryptionKeyMissingError';
+    this.cause = cause;
   }
+}
+
+function rejectUnavailableKey(error: unknown): never {
+  throw error instanceof MobileEncryptionKeyMissingError
+    ? error : new MobileEncryptionKeyMissingError(error);
 }
 
 async function readStoredKey(): Promise<CryptoKey | null> {
@@ -114,7 +122,7 @@ async function readMobileEncryptionKey(): Promise<CryptoKey | null> {
     throw new Error('Mobile encryption keys must only be called on mobile');
   }
   if (cachedKey) return cachedKey;
-  if (!pendingRead) pendingRead = readStoredKeyWithRetries();
+  if (!pendingRead) pendingRead = readStoredKeyWithRetries().catch(rejectUnavailableKey);
   const read = pendingRead;
   try {
     const key = await read;
@@ -152,7 +160,7 @@ export async function getOrCreateMobileEncryptionKey(): Promise<CryptoKey> {
       // Import the actual persisted value, which may be an existing key, only after success.
       cachedKey = await importEncryptionKey(new Uint8Array(decodeBase64(persisted)));
       return cachedKey;
-    })();
+    })().catch(rejectUnavailableKey);
   }
   const creation = pendingCreation;
   try {

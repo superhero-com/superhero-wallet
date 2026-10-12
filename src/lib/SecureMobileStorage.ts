@@ -13,7 +13,7 @@ interface ISecureWalletStorage extends Omit<IWalletStorage, 'get' | 'remove' | '
   clear: () => Promise<void>;
 }
 
-/** Native extension maintained in patches/@aparajita+capacitor-secure-storage+8.0.0.patch. */
+/** Native extension maintained in patches/@aparajita+capacitor-secure-storage+8.0.1.patch. */
 const nativeStorage = SecureStorage as typeof SecureStorage & {
   internalGetOrCreateItem: (options: {
     prefixedKey: string;

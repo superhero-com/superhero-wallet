@@ -49,6 +49,23 @@ describe('mobileEncryption', () => {
       await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe(plaintext);
     });
 
+    it('preserves legacy data when native key creation rejects and migrates after recovery', async () => {
+      const {
+        encryptMobileStateIfPlaintext, tryDecryptWithMobileKey, SecureMobileStorage,
+      } = await loadModule();
+      const plaintext = 'abandon abandon abandon about';
+      const create = vi.spyOn(SecureMobileStorage, 'getOrCreate')
+        .mockRejectedValueOnce(new Error('Existing Keychain item could not be read'));
+
+      await expect(encryptMobileStateIfPlaintext(plaintext)).resolves.toBe(plaintext);
+      expect(await SecureMobileStorage.get('mobile-data-key')).toBeNull();
+
+      create.mockRestore();
+      const encrypted = await encryptMobileStateIfPlaintext(plaintext);
+      expect(encrypted).not.toBe(plaintext);
+      await expect(tryDecryptWithMobileKey(encrypted)).resolves.toBe(plaintext);
+    });
+
     it('is idempotent: re-encrypting its own output returns it unchanged', async () => {
       const { encryptMobileStateIfPlaintext, tryDecryptWithMobileKey } = await loadModule();
       const plaintext = 'abandon abandon abandon about';
@@ -190,7 +207,10 @@ describe('mobileEncryption', () => {
       const setSpy = vi.spyOn(SecureMobileStorage, 'set')
         .mockRejectedValueOnce(new Error('keychain locked'));
 
-      await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow('keychain locked');
+      await expect(getOrCreateMobileEncryptionKey()).rejects.toMatchObject({
+        name: 'MobileEncryptionKeyMissingError',
+        cause: expect.objectContaining({ message: 'keychain locked' }),
+      });
 
       // A retry mints a fresh key and persists it for real (spy falls through).
       const key = await getOrCreateMobileEncryptionKey();
@@ -356,7 +376,9 @@ describe('mobileEncryption', () => {
     ));
     const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
 
-    await expect(getOrCreateMobileEncryptionKey()).rejects.toBe(readError);
+    await expect(getOrCreateMobileEncryptionKey()).rejects.toMatchObject({
+      name: 'MobileEncryptionKeyMissingError', cause: readError,
+    });
 
     expect(createSpy).not.toHaveBeenCalled();
     expect(await realGet('mobile-data-key')).toBeNull();
@@ -370,7 +392,9 @@ describe('mobileEncryption', () => {
       key === 'mobile-data-key' ? Promise.reject(readError) : realGet(key)
     ));
 
-    await expect(getOrCreateMobileEncryptionKey()).rejects.toBe(readError);
+    await expect(getOrCreateMobileEncryptionKey()).rejects.toMatchObject({
+      name: 'MobileEncryptionKeyMissingError', cause: readError,
+    });
     expect(await realGet('mobile-data-key')).toBeNull();
   });
 });
