@@ -119,6 +119,45 @@ describe('useAuth on mobile', () => {
       .resolves.toBe(VALID_MNEMONIC);
   });
 
+  it('shows the loader while a new mnemonic is being stored, and hides it before the biometric offer', async () => {
+    const { auth, ui } = await boot();
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const realSet = SecureMobileStorage.set;
+    // The storage ref writes the mnemonic again later; the first write is the save itself.
+    const loaderWhileStoring = [];
+    vi.spyOn(SecureMobileStorage, 'set').mockImplementation((key, value) => {
+      if (key === STORAGE_KEYS.mnemonic) loaderWhileStoring.push(ui.isLoaderVisible.value);
+      return realSet(key, value);
+    });
+    openEnableBiometricLoginModalMock.mockImplementation(async () => {
+      expect(ui.isLoaderVisible.value).toBe(false);
+    });
+
+    await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+    expect(loaderWhileStoring[0]).toBe(true);
+    expect(openEnableBiometricLoginModalMock).toHaveBeenCalledTimes(1);
+    expect(ui.isLoaderVisible.value).toBe(false);
+  });
+
+  it('hides the loader again when storing the new mnemonic fails', async () => {
+    const { auth, ui } = await boot();
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const realSet = SecureMobileStorage.set;
+    vi.spyOn(SecureMobileStorage, 'set').mockImplementation((key, value) => (
+      key === STORAGE_KEYS.mnemonic
+        ? Promise.reject(new Error('Keychain write failed'))
+        : realSet(key, value)
+    ));
+
+    await expect(auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC))
+      .rejects.toThrow('Keychain write failed');
+
+    expect(ui.isLoaderVisible.value).toBe(false);
+  });
+
   it('restores the encrypted mnemonic and unlocks via biometric auth after a simulated app restart', async () => {
     const { auth: authGen1, ui: uiGen1 } = await boot();
     uiGen1.setBiometricLoginEnabled(true);

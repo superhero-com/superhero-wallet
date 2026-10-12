@@ -131,9 +131,9 @@ export default defineComponent({
         return;
       }
 
+      discovering.value = true;
       try {
         await setMnemonicAndInitializeAuthentication(mnemonicParsed);
-        discovering.value = true;
         setBackedUpSeed(true);
         await discoverAccounts();
         props.resolve();

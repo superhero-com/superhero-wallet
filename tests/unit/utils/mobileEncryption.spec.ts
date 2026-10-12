@@ -145,7 +145,57 @@ describe('mobileEncryption', () => {
       await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow(/only be called on mobile/);
     });
 
-    it('uses the existing key returned by atomic creation after every preliminary read is empty', async () => {
+    it('creates the key at once when no read is in flight, without a read-retry cycle', async () => {
+      const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      await getOrCreateMobileEncryptionKey();
+
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(waitBeforeKeyReadRetry).not.toHaveBeenCalled();
+    });
+
+    it('reuses the key found by a read already in flight instead of creating one', async () => {
+      const first = await loadModule();
+      await first.getOrCreateMobileEncryptionKey();
+      const storedKey = await first.SecureMobileStorage.get('mobile-data-key');
+      const { getMobileEncryptionKey, getOrCreateMobileEncryptionKey, SecureMobileStorage } = (
+        await restartApp()
+      );
+      let finishRead;
+      vi.spyOn(SecureMobileStorage, 'get').mockImplementationOnce(
+        () => new Promise((resolve) => { finishRead = () => resolve(storedKey); }),
+      );
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      const reading = getMobileEncryptionKey();
+      const creating = getOrCreateMobileEncryptionKey();
+      finishRead();
+
+      expect(await creating).toBe(await reading);
+      expect(createSpy).not.toHaveBeenCalled();
+    });
+
+    it('creates the key once an in-flight read ends empty, sharing its single retry cycle', async () => {
+      const { getMobileEncryptionKey, getOrCreateMobileEncryptionKey, SecureMobileStorage } = (
+        await loadModule()
+      );
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      const reading = getMobileEncryptionKey().catch((error) => error);
+      const key = await getOrCreateMobileEncryptionKey();
+
+      expect(key.algorithm.name).toBe('AES-GCM');
+      expect((await reading).name).toBe('MobileEncryptionKeyMissingError');
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(waitBeforeKeyReadRetry).toHaveBeenCalledTimes(4);
+    });
+
+    it('uses the existing key returned by atomic creation', async () => {
       const first = await loadModule();
       const ciphertext = await first.encryptMobileStateIfPlaintext('must remain recoverable');
       const originalKey = await first.SecureMobileStorage.get('mobile-data-key');
@@ -236,21 +286,27 @@ describe('mobileEncryption', () => {
       return { ...(await restartApp()), ciphertext, storedKey };
     }
 
-    it('does not mint a key over a stored encrypted wallet', async () => {
+    it('does not mint a key over a stored encrypted wallet, and does not wait to decide', async () => {
       const {
         getOrCreateMobileEncryptionKey,
         MobileEncryptionKeyMissingError,
         SecureMobileStorage,
       } = await restartWithEncryptedWalletAndNoKey();
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
 
       await expect(getOrCreateMobileEncryptionKey())
         .rejects.toBeInstanceOf(MobileEncryptionKeyMissingError);
+
+      expect(createSpy).not.toHaveBeenCalled();
+      expect(waitBeforeKeyReadRetry).not.toHaveBeenCalled();
       expect(await SecureMobileStorage.get('mobile-data-key')).toBeNull();
     });
 
     it('retries the read and keeps the original key once it succeeds', async () => {
       const {
-        getOrCreateMobileEncryptionKey,
+        getMobileEncryptionKey,
         tryDecryptWithMobileKey,
         SecureMobileStorage,
         ciphertext,
@@ -267,7 +323,7 @@ describe('mobileEncryption', () => {
       });
       await SecureMobileStorage.set('mobile-data-key', storedKey);
 
-      await getOrCreateMobileEncryptionKey();
+      await getMobileEncryptionKey();
 
       await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe('critical seed phrase');
     });
@@ -293,7 +349,7 @@ describe('mobileEncryption', () => {
 
     it('keeps the original key when the wallet also reads back empty on a retry', async () => {
       const {
-        getOrCreateMobileEncryptionKey,
+        getMobileEncryptionKey,
         tryDecryptWithMobileKey,
         SecureMobileStorage,
         ciphertext,
@@ -302,7 +358,7 @@ describe('mobileEncryption', () => {
       await SecureMobileStorage.set('mobile-data-key', storedKey);
       const realGet = flakeReads(SecureMobileStorage, 2);
 
-      await getOrCreateMobileEncryptionKey();
+      await getMobileEncryptionKey();
 
       expect(await realGet('mobile-data-key')).toBe(storedKey);
       await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe('critical seed phrase');
@@ -310,13 +366,13 @@ describe('mobileEncryption', () => {
 
     it('does not mint a key when the wallet reads back empty after it was seen', async () => {
       const {
-        getOrCreateMobileEncryptionKey,
+        getMobileEncryptionKey,
         MobileEncryptionKeyMissingError,
         SecureMobileStorage,
       } = await restartWithEncryptedWalletAndNoKey();
       const realGet = flakeReads(SecureMobileStorage, Infinity);
 
-      await expect(getOrCreateMobileEncryptionKey())
+      await expect(getMobileEncryptionKey())
         .rejects.toBeInstanceOf(MobileEncryptionKeyMissingError);
       expect(await realGet('mobile-data-key')).toBeNull();
     });

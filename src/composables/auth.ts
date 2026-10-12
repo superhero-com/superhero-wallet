@@ -401,12 +401,17 @@ export const useAuth = createCustomScopedComposable(() => {
        * names, secure-login timeout — is also encrypted via the shared
        * reactive key.
        */
-      await assertNoUnloadedWalletStored();
-      if (!encryptionKey.value) {
-        const mobileKey = await getOrCreateMobileEncryptionKey();
-        setEncryptionKey(mobileKey);
+      setLoaderVisible(true);
+      try {
+        await assertNoUnloadedWalletStored();
+        if (!encryptionKey.value) {
+          const mobileKey = await getOrCreateMobileEncryptionKey();
+          setEncryptionKey(mobileKey);
+        }
+        await storeMobileMnemonic(await encrypt(encryptionKey.value!, newMnemonic));
+      } finally {
+        setLoaderVisible(false);
       }
-      await storeMobileMnemonic(await encrypt(encryptionKey.value!, newMnemonic));
       if (await checkBiometricLoginAvailability()) {
         await openEnableBiometricLoginModal();
       }

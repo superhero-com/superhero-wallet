@@ -117,10 +117,14 @@ async function readStoredKeyWithRetries(
   return readStoredKeyWithRetries(retry + 1, isWalletStored);
 }
 
-async function readMobileEncryptionKey(): Promise<CryptoKey | null> {
+function assertMobileApp() {
   if (!IS_MOBILE_APP) {
     throw new Error('Mobile encryption keys must only be called on mobile');
   }
+}
+
+async function readMobileEncryptionKey(): Promise<CryptoKey | null> {
+  assertMobileApp();
   if (cachedKey) return cachedKey;
   if (!pendingRead) pendingRead = readStoredKeyWithRetries().catch(rejectUnavailableKey);
   const read = pendingRead;
@@ -144,11 +148,22 @@ export async function getMobileEncryptionKey(): Promise<CryptoKey> {
 /**
  * For explicit wallet creation/import and migration of known legacy plaintext only.
  * iOS creates atomically: if the item already exists, use its key, never overwrite it.
+ * No read retries here: the iOS insert reports an existing key itself, and Android
+ * rejects failed reads, so a retried empty read would only delay the user. A stored
+ * encrypted wallet still blocks creation, as on the read-only path.
  */
 export async function getOrCreateMobileEncryptionKey(): Promise<CryptoKey> {
+  assertMobileApp();
+  if (cachedKey) return cachedKey;
   if (pendingCreation) return pendingCreation;
-  const key = await readMobileEncryptionKey();
-  if (key) return key;
+  // Reuse a startup read in flight instead of running a second native operation beside it.
+  const key = pendingRead
+    ? await pendingRead
+    : await readStoredKeyWithRetries(KEY_READ_RETRY_DELAYS.length).catch(rejectUnavailableKey);
+  if (key) {
+    cachedKey = key;
+    return key;
+  }
   if (!pendingCreation) {
     pendingCreation = (async () => {
       const rawBytes = globalThis.crypto.getRandomValues(new Uint8Array(MOBILE_KEY_LENGTH));
