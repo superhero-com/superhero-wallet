@@ -91,7 +91,8 @@ describe('decryptedComputed', () => {
     const key = ref(oldKey);
     const encryptedState = ref(ciphertext('old-ciphertext'));
     const onDecrypted = vi.fn();
-    const decrypted = decryptedComputed(key, encryptedState, '', { onDecrypted });
+    const onDecryptFailed = vi.fn();
+    const decrypted = decryptedComputed(key, encryptedState, '', { onDecrypted, onDecryptFailed });
 
     mockSubtleDecrypt.mockImplementation(async (_algorithm, usedKey, encryptedBytes) => {
       const label = Buffer.from(encryptedBytes).toString();
@@ -115,8 +116,70 @@ describe('decryptedComputed', () => {
 
     expect(decrypted.value).toBe('secret');
     expect(onDecrypted).toHaveBeenLastCalledWith('secret');
+    expect(onDecryptFailed).not.toHaveBeenCalled();
     expect(mockSubtleEncrypt).not.toHaveBeenCalled();
     expect(encryptedState.value).toBe(ciphertext('new-ciphertext'));
+  });
+
+  it('reports state the key cannot decrypt, and recovers once a key that can arrives', async () => {
+    const { decryptedComputed, nextTick, ref } = await loadModule();
+    mockSubtleDecrypt.mockImplementation(async (_algorithm, usedKey, encryptedBytes) => {
+      const label = Buffer.from(encryptedBytes).toString();
+      if (usedKey.id === newKey.id && label === 'new-ciphertext') {
+        return new TextEncoder().encode('secret');
+      }
+      throw new Error('unreadable');
+    });
+    const key = ref(oldKey);
+    const encryptedState = ref(ciphertext('new-ciphertext'));
+    const onDecrypted = vi.fn();
+    const onDecryptFailed = vi.fn();
+    const decrypted = decryptedComputed(key, encryptedState, 'default', { onDecrypted, onDecryptFailed });
+
+    await flushWatchers(nextTick);
+
+    expect(onDecryptFailed).toHaveBeenCalledTimes(1);
+    expect(onDecryptFailed).toHaveBeenCalledWith(expect.any(Error));
+    expect(onDecrypted).not.toHaveBeenCalled();
+    expect(decrypted.value).toBe('default');
+    expect(encryptedState.value).toBe(ciphertext('new-ciphertext'));
+
+    key.value = newKey;
+    await flushWatchers(nextTick);
+
+    expect(onDecrypted).toHaveBeenCalledWith('secret');
+    expect(onDecryptFailed).toHaveBeenCalledTimes(1);
+    expect(decrypted.value).toBe('secret');
+    expect(mockSubtleEncrypt).not.toHaveBeenCalled();
+  });
+
+  it('ignores a failure that settles after a newer decrypt succeeded', async () => {
+    const { decryptedComputed, nextTick, ref } = await loadModule();
+    let failSlowDecrypt;
+    mockSubtleDecrypt.mockImplementation((_algorithm, _usedKey, encryptedBytes) => {
+      const label = Buffer.from(encryptedBytes).toString();
+      if (label === 'slow-ciphertext') {
+        return new Promise((_resolve, reject) => {
+          failSlowDecrypt = () => reject(new Error('unreadable'));
+        });
+      }
+      return Promise.resolve(new TextEncoder().encode('secret'));
+    });
+    const key = ref(oldKey);
+    const encryptedState = ref(ciphertext('slow-ciphertext'));
+    const onDecryptFailed = vi.fn();
+    const decrypted = decryptedComputed(key, encryptedState, 'default', { onDecryptFailed });
+
+    await flushWatchers(nextTick);
+    encryptedState.value = ciphertext('fast-ciphertext');
+    await flushWatchers(nextTick);
+    expect(decrypted.value).toBe('secret');
+
+    failSlowDecrypt();
+    await flushWatchers(nextTick);
+
+    expect(decrypted.value).toBe('secret');
+    expect(onDecryptFailed).not.toHaveBeenCalled();
   });
 
   it('clears stale local plaintext without overwriting storage when decryption is unrecoverable', async () => {

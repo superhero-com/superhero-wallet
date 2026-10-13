@@ -13,6 +13,7 @@ import { tg } from '@/popup/plugins/i18n';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
 import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/avalancheNetworkSettings';
+import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import { PROTOCOLS } from '@/constants';
 import { ETH_GAS_LIMIT } from '../config';
 
@@ -29,6 +30,7 @@ export function useEthFeeCalculation(
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
   const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
   const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+  const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
 
   const feeSelectedIndex = ref(0);
   const gasLimit = ref(ETH_GAS_LIMIT);
@@ -37,7 +39,7 @@ export function useEthFeeCalculation(
   const defaultBaseFeePerGas = ref(new BigNumber(0));
   const defaultMaxPriorityFeePerGas = ref(new BigNumber(0));
   const defaultMaxFeePerGas = ref(new BigNumber(0));
-  const defaultGasPrice = ref(new BigNumber(0)); // for BNB
+  const defaultGasPrice = ref(new BigNumber(0)); // for BNB, Avalanche & Polygon
 
   const maxPriorityFeePerGasSlow = computed(() => (
     defaultMaxPriorityFeePerGas.value.multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.slow)
@@ -82,7 +84,7 @@ export function useEthFeeCalculation(
       ];
     }
 
-    // BNB Chain & Avalanche: simple gasPrice * multiplier
+    // BNB Chain, Avalanche & Polygon: simple gasPrice * multiplier
     return [
       {
         fee: defaultGasPrice.value
@@ -119,10 +121,16 @@ export function useEthFeeCalculation(
       defaultBaseFeePerGas.value = new BigNumber(fromWei(feeData.baseFeePerGas!, 'ether'));
       defaultMaxFeePerGas.value = new BigNumber(fromWei(feeData.maxFeePerGas!, 'ether'));
       defaultMaxPriorityFeePerGas.value = new BigNumber(fromWei(feeData.maxPriorityFeePerGas!, 'ether'));
-    } else if (protocol === PROTOCOLS.bnb || protocol === PROTOCOLS.avalanche) {
-      const { nodeUrl } = protocol === PROTOCOLS.bnb
-        ? bnbActiveNetworkSettings.value
-        : avalancheActiveNetworkSettings.value;
+    } else if (
+      protocol === PROTOCOLS.bnb
+      || protocol === PROTOCOLS.avalanche
+      || protocol === PROTOCOLS.polygonPos
+    ) {
+      const { nodeUrl } = {
+        [PROTOCOLS.bnb]: bnbActiveNetworkSettings,
+        [PROTOCOLS.avalanche]: avalancheActiveNetworkSettings,
+        [PROTOCOLS.polygonPos]: polygonActiveNetworkSettings,
+      }[protocol].value;
       const web3Eth = new Web3Eth(nodeUrl);
       const gasPrice = await web3Eth.getGasPrice();
       // Add 10% buffer to prevent insufficient funds errors
@@ -130,22 +138,23 @@ export function useEthFeeCalculation(
     }
   }
 
+  // Per-gas prices go into each recipient's transaction, so they don't scale with recipients.
   const maxFeePerGas = computed(() => (
     protocol === PROTOCOLS.ethereum
-      ? feeList.value[feeSelectedIndex.value].maxFeePerGas!.multipliedBy(recipientsCount.value)
+      ? feeList.value[feeSelectedIndex.value].maxFeePerGas!
       : new BigNumber(0)
   ));
 
   const maxPriorityFeePerGas = computed(() => (
     protocol === PROTOCOLS.ethereum
-      ? feeList.value[feeSelectedIndex.value].maxPriorityFee!.multipliedBy(recipientsCount.value)
+      ? feeList.value[feeSelectedIndex.value].maxPriorityFee!
       : new BigNumber(0)
   ));
 
   const maxFee = computed(() => (
     protocol === PROTOCOLS.ethereum
       ? maxFeePerGas.value!.multipliedBy(gasLimit.value).multipliedBy(recipientsCount.value)
-      : fee.value // for BNB & Avalanche, maxFee is just fee
+      : fee.value // for BNB, Avalanche & Polygon, maxFee is just fee
   ));
 
   return {

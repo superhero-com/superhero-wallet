@@ -1,4 +1,9 @@
-import { CONNECTION_TYPES, IS_EXTENSION, IS_OFFSCREEN_TAB } from '@/constants';
+import {
+  CONNECTION_TYPES,
+  IS_EXTENSION,
+  IS_OFFSCREEN_TAB,
+  SESSION_METHODS,
+} from '@/constants';
 import { getSessionEncryptionKey as getSessionEncryptionKeyOffscreen } from '@/offscreen/popupHandler';
 import { exportEncryptionKey, importEncryptionKey } from './crypto';
 
@@ -14,10 +19,17 @@ const storageSession = (browser.storage as any)?.session;
  */
 export async function sessionStart(encryptionKey: CryptoKey) {
   if (IS_EXTENSION && !IS_OFFSCREEN_TAB) {
-    browser.runtime.connect({ name: CONNECTION_TYPES.SESSION });
+    // Before storing: the port's disconnect starts the session timeout, even mid-write.
+    const port = browser.runtime.connect({ name: CONNECTION_TYPES.SESSION });
     await storageSession.set({
       [SESSION_STORAGE_KEYS.exportedEncryptionKey]: await exportEncryptionKey(encryptionKey),
     });
+    // Chrome's offscreen documents can't watch `storage.session`.
+    try {
+      port.postMessage({ method: SESSION_METHODS.sessionKeyStored });
+    } catch {
+      // No offscreen tab yet: it reads the key when it boots.
+    }
   }
 }
 
@@ -48,39 +60,4 @@ export async function getSessionEncryptionKey() {
     }
   }
   return null;
-}
-
-/**
- * Subscribe to publications of the session encryption key into
- * `browser.storage.session` (the bus used by `sessionStart()` in another
- * context). Intended for the offscreen tab to learn that the popup just
- * authenticated, since the salt-driven polling in `syncBackgroundEncryptionKey`
- * is bounded and may have already given up by the time the user enters
- * their password.
- *
- * The listener is filtered to:
- *   - `areaName === 'session'` so other storage areas are ignored, and
- *   - `newValue` truthy so logout (`sessionEnd`) does not retrigger work.
- *
- * Returns a teardown function for tests; production callers normally let
- * the listener live for the lifetime of the offscreen document.
- */
-export function subscribeToSessionEncryptionKey(callback: () => void): () => void {
-  const onChanged = (browser.storage as any)?.onChanged;
-  if (!onChanged?.addListener) {
-    return () => {};
-  }
-  const listener = (
-    changes: Record<string, { newValue?: unknown }>,
-    areaName?: string,
-  ) => {
-    if (
-      areaName === 'session'
-      && changes?.[SESSION_STORAGE_KEYS.exportedEncryptionKey]?.newValue
-    ) {
-      callback();
-    }
-  };
-  onChanged.addListener(listener);
-  return () => onChanged.removeListener?.(listener);
 }

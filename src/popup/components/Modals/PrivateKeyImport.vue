@@ -52,6 +52,7 @@ import { useI18n } from 'vue-i18n';
 import type { Protocol, ResolveCallback } from '@/types';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { ImportedAccountsUnreadableError } from '@/lib/errors';
 import { ACCOUNT_TYPES, MODAL_HELP } from '@/constants';
 import { useAccounts, useModals } from '@/composables';
 
@@ -116,14 +117,21 @@ export default defineComponent({
         });
         return;
       }
-      const globalIdx = await addPrivateKeyAccount({
-        type: ACCOUNT_TYPES.privateKey,
-        isRestored: false,
-        protocol: props.protocol,
-        privateKey: Buffer.from(privateKey.value, 'hex'),
-      });
-      setActiveAccountByGlobalIdx(globalIdx);
-      props.resolve();
+      try {
+        const globalIdx = await addPrivateKeyAccount({
+          type: ACCOUNT_TYPES.privateKey,
+          isRestored: false,
+          protocol: props.protocol,
+          privateKey: Buffer.from(privateKey.value, 'hex'),
+        });
+        setActiveAccountByGlobalIdx(globalIdx);
+        props.resolve();
+      } catch (e) {
+        // The user is offered to remove them instead.
+        if (!(e instanceof ImportedAccountsUnreadableError)) {
+          throw e;
+        }
+      }
     }
 
     function showPrivateKeyHelp() {

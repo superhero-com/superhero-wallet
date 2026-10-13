@@ -22,7 +22,7 @@ import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
-import { isAcceptedOffscreenSender } from './messageGuards';
+import { isAcceptedOffscreenSender, isExtensionPageSender } from './messageGuards';
 
 const { activeNetworkName, networks } = useNetworks();
 const { activeAccount } = useAccounts();
@@ -117,6 +117,18 @@ browser.runtime.onMessage.addListener(
       params: { aepp, rpcMethodParams = {} } = {},
     } = msg;
 
+    // Content scripts relay whatever a web page posts: EVM RPC calls only.
+    if (!isExtensionPageSender(sender)) {
+      if (typeof aepp === 'string' && method) {
+        return handleEvmRpcMethod(
+          aepp,
+          method as EthRpcSupportedMethods,
+          rpcMethodParams as IEthRpcMethodParameters,
+        );
+      }
+      return undefined;
+    }
+
     if (method === POPUP_METHODS.reload) {
       wallet.disconnect();
       window.location.reload();
@@ -140,14 +152,6 @@ browser.runtime.onMessage.addListener(
     if (method === POPUP_METHODS.ledgerSignMessage) {
       const { signMessage } = useLedger();
       return signMessage(payload.address, payload.accountIndex, payload.message);
-    }
-
-    if (typeof aepp === 'string' && method) {
-      return handleEvmRpcMethod(
-        aepp,
-        method as EthRpcSupportedMethods,
-        rpcMethodParams as IEthRpcMethodParameters,
-      );
     }
 
     return undefined;

@@ -234,8 +234,8 @@ export default defineComponent({
           )),
         );
 
-        const total = results.reduce((sum, value) => sum + value, 0);
-        return total;
+        // The fee is per transaction and gets multiplied by the recipients count.
+        return Math.max(...results);
       }
       return undefined;
     }

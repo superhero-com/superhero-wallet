@@ -48,14 +48,14 @@
         </BtnMain>
       </Field>
       <div
-        v-if="invites.length > 0"
+        v-if="visibleInvites.length > 0"
         class="generated-links"
       >
         <p class="section-title">
           {{ $t('pages.invite.created-links') }}
         </p>
         <InviteItem
-          v-for="link in invites"
+          v-for="link in visibleInvites"
           v-bind="link ?? null"
           :key="link.secretKey.toString()"
           @loading="setLoaderVisible"
@@ -66,9 +66,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
-import { AE_AMOUNT_FORMATS, decode, MemoryAccount } from '@aeternity/aepp-sdk';
+import {
+  AE_AMOUNT_FORMATS,
+  decode,
+  InvalidTxError,
+  MemoryAccount,
+} from '@aeternity/aepp-sdk';
 
 import type { IFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -106,8 +111,18 @@ export default defineComponent({
     const { marketData } = useCurrencies();
     const { getAeSdk } = useAeSdk();
     const { balance } = useBalances();
-    const { invites, addInvite, handleInsufficientBalanceError } = useInvites();
+    const {
+      invites,
+      addInvite,
+      removeInvite,
+      handleInsufficientBalanceError,
+    } = useInvites();
     const { setLoaderVisible } = useUi();
+
+    // Shown once funded, as an invite item reads its balance only when it appears.
+    const pendingInviteSecretKey = ref<Buffer | null>(null);
+    const visibleInvites = computed(() => invites.value
+      .filter(({ secretKey }) => secretKey !== pendingInviteSecretKey.value));
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -121,24 +136,32 @@ export default defineComponent({
     async function generate(resetField: () => void) {
       setLoaderVisible(true);
       const { address, secretKey } = MemoryAccount.generate();
+      const inviteSecretKey = decode(secretKey);
 
       try {
         const aeSdk = await getAeSdk();
+        // Stored before the funds move: they would be lost without it.
+        addInvite(inviteSecretKey);
+        pendingInviteSecretKey.value = inviteSecretKey;
         await aeSdk.spend(
           formModel.value.amount || 0,
           address,
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
       } catch (error: any) {
+        // Only a failed verification is sure to stop the transfer before it is sent.
+        if (error instanceof InvalidTxError) {
+          removeInvite(inviteSecretKey);
+        }
         if (await handleInsufficientBalanceError(error)) {
           return;
         }
         throw error;
       } finally {
+        pendingInviteSecretKey.value = null;
         setLoaderVisible(false);
       }
 
-      addInvite(decode(secretKey));
       // Field is dirty after submit, so we need to reset it and not just clear the value
       resetField();
     }
@@ -149,7 +172,7 @@ export default defineComponent({
       activeAccount,
       balance,
       fee,
-      invites,
+      visibleInvites,
       max,
       formModel,
       generate,

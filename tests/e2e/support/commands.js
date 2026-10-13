@@ -96,7 +96,19 @@ Cypress.Commands.add('login', (options, route) => {
     const mnemonicEncryptionResult = await encrypt(encryptionKey, TEST_ACCOUNT.mnemonic);
     return [mnemonicEncryptionResult, salt];
   }).then(([mnemonicEncryptionResult, salt]) => {
-    const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
+    const {
+      isSeedBackedUp = false,
+      pendingTransaction,
+      network = null,
+      accountsRaw = [{
+        idx: 0,
+        protocol: PROTOCOLS.aeternity,
+        isRestored: true,
+        type: 'hd-wallet',
+      }],
+      privateKeyAccountsRaw,
+      activeAccountGlobalIdx = 0,
+    } = options || {};
 
     cy.openPopup(async (contentWindow) => {
       /**
@@ -113,19 +125,17 @@ Cypress.Commands.add('login', (options, route) => {
         [prepareStorageKey([STORAGE_KEYS.activeNetworkName])]: network || NETWORK_NAME_TESTNET,
         [prepareStorageKey([STORAGE_KEYS.mnemonic])]: mnemonicEncryptionResult,
         [prepareStorageKey([STORAGE_KEYS.encryptionSalt])]: encodeBase64(salt),
-        [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
-          idx: 0,
-          protocol: PROTOCOLS.aeternity,
-          isRestored: true,
-          type: 'hd-wallet',
-        }],
+        [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: accountsRaw,
         [prepareStorageKey([STORAGE_KEYS.otherSettings])]: {
           isSeedBackedUp,
         },
         [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
           [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
         },
-        [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: 0,
+        [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: activeAccountGlobalIdx,
+        ...privateKeyAccountsRaw && {
+          [prepareStorageKey([STORAGE_KEYS.privateKeyAccountsRaw])]: privateKeyAccountsRaw,
+        },
       };
 
       Object.entries(dataToBeStored).forEach(([key, data]) => {
@@ -262,6 +272,15 @@ Cypress.Commands.add('openNetworks', () => {
     .get('[data-cy=networks-settings]')
     .click()
     .urlEquals('/more/settings/networks');
+});
+
+Cypress.Commands.add('openSecureLoginSettings', () => {
+  cy.openPageMore()
+    .get('[data-cy=settings]')
+    .click()
+    .get('[data-cy=secure-login-settings]')
+    .click()
+    .urlEquals('/more/settings/secure-login');
 });
 
 /**

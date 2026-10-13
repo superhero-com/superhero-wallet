@@ -678,6 +678,8 @@ export function createCustomScopedComposable<T>(composableBody: () => T) {
 
 interface decryptedComputedOptions {
   onDecrypted?: (val: string | null) => any;
+  /** The stored state can't be decrypted with the current key. */
+  onDecryptFailed?: (error: unknown) => any;
 }
 
 /**
@@ -691,13 +693,14 @@ export function decryptedComputed(
   options: decryptedComputedOptions = {},
 ) {
   let updating = false;
+  let latestRun = 0;
   const decrypted = ref(defaultVal);
 
-  async function setEncryptedState(val: string) {
+  async function setEncryptedState(val: string, encryptionKey = key.value) {
     updating = true;
     try {
       // eslint-disable-next-line no-param-reassign
-      encryptedState.value = await encrypt(key.value!, val);
+      encryptedState.value = await encrypt(encryptionKey!, val);
     } catch (e) {
       handleUnknownError(e);
     } finally {
@@ -707,6 +710,8 @@ export function decryptedComputed(
 
   watch([key, encryptedState], async ([newKey, newState], [oldKey]) => {
     if (!updating) {
+      latestRun += 1;
+      const run = latestRun;
       try {
         /**
          * Key rotation: re-encrypt under `newKey`. Must not use `decrypted.value`
@@ -733,7 +738,8 @@ export function decryptedComputed(
           }
           decrypted.value = plaintext;
           options.onDecrypted?.(plaintext);
-          await setEncryptedState(plaintext);
+          // Under the key the salt on disk derives, even if a lock cleared `key` meanwhile.
+          await setEncryptedState(plaintext, newKey);
         } else if (newKey && newState) {
           decrypted.value = await decrypt(newKey, newState);
           options.onDecrypted?.(decrypted.value);
@@ -741,8 +747,12 @@ export function decryptedComputed(
           decrypted.value = defaultVal;
         }
       } catch (e) {
-        decrypted.value = defaultVal;
         handleUnknownError(e);
+        // A newer run owns the state.
+        if (run === latestRun) {
+          decrypted.value = defaultVal;
+          options.onDecryptFailed?.(e);
+        }
       }
     }
   }, { immediate: true });

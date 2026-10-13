@@ -49,6 +49,23 @@ describe('mobileEncryption', () => {
       await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe(plaintext);
     });
 
+    it('preserves legacy data when native key creation rejects and migrates after recovery', async () => {
+      const {
+        encryptMobileStateIfPlaintext, tryDecryptWithMobileKey, SecureMobileStorage,
+      } = await loadModule();
+      const plaintext = 'abandon abandon abandon about';
+      const create = vi.spyOn(SecureMobileStorage, 'getOrCreate')
+        .mockRejectedValueOnce(new Error('Existing Keychain item could not be read'));
+
+      await expect(encryptMobileStateIfPlaintext(plaintext)).resolves.toBe(plaintext);
+      expect(await SecureMobileStorage.get('mobile-data-key')).toBeNull();
+
+      create.mockRestore();
+      const encrypted = await encryptMobileStateIfPlaintext(plaintext);
+      expect(encrypted).not.toBe(plaintext);
+      await expect(tryDecryptWithMobileKey(encrypted)).resolves.toBe(plaintext);
+    });
+
     it('is idempotent: re-encrypting its own output returns it unchanged', async () => {
       const { encryptMobileStateIfPlaintext, tryDecryptWithMobileKey } = await loadModule();
       const plaintext = 'abandon abandon abandon about';
@@ -81,7 +98,7 @@ describe('mobileEncryption', () => {
       await first.SecureMobileStorage.remove('mobile-data-key');
 
       const afterWipe = await restartApp();
-      // The new install mints a different key, so this blob is undecryptable now...
+      // The key is unavailable, so this blob is undecryptable now...
       await expect(afterWipe.tryDecryptWithMobileKey(ciphertext)).resolves.toBeNull();
       // ...and must therefore be returned untouched, not re-encrypted.
       await expect(afterWipe.encryptMobileStateIfPlaintext(ciphertext)).resolves.toBe(ciphertext);
@@ -128,6 +145,82 @@ describe('mobileEncryption', () => {
       await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow(/only be called on mobile/);
     });
 
+    it('creates the key at once when no read is in flight, without a read-retry cycle', async () => {
+      const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      await getOrCreateMobileEncryptionKey();
+
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(waitBeforeKeyReadRetry).not.toHaveBeenCalled();
+    });
+
+    it('reuses the key found by a read already in flight instead of creating one', async () => {
+      const first = await loadModule();
+      await first.getOrCreateMobileEncryptionKey();
+      const storedKey = await first.SecureMobileStorage.get('mobile-data-key');
+      const { getMobileEncryptionKey, getOrCreateMobileEncryptionKey, SecureMobileStorage } = (
+        await restartApp()
+      );
+      let finishRead;
+      vi.spyOn(SecureMobileStorage, 'get').mockImplementationOnce(
+        () => new Promise((resolve) => { finishRead = () => resolve(storedKey); }),
+      );
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      const reading = getMobileEncryptionKey();
+      const creating = getOrCreateMobileEncryptionKey();
+      finishRead();
+
+      expect(await creating).toBe(await reading);
+      expect(createSpy).not.toHaveBeenCalled();
+    });
+
+    it('creates the key once an in-flight read ends empty, sharing its single retry cycle', async () => {
+      const { getMobileEncryptionKey, getOrCreateMobileEncryptionKey, SecureMobileStorage } = (
+        await loadModule()
+      );
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      const reading = getMobileEncryptionKey().catch((error) => error);
+      const key = await getOrCreateMobileEncryptionKey();
+
+      expect(key.algorithm.name).toBe('AES-GCM');
+      expect((await reading).name).toBe('MobileEncryptionKeyMissingError');
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(waitBeforeKeyReadRetry).toHaveBeenCalledTimes(4);
+    });
+
+    it('uses the existing key returned by atomic creation', async () => {
+      const first = await loadModule();
+      const ciphertext = await first.encryptMobileStateIfPlaintext('must remain recoverable');
+      const originalKey = await first.SecureMobileStorage.get('mobile-data-key');
+      const afterRestart = await restartApp();
+      vi.spyOn(afterRestart.SecureMobileStorage, 'get').mockResolvedValue(null);
+      // The native insert detects a duplicate despite the failed preliminary reads.
+      vi.spyOn(afterRestart.SecureMobileStorage, 'getOrCreate').mockResolvedValue(originalKey);
+
+      await afterRestart.getOrCreateMobileEncryptionKey();
+
+      await expect(afterRestart.tryDecryptWithMobileKey(ciphertext))
+        .resolves.toBe('must remain recoverable');
+    });
+
+    it('shares one persisted key across concurrent creation requests', async () => {
+      const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      const requests = Array.from({ length: 10 }, () => getOrCreateMobileEncryptionKey());
+      const keys = await Promise.all(requests);
+
+      expect(new Set(keys).size).toBe(1);
+      expect(createSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('persists the key once, reuses it in-memory, and reloads it after a restart', async () => {
       const {
         getOrCreateMobileEncryptionKey,
@@ -164,7 +257,10 @@ describe('mobileEncryption', () => {
       const setSpy = vi.spyOn(SecureMobileStorage, 'set')
         .mockRejectedValueOnce(new Error('keychain locked'));
 
-      await expect(getOrCreateMobileEncryptionKey()).rejects.toThrow('keychain locked');
+      await expect(getOrCreateMobileEncryptionKey()).rejects.toMatchObject({
+        name: 'MobileEncryptionKeyMissingError',
+        cause: expect.objectContaining({ message: 'keychain locked' }),
+      });
 
       // A retry mints a fresh key and persists it for real (spy falls through).
       const key = await getOrCreateMobileEncryptionKey();
@@ -177,5 +273,184 @@ describe('mobileEncryption', () => {
       const restarted = await restartApp();
       await expect(restarted.tryDecryptWithMobileKey(ciphertext)).resolves.toBe('must survive');
     });
+  });
+
+  describe('when the key reads back empty', () => {
+    /** Stores an encrypted mnemonic, then drops its key, and restarts. */
+    async function restartWithEncryptedWalletAndNoKey() {
+      const first = await loadModule();
+      const ciphertext = await first.encryptMobileStateIfPlaintext('critical seed phrase');
+      await first.SecureMobileStorage.set('mnemonic', ciphertext);
+      const storedKey = await first.SecureMobileStorage.get('mobile-data-key');
+      await first.SecureMobileStorage.remove('mobile-data-key');
+      return { ...(await restartApp()), ciphertext, storedKey };
+    }
+
+    it('does not mint a key over a stored encrypted wallet, and does not wait to decide', async () => {
+      const {
+        getOrCreateMobileEncryptionKey,
+        MobileEncryptionKeyMissingError,
+        SecureMobileStorage,
+      } = await restartWithEncryptedWalletAndNoKey();
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      await expect(getOrCreateMobileEncryptionKey())
+        .rejects.toBeInstanceOf(MobileEncryptionKeyMissingError);
+
+      expect(createSpy).not.toHaveBeenCalled();
+      expect(waitBeforeKeyReadRetry).not.toHaveBeenCalled();
+      expect(await SecureMobileStorage.get('mobile-data-key')).toBeNull();
+    });
+
+    it('retries the read and keeps the original key once it succeeds', async () => {
+      const {
+        getMobileEncryptionKey,
+        tryDecryptWithMobileKey,
+        SecureMobileStorage,
+        ciphertext,
+        storedKey,
+      } = await restartWithEncryptedWalletAndNoKey();
+      const realGet = SecureMobileStorage.get;
+      let hasKeyReadFailed = false;
+      vi.spyOn(SecureMobileStorage, 'get').mockImplementation((key) => {
+        if (key === 'mobile-data-key' && !hasKeyReadFailed) {
+          hasKeyReadFailed = true;
+          return Promise.resolve(null);
+        }
+        return realGet(key);
+      });
+      await SecureMobileStorage.set('mobile-data-key', storedKey);
+
+      await getMobileEncryptionKey();
+
+      await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe('critical seed phrase');
+    });
+
+    /** The key reads back empty `keyMisses` times; the mnemonic only on its 2nd read. */
+    function flakeReads(SecureMobileStorage, keyMisses) {
+      const realGet = SecureMobileStorage.get;
+      let keyReads = 0;
+      let mnemonicReads = 0;
+      vi.spyOn(SecureMobileStorage, 'get').mockImplementation((key) => {
+        if (key === 'mobile-data-key') {
+          keyReads += 1;
+          if (keyReads <= keyMisses) return Promise.resolve(null);
+        }
+        if (key === 'mnemonic') {
+          mnemonicReads += 1;
+          if (mnemonicReads === 2) return Promise.resolve(null);
+        }
+        return realGet(key);
+      });
+      return realGet;
+    }
+
+    it('keeps the original key when the wallet also reads back empty on a retry', async () => {
+      const {
+        getMobileEncryptionKey,
+        tryDecryptWithMobileKey,
+        SecureMobileStorage,
+        ciphertext,
+        storedKey,
+      } = await restartWithEncryptedWalletAndNoKey();
+      await SecureMobileStorage.set('mobile-data-key', storedKey);
+      const realGet = flakeReads(SecureMobileStorage, 2);
+
+      await getMobileEncryptionKey();
+
+      expect(await realGet('mobile-data-key')).toBe(storedKey);
+      await expect(tryDecryptWithMobileKey(ciphertext)).resolves.toBe('critical seed phrase');
+    });
+
+    it('does not mint a key when the wallet reads back empty after it was seen', async () => {
+      const {
+        getMobileEncryptionKey,
+        MobileEncryptionKeyMissingError,
+        SecureMobileStorage,
+      } = await restartWithEncryptedWalletAndNoKey();
+      const realGet = flakeReads(SecureMobileStorage, Infinity);
+
+      await expect(getMobileEncryptionKey())
+        .rejects.toBeInstanceOf(MobileEncryptionKeyMissingError);
+      expect(await realGet('mobile-data-key')).toBeNull();
+    });
+
+    it('retries read-only key loading five times without creating a key', async () => {
+      const {
+        getMobileEncryptionKey, MobileEncryptionKeyMissingError, SecureMobileStorage,
+      } = await loadModule();
+      // Stubbed in the vitest setup.
+      const { waitBeforeKeyReadRetry } = await import('@/utils/waitBeforeKeyReadRetry');
+      waitBeforeKeyReadRetry.mockClear();
+      const getSpy = vi.spyOn(SecureMobileStorage, 'get');
+      const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+      await expect(getMobileEncryptionKey())
+        .rejects.toBeInstanceOf(MobileEncryptionKeyMissingError);
+
+      expect(createSpy).not.toHaveBeenCalled();
+      expect(getSpy.mock.calls.filter(([key]) => key === 'mobile-data-key')).toHaveLength(5);
+      expect(waitBeforeKeyReadRetry.mock.calls).toEqual([[200], [400], [800], [1600]]);
+    });
+
+    it('mints a new key once the stored wallet is reset', async () => {
+      const {
+        getOrCreateMobileEncryptionKey,
+        SecureMobileStorage,
+      } = await restartWithEncryptedWalletAndNoKey();
+      await SecureMobileStorage.remove('mnemonic');
+
+      const key = await getOrCreateMobileEncryptionKey();
+
+      expect(key.algorithm.name).toBe('AES-GCM');
+      expect(await SecureMobileStorage.get('mobile-data-key')).toEqual(expect.any(String));
+    });
+
+    it('still mints a key next to a legacy plaintext mnemonic', async () => {
+      const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+      await SecureMobileStorage.set('mnemonic', 'abandon abandon abandon about');
+
+      await expect(getOrCreateMobileEncryptionKey()).resolves.toBeDefined();
+      expect(await SecureMobileStorage.get('mobile-data-key')).toEqual(expect.any(String));
+    });
+
+    it('leaves legacy plaintext as is instead of throwing', async () => {
+      const { encryptMobileStateIfPlaintext } = await restartWithEncryptedWalletAndNoKey();
+
+      await expect(encryptMobileStateIfPlaintext('a'.repeat(64))).resolves.toBe('a'.repeat(64));
+    });
+  });
+
+  it('does not treat a rejected mnemonic read as permission to create a key', async () => {
+    const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+    const readError = new Error('secure storage unavailable');
+    const realGet = SecureMobileStorage.get;
+    vi.spyOn(SecureMobileStorage, 'get').mockImplementation((key) => (
+      key === 'mnemonic' ? Promise.reject(readError) : realGet(key)
+    ));
+    const createSpy = vi.spyOn(SecureMobileStorage, 'getOrCreate');
+
+    await expect(getOrCreateMobileEncryptionKey()).rejects.toMatchObject({
+      name: 'MobileEncryptionKeyMissingError', cause: readError,
+    });
+
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(await realGet('mobile-data-key')).toBeNull();
+  });
+
+  it('does not mint a key when reading it fails (Android rejects instead of returning empty)', async () => {
+    const { getOrCreateMobileEncryptionKey, SecureMobileStorage } = await loadModule();
+    const readError = new Error('Keystore decryption failed');
+    const realGet = SecureMobileStorage.get;
+    vi.spyOn(SecureMobileStorage, 'get').mockImplementation((key) => (
+      key === 'mobile-data-key' ? Promise.reject(readError) : realGet(key)
+    ));
+
+    await expect(getOrCreateMobileEncryptionKey()).rejects.toMatchObject({
+      name: 'MobileEncryptionKeyMissingError', cause: readError,
+    });
+    expect(await realGet('mobile-data-key')).toBeNull();
   });
 });

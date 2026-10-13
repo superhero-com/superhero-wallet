@@ -152,3 +152,33 @@ describe('useAeMiddleware getMiddleware', () => {
     }
   });
 });
+
+describe('useAeMiddleware fetchFromMiddlewareCamelCasedPrecise', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('keeps amounts above the safe integer range exact', async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(
+      '{"info":{"last_bid":{"tx":{"name_fee":500000000000000000001}}}}',
+    ));
+    vi.stubGlobal('fetch', fetch);
+    const { composable } = await loadComposable();
+
+    const response = await composable.fetchFromMiddlewareCamelCasedPrecise('/v2/names/a.chain/auction');
+
+    expect(fetch).toHaveBeenCalledWith(`${MDW_TESTNET}/v2/names/a.chain/auction`);
+    expect(response.info.lastBid.tx.nameFee).toBe('500000000000000000001');
+  });
+
+  it('rejects an error response instead of returning its body', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
+      '{"error":"not found: a.chain"}',
+      { status: 404 },
+    )));
+    const { composable } = await loadComposable();
+
+    await expect(composable.fetchFromMiddlewareCamelCasedPrecise('/v2/names/a.chain/auction'))
+      .rejects.toThrow('404');
+  });
+});

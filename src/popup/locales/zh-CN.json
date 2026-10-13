@@ -245,6 +245,11 @@
       "helpMsg": "使用私钥导入到你钱包的账户无法通过你的助记词恢复，只能通过此私钥恢复。请确保安全备份此类账户的私钥。 <p> 切勿与任何人分享你的私钥，因为它可提供对你的账户与资金的完全控制！ </p>",
       "btnText": "导入账户"
     },
+    "unreadablePrivateKeyAccounts": {
+      "title": "无法读取导入的账户",
+      "msg": "你通过私钥导入的账户在此设备上无法解密，也无法在此恢复。助记词账户不受影响，所有资产仍在区块链上。如需再次导入账户，请先移除无法读取的账户。你需要每个账户的私钥才能找回它。",
+      "btnText": "移除导入的账户"
+    },
     "name-exist": {
       "title": "名称注册错误",
       "msg": "该名称已被注册。"
@@ -1113,10 +1118,16 @@
       "selectProtocol": "请选择要创建第一个钱包账户的区块链。",
       "accountNotFound": "未找到账户。请再次检查你的助记词。",
       "passwordWasNotSet": "未设置密码。请设置密码以继续。",
+      "walletNotSaved": "无法在此设备上保存钱包。请重试。",
       "invalidSeed": "你的助记词应由 12 个或更多以空格分隔的单词组成。",
       "seedPlaceHolder": "在此输入或粘贴你的助记词",
       "scanSeedPhrase": "扫描助记词",
-      "restoringAccounts": "正在恢复账户..."
+      "restoringAccounts": "正在恢复账户...",
+      "replaceWalletTitle": "请先重置此设备上的钱包",
+      "replaceWalletMessage": "此设备上的钱包已锁定或无法读取。要创建或导入钱包，请先重置它。重置后，只能通过其助记词恢复该钱包。",
+      "replaceWalletConfirm": "重置钱包",
+      "restoreIncompleteTitle": "部分账户可能缺失",
+      "restoreIncompleteText": "恢复此钱包时未能检查你的全部账户。请通过“添加账户”添加缺失的账户。"
     },
     "notifications": {
       "superhero": "Superhero.com",
@@ -1471,7 +1482,12 @@
   },
   "auth": {
     "walletDataUnreadableTitle": "钱包数据无法读取",
-    "walletDataUnreadableMessage": "无法解密你的加密钱包数据。通常是因为设备钥匙串已被清空，或应用从未包含钥匙串的备份中恢复。请重新安装应用并使用助记词恢复。"
+    "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
+    "walletDataUnreadableAction": "重置钱包",
+    "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
+    "storedWalletFoundTitle": "在此设备上找到钱包",
+    "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
+    "storedWalletFoundAction": "重新加载"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

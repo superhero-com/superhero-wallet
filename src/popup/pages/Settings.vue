@@ -12,6 +12,7 @@
         :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
         :info="secureLoginSettingsInfo"
         :title="$t('pages.titles.secureLogin')"
+        data-cy="secure-login-settings"
       />
       <PanelItem
         :to="{ name: ROUTE_NETWORK_SETTINGS }"
