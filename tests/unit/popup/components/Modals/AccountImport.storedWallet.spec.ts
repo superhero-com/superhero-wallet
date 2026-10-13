@@ -117,6 +117,25 @@ describe('AccountImport when a wallet that failed to load is stored', () => {
   });
 });
 
+describe('AccountImport while the imported seed is being stored', () => {
+  it('locks the form, so the seed cannot be submitted twice', async () => {
+    let finishStoring;
+    const { wrapper, resolve } = await importSeed({
+      setMnemonicAndInitializeAuthentication: vi.fn(
+        () => new Promise((finish) => { finishStoring = finish; }),
+      ),
+    });
+
+    expect(wrapper.find('[data-cy=btn-import].disabled').exists()).toBe(true);
+    expect(wrapper.find('[data-cy=field-mnemonic] textarea').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain(en.common.actionMayTakeFewMoments);
+
+    finishStoring();
+    await flushPromises();
+    expect(resolve).toHaveBeenCalled();
+  });
+});
+
 describe('AccountImport while restoring the accounts of the imported seed', () => {
   it('cannot be closed, so the start page cannot create a wallet over the seed meanwhile', async () => {
     let finishDiscovery;

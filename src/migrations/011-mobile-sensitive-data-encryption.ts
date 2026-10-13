@@ -10,10 +10,10 @@ import { IS_MOBILE_APP } from '@/constants';
  * Attached as a migration step on every sensitive `useStorageRef` call
  * whose underlying storage can hold legacy plaintext: mnemonic, imported
  * account private keys, preclaimed names, secure-login timeout. The
- * detection is robust: we try to decrypt with the mobile key, and only
- * encrypt when decryption fails (meaning the value is either plaintext
- * or ciphertext from a different key — the latter being unrecoverable
- * and treated like plaintext for our purposes).
+ * detection preserves existing ciphertext even if its key is unavailable.
+ * Only legacy plaintext is encrypted; if the key cannot be loaded or safely
+ * created, the original value is retained so restoration can finish and the
+ * migration can retry on a later launch.
  *
  * No-op on extension / web where `IS_MOBILE_APP === false`. The
  * `mobileEncryption` utility (and its transitive Capacitor native

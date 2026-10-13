@@ -1,7 +1,7 @@
 PODS:
   - AparajitaCapacitorBiometricAuth (10.0.0):
     - Capacitor
-  - AparajitaCapacitorSecureStorage (8.0.0):
+  - AparajitaCapacitorSecureStorage (8.0.1):
     - Capacitor
     - KeychainSwift (~> 21.0)
   - Capacitor (8.4.1):
@@ -155,7 +155,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AparajitaCapacitorBiometricAuth: 1ae24ba90d7977dffb4bc9040f374a807a510c98
-  AparajitaCapacitorSecureStorage: 8128d05cafcb13b00448e20fb388a0edccd44b12
+  AparajitaCapacitorSecureStorage: 64fcd783a62dce106dd73d54caa2d7232589eabe
   Capacitor: 35242afe195b1e53c58ca1b827d1b444c5e6602b
   CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
   CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
