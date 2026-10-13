@@ -2,20 +2,20 @@ import { ref } from 'vue';
 import { METHODS, Tag } from '@aeternity/aepp-sdk';
 import {
   fromWei,
+  numberToHex,
   toChecksumAddress,
   toWei,
   hexToString,
 } from 'web3-utils';
 import { sign } from 'web3-eth-accounts';
-import Web3Eth, { getBlock } from 'web3-eth';
-import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { isEmpty } from 'lodash-es';
 
 import type { IModalProps, Protocol } from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
-import { watchUntilTruthy } from '@/utils';
+import { fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { withGasHeadroom } from '@/protocols/evm/helpers';
 import { EtherscanService, EtherscanDefaultResponse } from '@/protocols/ethereum/libs/EtherscanService';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
@@ -40,6 +40,8 @@ import {
   useNetworks,
   usePermissions,
 } from '@/composables';
+
+type EvmRpcResponse = { result?: any; error?: { code: number; message: string } };
 
 function getUnknownError(message: string) {
   return { error: { code: -32603, message } };
@@ -143,13 +145,42 @@ function getActiveEvmNetworkSettings(protocol: Protocol) {
   };
 }
 
+async function sendToNode(
+  nodeUrl: string,
+  method: string,
+  params: unknown[],
+): Promise<EvmRpcResponse> {
+  try {
+    const response = await fetchJson(nodeUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params,
+      }),
+    });
+    return response?.error ? { error: response.error } : { result: response?.result ?? null };
+  } catch (error: any) {
+    return getUnknownError(error.message);
+  }
+}
+
+/**
+ * Send a read-only request to the active EVM chain's node as is, bypassing the Etherscan proxy.
+ */
+export function forwardEvmRpcToNode(method: string, params: unknown[] = []) {
+  return sendToNode(getActiveEvmNetworkSettings(selectProtocolByChainId()).nodeUrl, method, params);
+}
+
 export async function handleEvmRpcMethod(
   aepp: string,
   method: EthRpcSupportedMethods,
   params: IEthRpcMethodParameters,
   name?: string,
   caipChainId?: string,
-): Promise<{ result?: any; error?: { code: number; message: string } }> {
+): Promise<EvmRpcResponse> {
   const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
   const { getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
@@ -214,7 +245,7 @@ export async function handleEvmRpcMethod(
     } catch (error: any) {
       return getUnknownError(error.message);
     }
-    return { result: balance ? toWei(balance, 'ether') : 0 };
+    return { result: numberToHex(toWei(balance || '0', 'ether')) };
   }
   if (method === ETH_RPC_METHODS.getChainId) {
     return {
@@ -238,14 +269,7 @@ export async function handleEvmRpcMethod(
     };
   }
   if (method === ETH_RPC_METHODS.getBlockNumber) {
-    let currentBlock;
-
-    try {
-      currentBlock = await getBlock(new Web3Eth(nodeUrl), 'latest', true, DEFAULT_RETURN_FORMAT);
-    } catch (error: any) {
-      return getUnknownError(error.message);
-    }
-    return { result: currentBlock?.number.toString() };
+    return sendToNode(nodeUrl, method, []);
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
@@ -256,26 +280,19 @@ export async function handleEvmRpcMethod(
 
     const url = aepp;
 
-    let estimatedGas = null as any;
-    try {
-      estimatedGas = params?.gas ? null : (await new EtherscanService(
-        predefined.middlewareUrl,
-        chainId,
-      )
-        .fetchFromApi({
-          module: 'proxy',
-          action: 'eth_estimateGas',
-          to: params.to,
-          value: `0x${Number(params.value || 0).toString(16)}`,
-          data: params.data || '0x',
-        }))?.result;
-    } catch (_) {
-      // fall back to a conservative gas limit if estimation API fails
-      estimatedGas = '0x5208'; // 21000
+    let gasHex = params.gas;
+    if (!gasHex) {
+      const estimation = await sendToNode(nodeUrl, ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas, [{
+        from: params.from,
+        to: params.to,
+        value: params.value,
+        data: params.data,
+      }]);
+      if (estimation.error) return estimation;
+      gasHex = numberToHex(withGasHeadroom(BigInt(estimation.result)));
     }
 
-    const gasHexOrNum = params?.gas ?? estimatedGas;
-    const gas = Number(gasHexOrNum);
+    const gas = Number(gasHex);
     const senderId = toChecksumAddress(params.from!);
     const recipientId = toChecksumAddress(params.to!);
     const isCoinTransfer = !params.data;
@@ -307,7 +324,7 @@ export async function handleEvmRpcMethod(
         try {
           const actionResult = await adapter.transferPreparedTransaction({
             ...params,
-            gas: gasHexOrNum,
+            gas: gasHex,
           });
           return actionResult?.hash
             ? { result: actionResult?.hash }
