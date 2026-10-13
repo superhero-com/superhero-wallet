@@ -24,6 +24,7 @@ import {
   APP_NAME,
   IN_FRAME,
   IS_EXTENSION,
+  IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
   PROTOCOLS,
   RUNNING_IN_TESTS,
@@ -216,7 +217,10 @@ export function useAeSdk() {
           instance: nodeInstance!,
         }],
         id: APP_NAME,
-        type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
+        // The in-app browser posts the wallet's messages from inside the dapp's own window.
+        type: IS_EXTENSION || IS_OFFSCREEN_TAB || IS_MOBILE_APP
+          ? WALLET_TYPE.extension
+          : WALLET_TYPE.window,
         // TODO: the ttl is set to 0 to avoid the timeout error when blockchain experiencing issues
         ttl: 0,
         onConnection(aeppId, params, origin) {
