@@ -117,11 +117,12 @@ browser.runtime.onMessage.addListener(
       params: { aepp, rpcMethodParams = {} } = {},
     } = msg;
 
-    // Content scripts relay whatever a web page posts: EVM RPC calls only.
+    // Content scripts relay whatever a web page posts: EVM RPC calls only,
+    // so take the origin from the browser, not from the message.
     if (!isExtensionPageSender(sender)) {
-      if (typeof aepp === 'string' && method) {
+      if (typeof aepp === 'string' && method && sender.url) {
         return handleEvmRpcMethod(
-          aepp,
+          new URL(sender.url).origin,
           method as EthRpcSupportedMethods,
           rpcMethodParams as IEthRpcMethodParameters,
         );

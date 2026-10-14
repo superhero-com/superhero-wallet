@@ -89,6 +89,12 @@ describe('inject.ts accountsChanged propagation', () => {
       origin,
       source: { postMessage: vi.fn() },
     })],
+    ['a method that is not a string', () => ({
+      // eslint-disable-next-line no-new-wrappers
+      data: { method: new String('eth_requestAccounts'), aepp: 'https://aescan.io' },
+      origin,
+      source: window,
+    })],
   ])('does not forward page requests from %s', async (_label, createEvent) => {
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
     ((global as any).browser.runtime.sendMessage as vi.Mock).mockClear();
