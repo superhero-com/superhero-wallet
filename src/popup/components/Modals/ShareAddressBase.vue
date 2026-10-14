@@ -118,10 +118,6 @@ import {
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { useAccounts, useCopy, useFungibleTokens } from '@/composables';
 import { invokeDeviceShare } from '@/utils';
-import {
-  AE_CONTRACT_ID,
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import InputAmount from '../InputAmount.vue';
@@ -173,20 +169,21 @@ export default defineComponent({
     const amount = ref<number | string>('');
     const selectedAsset = ref<IAsset | IToken | null>(null);
 
-    function getTokenInfoQuery(account?: string): Record<string, string> {
-      if (!amount.value || +amount.value <= 0) {
-        return {};
-      }
-      const token = (selectedAsset.value?.contractId === AE_CONTRACT_ID)
-        ? AE_SYMBOL
-        : selectedAsset.value?.contractId || AE_SYMBOL;
-      const tokenResult = { token, amount: amount.value.toString() };
-      return account ? { ...tokenResult, account } : tokenResult;
+    function getAccountLinkQuery(account: string): Record<string, string> {
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      const contractId = selectedAsset.value?.contractId;
+      // The token also tells the opening wallet which protocol to switch to
+      const token = (!contractId || contractId === adapter.coinContractId)
+        ? adapter.getUrlTokenKey()
+        : contractId;
+      return (amount.value && +amount.value > 0)
+        ? { token, amount: amount.value.toString(), account }
+        : { token, account };
     }
 
     function getAccountLink(address: string | undefined) {
       return address
-        ? RouteQueryActionsController.createUrl('/account', 'transferSend', getTokenInfoQuery(address))
+        ? RouteQueryActionsController.createUrl('/account', 'transferSend', getAccountLinkQuery(address))
         : '';
     }
 
@@ -204,24 +201,24 @@ export default defineComponent({
     async function share() {
       const address = props.accountAddress;
       const walletLink = getAccountLink(address);
-      const { protocolName } = ProtocolAdapterFactory.getAdapter(props.protocol);
+      const { protocolName, coinSymbol } = ProtocolAdapterFactory.getAdapter(props.protocol);
       const text = (amount.value && +amount.value > 0)
         ? t(
+          'modals.receive.shareTextWithAmount',
+          {
+            coinSymbol: selectedAsset.value?.symbol || coinSymbol,
+            protocolName,
+            address,
+            walletLink,
+            amount: amount.value,
+          },
+        )
+        : t(
           'modals.receive.shareTextNoAmount',
           {
             protocolName,
             address,
             walletLink,
-          },
-        )
-        : t(
-          'modals.receive.shareTextWithAmount',
-          {
-            coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
-            protocolName,
-            address,
-            walletLink,
-            amount: amount.value,
           },
         );
       await invokeDeviceShare(text);

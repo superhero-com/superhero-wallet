@@ -288,6 +288,25 @@ describe('Test cases for deeplinks', () => {
         .get('[data-cy=btn-close]')
         .click();
     });
+
+    it('Test transfer deeplinks without amount', () => {
+      cy.login({})
+        .addEthereumBitcoinAccounts()
+        .visit(`/account?op=transferSend&token=AE&account=${STUB_ACCOUNT.addressAeternity}`)
+        .loginUsingPassword()
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressAeternity)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('have.value', '')
+        .get('[data-cy=btn-close]')
+        .click()
+        .visit(`/account?op=transferSend&token=bitcoin&account=${STUB_ACCOUNT.addressBitcoinTestnet}`)
+        .loginUsingPassword()
+        .formRecipientAddressToBeEqual(STUB_ACCOUNT.addressBitcoinTestnet)
+        .get('[data-cy=amount] [data-cy=input]')
+        .should('have.value', '')
+        .get('[data-cy=btn-close]')
+        .click();
+    });
   });
 
   // TODO: retip, comment
