@@ -10,6 +10,7 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
+import type { IAppData } from '@/types';
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
 import {
   useAccounts,
@@ -24,6 +25,7 @@ import {
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
 } from '@/constants';
+import { createAppData } from '@/utils';
 import en from '@/popup/locales/en-US.json';
 
 // The Air Gap branch of `confirm()` only runs inside the popup.
@@ -476,6 +478,33 @@ describe('ConfirmTransactionSign.vue rebuilding for another signer', () => {
     // The other half of the split: what gets signed takes the mempool-aware
     // next-nonce, never the chain nonce the dry run uses.
     expect((unpackTx(txRaw) as any).nonce).toBe(9);
+  });
+});
+
+describe('ConfirmTransactionSign.vue dapp label', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const mountEvmFrom = (app: IAppData) => mountModal(ADDRESS_PREPARED, {
+    protocol: PROTOCOLS.ethereum,
+    txBase64: undefined,
+    tx: { senderId: ADDRESS_EVM, fee: '21000', amount: '1000000000000000000' },
+    fromAccount: ADDRESS_EVM,
+    app,
+  });
+  const shownAppName = (wrapper: any) => wrapper.find('.app-name').text();
+
+  it('labels a transaction from Superhero Chat', async () => {
+    const wrapper = mountEvmFrom(createAppData('https://chat.superhero.com'));
+    await flushPromises();
+
+    expect(shownAppName(wrapper)).toBe(en.modals.confirmTransactionSign.superheroChat);
+  });
+
+  it('shows a self-reported Superhero Chat URL under its own host', async () => {
+    const wrapper = mountEvmFrom(createAppData('https://chat.superhero.com', 'self-reported'));
+    await flushPromises();
+
+    expect(shownAppName(wrapper)).toBe('chat.superhero.com');
   });
 });
 

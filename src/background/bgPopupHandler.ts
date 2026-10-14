@@ -84,6 +84,7 @@ export const openPopup = async (
         name: app.name || app.host,
         protocol: app.protocol,
         host: app.host,
+        ...(popupProps.app?.originSource ? { originSource: popupProps.app.originSource } : {}),
       },
     },
   };

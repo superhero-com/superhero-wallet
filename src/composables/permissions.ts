@@ -27,10 +27,11 @@ import {
   PROTOCOLS,
   EVM_PROTOCOLS,
 } from '@/constants';
-import { getCleanModalOptions, watchUntilTruthy } from '@/utils';
+import { createAppData, getCleanModalOptions, watchUntilTruthy } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
+import migratePermissionsDropEmptyHost from '@/migrations/012-permissions-drop-empty-host';
 import { useAccounts } from '@/composables';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
@@ -49,6 +50,7 @@ const permissions = useStorageRef<PermissionRegistry>(
     backgroundSync: true,
     migrations: [
       migratePermissionsVuexToComposable,
+      migratePermissionsDropEmptyHost,
     ],
   },
 );
@@ -100,6 +102,10 @@ export function usePermissions() {
   }
 
   function addPermission(permission: IPermission) {
+    // The settings page can't route to an empty host
+    if (!permission.host) {
+      return;
+    }
     permissions.value[permission.host] = permission;
   }
 
@@ -200,12 +206,7 @@ export function usePermissions() {
         }
       }
 
-      app = {
-        host: url.host,
-        name: url.hostname,
-        protocol: url.protocol,
-        href: url.href,
-      };
+      app = createAppData(fullUrl, modalProps.app?.originSource);
       props = { ...props, app };
     }
 

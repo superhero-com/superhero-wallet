@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { ref } from 'vue';
+import { MODAL_CONFIRM_CONNECT } from '@/constants';
 
 vi.mock('@reown/walletkit', () => ({
   WalletKit: {
@@ -20,10 +21,32 @@ vi.mock('@reown/walletkit', () => ({
 vi.mock('@walletconnect/core', () => ({ Core: vi.fn(class Core {}) }));
 
 let activeAccountRef: any;
+const openModalMock = vi.fn();
+
+async function connectAndGetWallet(isConfirmRequired = false) {
+  const { useWalletConnect } = await import('@/composables/walletConnect');
+  await useWalletConnect().connect('wc:abc', isConfirmRequired);
+  const anyWallet: any = (await import('@reown/walletkit')).WalletKit;
+  return (anyWallet.init as vi.Mock).mock.results.at(-1).value;
+}
+
+function getLastHandler(web3wallet: any, event: string) {
+  return (web3wallet.on as vi.Mock).mock.calls.filter(([name]) => name === event).at(-1)[1];
+}
+
+/** A dapp claiming a trusted dapp's URL in its WalletConnect metadata. */
+const aescanProposal = {
+  id: 1,
+  params: {
+    proposer: { metadata: { url: 'https://aescan.io', name: 'aeScan', icons: [] } },
+    requiredNamespaces: { eip155: { methods: [], chains: ['eip155:1'], events: [] } },
+  },
+};
 
 describe('WalletConnect accountsChanged behavior', () => {
   beforeEach(async () => {
     vi.resetModules();
+    openModalMock.mockReset();
     // Mock constants and composables
     vi.doMock('@/constants', async () => ({
       ...(await vi.importActual('@/constants')),
@@ -51,7 +74,19 @@ describe('WalletConnect accountsChanged behavior', () => {
     vi.doMock('@/composables/accounts', () => ({ useAccounts: () => ({ activeAccount: activeAccountRef, accountsGroupedByProtocol, getLastActiveProtocolAccount: () => ({ address: '0xbbb' }) }) }));
     vi.doMock('@/composables/networks', () => ({ useNetworks: () => ({ activeNetwork, networks }) }));
     vi.doMock('@/popup/plugins/i18n', () => ({ tg: (k: string) => k }));
-    vi.doMock('@/composables/modals', () => ({ useModals: () => ({ openDefaultModal: vi.fn(), openModal: vi.fn() }) }));
+    vi.doMock('@/composables/modals', () => ({ useModals: () => ({ openDefaultModal: vi.fn(), openModal: openModalMock }) }));
+  });
+
+  afterEach(() => {
+    [
+      '@/constants',
+      '@/composables/auth',
+      '@/composables',
+      '@/composables/accounts',
+      '@/composables/networks',
+      '@/popup/plugins/i18n',
+      '@/composables/modals',
+    ].forEach((path) => vi.doUnmock(path));
   });
 
   it('approves session with events and orders accounts by last active', async () => {
@@ -79,5 +114,86 @@ describe('WalletConnect accountsChanged behavior', () => {
     // Some WC utils may strip unrequested events; ensure events array exists
     expect(Array.isArray(ns.events)).toBe(true);
     expect(ns.accounts[0]).toBe('eip155:1:0xbbb');
+  });
+
+  it('marks the proposal URL as self-reported in the connect modal', async () => {
+    const web3wallet = await connectAndGetWallet(true);
+    await getLastHandler(web3wallet, 'session_proposal')(aescanProposal);
+
+    expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.objectContaining({
+      app: {
+        host: 'aescan.io',
+        name: 'aescan.io',
+        protocol: 'https:',
+        href: 'https://aescan.io/',
+        originSource: 'self-reported',
+      },
+    }));
+  });
+});
+
+describe('WalletConnect dapp requests', () => {
+  const account = { address: '0xbbb', protocol: 'ethereum' };
+
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    openModalMock.mockReset().mockResolvedValue({});
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
+      WALLET_CONNECT_PROJECT_ID: 'pid',
+    }));
+    const activeNetwork = ref({
+      name: 'Main',
+      type: 'mainnet',
+      protocols: { ethereum: { chainId: '1', nodeUrl: 'https://eth.rpc' } },
+    });
+    vi.doMock('@/composables/accounts', () => ({
+      useAccounts: () => ({
+        activeAccount: ref(account),
+        accountsGroupedByProtocol: ref({ ethereum: [account] }),
+        getLastActiveProtocolAccount: () => account,
+      }),
+    }));
+    vi.doMock('@/composables/networks', () => ({
+      useNetworks: () => ({
+        activeNetwork,
+        activeNetworkName: ref('Main'),
+        networks: ref({ Main: activeNetwork.value }),
+        switchNetwork: vi.fn(),
+      }),
+    }));
+    vi.doMock('@/composables/modals', () => ({ useModals: () => ({ openDefaultModal: vi.fn(), openModal: openModalMock }) }));
+  });
+
+  afterEach(() => {
+    [
+      '@/constants',
+      '@/composables/accounts',
+      '@/composables/networks',
+      '@/composables/modals',
+    ].forEach((path) => vi.doUnmock(path));
+  });
+
+  it.each([
+    'eth_requestAccounts',
+    'wallet_requestPermissions',
+  ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
+    const web3wallet = await connectAndGetWallet();
+    (web3wallet.approveSession as vi.Mock).mockResolvedValueOnce({
+      topic: 't',
+      namespaces: { eip155: { accounts: [], chains: [] } },
+      peer: { metadata: aescanProposal.params.proposer.metadata },
+    });
+    await getLastHandler(web3wallet, 'session_proposal')(aescanProposal);
+    await getLastHandler(web3wallet, 'session_request')({
+      id: 2,
+      topic: 't',
+      params: { chainId: 'eip155:1', request: { method, params: [] } },
+    });
+
+    expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.objectContaining({
+      app: expect.objectContaining({ host: 'aescan.io', originSource: 'self-reported' }),
+    }));
   });
 });
