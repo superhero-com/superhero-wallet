@@ -732,6 +732,8 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   isSenderReplaced?: boolean;
   protocol?: Protocol;
   accountIdx?: number;
+  /** Signed in the offscreen document, so the modal has to drive hardware wallets. */
+  isOffscreenRequest?: boolean;
 }
 
 /**
@@ -748,6 +750,18 @@ export interface ISignModalResolution {
   rebuildForSelectedAccount?: boolean;
 }
 
+/** Sent by the offscreen document to the side panel that shows the popup. */
+export interface ISidePanelRequest {
+  id: string;
+  popupType: PopupType;
+  props: Omit<IPopupProps, 'resolve' | 'reject'>;
+}
+
+/** Sent by a side panel to the offscreen document: its window and visibility, and the answers. */
+export type SidePanelMessage = { windowId: number; visible: boolean }
+  | { id: string; type: typeof POPUP_ACTIONS.resolve; payload?: any }
+  | { id: string; type: typeof POPUP_ACTIONS.reject };
+
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
 }
@@ -761,6 +775,7 @@ export interface IBackgroundMessageData {
     aepp?: string | object;
     popupType?: PopupType;
     popupProps?: Partial<IPopupProps>;
+    sidePanelWindowIds?: number[];
     id?: string;
     rpcMethodParams?: IEthRpcMethodParameters | { result?: string | string[] };
   };

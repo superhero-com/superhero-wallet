@@ -98,7 +98,6 @@ import {
   AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
-  RUNNING_IN_POPUP,
 } from '@/constants';
 import type { IAccount, ISignModalResolution } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
@@ -136,6 +135,7 @@ export default defineComponent({
   },
   setup() {
     const {
+      isOffscreenRequest,
       isUnknownDapp,
       popupProps,
       sender,
@@ -243,7 +243,7 @@ export default defineComponent({
           selectedAccount.value.protocol,
         );
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
         const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
           MODAL_SIGN_AIR_GAP_TRANSACTION,
           { txRaw: await getTransactionToSign() },

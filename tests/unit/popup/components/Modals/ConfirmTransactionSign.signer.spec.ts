@@ -1,5 +1,5 @@
-import { computed, ref } from 'vue';
-import { flushPromises, mount } from '@vue/test-utils';
+import { computed } from 'vue';
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import {
   AccountMemory,
@@ -22,17 +22,12 @@ import {
 } from '@/composables';
 import {
   ACCOUNT_TYPES,
+  MODAL_LEDGER_SIGN,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
 } from '@/constants';
 import { createAppData } from '@/utils';
 import en from '@/popup/locales/en-US.json';
-
-// The Air Gap branch of `confirm()` only runs inside the popup.
-vi.mock('@/constants', async (importOriginal) => ({
-  ...await importOriginal<any>(),
-  RUNNING_IN_POPUP: true,
-}));
 
 /**
  * A transaction carries its sender, so only the account it was built for can
@@ -65,11 +60,19 @@ const accountAirGap = {
   globalIdx: 2,
   type: ACCOUNT_TYPES.airGap,
 };
+const ADDRESS_LEDGER = AccountMemory.generate().address;
+const accountLedger = {
+  protocol: PROTOCOLS.aeternity,
+  address: ADDRESS_LEDGER,
+  idx: 3,
+  globalIdx: 4,
+  type: ACCOUNT_TYPES.ledger,
+};
 const ADDRESS_EVM = '0x1111111111111111111111111111111111111111';
 const accountEvm = {
   protocol: PROTOCOLS.ethereum, address: ADDRESS_EVM, idx: 0, globalIdx: 3, type: 'hd-wallet',
 };
-const walletAccounts = [accountActive, accountPrepared, accountAirGap, accountEvm];
+const walletAccounts = [accountActive, accountPrepared, accountAirGap, accountLedger, accountEvm];
 
 /** A real SpendTx, encoded, sent by `senderId`. */
 const buildSpendTxFor = (senderId: Encoded.AccountAddress) => buildTx({
@@ -96,12 +99,12 @@ const buildContractCallTxFor = (callerId: Encoded.AccountAddress) => buildTx({
   callData: 'cb_KxFE1kQfP4oEp9E=',
 }) as Encoded.Transaction;
 
-vi.mock('@/composables', () => ({
+vi.mock('@/composables', async () => ({
   useAccounts: vi.fn(),
   useAeSdk: vi.fn(),
   useFungibleTokens: vi.fn(),
   useModals: vi.fn(),
-  usePopupProps: vi.fn(),
+  usePopupProps: (await vi.importActual<any>('@/composables/popupProps')).usePopupProps,
   useTransactionData: vi.fn(),
 }));
 
@@ -117,6 +120,9 @@ vi.mock('@/protocols/aeternity/composables/aeTokenSales', () => ({
     tokenSaleAddressToTokenContractAddress: vi.fn(),
   })),
 }));
+
+// Unmounting clears the shared popup props, as it does in the app.
+enableAutoUnmount(afterEach);
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 
@@ -175,22 +181,19 @@ function mountModal(
   });
   getBalance = vi.fn(async () => '1000000000000000000000');
 
-  // @ts-ignore
-  (usePopupProps as vi.Mock).mockReturnValue({
-    isUnknownDapp: computed(() => false),
-    setPopupProps: vi.fn(),
-    popupProps: ref({
-      protocol: PROTOCOLS.aeternity,
-      txBase64: buildSpendTxFor(preparedFor),
-      tx: { fee: '20000000000000', amount: '1000000000000000000' },
-      app: {
-        host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
-      },
-      resolve,
-      reject: vi.fn(),
-      ...popupPropsOverrides,
-    }),
-  });
+  usePopupProps().setPopupProps({
+    protocol: PROTOCOLS.aeternity,
+    txBase64: buildSpendTxFor(preparedFor),
+    tx: { fee: '20000000000000', amount: '1000000000000000000' },
+    app: {
+      host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
+    },
+    // A dapp request, signed in the offscreen document behind the modal.
+    isOffscreenRequest: true,
+    resolve,
+    reject: vi.fn(),
+    ...popupPropsOverrides,
+  } as any);
 
   // @ts-ignore
   (useAccounts as vi.Mock).mockReturnValue({
@@ -478,6 +481,41 @@ describe('ConfirmTransactionSign.vue rebuilding for another signer', () => {
     // The other half of the split: what gets signed takes the mempool-aware
     // next-nonce, never the chain nonce the dry run uses.
     expect((unpackTx(txRaw) as any).nonce).toBe(9);
+  });
+});
+
+/**
+ * The offscreen document that signs a dapp request has no UI, so the modal
+ * walks the user through the device. In the app the signer does that itself,
+ * and the modal doing it as well would prompt twice.
+ */
+describe('ConfirmTransactionSign.vue hardware wallets', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const devices = [
+    ['Ledger', ADDRESS_LEDGER, MODAL_LEDGER_SIGN],
+    ['Air Gap', ADDRESS_AIR_GAP, MODAL_SIGN_AIR_GAP_TRANSACTION],
+  ] as const;
+  const openedModals = () => openModal.mock.calls.map(([name]) => name);
+
+  it.each(devices)('drives the %s device for a dapp request', async (_device, address, modal) => {
+    const wrapper = mountModal(address);
+    await flushPromises();
+
+    await (wrapper.vm as any).confirm();
+
+    expect(openedModals()).toEqual([modal]);
+    expect(resolve).toHaveBeenCalledWith(expect.objectContaining({ selectedAddress: address }));
+  });
+
+  it.each(devices)('leaves the %s device to the signer in the app', async (_device, address) => {
+    const wrapper = mountModal(address, { isOffscreenRequest: false });
+    await flushPromises();
+
+    await (wrapper.vm as any).confirm();
+
+    expect(openedModals()).toEqual([]);
+    expect(resolve).toHaveBeenCalledWith(expect.objectContaining({ selectedAddress: address }));
   });
 });
 

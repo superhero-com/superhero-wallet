@@ -1,5 +1,4 @@
-import { computed, ref } from 'vue';
-import { mount } from '@vue/test-utils';
+import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import {
   AccountMemory, Encoded, Tag, buildTx, getTransactionSignerAddress,
@@ -11,14 +10,8 @@ import MessageSign from '@/popup/pages/Popups/MessageSign.vue';
 import {
   useAccounts, useAeSdk, useModals, usePopupProps,
 } from '@/composables';
-import { PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, MODAL_LEDGER_SIGN, PROTOCOLS } from '@/constants';
 import en from '@/popup/locales/en-US.json';
-
-// The Air Gap branch of `ConfirmRawSign.confirm()` only runs inside the popup.
-vi.mock('@/constants', async (importOriginal) => ({
-  ...await importOriginal<any>(),
-  RUNNING_IN_POPUP: true,
-}));
 
 /**
  * Message / unsafe payloads carry no sender, so the wallet signs them with
@@ -40,12 +33,15 @@ const accountOther = {
   protocol: PROTOCOLS.aeternity, address: ADDRESS_OTHER, idx: 1, globalIdx: 1, type: 'hd-wallet',
 };
 
-vi.mock('@/composables', () => ({
+vi.mock('@/composables', async () => ({
   useAccounts: vi.fn(),
   useAeSdk: vi.fn(),
   useModals: vi.fn(),
-  usePopupProps: vi.fn(),
+  usePopupProps: (await vi.importActual<any>('@/composables/popupProps')).usePopupProps,
 }));
+
+// Unmounting clears the shared popup props, as it does in the app.
+enableAutoUnmount(afterEach);
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 
@@ -58,25 +54,28 @@ const SignAccountSelectStub = {
 let setActiveAccountByAddressAndProtocol: ReturnType<typeof vi.fn>;
 let resolve: ReturnType<typeof vi.fn>;
 
-function mountModal(component: any) {
+/** `popupProps` of a dapp request, signed in the offscreen document behind the modal. */
+function setPopupProps(props: Record<string, any>) {
+  usePopupProps().setPopupProps({
+    protocol: PROTOCOLS.aeternity,
+    app: {
+      host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
+    },
+    isOffscreenRequest: true,
+    resolve,
+    reject: vi.fn(),
+    ...props,
+  } as any);
+}
+
+function mountModal(component: any, popupPropsOverrides: Record<string, any> = {}) {
   setActiveAccountByAddressAndProtocol = vi.fn();
   resolve = vi.fn();
 
-  // @ts-ignore
-  (usePopupProps as vi.Mock).mockReturnValue({
-    isUnknownDapp: computed(() => false),
-    setPopupProps: vi.fn(),
-    sender: computed(() => ({ name: 'dapp.test', address: 'dapp.test', url: 'https://dapp.test/' })),
-    popupProps: ref({
-      protocol: PROTOCOLS.aeternity,
-      txBase64: 'tx_someRawPayload',
-      message: 'hello',
-      app: {
-        host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
-      },
-      resolve,
-      reject: vi.fn(),
-    }),
+  setPopupProps({
+    txBase64: 'tx_someRawPayload',
+    message: 'hello',
+    ...popupPropsOverrides,
   });
 
   // @ts-ignore
@@ -184,25 +183,14 @@ describe('ConfirmRawSign account switcher', () => {
     payload: 'ba_Xfbg4g==',
   }) as Encoded.Transaction;
 
-  function mountRawSign(txBase64: Encoded.Transaction) {
+  function mountRawSign(
+    txBase64: Encoded.Transaction,
+    popupPropsOverrides: Record<string, any> = {},
+  ) {
     setActiveAccountByAddressAndProtocol = vi.fn();
     resolve = vi.fn();
 
-    // @ts-ignore
-    (usePopupProps as vi.Mock).mockReturnValue({
-      isUnknownDapp: computed(() => false),
-      setPopupProps: vi.fn(),
-      sender: computed(() => ({ name: 'dapp.test', address: 'dapp.test', url: 'https://dapp.test/' })),
-      popupProps: ref({
-        protocol: PROTOCOLS.aeternity,
-        txBase64,
-        app: {
-          host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
-        },
-        resolve,
-        reject: vi.fn(),
-      }),
-    });
+    setPopupProps({ txBase64, ...popupPropsOverrides });
 
     // @ts-ignore
     (useAccounts as vi.Mock).mockReturnValue({
@@ -310,5 +298,54 @@ describe('ConfirmRawSign account switcher', () => {
 
     const [, airGapProps] = openModal.mock.calls[0];
     expect(getTransactionSignerAddress(airGapProps.txRaw)).toBe(ADDRESS_AIR_GAP);
+  });
+
+  it('leaves the Air Gap device to the signer in the app', async () => {
+    const ADDRESS_AIR_GAP = AccountMemory.generate().address;
+    const wrapper = mountRawSign(buildSpendTxFor(ADDRESS_PREPARED), { isOffscreenRequest: false });
+    const accountAirGap = {
+      protocol: PROTOCOLS.aeternity, address: ADDRESS_AIR_GAP, idx: 3, globalIdx: 3, type: 'airgap',
+    };
+    const { openModal } = (useModals as any)();
+
+    await wrapper.findComponent(SignAccountSelectStub).vm.$emit('select', accountAirGap);
+    await wrapper.find('[data-cy="rebuild-for-signer"]').trigger('click');
+    await (wrapper.vm as any).confirm();
+
+    expect(openModal).not.toHaveBeenCalled();
+    expect(resolve).toHaveBeenCalledWith(expect.objectContaining({
+      selectedAddress: ADDRESS_AIR_GAP,
+      rebuildForSelectedAccount: true,
+    }));
+  });
+});
+
+/**
+ * The offscreen document that signs a dapp request has no UI, so the modal
+ * asks to confirm on the Ledger. In the app the signer does that itself.
+ */
+describe('MessageSign Ledger prompt', () => {
+  const accountLedger = {
+    protocol: PROTOCOLS.aeternity,
+    address: ADDRESS_OTHER,
+    idx: 1,
+    globalIdx: 1,
+    type: ACCOUNT_TYPES.ledger,
+  };
+
+  it.each([
+    ['shows it for a dapp request', true, [MODAL_LEDGER_SIGN]],
+    ['leaves it to the signer in the app', false, []],
+  ])('%s', async (_name, isOffscreenRequest, expectedModals) => {
+    const wrapper = mountModal(MessageSign, { isOffscreenRequest });
+    const { openModal } = (useModals as any)();
+
+    await wrapper.findComponent(SignAccountSelectStub).vm.$emit('select', accountLedger);
+    await (wrapper.vm as any).approve();
+
+    expect(openModal.mock.calls.map(([name]: [string]) => name)).toEqual(expectedModals);
+    expect(resolve).toHaveBeenCalledWith(
+      expect.objectContaining({ selectedAddress: ADDRESS_OTHER }),
+    );
   });
 });

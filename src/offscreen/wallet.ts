@@ -17,7 +17,7 @@ import {
 } from '@/composables';
 import { setSessionTimeout } from '@/background/bgPopupHandler';
 import browser from 'webextension-polyfill';
-import { removePopup, getPopup } from './popupHandler';
+import { removePopup, getPopup, addSidePanel } from './popupHandler';
 import { detectConnectionType } from './utils';
 
 window.browser = browser;
@@ -123,6 +123,10 @@ export async function init() {
         });
 
         port.onDisconnect.addListener(() => removePopup(id!));
+        break;
+      }
+      case CONNECTION_TYPES.SIDE_PANEL: {
+        addSidePanel(port as Runtime.Port);
         break;
       }
       case CONNECTION_TYPES.OTHER: {

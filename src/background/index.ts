@@ -59,6 +59,7 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
       id,
       popupProps,
       popupType,
+      sidePanelWindowIds,
     } = msg.params ?? {};
     switch (msg.method) {
       case 'chainChanged':
@@ -86,7 +87,7 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
         });
         break;
       case 'openPopup':
-        openPopup(popupType!, aepp!, popupProps).then((popupConfig) => {
+        openPopup(popupType!, aepp!, popupProps, sidePanelWindowIds).then((popupConfig) => {
           sendResponse(popupConfig);
         });
         return true;

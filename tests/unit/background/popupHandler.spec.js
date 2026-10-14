@@ -9,6 +9,7 @@ import { STUB_TX_BASE_64 } from '../../../src/constants/stubs';
 import { AE_DEX_URL } from '../../../src/protocols/aeternity/config';
 
 const mockCreate = vi.fn(() => true);
+const mockGetLastFocused = vi.fn();
 const mockGetUrl = vi.fn((text) => text);
 
 const testAeppUrl = 'http://test.com';
@@ -20,6 +21,7 @@ global.browser = {
   },
   windows: {
     create: mockCreate,
+    getLastFocused: mockGetLastFocused,
   },
   runtime: {
     getURL: mockGetUrl,
@@ -117,5 +119,44 @@ describe('popupHandler', () => {
     const { id, props } = await openPopup(POPUP_TYPE_CONNECT, 'https://aescan.io', {});
     expect(props.app).not.toHaveProperty('originSource');
     removePopup(id);
+  });
+
+  describe('with open side panels', () => {
+    beforeEach(() => {
+      mockCreate.mockClear();
+    });
+
+    it('leaves the popup to the side panel of the focused window', async () => {
+      mockGetLastFocused.mockResolvedValue({ id: 2, focused: true, state: 'normal' });
+      const { id, props, sidePanelWindowId } = await openPopup(
+        POPUP_TYPE_CONNECT,
+        testAeppUrl,
+        {},
+        [1, 2],
+      );
+      expect(sidePanelWindowId).toBe(2);
+      expect(props.app.href).toBe(`${testAeppUrl}/`);
+      expect(getPopup(id)).toBeTruthy();
+      expect(mockCreate).not.toHaveBeenCalled();
+      removePopup(id);
+    });
+
+    it.each([
+      ['the focused window has no side panel', { id: 3, focused: true, state: 'normal' }],
+      ['another app has the focus', { id: 2, focused: false, state: 'normal' }],
+      // Chrome still reports a minimized window as focused.
+      ['the window is minimized', { id: 2, focused: true, state: 'minimized' }],
+    ])('opens a popup window when %s', async (_case, lastFocused) => {
+      mockGetLastFocused.mockResolvedValue(lastFocused);
+      const { id, sidePanelWindowId } = await openPopup(
+        POPUP_TYPE_CONNECT,
+        testAeppUrl,
+        {},
+        [1, 2],
+      );
+      expect(sidePanelWindowId).toBeUndefined();
+      expect(mockCreate).toHaveBeenCalledOnce();
+      removePopup(id);
+    });
   });
 });

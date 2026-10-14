@@ -70,6 +70,7 @@ export const TX_DIRECTION = {
 export const CONNECTION_TYPES = {
   SESSION: 'SESSION',
   POPUP: 'POPUP',
+  SIDE_PANEL: 'SIDE_PANEL',
   OTHER: 'OTHER',
 };
 
