@@ -21,6 +21,16 @@
         @error="handleError"
       />
     </template>
+    <template #footer-after>
+      <BtnMain
+        v-if="showCopyQrButton"
+        :icon="CopyOutlinedIcon"
+        :text="$t('pages.send.copy')"
+        variant="muted"
+        extend
+        @click="copyQrCode()"
+      />
+    </template>
   </TransferSendBase>
 </template>
 
@@ -51,6 +61,8 @@ import { useAccounts, useAeSdk, useFungibleTokens } from '@/composables';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
 import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import CopyOutlinedIcon from '@/icons/copy-outlined.svg?vue-component';
 import TransferSendForm from '../components/TransferSendForm.vue';
 import TransferReviewTip from '../components/TransferReviewTip.vue';
 import TransferReview from '../components/TransferReview.vue';
@@ -60,6 +72,7 @@ export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_SEND,
   components: {
     TransferSendBase,
+    BtnMain,
   },
   props: {
     ...transferSendModalRequiredProps,
@@ -99,6 +112,8 @@ export default defineComponent({
       && isActiveAccountAirGap.value
     ));
 
+    const showCopyQrButton = computed(() => showNextButton.value && !props.isMultisig);
+
     const isSendingDisabled = computed(() => (
       error.value
       || !isAeNodeReady.value
@@ -120,6 +135,10 @@ export default defineComponent({
 
     function proceedToNextStep() {
       (currentRenderedComponent.value as any).submit();
+    }
+
+    function copyQrCode() {
+      (currentRenderedComponent.value as any).copyQrCode();
     }
 
     function handleSendFormSuccess() {
@@ -224,7 +243,10 @@ export default defineComponent({
       isAddressUrl,
       isSendingDisabled,
       customPrimaryButtonText,
+      showCopyQrButton,
+      CopyOutlinedIcon,
       proceedToNextStep,
+      copyQrCode,
       editTransfer,
       handleError,
     };

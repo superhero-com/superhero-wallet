@@ -38,6 +38,7 @@
       </div>
       <TransferQRCodeGenerator
         v-if="isActiveAccountAirGap && !isMultisig"
+        ref="qrCodeGenerator"
         :transfer-data="displayTransferData"
       />
     </template>
@@ -285,6 +286,7 @@ export default defineComponent({
     } = useFungibleTokens();
     const { gaMetaParams } = useAeGaMetaParams();
 
+    const qrCodeGenerator = ref<InstanceType<typeof TransferQRCodeGenerator>>();
     const loading = ref<boolean>(false);
     const feeInput = ref(new BigNumber(props.transferData.fee || 0).toFixed());
     const nonceInput = ref(props.transferData.nonce?.toString() || '');
@@ -448,6 +450,10 @@ export default defineComponent({
 
     function handleNonceInput(value: string) {
       nonceInput.value = value;
+    }
+
+    function copyQrCode() {
+      qrCodeGenerator.value?.copyAsSingleQR();
     }
 
     async function fetchCurrentAccountNonce() {
@@ -777,6 +783,8 @@ export default defineComponent({
       handleFeeInput,
       handleNonceInput,
       showTotal,
+      qrCodeGenerator,
+      copyQrCode,
       submit,
     };
   },
