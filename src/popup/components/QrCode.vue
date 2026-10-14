@@ -57,6 +57,8 @@ export default defineComponent({
         mode: 'Byte',
         errorCorrectionLevel: 'M',
       },
+      // Integer dot sizes leave a margin that grows with the module count
+      dotsOptions: { roundSize: false },
       imageOptions: {
         hideBackgroundDots: false,
         imageSize: 0.7,

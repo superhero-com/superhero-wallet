@@ -27,19 +27,10 @@
     <WrappedQrCode
       v-if="currentStep === STEPS.initial"
       :value="fragments"
-      :size="290"
+      :size="240"
       :type-number="0"
       :external-copied="copied"
-    >
-      <BtnMain
-        class="btn-copy"
-        :icon="CopyOutlinedIcon"
-        :text="$t('pages.send.copy')"
-        variant="muted"
-        extend
-        @click="copyAsSingleQR()"
-      />
-    </WrappedQrCode>
+    />
 
     <!-- Second Step -->
     <div v-else class="input-wrapper">
@@ -62,6 +53,14 @@
         :disabled="isMainButtonDisabled"
         :text="mainButtonText"
         @click="mainButtonAction()"
+      />
+      <BtnMain
+        v-if="isFirstStep"
+        :icon="CopyOutlinedIcon"
+        :text="$t('pages.send.copy')"
+        variant="muted"
+        extend
+        @click="copyAsSingleQR()"
       />
     </template>
   </Modal>
@@ -154,7 +153,9 @@ export default defineComponent({
     ));
 
     function copyAsSingleQR(): void {
-      copy(getURFromFragments(fragments.value));
+      if (fragments.value?.length) {
+        copy(getURFromFragments(fragments.value));
+      }
     }
 
     function mainButtonAction() {
@@ -227,6 +228,7 @@ export default defineComponent({
       mainButtonText,
       secondaryButtonText,
       isMainButtonDisabled,
+      isFirstStep,
       currentStep,
       syncCode,
       copy,
@@ -247,10 +249,6 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     gap: 10px;
-  }
-
-  .btn-copy {
-    margin-top: 16px;
   }
 }
 </style>

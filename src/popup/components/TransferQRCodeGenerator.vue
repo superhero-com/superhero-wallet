@@ -5,19 +5,10 @@
     >
       <WrappedQrCode
         :value="fragments"
-        :size="290"
+        :size="240"
         :type-number="0"
         :external-copied="copied"
-      >
-        <BtnMain
-          class="btn-copy"
-          :icon="CopyOutlinedIcon"
-          :text="$t('pages.send.copy')"
-          variant="muted"
-          extend
-          @click="copyAsSingleQR()"
-        />
-      </WrappedQrCode>
+      />
     </template>
     <Loader v-else />
   </div>
@@ -51,15 +42,11 @@ import {
 
 import WrappedQrCode from './WrappedQrCode.vue';
 import Loader from './Loader.vue';
-import BtnMain from './buttons/BtnMain.vue';
-
-import CopyOutlinedIcon from '../../icons/copy-outlined.svg?vue-component';
 
 export default defineComponent({
   components: {
     WrappedQrCode,
     Loader,
-    BtnMain,
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
@@ -74,7 +61,9 @@ export default defineComponent({
     const { copy, copied } = useCopy();
 
     function copyAsSingleQR(): void {
-      copy(getURFromFragments(fragments.value));
+      if (fragments.value?.length) {
+        copy(getURFromFragments(fragments.value));
+      }
     }
 
     async function generateQrFragments() {
@@ -131,16 +120,9 @@ export default defineComponent({
 
     return {
       fragments,
-      CopyOutlinedIcon,
       copied,
       copyAsSingleQR,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.transfer-qr-code-generator .btn-copy {
-  margin-top: 16px;
-}
-</style>

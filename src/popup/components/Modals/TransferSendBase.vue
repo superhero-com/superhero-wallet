@@ -28,6 +28,7 @@
         data-cy="next-step-button"
         @click="$emit('step-next')"
       />
+      <slot name="footer-after" />
     </template>
   </Modal>
 </template>
@@ -132,12 +133,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .transfer-send-base {
+  // Grow ratios instead of 30%/70% bases, which with the footer gap don't fit in one row
   .button-action-secondary {
-    flex-basis: 30%;
+    flex: 3;
   }
 
   .button-action-primary {
-    flex-basis: 70%;
+    flex: 7;
   }
 }
 </style>
