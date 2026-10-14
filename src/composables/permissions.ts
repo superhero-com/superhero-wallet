@@ -192,6 +192,8 @@ export function usePermissions() {
       if (
         checkPermission(url.host, method, modalProps.tx)
         && !(method === METHODS.sign && modalProps.protocol !== PROTOCOLS.aeternity)
+        // A host the dapp claims can't use a message signing right granted to the real one
+        && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
       ) {
         try {
           await Promise.race(

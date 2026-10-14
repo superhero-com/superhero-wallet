@@ -1,6 +1,11 @@
 import { METHODS } from '@aeternity/aepp-sdk';
-import type { IModalProps, IPermission } from '@/types';
-import { MODAL_CONFIRM_CONNECT, PERMISSION_DEFAULTS, STORAGE_KEYS } from '@/constants';
+import type { IAppData, IModalProps, IPermission } from '@/types';
+import {
+  MODAL_CONFIRM_CONNECT,
+  MODAL_MESSAGE_SIGN,
+  PERMISSION_DEFAULTS,
+  STORAGE_KEYS,
+} from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 
 const HOST = 'dapp.example';
@@ -73,6 +78,36 @@ describe('usePermissions - dapp host', () => {
         app: { host: 'aescan.io', originSource: 'self-reported' },
       });
       expect(app).toMatchObject({ host: HOST, originSource: 'self-reported' });
+    });
+  });
+
+  describe('message signing for a host with a standing permission', () => {
+    beforeEach(() => {
+      vi.doMock('@/composables/accounts', () => ({
+        useAccounts: () => ({ activeAccount: { value: { address: '0x1' } } }),
+      }));
+    });
+
+    afterEach(() => {
+      vi.doUnmock('@/composables/accounts');
+    });
+
+    async function askToSignMessage(app?: IAppData) {
+      const { addPermission, checkOrAskPermission } = await loadPermissions();
+      addPermission({
+        ...PERMISSION_DEFAULTS, host: HOST, name: HOST, messageSign: true,
+      });
+      return checkOrAskPermission(METHODS.signMessage, `https://${HOST}/`, { app });
+    }
+
+    it('signs without asking the host itself', async () => {
+      expect(await askToSignMessage()).toBe(true);
+      expect(openModalMock).not.toHaveBeenCalled();
+    });
+
+    it('asks a dapp that only claims the host', async () => {
+      await askToSignMessage({ host: HOST, originSource: 'self-reported' });
+      expect(openModalMock).toHaveBeenCalledWith(MODAL_MESSAGE_SIGN, expect.anything());
     });
   });
 });

@@ -97,7 +97,7 @@ describe('handleEvmRpcMethod - BNB network basics', () => {
   });
 });
 
-describe('handleEvmRpcMethod - connect modal app', () => {
+describe('handleEvmRpcMethod - modal app', () => {
   const aepp = 'https://dapp.example';
   const account = { address: '0x0000000000000000000000000000000000000001' };
   const checkOrAskPermission = vi.fn();
@@ -148,6 +148,7 @@ describe('handleEvmRpcMethod - connect modal app', () => {
       value: '0x1',
       gas: '0x5208',
     }],
+    [ETH_RPC_METHODS.signPersonal, { data: '0x6869' }],
   ])('marks the %s modal app as self-reported', async (method, params) => {
     await handle(aepp, method, params, 'Dapp', 'eip155:56', 'self-reported');
     expect(modalApp()).toMatchObject({ host: 'dapp.example', originSource: 'self-reported' });
@@ -161,5 +162,13 @@ describe('handleEvmRpcMethod - connect modal app', () => {
   it('passes no app when the request has no origin', async () => {
     await handle(undefined, ETH_RPC_METHODS.requestAccounts, {}, undefined, 'eip155:56', 'self-reported');
     expect(modalApp()).toBeUndefined();
+  });
+
+  it('keeps serving connect requests after one with a malformed origin', async () => {
+    await expect(handle('not a url', ETH_RPC_METHODS.requestAccounts, {}, undefined, 'eip155:56'))
+      .rejects.toThrow();
+
+    await handle(aepp, ETH_RPC_METHODS.requestAccounts, {}, undefined, 'eip155:56');
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
   });
 });

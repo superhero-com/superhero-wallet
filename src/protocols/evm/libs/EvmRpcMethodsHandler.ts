@@ -66,23 +66,25 @@ async function checkOrAskEvmPermission(
   await watchUntilTruthy(() => !isCheckingPermissions.value);
 
   isCheckingPermissions.value = true;
-  const permission = await checkOrAskPermission(
-    METHODS.subscribeAddress,
-    aepp,
-    {
-      protocol,
-      app: aepp ? createAppData(aepp, originSource) : undefined,
-      access: [
-        CONNECT_PERMISSIONS.address,
-        CONNECT_PERMISSIONS.networks,
-        CONNECT_PERMISSIONS.transactions,
-      ],
-    },
-  );
-  await watchUntilTruthy(() => !isEmpty(activeAccount.value));
-  isCheckingPermissions.value = false;
-
-  return permission;
+  try {
+    const permission = await checkOrAskPermission(
+      METHODS.subscribeAddress,
+      aepp,
+      {
+        protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
+        access: [
+          CONNECT_PERMISSIONS.address,
+          CONNECT_PERMISSIONS.networks,
+          CONNECT_PERMISSIONS.transactions,
+        ],
+      },
+    );
+    await watchUntilTruthy(() => !isEmpty(activeAccount.value));
+    return permission;
+  } finally {
+    isCheckingPermissions.value = false;
+  }
 }
 
 function getProtocolCoinContractId(protocol: Protocol) {
@@ -363,6 +365,7 @@ export async function handleEvmRpcMethod(
       aepp,
       {
         protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
         message: rawMessage,
       },
     );
