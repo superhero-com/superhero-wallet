@@ -64,14 +64,14 @@
   ],
   "side_panel": {
     "default_title": "Superhero Wallet",
-    "default_path": "index.html"
+    "default_path": "index.html?sidepanel"
   },
   "externally_connectable": {
     "matches": ["https://wallet.superhero.com/*"]
   },
   "sidebar_action": {
     "default_title": "Superhero Wallet",
-    "default_panel": "index.html",
+    "default_panel": "index.html?sidepanel",
     "default_icon": "icons/icon_128.png"
   }
 }
