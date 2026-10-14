@@ -34,12 +34,11 @@
           :copied="copied"
           @click="copyAddress()"
         >
-          <Scrollable class="address-scrollable-area">
-            <AddressFormatted
-              data-cy="qr-code-info"
-              :address="accountAddress"
-            />
-          </Scrollable>
+          <AddressFormatted
+            class="address-text"
+            data-cy="qr-code-info"
+            :address="accountAddress"
+          />
         </CopyText>
       </div>
 
@@ -73,21 +72,20 @@
 
     <template #footer>
       <BtnMain
-        data-cy="copy"
-        :variant="IS_MOBILE_DEVICE ? 'muted' : 'primary'"
-        class="btn-copy"
-        :text="copied ? $t('modals.receive.copied') : $t('common.copy')"
-        @click="copyAddress()"
+        v-if="IS_MOBILE_DEVICE"
+        variant="muted"
+        :icon="ShareIcon"
+        :text="$t('common.share')"
+        @click="share"
       />
 
       <BtnMain
-        v-if="IS_MOBILE_DEVICE"
-        class="btn-share"
-        :icon="ShareIcon"
-        @click="share"
-      >
-        {{ $t('common.share') }}
-      </BtnMain>
+        data-cy="copy"
+        :icon="CopyOutlinedIcon"
+        :text="copied ? $t('modals.receive.copied') : $t('common.copy')"
+        wide
+        @click="copyAddress()"
+      />
     </template>
   </Modal>
 </template>
@@ -122,7 +120,6 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import InputAmount from '../InputAmount.vue';
 import WrappedQrCode from '../WrappedQrCode.vue';
-import Scrollable from '../Scrollable.vue';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AddressFormatted from '../AddressFormatted.vue';
@@ -130,6 +127,7 @@ import CopyText from '../CopyText.vue';
 import AccountItem from '../AccountItem.vue';
 
 import ShareIcon from '../../../icons/share.svg?vue-component';
+import CopyOutlinedIcon from '../../../icons/copy-outlined.svg?vue-component';
 
 export const shareAddressRequiredProps = {
   resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
@@ -143,7 +141,6 @@ export default defineComponent({
     Modal,
     WrappedQrCode,
     BtnMain,
-    Scrollable,
     AddressFormatted,
     CopyText,
     AccountItem,
@@ -256,6 +253,7 @@ export default defineComponent({
       PROTOCOLS,
       IS_MOBILE_DEVICE,
       ShareIcon,
+      CopyOutlinedIcon,
       amount,
       selectedAsset,
       assetDecimals,
@@ -286,27 +284,18 @@ export default defineComponent({
   }
 
   .address {
-    max-width: 260px;
+    width: 234px;
     margin: 14px auto 0;
 
     &-copy {
       display: block;
     }
 
-    &-scrollable-area {
+    &-text {
       @extend %face-mono-14-medium;
 
-      width: 100%;
-      height: 74px;
-      color: $color-white;
-      font-style: normal;
-      text-align: left;
       line-height: 24px;
     }
-  }
-
-  .btn-share {
-    min-width: 60%;
   }
 }
 </style>
