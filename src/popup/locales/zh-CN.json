@@ -511,10 +511,6 @@
       "redeemFull": "全部兑换",
       "redeemedBy": "{0} 兑换者",
       "alreadyRedeemed": "此礼品卡已被兑换。"
-    },
-    "appsBrowserError": {
-      "title": "需要 æternity 账户以浏览 æ 生态",
-      "createAccount":"创建账户"
     }
   },
   "airGap": {
@@ -1414,8 +1410,7 @@
     "appsBrowser": {
       "popularApps": "精选",
       "recentApps": "最近访问",
-      "inputPlaceholder": "输入 URL",
-      "iframeTitle": "已选择的应用"
+      "inputPlaceholder": "输入 URL"
     },
     "warningDappBrowser": {
       "title": "你将访问\n第三方网站",
@@ -1435,20 +1430,6 @@
     "confirmTransactionWarning": "确认此交易",
     "signDataAction": "签名数据",
     "signDataWarning": "签名此数据"
-  },
-  "dappActionBrowser": {
-    "refresh": {
-      "title": "刷新",
-      "description": "重新加载页面内容"
-    },
-    "bookmark": {
-      "title": "添加书签",
-      "description": "将此页面添加到收藏夹"
-    },
-    "share": {
-      "title": "分享",
-      "description": "将此页面分享给你的联系人"
-    }
   },
   "validation": {
     "formInvalid": "上方一个或多个字段无效。请检查你输入的信息。",

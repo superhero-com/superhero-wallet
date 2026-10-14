@@ -12,6 +12,7 @@ import {
   ETH_RPC_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
+import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
 import browser from 'webextension-polyfill';
 
 const connectedDapps: Record<string, any> = {};
@@ -81,34 +82,11 @@ const runContentScript = () => {
       let { method } = event.data;
       if (!method) method = 'pageMessage';
 
-      if (method === ETH_RPC_METHODS.getBalance) {
-        handleEthRpcRequest(event, method, { address: event.data.params[0] });
-      } else if (method === ETH_RPC_METHODS.signPersonal) {
-        handleEthRpcRequest(event, method, { data: event.data.params?.[0] });
-      } else if (
-        method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionByHash
-        || method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionReceipt
-      ) {
-        handleEthRpcRequest(event, method, { txhash: event.data.params?.[0] });
-      } else if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getBlockByNumber) {
-        handleEthRpcRequest(event, method, {
-          tag: event.data.params?.[0],
-          boolean: event.data.params?.[1],
-        });
-      } else if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getUncleByBlockNumberAndIndex) {
-        handleEthRpcRequest(event, method, {
-          tag: event.data.params?.[0],
-          index: event.data.params?.[1],
-        });
-      } else if (
+      if (
         Object.values(ETH_RPC_METHODS).includes(method)
         || Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
       ) {
-        handleEthRpcRequest(event, method, {
-          ...(event.data.params?.[0] || {}),
-          ...(event.data.params?.[1] && !event.data.params?.[0]?.tag
-            ? { tag: event.data.params[1] } : {}),
-        });
+        handleEthRpcRequest(event, method, toEvmRpcParams(method, event.data.params));
       } else if (event.data.superheroWalletRequest) {
         handleEthRpcRequest(event, method, event.data.params);
       } else if (!event.data.resolve) {

@@ -384,7 +384,6 @@ export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
-export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
@@ -507,15 +506,6 @@ export const TRANSFER_SEND_STEPS = {
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';
-
-/**
- * @description List of all possible actions through the in-app browser.
- */
-export const BROWSER_ACTIONS = {
-  refresh: 'refresh',
-  share: 'share',
-  favourite: 'favourite',
-} as const;
 
 /**
  * List of dapps that we are sure that we support.

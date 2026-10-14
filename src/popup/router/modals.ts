@@ -32,7 +32,6 @@ import {
   MODAL_RESET_WALLET,
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
-  MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WALLET_CONNECT,
   MODAL_WARNING_DAPP_BROWSER,
   MODAL_BIOMETRIC_LOGIN,
@@ -98,7 +97,6 @@ const WarningDappBrowser = defineAsyncComponent(() => import('@/popup/components
 const MultisigProposalConfirmActions = defineAsyncComponent(
   () => import('@/popup/components/Modals/MultisigProposalConfirmActions.vue'),
 );
-const BrowserActions = defineAsyncComponent(() => import('@/popup/components/Modals/BrowserActions.vue'));
 const WalletConnect = defineAsyncComponent(() => import('@/popup/components/Modals/WalletConnectModal.vue'));
 const AirGapImportAccounts = defineAsyncComponent(() => import('@/popup/components/Modals/AirGapImportAccounts.vue'));
 const LedgerImportAccounts = defineAsyncComponent(() => import('@/popup/components/Modals/LedgerImportAccounts.vue'));
@@ -239,9 +237,6 @@ export default () => {
   });
   registerModal(MODAL_NETWORK_SWITCHER, {
     component: NetworkSwitcherModal,
-  });
-  registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
-    component: BrowserActions,
   });
   registerModal(MODAL_WALLET_CONNECT, {
     component: WalletConnect,

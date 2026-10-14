@@ -71,14 +71,6 @@ vi.mock('web3-eth', () => {
   return { __esModule: true, default: impl, Web3Eth: impl };
 });
 
-vi.mock('../../../../../src/protocols/ethereum/libs/EtherscanService', () => ({
-  EtherscanService: class {
-    // minimal API used in sendTransaction path for gas estimation
-    // eslint-disable-next-line class-methods-use-this
-    async fetchFromApi() { return { message: 'OK', result: '0x5208' }; }
-  },
-}));
-
 describe('handleEvmRpcMethod - BNB network basics', () => {
   const aepp = 'https://dapp.example';
 
@@ -93,11 +85,14 @@ describe('handleEvmRpcMethod - BNB network basics', () => {
   });
 
   it('sendTransaction delegates to adapter.transferPreparedTransaction and returns hash', async () => {
+    // The node answering the gas estimation
+    vi.stubGlobal('fetch', vi.fn(async () => ({ status: 200, json: async () => ({ result: '0x5208' }) })));
     const res = await handleEvmRpcMethod(aepp, ETH_RPC_METHODS.sendTransaction, {
       from: '0x0000000000000000000000000000000000000001',
       to: '0x0000000000000000000000000000000000000002',
       value: '0xde0b6b3a7640000', // 1 ether in hex wei
     }, 'Dapp', 'eip155:56');
+    vi.unstubAllGlobals();
     expect(res.result === '0xhash' || res.error).toBeTruthy();
   });
 });
