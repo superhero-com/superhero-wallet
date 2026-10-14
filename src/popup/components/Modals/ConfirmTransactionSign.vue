@@ -546,7 +546,10 @@ export default defineComponent({
       .multipliedBy(gasPrice.value));
 
     const appName = computed((): string | undefined => {
-      if (SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)) {
+      if (
+        app.value?.originSource !== 'self-reported'
+        && SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)
+      ) {
         return t('modals.confirmTransactionSign.superheroChat');
       }
       if (protocol !== PROTOCOLS.aeternity) {

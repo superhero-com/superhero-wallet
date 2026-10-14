@@ -10,10 +10,10 @@ import {
 import { sign } from 'web3-eth-accounts';
 import { isEmpty } from 'lodash-es';
 
-import type { IModalProps, Protocol } from '@/types';
+import type { AppOriginSource, IModalProps, Protocol } from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
-import { fetchJson, watchUntilTruthy } from '@/utils';
+import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { withGasHeadroom } from '@/protocols/evm/helpers';
 import { EtherscanService, EtherscanDefaultResponse } from '@/protocols/ethereum/libs/EtherscanService';
@@ -56,28 +56,35 @@ const ERROR_USER_REJECTED_REQUEST = {
 
 const isCheckingPermissions = ref(false);
 
-async function checkOrAskEvmPermission(aepp: string, protocol: Protocol) {
+async function checkOrAskEvmPermission(
+  aepp: string,
+  protocol: Protocol,
+  originSource?: AppOriginSource,
+) {
   const { checkOrAskPermission } = usePermissions();
   const { activeAccount } = useAccounts();
   await watchUntilTruthy(() => !isCheckingPermissions.value);
 
   isCheckingPermissions.value = true;
-  const permission = await checkOrAskPermission(
-    METHODS.subscribeAddress,
-    aepp,
-    {
-      protocol,
-      access: [
-        CONNECT_PERMISSIONS.address,
-        CONNECT_PERMISSIONS.networks,
-        CONNECT_PERMISSIONS.transactions,
-      ],
-    },
-  );
-  await watchUntilTruthy(() => !isEmpty(activeAccount.value));
-  isCheckingPermissions.value = false;
-
-  return permission;
+  try {
+    const permission = await checkOrAskPermission(
+      METHODS.subscribeAddress,
+      aepp,
+      {
+        protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
+        access: [
+          CONNECT_PERMISSIONS.address,
+          CONNECT_PERMISSIONS.networks,
+          CONNECT_PERMISSIONS.transactions,
+        ],
+      },
+    );
+    await watchUntilTruthy(() => !isEmpty(activeAccount.value));
+    return permission;
+  } finally {
+    isCheckingPermissions.value = false;
+  }
 }
 
 function getProtocolCoinContractId(protocol: Protocol) {
@@ -180,6 +187,7 @@ export async function handleEvmRpcMethod(
   params: IEthRpcMethodParameters,
   name?: string,
   caipChainId?: string,
+  originSource?: AppOriginSource,
 ): Promise<EvmRpcResponse> {
   const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
   const { getLastActiveProtocolAccount } = useAccounts();
@@ -190,7 +198,7 @@ export async function handleEvmRpcMethod(
   const { chainId, nodeUrl, predefined } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
@@ -211,7 +219,7 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol)) {
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource)) {
       // ensure we emit connect event for EIP-1193 consumers
       const account = getLastActiveProtocolAccount(protocol)!;
       try {
@@ -299,7 +307,12 @@ export async function handleEvmRpcMethod(
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol,
-      app: { href: url, host: url ? new URL(url).hostname : '', name: name || url },
+      app: {
+        href: url,
+        host: url ? new URL(url).hostname : '',
+        name: name || url,
+        originSource,
+      },
       tx: {
         amount: params.value ? +fromWei(params.value, 'ether') : 0,
         fee: gas * +(maxFeePerGas.value || 0),
@@ -352,6 +365,7 @@ export async function handleEvmRpcMethod(
       aepp,
       {
         protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
         message: rawMessage,
       },
     );

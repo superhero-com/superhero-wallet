@@ -1,5 +1,6 @@
 import { openPopup, getPopup, removePopup } from '../../../src/background/bgPopupHandler';
 import {
+  POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
@@ -97,4 +98,24 @@ describe('popupHandler', () => {
       expect(getPopup(queryParams.id)).toBeFalsy();
     },
   ));
+
+  it('keeps the origin source of a self-reported app', async () => {
+    const { id, props } = await openPopup(POPUP_TYPE_CONNECT, 'https://aescan.io', {
+      app: { host: 'aescan.io', originSource: 'self-reported' },
+    });
+    expect(props.app).toEqual({
+      href: 'https://aescan.io/',
+      name: 'aescan.io',
+      protocol: 'https:',
+      host: 'aescan.io',
+      originSource: 'self-reported',
+    });
+    removePopup(id);
+  });
+
+  it('adds no origin source when the caller gave none', async () => {
+    const { id, props } = await openPopup(POPUP_TYPE_CONNECT, 'https://aescan.io', {});
+    expect(props.app).not.toHaveProperty('originSource');
+    removePopup(id);
+  });
 });

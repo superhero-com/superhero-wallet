@@ -57,6 +57,7 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
 
   beforeEach(async () => {
     vi.resetModules();
+    localStorage.clear();
     ({ usePermissions } = await import('@/composables/permissions'));
     usePermissions().resetPermissions();
   });
@@ -231,8 +232,14 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       }));
     });
 
+    afterEach(() => {
+      vi.doUnmock('@/composables/modals');
+      vi.doUnmock('@/composables/accounts');
+    });
+
     async function askToSign(protocol) {
       vi.resetModules();
+      localStorage.clear();
       const { usePermissions: useFreshPermissions } = await import('@/composables/permissions');
       const permissions = useFreshPermissions();
       permissions.resetPermissions();

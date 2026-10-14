@@ -301,10 +301,16 @@ export default defineComponent({
     });
 
     const trustedDapp = computed(() => {
-      const urlWithNoProtocol = prepareUrlToDisplay(popupProps.value?.app?.href);
-      return (urlWithNoProtocol)
-        ? TRUSTED_DAPPS.find(({ url }) => urlWithNoProtocol.startsWith(prepareUrlToDisplay(url)!))
-        : undefined;
+      const { href, originSource } = popupProps.value?.app || {};
+      if (!href || originSource === 'self-reported') {
+        return undefined;
+      }
+      try {
+        const { origin } = new URL(href);
+        return TRUSTED_DAPPS.find(({ url }) => new URL(url).origin === origin);
+      } catch {
+        return undefined;
+      }
     });
 
     const dappNameToDisplay = computed(
@@ -327,6 +333,7 @@ export default defineComponent({
 
     function confirm() {
       if (popupProps.value?.app?.host) {
+        const { originSource, ...app } = popupProps.value.app;
         /**
          * TODO: When a user disconnects, set the `rememberMe` permission to false
          * Currently, disconnecting through the dapp does not call the appropriate
@@ -334,9 +341,9 @@ export default defineComponent({
          * */
         addPermission({
           ...PERMISSION_DEFAULTS,
-          ...popupProps.value?.app,
+          ...app,
           ...permission.value,
-          name: permission.value?.name || popupProps.value.app.name || popupProps.value.app.host,
+          name: permission.value?.name || app.name || app.host,
           address: rememberMe.value,
         });
       }

@@ -163,5 +163,14 @@ describe('offscreen message listener', () => {
       expect(handleEvmRpcMethod)
         .toHaveBeenCalledWith('https://aepp.example', 'eth_getBalance', { address: '0x0' });
     });
+
+    it('takes the origin from the sender, not from the message', async () => {
+      const listener = await loadListener();
+
+      await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), WEB_PAGE);
+
+      expect(handleEvmRpcMethod)
+        .toHaveBeenCalledWith('https://aepp.example', 'eth_requestAccounts', {});
+    });
   });
 });

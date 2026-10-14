@@ -81,6 +81,8 @@ const runContentScript = () => {
       }
       let { method } = event.data;
       if (!method) method = 'pageMessage';
+      // A `String` object slips past the checks below and turns into a string on the way out
+      if (typeof method !== 'string') return;
 
       if (
         Object.values(ETH_RPC_METHODS).includes(method)

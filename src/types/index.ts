@@ -120,11 +120,15 @@ export interface IPageableResponse<T> {
   next: string;
 }
 
+/** Set when the app's URL comes from the dapp itself (WalletConnect). */
+export type AppOriginSource = 'self-reported';
+
 export interface IAppData {
   name?: string;
   href?: string;
   host: string;
   protocol?: string;
+  originSource?: AppOriginSource;
 }
 
 export interface IWallet {

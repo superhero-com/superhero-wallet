@@ -18,9 +18,11 @@ import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
 import type {
   AccountAddress,
+  AppOriginSource,
   AssetContractId,
   BigNumberPublic,
   IAccount,
+  IAppData,
   ICommonTransaction,
   IDashboardTransaction,
   IFormSelectOption,
@@ -129,6 +131,17 @@ export function convertWrappedCoinTokenToCoin(asset: ITokenResolved): ITokenReso
 
 export function errorHasValidationKey(error: any, expectedKey: string): boolean {
   return error.validation?.some(({ key }: any) => expectedKey === key);
+}
+
+export function createAppData(href: string, originSource?: AppOriginSource): IAppData {
+  const url = new URL(href);
+  return {
+    host: url.host,
+    name: url.hostname,
+    protocol: url.protocol,
+    href: url.href,
+    ...(originSource ? { originSource } : {}),
+  };
 }
 
 /**

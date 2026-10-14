@@ -19,6 +19,7 @@ import {
   EVM_PROTOCOLS,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
+import { createAppData } from '@/utils';
 
 import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_ETHERSCAN_PROXY_METHODS } from '@/protocols/ethereum/config';
 import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
@@ -318,6 +319,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           : proposal.request.params[0],
         name,
         proposal.chainId,
+        'self-reported',
       );
 
       try {
@@ -468,7 +470,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
         try {
           if (isConfirmRequired) {
-            const app = new URL(proposal.proposer.metadata.url);
+            const app = createAppData(proposal.proposer.metadata.url, 'self-reported');
             const { icons } = proposal.proposer.metadata;
             const icon = icons?.[0] ?? '';
 
