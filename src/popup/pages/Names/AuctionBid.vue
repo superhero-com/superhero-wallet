@@ -33,7 +33,10 @@
                 />
               </template>
             </DetailsItem>
-            <DetailsItem :label="$t('common.total')">
+            <DetailsItem
+              :label="$t('common.total')"
+              class="total"
+            >
               <template #value>
                 <TokenAmount
                   :amount="+amountTotal"
@@ -194,10 +197,21 @@ export default defineComponent({
 
     .tx-details {
       display: flex;
+      justify-content: space-between;
+      gap: 16px;
       padding-top: 16px;
 
-      .details-item {
-        margin-right: 24px;
+      .total {
+        :deep(.label),
+        :deep(.value),
+        :deep(.token-amount) {
+          justify-content: flex-end;
+        }
+
+        :deep(.token-amount) {
+          flex-wrap: wrap;
+          row-gap: 4px;
+        }
       }
     }
 
