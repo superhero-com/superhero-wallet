@@ -18,6 +18,7 @@ vi.mock('../../../../../src/composables', () => ({
     checkPermission: () => true,
     checkOrAskPermission: vi.fn().mockResolvedValue(true),
     removePermission: vi.fn(),
+    permissions: { value: {} },
   }),
   useAccounts: () => ({
     getLastActiveProtocolAccount: () => ({ address: '0x0000000000000000000000000000000000000001', protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
@@ -34,6 +35,7 @@ vi.mock('@/composables', () => ({
     checkPermission: () => true,
     checkOrAskPermission: vi.fn().mockResolvedValue(true),
     removePermission: vi.fn(),
+    permissions: { value: {} },
   }),
   useAccounts: () => ({
     getLastActiveProtocolAccount: () => ({ address: '0x0000000000000000000000000000000000000001', protocol: 'bnb', secretKey: new Uint8Array([1, 2, 3]) }),
@@ -110,6 +112,8 @@ describe('handleEvmRpcMethod - modal app', () => {
         checkPermission: () => false,
         checkOrAskPermission,
         removePermission: vi.fn(),
+        // Stored by the connect popup
+        permissions: { value: { 'dapp.example': { host: 'dapp.example' } } },
       }),
       useAccounts: () => ({
         activeAccount: { value: account },

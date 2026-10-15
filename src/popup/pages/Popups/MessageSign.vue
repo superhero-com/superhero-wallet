@@ -28,7 +28,9 @@
       ({{ sender.address }}) {{ $t('pages.popupMessageSign.heading') }}
     </div>
 
+    <!-- A dapp that names the signer accepts only that account's signature -->
     <SignAccountSelect
+      v-if="!popupProps?.fromAccount"
       :account="selectedAccount"
       :protocol="protocol"
       :label="$t('modals.signAccountSelect.label')"
@@ -42,7 +44,9 @@
       class="message-text"
     >
       <template #value>
-        <CopyText :value="popupProps?.message" />
+        <CopyText :value="popupProps?.message">
+          <span class="message-value">{{ popupProps?.message }}</span>
+        </CopyText>
       </template>
     </DetailsItem>
 
@@ -93,7 +97,11 @@ export default defineComponent({
     SignAccountSelect,
   },
   setup() {
-    const { getLastActiveProtocolAccount, setActiveAccountByAddressAndProtocol } = useAccounts();
+    const {
+      getAccountByProtocolAndAddress,
+      getLastActiveProtocolAccount,
+      setActiveAccountByAddressAndProtocol,
+    } = useAccounts();
     const {
       isOffscreenRequest,
       isUnknownDapp,
@@ -103,7 +111,12 @@ export default defineComponent({
     } = usePopupProps();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
-    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
+    const { fromAccount } = popupProps.value || {};
+    const selectedAccount = ref<IAccount | undefined>(
+      fromAccount
+        ? getAccountByProtocolAndAddress(protocol, fromAccount)
+        : getLastActiveProtocolAccount(protocol),
+    );
 
     async function approve() {
       const { openModal } = useModals();
@@ -163,6 +176,10 @@ export default defineComponent({
 
   .message-text {
     margin-top: 16px;
+  }
+
+  .message-value {
+    white-space: pre-wrap;
   }
 }
 </style>

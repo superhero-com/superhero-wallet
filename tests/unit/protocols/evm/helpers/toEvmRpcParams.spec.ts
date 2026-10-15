@@ -6,6 +6,8 @@ describe('toEvmRpcParams', () => {
   it.each([
     ['eth_getBalance', [ADDRESS, 'latest'], { address: ADDRESS }],
     ['personal_sign', ['0x68656c6c6f', ADDRESS], { data: '0x68656c6c6f' }],
+    ['eth_signTypedData_v4', [ADDRESS, '{"primaryType":"M"}'], { address: ADDRESS, data: '{"primaryType":"M"}' }],
+    ['eth_signTypedData_v4', [ADDRESS, { primaryType: 'M' }], { address: ADDRESS, data: '{"primaryType":"M"}' }],
     [
       'eth_sendTransaction',
       [{ from: ADDRESS, to: ADDRESS, value: '0x1' }],

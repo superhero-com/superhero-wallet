@@ -34,7 +34,8 @@ export type WalletConnectUri = `wc:${string}`;
 
 type SupportedRequestMethod =
   | 'eth_sendTransaction'
-  | 'personal_sign';
+  | 'personal_sign'
+  | 'eth_signTypedData_v4';
 
 const isOpenUsingDeeplink = ref(false);
 let composableInitialized = false;
@@ -448,6 +449,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           ETH_RPC_METHODS.getChainId,
           ETH_RPC_NODE_METHODS.getBlockNumber,
           ETH_RPC_METHODS.signPersonal,
+          ETH_RPC_METHODS.signTypedDataV4,
           ETH_RPC_METHODS.sendTransaction,
           // common proxy calls often used by dapps
           ETH_RPC_NODE_METHODS.estimateGas,

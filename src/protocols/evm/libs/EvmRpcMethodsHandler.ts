@@ -2,12 +2,13 @@ import { ref } from 'vue';
 import { METHODS, Tag } from '@aeternity/aepp-sdk';
 import {
   fromWei,
+  isAddress,
   numberToHex,
   toChecksumAddress,
   toWei,
   hexToString,
 } from 'web3-utils';
-import { sign } from 'web3-eth-accounts';
+import { sign, signMessageWithPrivateKey } from 'web3-eth-accounts';
 import { isEmpty } from 'lodash-es';
 
 import type { AppOriginSource, IModalProps, Protocol } from '@/types';
@@ -16,6 +17,11 @@ import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocol
 import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { withGasHeadroom } from '@/protocols/evm/helpers';
+import {
+  getSignedTypedData,
+  hashTypedData,
+  type ITypedData,
+} from '@/protocols/evm/helpers/hashTypedData';
 import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
@@ -56,6 +62,13 @@ const ERROR_USER_REJECTED_REQUEST = {
   },
 };
 
+const ERROR_UNAUTHORIZED = {
+  error: {
+    code: 4100,
+    message: 'The requested account and/or method has not been authorized by the user',
+  },
+};
+
 const isCheckingPermissions = ref(false);
 
 async function checkOrAskEvmPermission(
@@ -63,7 +76,7 @@ async function checkOrAskEvmPermission(
   protocol: Protocol,
   originSource?: AppOriginSource,
 ) {
-  const { checkOrAskPermission } = usePermissions();
+  const { checkOrAskPermission, permissions } = usePermissions();
   const { activeAccount } = useAccounts();
   await watchUntilTruthy(() => !isCheckingPermissions.value);
 
@@ -82,11 +95,41 @@ async function checkOrAskEvmPermission(
         ],
       },
     );
+    if (permission && aepp) {
+      // The popup answers before the permission it stores reaches this context
+      await watchUntilTruthy(() => permissions.value[new URL(aepp).host], 3000);
+    }
     await watchUntilTruthy(() => !isEmpty(activeAccount.value));
     return permission;
   } finally {
     isCheckingPermissions.value = false;
   }
+}
+
+/**
+ * Whether the user connected the site (even without remembering it) or approved the
+ * WalletConnect session. One that is not connected gets one answer for any account,
+ * so it can't tell which accounts the wallet holds.
+ */
+function isConnectedApp(aepp: string, originSource?: AppOriginSource) {
+  if (originSource === 'self-reported') return true;
+  const { permissions } = usePermissions();
+  return !!aepp && !!permissions.value[new URL(aepp).host];
+}
+
+/**
+ * The account a dapp asks to sign with, if the dapp was given it:
+ * a WalletConnect session lists all accounts, a site gets the active one.
+ */
+function getRequestedAccount(protocol: Protocol, address?: string, originSource?: AppOriginSource) {
+  // A wrong checksum is still accepted, as in MetaMask
+  if (!address || !isAddress(address, false)) return undefined;
+  const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
+  const checksumAddress = toChecksumAddress(address);
+  const account = (originSource === 'self-reported')
+    ? getAccountByProtocolAndAddress(protocol, checksumAddress)
+    : getLastActiveProtocolAccount(protocol);
+  return account?.address === checksumAddress ? account : undefined;
 }
 
 function getProtocolCoinContractId(protocol: Protocol) {
@@ -364,6 +407,53 @@ export async function handleEvmRpcMethod(
       try {
         const signedMessage = await sign(rawMessage, `0x${Buffer.from(evmAccount.secretKey).toString('hex')}`);
         return { result: signedMessage.signature };
+      } catch (e: any) {
+        return getUnknownError(e.message);
+      }
+    }
+    return ERROR_USER_REJECTED_REQUEST;
+  }
+
+  if (method === ETH_RPC_METHODS.signTypedDataV4) {
+    if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
+    let typedData: ITypedData;
+    let hash: string;
+    let domainChainId: bigint | undefined;
+    try {
+      typedData = JSON.parse(params.data!);
+      hash = hashTypedData(typedData);
+      if (typedData.domain?.chainId != null) {
+        domainChainId = BigInt(typedData.domain.chainId as string);
+      }
+    } catch (e: any) {
+      return { error: { code: -32602, message: e.message } };
+    }
+    // As in MetaMask: a signature for another chain could be replayed there
+    if (domainChainId !== undefined && domainChainId !== BigInt(chainId)) {
+      return {
+        error: {
+          code: -32602,
+          message: `Provided chainId "${domainChainId}" must match the active chainId "${chainId}"`,
+        },
+      };
+    }
+
+    const evmAccount = getRequestedAccount(protocol, params.address, originSource);
+    if (!evmAccount) return ERROR_UNAUTHORIZED;
+
+    const permitted = await checkOrAskPermission(
+      METHODS.signTypedData,
+      aepp,
+      {
+        protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
+        message: JSON.stringify(getSignedTypedData(typedData), null, 2),
+        fromAccount: evmAccount.address,
+      },
+    );
+    if (permitted && evmAccount.secretKey) {
+      try {
+        return { result: signMessageWithPrivateKey(hash, evmAccount.secretKey).signature };
       } catch (e: any) {
         return getUnknownError(e.message);
       }

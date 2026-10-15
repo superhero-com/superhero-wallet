@@ -134,7 +134,12 @@ describe('WalletConnect accountsChanged behavior', () => {
 });
 
 describe('WalletConnect dapp requests', () => {
-  const account = { address: '0xbbb', protocol: 'ethereum' };
+  /** Holds keccak256('cow') */
+  const account = {
+    address: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+    protocol: 'ethereum',
+    secretKey: Buffer.from('c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4', 'hex'),
+  };
 
   beforeEach(() => {
     vi.resetModules();
@@ -154,6 +159,9 @@ describe('WalletConnect dapp requests', () => {
         activeAccount: ref(account),
         accountsGroupedByProtocol: ref({ ethereum: [account] }),
         getLastActiveProtocolAccount: () => account,
+        getAccountByProtocolAndAddress: (_: string, address: string) => (
+          address === account.address ? account : undefined
+        ),
       }),
     }));
     vi.doMock('@/composables/networks', () => ({
@@ -200,6 +208,11 @@ describe('WalletConnect dapp requests', () => {
     'eth_requestAccounts',
     'wallet_requestPermissions',
   ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
+    const { usePermissions } = await import('@/composables/permissions');
+    // As the connect popup, which stores the permission
+    openModalMock.mockImplementation(async (_, { app }) => (
+      usePermissions().addPermission({ host: app.host })
+    ));
     await request(method, []);
 
     expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.objectContaining({
@@ -214,5 +227,54 @@ describe('WalletConnect dapp requests', () => {
     expect(await request('eth_getTransactionReceipt', ['0x01']))
       .toEqual({ topic: 't', response: { id: 2, jsonrpc: '2.0', result: null } });
     expect(fetchMock).toHaveBeenCalledWith('https://eth.rpc', expect.anything());
+  });
+
+  it('answers the rejection of the user as an error', async () => {
+    openModalMock.mockRejectedValue(new Error('Rejected'));
+
+    expect(await request('personal_sign', ['0x68656c6c6f', account.address])).toMatchObject({
+      response: { id: 2, error: { code: 4001 } },
+    });
+  });
+
+  it('signs typed data the dapp sends as an object', async () => {
+    // The example of the EIP-712 spec, and its signature
+    const mail = {
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Person: [{ name: 'name', type: 'string' }, { name: 'wallet', type: 'address' }],
+        Mail: [
+          { name: 'from', type: 'Person' },
+          { name: 'to', type: 'Person' },
+          { name: 'contents', type: 'string' },
+        ],
+      },
+      primaryType: 'Mail',
+      domain: {
+        name: 'Ether Mail',
+        version: '1',
+        chainId: 1,
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+      },
+      message: {
+        from: { name: 'Cow', wallet: account.address },
+        to: { name: 'Bob', wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB' },
+        contents: 'Hello, Bob!',
+      },
+    };
+
+    expect(await request('eth_signTypedData_v4', [account.address, mail])).toEqual({
+      topic: 't',
+      response: {
+        id: 2,
+        jsonrpc: '2.0',
+        result: '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c',
+      },
+    });
   });
 });

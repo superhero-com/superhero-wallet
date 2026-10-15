@@ -146,6 +146,7 @@ export const ETH_RPC_METHODS = {
   // signing
   sendTransaction: 'eth_sendTransaction',
   signPersonal: 'personal_sign',
+  signTypedDataV4: 'eth_signTypedData_v4',
   // wallet
   requestPermissions: 'wallet_requestPermissions',
   switchNetwork: 'wallet_switchEthereumChain',
