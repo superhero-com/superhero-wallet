@@ -46,7 +46,7 @@
         >
           <QrCode
             :value="[account.address ?? '']"
-            :size="116"
+            :size="100"
             class="qrcode"
             :class="{ hidden: isPlaceholder }"
             disable-click-to-copy
@@ -364,6 +364,7 @@ export default defineComponent({
       .qrcode {
         display: inline-flex;
         border-radius: 12px;
+        // Inside the padding it must equal the QrCode size, WebKit doesn't shrink the canvas
         height: 116px;
         width: 116px;
         padding: 8px;
