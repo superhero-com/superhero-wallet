@@ -141,12 +141,14 @@ export default defineComponent({
 
 .input-amount {
   &-desc {
-    @include mixins.flex(space-between, center);
+    @include mixins.flex(space-between, flex-start);
 
+    gap: 8px;
     user-select: none;
 
     &-total {
-      overflow-wrap: anywhere;
+      min-width: 0;
+      word-break: break-all;
 
       .focused & {
         color: rgba($color-white, 0.75);
@@ -154,7 +156,9 @@ export default defineComponent({
     }
 
     &-at {
+      flex-shrink: 0;
       margin-left: auto;
+      white-space: nowrap;
     }
   }
 
