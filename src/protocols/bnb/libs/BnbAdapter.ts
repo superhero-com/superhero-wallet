@@ -49,6 +49,7 @@ import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
+  BNB_COIN_NAME,
   BNB_COIN_PRECISION,
   BNB_COIN_SYMBOL,
   BNB_CONTRACT_ID,
@@ -78,7 +79,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override protocolName = BNB_PROTOCOL_NAME;
 
-  override coinName = BNB_PROTOCOL_NAME;
+  override coinName = BNB_COIN_NAME;
 
   override coinSymbol = BNB_COIN_SYMBOL;
 

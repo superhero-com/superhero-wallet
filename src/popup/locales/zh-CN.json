@@ -455,8 +455,7 @@
       "button": "转移"
     },
     "receive": {
-      "funds": "资金",
-      "title": "接收 {name} 到公开地址",
+      "title": "在 {name} 上接收",
       "requestAmount": "请求特定金额（可选）",
       "copied": "已复制！",
       "shareTextNoAmount": "我的 {protocolName} 地址：{address} 或使用 Superhero 钱包发送：{walletLink}",
@@ -466,8 +465,7 @@
       "title": "接收资金到多签保管库"
     },
     "send": {
-      "sendTitle": "发送资金",
-      "sendAsset": "发送 {name}",
+      "sendTitle": "在 {name} 上发送",
       "reviewTitle": "审核交易",
       "recipientLabel": "收款人",
       "recipientPlaceholder": "输入公开地址或 .chain 名称",

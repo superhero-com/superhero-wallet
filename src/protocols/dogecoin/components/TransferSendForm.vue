@@ -5,7 +5,6 @@
     :fee="numericFee"
     :fee-symbol="DOGE_SYMBOL"
     :protocol="PROTOCOLS.dogecoin"
-    :custom-title="$t('modals.send.sendAsset', { name: DOGE_PROTOCOL_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -78,7 +77,7 @@ import { useAccounts, useBalances, useNetworks } from '@/composables';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
-import { DOGE_PROTOCOL_NAME, DOGE_SYMBOL } from '@/protocols/dogecoin/config';
+import { DOGE_SYMBOL } from '@/protocols/dogecoin/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fetchJson, executeAndSetInterval } from '@/utils';
 
@@ -249,7 +248,6 @@ export default defineComponent({
     );
 
     return {
-      DOGE_PROTOCOL_NAME,
       DOGE_SYMBOL,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,

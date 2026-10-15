@@ -6,7 +6,7 @@
       />
     </template>
     <template v-else>
-      <ModalHeader :title="customTitle || $t('modals.send.sendTitle')" />
+      <ModalHeader :title="customTitle || $t('modals.send.sendTitle', { name: protocolName })" />
       <div class="account-row">
         <AccountItem
           :address="activeAccount.address"
@@ -58,6 +58,7 @@ import {
 } from 'vue';
 import type { Protocol } from '@/types';
 import { useAccounts } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -79,11 +80,12 @@ export default defineComponent({
     customTitle: { type: String, default: '' },
     protocol: { type: String as PropType<Protocol>, required: true },
   },
-  setup() {
+  setup(props) {
     const { activeAccount } = useAccounts();
 
     return {
       activeAccount,
+      protocolName: ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
     };
   },
 });

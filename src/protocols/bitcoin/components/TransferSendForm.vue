@@ -5,7 +5,6 @@
     :fee="numericFee"
     :fee-symbol="coinSymbol"
     :protocol="protocol"
-    :custom-title="$t('modals.send.sendAsset', { name: protocolName })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -288,7 +287,6 @@ export default defineComponent({
 
     return {
       INFO_BOX_TYPES,
-      protocolName: ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
       coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
       DUST_AMOUNT,
       PROTOCOLS,

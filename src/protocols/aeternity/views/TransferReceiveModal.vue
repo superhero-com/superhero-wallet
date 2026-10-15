@@ -2,7 +2,7 @@
   <ShareAddressBase
     :heading="(isMultisig)
       ? $t('modals.receiveMultisig.title')
-      : $t('modals.receive.title', { name: $t('modals.receive.funds') })
+      : $t('modals.receive.title', { name: AE_PROTOCOL_NAME })
     "
     :account-address="activeAccountAddress"
     :account-name="activeAccountName"
@@ -23,6 +23,7 @@ import {
 } from '@/constants';
 import { useAccounts, useFungibleTokens, useMultisigAccounts } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { AE_PROTOCOL_NAME } from '@/protocols/aeternity/config';
 
 import ShareAddressBase, { shareAddressRequiredProps } from '@/popup/components/Modals/ShareAddressBase.vue';
 
@@ -50,6 +51,7 @@ export default defineComponent({
     const tokens = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
 
     return {
+      AE_PROTOCOL_NAME,
       PROTOCOLS,
       tokens,
       activeAccountAddress,
