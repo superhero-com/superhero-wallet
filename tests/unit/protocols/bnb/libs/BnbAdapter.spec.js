@@ -87,6 +87,12 @@ describe('BnbAdapter registration and metadata', () => {
     expect(defaultCoin.name).toBe(adapter.coinName);
   });
 
+  it('names the coin BNB and the network BNB Smart Chain', () => {
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+    expect(adapter.getDefaultCoin().name).toBe('BNB');
+    expect(adapter.protocolName).toBe('BNB Smart Chain');
+  });
+
   it('isAccountAddressValid validates 0x addresses', () => {
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
     expect(adapter.isAccountAddressValid('0x0000000000000000000000000000000000000001')).toBe(true);

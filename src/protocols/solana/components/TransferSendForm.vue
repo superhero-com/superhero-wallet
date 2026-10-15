@@ -6,7 +6,6 @@
     :max-fee="numericMaxFee"
     :fee-symbol="SOL_COIN_SYMBOL"
     :protocol="PROTOCOLS.solana"
-    :custom-title="$t('modals.send.sendAsset', { name: SOL_PROTOCOL_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -83,7 +82,7 @@ import { useSolMaxAmount } from '@/protocols/solana/composables/solMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import { executeAndSetInterval } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { SOL_COIN_SYMBOL, SOL_PROTOCOL_NAME } from '@/protocols/solana/config';
+import { SOL_COIN_SYMBOL } from '@/protocols/solana/config';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
@@ -245,7 +244,6 @@ export default defineComponent({
     );
 
     return {
-      SOL_PROTOCOL_NAME,
       SOL_COIN_SYMBOL,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,

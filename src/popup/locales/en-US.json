@@ -462,8 +462,7 @@
       "button": "Transfer"
     },
     "receive": {
-      "funds": "funds",
-      "title": "Receive {name} to public address",
+      "title": "Receive on {name}",
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
       "shareTextNoAmount": "My {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}",
@@ -473,8 +472,7 @@
       "title": "Receive funds to multisig vault"
     },
     "send": {
-      "sendTitle": "Send funds",
-      "sendAsset": "Send {name}",
+      "sendTitle": "Send on {name}",
       "reviewTitle": "Review transaction",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",

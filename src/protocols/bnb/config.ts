@@ -1,9 +1,10 @@
 import type { IDefaultNetworkTypeData } from '@/types';
 import { ALCHEMY_API_KEY, NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
 
-export const BNB_PROTOCOL_NAME = 'BNB';
+export const BNB_PROTOCOL_NAME = 'BNB Smart Chain';
 
 export const BNB_CONTRACT_ID = 'bnb';
+export const BNB_COIN_NAME = 'BNB';
 export const BNB_COIN_SYMBOL = 'BNB';
 export const BNB_COIN_PRECISION = 18;
 

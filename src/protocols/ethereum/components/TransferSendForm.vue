@@ -6,7 +6,6 @@
     :max-fee="numericMaxFee"
     :fee-symbol="coinSymbol"
     :protocol="protocol"
-    :custom-title="$t('modals.send.sendAsset', { name: protocolName })"
     class="transfer-send-form"
   >
     <template #recipient>
@@ -133,7 +132,6 @@ export default defineComponent({
   ],
   setup(props, { emit }) {
     const adapter = computed(() => ProtocolAdapterFactory.getAdapter(props.protocol));
-    const protocolName = computed(() => adapter.value.protocolName);
     const coinSymbol = computed(() => adapter.value.coinSymbol);
 
     const { t } = useI18n();
@@ -285,7 +283,6 @@ export default defineComponent({
     );
 
     return {
-      protocolName,
       coinSymbol,
       ETH_PROTOCOL_NAME,
       ETH_COIN_SYMBOL,
