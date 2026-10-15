@@ -278,7 +278,6 @@ import {
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
   EVM_PROTOCOLS,
-  RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
   TX_DIRECTION,
 } from '@/constants';
@@ -369,7 +368,12 @@ export default defineComponent({
       getAccountByProtocolAndAddress,
       setActiveAccountByAddressAndProtocol,
     } = useAccounts();
-    const { isUnknownDapp, popupProps, setPopupProps } = usePopupProps();
+    const {
+      isOffscreenRequest,
+      isUnknownDapp,
+      popupProps,
+      setPopupProps,
+    } = usePopupProps();
     const {
       loadSingleToken,
       getProtocolAvailableTokens,
@@ -694,7 +698,7 @@ export default defineComponent({
           selectedAccount.value.protocol,
         );
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
         const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
           MODAL_SIGN_AIR_GAP_TRANSACTION,
           { txRaw: await getTransactionToSign() },
@@ -707,7 +711,7 @@ export default defineComponent({
           });
         }
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
         await openModal(MODAL_LEDGER_SIGN);
       }
       // Carried on the same round trip `checkOrAskPermission` already awaits, so

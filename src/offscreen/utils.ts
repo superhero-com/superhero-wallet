@@ -21,7 +21,10 @@ export const detectConnectionType = (port: Runtime.Port) => {
     senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
     || IS_FIREFOX
   );
-  if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
+  if (
+    [CONNECTION_TYPES.POPUP, CONNECTION_TYPES.SIDE_PANEL].includes(port.name)
+    && isExtensionSender
+  ) {
     return port.name;
   } if (CONNECTION_TYPES.SESSION === port.name) {
     return CONNECTION_TYPES.SESSION;
@@ -41,7 +44,12 @@ export async function executeOrSendMessageToBackground(
   if (IS_FIREFOX) {
     switch (method) {
       case POPUP_METHODS.openPopup:
-        return openPopup(params?.popupType!, params?.aepp!, params?.popupProps);
+        return openPopup(
+          params?.popupType!,
+          params?.aepp!,
+          params?.popupProps,
+          params?.sidePanelWindowIds,
+        );
       case POPUP_METHODS.removePopup:
         return removePopup(params?.id!);
       case POPUP_METHODS.getPopup:

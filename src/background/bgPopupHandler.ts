@@ -9,6 +9,8 @@ import type {
 interface IPopupConfigNoActions {
   id: string;
   props: Omit<IPopupProps, 'resolve' | 'reject'>;
+  /** Set when the side panel of this window shows the popup instead. */
+  sidePanelWindowId?: number;
 }
 
 /**
@@ -35,6 +37,7 @@ export const openPopup = async (
   popupType: PopupType,
   aepp: string | Record<string, any> | undefined, // TODO establish correct type for the object
   popupProps: Partial<IPopupProps> = {},
+  sidePanelWindowIds: number[] = [],
 ) => {
   const id = uuid();
 
@@ -60,23 +63,36 @@ export const openPopup = async (
     }
   });
 
-  const extUrl = browser.runtime.getURL('./index.html');
-  const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
-  const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
+  const focusedWindow = sidePanelWindowIds.length
+    ? await browser.windows.getLastFocused()
+    : undefined;
+  // `focused` stays true for a minimized window.
+  const sidePanelWindowId = (
+    focusedWindow?.focused
+    && focusedWindow.state !== 'minimized'
+    && sidePanelWindowIds.includes(focusedWindow.id!)
+  ) ? focusedWindow.id : undefined;
 
-  const popupWindow = await browser.windows.create({
-    url: popupUrl,
-    type: 'popup',
-    height: 630,
-    width: await isMacOsExtension ? 360 : 375,
-  });
+  if (sidePanelWindowId === undefined) {
+    const extUrl = browser.runtime.getURL('./index.html');
+    const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
+    const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
 
-  if (!popupWindow) {
-    return null;
+    const popupWindow = await browser.windows.create({
+      url: popupUrl,
+      type: 'popup',
+      height: 630,
+      width: await isMacOsExtension ? 360 : 375,
+    });
+
+    if (!popupWindow) {
+      return null;
+    }
   }
 
   popups[id] = {
     id,
+    sidePanelWindowId,
     props: {
       ...popupProps,
       app: {

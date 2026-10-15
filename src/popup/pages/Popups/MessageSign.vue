@@ -69,7 +69,6 @@ import {
   ACCOUNT_TYPES,
   MODAL_LEDGER_SIGN,
   PROTOCOLS,
-  RUNNING_IN_POPUP,
 } from '@/constants';
 import type { IAccount, ISignModalResolution } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
@@ -96,6 +95,7 @@ export default defineComponent({
   setup() {
     const { getLastActiveProtocolAccount, setActiveAccountByAddressAndProtocol } = useAccounts();
     const {
+      isOffscreenRequest,
       isUnknownDapp,
       popupProps,
       sender,
@@ -113,7 +113,7 @@ export default defineComponent({
           selectedAccount.value.protocol,
         );
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
         await openModal(MODAL_LEDGER_SIGN);
       }
       const modalResolution: ISignModalResolution = {

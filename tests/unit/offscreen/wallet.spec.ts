@@ -1,11 +1,13 @@
 // @ts-nocheck
 import { nextTick, ref } from 'vue';
+import { CONNECTION_TYPES } from '@/constants';
 
 describe('offscreen wallet connections', () => {
   let onConnectListener: vi.Mock;
   let disconnectListener: vi.Mock;
   let messageListener: vi.Mock;
   let syncBackgroundEncryptionKey: vi.Mock;
+  let addSidePanel: vi.Mock;
   let aeSdk: any;
   let aeSdkComposable: any;
   let activeNetwork;
@@ -36,6 +38,7 @@ describe('offscreen wallet connections', () => {
     disconnectListener = vi.fn();
     messageListener = vi.fn();
     syncBackgroundEncryptionKey = vi.fn();
+    addSidePanel = vi.fn();
     activeNetwork = ref({});
     aeSdk = {
       _clients: new Map([['client-id', {}]]),
@@ -96,6 +99,7 @@ describe('offscreen wallet connections', () => {
       IS_FIREFOX: false,
     }));
     vi.doMock('@/offscreen/popupHandler', () => ({
+      addSidePanel,
       getPopup: vi.fn(),
       removePopup: vi.fn(),
     }));
@@ -268,6 +272,31 @@ describe('offscreen wallet connections', () => {
         method: SESSION_METHODS.setSessionTimeout,
         payload: 0,
       });
+    });
+  });
+
+  describe('side panel port', () => {
+    async function connectSidePanelFrom(url: string) {
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      const port = createPort();
+      port.name = CONNECTION_TYPES.SIDE_PANEL;
+      port.sender.url = url;
+      await onConnectListener(port);
+      return port;
+    }
+
+    it('is taken from the wallet page', async () => {
+      const port = await connectSidePanelFrom('chrome-extension://test-extension-id/index.html?sidepanel');
+
+      expect(addSidePanel).toHaveBeenCalledWith(port);
+    });
+
+    it('is taken as a dapp connection from a web page', async () => {
+      await connectSidePanelFrom('https://dapp.example/');
+
+      expect(addSidePanel).not.toHaveBeenCalled();
+      expect(aeSdk.addRpcClient).toHaveBeenCalledOnce();
     });
   });
 
