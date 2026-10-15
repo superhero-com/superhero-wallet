@@ -1,4 +1,5 @@
 import { isPlainObject } from 'lodash-es';
+import { isAddress } from 'web3-utils';
 import type { IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 import { ETH_RPC_METHODS } from '@/protocols/ethereum/config';
 
@@ -10,7 +11,10 @@ export function toEvmRpcParams(method: string, params?: any[]): IEthRpcMethodPar
     case ETH_RPC_METHODS.getBalance:
       return { address: params?.[0] };
     case ETH_RPC_METHODS.signPersonal:
-      return { data: params?.[0] };
+      // Some dapps put the address first, which MetaMask accepts
+      return isAddress(params?.[0], false) && !isAddress(params?.[1], false)
+        ? { data: params?.[1], address: params?.[0] }
+        : { data: params?.[0], address: params?.[1] };
     case ETH_RPC_METHODS.signTypedDataV4:
       return {
         address: params?.[0],

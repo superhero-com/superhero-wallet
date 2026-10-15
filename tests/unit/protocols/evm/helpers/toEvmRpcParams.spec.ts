@@ -1,11 +1,25 @@
 import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
 
 const ADDRESS = '0x5b38da6a701c568545dcfcb03fcb875f56beddc4';
+const WRONG_CHECKSUM_ADDRESS = '0x5b38Da6a701c568545dCfcB03FcB875f56beddC4';
+const MESSAGE_LIKE_AN_ADDRESS = '0xab8483f64d9c6d1ecf9b849ae677dd3315835cb2';
 
 describe('toEvmRpcParams', () => {
   it.each([
     ['eth_getBalance', [ADDRESS, 'latest'], { address: ADDRESS }],
-    ['personal_sign', ['0x68656c6c6f', ADDRESS], { data: '0x68656c6c6f' }],
+    ['personal_sign', ['0x68656c6c6f', ADDRESS], { data: '0x68656c6c6f', address: ADDRESS }],
+    ['personal_sign', [ADDRESS, '0x68656c6c6f'], { data: '0x68656c6c6f', address: ADDRESS }],
+    [
+      'personal_sign',
+      [WRONG_CHECKSUM_ADDRESS, '0x68656c6c6f'],
+      { data: '0x68656c6c6f', address: WRONG_CHECKSUM_ADDRESS },
+    ],
+    [
+      'personal_sign',
+      [MESSAGE_LIKE_AN_ADDRESS, ADDRESS],
+      { data: MESSAGE_LIKE_AN_ADDRESS, address: ADDRESS },
+    ],
+    ['personal_sign', ['0x68656c6c6f'], { data: '0x68656c6c6f', address: undefined }],
     ['eth_signTypedData_v4', [ADDRESS, '{"primaryType":"M"}'], { address: ADDRESS, data: '{"primaryType":"M"}' }],
     ['eth_signTypedData_v4', [ADDRESS, { primaryType: 'M' }], { address: ADDRESS, data: '{"primaryType":"M"}' }],
     [

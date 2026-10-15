@@ -1,17 +1,24 @@
 import { ref } from 'vue';
 import { METHODS, Tag } from '@aeternity/aepp-sdk';
 import {
+  bytesToHex,
   fromWei,
+  hexToBytes,
   isAddress,
   numberToHex,
   toChecksumAddress,
   toWei,
-  hexToString,
+  utf8ToBytes,
 } from 'web3-utils';
 import { sign, signMessageWithPrivateKey } from 'web3-eth-accounts';
 import { isEmpty } from 'lodash-es';
 
-import type { AppOriginSource, IModalProps, Protocol } from '@/types';
+import type {
+  AppOriginSource,
+  IModalProps,
+  ISignModalResolution,
+  Protocol,
+} from '@/types';
 import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 
 import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
@@ -70,6 +77,16 @@ const ERROR_UNAUTHORIZED = {
 };
 
 const isCheckingPermissions = ref(false);
+
+/** A hex message as the user reads it: its text, or the hex when it is not text */
+function getMessageText(hex: string): string {
+  try {
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(hexToBytes(hex));
+    return /[^\P{Cc}\t\n\r]/u.test(text) ? hex : text;
+  } catch {
+    return hex;
+  }
+}
 
 async function checkOrAskEvmPermission(
   aepp: string,
@@ -227,7 +244,7 @@ export async function handleEvmRpcMethod(
   originSource?: AppOriginSource,
 ): Promise<EvmRpcResponse> {
   const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
-  const { getLastActiveProtocolAccount } = useAccounts();
+  const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
 
   const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
@@ -384,29 +401,40 @@ export async function handleEvmRpcMethod(
     return ERROR_USER_REJECTED_REQUEST;
   }
   if (method === ETH_RPC_METHODS.signPersonal) {
-    const evmAccount = getLastActiveProtocolAccount(protocol);
-
-    let rawMessage: string;
-
-    try {
-      rawMessage = hexToString(params.data!);
-    } catch (e: any) {
-      return { error: { code: -32602, message: e.message } };
+    if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
+    const { data } = params;
+    if (typeof data !== 'string') {
+      return { error: { code: -32602, message: 'Missing the message to sign' } };
     }
+    // "0x…" or "0X…" is bytes as in MetaMask, anything else a text as ethers and viem verify it
+    const isHexMessage = /^0x[\da-f]*$/i.test(data);
+    if (isHexMessage && data.length % 2) {
+      return { error: { code: -32602, message: 'Expected whole bytes in hex' } };
+    }
+    // `sign` would read any hex-like text as bytes, so a text goes in as its bytes
+    const messageHex = isHexMessage ? `0x${data.slice(2)}` : bytesToHex(utf8ToBytes(data));
+    const requestedAccount = getRequestedAccount(protocol, params.address, originSource);
+    if (params.address && !requestedAccount) return ERROR_UNAUTHORIZED;
 
+    let selectedAddress: string | undefined;
     const permitted = await checkOrAskPermission(
       METHODS.signMessage,
       aepp,
       {
         protocol,
         app: aepp ? createAppData(aepp, originSource) : undefined,
-        message: rawMessage,
+        message: isHexMessage ? getMessageText(messageHex) : data,
+        fromAccount: requestedAccount?.address,
       },
+      (resolution: ISignModalResolution) => { selectedAddress = resolution?.selectedAddress; },
     );
+    // Without an address the dapp takes a signature of the account the user picked
+    const evmAccount = requestedAccount
+      ?? (selectedAddress ? getAccountByProtocolAndAddress(protocol, selectedAddress) : undefined)
+      ?? getLastActiveProtocolAccount(protocol);
     if (permitted && evmAccount?.secretKey) {
       try {
-        const signedMessage = await sign(rawMessage, `0x${Buffer.from(evmAccount.secretKey).toString('hex')}`);
-        return { result: signedMessage.signature };
+        return { result: sign(messageHex, evmAccount.secretKey).signature };
       } catch (e: any) {
         return getUnknownError(e.message);
       }

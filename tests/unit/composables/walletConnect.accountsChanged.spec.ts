@@ -237,6 +237,18 @@ describe('WalletConnect dapp requests', () => {
     });
   });
 
+  it('signs a message with the account the dapp names', async () => {
+    expect(await request('personal_sign', ['0x68656c6c6f', account.address])).toEqual({
+      topic: 't',
+      response: {
+        id: 2,
+        jsonrpc: '2.0',
+        // By `@metamask/eth-sig-util` personalSign of "hello"
+        result: '0x2452a50a1b27db559e685e82ef59445ff08ca6843b5089aa1c32a70db206d47d693e5ae94daffccbbf590c5d2a72ad5706994748d2c8d3a8b39355589e16e8751c',
+      },
+    });
+  });
+
   it('signs typed data the dapp sends as an object', async () => {
     // The example of the EIP-712 spec, and its signature
     const mail = {

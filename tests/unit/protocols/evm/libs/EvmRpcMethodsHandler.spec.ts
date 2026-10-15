@@ -135,6 +135,8 @@ const permit = {
 };
 /** By `@metamask/eth-sig-util` signTypedData V4 */
 const PERMIT_SIGNATURE = '0x44414d7daf8c2701848542c05cda9536967774916d171d420c73315cbf9822b13ba5129075dd4fa2fb2f85f127b0da3da72bec974114093affbf95f6c217d1961c';
+/** By `@metamask/eth-sig-util` personalSign of "hello" */
+const HELLO_SIGNATURE = '0x2452a50a1b27db559e685e82ef59445ff08ca6843b5089aa1c32a70db206d47d693e5ae94daffccbbf590c5d2a72ad5706994748d2c8d3a8b39355589e16e8751c';
 
 /** Answers JSON-RPC requests like a node would, by method. */
 function mockNode(responses: Record<string, object>) {
@@ -230,6 +232,120 @@ describe('handleEvmRpcMethod', () => {
       const response = await handleEvmRpcMethod(DAPP, 'wallet_switchEthereumChain', { chainId: '0x2a' });
       expect(response.error?.code).toBe(4902);
       expect(switchNetwork).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('personal_sign', () => {
+    // Signatures by `@metamask/eth-sig-util` personalSign
+    it.each([
+      [
+        'a text that looks like hex',
+        '0x307831323334',
+        '0x1234',
+        '0xc60f27be0fa4ca0ff2daa6fb6b290200a4267833d7c4c7901cb9109e92ddc35c234087ae8ae40af6bb8f614857c060af4e16496b599ba24b44dcc752f4bb118f1b',
+      ],
+      [
+        'bytes that are not text',
+        `0xffffffff${'00'.repeat(28)}`,
+        `0xffffffff${'00'.repeat(28)}`,
+        '0xe8ab77ecb912e77726edfd23d4c5883b03737a804b72e8f8f35924f0a5efbe956923d0ebaf470ba64e632a6adc1263e4c572d4c9706e947825de2946df27553c1c',
+      ],
+      [
+        'a text',
+        'hello',
+        'hello',
+        '0x2452a50a1b27db559e685e82ef59445ff08ca6843b5089aa1c32a70db206d47d693e5ae94daffccbbf590c5d2a72ad5706994748d2c8d3a8b39355589e16e8751c',
+      ],
+      [
+        'bytes with a capital 0X',
+        '0X12',
+        '0x12',
+        '0x905fb2b5d20ac06742317bfb058172b4cb728674e928efc85483934a40829d1713b1e86cfe2cbb12df440231a93c95677b0da396db2f57d127f1faafb2cb67f61b',
+      ],
+      [
+        'bytes of control characters',
+        '0x0001',
+        '0x0001',
+        '0x5c56b83acb60793576e87ce3834cd0eb85b2f4c2fa9f7e0fa022b6fbc99ae3234a6f512d36d230561e947b74b13e7f236096f2d3478d79846546f7b4d5c323ee1c',
+      ],
+    ])('signs %s as is', async (_, data, shown, signature) => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data, address: SIGNER.address });
+
+      expect(response).toEqual({ result: signature });
+      expect(checkOrAskPermission.mock.calls[0][2])
+        .toMatchObject({ message: shown, fromAccount: SIGNER.address });
+    });
+
+    it('shows the lines of a text', async () => {
+      await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x610a62', address: SIGNER.address });
+      expect(checkOrAskPermission.mock.calls[0][2].message).toBe('a\nb');
+    });
+
+    it('signs with the account picked in the modal when the dapp names none', async () => {
+      checkOrAskPermission.mockImplementation(async (_method, _url, _props, onModalResolved) => {
+        onModalResolved({ selectedAddress: OTHER.address });
+        return true;
+      });
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x307831323334' });
+
+      expect(response.result).toBe('0xa95eca00ead874470bcfc5e5badc1ff929d0f77b1acab6139da34db398f60ff80ca1213a6518f3ee7ef143421b3e1cc5359fde664d0a1f42e7e516c207f55ceb1b');
+      expect(checkOrAskPermission.mock.calls[0][2].fromAccount).toBeUndefined();
+    });
+
+    it('signs with the active account when the site may sign without a modal', async () => {
+      // The standing permission resolves without the modal, so nobody picks an account
+      checkOrAskPermission.mockResolvedValue(true);
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x68656c6c6f' });
+
+      // By `@metamask/eth-sig-util` personalSign of "hello"
+      expect(response.result).toBe('0x2452a50a1b27db559e685e82ef59445ff08ca6843b5089aa1c32a70db206d47d693e5ae94daffccbbf590c5d2a72ad5706994748d2c8d3a8b39355589e16e8751c');
+    });
+
+    it('signs with any account of a WalletConnect session', async () => {
+      const response = await handleEvmRpcMethod(STRANGER, 'personal_sign', {
+        data: '0x307831323334', address: OTHER.address,
+      }, 'Dapp', undefined, 'self-reported');
+
+      expect(response.result).toBe('0xa95eca00ead874470bcfc5e5badc1ff929d0f77b1acab6139da34db398f60ff80ca1213a6518f3ee7ef143421b3e1cc5359fde664d0a1f42e7e516c207f55ceb1b');
+      expect(checkOrAskPermission.mock.calls[0][2].fromAccount).toBe(OTHER.address);
+    });
+
+    it.each([
+      ['an account the wallet does not hold', SENDER],
+      ['another account of the wallet, which the site was not given', OTHER.address],
+    ])('rejects %s without asking', async (_, address) => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x01', address });
+      expect(response).toEqual(UNAUTHORIZED);
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request without a message without asking', async () => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { address: SIGNER.address });
+      expect(response.error?.code).toBe(-32602);
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+    });
+
+    it('returns the rejection of the user', async () => {
+      checkOrAskPermission.mockResolvedValue(false);
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x01', address: SIGNER.address });
+      expect(response.error?.code).toBe(4001);
+    });
+
+    it('rejects hex that is not whole bytes without asking', async () => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x123', address: SIGNER.address });
+      expect(response.error?.code).toBe(-32602);
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['an account it holds', SIGNER.address],
+      ['an account it does not hold', SENDER],
+      ['no account', undefined],
+    ])('gives a site that is not connected one answer for %s', async (_, address) => {
+      const response = await handleEvmRpcMethod(STRANGER, 'personal_sign', { data: '0x01', address });
+
+      expect(response).toEqual(UNAUTHORIZED);
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
     });
   });
 
@@ -479,6 +595,8 @@ describe('handleEvmRpcRequest', () => {
   });
 
   it.each([
+    ['a message', 'personal_sign', ['0x68656c6c6f', SIGNER.address], HELLO_SIGNATURE],
+    ['a message after the address', 'personal_sign', [SIGNER.address, '0x68656c6c6f'], HELLO_SIGNATURE],
     ['typed data sent as an object', 'eth_signTypedData_v4', [SIGNER.address, permit], PERMIT_SIGNATURE],
   ])('signs %s', async (_, method, params, signature) => {
     expect(await handleEvmRpcRequest(DAPP, method, params)).toEqual({ result: signature });
