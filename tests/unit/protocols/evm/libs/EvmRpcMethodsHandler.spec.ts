@@ -17,6 +17,7 @@ const {
 const SENDER = '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4';
 const RECIPIENT = '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2';
 const ETH_NODE_URL = 'https://eth.node.example';
+const AVALANCHE_NODE_URL = 'https://avalanche.node.example';
 
 vi.mock('@/composables', () => ({
   usePermissions: () => ({
@@ -31,7 +32,10 @@ vi.mock('@/composables', () => ({
   useNetworks: () => ({
     activeNetwork: ref({ name: 'Mainnet' }),
     networks: ref({
-      Mainnet: { name: 'Mainnet', protocols: { ethereum: { chainId: '1' }, bnb: { chainId: '56' } } },
+      Mainnet: {
+        name: 'Mainnet',
+        protocols: { ethereum: { chainId: '1' }, bnb: { chainId: '56' }, avalanche: { chainId: '43114' } },
+      },
       Testnet: { name: 'Testnet', protocols: { ethereum: { chainId: '11155111' }, bnb: { chainId: '97' } } },
     }),
     switchNetwork,
@@ -46,6 +50,11 @@ vi.mock('@/protocols/ethereum/composables/ethFeeCalculation', () => ({
 vi.mock('@/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: ref({ chainId: '1', nodeUrl: ETH_NODE_URL }),
+  }),
+}));
+vi.mock('@/protocols/avalanche/composables/avalancheNetworkSettings', () => ({
+  useAvalancheNetworkSettings: () => ({
+    avalancheActiveNetworkSettings: ref({ chainId: '43114', nodeUrl: AVALANCHE_NODE_URL }),
   }),
 }));
 vi.mock('@/protocols/bnb/composables/bnbNetworkSettings', () => ({
@@ -106,6 +115,16 @@ describe('handleEvmRpcMethod', () => {
       expect(getNodeRequests(fetchMock)).toMatchObject([{ method: 'eth_estimateGas', params: [tx] }]);
       expect(checkOrAskPermission.mock.calls[0][2].tx.gas).toBe(24150);
       expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x5e56' });
+    });
+
+    it('estimates on the node of the requested chain and shows its coin', async () => {
+      const fetchMock = mockNode({ eth_estimateGas: { result: '0x5208' } });
+      await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', tx, 'Dapp', 'eip155:43114');
+
+      expect(getNodeRequests(fetchMock)).toMatchObject([{ url: AVALANCHE_NODE_URL }]);
+      expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({
+        protocol: 'avalanche', tx: { contractId: 'avalanche' },
+      });
     });
 
     it('keeps the gas set by the dapp', async () => {

@@ -19,6 +19,7 @@ import { withGasHeadroom } from '@/protocols/evm/helpers';
 import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
+import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/avalancheNetworkSettings';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import {
@@ -27,6 +28,7 @@ import {
   ETH_RPC_NODE_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
+import { AVALANCHE_CONTRACT_ID } from '@/protocols/avalanche/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { POLYGON_POS_CONTRACT_ID } from '@/protocols/polygonPos/config';
 
@@ -89,6 +91,7 @@ async function checkOrAskEvmPermission(
 
 function getProtocolCoinContractId(protocol: Protocol) {
   if (protocol === PROTOCOLS.bnb) return BNB_CONTRACT_ID as any;
+  if (protocol === PROTOCOLS.avalanche) return AVALANCHE_CONTRACT_ID as any;
   if (protocol === PROTOCOLS.polygonPos) return POLYGON_POS_CONTRACT_ID as any;
   return ETH_CONTRACT_ID as any;
 }
@@ -127,6 +130,13 @@ function getActiveEvmNetworkSettings(protocol: Protocol) {
     return {
       chainId: bnbActiveNetworkSettings.value.chainId,
       nodeUrl: bnbActiveNetworkSettings.value.nodeUrl,
+    };
+  }
+  if (protocol === PROTOCOLS.avalanche) {
+    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+    return {
+      chainId: avalancheActiveNetworkSettings.value.chainId,
+      nodeUrl: avalancheActiveNetworkSettings.value.nodeUrl,
     };
   }
   if (protocol === PROTOCOLS.polygonPos) {
