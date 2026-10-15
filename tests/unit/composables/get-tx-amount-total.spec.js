@@ -313,6 +313,28 @@ describe('getTxAmountTotal', () => {
       expect(getTxAmountTotal(tokenTx, TX_DIRECTION.received)).toBe(500);
     });
 
+    it('excludes the fee for a token transfer missing from the token list', () => {
+      const tokenTx = {
+        protocol: PROTOCOLS.ethereum,
+        tx: {
+          amount: 500, fee: 21000, contractId: '0xunlistedtoken', isTokenTransfer: true,
+        },
+      };
+
+      expect(getTxAmountTotal(tokenTx, TX_DIRECTION.sent)).toBe(500);
+      expect(getTxAmountTotal(tokenTx, TX_DIRECTION.received)).toBe(500);
+    });
+
+    it('adds the fee for a call to a contract missing from the token list', () => {
+      const callTx = {
+        protocol: PROTOCOLS.ethereum,
+        tx: { amount: 1000000, fee: 21000, contractId: '0xsomecontract' },
+      };
+
+      expect(getTxAmountTotal(callTx, TX_DIRECTION.sent)).toBe(1000000 + 21000);
+      expect(getTxAmountTotal(callTx, TX_DIRECTION.received)).toBe(1000000);
+    });
+
     it('adds the fee for a contract-creation / non-token contract call', () => {
       const createTx = {
         protocol: PROTOCOLS.ethereum,

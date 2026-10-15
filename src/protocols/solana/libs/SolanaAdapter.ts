@@ -619,6 +619,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
           senderId: senderIdStr,
           recipientId: recipientIdStr,
           contractId: mint,
+          isTokenTransfer: mint !== SOL_CONTRACT_ID,
           type: (Tag[Tag.ContractCallTx] as any),
           tag: Tag.ContractCallTx as any,
           arguments: [],
