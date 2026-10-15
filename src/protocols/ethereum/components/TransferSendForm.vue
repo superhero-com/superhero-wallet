@@ -213,7 +213,7 @@ export default defineComponent({
     }
 
     async function getTransferGasLimit() {
-      const amount = new BigNumber(formModel.value.amount!);
+      const amount = new BigNumber(formModel.value.amount || 0);
       if (
         !isEvmContract(props.transferData.selectedAsset?.contractId)
         && amount.gt(0)
