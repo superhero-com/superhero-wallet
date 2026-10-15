@@ -15,6 +15,7 @@ import {
   TX_FUNCTIONS,
 } from '@/protocols/aeternity/config';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
+import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
 
 const TEST_TOKEN_DECIMALS = 12;
 /** An Æternity token deliberately registered WITHOUT a `decimals` field. */
@@ -349,5 +350,23 @@ describe('getTxAmountTotal', () => {
       expect(getTxAmountTotal(createTx, TX_DIRECTION.sent)).toBe(30000);
       expect(getTxAmountTotal(createTx, TX_DIRECTION.received)).toBe(0);
     });
+  });
+
+  describe('Bitcoin and Dogecoin', () => {
+    [PROTOCOLS.bitcoin, PROTOCOLS.dogecoin].forEach((protocol) => it(
+      `adds the fee for a sent ${protocol} transfer only`,
+      () => {
+        const transaction = normalizeTransactionStructure({
+          fee: 10000,
+          status: { confirmed: true, block_height: 1, block_time: 1700000000 },
+          txid: 'txid',
+          vin: [{ prevout: { scriptpubkey_address: 'sender' } }],
+          vout: [{ scriptpubkey_address: 'recipient', value: 1000000 }],
+        }, 'sender', protocol);
+
+        expect(getTxAmountTotal(transaction, TX_DIRECTION.sent)).toBe(0.0101);
+        expect(getTxAmountTotal(transaction, TX_DIRECTION.received)).toBe(0.01);
+      },
+    ));
   });
 });

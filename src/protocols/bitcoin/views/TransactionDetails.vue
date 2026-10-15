@@ -32,10 +32,9 @@ import { useRoute, useRouter } from 'vue-router';
 
 import type { ITokenResolved, ITransaction, Protocol } from '@/types';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
-import { useUi } from '@/composables';
+import { useFungibleTokens, useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
@@ -52,6 +51,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const { setLoaderVisible } = useUi();
+    const { getTxAmountTotal } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as string;
@@ -60,13 +60,12 @@ export default defineComponent({
     const transaction = ref<ITransaction>();
 
     const isReceived = computed(() => transaction.value?.tx?.senderId !== transactionOwner);
+    const direction = computed(() => isReceived.value ? TX_DIRECTION.received : TX_DIRECTION.sent);
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
     const amount = computed((): number => transaction.value?.tx?.amount || 0);
     const amountTotal = computed((): number => transaction.value?.tx
-      ? getTxAmountTotal(transaction.value, isReceived.value)
+      ? getTxAmountTotal(transaction.value, direction.value)
       : 0);
-
-    const direction = computed(() => isReceived.value ? TX_DIRECTION.received : TX_DIRECTION.sent);
 
     const assets = computed((): ITokenResolved[] => [{
       amount: amount.value,
