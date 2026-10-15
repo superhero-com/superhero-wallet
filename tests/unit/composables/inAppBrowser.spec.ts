@@ -31,7 +31,7 @@ const isAuthenticated = ref(true);
 const wcSession = ref(null);
 const connectWalletConnect = vi.fn();
 const handleEvmRpcMethod = vi.fn();
-const forwardEvmRpcToNode = vi.fn();
+const handleEvmRpcRequest = vi.fn();
 const getAeSdk = vi.fn();
 const evmState = { accounts: [], chainId: '0x1' };
 let walletSdk;
@@ -47,7 +47,7 @@ vi.mock('@/composables/walletConnect', () => ({
 }));
 vi.mock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
   handleEvmRpcMethod,
-  forwardEvmRpcToNode,
+  handleEvmRpcRequest,
 }));
 
 const { useInAppBrowser } = await import('@/composables/inAppBrowser');
@@ -147,6 +147,7 @@ describe('useInAppBrowser', () => {
       eth_accounts: { result: evmState.accounts },
       eth_chainId: { result: evmState.chainId },
     }[method] ?? { result: null }));
+    handleEvmRpcRequest.mockResolvedValue({ result: null });
 
     vi.spyOn(Node.prototype, 'getStatus').mockResolvedValue({ networkId: 'ae_uat' });
     getAeSdk.mockImplementation(async () => walletSdk);
@@ -253,9 +254,9 @@ describe('useInAppBrowser', () => {
   });
 
   describe('EVM dapps', () => {
-    it('get requests answered with the params the wallet expects', async () => {
+    it('get requests answered, their params passed on as sent', async () => {
       const dappPage = await openDapp();
-      handleEvmRpcMethod.mockResolvedValueOnce({ result: '0xsignature' });
+      handleEvmRpcRequest.mockResolvedValueOnce({ result: '0xsignature' });
 
       const signature = await dappPage.ethereum.request({
         method: 'personal_sign',
@@ -263,24 +264,25 @@ describe('useInAppBrowser', () => {
       });
 
       expect(signature).toBe('0xsignature');
-      expect(handleEvmRpcMethod).toHaveBeenCalledWith(DAPP_ORIGIN, 'personal_sign', { data: '0x68656c6c6f' });
+      expect(handleEvmRpcRequest)
+        .toHaveBeenCalledWith(DAPP_ORIGIN, 'personal_sign', ['0x68656c6c6f', EVM_ADDRESS]);
     });
 
     it('get the wallet error as a rejection', async () => {
       const dappPage = await openDapp();
-      handleEvmRpcMethod.mockResolvedValueOnce({ error: { code: 4001, message: 'Rejected' } });
+      handleEvmRpcRequest.mockResolvedValueOnce({ error: { code: 4001, message: 'Rejected' } });
 
       await expect(dappPage.ethereum.request({ method: 'eth_requestAccounts' }))
         .rejects.toMatchObject({ code: 4001, message: 'Rejected' });
     });
 
-    it('get read-only calls answered by the node as is', async () => {
+    it('pass read-only calls on as is', async () => {
       const dappPage = await openDapp();
       const params = [{ to: EVM_ADDRESS, data: '0x70a08231' }, 'latest'];
-      forwardEvmRpcToNode.mockResolvedValueOnce({ result: '0x01' });
+      handleEvmRpcRequest.mockResolvedValueOnce({ result: '0x01' });
 
       expect(await dappPage.ethereum.request({ method: 'eth_call', params })).toBe('0x01');
-      expect(forwardEvmRpcToNode).toHaveBeenCalledWith('eth_call', params);
+      expect(handleEvmRpcRequest).toHaveBeenCalledWith(DAPP_ORIGIN, 'eth_call', params);
     });
 
     it('find the provider through EIP-6963', async () => {
@@ -326,7 +328,7 @@ describe('useInAppBrowser', () => {
       }));
       await settle();
 
-      expect(handleEvmRpcMethod).not.toHaveBeenCalledWith(expect.anything(), 'eth_requestAccounts', expect.anything());
+      expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
 
     it('stops serving the previous document after a navigation', async () => {
@@ -336,18 +338,18 @@ describe('useInAppBrowser', () => {
 
       dappPage.ethereum.request({ method: 'eth_requestAccounts' });
       await settle();
-      expect(handleEvmRpcMethod).not.toHaveBeenCalledWith(expect.anything(), 'eth_requestAccounts', expect.anything());
+      expect(handleEvmRpcRequest).not.toHaveBeenCalled();
 
       evilPage.ethereum.request({ method: 'eth_requestAccounts' });
-      await vi.waitFor(() => expect(handleEvmRpcMethod)
-        .toHaveBeenCalledWith('https://evil.example', 'eth_requestAccounts', {}));
+      await vi.waitFor(() => expect(handleEvmRpcRequest)
+        .toHaveBeenCalledWith('https://evil.example', 'eth_requestAccounts', undefined));
     });
 
     it('does not hand a reply to the page that replaced the requester', async () => {
       const dappPage = await openDapp();
       let resolveRequest;
       const request = new Promise((resolve) => { resolveRequest = resolve; });
-      handleEvmRpcMethod.mockReturnValueOnce(request);
+      handleEvmRpcRequest.mockReturnValueOnce(request);
       dappPage.ethereum.request({ method: 'eth_requestAccounts' });
       await vi.waitFor(() => expect(resolveRequest).toBeDefined());
 
@@ -373,6 +375,7 @@ describe('useInAppBrowser', () => {
       expect(browser.executeScript).toHaveBeenCalled();
       expect(evilPage.ethereum).toBeUndefined();
       expect(handleEvmRpcMethod).not.toHaveBeenCalled();
+      expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
   });
 

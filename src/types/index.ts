@@ -28,7 +28,7 @@ import {
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
-import type { EthRpcSupportedMethods, IEthRpcMethodParameters } from '@/protocols/ethereum/types';
+import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 import {
   AE_CONTRACT_ID,
   MULTISIG_CREATION_PHASES,
@@ -777,7 +777,8 @@ export interface IBackgroundMessageData {
     popupProps?: Partial<IPopupProps>;
     sidePanelWindowIds?: number[];
     id?: string;
-    rpcMethodParams?: IEthRpcMethodParameters | { result?: string | string[] };
+    /** The positional params of an EIP-1193 request, or the value of an event */
+    rpcMethodParams?: unknown[] | { result?: string | string[] };
   };
   payload?: any;
 }

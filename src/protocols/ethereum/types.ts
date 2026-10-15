@@ -1,5 +1,5 @@
 import type { Dictionary, INetworkProtocolSettings, ObjectValues } from '@/types';
-import { ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
+import { ETH_RPC_METHODS, ETH_RPC_NODE_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 
 /**
  * Settings specific to this protocol.
@@ -31,15 +31,13 @@ export interface IEthRpcMethodParameters {
   from?: string;
   data?: string;
   gas?: string;
-  tag?: string;
   value?: string;
   chainId?: string;
-  result?: string;
-  /** This exist for proxy Etherscan methods */
+  /** Other fields of a transaction */
   [key: string]: string | undefined;
 }
 
 export type EthRpcMethod = ObjectValues<typeof ETH_RPC_METHODS>;
-export type EthRpcEtherscanProxyMethod = ObjectValues<typeof ETH_RPC_ETHERSCAN_PROXY_METHODS>;
+export type EthRpcNodeMethod = ObjectValues<typeof ETH_RPC_NODE_METHODS>;
 export type ETHRpcWalletEvents = ObjectValues<typeof ETH_RPC_WALLET_EVENTS>;
-export type EthRpcSupportedMethods = EthRpcMethod | EthRpcEtherscanProxyMethod | ETHRpcWalletEvents;
+export type EthRpcSupportedMethods = EthRpcMethod | EthRpcNodeMethod | ETHRpcWalletEvents;

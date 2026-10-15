@@ -12,6 +12,7 @@ vi.mock('@reown/walletkit', () => ({
       pair: vi.fn(),
       approveSession: vi.fn().mockResolvedValue({ topic: 't', namespaces: { eip155: { accounts: [], chains: [] } } }),
       rejectSession: vi.fn().mockResolvedValue(undefined),
+      respondSessionRequest: vi.fn(),
     }),
   },
 }));
@@ -173,12 +174,11 @@ describe('WalletConnect dapp requests', () => {
       '@/composables/networks',
       '@/composables/modals',
     ].forEach((path) => vi.doUnmock(path));
+    vi.unstubAllGlobals();
   });
 
-  it.each([
-    'eth_requestAccounts',
-    'wallet_requestPermissions',
-  ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
+  /** Returns what the wallet responds to a request of the dapp of an approved session */
+  async function request(method: string, params: unknown[]) {
     const web3wallet = await connectAndGetWallet();
     (web3wallet.approveSession as vi.Mock).mockResolvedValueOnce({
       topic: 't',
@@ -186,14 +186,33 @@ describe('WalletConnect dapp requests', () => {
       peer: { metadata: aescanProposal.params.proposer.metadata },
     });
     await getLastHandler(web3wallet, 'session_proposal')(aescanProposal);
+    (web3wallet.getActiveSessions as vi.Mock).mockReturnValue({ t: {} });
+    (web3wallet.respondSessionRequest as vi.Mock).mockClear();
     await getLastHandler(web3wallet, 'session_request')({
       id: 2,
       topic: 't',
-      params: { chainId: 'eip155:1', request: { method, params: [] } },
+      params: { chainId: 'eip155:1', request: { method, params } },
     });
+    return (web3wallet.respondSessionRequest as vi.Mock).mock.calls.at(-1)?.[0];
+  }
+
+  it.each([
+    'eth_requestAccounts',
+    'wallet_requestPermissions',
+  ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
+    await request(method, []);
 
     expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.objectContaining({
       app: expect.objectContaining({ host: 'aescan.io', originSource: 'self-reported' }),
     }));
+  });
+
+  it('answers a read of the node with its null result, not an error', async () => {
+    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ jsonrpc: '2.0', id: 1, result: null }) }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await request('eth_getTransactionReceipt', ['0x01']))
+      .toEqual({ topic: 't', response: { id: 2, jsonrpc: '2.0', result: null } });
+    expect(fetchMock).toHaveBeenCalledWith('https://eth.rpc', expect.anything());
   });
 });

@@ -16,15 +16,15 @@ import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocol
 import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { withGasHeadroom } from '@/protocols/evm/helpers';
-import { EtherscanService, EtherscanDefaultResponse } from '@/protocols/ethereum/libs/EtherscanService';
+import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import {
   ETH_CONTRACT_ID,
-  ETH_RPC_ETHERSCAN_PROXY_METHODS,
   ETH_RPC_METHODS,
+  ETH_RPC_NODE_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
@@ -123,32 +123,23 @@ function selectProtocolByChainId(targetChainId?: string): Protocol {
 
 function getActiveEvmNetworkSettings(protocol: Protocol) {
   if (protocol === PROTOCOLS.bnb) {
-    const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
+    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     return {
       chainId: bnbActiveNetworkSettings.value.chainId,
       nodeUrl: bnbActiveNetworkSettings.value.nodeUrl,
-      predefined: bnbActiveNetworkPredefinedSettings.value,
     };
   }
   if (protocol === PROTOCOLS.polygonPos) {
-    const {
-      polygonActiveNetworkSettings,
-      polygonActiveNetworkPredefinedSettings,
-    } = usePolygonNetworkSettings();
+    const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
     return {
       chainId: polygonActiveNetworkSettings.value.chainId,
       nodeUrl: polygonActiveNetworkSettings.value.nodeUrl,
-      predefined: polygonActiveNetworkPredefinedSettings.value,
     };
   }
-  const { ethActiveNetworkSettings, ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+  const { ethActiveNetworkSettings } = useEthNetworkSettings();
   return {
     chainId: ethActiveNetworkSettings.value.chainId,
     nodeUrl: ethActiveNetworkSettings.value.nodeUrl,
-    predefined: ethActiveNetworkPredefinedSettings.value,
   };
 }
 
@@ -174,13 +165,6 @@ async function sendToNode(
   }
 }
 
-/**
- * Send a read-only request to the active EVM chain's node as is, bypassing the Etherscan proxy.
- */
-export function forwardEvmRpcToNode(method: string, params: unknown[] = []) {
-  return sendToNode(getActiveEvmNetworkSettings(selectProtocolByChainId()).nodeUrl, method, params);
-}
-
 export async function handleEvmRpcMethod(
   aepp: string,
   method: EthRpcSupportedMethods,
@@ -195,7 +179,7 @@ export async function handleEvmRpcMethod(
 
   const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
   const protocol = selectProtocolByChainId(requestedChainId);
-  const { chainId, nodeUrl, predefined } = getActiveEvmNetworkSettings(protocol);
+  const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
     return (await checkOrAskEvmPermission(aepp, protocol, originSource))
@@ -276,9 +260,6 @@ export async function handleEvmRpcMethod(
       },
     };
   }
-  if (method === ETH_RPC_METHODS.getBlockNumber) {
-    return sendToNode(nodeUrl, method, []);
-  }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
 
@@ -290,7 +271,7 @@ export async function handleEvmRpcMethod(
 
     let gasHex = params.gas;
     if (!gasHex) {
-      const estimation = await sendToNode(nodeUrl, ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas, [{
+      const estimation = await sendToNode(nodeUrl, ETH_RPC_NODE_METHODS.estimateGas, [{
         from: params.from,
         to: params.to,
         value: params.value,
@@ -384,29 +365,6 @@ export async function handleEvmRpcMethod(
     return { result: `Superhero Wallet/v${process.env.npm_package_version}` };
   }
 
-  if (
-    method !== ETH_RPC_WALLET_EVENTS.chainChanged
-    && method !== ETH_RPC_WALLET_EVENTS.accountsChanged
-    && Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
-  ) {
-    const apiUrl = predefined.middlewareUrl;
-    let response: EtherscanDefaultResponse | null;
-    try {
-      response = await new EtherscanService(apiUrl, chainId)
-        .fetchFromApi({
-          module: 'proxy',
-          action: method,
-          ...params,
-        });
-      if (!response?.message?.startsWith('OK')) {
-        getUnknownError(response?.result || 'Unknown error');
-      }
-      return { result: response?.result };
-    } catch (error: any) {
-      return getUnknownError(error.message);
-    }
-  }
-
   // EIP-5792: Wallet Capabilities – respond with empty object if queried
   if ((method as string) === 'wallet_getCapabilities') {
     return { result: {} };
@@ -415,4 +373,40 @@ export async function handleEvmRpcMethod(
   // eslint-disable-next-line no-console
   console.warn(`Method ${method} is not supported.`);
   return { error: { code: -32004, message: `Method "${method}" is not supported` } };
+}
+
+const NODE_METHODS: string[] = Object.values(ETH_RPC_NODE_METHODS);
+
+/**
+ * Answer an EIP-1193 request: one that reads the chain on the node of the requested chain,
+ * the rest by the wallet.
+ */
+export async function handleEvmRpcRequest(
+  aepp: string,
+  method: string,
+  params: unknown,
+  name?: string,
+  caipChainId?: string,
+  originSource?: AppOriginSource,
+): Promise<EvmRpcResponse> {
+  const positionalParams = Array.isArray(params) ? params : [];
+  // A dapp waits for an answer, also when e.g. its address is malformed
+  try {
+    if (NODE_METHODS.includes(method)) {
+      const { nodeUrl } = getActiveEvmNetworkSettings(
+        selectProtocolByChainId(parseCaipChainId(caipChainId)),
+      );
+      return await sendToNode(nodeUrl, method, positionalParams);
+    }
+    return await handleEvmRpcMethod(
+      aepp,
+      method as EthRpcSupportedMethods,
+      toEvmRpcParams(method, positionalParams),
+      name,
+      caipChainId,
+      originSource,
+    );
+  } catch (error: any) {
+    return getUnknownError(error.message);
+  }
 }

@@ -4,14 +4,12 @@ import { ETH_RPC_METHODS } from '../../../../../src/protocols/ethereum/config';
 vi.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: { value: { chainId: '56', nodeUrl: 'https://bsc.rpc' } },
-    bnbActiveNetworkPredefinedSettings: { value: { middlewareUrl: 'https://api.etherscan.io/v2/api ' } },
   }),
 }));
 
 vi.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: { value: { chainId: '1', nodeUrl: 'https://eth.rpc' } },
-    ethActiveNetworkPredefinedSettings: { value: { middlewareUrl: 'https://api.etherscan.io/v2/api ' } },
   }),
 }));
 

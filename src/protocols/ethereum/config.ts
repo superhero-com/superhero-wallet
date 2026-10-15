@@ -98,20 +98,48 @@ export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testne
   ? ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
   : ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
 
-export const ETH_RPC_ETHERSCAN_PROXY_METHODS = {
+/** Answered by the node of the chain as is: they read it or broadcast a signed transaction */
+export const ETH_RPC_NODE_METHODS = {
+  blobBaseFee: 'eth_blobBaseFee',
   callContractOffChain: 'eth_call',
-  getBlockByNumber: 'eth_getBlockByNumber',
-  getUncleByBlockNumberAndIndex: 'eth_getUncleByBlockNumberAndIndex',
+  createAccessList: 'eth_createAccessList',
   estimateGas: 'eth_estimateGas',
+  feeHistory: 'eth_feeHistory',
+  gasPrice: 'eth_gasPrice',
+  getBlockByHash: 'eth_getBlockByHash',
+  getBlockByNumber: 'eth_getBlockByNumber',
+  getBlockNumber: 'eth_blockNumber',
+  getBlockReceipts: 'eth_getBlockReceipts',
+  getBlockTransactionCountByHash: 'eth_getBlockTransactionCountByHash',
+  getBlockTransactionCountByNumber: 'eth_getBlockTransactionCountByNumber',
+  getCode: 'eth_getCode',
+  getFilterChanges: 'eth_getFilterChanges',
+  getFilterLogs: 'eth_getFilterLogs',
+  getLogs: 'eth_getLogs',
+  getProof: 'eth_getProof',
+  getStorageAt: 'eth_getStorageAt',
+  getTransactionByBlockHashAndIndex: 'eth_getTransactionByBlockHashAndIndex',
+  getTransactionByBlockNumberAndIndex: 'eth_getTransactionByBlockNumberAndIndex',
   getTransactionByHash: 'eth_getTransactionByHash',
   getTransactionCount: 'eth_getTransactionCount',
-  gasPrice: 'eth_gasPrice',
   getTransactionReceipt: 'eth_getTransactionReceipt',
+  getUncleByBlockHashAndIndex: 'eth_getUncleByBlockHashAndIndex',
+  getUncleByBlockNumberAndIndex: 'eth_getUncleByBlockNumberAndIndex',
+  getUncleCountByBlockHash: 'eth_getUncleCountByBlockHash',
+  getUncleCountByBlockNumber: 'eth_getUncleCountByBlockNumber',
+  maxPriorityFeePerGas: 'eth_maxPriorityFeePerGas',
+  newBlockFilter: 'eth_newBlockFilter',
+  newFilter: 'eth_newFilter',
+  newPendingTransactionFilter: 'eth_newPendingTransactionFilter',
+  sendRawTransaction: 'eth_sendRawTransaction',
+  syncing: 'eth_syncing',
+  uninstallFilter: 'eth_uninstallFilter',
+  netListening: 'net_listening',
+  netVersion: 'net_version',
 } as const;
 
 export const ETH_RPC_METHODS = {
   getBalance: 'eth_getBalance',
-  getBlockNumber: 'eth_blockNumber',
   getChainId: 'eth_chainId',
   getAccounts: 'eth_accounts',
   requestAccounts: 'eth_requestAccounts',

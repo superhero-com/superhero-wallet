@@ -4,7 +4,6 @@ import { watch } from 'vue';
 
 import type { Runtime } from 'webextension-polyfill';
 import type { IBackgroundMessageData } from '@/types';
-import type { EthRpcSupportedMethods, IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 
 import {
   IS_FIREFOX,
@@ -18,7 +17,7 @@ import {
   useLedger,
   useAccounts,
 } from '@/composables';
-import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import { handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
@@ -114,18 +113,14 @@ browser.runtime.onMessage.addListener(
     const {
       method,
       payload,
-      params: { aepp, rpcMethodParams = {} } = {},
+      params: { aepp, rpcMethodParams } = {},
     } = msg;
 
     // Content scripts relay whatever a web page posts: EVM RPC calls only,
     // so take the origin from the browser, not from the message.
     if (!isExtensionPageSender(sender)) {
       if (typeof aepp === 'string' && method && sender.url) {
-        return handleEvmRpcMethod(
-          new URL(sender.url).origin,
-          method as EthRpcSupportedMethods,
-          rpcMethodParams as IEthRpcMethodParameters,
-        );
+        return handleEvmRpcRequest(new URL(sender.url).origin, method, rpcMethodParams);
       }
       return undefined;
     }

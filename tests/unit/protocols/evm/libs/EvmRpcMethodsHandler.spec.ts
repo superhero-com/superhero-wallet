@@ -46,17 +46,15 @@ vi.mock('@/protocols/ethereum/composables/ethFeeCalculation', () => ({
 vi.mock('@/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: ref({ chainId: '1', nodeUrl: ETH_NODE_URL }),
-    ethActiveNetworkPredefinedSettings: ref({ middlewareUrl: 'https://etherscan.example' }),
   }),
 }));
 vi.mock('@/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: ref({ chainId: '56', nodeUrl: 'https://bnb.node.example' }),
-    bnbActiveNetworkPredefinedSettings: ref({ middlewareUrl: 'https://etherscan.example' }),
   }),
 }));
 
-const { forwardEvmRpcToNode, handleEvmRpcMethod } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+const { handleEvmRpcMethod, handleEvmRpcRequest } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
 
 const DAPP = 'https://dapp.example';
 
@@ -95,13 +93,6 @@ describe('handleEvmRpcMethod', () => {
       const response = await handleEvmRpcMethod(DAPP, 'eth_getBalance', { address: SENDER });
       expect(response).toEqual({ result: expected });
     });
-  });
-
-  it('returns the block number reported by the node', async () => {
-    const fetchMock = mockNode({ eth_blockNumber: { result: '0x1312d00' } });
-    const response = await handleEvmRpcMethod(DAPP, 'eth_blockNumber', {});
-    expect(response).toEqual({ result: '0x1312d00' });
-    expect(getNodeRequests(fetchMock)).toMatchObject([{ url: ETH_NODE_URL, method: 'eth_blockNumber' }]);
   });
 
   describe('eth_sendTransaction', () => {
@@ -155,35 +146,82 @@ describe('handleEvmRpcMethod', () => {
   });
 });
 
-describe('forwardEvmRpcToNode', () => {
+describe('handleEvmRpcRequest', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it('passes the request to the active chain node as is', async () => {
+  it('passes a request that reads the chain to its node as is', async () => {
     const call = [{ to: RECIPIENT, data: '0x70a08231' }, 'latest'];
     const fetchMock = mockNode({ eth_call: { result: '0x01' } });
 
-    expect(await forwardEvmRpcToNode('eth_call', call)).toEqual({ result: '0x01' });
+    expect(await handleEvmRpcRequest(DAPP, 'eth_call', call)).toEqual({ result: '0x01' });
     expect(getNodeRequests(fetchMock)).toEqual([{
       url: ETH_NODE_URL, jsonrpc: '2.0', id: 1, method: 'eth_call', params: call,
     }]);
   });
 
+  it.each([
+    ['eth_blockNumber', []],
+    ['eth_getTransactionCount', [SENDER, 'pending']],
+    ['eth_getCode', [RECIPIENT, 'latest']],
+    ['eth_feeHistory', ['0x5', 'latest', [25, 75]]],
+    ['eth_sendRawTransaction', ['0x02f8']],
+    ['net_version', []],
+  ])('passes %s to the node', async (method, params) => {
+    const fetchMock = mockNode({ [method]: { result: '0x01' } });
+    expect(await handleEvmRpcRequest(DAPP, method, params)).toEqual({ result: '0x01' });
+    expect(getNodeRequests(fetchMock)).toMatchObject([{ method, params }]);
+  });
+
+  it('asks the node of the chain the request is for', async () => {
+    const fetchMock = mockNode({ eth_call: { result: '0x01' } });
+    await handleEvmRpcRequest(DAPP, 'eth_call', [], 'Dapp', 'eip155:56');
+    expect(getNodeRequests(fetchMock)).toMatchObject([{ url: 'https://bnb.node.example' }]);
+  });
+
+  it('answers the methods of the wallet by itself', async () => {
+    adapter.fetchBalance.mockResolvedValue('1');
+    const fetchMock = mockNode({});
+
+    expect(await handleEvmRpcRequest(DAPP, 'eth_getBalance', [SENDER, 'latest']))
+      .toEqual({ result: '0xde0b6b3a7640000' });
+    expect(adapter.fetchBalance).toHaveBeenCalledWith(SENDER);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps other methods off the node', async () => {
+    const fetchMock = mockNode({});
+    expect((await handleEvmRpcRequest(DAPP, 'eth_sign', [SENDER, '0x01'])).error?.code).toBe(-32004);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('answers null for a transaction the node does not know yet', async () => {
     mockNode({ eth_getTransactionReceipt: { result: null } });
-    expect(await forwardEvmRpcToNode('eth_getTransactionReceipt', ['0x01'])).toEqual({ result: null });
+    expect(await handleEvmRpcRequest(DAPP, 'eth_getTransactionReceipt', ['0x01'])).toEqual({ result: null });
   });
 
   it('returns the node error', async () => {
     const error = { code: -32000, message: 'header not found' };
     mockNode({ eth_call: { error } });
-    expect(await forwardEvmRpcToNode('eth_call', [])).toEqual({ error });
+    expect(await handleEvmRpcRequest(DAPP, 'eth_call', [])).toEqual({ error });
   });
 
   it('reports an unreachable node as an internal error', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Failed to fetch')));
-    expect(await forwardEvmRpcToNode('eth_call', []))
+    expect(await handleEvmRpcRequest(DAPP, 'eth_call', []))
       .toEqual({ error: { code: -32603, message: 'Failed to fetch' } });
+  });
+
+  it('answers a request it fails to handle with an internal error', async () => {
+    const tx = { from: 'nope', to: RECIPIENT, gas: '0x5208' };
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [tx]);
+
+    expect(response.error?.code).toBe(-32603);
+    expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
   });
 });

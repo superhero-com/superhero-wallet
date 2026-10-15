@@ -104,6 +104,28 @@ describe('inject.ts accountsChanged propagation', () => {
     expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
   });
 
+  it('forwards the params of an EVM request as the page sent them', async () => {
+    const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
+    ((global as any).browser.runtime.sendMessage as vi.Mock).mockClear();
+    const params = ['0x68656c6c6f', '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826'];
+
+    await messageHandler({
+      data: {
+        superheroWalletRequest: true, method: 'personal_sign', params, requestId: 1,
+      },
+      origin,
+      source: window,
+    });
+
+    expect((global as any).browser.runtime.sendMessage).toHaveBeenCalledWith({
+      target: 'offscreen',
+      jsonrpc: '2.0',
+      id: null,
+      method: 'personal_sign',
+      params: { rpcMethodParams: params, aepp: origin },
+    });
+  });
+
   it('forwards aepp SDK page messages to the offscreen document', async () => {
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
     ((global as any).browser.runtime.sendMessage as vi.Mock).mockClear();
