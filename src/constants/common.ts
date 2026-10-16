@@ -135,7 +135,9 @@ export const STORAGE_KEYS = {
   hiddenCards: 'hidden-cards',
   otherSettings: 'other-settings',
   errorLog: 'error-log',
+  /** Plaintext invites of older versions, moved to `invitesEncrypted`. */
   invites: 'invites',
+  invitesEncrypted: 'invites-encrypted',
   multisigAccounts: 'multisig',
   multisigAccountsPending: 'multisig-pending',
   activeMultisigAccount: 'active-multisig-account',

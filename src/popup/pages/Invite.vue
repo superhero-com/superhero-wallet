@@ -140,9 +140,9 @@ export default defineComponent({
 
       try {
         const aeSdk = await getAeSdk();
-        // Stored before the funds move: they would be lost without it.
-        addInvite(inviteSecretKey);
         pendingInviteSecretKey.value = inviteSecretKey;
+        // Stored before the funds move: they would be lost without it.
+        await addInvite(inviteSecretKey);
         await aeSdk.spend(
           formModel.value.amount || 0,
           address,

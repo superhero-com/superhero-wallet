@@ -314,6 +314,16 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonic.value = ciphertext;
   }
 
+  /**
+   * False once the password was changed in another window: pages other than the offscreen
+   * tab don't sync the storage, so they keep a key the stored salt no longer derives.
+   */
+  function isEncryptionKeyCurrent() {
+    if (IS_MOBILE_APP) return true;
+    const storedSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    return storedSalt === (encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null);
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
@@ -356,6 +366,11 @@ export const useAuth = createCustomScopedComposable(() => {
     // so after a lock they would stay under a key the new salt makes underivable.
     if (encryptionKey.value !== currentKey) {
       throw new Error('The wallet got locked while setting the password');
+    }
+    // A window that missed a password change in another one still holds the old salt:
+    // its new salt would leave the invites, stored under the other one, unreadable.
+    if (currentKey && !isEncryptionKeyCurrent()) {
+      throw new Error('The password was changed in another window');
     }
     /**
      * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
@@ -966,6 +981,7 @@ export const useAuth = createCustomScopedComposable(() => {
     checkBiometricLoginAvailability,
     checkUserAuth,
     getEncryptionKey,
+    isEncryptionKeyCurrent,
     lockWallet,
     logout,
     setMnemonicAndInitializeAuthentication,

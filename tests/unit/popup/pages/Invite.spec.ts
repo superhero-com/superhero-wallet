@@ -8,11 +8,13 @@ import en from '@/popup/locales/en-US.json';
 
 /**
  * Generating an invite moves funds to a fresh account whose key exists only in the
- * wallet's storage. Runs the real `useInvites` and storage; mocks only the SDK, modals
- * and the balance/UI state the page reads.
+ * wallet's storage. Runs the real `useInvites`, `useAuth` and storage; mocks only the SDK,
+ * modals and the balance/UI state the page reads.
  */
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 const TX_HASH = 'th_2Lzq4y5a9xX9dKz7mq2pKyGJbYsdTkRaZyWNd5x3qAyCXdM5BP';
+const MNEMONIC = 'legal winner thank year wave sausage worth useful legal winner thank yellow';
+const PASSWORD = 'Pa55-w0rd!';
 
 const InputAmountStub = {
   props: ['modelValue'],
@@ -29,9 +31,30 @@ const InviteItemStub = {
   template: '<div data-cy="invite-item" />',
 };
 
+/** Unlocks a wallet stored as the current versions do. */
+async function unlockWallet() {
+  const { WalletStorage } = await import('@/lib/WalletStorage');
+  const { STORAGE_KEYS } = await import('@/constants');
+  const {
+    encodeBase64,
+    encrypt,
+    generateEncryptionKey,
+    generateSalt,
+  } = await import('@/utils/crypto');
+  const { useAuth } = await import('@/composables/auth');
+  const salt = generateSalt();
+  const key = await generateEncryptionKey(PASSWORD, salt);
+  WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(salt));
+  WalletStorage.set(STORAGE_KEYS.mnemonic, await encrypt(key, MNEMONIC));
+  const auth = useAuth();
+  await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+  expect(await auth.authenticateWithPassword(PASSWORD)).toBe(true);
+}
+
 describe('Invite page', () => {
   let spend;
   let openDefaultModal;
+  let setLoaderVisible;
   let errorHandler;
 
   beforeEach(async () => {
@@ -40,6 +63,7 @@ describe('Invite page', () => {
 
     spend = vi.fn().mockResolvedValue({ hash: TX_HASH });
     openDefaultModal = vi.fn().mockResolvedValue(undefined);
+    setLoaderVisible = vi.fn();
     errorHandler = vi.fn();
 
     // Registered before the composables barrel is reloaded below.
@@ -58,16 +82,21 @@ describe('Invite page', () => {
     mockComposable('@/composables/maxAmount', {
       useMaxAmount: () => ({ max: ref('9'), fee: ref(new BigNumber('0.00002')) }),
     });
-    mockComposable('@/composables/ui', { useUi: () => ({ setLoaderVisible: vi.fn() }) });
+    vi.doMock('@/composables/ui', async (importOriginal) => {
+      const actual = await importOriginal();
+      return { useUi: () => ({ ...actual.useUi(), setLoaderVisible }) };
+    });
     await import('@/protocols/registerAdapters');
 
     // Registered by the app's vee-validate plugin, which isn't under test here.
     const { defineRule } = await import('vee-validate');
     ['does_not_exceed_decimals', 'min_value_exclusive', 'max_value', 'enough_coin']
       .forEach((rule) => defineRule(rule, () => true));
+
+    await unlockWallet();
   });
 
-  async function generateInvite() {
+  async function generateInvite({ untilSent = false } = {}) {
     const { default: Invite } = await import('@/popup/pages/Invite.vue');
     const wrapper = mount(Invite, {
       global: {
@@ -86,6 +115,10 @@ describe('Invite page', () => {
     await wrapper.find('[data-cy=amount]').setValue('1');
     await flushPromises();
     await wrapper.find('[data-cy=invite-generate]').trigger('click');
+    // The key is encrypted before the funds are sent.
+    await vi.waitFor(() => (untilSent
+      ? expect(spend).toHaveBeenCalled()
+      : expect(setLoaderVisible).toHaveBeenLastCalledWith(false)));
     await flushPromises();
     return wrapper;
   }
@@ -93,8 +126,14 @@ describe('Invite page', () => {
   async function getStoredInviteAddresses() {
     const { WalletStorage } = await import('@/lib/WalletStorage');
     const { STORAGE_KEYS } = await import('@/constants');
+    const { decrypt } = await import('@/utils/crypto');
+    const { useAuth } = await import('@/composables/auth');
     const { getAccountFromSecret } = await import('@/protocols/aeternity/helpers');
-    return (WalletStorage.get(STORAGE_KEYS.invites) || [])
+    const ciphertext = WalletStorage.get(STORAGE_KEYS.invitesEncrypted);
+    const invites = ciphertext
+      ? JSON.parse(await decrypt(useAuth().encryptionKey.value, ciphertext))
+      : [];
+    return invites
       .map(({ secretKey }) => getAccountFromSecret(Buffer.from(secretKey.data)).address);
   }
 
@@ -107,7 +146,6 @@ describe('Invite page', () => {
   it('stores the key of the funded invite account before the funds are sent', async () => {
     let storedAddressesWhenSent;
     spend.mockImplementation(async () => {
-      await flushPromises();
       storedAddressesWhenSent = await getStoredInviteAddresses();
       return { hash: TX_HASH };
     });
@@ -147,17 +185,32 @@ describe('Invite page', () => {
 
     const wrapper = await generateInvite();
 
-    expect(await getStoredInviteAddresses()).toEqual([]);
+    await vi.waitFor(async () => expect(await getStoredInviteAddresses()).toEqual([]));
     expect(wrapper.findAllComponents(InviteItemStub)).toHaveLength(0);
     expect(openDefaultModal).toHaveBeenCalledWith({ msg: en.pages.invite['insufficient-balance'] });
     expect(errorHandler).not.toHaveBeenCalled();
+  });
+
+  it('does not send the funds when the invite key cannot be stored', async () => {
+    const { useAuth } = await import('@/composables/auth');
+    await useAuth().logout();
+
+    const wrapper = await generateInvite();
+
+    expect(spend).not.toHaveBeenCalled();
+    expect(wrapper.findAllComponents(InviteItemStub)).toHaveLength(0);
+    expect(errorHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('locked') }),
+      expect.anything(),
+      expect.anything(),
+    );
   });
 
   it('shows the new invite once its funds have arrived', async () => {
     let markMined;
     spend.mockReturnValue(new Promise((resolve) => { markMined = resolve; }));
 
-    const wrapper = await generateInvite();
+    const wrapper = await generateInvite({ untilSent: true });
 
     const [[, fundedAddress]] = spend.mock.calls;
     expect(await getStoredInviteAddresses()).toEqual([fundedAddress]);

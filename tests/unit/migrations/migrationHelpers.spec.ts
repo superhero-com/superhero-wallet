@@ -47,6 +47,16 @@ describe('migrationHelpers: collectVuexState', () => {
     expect(getMock).toHaveBeenCalledTimes(1);
   });
 
+  it('reads the storage again after a failed read instead of waiting for it', async () => {
+    const { collectVuexState } = await import('@/migrations/migrationHelpers');
+    globalThis.browser.storage.local.get = vi.fn()
+      .mockRejectedValueOnce(new Error('Storage unavailable'))
+      .mockResolvedValue({ state: { mnemonic: 'read-again' } });
+
+    await expect(collectVuexState()).rejects.toThrow('Storage unavailable');
+    expect(await collectVuexState()).toEqual({ mnemonic: 'read-again' });
+  });
+
   it('resolves to undefined without reading storage when there is no `browser` global (offscreen/non-extension context)', async () => {
     const { collectVuexState } = await import('@/migrations/migrationHelpers');
     const originalBrowser = globalThis.browser;
