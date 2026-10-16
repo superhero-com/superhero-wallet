@@ -86,6 +86,15 @@ describe('Transactions', () => {
           .get('.transaction-list:visible [data-cy=list] .vs-row')
           .should('contain', 'Received');
       });
+
+      it('loads the next page while the list does not fill the screen', () => {
+        interceptActivities(2);
+        openTransactionList(htmlClass);
+
+        cy.wait('@nextPage')
+          .get('.transaction-list:visible [data-cy=list] .vs-row')
+          .should('contain', 'Received');
+      });
     });
   });
 });
