@@ -68,7 +68,7 @@ import { throttle } from 'lodash-es';
 
 import type { ICommonTransaction, ITransaction } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT, TX_DIRECTION } from '@/constants';
-import { pipe, sortTransactionsByDate, watchUntilTruthy } from '@/utils';
+import { pipe, sortTransactionsByDate } from '@/utils';
 import {
   useAccounts,
   useAeSdk,
@@ -202,33 +202,34 @@ export default defineComponent({
       }
     }
 
+    // The viewport is shared with lists on pages hidden in the Ionic stack
+    function isOwnViewport(element?: Element): element is Element {
+      const ionContent = appInnerElem.value;
+      return !!element && !!ionContent && (
+        element === ionContent || element.getRootNode() === ionContent.shadowRoot
+      );
+    }
+
+    /**
+     * A list that doesn't fill the viewport can't be scrolled to load the next page.
+     * For fungible tokens whose transactions were done long ago,
+     * this will result in a huge number of requests to load all user
+     * transactions that were done after and sort them out.
+     * TODO: Improve the fulfillment logic
+     * by moving to filtering on the mdw side
+     * and using the new fungible token endpoint https://github.com/aeternity/ae_mdw/issues/1678
+     */
     async function checkLoadMore() {
       // nextTick is required because viewportElement scrollHeight
       // is not being changed fast enough, after filter is applied
       await nextTick();
-      await watchUntilTruthy(() => !props.isLoading);
-      if (viewportElement.value) {
-        const {
-          scrollHeight,
-          scrollTop,
-          clientHeight,
-        } = viewportElement.value;
-
-        if (scrollHeight - scrollTop <= clientHeight + 100) {
-          loadMore();
-          if (!props.isEndReached) {
-            /**
-             * checkLoadMore is needed to populate the list with the right transaction type.
-             * For fungible tokens whose transactions were done long ago,
-             * this will result in a huge number of requests to load all user
-             *  transactions that were done after and sort them out.
-             * TODO: Improve the fulfillment logic
-             * by moving to filtering on the mdw side
-             * and using the new fungible token endpoint https://github.com/aeternity/ae_mdw/issues/1678
-             */
-            checkLoadMore();
-          }
-        }
+      const element = viewportElement.value;
+      if (props.isLoading || props.isEndReached || !isOwnViewport(element)) {
+        return;
+      }
+      const { scrollHeight, scrollTop, clientHeight } = element;
+      if (clientHeight && scrollHeight - scrollTop <= clientHeight + 100) {
+        loadMore();
       }
     }
 
@@ -238,7 +239,7 @@ export default defineComponent({
     );
 
     watch(
-      displayMode,
+      [() => props.isLoading, () => props.isEndReached, displayMode, viewportElement],
       () => checkLoadMore(),
     );
 
