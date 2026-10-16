@@ -10,13 +10,13 @@ describe('offscreen message listener', () => {
     signTransaction: vi.fn(),
     signMessage: vi.fn(),
   };
-  const handleEvmRpcMethod = vi.fn();
+  const handleEvmRpcRequest = vi.fn();
   const wallet = { init: vi.fn(), disconnect: vi.fn() };
 
   function mockOffscreenDependencies() {
     Object.values(ledger).forEach((mock) => mock.mockReset());
     ledger.discoverAccounts.mockResolvedValue(['ledger-account']);
-    handleEvmRpcMethod.mockReset().mockResolvedValue({ result: '0x1' });
+    handleEvmRpcRequest.mockReset().mockResolvedValue({ result: '0x1' });
     wallet.disconnect.mockReset();
 
     vi.doMock('vue', () => ({
@@ -47,7 +47,7 @@ describe('offscreen message listener', () => {
         activeAccount: { value: { protocol: 'ethereum' } },
       }),
     }));
-    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({ handleEvmRpcMethod }));
+    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({ handleEvmRpcRequest }));
     vi.doMock('@/protocols/ethereum/config', () => ({
       ETH_RPC_WALLET_EVENTS: {
         chainChanged: 'chainChanged',
@@ -156,12 +156,12 @@ describe('offscreen message listener', () => {
 
     it('still serves EVM RPC calls', async () => {
       const listener = await loadListener();
-      const params = { aepp: 'https://aepp.example', rpcMethodParams: { address: '0x0' } };
+      const params = { aepp: 'https://aepp.example', rpcMethodParams: ['0x0', 'latest'] };
 
       await expect(listener(relayed('eth_getBalance', params), WEB_PAGE))
         .resolves.toEqual({ result: '0x1' });
-      expect(handleEvmRpcMethod)
-        .toHaveBeenCalledWith('https://aepp.example', 'eth_getBalance', { address: '0x0' });
+      expect(handleEvmRpcRequest)
+        .toHaveBeenCalledWith('https://aepp.example', 'eth_getBalance', ['0x0', 'latest']);
     });
 
     it('takes the origin from the sender, not from the message', async () => {
@@ -169,8 +169,8 @@ describe('offscreen message listener', () => {
 
       await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), WEB_PAGE);
 
-      expect(handleEvmRpcMethod)
-        .toHaveBeenCalledWith('https://aepp.example', 'eth_requestAccounts', {});
+      expect(handleEvmRpcRequest)
+        .toHaveBeenCalledWith('https://aepp.example', 'eth_requestAccounts', undefined);
     });
   });
 });

@@ -12,6 +12,7 @@ vi.mock('@reown/walletkit', () => ({
       pair: vi.fn(),
       approveSession: vi.fn().mockResolvedValue({ topic: 't', namespaces: { eip155: { accounts: [], chains: [] } } }),
       rejectSession: vi.fn().mockResolvedValue(undefined),
+      respondSessionRequest: vi.fn(),
     }),
   },
 }));
@@ -133,7 +134,12 @@ describe('WalletConnect accountsChanged behavior', () => {
 });
 
 describe('WalletConnect dapp requests', () => {
-  const account = { address: '0xbbb', protocol: 'ethereum' };
+  /** Holds keccak256('cow') */
+  const account = {
+    address: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+    protocol: 'ethereum',
+    secretKey: Buffer.from('c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4', 'hex'),
+  };
 
   beforeEach(() => {
     vi.resetModules();
@@ -153,6 +159,9 @@ describe('WalletConnect dapp requests', () => {
         activeAccount: ref(account),
         accountsGroupedByProtocol: ref({ ethereum: [account] }),
         getLastActiveProtocolAccount: () => account,
+        getAccountByProtocolAndAddress: (_: string, address: string) => (
+          address === account.address ? account : undefined
+        ),
       }),
     }));
     vi.doMock('@/composables/networks', () => ({
@@ -173,12 +182,11 @@ describe('WalletConnect dapp requests', () => {
       '@/composables/networks',
       '@/composables/modals',
     ].forEach((path) => vi.doUnmock(path));
+    vi.unstubAllGlobals();
   });
 
-  it.each([
-    'eth_requestAccounts',
-    'wallet_requestPermissions',
-  ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
+  /** Returns what the wallet responds to a request of the dapp of an approved session */
+  async function request(method: string, params: unknown[]) {
     const web3wallet = await connectAndGetWallet();
     (web3wallet.approveSession as vi.Mock).mockResolvedValueOnce({
       topic: 't',
@@ -186,14 +194,99 @@ describe('WalletConnect dapp requests', () => {
       peer: { metadata: aescanProposal.params.proposer.metadata },
     });
     await getLastHandler(web3wallet, 'session_proposal')(aescanProposal);
+    (web3wallet.getActiveSessions as vi.Mock).mockReturnValue({ t: {} });
+    (web3wallet.respondSessionRequest as vi.Mock).mockClear();
     await getLastHandler(web3wallet, 'session_request')({
       id: 2,
       topic: 't',
-      params: { chainId: 'eip155:1', request: { method, params: [] } },
+      params: { chainId: 'eip155:1', request: { method, params } },
     });
+    return (web3wallet.respondSessionRequest as vi.Mock).mock.calls.at(-1)?.[0];
+  }
+
+  it.each([
+    'eth_requestAccounts',
+    'wallet_requestPermissions',
+  ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
+    const { usePermissions } = await import('@/composables/permissions');
+    // As the connect popup, which stores the permission
+    openModalMock.mockImplementation(async (_, { app }) => (
+      usePermissions().addPermission({ host: app.host })
+    ));
+    await request(method, []);
 
     expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.objectContaining({
       app: expect.objectContaining({ host: 'aescan.io', originSource: 'self-reported' }),
     }));
+  });
+
+  it('answers a read of the node with its null result, not an error', async () => {
+    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ jsonrpc: '2.0', id: 1, result: null }) }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await request('eth_getTransactionReceipt', ['0x01']))
+      .toEqual({ topic: 't', response: { id: 2, jsonrpc: '2.0', result: null } });
+    expect(fetchMock).toHaveBeenCalledWith('https://eth.rpc', expect.anything());
+  });
+
+  it('answers the rejection of the user as an error', async () => {
+    openModalMock.mockRejectedValue(new Error('Rejected'));
+
+    expect(await request('personal_sign', ['0x68656c6c6f', account.address])).toMatchObject({
+      response: { id: 2, error: { code: 4001 } },
+    });
+  });
+
+  it('signs a message with the account the dapp names', async () => {
+    expect(await request('personal_sign', ['0x68656c6c6f', account.address])).toEqual({
+      topic: 't',
+      response: {
+        id: 2,
+        jsonrpc: '2.0',
+        // By `@metamask/eth-sig-util` personalSign of "hello"
+        result: '0x2452a50a1b27db559e685e82ef59445ff08ca6843b5089aa1c32a70db206d47d693e5ae94daffccbbf590c5d2a72ad5706994748d2c8d3a8b39355589e16e8751c',
+      },
+    });
+  });
+
+  it('signs typed data the dapp sends as an object', async () => {
+    // The example of the EIP-712 spec, and its signature
+    const mail = {
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Person: [{ name: 'name', type: 'string' }, { name: 'wallet', type: 'address' }],
+        Mail: [
+          { name: 'from', type: 'Person' },
+          { name: 'to', type: 'Person' },
+          { name: 'contents', type: 'string' },
+        ],
+      },
+      primaryType: 'Mail',
+      domain: {
+        name: 'Ether Mail',
+        version: '1',
+        chainId: 1,
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+      },
+      message: {
+        from: { name: 'Cow', wallet: account.address },
+        to: { name: 'Bob', wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB' },
+        contents: 'Hello, Bob!',
+      },
+    };
+
+    expect(await request('eth_signTypedData_v4', [account.address, mail])).toEqual({
+      topic: 't',
+      response: {
+        id: 2,
+        jsonrpc: '2.0',
+        result: '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c',
+      },
+    });
   });
 });

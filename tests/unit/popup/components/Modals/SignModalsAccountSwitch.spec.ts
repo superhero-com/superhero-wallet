@@ -68,7 +68,11 @@ function setPopupProps(props: Record<string, any>) {
   } as any);
 }
 
-function mountModal(component: any, popupPropsOverrides: Record<string, any> = {}) {
+function mountModal(
+  component: any,
+  popupPropsOverrides: Record<string, any> = {},
+  accountsOverrides: Record<string, any> = {},
+) {
   setActiveAccountByAddressAndProtocol = vi.fn();
   resolve = vi.fn();
 
@@ -83,6 +87,7 @@ function mountModal(component: any, popupPropsOverrides: Record<string, any> = {
     getLastActiveProtocolAccount: vi.fn(() => accountActive),
     getAccountByProtocolAndAddress: vi.fn(),
     setActiveAccountByAddressAndProtocol,
+    ...accountsOverrides,
   });
 
   // @ts-ignore
@@ -347,5 +352,28 @@ describe('MessageSign Ledger prompt', () => {
     expect(resolve).toHaveBeenCalledWith(
       expect.objectContaining({ selectedAddress: ADDRESS_OTHER }),
     );
+  });
+});
+
+/** An EVM dapp names the account, and accepts no other account's signature. */
+describe('MessageSign requested signer', () => {
+  const accountRequested = {
+    protocol: PROTOCOLS.ethereum,
+    address: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+    idx: 1,
+    globalIdx: 1,
+    type: 'hd-wallet',
+  };
+
+  it('signs with it, without offering the switcher', async () => {
+    const wrapper = mountModal(
+      MessageSign,
+      { protocol: PROTOCOLS.ethereum, fromAccount: accountRequested.address },
+      { getAccountByProtocolAndAddress: vi.fn(() => accountRequested) },
+    );
+
+    expect(wrapper.findComponent(SignAccountSelectStub).exists()).toBe(false);
+    await (wrapper.vm as any).approve();
+    expect(resolve).toHaveBeenCalledWith({ selectedAddress: accountRequested.address });
   });
 });

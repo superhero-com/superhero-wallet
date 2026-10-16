@@ -8,7 +8,6 @@ import type {
   ITransaction,
   Protocol,
 } from '@/types';
-import type { EthRpcEtherscanProxyMethod } from '@/protocols/ethereum/types';
 import { ETHERSCAN_API_KEY, TXS_PER_PAGE } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
@@ -25,7 +24,7 @@ export interface EtherscanDefaultResponse {
 
 interface EtherscanApiCallParams {
   module: 'account' | 'contract' | 'transaction' | 'block' | 'logs' | 'proxy' | 'stats' | 'gastracker';
-  action: 'txlist' | 'tokentx' | 'getabi' | EthRpcEtherscanProxyMethod; // Extend in the future
+  action: 'txlist' | 'tokentx' | 'getabi'; // Extend in the future
   [key: string]: string | undefined;
 }
 

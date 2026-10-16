@@ -21,10 +21,9 @@ import {
 import { tg } from '@/popup/plugins/i18n';
 import { createAppData } from '@/utils';
 
-import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_ETHERSCAN_PROXY_METHODS } from '@/protocols/ethereum/config';
-import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_NODE_METHODS } from '@/protocols/ethereum/config';
 import type { Protocol, IAccount } from '@/types';
-import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import { handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
@@ -35,7 +34,8 @@ export type WalletConnectUri = `wc:${string}`;
 
 type SupportedRequestMethod =
   | 'eth_sendTransaction'
-  | 'personal_sign';
+  | 'personal_sign'
+  | 'eth_signTypedData_v4';
 
 const isOpenUsingDeeplink = ref(false);
 let composableInitialized = false;
@@ -311,12 +311,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
       const { url, name } = wcSession.value?.peer.metadata! || {};
-      const { result, error } = await handleEvmRpcMethod(
+      const { result, error } = await handleEvmRpcRequest(
         url,
-        proposal.request.method as EthRpcSupportedMethods,
-        proposal.request.method === ETH_RPC_METHODS.signPersonal
-          ? { data: proposal.request.params[0] }
-          : proposal.request.params[0],
+        proposal.request.method,
+        proposal.request.params,
         name,
         proposal.chainId,
         'self-reported',
@@ -333,14 +331,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           response: {
             id,
             jsonrpc: '2.0',
-            ...(result
-              ? { result }
-              : {
-                error: {
-                  code: error?.code || 5000,
-                  message: error?.message || 'User rejected.',
-                },
-              }),
+            // A read can answer null or false, e.g. the receipt of a pending transaction
+            ...(error
+              ? { error: { code: error.code || 5000, message: error.message || 'User rejected.' } }
+              : { result: result ?? null }),
           },
         });
       } catch (e) {
@@ -453,13 +447,14 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           ETH_RPC_METHODS.requestAccounts,
           ETH_RPC_METHODS.getAccounts,
           ETH_RPC_METHODS.getChainId,
-          ETH_RPC_METHODS.getBlockNumber,
+          ETH_RPC_NODE_METHODS.getBlockNumber,
           ETH_RPC_METHODS.signPersonal,
+          ETH_RPC_METHODS.signTypedDataV4,
           ETH_RPC_METHODS.sendTransaction,
           // common proxy calls often used by dapps
-          ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas,
-          ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionCount,
-          ETH_RPC_ETHERSCAN_PROXY_METHODS.gasPrice,
+          ETH_RPC_NODE_METHODS.estimateGas,
+          ETH_RPC_NODE_METHODS.getTransactionCount,
+          ETH_RPC_NODE_METHODS.gasPrice,
           // EIP-5792
           'wallet_getCapabilities' as any,
         ];

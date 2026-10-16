@@ -5,14 +5,12 @@ import {
   connectionProxy,
 } from '@aeternity/aepp-sdk';
 
-import type { IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 import type { BackgroundMethod } from '@/types';
 import {
-  ETH_RPC_ETHERSCAN_PROXY_METHODS,
   ETH_RPC_METHODS,
+  ETH_RPC_NODE_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
-import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
 import browser from 'webextension-polyfill';
 
 const connectedDapps: Record<string, any> = {};
@@ -49,7 +47,7 @@ const runContentScript = () => {
   async function handleEthRpcRequest(
     event: any,
     method: BackgroundMethod,
-    params: IEthRpcMethodParameters,
+    params: unknown,
   ) {
     const { result, error }: any = await sendToOffscreen(method, {
       rpcMethodParams: params,
@@ -85,11 +83,10 @@ const runContentScript = () => {
       if (typeof method !== 'string') return;
 
       if (
-        Object.values(ETH_RPC_METHODS).includes(method)
-        || Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
+        event.data.superheroWalletRequest
+        || Object.values(ETH_RPC_METHODS).includes(method)
+        || Object.values(ETH_RPC_NODE_METHODS).includes(method)
       ) {
-        handleEthRpcRequest(event, method, toEvmRpcParams(method, event.data.params));
-      } else if (event.data.superheroWalletRequest) {
         handleEthRpcRequest(event, method, event.data.params);
       } else if (!event.data.resolve) {
         sendToOffscreen(method, event.data);

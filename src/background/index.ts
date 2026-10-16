@@ -59,8 +59,11 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
       id,
       popupProps,
       popupType,
+      rpcMethodParams,
       sidePanelWindowIds,
     } = msg.params ?? {};
+    // An event carries its value here, unlike a request its params
+    const eventResult = Array.isArray(rpcMethodParams) ? undefined : rpcMethodParams?.result;
     switch (msg.method) {
       case 'chainChanged':
         browser.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
@@ -68,7 +71,7 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
             browser.tabs.sendMessage(tab.id, {
               superheroWalletApproved: true,
               method: msg.method,
-              result: msg.params?.rpcMethodParams?.result,
+              result: eventResult,
               type: 'result',
             });
           }
@@ -80,7 +83,7 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
             browser.tabs.sendMessage(tab.id, {
               superheroWalletApproved: true,
               method: msg.method,
-              result: msg.params?.rpcMethodParams?.result,
+              result: eventResult,
               type: 'result',
             });
           }

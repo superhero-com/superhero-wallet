@@ -1,5 +1,7 @@
+import { isPlainObject } from 'lodash-es';
+import { isAddress } from 'web3-utils';
 import type { IEthRpcMethodParameters } from '@/protocols/ethereum/types';
-import { ETH_RPC_ETHERSCAN_PROXY_METHODS, ETH_RPC_METHODS } from '@/protocols/ethereum/config';
+import { ETH_RPC_METHODS } from '@/protocols/ethereum/config';
 
 /**
  * Map the positional EIP-1193 `params` to the named ones `handleEvmRpcMethod` expects.
@@ -9,18 +11,18 @@ export function toEvmRpcParams(method: string, params?: any[]): IEthRpcMethodPar
     case ETH_RPC_METHODS.getBalance:
       return { address: params?.[0] };
     case ETH_RPC_METHODS.signPersonal:
-      return { data: params?.[0] };
-    case ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionByHash:
-    case ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionReceipt:
-      return { txhash: params?.[0] };
-    case ETH_RPC_ETHERSCAN_PROXY_METHODS.getBlockByNumber:
-      return { tag: params?.[0], boolean: params?.[1] };
-    case ETH_RPC_ETHERSCAN_PROXY_METHODS.getUncleByBlockNumberAndIndex:
-      return { tag: params?.[0], index: params?.[1] };
-    default:
+      // Some dapps put the address first, which MetaMask accepts
+      return isAddress(params?.[0], false) && !isAddress(params?.[1], false)
+        ? { data: params?.[1], address: params?.[0] }
+        : { data: params?.[0], address: params?.[1] };
+    case ETH_RPC_METHODS.signTypedDataV4:
       return {
-        ...(params?.[0] || {}),
-        ...(params?.[1] && !params?.[0]?.tag ? { tag: params[1] } : {}),
+        address: params?.[0],
+        // Some dapps send the typed data as an object instead of a JSON string
+        data: typeof params?.[1] === 'string' ? params[1] : JSON.stringify(params?.[1]),
       };
+    default:
+      // e.g. the transaction of `eth_sendTransaction`
+      return isPlainObject(params?.[0]) ? params![0] : {};
   }
 }

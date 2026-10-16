@@ -2,15 +2,9 @@ import { effectScope, watch } from 'vue';
 import { RPC_STATUS } from '@aeternity/aepp-sdk';
 
 import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
-import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 import { executeAndSetInterval, handleUnknownError } from '@/utils';
-import {
-  ETH_RPC_ETHERSCAN_PROXY_METHODS,
-  ETH_RPC_METHODS,
-  ETH_RPC_WALLET_EVENTS,
-} from '@/protocols/ethereum/config';
-import { forwardEvmRpcToNode, handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
-import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
+import { ETH_RPC_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
+import { handleEvmRpcMethod, handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { SUPERHERO_EIP6963_PROVIDER_INFO } from '@/content-scripts/eip6963ProviderInfo';
 // eslint-disable-next-line import/extensions
 import providerScript from '@/content-scripts/inAppBrowserProvider.js?raw';
@@ -49,8 +43,6 @@ type AeppConnection = Parameters<AeSdkSuperhero['addRpcClient']>[0];
 const BROWSER_OPTIONS = 'beforeload=get,zoomcontrols=no';
 const SESSION_PLACEHOLDER = "'__SUPERHERO_SESSION__'";
 const AEPP_ANNOUNCE_INTERVAL = 3000;
-/** Read-only methods answered by the chain's node, not the throttled Etherscan proxy. */
-const NODE_METHODS: string[] = Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS);
 
 function getWalletConnectUri(url: string): WalletConnectUri | undefined {
   const uri = url.startsWith('superhero://wc') ? new URL(url).searchParams.get('uri') : url;
@@ -175,14 +167,7 @@ export function useInAppBrowser() {
     }
 
     async function handleEvmRequest(origin: string, { id, method, params }: any) {
-      const positionalParams = Array.isArray(params) ? params : [];
-      const response = NODE_METHODS.includes(method)
-        ? await forwardEvmRpcToNode(method, positionalParams)
-        : await handleEvmRpcMethod(
-          origin,
-          method as EthRpcSupportedMethods,
-          toEvmRpcParams(method, positionalParams),
-        ).catch((error) => ({ error: { code: -32603, message: error.message } }));
+      const response = await handleEvmRpcRequest(origin, method, params);
       postToPage(origin, { superheroInAppBrowser: 'response', id, ...response });
     }
 
