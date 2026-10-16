@@ -48,6 +48,7 @@ import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-c
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import migrateMnemonicMobileToSecureStorage from '@/migrations/010-mnemonic-mobile-to-secure-storage';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
+import { removeLegacySecrets } from '@/migrations/migrationHelpers';
 import {
   LEGACY_DEFAULT_PASSWORD,
   clearDefaultPasswordSecret,
@@ -814,6 +815,28 @@ export const useAuth = createCustomScopedComposable(() => {
     await setPassword(newPassword);
   }
 
+  /**
+   * Older versions kept the seed in plaintext in the browser storage. It goes only once
+   * the stored ciphertext opens to the same seed, so it is never the only readable copy.
+   */
+  async function removeLegacyPlaintextSeed() {
+    const key = encryptionKey.value;
+    const unlockedMnemonic = mnemonicDecrypted.value;
+    const seedHex = Buffer.from(mnemonicSeed.value!).toString('hex');
+    const isUnlockedMnemonic = (value: unknown) => value === unlockedMnemonic;
+    const isUnlockedAccount = (value: any) => value?.privateKey === seedHex;
+    await removeLegacySecrets({
+      stateFields: { mnemonic: isUnlockedMnemonic, account: isUnlockedAccount },
+      entries: { mnemonic: isUnlockedMnemonic, userAccount: isUnlockedAccount },
+      confirm: async () => {
+        const storage = (IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
+        const stored = await storage.get<string>(STORAGE_KEYS.mnemonic);
+        return !!key && !!stored
+          && await decrypt(key, stored).catch(() => null) === unlockedMnemonic;
+      },
+    });
+  }
+
   (async () => {
     checkBiometricLoginAvailability();
 
@@ -868,6 +891,15 @@ export const useAuth = createCustomScopedComposable(() => {
     (val) => {
       if (val) {
         isSessionExpired = false;
+      }
+    },
+  );
+
+  watch(
+    () => isAuthenticated.value && isMnemonicEncrypted.value && !!mnemonicDecrypted.value,
+    (isUnlocked) => {
+      if (isUnlocked) {
+        removeLegacyPlaintextSeed().catch(handleUnknownError);
       }
     },
   );

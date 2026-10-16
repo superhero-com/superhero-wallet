@@ -1,3 +1,4 @@
+import { omit } from 'lodash-es';
 import { IS_OFFSCREEN_TAB } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { ref } from 'vue';
@@ -22,3 +23,51 @@ export const collectVuexState = (() => {
     return vuexState;
   };
 })();
+
+type LegacyValueCheck = (value: any) => boolean;
+
+let legacySecretsRemoval = Promise.resolve();
+
+/**
+ * The Vuex state, and the entries stored before it, kept secrets in plaintext.
+ * Removes the state fields and the entries whose value passes its check.
+ * The other state fields stay, as migrations read them lazily.
+ */
+export function removeLegacySecrets({
+  stateFields = {},
+  entries = {},
+  confirm,
+}: {
+  stateFields?: Record<string, LegacyValueCheck>;
+  entries?: Record<string, LegacyValueCheck>;
+  /** Asked only when there is something to remove. */
+  confirm?: () => Promise<boolean>;
+}): Promise<void> {
+  if (!window?.browser || IS_OFFSCREEN_TAB) {
+    return Promise.resolve();
+  }
+  const pickRemovable = (checks: Record<string, LegacyValueCheck>, values: Record<string, any>) => (
+    Object.keys(checks).filter((key) => values[key] !== undefined && checks[key](values[key]))
+  );
+  // Queued, so that two removals don't write back each other's fields.
+  const removal = legacySecretsRemoval.then(async () => {
+    const storage = window.browser.storage.local;
+    const stored: Record<string, any> = await storage.get(['state', ...Object.keys(entries)]);
+    const fieldsToRemove = pickRemovable(stateFields, stored.state || {});
+    const entriesToRemove = pickRemovable(entries, stored);
+    if (
+      (!fieldsToRemove.length && !entriesToRemove.length)
+      || (confirm && !await confirm())
+    ) {
+      return;
+    }
+    if (fieldsToRemove.length) {
+      await storage.set({ state: omit(stored.state, fieldsToRemove) });
+    }
+    if (entriesToRemove.length) {
+      await storage.remove(entriesToRemove);
+    }
+  });
+  legacySecretsRemoval = removal.catch(() => {});
+  return removal;
+}
