@@ -123,7 +123,7 @@ export default defineComponent({
           } else {
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.spend(
-              Number(amount),
+              amount,
               recipient,
               {
                 fromAccount: lastActiveEthAccount?.address,

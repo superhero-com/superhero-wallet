@@ -155,6 +155,7 @@ async function loadAdapter() {
   const { EthereumAdapter } = await import('@/protocols/ethereum/libs/EthereumAdapter');
   const { FeeMarketEIP1559Transaction } = await import('web3-eth-accounts');
   const web3Eth = await import('web3-eth');
+  const broadcast = await import('@/protocols/evm/libs/broadcastSignedTransaction');
 
   return {
     EthereumAdapter,
@@ -162,6 +163,7 @@ async function loadAdapter() {
     contractMockState,
     web3EthMockState,
     getTransactionCountMock: web3Eth.getTransactionCount as unknown as ReturnType<typeof vi.fn>,
+    broadcastMock: broadcast.broadcastSignedTransaction as unknown as ReturnType<typeof vi.fn>,
   };
 }
 
@@ -169,6 +171,8 @@ let EthereumAdapter: Awaited<ReturnType<typeof loadAdapter>>['EthereumAdapter'];
 let contractMockState: ContractMockState;
 let web3EthMockState: { txCount: number };
 let getTransactionCountMock: ReturnType<typeof vi.fn>;
+let broadcastMock: ReturnType<typeof vi.fn>;
+let FeeMarketEIP1559Transaction: Awaited<ReturnType<typeof loadAdapter>>['FeeMarketEIP1559Transaction'];
 let fromTxDataSpy: ReturnType<typeof vi.spyOn>;
 
 beforeAll(async () => {
@@ -177,12 +181,15 @@ beforeAll(async () => {
   contractMockState = loaded.contractMockState;
   web3EthMockState = loaded.web3EthMockState;
   getTransactionCountMock = loaded.getTransactionCountMock;
+  broadcastMock = loaded.broadcastMock;
+  FeeMarketEIP1559Transaction = loaded.FeeMarketEIP1559Transaction;
   fromTxDataSpy = vi.spyOn(loaded.FeeMarketEIP1559Transaction, 'fromTxData');
 });
 
 beforeEach(() => {
   fromTxDataSpy.mockClear();
   getTransactionCountMock.mockClear();
+  broadcastMock.mockClear();
   contractMockState.decimals = 18;
   contractMockState.estimateGas = 21000;
   contractMockState.transferCalls = [];
@@ -192,14 +199,6 @@ beforeEach(() => {
 describe('EthereumAdapter - spend (native ETH transfer, wei math)', () => {
   // 0.1 ETH must become exactly 100000000000000000 wei (0.1 * 10^18) with no
   // floating-point drift.
-  //
-  // `spend`'s public signature still takes `amount: number`, so the value already
-  // went through one lossy number->string round trip before this test observes it;
-  // `constructAndSignTx` re-parses it through `new BigNumber(amount).toFixed(...)`
-  // rather than the JS-native `Number.prototype.toFixed`, which recovers the
-  // shortest decimal representation for amounts within ~15 significant digits.
-  // Amounts beyond that range still drift (see the full-precision test below) and
-  // need `amount` threaded as a string end-to-end across all adapters to fix.
   it('produces exact wei value for 0.1 ETH', async () => {
     const adapter = new EthereumAdapter();
     await adapter.constructAndSignTx(0.1, RECIPIENT, {
@@ -229,22 +228,30 @@ describe('EthereumAdapter - spend (native ETH transfer, wei math)', () => {
   });
 
   // A high-precision amount using the full ETH_COIN_PRECISION (18 decimals) must
-  // convert exactly, with no drift introduced by the conversion. Same root cause
-  // as the 0.1 ETH case above (amount typed as `number`).
-  it.fails('produces exact wei for a full-precision (18 decimal) amount', async () => {
+  // convert exactly. A JS number can't hold it, so it is passed as a string.
+  it('produces exact wei for a full-precision (18 decimal) amount', async () => {
     const adapter = new EthereumAdapter();
-    // This 19-significant-digit literal losing precision at parse time is the
-    // point of the test - it demonstrates drift before any adapter code runs.
-    // eslint-disable-next-line no-loss-of-precision
-    await adapter.constructAndSignTx(1.123456789012345678, RECIPIENT, {
+    await adapter.constructAndSignTx('1.123456789012345678', RECIPIENT, {
       fromAccount: FROM_ACCOUNT,
       maxPriorityFeePerGas: '0.000000001',
       maxFeePerGas: '0.00000002',
       nonce: 0,
     });
     const txData = fromTxDataSpy.mock.calls[0][0] as any;
-    // Actual: 1123456789012345691n (drift from the `number` amount type).
     expect(BigInt(txData.value)).toBe(1123456789012345678n);
+  });
+
+  it('broadcasts a signed tx carrying the exact wei of a large max-balance-like amount', async () => {
+    const adapter = new EthereumAdapter();
+    await adapter.spend('98765.432109876543210987', RECIPIENT, {
+      fromAccount: FROM_ACCOUNT,
+      maxPriorityFeePerGas: '0.000000001',
+      maxFeePerGas: '0.00000002',
+      nonce: 0,
+    });
+    const [, serializedTx] = broadcastMock.mock.calls[0];
+    expect(FeeMarketEIP1559Transaction.fromSerializedTx(serializedTx).value)
+      .toBe(98765432109876543210987n);
   });
 
   it('populates EIP-1559 fee fields (maxFeePerGas/maxPriorityFeePerGas), never legacy gasPrice', async () => {

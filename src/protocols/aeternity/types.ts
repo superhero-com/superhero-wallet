@@ -38,7 +38,7 @@ export interface AeTippingV2ContractApi extends AeTippingV1ContractApi {
   retip_token: (
     id: number,
     contactId: Encoded.ContractAddress,
-    amount: number
+    amount: string
   ) => Encoded.TxHash;
 }
 

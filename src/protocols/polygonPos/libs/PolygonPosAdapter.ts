@@ -587,7 +587,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
   }
 
   async constructAndSignTx(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
@@ -612,7 +612,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
     const hexAmount = bigIntToHex(
-      BigInt(toWei(amount.toFixed(POLYGON_POS_COIN_PRECISION), 'ether')),
+      BigInt(toWei(new BigNumber(amount).toFixed(POLYGON_POS_COIN_PRECISION), 'ether')),
     );
 
     const txData: TxData = {
@@ -633,7 +633,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
   }
 
   override async spend(
-    amount: number,
+    amount: number | string,
     recipient: AccountAddress,
     options: {
       fromAccount: AccountAddress;

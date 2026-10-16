@@ -384,12 +384,13 @@ export function useFungibleTokens() {
       for_account: tippingContractAddresses?.value?.tippingV2?.replace('ct_', 'ak_'),
     });
 
+    // Exact, as the tip and retip take it
     const allowanceAmount = (decodedResult !== undefined)
       ? new BigNumber(decodedResult)
         .multipliedBy(-1)
         .plus(toShiftedBigNumber(amount, tokenData?.decimals!))
-        .toNumber()
-      : toShiftedBigNumber(amount, tokenData?.decimals!).toNumber();
+        .toFixed()
+      : toShiftedBigNumber(amount, tokenData?.decimals!).toFixed();
 
     const getContractFunction = (tokenContract.methods as any)[
       decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
