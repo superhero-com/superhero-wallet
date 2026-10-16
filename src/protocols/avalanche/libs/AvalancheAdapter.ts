@@ -19,6 +19,7 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
+import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
@@ -425,6 +426,15 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
     await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
+  }
+
+  override async transferPreparedTransaction(transaction: any = {}): Promise<ITransferResponse> {
+    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+    return transferPreparedLegacyTransaction(
+      this.protocol,
+      avalancheActiveNetworkSettings.value,
+      transaction,
+    );
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {
