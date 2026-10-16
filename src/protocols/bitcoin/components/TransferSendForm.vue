@@ -151,6 +151,8 @@ export default defineComponent({
       transferData: props.transferData,
     });
 
+    const recipientPlaceholderText = t('modals.send.recipientPlaceholderProtocol', { name: props.protocol });
+
     const feeSelectedIndex = ref(1);
     const feeSlow = ref(new BigNumber(0.00002));
     const feeMedium = ref(new BigNumber(0.00002));
@@ -300,6 +302,7 @@ export default defineComponent({
       feeSelectedIndex,
       numericFee,
       activeAccount,
+      recipientPlaceholderText,
       errors,
       balance,
       max,
