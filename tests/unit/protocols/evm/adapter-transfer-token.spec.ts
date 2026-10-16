@@ -141,10 +141,12 @@ beforeEach(() => {
 const transferToken = (
   name: string,
   amount: string,
+  options: { nonce?: number } = {},
 ) => adapters[name].transferToken(amount, RECIPIENT, TOKEN_CONTRACT, {
   fromAccount: FROM_ACCOUNT,
   maxPriorityFeePerGas: '0.000000002',
   maxFeePerGas: '0.00000003',
+  ...options,
 });
 
 const lastTransferAmount = () => BigInt(
@@ -183,5 +185,11 @@ describe.each(['Polygon', 'BNB'])('%s adapter transferToken', (name) => {
 
     const { gasLimit } = builtTxData.at(-1)!;
     expect(BigInt(gasLimit)).toBe(BigInt(74750));
+  });
+
+  it('signs with the nonce it is given, as for the next of several recipients', async () => {
+    await transferToken(name, '1', { nonce: 4 });
+
+    expect(Number(builtTxData.at(-1)!.nonce)).toBe(4);
   });
 });

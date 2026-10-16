@@ -6,6 +6,7 @@ import type {
   ICommonTransaction,
   ITokenBalance,
   ITransaction,
+  ITx,
 } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import {
@@ -54,6 +55,13 @@ function getTokenBalancesByAccountKey(tokenBalanceList: ITokenBalance[]) {
 }
 
 /**
+ * The account whose nonce the transaction uses.
+ */
+function getTransactionSender(tx?: ITx) {
+  return tx?.callerId || tx?.senderId || tx?.accountId || tx?.ownerId;
+}
+
+/**
  * All pending and latest fetched transactions as a flat list sorted by date.
  */
 const allLatestTransactions = computed((): ICommonTransaction[] => {
@@ -83,11 +91,23 @@ export function useLatestTransactionList() {
     ).filter((transaction) => hash !== transaction.hash);
   }
 
-  function removeAccountPendingTransactionByNonce(address: AccountAddress, nonce?: number) {
-    if (!nonce) return;
+  /**
+   * Remove pending transactions that can't be mined anymore,
+   * because the account mined another one with the same nonce (e.g. sped up).
+   */
+  function removeAccountPendingTransactionByNonce(
+    address: AccountAddress,
+    { protocol, tx }: ITransaction,
+  ) {
+    // Incoming transactions carry the nonce of the sender
+    if (tx?.nonce == null || getTransactionSender(tx) !== address) return;
     accountsTransactionsPending.value[address] = (
       accountsTransactionsPending.value[address] || []
-    ).filter((transaction) => nonce !== transaction.tx?.nonce);
+    ).filter((transaction) => (
+      transaction.protocol !== protocol
+      // Etherscan returns the nonce as a string
+      || String(transaction.tx?.nonce) !== String(tx.nonce)
+    ));
   }
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
@@ -108,6 +128,9 @@ export function useLatestTransactionList() {
       || pendingTransactions?.length
     ) {
       accountsTransactionsLatest.value[address] = [
+        // Ethereum, BNB and Polygon accounts share the address
+        ...(accountsTransactionsLatest.value[address] || [])
+          .filter((transaction) => transaction.protocol !== protocol),
         ...regularTransactions,
         ...(pendingTransactions || []),
       ];
@@ -117,7 +140,7 @@ export function useLatestTransactionList() {
           ({ hash }) => removeAccountPendingTransactionByHash(address, hash),
         );
         regularTransactions.forEach(
-          (transaction) => removeAccountPendingTransactionByNonce(address, transaction.tx?.nonce),
+          (transaction) => removeAccountPendingTransactionByNonce(address, transaction),
         );
       }
     }
@@ -171,12 +194,14 @@ export function useLatestTransactionList() {
     setInterval(() => {
       Object.entries(accountsTransactionsLatest.value)
         .forEach(([accountAddress, transactionList]) => {
-          if (transactionList.some(({ pending }) => !!pending)) {
-            const accProtocol = transactionList.find(Boolean)?.protocol;
-            if (!accProtocol) return;
-            const acc = getAccountByProtocolAndAddress(accProtocol, accountAddress)!;
-            loadAccountLatestTransactions(acc);
-          }
+          new Set(
+            transactionList
+              .filter(({ pending }) => !!pending)
+              .map(({ protocol }) => protocol),
+          ).forEach((accProtocol) => {
+            const acc = getAccountByProtocolAndAddress(accProtocol, accountAddress);
+            if (acc) loadAccountLatestTransactions(acc);
+          });
         });
     }, 60000);
 
