@@ -61,6 +61,7 @@ describe('offscreen wallet connections', () => {
     (global as any).browser = {
       runtime: {
         id: 'test-extension-id',
+        getURL: (path: string) => `chrome-extension://test-extension-id/${path}`,
         onConnect: {
           addListener: vi.fn((listener) => {
             onConnectListener = listener;
@@ -272,6 +273,20 @@ describe('offscreen wallet connections', () => {
         method: SESSION_METHODS.setSessionTimeout,
         payload: 0,
       });
+    });
+
+    it('is not taken from a content script, which could keep the wallet unlocked', async () => {
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      const port = createSessionPort();
+      port.sender.url = 'https://dapp.example/';
+      await onConnectListener(port);
+
+      await disconnectListener();
+
+      // Served as any other port of a web page
+      expect(aeSdk.addRpcClient).toHaveBeenCalledOnce();
+      expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
     });
   });
 
