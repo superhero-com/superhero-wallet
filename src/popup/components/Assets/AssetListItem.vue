@@ -19,6 +19,7 @@
         icon-size="lg"
         full-symbol
         bright
+        truncate-to-fit
       />
       <TokenAmountFormatted
         :amount="asset.convertedBalance?.toString()"
@@ -104,9 +105,12 @@ export default defineComponent({
 
 .tokens-list-item {
   .row {
-    display: flex;
+    // A side is cut only when it doesn't fit next to the other one, two long sides get half each
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, max-content);
     align-items: center;
     justify-content: space-between;
+    column-gap: 8px;
 
     &.bottom {
       margin-top: 4px;
