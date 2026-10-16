@@ -33,9 +33,9 @@
             ? { max_value: max.toString() }
             : {},
           enough_coin: [fee.toString(), coinSymbol],
-          ...activeNetwork.type === NETWORK_TYPE_TESTNET
-            ? {}
-            : { min_value_exclusive: toBitcoin(DUST_AMOUNT) },
+          ...activeNetwork.type !== NETWORK_TYPE_TESTNET && protocol === PROTOCOLS.bitcoin
+            ? { min_value: toBitcoin(DUST_AMOUNT) }
+            : {},
         }"
         @asset-selected="handleAssetChange"
       >
