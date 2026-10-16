@@ -100,7 +100,7 @@ export function useAeSdk() {
     onNetworkChange,
   } = useNetworks();
   const {
-    accountsAddressList,
+    aeAccounts,
     getLastActiveProtocolAccount,
     onAccountChange,
   } = useAccounts();
@@ -264,10 +264,11 @@ export function useAeSdk() {
             // answering. Without this a dApp listing accounts during a slow
             // restore could receive an empty list.
             await watchUntilTruthy(
-              () => accountsAddressList.value.length,
+              () => aeAccounts.value.length,
               ACCOUNT_RESTORE_TIMEOUT,
             );
-            return accountsAddressList.value;
+            // The SDK answers with `addresses()`, the æternity ones only
+            return undefined;
           }
           return Promise.reject(new RpcRejectedByUserError());
         },
