@@ -508,6 +508,8 @@ export interface ITx {
   gasPrice?: number;
   gasUsed?: number;
   internalEvents?: any[]; // TODO: type internal events
+  /** The data source reported a token transfer, even if the token is not on the token list */
+  isTokenTransfer?: boolean;
   log?: any[]; // TODO find source
   name?: any;
   nameFee?: number;

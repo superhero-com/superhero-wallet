@@ -240,6 +240,8 @@ export class EtherscanService {
         callData: isEthTransfer ? null : input,
         contractId,
         function: functionName,
+        // Only `tokentx` rows have `tokenDecimal`
+        isTokenTransfer: tokenDecimal !== undefined,
         nonce,
         gasPrice: gasPriceInEther,
         gasUsed,
