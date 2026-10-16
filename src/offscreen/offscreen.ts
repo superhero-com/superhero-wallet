@@ -21,7 +21,8 @@ import { handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
-import { isAcceptedOffscreenSender, isExtensionPageSender } from './messageGuards';
+import { isExtensionPageSender } from '../background/messageGuards';
+import { isAcceptedOffscreenSender } from './messageGuards';
 
 const { activeNetworkName, networks } = useNetworks();
 const { activeAccount } = useAccounts();

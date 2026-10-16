@@ -1,4 +1,3 @@
-import type { Runtime } from 'webextension-polyfill';
 import type { IBackgroundMessageData } from '@/types';
 import {
   openPopup,
@@ -7,6 +6,7 @@ import {
   getSessionEncryptionKey,
   setSessionTimeout,
 } from './bgPopupHandler';
+import { isExtensionPageSender } from './messageGuards';
 import { registerInPageContentScript, updateDynamicRules } from './utils';
 
 (async () => {
@@ -33,16 +33,6 @@ import { registerInPageContentScript, updateDynamicRules } from './utils';
 })();
 
 /**
- * Only accept messages originating from this extension's own contexts
- * (popup, offscreen document, service worker, our injected content scripts).
- * Blocks cross-extension `runtime.sendMessage` (paired with removal of wildcard
- * `externally_connectable.ids` in manifest.json) and any stray external sender.
- */
-const isInternalSender = (sender: Runtime.MessageSender): boolean => (
-  !!sender && sender.id === browser.runtime.id
-);
-
-/**
  * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
  */
 const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0] = (
@@ -50,7 +40,9 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
   sender,
   sendResponse,
 ): any => {
-  if (!isInternalSender(sender)) {
+  // Extension pages only: content scripts carry the extension id too,
+  // but run inside web pages and send nothing to the background.
+  if (!isExtensionPageSender(sender)) {
     return undefined;
   }
   if (msg.target === 'background') {

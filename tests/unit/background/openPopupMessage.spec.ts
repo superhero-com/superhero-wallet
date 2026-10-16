@@ -6,7 +6,7 @@ describe('background openPopup message', () => {
       runtime: {
         id: 'test-extension-id',
         onMessage: { addListener: vi.fn() },
-        getURL: vi.fn((path) => path),
+        getURL: vi.fn((path) => `chrome-extension://test-extension-id/${path}`),
         getContexts: vi.fn().mockResolvedValue([{}]),
         onInstalled: { addListener: vi.fn() },
       },
@@ -35,7 +35,7 @@ describe('background openPopup message', () => {
           sidePanelWindowIds: [2],
         },
       },
-      { id: 'test-extension-id' },
+      { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/offscreen.html' },
       sendResponse,
     );
 
