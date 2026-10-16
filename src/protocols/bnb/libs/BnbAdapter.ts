@@ -398,14 +398,12 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const nodeGasPriceWei = await web3Eth.getGasPrice();
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
-    const [nonce, estimatedGas] = await Promise.all([
-      this.getTransactionCount(options.fromAccount),
-      contract.methods.transfer(recipient, hexAmount).estimateGas({ from: options.fromAccount }),
-    ]);
+    const estimatedGas = await contract.methods.transfer(recipient, hexAmount)
+      .estimateGas({ from: options.fromAccount });
     const gasLimit = withGasHeadroom(estimatedGas);
 
     const txData: TxData = {
-      nonce,
+      nonce: options.nonce,
       gasPrice,
       gasLimit: `0x${gasLimit.toString(16)}`,
       to: contractId,
