@@ -176,7 +176,7 @@ describe('handleEvmRpcMethod', () => {
   });
 
   describe('eth_sendTransaction', () => {
-    const tx = { from: SENDER, to: RECIPIENT, value: '0xde0b6b3a7640000' };
+    const tx = { from: SIGNER.address, to: RECIPIENT, value: '0xde0b6b3a7640000' };
 
     it('sends with the node gas estimate plus headroom', async () => {
       const fetchMock = mockNode({ eth_estimateGas: { result: '0x5208' } });
@@ -214,6 +214,90 @@ describe('handleEvmRpcMethod', () => {
       expect(response).toEqual({ error });
       expect(checkOrAskPermission).not.toHaveBeenCalled();
       expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+    });
+
+    it('sends nothing when the user rejects', async () => {
+      mockNode({ eth_estimateGas: { result: '0x5208' } });
+      checkOrAskPermission.mockResolvedValue(false);
+      const response = await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', tx);
+
+      expect(response.error?.code).toBe(4001);
+      expect(checkOrAskPermission.mock.calls[0][2].fromAccount).toBe(SIGNER.address);
+      expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['an account it holds', SIGNER.address],
+      ['an account it does not hold', SENDER],
+      ['no account', undefined],
+    ])('gives a site that is not connected one answer for %s', async (_, from) => {
+      const fetchMock = mockNode({ eth_estimateGas: { result: '0x5208' } });
+      const response = await handleEvmRpcMethod(STRANGER, 'eth_sendTransaction', { ...tx, from });
+
+      expect(response).toEqual(UNAUTHORIZED);
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+      expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['another account of the wallet, which the site was not given', OTHER.address],
+      ['an account the wallet does not hold', SENDER],
+      ['an invalid address', 'cow'],
+    ])('rejects a transaction from %s without asking', async (_, from) => {
+      const fetchMock = mockNode({ eth_estimateGas: { result: '0x5208' } });
+      const response = await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', { ...tx, from });
+
+      expect(response).toEqual(UNAUTHORIZED);
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+      expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects a site the user disconnected in the settings', async () => {
+      const aepp = 'https://disconnected.example';
+      const { permissions } = usePermissions();
+      permissions.value['disconnected.example'] = { host: 'disconnected.example', address: true } as any;
+      await handleEvmRpcMethod(aepp, 'eth_requestAccounts', {});
+      delete permissions.value['disconnected.example'];
+      checkOrAskPermission.mockClear();
+
+      expect(await handleEvmRpcMethod(aepp, 'eth_sendTransaction', { ...tx, gas: '0x5208' }))
+        .toEqual(UNAUTHORIZED);
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+      expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['connected without being remembered', 'https://unremembered.example', undefined],
+      ['of a WalletConnect session, which keeps no permission', STRANGER, 'self-reported'],
+    ])('sends for a site %s', async (_, aepp, originSource) => {
+      const response = await handleEvmRpcMethod(aepp, 'eth_sendTransaction', {
+        ...tx, gas: '0x5208',
+      }, 'Dapp', undefined, originSource as AppOriginSource | undefined);
+
+      expect(response).toEqual({ result: '0xhash' });
+      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x5208' });
+    });
+
+    it('sends from any account of a WalletConnect session', async () => {
+      const response = await handleEvmRpcMethod(STRANGER, 'eth_sendTransaction', {
+        ...tx, from: OTHER.address, gas: '0x5208',
+      }, 'Dapp', undefined, 'self-reported');
+
+      expect(response).toEqual({ result: '0xhash' });
+      expect(checkOrAskPermission.mock.calls[0][2].fromAccount).toBe(OTHER.address);
+      expect(adapter.transferPreparedTransaction)
+        .toHaveBeenCalledWith({ ...tx, from: OTHER.address, gas: '0x5208' });
+    });
+
+    it('sends from the requested account named with a wrong checksum, as MetaMask does', async () => {
+      const response = await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', {
+        ...tx, from: `0xc${SIGNER.address.slice(3)}`, gas: '0x5208',
+      });
+
+      expect(response).toEqual({ result: '0xhash' });
+      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x5208' });
     });
   });
 
@@ -626,7 +710,7 @@ describe('handleEvmRpcRequest', () => {
   });
 
   it('answers a request it fails to handle with an internal error', async () => {
-    const tx = { from: 'nope', to: RECIPIENT, gas: '0x5208' };
+    const tx = { from: SIGNER.address, to: 'nope', gas: '0x5208' };
     const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [tx]);
 
     expect(response.error?.code).toBe(-32603);
