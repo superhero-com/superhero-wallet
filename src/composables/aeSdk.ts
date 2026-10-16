@@ -38,6 +38,7 @@ import {
   AE_NETWORK_MAINNET_ID,
   AE_NETWORK_TESTNET_ID,
   DEX_CONTRACTS,
+  SUPERHERO_CONTRACTS,
 } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { selectAeppNetwork } from '@/protocols/aeternity/helpers/selectAeppNetwork';
@@ -97,6 +98,10 @@ const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetw
 
 const dexContracts = computed(
   () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
+);
+
+const superheroContracts = computed(
+  () => nodeNetworkId.value ? SUPERHERO_CONTRACTS[nodeNetworkId.value] : undefined,
 );
 
 function replaceNode(sdk: AeSdk, name: string, node: Node): Promise<void> {
@@ -459,6 +464,7 @@ export function useAeSdk() {
     nodeNetworkId,
     isTippingSupported,
     dexContracts,
+    superheroContracts,
     getAeSdk,
     getDryAeSdk,
     resetNode,

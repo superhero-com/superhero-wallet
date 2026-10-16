@@ -33,6 +33,7 @@ import {
   aettosToAe,
   getInnerTransaction,
   getOwnershipStatus,
+  getSuperheroTxAction,
   getTransactionExecutionResult,
   getTransactionTokenInfoResolver,
   getTxDirection,
@@ -66,7 +67,7 @@ export function useTransactionData({
   showDetailedAllowanceInfo = false,
   hideFeeFromAssets = false,
 }: UseTransactionOptions) {
-  const { dexContracts } = useAeSdk();
+  const { dexContracts, superheroContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
   const {
@@ -181,23 +182,30 @@ export function useTransactionData({
     && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
   ));
 
+  // Entrypoints like `withdraw` exist on non-DEX contracts as well
   const isDexLiquidityAdd = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunctionRaw.value),
   );
   const isDexLiquidityRemove = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunctionRaw.value),
+    (): boolean => (
+      isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunctionRaw.value)
+    ),
   );
   const isDexPool = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunctionRaw.value),
   );
   const isDexSwap = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunctionRaw.value),
   );
   const isDexMaxSpent = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunctionRaw.value),
   );
   const isDexMinReceived = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunctionRaw.value),
+  );
+
+  const superheroTxAction = computed(
+    () => getSuperheroTxAction(transaction.value, superheroContracts.value),
   );
 
   const isMultisig = computed((): boolean => (
@@ -401,6 +409,8 @@ export function useTransactionData({
     isDexMinReceived,
     isDexPool,
     isDexSwap,
+
+    superheroTxAction,
 
     isMultisig,
     isTip,

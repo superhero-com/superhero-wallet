@@ -3,6 +3,9 @@ import type {
   DexFunctionType,
   IDefaultNetworkTypeData,
   IDexContracts,
+  ISuperheroContracts,
+  SuperheroContractType,
+  SuperheroTxAction,
   TokenSaleFunctionType,
   TxFunctionRaw,
 } from '@/types';
@@ -257,6 +260,66 @@ export const DEX_CONTRACTS: Record<string, IDexContracts> = {
     ],
   },
 };
+
+/**
+ * Contracts the Superhero app calls, by node network id. The social graph address is
+ * served by the Superhero API (`/api/social-graph/policy`), the rest by the app config.
+ */
+export const SUPERHERO_CONTRACTS: Record<string, ISuperheroContracts> = {
+  [AE_NETWORK_MAINNET_ID]: {
+    posts: ['ct_2Hyt9ZxzXra5NAzhePkRsDPDWppoatVD7CtHnUoHVbuehwR8Nb'],
+    socialGraph: ['ct_2YSDFU8Lsc3AC4tSb3B3XEegBUK6r7LsoNRw3U388EFY1SdiRd'],
+    governance: ['ct_ouZib4wT9cNwgRA1pxgA63XEUd8eQRrG8PcePDEYogBc1VYTq'],
+    affiliation: ['ct_2GG42rs2FDPTXuUCWHMn98bu5Ab6mgNxY7KdGAKUNsrLqutNxZ'],
+  },
+  [AE_NETWORK_TESTNET_ID]: {
+    posts: ['ct_2J1wuuw9urs9ADBh5QbvuPyUCLdKbW5YRkfhgPoN7rGjBbPiBW'],
+    socialGraph: [],
+    governance: ['ct_2nritSnqW6zooEL4g2SMW5pf12GUbrNyZ17osTLrap7wXiSSjf'],
+    affiliation: ['ct_2QmAcPxY4TBbFmkSUhxU4UTwoRot8SMmZzaAKL6oyHmQqRL1rK'],
+  },
+};
+
+/**
+ * Superhero app entrypoints per contract type. Names like `withdraw` or `vote` exist
+ * on unrelated contracts too, so a call only counts when its contract is listed in
+ * `SUPERHERO_CONTRACTS` under the same type.
+ */
+export const SUPERHERO_TX_FUNCTIONS: Record<
+  SuperheroContractType,
+  Partial<Record<string, SuperheroTxAction>>
+> = {
+  posts: {
+    post_without_tip: 'post',
+  },
+  socialGraph: {
+    follow: 'follow',
+    unfollow: 'unfollow',
+    block: 'block',
+    unblock: 'unblock',
+  },
+  governance: {
+    delegate: 'delegate',
+    revoke_delegation: 'revokeDelegation',
+    add_poll: 'addPoll',
+  },
+  affiliation: {
+    register_invitation_code: 'createInvites',
+    revoke_invitation_code: 'revokeInvite',
+    withdraw: 'collectRewards',
+  },
+};
+
+/**
+ * Superhero calls whose first argument is the account they act on.
+ */
+export const SUPERHERO_TX_ACTIONS_WITH_TARGET: SuperheroTxAction[] = [
+  'follow',
+  'unfollow',
+  'block',
+  'unblock',
+  'delegate',
+];
 
 export const ACTIVITIES_TYPES = {
   aex9TransferEvent: 'Aex9TransferEvent',

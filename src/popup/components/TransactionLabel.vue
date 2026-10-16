@@ -80,7 +80,7 @@ import { useI18n } from 'vue-i18n';
 
 import type { ITransaction } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
-import { getDefaultAccountLabel } from '@/utils';
+import { getDefaultAccountLabel, getSuperheroTxListLabel } from '@/utils';
 import { useAccounts, useFungibleTokens, useTransactionData } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import {
@@ -128,6 +128,7 @@ export default defineComponent({
       isErrorTransaction,
       executionResult,
       isTip,
+      superheroTxAction,
       txTypeListLabel,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
@@ -188,6 +189,8 @@ export default defineComponent({
         text = t('transaction.tokenSale.sold');
       } else if (isTokenSaleFactory.value) {
         text = t('transaction.tokenSale.createdToken');
+      } else if (superheroTxAction.value) {
+        text = getSuperheroTxListLabel(superheroTxAction.value);
       } else if (isTip.value && props.transaction.claim) {
         text = t('transaction.listType.tipReceived');
       } else if (isTip.value) {
