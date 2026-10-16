@@ -16,8 +16,12 @@ export const collectVuexState = (() => {
         await watchUntilTruthy(() => !isCollecting.value);
       } else if (!vuexState && !IS_OFFSCREEN_TAB) {
         isCollecting.value = true;
-        vuexState = (await window.browser.storage.local.get('state'))?.state as any;
-        isCollecting.value = false;
+        try {
+          vuexState = (await window.browser.storage.local.get('state'))?.state as any;
+        } finally {
+          // Or a failed read would hold up the invites to be stored for good
+          isCollecting.value = false;
+        }
       }
     }
     return vuexState;
@@ -63,6 +67,9 @@ export function removeLegacySecrets({
     }
     if (fieldsToRemove.length) {
       await storage.set({ state: omit(stored.state, fieldsToRemove) });
+      // Or the migrations reading it later would bring them back.
+      const cachedState = await collectVuexState();
+      fieldsToRemove.forEach((field) => delete cachedState?.[field]);
     }
     if (entriesToRemove.length) {
       await storage.remove(entriesToRemove);

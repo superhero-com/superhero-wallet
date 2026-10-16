@@ -314,6 +314,16 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonic.value = ciphertext;
   }
 
+  /**
+   * False once the password was changed in another window: pages other than the offscreen
+   * tab don't sync the storage, so they keep a key the stored salt no longer derives.
+   */
+  function isEncryptionKeyCurrent() {
+    if (IS_MOBILE_APP) return true;
+    const storedSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    return storedSalt === (encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null);
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
@@ -966,6 +976,7 @@ export const useAuth = createCustomScopedComposable(() => {
     checkBiometricLoginAvailability,
     checkUserAuth,
     getEncryptionKey,
+    isEncryptionKeyCurrent,
     lockWallet,
     logout,
     setMnemonicAndInitializeAuthentication,
