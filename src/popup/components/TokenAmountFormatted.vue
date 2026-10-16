@@ -18,7 +18,8 @@
     <div
       v-if="symbol"
       class="symbol"
-      v-text="truncateString(symbol, 5)"
+      :title="symbol"
+      v-text="symbol"
     />
   </div>
 </template>
@@ -27,7 +28,7 @@
 import { computed, defineComponent } from 'vue';
 import BigNumber from 'bignumber.js';
 
-import { amountRounded, formatNumber, truncateString } from '@/utils';
+import { amountRounded, formatNumber } from '@/utils';
 
 export default defineComponent({
   props: {
@@ -100,7 +101,6 @@ export default defineComponent({
 
     return {
       assetAmountFormatted,
-      truncateString,
     };
   },
 });
@@ -127,6 +127,9 @@ export default defineComponent({
   .symbol {
     @extend %face-sans-16-medium;
 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25; // Keeps descenders inside the clipped box
     letter-spacing: -0.02em;
     margin-left: 2.5px;
   }

@@ -20,6 +20,7 @@
         :protocol="protocol"
         full-symbol
         bright
+        truncate-to-fit
       />
       <TokenAmountFormatted
         :amount="asset.amount?.toString()"
@@ -88,9 +89,12 @@ export default defineComponent({
   line-height: 20px;
 
   .row {
-    display: flex;
+    // A side is cut only when it doesn't fit next to the other one, two long sides get half each
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, max-content);
     justify-content: space-between;
     align-items: center;
+    column-gap: 8px;
     margin-bottom: 4px;
     font-size: 18px;
 

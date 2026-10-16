@@ -1,7 +1,7 @@
 <template>
   <span
     class="tokens"
-    :class="{ vertical, bright }"
+    :class="{ vertical, bright, 'truncate-to-fit': truncateToFit }"
   >
     <AssetIcon
       v-if="!noIcons && imgAsset"
@@ -73,6 +73,11 @@ export default defineComponent({
     noIcons: Boolean,
     fullSymbol: Boolean,
     bright: Boolean,
+    /**
+     * Shorten the symbols only when they don't fit the available width,
+     * instead of cutting them to `symbolLength` characters
+     */
+    truncateToFit: Boolean,
   },
   setup(props) {
     function getAvailableCharLength() {
@@ -86,6 +91,9 @@ export default defineComponent({
     }
 
     function truncateString(text: string) {
+      if (props.truncateToFit) {
+        return text;
+      }
       const maxLength = getAvailableCharLength();
       return truncateStringFactory(text, maxLength);
     }
@@ -138,6 +146,26 @@ export default defineComponent({
   .separator {
     margin: 0 1px;
     vertical-align: middle;
+  }
+
+  &.truncate-to-fit {
+    min-width: 0;
+
+    .icon {
+      flex-shrink: 0;
+    }
+
+    .symbols {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+
+      .symbol {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.25; // Keeps descenders inside the clipped box
+      }
+    }
   }
 
   &.vertical {
