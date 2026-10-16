@@ -35,7 +35,7 @@
           enough_coin: [fee.toString(), coinSymbol],
           ...activeNetwork.type === NETWORK_TYPE_TESTNET
             ? {}
-            : { min_value_exclusive: toBitcoin(DUST_AMOUNT) },
+            : { min_value: toBitcoin(DUST_AMOUNT) },
         }"
         @asset-selected="handleAssetChange"
       >

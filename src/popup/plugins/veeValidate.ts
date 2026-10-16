@@ -82,6 +82,14 @@ defineRule(
 );
 
 defineRule(
+  'min_value',
+  (value: string, [arg]: [number]) => (
+    (value && BigNumber(value).isGreaterThanOrEqualTo(arg))
+    || tg('validation.minValue', [arg])
+  ),
+);
+
+defineRule(
   'min_value_exclusive',
   (value: string, [arg]: [number]) => (
     (value && BigNumber(value).isGreaterThan(arg))
