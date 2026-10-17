@@ -514,7 +514,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async spend(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: { payload: string; nonce: number; fee?: string },
   ): Promise<ITransferResponse> {

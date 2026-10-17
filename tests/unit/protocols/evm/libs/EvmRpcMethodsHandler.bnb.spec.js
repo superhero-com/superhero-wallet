@@ -83,18 +83,6 @@ describe('handleEvmRpcMethod - BNB network basics', () => {
     const res = await handleEvmRpcMethod(aepp, ETH_RPC_METHODS.getBalance, { address: '0x0000000000000000000000000000000000000001' }, 'Dapp', 'eip155:56');
     expect(typeof res.result === 'string' || res.result === 0).toBe(true);
   });
-
-  it('sendTransaction delegates to adapter.transferPreparedTransaction and returns hash', async () => {
-    // The node answering the gas estimation
-    vi.stubGlobal('fetch', vi.fn(async () => ({ status: 200, json: async () => ({ result: '0x5208' }) })));
-    const res = await handleEvmRpcMethod(aepp, ETH_RPC_METHODS.sendTransaction, {
-      from: '0x0000000000000000000000000000000000000001',
-      to: '0x0000000000000000000000000000000000000002',
-      value: '0xde0b6b3a7640000', // 1 ether in hex wei
-    }, 'Dapp', 'eip155:56');
-    vi.unstubAllGlobals();
-    expect(res.result === '0xhash' || res.error).toBeTruthy();
-  });
 });
 
 describe('handleEvmRpcMethod - modal app', () => {
@@ -118,6 +106,7 @@ describe('handleEvmRpcMethod - modal app', () => {
       useAccounts: () => ({
         activeAccount: { value: account },
         getLastActiveProtocolAccount: () => account,
+        getAccountByProtocolAndAddress: () => account,
       }),
       useNetworks: () => ({
         activeNetwork: { value: { name: 'Mainnet' } },
@@ -154,6 +143,15 @@ describe('handleEvmRpcMethod - modal app', () => {
   ])('marks the %s modal app as self-reported', async (method, params) => {
     await handle(aepp, method, params, 'Dapp', 'eip155:56', 'self-reported');
     expect(modalApp()).toMatchObject({ host: 'dapp.example', originSource: 'self-reported' });
+  });
+
+  it('sends a transaction of the connected site from its account', async () => {
+    expect(await handle(aepp, ETH_RPC_METHODS.sendTransaction, {
+      from: account.address,
+      to: '0x0000000000000000000000000000000000000002',
+      value: '0xde0b6b3a7640000', // 1 BNB in wei
+      gas: '0x5208',
+    }, 'Dapp', 'eip155:56')).toEqual({ result: '0xhash' });
   });
 
   it('adds no origin source when the caller gave none', async () => {

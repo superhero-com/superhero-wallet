@@ -12,6 +12,7 @@ import {
   getPopup,
   getSessionEncryptionKey,
 } from '@/background/bgPopupHandler';
+import { isExtensionPageSender } from '@/background/messageGuards';
 import { getCleanModalOptions } from '@/utils';
 
 export const detectConnectionType = (port: Runtime.Port) => {
@@ -26,7 +27,9 @@ export const detectConnectionType = (port: Runtime.Port) => {
     && isExtensionSender
   ) {
     return port.name;
-  } if (CONNECTION_TYPES.SESSION === port.name) {
+  }
+  // Its disconnect restarts the auto-lock timer, so content scripts can't open one.
+  if (CONNECTION_TYPES.SESSION === port.name && isExtensionPageSender(port.sender)) {
     return CONNECTION_TYPES.SESSION;
   }
   return CONNECTION_TYPES.OTHER;

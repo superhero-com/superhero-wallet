@@ -1,4 +1,6 @@
 // @ts-nocheck
+const OFFSCREEN_DOCUMENT = { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/offscreen.html' };
+
 describe('background accountsChanged forwarding', () => {
   const sendMessageMock = vi.fn();
   const queryMock = vi.fn().mockResolvedValue([{ id: 123 }]);
@@ -10,7 +12,7 @@ describe('background accountsChanged forwarding', () => {
       runtime: {
         id: 'test-extension-id',
         onMessage: { addListener: vi.fn() },
-        getURL: vi.fn(() => 'offscreen.html'),
+        getURL: vi.fn((path) => `chrome-extension://test-extension-id/${path}`),
         getContexts: vi.fn().mockResolvedValue([{}]),
         offscreen: { createDocument: vi.fn().mockResolvedValue(undefined) },
         onInstalled: { addListener: vi.fn() },
@@ -37,7 +39,7 @@ describe('background accountsChanged forwarding', () => {
         method: 'accountsChanged',
         params: { rpcMethodParams: { result: ['0xabc'] } },
       },
-      { id: 'test-extension-id' },
+      OFFSCREEN_DOCUMENT,
       vi.fn(),
     );
 
@@ -102,7 +104,7 @@ describe('background accountsChanged forwarding', () => {
 
     const result = await listener(
       msg,
-      { id: 'test-extension-id' },
+      OFFSCREEN_DOCUMENT,
       vi.fn(),
     );
 

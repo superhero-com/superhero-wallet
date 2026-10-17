@@ -331,6 +331,10 @@ export async function handleEvmRpcMethod(
     };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
+    if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
+    const evmAccount = getRequestedAccount(protocol, params.from, originSource);
+    if (!evmAccount) return ERROR_UNAUTHORIZED;
+
     const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
 
     await updateFeeList();
@@ -352,7 +356,7 @@ export async function handleEvmRpcMethod(
     }
 
     const gas = Number(gasHex);
-    const senderId = toChecksumAddress(params.from!);
+    const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
     const isCoinTransfer = !params.data;
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
@@ -388,6 +392,7 @@ export async function handleEvmRpcMethod(
         try {
           const actionResult = await adapter.transferPreparedTransaction({
             ...params,
+            from: senderId,
             gas: gasHex,
           });
           return actionResult?.hash

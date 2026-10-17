@@ -255,7 +255,6 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     recipientAddress: { type: String, default: null },
-    amount: { type: Number, default: null },
     isMultisig: Boolean,
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
@@ -536,7 +535,7 @@ export default defineComponent({
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-          actionResult = await aeternityAdapter.spend(Number(amount), recipient, {
+          actionResult = await aeternityAdapter.spend(new BigNumber(amount).toFixed(), recipient, {
             payload: props.transferData.payload,
             waitMined: false,
             nonce,
@@ -579,6 +578,7 @@ export default defineComponent({
 
     async function sendTip({
       amount,
+      amountRaw,
       recipient,
       selectedAsset,
       note,
@@ -589,15 +589,12 @@ export default defineComponent({
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tippingV2 || tippingV1;
         if (selectedAsset.contractId !== AE_CONTRACT_ID && tippingV2) {
-          await createOrChangeAllowance(
-            selectedAsset.contractId,
-            props.amount,
-          );
+          await createOrChangeAllowance(selectedAsset.contractId, amountRaw);
           txResult = await tippingV2.tip_token(
             recipient,
             escapeSpecialChars(note),
             selectedAsset.contractId,
-            amount,
+            new BigNumber(amount).toFixed(),
           );
         } else {
           txResult = await tippingContract.tip(
@@ -707,6 +704,7 @@ export default defineComponent({
       } else if (props.isAddressUrl) {
         await sendTip({
           amount,
+          amountRaw,
           recipient: recipients[0],
           selectedAsset,
           note,

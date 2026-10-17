@@ -35,7 +35,7 @@
           enough_coin: [fee.toString(), coinSymbol],
           ...activeNetwork.type === NETWORK_TYPE_TESTNET
             ? {}
-            : { min_value_exclusive: toBitcoin(DUST_AMOUNT) },
+            : { min_value: toBitcoin(DUST_AMOUNT) },
         }"
         @asset-selected="handleAssetChange"
       >
@@ -150,6 +150,8 @@ export default defineComponent({
     } = useTransferSendForm({
       transferData: props.transferData,
     });
+
+    const recipientPlaceholderText = t('modals.send.recipientPlaceholderProtocol', { name: props.protocol });
 
     const feeSelectedIndex = ref(1);
     const feeSlow = ref(new BigNumber(0.00002));
@@ -300,6 +302,7 @@ export default defineComponent({
       feeSelectedIndex,
       numericFee,
       activeAccount,
+      recipientPlaceholderText,
       errors,
       balance,
       max,
