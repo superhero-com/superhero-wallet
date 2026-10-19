@@ -7,7 +7,69 @@ export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
 }
 
-const sumValues = (items: { value: number }[]) => items.reduce((sum, { value }) => sum + value, 0);
+export const sumValues = (
+  items: { value: number }[],
+) => items.reduce((sum, { value }) => sum + value, 0);
+
+/**
+ * Picks the smallest UTXO that covers `targetValue` alone, else the largest ones first.
+ * Returns all of them when they are not enough.
+ */
+export function selectUtxos<T extends { value: number }>(utxos: T[], targetValue: number): T[] {
+  const [smallestSufficient] = utxos
+    .filter(({ value }) => value >= targetValue)
+    .sort((a, b) => a.value - b.value);
+  if (smallestSufficient) {
+    return [smallestSufficient];
+  }
+
+  const selected: T[] = [];
+  [...utxos]
+    .sort((a, b) => b.value - a.value)
+    .some((utxo) => {
+      selected.push(utxo);
+      return sumValues(selected) >= targetValue;
+    });
+  return selected;
+}
+
+/**
+ * Virtual size of sending `amount` at `feeRate` with the UTXOs `selectUtxos` picks for it and
+ * its fee, or every UTXO for a `sweep`, which has no change. Otherwise change of at least
+ * `dustAmount` gets an output, and `withChange` counts one anyway.
+ * No UTXOs count as one input, so an empty wallet still gets a usual size.
+ */
+export function estimateSendVsize(
+  utxos: { value: number }[],
+  amount: number,
+  feeRate: number,
+  {
+    dustAmount,
+    sweep,
+    withChange,
+    getVsize,
+  }: {
+    dustAmount: number;
+    sweep?: boolean;
+    withChange?: boolean;
+    getVsize: (inputCount: number, hasChange: boolean) => number;
+  },
+): number {
+  const getSendVsize = (fee: number) => {
+    const selected = sweep ? utxos : selectUtxos(utxos, amount + fee);
+    const hasChange = withChange || (!sweep && sumValues(selected) - amount - fee >= dustAmount);
+    return getVsize(Math.max(selected.length, 1), hasChange);
+  };
+  // The fee can take more inputs or the change; stop once a size repeats.
+  const vsizes: number[] = [];
+  let vsize = getSendVsize(0);
+  while (!vsizes.includes(vsize)) {
+    vsizes.push(vsize);
+    vsize = getSendVsize(Math.ceil(feeRate * vsize));
+  }
+  // A size that keeps flipping pays for the largest one it flips between.
+  return Math.max(...vsizes.slice(vsizes.indexOf(vsize)));
+}
 
 /**
  * Reads an esplora transaction from the owner's side (the first input's side if there is none).

@@ -47,7 +47,18 @@ import {
 } from '@/protocols/dogecoin/config';
 import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
 import { useDogeNetworkSettings } from '@/protocols/dogecoin/composables/dogeNetworkSettings';
-import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
+import {
+  estimateSendVsize,
+  normalizeTransactionStructure,
+  selectUtxos,
+  sumValues,
+} from '@/protocols/bitcoin/helpers';
+
+// Bytes of the version, locktime and input and output counts
+const TX_OVERHEAD_SIZE = 10;
+// Bytes of a P2PKH input with the longest low-S signature (72 bytes)
+const P2PKH_INPUT_SIZE = 148;
+const P2PKH_OUTPUT_SIZE = 34;
 
 class DogeExplorer extends ProtocolExplorer {
   constructor(private baseUrl: string) { super(); }
@@ -318,26 +329,15 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       };
     }));
 
-    const sorted = fullUtxos.sort((a, b) => (
-      Math.abs(a.value - amountInSatoshi + feeInSatoshi)
-      - Math.abs(b.value - amountInSatoshi + feeInSatoshi)
-    ));
+    const selected = selectUtxos(fullUtxos, amountInSatoshi + feeInSatoshi);
+    const total = sumValues(selected);
+    // Also refuses a fee or UTXO without a value
+    if (!(total >= amountInSatoshi + feeInSatoshi)) throw new Error('Insufficient balance');
 
-    let total = 0;
-    let enough = false;
     const psbt = new Psbt({ network: network as any });
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const {
-      txid, vout, value, transactionInHex,
-    } of sorted) {
-      if (enough) break;
+    selected.forEach(({ txid, vout, transactionInHex }) => {
       psbt.addInput({ hash: txid, index: vout, nonWitnessUtxo: Buffer.from(transactionInHex, 'hex') });
-      total += value;
-      if (total >= amountInSatoshi + feeInSatoshi) enough = true;
-    }
-
-    if (!enough) throw new Error('Insufficient balance');
+    });
 
     // bitcoinjs-lib 7 represents satoshi amounts as bigint.
     psbt.addOutput({ address: recipient, value: BigInt(amountInSatoshi) });
@@ -350,6 +350,36 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     // Dogecoin typical fee per vbyte can exceed bitcoinjs's default maximumFeeRate.
     // Pass `true` to bypass this safety check for Dogecoin.
     return psbt.extractTransaction(true);
+  }
+
+  /** Virtual sizes of the send at each of `feeRates` koinu/vB, see `estimateSendVsize`. */
+  async estimateVsize(
+    amountInDoge: number,
+    _recipient: string,
+    feeRates: number[],
+    options: { address: string; sweep?: boolean; withChange?: boolean },
+  ): Promise<number[]> {
+    const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
+    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
+    if (!Array.isArray(utxos)) {
+      throw new Error('Unexpected UTXO response');
+    }
+
+    return feeRates.map((feeRate) => estimateSendVsize(
+      utxos,
+      Math.round(amountInDoge * 1e8),
+      feeRate,
+      {
+        // Any change gets an output
+        dustAmount: 1,
+        sweep: options.sweep,
+        withChange: options.withChange,
+        getVsize: (inputCount, hasChange) => (
+          TX_OVERHEAD_SIZE + P2PKH_INPUT_SIZE * inputCount + P2PKH_OUTPUT_SIZE * (hasChange ? 2 : 1)
+        ),
+      },
+    ));
   }
 
   async spend(

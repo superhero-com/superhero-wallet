@@ -111,4 +111,20 @@ describe('BitcoinAdapter - custom network uses the testnet address format everyw
       [account.address, 9_000],
     ]);
   });
+
+  it('sizes a send to a tb1q recipient with change to the tb1q sender', async () => {
+    const account = adapter.getHdWalletAccountFromMnemonicSeed(seed, 0);
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = vi.fn((url: any) => (String(url) === `${CUSTOM_NODE_URL}/address/${account.address}/utxo`
+      ? Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([{ txid: 'ab'.repeat(32), vout: 0, value: 20_000 }]),
+      })
+      : Promise.reject(new Error(`Unhandled fetch: ${url}`))));
+
+    // One P2WPKH input, the payment and change
+    expect(await adapter.estimateVsize(0.0001, tb1qRecipient, [10], { address: account.address }))
+      .toEqual([141]);
+  });
 });

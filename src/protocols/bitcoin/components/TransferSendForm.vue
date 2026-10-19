@@ -37,6 +37,7 @@
             ? { min_value: toBitcoin(DUST_AMOUNT) }
             : {},
         }"
+        @update:model-value="shouldUseMaxAmount = false"
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
@@ -75,6 +76,7 @@ import {
   ref,
   watch,
 } from 'vue';
+import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
@@ -95,6 +97,8 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Logger from '@/lib/logger';
 import { DUST_AMOUNT } from '@/protocols/bitcoin/config';
+import type { BitcoinAdapter } from '@/protocols/bitcoin/libs/BitcoinAdapter';
+import type { DogecoinAdapter } from '@/protocols/dogecoin/libs/DogecoinAdapter';
 
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -199,19 +203,28 @@ export default defineComponent({
       }
     }
 
+    async function getTransactionVsizes(feeRates: number[]): Promise<number[]> {
+      // Max spends every input, so the fee doesn't move its size. A later send to
+      // another recipient can have change.
+      return (bitcoinAdapter as BitcoinAdapter | DogecoinAdapter).estimateVsize(
+        Number(formModel.value.amount) || 0,
+        formModel.value.addresses?.[0] || activeAccount.value.address,
+        feeRates,
+        {
+          address: activeAccount.value.address,
+          sweep: shouldUseMaxAmount.value,
+          withChange: recipientsCount.value > 1,
+        },
+      );
+    }
+
+    let feeUpdateRun = 0;
+    let appliedFeeUpdateRun = 0;
+
     async function updateFeeList() {
+      feeUpdateRun += 1;
+      const run = feeUpdateRun;
       try {
-        const byteSize = (await bitcoinAdapter.constructAndSignTx(
-          // TODO: changed to 0 because balance.value can differs
-          // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
-          // consider returning an actual amount in future
-          0,
-          formModel.value.addresses?.[0] || activeAccount.value.address,
-          {
-            fee: 0,
-            ...activeAccount.value,
-          },
-        )).virtualSize();
         const { nodeUrl } = (activeNetwork.value.protocols as any)[props.protocol];
 
         let feeRate: number | undefined;
@@ -226,25 +239,19 @@ export default defineComponent({
         const baseRate = (
           Number.isFinite(feeRate) && feeRate! > 0
         ) ? feeRate! : DEFAULT_RATE_SAT_PER_VB;
+        // Slow, medium and fast. Double the medium for the testnet to match relay fee.
+        // TODO: Revisit this along with fee calculation
+        const feeRates = [0.5, activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1, 1.5]
+          .map((factor) => factor * baseRate);
+        // Each speed is sized at its own rate, as a higher fee can take another input.
+        const vsizes = await getTransactionVsizes(feeRates);
+        // Drop this result if a newer run was already applied.
+        if (run < appliedFeeUpdateRun) return;
+        appliedFeeUpdateRun = run;
 
-        const feeStepFactor = new BigNumber(0.5);
-        const newFeeMedium = new BigNumber(Math.ceil(baseRate * byteSize));
-
-        feeSlow.value = new BigNumber(
-          toBitcoin(Math.ceil(newFeeMedium.minus(newFeeMedium.times(feeStepFactor)).toNumber())),
-        );
-
-        feeMedium.value = new BigNumber(
-          toBitcoin(
-            // Double the fee for the testnet to match relay fee.
-            // TODO: Revisit this along with fee calculation
-            newFeeMedium.toNumber() * (activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1),
-          ),
-        );
-
-        feeHigh.value = new BigNumber(
-          toBitcoin(Math.ceil(newFeeMedium.plus(newFeeMedium.times(feeStepFactor)).toNumber())),
-        );
+        [feeSlow.value, feeMedium.value, feeHigh.value] = feeRates.map((rate, idx) => (
+          new BigNumber(toBitcoin(Math.ceil(rate * vsizes[idx])))
+        ));
       } catch (error: any) {
         Logger.write(error);
       }
@@ -258,7 +265,12 @@ export default defineComponent({
       }, 5000);
     });
 
+    const updateFeeListDebounced = debounce(updateFeeList, 300);
+
+    watch([() => formModel.value.amount, recipientsCount], () => updateFeeListDebounced());
+
     onUnmounted(() => {
+      updateFeeListDebounced.cancel();
       if (polling) {
         clearInterval(polling);
       }
