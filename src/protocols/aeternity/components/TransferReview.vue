@@ -219,7 +219,7 @@ import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaPar
 import {
   aeToAettos,
   aettosToAe,
-  isAccountNotFoundError,
+  fetchAccountNextNonce,
 } from '@/protocols/aeternity/helpers';
 import {
   getAdjustedTransferTotal,
@@ -457,15 +457,10 @@ export default defineComponent({
 
     async function fetchCurrentAccountNonce() {
       const aeSdk = await getAeSdk();
-      try {
-        const { nonce } = await aeSdk.api.getAccountByPubkey(activeAccount.value.address);
-        return nonce + 1;
-      } catch (error) {
-        if (isAccountNotFoundError(error)) {
-          return 1;
-        }
-        throw error;
-      }
+      return fetchAccountNextNonce(
+        aeSdk.api,
+        activeAccount.value.address as Encoded.AccountAddress,
+      );
     }
 
     async function openTransactionFailedModal(msg: string) {

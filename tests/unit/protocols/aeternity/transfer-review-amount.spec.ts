@@ -1,9 +1,9 @@
 /**
  * [BLACK-BOX] The aeternity review screen signs exactly the amount the user
- * confirmed. The component, the adapter, `useAeSdk`, the SDK's spend and the
- * wallet's signer are real; the node is stubbed at its API methods and the signed
- * transaction is read back from `postTransaction`. The account store and the
- * composables a coin transfer does not go through are stubbed too.
+ * confirmed. The component, the adapter, `useAeSdk`, the SDK's spend and contract
+ * calls and the wallet's signer are real; the node is stubbed at its API methods and
+ * the signed transaction is read back from `postTransaction`. The account store and
+ * the composables a transfer does not go through are stubbed too.
  */
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import BigNumber from 'bignumber.js';
@@ -38,6 +38,7 @@ const ACCOUNT = {
   secretKey: decode(signer.secretKey),
 };
 const RECIPIENT = MemoryAccount.generate().address;
+const TOKEN = 'ct_46WPtSJH9Mc1rNbRaWo6k2v6Bm8dc1FuCFxS2n6gFo7M27Ucu';
 const AE_ASSET = { contractId: AE_CONTRACT_ID, protocol: PROTOCOLS.aeternity, decimals: 18 };
 const RECIPIENTS = [RECIPIENT, MemoryAccount.generate().address, MemoryAccount.generate().address];
 
@@ -117,6 +118,8 @@ async function acceptTransaction({ tx }: { tx: string }) {
 }
 
 let postTransaction: ReturnType<typeof vi.spyOn<Node, 'postTransaction'>>;
+let chainNonce = 0;
+let nextNonce = 1;
 
 beforeAll(() => {
   vi.spyOn(Node.prototype, 'getStatus').mockResolvedValue({
@@ -126,13 +129,54 @@ beforeAll(() => {
     topBlockHeight: 100,
   } as any);
   vi.spyOn(Node.prototype, 'getCurrentKeyBlockHeight').mockResolvedValue({ height: 100 });
+  // No protocol parameters endpoint, so the SDK's own are used.
+  const notFound = Object.assign(new Error('Not found'), { statusCode: 404 });
+  vi.spyOn(Node.prototype, 'getProtocolParameters').mockRejectedValue(notFound);
+  vi.spyOn(Node.prototype, 'getNodeSettings').mockRejectedValue(notFound);
+  vi.spyOn(Node.prototype, 'getRecentGasPrices')
+    .mockResolvedValue([{ minGasPrice: 1000000000n, minutes: 1, utilization: 0 }]);
+  // Contract calls: the contract exists and the dry run that prices the gas succeeds,
+  // but only at the nonce that follows the chain's, as on a real node.
+  vi.spyOn(Node.prototype, 'getContract').mockImplementation(async (contractId) => ({
+    id: contractId,
+    ownerId: ACCOUNT.address,
+    vmVersion: 7,
+    abiVersion: 3,
+    active: true,
+    referrerIds: [],
+    deposit: 0n,
+  } as any));
+  vi.spyOn(Node.prototype, 'protectedDryRunTxs').mockImplementation(async ({ txs }) => ({
+    results: txs.map(({ tx }) => (
+      unpackTx(tx as Encoded.Transaction, Tag.ContractCallTx).nonce === chainNonce + 1
+        ? {
+          type: 'contract_call',
+          result: 'ok',
+          callObj: {
+            callerId: ACCOUNT.address,
+            callerNonce: chainNonce + 1,
+            contractId: TOKEN,
+            gasPrice: 1000000000n,
+            gasUsed: 20000,
+            height: 100,
+            log: [],
+            returnType: 'ok',
+            // unit
+            returnValue: 'cb_Xfbg4g==',
+          },
+        }
+        : { type: 'contract_call', result: 'error', reason: 'tx_nonce_too_high_for_account' }
+    )),
+  } as any));
   vi.spyOn(Node.prototype, 'getAccountByPubkey').mockImplementation(async (address) => ({
     id: address,
     balance: 10n ** 30n,
-    nonce: 0,
+    nonce: chainNonce,
     kind: 'basic',
     payable: true,
   } as any));
+  // Counts the mempool too, unlike the account's nonce.
+  vi.spyOn(Node.prototype, 'getAccountNextNonce').mockImplementation(async () => ({ nextNonce }));
   postTransaction = vi.spyOn(Node.prototype, 'postTransaction')
     .mockImplementation(acceptTransaction as any);
   vi.spyOn(Logger, 'write').mockResolvedValue(undefined);
@@ -141,6 +185,8 @@ beforeAll(() => {
 afterAll(() => vi.restoreAllMocks());
 
 beforeEach(() => {
+  chainNonce = 0;
+  nextNonce = 1;
   postedTxs.length = 0;
   vi.clearAllMocks();
   // Also drops a failure a test queued but did not reach.
@@ -239,24 +285,57 @@ describe('aeternity TransferReview - signed amount', () => {
   });
 
   it('allows and tips every digit of a token amount', async () => {
-    const token = 'ct_46WPtSJH9Mc1rNbRaWo6k2v6Bm8dc1FuCFxS2n6gFo7M27Ucu';
     const amount = '1234.567890123456789012';
     const wrapper = mountReview({
       amount,
       addresses: ['https://example.com'],
-      selectedAsset: { contractId: token, protocol: PROTOCOLS.aeternity, decimals: 18 },
+      selectedAsset: { contractId: TOKEN, protocol: PROTOCOLS.aeternity, decimals: 18 },
       note: 'Thanks',
     }, { isAddressUrl: true });
     await flushPromises();
     await (wrapper.vm as any).submit();
 
-    expect(createOrChangeAllowance).toHaveBeenCalledWith(token, amount);
+    expect(createOrChangeAllowance).toHaveBeenCalledWith(TOKEN, amount);
     expect(tipToken).toHaveBeenCalledWith(
       'https://example.com',
       'Thanks',
-      token,
+      TOKEN,
       toBaseUnits(amount, 18),
     );
+  });
+});
+
+describe('aeternity TransferReview - nonce', () => {
+  it('signs with the next nonce counting pending transactions', async () => {
+    chainNonce = 4;
+    nextNonce = 9;
+    const wrapper = mountReview({
+      amount: '1',
+      addresses: [RECIPIENT],
+      fee: new BigNumber('0.00002'),
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(postedSpendTxs().map(({ nonce }) => nonce)).toEqual([9]);
+  });
+
+  it('sends a token with the next nonce while a transaction is pending', async () => {
+    chainNonce = 4;
+    nextNonce = 6;
+    const wrapper = mountReview({
+      amount: '1',
+      addresses: [RECIPIENT],
+      selectedAsset: { contractId: TOKEN, protocol: PROTOCOLS.aeternity, decimals: 18 },
+      fee: new BigNumber('0.0002'),
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(Logger.write).not.toHaveBeenCalled();
+    expect(postedTxs).toHaveLength(1);
+    expect(unpackTx(postedTxs[0], Tag.SignedTx).encodedTx)
+      .toMatchObject({ tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 6 });
   });
 });
 
@@ -313,6 +392,27 @@ describe('aeternity TransferReview - several recipients', () => {
     expect(routerPush).toHaveBeenCalledWith(expect.objectContaining({
       query: { latestTxHash: buildTxHash(postedTxs[0]) },
     }));
+  });
+
+  it('transfers a token to every recipient with the following nonces', async () => {
+    chainNonce = 4;
+    nextNonce = 5;
+    const wrapper = mountReview({
+      amount: '1',
+      addresses: RECIPIENTS,
+      selectedAsset: { contractId: TOKEN, protocol: PROTOCOLS.aeternity, decimals: 18 },
+      // 0.0002 AE each, above the least fee of a contract call
+      fee: new BigNumber('0.0006'),
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(Logger.write).not.toHaveBeenCalled();
+    expect(postedTxs.map((tx) => unpackTx(tx, Tag.SignedTx).encodedTx)).toMatchObject([
+      { tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 5 },
+      { tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 6 },
+      { tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 7 },
+    ]);
   });
 });
 
