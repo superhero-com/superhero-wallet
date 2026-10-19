@@ -6,7 +6,8 @@
  */
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { Transaction, TransactionFactory, privateKeyToAddress } from 'web3-eth-accounts';
-import { hexToBytes } from 'web3-utils';
+import { decodeFunctionCall } from 'web3-eth-abi';
+import { bytesToHex, hexToBytes } from 'web3-utils';
 
 import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/ethereum/components/TransferReview.vue';
@@ -31,9 +32,23 @@ const {
   };
 });
 
+/** The standard ERC-20 transfer, to read the signed calldata back with. */
+const TRANSFER_ABI = {
+  name: 'transfer',
+  type: 'function',
+  inputs: [{ name: 'to', type: 'address' }, { name: 'value', type: 'uint256' }],
+  outputs: [{ name: '', type: 'bool' }],
+  stateMutability: 'nonpayable',
+} as const;
 const FROM_ACCOUNT = privateKeyToAddress(SECRET_KEY);
 const RECIPIENT = '0x0000000000000000000000000000000000000002';
 const TOKEN_CONTRACT = '0x0000000000000000000000000000000000000003';
+const CHAIN_IDS: Record<string, bigint> = {
+  [PROTOCOLS.ethereum]: 1n,
+  [PROTOCOLS.bnb]: 56n,
+  [PROTOCOLS.avalanche]: 43114n,
+  [PROTOCOLS.polygonPos]: 137n,
+};
 
 vi.mock('vue-router', async (importOriginal) => ({
   ...await importOriginal<object>(),
@@ -202,6 +217,25 @@ describe.each([
   });
 });
 
+describe.each([
+  PROTOCOLS.ethereum,
+  PROTOCOLS.bnb,
+  PROTOCOLS.avalanche,
+  PROTOCOLS.polygonPos,
+])('%s TransferReview - coin transfer', (protocol) => {
+  it('signs a plain transfer to the recipient on the chain', async () => {
+    const { coinContractId } = ProtocolAdapterFactory.getAdapter(protocol as any);
+    const signedTx = await signReviewed(protocol, coinContractId, '0.5');
+
+    expect(signedTx.to?.toString()).toBe(RECIPIENT);
+    expect(signedTx.value).toBe(500000000000000000n);
+    expect(signedTx.data).toHaveLength(0);
+    expect(signedTx.common.chainId()).toBe(CHAIN_IDS[protocol]);
+    expect(signedTx.nonce).toBe(3n);
+    expect(signedTx.gasLimit).toBe(21000n);
+  });
+});
+
 // Avalanche has no token transfers.
 describe.each([
   PROTOCOLS.ethereum,
@@ -210,6 +244,25 @@ describe.each([
 ])('%s TransferReview - token transfer', (protocol) => {
   beforeEach(() => {
     explorerRequests.length = 0;
+  });
+
+  it('calls the token contract to transfer the amount in its own decimals', async () => {
+    const signedTx = await signReviewed(protocol, TOKEN_CONTRACT, '1.5');
+
+    expect(signedTx.to?.toString()).toBe(TOKEN_CONTRACT);
+    expect(signedTx.value).toBe(0n);
+    expect(signedTx.common.chainId()).toBe(CHAIN_IDS[protocol]);
+    expect(signedTx.nonce).toBe(3n);
+    // The node's estimate of 65 000 gas plus 15% headroom
+    expect(signedTx.gasLimit).toBe(74750n);
+    const callData = bytesToHex(signedTx.data);
+    // The selector of transfer(address,uint256)
+    expect(callData.slice(0, 10)).toBe('0xa9059cbb');
+    expect(decodeFunctionCall(TRANSFER_ABI, callData)).toMatchObject({
+      __method__: 'transfer(address,uint256)',
+      to: RECIPIENT,
+      value: 1500000n,
+    });
   });
 
   it('signs without waiting for the block explorer', async () => {

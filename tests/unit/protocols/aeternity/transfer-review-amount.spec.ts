@@ -16,6 +16,7 @@ import {
   decode,
   unpackTx,
 } from '@aeternity/aepp-sdk';
+import { Encoder } from '@aeternity/aepp-calldata';
 
 import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/aeternity/components/TransferReview.vue';
@@ -24,6 +25,7 @@ import { PROTOCOLS } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { i18n } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';
+import FungibleTokenFullACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 // The setup files already loaded the composables with the real deps; reload them to apply mocks.
 vi.hoisted(() => vi.resetModules());
@@ -79,8 +81,9 @@ vi.mock('@/composables/deepLinkApi', () => ({
   useDeepLinkApi: () => ({ isDeepLinkUsed: false, openCallbackOrGoHome: vi.fn() }),
 }));
 
-const { createOrChangeAllowance, tipToken } = vi.hoisted(() => ({
+const { createOrChangeAllowance, tipCoin, tipToken } = vi.hoisted(() => ({
   createOrChangeAllowance: vi.fn(),
+  tipCoin: vi.fn(async () => ({ hash: 'th_tip' })),
   tipToken: vi.fn(async () => ({ hash: 'th_tip' })),
 }));
 
@@ -93,7 +96,7 @@ vi.mock('@/composables/fungibleTokens', () => ({
 vi.mock('@/composables/tippingContracts', () => ({
   useTippingContracts: () => ({
     getTippingContracts: async () => ({
-      tippingV2: { tip_token: tipToken, $options: { address: 'ct_tipping' } },
+      tippingV2: { tip: tipCoin, tip_token: tipToken, $options: { address: 'ct_tipping' } },
     }),
   }),
 }));
@@ -302,6 +305,53 @@ describe('aeternity TransferReview - signed amount', () => {
       TOKEN,
       toBaseUnits(amount, 18),
     );
+  });
+});
+
+describe('aeternity TransferReview - signed calls', () => {
+  it('transfers every digit of a token amount to the recipient', async () => {
+    const amount = '1234.567890123456789012';
+    const wrapper = mountReview({
+      amount,
+      addresses: [RECIPIENT],
+      selectedAsset: { contractId: TOKEN, protocol: PROTOCOLS.aeternity, decimals: 18 },
+      fee: new BigNumber('0.0002'),
+      nonce: 1,
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(postedTxs).toHaveLength(1);
+    const { encodedTx } = unpackTx(postedTxs[0], Tag.SignedTx);
+    expect(encodedTx).toMatchObject({
+      tag: Tag.ContractCallTx,
+      callerId: ACCOUNT.address,
+      contractId: TOKEN,
+      amount: '0',
+      fee: '200000000000000',
+      nonce: 1,
+    });
+    expect((encodedTx as { callData: string }).callData).toBe(
+      new Encoder(FungibleTokenFullACI as any).encode('FungibleTokenFull', 'transfer', [
+        RECIPIENT,
+        BigInt(toBaseUnits(amount, 18)),
+      ]),
+    );
+  });
+
+  it('tips every digit of a coin amount', async () => {
+    const wrapper = mountReview({
+      amount: '1.499825123456789123',
+      addresses: ['https://example.com'],
+      note: 'Thanks',
+    }, { isAddressUrl: true });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(tipCoin).toHaveBeenCalledWith('https://example.com', 'Thanks', {
+      amount: '1499825123456789123',
+      waitMined: false,
+    });
   });
 });
 
