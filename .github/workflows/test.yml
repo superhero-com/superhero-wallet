@@ -82,3 +82,27 @@ jobs:
       - name: Install app dependencies
         run: npm ci
       - run: npm run test:e2e:extension
+  webkit:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: wallet
+      PUPPETEER_SKIP_DOWNLOAD: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install app dependencies
+        run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+      # The WebKit of iOS 17, as pinned by playwright-core
+      - name: Install WebKit
+        run: npx playwright-core install --with-deps webkit
+      - run: npm run test:e2e:webkit
