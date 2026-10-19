@@ -805,6 +805,8 @@ export interface IAuctionBid {
 export interface IAuction {
   bids: IAuctionBid[];
   expiration: number;
+  /** As the node has it: `bids` leaves out the bids made through a contract call */
+  highestBid?: IAuctionBid;
 }
 
 export interface INameAuctionBid {

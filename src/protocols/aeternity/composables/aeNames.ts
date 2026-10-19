@@ -89,10 +89,8 @@ interface IUpdateNamePointerParams {
   type?: keyof typeof UPDATE_POINTER_ACTION;
 }
 
-interface IAuctionEntryParams {
+interface IAuctionEntryParams extends IAuction {
   name: ChainName;
-  expiration: number;
-  bids: IAuctionBid[];
 }
 
 type PendingNameTransactionType = 'NameUpdateTx' | 'NameTransferTx';
@@ -446,20 +444,42 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return auctions.value[name] || null;
   }
 
-  function getNameAuctionHighestBid(name: string): IAuctionBid {
-    return getNameAuction(name)
-      ?.bids
-      .reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
+  function getNameAuctionHighestBid(name: string): IAuctionBid | undefined {
+    const auction = getNameAuction(name);
+    if (auction?.highestBid) {
+      return auction.highestBid;
+    }
+    const bids = auction?.bids;
+    return bids?.length
+      ? bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b))
+      : undefined;
+  }
+
+  /** `undefined` when the node can't tell, the middleware bids are all there is then */
+  async function fetchNodeAuctionHighestBid(name: string): Promise<IAuctionBid | undefined> {
+    try {
+      const aeSdk = await getAeSdk();
+      const { highestBidder, highestBid } = await aeSdk.api.getAuctionEntryByName(name);
+      return {
+        accountId: highestBidder,
+        nameFee: new BigNumber(aettosToAe(highestBid.toString())),
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   /**
    * For an expired name that is auctioned again the middleware returns the previous
    * owner's claims and activities, so only the auction itself has the current bids.
+   * The highest bid comes from the node: the middleware lists a claim made by a contract
+   * call without its amount.
    */
   async function fetchNameAuction(name: string): Promise<IAuction> {
-    const { info } = await fetchFromMiddlewareCamelCasedPrecise(
-      `/v2/names/${name}/auction?expand=true`,
-    );
+    const [{ info }, highestBid] = await Promise.all([
+      fetchFromMiddlewareCamelCasedPrecise(`/v2/names/${name}/auction?expand=true`),
+      fetchNodeAuctionHighestBid(name),
+    ]);
     return {
       expiration: info.auctionEnd,
       bids: info.bids
@@ -470,6 +490,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
           accountId,
           nameFee: new BigNumber(aettosToAe(nameFee!)),
         })),
+      highestBid,
     };
   }
 
@@ -564,8 +585,13 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
-  function setAuctionEntry({ name, expiration, bids }: IAuctionEntryParams) {
-    auctions.value[name] = { expiration, bids };
+  function setAuctionEntry({
+    name,
+    expiration,
+    bids,
+    highestBid,
+  }: IAuctionEntryParams) {
+    auctions.value[name] = { expiration, bids, highestBid };
   }
 
   function setPendingAutoExtendName(name: ChainName) {

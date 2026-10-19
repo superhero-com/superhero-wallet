@@ -66,6 +66,7 @@ const createTestContext = async ({
     getHeight: vi.fn().mockResolvedValue(topBlockHeight),
     api: {
       getTopHeader: vi.fn().mockResolvedValue({ height: topBlockHeight }),
+      getAuctionEntryByName: vi.fn().mockRejectedValue(new Error('Name auction not found')),
     },
   };
 
@@ -1451,5 +1452,43 @@ describe('useAeNames fetchNameAuction', () => {
 
     ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
     expect(ctx.aeNames.getNameAuctionHighestBid('test.chain').accountId).toBe('ak_carol');
+  });
+
+  const contractBidAuction = {
+    name: 'test.chain',
+    status: 'auction',
+    info: {
+      auctionEnd: 1000,
+      bids: [{ tx: { type: 'ContractCallTx', callerId: 'ak_dave' } }],
+    },
+  };
+
+  it('takes the highest bid from the node, which knows the amount of a contract call bid', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue(contractBidAuction);
+    ctx.sdk.api.getAuctionEntryByName.mockResolvedValue({
+      highestBidder: 'ak_dave',
+      highestBid: 600000000000000000001n,
+    });
+
+    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+
+    expect(ctx.sdk.api.getAuctionEntryByName).toHaveBeenCalledWith('test.chain');
+    expect(auction.bids).toEqual([]);
+    const highestBid = ctx.aeNames.getNameAuctionHighestBid('test.chain');
+    expect([highestBid.accountId, highestBid.nameFee.toFixed()])
+      .toEqual(['ak_dave', '600.000000000000000001']);
+  });
+
+  it('has no highest bid when every bid was made by a contract call and the node can\'t tell', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue(contractBidAuction);
+
+    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+
+    expect(auction.bids).toEqual([]);
+    expect(ctx.aeNames.getNameAuctionHighestBid('test.chain')).toBeUndefined();
   });
 });
