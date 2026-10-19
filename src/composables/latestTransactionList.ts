@@ -4,12 +4,14 @@ import type {
   AccountAddress,
   IAccount,
   ICommonTransaction,
+  IFetchTransactionResult,
   ITokenBalance,
   ITransaction,
   ITx,
 } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import {
+  handleUnknownError,
   pipe,
   removeDuplicatedTransactions,
   sortTransactionsByDate,
@@ -113,10 +115,17 @@ export function useLatestTransactionList() {
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const currentNetworkName = activeNetwork.value.name;
+    let response: IFetchTransactionResult;
+    try {
+      response = await adapter.fetchAccountTransactions(address);
+    } catch (error) {
+      handleUnknownError(error);
+      return true;
+    }
     const {
       regularTransactions,
       pendingTransactions,
-    } = await adapter.fetchAccountTransactions(address);
+    } = response;
 
     // This is necessary in case the user switches between networks faster,
     // than transactions are returned (limitations of the free Ethereum middleware)

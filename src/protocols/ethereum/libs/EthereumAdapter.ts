@@ -45,7 +45,7 @@ import type {
   NetworkTypeDefault,
 } from '@/types';
 import { ACCOUNT_TYPES, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
-import { getLastNotEmptyAccountIndex, handleUnknownError, toHex } from '@/utils';
+import { getLastNotEmptyAccountIndex, toHex } from '@/utils';
 import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -493,8 +493,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         paginationParams.nextPageNum = ((nextPageNum) ? +nextPageNum + 1 : 2).toString();
       }
     } catch (error: any) {
-      handleUnknownError(error);
       Logger.write(error);
+      throw error;
     }
 
     return {
@@ -534,6 +534,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return {

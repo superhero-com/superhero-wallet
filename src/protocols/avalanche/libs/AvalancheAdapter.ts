@@ -368,6 +368,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
@@ -407,6 +408,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };

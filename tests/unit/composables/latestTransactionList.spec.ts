@@ -393,6 +393,34 @@ describe('useLatestTransactionList', () => {
     });
   });
 
+  describe('a failing history API', () => {
+    it('logs a failing account', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.spyOn(ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity), 'fetchAccountTransactions')
+        .mockRejectedValueOnce(new Error('HTTP 500'));
+      etherscanTxList[ETHEREUM_CHAIN_ID] = [etherscanTransfer({
+        hash: OTHER_HASH, nonce: 5, from: EVM_OTHER_ADDRESS, to: EVM_ADDRESS,
+      })];
+      const {
+        allLatestTransactions,
+        areLatestTransactionsUpdating,
+        loadAllLatestTransactions,
+      } = await openWallet();
+
+      expect(findTransaction(allLatestTransactions, OTHER_HASH)).toBeDefined();
+      expect(areLatestTransactionsUpdating.value).toBe(false);
+      expect(warn).toHaveBeenCalledWith('Unknown rejection', new Error('HTTP 500'));
+
+      aeHistory = [aeMiddlewareSpend({
+        hash: AE_OTHER_HASH, nonce: 1, senderId: AE_OTHER_ADDRESS, recipientId: AE_ADDRESS,
+      })];
+      await loadAllLatestTransactions();
+
+      expect(findTransaction(allLatestTransactions, AE_OTHER_HASH)).toBeDefined();
+      warn.mockRestore();
+    });
+  });
+
   describe('a network switch', () => {
     it('loads the new network when it happens while the previous one is loading', async () => {
       const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);

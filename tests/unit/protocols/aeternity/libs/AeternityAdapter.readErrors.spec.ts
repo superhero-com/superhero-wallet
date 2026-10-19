@@ -54,4 +54,18 @@ describe('AeternityAdapter read errors', () => {
 
     expect(await adapter.fetchAccountTokenBalances('ak_test')).toBeNull();
   });
+
+  it.each([
+    ['fetchAccountTransactions', (adapter) => adapter.fetchAccountTransactions('ak_test')],
+    ['fetchAccountAssetTransactions', (adapter) => adapter.fetchAccountAssetTransactions('ak_test', 'ct_token')],
+  ])('%s rejects when the middleware fails', async (_, fetchPage) => {
+    const error = new TypeError('Failed to fetch');
+    vi.spyOn(global, 'fetch').mockRejectedValue(error);
+    const adapter = await getAdapter();
+    vi.spyOn(adapter, 'fetchPendingTransactions').mockResolvedValue([]);
+    const { default: Logger } = await import('@/lib/logger');
+    vi.spyOn(Logger, 'write').mockResolvedValue(undefined);
+
+    await expect(fetchPage(adapter)).rejects.toBe(error);
+  });
 });

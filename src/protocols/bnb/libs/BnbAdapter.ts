@@ -491,6 +491,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
@@ -530,6 +531,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
