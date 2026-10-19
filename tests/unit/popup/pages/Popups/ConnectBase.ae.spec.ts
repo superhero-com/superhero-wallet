@@ -5,7 +5,7 @@ import type { AppOriginSource } from '@/types';
 import ConnectBase from '@/popup/pages/Popups/ConnectBase.vue';
 import { usePopupProps, useAccounts } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
-import { PROTOCOLS } from '@/constants';
+import { PERMISSION_DEFAULTS, PROTOCOLS } from '@/constants';
 import { createAppData } from '@/utils';
 import en from '@/popup/locales/en-US.json';
 
@@ -142,6 +142,54 @@ describe('ConnectBase.vue dapp identity', () => {
       }),
     });
     expect(permissions.value['app.uniswap.org']).not.toHaveProperty('originSource');
+  });
+
+  it('saves only the connection for the http page of a site connected over https', async () => {
+    const { addPermission, permissions, resetPermissions } = usePermissions();
+    resetPermissions();
+    addPermission({
+      ...PERMISSION_DEFAULTS,
+      host: 'app.uniswap.org',
+      name: 'Uniswap',
+      address: true,
+      addressList: true,
+      messageSign: true,
+      dailySpendLimit: true,
+      transactionSignLimit: 5,
+      transactionSignSpent: 1,
+      protocol: 'https:',
+    });
+
+    const wrapper = mountWithApp('http://app.uniswap.org/');
+    expect(shownName(wrapper)).toBe('app.uniswap.org');
+    await wrapper.find('[data-cy="accept"]').trigger('click');
+
+    expect(permissions.value['app.uniswap.org']).toEqual({
+      ...PERMISSION_DEFAULTS,
+      ...createAppData('http://app.uniswap.org/'),
+      address: true,
+    });
+  });
+
+  it('keeps the permission of a site that moved to https', async () => {
+    const { addPermission, permissions, resetPermissions } = usePermissions();
+    resetPermissions();
+    addPermission({
+      ...PERMISSION_DEFAULTS,
+      host: 'app.uniswap.org',
+      name: 'Uniswap',
+      messageSign: true,
+      transactionSignLimit: 5,
+      protocol: 'http:',
+    });
+
+    const wrapper = mountWithApp('https://app.uniswap.org/');
+    expect(shownName(wrapper)).toBe('Uniswap');
+    await wrapper.find('[data-cy="accept"]').trigger('click');
+
+    expect(permissions.value['app.uniswap.org']).toMatchObject({
+      name: 'Uniswap', messageSign: true, transactionSignLimit: 5, protocol: 'https:',
+    });
   });
 
   it('saves no permission for the URL a WalletConnect dapp claims', async () => {

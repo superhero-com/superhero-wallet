@@ -236,7 +236,7 @@ export default defineComponent({
       sender,
       setPopupProps,
     } = usePopupProps();
-    const { permissions, addPermission } = usePermissions();
+    const { addPermission, getPermissionForUrl } = usePermissions();
 
     const accessLabels: Record<ConnectPermission, any> = {
       [CONNECT_PERMISSIONS.address]: {
@@ -295,9 +295,10 @@ export default defineComponent({
       selectedAccount.value = getAccountByProtocolAndAddress(protocol as Protocol, address);
     }
 
+    // Not one given to a more secure page: an `http:` page can't take what `https:` was given
     const permission = computed(() => {
-      const host = popupProps.value?.app?.host;
-      return (host) ? permissions.value[host] : undefined;
+      const href = popupProps.value?.app?.href;
+      return (href) ? getPermissionForUrl(href) : undefined;
     });
 
     // A WalletConnect dapp's permission is never saved, so there is nothing to remember
@@ -349,6 +350,8 @@ export default defineComponent({
           ...permission.value,
           name: permission.value?.name || app.name || app.host,
           address: rememberMe.value,
+          // Not the scheme of the permission it replaces
+          protocol: app.protocol,
         });
       }
       if (selectedAccount.value) {

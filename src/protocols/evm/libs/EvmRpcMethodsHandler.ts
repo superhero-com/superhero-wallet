@@ -101,7 +101,7 @@ async function checkOrAskEvmPermission(
   originSource?: AppOriginSource,
   sessionTopic?: string,
 ) {
-  const { checkOrAskPermission, permissions } = usePermissions();
+  const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
   await watchUntilTruthy(() => !isCheckingPermissions.value);
 
@@ -125,7 +125,7 @@ async function checkOrAskEvmPermission(
       approveWalletConnectSession(sessionTopic);
     } else if (permission && aepp && originSource !== 'self-reported') {
       // The popup answers before the permission it stores reaches this context
-      await watchUntilTruthy(() => permissions.value[new URL(aepp).host], 3000);
+      await watchUntilTruthy(() => getPermissionForUrl(aepp), 3000);
     }
     await watchUntilTruthy(() => !isEmpty(activeAccount.value));
     return permission;
@@ -141,8 +141,8 @@ async function checkOrAskEvmPermission(
  */
 function isConnectedApp(aepp: string, originSource?: AppOriginSource) {
   if (originSource === 'self-reported') return true;
-  const { permissions } = usePermissions();
-  return !!aepp && !!permissions.value[new URL(aepp).host];
+  const { getPermissionForUrl } = usePermissions();
+  return !!aepp && !!getPermissionForUrl(aepp);
 }
 
 /**
@@ -273,7 +273,12 @@ export async function handleEvmRpcMethod(
   /** Of the WalletConnect session the request came in */
   sessionTopic?: string,
 ): Promise<EvmRpcResponse> {
-  const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
+  const {
+    checkPermission,
+    checkOrAskPermission,
+    getPermissionForUrl,
+    removePermission,
+  } = usePermissions();
   const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
 
@@ -294,7 +299,7 @@ export async function handleEvmRpcMethod(
 
   if (method === ETH_RPC_METHODS.getAccounts) {
     // A WalletConnect session already holds its accounts
-    if (originSource === 'self-reported' || checkPermission(new URL(aepp).host, METHODS.connect)) {
+    if (originSource === 'self-reported' || checkPermission(aepp, METHODS.connect)) {
       const evmAccount = getLastActiveProtocolAccount(protocol);
 
       return {
@@ -331,8 +336,9 @@ export async function handleEvmRpcMethod(
     if (sessionTopic) {
       approvedSessionTopics.delete(sessionTopic);
     }
-    // The URL a WalletConnect dapp claims may be a site the user connected
-    if (originSource !== 'self-reported') {
+    // The URL a WalletConnect dapp claims may be a site the user connected,
+    // and an `http:` page can't drop what was given to the `https:` one
+    if (originSource !== 'self-reported' && getPermissionForUrl(aepp)) {
       removePermission(new URL(aepp).host);
     }
     return { result: null };

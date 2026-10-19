@@ -46,6 +46,7 @@ vi.mock('@/composables', () => {
       checkPermission: () => true,
       checkOrAskPermission,
       removePermission: (host: string) => { delete permissions.value[host]; },
+      getPermissionForUrl: (url: string) => permissions.value[new URL(url).host],
       permissions,
     }),
     useAccounts: () => ({

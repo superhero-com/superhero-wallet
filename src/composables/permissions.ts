@@ -146,17 +146,36 @@ export function usePermissions() {
     return true;
   }
 
+  /**
+   * The permission of the host, unless it was given to a more secure page,
+   * e.g. an `http:` page does not get the permission of the `https:` one.
+   */
+  function getPermissionForUrl(fullUrl: string): IPermission | undefined {
+    const { host, protocol } = new URL(fullUrl);
+    const permission = permissions.value[host];
+    return (
+      // One added by hand has no scheme
+      !permission?.protocol
+      || permission.protocol === protocol
+      // A site that moved to https keeps what its http page was given
+      || protocol === 'https:'
+    ) ? permission : undefined;
+  }
+
   function checkPermission(
-    host: string,
+    fullUrl: string,
     method: METHODS,
     transactionSignOptions: ITransactionSignPermissionOptions = {},
   ): boolean {
-    const permission = permissions.value[host];
+    const permission = getPermissionForUrl(fullUrl);
     if (!permission) {
       return false;
     }
     switch (method) {
-      case METHODS.sign: return checkTransactionSignLimit(host, transactionSignOptions);
+      case METHODS.sign: return checkTransactionSignLimit(
+        new URL(fullUrl).host,
+        transactionSignOptions,
+      );
       case METHODS.connect: return permission.address;
       case METHODS.address: return permission.addressList;
       case METHODS.signMessage: return permission.messageSign;
@@ -188,9 +207,8 @@ export function usePermissions() {
     const { activeAccount } = useAccounts();
 
     if (fullUrl) {
-      const url = new URL(fullUrl);
       if (
-        checkPermission(url.host, method, modalProps.tx)
+        checkPermission(fullUrl, method, modalProps.tx)
         && !(method === METHODS.sign && modalProps.protocol !== PROTOCOLS.aeternity)
         // A host the dapp claims can't use a message signing right granted to the real one
         && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
@@ -260,6 +278,7 @@ export function usePermissions() {
     permissions,
     addPermission,
     removePermission,
+    getPermissionForUrl,
     checkPermission,
     checkOrAskPermission,
     checkTransactionSignLimit,
