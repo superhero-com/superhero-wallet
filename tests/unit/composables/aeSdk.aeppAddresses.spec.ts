@@ -10,10 +10,20 @@ import {
   AeSdkAepp,
   BrowserWindowMessageConnection,
   MESSAGE_DIRECTION,
+  METHODS,
   Node,
+  RpcNotAuthorizeError,
+  Tag,
+  buildTx,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import { ACCOUNT_TYPES, PROTOCOLS, STORAGE_KEYS } from '@/constants';
+import {
+  ACCOUNT_TYPES,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
+  PROTOCOLS,
+  STORAGE_KEYS,
+} from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { encrypt, generateEncryptionKey, generateSalt } from '@/utils/crypto';
 
@@ -145,5 +155,52 @@ describe('useAeSdk, an aepp asking for addresses', () => {
     const { aepp } = await connectAepp();
 
     await expect(aepp.askAddresses()).rejects.toThrow('Operation rejected by user');
+  });
+
+  describe('then asking to sign', () => {
+    /** As an account of the SDK's `WalletConnectorFrame.getAccounts()` asks */
+    async function requestSign(aepp, accounts) {
+      const { address } = accounts.getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+      const tx = buildTx({
+        tag: Tag.SpendTx,
+        senderId: address,
+        recipientId: address,
+        amount: '1000000000000000000',
+        fee: 2e14,
+        nonce: 1,
+      });
+      const { signedTransaction } = await aepp.rpcClient.request(METHODS.sign, {
+        onAccount: address, tx, returnSigned: true, networkId: 'ae_mainnet',
+      });
+      return unpackTx(signedTransaction);
+    }
+
+    it('is rejected without asking when the aepp was given no account', async () => {
+      seedHdAccounts([PROTOCOLS.aeternity]);
+      const { aepp, accounts } = await connectAepp();
+
+      await expect(requestSign(aepp, accounts)).rejects.toBeInstanceOf(RpcNotAuthorizeError);
+      expect(openModal).not.toHaveBeenCalled();
+    });
+
+    it('is rejected without asking when the user refused the aepp the accounts', async () => {
+      seedHdAccounts([PROTOCOLS.aeternity]);
+      openModal.mockRejectedValueOnce(new Error('Rejected'));
+      const { aepp, accounts } = await connectAepp();
+      await expect(aepp.askAddresses()).rejects.toThrow('Operation rejected by user');
+
+      await expect(requestSign(aepp, accounts)).rejects.toBeInstanceOf(RpcNotAuthorizeError);
+      expect(openModal).toHaveBeenCalledOnce();
+    });
+
+    it('is asked to the user once the aepp listed the accounts', async () => {
+      seedHdAccounts([PROTOCOLS.aeternity]);
+      const { aepp, accounts } = await connectAepp();
+      await aepp.askAddresses();
+
+      expect(await requestSign(aepp, accounts)).toMatchObject({ tag: Tag.SignedTx });
+      expect(openModal).toHaveBeenCalledTimes(2);
+      expect(openModal).toHaveBeenLastCalledWith(MODAL_CONFIRM_TRANSACTION_SIGN, expect.anything());
+    });
   });
 });

@@ -3,6 +3,7 @@ import {
   AccountBase,
   DelegationTag,
   MemoryAccount,
+  RpcNotAuthorizeError,
   RpcRejectedByUserError,
   getTransactionSignerAddress,
   unpackDelegation,
@@ -69,6 +70,16 @@ function isDappRequest(options?: { aeppOrigin?: string; [key: string]: any }): b
   return IS_OFFSCREEN_TAB || IN_FRAME || !!options?.aeppOrigin;
 }
 
+/**
+ * An aepp can ask to sign only once the user let it see the accounts, by subscribing
+ * or listing them. A deep link comes with no RPC client.
+ */
+function assertAeppGivenAccounts(aeppRpcClientId?: string) {
+  if (aeppRpcClientId && !useAeSdk().isAeppGivenAccounts(aeppRpcClientId)) {
+    throw new RpcNotAuthorizeError();
+  }
+}
+
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
@@ -130,6 +141,8 @@ export class AeAccountHdWallet extends MemoryAccount {
     txBase64: Encoded.Transaction,
     options: Parameters<AccountBase['signTransaction']>[1] & InternalOptions,
   ): Promise<Encoded.Transaction> {
+    // Also before the Air Gap modal below
+    assertAeppGivenAccounts(options?.aeppRpcClientId);
     if (!this.nodeNetworkId.value) {
       // The initial node status request may have failed (e.g. no connectivity
       // right after a fresh browser start), leaving `nodeNetworkId` empty even
@@ -311,6 +324,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let modalResolution: ISignModalResolution | undefined;
 
     if (isDappRequest(options)) {
+      assertAeppGivenAccounts(options?.aeppRpcClientId);
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
@@ -366,6 +380,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let modalResolution: ISignModalResolution | undefined;
 
     if (isDappRequest(options)) {
+      assertAeppGivenAccounts(options?.aeppRpcClientId);
       const dataType = new TypeResolver().resolveType(aci);
       const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
       const {
@@ -410,6 +425,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     const { getMiddleware } = useAeMiddleware();
 
     if (isDappRequest(options)) {
+      assertAeppGivenAccounts(options?.aeppRpcClientId);
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -477,6 +493,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let modalResolution: ISignModalResolution | undefined;
 
     if (isDappRequest(options) && !this.isSigningAlreadyConfirmed) {
+      assertAeppGivenAccounts(options?.aeppRpcClientId);
       this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
