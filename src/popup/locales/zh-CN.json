@@ -1011,6 +1011,7 @@
     },
     "names": {
       "balance-error": "你的账户余额不足以执行该交易。",
+      "preclaim-not-mined": "{name} 的预注册交易未被打包。请重新注册该名称。",
       "pointer-added": "名称 {type} 成功！",
       "auto-extend": "自动延长",
       "tabs": {

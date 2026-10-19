@@ -13,6 +13,7 @@ import {
   unpackTx,
   verify,
 } from '@aeternity/aepp-sdk';
+import en from '@/popup/locales/en-US.json';
 import { restError } from '../../../helpers/restError';
 
 /**
@@ -31,7 +32,9 @@ const keys = Object.fromEntries([activeAccount, otherAccount].map((account) => [
   account,
 ]));
 
-function createNode() {
+function createNode({
+  getTransactionByHash = async (hash) => ({ hash, blockHeight: TOP_HEIGHT, tx: {} }),
+} = {}) {
   const posted = [];
   const node = {
     posted,
@@ -49,7 +52,7 @@ function createNode() {
       posted.push(tx);
       return { txHash: buildTxHash(tx) };
     },
-    getTransactionByHash: async (hash) => ({ hash, blockHeight: TOP_HEIGHT, tx: {} }),
+    getTransactionByHash,
     nameEntry: null,
     getNameEntryByName: async () => {
       if (!node.nameEntry) {
@@ -69,6 +72,9 @@ const nameEntry = (owner, pointers = []) => ({
   pointers,
 });
 
+/** Lets a change to the stored entries reach the storage */
+const settleStorage = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+
 /** The transactions the node got, unwrapped from their signatures. */
 const postedTxs = (node) => node.posted.map((tx) => unpackTx(tx, Tag.SignedTx).encodedTx);
 
@@ -79,11 +85,15 @@ function isSignedBy(signedTx, address) {
   return verify(Buffer.concat([Buffer.from(NETWORK_ID), txHash]), signature, address);
 }
 
-async function createContext({ preclaimedNames = {}, ownedNames = [] } = {}) {
+async function createContext({
+  preclaimedNames = {},
+  ownedNames = [],
+  getTransactionByHash = undefined,
+} = {}) {
   vi.resetModules();
   localStorage.clear();
 
-  const node = createNode();
+  const node = createNode({ getTransactionByHash });
   const sdk = {
     // As `AeSdkBase.getContext`; transactions are built as without `verify`
     getContext: (mergeWith = {}) => ({
@@ -190,21 +200,127 @@ describe('useAeNames with the real SDK', () => {
     vi.restoreAllMocks();
   });
 
-  it('preclaims for the chosen account with the salt it stores', async () => {
-    const ctx = await createContext();
+  it('preclaims for the chosen account and stores the salt before the preclaim is mined', async () => {
+    const ctx = await createContext({
+      getTransactionByHash: async (hash) => ({ hash, blockHeight: -1, tx: { ttl: 0 } }),
+    });
 
-    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+    const queued = ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false);
 
+    await vi.waitFor(() => expect(ctx.getStoredEntry()).toMatchObject({
+      address: otherAccount.address,
+      status: 'preclaim-submitted',
+      preclaimTxHash: buildTxHash(ctx.node.posted[0]),
+    }), { timeout: 3000 });
     const [preclaimTx] = postedTxs(ctx.node);
-    await vi.waitFor(() => expect(ctx.getStoredEntry()).toBeDefined());
-    const entry = ctx.getStoredEntry();
     expect(preclaimTx.tag).toBe(Tag.NamePreclaimTx);
     expect(preclaimTx.accountId).toBe(otherAccount.address);
     expect(isSignedBy(ctx.node.posted[0], otherAccount.address)).toBe(true);
     expect(isSignedBy(ctx.node.posted[0], activeAccount.address)).toBe(false);
-    expect(preclaimTx.commitmentId).toBe(commitmentHash(NAME, entry.salt));
-    expect(entry.address).toBe(otherAccount.address);
+    expect(preclaimTx.commitmentId).toBe(commitmentHash(NAME, ctx.getStoredEntry().salt));
+    expect(await queued).toBe(true);
     expect(ctx.openDefaultModal).not.toHaveBeenCalled();
+  });
+
+  describe('a preclaim stored before it was mined', () => {
+    const PRECLAIM_TX_HASH = 'th_2Lzq4y5a9xX9dKz7mq2pKyGJbYsdTkRaZyWNd5x3qAyCXdM5BP';
+
+    function createSubmittedContext(getTransactionByHash, sentAtHeight = TOP_HEIGHT - 5) {
+      return createContext({
+        getTransactionByHash,
+        preclaimedNames: {
+          [NETWORK_ID]: {
+            [NAME]: {
+              address: activeAccount.address,
+              name: NAME,
+              salt: 4242,
+              blockHeight: sentAtHeight,
+              autoExtend: false,
+              status: 'preclaim-submitted',
+              preclaimTxHash: PRECLAIM_TX_HASH,
+            },
+          },
+        },
+      });
+    }
+
+    const minedAt = (blockHeight) => vi.fn(async (hash) => ({ hash, blockHeight, tx: {} }));
+
+    it('is claimed with its salt once it was mined in an earlier generation', async () => {
+      const ctx = await createSubmittedContext(minedAt(TOP_HEIGHT - 1));
+
+      await ctx.aeNames.claimPreclaimedNames();
+
+      expect(ctx.node.getTransactionByHash).toHaveBeenCalledWith(PRECLAIM_TX_HASH);
+      const [claimTx] = postedTxs(ctx.node);
+      expect(claimTx.tag).toBe(Tag.NameClaimTx);
+      expect(String(claimTx.nameSalt)).toBe('4242');
+      expect(claimTx.accountId).toBe(activeAccount.address);
+    });
+
+    it('waits for the next generation when it was mined in the current one', async () => {
+      const ctx = await createSubmittedContext(minedAt(TOP_HEIGHT));
+
+      await ctx.aeNames.claimPreclaimedNames();
+
+      expect(ctx.node.posted).toEqual([]);
+      await vi.waitFor(() => expect(ctx.getStoredEntry()).toMatchObject({
+        status: 'preclaimed',
+        blockHeight: TOP_HEIGHT,
+        salt: 4242,
+      }));
+    });
+
+    it.each([
+      ['while it is not mined', minedAt(-1)],
+      ['while the node cannot be reached', async () => {
+        throw restError('Error sending request: Failed to fetch', { code: 'REQUEST_SEND_ERROR' });
+      }],
+    ])('is kept %s', async (_, getTransactionByHash) => {
+      const ctx = await createSubmittedContext(getTransactionByHash);
+
+      await ctx.aeNames.claimPreclaimedNames();
+
+      expect(ctx.node.posted).toEqual([]);
+      await settleStorage();
+      expect(ctx.getStoredEntry()).toMatchObject({
+        status: 'preclaim-submitted',
+        salt: 4242,
+      });
+      expect(ctx.openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    const notFound = async () => {
+      throw restError('v3/transactions/th_ error: Transaction not found', { statusCode: 404 });
+    };
+
+    // Sent to one node behind the address, the one asked may not have it yet
+    it('is kept while the node does not know it a block after it was sent', async () => {
+      const ctx = await createSubmittedContext(notFound, TOP_HEIGHT - 1);
+
+      await ctx.aeNames.claimPreclaimedNames();
+
+      expect(ctx.node.posted).toEqual([]);
+      await settleStorage();
+      expect(ctx.getStoredEntry()).toMatchObject({
+        status: 'preclaim-submitted',
+        salt: 4242,
+      });
+      expect(ctx.openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    it('is dropped when the node does not know it five blocks after it was sent', async () => {
+      const ctx = await createSubmittedContext(notFound);
+
+      await ctx.aeNames.claimPreclaimedNames();
+
+      expect(ctx.node.posted).toEqual([]);
+      await vi.waitFor(() => expect(ctx.getStoredEntry()).toBeUndefined());
+      expect(ctx.openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+        icon: 'critical',
+        msg: en.pages.names['preclaim-not-mined'].replace('{name}', NAME),
+      }));
+    });
   });
 
   it('claims with the stored salt for the chosen account, then points the name to it', async () => {

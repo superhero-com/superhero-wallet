@@ -1018,6 +1018,7 @@
     },
     "names": {
       "balance-error": "Your account balance is not enough to execute this transaction.",
+      "preclaim-not-mined": "The preclaim of {name} was not mined. Please register the name again.",
       "pointer-added": "Name {type} successful!",
       "auto-extend": "Auto-extend",
       "tabs": {

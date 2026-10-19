@@ -43,6 +43,7 @@ vi.mock('@/composables', () => ({
 
 vi.mock('@/protocols/aeternity/composables/aeNames', () => ({
   NAME_CLAIM_STATUS: {
+    preclaimSubmitted: 'preclaim-submitted',
     preclaimed: 'preclaimed',
     claimSubmitted: 'claim-submitted',
     pointerUpdatePending: 'pointer-update-pending',
@@ -106,7 +107,7 @@ describe('NameItem', () => {
     Transition: false,
   };
 
-  function mountNameItem(name, hash) {
+  function mountNameItem(name, hash, entry = {}) {
     return mount(NameItem, {
       props: {
         nameEntry: {
@@ -118,6 +119,7 @@ describe('NameItem', () => {
           expiresAt: 150,
           autoExtend: false,
           hash,
+          ...entry,
         },
       },
       global: {
@@ -171,5 +173,15 @@ describe('NameItem', () => {
     await nextTick();
     expect(wrapper.vm.isSettingThisDefault).toBe(false);
     expect(wrapper.vm.isSettingDefaultInProgress).toBe(true);
+  });
+
+  it.each([
+    ['preclaim-submitted', 'pages.names.list.status.preclaiming'],
+    ['preclaimed', 'pages.names.list.status.preclaiming'],
+    ['claim-submitted', 'pages.names.list.status.claiming'],
+  ])('labels a queued claim in status %s', (pendingStatus, label) => {
+    const wrapper = mountNameItem('queued.chain', undefined, { pending: true, pendingStatus });
+
+    expect(wrapper.find('.pending').text()).toBe(label);
   });
 });

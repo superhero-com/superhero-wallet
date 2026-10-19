@@ -31,6 +31,8 @@ import {
   decryptedComputed,
   fetchAllPages,
   handleUnknownError,
+  isNotFoundError,
+  isTransientRequestError,
 } from '@/utils';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
@@ -59,6 +61,7 @@ import {
   isInsufficientBalanceError,
 } from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
+import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 
 import { useAeAddressLinkContract } from './aeAddressLinkContract';
 import { useAeAddressLinkBackend } from './aeAddressLinkBackend';
@@ -70,6 +73,8 @@ const FEE_ESTIMATION_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv
 const FEE_ESTIMATION_NONCE = 10000;
 const PENDING_NAME_TRANSFER_TX_MAX_AGE = 5 * 60 * 1000;
 const EXTERNAL_NAME_CACHE_TTL = 10 * 60 * 1000;
+/** As the blocks `poll` of the SDK waits for a transaction to get mined */
+const PRECLAIM_NOT_FOUND_BLOCKS = 5;
 /**
  * How long an optimistically-applied default-name change is protected from being
  * overwritten by the on-chain polling while its `link`/`unlink` transaction is
@@ -107,6 +112,8 @@ type PendingNameLookupResult = {
 };
 
 export const NAME_CLAIM_STATUS = {
+  /** Accepted by the node, not mined yet: closing the app before it is mined loses no salt */
+  preclaimSubmitted: 'preclaim-submitted',
   preclaimed: 'preclaimed',
   claimSubmitted: 'claim-submitted',
   pointerUpdatePending: 'pointer-update-pending',
@@ -124,6 +131,7 @@ interface IPreclaimedName {
   blockHeight: number;
   autoExtend: boolean;
   status: NameClaimStatus;
+  preclaimTxHash?: Encoded.TxHash;
   claimTxHash?: Encoded.TxHash;
   claimedAt?: number;
 }
@@ -694,8 +702,30 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     return new Name(name, aeSdk.getContext(options));
   }
 
-  async function isNameRegistered(nameObj: Name) {
-    return nameObj.getState().then(() => true, () => false);
+  /** `null` also for a name in auction, it has no owner before the auction ends */
+  async function getNameOwner(nameObj: Name): Promise<string | null> {
+    try {
+      return (await nameObj.getState()).owner;
+    } catch (error) {
+      // A node that didn't answer doesn't say the name is free
+      if (isTransientRequestError(error)) {
+        throw error;
+      }
+      return null;
+    }
+  }
+
+  /** `null` when the name isn't in auction */
+  async function getAuctionHighestBidder(name: AensName): Promise<string | null> {
+    const aeSdk = await getAeSdk();
+    try {
+      return (await aeSdk.api.getAuctionEntryByName(name)).highestBidder;
+    } catch (error) {
+      if (isTransientRequestError(error)) {
+        throw error;
+      }
+      return null;
+    }
   }
 
   function getClaimErrorMessage(error: any) {
@@ -1086,16 +1116,18 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     try {
       const networkId = nodeNetworkId.value!;
       const aeSdk = await getAeSdk();
-      const nameObj = await createNameInstance(name, getClaimOptions(address));
-      const { nameSalt } = await nameObj.preclaim();
       const currentHeight = await aeSdk.getHeight();
+      const nameObj = await createNameInstance(name, getClaimOptions(address));
+      const { nameSalt, hash } = await nameObj.preclaim({ waitMined: false });
       upsertPreclaimedName(networkId, name, {
         address,
         name,
         salt: nameSalt,
+        // Until the height the preclaim is mined at is known
         blockHeight: currentHeight,
         autoExtend,
-        status: NAME_CLAIM_STATUS.preclaimed,
+        status: NAME_CLAIM_STATUS.preclaimSubmitted,
+        preclaimTxHash: hash,
       });
       return true;
     } catch (error: any) {
@@ -1104,23 +1136,76 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     }
   }
 
-  async function claimName({
-    name,
-    address,
-    autoExtend,
-    salt,
-    blockHeight,
-    status,
-    claimTxHash,
-  }: IPreclaimedName) {
+  /**
+   * The entry with the height its preclaim was mined at, `null` until it is mined. A preclaim the
+   * node still doesn't know some blocks after it was sent was dropped and can't be claimed.
+   */
+  async function getMinedPreclaim(
+    aeSdk: AeSdkSuperhero,
+    networkId: NetworkId,
+    { name, preclaimTxHash, blockHeight: sentAtHeight }: IPreclaimedName,
+  ) {
+    try {
+      const { blockHeight } = await aeSdk.api.getTransactionByHash(preclaimTxHash!);
+      if (blockHeight === -1) {
+        return null;
+      }
+      return patchPreclaimedName(networkId, name, {
+        status: NAME_CLAIM_STATUS.preclaimed,
+        blockHeight,
+      });
+    } catch (error: any) {
+      // The node asked can be another one than it was sent to, and not have it yet
+      if (
+        isNotFoundError(error)
+        && topBlockHeight.value >= sentAtHeight + PRECLAIM_NOT_FOUND_BLOCKS
+      ) {
+        removePreclaimedName(networkId, name);
+        openDefaultModal({
+          icon: 'critical',
+          msg: tg('pages.names.preclaim-not-mined', { name }),
+        });
+      } else {
+        logSilentError(error);
+      }
+      return null;
+    }
+  }
+
+  async function claimName(entry: IPreclaimedName) {
+    const {
+      name,
+      address,
+      autoExtend,
+      salt,
+      blockHeight,
+      status,
+      claimTxHash,
+    } = entry;
     // Already on-chain - only waiting for the middleware (see `processOwnedNamesUpdate`).
     if (status === NAME_CLAIM_STATUS.claimed) {
       return;
     }
 
     const aeSdk = await getAeSdk() as any;
+    // Read once the SDK settled, during a network switch it is the network left until then
     const networkId = nodeNetworkId.value!;
+    // An entry of the network left, the queue started before a network switch
+    if (preclaimedNames.value[networkId]?.[name]?.salt !== salt) {
+      return;
+    }
+
+    if (status === NAME_CLAIM_STATUS.preclaimSubmitted) {
+      const minedPreclaim = await getMinedPreclaim(aeSdk, networkId, entry);
+      if (minedPreclaim) {
+        await claimName(minedPreclaim);
+      }
+      return;
+    }
+
     let currentClaimTxHash = claimTxHash;
+    // Also for the account's own claim found below
+    let isClaimMined = status === NAME_CLAIM_STATUS.pointerUpdatePending;
 
     /**
      * The claim transaction is intended to be executed in the next block after preclaim.
@@ -1139,7 +1224,14 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
 
     if (status === NAME_CLAIM_STATUS.preclaimed) {
       try {
-        if (await isNameRegistered(nameObj)) {
+        const isAuctionName = name.length <= AE_AENS_NAME_AUCTION_MAX_LENGTH;
+        const nameOwner = await getNameOwner(nameObj)
+          // Until the auction ends the node has its highest bidder instead
+          ?? (isAuctionName ? await getAuctionHighestBidder(name) : null);
+        if (nameOwner === address) {
+          // The account's own claim, from a run that didn't get the node's answer
+          isClaimMined = true;
+        } else if (nameOwner) {
           removePreclaimedName(networkId, name);
           await updateOwnedNames();
           openDefaultModal({
@@ -1147,30 +1239,38 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
             msg: tg('modals.name-exist.msg'),
           });
           return;
+        } else {
+          const pendingClaimTransaction = await getPendingNameClaimTransaction(address, name);
+          currentClaimTxHash = pendingClaimTransaction?.hash
+            || (await nameObj.claim({ ...claimOptions, nameSalt: salt, waitMined: false })).hash;
+          patchPreclaimedName(networkId, name, {
+            status: NAME_CLAIM_STATUS.claimSubmitted,
+            claimTxHash: currentClaimTxHash,
+          });
         }
-
-        const pendingClaimTransaction = await getPendingNameClaimTransaction(address, name);
-        currentClaimTxHash = pendingClaimTransaction?.hash
-          || (await nameObj.claim({ ...claimOptions, nameSalt: salt, waitMined: false })).hash;
-        patchPreclaimedName(networkId, name, {
-          status: NAME_CLAIM_STATUS.claimSubmitted,
-          claimTxHash: currentClaimTxHash,
-        });
       } catch (error: any) {
+        // Tried again with the next block: the node may only be unavailable for now
+        if (isTransientRequestError(error)) {
+          logSilentError(error);
+          return;
+        }
         removePreclaimedName(networkId, name);
         openClaimErrorModal(error);
         return;
       }
     }
 
-    if (!currentClaimTxHash) {
-      return;
-    }
-
-    if (status !== NAME_CLAIM_STATUS.pointerUpdatePending) {
+    if (!isClaimMined) {
+      if (!currentClaimTxHash) {
+        return;
+      }
       try {
         await aeSdk.poll(currentClaimTxHash);
       } catch (error: any) {
+        if (isTransientRequestError(error)) {
+          logSilentError(error);
+          return;
+        }
         removePreclaimedName(networkId, name);
         openDefaultModal({ msg: error.message });
         return;
