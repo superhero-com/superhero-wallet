@@ -147,7 +147,7 @@ const HELLO_SIGNATURE = '0x2452a50a1b27db559e685e82ef59445ff08ca6843b5089aa1c32a
 function mockNode(responses: Record<string, object>) {
   const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
     const { method } = JSON.parse(init.body as string);
-    return { status: 200, json: async () => ({ jsonrpc: '2.0', id: 1, ...responses[method] }) };
+    return { ok: true, status: 200, json: async () => ({ jsonrpc: '2.0', id: 1, ...responses[method] }) };
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
@@ -780,6 +780,21 @@ describe('handleEvmRpcRequest', () => {
     const error = { code: -32000, message: 'header not found' };
     mockNode({ eth_call: { error } });
     expect(await handleEvmRpcRequest(DAPP, 'eth_call', [])).toEqual({ error });
+  });
+
+  it('returns the node error sent with an HTTP error status', async () => {
+    const error = { code: -32005, message: 'rate limit exceeded' };
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(
+      JSON.stringify({ jsonrpc: '2.0', id: 1, error }),
+      { status: 429 },
+    )));
+    expect(await handleEvmRpcRequest(DAPP, 'eth_call', [])).toEqual({ error });
+  });
+
+  it('reports an HTTP error without a node error as an internal error, without the host', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('Bad Gateway', { status: 502 })));
+    expect(await handleEvmRpcRequest(DAPP, 'eth_call', []))
+      .toEqual({ error: { code: -32603, message: 'HTTP 502' } });
   });
 
   it('reports an unreachable node as an internal error', async () => {

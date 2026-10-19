@@ -41,6 +41,7 @@ describe('DogecoinAdapter - change output', () => {
       const u = String(url);
       if (u === `${nodeUrl}/address/${sender}/utxo`) {
         return Promise.resolve({
+          ok: true,
           status: 200,
           json: () => Promise.resolve([{ txid, vout: 0, value: input }]),
         });

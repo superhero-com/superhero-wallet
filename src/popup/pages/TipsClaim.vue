@@ -118,7 +118,8 @@ export default defineComponent({
 
         router.push({ name: ROUTE_ACCOUNT });
       } catch (error: any) {
-        const { error: errorMessage = '' } = error.response ? error.response.data : {};
+        const backendError = error.response?.data?.error;
+        const errorMessage = (typeof backendError === 'string') ? backendError : '';
         let msg;
         if (errorMessage.includes('MORE_ORACLES_NEEDED')) {
           msg = t('pages.claim.moreOracles');

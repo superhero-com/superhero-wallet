@@ -78,6 +78,22 @@ describe('useTransactionList on API errors', () => {
     list.stopTransactionListPolling();
   });
 
+  it('stops loading when the dogecoin API answers with an HTTP error', async () => {
+    // The retired sochain v2 answers every call with a JSON error
+    vi.spyOn(global, 'fetch').mockImplementation(async () => new Response(
+      JSON.stringify({ status: 'fail', data: { error_message: 'API v2 was retired.' } }),
+      { status: 404 },
+    ));
+    const list = await useTransactionList({ accountAddress: 'DTestAddress', protocol: 'dogecoin' });
+
+    await list.initializeTransactionListPolling();
+
+    expect(list.isEndReached.value).toBe(false);
+    expect(list.isLoading.value).toBe(false);
+    expect(warnSpy).toHaveBeenCalledWith('Unknown rejection', expect.objectContaining({ statusCode: 404 }));
+    list.stopTransactionListPolling();
+  });
+
   it('loads the first page by polling after the first load failed, and appends the next', async () => {
     const adapter = await getAdapter('bitcoin');
     vi.spyOn(adapter, 'fetchAccountTransactions')

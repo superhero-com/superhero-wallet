@@ -39,7 +39,7 @@ import {
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { PROTOCOLS } from '@/constants';
-import { postJson } from '@/utils';
+import { handleUnknownError, postJson } from '@/utils';
 import {
   useAccounts,
   useAeSdk,
@@ -113,7 +113,7 @@ export default defineComponent({
         });
         const respondChallenge = await fetchRespondChallenge(responseChallenge);
 
-        postToCommentApi(respondChallenge);
+        postToCommentApi(respondChallenge).catch(handleUnknownError);
 
         await openCallbackOrGoHome(true);
       } catch (e: any) {

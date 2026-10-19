@@ -214,6 +214,25 @@ export async function fetchJson<T = any>(
   options?: RequestInit,
 ): Promise<T | null> {
   const response = await fetch(url, options);
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    let data;
+    try {
+      data = text ? JSON.parse(text) : undefined;
+    } catch {
+      data = text;
+    }
+    let host;
+    try {
+      host = new URL(url).host;
+    } catch { /* relative URL */ }
+    // Only the host: the path or query can carry an API key
+    const message = `HTTP ${response.status}${host ? ` from ${host}` : ''}`;
+    const error = Object.assign(new Error(message), { statusCode: response.status });
+    // Not enumerable, so the saved error log doesn't copy the body
+    Object.defineProperty(error, 'response', { value: { data } });
+    throw error;
+  }
   if (response.status === 204) {
     return null;
   }

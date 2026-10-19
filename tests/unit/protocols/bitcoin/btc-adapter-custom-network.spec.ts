@@ -84,6 +84,7 @@ describe('BitcoinAdapter - custom network uses the testnet address format everyw
       const u = String(url);
       if (u === `${CUSTOM_NODE_URL}/address/${account.address}/utxo`) {
         return Promise.resolve({
+          ok: true,
           status: 200,
           json: () => Promise.resolve([{ txid, vout: 0, value: 20_000 }]),
         });

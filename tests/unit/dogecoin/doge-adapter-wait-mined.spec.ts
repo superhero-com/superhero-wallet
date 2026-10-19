@@ -39,10 +39,7 @@ describe('DogecoinAdapter - waitTransactionMined polling', () => {
 
   it('resolves null when every lookup rejects', async () => {
     vi.restoreAllMocks();
-    const fetchSpy = vi.fn(() => Promise.resolve({
-      status: 404,
-      json: () => Promise.reject(new SyntaxError('Unexpected token T in JSON')),
-    }));
+    const fetchSpy = vi.fn(async () => new Response('Transaction not found', { status: 404 }));
     // @ts-ignore - test double for the fetch boundary
     global.fetch = fetchSpy;
     const unhandled = vi.fn();

@@ -126,7 +126,8 @@ vi.mock('../../src/protocols/aeternity/composables', () => ({
   })),
 }));
 vi.mock('@/utils', () => ({
-  fetchJson: vi.fn(() => ({})),
+  fetchJson: vi.fn(async () => ({})),
+  handleUnknownError: vi.fn(),
 }));
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({})),

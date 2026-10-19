@@ -264,7 +264,7 @@ describe('WalletConnect dapp requests', () => {
   });
 
   it('answers a read of the node with its null result, not an error', async () => {
-    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ jsonrpc: '2.0', id: 1, result: null }) }));
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ jsonrpc: '2.0', id: 1, result: null }) }));
     vi.stubGlobal('fetch', fetchMock);
 
     expect(await request('eth_getTransactionReceipt', ['0x01']))

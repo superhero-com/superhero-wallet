@@ -15,6 +15,7 @@ describe('AeternityAdapter token pagination', () => {
 
   it('fetches a single paginated token page from middleware', async () => {
     global.fetch.mockResolvedValue({
+      ok: true,
       status: 200,
       json: async () => ({
         data: [{
@@ -48,6 +49,7 @@ describe('AeternityAdapter token pagination', () => {
 
   it('fetches a prefix search page from middleware', async () => {
     global.fetch.mockResolvedValue({
+      ok: true,
       status: 200,
       json: async () => ({
         data: [{

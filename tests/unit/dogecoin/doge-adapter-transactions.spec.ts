@@ -32,7 +32,10 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
       ],
     }];
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(list) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(list),
+    })) as any;
 
     const res = await adapter.fetchAccountTransactions('Addr');
     expect(res.regularTransactions.length).toBe(1);
@@ -51,7 +54,10 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
       ],
     };
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(tx) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(tx),
+    })) as any;
 
     const res = await adapter.fetchTransactionByHash('abc', 'S');
     expect(res.hash).toBe('abc');

@@ -5,7 +5,7 @@ import { uniqBy, isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Contract, Encoding, Tag } from '@aeternity/aepp-sdk';
 
-import { isAssetCoin, toShiftedBigNumber } from '@/utils';
+import { handleUnknownError, isAssetCoin, toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
   AssetContractId,
@@ -262,7 +262,12 @@ export function useFungibleTokens() {
             };
           }
 
-          const response = await adapter.fetchAvailableTokensPage(nextPageUrl || undefined);
+          const response = await adapter.fetchAvailableTokensPage(nextPageUrl || undefined)
+            .catch((error) => {
+              // Other protocols still get their tokens
+              handleUnknownError(error);
+              return null;
+            });
 
           if (response == null) {
             return {

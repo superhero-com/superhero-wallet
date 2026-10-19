@@ -24,8 +24,9 @@
           {{ sdkVersion }}
         </PanelTableItem>
 
-        <template v-if="aeActiveNetworkSettings && middlewareStatus">
+        <template v-if="aeActiveNetworkSettings">
           <PanelTableItem
+            v-if="middlewareStatus"
             :name="$t('pages.about.middleware-version')"
             :href="`${middlewareUrl}/status`"
             is-external-link
@@ -76,7 +77,7 @@ import {
 
 import type { IMiddlewareStatus } from '@/types';
 import { AGGREGATOR_URL, APP_NAME, BUG_REPORT_URL } from '@/constants';
-import { fetchJson } from '@/utils';
+import { fetchJson, handleUnknownError } from '@/utils';
 
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
 import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
@@ -108,11 +109,13 @@ export default defineComponent({
     const middlewareUrl = computed(() => aeActiveNetworkSettings.value.middlewareUrl);
     const nodeUrl = computed(() => aeActiveNetworkSettings.value.nodeUrl);
 
-    onMounted(async () => {
-      [middlewareStatus.value, nodeStatus.value] = await Promise.all([
-        fetchMiddlewareStatus(),
-        fetchJson(`${nodeUrl.value}/v3/status`),
-      ]);
+    onMounted(() => {
+      fetchMiddlewareStatus()
+        .then((status) => { middlewareStatus.value = status; })
+        .catch(handleUnknownError);
+      fetchJson(`${nodeUrl.value}/v3/status`)
+        .then((status) => { nodeStatus.value = status; })
+        .catch(handleUnknownError);
     });
 
     return {

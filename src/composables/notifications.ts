@@ -186,7 +186,7 @@ export function useNotifications({
 
   function markAsReadAll() {
     markAsReadWallet();
-    markAsReadSuperhero();
+    markAsReadSuperhero().catch(handleUnknownError);
   }
 
   function removeIsSeedBackedUpNotification() {
