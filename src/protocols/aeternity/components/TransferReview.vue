@@ -710,7 +710,7 @@ export default defineComponent({
           note,
         });
       } else {
-        let hash;
+        let lastHash;
         const customFee = effectiveTransferData.fee
           ? aeToAettos(
             new BigNumber(effectiveTransferData.fee).dividedBy(recipients.length || 1),
@@ -720,17 +720,22 @@ export default defineComponent({
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           // eslint-disable-next-line no-await-in-loop
-          hash = await transfer({
+          const hash = await transfer({
             amount,
             recipient,
             selectedAsset,
             nonce: currentNonce,
             fee: customFee,
           });
+          // A later nonce would stay pending until the gap is filled by a retry.
+          if (!hash) {
+            break;
+          }
+          lastHash = hash;
           currentNonce += 1;
         }
-        if (hash) {
-          router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
+        if (lastHash) {
+          router.push({ name: homeRouteName.value, query: { latestTxHash: lastHash } });
         }
       }
     }
