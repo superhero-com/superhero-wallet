@@ -165,68 +165,8 @@ Cypress.Commands.add('openPageMore', () => {
     .click();
 });
 
-Cypress.Commands.add('openTip', () => {
-  cy.visit('/more/tips')
-    .get('[data-cy=tip-container]')
-    .should('be.visible');
-});
-
 Cypress.Commands.add('openSendModal', () => {
   cy.get('[data-cy=send]').click();
-});
-
-Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
-  cy.get('[data-cy=input-number]').clear();
-  if (amount || amount === 0) {
-    cy.get('[data-cy=input-number]').type(amount);
-  }
-
-  cy.get('[data-cy=textarea]').clear();
-  if (note) cy.get('[data-cy=textarea]').type(note);
-
-  if (url) {
-    cy.get('[data-cy=input-text]').clear().type(url);
-  }
-});
-
-Cypress.Commands.add('toConfirmTip', (tip = {}) => {
-  if (!tip.onTip) cy.openTip();
-  cy.enterTipDetails({ ...tip })
-    .buttonShouldNotBeDisabled('[data-cy=send-tip]')
-    .get('[data-cy=send-tip]')
-    .click()
-    .get('.modal .container')
-    .should('be.visible')
-    .get('[data-cy=to-confirm]')
-    .should('be.visible')
-    .click()
-    .get('[data-cy=confirm-tip]')
-    .should('be.visible')
-    .buttonShouldNotBeDisabled('[data-cy=confirm-tip]')
-    .get('[data-cy=tip-amount]')
-    .should('contain', tip.amount)
-    .get('[data-cy=tip-url]')
-    .should('contain', tip.url)
-    .get('[data-cy=tip-note]')
-    .should('contain', tip.note);
-});
-
-Cypress.Commands.add('sendTip', (tip = {}) => {
-  cy.toConfirmTip({ ...tip })
-    .get('[data-cy=confirm-tip]')
-    .click()
-    .get('[data-cy=balance-info]')
-    .should('be.visible')
-    .urlEquals('account')
-    .get('[data-cy=pending-txs]')
-    .should('be.visible')
-    .get('[data-cy=success-tip]', { timeout: 240000 })
-    .should('be.visible')
-    .urlEquals('success-tip')
-    .get('[data-cy=tip-amount]')
-    .should('contain', tip.amount)
-    .get('[data-cy=tip-url]')
-    .should('contain', tip.url);
 });
 
 Cypress.Commands.add('pendingTx', (tx = {}) => {

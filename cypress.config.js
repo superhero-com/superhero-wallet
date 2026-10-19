@@ -92,7 +92,6 @@ module.exports = defineConfig({
     experimentalRunAllSpecs: true,
     baseUrl: 'http://localhost:8080',
     excludeSpecPattern: [
-      'tests/e2e/integration/tip.cy.js',
       'tests/e2e/integration/transaction-details.cy.js',
     ],
     setupNodeEvents(on) {
