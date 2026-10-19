@@ -73,6 +73,7 @@ module.exports = {
     {
       files: [
         '**/tests/unit/**/*.spec.{j,t}s?(x)',
+        '**/tests/unit/helpers/**/*.{j,t}s',
       ],
       env: {
         jest: true,
