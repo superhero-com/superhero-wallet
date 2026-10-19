@@ -19,6 +19,7 @@ import {
 
 import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/aeternity/components/TransferReview.vue';
+import TransferQRCodeGenerator from '@/popup/components/TransferQRCodeGenerator.vue';
 import { PROTOCOLS } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { i18n } from '@/popup/plugins/i18n';
@@ -49,10 +50,11 @@ vi.mock('vue-router', async (importOriginal) => ({
 
 vi.mock('@/composables/accounts', async () => {
   const { ref } = await import('vue');
+  const isActiveAccountAirGap = ref(false);
   return {
     useAccounts: () => ({
       activeAccount: ref(ACCOUNT),
-      isActiveAccountAirGap: ref(false),
+      isActiveAccountAirGap,
       aeAccounts: ref([ACCOUNT]),
       accountsAddressList: ref([ACCOUNT.address]),
       getLastActiveProtocolAccount: () => ACCOUNT,
@@ -61,6 +63,15 @@ vi.mock('@/composables/accounts', async () => {
     }),
   };
 });
+
+const { generateTransactionURDataFragments } = vi.hoisted(() => ({
+  generateTransactionURDataFragments: vi.fn(async () => ['ur:fragment']),
+}));
+
+// The AirGap QR code is built from the unsigned transaction it is given.
+vi.mock('@/composables/airGap', () => ({
+  useAirGap: () => ({ generateTransactionURDataFragments }),
+}));
 
 // Needs the Ionic router; a send from the transfer form is not a deep link.
 vi.mock('@/composables/deepLinkApi', () => ({
@@ -273,6 +284,21 @@ describe('aeternity TransferReview - several recipients', () => {
     expect(routerPush).not.toHaveBeenCalled();
   });
 
+  it('splits a custom fee into whole aettos', async () => {
+    const wrapper = mountReview({
+      amount: '1',
+      addresses: RECIPIENTS,
+      fee: new BigNumber('0.0001'),
+      nonce: 1,
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(Logger.write).not.toHaveBeenCalled();
+    expect(postedSpendTxs().map(({ fee }) => fee))
+      .toEqual(['33333333333333', '33333333333333', '33333333333333']);
+  });
+
   it('stops at a failed second transaction and opens the one sent', async () => {
     postTransaction
       .mockImplementationOnce(acceptTransaction as any)
@@ -287,5 +313,41 @@ describe('aeternity TransferReview - several recipients', () => {
     expect(routerPush).toHaveBeenCalledWith(expect.objectContaining({
       query: { latestTxHash: buildTxHash(postedTxs[0]) },
     }));
+  });
+});
+
+describe('aeternity TransferQRCodeGenerator', () => {
+  it('builds the AirGap transaction with a fee in whole aettos', async () => {
+    const { useAccounts } = await import('@/composables/accounts');
+    const { isActiveAccountAirGap } = useAccounts();
+    isActiveAccountAirGap.value = true;
+    try {
+      mount(TransferQRCodeGenerator, {
+        props: {
+          transferData: {
+            amount: '1',
+            addresses: [RECIPIENT],
+            selectedAsset: AE_ASSET,
+            // 0.00002 AE and half an aetto, which must be dropped
+            fee: new BigNumber('0.0000200000000000005'),
+            nonce: 1,
+            payload: '',
+          },
+        },
+        global: { stubs: { WrappedQrCode: true } },
+      });
+      await vi.waitFor(() => expect(generateTransactionURDataFragments).toHaveBeenCalled());
+    } finally {
+      isActiveAccountAirGap.value = false;
+    }
+
+    const [, tx] = generateTransactionURDataFragments.mock.calls[0] as unknown as [
+      unknown, Encoded.Transaction,
+    ];
+    expect(unpackTx(tx, Tag.SpendTx)).toMatchObject({
+      recipientId: RECIPIENT,
+      amount: '1000000000000000000',
+      fee: '20000000000000',
+    });
   });
 });

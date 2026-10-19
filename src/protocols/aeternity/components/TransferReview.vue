@@ -711,10 +711,11 @@ export default defineComponent({
         });
       } else {
         let lastHash;
+        // Fees are whole aettos; rounding down keeps the total within the entered fee.
         const customFee = effectiveTransferData.fee
-          ? aeToAettos(
-            new BigNumber(effectiveTransferData.fee).dividedBy(recipients.length || 1),
-          )
+          ? new BigNumber(aeToAettos(effectiveTransferData.fee))
+            .dividedToIntegerBy(recipients.length || 1)
+            .toFixed()
           : undefined;
         let currentNonce = effectiveTransferData.nonce || await fetchCurrentAccountNonce();
         // eslint-disable-next-line no-restricted-syntax
