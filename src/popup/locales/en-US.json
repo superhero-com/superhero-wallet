@@ -1291,6 +1291,12 @@
       "refuse": "Disapprove",
       "sign": "Approve",
       "expiresAt": "Expires at height",
+      "unverified": {
+        "title": "Transaction not verified",
+        "msg": "The transaction stored for this proposal couldn't be loaded, or doesn't match the one the vault was asked to approve. Approve and Send stay disabled until it's verified; the wallet keeps checking. You can still disapprove or revoke it.",
+        "notSent": "The transaction stored for this proposal doesn't match it, so it was not sent."
+      },
+      "changed": "The proposal changed while you were confirming. Review it again.",
       "infoBox": {
         "signatures": "signatures",
         "signature": "signature",

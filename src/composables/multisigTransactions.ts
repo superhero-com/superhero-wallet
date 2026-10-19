@@ -1,5 +1,7 @@
 import {
   AccountGeneralized,
+  ArgumentError,
+  IllegalArgumentError,
   unpackTx,
   Tag,
   encode,
@@ -7,6 +9,7 @@ import {
   Encoding,
   Contract,
 } from '@aeternity/aepp-sdk';
+import { isEqual, uniqWith } from 'lodash-es';
 
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
 import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
@@ -21,9 +24,14 @@ import {
   fetchJson,
   handleUnknownError,
 } from '@/utils';
+import { tg } from '@/popup/plugins/i18n';
 import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { type IAeGaMetaParams, useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
+import {
+  type IAeGaMetaParams,
+  LEGACY_GA_META_PARAMS,
+  useAeGaMetaParams,
+} from '@/protocols/aeternity/composables/aeGaMetaParams';
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
@@ -33,6 +41,9 @@ interface InternalOptions {
 }
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
+
+/** The fee and gas price a stored transaction matched its proposal hash with */
+const proposalGaMetaParams = new Map<string, IAeGaMetaParams>();
 
 export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
@@ -68,6 +79,46 @@ export function useMultisigTransactions() {
       .catch(handleUnknownError);
   }
 
+  async function buildAuthTxHashHex(tx: Encoded.Transaction, gaMetaParams: IAeGaMetaParams) {
+    const aeSdk = await getAeSdk();
+    try {
+      return Buffer.from(await aeSdk.buildAuthTxHash(tx, gaMetaParams)).toString('hex');
+    } catch (error) {
+      // A pair this network can't price, so no proposal on it was hashed with it
+      if (error instanceof ArgumentError || error instanceof IllegalArgumentError) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * The fee and gas price `txHash` was built from `tx` with, `null` if it wasn't built from it.
+   * Proposals of older wallets were hashed with the legacy pair.
+   *
+   * Only a match is kept: a mismatch can be the node's doing. One that fails to answer leaves the
+   * SDK pricing by the parameters of its release, and a network switch mid-check hashes for the
+   * other network. A match needs no network in the key, the hash commits to one.
+   */
+  async function resolveGaMetaParams(
+    tx: Encoded.Transaction,
+    txHash: string,
+  ): Promise<IAeGaMetaParams | null> {
+    const key = `${txHash}:${tx}`;
+    if (!proposalGaMetaParams.has(key)) {
+      const candidates = uniqWith([await getGaMetaParams(), LEGACY_GA_META_PARAMS], isEqual);
+      const hashes = await Promise.all(
+        candidates.map((gaMetaParams) => buildAuthTxHashHex(tx, gaMetaParams)),
+      );
+      const gaMetaParams = candidates[hashes.indexOf(txHash)];
+      if (!gaMetaParams) {
+        return null;
+      }
+      proposalGaMetaParams.set(key, gaMetaParams);
+    }
+    return proposalGaMetaParams.get(key)!;
+  }
+
   /**
    * Get current active multisig transaction
    * @param contractAddress multisig contract
@@ -85,12 +136,21 @@ export function useMultisigTransactions() {
       )
     ) {
       const rawTx = await fetchTransactionByHash(txHash);
+      // The backend could serve any transaction, only the hash is on chain
+      const gaMetaParams = rawTx && await resolveGaMetaParams(rawTx.tx, txHash)
+        .catch((error) => {
+          handleUnknownError(error);
+          return null;
+        });
+      const isTxVerified = !!gaMetaParams;
 
       return {
         ...activeMultisigAccount.value,
         totalConfirmations: activeMultisigAccount.value.confirmedBy.length,
         hash: txHash,
-        tx: rawTx ? unpackTx(rawTx.tx) as any : undefined,
+        tx: isTxVerified ? unpackTx(rawTx!.tx) as any : undefined,
+        isTxVerified,
+        gaMetaParams: gaMetaParams || undefined,
         isMultisig: true,
         microTime: rawTx ? Date.now() : undefined,
         protocol: PROTOCOLS.aeternity,
@@ -192,8 +252,15 @@ export function useMultisigTransactions() {
     accountId: Encoded.AccountAddress,
     spendTx: Encoded.Transaction,
     nonce: number,
+    txHash: string,
   ): Promise<any> {
-    const [dryAeSdk, gaMetaParams] = await Promise.all([getDryAeSdk(), getGaMetaParams()]);
+    const [dryAeSdk, gaMetaParams] = await Promise.all([
+      getDryAeSdk(),
+      resolveGaMetaParams(spendTx, txHash),
+    ]);
+    if (!gaMetaParams) {
+      throw new Error(tg('pages.proposalDetails.unverified.notSent'));
+    }
     const gaContractRpc = await Contract.initialize({
       ...dryAeSdk.getContext(),
       aci: SimpleGAMultiSigAci,
@@ -202,8 +269,8 @@ export function useMultisigTransactions() {
     return dryAeSdk.sendTransaction(spendTx, {
       authData: {
         callData: gaContractRpc._calldata.encode(gaContractRpc._name, 'authorize', [nonce]),
-        // The same values `proposeTx` hashed into the proposal - the contract compares its stored
-        // hash against the one the node derives from this transaction, so they have to match.
+        // The values the proposal was hashed with - the contract compares its stored hash against
+        // the one the node derives from this transaction, so they have to match.
         ...gaMetaParams,
       },
       onAccount: new AccountGeneralized(accountId),

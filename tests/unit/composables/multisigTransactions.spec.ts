@@ -38,8 +38,10 @@ import {
   buildAuthTxHash as sdkBuildAuthTxHash,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
+import { ref } from 'vue';
 import { AE_GA_META_TX_FEE_GAS } from '@/protocols/aeternity/config';
 import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
+import en from '@/popup/locales/en-US.json';
 
 // Valid checksummed `ak_` addresses, reused from
 // tests/unit/protocols/aeternity/rebuildTransactionForSigner.spec.ts - real bech32
@@ -59,6 +61,8 @@ const GA_META_PARAMS = {
   fee: new BigNumber(getFloorGasPrice(defaultProtocolParameters).toString())
     .times(AE_GA_META_TX_FEE_GAS).toFixed(),
 };
+/** What wallets hashed with before SDK 15, see `LEGACY_GA_META_PARAMS` in ga-multisig-backend */
+const LEGACY_GA_META_PARAMS = { fee: '100000000000000', gasPrice: '1000000000' };
 
 describe('buildAuthTxHash (real aeternity SDK function, not mocked)', () => {
   /**
@@ -144,6 +148,8 @@ describe('useMultisigTransactions', () => {
   const FIXED_TOP_HEIGHT = 1000;
   const EXPECTED_EXPIRATION = FIXED_TOP_HEIGHT + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
   const PROPOSED_TX_HASH_BUFFER = Buffer.from('aa'.repeat(32), 'hex');
+  const PROPOSED_TX_HASH = PROPOSED_TX_HASH_BUFFER.toString('hex');
+  const activeMultisigAccount = ref(null);
 
   beforeEach(async () => {
     vi.resetModules();
@@ -186,6 +192,7 @@ describe('useMultisigTransactions', () => {
     };
 
     fetchCurrentTopBlockHeightMock = vi.fn().mockResolvedValue(FIXED_TOP_HEIGHT);
+    activeMultisigAccount.value = null;
 
     // These mocks must be registered *before* `registerAdapters` is imported below:
     // the `@/composables` barrel eagerly loads all composables, so `vi.doMock`
@@ -200,6 +207,9 @@ describe('useMultisigTransactions', () => {
       useTopHeaderData: () => ({
         fetchCurrentTopBlockHeight: fetchCurrentTopBlockHeightMock,
       }),
+    }));
+    vi.doMock('@/composables/multisigAccounts', () => ({
+      useMultisigAccounts: () => ({ activeMultisigAccount }),
     }));
 
     await import('@/protocols/registerAdapters');
@@ -428,7 +438,7 @@ describe('useMultisigTransactions', () => {
       const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
       const { sendTx } = useMultisigTransactions();
 
-      await sendTx(ADDRESS_A as any, 'tx_spend' as any, 7);
+      await sendTx(ADDRESS_A as any, 'tx_spend' as any, 7, PROPOSED_TX_HASH);
 
       expect(contractInitializeMock).toHaveBeenCalledWith(expect.objectContaining({
         bytecode: expect.any(String),
@@ -444,8 +454,8 @@ describe('useMultisigTransactions', () => {
       const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
       const { sendTx } = useMultisigTransactions();
 
-      await sendTx(ADDRESS_A as any, 'tx_spend' as any, 1);
-      await sendTx(ADDRESS_A as any, 'tx_spend' as any, 2);
+      await sendTx(ADDRESS_A as any, 'tx_spend' as any, 1, PROPOSED_TX_HASH);
+      await sendTx(ADDRESS_A as any, 'tx_spend' as any, 2, PROPOSED_TX_HASH);
 
       expect(mockGaContractRpc._calldata.encode).toHaveBeenNthCalledWith(1, 'SimpleGAMultiSig', 'authorize', [1]);
       expect(mockGaContractRpc._calldata.encode).toHaveBeenNthCalledWith(2, 'SimpleGAMultiSig', 'authorize', [2]);
@@ -455,10 +465,201 @@ describe('useMultisigTransactions', () => {
       const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
       const { sendTx } = useMultisigTransactions();
 
-      await sendTx(ADDRESS_B as any, 'tx_spend' as any, 1);
+      await sendTx(ADDRESS_B as any, 'tx_spend' as any, 1, PROPOSED_TX_HASH);
 
       const [, sendOptions] = mockDryAeSdk.sendTransaction.mock.calls[0];
       expect(sendOptions.onAccount.address).toBe(ADDRESS_B);
+    });
+  });
+
+  /**
+   * The backend serves the transaction a proposal stands for, and the contract holds only its
+   * authentication hash. Hashed for real against node doubles running different gas price floors.
+   */
+  describe('proposal verification', () => {
+    function makeNode(floorGasPrice = BigInt(defaultProtocolParameters.minGasPrice)) {
+      const version = ConsensusProtocolVersion.Arcus;
+      return {
+        getNodeInfo: async () => ({ nodeNetworkId: 'ae_uat', consensusProtocolVersion: version }),
+        getProtocolParameters: async () => ({
+          currentProtocolVersion: version,
+          protocols: [{
+            version,
+            minimumGasPrice: floorGasPrice,
+            gasPerByte: 20,
+            txBaseGas: {},
+            contractTxBaseGas: [],
+            stateGasPerBlock: {},
+          }],
+        }),
+        getNodeSettings: async () => ({
+          minMinerGasPrice: floorGasPrice,
+          blockGasLimit: defaultProtocolParameters.blockGasLimit,
+          maxAuthFunGas: defaultProtocolParameters.maxAuthFunGas,
+        }),
+      };
+    }
+
+    const spendTx = (amount: string) => buildTx({
+      tag: Tag.SpendTx,
+      senderId: ADDRESS_A,
+      recipientId: ADDRESS_B,
+      amount,
+      nonce: 1,
+    });
+    const TX_A = spendTx('100');
+    const TX_B = spendTx('999');
+
+    async function hashOf(tx, gaMetaParams) {
+      return Buffer.from(await sdkBuildAuthTxHash(tx, { ...gaMetaParams, onNode: makeNode() }))
+        .toString('hex');
+    }
+
+    function connectTo(node) {
+      mockAeSdk.api = node;
+      mockAeSdk.buildAuthTxHash = vi.fn(
+        (tx, options) => sdkBuildAuthTxHash(tx, { ...options, onNode: node }),
+      );
+    }
+
+    function propose(txHash: string, storedTx: string) {
+      activeMultisigAccount.value = {
+        gaAccountId: ADDRESS_A,
+        txHash,
+        hasPendingTransaction: true,
+        confirmedBy: [ADDRESS_A],
+      };
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ hash: txHash, tx: storedTx }),
+      }));
+    }
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('shows the transaction the proposal was hashed from, checking it once', async () => {
+      connectTo(makeNode());
+      propose(await hashOf(TX_A, GA_META_PARAMS), TX_A);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+      const checks = mockAeSdk.buildAuthTxHash.mock.calls.length;
+      await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(true);
+      expect(proposal.tx.amount).toBe('100');
+      expect(proposal.tx.recipientId).toBe(ADDRESS_B);
+      expect(mockAeSdk.buildAuthTxHash).toHaveBeenCalledTimes(checks);
+    });
+
+    it('does not show a transaction the proposal was not hashed from', async () => {
+      connectTo(makeNode());
+      propose(await hashOf(TX_A, GA_META_PARAMS), TX_B);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(false);
+      expect(proposal.tx).toBeUndefined();
+      expect(proposal.gaMetaParams).toBeUndefined();
+      expect(proposal.confirmedBy).toEqual([ADDRESS_A]);
+    });
+
+    it('shows a proposal hashed with the fee of older wallets on a network with another floor', async () => {
+      connectTo(makeNode(1000000n));
+      propose(await hashOf(TX_A, LEGACY_GA_META_PARAMS), TX_A);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(true);
+      expect(proposal.tx.amount).toBe('100');
+      expect(proposal.gaMetaParams).toEqual(LEGACY_GA_META_PARAMS);
+    });
+
+    it('checks a proposal again after a check that a failing node made fail', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const floor = 1000000n;
+      const nodePair = { gasPrice: '1000000', fee: '100000000000' };
+      const txHash = Buffer.from(
+        await sdkBuildAuthTxHash(TX_A, { ...nodePair, onNode: makeNode(floor) }),
+      ).toString('hex');
+      // Prices by the parameters of the SDK release then, the legacy pair
+      connectTo({
+        ...makeNode(floor),
+        getProtocolParameters: async () => {
+          throw Object.assign(new Error('Service Unavailable'), { statusCode: 503 });
+        },
+      });
+      propose(txHash, TX_A);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      expect((await fetchActiveMultisigTx()).isTxVerified).toBe(false);
+
+      // Another node object: the SDK keeps the parameters per node
+      connectTo(makeNode(floor));
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(true);
+      expect(proposal.gaMetaParams).toEqual(nodePair);
+    });
+
+    it('shows a proposal on a network whose floor is above the fee of older wallets', async () => {
+      connectTo(makeNode(2000000000n));
+      propose(await hashOf(TX_A, { fee: '200000000000000', gasPrice: '2000000000' }), TX_A);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(true);
+      expect(proposal.tx.amount).toBe('100');
+    });
+
+    it('does not take the fee of older wallets where it is below the floor', async () => {
+      connectTo(makeNode(2000000000n));
+      propose(await hashOf(TX_A, LEGACY_GA_META_PARAMS), TX_A);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(false);
+      expect(proposal.tx).toBeUndefined();
+    });
+
+    it('sends with the fee and gas price the proposal was hashed with', async () => {
+      connectTo(makeNode(1000000n));
+      const txHash = await hashOf(TX_A, LEGACY_GA_META_PARAMS);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { sendTx } = useMultisigTransactions();
+
+      await sendTx(ADDRESS_A as any, TX_A, 3, txHash);
+
+      expect(mockDryAeSdk.sendTransaction).toHaveBeenCalledWith(TX_A, {
+        authData: { callData: 'encoded-authorize-calldata', ...LEGACY_GA_META_PARAMS },
+        onAccount: expect.objectContaining({ address: ADDRESS_A }),
+      });
+    });
+
+    it('does not send a transaction the proposal was not hashed from', async () => {
+      connectTo(makeNode());
+      const txHash = await hashOf(TX_A, GA_META_PARAMS);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { sendTx } = useMultisigTransactions();
+
+      await expect(sendTx(ADDRESS_A as any, TX_B, 3, txHash))
+        .rejects.toThrow(en.pages.proposalDetails.unverified.notSent);
+
+      expect(mockDryAeSdk.sendTransaction).not.toHaveBeenCalled();
     });
   });
 });
