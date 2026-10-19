@@ -51,9 +51,8 @@ import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensit
 import { removeLegacySecrets } from '@/migrations/migrationHelpers';
 import {
   LEGACY_DEFAULT_PASSWORD,
-  clearDefaultPasswordSecret,
+  generateDefaultPasswordSecret,
   getDefaultPasswordSecret,
-  getOrCreateDefaultPasswordSecret,
 } from './defaultPassword';
 
 import { useUi } from './ui';
@@ -348,7 +347,16 @@ export const useAuth = createCustomScopedComposable(() => {
     return storedSalt === (encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null);
   }
 
-  async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
+  /**
+   * `isDefaultPasswordSecret` stores the password as the default-password secret
+   * together with the salt, so another window can't pair a different one with it.
+   * Web and extension only, mobile returns before the commit.
+   */
+  async function setPassword(
+    password: string,
+    plaintextToEncrypt = mnemonicDecrypted.value,
+    { isDefaultPasswordSecret = false } = {},
+  ) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
       throw new Error('The wallet is locked, there is no mnemonic to encrypt');
@@ -413,14 +421,22 @@ export const useAuth = createCustomScopedComposable(() => {
      * disk.
      */
     const previousStoredSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    const previousSecret = isDefaultPasswordSecret
+      ? WalletStorage.get<string>(STORAGE_KEYS.defaultPasswordSecret)
+      : null;
+    const restore = (key: string, value: string | null) => (
+      (value === null) ? WalletStorage.remove(key) : WalletStorage.set(key, value)
+    );
     try {
       WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(newSalt));
+      if (isDefaultPasswordSecret) {
+        WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, password);
+      }
       WalletStorage.set(STORAGE_KEYS.mnemonic, newMnemonicCiphertext);
     } catch (error) {
-      if (previousStoredSalt === null) {
-        WalletStorage.remove(STORAGE_KEYS.encryptionSalt);
-      } else {
-        WalletStorage.set(STORAGE_KEYS.encryptionSalt, previousStoredSalt);
+      restore(STORAGE_KEYS.encryptionSalt, previousStoredSalt);
+      if (isDefaultPasswordSecret) {
+        restore(STORAGE_KEYS.defaultPasswordSecret, previousSecret);
       }
       throw error;
     }
@@ -777,10 +793,8 @@ export const useAuth = createCustomScopedComposable(() => {
             /**
              * Transparently rotate legacy "skip password" installs off the
              * hardcoded `testPassword123` sentinel the moment we unlock
-             * with it. We drop any stale stored secret first (defensive —
-             * if one existed, `storedSecret` would have worked above and
-             * we would not be on this path), then mint a new per-install
-             * 256-bit random secret and hand it to `setPassword`, which:
+             * with it. We mint a new per-install 256-bit random secret and
+             * hand it to `setPassword`, which:
              *   - generates a fresh `encryptionSalt`,
              *   - derives a new AES-GCM key and publishes it on
              *     `encryptionKey`, which triggers every `decryptedComputed`
@@ -788,15 +802,18 @@ export const useAuth = createCustomScopedComposable(() => {
              *     preclaimed names in `aeNames.ts`, the secure-login
              *     timeout above) to re-encrypt its ciphertext under the
              *     new key,
-             *   - re-encrypts the mnemonic on top of that key.
+             *   - re-encrypts the mnemonic on top of that key,
+             *   - stores the secret in the same commit as the salt and the
+             *     mnemonic (replacing any stale one), so a popup and a side
+             *     panel rotating at once leave one pair that opens the wallet.
              * After this runs the on-disk state no longer depends on any
              * value shipped in source, and subsequent launches take the
              * `storedSecret` branch above.
              */
             try {
-              await clearDefaultPasswordSecret();
-              const rotatedSecret = await getOrCreateDefaultPasswordSecret();
-              await setPassword(rotatedSecret);
+              await setPassword(generateDefaultPasswordSecret(), undefined, {
+                isDefaultPasswordSecret: true,
+              });
             } catch (error) {
               // Rotation is best-effort — a failure here still leaves the
               // user authenticated under the legacy password, matching

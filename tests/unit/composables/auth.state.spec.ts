@@ -33,6 +33,9 @@ function flushAsync() {
   return new Promise((resolve) => { setTimeout(resolve, 0); });
 }
 
+// WebCrypto shares a small thread pool with every spec of a full run
+const WAIT_FOR_CRYPTO = { timeout: 10000 };
+
 function makeSessionStorageStub() {
   const store: Record<string, unknown> = {};
   return {
@@ -397,6 +400,196 @@ describe('useAuth state machine branches', () => {
 
       await expect(auth.setPassword('new-password')).rejects.toThrow('mnemonic');
       expect(await readStorage('mnemonic')).toBe(mnemonicCiphertext);
+    });
+  });
+
+  describe('legacy default-password rotation', () => {
+    const SECURE_LOGIN_TIMEOUT = '900000';
+    const IMPORTED_ACCOUNTS = JSON.stringify([{
+      type: 'private-key',
+      isRestored: false,
+      protocol: 'ethereum',
+      privateKey: Buffer.from('aa'.repeat(32), 'hex'),
+    }]);
+    const ENCRYPTED_DATA = {
+      mnemonic: VALID_MNEMONIC,
+      privateKeyAccountsRaw: IMPORTED_ACCOUNTS,
+      secureLoginTimeout: SECURE_LOGIN_TIMEOUT,
+    };
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function readStorage(name: string) {
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { composeStorageKeys } = await import('@/utils/common');
+      return JSON.parse(localStorage.getItem(composeStorageKeys(STORAGE_KEYS[name])));
+    }
+
+    async function storedKey() {
+      const { generateEncryptionKey, decodeBase64 } = await import('@/utils/crypto');
+      return generateEncryptionKey(
+        await readStorage('defaultPasswordSecret'),
+        decodeBase64(await readStorage('encryptionSalt')),
+      );
+    }
+
+    /** A wallet stored by the pre-upgrade "skip password" flow, with an imported account. */
+    async function seedWallet(password: string) {
+      const {
+        encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+      } = await import('@/utils/crypto');
+      const { WalletStorage } = await import('@/lib/WalletStorage');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const salt = generateSalt();
+      const key = await generateEncryptionKey(password, salt);
+      WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(salt));
+      WalletStorage.set(STORAGE_KEYS.accountsRaw, [
+        { isRestored: true, protocol: 'aeternity', type: 'hd-wallet' },
+      ]);
+      await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
+        WalletStorage.set(STORAGE_KEYS[name], await encrypt(key, plaintext))
+      )));
+      return key;
+    }
+
+    /** A popup or side panel: its own module instances over the shared storage. */
+    async function openWindow() {
+      vi.resetModules();
+      await import('@/protocols/registerAdapters');
+      const { useAuth } = await import('@/composables/auth');
+      const { useAccounts } = await import('@/composables/accounts');
+      const auth = useAuth();
+      const accounts = useAccounts(); // Re-encrypts the imported keys on a key change.
+      await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+      return { auth, accounts };
+    }
+
+    /** The imported keys and the timeout follow the new key in watchers, after the rotation. */
+    async function waitForDataUnderStoredSecret() {
+      const { decrypt } = await import('@/utils/crypto');
+      await vi.waitFor(async () => {
+        const key = await storedKey();
+        await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
+          expect(await decrypt(key, await readStorage(name))).toBe(plaintext)
+        )));
+      }, WAIT_FOR_CRYPTO);
+    }
+
+    async function expectOpensWithStoredSecret() {
+      // Another window gets no storage events, so it reads them once all are stored.
+      await waitForDataUnderStoredSecret();
+      const { auth, accounts } = await openWindow();
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(auth.isUsingDefaultPassword.value).toBe(true);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
+      await vi.waitFor(() => expect(accounts.accounts.value.map(({ type }) => type))
+        .toEqual(['hd-wallet', 'private-key']), WAIT_FOR_CRYPTO);
+      expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT);
+    }
+
+    it('moves the wallet and its data to a per-install secret', async () => {
+      const { decrypt } = await import('@/utils/crypto');
+      const legacyKey = await seedWallet('testPassword123');
+      const legacySalt = await readStorage('encryptionSalt');
+      const { auth } = await openWindow();
+
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(auth.isUsingDefaultPassword.value).toBe(true);
+
+      await waitForDataUnderStoredSecret();
+      expect(await readStorage('defaultPasswordSecret')).not.toBe('testPassword123');
+      expect(await readStorage('encryptionSalt')).not.toBe(legacySalt);
+      await Promise.all(Object.keys(ENCRYPTED_DATA).map(async (name) => (
+        expect(decrypt(legacyKey, await readStorage(name))).rejects.toThrow()
+      )));
+
+      await expectOpensWithStoredSecret();
+    });
+
+    it.each([
+      ['no secret', null],
+      // E.g. one written before a rotation that was cut off.
+      ['a stale secret', 'stale-secret'],
+    ])('leaves the legacy wallet with %s as it was when storing the new one fails, and rotates it later', async (_, storedSecret) => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await seedWallet('testPassword123');
+      const legacySalt = await readStorage('encryptionSalt');
+      const { composeStorageKeys } = await import('@/utils/common');
+      const { STORAGE_KEYS } = await import('@/constants');
+      if (storedSecret) {
+        const { WalletStorage } = await import('@/lib/WalletStorage');
+        WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, storedSecret);
+      }
+      walletStorageSetMock.mockImplementation((keys, value, realSet) => {
+        if (composeStorageKeys(keys) === composeStorageKeys(STORAGE_KEYS.mnemonic)) {
+          throw new Error('QuotaExceededError');
+        }
+        return realSet(keys, value);
+      });
+      const { auth } = await openWindow();
+
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(await readStorage('defaultPasswordSecret')).toBe(storedSecret);
+      expect(await readStorage('encryptionSalt')).toBe(legacySalt);
+
+      walletStorageSetMock.mockImplementation((keys, value, realSet) => realSet(keys, value));
+      const { auth: reopened } = await openWindow();
+      await reopened.checkUserAuth();
+      expect(reopened.isUsingDefaultPassword.value).toBe(true);
+      await expectOpensWithStoredSecret();
+    });
+
+    it('asks for the password when neither the stored nor the legacy secret opens the wallet', async () => {
+      await seedWallet('a-real-password');
+      const { auth } = await openWindow();
+
+      await auth.checkUserAuth();
+
+      expect(openPasswordLoginModalMock).toHaveBeenCalledTimes(1);
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(await readStorage('defaultPasswordSecret')).toBeNull();
+    });
+
+    it('stores one secret and salt that open the wallet when two windows rotate at once', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await seedWallet('testPassword123');
+      const legacySalt = await readStorage('encryptionSalt');
+      const { encodeBase64 } = await import('@/utils/crypto');
+      const { auth: first } = await openWindow();
+      const { auth: second } = await openWindow();
+      // Each new key (fresh salt) waits until its turn.
+      const { subtle } = globalThis.crypto;
+      const deriveKey = subtle.deriveKey.bind(subtle);
+      const heldDerivations = [];
+      vi.spyOn(subtle, 'deriveKey').mockImplementation((params, ...rest) => (
+        encodeBase64(params.salt) === legacySalt
+          ? deriveKey(params, ...rest)
+          : new Promise((resolve) => {
+            heldDerivations.push(() => resolve(deriveKey(params, ...rest)));
+          })
+      ));
+
+      const firstCheck = first.checkUserAuth();
+      await vi.waitFor(() => expect(heldDerivations).toHaveLength(1), WAIT_FOR_CRYPTO);
+      const secondCheck = second.checkUserAuth();
+      await vi.waitFor(() => expect(heldDerivations).toHaveLength(2), WAIT_FOR_CRYPTO);
+      heldDerivations[0]();
+      await vi.waitFor(
+        async () => expect(await readStorage('encryptionSalt')).not.toBe(legacySalt),
+        WAIT_FOR_CRYPTO,
+      );
+      heldDerivations[1]();
+      await Promise.all([firstCheck, secondCheck]);
+      vi.mocked(subtle.deriveKey).mockRestore();
+
+      const { decrypt } = await import('@/utils/crypto');
+      expect(await decrypt(await storedKey(), await readStorage('mnemonic'))).toBe(VALID_MNEMONIC);
+      await expectOpensWithStoredSecret();
     });
   });
 
