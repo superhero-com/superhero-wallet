@@ -167,6 +167,7 @@ interface LoadAvailableTokensOptions {
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(30000);
 
 let areTokenBalancesUpdating = false;
+let isTokenBalancesReloadRequested = false;
 
 /**
  * Store and provide the access to all protocol's fungible tokens.
@@ -338,12 +339,7 @@ export function useFungibleTokens() {
     }
   }
 
-  async function loadTokenBalances() {
-    if (areTokenBalancesUpdating) {
-      return;
-    }
-
-    areTokenBalancesUpdating = true;
+  async function processTokenBalancesUpdate() {
     const networkAtStart = activeNetwork.value.name;
     const tokenBalancesFetchPromisesByKey: Dictionary<Promise<ITokenBalance[] | null>> = {};
     accounts.value.map(
@@ -371,14 +367,35 @@ export function useFungibleTokens() {
       return null;
     });
 
-    tokenBalances.value = (await Promise.all(
+    const newTokenBalances = (await Promise.all(
       (Object.entries(tokenBalancesFetchPromisesByKey)).map(
         async ([key, promise]) => await promise || cachedTokenBalancesByKey[key] || [],
       ),
     )).flat();
-    tokenBalancesNetworkName.value = networkAtStart;
 
-    areTokenBalancesUpdating = false;
+    if (activeNetwork.value.name === networkAtStart) {
+      tokenBalances.value = newTokenBalances;
+      tokenBalancesNetworkName.value = networkAtStart;
+    }
+  }
+
+  async function loadTokenBalances() {
+    if (areTokenBalancesUpdating) {
+      // E.g. after a network switch the running batch is discarded
+      isTokenBalancesReloadRequested = true;
+      return;
+    }
+
+    areTokenBalancesUpdating = true;
+    try {
+      do {
+        isTokenBalancesReloadRequested = false;
+        // eslint-disable-next-line no-await-in-loop
+        await processTokenBalancesUpdate();
+      } while (isTokenBalancesReloadRequested);
+    } finally {
+      areTokenBalancesUpdating = false;
+    }
   }
 
   async function createOrChangeAllowance(contractId: AssetContractId, amount: number | string) {
@@ -489,7 +506,12 @@ export function useFungibleTokens() {
       .plus(isReceived ? 0 : gasCost));
   }
 
-  tokenBalancesPooling(() => loadTokenBalances());
+  tokenBalancesPooling(() => {
+    // A batch outlasting the interval would get a rerun queued
+    if (!areTokenBalancesUpdating) {
+      loadTokenBalances();
+    }
+  });
 
   if (!composableInitialized) {
     composableInitialized = true;
@@ -505,13 +527,14 @@ export function useFungibleTokens() {
       const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
       const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
       if (newMiddlewareUrl !== oldMiddlewareUrl) {
-        tokenBalances.value = [];
         defaultTokensAvailable.value = {};
         ephemeralTokensAvailable.value = {};
         availableTokensNextPageUrls.value = {};
         lastAvailableTokensLoadTime.value = 0;
-        await loadTokenBalances();
       }
+      // The networks can share the middleware and differ in other protocols
+      tokenBalances.value = [];
+      await loadTokenBalances();
     });
   }
 

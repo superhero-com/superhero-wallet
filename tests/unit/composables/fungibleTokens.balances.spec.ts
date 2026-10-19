@@ -1,5 +1,6 @@
 // @ts-nocheck
-import { ref } from 'vue';
+import { defineComponent, h, ref } from 'vue';
+import { flushPromises, mount } from '@vue/test-utils';
 
 /**
  * Token balances of every account are polled. A failed fetch keeps what is shown.
@@ -27,6 +28,18 @@ describe('useFungibleTokens token balances', () => {
   beforeEach(async () => {
     vi.resetModules();
     localStorage.clear();
+    // A mounted component polls only while the app is active and online
+    vi.doMock('@/composables/connection', async (importOriginal) => {
+      const actual = await importOriginal();
+      return {
+        ...actual,
+        useConnection: () => ({ ...actual.useConnection(), isOnline: ref(true) }),
+      };
+    });
+    vi.doMock('@/composables/ui', async (importOriginal) => {
+      const actual = await importOriginal();
+      return { ...actual, useUi: () => ({ ...actual.useUi(), isAppActive: ref(true) }) };
+    });
     vi.doMock('@/composables/aeSdk', () => ({
       useAeSdk: () => ({ getAeSdk: vi.fn(), isTippingSupported: ref(true) }),
     }));
@@ -43,9 +56,13 @@ describe('useFungibleTokens token balances', () => {
   });
 
   afterEach(() => {
+    vi.doUnmock('@/composables/connection');
+    vi.doUnmock('@/composables/ui');
     vi.doUnmock('@/composables/aeSdk');
     vi.doUnmock('@/composables/accounts');
     vi.restoreAllMocks();
+    vi.useRealTimers();
+    document.body.innerHTML = '';
   });
 
   async function useFungibleTokens() {
@@ -110,6 +127,91 @@ describe('useFungibleTokens token balances', () => {
     await loadTokenBalances();
 
     expect(tokenBalances.value).toEqual([]);
+  });
+
+  it('discards a batch that resolves after a network switch and loads the new network', async () => {
+    let resolveMainnetFetch;
+    let resolveTestnetFetch;
+    const fetchSpy = vi.spyOn(adapter, 'fetchAccountTokenBalances')
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveMainnetFetch = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveTestnetFetch = resolve; }));
+    const { tokenBalances, loadTokenBalances } = await useFungibleTokens();
+    const { useNetworks } = await import('@/composables/networks');
+    const { NETWORK_NAME_TESTNET } = await import('@/constants');
+
+    const loading = loadTokenBalances();
+    useNetworks().switchNetwork(NETWORK_NAME_TESTNET);
+    resolveMainnetFetch([tokenBalance('ct_mainnet')]);
+
+    await flushPromises();
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(tokenBalances.value).toEqual([]);
+
+    resolveTestnetFetch([tokenBalance('ct_testnet')]);
+    await loading;
+    expect(tokenBalances.value).toEqual([tokenBalance('ct_testnet')]);
+  });
+
+  it('can load again after a failed batch', async () => {
+    const fetchSpy = vi.spyOn(adapter, 'fetchAccountTokenBalances')
+      .mockRejectedValueOnce(new Error('Unexpected'))
+      .mockResolvedValueOnce([tokenBalance('ct_a')]);
+    const { tokenBalances, loadTokenBalances } = await useFungibleTokens();
+
+    await expect(loadTokenBalances()).rejects.toThrow('Unexpected');
+    await loadTokenBalances();
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(tokenBalances.value).toEqual([tokenBalance('ct_a')]);
+  });
+
+  it('skips the poll while a batch is still running', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
+    let resolveFetch;
+    const fetchSpy = vi.spyOn(adapter, 'fetchAccountTokenBalances')
+      .mockImplementation(() => new Promise((resolve) => { resolveFetch = resolve; }));
+    // The currency rates the same component polls
+    vi.spyOn(global, 'fetch').mockImplementation(async () => new Response('{}'));
+    const { useFungibleTokens: useTokens } = await import('@/composables/fungibleTokens');
+    const page = document.createElement('div');
+    page.classList.add('ion-page');
+    document.body.appendChild(page);
+    let tokenBalances;
+    const wrapper = mount(defineComponent({
+      setup() {
+        ({ tokenBalances } = useTokens());
+        return {};
+      },
+      render: () => h('div'),
+    }), { attachTo: page });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(30000);
+    resolveFetch([tokenBalance('ct_a')]);
+    await flushPromises();
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(tokenBalances.value).toEqual([tokenBalance('ct_a')]);
+    wrapper.unmount();
+  });
+
+  it('loads the balances again on a network that shares the aeternity middleware', async () => {
+    const fetchSpy = vi.spyOn(adapter, 'fetchAccountTokenBalances')
+      .mockResolvedValueOnce([tokenBalance('ct_mainnet')])
+      .mockResolvedValueOnce([tokenBalance('ct_custom')]);
+    const { tokenBalances, loadTokenBalances } = await useFungibleTokens();
+    const { useNetworks } = await import('@/composables/networks');
+    const { NETWORK_NAME_MAINNET } = await import('@/constants');
+    const { networks, addCustomNetwork, switchNetwork } = useNetworks();
+    await loadTokenBalances();
+
+    addCustomNetwork({ ...networks.value[NETWORK_NAME_MAINNET], name: 'Custom' });
+    switchNetwork('Custom');
+    expect(tokenBalances.value).toEqual([]);
+    await flushPromises();
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(tokenBalances.value).toEqual([tokenBalance('ct_custom')]);
   });
 
   it('replaces the balances with an empty list when the account has no tokens', async () => {

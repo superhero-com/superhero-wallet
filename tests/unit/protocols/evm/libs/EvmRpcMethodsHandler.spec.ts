@@ -349,11 +349,16 @@ describe('handleEvmRpcMethod', () => {
     it.each([
       ['0xaa36a7', 'Testnet'],
       ['11155111', 'Testnet'],
-      ['0x38', 'Mainnet'],
     ])('switches to the network of chain %s', async (chainId, networkName) => {
       expect(await handleEvmRpcMethod(DAPP, 'wallet_switchEthereumChain', { chainId }))
         .toEqual({ result: null });
       expect(switchNetwork).toHaveBeenCalledWith(networkName);
+    });
+
+    it('does not switch for a chain of the active network', async () => {
+      expect(await handleEvmRpcMethod(DAPP, 'wallet_switchEthereumChain', { chainId: '0x38' }))
+        .toEqual({ result: null });
+      expect(switchNetwork).not.toHaveBeenCalled();
     });
 
     it('rejects an unknown chain', async () => {

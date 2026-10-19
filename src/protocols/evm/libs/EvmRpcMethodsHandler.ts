@@ -366,7 +366,10 @@ export async function handleEvmRpcMethod(
         (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
       ));
     if (network) {
-      switchNetwork(network.name);
+      // A dapp can ask for the chain the wallet is already on
+      if (network.name !== activeNetwork.value.name) {
+        switchNetwork(network.name);
+      }
       return { result: null };
     }
     return {
