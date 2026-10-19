@@ -57,12 +57,22 @@ import type {
   AssetContractId,
   NetworkTypeDefault,
 } from '@/types';
-import { getLastNotEmptyAccountIndex, fetchJson, handleUnknownError } from '@/utils';
+import {
+  getLastNotEmptyAccountIndex,
+  fetchJson,
+  handleUnknownError,
+  toShiftedBigNumber,
+} from '@/utils';
 
 const TOKEN_PROGRAM_ID = new PublicKey(SOL_TOKEN_PROGRAM_ID);
 
 const TRANSACTION_POLLING_INTERVAL = 3000;
 const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
+
+// Float multiplication is off by a lamport from 2^22 SOL on.
+const toLamports = (sol: number) => toShiftedBigNumber(sol, SOL_COIN_PRECISION)
+  .integerValue()
+  .toNumber();
 
 export class SolanaAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.solana;
@@ -785,7 +795,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const conn = this.getConnection();
     const { blockhash } = await conn.getLatestBlockhash('finalized');
 
-    const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+    const lamports = toLamports(amount);
     await this.assertRecipientsStayRentExempt(conn, [toPubkey], lamports);
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
     tx.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
@@ -852,7 +862,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const fromPubkey = new PublicKey(account.address as string);
     const conn = this.getConnection();
     const { blockhash } = await conn.getLatestBlockhash('finalized');
-    const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+    const lamports = toLamports(amount);
     const recipientPubkeys = recipients.map((r) => new PublicKey(r as string));
     await this.assertRecipientsStayRentExempt(conn, recipientPubkeys, lamports);
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
@@ -889,7 +899,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
         try {
           const feeInfo = await conn.getFeeForMessage(tx.compileMessage(), 'confirmed');
           const feeLamports = Number(feeInfo?.value || 0);
-          const amountLamports = Math.round(amount * LAMPORTS_PER_SOL) * list.length;
+          const amountLamports = toLamports(amount) * list.length;
           required = amountLamports + feeLamports;
           payerBalance = await conn.getBalance(tx.feePayer as PublicKey);
         } catch (_) { /* best-effort */ }
