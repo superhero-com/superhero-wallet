@@ -1,7 +1,7 @@
 /**
  * [BLACK-BOX] The send form of Bitcoin, which Dogecoin uses too. Bitcoin mainnet nodes don't
  * relay outputs under 546 sat (dust), so the form stops such an amount on mainnet; 546 sat
- * itself is not dust. Dogecoin has no such minimum but still rejects 0.
+ * itself is not dust. Dogecoin outputs under 0.01 DOGE need an extra fee, so it starts there.
  * Runs the app's real validation rules.
  */
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
@@ -139,12 +139,22 @@ describe('Bitcoin send form on testnet', () => {
 });
 
 describe('Dogecoin send form on mainnet', () => {
-  it('rejects 0', async () => {
-    expect(await getAmountMessage(PROTOCOLS.dogecoin, '0')).toBe('Amount must be more than 0.');
+  it.each(['0', '0.00999999'])('rejects %s DOGE', async (amount) => {
+    expect(await getAmountMessage(PROTOCOLS.dogecoin, amount)).toBe('Amount must be 0.01 or more.');
   });
 
-  it('accepts amounts under the Bitcoin dust limit', async () => {
-    expect(await getAmountMessage(PROTOCOLS.dogecoin, '0.00000545')).toBe('');
+  it('accepts 0.01 DOGE', async () => {
+    expect(await getAmountMessage(PROTOCOLS.dogecoin, '0.01')).toBe('');
+  });
+});
+
+describe('Dogecoin send form on testnet', () => {
+  beforeAll(() => useNetworks().switchNetwork(NETWORK_NAME_TESTNET));
+  afterAll(() => useNetworks().switchNetwork(NETWORK_NAME_MAINNET));
+
+  it('rejects 0.00999999 DOGE', async () => {
+    expect(await getAmountMessage(PROTOCOLS.dogecoin, '0.00999999'))
+      .toBe('Amount must be 0.01 or more.');
   });
 });
 
@@ -415,6 +425,35 @@ describe('Bitcoin send form fee', () => {
   });
 });
 
+describe('Send form default fee', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.stubGlobal('fetch', () => new Promise(() => {}));
+  });
+
+  it.each([
+    [PROTOCOLS.bitcoin, 0.00002],
+    [PROTOCOLS.dogecoin, 0.00226],
+  ])('starts %s at %s', async (protocol, fee) => {
+    const wrapper = mountForm(protocol);
+    await flushPromises();
+    expect(getFee(wrapper)).toBe(fee);
+  });
+
+  it('falls back to 1000 koinu/vB for Dogecoin', async () => {
+    vi.stubGlobal('fetch', () => Promise.reject(new Error('offline')));
+    // Two inputs and change
+    const estimateVsize = vi.spyOn(ProtocolAdapterFactory.getAdapter(PROTOCOLS.dogecoin) as any, 'estimateVsize')
+      .mockResolvedValue([374, 374, 374]);
+
+    const wrapper = mountForm(PROTOCOLS.dogecoin);
+    await flushPromises();
+
+    expect(estimateVsize.mock.lastCall![2]).toEqual([1000, 1000, 1500]);
+    expect(getSpeedFees(wrapper)).toEqual(['0.00374', '0.00374', '0.00561']);
+  });
+});
+
 describe('Dogecoin send form fee', () => {
   const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.dogecoin) as any;
 
@@ -440,5 +479,27 @@ describe('Dogecoin send form fee', () => {
 
     expect(estimateVsize.mock.lastCall![0]).toBe(0.5);
     expect(getFee(wrapper)).toBe(0.00374);
+  });
+
+  it.each([
+    [400, [1000, 1000, 1000], ['0.00226', '0.00226', '0.00226']],
+    // The fast fee takes a second input
+    [1500, [1000, 1500, 2250], ['0.00226', '0.00339', '0.008415']],
+  ])('sizes every speed at 0.01 DOGE/kB or more when the API asks %i koinu/vB', async (
+    rate,
+    feeRates,
+    fees,
+  ) => {
+    stubFeeEstimates(rate);
+    const estimateVsize = vi.spyOn(adapter, 'estimateVsize')
+      .mockImplementation(async (amount: any, recipient: any, rates: any) => (
+        rates.map((feeRate: number) => (feeRate > 2000 ? 374 : 226))
+      ));
+
+    const wrapper = mountForm(PROTOCOLS.dogecoin);
+    await flushPromises();
+
+    expect(estimateVsize.mock.lastCall![2]).toEqual(feeRates);
+    expect(getSpeedFees(wrapper)).toEqual(fees);
   });
 });
