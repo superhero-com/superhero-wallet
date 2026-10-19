@@ -31,8 +31,9 @@
             v-if="!isErrorTransaction"
             name="swap-data"
           />
+          <!-- EVM transactions have no reason -->
           <DetailsItem
-            v-if="isErrorTransaction"
+            v-if="isErrorTransaction && transaction.tx.return"
             :label="$t('pages.transactionDetails.reason')"
             :value="transaction.tx.return"
             class="reason"

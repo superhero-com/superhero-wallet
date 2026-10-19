@@ -129,7 +129,7 @@ describe('useTransactionData token transfers', () => {
   });
 
   it('still shows a contract call fetched by hash as the coin with the fee', () => {
-    const transaction = normalizeWeb3EthTransactionStructure({
+    const transaction = normalizeWeb3EthTransactionStructure(PROTOCOLS.ethereum, {
       blockNumber: 1n,
       from: OWNER,
       to: SOME_CONTRACT,

@@ -448,11 +448,20 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       }
     }
 
-    const block = transaction?.blockHash
-      ? await getBlock(web3Eth, transaction.blockHash, true, DEFAULT_RETURN_FORMAT)
-      : undefined;
-    const normalized = normalizeWeb3EthTransactionStructure(transaction, block, transactionOwner);
-    return normalized;
+    const [block, receipt] = transaction?.blockHash
+      ? await Promise.all([
+        getBlock(web3Eth, transaction.blockHash, false, DEFAULT_RETURN_FORMAT),
+        // Without the receipt the fee is the most the gas limit can cost
+        getTransactionReceipt(web3Eth, hash, DEFAULT_RETURN_FORMAT).catch(() => undefined),
+      ])
+      : [undefined, undefined];
+    return normalizeWeb3EthTransactionStructure(
+      this.protocol,
+      transaction,
+      block,
+      transactionOwner,
+      receipt,
+    );
   }
 
   override async fetchAccountTransactions(
