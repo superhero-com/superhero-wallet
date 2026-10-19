@@ -20,6 +20,11 @@ describe('AeternityAdapter read errors', () => {
     await import('@/protocols/registerAdapters');
   });
 
+  afterEach(() => {
+    vi.doUnmock('@/composables/aeSdk');
+    vi.restoreAllMocks();
+  });
+
   async function getAdapter() {
     const { AeternityAdapter } = await import('@/protocols/aeternity/libs/AeternityAdapter');
     return new AeternityAdapter();
@@ -40,5 +45,13 @@ describe('AeternityAdapter read errors', () => {
 
     await expect(adapter.fetchBalance('ak_test')).rejects.toBe(error);
     expect(setAeNodeErrorMock).toHaveBeenCalledWith(true);
+  });
+
+  it('fetchAccountTokenBalances returns null when the middleware fails', async () => {
+    vi.spyOn(global, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const adapter = await getAdapter();
+
+    expect(await adapter.fetchAccountTokenBalances('ak_test')).toBeNull();
   });
 });

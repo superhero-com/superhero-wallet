@@ -156,6 +156,7 @@ export const STORAGE_KEYS = {
   lastAvailableTokensLoadTime: 'last-available-tokens-load-time',
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
+  fungibleTokenBalancesNetworkName: 'fungible-token-balances-network-name',
   preclaimedNames: 'preclaimed-names',
   pendingNameAutoExtendTxs: 'pending-name-auto-extend-txs',
   pendingNameTransferTxs: 'pending-name-transfer-txs',

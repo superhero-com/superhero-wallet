@@ -299,7 +299,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
         const response = await new EthplorerService(apiUrl)
           .fetchAccountTokenBalances(address, PROTOCOLS.bnb);
         // Ensure protocol is BNB
-        return (response || [])?.map((b) => ({ ...b, protocol: PROTOCOLS.bnb }));
+        return response?.map((b) => ({ ...b, protocol: PROTOCOLS.bnb })) ?? null;
       }
       const response = await new AlchemyService(apiUrl).getTokenBalances(address);
       return response;

@@ -60,6 +60,15 @@ const tokenBalances = useStorageRef<ITokenBalance[]>(
   STORAGE_KEYS.fungibleTokenBalances,
 );
 
+/**
+ * The network `tokenBalances` was fetched for. A dapp can switch the network
+ * while the app is closed, so the stored balances can be of another one.
+ */
+const tokenBalancesNetworkName = useStorageRef<string | null>(
+  null,
+  STORAGE_KEYS.fungibleTokenBalancesNetworkName,
+);
+
 const lastAvailableTokensLoadTime = useStorageRef<number>(
   0,
   STORAGE_KEYS.lastAvailableTokensLoadTime,
@@ -335,6 +344,7 @@ export function useFungibleTokens() {
     }
 
     areTokenBalancesUpdating = true;
+    const networkAtStart = activeNetwork.value.name;
     const tokenBalancesFetchPromisesByKey: Dictionary<Promise<ITokenBalance[] | null>> = {};
     accounts.value.map(
       ({ address, protocol }) => {
@@ -347,7 +357,9 @@ export function useFungibleTokens() {
 
     // for each promise check if it returned null, if so, use cached data
     // because it means that we couldn't fetch new data
-    const cachedTokenBalances = tokenBalances.value;
+    const cachedTokenBalances = (tokenBalancesNetworkName.value === networkAtStart)
+      ? tokenBalances.value
+      : [];
 
     const cachedTokenBalancesByKey: Dictionary<ITokenBalance[]> = {};
     cachedTokenBalances.map((tokenBalance) => {
@@ -364,6 +376,7 @@ export function useFungibleTokens() {
         async ([key, promise]) => await promise || cachedTokenBalancesByKey[key] || [],
       ),
     )).flat();
+    tokenBalancesNetworkName.value = networkAtStart;
 
     areTokenBalancesUpdating = false;
   }

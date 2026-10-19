@@ -390,7 +390,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       });
       return balances;
     } catch (e) {
-      return [];
+      return null;
     }
   }
 

@@ -323,7 +323,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return this.fetchAex9TokensPage(nextPageUrl || searchPath);
   }
 
-  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
+  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null> {
     const { fetchFromMiddleware } = useAeMiddleware();
     const { loadAllTokenSalesInfoByAccount, tokenSales } = useAeTokenSales();
     try {
@@ -352,7 +352,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     } catch (error: any) {
       handleUnknownError(error);
     }
-    return [];
+    return null;
   }
 
   override async transferToken(
