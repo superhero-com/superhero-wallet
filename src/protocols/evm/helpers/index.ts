@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { toWei } from 'web3-utils';
+import type { BigNumberPublic } from '@/types';
 
 /**
  * `estimateGas` can undershoot by mining time (e.g. first-time recipient storage
@@ -10,7 +11,7 @@ export function withGasHeadroom(estimatedGas: bigint | number): bigint {
 }
 
 /** ERC-20 amounts scale by the token's own `decimals()`, not the chain's 1e18. */
-export function toTokenBaseUnits(amount: BigNumber, decimals: number): bigint {
+export function toTokenBaseUnits(amount: BigNumberPublic, decimals: number): bigint {
   return BigInt(amount.shiftedBy(decimals).toFixed(0, BigNumber.ROUND_DOWN));
 }
 

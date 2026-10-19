@@ -896,6 +896,7 @@ export default defineComponent({
           popupProps.value.tx.data,
           popupProps.value.tx.contractId,
           activeAccount.address,
+          protocol,
         );
         decodingCallData.value = false;
       }

@@ -1,5 +1,5 @@
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
-import { FMT_BYTES, FMT_NUMBER } from 'web3-types';
+import { FMT_BYTES, FMT_NUMBER, type ContractAbi } from 'web3-types';
 import { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
 import { bigIntToHex } from 'web3-eth-accounts';
 import Contract from 'web3-eth-contract';
@@ -15,10 +15,13 @@ import { handleUnknownError } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { TX_RETURN_TYPE_REVERT } from '@/protocols/aeternity/config';
 import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { getActiveEvmNetworkSettings } from '@/protocols/evm/helpers/activeEvmNetworkSettings';
 import { ERC20_ABI } from '../config';
 import { EthDecodedCallData } from '../types';
 import { EtherscanService } from '../libs/EtherscanService';
-import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
+
+/** `transfer` and `approve`, decoded with `ERC20_ABI` */
+const ERC20_METHOD_SIGNATURES = ['0xa9059cbb', '0x095ea7b3'];
 
 /**
  * Convert Gwei to Ether
@@ -118,32 +121,38 @@ export async function getTokenTransferGasLimit(
   return roundedToNextThousand;
 }
 
-export async function decodeTxData(
-  txData: string,
-  contractId: string,
-  fromAccount: string,
-): Promise<EthDecodedCallData | undefined> {
-  const {
-    ethActiveNetworkPredefinedSettings,
-    ethActiveNetworkSettings,
-  } = useEthNetworkSettings();
-  const { middlewareUrl: apiUrl } = ethActiveNetworkPredefinedSettings.value;
-  const { chainId } = ethActiveNetworkSettings.value;
-
-  const contractAbi = await new EtherscanService(apiUrl, chainId)
+async function fetchContractAbi(contractId: string, protocol: Protocol) {
+  const { middlewareUrl, chainId } = getActiveEvmNetworkSettings(protocol);
+  const contractAbi = await new EtherscanService(middlewareUrl, chainId)
     .fetchFromApi({
       module: 'contract',
       action: 'getabi',
       address: contractId,
     });
 
-  if (!contractAbi?.message?.startsWith('OK')) {
+  return contractAbi?.message?.startsWith('OK')
+    ? JSON.parse(contractAbi.result) as ContractAbi
+    : undefined;
+}
+
+export async function decodeTxData(
+  txData: string,
+  contractId: string,
+  fromAccount: string,
+  protocol: Protocol,
+): Promise<EthDecodedCallData | undefined> {
+  // web3 looks up the selector in lowercase
+  const data = txData.toLowerCase();
+  const abi = ERC20_METHOD_SIGNATURES.includes(data.slice(0, 10))
+    ? ERC20_ABI
+    : await fetchContractAbi(contractId, protocol);
+
+  if (!abi) {
     return undefined;
   }
-  const parsedAbi = JSON.parse(contractAbi.result);
 
   const contractInstance = new Contract(
-    parsedAbi,
+    abi,
     contractId,
     { from: fromAccount },
   );
@@ -152,11 +161,11 @@ export async function decodeTxData(
     // Decode the method and parameters from the input data
     // TODO contractInstance doesn't always have the method signatures
     // then we are not able to decode the method name and get the parameters
-    const methodSignature = txData.slice(0, 10);
+    const methodSignature = data.slice(0, 10);
     const method = contractInstance.options.jsonInterface
       .find((m) => m.signature === methodSignature);
 
-    const params = contractInstance.decodeMethodData(txData);
+    const params = contractInstance.decodeMethodData(data);
 
     return {
       functionName: (method as any).name,

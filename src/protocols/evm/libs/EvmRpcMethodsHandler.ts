@@ -23,19 +23,17 @@ import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocol
 
 import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { withGasHeadroom } from '@/protocols/evm/helpers';
+import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { getActiveEvmNetworkSettings } from '@/protocols/evm/helpers/activeEvmNetworkSettings';
 import {
   getSignedTypedData,
   hashTypedData,
   type ITypedData,
 } from '@/protocols/evm/helpers/hashTypedData';
 import { toEvmRpcParams } from '@/protocols/evm/helpers/toEvmRpcParams';
-import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
-import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
-import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/avalancheNetworkSettings';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
-import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import {
+  ETH_COIN_PRECISION,
   ETH_CONTRACT_ID,
   ETH_RPC_METHODS,
   ETH_RPC_NODE_METHODS,
@@ -194,35 +192,6 @@ function selectProtocolByChainId(targetChainId?: string): Protocol | undefined {
   ));
 }
 
-function getActiveEvmNetworkSettings(protocol: Protocol) {
-  if (protocol === PROTOCOLS.bnb) {
-    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
-    return {
-      chainId: bnbActiveNetworkSettings.value.chainId,
-      nodeUrl: bnbActiveNetworkSettings.value.nodeUrl,
-    };
-  }
-  if (protocol === PROTOCOLS.avalanche) {
-    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
-    return {
-      chainId: avalancheActiveNetworkSettings.value.chainId,
-      nodeUrl: avalancheActiveNetworkSettings.value.nodeUrl,
-    };
-  }
-  if (protocol === PROTOCOLS.polygonPos) {
-    const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
-    return {
-      chainId: polygonActiveNetworkSettings.value.chainId,
-      nodeUrl: polygonActiveNetworkSettings.value.nodeUrl,
-    };
-  }
-  const { ethActiveNetworkSettings } = useEthNetworkSettings();
-  return {
-    chainId: ethActiveNetworkSettings.value.chainId,
-    nodeUrl: ethActiveNetworkSettings.value.nodeUrl,
-  };
-}
-
 /** Of those the wallet answers, the ones that send or read on a chain */
 const CHAIN_BOUND_METHODS: string[] = [
   ETH_RPC_METHODS.sendTransaction,
@@ -265,6 +234,28 @@ async function sendToNode(
     // The message names the host, which could reveal a custom node URL
     return getUnknownError(error.statusCode ? `HTTP ${error.statusCode}` : error.message);
   }
+}
+
+interface IFeePerGas {
+  gasPrice?: bigint;
+  maxFeePerGas?: bigint;
+  maxPriorityFeePerGas?: bigint;
+}
+
+/**
+ * The fee per gas of the send form, priced once so that the one shown is the one signed.
+ * The fee fields of a dapp are ignored. Ethereum signs EIP-1559 transactions, the other
+ * chains legacy ones.
+ */
+async function getFeePerGas(protocol: Protocol): Promise<IFeePerGas> {
+  const { updateFeeList, maxFeePerGas, maxPriorityFeePerGas } = useEthFeeCalculation(protocol);
+  await updateFeeList();
+  return (protocol === PROTOCOLS.ethereum)
+    ? {
+      maxFeePerGas: toTokenBaseUnits(maxFeePerGas.value, ETH_COIN_PRECISION),
+      maxPriorityFeePerGas: toTokenBaseUnits(maxPriorityFeePerGas.value, ETH_COIN_PRECISION),
+    }
+    : { gasPrice: toTokenBaseUnits(maxFeePerGas.value, ETH_COIN_PRECISION) };
 }
 
 export async function handleEvmRpcMethod(
@@ -388,10 +379,6 @@ export async function handleEvmRpcMethod(
     const evmAccount = getRequestedAccount(protocol, params.from, originSource);
     if (!evmAccount) return ERROR_UNAUTHORIZED;
 
-    const { updateFeeList, maxFeePerGas } = useEthFeeCalculation(protocol);
-
-    await updateFeeList();
-
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
     const url = aepp;
@@ -408,6 +395,8 @@ export async function handleEvmRpcMethod(
       gasHex = numberToHex(withGasHeadroom(BigInt(estimation.result)));
     }
 
+    const { gasPrice, maxFeePerGas, maxPriorityFeePerGas } = await getFeePerGas(protocol);
+
     const gas = Number(gasHex);
     const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
@@ -423,7 +412,7 @@ export async function handleEvmRpcMethod(
       },
       tx: {
         amount: params.value ? +fromWei(params.value, 'ether') : 0,
-        fee: gas * +(maxFeePerGas.value || 0),
+        fee: +fromWei(BigInt(gas) * (maxFeePerGas ?? gasPrice!), 'ether'),
         gas,
         contractId: (isCoinTransfer) ? getProtocolCoinContractId(protocol) : recipientId,
         type: Tag[tag],
@@ -447,6 +436,11 @@ export async function handleEvmRpcMethod(
             ...params,
             from: senderId,
             gas: gasHex,
+            ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
+            ...(maxFeePerGas !== undefined) ? {
+              maxFeePerGas: numberToHex(maxFeePerGas),
+              maxPriorityFeePerGas: numberToHex(maxPriorityFeePerGas!),
+            } : {},
           });
           return actionResult?.hash
             ? { result: actionResult?.hash }

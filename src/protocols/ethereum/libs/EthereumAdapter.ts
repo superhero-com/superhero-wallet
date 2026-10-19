@@ -63,7 +63,6 @@ import {
   ETH_MDW_TO_NODE_APPROX_DELAY_TIME,
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
-import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
@@ -306,35 +305,26 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     }
   }
 
+  /** Signs at the fees the user was shown */
   override async transferPreparedTransaction({
     to,
     from,
     data = '0x',
     value,
     gas,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
   }: any = {}): Promise<ITransferResponse> {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { chainId } = ethActiveNetworkSettings.value;
-    const {
-      updateFeeList,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-    } = useEthFeeCalculation(this.protocol);
 
     const account = getAccountByProtocolAndAddress(PROTOCOLS.ethereum, toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
       throw new Error('Token transfer were initiated from not existing or not ethereum account.');
     }
 
-    const [nonce] = await Promise.all([
-      this.getTransactionCount(from),
-      updateFeeList(),
-    ]);
-
-    if (!maxPriorityFeePerGas.value || !maxFeePerGas.value) {
-      throw new Error('Failed to calculate the fee.');
-    }
+    const nonce = await this.getTransactionCount(from);
 
     const txData: FeeMarketEIP1559TxData = {
       chainId: toHex(chainId),
@@ -343,8 +333,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       data,
       value,
       gasLimit: gas,
-      maxPriorityFeePerGas: bigIntToHex(BigInt(toWei(maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
-      maxFeePerGas: bigIntToHex(BigInt(toWei(maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
+      maxPriorityFeePerGas,
+      maxFeePerGas,
       type: '0x02',
     };
 

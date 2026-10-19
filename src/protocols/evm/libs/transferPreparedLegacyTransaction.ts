@@ -8,7 +8,7 @@ import { broadcastSignedTransaction } from './broadcastSignedTransaction';
 
 /**
  * Sign a transaction prepared by a dapp with the account it names as `from`
- * and broadcast it, at the gas price of the node.
+ * and broadcast it, at the gas price the user was shown.
  */
 export async function transferPreparedLegacyTransaction(
   protocol: Protocol,
@@ -19,6 +19,7 @@ export async function transferPreparedLegacyTransaction(
     value,
     data = '0x',
     gas,
+    gasPrice,
   }: any,
 ): Promise<ITransferResponse> {
   const { getAccountByProtocolAndAddress } = useAccounts();
@@ -28,10 +29,7 @@ export async function transferPreparedLegacyTransaction(
   }
 
   const web3Eth = new Web3Eth(nodeUrl);
-  const [nonce, gasPrice] = await Promise.all([
-    web3Eth.getTransactionCount(from, 'pending'),
-    web3Eth.getGasPrice(),
-  ]);
+  const nonce = await web3Eth.getTransactionCount(from, 'pending');
   const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
   const signedTx = new Transaction({
     nonce,

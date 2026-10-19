@@ -36,7 +36,7 @@ const getRevertedCall = (protocol) => EtherscanService.normalizeEtherscanTransac
     gasPrice: '20000000000',
     isError: '1',
     txreceipt_status: '0',
-    // swapExactTokensForTokens
+    // swapExactTokensForTokens, not an ERC-20 call
     input: `0x38ed1739${'0'.repeat(64)}`,
     contractAddress: '',
     gasUsed: '30000',
@@ -45,6 +45,8 @@ const getRevertedCall = (protocol) => EtherscanService.normalizeEtherscanTransac
   },
   OWNER,
 );
+
+let etherscanCalls;
 
 async function mountDetails(protocol, transaction) {
   vi.spyOn(ProtocolAdapterFactory.getAdapter(protocol), 'fetchTransactionByHash')
@@ -66,8 +68,13 @@ async function mountDetails(protocol, transaction) {
 
 describe('EVM transaction details', () => {
   beforeEach(() => {
-    vi.spyOn(EtherscanService.prototype, 'fetchFromApi')
-      .mockResolvedValue({ status: '0', message: 'NOTOK', result: '' });
+    etherscanCalls = [];
+    vi.spyOn(EtherscanService.prototype, 'fetchFromApi').mockImplementation(
+      async function fetchFromApi(params) {
+        etherscanCalls.push({ apiUrl: this.apiUrl, chainId: this.chainId, ...params });
+        return { status: '0', message: 'NOTOK', result: '' };
+      },
+    );
   });
 
   afterEach(() => {
@@ -80,6 +87,14 @@ describe('EVM transaction details', () => {
     expect(wrapper.findComponent(TransactionErrorStatus).props('returnType')).toBe('revert');
     expect(wrapper.findComponent(TransactionAssetRows).props('error')).toBe(true);
     expect(wrapper.find('[data-cy="reason"]').exists()).toBe(false);
+  });
+
+  it('decodes the call data on the chain of the transaction', async () => {
+    await mountDetails(PROTOCOLS.bnb, getRevertedCall(PROTOCOLS.bnb));
+
+    expect(etherscanCalls).toEqual([
+      expect.objectContaining({ chainId: '56', action: 'getabi', address: CONTRACT }),
+    ]);
   });
 
   it('shows no error for a successful transaction', async () => {

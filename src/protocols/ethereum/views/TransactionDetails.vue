@@ -151,6 +151,7 @@ export default defineComponent({
             ? innerTx.value.contractId
             : innerTx.value.recipientId,
           activeAccount.value.address,
+          props.protocol,
         );
       }
       return null;
