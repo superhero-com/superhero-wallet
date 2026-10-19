@@ -29,8 +29,8 @@ function readAmount(selector) {
     .then(($el) => parseAmount($el.text()));
 }
 
-function waitForAmount(selector, expected) {
-  cy.get(`${selector} .amount`).should(($el) => {
+function waitForAmount(selector, expected, options = {}) {
+  cy.get(`${selector} .amount`, options).should(($el) => {
     expect($el.text()).to.match(new RegExp(`^\\s*${expected.toFixed().replace('.', '\\.')}\\s`));
   });
 }
@@ -70,6 +70,76 @@ function stubJsonRpc(hostname, results, sendMethod, sendResult) {
       : results[method];
     req.reply({ jsonrpc: '2.0', id, result: result ?? null });
   });
+}
+
+const SEPOLIA = {
+  baseFee: GWEI.times(10),
+  priorityFee: GWEI,
+  nonce: 5,
+};
+
+const ERC20_TOKEN = {
+  address: '0x1c7d4b196cb0c7b01d743fbc6116a902379c7238',
+  name: 'Test USD',
+  symbol: 'TUSD',
+  decimals: 6,
+};
+
+/** Sepolia node, Ethplorer with a 50 TUSD balance and an empty Etherscan history */
+function stubSepolia() {
+  const { baseFee, priorityFee, nonce } = SEPOLIA;
+  const tokenInfo = {
+    address: ERC20_TOKEN.address,
+    // Ethplorer sends it as a string
+    decimals: String(ERC20_TOKEN.decimals),
+    name: ERC20_TOKEN.name,
+    symbol: ERC20_TOKEN.symbol,
+  };
+
+  stubJsonRpc('ethereum-sepolia-rpc.publicnode.com', {
+    eth_chainId: toRpcHex(11155111),
+    eth_getBalance: toRpcHex(1e18),
+    eth_gasPrice: toRpcHex(baseFee),
+    eth_maxPriorityFeePerGas: toRpcHex(priorityFee),
+    eth_getTransactionCount: toRpcHex(nonce),
+    eth_blockNumber: '0x100',
+    eth_getBlockByNumber: {
+      number: '0x100',
+      hash: `0x${'ab'.repeat(32)}`,
+      parentHash: `0x${'cd'.repeat(32)}`,
+      timestamp: '0x65000000',
+      gasLimit: '0x1c9c380',
+      gasUsed: '0x0',
+      baseFeePerGas: toRpcHex(baseFee),
+      miner: `0x${'00'.repeat(20)}`,
+      transactions: [],
+    },
+    // decimals() of the token
+    eth_call: `0x${ERC20_TOKEN.decimals.toString(16).padStart(64, '0')}`,
+    // Its 15% headroom is a whole thousand, which the form rounds the gas up to
+    eth_estimateGas: toRpcHex(40000),
+  }, 'eth_sendRawTransaction', `0x${'12'.repeat(32)}`);
+  cy.intercept({ hostname: 'sepolia-api.ethplorer.io', pathname: /^\/getAddressInfo\// }, {
+    tokens: [{ rawBalance: '50000000', tokenInfo }],
+  });
+  cy.intercept({ hostname: 'sepolia-api.ethplorer.io', pathname: '/getTopTokens' }, {
+    tokens: [tokenInfo],
+  });
+  cy.intercept({ hostname: 'api.etherscan.io' }, { status: '0', message: 'No transactions found', result: [] });
+}
+
+/** Sender, nonce and the fees the send form showed (aliased `fee` and `maxFee`) */
+function expectSepoliaFees(tx, { fee, maxFee }) {
+  const gasLimit = new BigNumber(tx.gasLimit);
+
+  expect(tx.type).to.eq(2);
+  expect(tx.chainId).to.eq('11155111');
+  expect(tx.from).to.eq(STUB_ACCOUNT.addressEthereum.toLowerCase());
+  expect(tx.nonce).to.eq(String(SEPOLIA.nonce));
+  expect(new BigNumber(tx.maxFeePerGas).times(gasLimit).shiftedBy(-18).toFixed())
+    .to.eq(maxFee.toFixed());
+  expect(SEPOLIA.baseFee.plus(tx.maxPriorityFeePerGas).times(gasLimit).shiftedBy(-18).toFixed())
+    .to.eq(fee.toFixed());
 }
 
 describe('Send modal', () => {
@@ -259,32 +329,9 @@ describe('Send modal', () => {
   });
 
   it('sends ETH with the EIP-1559 fees shown on the form', () => {
-    const baseFee = GWEI.times(10);
-    const priorityFee = GWEI;
     const amount = 0.01;
 
-    stubJsonRpc('ethereum-sepolia-rpc.publicnode.com', {
-      eth_chainId: toRpcHex(11155111),
-      eth_getBalance: toRpcHex(1e18),
-      eth_gasPrice: toRpcHex(baseFee),
-      eth_maxPriorityFeePerGas: toRpcHex(priorityFee),
-      eth_getTransactionCount: '0x5',
-      eth_blockNumber: '0x100',
-      eth_getBlockByNumber: {
-        number: '0x100',
-        hash: `0x${'ab'.repeat(32)}`,
-        parentHash: `0x${'cd'.repeat(32)}`,
-        timestamp: '0x65000000',
-        gasLimit: '0x1c9c380',
-        gasUsed: '0x0',
-        baseFeePerGas: toRpcHex(baseFee),
-        miner: `0x${'00'.repeat(20)}`,
-        transactions: [],
-      },
-    }, 'eth_sendRawTransaction', `0x${'12'.repeat(32)}`);
-    cy.intercept({ hostname: 'sepolia-api.ethplorer.io' }, { tokens: [] });
-    cy.intercept({ hostname: 'api.etherscan.io' }, { status: '0', message: 'No transactions found', result: [] });
-
+    stubSepolia();
     loginWith(PROTOCOLS.ethereum);
     cy.openSendModal();
     pasteAddress(RECIPIENTS.evm);
@@ -302,18 +349,52 @@ describe('Send modal', () => {
 
     cy.wait('@broadcast').then(({ request }) => decodeBroadcast('evm', request.body.params[0]))
       .then(function assertTx(tx) {
-        const gasLimit = new BigNumber(tx.gasLimit);
-
-        expect(tx.type).to.eq(2);
-        expect(tx.chainId).to.eq('11155111');
-        expect(tx.from).to.eq(STUB_ACCOUNT.addressEthereum.toLowerCase());
         expect(tx.to).to.eq(RECIPIENTS.evm.toLowerCase());
         expect(tx.value).to.eq(new BigNumber(amount).shiftedBy(18).toFixed());
-        expect(tx.nonce).to.eq('5');
-        expect(new BigNumber(tx.maxFeePerGas).times(gasLimit).shiftedBy(-18).toFixed())
-          .to.eq(this.maxFee.toFixed());
-        expect(baseFee.plus(tx.maxPriorityFeePerGas).times(gasLimit).shiftedBy(-18).toFixed())
-          .to.eq(this.fee.toFixed());
+        expect(tx.data).to.eq('');
+        expectSepoliaFees(tx, this);
+      });
+    cy.get('[data-cy=pending-txs]').should('exist');
+  });
+
+  it('sends an ERC-20 token with the EIP-1559 fees shown on the form', () => {
+    const amount = 0.5;
+
+    stubSepolia();
+    loginWith(PROTOCOLS.ethereum);
+    cy.openSendModal();
+    cy.get('[data-cy=select-asset]').click();
+    cy.get('.asset-selector [data-cy=list]').contains(ERC20_TOKEN.name).click();
+    pasteAddress(RECIPIENTS.evm);
+    cy.enterInputAmount(amount);
+
+    // The token transfer's gas estimate plus 15%, which the form picks up on its 5s polling
+    waitForAmount('[data-cy=review-fee]', new BigNumber('0.000506'), { timeout: 10000 });
+    readAmount('[data-cy=review-max-fee]').as('maxFee');
+    cy.get('[data-cy=next-step-button]')
+      .should('not.have.class', 'disabled')
+      .click();
+
+    cy.get('[data-cy=review-amount]').should('contain', ERC20_TOKEN.symbol);
+    readAmount('[data-cy=review-fee]').as('fee');
+    cy.get('[data-cy=next-step-button]').click();
+
+    cy.wait('@broadcast').then(({ request }) => decodeBroadcast('evm', request.body.params[0]))
+      .then(function assertTx(tx) {
+        const [selector, recipient, tokenAmount] = [
+          tx.data.slice(0, 8),
+          tx.data.slice(8, 72),
+          tx.data.slice(72),
+        ];
+
+        expect(tx.to).to.eq(ERC20_TOKEN.address);
+        expect(tx.value).to.eq('0');
+        // transfer(address,uint256)
+        expect(selector).to.eq('a9059cbb');
+        expect(`0x${recipient.slice(24)}`).to.eq(RECIPIENTS.evm.toLowerCase());
+        expect(new BigNumber(tokenAmount, 16).toFixed())
+          .to.eq(new BigNumber(amount).shiftedBy(ERC20_TOKEN.decimals).toFixed());
+        expectSepoliaFees(tx, this);
       });
     cy.get('[data-cy=pending-txs]').should('exist');
   });
