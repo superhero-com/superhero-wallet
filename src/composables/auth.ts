@@ -195,6 +195,8 @@ export const useAuth = createCustomScopedComposable(() => {
 
   const biometricAuth = reactive({
     available: false,
+    /** Biometrics, or the device passcode the prompt falls back to. */
+    deviceCredentialAvailable: false,
     updating: false,
     checked: false,
   });
@@ -212,16 +214,27 @@ export const useAuth = createCustomScopedComposable(() => {
     } else if (!biometricAuth.checked || forceUpdate) {
       biometricAuth.updating = true;
       try {
-        biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
+        // Patched on Android to ignore a locked SIM, and a passcode that Android 10
+        // can't prompt for without biometric hardware, see `patches/`.
+        const { isAvailable, deviceIsSecure } = await BiometricAuth.checkBiometry();
+        biometricAuth.available = isAvailable;
+        biometricAuth.deviceCredentialAvailable = isAvailable || deviceIsSecure;
         biometricAuth.checked = true;
       } finally {
         biometricAuth.updating = false;
       }
     }
-    if (!biometricAuth.available && isBiometricLoginEnabled.value) {
+    // Locked out or unenrolled biometrics still leave the passcode to unlock with.
+    if (!biometricAuth.deviceCredentialAvailable && isBiometricLoginEnabled.value) {
       setBiometricLoginEnabled(false);
     }
     return biometricAuth.available;
+  }
+
+  /** Checks if the user can be verified on the device, with biometrics or the passcode. */
+  async function canAuthenticateWithDevice() {
+    await checkBiometricLoginAvailability();
+    return biometricAuth.deviceCredentialAvailable;
   }
 
   /**
@@ -576,7 +589,7 @@ export const useAuth = createCustomScopedComposable(() => {
         || force
       )
       && (isBiometricLoginEnabled.value || force)
-      && await checkBiometricLoginAvailability()
+      && await canAuthenticateWithDevice()
     ) {
       return BiometricAuth.authenticate({
         reason: t('biometricAuth.reason'),
@@ -652,7 +665,7 @@ export const useAuth = createCustomScopedComposable(() => {
         }
         if (
           (isBiometricLoginEnabled.value || isManualMobileLockActive)
-          && await checkBiometricLoginAvailability()
+          && await canAuthenticateWithDevice()
         ) {
           try {
             await openBiometricLoginModal({
@@ -994,6 +1007,7 @@ export const useAuth = createCustomScopedComposable(() => {
     secureLoginTimeoutDecrypted,
     authenticateWithBiometry,
     authenticateWithPassword,
+    canAuthenticateWithDevice,
     checkBiometricLoginAvailability,
     checkUserAuth,
     getEncryptionKey,

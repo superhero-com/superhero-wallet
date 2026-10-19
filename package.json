@@ -45,7 +45,7 @@
     "@aeternity/json-bigint": "^0.3.1",
     "@airgap/aeternity": "^0.13.46",
     "@airgap/serializer": "^0.13.46",
-    "@aparajita/capacitor-biometric-auth": "^10.0.0",
+    "@aparajita/capacitor-biometric-auth": "10.0.0",
     "@aparajita/capacitor-secure-storage": "8.0.1",
     "@bitcoinerlab/secp256k1": "^1.2.0",
     "@capacitor-mlkit/barcode-scanning": "^8.2.1",

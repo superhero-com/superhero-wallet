@@ -22,6 +22,8 @@ import en from '@/popup/locales/en-US.json';
  */
 const VALID_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const OTHER_VALID_MNEMONIC = 'legal winner thank year wave sausage worth useful legal winner thank yellow';
+/** Real WebCrypto runs before these waits, which a loaded CI runner may stretch past 1 s. */
+const WAIT_FOR_CRYPTO = { timeout: 5000 };
 
 function flushAsync() {
   return new Promise((resolve) => { setTimeout(resolve, 0); });
@@ -240,7 +242,7 @@ describe('useAuth on mobile', () => {
       .mockRejectedValue(new Error('Existing Keychain item could not be read'));
     const { auth } = await boot();
 
-    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true), WAIT_FOR_CRYPTO);
     await auth.checkUserAuth();
     expect(auth.isAuthenticated.value).toBe(false);
     await expect(auth.checkUserAuth()).resolves.toBeUndefined();
@@ -269,7 +271,7 @@ describe('useAuth on mobile', () => {
       key === 'mobile-data-key' ? Promise.reject(new Error('Keychain unavailable')) : realGet(key)
     ));
     const { auth } = await boot();
-    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true), WAIT_FOR_CRYPTO);
 
     await expect(auth.checkUserAuth()).resolves.toBeUndefined();
     await expect(auth.checkUserAuth()).resolves.toBeUndefined();
@@ -300,7 +302,7 @@ describe('useAuth on mobile', () => {
     const setSpy = vi.spyOn(SecureMobileStorage, 'set');
     const { auth } = await boot();
 
-    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true), WAIT_FOR_CRYPTO);
     await expect(auth.checkUserAuth()).resolves.toBeUndefined();
     expect(auth.isAuthenticated.value).toBe(false);
     expect(auth.isMnemonicUnreadable.value).toBe(true);
@@ -313,6 +315,99 @@ describe('useAuth on mobile', () => {
       .rejects.toThrow('AEADBadTagException');
     expect(setSpy.mock.calls.some(([key]) => key === 'mnemonic')).toBe(false);
     expect(await realGet('mnemonic')).toBe(storedSeed);
+  });
+
+  it('asks for the device passcode when biometrics are unavailable on a secured device', async () => {
+    const { auth: authGen1, ui: uiGen1 } = await boot();
+    uiGen1.setBiometricLoginEnabled(true);
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+    // E.g. locked out after failed attempts, or no finger enrolled anymore.
+    checkBiometryMock.mockResolvedValue({ isAvailable: false, deviceIsSecure: true });
+    let unlock;
+    openBiometricLoginModalMock.mockImplementation(() => new Promise((resolve) => {
+      unlock = resolve;
+    }));
+    const { auth, ui } = await restart();
+    ui.isAppActive.value = true;
+
+    const checking = auth.checkUserAuth();
+    await vi.waitFor(
+      () => expect(openBiometricLoginModalMock).toHaveBeenCalledTimes(1),
+      WAIT_FOR_CRYPTO,
+    );
+    expect(auth.isAuthenticated.value).toBe(false);
+    expect(ui.isBiometricLoginEnabled.value).toBe(true);
+    // Not offered to set up as biometrics, only verified with the passcode.
+    await expect(auth.checkBiometricLoginAvailability()).resolves.toBe(false);
+    await expect(auth.canAuthenticateWithDevice()).resolves.toBe(true);
+
+    unlock();
+    await checking;
+    expect(auth.isAuthenticated.value).toBe(true);
+    expect(ui.isBiometricLoginEnabled.value).toBe(true);
+
+    await auth.authenticateWithBiometry(true);
+    expect(biometricAuthenticateMock).toHaveBeenCalledWith(expect.objectContaining({
+      allowDeviceCredential: true,
+    }));
+  });
+
+  it('turns biometric login off and opens the wallet on a device with no passcode', async () => {
+    const { auth: authGen1, ui: uiGen1 } = await boot();
+    uiGen1.setBiometricLoginEnabled(true);
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+    // Also what the patched Android plugin reports for a device locked only by its SIM.
+    checkBiometryMock.mockResolvedValue({ isAvailable: false, deviceIsSecure: false });
+    const { auth, ui } = await restart();
+    ui.isAppActive.value = true;
+    await auth.checkUserAuth();
+
+    expect(openBiometricLoginModalMock).not.toHaveBeenCalled();
+    expect(auth.isAuthenticated.value).toBe(true);
+    expect(ui.isBiometricLoginEnabled.value).toBe(false);
+  });
+
+  describe('when the passcode prompt fails', () => {
+    async function restartWithFailingPrompt(code) {
+      const { auth: authGen1, ui: uiGen1 } = await boot();
+      uiGen1.setBiometricLoginEnabled(true);
+      await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+      checkBiometryMock.mockResolvedValue({ isAvailable: false, deviceIsSecure: true });
+      biometricAuthenticateMock.mockRejectedValue(Object.assign(new Error(code), { code }));
+      const restarted = await restart();
+      // The prompt runs in the modal.
+      openBiometricLoginModalMock.mockImplementation(({ force, deferAuthStateUpdate }) => (
+        restarted.auth.authenticateWithBiometry(force, { setAuthenticated: !deferAuthStateUpdate })
+      ));
+      restarted.ui.isAppActive.value = true;
+      return restarted;
+    }
+
+    it.each([
+      ['is cancelled', 'userCancel'],
+      ['finds no passcode after all, e.g. one removed meanwhile', 'noDeviceCredential'],
+    ])('keeps the wallet locked when it %s', async (_, code) => {
+      const { auth, ui } = await restartWithFailingPrompt(code);
+
+      await auth.checkUserAuth();
+
+      expect(biometricAuthenticateMock).toHaveBeenCalledTimes(1);
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(ui.isBiometricLoginEnabled.value).toBe(true);
+    });
+
+    it('fails a check forced to show a secret, e.g. the seed phrase, in an unlocked wallet', async () => {
+      const { auth } = await restartWithFailingPrompt('noDeviceCredential');
+      biometricAuthenticateMock.mockResolvedValueOnce(undefined);
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+
+      await expect(auth.authenticateWithBiometry(true)).rejects.toThrow('noDeviceCredential');
+      expect(auth.isAuthenticated.value).toBe(true);
+    });
   });
 
   it('keeps the wallet locked when the biometric login prompt is dismissed', async () => {
@@ -433,6 +528,28 @@ describe('useAuth on mobile', () => {
     expect(auth.isAuthenticated.value).toBe(true);
   });
 
+  it('asks for the device passcode on resume when the biometrics got locked out meanwhile', async () => {
+    const { auth: authGen1, ui: uiGen1 } = await boot();
+    uiGen1.setBiometricLoginEnabled(true);
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    const { auth, ui } = await restart();
+    ui.isAppActive.value = true;
+    await auth.checkUserAuth();
+    expect(openBiometricLoginModalMock).toHaveBeenCalledTimes(1);
+
+    checkBiometryMock.mockResolvedValue({ isAvailable: false, deviceIsSecure: true });
+    ui.isAppActive.value = false;
+    await nextTick();
+    ui.isAppActive.value = true;
+    await nextTick();
+
+    await vi.waitFor(
+      () => expect(openBiometricLoginModalMock).toHaveBeenCalledTimes(2),
+      WAIT_FOR_CRYPTO,
+    );
+    expect(ui.isBiometricLoginEnabled.value).toBe(true);
+  });
+
   /** Leaves the mnemonic encrypted under a key that is no longer the stored one. */
   async function bootWithMismatchedMobileKey() {
     const { auth: authGen1 } = await boot();
@@ -529,7 +646,7 @@ describe('useAuth on mobile', () => {
     // The seed reads back empty at startup, and can be read again later.
     await SecureMobileStorage.remove(STORAGE_KEYS.mnemonic);
     const { auth } = await restart();
-    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true), WAIT_FOR_CRYPTO);
     await SecureMobileStorage.set(STORAGE_KEYS.mnemonic, storedMnemonic);
 
     const originalLocation = window.location;

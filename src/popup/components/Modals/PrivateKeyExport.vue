@@ -133,7 +133,7 @@ export default defineComponent({
 
     const { activeAccount } = useAccounts();
     const {
-      checkBiometricLoginAvailability,
+      canAuthenticateWithDevice,
       encryptionSalt,
       mnemonicEncrypted,
       isUsingDefaultPassword,
@@ -156,8 +156,9 @@ export default defineComponent({
      * Three-way re-auth gate before revealing the private key, mirroring
      * the seed-phrase route guard in `router/routes.ts`:
      *
-     *  - Mobile app with biometry available & enabled: force a fresh biometric
-     *    prompt so a user who just unlocked the app still has to confirm.
+     *  - Mobile app with biometric login enabled and biometry or the device passcode
+     *    available: force a fresh prompt so a user who just unlocked the app still has
+     *    to confirm.
      *  - Extension/web (including mobile web) with a real password: verify it by attempting the
      *    mnemonic decryption (the catch below marks `isAuthFailed`).
      *  - Everything else (mobile app with biometry off, or extension in
@@ -175,7 +176,7 @@ export default defineComponent({
         if (
           IS_MOBILE_APP
           && isBiometricLoginEnabled.value
-          && await checkBiometricLoginAvailability()
+          && await canAuthenticateWithDevice()
         ) {
           const authenticated = await openBiometricLoginModal({ force: true })
             .then(() => true)
