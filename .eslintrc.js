@@ -1,3 +1,7 @@
+// An override replaces the rule's options, so airbnb's own restrictions are kept.
+const [, ...airbnbRestrictedProperties] = require('eslint-config-airbnb-base/rules/best-practices')
+  .rules['no-restricted-properties'];
+
 module.exports = {
   root: true,
   parserOptions: {
@@ -70,6 +74,18 @@ module.exports = {
     'vuejs-accessibility/click-events-have-key-events': 'off',
   },
   overrides: [
+    {
+      files: ['tests/**/*.{js,ts}'],
+      rules: {
+        'no-restricted-properties': ['error', ...airbnbRestrictedProperties, ...[
+          'describe', 'context', 'it', 'test',
+        ].map((object) => ({
+          object,
+          property: 'only',
+          message: 'A focused test skips all the others; remove .only.',
+        }))],
+      },
+    },
     {
       files: [
         '**/tests/unit/**/*.spec.{j,t}s?(x)',
