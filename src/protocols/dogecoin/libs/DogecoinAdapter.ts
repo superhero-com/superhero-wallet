@@ -379,7 +379,12 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       const interval = setInterval(async () => {
         attemptNo += 1;
         const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
-        const tx = await this.fetchTransactionByHash(hash);
+        let tx = null;
+        try {
+          tx = await this.fetchTransactionByHash(hash);
+        } catch {
+          // The node answers 404 until it sees the transaction.
+        }
         if (tx) {
           clearInterval(interval);
           return resolve(tx);
