@@ -284,39 +284,33 @@ Cypress.Commands.add('openSecureLoginSettings', () => {
 });
 
 /**
- * For the values of the `data-cy` for particular fields please go to `AeternityAdapter`
- * and look for `testId` within the `networkSettings`.
+ * The form has a group of fields per protocol, each field's `data-cy` is its setting key.
+ * Scrolling a field to the top would put it under the page header.
  */
 Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl) => {
+  const options = { scrollBehavior: 'center' };
   cy.get('[data-cy=network-form]')
-    .should('be.visible')
+    .should('exist')
     .getInputByTestId('network-name')
-    .clear()
-    .type(name)
-    .getInputByTestId('ae-node-url')
-    .clear()
-    .type(nodeUrl)
-    .getInputByTestId('ae-middleware-url')
-    .clear()
-    .type(middlewareUrl);
+    .clear(options)
+    .type(name, options)
+    .get('[data-cy=group-aeternity] [data-cy=nodeUrl] input')
+    .clear(options)
+    .type(nodeUrl, options)
+    .get('[data-cy=group-aeternity] [data-cy=middlewareUrl] input')
+    .clear(options)
+    .type(middlewareUrl, options);
 });
 
 Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {
   cy.get('[data-cy=to-add]')
     .click()
-    .getByTestId('btn-add-network')
-    .should('be.visible')
     .enterNetworkDetails(name, nodeUrl, middlewareUrl)
     .getByTestId('btn-add-network')
-    .click()
-    .getByTestId('networks')
-    .should('be.visible')
-    .getInputByTestId('network-name')
-    .should('contain', name)
-    .getInputByTestId('ae-node-url')
-    .should('contain', nodeUrl)
-    .getInputByTestId('ae-middleware-url')
-    .should('contain', middlewareUrl);
+    .should('not.have.class', 'disabled')
+    .click();
+  cy.contains('[data-cy=networks] .network-row', name)
+    .should('contain', nodeUrl.replace('https://', ''));
 });
 
 Cypress.Commands.add('openTransactions', () => {

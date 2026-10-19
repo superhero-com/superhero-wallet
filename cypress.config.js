@@ -94,7 +94,6 @@ module.exports = defineConfig({
     excludeSpecPattern: [
       'tests/e2e/integration/tip.cy.js',
       'tests/e2e/integration/transaction-details.cy.js',
-      'tests/e2e/integration/networks.cy.js',
     ],
     setupNodeEvents(on) {
       on('task', { decodeSignedTx });
