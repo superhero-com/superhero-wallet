@@ -352,12 +352,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
       nonce: number;
     },
   ): Promise<ITransferResponse> {
-    const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
+    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByProtocolAndAddress } = useAccounts();
-    const apiUrl = bnbActiveNetworkPredefinedSettings.value.middlewareUrl;
 
     const account = getAccountByProtocolAndAddress(
       PROTOCOLS.bnb,
@@ -370,22 +366,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     }
     const { chainId, nodeUrl } = bnbActiveNetworkSettings.value;
 
-    const contractAbi = await new EtherscanService(
-      apiUrl,
-      chainId,
-    ).fetchFromApi({
-      module: 'contract',
-      action: 'getabi',
-      address: contractId,
-    });
-
-    const contract = new Contract(
-      contractAbi && Array.isArray(contractAbi?.result)
-        ? contractAbi.result
-        : ERC20_ABI,
-      contractId,
-      { from: options.fromAccount },
-    );
+    const contract = new Contract(ERC20_ABI, contractId, { from: options.fromAccount });
 
     contract.setProvider(nodeUrl);
 

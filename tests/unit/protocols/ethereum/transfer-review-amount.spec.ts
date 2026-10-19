@@ -1,10 +1,12 @@
 /**
  * [BLACK-BOX] The EVM review screen signs exactly the amount the user confirmed, on
  * every chain it serves. The component, the adapters and the signing are real; only
- * the account store, the RPC client (nonce, gas price) and the broadcast are stubbed.
+ * the account store, the RPC client (nonce, gas price, token contract calls), the block
+ * explorer and the broadcast are stubbed.
  */
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { TransactionFactory, privateKeyToAddress } from 'web3-eth-accounts';
+import { hexToBytes } from 'web3-utils';
 
 import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/ethereum/components/TransferReview.vue';
@@ -12,20 +14,26 @@ import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { i18n } from '@/popup/plugins/i18n';
 
-type Broadcast = (web3Eth: unknown, serializedTx: Uint8Array) => Promise<void>;
+type Broadcast = (web3Eth: unknown, serializedTx: Uint8Array | string) => Promise<void>;
 
 // The setup files already loaded the adapters with the real deps; reload them to apply mocks.
-const { SECRET_KEY, broadcastSignedTransaction } = vi.hoisted(() => {
+const {
+  SECRET_KEY,
+  broadcastSignedTransaction,
+  explorerRequests,
+} = vi.hoisted(() => {
   vi.resetModules();
   return {
     // A 32-byte value below the secp256k1 curve order is a valid private key.
     SECRET_KEY: Buffer.alloc(32, 1),
     broadcastSignedTransaction: vi.fn<Broadcast>(async () => {}),
+    explorerRequests: [] as unknown[],
   };
 });
 
 const FROM_ACCOUNT = privateKeyToAddress(SECRET_KEY);
 const RECIPIENT = '0x0000000000000000000000000000000000000002';
+const TOKEN_CONTRACT = '0x0000000000000000000000000000000000000003';
 
 vi.mock('vue-router', async (importOriginal) => ({
   ...await importOriginal<object>(),
@@ -65,6 +73,38 @@ vi.mock('web3-eth', async (importOriginal) => {
   };
 });
 
+// A 6-decimal ERC-20 token; the calldata is the real encoding with the ABI the adapter passes.
+vi.mock('web3-eth-contract', async (importOriginal) => {
+  const { encodeFunctionCall } = await import('web3-eth-abi');
+  // eslint-disable-next-line prefer-arrow-callback
+  const Contract = function Contract(abi: { name?: string }[]) {
+    const transferAbi = abi.find(({ name }) => name === 'transfer');
+    return {
+      setProvider: () => {},
+      methods: {
+        decimals: () => ({ call: async () => 6n }),
+        transfer: (to: string, value: string) => ({
+          estimateGas: async () => 65000n,
+          encodeABI: () => encodeFunctionCall(transferAbi as any, [to, value]),
+        }),
+      },
+    };
+  };
+  return { ...await importOriginal<object>(), Contract, default: Contract };
+});
+
+vi.mock('@/protocols/ethereum/libs/EtherscanService', () => ({
+  // eslint-disable-next-line prefer-arrow-callback
+  EtherscanService: function EtherscanService() {
+    return {
+      fetchFromApi: async (params: unknown) => {
+        explorerRequests.push(params);
+        return { status: '1', result: '[]' };
+      },
+    };
+  },
+}));
+
 vi.mock('@/protocols/evm/libs/broadcastSignedTransaction', () => ({ broadcastSignedTransaction }));
 
 enableAutoUnmount(afterEach);
@@ -89,17 +129,20 @@ function randomAmount(random: () => number, decimals: number) {
   return `${Math.floor(random() * 100000)}.${fraction}`;
 }
 
-/** Confirms a coin transfer on the review screen and returns the value it signed. */
-async function signReviewedTransfer(protocol: string, amount: string) {
+/** Confirms a transfer on the review screen and returns the transaction it signed. */
+async function signReviewed(protocol: string, contractId: string, amount: string) {
   broadcastSignedTransaction.mockClear();
-  const { coinContractId } = ProtocolAdapterFactory.getAdapter(protocol as any);
   const wrapper = mount(TransferReview, {
     props: {
       protocol,
       transferData: {
         amount,
         addresses: [RECIPIENT],
-        selectedAsset: { contractId: coinContractId, protocol, decimals: 18 },
+        selectedAsset: {
+          contractId,
+          protocol,
+          decimals: contractId === TOKEN_CONTRACT ? 6 : 18,
+        },
         maxFeePerGas: '0.00000002',
         maxPriorityFeePerGas: '0.000000001',
         payload: '',
@@ -114,9 +157,18 @@ async function signReviewedTransfer(protocol: string, amount: string) {
 
   expect(broadcastSignedTransaction).toHaveBeenCalledTimes(1);
   const [, serializedTx] = broadcastSignedTransaction.mock.calls[0];
-  const signedTx = TransactionFactory.fromSerializedData(serializedTx);
+  // BNB and Polygon broadcast the raw transaction as a hex string.
+  const signedTx = TransactionFactory.fromSerializedData(
+    typeof serializedTx === 'string' ? hexToBytes(serializedTx) : serializedTx,
+  );
   expect(signedTx.getSenderAddress().toString()).toBe(FROM_ACCOUNT.toLowerCase());
-  return signedTx.value;
+  return signedTx;
+}
+
+/** Confirms a coin transfer on the review screen and returns the value it signed. */
+async function signReviewedTransfer(protocol: string, amount: string) {
+  const { coinContractId } = ProtocolAdapterFactory.getAdapter(protocol as any);
+  return (await signReviewed(protocol, coinContractId, amount)).value;
 }
 
 describe.each([
@@ -147,5 +199,22 @@ describe.each([
       expect(await signReviewedTransfer(protocol, amount), amount)
         .toBe(toBaseUnits(amount, 18));
     }
+  });
+});
+
+// Avalanche has no token transfers.
+describe.each([
+  PROTOCOLS.ethereum,
+  PROTOCOLS.bnb,
+  PROTOCOLS.polygonPos,
+])('%s TransferReview - token transfer', (protocol) => {
+  beforeEach(() => {
+    explorerRequests.length = 0;
+  });
+
+  it('signs without waiting for the block explorer', async () => {
+    await signReviewed(protocol, TOKEN_CONTRACT, '1.5');
+
+    expect(explorerRequests).toEqual([]);
   });
 });
