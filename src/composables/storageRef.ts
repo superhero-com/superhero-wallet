@@ -75,8 +75,10 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
   (async () => {
     let restoredValue = await storage.get<TSerialized | null>(storageKey);
     if (migrations?.length) {
+      // iOS Keychain writes delete the item first, so don't rewrite an unchanged value
+      const storedValue = JSON.stringify(restoredValue);
       restoredValue = await asyncPipe<TSerialized | null>(migrations)(restoredValue!);
-      if (restoredValue !== null) {
+      if (restoredValue !== null && JSON.stringify(restoredValue) !== storedValue) {
         storage.set(storageKey, restoredValue);
       }
     }

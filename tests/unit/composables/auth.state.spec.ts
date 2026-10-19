@@ -265,7 +265,7 @@ describe('useAuth state machine branches', () => {
       expect(auth.mnemonic.value).toBe(mnemonicRefBeforeFailure);
 
       // Restore normal storage behavior before restarting - `useStorageRef`'s
-      // restore IIFE writes the restored value back to storage on every boot.
+      // restore IIFE writes back the values its migrations change.
       walletStorageSetMock.mockImplementation(
         (keys: any, value: any, realSet: any) => realSet(keys, value),
       );

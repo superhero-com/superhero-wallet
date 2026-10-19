@@ -173,6 +173,35 @@ describe('useAuth on mobile', () => {
     expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
   });
 
+  it('does not write the stored seed back on restart', async () => {
+    const { auth: authGen1 } = await boot();
+    await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+    vi.resetModules();
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const setSpy = vi.spyOn(SecureMobileStorage, 'set');
+    const { auth } = await boot();
+    await auth.checkUserAuth();
+    await flushAsync();
+
+    expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+    expect(setSpy.mock.calls.filter(([key]) => key === 'mnemonic')).toHaveLength(0);
+  });
+
+  it('writes a legacy plaintext seed back once, encrypted', async () => {
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    await SecureMobileStorage.set('mnemonic', VALID_MNEMONIC);
+    const setSpy = vi.spyOn(SecureMobileStorage, 'set');
+    const { auth } = await boot();
+    await auth.checkUserAuth();
+    await flushAsync();
+
+    const seedWrites = setSpy.mock.calls.filter(([key]) => key === 'mnemonic');
+    expect(seedWrites).toHaveLength(1);
+    expect(seedWrites[0][1]).not.toBe(VALID_MNEMONIC);
+    expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+  });
+
   it('preserves the key when all secure reads are empty at startup and unlocks after reads recover', async () => {
     const { auth: first } = await boot();
     await first.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
