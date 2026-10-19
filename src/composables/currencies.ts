@@ -149,9 +149,8 @@ export function useCurrencies({
 
     currencyRates.value = fullRates;
 
-    isCurrenciesUnavailable.value = (
-      !Object.keys(currencyRates.value).length && !Object.keys(fetchedCurrencyRates ?? {}).length
-    );
+    // `fetchCoinCurrencyRates` returns null only when the request fails
+    isCurrenciesUnavailable.value = fetchedCurrencyRates === null;
     isLoadingCurrencies.value = false;
   }
 

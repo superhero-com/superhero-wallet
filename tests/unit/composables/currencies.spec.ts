@@ -83,6 +83,39 @@ describe('useCurrencies', () => {
     expect(getCurrentCurrencyRate('aeternity')).toBe(0.05);
   });
 
+  it('flags unavailable on null, clears on the next success, keeps old rates', async () => {
+    fetchCoinCurrencyRatesMock.mockResolvedValueOnce({ aeternity: { usd: 0.05 } });
+
+    const { useCurrencies } = await import('@/composables/currencies');
+    const {
+      loadCurrencyRates, getCurrentCurrencyRate, isCurrenciesUnavailable,
+    } = useCurrencies({ pollingDisabled: true });
+
+    await loadCurrencyRates();
+    expect(isCurrenciesUnavailable.value).toBe(false);
+
+    // CoinGecko.fetchCoinCurrencyRates returns null when the request fails
+    fetchCoinCurrencyRatesMock.mockResolvedValueOnce(null);
+    await loadCurrencyRates();
+    expect(isCurrenciesUnavailable.value).toBe(true);
+    expect(getCurrentCurrencyRate('aeternity')).toBe(0.05);
+
+    fetchCoinCurrencyRatesMock.mockResolvedValueOnce({ aeternity: { usd: 0.06 } });
+    await loadCurrencyRates();
+    expect(isCurrenciesUnavailable.value).toBe(false);
+    expect(getCurrentCurrencyRate('aeternity')).toBe(0.06);
+  });
+
+  it('does not flag unavailable when the response has no rates for the coins in use', async () => {
+    const { useCurrencies } = await import('@/composables/currencies');
+    const { loadCurrencyRates, isCurrenciesUnavailable } = useCurrencies({
+      pollingDisabled: true,
+    });
+
+    await loadCurrencyRates();
+    expect(isCurrenciesUnavailable.value).toBe(false);
+  });
+
   it('setCurrentCurrency switches the currency code and reloads coin market data once logged in', async () => {
     fetchCoinMarketDataMock.mockResolvedValue([{ id: 'aeternity', currentPrice: 0.1 }]);
 
