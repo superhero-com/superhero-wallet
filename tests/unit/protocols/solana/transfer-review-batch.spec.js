@@ -10,6 +10,7 @@ const mockAdapter = {
   transferTokenBatch: vi.fn(async (_amount, recipients) => (
     [{ hash: 'sig-batch-token', recipients }]
   )),
+  transferToken: vi.fn(async () => ({ hash: 'sig-token' })),
 };
 
 vi.mock('vue-router', () => ({
@@ -76,7 +77,7 @@ describe('Solana TransferReview - batch', () => {
         transferData: {
           amount: '5',
           addresses: ['REC1', 'REC2', 'REC3'],
-          selectedAsset: { contractId: 'TOKEN', symbol: 'TOK' },
+          selectedAsset: { contractId: 'TOKEN', symbol: 'TOK', decimals: 6 },
         },
       },
       global: {
@@ -92,6 +93,28 @@ describe('Solana TransferReview - batch', () => {
     const { ProtocolAdapterFactory } = (await import('@/lib/ProtocolAdapterFactory'));
     const adapter = ProtocolAdapterFactory.getAdapter();
     expect(adapter.transferTokenBatch).toHaveBeenCalledTimes(1);
-    expect(adapter.transferTokenBatch).toHaveBeenCalledWith('5', ['REC1', 'REC2', 'REC3'], 'TOKEN', { fromAccount: 'SENDER' });
+    expect(adapter.transferTokenBatch).toHaveBeenCalledWith('5', ['REC1', 'REC2', 'REC3'], 'TOKEN', { fromAccount: 'SENDER', decimals: 6 });
+  });
+
+  it('passes the token decimals to transferToken for a single recipient', async () => {
+    const wrapper = mount(TransferReview, {
+      props: {
+        transferData: {
+          amount: '5',
+          addresses: ['REC1'],
+          selectedAsset: { contractId: 'TOKEN', symbol: 'TOK', decimals: 0 },
+        },
+      },
+      global: {
+        stubs: { AvatarWithChainName: true, DetailsItem: true, TokenAmount: true },
+        mocks: {
+          $t: () => 't',
+        },
+      },
+    });
+
+    await wrapper.vm.submit();
+
+    expect(mockAdapter.transferToken).toHaveBeenCalledWith('5', 'REC1', 'TOKEN', { fromAccount: 'SENDER', decimals: 0 });
   });
 });

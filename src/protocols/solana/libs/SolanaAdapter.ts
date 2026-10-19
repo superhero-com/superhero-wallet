@@ -5,10 +5,11 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
-  createTransferInstruction,
+  createTransferCheckedInstruction,
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
 import {
+  AccountInfo,
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
@@ -30,6 +31,7 @@ import {
   SOL_COIN_SYMBOL,
   SOL_COINGECKO_COIN_ID,
   SOL_CONTRACT_ID,
+  SOL_INCINERATOR_ADDRESS,
   SOL_MDW_TO_NODE_APPROX_DELAY_TIME,
   SOL_NETWORK_DEFAULT_ENV_SETTINGS,
   SOL_NETWORK_DEFAULT_SETTINGS,
@@ -428,11 +430,34 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     throw new Error('Solana transaction sending is not implemented yet.');
   }
 
+  /**
+   * Prefers the decimals the form passes over the token list, which can be wrong.
+   */
+  private async getTokenDecimals(
+    conn: Connection,
+    mintPk: PublicKey,
+    decimals?: number,
+  ): Promise<number> {
+    let resolved = decimals
+      ?? this.tokenListCache?.find((t) => t.contractId === mintPk.toBase58())?.decimals;
+    if (!Number.isInteger(resolved)) {
+      try {
+        const mintInfo = await conn.getParsedAccountInfo(mintPk);
+        // @ts-ignore
+        resolved = mintInfo?.value?.data?.parsed?.info?.decimals;
+      } catch (e) { /* NOOP */ }
+    }
+    if (!Number.isInteger(resolved)) {
+      throw new Error(`Could not read the decimals of token ${mintPk.toBase58()}.`);
+    }
+    return resolved!;
+  }
+
   override async transferToken(
     amount: string,
     recipient: AccountAddress,
     contractId: AssetContractId,
-    options: { fromAccount: AccountAddress },
+    options: { fromAccount: AccountAddress; decimals?: number },
   ): Promise<ITransferResponse> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const sender = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
@@ -445,16 +470,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const ownerPk = new PublicKey(sender.address as string);
     const recipientPk = new PublicKey(recipient as string);
 
-    // Resolve decimals (try token list first)
-    let decimals = this.tokenListCache?.find((t) => t.contractId === contractId)?.decimals || 0;
-    if (!decimals) {
-      try {
-        const mintInfo = await conn.getParsedAccountInfo(mintPk);
-        // @ts-ignore
-        decimals = mintInfo?.value?.data?.parsed?.info?.decimals || 0;
-      } catch (e) { /* NOOP */ }
-    }
-
+    const decimals = await this.getTokenDecimals(conn, mintPk, options.decimals);
     const rawAmount = BigInt(new BigNumber(amount || 0).shiftedBy(decimals).toFixed(0));
 
     // Sender token account
@@ -488,11 +504,13 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       ));
     }
 
-    tx.add(createTransferInstruction(
+    tx.add(createTransferCheckedInstruction(
       ownerTokenAccount,
+      mintPk,
       recipientAta,
       ownerPk,
       rawAmount,
+      decimals,
       [],
       SPL_TOKEN_PROGRAM_ID,
     ));
@@ -772,6 +790,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const { blockhash } = await conn.getLatestBlockhash('finalized');
 
     const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+    await this.assertRecipientsStayRentExempt(conn, [toPubkey], lamports);
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
     tx.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
 
@@ -780,6 +799,44 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     tx.sign(keypair);
 
     return tx;
+  }
+
+  /**
+   * The chain rejects a transfer that leaves the recipient below the rent-exempt minimum
+   * (InsufficientFundsForRent), new accounts included, except the incinerator.
+   */
+  private async assertRecipientsStayRentExempt(
+    conn: Connection,
+    allRecipients: PublicKey[],
+    lamports: number,
+  ) {
+    const recipients = allRecipients.filter((pk) => pk.toBase58() !== SOL_INCINERATOR_ADDRESS);
+    let infos: (AccountInfo<Buffer> | null)[];
+    let rentByDataSize: Map<number, number>;
+    try {
+      infos = await conn.getMultipleAccountsInfo(recipients);
+      const dataSizes = Array.from(new Set(infos.map((info) => info?.data.length || 0)));
+      rentByDataSize = new Map(await Promise.all(dataSizes.map(
+        async (size) => [size, await conn.getMinimumBalanceForRentExemption(size)] as const,
+      )));
+    } catch (_) {
+      return; // best-effort
+    }
+
+    infos.forEach((info, idx) => {
+      const required = rentByDataSize.get(info?.data.length || 0)!;
+      const balance = info?.lamports || 0;
+      if (balance + lamports < required) {
+        const toSol = (value: number) => new BigNumber(value)
+          .shiftedBy(-SOL_COIN_PRECISION)
+          .toFixed();
+        throw new Error(tg('modals.transaction-failed.solRentError', [
+          toSol(required),
+          toSol(required - balance),
+          recipients[idx].toBase58(),
+        ]));
+      }
+    });
   }
 
   /**
@@ -800,10 +857,11 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const conn = this.getConnection();
     const { blockhash } = await conn.getLatestBlockhash('finalized');
     const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+    const recipientPubkeys = recipients.map((r) => new PublicKey(r as string));
+    await this.assertRecipientsStayRentExempt(conn, recipientPubkeys, lamports);
     const tx = new Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
 
-    recipients.forEach((r) => {
-      const toPubkey = new PublicKey(r as string);
+    recipientPubkeys.forEach((toPubkey) => {
       tx.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
     });
 
@@ -830,60 +888,19 @@ export class SolanaAdapter extends BaseProtocolAdapter {
       try {
         const tx = await this.constructAndSignBatchTx(amount, list as string[], options);
         // Preflight balance check: base fee and total lamports
+        let payerBalance: number | undefined;
+        let required = 0;
         try {
           const feeInfo = await conn.getFeeForMessage(tx.compileMessage(), 'confirmed');
           const feeLamports = Number(feeInfo?.value || 0);
           const amountLamports = Math.round(amount * LAMPORTS_PER_SOL) * list.length;
-          const payer = tx.feePayer as PublicKey;
-          const payerBalance = await conn.getBalance(payer);
-          const required = amountLamports + feeLamports;
-          if (payerBalance < required) {
-            throw new Error(`Insufficient SOL to cover total ${required / LAMPORTS_PER_SOL} (amount + fees). Balance: ${payerBalance / LAMPORTS_PER_SOL}`);
-          }
+          required = amountLamports + feeLamports;
+          payerBalance = await conn.getBalance(tx.feePayer as PublicKey);
         } catch (_) { /* best-effort */ }
+        if (payerBalance !== undefined && payerBalance < required) {
+          throw new Error(`Insufficient SOL to cover total ${required / LAMPORTS_PER_SOL} (amount + fees). Balance: ${payerBalance / LAMPORTS_PER_SOL}`);
+        }
 
-        // Preflight rent check: prevent sending to program-owned accounts below rent-exempt
-        try {
-          const pubkeys = (list as string[]).map((r) => new PublicKey(r));
-          const infos = await conn.getMultipleAccountsInfo(pubkeys);
-          // Pre-compute rent-exempt minimum for unique data sizes
-          const uniqueSizes = Array.from(new Set(
-            infos
-              .filter((info) => info && !info.owner.equals(SystemProgram.programId))
-              .map((info) => info!.data?.length || 0)
-              .filter((len) => len > 0),
-          ));
-          const rentValues = await Promise.all(
-            uniqueSizes.map((size) => conn.getMinimumBalanceForRentExemption(size)),
-          );
-          const rentMap = new Map<number, number>(
-            uniqueSizes.map((size, idx) => [size, rentValues[idx]]),
-          );
-
-          for (let i = 0; i < infos.length; i += 1) {
-            const info = infos[i];
-            if (!info) {
-              // Non-existent: system transfer to new account is fine
-              // No rent requirement for zero-size system accounts
-              // eslint-disable-next-line no-continue
-              continue;
-            }
-            const isSystemOwned = info.owner.equals(SystemProgram.programId);
-            const dataLen = info.data?.length || 0;
-            if (!isSystemOwned && dataLen > 0) {
-              const required = rentMap.get(dataLen) || 0;
-              const perRecipientLamports = Math.round(amount * LAMPORTS_PER_SOL);
-              const afterTransfer = info.lamports + perRecipientLamports;
-              if (afterTransfer < required) {
-                throw new Error(
-                  `Recipient ${pubkeys[i].toBase58()} is a program account with `
-                  + `insufficient rent. After transfer: ${afterTransfer / LAMPORTS_PER_SOL} SOL, `
-                  + `Requires: ${required / LAMPORTS_PER_SOL} SOL to be rent-exempt`,
-                );
-              }
-            }
-          }
-        } catch (_) { /* best-effort */ }
         const signature = await conn.sendRawTransaction(tx.serialize(), {
           skipPreflight: false,
           preflightCommitment: 'confirmed',
@@ -939,7 +956,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     amount: string,
     recipients: AccountAddress[],
     contractId: AssetContractId,
-    options: { fromAccount: AccountAddress },
+    options: { fromAccount: AccountAddress; decimals?: number },
   ): Promise<Array<{ hash: string; recipients: AccountAddress[] }>> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const sender = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
@@ -952,14 +969,7 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     const ownerPk = new PublicKey(sender.address as string);
 
     // Resolve decimals and owner token account once
-    let decimals = this.tokenListCache?.find((t) => t.contractId === contractId)?.decimals || 0;
-    if (!decimals) {
-      try {
-        const mintInfo = await conn.getParsedAccountInfo(mintPk);
-        // @ts-ignore
-        decimals = mintInfo?.value?.data?.parsed?.info?.decimals || 0;
-      } catch (e) { /* NOOP */ }
-    }
+    const decimals = await this.getTokenDecimals(conn, mintPk, options.decimals);
     const rawAmount = BigInt(new BigNumber(amount || 0).shiftedBy(decimals).toFixed(0));
     const ownerTokenAccount = (await conn.getParsedTokenAccountsByOwner(ownerPk, { mint: mintPk }))
       .value?.[0]?.pubkey;
@@ -1006,33 +1016,37 @@ export class SolanaAdapter extends BaseProtocolAdapter {
               ASSOCIATED_TOKEN_PROGRAM_ID,
             ));
           }
-          tx.add(createTransferInstruction(
+          tx.add(createTransferCheckedInstruction(
             ownerTokenAccount,
+            mintPk,
             recipientAta,
             ownerPk,
             rawAmount,
+            decimals,
             [],
             SPL_TOKEN_PROGRAM_ID,
           ));
         });
 
         // Preflight balance check: include fees + ATA rent if any
+        const missingCount = resolved.filter((r) => !r.hasAta).length;
+        let payerBalance: number | undefined;
+        let required = 0;
         try {
           const feeInfo = await conn.getFeeForMessage(tx.compileMessage(), 'confirmed');
           const feeLamports = Number(feeInfo?.value || 0);
-          const missingCount = resolved.filter((r) => !r.hasAta).length;
           const rentPerAta = missingCount > 0
             ? await conn.getMinimumBalanceForRentExemption(165)
             : 0;
-          const required = feeLamports + (missingCount * rentPerAta);
-          const payerBalance = await conn.getBalance(ownerPk);
-          if (payerBalance < required) {
-            throw new Error(
-              `Insufficient SOL to fund ${missingCount} new token account(s) and fees. `
-              + `Required: ${required / LAMPORTS_PER_SOL}, Balance: ${payerBalance / LAMPORTS_PER_SOL}`,
-            );
-          }
+          required = feeLamports + (missingCount * rentPerAta);
+          payerBalance = await conn.getBalance(ownerPk);
         } catch (_) { /* best-effort */ }
+        if (payerBalance !== undefined && payerBalance < required) {
+          throw new Error(
+            `Insufficient SOL to fund ${missingCount} new token account(s) and fees. `
+            + `Required: ${required / LAMPORTS_PER_SOL}, Balance: ${payerBalance / LAMPORTS_PER_SOL}`,
+          );
+        }
 
         tx.sign(keypair);
         const sig = await conn.sendRawTransaction(

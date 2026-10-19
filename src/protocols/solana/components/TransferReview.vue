@@ -108,7 +108,10 @@ export default defineComponent({
             amount,
             recipients,
             selectedAsset.contractId,
-            { fromAccount: lastActiveSolanaAccount?.address },
+            {
+              fromAccount: lastActiveSolanaAccount?.address,
+              decimals: selectedAsset.decimals,
+            },
           );
           results.forEach(({ hash, recipients: recs }: any) => {
             recs.forEach((recipient: string) => {
@@ -172,6 +175,7 @@ export default defineComponent({
                 selectedAsset.contractId,
                 {
                   fromAccount: lastActiveSolanaAccount?.address,
+                  decimals: selectedAsset.decimals,
                 },
               );
             } else {
