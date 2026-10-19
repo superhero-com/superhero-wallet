@@ -22,6 +22,7 @@ import type {
   ITransaction,
   ITransferResponse,
   MarketData,
+  NetworkType,
   NetworkTypeDefault,
   ITransactionApiPaginationParams,
   IAccountRaw,
@@ -97,12 +98,17 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  /**
+   * Custom networks use the testnet format, as that is what their accounts are derived with.
+   */
+  private getBitcoinNetwork(networkType: NetworkType) {
+    return (networkType === NETWORK_TYPE_MAINNET) ? networks.bitcoin : networks.testnet;
+  }
+
   override getAccountPrefix() {
     const { activeNetwork } = useNetworks();
 
-    return (activeNetwork.value.type === NETWORK_TYPE_TESTNET)
-      ? 'tb1q'
-      : 'bc1q';
+    return `${this.getBitcoinNetwork(activeNetwork.value.type).bech32}1q`;
   }
 
   override getExplorer() {
@@ -165,13 +171,9 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
    * `networkType` is required to validate Bitcoin address on non mainnet networks
    * because same account has different addresses on different networks.
    */
-  override isAccountAddressValid(address: string, networkType?: NetworkTypeDefault) {
+  override isAccountAddressValid(address: string, networkType?: NetworkType) {
     try {
-      const networksMap: Record<NetworkTypeDefault, keyof typeof networks> = {
-        [NETWORK_TYPE_MAINNET]: 'bitcoin',
-        [NETWORK_TYPE_TESTNET]: 'testnet',
-      };
-      const btcNetwork = networkType ? networks[networksMap[networkType]] : undefined;
+      const btcNetwork = networkType ? this.getBitcoinNetwork(networkType) : undefined;
       toOutputScript(address, btcNetwork);
       return true;
     } catch (error) {
@@ -179,7 +181,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     }
   }
 
-  override isValidAddressOrNameEncoding(address: string, networkType?: NetworkTypeDefault) {
+  override isValidAddressOrNameEncoding(address: string, networkType?: NetworkType) {
     return this.isAccountAddressValid(address, networkType);
   }
 
@@ -197,7 +199,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   ): IHdWalletAccount {
     const { activeNetwork } = useNetworks();
 
-    const network = networks[activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 'bitcoin' : 'testnet'];
+    const network = this.getBitcoinNetwork(activeNetwork.value.type);
     const pathCoinType = activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 0 : 1;
 
     const node = this.bip32.fromSeed(Buffer.from(seed));
@@ -232,7 +234,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       const ECPair = ECPairFactory(ecc);
       const account = ECPair.fromPrivateKey(Buffer.from(rawAccount.privateKey));
 
-      const network = networks[activeNetwork.value.type === NETWORK_TYPE_MAINNET ? 'bitcoin' : 'testnet'];
+      const network = this.getBitcoinNetwork(activeNetwork.value.type);
       const { address } = payments.p2wpkh({ // p2wpkh for Native-Segwit and p2pkh for Legacy
         pubkey: account.publicKey,
         network,
@@ -337,7 +339,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   ): Promise<Transaction> {
     const { activeNetwork } = useNetworks();
 
-    const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
+    const network = this.getBitcoinNetwork(activeNetwork.value.type);
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
     const amountInSatoshi = toSatoshi(amountInBtc);
