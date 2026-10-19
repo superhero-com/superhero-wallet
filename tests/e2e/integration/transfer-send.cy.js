@@ -51,8 +51,8 @@ function pasteAddress(address) {
     .trigger('input');
 }
 
-function decodeBroadcast(protocol, raw) {
-  return cy.task('decodeSignedTx', { protocol, raw });
+function decodeBroadcast(protocol, raw, additionalData = {}) {
+  return cy.task('decodeSignedTx', { protocol, raw, ...additionalData });
 }
 
 /** Answers JSON-RPC calls by method; `sendMethod` is the broadcast, aliased `@broadcast`. */
@@ -259,6 +259,7 @@ describe('Send modal', () => {
       .then(function assertTx(tx) {
         expect(tx.tag).to.eq('SpendTx');
         expect(tx.signatures).to.eq(1);
+        expect(tx.isSignatureValid).to.eq(true);
         expect(tx.senderId).to.eq(address);
         expect(tx.recipientId).to.eq(RECIPIENTS.aeternity);
         expect(tx.amount).to.eq(new BigNumber(amount).shiftedBy(18).toFixed());
@@ -311,12 +312,15 @@ describe('Send modal', () => {
     cy.get('[data-cy=review-amount]').should('contain', amount);
     cy.get('[data-cy=next-step-button]').click();
 
-    cy.wait('@broadcast').then(({ request }) => decodeBroadcast('bitcoin', request.body))
+    cy.wait('@broadcast').then(({ request }) => decodeBroadcast('bitcoin', request.body, {
+      prevouts: [{ txid: utxo.txid, vout: utxo.vout, hex: utxo.hex }],
+    }))
       .then(function assertTx(tx) {
         const feeInSats = this.fee.shiftedBy(8).toNumber();
         const [payment, change] = tx.outs;
 
         expect(tx.ins).to.deep.eq([{ txid: utxo.txid, vout: utxo.vout }]);
+        expect(tx.signatureValidity).to.deep.eq([true]);
         expect(payment).to.deep.eq({
           address: RECIPIENTS.bitcoin,
           value: new BigNumber(amount).shiftedBy(8).toFixed(),
