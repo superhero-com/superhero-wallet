@@ -95,6 +95,7 @@ import {
   useAuth,
   useConnection,
   useCurrencies,
+  useInvites,
   useLanguages,
   useModals,
   useMultisigAccounts,
@@ -146,6 +147,8 @@ export default defineComponent({
     } = useAeNames({ pollingDisabled: true });
     const { topBlockHeight } = useTopHeaderData();
     const { navigateBack } = usePageNavigation();
+    // Moves the plaintext invites of older versions to the encrypted storage.
+    useInvites();
 
     const innerElement = ref<HTMLDivElement>();
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);

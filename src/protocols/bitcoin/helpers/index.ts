@@ -7,6 +7,12 @@ export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
 }
 
+const sumValues = (items: { value: number }[]) => items.reduce((sum, { value }) => sum + value, 0);
+
+/**
+ * Reads an esplora transaction from the owner's side (the first input's side if there is none).
+ * The owner spending an input makes it outgoing, and outputs to input addresses count as change.
+ */
 export function normalizeTransactionStructure(
   transaction: any,
   transactionOwner?: string,
@@ -20,36 +26,40 @@ export function normalizeTransactionStructure(
     vout,
   } = transaction;
 
-  /**
-   * In case the transaction consists out of two elements:
-   * 1) Sending to a recipient
-   * 2) Resending the rest to a sender's subaccount
-   * our current transaction overview logic will show only one of them.
-   * This means that if user decides to view transaction information
-   * not related to the transactionOwner using our wallet,
-   * we will not be able to show the correct information.
-   * TODO: show ALL the transaction info
-   */
+  // Coinbase inputs have no prevout
+  const inputs: { address?: string; value: number }[] = vin.map(({ prevout }: any) => ({
+    address: prevout?.scriptpubkey_address,
+    value: prevout?.value ?? 0,
+  }));
+  const inputAddresses = inputs.map(({ address }) => address);
+  // OP_RETURN and other outputs without an address are paid away too
+  const outputs: { address?: string; value: number }[] = vout
+    .map(({ scriptpubkey_address: address, value }: any) => ({ address, value }));
 
-  const amountInSatochi = (
-    vout.length === 1
-    // in case transactions are made from our wallet (address remains the same)
-    || vin[0].prevout.scriptpubkey === vout[1].scriptpubkey
-    /**
-     * In case transactions are made from wallets with different send schema
-     * sending the rest of the remain balance to
-     * a NEXT address for this account (next ADDRESS_INDEX)
-     * derivation path m/purpose’/coin_type’/account’/change/ADDRESS_INDEX
-     */
-    || transactionOwner === vout[0].scriptpubkey_address
-  ) ? vout[0].value : vout[1].value;
-  const recipientId = (
-    vout.length === 1
-    || vin[0].prevout.scriptpubkey === vout[1].scriptpubkey
-    || transactionOwner === vout[0].scriptpubkey_address
-  )
-    ? vout[0].scriptpubkey_address
-    : vout[1].scriptpubkey_address;
+  const owner = transactionOwner || inputAddresses[0];
+  const ownerOutputs = outputs.filter(({ address }) => address && address === owner);
+  const paidOutputs = outputs
+    .filter(({ address }) => !address || !inputAddresses.includes(address));
+  let isOutgoing = !!owner && inputAddresses.includes(owner);
+  let transferOutputs = isOutgoing ? paidOutputs : ownerOutputs;
+  if (isOutgoing && !transferOutputs.length) {
+    // Paying itself, the wallet puts the amount first and the change after it
+    transferOutputs = ownerOutputs.slice(0, 1);
+  }
+  let amountInSatoshi = sumValues(transferOutputs);
+
+  // Others spend inputs too (PayJoin, CoinJoin, a seed also used in another wallet):
+  // the owner sent or received what its balance changed by.
+  if (isOutgoing && inputAddresses.some((address) => address !== owner)) {
+    const balanceChange = sumValues(ownerOutputs)
+      - sumValues(inputs.filter(({ address }) => address === owner));
+    isOutgoing = balanceChange < 0;
+    amountInSatoshi = isOutgoing ? Math.max(0, -balanceChange - fee) : balanceChange;
+    // The payee, else a co-spender the owner paid
+    transferOutputs = isOutgoing
+      ? [...paidOutputs, ...outputs.filter(({ address }) => address !== owner)]
+      : ownerOutputs;
+  }
 
   return {
     protocol,
@@ -59,10 +69,10 @@ export function normalizeTransactionStructure(
     microTime: status.block_time * 1000,
     pending: !status.confirmed,
     tx: {
-      amount: satoshiToBtc(amountInSatochi),
+      amount: satoshiToBtc(amountInSatoshi),
       fee: satoshiToBtc(fee),
-      senderId: vin[0].prevout.scriptpubkey_address,
-      recipientId,
+      senderId: isOutgoing ? owner : inputAddresses.find((address) => address && address !== owner),
+      recipientId: transferOutputs.find(({ address }) => address)?.address ?? owner,
       type: 'SpendTx', // TODO: create own types
       arguments: [],
       callerId: '' as any,

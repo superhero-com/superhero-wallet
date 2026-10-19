@@ -558,7 +558,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async constructAndSignTx(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<FeeMarketEIP1559Transaction> {
@@ -597,7 +597,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async spend(
-    amount: number,
+    amount: number | string,
     recipient: AccountAddress,
     options: {
       fromAccount: AccountAddress;

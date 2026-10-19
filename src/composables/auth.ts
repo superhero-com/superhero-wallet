@@ -48,6 +48,7 @@ import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-c
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import migrateMnemonicMobileToSecureStorage from '@/migrations/010-mnemonic-mobile-to-secure-storage';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
+import { removeLegacySecrets } from '@/migrations/migrationHelpers';
 import {
   LEGACY_DEFAULT_PASSWORD,
   clearDefaultPasswordSecret,
@@ -313,6 +314,16 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonic.value = ciphertext;
   }
 
+  /**
+   * False once the password was changed in another window: pages other than the offscreen
+   * tab don't sync the storage, so they keep a key the stored salt no longer derives.
+   */
+  function isEncryptionKeyCurrent() {
+    if (IS_MOBILE_APP) return true;
+    const storedSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    return storedSalt === (encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null);
+  }
+
   async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
@@ -355,6 +366,11 @@ export const useAuth = createCustomScopedComposable(() => {
     // so after a lock they would stay under a key the new salt makes underivable.
     if (encryptionKey.value !== currentKey) {
       throw new Error('The wallet got locked while setting the password');
+    }
+    // A window that missed a password change in another one still holds the old salt:
+    // its new salt would leave the invites, stored under the other one, unreadable.
+    if (currentKey && !isEncryptionKeyCurrent()) {
+      throw new Error('The password was changed in another window');
     }
     /**
      * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
@@ -814,6 +830,28 @@ export const useAuth = createCustomScopedComposable(() => {
     await setPassword(newPassword);
   }
 
+  /**
+   * Older versions kept the seed in plaintext in the browser storage. It goes only once
+   * the stored ciphertext opens to the same seed, so it is never the only readable copy.
+   */
+  async function removeLegacyPlaintextSeed() {
+    const key = encryptionKey.value;
+    const unlockedMnemonic = mnemonicDecrypted.value;
+    const seedHex = Buffer.from(mnemonicSeed.value!).toString('hex');
+    const isUnlockedMnemonic = (value: unknown) => value === unlockedMnemonic;
+    const isUnlockedAccount = (value: any) => value?.privateKey === seedHex;
+    await removeLegacySecrets({
+      stateFields: { mnemonic: isUnlockedMnemonic, account: isUnlockedAccount },
+      entries: { mnemonic: isUnlockedMnemonic, userAccount: isUnlockedAccount },
+      confirm: async () => {
+        const storage = (IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
+        const stored = await storage.get<string>(STORAGE_KEYS.mnemonic);
+        return !!key && !!stored
+          && await decrypt(key, stored).catch(() => null) === unlockedMnemonic;
+      },
+    });
+  }
+
   (async () => {
     checkBiometricLoginAvailability();
 
@@ -868,6 +906,15 @@ export const useAuth = createCustomScopedComposable(() => {
     (val) => {
       if (val) {
         isSessionExpired = false;
+      }
+    },
+  );
+
+  watch(
+    () => isAuthenticated.value && isMnemonicEncrypted.value && !!mnemonicDecrypted.value,
+    (isUnlocked) => {
+      if (isUnlocked) {
+        removeLegacyPlaintextSeed().catch(handleUnknownError);
       }
     },
   );
@@ -934,6 +981,7 @@ export const useAuth = createCustomScopedComposable(() => {
     checkBiometricLoginAvailability,
     checkUserAuth,
     getEncryptionKey,
+    isEncryptionKeyCurrent,
     lockWallet,
     logout,
     setMnemonicAndInitializeAuthentication,

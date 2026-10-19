@@ -19,7 +19,9 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
+import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
 import { BIP32Factory } from 'bip32';
+import BigNumber from 'bignumber.js';
 
 import type {
   AccountAddress,
@@ -226,7 +228,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
   }
 
   override async constructAndSignTx(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
@@ -248,7 +250,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     const gasPrice = bigIntToHex(nodeGasPriceWei);
 
     const hexAmount = bigIntToHex(
-      BigInt(toWei(amount.toFixed(AVALANCHE_COIN_PRECISION), 'ether')),
+      BigInt(toWei(new BigNumber(amount).toFixed(AVALANCHE_COIN_PRECISION), 'ether')),
     );
 
     const txData: TxData = {
@@ -411,7 +413,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
   }
 
   override async spend(
-    amount: number,
+    amount: number | string,
     recipient: AccountAddress,
     options: {
       fromAccount: AccountAddress;
@@ -424,6 +426,15 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
     await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
+  }
+
+  override async transferPreparedTransaction(transaction: any = {}): Promise<ITransferResponse> {
+    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+    return transferPreparedLegacyTransaction(
+      this.protocol,
+      avalancheActiveNetworkSettings.value,
+      transaction,
+    );
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {
