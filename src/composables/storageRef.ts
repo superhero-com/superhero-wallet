@@ -1,7 +1,7 @@
 import { Ref, ref, watch } from 'vue';
 import type { Migration, StorageKey } from '@/types';
 import { WalletStorage } from '@/lib/WalletStorage';
-import { asyncPipe } from '@/utils';
+import { asyncPipe, handleUnknownError } from '@/utils';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { IS_MOBILE_APP } from '@/constants';
 
@@ -28,6 +28,11 @@ export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
    */
   onRestored?: (val: T | null) => any;
   /**
+   * Runs when the stored value can't be read or migrated. The state keeps its initial value
+   * and `onRestored` is called with `null` after it.
+   */
+  onRestoreFailed?: (error: unknown) => any;
+  /**
    * Allows to run a callback whenever the state is synced with the background.
    */
   onBackgroundSync?: (val: T) => any;
@@ -52,6 +57,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
     backgroundSync = false,
     migrations,
     onRestored,
+    onRestoreFailed,
     onBackgroundSync,
   } = options;
 
@@ -73,35 +79,59 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
 
   // Restore state and run watchers
   (async () => {
-    let restoredValue = await storage.get<TSerialized | null>(storageKey);
-    if (migrations?.length) {
-      // iOS Keychain writes delete the item first, so don't rewrite an unchanged value
-      const storedValue = JSON.stringify(restoredValue);
-      restoredValue = await asyncPipe<TSerialized | null>(migrations)(restoredValue!);
-      if (restoredValue !== null && JSON.stringify(restoredValue) !== storedValue) {
-        storage.set(storageKey, restoredValue);
+    let restoredValue: TSerialized | null = null;
+    let isRestoreFailed = false;
+    try {
+      restoredValue = await storage.get<TSerialized | null>(storageKey);
+      if (migrations?.length) {
+        // iOS Keychain writes delete the item first, so don't rewrite an unchanged value
+        const storedValue = JSON.stringify(restoredValue);
+        restoredValue = await asyncPipe<TSerialized | null>(migrations)(restoredValue!);
+        if (restoredValue !== null && JSON.stringify(restoredValue) !== storedValue) {
+          storage.set(storageKey, restoredValue);
+        }
       }
+      /**
+       * `onRestored` must run after `setLocalState` so reactive refs (e.g. mnemonic)
+       * are populated before guards like `checkUserAuth` observe `isMnemonicRestored`.
+       * Previously `onRestored` fired first, which could leave `mnemonic.value` empty
+       * while `isMnemonicRestored` was already true — skipping the password modal and
+       * breaking flows such as deep links / e2e `cy.login(..., '/invite/...')`.
+       */
+      await setLocalState(restoredValue);
+    } catch (error) {
+      // E.g. Android rejects a Keystore read it can't decrypt; waiting callers must not hang.
+      handleUnknownError(error);
+      // For the exportable error log; loaded here as the logger's imports lead back to this module.
+      const { message, stack } = (error instanceof Error)
+        ? error
+        : { message: String(error), stack: undefined };
+      import('@/lib/logger').then(({ default: Logger }) => Logger.write({
+        message: `Reading "${storageKey}" from the storage failed: ${message}`,
+        stack,
+        type: 'api-response',
+        modal: false,
+      })).catch(handleUnknownError);
+      restoredValue = null;
+      isRestoreFailed = true;
+      onRestoreFailed?.(error);
     }
-    /**
-     * `onRestored` must run after `setLocalState` so reactive refs (e.g. mnemonic)
-     * are populated before guards like `checkUserAuth` observe `isMnemonicRestored`.
-     * Previously `onRestored` fired first, which could leave `mnemonic.value` empty
-     * while `isMnemonicRestored` was already true — skipping the password modal and
-     * breaking flows such as deep links / e2e `cy.login(..., '/invite/...')`.
-     */
-    await setLocalState(restoredValue);
     onRestored?.(
       restoredValue == null ? restoredValue as T : state.value,
     );
 
     /**
      * Synchronize the state value with the storage.
+     * A value that couldn't be read may still be stored intact, so only a caller
+     * that handles the failure (`onRestoreFailed`) gets to write over it.
      */
-    watch(state, (val) => {
-      if (!watcherDisabled) {
-        setStorageState(val);
-      }
-    }, { deep: true });
+    if (!isRestoreFailed || onRestoreFailed) {
+      watch(state, (val) => {
+        if (!watcherDisabled) {
+          setStorageState(val);
+        }
+      }, { deep: true });
+    }
 
     /**
      * Two way binding between the extension and the background

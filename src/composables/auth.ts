@@ -97,6 +97,9 @@ export const useAuth = createCustomScopedComposable(() => {
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
   const isMnemonicRestored = ref(false);
+  /** The stored mnemonic couldn't be read, so it is empty but may still be stored. */
+  const isMnemonicUnreadable = ref(false);
+  let mnemonicReadError: unknown;
   /** User skipped setting password so the test one was used */
   const isUsingDefaultPassword = ref(false);
   const encryptionKey = ref<CryptoKey>();
@@ -124,6 +127,10 @@ export const useAuth = createCustomScopedComposable(() => {
          */
         (IS_MOBILE_APP) ? migrateMobileSensitiveDataEncryption : null,
       ].filter(excludeFalsy),
+      onRestoreFailed(error) {
+        mnemonicReadError = error;
+        isMnemonicUnreadable.value = true;
+      },
       onRestored() {
         isMnemonicRestored.value = true;
       },
@@ -255,13 +262,17 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
-   * The stored mnemonic can't be decrypted on this device, or its key can't be read.
+   * The stored mnemonic can't be decrypted on this device, or it or its key can't be read.
    * Reinstalling doesn't help on iOS (the Keychain survives it), so offer the in-app reset.
+   * After a failed read (`isReadFailed`) reopening may help, so that is suggested first.
    */
-  function surfaceUnreadableWalletData(error: unknown) {
-    const message = (error instanceof MobileEncryptionKeyMissingError)
-      ? t('auth.walletKeyUnavailableMessage')
-      : t('auth.walletDataUnreadableMessage');
+  function surfaceUnreadableWalletData(error: unknown, { isReadFailed = false } = {}) {
+    let message = t('auth.walletDataUnreadableMessage');
+    if (isReadFailed) {
+      message = t('auth.walletDataReadFailedMessage');
+    } else if (error instanceof MobileEncryptionKeyMissingError) {
+      message = t('auth.walletKeyUnavailableMessage');
+    }
     handleUnknownError(error);
     Logger.write({
       title: t('auth.walletDataUnreadableTitle'),
@@ -592,6 +603,10 @@ export const useAuth = createCustomScopedComposable(() => {
    */
   async function checkUserAuth(): Promise<any> {
     await watchUntilTruthy(isMnemonicRestored);
+    if (isMnemonicUnreadable.value) {
+      surfaceUnreadableWalletData(mnemonicReadError, { isReadFailed: true });
+      return;
+    }
     updateSessionExpiredFromDeadline();
 
     if (
@@ -967,6 +982,7 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticated: readonly(isAuthenticated),
     isMnemonicRestored,
     isMnemonicEncrypted,
+    isMnemonicUnreadable,
     isUsingDefaultPassword,
     mnemonic,
     mnemonicDecrypted,

@@ -57,6 +57,7 @@ const FALLBACK_ACCOUNT = {
 function mountIndex({
   mnemonic = 'stored-ciphertext',
   isAuthenticated = false,
+  isMnemonicUnreadable = false,
   activeIdx = 0,
   discoverAccounts = undefined,
   openConfirmModal = vi.fn().mockResolvedValue(undefined),
@@ -103,6 +104,7 @@ function mountIndex({
   });
   useAuth.mockReturnValue({
     isAuthenticated: state.isAuthenticated,
+    isMnemonicUnreadable: ref(isMnemonicUnreadable),
     mnemonic: state.mnemonic,
     generateMnemonic: () => 'new mnemonic',
     setMnemonicAndInitializeAuthentication: deps.setMnemonicAndInitializeAuthentication,
@@ -355,6 +357,20 @@ describe('Index page on mobile with a locked or unreadable wallet stored', () =>
 
     expect(openModal).toHaveBeenCalledWith(MODAL_RESET_WALLET);
     expect(openModal).not.toHaveBeenCalledWith(MODAL_ACCOUNT_IMPORT);
+  });
+
+  it('offers to reset a wallet whose seed could not be read at all, on any platform', async () => {
+    platform.isMobileApp = false;
+    const { wrapper, openModal, setMnemonicAndInitializeAuthentication } = mountIndex({
+      mnemonic: '',
+      isMnemonicUnreadable: true,
+    });
+
+    await tap(wrapper, 'generate-wallet');
+    await tap(wrapper, 'import-wallet');
+
+    expect(openModal.mock.calls).toEqual([[MODAL_RESET_WALLET], [MODAL_RESET_WALLET]]);
+    expect(setMnemonicAndInitializeAuthentication).not.toHaveBeenCalled();
   });
 
   it('keeps it when the reset is not confirmed', async () => {

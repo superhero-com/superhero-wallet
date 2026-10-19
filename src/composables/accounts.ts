@@ -30,6 +30,7 @@ import {
 import { tg } from '@/popup/plugins/i18n';
 import { ImportedAccountsUnreadableError } from '@/lib/errors';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 
@@ -56,6 +57,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     mnemonicSeed,
     isMnemonicRestored,
     isAuthenticated,
+    isMnemonicUnreadable,
     encryptionKey,
   } = useAuth();
 
@@ -92,6 +94,10 @@ export const useAccounts = createCustomScopedComposable(() => {
        * already-ciphertext blobs (see migration for the detection logic).
        */
       migrations: IS_MOBILE_APP ? [migrateMobileSensitiveDataEncryption] : [],
+      // They may still be stored, so imports must not write over them.
+      onRestoreFailed: () => {
+        arePrivateKeysAccountsUnreadable.value = true;
+      },
       onRestored: () => {
         arePrivateKeysAccountsEncryptedRestored.value = true;
       },
@@ -142,6 +148,8 @@ export const useAccounts = createCustomScopedComposable(() => {
       || arePrivateKeysAccountsDecrypted.value
       // Otherwise the router guard waits forever and the app stays blank.
       || arePrivateKeysAccountsUnreadable.value
+      // Nothing decrypts them while the seed can't be read, and the reset is offered then.
+      || isMnemonicUnreadable.value
     )
   ));
 
@@ -336,23 +344,33 @@ export const useAccounts = createCustomScopedComposable(() => {
    * password change re-encrypted them. Removing them lets the user import again.
    */
   function offerToRemoveUnreadablePrivateKeyAccounts() {
+    // Nothing to decrypt means the secure-storage read failed, which reopening may fix.
+    const isReadFailed = IS_MOBILE_APP && accountsPrivateKeysEncrypted.value === null;
     openConfirmModal({
       title: tg('modals.unreadablePrivateKeyAccounts.title'),
-      msg: tg('modals.unreadablePrivateKeyAccounts.msg'),
+      msg: tg(isReadFailed
+        ? 'modals.unreadablePrivateKeyAccounts.readFailedMsg'
+        : 'modals.unreadablePrivateKeyAccounts.msg'),
       icon: 'critical',
       buttonMessage: tg('modals.unreadablePrivateKeyAccounts.btnText'),
     })
-      .then(() => {
+      .then(async () => {
+        // Popups get no storage events, so the offscreen tab may have re-encrypted it meanwhile,
+        // and a read that failed at startup may work now.
+        let stored: string | null = null;
+        try {
+          stored = IS_MOBILE_APP
+            ? await SecureMobileStorage.get<string>(STORAGE_KEYS.privateKeyAccountsRaw)
+            : WalletStorage.get<string>(STORAGE_KEYS.privateKeyAccountsRaw);
+          // As at startup, so mobile plaintext from before the encryption isn't taken as is.
+          stored = await migrateMobileSensitiveDataEncryption(stored);
+        } catch { /* Still unreadable */ }
         if (!isAuthenticated.value || !arePrivateKeysAccountsUnreadable.value) {
           return;
         }
-        if (!IS_MOBILE_APP) {
-          // Popups get no storage events; the offscreen tab may have re-encrypted it meanwhile.
-          const stored = WalletStorage.get<string>(STORAGE_KEYS.privateKeyAccountsRaw);
-          if (stored && stored !== accountsPrivateKeysEncrypted.value) {
-            accountsPrivateKeysEncrypted.value = stored;
-            return;
-          }
+        if (stored && stored !== accountsPrivateKeysEncrypted.value) {
+          accountsPrivateKeysEncrypted.value = stored;
+          return;
         }
         accountsPrivateKeysEncrypted.value = null;
         arePrivateKeysAccountsUnreadable.value = false;

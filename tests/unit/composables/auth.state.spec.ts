@@ -520,6 +520,31 @@ describe('useAuth state machine branches', () => {
     });
   });
 
+  describe('stored seed that cannot be read', () => {
+    it('stays locked on the web and suggests to reopen before the reset', async () => {
+      mockConstants();
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { composeStorageKeys } = await import('@/utils/common');
+      localStorage.setItem(composeStorageKeys(STORAGE_KEYS.mnemonic), '{"cut off');
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const { useAuth } = await import('@/composables/auth');
+      const auth = useAuth();
+
+      try {
+        await auth.checkUserAuth();
+      } finally {
+        warnSpy.mockRestore();
+      }
+
+      expect(auth.isMnemonicUnreadable.value).toBe(true);
+      expect(auth.isAuthenticated.value).toBe(false);
+      // Nothing was decrypted, and a failed extension storage read may work next time.
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        msg: en.auth.walletDataReadFailedMessage,
+      }));
+    });
+  });
+
   describe('stale session key (extension)', () => {
     let session;
 

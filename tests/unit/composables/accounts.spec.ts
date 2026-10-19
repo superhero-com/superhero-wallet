@@ -27,7 +27,14 @@ import {
 } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { watchUntilTruthy } from '@/utils';
-import { generateEncryptionKey, generateSalt, encrypt } from '@/utils/crypto';
+import {
+  generateEncryptionKey,
+  generateSalt,
+  encodeBase64,
+  encrypt,
+  decrypt,
+  importEncryptionKey,
+} from '@/utils/crypto';
 import en from '@/popup/locales/en-US.json';
 
 const VALID_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
@@ -55,6 +62,7 @@ describe('useAccounts', () => {
   let mnemonicSeedRef;
   let isMnemonicRestoredRef;
   let isAuthenticatedRef;
+  let isMnemonicUnreadableRef;
   let encryptionKeyRef;
   let openModalMock;
   let openConfirmModalMock;
@@ -66,6 +74,7 @@ describe('useAccounts', () => {
     mnemonicSeedRef = ref(MNEMONIC_SEED);
     isMnemonicRestoredRef = ref(true);
     isAuthenticatedRef = ref(false);
+    isMnemonicUnreadableRef = ref(false);
     encryptionKeyRef = ref(undefined);
     openModalMock = vi.fn().mockRejectedValue(new Error('No modals in this test'));
     openConfirmModalMock = vi.fn().mockRejectedValue(new Error('Dismissed'));
@@ -90,6 +99,7 @@ describe('useAccounts', () => {
         mnemonicSeed: mnemonicSeedRef,
         isMnemonicRestored: isMnemonicRestoredRef,
         isAuthenticated: isAuthenticatedRef,
+        isMnemonicUnreadable: isMnemonicUnreadableRef,
         encryptionKey: encryptionKeyRef,
       }),
     }));
@@ -243,6 +253,23 @@ describe('useAccounts', () => {
     expect(accounts.areAccountsReady.value).toBe(false);
   });
 
+  it('is ready without the imported accounts when the seed could not be read, so the reset can be offered', async () => {
+    await seedImportedEthAccount({
+      type: ACCOUNT_TYPES.privateKey,
+      isRestored: false,
+      protocol: PROTOCOLS.ethereum,
+      privateKey: Buffer.from(IMPORTED_ETH_PRIVATE_KEY_HEX, 'hex'),
+    });
+    mnemonicSeedRef.value = null;
+    isMnemonicUnreadableRef.value = true;
+
+    const accounts = await boot();
+
+    expect(await watchUntilTruthy(accounts.areAccountsReady, 1000)).toBe(true);
+    expect(accounts.accounts.value).toEqual([]);
+    expect(accounts.isLoggedIn.value).toBe(false);
+  });
+
   it('waits for a last active imported account instead of handing out another one of its protocol', async () => {
     seedAccountsRaw([
       { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
@@ -269,7 +296,7 @@ describe('useAccounts', () => {
     )).toMatchObject({ globalIdx: 2, type: ACCOUNT_TYPES.privateKey });
   });
 
-  describe('imported private keys that cannot be decrypted', () => {
+  describe('imported private keys that cannot be decrypted or read', () => {
     const seedAccount = {
       isRestored: true,
       protocol: PROTOCOLS.aeternity,
@@ -483,6 +510,142 @@ describe('useAccounts', () => {
       accounts.addRawAccount(seedAccount);
       await expect(accounts.addPrivateKeyAccount(secondImportedRaw)).resolves.toBe(1);
       expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
+    });
+
+    describe('whose read rejects at startup', () => {
+      let readStored;
+      let failedRead;
+
+      afterEach(() => {
+        vi.doUnmock('@/constants');
+      });
+
+      /**
+       * Readable with the current key, but the read fails, e.g. an Android Keystore error.
+       * With `isReadFailing: false` the read works, but they are under another key.
+       * With `isLegacyPlaintext` they are stored unencrypted, as before the mobile encryption.
+       */
+      async function bootWithFailingRead({
+        isMobile = false,
+        isReadFailing = true,
+        isLegacyPlaintext = false,
+      } = {}) {
+        if (isMobile) {
+          vi.doMock('@/constants', async (importOriginal) => ({
+            ...await importOriginal(),
+            IS_MOBILE_APP: true,
+          }));
+        }
+        const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+        const { WalletStorage: walletStorage } = await import('@/lib/WalletStorage');
+        const storage = isMobile ? SecureMobileStorage : walletStorage;
+        seedAccountsRaw([seedAccount]);
+        if (isLegacyPlaintext) {
+          // The per-install key, which the mobile encryption migration encrypts with
+          const rawKey = globalThis.crypto.getRandomValues(new Uint8Array(32));
+          await storage.set(STORAGE_KEYS.mobileDataKey, encodeBase64(rawKey));
+          currentKey = await importEncryptionKey(rawKey);
+          storedCiphertext = JSON.stringify([importedRaw]);
+        } else {
+          currentKey = await generateEncryptionKey('test-password', generateSalt());
+          storedCiphertext = await encrypt(currentKey, JSON.stringify([importedRaw]));
+        }
+        await storage.set(STORAGE_KEYS.privateKeyAccountsRaw, storedCiphertext);
+        encryptionKeyRef.value = isReadFailing
+          ? currentKey
+          : await generateEncryptionKey('another-password', generateSalt());
+        isAuthenticatedRef.value = true;
+        const realGet = storage.get;
+        readStored = () => realGet(STORAGE_KEYS.privateKeyAccountsRaw);
+        failedRead = vi.spyOn(storage, 'get').mockImplementation((key) => {
+          if (key !== STORAGE_KEYS.privateKeyAccountsRaw || !isReadFailing) return realGet(key);
+          if (isMobile) return Promise.reject(new Error('osError'));
+          throw new SyntaxError('Unexpected end of JSON input');
+        });
+        const accounts = await boot();
+        expect(await watchUntilTruthy(accounts.areAccountsReady, 5000)).toBe(true);
+        return accounts;
+      }
+
+      it.each([
+        // A corrupt entry, which reopening doesn't fix
+        ['web', false, en.modals.unreadablePrivateKeyAccounts.msg],
+        ['mobile', true, en.modals.unreadablePrivateKeyAccounts.readFailedMsg],
+      ])('opens the wallet on %s and refuses imports over them, keeping them stored', async (_, isMobile, msg) => {
+        const accounts = await bootWithFailingRead({ isMobile });
+
+        await attemptImport(accounts);
+        await flushAsync();
+
+        expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet]);
+        expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+          title: en.modals.unreadablePrivateKeyAccounts.title,
+          msg,
+        }));
+        expect(await readStored()).toBe(storedCiphertext);
+      });
+
+      it('says on mobile that they can\'t be decrypted when they were read', async () => {
+        const accounts = await bootWithFailingRead({ isMobile: true, isReadFailing: false });
+
+        await attemptImport(accounts);
+
+        expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+          msg: en.modals.unreadablePrivateKeyAccounts.msg,
+        }));
+      });
+
+      it.each([
+        ['web', false],
+        ['mobile', true],
+      ])('takes them back on %s when they read fine once the removal is confirmed', async (_, isMobile) => {
+        const confirm = deferConfirm();
+        const accounts = await bootWithFailingRead({ isMobile });
+        await attemptImport(accounts);
+
+        failedRead.mockRestore();
+        confirm();
+
+        expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+        expect(await readStored()).toBe(storedCiphertext);
+        await accounts.addPrivateKeyAccount(secondImportedRaw);
+        expect(accountTypes(accounts))
+          .toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey, ACCOUNT_TYPES.privateKey]);
+      });
+
+      it('takes them back on mobile when they read fine as plaintext from before the encryption', async () => {
+        const confirm = deferConfirm();
+        const accounts = await bootWithFailingRead({ isMobile: true, isLegacyPlaintext: true });
+        await attemptImport(accounts);
+
+        failedRead.mockRestore();
+        confirm();
+
+        expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+        // Encrypted as the startup would have done
+        await vi.waitFor(async () => {
+          const stored = JSON.parse(await decrypt(currentKey, await readStored()));
+          expect(stored).toEqual(JSON.parse(JSON.stringify([importedRaw])));
+        }, { timeout: 5000 });
+      });
+
+      it.each([
+        ['web', false],
+        ['mobile', true],
+      ])('removes them on %s when confirmed while the read still fails, and imports work again', async (_, isMobile) => {
+        openConfirmModalMock.mockResolvedValue(undefined);
+        const accounts = await bootWithFailingRead({ isMobile });
+
+        await attemptImport(accounts);
+        await flushAsync();
+        await accounts.addPrivateKeyAccount(secondImportedRaw);
+
+        expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
+        await vi.waitFor(async () => {
+          const stored = JSON.parse(await decrypt(currentKey, await readStored()));
+          expect(stored).toEqual(JSON.parse(JSON.stringify([secondImportedRaw])));
+        }, { timeout: 5000 });
+      });
     });
   });
 

@@ -287,6 +287,34 @@ describe('useAuth on mobile', () => {
     expect(recovered.isAuthenticated.value).toBe(true);
   });
 
+  it('stays locked and offers the reset when the stored seed read rejects, without writing a seed', async () => {
+    const { auth: first } = await boot();
+    await first.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+    vi.resetModules();
+    const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+    const realGet = SecureMobileStorage.get;
+    const storedSeed = await realGet('mnemonic');
+    vi.spyOn(SecureMobileStorage, 'get').mockImplementation((key) => (
+      key === 'mnemonic' ? Promise.reject(new Error('AEADBadTagException')) : realGet(key)
+    ));
+    const setSpy = vi.spyOn(SecureMobileStorage, 'set');
+    const { auth } = await boot();
+
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+    await expect(auth.checkUserAuth()).resolves.toBeUndefined();
+    expect(auth.isAuthenticated.value).toBe(false);
+    expect(auth.isMnemonicUnreadable.value).toBe(true);
+    // The read may work next time, so reopening is suggested before a reset.
+    expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+      msg: en.auth.walletDataReadFailedMessage,
+    }));
+
+    await expect(auth.setMnemonicAndInitializeAuthentication(OTHER_VALID_MNEMONIC))
+      .rejects.toThrow('AEADBadTagException');
+    expect(setSpy.mock.calls.some(([key]) => key === 'mnemonic')).toBe(false);
+    expect(await realGet('mnemonic')).toBe(storedSeed);
+  });
+
   it('keeps the wallet locked when the biometric login prompt is dismissed', async () => {
     const { auth: authGen1, ui: uiGen1 } = await boot();
     uiGen1.setBiometricLoginEnabled(true);

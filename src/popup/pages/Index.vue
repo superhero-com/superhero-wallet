@@ -165,6 +165,7 @@ export default defineComponent({
     } = useAccounts();
     const {
       isAuthenticated,
+      isMnemonicUnreadable,
       mnemonic,
       generateMnemonic,
       setMnemonicAndInitializeAuthentication,
@@ -180,12 +181,14 @@ export default defineComponent({
     let isOpeningStoredWallet = false;
 
     /**
-     * On mobile this page is also reachable with a locked or unreadable wallet stored.
-     * Replacing it in place would keep its imported accounts, so offer the reset instead.
+     * On mobile this page is also reachable with a locked or unreadable wallet stored,
+     * and on any platform with a seed that failed to load. Replacing it in place would
+     * keep its imported accounts, so offer the reset instead.
      * Resolves `true` when such a wallet is in the way.
      */
     async function offerResetOfLockedWallet(): Promise<boolean> {
-      if (!IS_MOBILE_APP || !mnemonic.value || isAuthenticated.value) {
+      const isLockedWalletStored = IS_MOBILE_APP && !!mnemonic.value && !isAuthenticated.value;
+      if (!isLockedWalletStored && !isMnemonicUnreadable.value) {
         return false;
       }
       await openConfirmModal({

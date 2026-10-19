@@ -38,6 +38,7 @@ vi.mock('@/composables/auth', () => ({
     mnemonicSeed: ref(MNEMONIC_SEED),
     isMnemonicRestored: ref(true),
     isAuthenticated: ref(true),
+    isMnemonicUnreadable: ref(false),
     encryptionKey: ref(undefined),
   }),
 }));

@@ -248,6 +248,7 @@
     "unreadablePrivateKeyAccounts": {
       "title": "无法读取导入的账户",
       "msg": "你通过私钥导入的账户在此设备上无法解密，也无法在此恢复。助记词账户不受影响，所有资产仍在区块链上。如需再次导入账户，请先移除无法读取的账户。你需要每个账户的私钥才能找回它。",
+      "readFailedMsg": "无法从此设备读取你通过私钥导入的账户。请关闭应用后重新打开。只有在问题持续出现且你有这些账户的私钥时才移除它们。没有私钥，移除后将无法再访问这些账户。助记词账户不受影响。",
       "btnText": "移除导入的账户"
     },
     "name-exist": {
@@ -1464,6 +1465,7 @@
     "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
     "walletDataUnreadableAction": "重置钱包",
     "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
+    "walletDataReadFailedMessage": "无法从此设备读取钱包数据。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
     "storedWalletFoundTitle": "在此设备上找到钱包",
     "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
     "storedWalletFoundAction": "重新加载"
