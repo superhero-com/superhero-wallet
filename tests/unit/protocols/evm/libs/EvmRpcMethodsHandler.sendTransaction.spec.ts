@@ -213,7 +213,12 @@ describe('eth_sendTransaction of a dapp', () => {
     expect(openModal).toHaveBeenCalledOnce();
     expect(openModal.mock.calls[0]).toMatchObject([
       MODAL_CONFIRM_TRANSACTION_SIGN,
-      { protocol, fromAccount: from, tx: { recipientId: TX.to } },
+      {
+        protocol,
+        fromAccount: from,
+        // 100 000 gas at the node's price + 10%
+        tx: { recipientId: TX.to, fee: expect.closeTo(0.003025, 9), gas: 100000 },
+      },
     ]);
   });
 

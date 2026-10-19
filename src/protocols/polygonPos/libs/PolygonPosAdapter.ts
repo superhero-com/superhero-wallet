@@ -21,7 +21,11 @@ import Web3Eth, {
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
 import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
-import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import {
+  getLegacyGasPrice,
+  toTokenBaseUnits,
+  withGasHeadroom,
+} from '@/protocols/evm/helpers';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
@@ -357,8 +361,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     const hexAmount = bigIntToHex(toTokenBaseUnits(amountBN, tokenDecimals));
 
     const web3Eth = this.getWeb3EthInstance();
-    const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const gasPrice = bigIntToHex(nodeGasPriceWei);
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
 
     const estimatedGas = await contract.methods.transfer(recipient, hexAmount)
       .estimateGas({ from: options.fromAccount });
@@ -536,8 +539,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     const { chainId } = polygonActiveNetworkSettings.value;
 
     const web3Eth = this.getWeb3EthInstance();
-    const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const gasPrice = bigIntToHex(nodeGasPriceWei);
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
 
     const hexAmount = bigIntToHex(
       BigInt(toWei(new BigNumber(amount).toFixed(POLYGON_POS_COIN_PRECISION), 'ether')),

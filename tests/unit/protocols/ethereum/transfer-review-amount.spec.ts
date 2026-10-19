@@ -5,7 +5,7 @@
  * explorer and the broadcast are stubbed.
  */
 import { enableAutoUnmount, mount } from '@vue/test-utils';
-import { TransactionFactory, privateKeyToAddress } from 'web3-eth-accounts';
+import { Transaction, TransactionFactory, privateKeyToAddress } from 'web3-eth-accounts';
 import { hexToBytes } from 'web3-utils';
 
 import '@/protocols/registerAdapters';
@@ -216,5 +216,23 @@ describe.each([
     await signReviewed(protocol, TOKEN_CONTRACT, '1.5');
 
     expect(explorerRequests).toEqual([]);
+  });
+});
+
+describe('TransferReview - chains without EIP-1559', () => {
+  it.each([
+    [PROTOCOLS.bnb, 'coin'],
+    [PROTOCOLS.bnb, 'token'],
+    [PROTOCOLS.avalanche, 'coin'],
+    [PROTOCOLS.polygonPos, 'coin'],
+    [PROTOCOLS.polygonPos, 'token'],
+  ])('signs the gas price picked on the form (%s %s)', async (protocol, asset) => {
+    const contractId = asset === 'token'
+      ? TOKEN_CONTRACT
+      : ProtocolAdapterFactory.getAdapter(protocol).coinContractId;
+    const signedTx = await signReviewed(protocol, contractId, '1') as Transaction;
+
+    // The form's 20 gwei rather than the node's 1 gwei.
+    expect(signedTx.gasPrice).toBe(20000000000n);
   });
 });
