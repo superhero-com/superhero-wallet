@@ -649,6 +649,38 @@ describe('useAccounts', () => {
     });
   });
 
+  it('derives the published addresses from imported private keys, also after a restart', async () => {
+    const { PRIVATE_KEY_VECTORS } = await import('../../fixtures/privateKeyVectors');
+    seedAccountsRaw([
+      { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
+    ]);
+    encryptionKeyRef.value = await generateEncryptionKey('test-password', generateSalt());
+    isAuthenticatedRef.value = true;
+    const importedAddresses = ({ accounts: list }) => list.value
+      .filter(({ type }) => type === ACCOUNT_TYPES.privateKey)
+      .map(({ protocol, address }) => [protocol, address]);
+    const expected = PRIVATE_KEY_VECTORS.map(([protocol, , address]) => [protocol, address]);
+    const accounts = await boot();
+    expect(await watchUntilTruthy(accounts.areAccountsReady, 5000)).toBe(true);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [protocol, privateKeyHex] of PRIVATE_KEY_VECTORS) {
+      // eslint-disable-next-line no-await-in-loop
+      await accounts.addPrivateKeyAccount({
+        type: ACCOUNT_TYPES.privateKey,
+        isRestored: false,
+        protocol,
+        privateKey: Buffer.from(privateKeyHex, 'hex'),
+      });
+    }
+    expect(importedAddresses(accounts)).toEqual(expected);
+
+    vi.resetModules();
+    const restarted = await boot();
+    // Decrypting and deriving every protocol takes a while in a full run.
+    await vi.waitFor(() => expect(importedAddresses(restarted)).toEqual(expected), 5000);
+  });
+
   describe('discoverAccounts', () => {
     const AE = PROTOCOLS.aeternity;
     const ETH = PROTOCOLS.ethereum;
