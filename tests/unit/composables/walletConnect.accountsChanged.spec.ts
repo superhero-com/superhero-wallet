@@ -185,39 +185,82 @@ describe('WalletConnect dapp requests', () => {
     vi.unstubAllGlobals();
   });
 
-  /** Returns what the wallet responds to a request of the dapp of an approved session */
-  async function request(method: string, params: unknown[]) {
-    const web3wallet = await connectAndGetWallet();
+  /** Approves a session and returns a function giving what the wallet responds to its dapp */
+  async function approveSession(isConfirmRequired = false) {
+    const web3wallet = await connectAndGetWallet(isConfirmRequired);
     (web3wallet.approveSession as vi.Mock).mockResolvedValueOnce({
       topic: 't',
       namespaces: { eip155: { accounts: [], chains: [] } },
       peer: { metadata: aescanProposal.params.proposer.metadata },
     });
     await getLastHandler(web3wallet, 'session_proposal')(aescanProposal);
-    (web3wallet.getActiveSessions as vi.Mock).mockReturnValue({ t: {} });
-    (web3wallet.respondSessionRequest as vi.Mock).mockClear();
-    await getLastHandler(web3wallet, 'session_request')({
-      id: 2,
-      topic: 't',
-      params: { chainId: 'eip155:1', request: { method, params } },
-    });
-    return (web3wallet.respondSessionRequest as vi.Mock).mock.calls.at(-1)?.[0];
+    (web3wallet.getActiveSessions as vi.Mock).mockReturnValue({ t: { topic: 't' } });
+    let id = 1;
+    return async (method: string, params: unknown[]) => {
+      id += 1;
+      (web3wallet.respondSessionRequest as vi.Mock).mockClear();
+      await getLastHandler(web3wallet, 'session_request')({
+        id,
+        topic: 't',
+        params: { chainId: 'eip155:1', request: { method, params } },
+      });
+      return (web3wallet.respondSessionRequest as vi.Mock).mock.calls.at(-1)?.[0];
+    };
+  }
+
+  async function request(method: string, params: unknown[]) {
+    return (await approveSession())(method, params);
   }
 
   it.each([
     'eth_requestAccounts',
     'wallet_requestPermissions',
   ])('%s shows the claimed URL as self-reported in the connect modal', async (method) => {
-    const { usePermissions } = await import('@/composables/permissions');
-    // As the connect popup, which stores the permission
-    openModalMock.mockImplementation(async (_, { app }) => (
-      usePermissions().addPermission({ host: app.host })
-    ));
     await request(method, []);
 
     expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.objectContaining({
       app: expect.objectContaining({ host: 'aescan.io', originSource: 'self-reported' }),
     }));
+  });
+
+  it('asks to connect once per session', async () => {
+    const send = await approveSession();
+
+    expect((await send('eth_requestAccounts', [])).response.result).toEqual([account.address]);
+    expect((await send('eth_requestAccounts', [])).response.result).toEqual([account.address]);
+    expect(openModalMock).toHaveBeenCalledOnce();
+  });
+
+  it('does not ask to connect again after the user confirmed the session', async () => {
+    const send = await approveSession(true);
+
+    expect((await send('eth_requestAccounts', [])).response.result).toEqual([account.address]);
+    expect(openModalMock).toHaveBeenCalledOnce();
+  });
+
+  it('gives the account of the session to eth_accounts', async () => {
+    const send = await approveSession();
+
+    expect((await send('eth_accounts', [])).response.result).toEqual([account.address]);
+  });
+
+  it('asks to connect again after the dapp revoked its permissions', async () => {
+    const send = await approveSession();
+    await send('eth_requestAccounts', []);
+    await send('wallet_revokePermissions', []);
+
+    expect((await send('eth_requestAccounts', [])).response.result).toEqual([account.address]);
+    expect(openModalMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the permission of the website whose URL the dapp claims', async () => {
+    const send = await approveSession();
+    const { usePermissions } = await import('@/composables/permissions');
+    const { permissions, addPermission } = usePermissions();
+    addPermission({ host: 'aescan.io', address: true } as any);
+
+    expect((await send('wallet_revokePermissions', [])).response.result).toBeNull();
+    expect(permissions.value['aescan.io']).toEqual({ host: 'aescan.io', address: true });
   });
 
   it('answers a read of the node with its null result, not an error', async () => {

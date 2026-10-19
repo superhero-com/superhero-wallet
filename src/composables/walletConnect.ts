@@ -23,7 +23,10 @@ import { createAppData } from '@/utils';
 
 import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_NODE_METHODS } from '@/protocols/ethereum/config';
 import type { Protocol, IAccount } from '@/types';
-import { handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import {
+  approveWalletConnectSession,
+  handleEvmRpcRequest,
+} from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
@@ -318,6 +321,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         name,
         proposal.chainId,
         'self-reported',
+        topic,
       );
 
       try {
@@ -481,7 +485,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             });
           }
 
-          wcSession.value = await web3wallet!.approveSession({
+          const session = await web3wallet!.approveSession({
             id,
             namespaces: wcUtils.buildApprovedNamespaces({
               proposal,
@@ -499,6 +503,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
               },
             }),
           });
+          if (isConfirmRequired) {
+            approveWalletConnectSession(session.topic);
+          }
+          wcSession.value = session;
 
           // Attach listeners only after session is approved
           monitorActiveSessionEvents();

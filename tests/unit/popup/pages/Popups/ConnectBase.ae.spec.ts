@@ -127,11 +127,11 @@ describe('ConnectBase.vue dapp identity', () => {
     expect(shownLogo(wrapper).exists()).toBe(false);
   });
 
-  it('saves the permission under the app host without the origin source', async () => {
+  it('saves the permission of a site under its host', async () => {
     const { permissions, resetPermissions } = usePermissions();
     resetPermissions();
 
-    const wrapper = mountWithApp('https://app.uniswap.org/', 'self-reported');
+    const wrapper = mountWithApp('https://app.uniswap.org/');
     await wrapper.find('[data-cy="accept"]').trigger('click');
 
     expect(permissions.value).toEqual({
@@ -142,5 +142,27 @@ describe('ConnectBase.vue dapp identity', () => {
       }),
     });
     expect(permissions.value['app.uniswap.org']).not.toHaveProperty('originSource');
+  });
+
+  it('saves no permission for the URL a WalletConnect dapp claims', async () => {
+    const { permissions, resetPermissions } = usePermissions();
+    resetPermissions();
+    const resolve = vi.fn();
+
+    const wrapper = mountBaseWith({
+      protocol: PROTOCOLS.aeternity,
+      app: createAppData('https://app.uniswap.org/', 'self-reported'),
+      resolve,
+    });
+    await wrapper.find('[data-cy="accept"]').trigger('click');
+
+    expect(permissions.value).toEqual({});
+    expect(resolve).toHaveBeenCalled();
+  });
+
+  it('offers to remember a site but not a WalletConnect dapp, which is never saved', () => {
+    expect(mountWithApp('https://app.uniswap.org/').find('[data-cy="checkbox"]').exists()).toBe(true);
+    expect(mountWithApp('https://app.uniswap.org/', 'self-reported').find('[data-cy="checkbox"]').exists())
+      .toBe(false);
   });
 });

@@ -78,6 +78,13 @@ const ERROR_UNAUTHORIZED = {
 
 const isCheckingPermissions = ref(false);
 
+/** WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants */
+const approvedSessionTopics = new Set<string>();
+
+export function approveWalletConnectSession(topic: string) {
+  approvedSessionTopics.add(topic);
+}
+
 /** A hex message as the user reads it: its text, or the hex when it is not text */
 function getMessageText(hex: string): string {
   try {
@@ -92,6 +99,7 @@ async function checkOrAskEvmPermission(
   aepp: string,
   protocol: Protocol,
   originSource?: AppOriginSource,
+  sessionTopic?: string,
 ) {
   const { checkOrAskPermission, permissions } = usePermissions();
   const { activeAccount } = useAccounts();
@@ -99,7 +107,8 @@ async function checkOrAskEvmPermission(
 
   isCheckingPermissions.value = true;
   try {
-    const permission = await checkOrAskPermission(
+    const isApprovedSession = !!sessionTopic && approvedSessionTopics.has(sessionTopic);
+    const permission = isApprovedSession || await checkOrAskPermission(
       METHODS.subscribeAddress,
       aepp,
       {
@@ -112,7 +121,9 @@ async function checkOrAskEvmPermission(
         ],
       },
     );
-    if (permission && aepp) {
+    if (permission && sessionTopic) {
+      approveWalletConnectSession(sessionTopic);
+    } else if (permission && aepp && originSource !== 'self-reported') {
       // The popup answers before the permission it stores reaches this context
       await watchUntilTruthy(() => permissions.value[new URL(aepp).host], 3000);
     }
@@ -259,6 +270,8 @@ export async function handleEvmRpcMethod(
   name?: string,
   caipChainId?: string,
   originSource?: AppOriginSource,
+  /** Of the WalletConnect session the request came in */
+  sessionTopic?: string,
 ): Promise<EvmRpcResponse> {
   const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
   const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
@@ -274,15 +287,14 @@ export async function handleEvmRpcMethod(
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol, originSource))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
 
   if (method === ETH_RPC_METHODS.getAccounts) {
-    const { host } = new URL(aepp);
-
-    if (checkPermission(host, METHODS.connect)) {
+    // A WalletConnect session already holds its accounts
+    if (originSource === 'self-reported' || checkPermission(new URL(aepp).host, METHODS.connect)) {
       const evmAccount = getLastActiveProtocolAccount(protocol);
 
       return {
@@ -295,7 +307,7 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol, originSource)) {
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic)) {
       // ensure we emit connect event for EIP-1193 consumers
       const account = getLastActiveProtocolAccount(protocol)!;
       try {
@@ -316,8 +328,13 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.revokePermissions) {
-    const { host } = new URL(aepp);
-    removePermission(host);
+    if (sessionTopic) {
+      approvedSessionTopics.delete(sessionTopic);
+    }
+    // The URL a WalletConnect dapp claims may be a site the user connected
+    if (originSource !== 'self-reported') {
+      removePermission(new URL(aepp).host);
+    }
     return { result: null };
   }
 
@@ -539,6 +556,7 @@ export async function handleEvmRpcRequest(
   name?: string,
   caipChainId?: string,
   originSource?: AppOriginSource,
+  sessionTopic?: string,
 ): Promise<EvmRpcResponse> {
   const positionalParams = Array.isArray(params) ? params : [];
   // A dapp waits for an answer, also when e.g. its address is malformed
@@ -559,6 +577,7 @@ export async function handleEvmRpcRequest(
       name,
       caipChainId,
       originSource,
+      sessionTopic,
     );
   } catch (error: any) {
     return getUnknownError(error.message);
