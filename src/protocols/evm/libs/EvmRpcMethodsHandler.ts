@@ -165,23 +165,22 @@ function parseCaipChainId(chainIdOrCaip?: string): string | undefined {
     : chainIdOrCaip;
 }
 
-function selectProtocolByChainId(targetChainId?: string): Protocol {
-  const { activeNetwork, networks } = useNetworks();
+/** The currently active EVM protocol if available, otherwise ethereum */
+function getActiveEvmProtocol(): Protocol {
   const { activeAccount } = useAccounts();
-  const network = networks.value[activeNetwork.value.name];
-  if (targetChainId) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const protocol of EVM_PROTOCOLS) {
-      const protoSettings: any = network.protocols[protocol];
-      if (protoSettings?.chainId?.toString() === targetChainId.toString()) {
-        return protocol;
-      }
-    }
-  }
-  // Fallback to currently active EVM protocol if available, otherwise ethereum
   return EVM_PROTOCOLS.includes(activeAccount.value.protocol)
     ? activeAccount.value.protocol
     : PROTOCOLS.ethereum;
+}
+
+/** `undefined` for a chain that is not on the active network */
+function selectProtocolByChainId(targetChainId?: string): Protocol | undefined {
+  if (!targetChainId) return getActiveEvmProtocol();
+  const { activeNetwork, networks } = useNetworks();
+  const network = networks.value[activeNetwork.value.name];
+  return EVM_PROTOCOLS.find((protocol) => (
+    (network.protocols[protocol] as any)?.chainId?.toString() === targetChainId.toString()
+  ));
 }
 
 function getActiveEvmNetworkSettings(protocol: Protocol) {
@@ -210,6 +209,24 @@ function getActiveEvmNetworkSettings(protocol: Protocol) {
   return {
     chainId: ethActiveNetworkSettings.value.chainId,
     nodeUrl: ethActiveNetworkSettings.value.nodeUrl,
+  };
+}
+
+/** Of those the wallet answers, the ones that send or read on a chain */
+const CHAIN_BOUND_METHODS: string[] = [
+  ETH_RPC_METHODS.sendTransaction,
+  ETH_RPC_METHODS.getBalance,
+];
+
+function getChainMismatchError(
+  requestedChainId: string | bigint,
+  activeChainId = getActiveEvmNetworkSettings(getActiveEvmProtocol()).chainId,
+) {
+  return {
+    error: {
+      code: -32602,
+      message: `Provided chainId "${requestedChainId}" must match the active chainId "${activeChainId}"`,
+    },
   };
 }
 
@@ -248,7 +265,12 @@ export async function handleEvmRpcMethod(
   const { activeNetwork, networks, switchNetwork } = useNetworks();
 
   const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
-  const protocol = selectProtocolByChainId(requestedChainId);
+  const protocolOfChain = selectProtocolByChainId(requestedChainId);
+  // The rest don't depend on the chain, e.g. a message signature, or name a chain to switch to
+  if (!protocolOfChain && CHAIN_BOUND_METHODS.includes(method)) {
+    return getChainMismatchError(requestedChainId!);
+  }
+  const protocol = protocolOfChain ?? getActiveEvmProtocol();
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
@@ -464,12 +486,7 @@ export async function handleEvmRpcMethod(
     }
     // As in MetaMask: a signature for another chain could be replayed there
     if (domainChainId !== undefined && domainChainId !== BigInt(chainId)) {
-      return {
-        error: {
-          code: -32602,
-          message: `Provided chainId "${domainChainId}" must match the active chainId "${chainId}"`,
-        },
-      };
+      return getChainMismatchError(domainChainId, chainId);
     }
 
     const evmAccount = getRequestedAccount(protocol, params.address, originSource);
@@ -527,9 +544,12 @@ export async function handleEvmRpcRequest(
   // A dapp waits for an answer, also when e.g. its address is malformed
   try {
     if (NODE_METHODS.includes(method)) {
-      const { nodeUrl } = getActiveEvmNetworkSettings(
-        selectProtocolByChainId(parseCaipChainId(caipChainId)),
-      );
+      const requestedChainId = parseCaipChainId(caipChainId);
+      const protocol = selectProtocolByChainId(requestedChainId);
+      if (!protocol) {
+        return getChainMismatchError(requestedChainId!);
+      }
+      const { nodeUrl } = getActiveEvmNetworkSettings(protocol);
       return await sendToNode(nodeUrl, method, positionalParams);
     }
     return await handleEvmRpcMethod(

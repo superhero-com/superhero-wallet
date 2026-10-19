@@ -100,6 +100,10 @@ const STRANGER = 'https://stranger.example';
 const UNAUTHORIZED = {
   error: { code: 4100, message: 'The requested account and/or method has not been authorized by the user' },
 };
+/** Sepolia, a chain of Testnet while Mainnet is active */
+const FOREIGN_CHAIN_ERROR = {
+  error: { code: -32602, message: 'Provided chainId "11155111" must match the active chainId "1"' },
+};
 
 const permit = {
   types: {
@@ -172,6 +176,19 @@ describe('handleEvmRpcMethod', () => {
       adapter.fetchBalance.mockResolvedValue(balance);
       const response = await handleEvmRpcMethod(DAPP, 'eth_getBalance', { address: SENDER });
       expect(response).toEqual({ result: expected });
+    });
+
+    it('rejects a balance on a chain of another network', async () => {
+      const response = await handleEvmRpcMethod(
+        DAPP,
+        'eth_getBalance',
+        { address: SENDER },
+        'Dapp',
+        'eip155:11155111',
+      );
+
+      expect(response).toEqual(FOREIGN_CHAIN_ERROR);
+      expect(adapter.fetchBalance).not.toHaveBeenCalled();
     });
   });
 
@@ -289,6 +306,32 @@ describe('handleEvmRpcMethod', () => {
       expect(checkOrAskPermission.mock.calls[0][2].fromAccount).toBe(OTHER.address);
       expect(adapter.transferPreparedTransaction)
         .toHaveBeenCalledWith({ ...tx, from: OTHER.address, gas: '0x5208' });
+    });
+
+    it.each([
+      ['the chain of the WalletConnect request', {}, 'eip155:11155111'],
+      ['the chainId of the transaction', { chainId: '0xaa36a7' }, undefined],
+    ])('rejects a transaction for a chain of another network named by %s', async (_, txFields, caipChainId) => {
+      const fetchMock = mockNode({ eth_estimateGas: { result: '0x5208' } });
+      const response = await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', {
+        ...tx, ...txFields,
+      }, 'Dapp', caipChainId);
+
+      expect(response).toEqual(FOREIGN_CHAIN_ERROR);
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
+      expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the chain of the WalletConnect request', {}, 'eip155:1'],
+      ['the chainId of the transaction, as viem does', { chainId: '0x1' }, undefined],
+    ])('sends a transaction for the active chain named by %s', async (_, txFields, caipChainId) => {
+      const response = await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', {
+        ...tx, ...txFields, gas: '0x5208',
+      }, 'Dapp', caipChainId);
+
+      expect(response).toEqual({ result: '0xhash' });
     });
 
     it('sends from the requested account named with a wrong checksum, as MetaMask does', async () => {
@@ -414,6 +457,15 @@ describe('handleEvmRpcMethod', () => {
       const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x01', address });
       expect(response).toEqual(UNAUTHORIZED);
       expect(checkOrAskPermission).not.toHaveBeenCalled();
+    });
+
+    it('signs a message of a WalletConnect session on a chain of another network', async () => {
+      const response = await handleEvmRpcMethod(STRANGER, 'personal_sign', {
+        data: '0x68656c6c6f', address: SIGNER.address,
+      }, 'Dapp', 'eip155:11155111', 'self-reported');
+
+      expect(response).toEqual({ result: HELLO_SIGNATURE });
+      expect(checkOrAskPermission).toHaveBeenCalledOnce();
     });
 
     it('rejects a request without a message without asking', async () => {
@@ -660,6 +712,14 @@ describe('handleEvmRpcRequest', () => {
     const fetchMock = mockNode({ eth_call: { result: '0x01' } });
     await handleEvmRpcRequest(DAPP, 'eth_call', [], 'Dapp', 'eip155:56');
     expect(getNodeRequests(fetchMock)).toMatchObject([{ url: 'https://bnb.node.example' }]);
+  });
+
+  it('keeps a request for a chain of another network off the nodes', async () => {
+    const fetchMock = mockNode({ eth_call: { result: '0x01' } });
+
+    expect(await handleEvmRpcRequest(DAPP, 'eth_call', [], 'Dapp', 'eip155:11155111'))
+      .toEqual(FOREIGN_CHAIN_ERROR);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   describe('with a BNB account active', () => {
