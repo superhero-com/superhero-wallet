@@ -56,6 +56,12 @@ export const DISTINCT_PROTOCOL_VIEWS = [
 */
 export const ADDRESS_GAP_LIMIT = 5;
 
+/**
+ * A node that doesn't answer whether an account is used by then counts as failing the check,
+ * so a stalled one can't stall the account discovery.
+ */
+export const ACCOUNT_CHECK_TIMEOUT = 30000;
+
 export const SEED_LENGTH = 12;
 export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 

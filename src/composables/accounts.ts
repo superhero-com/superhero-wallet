@@ -24,11 +24,12 @@ import {
   createCustomScopedComposable,
   decryptedComputed,
   excludeFalsy,
+  handleUnknownError,
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
 import { tg } from '@/popup/plugins/i18n';
-import { ImportedAccountsUnreadableError } from '@/lib/errors';
+import { AccountDiscoveryError, ImportedAccountsUnreadableError } from '@/lib/errors';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
@@ -401,28 +402,26 @@ export const useAccounts = createCustomScopedComposable(() => {
   /**
    * Establish the last used account index under the actual seed phrase for each of the protocols
    * and collect the raw accounts so they can be stored in the browser storage.
-   * Resolves `false` when `timeout` (ms) elapses first; nothing is added after that.
+   * Resolves `false` when a check fails or gets no answer in time, adding the accounts found
+   * anyway. With none found and no chain chosen, the first æternity account is added.
    */
-  async function discoverAccounts({ timeout }: { timeout?: number } = {}): Promise<boolean> {
+  async function discoverAccounts(): Promise<boolean> {
     const ms = mnemonicSeed.value;
     if (ms == null) throw new Error('Can\'t discover accounts without mnemonic seed');
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    // One timer for all the protocols, so a stalled one doesn't discard the others.
-    const timedOut = timeout
-      ? new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), timeout); })
-      : null;
+    let isComplete = true;
     const lastUsedAccountIndexRegistry = await Promise.all(
-      PROTOCOL_LIST.map((protocol) => {
-        const discovery = ProtocolAdapterFactory
-          .getAdapter(protocol)
-          .discoverLastUsedAccountIndex(ms);
-        return timedOut ? Promise.race([discovery, timedOut]) : discovery;
-      }),
-    ).finally(() => clearTimeout(timer));
-    const isComplete = lastUsedAccountIndexRegistry.every((index) => index !== null);
+      PROTOCOL_LIST.map((protocol) => ProtocolAdapterFactory
+        .getAdapter(protocol)
+        .discoverLastUsedAccountIndex(ms)
+        .catch((error): number => {
+          handleUnknownError(error);
+          isComplete = false;
+          return (error instanceof AccountDiscoveryError) ? error.lastUsedIndex : -1;
+        })),
+    );
 
     PROTOCOL_LIST.forEach((protocol, index) => {
-      for (let i = 0; i <= (lastUsedAccountIndexRegistry[index] ?? -1); i += 1) {
+      for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
         addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       }
     });
@@ -436,6 +435,13 @@ export const useAccounts = createCustomScopedComposable(() => {
         });
         addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       } catch (error) { /* NOOP */ }
+    }
+    if (!accountsRaw.value.length) {
+      addRawAccount({
+        isRestored: true,
+        protocol: PROTOCOLS.aeternity,
+        type: ACCOUNT_TYPES.hdWallet,
+      });
     }
     return isComplete;
   }

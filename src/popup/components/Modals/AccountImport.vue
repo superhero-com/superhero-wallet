@@ -77,6 +77,7 @@ import {
   useAccounts,
   useAuth,
   useModals,
+  useNotifications,
   useUi,
 } from '@/composables';
 
@@ -104,6 +105,7 @@ export default defineComponent({
     const { t } = useI18n();
     const { discoverAccounts } = useAccounts();
     const { openScanQrModal } = useModals();
+    const { addWalletNotification } = useNotifications();
     const { setMnemonicAndInitializeAuthentication } = useAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
@@ -135,7 +137,13 @@ export default defineComponent({
       try {
         await setMnemonicAndInitializeAuthentication(mnemonicParsed);
         setBackedUpSeed(true);
-        await discoverAccounts();
+        const isComplete = await discoverAccounts();
+        if (!isComplete) {
+          addWalletNotification({
+            title: t('pages.index.restoreIncompleteTitle'),
+            text: t('pages.index.restoreIncompleteText'),
+          });
+        }
         props.resolve();
         router.push(loginTargetLocation.value);
       } catch (e) {

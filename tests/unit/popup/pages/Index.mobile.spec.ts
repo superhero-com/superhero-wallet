@@ -48,11 +48,6 @@ const FOUND_ACCOUNT = {
   protocol: PROTOCOLS.ethereum,
   type: ACCOUNT_TYPES.hdWallet,
 };
-const FALLBACK_ACCOUNT = {
-  isRestored: true,
-  protocol: PROTOCOLS.aeternity,
-  type: ACCOUNT_TYPES.hdWallet,
-};
 
 function mountIndex({
   mnemonic = 'stored-ciphertext',
@@ -158,7 +153,7 @@ describe('Index page with an unlocked wallet stored and no accounts', () => {
     } = mountIndex({ isAuthenticated: true });
     await flushPromises();
 
-    expect(discoverAccounts).toHaveBeenCalledWith({ timeout: expect.any(Number) });
+    expect(discoverAccounts).toHaveBeenCalledWith();
     expect(accountsRaw.value).toEqual([FOUND_ACCOUNT]);
     expect(addWalletNotification).not.toHaveBeenCalled();
     expect(setActiveAccountByGlobalIdx).not.toHaveBeenCalled();
@@ -186,26 +181,13 @@ describe('Index page with an unlocked wallet stored and no accounts', () => {
     expect(wrapper.find('[data-cy=restoring-accounts]').exists()).toBe(false);
   });
 
-  it('opens the first æternity account when nothing is found and no chain is chosen', async () => {
-    const { accountsRaw, addWalletNotification } = mountIndex({
-      isAuthenticated: true,
-      discoverAccounts: vi.fn().mockResolvedValue(true),
-    });
-    await flushPromises();
-
-    expect(accountsRaw.value).toEqual([FALLBACK_ACCOUNT]);
-    expect(addWalletNotification).not.toHaveBeenCalled();
-    expect(routerPush).toHaveBeenCalledWith({ name: 'account' });
-  });
-
-  it('opens the first æternity account and says some may be missing when it times out', async () => {
-    const { accountsRaw, addWalletNotification } = mountIndex({
+  it('opens it and says some may be missing when the restore is incomplete', async () => {
+    const { addWalletNotification } = mountIndex({
       isAuthenticated: true,
       discoverAccounts: vi.fn().mockResolvedValue(false),
     });
     await flushPromises();
 
-    expect(accountsRaw.value).toEqual([FALLBACK_ACCOUNT]);
     expect(addWalletNotification).toHaveBeenCalledWith({
       title: en.pages.index.restoreIncompleteTitle,
       text: en.pages.index.restoreIncompleteText,
@@ -213,14 +195,15 @@ describe('Index page with an unlocked wallet stored and no accounts', () => {
     expect(routerPush).toHaveBeenCalledWith({ name: 'account' });
   });
 
-  it('opens the first æternity account and says some may be missing when the discovery fails', async () => {
-    const { accountsRaw, addWalletNotification } = mountIndex({
+  it('opens it and says some may be missing when the discovery throws', async () => {
+    const { addWalletNotification } = mountIndex({
       isAuthenticated: true,
-      discoverAccounts: vi.fn().mockRejectedValue(new Error('offline')),
+      // Its checks never throw, only a seed gone before it starts does.
+      discoverAccounts: vi.fn()
+        .mockRejectedValue(new Error('Can\'t discover accounts without mnemonic seed')),
     });
     await flushPromises();
 
-    expect(accountsRaw.value).toEqual([FALLBACK_ACCOUNT]);
     expect(addWalletNotification).toHaveBeenCalledWith(expect.objectContaining({
       title: en.pages.index.restoreIncompleteTitle,
     }));

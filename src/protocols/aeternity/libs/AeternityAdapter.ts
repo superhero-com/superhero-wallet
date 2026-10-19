@@ -45,6 +45,7 @@ import {
   getActivityHash,
   getLastNotEmptyAccountIndex,
   handleUnknownError,
+  isNotFoundError,
   toShiftedBigNumber,
 } from '@/utils';
 import Logger from '@/lib/logger';
@@ -193,7 +194,14 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   override async isAccountUsed(address: string): Promise<boolean> {
     const { getDryAeSdk } = useAeSdk();
     const aeSdk = await getDryAeSdk();
-    return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
+    return aeSdk.api.getAccountByPubkey(address).then(
+      () => true,
+      (error) => {
+        // The node doesn't know accounts that never received anything.
+        if (isNotFoundError(error)) return false;
+        throw error;
+      },
+    );
   }
 
   protected override deriveHdWalletAccountFromMnemonicSeed(

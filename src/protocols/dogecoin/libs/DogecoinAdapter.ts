@@ -181,6 +181,7 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
+    // An error means unused, not a failed discovery, while the mainnet API is retired
     try {
       const { activeNetwork } = useNetworks();
       const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;

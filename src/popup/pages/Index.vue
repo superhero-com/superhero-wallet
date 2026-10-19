@@ -118,7 +118,6 @@ import {
   MODAL_ACCOUNT_IMPORT,
   MODAL_PROTOCOL_SELECT,
   MODAL_RESET_WALLET,
-  PROTOCOLS,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { StoredWalletFoundError } from '@/lib/errors';
@@ -139,9 +138,6 @@ import SuperheroLogoIcon from '@/icons/logo.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 import CheckCircleIcon from '@/icons/check-circle-fill.svg?vue-component';
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
-
-/** Enough for a normal discovery; a stalled node falls back to the first account. */
-const ACCOUNTS_RESTORE_TIMEOUT = 30000;
 
 export default defineComponent({
   components: {
@@ -206,18 +202,10 @@ export default defineComponent({
       isRestoringAccounts.value = true;
       let isComplete = false;
       try {
-        isComplete = await discoverAccounts({ timeout: ACCOUNTS_RESTORE_TIMEOUT });
+        isComplete = await discoverAccounts();
       } catch (error) {
         handleUnknownError(error);
       } finally {
-        // Nothing found and no chain chosen, or the discovery didn't finish.
-        if (!accountsRaw.value.length) {
-          addRawAccount({
-            isRestored: true,
-            protocol: PROTOCOLS.aeternity,
-            type: ACCOUNT_TYPES.hdWallet,
-          });
-        }
         isRestoringAccounts.value = false;
       }
       if (!isComplete) {

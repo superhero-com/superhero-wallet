@@ -650,28 +650,54 @@ describe('useAccounts', () => {
   });
 
   describe('discoverAccounts', () => {
+    const AE = PROTOCOLS.aeternity;
+    const ETH = PROTOCOLS.ethereum;
+
     /**
-     * Every adapter reports `lastUsedIndex` (or none) once the returned `release` is called;
-     * the `stalled` ones never report.
+     * Stubs each protocol's node with `isUsed(protocol, index)`, which may also throw or
+     * never settle. Its checks answer once the returned `release` is called.
      */
-    async function stubDiscovery(lastUsedIndex, stalled = []) {
+    async function stubNodes(isUsed) {
       const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
       const { PROTOCOL_LIST } = await import('@/constants');
       let release;
       const released = new Promise((resolve) => { release = resolve; });
       PROTOCOL_LIST.forEach((protocol) => {
-        vi.spyOn(ProtocolAdapterFactory.getAdapter(protocol), 'discoverLastUsedAccountIndex')
-          .mockImplementation(() => (stalled.includes(protocol)
-            ? new Promise(() => {})
-            : released.then(() => lastUsedIndex[protocol] ?? -1)));
+        const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+        // Derived once each, as the checks of a scan ask for the same addresses.
+        const indexByAddress = new Map();
+        const indexOf = (address) => {
+          while (!indexByAddress.has(address)) {
+            if (indexByAddress.size >= 20) throw new Error(`Unknown ${protocol} address ${address}`);
+            const { address: derived } = adapter
+              .getHdWalletAccountFromMnemonicSeed(MNEMONIC_SEED, indexByAddress.size);
+            indexByAddress.set(derived, indexByAddress.size);
+          }
+          return indexByAddress.get(address);
+        };
+        vi.spyOn(adapter, 'isAccountUsed').mockImplementation(async (address) => {
+          await released;
+          return isUsed(protocol, indexOf(address));
+        });
       });
       return release;
     }
 
-    it('waits for the discovery when no timeout is given', async () => {
+    const usedUpTo = (lastUsedIndex) => (protocol, index) => (
+      index <= (lastUsedIndex[protocol] ?? -1)
+    );
+    const stalled = () => new Promise(() => {});
+    const protocolsOf = ({ accounts: list }) => list.value.map(({ protocol }) => protocol);
+
+    async function bootRestored() {
       const accounts = await boot();
       await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 0 });
+      return accounts;
+    }
+
+    it('waits for the nodes to answer', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({ [AE]: 0 }));
       let isSettled = false;
       const discovering = accounts.discoverAccounts().finally(() => { isSettled = true; });
 
@@ -680,64 +706,111 @@ describe('useAccounts', () => {
       release();
 
       await expect(discovering).resolves.toBe(true);
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.aeternity]);
+      expect(protocolsOf(accounts)).toEqual([AE]);
     });
 
-    it('adds the found accounts when the discovery finishes in time', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 });
+    it('adds the found accounts', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({ [AE]: 1 }));
       release();
 
-      await expect(accounts.discoverAccounts({ timeout: 1000 })).resolves.toBe(true);
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.aeternity, PROTOCOLS.aeternity]);
-    });
-
-    it('adds nothing when it times out, even once the discovery finishes later', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 });
-
-      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
-      release();
-      await flushAsync();
-
-      expect(accounts.accounts.value).toEqual([]);
+      await expect(accounts.discoverAccounts()).resolves.toBe(true);
+      expect(protocolsOf(accounts)).toEqual([AE, AE]);
     });
 
     it('asks for a protocol when a complete discovery finds nothing', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({});
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({}));
       release();
-      openModalMock.mockResolvedValueOnce(PROTOCOLS.ethereum);
+      openModalMock.mockResolvedValueOnce(ETH);
 
-      await expect(accounts.discoverAccounts({ timeout: 1000 })).resolves.toBe(true);
+      await expect(accounts.discoverAccounts()).resolves.toBe(true);
       expect(openModalMock).toHaveBeenCalledWith(MODAL_PROTOCOL_SELECT, expect.anything());
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.ethereum]);
+      expect(protocolsOf(accounts)).toEqual([ETH]);
     });
 
-    it('does not ask for a protocol when the discovery that found nothing was cut short', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      await stubDiscovery({});
-
-      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
-      expect(openModalMock).not.toHaveBeenCalled();
-    });
-
-    it('keeps the protocols that finished when another one times out', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 }, [PROTOCOLS.ethereum]);
+    it('opens the first æternity account when no protocol is chosen for an unused seed', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({}));
       release();
 
-      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.aeternity, PROTOCOLS.aeternity]);
+      await expect(accounts.discoverAccounts()).resolves.toBe(true);
+      expect(openModalMock).toHaveBeenCalledWith(MODAL_PROTOCOL_SELECT, expect.anything());
+      expect(protocolsOf(accounts)).toEqual([AE]);
+    });
+
+    it.each([
+      ['before finding any', () => { throw new Error('network down'); }, [AE]],
+      ['after finding two', (index) => {
+        if (index === 2) throw new Error('network down');
+        return index < 2;
+      }, [ETH, ETH]],
+      ['and finds the ones after the failed check', (index) => {
+        if (index === 2) throw new Error('network down');
+        return [0, 1, 3, 6].includes(index);
+      }, Array(7).fill(ETH)],
+    ])('counts a failed check %s as incomplete, keeping the accounts found', async (_, isEthUsed, protocols) => {
+      const accounts = await bootRestored();
+      const release = await stubNodes((protocol, index) => (
+        (protocol === ETH) ? isEthUsed(index) : false
+      ));
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      release();
+
+      try {
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+      } finally {
+        warnSpy.mockRestore();
+      }
+      // It may have missed accounts, so no protocol is asked for.
+      expect(openModalMock).not.toHaveBeenCalled();
+      expect(protocolsOf(accounts)).toEqual(protocols);
+    });
+
+    describe('when a node stops answering', () => {
+      beforeEach(() => {
+        vi.doMock('@/constants', async (importOriginal) => ({
+          ...await importOriginal(),
+          ACCOUNT_CHECK_TIMEOUT: 10,
+        }));
+      });
+
+      afterEach(() => {
+        vi.doUnmock('@/constants');
+      });
+
+      it('keeps the accounts confirmed before', async () => {
+        const accounts = await bootRestored();
+        // The first 5 æternity accounts are used, then its node stops answering.
+        const release = await stubNodes((protocol, index) => (
+          (protocol === AE && index >= 5) ? stalled() : protocol === AE
+        ));
+        release();
+
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+        expect(protocolsOf(accounts)).toEqual([AE, AE, AE, AE, AE]);
+      });
+
+      it('opens the first æternity account, not asking for a protocol', async () => {
+        const accounts = await bootRestored();
+        const release = await stubNodes(stalled);
+        release();
+
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+        expect(openModalMock).not.toHaveBeenCalled();
+        expect(protocolsOf(accounts)).toEqual([AE]);
+      });
+
+      it('keeps the protocols that finished', async () => {
+        const accounts = await bootRestored();
+        const release = await stubNodes((protocol, index) => (
+          (protocol === ETH) ? stalled() : usedUpTo({ [AE]: 1 })(protocol, index)
+        ));
+        release();
+
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+        expect(protocolsOf(accounts)).toEqual([AE, AE]);
+      });
     });
   });
 });
