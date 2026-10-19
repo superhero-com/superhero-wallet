@@ -27,4 +27,6 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: npx commitlint --from $BASE --to $HEAD --verbose
       - run: npx cross-env NODE_ENV=production npm run lint:vue && npm run lint:css
-      - run: npm test
+      - run: npm run typecheck:baseline
+      - run: npm run test:unit:coverage
+      - run: npm run test:e2e

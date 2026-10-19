@@ -12,6 +12,7 @@
     "lint:commit": "commitlint --from develop --verbose",
     "lint": "cross-env NODE_ENV=production npm run lint:commit && npm run lint:vue && npm run lint:css",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "typecheck:baseline": "node scripts/check-typecheck.mjs",
     "dev": "cross-env PLATFORM=web vite",
     "build": "cross-env PLATFORM=web vite build",
     "build:android": "cross-env PLATFORM=ionic vite build && npx cap sync android && npx cap open android",

@@ -195,22 +195,29 @@ describe('hashTypedData', () => {
       .toBe('0x062ca8914f730aef4bab59b6d3293a0f277037517a26aa70359bc08c4e485ca8');
   });
 
-  it('hashes many structs whose type has many dependencies in time', () => {
+  it('walks the type dependencies once, not once per struct', () => {
     // M(I[] items) I(D0 x) D0(D1 n) … D999()
     const types: Record<string, { name: string; type: string }[]> = {
       M: [{ name: 'items', type: 'I[]' }],
       I: [{ name: 'x', type: 'D0' }],
     };
     for (let i = 0; i < 1000; i += 1) types[`D${i}`] = i < 999 ? [{ name: 'n', type: `D${i + 1}` }] : [];
+    let walks = 0;
+    types.D500 = new Proxy(types.D500, {
+      get(target, key, receiver) {
+        if (key === 'forEach' || key === 'map') walks += 1;
+        return Reflect.get(target, key, receiver);
+      },
+    });
     const typedData = {
       types, primaryType: 'M', domain: {}, message: { items: Array(2000).fill({ x: null }) },
     };
 
-    const start = performance.now();
     expect(hashTypedData(typedData))
       .toBe('0x6165880510d231dcfa78b72d136794afc0ada6aba777662468335d6c2d312e4b');
-    // The wallet hashes before it asks the user, so a dapp must not be able to keep it busy
-    expect(performance.now() - start).toBeLessThan(1000);
+    // The wallet hashes before it asks the user, so a dapp must not be able to keep it busy.
+    // Encoding M and I each walk it twice; per struct it would be thousands.
+    expect(walks).toBeLessThanOrEqual(4);
   });
 
   it.each([

@@ -37,6 +37,8 @@ export default defineConfig({
       include: ['src/**/*.{ts,js,vue}'],
       exclude: ['src/**/*.d.ts', 'src/icons/**', 'src/types/**'],
       reporter: ['text-summary', 'lcov'],
+      // Raise these as coverage grows; they only stop it from dropping.
+      thresholds: { lines: 45, branches: 36 },
     },
     // Many third-party packages ship ESM that must be transformed.
     server: {
