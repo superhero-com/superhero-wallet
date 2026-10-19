@@ -90,6 +90,17 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
     expect(vsize - tx.virtualSize()).toBeLessThanOrEqual(tx.ins.length);
   });
 
+  it('uses exact koinu when float multiplication would cross the UTXO boundary', async () => {
+    const amount = 40_000_000.12345678;
+    const exactAmount = 4_000_000_012_345_678;
+    expect(Math.round(amount * 1e8)).toBe(exactAmount + 1);
+
+    // Exact conversion leaves the first UTXO sufficient; the legacy float conversion needs two.
+    mockUtxos([exactAmount + 192_000, 500_000]);
+
+    expect(await adapter.estimateVsize(amount, recipient, [1000], keys)).toEqual([192]);
+  });
+
   it('sizes a sweep with every UTXO and no change', async () => {
     mockUtxos([10_000_000, 50_000_000, 60_000_000]);
 
