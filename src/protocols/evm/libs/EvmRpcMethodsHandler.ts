@@ -315,6 +315,7 @@ export async function handleEvmRpcMethod(
     };
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
+    if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
     const network = Object.values(networks.value)
       .find(({ protocols }) => (
         (protocols[protocol] as any).chainId === Number(params?.chainId).toString()

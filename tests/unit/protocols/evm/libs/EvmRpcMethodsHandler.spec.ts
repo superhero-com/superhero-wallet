@@ -317,6 +317,19 @@ describe('handleEvmRpcMethod', () => {
       expect(response.error?.code).toBe(4902);
       expect(switchNetwork).not.toHaveBeenCalled();
     });
+
+    it('rejects a site that is not connected', async () => {
+      const response = await handleEvmRpcMethod(STRANGER, 'wallet_switchEthereumChain', { chainId: '0xaa36a7' });
+      expect(response).toEqual(UNAUTHORIZED);
+      expect(switchNetwork).not.toHaveBeenCalled();
+    });
+
+    it('switches for a WalletConnect session', async () => {
+      expect(await handleEvmRpcMethod(STRANGER, 'wallet_switchEthereumChain', {
+        chainId: '0xaa36a7',
+      }, 'Dapp', undefined, 'self-reported')).toEqual({ result: null });
+      expect(switchNetwork).toHaveBeenCalledWith('Testnet');
+    });
   });
 
   describe('personal_sign', () => {
