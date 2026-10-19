@@ -1,4 +1,4 @@
-import { METHODS } from '@aeternity/aepp-sdk';
+import { METHODS, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 
@@ -29,7 +29,7 @@ import {
 } from '@/constants';
 import { createAppData, getCleanModalOptions, watchUntilTruthy } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
-import { openPopup } from '@/offscreen/popupHandler';
+import { getSessionEncryptionKey, openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
 import migratePermissionsDropEmptyHost from '@/migrations/012-permissions-drop-empty-host';
 import { useAccounts } from '@/composables';
@@ -54,6 +54,12 @@ const permissions = useStorageRef<PermissionRegistry>(
     ],
   },
 );
+
+/**
+ * Signed without asking under a daily spend limit, which counts only an amount,
+ * a fee and a name fee. A contract call, for one, can spend more than that.
+ */
+const DAILY_LIMIT_TX_TAGS: (Tag | undefined)[] = [Tag.SpendTx, Tag.NameClaimTx];
 
 const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType }>> = {
   [METHODS.subscribeAddress]: {
@@ -208,10 +214,20 @@ export function usePermissions() {
 
     if (fullUrl) {
       if (
-        checkPermission(fullUrl, method, modalProps.tx)
-        && !(method === METHODS.sign && modalProps.protocol !== PROTOCOLS.aeternity)
+        // Ahead of `checkPermission`, which counts a transaction towards the daily limit
+        !(method === METHODS.sign && (
+          modalProps.protocol !== PROTOCOLS.aeternity
+          || !DAILY_LIMIT_TX_TAGS.includes(modalProps.tx?.tag)
+        ))
         // A host the dapp claims can't use a message signing right granted to the real one
         && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
+        // The background page keeps the keys after the wallet locks
+        && !(
+          method === METHODS.sign
+          && IS_OFFSCREEN_TAB
+          && !await getSessionEncryptionKey().catch(() => null)
+        )
+        && checkPermission(fullUrl, method, modalProps.tx)
       ) {
         try {
           await Promise.race(

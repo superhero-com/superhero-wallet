@@ -80,6 +80,14 @@ function assertAeppGivenAccounts(aeppRpcClientId?: string) {
   }
 }
 
+function getTxSigner(txBase64: Encoded.Transaction): string | undefined {
+  try {
+    return getTransactionSignerAddress(txBase64);
+  } catch {
+    return undefined;
+  }
+}
+
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
@@ -184,6 +192,11 @@ export class AeAccountHdWallet extends MemoryAccount {
         tx = undefined;
       }
       const wasConfirmationAsked = isDeepLinkUsed || isDappRequest(options);
+      // A connected aepp may sign under its daily limit, unlike a deep link, but only
+      // from the account that signs here, and a device can't sign without the modal
+      const mayUseDailyLimit = !!options?.aeppRpcClientId && !!account
+        && getTxSigner(txBase64) === account.address
+        && !isAccountAirGap(account) && account.type !== ACCOUNT_TYPES.ledger;
 
       /**
        * Filled in only when the confirmation modal actually ran and resolved -
@@ -199,7 +212,12 @@ export class AeAccountHdWallet extends MemoryAccount {
         const permissionGranted = await checkOrAskPermission(
           METHODS.sign,
           options?.aeppOrigin,
-          { ...options, txBase64, tx },
+          {
+            ...options,
+            txBase64,
+            tx,
+            ...(mayUseDailyLimit ? { protocol: PROTOCOLS.aeternity } : {}),
+          },
           (payload) => { modalResolution = payload; },
         );
         if (!permissionGranted) {

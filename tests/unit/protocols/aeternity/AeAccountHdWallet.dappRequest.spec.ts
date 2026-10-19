@@ -287,3 +287,34 @@ describe('a request of an aepp given no account', () => {
     expect(superSignTransaction).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('the daily spend limit of an aepp', () => {
+  it('applies to a connected aepp, not to a deep link', async () => {
+    await wallet().signTransaction(buildSpendTx(), {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any);
+    // @ts-ignore
+    (useDeepLinkApi as vi.Mock).mockReturnValue({ isDeepLinkUsed: true });
+    await wallet().signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN } as any);
+
+    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ protocol: PROTOCOLS.aeternity });
+    expect(checkOrAskPermission.mock.calls[1][2]).not.toHaveProperty('protocol');
+  });
+
+  it('is off for a Ledger account, which signs in the modal', async () => {
+    // @ts-ignore
+    (useAccounts as vi.Mock).mockReturnValue({
+      aeAccounts: ref([]),
+      getLastActiveProtocolAccount: vi.fn(() => ({
+        ...accountActive, type: 'ledger', secretKey: undefined,
+      })),
+    });
+
+    // The mocked device signs nothing
+    await expect(wallet().signTransaction(buildSpendTx(), {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any)).rejects.toBeInstanceOf(RpcRejectedByUserError);
+
+    expect(checkOrAskPermission.mock.calls[0][2]).not.toHaveProperty('protocol');
+  });
+});
