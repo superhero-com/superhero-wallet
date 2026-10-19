@@ -149,6 +149,53 @@ describe('background message senders', () => {
 
       expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBe(SESSION_KEY_BASE64);
     });
+
+    it('keeps the wallet unlocked once a wallet page opens before the timeout ends', async () => {
+      await loadListener();
+      vi.useFakeTimers();
+
+      await sendMessage(setSessionTimeout(1000), OFFSCREEN_DOCUMENT);
+      await sendMessage(setSessionTimeout(null), OFFSCREEN_DOCUMENT);
+      await vi.advanceTimersByTimeAsync(ONE_DAY);
+
+      expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBe(SESSION_KEY_BASE64);
+    });
+
+    it('stays awake while a wallet page is shown, so Firefox keeps count of them', async () => {
+      await loadListener();
+      vi.useFakeTimers();
+      const { getPlatformInfo } = browser.runtime;
+
+      await sendMessage(setSessionTimeout(null), OFFSCREEN_DOCUMENT);
+      await vi.advanceTimersByTimeAsync(40000);
+
+      expect(getPlatformInfo).toHaveBeenCalledTimes(2);
+    });
+
+    it('sleeps again once the timeout ends', async () => {
+      await loadListener();
+      vi.useFakeTimers();
+      const { getPlatformInfo } = browser.runtime;
+
+      await sendMessage(setSessionTimeout(1000), OFFSCREEN_DOCUMENT);
+      await vi.advanceTimersByTimeAsync(1000);
+      getPlatformInfo.mockClear();
+      await vi.advanceTimersByTimeAsync(ONE_DAY);
+
+      expect(getPlatformInfo).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('does not let a content script stop the timeout', async () => {
+      await loadListener();
+      vi.useFakeTimers();
+
+      await sendMessage(setSessionTimeout(1000), OFFSCREEN_DOCUMENT);
+      await sendMessage(setSessionTimeout(null), CONTENT_SCRIPT);
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBeNull();
+    });
   });
 
   describe('popups', () => {

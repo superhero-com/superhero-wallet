@@ -21,6 +21,7 @@ import {
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
   MODAL_RESET_WALLET,
+  RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
@@ -40,6 +41,8 @@ import {
   handleUnknownError,
   MobileEncryptionKeyMissingError,
   sessionEnd,
+  sessionHold,
+  sessionRelease,
   sessionStart,
   watchUntilTruthy,
 } from '@/utils';
@@ -244,6 +247,10 @@ export const useAuth = createCustomScopedComposable(() => {
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
         sessionStart(newEncryptionKey);
+        // Only a shown page keeps the session, not a hidden one or a dapp's confirmation popup.
+        if (!isAppActive.value || RUNNING_IN_POPUP) {
+          sessionRelease();
+        }
       } else {
         sessionEnd();
       }
@@ -975,6 +982,10 @@ export const useAuth = createCustomScopedComposable(() => {
         clearInterval(expirationTimeout);
         updateSessionExpiredFromDeadline();
         sessionExpiresAt = null;
+        // Before checking the key, so the background can't time it out after the check.
+        if (isAuthenticated.value && !isSessionExpired && !RUNNING_IN_POPUP) {
+          sessionHold();
+        }
 
         // If session exists user needs to stay logged in
         if (!isAuthenticating.value) {
@@ -987,6 +998,8 @@ export const useAuth = createCustomScopedComposable(() => {
           }
         }
       } else if (wasActive && !isActive) {
+        // Once no page is shown, the background times the session out with the current timeout.
+        sessionRelease();
         if (!isAutoLockEnabled.value) {
           isSessionExpired = false;
           sessionExpiresAt = null;

@@ -66,6 +66,7 @@ function installExtensionStubs() {
     onMessage: { addListener: vi.fn() },
     onDisconnect: { addListener: vi.fn() },
     postMessage: vi.fn(),
+    disconnect: vi.fn(),
   }));
   globalThis.browser.storage.session = makeSessionStorageStub();
   return globalThis.browser.storage.session;
@@ -639,6 +640,242 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.isUsingDefaultPassword.value).toBe(false);
       expect(authRestarted.encryptionKey.value).toBeDefined();
       expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auto-lock on resume', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function openUnlocked() {
+      const { useAuth } = await import('@/composables/auth');
+      const { useUi } = await import('@/composables/ui');
+      const auth = useAuth();
+      const ui = useUi();
+      ui.isAppActive.value = true;
+      await flushAsync();
+      await auth.setPassword('a-real-password', VALID_MNEMONIC);
+      return { auth, ui };
+    }
+
+    async function hideAndShow(ui, hiddenMs = 0) {
+      const { isAppActive } = ui;
+      // Frozen, so the deadline set on hiding is exactly `hiddenMs` before the return
+      const dateNow = vi.spyOn(Date, 'now').mockReturnValue(Date.now());
+      const now = Date.now();
+      isAppActive.value = false;
+      await nextTick();
+      dateNow.mockReturnValue(now + hiddenMs);
+      isAppActive.value = true;
+      await nextTick();
+    }
+
+    it('locks the web wallet hidden for longer than the timeout', async () => {
+      const { auth, ui } = await openUnlocked();
+
+      await hideAndShow(ui, 300000);
+
+      await vi.waitFor(() => expect(auth.isAuthenticated.value).toBe(false));
+    });
+
+    it('keeps the web wallet open when it comes back in time', async () => {
+      const { auth, ui } = await openUnlocked();
+
+      await hideAndShow(ui, 299999);
+      await flushAsync();
+
+      expect(auth.isAuthenticated.value).toBe(true);
+    });
+
+    it('locks the extension when the background dropped the session key meanwhile', async () => {
+      mockConstants({ IS_EXTENSION: true });
+      const session = installExtensionStubs();
+      const { auth, ui } = await openUnlocked();
+      await vi.waitFor(
+        () => expect(session.store.exportedEncryptionKey).toBeDefined(),
+        WAIT_FOR_CRYPTO,
+      );
+
+      // The session timeout ran out while no page was open.
+      delete session.store.exportedEncryptionKey;
+      await hideAndShow(ui);
+
+      await vi.waitFor(() => expect(auth.isAuthenticated.value).toBe(false));
+    });
+
+    describe('on the extension, while hidden', () => {
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      /** Session ports this page connected and hasn't disconnected yet. */
+      function heldPorts() {
+        return globalThis.browser.runtime.connect.mock.results
+          .map(({ value }) => value)
+          .filter(({ disconnect }) => !disconnect.mock.calls.length);
+      }
+
+      async function openUnlockedExtensionPage(constants = {}) {
+        mockConstants({ IS_EXTENSION: true, ...constants });
+        const session = installExtensionStubs();
+        const { auth, ui } = await openUnlocked();
+        await vi.waitFor(
+          () => expect(session.store.exportedEncryptionKey).toBeDefined(),
+          WAIT_FOR_CRYPTO,
+        );
+        return { auth, ui, session };
+      }
+
+      /**
+       * Returns a wait for the session key check of the next show, which may lock the page.
+       * It resolves to the count of session ports held when the check started.
+       */
+      function watchKeyCheck() {
+        const { subtle } = globalThis.crypto;
+        const importKey = subtle.importKey.bind(subtle);
+        let heldPortsAtCheck;
+        const spy = vi.spyOn(subtle, 'importKey').mockImplementation((...args) => {
+          heldPortsAtCheck ??= heldPorts().length;
+          return importKey(...args);
+        });
+        return async () => {
+          await vi.waitFor(() => expect(spy).toHaveBeenCalled());
+          await spy.mock.results[0].value;
+          await flushAsync();
+          return heldPortsAtCheck;
+        };
+      }
+
+      it('leaves the session to the background, keeping it past its own timeout', async () => {
+        const { auth, ui, session } = await openUnlockedExtensionPage();
+        expect(heldPorts()).toHaveLength(1);
+
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+        ui.isAppActive.value = false;
+        await nextTick();
+        await vi.advanceTimersByTimeAsync(+auth.secureLoginTimeoutDecrypted.value);
+
+        expect(heldPorts()).toHaveLength(0);
+        // Another page may still be shown, the background removes it once none is.
+        expect(session.store.exportedEncryptionKey).toBeDefined();
+      });
+
+      it.each([
+        ['keeps the session again when shown before the timeout', 299999, true],
+        ['locks when shown after the timeout, without keeping the session', 300000, false],
+      ])('%s', async (_, hiddenMs, isUnlocked) => {
+        const { auth, ui } = await openUnlockedExtensionPage();
+        const keyChecked = watchKeyCheck();
+
+        await hideAndShow(ui, hiddenMs);
+        // Held before the check, so the background can't time the key out in between.
+        expect(await keyChecked()).toBe(isUnlocked ? 1 : 0);
+
+        await vi.waitFor(() => {
+          expect(auth.isAuthenticated.value).toBe(isUnlocked);
+          expect(heldPorts()).toHaveLength(isUnlocked ? 1 : 0);
+        });
+      });
+
+      it.each([
+        ['stays unlocked when shown while another page still keeps the session', true],
+        ['locks when shown once the background timed the session out', false],
+      ])('a page unlocked while hidden %s', async (_, isKeyKept) => {
+        const { session } = await openUnlockedExtensionPage();
+
+        // Reopened in the background, unlocking with the session key.
+        vi.resetModules();
+        globalThis.browser.runtime.connect.mockClear();
+        const { useAuth } = await import('@/composables/auth');
+        const { useUi } = await import('@/composables/ui');
+        const reopened = useAuth();
+        const ui = useUi();
+        ui.isAppActive.value = false;
+        await vi.waitFor(() => expect(reopened.isAuthenticated.value).toBe(true), WAIT_FOR_CRYPTO);
+        await vi.waitFor(() => expect(heldPorts()).toHaveLength(0));
+
+        // Shown long after any timeout: whether the key ran out is the background's call.
+        vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 24 * 60 * 60 * 1000);
+        if (isKeyKept) {
+          const keyChecked = watchKeyCheck();
+          ui.isAppActive.value = true;
+          expect(await keyChecked()).toBe(1);
+        } else {
+          delete session.store.exportedEncryptionKey;
+          ui.isAppActive.value = true;
+        }
+
+        await vi.waitFor(() => {
+          expect(reopened.isAuthenticated.value).toBe(isKeyKept);
+          expect(heldPorts()).toHaveLength(isKeyKept ? 1 : 0);
+        });
+      });
+
+      it('leaves the session to the background from a dapp popup, even when shown', async () => {
+        const { ui } = await openUnlockedExtensionPage({ RUNNING_IN_POPUP: true });
+        const { SESSION_METHODS } = await import('@/constants');
+
+        await vi.waitFor(() => expect(heldPorts()).toHaveLength(0));
+        const [port] = globalThis.browser.runtime.connect.mock.results.map(({ value }) => value);
+        expect(port.postMessage).toHaveBeenCalledWith({ method: SESSION_METHODS.sessionKeyStored });
+        expect(port.postMessage.mock.invocationCallOrder[0])
+          .toBeLessThan(port.disconnect.mock.invocationCallOrder[0]);
+
+        const keyChecked = watchKeyCheck();
+        await hideAndShow(ui);
+        await keyChecked();
+        expect(heldPorts()).toHaveLength(0);
+      });
+
+      it('leaves the session to the background once a page unlocked while hidden passed the key on', async () => {
+        mockConstants({ IS_EXTENSION: true });
+        const session = installExtensionStubs();
+        const { useAuth } = await import('@/composables/auth');
+        const { useUi } = await import('@/composables/ui');
+        const { SESSION_METHODS } = await import('@/constants');
+        const auth = useAuth();
+        useUi().isAppActive.value = false;
+        await flushAsync();
+
+        await auth.setPassword('a-real-password', VALID_MNEMONIC);
+        await vi.waitFor(() => {
+          expect(session.store.exportedEncryptionKey).toBeDefined();
+          expect(heldPorts()).toHaveLength(0);
+        }, WAIT_FOR_CRYPTO);
+
+        // The offscreen tab learns about the key only through the port.
+        const [port] = globalThis.browser.runtime.connect.mock.results.map(({ value }) => value);
+        expect(port.postMessage).toHaveBeenCalledWith({ method: SESSION_METHODS.sessionKeyStored });
+        expect(port.postMessage.mock.invocationCallOrder[0])
+          .toBeLessThan(port.disconnect.mock.invocationCallOrder[0]);
+      });
+
+      it('leaves the session to the background after rotating a legacy password while hidden', async () => {
+        mockConstants({ IS_EXTENSION: true });
+        const session = installExtensionStubs();
+        const {
+          encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+        } = await import('@/utils/crypto');
+        const { WalletStorage } = await import('@/lib/WalletStorage');
+        const { STORAGE_KEYS } = await import('@/constants');
+        // Stored by the pre-upgrade "skip password" flow.
+        const salt = generateSalt();
+        const legacySalt = encodeBase64(salt);
+        const legacyKey = await generateEncryptionKey('testPassword123', salt);
+        WalletStorage.set(STORAGE_KEYS.encryptionSalt, legacySalt);
+        WalletStorage.set(STORAGE_KEYS.mnemonic, await encrypt(legacyKey, VALID_MNEMONIC));
+
+        const { useAuth } = await import('@/composables/auth');
+        const auth = useAuth(); // Unlocks with it and rotates it, never shown.
+
+        await vi.waitFor(() => {
+          expect(auth.isAuthenticated.value).toBe(true);
+          expect(WalletStorage.get(STORAGE_KEYS.encryptionSalt)).not.toBe(legacySalt);
+          expect(session.store.exportedEncryptionKey).toBeDefined();
+          expect(heldPorts()).toHaveLength(0);
+        }, WAIT_FOR_CRYPTO);
+      });
     });
   });
 
