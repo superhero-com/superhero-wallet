@@ -104,6 +104,7 @@ import {
   Encoding,
 } from '@aeternity/aepp-sdk';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import type { IFormModel } from '@/types';
@@ -120,6 +121,7 @@ import {
   useCurrencies,
   useInvites,
   useMaxAmount,
+  useModals,
 } from '@/composables';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -142,12 +144,14 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const router = useRouter();
+    const { t } = useI18n();
 
     const { getLastActiveProtocolAccount } = useAccounts();
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
     const { getAeSdk } = useAeSdk();
     const { claimInvite, removeInvite, handleInsufficientBalanceError } = useInvites();
+    const { openConfirmModal } = useModals();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -173,7 +177,16 @@ export default defineComponent({
 
     const address = computed(() => getAccountFromSecret(props.secretKey).address);
 
-    function deleteItem() {
+    async function deleteItem() {
+      try {
+        await openConfirmModal({
+          icon: 'warning',
+          title: t('pages.invite.delete-confirm-title'),
+          msg: t('pages.invite.delete-confirm-msg'),
+        });
+      } catch {
+        return;
+      }
       removeInvite(props.secretKey);
     }
 

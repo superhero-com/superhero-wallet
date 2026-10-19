@@ -3,7 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { ref } from 'vue';
 import BigNumber from 'bignumber.js';
-import { InvalidTxError, TxTimedOutError } from '@aeternity/aepp-sdk';
+import { AE_AMOUNT_FORMATS, InvalidTxError, TxTimedOutError } from '@aeternity/aepp-sdk';
 import en from '@/popup/locales/en-US.json';
 
 /**
@@ -152,8 +152,9 @@ describe('Invite page', () => {
 
     const wrapper = await generateInvite();
 
-    const [[amount, fundedAddress]] = spend.mock.calls;
-    expect(amount).toBe('1');
+    const [[, fundedAddress]] = spend.mock.calls;
+    expect(spend).toHaveBeenCalledTimes(1);
+    expect(spend).toHaveBeenCalledWith('1', fundedAddress, { denomination: AE_AMOUNT_FORMATS.AE });
     expect(storedAddressesWhenSent).toEqual([fundedAddress]);
     expect(await getStoredInviteAddresses()).toEqual([fundedAddress]);
     expect(await getShownInviteAddresses(wrapper)).toEqual([fundedAddress]);

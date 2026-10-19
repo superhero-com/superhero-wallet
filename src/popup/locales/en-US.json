@@ -1380,7 +1380,9 @@
       "insufficient-invite-balance": "This invite link expired and the AE coins are already claimed.",
       "tip-attached": "Gift card amount",
       "top-up-with": "Top up with",
-      "delete": "Delete"
+      "delete": "Delete",
+      "delete-confirm-title": "Delete gift card?",
+      "delete-confirm-msg": "The gift card's key will be removed from this wallet, and any coins still on it will be lost. The balance shown is for the current network and reads 0 when it can't be loaded."
     },
     "permissions": {
       "login": "Don't ask for login requests",

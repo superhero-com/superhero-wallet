@@ -1373,7 +1373,9 @@
       "insufficient-invite-balance": "此邀请链接已过期，AE 代币已被领取。",
       "tip-attached": "礼品卡金额",
       "top-up-with": "充值方式",
-      "delete": "删除"
+      "delete": "删除",
+      "delete-confirm-title": "删除礼品卡？",
+      "delete-confirm-msg": "礼品卡的密钥将从此钱包中删除，其中剩余的代币将会丢失。显示的余额是当前网络上的余额，无法加载时显示为 0。"
     },
     "permissions": {
       "login": "不要请求登录",
