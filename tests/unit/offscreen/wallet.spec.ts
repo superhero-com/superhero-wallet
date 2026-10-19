@@ -315,6 +315,62 @@ describe('offscreen wallet connections', () => {
     });
   });
 
+  describe('popup port', () => {
+    let popupHandler;
+    let popupCount;
+
+    beforeEach(async () => {
+      vi.doUnmock('@/offscreen/popupHandler');
+      const extensionBrowser = (global as any).browser;
+      const wallet = (await import('@/offscreen/wallet'));
+      popupHandler = await import('@/offscreen/popupHandler');
+      (global as any).browser = extensionBrowser;
+      await wallet.init();
+
+      popupCount = 0;
+      extensionBrowser.runtime.sendMessage.mockImplementation(async ({ method }) => {
+        if (method !== 'openPopup') return undefined;
+        popupCount += 1;
+        return { id: `popup-${popupCount}`, props: {} };
+      });
+    });
+
+    async function openPopupWindow() {
+      const id = `popup-${popupCount + 1}`;
+      const request = popupHandler.openPopup('connect', 'https://dapp.example', {});
+      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      const port = createPort();
+      port.name = CONNECTION_TYPES.POPUP;
+      port.sender.url = `chrome-extension://test-extension-id/index.html?id=${id}`;
+      port.postMessage = vi.fn();
+      await onConnectListener(port);
+      return {
+        id, request, sendToOffscreen: messageListener, close: disconnectListener,
+      };
+    }
+
+    it('rejects the request of a popup closed without an answer', async () => {
+      const { id, request, close } = await openPopupWindow();
+      const onRejected = vi.fn();
+      request.catch(onRejected);
+
+      close();
+      await vi.waitFor(() => expect(onRejected).toHaveBeenCalled());
+      expect(popupHandler.getPopup(id)).toBeUndefined();
+    });
+
+    it('keeps the answer of a popup that closes once answered', async () => {
+      const {
+        id, request, sendToOffscreen, close,
+      } = await openPopupWindow();
+      await sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      close();
+
+      await expect(request).resolves.toBe('confirmed');
+      expect(popupHandler.getPopup(id)).toBeUndefined();
+    });
+  });
+
   describe('disconnect()', () => {
     function setupConnectedClient(overrides: Partial<{
       sendMessage: vi.Mock;

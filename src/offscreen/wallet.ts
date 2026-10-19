@@ -122,7 +122,11 @@ export async function init() {
           }
         });
 
-        port.onDisconnect.addListener(() => removePopup(id!));
+        port.onDisconnect.addListener(() => {
+          // Settles the request of a popup closed without an answer
+          getPopup(id!)?.actions.reject();
+          removePopup(id!);
+        });
         break;
       }
       case CONNECTION_TYPES.SIDE_PANEL: {
