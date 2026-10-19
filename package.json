@@ -32,6 +32,7 @@
     "test:unit:coverage": "vitest run --coverage",
     "cy:run": "cypress run",
     "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true NODE_ENV=development start-server-and-test serve http://localhost:8080 cy:run",
+    "test:e2e:extension": "node scripts/build-extension.mjs chrome && vitest run --config vitest.e2e-extension.config.ts",
     "test": "npm run test:unit && npm run test:e2e",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build:extension",
     "gen:capacitor-assets": "npx @capacitor/assets generate --iconBackgroundColor '#141414' --splashBackgroundColor '#141414' --splashBackgroundColorDark '#141414' --android --ios ",
