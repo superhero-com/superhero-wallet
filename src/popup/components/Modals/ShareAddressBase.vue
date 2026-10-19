@@ -167,15 +167,20 @@ export default defineComponent({
     const selectedAsset = ref<IAsset | IToken | null>(null);
 
     function getAccountLinkQuery(account: string): Record<string, string> {
-      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      const { protocol } = props;
+      const adapter = ProtocolAdapterFactory.getAdapter(protocol);
       const contractId = selectedAsset.value?.contractId;
-      // The token also tells the opening wallet which protocol to switch to
       const token = (!contractId || contractId === adapter.coinContractId)
         ? adapter.getUrlTokenKey()
         : contractId;
       return (amount.value && +amount.value > 0)
-        ? { token, amount: amount.value.toString(), account }
-        : { token, account };
+        ? {
+          protocol,
+          token,
+          amount: amount.value.toString(),
+          account,
+        }
+        : { protocol, token, account };
     }
 
     function getAccountLink(address: string | undefined) {
