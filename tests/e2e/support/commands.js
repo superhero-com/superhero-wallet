@@ -250,7 +250,7 @@ Cypress.Commands.add('goBack', () => {
 });
 
 Cypress.Commands.add('enterAddress', (address) => {
-  cy.get('[data-cy=address] [data-cy=input]').clear().type(address);
+  cy.get('[data-cy=address] [data-cy=textarea]').clear().type(address);
 });
 
 Cypress.Commands.add(
