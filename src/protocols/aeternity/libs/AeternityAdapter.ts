@@ -177,7 +177,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       return aettosToAe(balanceInAettos);
     } catch (e) {
       setAeNodeError(true);
-      return '0';
+      throw e;
     }
   }
 

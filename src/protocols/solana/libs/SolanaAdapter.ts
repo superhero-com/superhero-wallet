@@ -205,13 +205,9 @@ export class SolanaAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchBalance(address: AccountAddress): Promise<string> {
-    try {
-      const conn = this.getConnection();
-      const balance = await conn.getBalance(new PublicKey(address as string));
-      return (balance / LAMPORTS_PER_SOL).toString();
-    } catch (e) {
-      return '0';
-    }
+    const conn = this.getConnection();
+    const balance = await conn.getBalance(new PublicKey(address as string));
+    return (balance / LAMPORTS_PER_SOL).toString();
   }
 
   override isAccountAddressValid(address: AccountAddress) {
