@@ -160,8 +160,10 @@ export function useInAppBrowser() {
     }
 
     async function startSession(newSession: ISession, isNewDocument: boolean) {
+      // The page can claim to be the same document, but not the origin
+      const isSameDocument = !isNewDocument && session?.origin === newSession.origin;
       session = newSession;
-      if (!isNewDocument && aeppClient) return;
+      if (isSameDocument && aeppClient) return;
       await connectAepp(newSession.origin);
       evmState = await readEvmState(newSession.origin);
     }
