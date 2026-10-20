@@ -377,6 +377,23 @@ describe('useInAppBrowser', () => {
       expect(handleEvmRpcMethod).not.toHaveBeenCalled();
       expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
+
+    it('does not hand the aepp connection to a page of another origin', async () => {
+      const dappPage = await openDapp();
+      const { aepp } = await connectAepp(dappPage);
+      await aepp.subscribeAddress(SUBSCRIPTION_TYPES.subscribe, 'connected');
+
+      page = createPage(EVIL_URL);
+      // Defined before the provider is injected, to claim the same document
+      page.superheroInAppBrowser = {
+        connect: (token) => page.cordova_iab.postMessage(
+          JSON.stringify({ kind: 'ready', isNew: false, token }),
+        ),
+      };
+      listeners.loadstop({ url: EVIL_URL });
+
+      await vi.waitFor(() => expect(walletCallbacks.onDisconnect).toHaveBeenCalledOnce());
+    });
   });
 
   describe('native browser', () => {

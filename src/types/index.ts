@@ -390,6 +390,8 @@ export interface IPermission {
   transactionSignLimit: number;
   /** Amount spent during that day */
   transactionSignSpent: number;
+  /** The scheme of the page it was given to, e.g. `https:` */
+  protocol?: string;
 }
 
 /**

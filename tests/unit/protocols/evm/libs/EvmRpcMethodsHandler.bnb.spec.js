@@ -95,13 +95,15 @@ describe('handleEvmRpcMethod - modal app', () => {
     vi.resetModules();
     checkOrAskPermission.mockReset().mockResolvedValue(true);
     // The mocks above miss the module the setup file already loaded, so import it fresh
+    // Stored by the connect popup
+    const permissions = { value: { 'dapp.example': { host: 'dapp.example' } } };
     vi.doMock('@/composables', () => ({
       usePermissions: () => ({
         checkPermission: () => false,
         checkOrAskPermission,
         removePermission: vi.fn(),
-        // Stored by the connect popup
-        permissions: { value: { 'dapp.example': { host: 'dapp.example' } } },
+        permissions,
+        getPermissionForUrl: (url) => permissions.value[new URL(url).host],
       }),
       useAccounts: () => ({
         activeAccount: { value: account },

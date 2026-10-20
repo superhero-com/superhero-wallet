@@ -126,6 +126,13 @@ WalletStorage.set(STORAGE_KEYS.permissions, {
     name: 'Dapp',
     address: true,
   },
+  'secure.example': {
+    ...PERMISSION_DEFAULTS,
+    host: 'secure.example',
+    name: 'Secure',
+    address: true,
+    protocol: 'https:',
+  },
 });
 
 await import('@/protocols/registerAdapters');
@@ -230,6 +237,27 @@ describe('eth_sendTransaction of a dapp', () => {
     expect(response).toEqual({ error: { code: 4001, message: 'User have rejected the request' } });
     expect(getNodeRequests('eth_getTransactionCount')).toEqual([]);
     expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
+  });
+
+  it('treats the http page of a site connected over https as not connected', async () => {
+    const { from } = getChain(PROTOCOLS.avalanche);
+
+    expect(await handleEvmRpcRequest('http://secure.example', 'eth_accounts', [], 'Dapp', 'eip155:43114'))
+      .toEqual({ result: [] });
+    expect(await handleEvmRpcRequest('http://secure.example', 'eth_sendTransaction', [{ from, ...TX }], 'Dapp', 'eip155:43114'))
+      .toMatchObject({ error: { code: 4100 } });
+    expect(await handleEvmRpcRequest('https://secure.example', 'eth_accounts', [], 'Dapp', 'eip155:43114'))
+      .toEqual({ result: [from] });
+    expect(openModal).not.toHaveBeenCalled();
+  });
+
+  it('keeps the connection of a site over https when its http page revokes', async () => {
+    const { from } = getChain(PROTOCOLS.avalanche);
+
+    expect(await handleEvmRpcRequest('http://secure.example', 'wallet_revokePermissions', [{ eth_accounts: {} }]))
+      .toEqual({ result: null });
+    expect(await handleEvmRpcRequest('https://secure.example', 'eth_accounts', [], 'Dapp', 'eip155:43114'))
+      .toEqual({ result: [from] });
   });
 
   it('returns the error of the node that refused the transaction', async () => {

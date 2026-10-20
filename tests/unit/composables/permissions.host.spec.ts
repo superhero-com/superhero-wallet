@@ -110,4 +110,54 @@ describe('usePermissions - dapp host', () => {
       expect(openModalMock).toHaveBeenCalledWith(MODAL_MESSAGE_SIGN, expect.anything());
     });
   });
+
+  describe('connecting a host with a standing permission', () => {
+    beforeEach(() => {
+      vi.doMock('@/composables/accounts', () => ({
+        useAccounts: () => ({ activeAccount: { value: { address: '0x1' } } }),
+      }));
+    });
+
+    afterEach(() => {
+      vi.doUnmock('@/composables/accounts');
+    });
+
+    async function askToConnect(url: string, protocol?: string) {
+      const { addPermission, checkOrAskPermission } = await loadPermissions();
+      addPermission({
+        ...PERMISSION_DEFAULTS, host: new URL(url).host, name: HOST, address: true, protocol,
+      });
+      return checkOrAskPermission(METHODS.subscribeAddress, url);
+    }
+
+    it.each([
+      ['the scheme it was given over', 'https:', `https://${HOST}/`],
+      ['any scheme, given by an older version that kept none', undefined, `http://${HOST}/`],
+      ['a port with the scheme it was given over', 'http:', 'http://localhost:8080/'],
+      ['the https page of a site connected over http', 'http:', `https://${HOST}/`],
+    ])('connects without asking from %s', async (_, protocol, url) => {
+      expect(await askToConnect(url, protocol)).toBe(true);
+      expect(openModalMock).not.toHaveBeenCalled();
+    });
+
+    it('asks the http page of a host connected over https', async () => {
+      const { addPermission, checkOrAskPermission } = await loadPermissions();
+      addPermission({
+        ...PERMISSION_DEFAULTS, host: HOST, name: HOST, address: true, protocol: 'https:',
+      });
+
+      await checkOrAskPermission(METHODS.subscribeAddress, `http://${HOST}/`);
+      expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.anything());
+    });
+
+    it('asks another port of a host', async () => {
+      const { addPermission, checkOrAskPermission } = await loadPermissions();
+      addPermission({
+        ...PERMISSION_DEFAULTS, host: HOST, name: HOST, address: true, protocol: 'https:',
+      });
+
+      await checkOrAskPermission(METHODS.subscribeAddress, `https://${HOST}:8443/`);
+      expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.anything());
+    });
+  });
 });

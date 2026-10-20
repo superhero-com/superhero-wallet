@@ -45,37 +45,84 @@ describe('inject.ts accountsChanged propagation', () => {
     // Load script
     vi.resetModules();
     await import('@/content-scripts/inject');
-
-    // Simulate an RPC request that will store the source under connectedDapps
-    const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
-    // Await the async handler to ensure connectedDapps is populated
-    await Promise.resolve().then(() => messageHandler({
-      data: { method: 'eth_chainId', params: [] },
-      origin,
-      source: window,
-    }));
   });
 
   afterEach(async () => {
     vi.restoreAllMocks();
   });
 
-  it('forwards accountsChanged to connected dapp source', async () => {
-    await Promise.resolve();
-    // Now simulate background pushing accountsChanged
+  const flushPromises = () => new Promise((resolve) => { setTimeout(resolve); });
+
+  /** The page asks the wallet, which answers with `response` */
+  async function pageRequest(method: string, response: object) {
+    ((global as any).browser.runtime.sendMessage as vi.Mock).mockResolvedValueOnce(response);
+    const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
+    await messageHandler({
+      data: { method, params: [] },
+      origin,
+      source: window,
+    });
+    await flushPromises();
+  }
+
+  async function emitWalletEvent(method: string, result: unknown) {
     const runtimeListener = ((global as any).browser.runtime.onMessage.addListener as vi.Mock)
       .mock.calls[0][0];
-    await runtimeListener({ method: 'accountsChanged', result: ['0xabc'] });
-    const { calls } = postMessageSpy.mock;
-    const found = calls.some((args) => (
-      args[0]?.superheroWalletApproved === true
-      && args[0]?.method === 'accountsChanged'
-      && Array.isArray(args[0]?.result)
-      && args[0]?.result[0] === '0xabc'
-      && args[0]?.type === 'result'
-      && args[1] === origin
-    ));
-    expect(found).toBe(true);
+    await runtimeListener({ method, result });
+  }
+
+  const getPostedEvents = (method: string) => postMessageSpy.mock.calls
+    .filter(([data]) => data?.method === method);
+
+  it.each([
+    ['eth_requestAccounts'],
+    ['eth_accounts'],
+  ])('forwards accountsChanged to a page that got accounts from %s', async (method) => {
+    await pageRequest(method, { result: ['0xabc'] });
+
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+
+    expect(getPostedEvents('accountsChanged')).toEqual([[
+      expect.objectContaining({ result: ['0xdef'], superheroWalletApproved: true, type: 'result' }),
+      origin,
+    ]]);
+  });
+
+  it.each([
+    ['only asked for the chain id', [
+      ['eth_chainId', { result: '0x1' }],
+    ]],
+    ['got no accounts', [
+      ['eth_accounts', { result: [] }],
+    ]],
+    ['was refused the accounts', [
+      ['eth_requestAccounts', { error: { code: 4001, message: 'User have rejected the request' } }],
+    ]],
+    ['revoked its permissions', [
+      ['eth_requestAccounts', { result: ['0xabc'] }],
+      ['wallet_revokePermissions', { result: null }],
+    ]],
+  ])('does not forward accountsChanged to a page that %s', async (_label, requests) => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [method, response] of requests) {
+      // eslint-disable-next-line no-await-in-loop
+      await pageRequest(method, response);
+    }
+
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+
+    expect(getPostedEvents('accountsChanged')).toHaveLength(0);
+  });
+
+  it('forwards chainChanged to a page without accounts', async () => {
+    await pageRequest('eth_chainId', { result: '0x1' });
+
+    await emitWalletEvent('chainChanged', '0x38');
+
+    expect(getPostedEvents('chainChanged')).toEqual([[
+      expect.objectContaining({ result: '0x38', superheroWalletApproved: true, type: 'result' }),
+      origin,
+    ]]);
   });
 
   it.each([

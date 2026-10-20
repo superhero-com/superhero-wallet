@@ -14,6 +14,8 @@ import {
 import browser from 'webextension-polyfill';
 
 const connectedDapps: Record<string, any> = {};
+/** Whether the wallet gave this page accounts, so it may hear when they change */
+let hasAccounts = false;
 
 window.browser = browser;
 
@@ -56,6 +58,15 @@ const runContentScript = () => {
     if (!connectedDapps[event.origin]) {
       connectedDapps[event.origin] = event.source;
     }
+    if (
+      (method === ETH_RPC_METHODS.requestAccounts || method === ETH_RPC_METHODS.getAccounts)
+      && Array.isArray(result) && result.length
+    ) {
+      hasAccounts = true;
+    }
+    if (method === ETH_RPC_METHODS.revokePermissions && !error) {
+      hasAccounts = false;
+    }
     event.source.postMessage({
       jsonrpc: '2.0',
       result,
@@ -97,7 +108,7 @@ const runContentScript = () => {
   browser.runtime.onMessage.addListener(({ method, result }: any): undefined => {
     if (
       method === ETH_RPC_WALLET_EVENTS.chainChanged
-      || method === ETH_RPC_WALLET_EVENTS.accountsChanged
+      || (method === ETH_RPC_WALLET_EVENTS.accountsChanged && hasAccounts)
     ) {
       Object.entries(connectedDapps).forEach(([origin, source]) => {
         source.postMessage({

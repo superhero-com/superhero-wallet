@@ -110,7 +110,7 @@
           v-text="$t('pages.connectConfirm.ensureNetwork')"
         />
 
-        <div>
+        <div v-if="!isSelfReported">
           <CheckBox
             v-model="rememberMe"
             class="remember-me"
@@ -236,7 +236,7 @@ export default defineComponent({
       sender,
       setPopupProps,
     } = usePopupProps();
-    const { permissions, addPermission } = usePermissions();
+    const { addPermission, getPermissionForUrl } = usePermissions();
 
     const accessLabels: Record<ConnectPermission, any> = {
       [CONNECT_PERMISSIONS.address]: {
@@ -295,10 +295,14 @@ export default defineComponent({
       selectedAccount.value = getAccountByProtocolAndAddress(protocol as Protocol, address);
     }
 
+    // Not one given to a more secure page: an `http:` page can't take what `https:` was given
     const permission = computed(() => {
-      const host = popupProps.value?.app?.host;
-      return (host) ? permissions.value[host] : undefined;
+      const href = popupProps.value?.app?.href;
+      return (href) ? getPermissionForUrl(href) : undefined;
     });
+
+    // A WalletConnect dapp's permission is never saved, so there is nothing to remember
+    const isSelfReported = computed(() => popupProps.value?.app?.originSource === 'self-reported');
 
     const trustedDapp = computed(() => {
       const { href, originSource } = popupProps.value?.app || {};
@@ -332,7 +336,8 @@ export default defineComponent({
     );
 
     function confirm() {
-      if (popupProps.value?.app?.host) {
+      // A WalletConnect session is approved by itself, apart from the site it claims to be
+      if (popupProps.value?.app?.host && !isSelfReported.value) {
         const { originSource, ...app } = popupProps.value.app;
         /**
          * TODO: When a user disconnects, set the `rememberMe` permission to false
@@ -345,6 +350,8 @@ export default defineComponent({
           ...permission.value,
           name: permission.value?.name || app.name || app.host,
           address: rememberMe.value,
+          // Not the scheme of the permission it replaces
+          protocol: app.protocol,
         });
       }
       if (selectedAccount.value) {
@@ -366,6 +373,7 @@ export default defineComponent({
 
     return {
       rememberMe,
+      isSelfReported,
       accessList,
       popupProps,
       activeAccount,

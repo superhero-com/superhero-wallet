@@ -30,7 +30,15 @@
  * modal was shown. `checkTransactionSignLimit` itself is exercised directly against
  * the real `usePermissions()` singleton and real storage.
  */
-import { METHODS } from '@aeternity/aepp-sdk';
+import {
+  AccountMemory,
+  Encoding,
+  METHODS,
+  Tag,
+  buildTx as buildRawTx,
+  encode,
+  unpackTx,
+} from '@aeternity/aepp-sdk';
 
 const HOST = 'dapp.example';
 const AETTO = 1; // smallest aettos unit
@@ -206,18 +214,15 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
     });
   });
 
-  describe('non-aeternity protocol never hits the silent auto-sign fast path', () => {
+  describe('signing an aepp transaction under the daily limit', () => {
     /**
-     * `checkTransactionSignLimit` itself has no notion of "protocol" - it only does
-     * aettos accounting. The actual guarantee that non-aeternity signing requests
-     * never skip the confirmation modal lives one level up, in `checkOrAskPermission`
-     * (`modalProps.protocol !== PROTOCOLS.aeternity` short-circuits the fast path even
-     * when `checkTransactionSignLimit`/`checkPermission` would have said "yes, within
-     * budget"). Exercising that guarantee means going through `checkOrAskPermission`,
-     * so `@/composables/modals` and `@/composables/accounts` are mocked here (specific
-     * submodules, not the barrel) purely to observe whether a modal was shown.
+     * Through `checkOrAskPermission` with the props `AeAccountHdWallet.signTransaction`
+     * passes, so `@/composables/modals` and `@/composables/accounts` are mocked
+     * (specific submodules, not the barrel) to observe whether a modal was shown.
      */
     const openModalMock = vi.fn();
+    const SENDER = AccountMemory.generate().address;
+    const RECIPIENT = AccountMemory.generate().address;
 
     beforeEach(() => {
       openModalMock.mockReset();
@@ -228,7 +233,7 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       }));
       vi.doMock('@/composables/accounts', async (importOriginal) => ({
         ...(await importOriginal()),
-        useAccounts: () => ({ activeAccount: { value: { address: 'ak_2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' } } }),
+        useAccounts: () => ({ activeAccount: { value: { address: SENDER } } }),
       }));
     });
 
@@ -237,33 +242,144 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       vi.doUnmock('@/composables/accounts');
     });
 
-    async function askToSign(protocol) {
+    function buildTx(tag) {
+      const fields = {
+        [Tag.SpendTx]: { senderId: SENDER, recipientId: RECIPIENT, amount: 2 * ONE_AE_IN_AETTOS },
+        [Tag.ContractCallTx]: {
+          callerId: SENDER,
+          contractId: encode(new Uint8Array(32), Encoding.ContractAddress),
+          amount: 2 * ONE_AE_IN_AETTOS,
+          gasLimit: 1e5,
+          gasPrice: 1e9,
+          callData: 'cb_KxFE1kQfP4oEp9E=',
+        },
+        [Tag.NameClaimTx]: {
+          accountId: SENDER,
+          name: 'superherowallettest.chain',
+          nameSalt: 1,
+          // The minimum for the name: 0.0987 AE
+          nameFee: '98700000000000000',
+        },
+      }[tag];
+      return buildRawTx({
+        tag, fee: 2e14, nonce: 1, ...fields,
+      });
+    }
+
+    /** As `AeAccountHdWallet.signTransaction` asks to sign an aepp's transaction */
+    async function askToSign(txBase64, { protocol, limit = 100, spent = 0 } = {}) {
       vi.resetModules();
       localStorage.clear();
       const { usePermissions: useFreshPermissions } = await import('@/composables/permissions');
       const permissions = useFreshPermissions();
       permissions.resetPermissions();
-      permissions.addPermission(buildPermission({ transactionSignLimit: 100 }));
+      permissions.addPermission(buildPermission({
+        transactionSignLimit: limit,
+        transactionSignSpent: spent,
+      }));
 
-      return permissions.checkOrAskPermission(
+      const isSigned = await permissions.checkOrAskPermission(
         METHODS.sign,
         `https://${HOST}/`,
-        { tx: { amount: 1 * ONE_AE_IN_AETTOS }, protocol },
+        {
+          onAccount: SENDER,
+          aeppOrigin: `https://${HOST}`,
+          ...protocol ? { aeppRpcClientId: 'client-id', protocol } : {},
+          txBase64,
+          tx: unpackTx(txBase64),
+        },
       );
+      return { isSigned, spent: permissions.permissions.value[HOST].transactionSignSpent };
     }
 
-    it('auto-signs silently (no modal) for aeternity when within the daily limit', async () => {
-      const { PROTOCOLS } = await import('@/constants');
-      await askToSign(PROTOCOLS.aeternity);
+    it('signs a spend of a connected aepp without a modal, and counts it', async () => {
+      const result = await askToSign(buildTx(Tag.SpendTx), { protocol: 'aeternity' });
 
+      // The amount and the fee
+      expect(result).toEqual({ isSigned: true, spent: 2.0002 });
       expect(openModalMock).not.toHaveBeenCalled();
     });
 
-    it('always shows the confirmation modal for a non-aeternity protocol, even within the daily limit', async () => {
-      const { PROTOCOLS } = await import('@/constants');
-      await askToSign(PROTOCOLS.ethereum);
+    it('signs a name claim of a connected aepp without a modal, and counts its name fee', async () => {
+      const result = await askToSign(buildTx(Tag.NameClaimTx), { protocol: 'aeternity' });
 
-      expect(openModalMock).toHaveBeenCalled();
+      // The name fee and the fee
+      expect(result).toEqual({ isSigned: true, spent: 0.0989 });
+      expect(openModalMock).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['comes by a deep link, which names no protocol', 'SpendTx', undefined, 0],
+      ['spends over the limit', 'SpendTx', 'aeternity', 99],
+      ['calls a contract, which can spend more than it shows', 'ContractCallTx', 'aeternity', 0],
+      ['is for another protocol', 'SpendTx', 'ethereum', 0],
+    ])('asks to sign a transaction that %s, and counts nothing', async (_, tagName, protocol, spent) => {
+      const result = await askToSign(buildTx(Tag[tagName]), { protocol, spent });
+
+      expect(result).toEqual({ isSigned: true, spent });
+      expect(openModalMock).toHaveBeenCalledOnce();
+    });
+
+    describe('in the background page of the extension', () => {
+      /** It keeps the keys after the wallet locks, so only the session key tells it's unlocked */
+      const openPopupMock = vi.fn();
+      const getSessionEncryptionKeyMock = vi.fn();
+
+      beforeEach(() => {
+        openPopupMock.mockReset().mockResolvedValue({});
+        vi.doMock('@/constants', async (importOriginal) => ({
+          ...(await importOriginal()),
+          IS_OFFSCREEN_TAB: true,
+        }));
+        vi.doMock('@/offscreen/popupHandler', () => ({
+          openPopup: openPopupMock,
+          getSessionEncryptionKey: getSessionEncryptionKeyMock,
+        }));
+      });
+
+      afterEach(() => {
+        vi.doUnmock('@/constants');
+        vi.doUnmock('@/offscreen/popupHandler');
+      });
+
+      it('signs a spend under the limit while the wallet is unlocked', async () => {
+        getSessionEncryptionKeyMock.mockResolvedValue('session-key');
+
+        const result = await askToSign(buildTx(Tag.SpendTx), { protocol: 'aeternity' });
+
+        expect(result).toEqual({ isSigned: true, spent: 2.0002 });
+        expect(openPopupMock).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['locked', () => getSessionEncryptionKeyMock.mockResolvedValue(null)],
+        ['unreachable', () => getSessionEncryptionKeyMock.mockRejectedValue(new Error('No receiver'))],
+      ])('asks to sign a spend under the limit while the wallet is %s, and counts nothing', async (_, setSession) => {
+        setSession();
+
+        const result = await askToSign(buildTx(Tag.SpendTx), { protocol: 'aeternity' });
+
+        expect(result).toEqual({ isSigned: true, spent: 0 });
+        expect(openPopupMock).toHaveBeenCalledOnce();
+      });
+
+      it.each([
+        ['signs without a popup while the wallet is unlocked', 'session-key', 0],
+        ['asks in a popup while the wallet is locked', null, 1],
+      ])('for a site allowed to sign messages, %s', async (_, sessionKey, popups) => {
+        getSessionEncryptionKeyMock.mockResolvedValue(sessionKey);
+        vi.resetModules();
+        localStorage.clear();
+        const { usePermissions: useFreshPermissions } = await import('@/composables/permissions');
+        const permissions = useFreshPermissions();
+        permissions.resetPermissions();
+        permissions.addPermission(buildPermission({ messageSign: true }));
+
+        expect(await permissions.checkOrAskPermission(METHODS.signMessage, `https://${HOST}/`, {
+          message: 'hello',
+        })).toBe(true);
+        expect(openPopupMock).toHaveBeenCalledTimes(popups);
+      });
     });
   });
 });

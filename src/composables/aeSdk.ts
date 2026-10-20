@@ -72,6 +72,8 @@ const isAeNodeError = ref(false);
 
 /** List of connected dapps */
 const aeppInfo: Record<string, AeppInfoData> = {};
+/** The connected dapps the user let see the accounts */
+const aeppsGivenAccounts = new Set<string>();
 
 let dryAeSdk: AeSdk;
 
@@ -228,6 +230,7 @@ export function useAeSdk() {
         },
         onDisconnect(aeppId) {
           delete aeppInfo[aeppId];
+          aeppsGivenAccounts.delete(aeppId);
         },
         async onSubscription(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
@@ -251,6 +254,7 @@ export function useAeSdk() {
               // denial, so report it as such instead of `RpcRejectedByUserError`.
               return Promise.reject(new RpcInternalError());
             }
+            aeppsGivenAccounts.add(aeppId);
             return account.address;
           }
           return Promise.reject(new RpcRejectedByUserError());
@@ -267,6 +271,7 @@ export function useAeSdk() {
               () => aeAccounts.value.length,
               ACCOUNT_RESTORE_TIMEOUT,
             );
+            aeppsGivenAccounts.add(aeppId);
             // The SDK answers with `addresses()`, the æternity ones only
             return undefined;
           }
@@ -355,6 +360,11 @@ export function useAeSdk() {
     }
   }
 
+  /** Whether the user let the dapp subscribe to, or list, the accounts */
+  function isAeppGivenAccounts(aeppId: string) {
+    return aeppsGivenAccounts.has(aeppId);
+  }
+
   async function waitTransactionMined(hash: Encoded.TxHash) {
     const aeSdkLocal = await getAeSdk();
     return aeSdkLocal.poll(hash);
@@ -396,6 +406,7 @@ export function useAeSdk() {
     createNodeInstance,
     ensureNodeNetworkId,
     disconnectDapps,
+    isAeppGivenAccounts,
     waitTransactionMined,
   };
 }

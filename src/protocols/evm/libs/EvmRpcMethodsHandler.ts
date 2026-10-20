@@ -78,6 +78,13 @@ const ERROR_UNAUTHORIZED = {
 
 const isCheckingPermissions = ref(false);
 
+/** WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants */
+const approvedSessionTopics = new Set<string>();
+
+export function approveWalletConnectSession(topic: string) {
+  approvedSessionTopics.add(topic);
+}
+
 /** A hex message as the user reads it: its text, or the hex when it is not text */
 function getMessageText(hex: string): string {
   try {
@@ -92,14 +99,16 @@ async function checkOrAskEvmPermission(
   aepp: string,
   protocol: Protocol,
   originSource?: AppOriginSource,
+  sessionTopic?: string,
 ) {
-  const { checkOrAskPermission, permissions } = usePermissions();
+  const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
   await watchUntilTruthy(() => !isCheckingPermissions.value);
 
   isCheckingPermissions.value = true;
   try {
-    const permission = await checkOrAskPermission(
+    const isApprovedSession = !!sessionTopic && approvedSessionTopics.has(sessionTopic);
+    const permission = isApprovedSession || await checkOrAskPermission(
       METHODS.subscribeAddress,
       aepp,
       {
@@ -112,9 +121,11 @@ async function checkOrAskEvmPermission(
         ],
       },
     );
-    if (permission && aepp) {
+    if (permission && sessionTopic) {
+      approveWalletConnectSession(sessionTopic);
+    } else if (permission && aepp && originSource !== 'self-reported') {
       // The popup answers before the permission it stores reaches this context
-      await watchUntilTruthy(() => permissions.value[new URL(aepp).host], 3000);
+      await watchUntilTruthy(() => getPermissionForUrl(aepp), 3000);
     }
     await watchUntilTruthy(() => !isEmpty(activeAccount.value));
     return permission;
@@ -130,8 +141,8 @@ async function checkOrAskEvmPermission(
  */
 function isConnectedApp(aepp: string, originSource?: AppOriginSource) {
   if (originSource === 'self-reported') return true;
-  const { permissions } = usePermissions();
-  return !!aepp && !!permissions.value[new URL(aepp).host];
+  const { getPermissionForUrl } = usePermissions();
+  return !!aepp && !!getPermissionForUrl(aepp);
 }
 
 /**
@@ -165,23 +176,22 @@ function parseCaipChainId(chainIdOrCaip?: string): string | undefined {
     : chainIdOrCaip;
 }
 
-function selectProtocolByChainId(targetChainId?: string): Protocol {
-  const { activeNetwork, networks } = useNetworks();
+/** The currently active EVM protocol if available, otherwise ethereum */
+function getActiveEvmProtocol(): Protocol {
   const { activeAccount } = useAccounts();
-  const network = networks.value[activeNetwork.value.name];
-  if (targetChainId) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const protocol of EVM_PROTOCOLS) {
-      const protoSettings: any = network.protocols[protocol];
-      if (protoSettings?.chainId?.toString() === targetChainId.toString()) {
-        return protocol;
-      }
-    }
-  }
-  // Fallback to currently active EVM protocol if available, otherwise ethereum
   return EVM_PROTOCOLS.includes(activeAccount.value.protocol)
     ? activeAccount.value.protocol
     : PROTOCOLS.ethereum;
+}
+
+/** `undefined` for a chain that is not on the active network */
+function selectProtocolByChainId(targetChainId?: string): Protocol | undefined {
+  if (!targetChainId) return getActiveEvmProtocol();
+  const { activeNetwork, networks } = useNetworks();
+  const network = networks.value[activeNetwork.value.name];
+  return EVM_PROTOCOLS.find((protocol) => (
+    (network.protocols[protocol] as any)?.chainId?.toString() === targetChainId.toString()
+  ));
 }
 
 function getActiveEvmNetworkSettings(protocol: Protocol) {
@@ -210,6 +220,24 @@ function getActiveEvmNetworkSettings(protocol: Protocol) {
   return {
     chainId: ethActiveNetworkSettings.value.chainId,
     nodeUrl: ethActiveNetworkSettings.value.nodeUrl,
+  };
+}
+
+/** Of those the wallet answers, the ones that send or read on a chain */
+const CHAIN_BOUND_METHODS: string[] = [
+  ETH_RPC_METHODS.sendTransaction,
+  ETH_RPC_METHODS.getBalance,
+];
+
+function getChainMismatchError(
+  requestedChainId: string | bigint,
+  activeChainId = getActiveEvmNetworkSettings(getActiveEvmProtocol()).chainId,
+) {
+  return {
+    error: {
+      code: -32602,
+      message: `Provided chainId "${requestedChainId}" must match the active chainId "${activeChainId}"`,
+    },
   };
 }
 
@@ -242,25 +270,36 @@ export async function handleEvmRpcMethod(
   name?: string,
   caipChainId?: string,
   originSource?: AppOriginSource,
+  /** Of the WalletConnect session the request came in */
+  sessionTopic?: string,
 ): Promise<EvmRpcResponse> {
-  const { checkPermission, checkOrAskPermission, removePermission } = usePermissions();
+  const {
+    checkPermission,
+    checkOrAskPermission,
+    getPermissionForUrl,
+    removePermission,
+  } = usePermissions();
   const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
 
   const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
-  const protocol = selectProtocolByChainId(requestedChainId);
+  const protocolOfChain = selectProtocolByChainId(requestedChainId);
+  // The rest don't depend on the chain, e.g. a message signature, or name a chain to switch to
+  if (!protocolOfChain && CHAIN_BOUND_METHODS.includes(method)) {
+    return getChainMismatchError(requestedChainId!);
+  }
+  const protocol = protocolOfChain ?? getActiveEvmProtocol();
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol, originSource))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
 
   if (method === ETH_RPC_METHODS.getAccounts) {
-    const { host } = new URL(aepp);
-
-    if (checkPermission(host, METHODS.connect)) {
+    // A WalletConnect session already holds its accounts
+    if (originSource === 'self-reported' || checkPermission(aepp, METHODS.connect)) {
       const evmAccount = getLastActiveProtocolAccount(protocol);
 
       return {
@@ -273,7 +312,7 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol, originSource)) {
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic)) {
       // ensure we emit connect event for EIP-1193 consumers
       const account = getLastActiveProtocolAccount(protocol)!;
       try {
@@ -294,8 +333,14 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.revokePermissions) {
-    const { host } = new URL(aepp);
-    removePermission(host);
+    if (sessionTopic) {
+      approvedSessionTopics.delete(sessionTopic);
+    }
+    // The URL a WalletConnect dapp claims may be a site the user connected,
+    // and an `http:` page can't drop what was given to the `https:` one
+    if (originSource !== 'self-reported' && getPermissionForUrl(aepp)) {
+      removePermission(new URL(aepp).host);
+    }
     return { result: null };
   }
 
@@ -315,6 +360,7 @@ export async function handleEvmRpcMethod(
     };
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
+    if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
     const network = Object.values(networks.value)
       .find(({ protocols }) => (
         (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
@@ -463,12 +509,7 @@ export async function handleEvmRpcMethod(
     }
     // As in MetaMask: a signature for another chain could be replayed there
     if (domainChainId !== undefined && domainChainId !== BigInt(chainId)) {
-      return {
-        error: {
-          code: -32602,
-          message: `Provided chainId "${domainChainId}" must match the active chainId "${chainId}"`,
-        },
-      };
+      return getChainMismatchError(domainChainId, chainId);
     }
 
     const evmAccount = getRequestedAccount(protocol, params.address, originSource);
@@ -521,14 +562,18 @@ export async function handleEvmRpcRequest(
   name?: string,
   caipChainId?: string,
   originSource?: AppOriginSource,
+  sessionTopic?: string,
 ): Promise<EvmRpcResponse> {
   const positionalParams = Array.isArray(params) ? params : [];
   // A dapp waits for an answer, also when e.g. its address is malformed
   try {
     if (NODE_METHODS.includes(method)) {
-      const { nodeUrl } = getActiveEvmNetworkSettings(
-        selectProtocolByChainId(parseCaipChainId(caipChainId)),
-      );
+      const requestedChainId = parseCaipChainId(caipChainId);
+      const protocol = selectProtocolByChainId(requestedChainId);
+      if (!protocol) {
+        return getChainMismatchError(requestedChainId!);
+      }
+      const { nodeUrl } = getActiveEvmNetworkSettings(protocol);
       return await sendToNode(nodeUrl, method, positionalParams);
     }
     return await handleEvmRpcMethod(
@@ -538,6 +583,7 @@ export async function handleEvmRpcRequest(
       name,
       caipChainId,
       originSource,
+      sessionTopic,
     );
   } catch (error: any) {
     return getUnknownError(error.message);

@@ -5,6 +5,7 @@ import {
   Encoded,
   Encoding,
   METHODS,
+  RpcNotAuthorizeError,
   RpcRejectedByUserError,
   Tag,
   decode,
@@ -106,6 +107,8 @@ beforeEach(async () => {
   (useAeSdk as vi.Mock).mockReturnValue({
     ensureNodeNetworkId: vi.fn(),
     getAeSdk: vi.fn(async () => ({ api: {} })),
+    // The aepps the user let see the accounts
+    isAeppGivenAccounts: (id: string) => id === 'subscribed',
   });
 
   // `AeAccountHdWallet` is pulled in by `registerAdapters` (a setup file)
@@ -234,5 +237,84 @@ describe('unsafeSign', () => {
     await wallet().unsafeSign(data, {});
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+});
+
+describe('a request of an aepp given no account', () => {
+  const options = { aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'not-subscribed' } as any;
+
+  it.each([
+    ['signTransaction', () => wallet().signTransaction(buildSpendTx(), options)],
+    ['signMessage', () => wallet().signMessage('hello', options)],
+    ['signTypedData', () => wallet().signTypedData('cb_KXdob29seW1vbHlGazSE', 'string', options)],
+    ['signDelegation', () => wallet().signDelegation(delegation, options)],
+    ['unsafeSign', () => wallet().unsafeSign(new Uint8Array([1, 2, 3]), options)],
+  ])('is rejected by %s without asking the user', async (_, sign) => {
+    await expect(sign()).rejects.toBeInstanceOf(RpcNotAuthorizeError);
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(superSignTransaction).not.toHaveBeenCalled();
+  });
+
+  it('is rejected before an Air Gap account opens its signing modal', async () => {
+    const airGapAccount = { ...accountActive, type: 'airgap', secretKey: undefined };
+    // @ts-ignore
+    (useAccounts as vi.Mock).mockReturnValue({
+      aeAccounts: ref([airGapAccount]),
+      getLastActiveProtocolAccount: vi.fn(() => airGapAccount),
+    });
+
+    // The modal would answer instead
+    await expect(wallet().signTransaction(buildSpendTx(), options))
+      .rejects.toBeInstanceOf(RpcNotAuthorizeError);
+  });
+
+  it('is asked to the user once the aepp was given the accounts', async () => {
+    await wallet().signTransaction(buildSpendTx(), {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any);
+
+    expect(checkOrAskPermission).toHaveBeenCalledTimes(1);
+    expect(superSignTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('is asked to the user when it came by a deep link, without an RPC client', async () => {
+    // @ts-ignore
+    (useDeepLinkApi as vi.Mock).mockReturnValue({ isDeepLinkUsed: true });
+
+    await wallet().signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN } as any);
+
+    expect(checkOrAskPermission).toHaveBeenCalledTimes(1);
+    expect(superSignTransaction).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('the daily spend limit of an aepp', () => {
+  it('applies to a connected aepp, not to a deep link', async () => {
+    await wallet().signTransaction(buildSpendTx(), {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any);
+    // @ts-ignore
+    (useDeepLinkApi as vi.Mock).mockReturnValue({ isDeepLinkUsed: true });
+    await wallet().signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN } as any);
+
+    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ protocol: PROTOCOLS.aeternity });
+    expect(checkOrAskPermission.mock.calls[1][2]).not.toHaveProperty('protocol');
+  });
+
+  it('is off for a Ledger account, which signs in the modal', async () => {
+    // @ts-ignore
+    (useAccounts as vi.Mock).mockReturnValue({
+      aeAccounts: ref([]),
+      getLastActiveProtocolAccount: vi.fn(() => ({
+        ...accountActive, type: 'ledger', secretKey: undefined,
+      })),
+    });
+
+    // The mocked device signs nothing
+    await expect(wallet().signTransaction(buildSpendTx(), {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any)).rejects.toBeInstanceOf(RpcRejectedByUserError);
+
+    expect(checkOrAskPermission.mock.calls[0][2]).not.toHaveProperty('protocol');
   });
 });
