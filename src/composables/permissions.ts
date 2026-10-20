@@ -223,7 +223,7 @@ export function usePermissions() {
         && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
         // The background page keeps the keys after the wallet locks
         && !(
-          method === METHODS.sign
+          [METHODS.sign, METHODS.signMessage].includes(method)
           && IS_OFFSCREEN_TAB
           && !await getSessionEncryptionKey().catch(() => null)
         )

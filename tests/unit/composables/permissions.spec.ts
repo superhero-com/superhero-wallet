@@ -362,6 +362,24 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
         expect(result).toEqual({ isSigned: true, spent: 0 });
         expect(openPopupMock).toHaveBeenCalledOnce();
       });
+
+      it.each([
+        ['signs without a popup while the wallet is unlocked', 'session-key', 0],
+        ['asks in a popup while the wallet is locked', null, 1],
+      ])('for a site allowed to sign messages, %s', async (_, sessionKey, popups) => {
+        getSessionEncryptionKeyMock.mockResolvedValue(sessionKey);
+        vi.resetModules();
+        localStorage.clear();
+        const { usePermissions: useFreshPermissions } = await import('@/composables/permissions');
+        const permissions = useFreshPermissions();
+        permissions.resetPermissions();
+        permissions.addPermission(buildPermission({ messageSign: true }));
+
+        expect(await permissions.checkOrAskPermission(METHODS.signMessage, `https://${HOST}/`, {
+          message: 'hello',
+        })).toBe(true);
+        expect(openPopupMock).toHaveBeenCalledTimes(popups);
+      });
     });
   });
 });
