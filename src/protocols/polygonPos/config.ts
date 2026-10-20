@@ -15,11 +15,11 @@ export const POLYGON_MDW_TO_NODE_APPROX_DELAY_TIME = 30000;
 
 export const POLYGON_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<any> = {
   [NETWORK_TYPE_MAINNET]: {
-    nodeUrl: 'https://polygon-rpc.com',
+    nodeUrl: 'https://polygon.drpc.org',
     chainId: '137',
   },
   [NETWORK_TYPE_TESTNET]: {
-    nodeUrl: 'https://rpc-amoy.polygon.technology/',
+    nodeUrl: 'https://polygon-amoy-bor-rpc.publicnode.com',
     chainId: '80002',
   },
 };
