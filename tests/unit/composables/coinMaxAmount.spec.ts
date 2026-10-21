@@ -17,9 +17,9 @@ import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
  * ---- Black-box reasoning (written before reading coinMaxAmount.ts) ----
  * - Single recipient, coin: max = balance - fee.
  *   e.g. balance 1.5 AE, fee 0.000175 AE -> max = 1.499825 AE.
- * - Real callers (bitcoin/dogecoin/ethereum TransferSendForm.vue) pre-multiply `fee` by
- *   the recipient count before passing it in, so for N recipients the composable's own
- *   contract is: max = (balance - fee_total) / N.
+ * - Real callers (bitcoin TransferSendForm.vue, which dogecoin uses too, and ethereum's)
+ *   pre-multiply `fee` by the recipient count before passing it in, so for N recipients the
+ *   composable's own contract is: max = (balance - fee_total) / N.
  *   e.g. balance 1.5, fee_total 0.000525 (= 0.000175 x 3), N=3 -> max = 0.499825 each.
  * - balance < fee -> max = 0, never negative.
  * - balance == fee exactly -> max = 0.
