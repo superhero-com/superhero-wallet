@@ -368,7 +368,15 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       aci: FungibleTokenFullInterfaceACI,
       address: contractId as Encoded.ContractAddress,
     });
-    return tokenContract.transfer(recipient, amount, options);
+    // The dry run that prices the gas only takes the nonce after the chain's,
+    // not one after pending transactions.
+    const { nonce, ...estimateOptions } = options;
+    const gasLimit = await tokenContract._estimateGas(
+      'transfer',
+      [recipient, amount],
+      estimateOptions,
+    );
+    return tokenContract.transfer(recipient, amount, { ...options, gasLimit });
   }
 
   async fetchRegularTransactions(

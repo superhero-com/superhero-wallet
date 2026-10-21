@@ -219,7 +219,7 @@ import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaPar
 import {
   aeToAettos,
   aettosToAe,
-  isAccountNotFoundError,
+  fetchAccountNextNonce,
 } from '@/protocols/aeternity/helpers';
 import {
   getAdjustedTransferTotal,
@@ -457,15 +457,10 @@ export default defineComponent({
 
     async function fetchCurrentAccountNonce() {
       const aeSdk = await getAeSdk();
-      try {
-        const { nonce } = await aeSdk.api.getAccountByPubkey(activeAccount.value.address);
-        return nonce + 1;
-      } catch (error) {
-        if (isAccountNotFoundError(error)) {
-          return 1;
-        }
-        throw error;
-      }
+      return fetchAccountNextNonce(
+        aeSdk.api,
+        activeAccount.value.address as Encoded.AccountAddress,
+      );
     }
 
     async function openTransactionFailedModal(msg: string) {
@@ -710,27 +705,33 @@ export default defineComponent({
           note,
         });
       } else {
-        let hash;
+        let lastHash;
+        // Fees are whole aettos; rounding down keeps the total within the entered fee.
         const customFee = effectiveTransferData.fee
-          ? aeToAettos(
-            new BigNumber(effectiveTransferData.fee).dividedBy(recipients.length || 1),
-          )
+          ? new BigNumber(aeToAettos(effectiveTransferData.fee))
+            .dividedToIntegerBy(recipients.length || 1)
+            .toFixed()
           : undefined;
         let currentNonce = effectiveTransferData.nonce || await fetchCurrentAccountNonce();
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           // eslint-disable-next-line no-await-in-loop
-          hash = await transfer({
+          const hash = await transfer({
             amount,
             recipient,
             selectedAsset,
             nonce: currentNonce,
             fee: customFee,
           });
+          // A later nonce would stay pending until the gap is filled by a retry.
+          if (!hash) {
+            break;
+          }
+          lastHash = hash;
           currentNonce += 1;
         }
-        if (hash) {
-          router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
+        if (lastHash) {
+          router.push({ name: homeRouteName.value, query: { latestTxHash: lastHash } });
         }
       }
     }

@@ -17,13 +17,18 @@ if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
 
 import { ref } from 'vue';
 import BigNumber from 'bignumber.js';
+import { toWei } from 'web3-utils';
 import { useEthFeeCalculation } from '../../../../../src/protocols/ethereum/composables/ethFeeCalculation';
 import { PROTOCOLS } from '../../../../../src/constants';
 
 // The setup files already loaded this composable with the real deps; reload it to apply the mocks.
-const { web3EthNodeUrls } = vi.hoisted(() => {
+const { web3EthNodeUrls, mockNode } = vi.hoisted(() => {
   vi.resetModules();
-  return { web3EthNodeUrls: [] };
+  return { web3EthNodeUrls: [], mockNode: { gasPrice: '2000000000' } };
+});
+
+beforeEach(() => {
+  mockNode.gasPrice = '2000000000';
 });
 
 vi.mock('web3-eth', () => {
@@ -35,7 +40,7 @@ vi.mock('web3-eth', () => {
         maxFeePerGas: '2000000000',
         maxPriorityFeePerGas: '1000000000',
       }),
-      getGasPrice: async () => '2000000000',
+      getGasPrice: async () => mockNode.gasPrice,
       getBlock: async () => ({ number: 1n }),
     };
   };
@@ -90,7 +95,7 @@ describe('useEthFeeCalculation - Ethereum vs BNB', () => {
     expect(BigNumber.isBigNumber(fee.value)).toBe(true);
   });
 
-  it('BNB branch returns 3 fee items and omits EIP-1559 fields', async () => {
+  it('BNB branch returns 3 fee items and exposes a single gas price', async () => {
     const {
       feeList,
       maxFeePerGas,
@@ -103,7 +108,8 @@ describe('useEthFeeCalculation - Ethereum vs BNB', () => {
     );
     await updateFeeList();
     expect(feeList.value.length).toBe(3);
-    expect(maxFeePerGas.value.isZero()).toBe(true);
+    // Slow speed: node gas price 2 gwei + 10%
+    expect(maxFeePerGas.value.toFixed()).toBe(GWEI.times(2.2).toFixed());
     expect(maxPriorityFeePerGas.value.isZero()).toBe(true);
     expect(BigNumber.isBigNumber(fee.value)).toBe(true);
   });
@@ -154,5 +160,29 @@ describe('useEthFeeCalculation - gas price chains', () => {
     // Slow speed: node gas price 2 gwei + 10% buffer
     expect(fee.value.toFixed()).toBe(GWEI.times(2.2).times(GAS_LIMIT).times(2).toFixed());
     expect(maxFee.value.toFixed()).toBe(fee.value.toFixed());
+  });
+
+  it.each([
+    PROTOCOLS.bnb,
+    PROTOCOLS.avalanche,
+    PROTOCOLS.polygonPos,
+  ])('prices %s at the gas price of the picked speed', async (protocol) => {
+    mockNode.gasPrice = '1000000005';
+    const {
+      fee,
+      feeSelectedIndex,
+      maxFeePerGas,
+      updateFeeList,
+    } = useEthFeeCalculation(protocol, ref(2));
+    await updateFeeList();
+
+    // Node gas price + 10%, times 1, 1.5 or 2, in whole wei
+    ['1100000006', '1650000009', '2200000011'].forEach((wei, index) => {
+      feeSelectedIndex.value = index;
+      // The send form passes the price on as a decimal string; the adapter signs it in wei.
+      expect(toWei(maxFeePerGas.value.toFormat(18), 'ether')).toBe(wei);
+      expect(fee.value.toFixed())
+        .toBe(new BigNumber(wei).shiftedBy(-18).times(GAS_LIMIT * 2).toFixed());
+    });
   });
 });

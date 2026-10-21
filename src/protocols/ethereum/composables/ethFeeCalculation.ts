@@ -15,7 +15,7 @@ import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSet
 import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/avalancheNetworkSettings';
 import { usePolygonNetworkSettings } from '@/protocols/polygonPos/composables/polygonPosNetworkSettings';
 import { PROTOCOLS } from '@/constants';
-import { ETH_GAS_LIMIT } from '../config';
+import { ETH_COIN_PRECISION, ETH_GAS_LIMIT } from '../config';
 
 const MAX_PRIORITY_FEE_MULTIPLIERS = {
   slow: 1,
@@ -84,25 +84,31 @@ export function useEthFeeCalculation(
       ];
     }
 
-    // BNB Chain, Avalanche & Polygon: simple gasPrice * multiplier
+    // BNB Chain, Avalanche & Polygon: gasPrice * multiplier in whole wei, which is what gets signed
+    const getGasPrice = (multiplier: number) => defaultGasPrice.value
+      .multipliedBy(multiplier)
+      .decimalPlaces(ETH_COIN_PRECISION, BigNumber.ROUND_UP);
+    const gasPriceSlow = getGasPrice(MAX_PRIORITY_FEE_MULTIPLIERS.slow);
+    const gasPriceMedium = getGasPrice(MAX_PRIORITY_FEE_MULTIPLIERS.medium);
+    const gasPriceFast = getGasPrice(MAX_PRIORITY_FEE_MULTIPLIERS.fast);
     return [
       {
-        fee: defaultGasPrice.value
-          .multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.slow).multipliedBy(gasLimit.value),
+        fee: gasPriceSlow.multipliedBy(gasLimit.value),
         time: 16,
         label: tg('common.transferSpeed.slow'),
+        maxFeePerGas: gasPriceSlow,
       },
       {
-        fee: defaultGasPrice.value
-          .multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.medium).multipliedBy(gasLimit.value),
+        fee: gasPriceMedium.multipliedBy(gasLimit.value),
         time: 8,
         label: tg('common.transferSpeed.medium'),
+        maxFeePerGas: gasPriceMedium,
       },
       {
-        fee: defaultGasPrice.value
-          .multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.fast).multipliedBy(gasLimit.value),
+        fee: gasPriceFast.multipliedBy(gasLimit.value),
         time: 3,
         label: tg('common.transferSpeed.fast'),
+        maxFeePerGas: gasPriceFast,
       },
     ];
   });
@@ -133,17 +139,13 @@ export function useEthFeeCalculation(
       }[protocol].value;
       const web3Eth = new Web3Eth(nodeUrl);
       const gasPrice = await web3Eth.getGasPrice();
-      // Add 10% buffer to prevent insufficient funds errors
+      // 10% above the node's price, so that a send still gets mined if the price rises
       defaultGasPrice.value = new BigNumber(fromWei(gasPrice, 'ether')).multipliedBy(1.1);
     }
   }
 
   // Per-gas prices go into each recipient's transaction, so they don't scale with recipients.
-  const maxFeePerGas = computed(() => (
-    protocol === PROTOCOLS.ethereum
-      ? feeList.value[feeSelectedIndex.value].maxFeePerGas!
-      : new BigNumber(0)
-  ));
+  const maxFeePerGas = computed(() => feeList.value[feeSelectedIndex.value].maxFeePerGas!);
 
   const maxPriorityFeePerGas = computed(() => (
     protocol === PROTOCOLS.ethereum

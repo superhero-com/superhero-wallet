@@ -328,9 +328,9 @@ export default () => {
    */
   defineRule(
     'token_to_an_address',
-    (value: string, [isToken]: [boolean]) => (
-      !isNameValid(value)
-      || (isNameValid(value) && !isToken)
+    (value: string[], [isToken]: [boolean]) => (
+      !isToken
+      || !value?.some((address) => isNameValid(address))
       || tg('validation.tokenToAnAddress')
     ),
   );
@@ -340,9 +340,9 @@ export default () => {
    */
   defineRule(
     'airgap_to_an_address',
-    (value: string) => (
-      !isNameValid(value)
-        || tg('validation.airGapToAnAddress')
+    (value: string[]) => (
+      !value?.some((address) => isNameValid(address))
+      || tg('validation.airGapToAnAddress')
     ),
   );
 

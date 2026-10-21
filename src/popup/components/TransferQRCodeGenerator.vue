@@ -96,7 +96,11 @@ export default defineComponent({
         amount: new BigNumber(amount).toFixed().toString(),
         payload: encode(new TextEncoder().encode(props.transferData.payload), Encoding.Bytearray),
         nonce: props.transferData.nonce,
-        fee: props.transferData.fee ? aeToAettos(props.transferData.fee) : undefined,
+        fee: props.transferData.fee
+          ? new BigNumber(aeToAettos(props.transferData.fee))
+            .integerValue(BigNumber.ROUND_DOWN)
+            .toFixed()
+          : undefined,
       });
 
       const nextFragments = await generateTransactionURDataFragments(
