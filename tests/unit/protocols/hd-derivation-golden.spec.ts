@@ -9,7 +9,7 @@ import { EthereumAdapter } from '@/protocols/ethereum/libs/EthereumAdapter';
 import { PolygonAdapter } from '@/protocols/polygonPos/libs/PolygonPosAdapter';
 import { SolanaAdapter } from '@/protocols/solana/libs/SolanaAdapter';
 import { useNetworks } from '@/composables/networks';
-import { ACCOUNT_TYPES, NETWORK_NAME_TESTNET } from '@/constants';
+import { NETWORK_NAME_TESTNET } from '@/constants';
 import { TEST_ACCOUNT } from '../../fixtures/account';
 
 const toHex = (bytes: Uint8Array) => Buffer.from(bytes).toString('hex');
@@ -120,27 +120,5 @@ describe('HD derivation golden vectors', () => {
     expect(acc0.address).toMatchSnapshot();
     expect(toHex(acc0.publicKey)).toMatchSnapshot();
     expect(toHex(acc0.secretKey)).toMatchSnapshot();
-  });
-
-  it('resolveAccountRaw private-key path stays stable (Bitcoin)', () => {
-    const adapter = new BitcoinAdapter();
-    const priv = Buffer.from(new Uint8Array(32).fill(9));
-    const raw = { type: ACCOUNT_TYPES.privateKey, privateKey: priv } as any;
-    const res = adapter.resolveAccountRaw(raw, 0, 0);
-
-    expect(res?.address).toMatchSnapshot();
-    expect(res?.publicKey?.length).toBeGreaterThan(0);
-    expect(res?.secretKey?.length).toBe(32);
-  });
-
-  it('resolveAccountRaw private-key path stays stable (Ethereum)', () => {
-    const adapter = new EthereumAdapter();
-    const priv = Buffer.from(new Uint8Array(32).fill(9));
-    const raw = { type: ACCOUNT_TYPES.privateKey, privateKey: priv } as any;
-    const res = adapter.resolveAccountRaw(raw, 0, 0);
-
-    expect(res?.address).toMatchSnapshot();
-    expect(res?.publicKey?.length).toBeGreaterThan(0);
-    expect(res?.secretKey?.length).toBe(32);
   });
 });

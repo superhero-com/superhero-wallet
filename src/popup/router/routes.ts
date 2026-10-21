@@ -112,7 +112,7 @@ import ConfirmUnsafeSign from '../components/Modals/ConfirmUnsafeSign.vue';
 async function requireSeedPhraseReauth() {
   const {
     isUsingDefaultPassword,
-    checkBiometricLoginAvailability,
+    canAuthenticateWithDevice,
   } = useAuth();
   const { isBiometricLoginEnabled } = useUi();
   const {
@@ -122,7 +122,7 @@ async function requireSeedPhraseReauth() {
   } = useModals();
 
   if (IS_MOBILE_APP) {
-    if (isBiometricLoginEnabled.value && await checkBiometricLoginAvailability()) {
+    if (isBiometricLoginEnabled.value && await canAuthenticateWithDevice()) {
       await openBiometricLoginModal({ force: true });
       return;
     }

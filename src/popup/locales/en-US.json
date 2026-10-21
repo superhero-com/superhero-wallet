@@ -248,6 +248,7 @@
     "unreadablePrivateKeyAccounts": {
       "title": "Imported accounts unreadable",
       "msg": "The accounts you imported with a private key can't be decrypted on this device, and they can't be recovered here. Your seed phrase accounts are not affected, and all funds stay on the blockchain. To import accounts again, remove the unreadable ones. You'll need each account's private key to get it back.",
+      "readFailedMsg": "The accounts you imported with a private key couldn't be read from this device. Close the app and open it again. Remove them only if this keeps happening and you have their private keys. Without them, removing loses access to these accounts. Your seed phrase accounts are not affected.",
       "btnText": "Remove imported accounts"
     },
     "name-exist": {
@@ -1471,6 +1472,7 @@
     "walletDataUnreadableMessage": "The encrypted wallet data on this device can't be decrypted. Reinstalling the app won't fix this. Reset the wallet, then restore it with your seed phrase. Your funds stay on the blockchain, but only your seed phrase can restore access to them.",
     "walletDataUnreadableAction": "Reset wallet",
     "walletKeyUnavailableMessage": "The key that unlocks your wallet couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
+    "walletDataReadFailedMessage": "Your wallet data couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
     "storedWalletFoundTitle": "Wallet found on this device",
     "storedWalletFoundMessage": "Your wallet couldn't be loaded when the app started, but it's still stored on this device. Reload the app to open it.",
     "storedWalletFoundAction": "Reload"

@@ -114,7 +114,8 @@ export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
 let expirationTimeout: NodeJS.Timeout;
 let keepAliveInterval: NodeJS.Timeout;
 
-export const setSessionTimeout = async (sessionTimeout: number) => {
+/** `null` stops the timeout, e.g. while a wallet page is shown. */
+export const setSessionTimeout = async (sessionTimeout: number | null) => {
   if (expirationTimeout) {
     clearTimeout(expirationTimeout);
   }
@@ -123,11 +124,14 @@ export const setSessionTimeout = async (sessionTimeout: number) => {
   }
 
   /**
-   * This interval is set in order to keep service worker alive.
-   * By default service worker would be terminated in 30 seconds of inactivity.
+   * Keeps the service worker, or Firefox's event page, alive. Idle for 30 seconds it would be
+   * terminated with the timeout and, on Firefox, the count of shown pages.
    * https://stackoverflow.com/a/66618269
    */
   keepAliveInterval = setInterval(browser.runtime.getPlatformInfo, 20000);
+  if (sessionTimeout === null) {
+    return;
+  }
   expirationTimeout = setTimeout(
     async () => {
       try {

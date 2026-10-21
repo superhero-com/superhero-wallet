@@ -27,7 +27,14 @@ import {
 } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { watchUntilTruthy } from '@/utils';
-import { generateEncryptionKey, generateSalt, encrypt } from '@/utils/crypto';
+import {
+  generateEncryptionKey,
+  generateSalt,
+  encodeBase64,
+  encrypt,
+  decrypt,
+  importEncryptionKey,
+} from '@/utils/crypto';
 import en from '@/popup/locales/en-US.json';
 
 const VALID_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
@@ -55,6 +62,7 @@ describe('useAccounts', () => {
   let mnemonicSeedRef;
   let isMnemonicRestoredRef;
   let isAuthenticatedRef;
+  let isMnemonicUnreadableRef;
   let encryptionKeyRef;
   let openModalMock;
   let openConfirmModalMock;
@@ -66,6 +74,7 @@ describe('useAccounts', () => {
     mnemonicSeedRef = ref(MNEMONIC_SEED);
     isMnemonicRestoredRef = ref(true);
     isAuthenticatedRef = ref(false);
+    isMnemonicUnreadableRef = ref(false);
     encryptionKeyRef = ref(undefined);
     openModalMock = vi.fn().mockRejectedValue(new Error('No modals in this test'));
     openConfirmModalMock = vi.fn().mockRejectedValue(new Error('Dismissed'));
@@ -90,6 +99,7 @@ describe('useAccounts', () => {
         mnemonicSeed: mnemonicSeedRef,
         isMnemonicRestored: isMnemonicRestoredRef,
         isAuthenticated: isAuthenticatedRef,
+        isMnemonicUnreadable: isMnemonicUnreadableRef,
         encryptionKey: encryptionKeyRef,
       }),
     }));
@@ -243,6 +253,23 @@ describe('useAccounts', () => {
     expect(accounts.areAccountsReady.value).toBe(false);
   });
 
+  it('is ready without the imported accounts when the seed could not be read, so the reset can be offered', async () => {
+    await seedImportedEthAccount({
+      type: ACCOUNT_TYPES.privateKey,
+      isRestored: false,
+      protocol: PROTOCOLS.ethereum,
+      privateKey: Buffer.from(IMPORTED_ETH_PRIVATE_KEY_HEX, 'hex'),
+    });
+    mnemonicSeedRef.value = null;
+    isMnemonicUnreadableRef.value = true;
+
+    const accounts = await boot();
+
+    expect(await watchUntilTruthy(accounts.areAccountsReady, 1000)).toBe(true);
+    expect(accounts.accounts.value).toEqual([]);
+    expect(accounts.isLoggedIn.value).toBe(false);
+  });
+
   it('waits for a last active imported account instead of handing out another one of its protocol', async () => {
     seedAccountsRaw([
       { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
@@ -269,7 +296,7 @@ describe('useAccounts', () => {
     )).toMatchObject({ globalIdx: 2, type: ACCOUNT_TYPES.privateKey });
   });
 
-  describe('imported private keys that cannot be decrypted', () => {
+  describe('imported private keys that cannot be decrypted or read', () => {
     const seedAccount = {
       isRestored: true,
       protocol: PROTOCOLS.aeternity,
@@ -484,31 +511,225 @@ describe('useAccounts', () => {
       await expect(accounts.addPrivateKeyAccount(secondImportedRaw)).resolves.toBe(1);
       expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
     });
+
+    describe('whose read rejects at startup', () => {
+      let readStored;
+      let failedRead;
+
+      afterEach(() => {
+        vi.doUnmock('@/constants');
+      });
+
+      /**
+       * Readable with the current key, but the read fails, e.g. an Android Keystore error.
+       * With `isReadFailing: false` the read works, but they are under another key.
+       * With `isLegacyPlaintext` they are stored unencrypted, as before the mobile encryption.
+       */
+      async function bootWithFailingRead({
+        isMobile = false,
+        isReadFailing = true,
+        isLegacyPlaintext = false,
+      } = {}) {
+        if (isMobile) {
+          vi.doMock('@/constants', async (importOriginal) => ({
+            ...await importOriginal(),
+            IS_MOBILE_APP: true,
+          }));
+        }
+        const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+        const { WalletStorage: walletStorage } = await import('@/lib/WalletStorage');
+        const storage = isMobile ? SecureMobileStorage : walletStorage;
+        seedAccountsRaw([seedAccount]);
+        if (isLegacyPlaintext) {
+          // The per-install key, which the mobile encryption migration encrypts with
+          const rawKey = globalThis.crypto.getRandomValues(new Uint8Array(32));
+          await storage.set(STORAGE_KEYS.mobileDataKey, encodeBase64(rawKey));
+          currentKey = await importEncryptionKey(rawKey);
+          storedCiphertext = JSON.stringify([importedRaw]);
+        } else {
+          currentKey = await generateEncryptionKey('test-password', generateSalt());
+          storedCiphertext = await encrypt(currentKey, JSON.stringify([importedRaw]));
+        }
+        await storage.set(STORAGE_KEYS.privateKeyAccountsRaw, storedCiphertext);
+        encryptionKeyRef.value = isReadFailing
+          ? currentKey
+          : await generateEncryptionKey('another-password', generateSalt());
+        isAuthenticatedRef.value = true;
+        const realGet = storage.get;
+        readStored = () => realGet(STORAGE_KEYS.privateKeyAccountsRaw);
+        failedRead = vi.spyOn(storage, 'get').mockImplementation((key) => {
+          if (key !== STORAGE_KEYS.privateKeyAccountsRaw || !isReadFailing) return realGet(key);
+          if (isMobile) return Promise.reject(new Error('osError'));
+          throw new SyntaxError('Unexpected end of JSON input');
+        });
+        const accounts = await boot();
+        expect(await watchUntilTruthy(accounts.areAccountsReady, 5000)).toBe(true);
+        return accounts;
+      }
+
+      it.each([
+        // A corrupt entry, which reopening doesn't fix
+        ['web', false, en.modals.unreadablePrivateKeyAccounts.msg],
+        ['mobile', true, en.modals.unreadablePrivateKeyAccounts.readFailedMsg],
+      ])('opens the wallet on %s and refuses imports over them, keeping them stored', async (_, isMobile, msg) => {
+        const accounts = await bootWithFailingRead({ isMobile });
+
+        await attemptImport(accounts);
+        await flushAsync();
+
+        expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet]);
+        expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+          title: en.modals.unreadablePrivateKeyAccounts.title,
+          msg,
+        }));
+        expect(await readStored()).toBe(storedCiphertext);
+      });
+
+      it('says on mobile that they can\'t be decrypted when they were read', async () => {
+        const accounts = await bootWithFailingRead({ isMobile: true, isReadFailing: false });
+
+        await attemptImport(accounts);
+
+        expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+          msg: en.modals.unreadablePrivateKeyAccounts.msg,
+        }));
+      });
+
+      it.each([
+        ['web', false],
+        ['mobile', true],
+      ])('takes them back on %s when they read fine once the removal is confirmed', async (_, isMobile) => {
+        const confirm = deferConfirm();
+        const accounts = await bootWithFailingRead({ isMobile });
+        await attemptImport(accounts);
+
+        failedRead.mockRestore();
+        confirm();
+
+        expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+        expect(await readStored()).toBe(storedCiphertext);
+        await accounts.addPrivateKeyAccount(secondImportedRaw);
+        expect(accountTypes(accounts))
+          .toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey, ACCOUNT_TYPES.privateKey]);
+      });
+
+      it('takes them back on mobile when they read fine as plaintext from before the encryption', async () => {
+        const confirm = deferConfirm();
+        const accounts = await bootWithFailingRead({ isMobile: true, isLegacyPlaintext: true });
+        await attemptImport(accounts);
+
+        failedRead.mockRestore();
+        confirm();
+
+        expect(await watchUntilTruthy(() => accounts.accounts.value.length === 2, 5000)).toBe(true);
+        // Encrypted as the startup would have done
+        await vi.waitFor(async () => {
+          const stored = JSON.parse(await decrypt(currentKey, await readStored()));
+          expect(stored).toEqual(JSON.parse(JSON.stringify([importedRaw])));
+        }, { timeout: 5000 });
+      });
+
+      it.each([
+        ['web', false],
+        ['mobile', true],
+      ])('removes them on %s when confirmed while the read still fails, and imports work again', async (_, isMobile) => {
+        openConfirmModalMock.mockResolvedValue(undefined);
+        const accounts = await bootWithFailingRead({ isMobile });
+
+        await attemptImport(accounts);
+        await flushAsync();
+        await accounts.addPrivateKeyAccount(secondImportedRaw);
+
+        expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
+        await vi.waitFor(async () => {
+          const stored = JSON.parse(await decrypt(currentKey, await readStored()));
+          expect(stored).toEqual(JSON.parse(JSON.stringify([secondImportedRaw])));
+        }, { timeout: 5000 });
+      });
+    });
+  });
+
+  it('derives the published addresses from imported private keys, also after a restart', async () => {
+    const { PRIVATE_KEY_VECTORS } = await import('../../fixtures/privateKeyVectors');
+    seedAccountsRaw([
+      { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
+    ]);
+    encryptionKeyRef.value = await generateEncryptionKey('test-password', generateSalt());
+    isAuthenticatedRef.value = true;
+    const importedAddresses = ({ accounts: list }) => list.value
+      .filter(({ type }) => type === ACCOUNT_TYPES.privateKey)
+      .map(({ protocol, address }) => [protocol, address]);
+    const expected = PRIVATE_KEY_VECTORS.map(([protocol, , address]) => [protocol, address]);
+    const accounts = await boot();
+    expect(await watchUntilTruthy(accounts.areAccountsReady, 5000)).toBe(true);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [protocol, privateKeyHex] of PRIVATE_KEY_VECTORS) {
+      // eslint-disable-next-line no-await-in-loop
+      await accounts.addPrivateKeyAccount({
+        type: ACCOUNT_TYPES.privateKey,
+        isRestored: false,
+        protocol,
+        privateKey: Buffer.from(privateKeyHex, 'hex'),
+      });
+    }
+    expect(importedAddresses(accounts)).toEqual(expected);
+
+    vi.resetModules();
+    const restarted = await boot();
+    // Decrypting and deriving every protocol takes a while in a full run.
+    await vi.waitFor(() => expect(importedAddresses(restarted)).toEqual(expected), 5000);
   });
 
   describe('discoverAccounts', () => {
+    const AE = PROTOCOLS.aeternity;
+    const ETH = PROTOCOLS.ethereum;
+
     /**
-     * Every adapter reports `lastUsedIndex` (or none) once the returned `release` is called;
-     * the `stalled` ones never report.
+     * Stubs each protocol's node with `isUsed(protocol, index)`, which may also throw or
+     * never settle. Its checks answer once the returned `release` is called.
      */
-    async function stubDiscovery(lastUsedIndex, stalled = []) {
+    async function stubNodes(isUsed) {
       const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
       const { PROTOCOL_LIST } = await import('@/constants');
       let release;
       const released = new Promise((resolve) => { release = resolve; });
       PROTOCOL_LIST.forEach((protocol) => {
-        vi.spyOn(ProtocolAdapterFactory.getAdapter(protocol), 'discoverLastUsedAccountIndex')
-          .mockImplementation(() => (stalled.includes(protocol)
-            ? new Promise(() => {})
-            : released.then(() => lastUsedIndex[protocol] ?? -1)));
+        const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+        // Derived once each, as the checks of a scan ask for the same addresses.
+        const indexByAddress = new Map();
+        const indexOf = (address) => {
+          while (!indexByAddress.has(address)) {
+            if (indexByAddress.size >= 20) throw new Error(`Unknown ${protocol} address ${address}`);
+            const { address: derived } = adapter
+              .getHdWalletAccountFromMnemonicSeed(MNEMONIC_SEED, indexByAddress.size);
+            indexByAddress.set(derived, indexByAddress.size);
+          }
+          return indexByAddress.get(address);
+        };
+        vi.spyOn(adapter, 'isAccountUsed').mockImplementation(async (address) => {
+          await released;
+          return isUsed(protocol, indexOf(address));
+        });
       });
       return release;
     }
 
-    it('waits for the discovery when no timeout is given', async () => {
+    const usedUpTo = (lastUsedIndex) => (protocol, index) => (
+      index <= (lastUsedIndex[protocol] ?? -1)
+    );
+    const stalled = () => new Promise(() => {});
+    const protocolsOf = ({ accounts: list }) => list.value.map(({ protocol }) => protocol);
+
+    async function bootRestored() {
       const accounts = await boot();
       await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 0 });
+      return accounts;
+    }
+
+    it('waits for the nodes to answer', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({ [AE]: 0 }));
       let isSettled = false;
       const discovering = accounts.discoverAccounts().finally(() => { isSettled = true; });
 
@@ -517,64 +738,111 @@ describe('useAccounts', () => {
       release();
 
       await expect(discovering).resolves.toBe(true);
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.aeternity]);
+      expect(protocolsOf(accounts)).toEqual([AE]);
     });
 
-    it('adds the found accounts when the discovery finishes in time', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 });
+    it('adds the found accounts', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({ [AE]: 1 }));
       release();
 
-      await expect(accounts.discoverAccounts({ timeout: 1000 })).resolves.toBe(true);
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.aeternity, PROTOCOLS.aeternity]);
-    });
-
-    it('adds nothing when it times out, even once the discovery finishes later', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 });
-
-      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
-      release();
-      await flushAsync();
-
-      expect(accounts.accounts.value).toEqual([]);
+      await expect(accounts.discoverAccounts()).resolves.toBe(true);
+      expect(protocolsOf(accounts)).toEqual([AE, AE]);
     });
 
     it('asks for a protocol when a complete discovery finds nothing', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({});
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({}));
       release();
-      openModalMock.mockResolvedValueOnce(PROTOCOLS.ethereum);
+      openModalMock.mockResolvedValueOnce(ETH);
 
-      await expect(accounts.discoverAccounts({ timeout: 1000 })).resolves.toBe(true);
+      await expect(accounts.discoverAccounts()).resolves.toBe(true);
       expect(openModalMock).toHaveBeenCalledWith(MODAL_PROTOCOL_SELECT, expect.anything());
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.ethereum]);
+      expect(protocolsOf(accounts)).toEqual([ETH]);
     });
 
-    it('does not ask for a protocol when the discovery that found nothing was cut short', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      await stubDiscovery({});
-
-      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
-      expect(openModalMock).not.toHaveBeenCalled();
-    });
-
-    it('keeps the protocols that finished when another one times out', async () => {
-      const accounts = await boot();
-      await watchUntilTruthy(accounts.areAccountsRestored);
-      const release = await stubDiscovery({ [PROTOCOLS.aeternity]: 1 }, [PROTOCOLS.ethereum]);
+    it('opens the first æternity account when no protocol is chosen for an unused seed', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({}));
       release();
 
-      await expect(accounts.discoverAccounts({ timeout: 10 })).resolves.toBe(false);
-      expect(accounts.accounts.value.map(({ protocol }) => protocol))
-        .toEqual([PROTOCOLS.aeternity, PROTOCOLS.aeternity]);
+      await expect(accounts.discoverAccounts()).resolves.toBe(true);
+      expect(openModalMock).toHaveBeenCalledWith(MODAL_PROTOCOL_SELECT, expect.anything());
+      expect(protocolsOf(accounts)).toEqual([AE]);
+    });
+
+    it.each([
+      ['before finding any', () => { throw new Error('network down'); }, [AE]],
+      ['after finding two', (index) => {
+        if (index === 2) throw new Error('network down');
+        return index < 2;
+      }, [ETH, ETH]],
+      ['and finds the ones after the failed check', (index) => {
+        if (index === 2) throw new Error('network down');
+        return [0, 1, 3, 6].includes(index);
+      }, Array(7).fill(ETH)],
+    ])('counts a failed check %s as incomplete, keeping the accounts found', async (_, isEthUsed, protocols) => {
+      const accounts = await bootRestored();
+      const release = await stubNodes((protocol, index) => (
+        (protocol === ETH) ? isEthUsed(index) : false
+      ));
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      release();
+
+      try {
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+      } finally {
+        warnSpy.mockRestore();
+      }
+      // It may have missed accounts, so no protocol is asked for.
+      expect(openModalMock).not.toHaveBeenCalled();
+      expect(protocolsOf(accounts)).toEqual(protocols);
+    });
+
+    describe('when a node stops answering', () => {
+      beforeEach(() => {
+        vi.doMock('@/constants', async (importOriginal) => ({
+          ...await importOriginal(),
+          ACCOUNT_CHECK_TIMEOUT: 10,
+        }));
+      });
+
+      afterEach(() => {
+        vi.doUnmock('@/constants');
+      });
+
+      it('keeps the accounts confirmed before', async () => {
+        const accounts = await bootRestored();
+        // The first 5 æternity accounts are used, then its node stops answering.
+        const release = await stubNodes((protocol, index) => (
+          (protocol === AE && index >= 5) ? stalled() : protocol === AE
+        ));
+        release();
+
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+        expect(protocolsOf(accounts)).toEqual([AE, AE, AE, AE, AE]);
+      });
+
+      it('opens the first æternity account, not asking for a protocol', async () => {
+        const accounts = await bootRestored();
+        const release = await stubNodes(stalled);
+        release();
+
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+        expect(openModalMock).not.toHaveBeenCalled();
+        expect(protocolsOf(accounts)).toEqual([AE]);
+      });
+
+      it('keeps the protocols that finished', async () => {
+        const accounts = await bootRestored();
+        const release = await stubNodes((protocol, index) => (
+          (protocol === ETH) ? stalled() : usedUpTo({ [AE]: 1 })(protocol, index)
+        ));
+        release();
+
+        await expect(accounts.discoverAccounts()).resolves.toBe(false);
+        expect(protocolsOf(accounts)).toEqual([AE, AE]);
+      });
     });
   });
 });

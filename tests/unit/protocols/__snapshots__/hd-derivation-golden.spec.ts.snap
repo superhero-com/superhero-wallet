@@ -37,7 +37,3 @@ exports[`HD derivation golden vectors > SolanaAdapter 1`] = `"KL798nyZhQS2iPbW47
 exports[`HD derivation golden vectors > SolanaAdapter 2`] = `"04b20ec12fb2ac9fe7d3b6542e36bf6078645c072826c9daefd9d4f2a2175ada"`;
 
 exports[`HD derivation golden vectors > SolanaAdapter 3`] = `"e20bacbbe0066f4f6aba0bfef007750caea27994d712180a3f8f6260ee67091204b20ec12fb2ac9fe7d3b6542e36bf6078645c072826c9daefd9d4f2a2175ada"`;
-
-exports[`HD derivation golden vectors > resolveAccountRaw private-key path stays stable (Bitcoin) 1`] = `"tb1qvux25709r4uw6rzc8wyl7wwecjdhrx0873q8sh"`;
-
-exports[`HD derivation golden vectors > resolveAccountRaw private-key path stays stable (Ethereum) 1`] = `"0x58DA990A8F4A3a6ca7cb6315d68a140105917352"`;

@@ -9,6 +9,21 @@ import {
   POPUP_METHODS,
 } from '@/constants';
 
+type Transport = Awaited<ReturnType<typeof TransportWebUSB.create>>;
+
+/**
+ * Runs `action` on a new transport and always closes it, or the device stays claimed.
+ * A failed close (e.g. of an unplugged device) doesn't hide the error of `action`.
+ */
+async function withTransport<T>(action: (transport: Transport) => Promise<T>): Promise<T> {
+  const transport = await TransportWebUSB.create();
+  try {
+    return await action(transport);
+  } finally {
+    await transport.close().catch(() => {});
+  }
+}
+
 export function useLedger() {
   async function deriveAccount(accountIndex: number): Promise<AccountLedger> {
     if (!IS_OFFSCREEN_TAB && !IS_WEB) {
@@ -20,11 +35,9 @@ export function useLedger() {
         target: 'offscreen',
       });
     }
-    const transport = await TransportWebUSB.create();
-    const accountFactory = new AccountLedgerFactory(transport);
-    const ledgerAccount = await accountFactory.initialize(accountIndex);
-    await transport.close();
-    return ledgerAccount;
+    return withTransport(
+      (transport) => new AccountLedgerFactory(transport).initialize(accountIndex),
+    );
   }
 
   async function discoverAccounts(): Promise<AccountLedger[]> {
@@ -36,12 +49,10 @@ export function useLedger() {
     }
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    const transport = await TransportWebUSB.create();
-    const accountFactory = new AccountLedgerFactory(transport);
-    // TODO: remove `as` after fixing https://github.com/aeternity/aepp-sdk-js/issues/2046
-    const ledgerAccounts = (await accountFactory.discover(aeSdk.api)) as AccountLedger[];
-    await transport.close();
-    return ledgerAccounts;
+    return withTransport(async (transport) => (
+      // TODO: remove `as` after fixing https://github.com/aeternity/aepp-sdk-js/issues/2046
+      (await new AccountLedgerFactory(transport).discover(aeSdk.api)) as AccountLedger[]
+    ));
   }
 
   async function signMessage(
@@ -64,10 +75,9 @@ export function useLedger() {
       });
     }
 
-    const transport = await TransportWebUSB.create();
-    const restoredAccount = new AccountLedger(transport, accountIndex, address);
-
-    return restoredAccount.signMessage(message);
+    return withTransport(
+      (transport) => new AccountLedger(transport, accountIndex, address).signMessage(message),
+    );
   }
 
   async function signTransaction(
@@ -92,11 +102,10 @@ export function useLedger() {
 
     const { nodeNetworkId } = useAeSdk();
 
-    const transport = await TransportWebUSB.create();
-    const restoredAccount = new AccountLedger(transport, accountIndex, address);
-
-    return restoredAccount
-      .signTransaction(transaction, { networkId: nodeNetworkId.value });
+    return withTransport(
+      (transport) => new AccountLedger(transport, accountIndex, address)
+        .signTransaction(transaction, { networkId: nodeNetworkId.value }),
+    );
   }
 
   return {

@@ -98,11 +98,28 @@ const addAeppConnection = async (port: Runtime.Port) => {
   }
 };
 
+/** The last call started the timeout (a number) rather than stopping it (`null`). */
+let isTimeoutRunning = false;
+
+function setBackgroundSessionTimeout(sessionTimeout: number | null) {
+  isTimeoutRunning = sessionTimeout !== null;
+  if (IS_FIREFOX) {
+    setSessionTimeout(sessionTimeout);
+  } else {
+    browser.runtime.sendMessage<IBackgroundMessageData>({
+      target: 'background',
+      method: SESSION_METHODS.setSessionTimeout,
+      payload: sessionTimeout,
+    });
+  }
+}
+
 export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
   const { secureLoginTimeoutDecrypted, syncBackgroundEncryptionKey } = useAuth();
   const { getAeSdk, resetNode } = useAeSdk();
+  let sessionKeepingPortsCount = 0;
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port?.sender?.id !== browser.runtime.id) return;
@@ -138,26 +155,48 @@ export async function init() {
         break;
       }
       case CONNECTION_TYPES.SESSION: {
+        /**
+         * A shown page keeps the session until the last one closes, locks or gets hidden.
+         * Not a dapp's confirmation popup (`?id=`), which could keep it for as long as
+         * nobody answers.
+         */
+        const isKeepingSession = !new URL(port.sender!.url!).searchParams.has('id');
+        if (isKeepingSession) {
+          sessionKeepingPortsCount += 1;
+          if (sessionKeepingPortsCount === 1) {
+            setBackgroundSessionTimeout(null);
+          }
+        }
         port.onMessage.addListener((msg: IBackgroundMessageData) => {
           if (msg?.method === SESSION_METHODS.sessionKeyStored) {
+            // Asks the background for the key at once: a dapp's popup disconnects right after
+            // this, and with the "immediately" setting that drops the key.
             syncBackgroundEncryptionKey();
           }
         });
         port.onDisconnect.addListener(async () => {
-          if (IS_FIREFOX) {
-            setSessionTimeout(+secureLoginTimeoutDecrypted.value!);
-          } else {
-            browser.runtime.sendMessage<IBackgroundMessageData>({
-              target: 'background',
-              method: SESSION_METHODS.setSessionTimeout,
-              payload: +secureLoginTimeoutDecrypted.value!,
-            });
+          if (isKeepingSession) {
+            sessionKeepingPortsCount -= 1;
+          }
+          if (!sessionKeepingPortsCount) {
+            setBackgroundSessionTimeout(+secureLoginTimeoutDecrypted.value!);
           }
         });
         return;
       }
       default:
         throw new Error('Unknown connection type');
+    }
+  });
+
+  /**
+   * The setting is decrypted only once the session key is synced. A dapp's popup that closes
+   * right after unlocking doesn't wait for that, so a timeout started with the default is
+   * started again with the setting. A page opening meanwhile stops it, which ends this.
+   */
+  watch(secureLoginTimeoutDecrypted, (sessionTimeout) => {
+    if (isTimeoutRunning) {
+      setBackgroundSessionTimeout(+sessionTimeout!);
     }
   });
   await getAeSdk();

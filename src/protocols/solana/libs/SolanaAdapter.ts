@@ -228,17 +228,13 @@ export class SolanaAdapter extends BaseProtocolAdapter {
   }
 
   override async isAccountUsed(address: AccountAddress): Promise<boolean> {
-    try {
-      const conn = this.getConnection();
-      const pubkey = new PublicKey(address as string);
-      const [balance, signatures] = await Promise.all([
-        conn.getBalance(pubkey),
-        conn.getSignaturesForAddress(pubkey, { limit: 1 }),
-      ]);
-      return balance > 0 || signatures.length > 0;
-    } catch (e) {
-      return false;
-    }
+    const conn = this.getConnection();
+    const pubkey = new PublicKey(address as string);
+    const [balance, signatures] = await Promise.all([
+      conn.getBalance(pubkey),
+      conn.getSignaturesForAddress(pubkey, { limit: 1 }),
+    ]);
+    return balance > 0 || signatures.length > 0;
   }
 
   protected override deriveHdWalletAccountFromMnemonicSeed(

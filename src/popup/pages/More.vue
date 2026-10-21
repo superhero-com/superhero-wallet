@@ -178,12 +178,12 @@ export default defineComponent({
     const { addressBook } = useAddressBook();
     const { isBiometricLoginEnabled } = useUi();
     const {
-      checkBiometricLoginAvailability,
+      canAuthenticateWithDevice,
       isMnemonicEncrypted,
       isUsingDefaultPassword,
       lockWallet,
     } = useAuth();
-    const isBiometricLoginAvailable = ref(false);
+    const isDeviceAuthenticationAvailable = ref(false);
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
     const activeAccountFaucetUrl = computed(
@@ -195,13 +195,13 @@ export default defineComponent({
       || (
         IS_MOBILE_APP
         && isMnemonicEncrypted.value
-        && isBiometricLoginAvailable.value
+        && isDeviceAuthenticationAvailable.value
         && isBiometricLoginEnabled.value
       )
     ));
 
     onMounted(async () => {
-      isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
+      isDeviceAuthenticationAvailable.value = await canAuthenticateWithDevice();
     });
 
     return {

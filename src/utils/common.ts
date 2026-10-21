@@ -38,6 +38,7 @@ import type {
   Truthy,
 } from '@/types';
 import {
+  ACCOUNT_CHECK_TIMEOUT,
   ACCOUNT_TYPES,
   ADDRESS_GAP_LIMIT,
   DECIMAL_PLACES_HIGH_PRECISION,
@@ -53,6 +54,7 @@ import {
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
+import { AccountDiscoveryError } from '@/lib/errors';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
@@ -536,6 +538,8 @@ export function watchUntilTruthy<T>(
 
 /**
  * @returns {number} between -1 and n where -1 means there are no accounts found.
+ * A check that fails or gets no answer in `ACCOUNT_CHECK_TIMEOUT` counts as unused, so the
+ * accounts after it are still found, and the result comes as an `AccountDiscoveryError`.
  */
 export async function getLastNotEmptyAccountIndex(
   isAccountUsed: (address: string) => Promise<boolean>,
@@ -548,30 +552,47 @@ export async function getLastNotEmptyAccountIndex(
   let lastNotEmptyIdx = 0;
   let lastIndex = 0;
   let isAccountUsedArray: boolean[] = [];
+  let failure: { reason: unknown } | undefined;
   do {
-    try {
-      lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
-      lastIndex += isAccountUsedArray.length;
+    lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
+    lastIndex += isAccountUsedArray.length;
 
-      // eslint-disable-next-line no-await-in-loop
-      isAccountUsedArray = await Promise.all(
-        Array.from(
-          Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1).keys(),
-          // eslint-disable-next-line no-loop-func
-          (x) => x + lastIndex,
-        )
-          .map((index) => isAccountUsed(
-            getHdWalletAccountFromMnemonicSeed(wallet, index).address,
-          )),
-      );
-    } catch (e) {
-      break;
-    }
+    // eslint-disable-next-line no-await-in-loop
+    isAccountUsedArray = await Promise.all(
+      Array.from(
+        Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1).keys(),
+        // eslint-disable-next-line no-loop-func
+        (x) => x + lastIndex,
+      )
+        // eslint-disable-next-line no-loop-func
+        .map(async (index) => {
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            return await Promise.race([
+              isAccountUsed(getHdWalletAccountFromMnemonicSeed(wallet, index).address),
+              new Promise<never>((_, reject) => {
+                timer = setTimeout(
+                  () => reject(new Error('Account check timed out')),
+                  ACCOUNT_CHECK_TIMEOUT,
+                );
+              }),
+            ]);
+          } catch (error) {
+            failure ??= { reason: error };
+            return false;
+          } finally {
+            clearTimeout(timer);
+          }
+        }),
+    );
   } while (!(
     isAccountUsedArray.lastIndexOf(true) === -1
     || isAccountUsedArray.filter((isAccountUsedValue) => !isAccountUsedValue)
       .length === ADDRESS_GAP_LIMIT
   ));
+  if (failure) {
+    throw new AccountDiscoveryError(failure.reason, lastNotEmptyIdx);
+  }
   return lastNotEmptyIdx;
 }
 

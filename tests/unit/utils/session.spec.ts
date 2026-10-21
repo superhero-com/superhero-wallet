@@ -1,5 +1,5 @@
 // @ts-nocheck
-describe('sessionStart', () => {
+describe('extension session', () => {
   const originalBrowser = globalThis.browser;
   let port;
   let constants;
@@ -24,7 +24,7 @@ describe('sessionStart', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    port = { postMessage: vi.fn() };
+    port = { postMessage: vi.fn(), disconnect: vi.fn() };
     globalThis.browser = {
       runtime: { connect: vi.fn(() => port) },
       storage: {
@@ -82,10 +82,93 @@ describe('sessionStart', () => {
     await expect(sessionStart(await generateExtractableKey())).resolves.toBeUndefined();
   });
 
-  it('does nothing in the offscreen tab', async () => {
-    const sessionStart = await importSessionStart({ isExtension: false });
+  it('lets the background time the session out once the page locks', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    const { sessionEnd } = await import('@/utils/session');
+    const ports = [];
+    globalThis.browser.runtime.connect.mockImplementation(() => {
+      const newPort = { postMessage: vi.fn(), disconnect: vi.fn() };
+      ports.push(newPort);
+      return newPort;
+    });
+    await sessionStart(await generateExtractableKey());
+    await sessionStart(await generateExtractableKey()); // E.g. after a password change
+
+    await sessionEnd();
+
+    expect(globalThis.browser.storage.session.remove).toHaveBeenCalledWith('exportedEncryptionKey');
+    expect(ports).toHaveLength(2);
+    ports.forEach(({ disconnect }) => expect(disconnect).toHaveBeenCalledTimes(1));
+
+    // Not again when the page locks once more
+    await sessionEnd();
+    ports.forEach(({ disconnect }) => expect(disconnect).toHaveBeenCalledTimes(1));
+  });
+
+  it('lets the background time the session out also when the key could not be removed', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    const { sessionEnd } = await import('@/utils/session');
+    await sessionStart(await generateExtractableKey());
+    globalThis.browser.storage.session.remove.mockRejectedValue(new Error('Extension context invalidated'));
+
+    await expect(sessionEnd()).rejects.toThrow('Extension context invalidated');
+    expect(port.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the session of a page shown again with one port, until it is released', async () => {
+    await importSessionStart({ isExtension: true });
+    const { sessionHold, sessionRelease } = await import('@/utils/session');
+
+    sessionHold();
+    sessionHold();
+    expect(globalThis.browser.runtime.connect).toHaveBeenCalledTimes(1);
+    expect(globalThis.browser.runtime.connect)
+      .toHaveBeenCalledWith({ name: constants.CONNECTION_TYPES.SESSION });
+
+    await sessionRelease();
+    expect(port.disconnect).toHaveBeenCalledTimes(1);
+    expect(globalThis.browser.storage.session.remove).not.toHaveBeenCalled();
+
+    sessionHold();
+    expect(globalThis.browser.runtime.connect).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not open another port for a page that keeps the session already', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    const { sessionHold } = await import('@/utils/session');
 
     await sessionStart(await generateExtractableKey());
+    sessionHold();
+
+    expect(globalThis.browser.runtime.connect).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases the port only once the offscreen tab was told about the stored key', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    const { sessionRelease } = await import('@/utils/session');
+    let finishWrite;
+    globalThis.browser.storage.session.set.mockReturnValue(
+      new Promise((resolve) => { finishWrite = resolve; }),
+    );
+    const starting = sessionStart(await generateExtractableKey());
+    await vi.waitFor(() => expect(globalThis.browser.storage.session.set).toHaveBeenCalled());
+
+    const releasing = sessionRelease();
+    await Promise.resolve();
+    expect(port.disconnect).not.toHaveBeenCalled();
+
+    finishWrite();
+    await Promise.all([starting, releasing]);
+    expect(port.postMessage.mock.invocationCallOrder[0])
+      .toBeLessThan(port.disconnect.mock.invocationCallOrder[0]);
+  });
+
+  it('does nothing in the offscreen tab', async () => {
+    const sessionStart = await importSessionStart({ isExtension: false });
+    const { sessionHold } = await import('@/utils/session');
+
+    await sessionStart(await generateExtractableKey());
+    sessionHold();
 
     expect(globalThis.browser.runtime.connect).not.toHaveBeenCalled();
     expect(globalThis.browser.storage.session.set).not.toHaveBeenCalled();

@@ -82,6 +82,7 @@ describe('useAeSdk, an aepp asking for addresses', () => {
         mnemonicSeed: ref(mnemonicToSeedSync(MNEMONIC)),
         isMnemonicRestored: ref(true),
         isAuthenticated: ref(true),
+        isMnemonicUnreadable: ref(false),
         encryptionKey,
       }),
     }));

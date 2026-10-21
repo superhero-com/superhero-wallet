@@ -69,7 +69,7 @@ vi.mock('../../src/composables', () => ({
     generateMnemonic: vi.fn(),
     setMnemonicAndInitializeAuthentication: vi.fn(),
     openEnableBiometricLoginModal: vi.fn(),
-    checkBiometricLoginAvailability: vi.fn(async () => false),
+    canAuthenticateWithDevice: vi.fn(async () => false),
     isMnemonicEncrypted: { value: false },
     isUsingDefaultPassword: { value: true },
     lockWallet: vi.fn(),

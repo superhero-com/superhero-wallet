@@ -14,7 +14,7 @@
             <SwitchButton
               :label="$t('pages.secureLogin.enableSecureLogin')"
               :model-value="isBiometricLoginEnabled"
-              :disabled="!isBiometricLoginAvailable"
+              :disabled="!isDeviceAuthenticationAvailable"
               @update:modelValue="setBiometricLoginEnabled"
             />
           </div>
@@ -208,7 +208,7 @@ export default defineComponent({
   },
   setup() {
     const infoBoxEl = ref<ComponentRef>();
-    const isBiometricLoginAvailable = ref(false);
+    const isDeviceAuthenticationAvailable = ref(false);
     const isAuthFailed = ref(false);
     const isAuthenticating = ref(false);
     const isPasswordChangedSuccessfully = ref(false);
@@ -218,7 +218,7 @@ export default defineComponent({
     const wrapper = ref();
 
     const {
-      checkBiometricLoginAvailability,
+      canAuthenticateWithDevice,
       updatePassword,
       setPassword,
       secureLoginTimeoutDecrypted,
@@ -298,8 +298,8 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      isBiometricLoginAvailable.value = await checkBiometricLoginAvailability();
-      if (!isBiometricLoginAvailable.value && IS_MOBILE_APP) {
+      isDeviceAuthenticationAvailable.value = await canAuthenticateWithDevice();
+      if (!isDeviceAuthenticationAvailable.value && IS_MOBILE_APP) {
         openEnableBiometricLoginModal();
       }
     });
@@ -310,7 +310,7 @@ export default defineComponent({
       IS_MOBILE_APP,
       infoBoxEl,
       isBiometricLoginEnabled,
-      isBiometricLoginAvailable,
+      isDeviceAuthenticationAvailable,
       isPasswordChangedSuccessfully,
       isAuthFailed,
       isUsingDefaultPassword,
