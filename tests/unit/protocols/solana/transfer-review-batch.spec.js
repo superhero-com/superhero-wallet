@@ -117,4 +117,27 @@ describe('Solana TransferReview - batch', () => {
 
     expect(mockAdapter.transferToken).toHaveBeenCalledWith('5', 'REC1', 'TOKEN', { fromAccount: 'SENDER', decimals: 0 });
   });
+
+  it('ignores Confirm while the sends are running', async () => {
+    mockAdapter.spendBatch.mockClear();
+    const wrapper = mount(TransferReview, {
+      props: {
+        transferData: {
+          amount: '1',
+          addresses: ['REC1', 'REC2'],
+          selectedAsset: { contractId: 'SOL', symbol: 'SOL' },
+        },
+      },
+      global: {
+        stubs: { AvatarWithChainName: true, DetailsItem: true, TokenAmount: true },
+        mocks: {
+          $t: () => 't',
+        },
+      },
+    });
+
+    await Promise.all([wrapper.vm.submit(), wrapper.vm.submit()]);
+
+    expect(mockAdapter.spendBatch).toHaveBeenCalledTimes(1);
+  });
 });

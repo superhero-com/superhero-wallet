@@ -124,7 +124,8 @@ export default defineComponent({
         selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipients?.length || !selectedAsset) {
+      // Confirm again while sending would pay twice.
+      if (loading.value || !amount || !recipients?.length || !selectedAsset) {
         return;
       }
 

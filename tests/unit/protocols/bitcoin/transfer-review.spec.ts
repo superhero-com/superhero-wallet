@@ -134,4 +134,14 @@ describe('Bitcoin TransferReview - sending to several recipients', () => {
     expect(wrapper.emitted('success')).toHaveLength(1);
     expect((wrapper.vm as any).loading).toBe(false);
   });
+
+  it('ignores Confirm while the sends are running', async () => {
+    mockAdapter.spend.mockResolvedValueOnce({ hash: 'hash-1' });
+    const wrapper = mountReview(['REC1']);
+
+    await Promise.all([(wrapper.vm as any).submit(), (wrapper.vm as any).submit()]);
+
+    expect(mockAdapter.spend).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted('success')).toHaveLength(1);
+  });
 });
