@@ -95,7 +95,8 @@ export default defineComponent({
         selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipients?.length || !selectedAsset) {
+      // Confirm again while sending would pay twice.
+      if (loading.value || !amount || !recipients?.length || !selectedAsset) {
         return;
       }
 
@@ -108,7 +109,10 @@ export default defineComponent({
             amount,
             recipients,
             selectedAsset.contractId,
-            { fromAccount: lastActiveSolanaAccount?.address },
+            {
+              fromAccount: lastActiveSolanaAccount?.address,
+              decimals: selectedAsset.decimals,
+            },
           );
           results.forEach(({ hash, recipients: recs }: any) => {
             recs.forEach((recipient: string) => {
@@ -172,6 +176,7 @@ export default defineComponent({
                 selectedAsset.contractId,
                 {
                   fromAccount: lastActiveSolanaAccount?.address,
+                  decimals: selectedAsset.decimals,
                 },
               );
             } else {

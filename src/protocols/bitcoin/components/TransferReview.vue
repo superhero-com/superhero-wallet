@@ -124,13 +124,15 @@ export default defineComponent({
         selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipients?.length || !selectedAsset) {
+      // Confirm again while sending would pay twice.
+      if (loading.value || !amount || !recipients?.length || !selectedAsset) {
         return;
       }
 
       loading.value = true;
+      let lastHash: string | undefined;
       // eslint-disable-next-line no-restricted-syntax
-      for (const recipient of recipients) {
+      for (const [index, recipient] of recipients.entries()) {
         // eslint-disable-next-line no-await-in-loop
         const hash = await transfer({
           amount,
@@ -138,38 +140,48 @@ export default defineComponent({
           selectedAsset,
         });
 
-        if (hash) {
-          const lastActiveBtcAccount = getLastActiveProtocolAccount(props.protocol);
-          const transaction: ITransaction = {
-            hash: hash as any,
-            pending: true,
-            transactionOwner: lastActiveBtcAccount?.address,
-            protocol: props.protocol,
-            tx: {
-              amount: Number(amount),
-              callerId: lastActiveBtcAccount?.address!,
-              contractId: selectedAsset.contractId as any,
-              senderId: lastActiveBtcAccount?.address,
-              type: 'SpendTx',
-              recipientId: recipient,
-              arguments: [],
-              fee: props.transferData.fee?.dividedBy(recipients.length).toNumber() ?? 0,
-            },
-          };
-          addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+        // The remaining sends would spend the same coins, so stop at the first failure.
+        if (!hash) {
+          break;
         }
-        /**
-         * A timeout is necessary to allow the blockchain to have time
-         * to submit the previous transaction in case there are multiple recipients
-         */
-        // eslint-disable-next-line no-await-in-loop
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+        lastHash = hash;
+
+        const lastActiveBtcAccount = getLastActiveProtocolAccount(props.protocol);
+        const transaction: ITransaction = {
+          hash: hash as any,
+          pending: true,
+          transactionOwner: lastActiveBtcAccount?.address,
+          protocol: props.protocol,
+          tx: {
+            amount: Number(amount),
+            callerId: lastActiveBtcAccount?.address!,
+            contractId: selectedAsset.contractId as any,
+            senderId: lastActiveBtcAccount?.address,
+            type: 'SpendTx',
+            recipientId: recipient,
+            arguments: [],
+            fee: props.transferData.fee?.dividedBy(recipients.length).toNumber() ?? 0,
+          },
+        };
+        addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+
+        if (index < recipients.length - 1) {
+          /**
+           * A timeout is necessary to allow the blockchain to have time
+           * to submit the previous transaction in case there are multiple recipients
+           */
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+        }
       }
       loading.value = false;
 
-      // TODO - redirect after transfer function will be ready
-      router.push({ name: homeRouteName.value });
-      emit('success');
+      // Leave the review once anything was sent, so Confirm can't send it again.
+      if (lastHash) {
+        // TODO - redirect after transfer function will be ready
+        router.push({ name: homeRouteName.value });
+        emit('success');
+      }
     }
 
     return {

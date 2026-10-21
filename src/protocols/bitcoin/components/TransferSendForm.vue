@@ -36,7 +36,11 @@
           ...activeNetwork.type !== NETWORK_TYPE_TESTNET && protocol === PROTOCOLS.bitcoin
             ? { min_value: toBitcoin(DUST_AMOUNT) }
             : {},
+          ...protocol === PROTOCOLS.dogecoin
+            ? { min_value: toBitcoin(DOGE_DUST_AMOUNT) }
+            : {},
         }"
+        @update:model-value="shouldUseMaxAmount = false"
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
@@ -75,6 +79,7 @@ import {
   ref,
   watch,
 } from 'vue';
+import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
@@ -95,6 +100,13 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Logger from '@/lib/logger';
 import { DUST_AMOUNT } from '@/protocols/bitcoin/config';
+import {
+  DOGE_DEFAULT_FEE,
+  DOGE_DEFAULT_FEE_RATE,
+  DOGE_DUST_AMOUNT,
+} from '@/protocols/dogecoin/config';
+import type { BitcoinAdapter } from '@/protocols/bitcoin/libs/BitcoinAdapter';
+import type { DogecoinAdapter } from '@/protocols/dogecoin/libs/DogecoinAdapter';
 
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -153,10 +165,13 @@ export default defineComponent({
 
     const recipientPlaceholderText = t('modals.send.recipientPlaceholderProtocol', { name: props.protocol });
 
+    const isDogecoin = props.protocol === PROTOCOLS.dogecoin;
+    const defaultFee = isDogecoin ? DOGE_DEFAULT_FEE : 0.00002;
+
     const feeSelectedIndex = ref(1);
-    const feeSlow = ref(new BigNumber(0.00002));
-    const feeMedium = ref(new BigNumber(0.00002));
-    const feeHigh = ref(new BigNumber(0.00002));
+    const feeSlow = ref(new BigNumber(defaultFee));
+    const feeMedium = ref(new BigNumber(defaultFee));
+    const feeHigh = ref(new BigNumber(defaultFee));
     const recipientsCount = computed(() => formModel.value.addresses?.length || 1);
 
     const feeList = computed((): IFeeItem[] => [
@@ -199,19 +214,28 @@ export default defineComponent({
       }
     }
 
+    async function getTransactionVsizes(feeRates: number[]): Promise<number[]> {
+      // Max spends every input, so the fee doesn't move its size. A later send to
+      // another recipient can have change.
+      return (bitcoinAdapter as BitcoinAdapter | DogecoinAdapter).estimateVsize(
+        Number(formModel.value.amount) || 0,
+        formModel.value.addresses?.[0] || activeAccount.value.address,
+        feeRates,
+        {
+          address: activeAccount.value.address,
+          sweep: shouldUseMaxAmount.value,
+          withChange: recipientsCount.value > 1,
+        },
+      );
+    }
+
+    let feeUpdateRun = 0;
+    let appliedFeeUpdateRun = 0;
+
     async function updateFeeList() {
+      feeUpdateRun += 1;
+      const run = feeUpdateRun;
       try {
-        const byteSize = (await bitcoinAdapter.constructAndSignTx(
-          // TODO: changed to 0 because balance.value can differs
-          // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
-          // consider returning an actual amount in future
-          0,
-          formModel.value.addresses?.[0] || activeAccount.value.address,
-          {
-            fee: 0,
-            ...activeAccount.value,
-          },
-        )).virtualSize();
         const { nodeUrl } = (activeNetwork.value.protocols as any)[props.protocol];
 
         let feeRate: number | undefined;
@@ -221,30 +245,25 @@ export default defineComponent({
           feeRate = estimates?.['5'] || estimates?.['6'] || estimates?.['7'] || estimates?.['8'];
         } catch (_e) { /* ignore; fallback below */ }
 
-        // Sane defaults if API fails: medium ~15 sat/vB
-        const DEFAULT_RATE_SAT_PER_VB = 15;
+        // Sane defaults if API fails: medium 15 sat/vB, or 0.01 DOGE/kB for Dogecoin
+        const DEFAULT_RATE_SAT_PER_VB = isDogecoin ? DOGE_DEFAULT_FEE_RATE : 15;
         const baseRate = (
           Number.isFinite(feeRate) && feeRate! > 0
         ) ? feeRate! : DEFAULT_RATE_SAT_PER_VB;
+        // Slow, medium and fast. Double the medium for the testnet to match relay fee.
+        // TODO: Revisit this along with fee calculation
+        const feeRates = [0.5, activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1, 1.5]
+          // Dogecoin miners leave out transactions under 0.01 DOGE/kB by default.
+          .map((factor) => Math.max(factor * baseRate, isDogecoin ? DOGE_DEFAULT_FEE_RATE : 0));
+        // Each speed is sized at its own rate, as a higher fee can take another input.
+        const vsizes = await getTransactionVsizes(feeRates);
+        // Drop this result if a newer run was already applied.
+        if (run < appliedFeeUpdateRun) return;
+        appliedFeeUpdateRun = run;
 
-        const feeStepFactor = new BigNumber(0.5);
-        const newFeeMedium = new BigNumber(Math.ceil(baseRate * byteSize));
-
-        feeSlow.value = new BigNumber(
-          toBitcoin(Math.ceil(newFeeMedium.minus(newFeeMedium.times(feeStepFactor)).toNumber())),
-        );
-
-        feeMedium.value = new BigNumber(
-          toBitcoin(
-            // Double the fee for the testnet to match relay fee.
-            // TODO: Revisit this along with fee calculation
-            newFeeMedium.toNumber() * (activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1),
-          ),
-        );
-
-        feeHigh.value = new BigNumber(
-          toBitcoin(Math.ceil(newFeeMedium.plus(newFeeMedium.times(feeStepFactor)).toNumber())),
-        );
+        [feeSlow.value, feeMedium.value, feeHigh.value] = feeRates.map((rate, idx) => (
+          new BigNumber(toBitcoin(Math.ceil(rate * vsizes[idx])))
+        ));
       } catch (error: any) {
         Logger.write(error);
       }
@@ -258,7 +277,12 @@ export default defineComponent({
       }, 5000);
     });
 
+    const updateFeeListDebounced = debounce(updateFeeList, 300);
+
+    watch([() => formModel.value.amount, recipientsCount], () => updateFeeListDebounced());
+
     onUnmounted(() => {
+      updateFeeListDebounced.cancel();
       if (polling) {
         clearInterval(polling);
       }
@@ -291,6 +315,7 @@ export default defineComponent({
       INFO_BOX_TYPES,
       coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
       DUST_AMOUNT,
+      DOGE_DUST_AMOUNT,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,
       hasMultisigTokenWarning,

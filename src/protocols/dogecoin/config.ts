@@ -7,6 +7,19 @@ export const DOGE_PROTOCOL_NAME = 'Dogecoin';
 export const DOGE_COIN_PRECISION = 8; // Amount of decimals
 export const DOGE_COINGECKO_COIN_ID = 'dogecoin';
 
+/**
+ * Dogecoin Core's soft dust limit (0.01 DOGE): smaller outputs need an extra fee to relay.
+ */
+export const DOGE_DUST_AMOUNT = 1_000_000;
+/**
+ * Dogecoin Core's recommended fee rate (0.01 DOGE/kB) in koinu/vB.
+ */
+export const DOGE_DEFAULT_FEE_RATE = 1000;
+/**
+ * A 226 vB transaction (one input, two outputs) at `DOGE_DEFAULT_FEE_RATE`.
+ */
+export const DOGE_DEFAULT_FEE = 0.00226;
+
 export const DOGE_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings = {
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: 'https://sochain.com/api/v2',

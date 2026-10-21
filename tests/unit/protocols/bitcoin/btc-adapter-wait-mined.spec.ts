@@ -34,4 +34,27 @@ describe('BitcoinAdapter - waitTransactionMined polling', () => {
     expect(res).toBeNull();
     expect(spy).toHaveBeenCalled();
   });
+
+  it('resolves null when every lookup rejects (Blockstream 404 "Transaction not found")', async () => {
+    vi.restoreAllMocks();
+    // fetchJson calls .json() on the text/plain 404 body, which rejects.
+    const fetchSpy = vi.fn(() => Promise.resolve({
+      status: 404,
+      json: () => Promise.reject(new SyntaxError('Unexpected token T in JSON')),
+    }));
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = fetchSpy;
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+
+    let result: any = 'pending';
+    adapter.waitTransactionMined('00'.repeat(32)).then((res) => { result = res; });
+    await vi.advanceTimersByTimeAsync(5000 * 10);
+    expect(result).toBeNull();
+
+    await vi.advanceTimersByTimeAsync(5000 * 5);
+    expect(fetchSpy).toHaveBeenCalledTimes(10);
+    process.off('unhandledRejection', unhandled);
+    expect(unhandled).not.toHaveBeenCalled();
+  });
 });
