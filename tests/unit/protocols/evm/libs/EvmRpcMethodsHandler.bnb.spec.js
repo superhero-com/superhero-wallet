@@ -1,15 +1,18 @@
+import BigNumber from 'bignumber.js';
 import { handleEvmRpcMethod } from '../../../../../src/protocols/evm/libs/EvmRpcMethodsHandler';
 import { ETH_RPC_METHODS } from '../../../../../src/protocols/ethereum/config';
 
 vi.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: { value: { chainId: '56', nodeUrl: 'https://bsc.rpc' } },
+    bnbActiveNetworkPredefinedSettings: { value: { middlewareUrl: 'https://bscscan.api' } },
   }),
 }));
 
 vi.mock('../../../../../src/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: { value: { chainId: '1', nodeUrl: 'https://eth.rpc' } },
+    ethActiveNetworkPredefinedSettings: { value: { middlewareUrl: 'https://etherscan.api' } },
   }),
 }));
 
@@ -117,7 +120,11 @@ describe('handleEvmRpcMethod - modal app', () => {
       }),
     }));
     vi.doMock('@/protocols/ethereum/composables/ethFeeCalculation', () => ({
-      useEthFeeCalculation: () => ({ updateFeeList: vi.fn(), maxFeePerGas: { value: 1 } }),
+      // 1 gwei
+      useEthFeeCalculation: () => ({
+        updateFeeList: vi.fn(),
+        maxFeePerGas: { value: new BigNumber('0.000000001') },
+      }),
     }));
     ({ handleEvmRpcMethod: handle } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler'));
   });

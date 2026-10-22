@@ -80,17 +80,6 @@ export function useConnectionStatus() {
           description: t('connectionStatus.node.error.description'),
           icon: 'critical',
         };
-      case isCurrenciesUnavailable.value:
-        return {
-          statusMessage: t('connectionStatus.currencies.statusMessage'),
-          title: t('connectionStatus.currencies.title'),
-          description: t('connectionStatus.currencies.description'),
-          icon: 'critical',
-          option: {
-            href: 'https://www.coingecko.com/',
-            target: '_blank',
-          },
-        };
       case isMiddlewareUnavailable.value:
         return {
           statusMessage: t('connectionStatus.middleware.error.title'),
@@ -138,6 +127,18 @@ export function useConnectionStatus() {
           title: t('connectionStatus.middleware.syncing.title'),
           description: t('connectionStatus.middleware.syncing.description'),
           icon: 'warning',
+        };
+      // Last, as the cached prices are still shown
+      case isCurrenciesUnavailable.value:
+        return {
+          statusMessage: t('connectionStatus.currencies.statusMessage'),
+          title: t('connectionStatus.currencies.title'),
+          description: t('connectionStatus.currencies.description'),
+          icon: 'critical',
+          option: {
+            href: 'https://www.coingecko.com/',
+            target: '_blank',
+          },
         };
       default:
         return null;

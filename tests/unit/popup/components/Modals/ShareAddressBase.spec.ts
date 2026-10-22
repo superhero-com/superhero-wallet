@@ -84,7 +84,12 @@ describe('ShareAddressBase', () => {
 
     expect(key).toBe('modals.receive.shareTextNoAmount');
     expect(params.address).toBe(AE_ADDRESS);
-    expect(query).toEqual({ op: 'transferSend', token: AE_SYMBOL, account: AE_ADDRESS });
+    expect(query).toEqual({
+      op: 'transferSend',
+      protocol: PROTOCOLS.aeternity,
+      token: AE_SYMBOL,
+      account: AE_ADDRESS,
+    });
     expect(mockInvokeDeviceShare).toHaveBeenCalledTimes(1);
   });
 
@@ -94,7 +99,12 @@ describe('ShareAddressBase', () => {
 
     const { query } = await getSharedLinkQuery(wrapper);
 
-    expect(query).toEqual({ op: 'transferSend', token: BTC_CONTRACT_ID, account: BTC_ADDRESS });
+    expect(query).toEqual({
+      op: 'transferSend',
+      protocol: PROTOCOLS.bitcoin,
+      token: BTC_CONTRACT_ID,
+      account: BTC_ADDRESS,
+    });
   });
 
   it('falls back to the protocol coin before an asset is selected', async () => {
@@ -118,6 +128,7 @@ describe('ShareAddressBase', () => {
     expect(params.coinSymbol).toBe('TT');
     expect(query).toEqual({
       op: 'transferSend',
+      protocol: PROTOCOLS.aeternity,
       token: TOKEN_CONTRACT_ID,
       amount: '1.5',
       account: AE_ADDRESS,

@@ -5,7 +5,7 @@
 import { ref } from 'vue';
 import { mnemonicToSeedSync } from '@scure/bip39';
 import HttpProvider from 'web3-providers-http';
-import { Transaction, TransactionFactory } from 'web3-eth-accounts';
+import { FeeMarketEIP1559Transaction, Transaction, TransactionFactory } from 'web3-eth-accounts';
 import {
   bytesToHex,
   hexToBytes,
@@ -49,6 +49,11 @@ vi.mock('@/composables/modals', async (importOriginal) => {
 
 const DAPP = 'https://dapp.example';
 const GAS_PRICE = 27_500_000_000n;
+/** The node price raised by a tenth, as the send form does */
+const SIGNED_GAS_PRICE = 30_250_000_000n;
+/** Of the latest Ethereum block */
+const BASE_FEE = 10_000_000_000n;
+const TIP = 1_500_000_000n;
 const NONCE = 7n;
 const TX = {
   to: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
@@ -69,6 +74,17 @@ function answerNodeRequest(url: string, { id, method, params }: any) {
   const results: Record<string, () => unknown> = {
     eth_estimateGas: () => '0x5208',
     eth_gasPrice: () => numberToHex(GAS_PRICE),
+    eth_maxPriorityFeePerGas: () => numberToHex(TIP),
+    eth_getBlockByNumber: () => ({
+      number: '0x1',
+      hash: `0x${'1'.repeat(64)}`,
+      parentHash: `0x${'0'.repeat(64)}`,
+      timestamp: '0x65553f00',
+      gasLimit: '0x1c9c380',
+      gasUsed: '0x0',
+      baseFeePerGas: numberToHex(BASE_FEE),
+      transactions: [],
+    }),
     eth_getTransactionCount: () => numberToHex(NONCE),
     eth_call: () => '0x',
     eth_sendRawTransaction: () => keccak256(params[0]),
@@ -117,6 +133,7 @@ WalletStorage.set(STORAGE_KEYS.accountsRaw, [
   PROTOCOLS.avalanche,
   PROTOCOLS.bnb,
   PROTOCOLS.polygonPos,
+  PROTOCOLS.ethereum,
 ].map((protocol) => ({ protocol, type: ACCOUNT_TYPES.hdWallet, isRestored: true })));
 // The second Avalanche account
 WalletStorage.set(STORAGE_KEYS.activeAccountGlobalIdx, 1);
@@ -205,7 +222,7 @@ describe('eth_sendTransaction of a dapp', () => {
       value: BigInt(TX.value),
       data: TX.data,
       gasLimit: BigInt(TX.gas),
-      gasPrice: GAS_PRICE,
+      gasPrice: SIGNED_GAS_PRICE,
     });
     // Counting the pending transactions of the sender
     const nonceRequests = getNodeRequests('eth_getTransactionCount')
@@ -217,10 +234,45 @@ describe('eth_sendTransaction of a dapp', () => {
       {
         protocol,
         fromAccount: from,
-        // 100 000 gas at the node's price + 10%
-        tx: { recipientId: TX.to, fee: expect.closeTo(0.003025, 9), gas: 100000 },
+        // 100 000 gas at the signed gas price, the node's + 10%
+        tx: { recipientId: TX.to, fee: expect.closeTo(0.003025, 15), gas: 100000 },
       },
     ]);
+  });
+
+  it('signs the gas price shown, not the one a dapp set, on BNB Smart Chain', async () => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{
+      from, ...TX, gasPrice: '0x1', maxFeePerGas: '0x6fc23ac00',
+    }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toBeUndefined();
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).gasPrice).toBe(SIGNED_GAS_PRICE);
+    expect(getNodeRequests('eth_gasPrice')).toHaveLength(1);
+    expect(openModal.mock.calls[0][1].tx.fee).toBeCloseTo(0.003025, 15);
+  });
+
+  it('signs the Ethereum fees shown, not the ones a dapp set', async () => {
+    const { from } = getChain(PROTOCOLS.ethereum);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{
+      from, ...TX, maxFeePerGas: '0x6fc23ac00', maxPriorityFeePerGas: '0x77359400',
+    }], 'Dapp', 'eip155:1');
+
+    expect(response.error).toBeUndefined();
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    const tx = TransactionFactory
+      .fromSerializedData(hexToBytes(raw)) as FeeMarketEIP1559Transaction;
+    expect(tx.type).toBe(2);
+    expect(tx.common.chainId()).toBe(1n);
+    // Twice the base fee plus the node tip, plus the tip of the slow speed
+    expect(tx.maxFeePerGas).toBe(23_000_000_000n);
+    expect(tx.maxPriorityFeePerGas).toBe(TIP);
+    expect(tx.gasLimit).toBe(BigInt(TX.gas));
+    // The most the gas limit can cost at the max fee
+    expect(openModal.mock.calls[0][1].tx.fee).toBeCloseTo(0.0023, 15);
   });
 
   it('sends a transfer with the gas estimated by the node', async () => {

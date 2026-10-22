@@ -1,5 +1,10 @@
 import { computed } from 'vue';
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import {
+  config,
+  enableAutoUnmount,
+  flushPromises,
+  mount,
+} from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import {
   AccountMemory,
@@ -27,6 +32,7 @@ import {
   PROTOCOLS,
 } from '@/constants';
 import { createAppData } from '@/utils';
+import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import en from '@/popup/locales/en-US.json';
 
 /**
@@ -681,5 +687,62 @@ describe('ConfirmTransactionSign.vue contract-call verification', () => {
 
     expect((wrapper.vm as any).error).not.toBe('');
     expect(isAcceptDisabled(wrapper)).toBe(true);
+  });
+});
+
+describe('ConfirmTransactionSign.vue EVM call data', () => {
+  const TOKEN = '0x55d398326f99059fF775485246999027B3197955';
+  const SPENDER = '0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af';
+  const pad = (hex: string) => hex.replace(/^0x/, '').toLowerCase().padStart(64, '0');
+  let etherscanCalls: any[];
+
+  beforeEach(() => {
+    // The call data sits in the advanced details
+    config.global.renderStubDefaultSlot = true;
+    etherscanCalls = [];
+    vi.spyOn(EtherscanService.prototype, 'fetchFromApi').mockImplementation(
+      async function fetchFromApi(this: any, params: any) {
+        etherscanCalls.push({ chainId: this.chainId, ...params });
+        return { status: '0', message: 'NOTOK', result: '' } as any;
+      },
+    );
+  });
+
+  afterEach(() => {
+    config.global.renderStubDefaultSlot = false;
+    vi.restoreAllMocks();
+  });
+
+  const mountEvmCall = (data: string) => mountModal(ADDRESS_PREPARED, {
+    protocol: PROTOCOLS.bnb,
+    txBase64: undefined,
+    tx: {
+      senderId: ADDRESS_EVM, contractId: TOKEN, data, fee: 0.000021, amount: 0,
+    },
+    fromAccount: ADDRESS_EVM,
+  });
+
+  const getCallDataDetails = (wrapper: any) => wrapper.findComponent({ name: 'TransactionCallDataDetails' });
+
+  it('shows the spender and the amount of an approval', async () => {
+    const wrapper = mountEvmCall(`0x095ea7b3${pad(SPENDER)}${'f'.repeat(64)}`);
+    await flushPromises();
+
+    const decoded = getCallDataDetails(wrapper).props('callDataDecoded');
+    expect(decoded.functionName).toBe('approve');
+    expect(decoded.args[0]).toBe(SPENDER);
+    expect(decoded.args[1]).toBe(2n ** 256n - 1n);
+    expect(etherscanCalls).toEqual([]);
+  });
+
+  it('asks the explorer of the chain of the transaction for another contract', async () => {
+    // swapExactTokensForTokens
+    const wrapper = mountEvmCall(`0x38ed1739${'0'.repeat(64)}`);
+    await flushPromises();
+
+    expect(etherscanCalls).toEqual([
+      expect.objectContaining({ chainId: '56', action: 'getabi', address: TOKEN }),
+    ]);
+    expect(getCallDataDetails(wrapper).props('callDataDecoded')).toBeNull();
   });
 });

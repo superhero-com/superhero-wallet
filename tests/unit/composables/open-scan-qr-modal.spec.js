@@ -22,6 +22,15 @@ function withSetup(composable) {
 
 const testAmount = '11.111';
 const testInvoiceId = '232323123';
+const foreignLinkQuery = `account=${STUB_ACCOUNT.addressAeternity}&amount=99&payload=hi`;
+const foreignLinks = [
+  `https://evil.example/account?op=transferSend&${foreignLinkQuery}`,
+  `https://wallet.superhero.com.evil.example/account?${foreignLinkQuery}`,
+  `http://wallet.superhero.com/account?${foreignLinkQuery}`,
+  // Hosts that are not domain names
+  `https://1.2.3.4/pay?${foreignLinkQuery}`,
+  `https://wallet:8080/account?${foreignLinkQuery}`,
+];
 let numberOfTheTest = 0;
 
 const qrCodeSource = async () => {
@@ -32,6 +41,12 @@ const qrCodeSource = async () => {
     case (3): return Promise.resolve(`${STUB_ACCOUNT.addressAeternity}?token=${STUB_TOKEN_CONTRACT_ADDRESS}&amount=${testAmount}`);
     case (4): return Promise.resolve(`{ "invoiceId": "${testInvoiceId}", "invoiceContract": "${STUB_CONTRACT_ADDRESS}", "tokenContract": "${STUB_TOKEN_CONTRACT_ADDRESS}", "amount": "${testAmount}" }`);
     case (5): return Promise.resolve(null);
+    case (6):
+    case (7):
+    case (8):
+    case (9):
+    case (10): return Promise.resolve(foreignLinks[numberOfTheTest - 6]);
+    case (11): return Promise.resolve('https://evil.example/pay?amount=99');
     default:
       return '';
   }
@@ -143,5 +158,28 @@ describe('scanTransferQrCode', () => {
     expect(formModel.value.addresses[0]).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
     expect(formModel.value.amount).toBe(testAmount);
     expect(formModel.value.selectedAsset.contractId).toBe(STUB_TOKEN_CONTRACT_ADDRESS);
+  });
+
+  it.each(foreignLinks.map((link, idx) => [link, idx + 6]))(
+    'fills in nothing but the recipient from a link of another site: %s',
+    async (_, testNumber) => {
+      numberOfTheTest = testNumber;
+      formModel.value.addresses = undefined;
+      formModel.value.amount = '1';
+      formModel.value.payload = '';
+      await scanTransferQrCode();
+      expect(formModel.value.addresses).toEqual([STUB_ACCOUNT.addressAeternity]);
+      expect(formModel.value.amount).toBe('1');
+      expect(formModel.value.payload).toBe('');
+    },
+  );
+
+  it('fills in nothing from a link of another site without a recipient', async () => {
+    numberOfTheTest = 11;
+    formModel.value.addresses = undefined;
+    formModel.value.amount = '1';
+    await scanTransferQrCode();
+    expect(formModel.value.addresses).toBeUndefined();
+    expect(formModel.value.amount).toBe('1');
   });
 });

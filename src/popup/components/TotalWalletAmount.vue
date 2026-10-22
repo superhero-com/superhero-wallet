@@ -12,7 +12,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useCurrencies } from '@/composables';
+import { PROTOCOLS } from '@/constants';
+import { useAccounts, useCurrencies } from '@/composables';
 
 export default defineComponent({
   props: {
@@ -20,10 +21,25 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { isCurrenciesUnavailable, noCurrencyRateFiat, formatCurrency } = useCurrencies();
+    const { protocolsInUse } = useAccounts();
+    const {
+      isCurrenciesUnavailable,
+      noCurrencyRateFiat,
+      formatCurrency,
+      getCurrentCurrencyRate,
+    } = useCurrencies();
 
+    // The multisig total is of aeternity only
+    const totalProtocols = computed(
+      () => (props.isMultisig ? [PROTOCOLS.aeternity] : protocolsInUse.value),
+    );
+
+    // The cached rates still count when a request fails, unless a coin has none
     const totalAmount = computed(
-      () => isCurrenciesUnavailable.value
+      () => (
+        isCurrenciesUnavailable.value
+        && totalProtocols.value.some((protocol) => !getCurrentCurrencyRate(protocol))
+      )
         ? noCurrencyRateFiat.value
         : formatCurrency(+props.totalBalance),
     );

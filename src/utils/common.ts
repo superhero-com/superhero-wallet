@@ -165,7 +165,13 @@ export function createCallbackRegistry<T extends(...args: any) => any>() {
       return () => callbackRegistry.delete(savedId);
     },
     runCallbacks: (...args: Parameters<T>) => {
-      callbackRegistry.forEach((callback) => callback?.(...args as Array<any>));
+      callbackRegistry.forEach((callback) => {
+        try {
+          callback?.(...args as Array<any>);
+        } catch (error) {
+          handleUnknownError(error);
+        }
+      });
     },
   };
 }

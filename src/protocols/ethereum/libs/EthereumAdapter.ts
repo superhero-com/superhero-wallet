@@ -63,7 +63,6 @@ import {
   ETH_MDW_TO_NODE_APPROX_DELAY_TIME,
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
-import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
@@ -306,35 +305,26 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     }
   }
 
+  /** Signs at the fees the user was shown */
   override async transferPreparedTransaction({
     to,
     from,
     data = '0x',
     value,
     gas,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
   }: any = {}): Promise<ITransferResponse> {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { chainId } = ethActiveNetworkSettings.value;
-    const {
-      updateFeeList,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-    } = useEthFeeCalculation(this.protocol);
 
     const account = getAccountByProtocolAndAddress(PROTOCOLS.ethereum, toChecksumAddress(from));
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
       throw new Error('Token transfer were initiated from not existing or not ethereum account.');
     }
 
-    const [nonce] = await Promise.all([
-      this.getTransactionCount(from),
-      updateFeeList(),
-    ]);
-
-    if (!maxPriorityFeePerGas.value || !maxFeePerGas.value) {
-      throw new Error('Failed to calculate the fee.');
-    }
+    const nonce = await this.getTransactionCount(from);
 
     const txData: FeeMarketEIP1559TxData = {
       chainId: toHex(chainId),
@@ -343,8 +333,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       data,
       value,
       gasLimit: gas,
-      maxPriorityFeePerGas: bigIntToHex(BigInt(toWei(maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
-      maxFeePerGas: bigIntToHex(BigInt(toWei(maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION), 'ether'))),
+      maxPriorityFeePerGas,
+      maxFeePerGas,
       type: '0x02',
     };
 
@@ -448,11 +438,20 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       }
     }
 
-    const block = transaction?.blockHash
-      ? await getBlock(web3Eth, transaction.blockHash, true, DEFAULT_RETURN_FORMAT)
-      : undefined;
-    const normalized = normalizeWeb3EthTransactionStructure(transaction, block, transactionOwner);
-    return normalized;
+    const [block, receipt] = transaction?.blockHash
+      ? await Promise.all([
+        getBlock(web3Eth, transaction.blockHash, false, DEFAULT_RETURN_FORMAT),
+        // Without the receipt the fee is the most the gas limit can cost
+        getTransactionReceipt(web3Eth, hash, DEFAULT_RETURN_FORMAT).catch(() => undefined),
+      ])
+      : [undefined, undefined];
+    return normalizeWeb3EthTransactionStructure(
+      this.protocol,
+      transaction,
+      block,
+      transactionOwner,
+      receipt,
+    );
   }
 
   override async fetchAccountTransactions(

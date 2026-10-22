@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { METHODS } from '@aeternity/aepp-sdk';
+import BigNumber from 'bignumber.js';
 import type { AppOriginSource } from '@/types';
 
 const {
@@ -7,6 +8,7 @@ const {
   adapter,
   checkOrAskPermission,
   switchNetwork,
+  updateFeeList,
 } = vi.hoisted(() => {
   // The handler is already loaded by the global setup files; reload it with the mocks below.
   vi.resetModules();
@@ -15,6 +17,7 @@ const {
     adapter: { fetchBalance: vi.fn(), transferPreparedTransaction: vi.fn() },
     checkOrAskPermission: vi.fn(),
     switchNetwork: vi.fn(),
+    updateFeeList: vi.fn(),
   };
 });
 
@@ -74,21 +77,29 @@ vi.mock('@/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: { getAdapter: () => adapter },
 }));
 vi.mock('@/protocols/ethereum/composables/ethFeeCalculation', () => ({
-  useEthFeeCalculation: () => ({ updateFeeList: vi.fn(), maxFeePerGas: ref(2e-8) }),
+  // Ethereum: 20 gwei, 1 gwei of it the tip; the other chains: 27.5 gwei
+  useEthFeeCalculation: (protocol: string) => ({
+    updateFeeList,
+    maxFeePerGas: ref(new BigNumber(protocol === 'ethereum' ? '0.00000002' : '0.0000000275')),
+    maxPriorityFeePerGas: ref(new BigNumber(protocol === 'ethereum' ? '0.000000001' : 0)),
+  }),
 }));
 vi.mock('@/protocols/ethereum/composables/ethNetworkSettings', () => ({
   useEthNetworkSettings: () => ({
     ethActiveNetworkSettings: ref({ chainId: '1', nodeUrl: ETH_NODE_URL }),
+    ethActiveNetworkPredefinedSettings: ref({ middlewareUrl: 'https://etherscan.example' }),
   }),
 }));
 vi.mock('@/protocols/avalanche/composables/avalancheNetworkSettings', () => ({
   useAvalancheNetworkSettings: () => ({
     avalancheActiveNetworkSettings: ref({ chainId: '43114', nodeUrl: AVALANCHE_NODE_URL }),
+    avalancheActiveNetworkPredefinedSettings: ref({ middlewareUrl: 'https://snowtrace.example' }),
   }),
 }));
 vi.mock('@/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
     bnbActiveNetworkSettings: ref({ chainId: '56', nodeUrl: 'https://bnb.node.example' }),
+    bnbActiveNetworkPredefinedSettings: ref({ middlewareUrl: 'https://etherscan.example' }),
   }),
 }));
 
@@ -195,6 +206,9 @@ describe('handleEvmRpcMethod', () => {
 
   describe('eth_sendTransaction', () => {
     const tx = { from: SIGNER.address, to: RECIPIENT, value: '0xde0b6b3a7640000' };
+    const NODE_FEES = { maxFeePerGas: '0x4a817c800', maxPriorityFeePerGas: '0x3b9aca00' };
+    /** The other chains: 27.5 gwei */
+    const LEGACY_FEE = { gasPrice: '0x66720b300' };
 
     it('sends with the node gas estimate plus headroom', async () => {
       const fetchMock = mockNode({ eth_estimateGas: { result: '0x5208' } });
@@ -203,7 +217,8 @@ describe('handleEvmRpcMethod', () => {
       expect(response).toEqual({ result: '0xhash' });
       expect(getNodeRequests(fetchMock)).toMatchObject([{ method: 'eth_estimateGas', params: [tx] }]);
       expect(checkOrAskPermission.mock.calls[0][2].tx.gas).toBe(24150);
-      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x5e56' });
+      expect(adapter.transferPreparedTransaction)
+        .toHaveBeenCalledWith({ ...tx, gas: '0x5e56', ...NODE_FEES });
     });
 
     it('estimates on the node of the requested chain and shows its coin', async () => {
@@ -221,7 +236,55 @@ describe('handleEvmRpcMethod', () => {
       await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', { ...tx, gas: '0x7530' });
 
       expect(fetchMock).not.toHaveBeenCalled();
-      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x7530' });
+      expect(adapter.transferPreparedTransaction)
+        .toHaveBeenCalledWith({ ...tx, gas: '0x7530', ...NODE_FEES });
+    });
+
+    // 21000 gas at 20 gwei on Ethereum, at 27.5 gwei on the other chains
+    it.each([
+      ['Ethereum', { gasPrice: '0x1' }, undefined, NODE_FEES, 0.00042],
+      ['Ethereum', { maxFeePerGas: '0x6fc23ac00', maxPriorityFeePerGas: '0x77359400' }, undefined, NODE_FEES, 0.00042],
+      ['BNB Smart Chain', { gasPrice: '0x6fc23ac00' }, 'eip155:56', LEGACY_FEE, 0.0005775],
+      ['BNB Smart Chain', { maxFeePerGas: '0x6fc23ac00' }, 'eip155:56', LEGACY_FEE, 0.0005775],
+    ])('shows and signs the fee of the wallet on %s, not the dapp one %j', async (
+      _,
+      dappFees,
+      chainId,
+      signedFees,
+      shownFee,
+    ) => {
+      mockNode({});
+      await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', { ...tx, gas: '0x5208', ...dappFees }, 'Dapp', chainId);
+
+      expect(checkOrAskPermission.mock.calls[0][2].tx.fee).toBeCloseTo(shownFee, 15);
+      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith(
+        expect.objectContaining(signedFees),
+      );
+    });
+
+    it.each([
+      ['Avalanche', 'eip155:43114'],
+      ['BNB Smart Chain', 'eip155:56'],
+    ])('shows and signs the gas price of the send form on %s', async (_, chainId) => {
+      const fetchMock = mockNode({});
+      await handleEvmRpcMethod(DAPP, 'eth_sendTransaction', { ...tx, gas: '0x5208' }, 'Dapp', chainId);
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      // 21000 × 27.5 gwei
+      expect(checkOrAskPermission.mock.calls[0][2].tx.fee).toBeCloseTo(0.0005775, 15);
+      expect(adapter.transferPreparedTransaction)
+        .toHaveBeenCalledWith({ ...tx, gas: '0x5208', ...LEGACY_FEE });
+    });
+
+    it('returns an error without asking to sign when the fee can not be priced', async () => {
+      mockNode({});
+      updateFeeList.mockRejectedValueOnce(new Error('header not found'));
+      const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{
+        ...tx, gas: '0x5208',
+      }], 'Dapp', 'eip155:43114');
+
+      expect(response).toEqual({ error: { code: -32603, message: 'header not found' } });
+      expect(checkOrAskPermission).not.toHaveBeenCalled();
     });
 
     it('returns the estimation error without asking to sign', async () => {
@@ -295,7 +358,8 @@ describe('handleEvmRpcMethod', () => {
       }, 'Dapp', undefined, originSource as AppOriginSource | undefined);
 
       expect(response).toEqual({ result: '0xhash' });
-      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x5208' });
+      expect(adapter.transferPreparedTransaction)
+        .toHaveBeenCalledWith({ ...tx, gas: '0x5208', ...NODE_FEES });
     });
 
     it('sends from any account of a WalletConnect session', async () => {
@@ -306,7 +370,9 @@ describe('handleEvmRpcMethod', () => {
       expect(response).toEqual({ result: '0xhash' });
       expect(checkOrAskPermission.mock.calls[0][2].fromAccount).toBe(OTHER.address);
       expect(adapter.transferPreparedTransaction)
-        .toHaveBeenCalledWith({ ...tx, from: OTHER.address, gas: '0x5208' });
+        .toHaveBeenCalledWith({
+          ...tx, from: OTHER.address, gas: '0x5208', ...NODE_FEES,
+        });
     });
 
     it.each([
@@ -341,7 +407,8 @@ describe('handleEvmRpcMethod', () => {
       });
 
       expect(response).toEqual({ result: '0xhash' });
-      expect(adapter.transferPreparedTransaction).toHaveBeenCalledWith({ ...tx, gas: '0x5208' });
+      expect(adapter.transferPreparedTransaction)
+        .toHaveBeenCalledWith({ ...tx, gas: '0x5208', ...NODE_FEES });
     });
   });
 
