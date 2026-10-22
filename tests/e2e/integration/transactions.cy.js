@@ -44,7 +44,7 @@ function interceptActivities(firstPageSize) {
   cy.intercept({ method: 'GET', url: new RegExp(`/activities\\?limit=${TXS_PER_PAGE}$`) }, {
     data: getSpendActivities(0, firstPageSize),
     next: `/v2/accounts/${addressAeternity}/activities?cursor=1&limit=${TXS_PER_PAGE}`,
-  });
+  }).as('firstPage');
   cy.intercept({ method: 'GET', url: new RegExp(`/activities\\?cursor=1&limit=${TXS_PER_PAGE}$`) }, {
     data: getSpendActivities(firstPageSize, 20, { isReceived: true }),
     next: null,
@@ -60,10 +60,15 @@ function openTransactionList(htmlClass) {
     .click();
 }
 
-function scrollTransactionListToBottom(htmlClass) {
+function scrollTransactionListToBottom() {
   cy.get('.transaction-list:visible').then(($content) => {
-    cy.wrap(htmlClass ? $content[0].shadowRoot.querySelector('[part=scroll]') : $content)
-      .scrollTo('bottom');
+    const host = $content[0];
+    const inner = host.shadowRoot.querySelector('[part=scroll]');
+    const scrollElement = [host, inner].reduce((best, candidate) => (
+      candidate.scrollHeight - candidate.clientHeight
+        > best.scrollHeight - best.clientHeight ? candidate : best
+    ));
+    cy.wrap(scrollElement).scrollTo('bottom');
   });
 }
 
@@ -74,15 +79,26 @@ describe('Transactions', () => {
         interceptActivities(TXS_PER_PAGE);
         openTransactionList(htmlClass);
 
+        cy.wait('@firstPage');
         cy.get('.transaction-list:visible [data-cy=list] .vs-row')
           .should('have.length.above', 5)
           .get('[data-cy=loader]')
-          .should('not.exist')
-          .wait(2000)
-          .get('@nextPage.all')
-          .should('have.length', 0);
-        scrollTransactionListToBottom(htmlClass);
-        cy.wait('@nextPage')
+          .should('not.exist');
+        cy.get('.transaction-list:visible').then(($content) => {
+          const host = $content[0];
+          const inner = host.shadowRoot.querySelector('[part=scroll]');
+          const scrollElement = [host, inner].reduce((best, candidate) => (
+            candidate.scrollHeight - candidate.clientHeight
+              > best.scrollHeight - best.clientHeight ? candidate : best
+          ));
+          expect(scrollElement.scrollHeight).to.be.greaterThan(
+            scrollElement.clientHeight + 100,
+          );
+        });
+        cy.get('@nextPage.all').should('have.length', 0);
+        scrollTransactionListToBottom();
+        cy.wait(2000)
+          .wait('@nextPage')
           .get('.transaction-list:visible [data-cy=list] .vs-row')
           .should('contain', 'Received');
       });
