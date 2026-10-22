@@ -52,7 +52,7 @@ function mockUtxoFetch(
   global.fetch = vi.fn((url: any) => {
     const u = String(url);
     if (u === `${nodeUrl}/address/${address}/utxo`) {
-      return Promise.resolve({ status: 200, json: () => Promise.resolve(utxos) });
+      return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(utxos) });
     }
     const m = u.match(/\/tx\/([0-9a-f]+)\/hex$/);
     if (m && fundingHexByTxid[m[1]]) {

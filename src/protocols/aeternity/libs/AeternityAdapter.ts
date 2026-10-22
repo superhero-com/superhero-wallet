@@ -177,7 +177,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       return aettosToAe(balanceInAettos);
     } catch (e) {
       setAeNodeError(true);
-      return '0';
+      throw e;
     }
   }
 
@@ -323,7 +323,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return this.fetchAex9TokensPage(nextPageUrl || searchPath);
   }
 
-  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
+  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null> {
     const { fetchFromMiddleware } = useAeMiddleware();
     const { loadAllTokenSalesInfoByAccount, tokenSales } = useAeTokenSales();
     try {
@@ -352,7 +352,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     } catch (error: any) {
       handleUnknownError(error);
     }
-    return [];
+    return null;
   }
 
   override async transferToken(
@@ -392,39 +392,35 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     /** @link https://github.com/aeternity/ae_mdw?tab=readme-ov-file#v2accountsidactivities */
     const url = nextPageUrl || `/v2/accounts/${address}/activities?limit=${limit}`;
 
-    try {
-      let { data, next } = await fetchFromMiddlewareCamelCased(url);
+    let { data, next } = await fetchFromMiddlewareCamelCased(url);
 
-      // Some contract calls consist of several events
-      // this condition checking edge case when not all events in one chunk
-      const lastActivity = data.at(-1);
-      const lastActivityType = lastActivity?.type;
-      if (
-        (
-          lastActivityType === ACTIVITIES_TYPES.aex9TransferEvent
-          || lastActivityType === ACTIVITIES_TYPES.contractCallTxEvent
-          || lastActivityType === ACTIVITIES_TYPES.internalContractCallEvent
-          || lastActivityType === ACTIVITIES_TYPES.internalTransferEvent
-        )
-        && next
-      ) {
-        const additionalActivities = await fetchFromMiddlewareCamelCased(`${next.split('&limit=')[0]}&limit=5`);
-        additionalActivities.data.forEach((activity: any) => {
-          if (getActivityHash(activity) === getActivityHash(lastActivity)) {
-            data.push(activity);
-          }
-        });
-      }
-      let regularTransactions = normalizeActivitiesStructure(data || [])
-        .map((responseData: any) => normalizeMiddlewareTransactionStructure(responseData, address));
-
-      return {
-        regularTransactions,
-        nextPageUrl: next,
-      };
-    } catch (error) {
-      return {};
+    // Some contract calls consist of several events
+    // this condition checking edge case when not all events in one chunk
+    const lastActivity = data.at(-1);
+    const lastActivityType = lastActivity?.type;
+    if (
+      (
+        lastActivityType === ACTIVITIES_TYPES.aex9TransferEvent
+        || lastActivityType === ACTIVITIES_TYPES.contractCallTxEvent
+        || lastActivityType === ACTIVITIES_TYPES.internalContractCallEvent
+        || lastActivityType === ACTIVITIES_TYPES.internalTransferEvent
+      )
+      && next
+    ) {
+      const additionalActivities = await fetchFromMiddlewareCamelCased(`${next.split('&limit=')[0]}&limit=5`);
+      additionalActivities.data.forEach((activity: any) => {
+        if (getActivityHash(activity) === getActivityHash(lastActivity)) {
+          data.push(activity);
+        }
+      });
     }
+    let regularTransactions = normalizeActivitiesStructure(data || [])
+      .map((responseData: any) => normalizeMiddlewareTransactionStructure(responseData, address));
+
+    return {
+      regularTransactions,
+      nextPageUrl: next,
+    };
   }
 
   override async fetchPendingTransactions(
@@ -503,6 +499,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return {

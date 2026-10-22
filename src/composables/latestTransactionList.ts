@@ -4,12 +4,14 @@ import type {
   AccountAddress,
   IAccount,
   ICommonTransaction,
+  IFetchTransactionResult,
   ITokenBalance,
   ITransaction,
   ITx,
 } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import {
+  handleUnknownError,
   pipe,
   removeDuplicatedTransactions,
   sortTransactionsByDate,
@@ -43,6 +45,7 @@ const accountsTransactionsPending = useStorageRef<AccountsTransactionList>(
 );
 
 const areLatestTransactionsUpdating = ref(false);
+let isLatestTransactionsReloadRequested = false;
 
 function getTokenBalancesByAccountKey(tokenBalanceList: ITokenBalance[]) {
   const result: Record<string, ITokenBalance[]> = {};
@@ -112,10 +115,17 @@ export function useLatestTransactionList() {
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const currentNetworkName = activeNetwork.value.name;
+    let response: IFetchTransactionResult;
+    try {
+      response = await adapter.fetchAccountTransactions(address);
+    } catch (error) {
+      handleUnknownError(error);
+      return true;
+    }
     const {
       regularTransactions,
       pendingTransactions,
-    } = await adapter.fetchAccountTransactions(address);
+    } = response;
 
     // This is necessary in case the user switches between networks faster,
     // than transactions are returned (limitations of the free Ethereum middleware)
@@ -152,11 +162,21 @@ export function useLatestTransactionList() {
    * Loads all latest transactions for every account.
    */
   async function loadAllLatestTransactions() {
-    if (!areLatestTransactionsUpdating.value) {
-      areLatestTransactionsUpdating.value = true;
-      await Promise.all(accounts.value.map(
-        async (account) => loadAccountLatestTransactions(account),
-      ));
+    if (areLatestTransactionsUpdating.value) {
+      // E.g. after a network switch the running batch is discarded
+      isLatestTransactionsReloadRequested = true;
+      return;
+    }
+    areLatestTransactionsUpdating.value = true;
+    try {
+      do {
+        isLatestTransactionsReloadRequested = false;
+        // eslint-disable-next-line no-await-in-loop
+        await Promise.all(accounts.value.map(
+          async (account) => loadAccountLatestTransactions(account),
+        ));
+      } while (isLatestTransactionsReloadRequested);
+    } finally {
       areLatestTransactionsUpdating.value = false;
     }
   }

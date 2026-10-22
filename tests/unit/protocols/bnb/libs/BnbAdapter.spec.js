@@ -1,6 +1,7 @@
 import { ProtocolAdapterFactory } from '../../../../../src/lib/ProtocolAdapterFactory';
 import { PROTOCOLS } from '../../../../../src/constants';
 import { BnbAdapter } from '../../../../../src/protocols/bnb/libs/BnbAdapter';
+import { EthplorerService } from '../../../../../src/protocols/ethereum/libs/EthplorerService';
 
 vi.mock('../../../../../src/protocols/bnb/composables/bnbNetworkSettings', () => ({
   useBnbNetworkSettings: () => ({
@@ -107,4 +108,37 @@ describe('BnbAdapter registration and metadata', () => {
   });
 
   // NOTE: Complex signing path is covered in integration; skip heavy network-dependent test here.
+});
+
+describe('BnbAdapter token balances', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns null when Ethplorer has no new data (rate limited)', async () => {
+    vi.spyOn(EthplorerService.prototype, 'fetchAccountTokenBalances').mockResolvedValue(null);
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+
+    expect(await adapter.fetchAccountTokenBalances('0x0000000000000000000000000000000000000001'))
+      .toBeNull();
+  });
+
+  it('returns null when Ethplorer fails', async () => {
+    vi.spyOn(EthplorerService.prototype, 'fetchAccountTokenBalances')
+      .mockRejectedValue(new Error('Failed to fetch'));
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+
+    expect(await adapter.fetchAccountTokenBalances('0x0000000000000000000000000000000000000001'))
+      .toBeNull();
+  });
+
+  it('marks the Ethplorer balances as BNB', async () => {
+    vi.spyOn(EthplorerService.prototype, 'fetchAccountTokenBalances').mockResolvedValue([
+      { contractId: '0xToken', amount: '1', protocol: PROTOCOLS.ethereum },
+    ]);
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bnb);
+
+    expect(await adapter.fetchAccountTokenBalances('0x0000000000000000000000000000000000000001'))
+      .toEqual([{ contractId: '0xToken', amount: '1', protocol: PROTOCOLS.bnb }]);
+  });
 });

@@ -149,6 +149,7 @@ describe('eth_sendTransaction of a dapp', () => {
     );
     // The handler estimates the gas by itself
     vi.stubGlobal('fetch', async (url: string, init: RequestInit) => ({
+      ok: true,
       status: 200,
       json: async () => answerNodeRequest(url, JSON.parse(init.body as string)),
     }));

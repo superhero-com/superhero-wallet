@@ -48,6 +48,25 @@ describe('useBalances', () => {
     await import('@/protocols/registerAdapters');
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  /** Reload the modules with stored balances, as when the app opens */
+  async function loadStoredBalances(networkName) {
+    const { WalletStorage } = await import('@/lib/WalletStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    WalletStorage.set(STORAGE_KEYS.balances, { aeternity: { ak_active: '5' } });
+    WalletStorage.set(STORAGE_KEYS.balancesNetworkName, networkName);
+    vi.resetModules();
+    await import('@/protocols/registerAdapters');
+    const { useBalances } = await import('@/composables/balances');
+    const result = useBalances();
+    await new Promise((resolve) => { setTimeout(resolve); });
+    expect(result.balance.value.toString()).toBe('5');
+    return result;
+  }
+
   it('fetches and stores the balance of every account', async () => {
     const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
     const adapter = ProtocolAdapterFactory.getAdapter('aeternity');
@@ -106,21 +125,92 @@ describe('useBalances', () => {
     expect(fetchBalanceSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('treats a 404 (not-found) balance response as zero, without logging a warning', async () => {
+  it('stores 0 on a 404 (not-found) balance response, without logging a warning', async () => {
     const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
     const adapter = ProtocolAdapterFactory.getAdapter('aeternity');
-    vi.spyOn(adapter, 'fetchBalance').mockRejectedValue(
+    const fetchBalanceSpy = vi.spyOn(adapter, 'fetchBalance').mockResolvedValue('5');
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { useBalances } = await import('@/composables/balances');
+    const { updateBalances, balance, balances } = useBalances();
+
+    await updateBalances();
+    expect(balance.value.toString()).toBe('5');
+
+    fetchBalanceSpy.mockRejectedValue(
       Object.assign(new Error('not found'), { statusCode: 404 }),
+    );
+    await updateBalances();
+
+    expect(balances.value.aeternity.ak_active.toString()).toBe('0');
+    expect(balances.value.aeternity.ak_other.toString()).toBe('0');
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps the previous balance when a later fetch rejects with 500', async () => {
+    const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+    const adapter = ProtocolAdapterFactory.getAdapter('aeternity');
+    const fetchBalanceSpy = vi.spyOn(adapter, 'fetchBalance').mockImplementation(
+      async (address) => (address === 'ak_active' ? '5' : '7'),
     );
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const { useBalances } = await import('@/composables/balances');
-    const { updateBalances, balance } = useBalances();
+    const { updateBalances, balance, balances } = useBalances();
+
+    await updateBalances();
+
+    const serverError = Object.assign(new Error('Internal Server Error'), { statusCode: 500 });
+    fetchBalanceSpy.mockImplementation(
+      async (address) => {
+        if (address === 'ak_active') throw serverError;
+        return '8';
+      },
+    );
+    await updateBalances();
+
+    expect(balance.value.toString()).toBe('5');
+    expect(balances.value.aeternity.ak_other.toString()).toBe('8');
+    expect(warnSpy).toHaveBeenCalledWith('Unknown rejection', serverError);
+  });
+
+  it('leaves no entry when the first fetch fails, so the balance renders as 0', async () => {
+    const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+    const adapter = ProtocolAdapterFactory.getAdapter('aeternity');
+    vi.spyOn(adapter, 'fetchBalance').mockRejectedValue(new Error('Network Error'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { useBalances } = await import('@/composables/balances');
+    const { updateBalances, balance, balances } = useBalances();
+
+    await updateBalances();
+
+    expect(balances.value.aeternity?.ak_active).toBeUndefined();
+    expect(balance.value.toString()).toBe('0');
+  });
+
+  it('keeps the stored balance of the active network when the fetch fails', async () => {
+    const { updateBalances, balance } = await loadStoredBalances('Mainnet');
+    const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+    vi.spyOn(ProtocolAdapterFactory.getAdapter('aeternity'), 'fetchBalance')
+      .mockRejectedValue(new Error('Network Error'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await updateBalances();
+
+    expect(balance.value.toString()).toBe('5');
+  });
+
+  it('does not keep the stored balance of another network when the fetch fails', async () => {
+    const { updateBalances, balance } = await loadStoredBalances('Testnet');
+    const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+    vi.spyOn(ProtocolAdapterFactory.getAdapter('aeternity'), 'fetchBalance')
+      .mockRejectedValue(new Error('Network Error'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     await updateBalances();
 
     expect(balance.value.toString()).toBe('0');
-    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('sums every account balance converted to the current currency rate', async () => {

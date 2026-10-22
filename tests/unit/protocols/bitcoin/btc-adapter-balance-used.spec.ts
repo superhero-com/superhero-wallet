@@ -23,7 +23,7 @@ describe('BitcoinAdapter - balance and usage checks', () => {
       mempool_stats: { funded_txo_sum: 20_000_000, spent_txo_sum: 10_000_000 },
     });
     // @ts-ignore - mock global
-    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json })) as any;
 
     const bal = await adapter.fetchBalance('bc1qAddress');
     // (300-100 + 20-10) million sats = 210_000_000 sats => 2.1 BTC
@@ -36,7 +36,7 @@ describe('BitcoinAdapter - balance and usage checks', () => {
       mempool_stats: { funded_txo_sum: 0, spent_txo_sum: 0 },
     });
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json })) as any;
 
     const bal = await adapter.fetchBalance('bc1qAddress');
     expect(bal).toBe('0');
@@ -45,7 +45,7 @@ describe('BitcoinAdapter - balance and usage checks', () => {
   it('isAccountUsed is true when the address has funded outputs on chain', async () => {
     const json = async () => ({ chain_stats: { funded_txo_sum: 5000 } });
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json })) as any;
 
     const used = await adapter.isAccountUsed('bc1qAddress');
     expect(used).toBe(true);
@@ -54,7 +54,7 @@ describe('BitcoinAdapter - balance and usage checks', () => {
   it('isAccountUsed is false for a never-funded address', async () => {
     const json = async () => ({ chain_stats: { funded_txo_sum: 0 } });
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json })) as any;
 
     const used = await adapter.isAccountUsed('bc1qAddress');
     expect(used).toBe(false);

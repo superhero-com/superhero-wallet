@@ -259,7 +259,11 @@ async function sendToNode(
     });
     return response?.error ? { error: response.error } : { result: response?.result ?? null };
   } catch (error: any) {
-    return getUnknownError(error.message);
+    // Nodes send some JSON-RPC errors with an HTTP error status, e.g. rate limits
+    const rpcError = error.response?.data?.error;
+    if (rpcError) return { error: rpcError };
+    // The message names the host, which could reveal a custom node URL
+    return getUnknownError(error.statusCode ? `HTTP ${error.statusCode}` : error.message);
   }
 }
 
@@ -366,7 +370,10 @@ export async function handleEvmRpcMethod(
         (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
       ));
     if (network) {
-      switchNetwork(network.name);
+      // A dapp can ask for the chain the wallet is already on
+      if (network.name !== activeNetwork.value.name) {
+        switchNetwork(network.name);
+      }
       return { result: null };
     }
     return {

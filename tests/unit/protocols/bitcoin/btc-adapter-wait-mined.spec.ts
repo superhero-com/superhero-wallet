@@ -37,11 +37,8 @@ describe('BitcoinAdapter - waitTransactionMined polling', () => {
 
   it('resolves null when every lookup rejects (Blockstream 404 "Transaction not found")', async () => {
     vi.restoreAllMocks();
-    // fetchJson calls .json() on the text/plain 404 body, which rejects.
-    const fetchSpy = vi.fn(() => Promise.resolve({
-      status: 404,
-      json: () => Promise.reject(new SyntaxError('Unexpected token T in JSON')),
-    }));
+    // Blockstream answers an unknown transaction with a text/plain 404
+    const fetchSpy = vi.fn(async () => new Response('Transaction not found', { status: 404 }));
     // @ts-ignore - test double for the fetch boundary
     global.fetch = fetchSpy;
     const unhandled = vi.fn();

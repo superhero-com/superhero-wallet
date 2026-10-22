@@ -43,6 +43,15 @@ const balances = useStorageRef<Balances, BalancesSerialized>(
 );
 
 /**
+ * The network `balances` was fetched for. A dapp can switch the network
+ * while the app is closed, so the stored balances can be of another one.
+ */
+const balancesNetworkName = useStorageRef<string | null>(
+  null,
+  STORAGE_KEYS.balancesNetworkName,
+);
+
+/**
  * This composable detects if any app components requires balances data and polls the API
  * to live update the values. If no components are using it the polling stops.
  */
@@ -85,10 +94,11 @@ export function useBalances() {
         address,
         protocol,
       }) => ProtocolAdapterFactory.getAdapter(protocol).fetchBalance(address).catch((error) => {
-        if (!isNotFoundError(error)) {
-          handleUnknownError(error);
+        if (isNotFoundError(error)) {
+          return 0;
         }
-        return 0;
+        handleUnknownError(error);
+        return undefined;
       }),
     );
     const rawBalances = await Promise.all(balancesPromises);
@@ -98,14 +108,24 @@ export function useBalances() {
     }
 
     const newBalances: Balances = {} as Balances;
+    const cachedBalances = (balancesNetworkName.value === networkAtStart)
+      ? balances.value
+      : {} as Balances;
 
     rawBalances.forEach((val, index) => {
       const { protocol, address } = accountsCached[index];
       newBalances[protocol] ??= {};
-      newBalances[protocol][address] = new BigNumber(val || 0);
+      // Keep the last known balance when the fetch failed
+      const accountBalance = (val === undefined)
+        ? cachedBalances[protocol]?.[address]
+        : new BigNumber(val || 0);
+      if (accountBalance) {
+        newBalances[protocol][address] = accountBalance;
+      }
     });
 
     balances.value = newBalances;
+    balancesNetworkName.value = networkAtStart;
   }
 
   async function updateBalances() {

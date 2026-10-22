@@ -8,7 +8,7 @@ import { ref, type Ref } from 'vue';
 import { routerKey } from 'vue-router';
 import { toChecksumAddress } from 'web3-utils';
 import type { AccountAddress, ICommonTransaction, ITransaction } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { NETWORK_NAME_TESTNET, PROTOCOLS } from '@/constants';
 import { STUB_ACCOUNT, recipientId as AE_OTHER_ADDRESS } from '@/constants/stubs';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 
@@ -390,6 +390,68 @@ describe('useLatestTransactionList', () => {
 
       expect(findTransaction(allLatestTransactions, SENT_HASH)).toMatchObject({ pending: false });
       expect(findTransaction(allLatestTransactions, OTHER_HASH)).toMatchObject({ pending: false });
+    });
+  });
+
+  describe('a failing history API', () => {
+    it('logs a failing account', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.spyOn(ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity), 'fetchAccountTransactions')
+        .mockRejectedValueOnce(new Error('HTTP 500'));
+      etherscanTxList[ETHEREUM_CHAIN_ID] = [etherscanTransfer({
+        hash: OTHER_HASH, nonce: 5, from: EVM_OTHER_ADDRESS, to: EVM_ADDRESS,
+      })];
+      const {
+        allLatestTransactions,
+        areLatestTransactionsUpdating,
+        loadAllLatestTransactions,
+      } = await openWallet();
+
+      expect(findTransaction(allLatestTransactions, OTHER_HASH)).toBeDefined();
+      expect(areLatestTransactionsUpdating.value).toBe(false);
+      expect(warn).toHaveBeenCalledWith('Unknown rejection', new Error('HTTP 500'));
+
+      aeHistory = [aeMiddlewareSpend({
+        hash: AE_OTHER_HASH, nonce: 1, senderId: AE_OTHER_ADDRESS, recipientId: AE_ADDRESS,
+      })];
+      await loadAllLatestTransactions();
+
+      expect(findTransaction(allLatestTransactions, AE_OTHER_HASH)).toBeDefined();
+      warn.mockRestore();
+    });
+  });
+
+  describe('a network switch', () => {
+    it('loads the new network when it happens while the previous one is loading', async () => {
+      const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+      let resolveMainnetFetch: (value: any) => void;
+      const fetchAccountTransactions = vi.spyOn(adapter, 'fetchAccountTransactions')
+        .mockImplementationOnce(() => new Promise((resolve) => { resolveMainnetFetch = resolve; }));
+      const mainnetTransaction = aeMiddlewareSpend({
+        hash: AE_SENT_HASH, nonce: 1, senderId: AE_ADDRESS, recipientId: AE_OTHER_ADDRESS,
+      });
+      const testnetTransaction = aeMiddlewareSpend({
+        hash: AE_OTHER_HASH, nonce: 1, senderId: AE_ADDRESS, recipientId: AE_OTHER_ADDRESS,
+      });
+      aeHistory = [testnetTransaction];
+      const {
+        accountsTransactionsLatest,
+        areLatestTransactionsUpdating,
+      } = useLatestTransactionList();
+      const { useNetworks } = await import('@/composables/networks');
+
+      useNetworks().switchNetwork(NETWORK_NAME_TESTNET);
+      resolveMainnetFetch!({
+        regularTransactions: [mainnetTransaction],
+        pendingTransactions: [],
+        paginationParams: {},
+      });
+
+      await vi.waitFor(() => {
+        expect(accountsTransactionsLatest.value[AE_ADDRESS]).toEqual([testnetTransaction]);
+      });
+      expect(fetchAccountTransactions).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => expect(areLatestTransactionsUpdating.value).toBe(false));
     });
   });
 });

@@ -29,7 +29,10 @@ describe('BitcoinAdapter - transaction listing and pagination', () => {
       ],
     }];
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(list) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(list),
+    })) as any;
 
     return adapter.fetchAccountTransactions('Addr').then((res) => {
       expect(res.regularTransactions.length).toBe(1);
@@ -43,7 +46,7 @@ describe('BitcoinAdapter - transaction listing and pagination', () => {
     // @ts-ignore
     global.fetch = vi.fn((url: string) => {
       expect(String(url)).toContain('/txs/chain/tx0');
-      return Promise.resolve({ json: () => Promise.resolve([]) });
+      return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
     }) as any;
 
     const res = await adapter.fetchAccountTransactions('Addr', { lastTxId: 'tx0' });
@@ -62,7 +65,10 @@ describe('BitcoinAdapter - transaction listing and pagination', () => {
       ],
     };
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(tx) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(tx),
+    })) as any;
 
     const res = await adapter.fetchTransactionByHash('abc', 'S');
     expect(res.hash).toBe('abc');

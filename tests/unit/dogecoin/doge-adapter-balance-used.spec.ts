@@ -27,7 +27,7 @@ describe('DogecoinAdapter - balance and usage checks', () => {
       mempool_stats: { funded_txo_sum: 200_000_000, spent_txo_sum: 100_000_000 },
     });
     // @ts-ignore - mock global
-    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json })) as any;
     // fetchJson uses global.fetch under the hood in this codebase
 
     const bal = await adapter.fetchBalance('DAddress');
@@ -37,7 +37,7 @@ describe('DogecoinAdapter - balance and usage checks', () => {
   it('checks isAccountUsed by tx_count', async () => {
     const json = async () => ({ chain_stats: { tx_count: 2 } });
     // @ts-ignore - mock global
-    global.fetch = vi.fn(() => Promise.resolve({ json })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, json })) as any;
 
     const used = await adapter.isAccountUsed('DAddress');
     expect(used).toBe(true);
