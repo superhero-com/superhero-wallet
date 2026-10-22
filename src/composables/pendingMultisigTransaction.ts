@@ -200,19 +200,33 @@ export function usePendingMultisigTransaction() {
       watch(
         scopedActiveMultisigAccount,
         async (newValue, oldValue) => {
-          if (newValue && !isEqual(newValue, oldValue)) {
+          const pending = pendingMultisigTransaction.value;
+          // Loaded again with every update while unverified, a failed load can succeed next time
+          const isRetry = !!newValue?.txHash
+            && pending?.hash === newValue.txHash
+            && !pending.isTxVerified;
+          if (newValue && (!isEqual(newValue, oldValue) || isRetry)) {
             if (!newValue?.txHash) {
               activeMultisigTransactionData.value = null;
               pendingMultisigTransaction.value = null;
-            } else if (newValue.txHash !== oldValue?.txHash) {
-              isLoading.value = true;
-              [
-                activeMultisigTransactionData.value,
-                pendingMultisigTransaction.value,
-              ] = await Promise.all([
-                fetchLatestMultisigAccountTransaction(),
+              isLoading.value = false;
+            } else if (newValue.txHash !== oldValue?.txHash || isRetry) {
+              const { txHash } = newValue;
+              if (!isRetry) {
+                isLoading.value = true;
+              }
+              const [latestTransaction, activeMultisigTx] = await Promise.all([
+                isRetry
+                  ? activeMultisigTransactionData.value
+                  : fetchLatestMultisigAccountTransaction(),
                 fetchActiveMultisigTx(),
               ]);
+              // Loaded for a proposal the vault has moved on from
+              if (scopedActiveMultisigAccount.value?.txHash !== txHash) {
+                return;
+              }
+              activeMultisigTransactionData.value = latestTransaction;
+              pendingMultisigTransaction.value = activeMultisigTx;
               isLoading.value = false;
             } else if (
               !isEqual(newValue.confirmedBy, oldValue.confirmedBy)

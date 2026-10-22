@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { restError } from '../../../helpers/restError';
 
 /**
  * `useAeNames` is exercised against REAL `useStorageRef`/`localStorage`,
@@ -56,9 +57,8 @@ const createTestContext = async ({
   const getNames = vi.fn().mockResolvedValue([]);
   const nameExtendTtl = vi.fn().mockResolvedValue({ hash: 'th_extend' });
   const nameUpdate = vi.fn().mockResolvedValue({});
-  const namePreclaim = vi.fn().mockResolvedValue({ nameSalt: 123 });
   const nameClaim = vi.fn().mockResolvedValue({ hash: 'th_claim' });
-  const nameGetState = vi.fn().mockRejectedValue(new Error('Name not found'));
+  const nameGetState = vi.fn().mockRejectedValue(restError('Name not found', { statusCode: 404 }));
   const nameTransfer = vi.fn().mockResolvedValue({ hash: 'th_transfer' });
   const sdk = {
     getContext: vi.fn(() => ({})),
@@ -66,6 +66,9 @@ const createTestContext = async ({
     getHeight: vi.fn().mockResolvedValue(topBlockHeight),
     api: {
       getTopHeader: vi.fn().mockResolvedValue({ height: topBlockHeight }),
+      getAuctionEntryByName: vi.fn().mockRejectedValue(
+        restError('Name auction not found', { statusCode: 404 }),
+      ),
     },
   };
 
@@ -88,8 +91,6 @@ const createTestContext = async ({
         extendTtl = nameExtendTtl;
 
         update = nameUpdate;
-
-        preclaim = namePreclaim;
 
         claim = nameClaim;
 
@@ -241,7 +242,6 @@ const createTestContext = async ({
     nameGetState,
     nameExtendTtl,
     nameTransfer,
-    namePreclaim,
     nameUpdate,
     getPendingAutoExtendTxs: () => WalletStorage.get(STORAGE_KEYS.pendingNameAutoExtendTxs),
     getPendingNameTransferTxs: () => WalletStorage.get(STORAGE_KEYS.pendingNameTransferTxs),
@@ -527,6 +527,244 @@ describe('useAeNames queued claims', () => {
     );
     expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
       status: 'claimed',
+    });
+  });
+
+  describe('when claiming fails', () => {
+    const longName = 'verylongsupername.chain';
+    const queuedClaim = (fields) => ({
+      preclaimedNames: {
+        ae_testnet: {
+          [longName]: {
+            address: 'ak_test',
+            name: longName,
+            salt: 123,
+            blockHeight: 99,
+            autoExtend: false,
+            status: 'preclaimed',
+            ...fields,
+          },
+        },
+      },
+    });
+
+    it.each([
+      ['cannot be reached', restError('Error sending request: Failed to fetch', { code: 'REQUEST_SEND_ERROR' })],
+      ['is unavailable', restError('v3/transactions error: 503 status code', { statusCode: 503 })],
+    ])('keeps the claim to retry when the node %s', async (_, error) => {
+      const {
+        aeNames,
+        nameClaim,
+        openDefaultModal,
+        sdk,
+      } = await createTestContext(queuedClaim());
+      nameClaim.mockRejectedValueOnce(error);
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+        status: 'preclaimed',
+        salt: 123,
+      });
+      expect(openDefaultModal).not.toHaveBeenCalled();
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(nameClaim).toHaveBeenCalledTimes(2);
+      expect(sdk.poll).toHaveBeenCalledWith('th_claim');
+    });
+
+    it('drops the claim the node rejects', async () => {
+      const { aeNames, nameClaim, openDefaultModal } = await createTestContext(queuedClaim());
+      nameClaim.mockRejectedValueOnce(restError('v3/transactions error: Invalid tx', { statusCode: 400 }));
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(aeNames.preclaimedNames.value).toEqual({});
+      expect(openDefaultModal).toHaveBeenCalledWith({
+        icon: 'critical',
+        msg: 'v3/transactions error: Invalid tx',
+      });
+    });
+
+    it('keeps a sent claim when its status cannot be read', async () => {
+      const { aeNames, openDefaultModal, sdk } = await createTestContext(queuedClaim({
+        status: 'claim-submitted',
+        claimTxHash: 'th_existing',
+      }));
+      sdk.poll.mockRejectedValueOnce(restError('Error sending request: Failed to fetch', { code: 'REQUEST_SEND_ERROR' }));
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+        status: 'claim-submitted',
+        claimTxHash: 'th_existing',
+      });
+      expect(openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    const nameTakenModal = expect.objectContaining({ msg: expect.stringContaining('already') });
+
+    it('finishes the claim of a failed run that was mined, pointing the name to the account', async () => {
+      const {
+        aeNames,
+        fetchAllPages,
+        nameClaim,
+        nameGetState,
+        nameUpdate,
+        openDefaultModal,
+        sdk,
+      } = await createTestContext(queuedClaim({ autoExtend: true }));
+      nameGetState.mockResolvedValueOnce({ owner: 'ak_test' });
+      fetchAllPages.mockResolvedValue([middlewareName(longName)]);
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(nameClaim).not.toHaveBeenCalled();
+      expect(sdk.poll).not.toHaveBeenCalled();
+      expect(nameUpdate).toHaveBeenCalledWith(
+        { account_pubkey: 'ak_test' },
+        { extendPointers: true },
+      );
+      expect(aeNames.ownedNames.value).toEqual([
+        expect.objectContaining({ name: longName, autoExtend: true }),
+      ]);
+      expect(openDefaultModal).not.toHaveBeenCalledWith(nameTakenModal);
+    });
+
+    it('updates the pointer of a claim found mined again after it failed', async () => {
+      const {
+        aeNames,
+        nameGetState,
+        nameUpdate,
+        sdk,
+      } = await createTestContext(queuedClaim());
+      nameGetState.mockResolvedValueOnce({ owner: 'ak_test' });
+      nameUpdate.mockRejectedValueOnce(new Error('pointer failed'));
+
+      await aeNames.claimPreclaimedNames();
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+        status: 'pointer-update-pending',
+      });
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(nameUpdate).toHaveBeenCalledTimes(2);
+      expect(sdk.poll).not.toHaveBeenCalled();
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+        status: 'claimed',
+      });
+    });
+
+    it('keeps the claim to retry when the name can\'t be looked up', async () => {
+      const {
+        aeNames,
+        nameClaim,
+        nameGetState,
+        openDefaultModal,
+      } = await createTestContext(queuedClaim());
+      nameGetState.mockRejectedValueOnce(restError('v3/names error: 503 status code', { statusCode: 503 }));
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(nameClaim).not.toHaveBeenCalled();
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+        status: 'preclaimed',
+        salt: 123,
+      });
+      expect(openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    describe('of an auction name', () => {
+      const shortName = 'short.chain';
+      const queuedAuctionClaim = {
+        preclaimedNames: {
+          ae_testnet: {
+            [shortName]: {
+              address: 'ak_test',
+              name: shortName,
+              salt: 123,
+              blockHeight: 99,
+              autoExtend: false,
+              status: 'preclaimed',
+            },
+          },
+        },
+      };
+
+      it('claims a name nobody bids on yet', async () => {
+        const { aeNames, nameClaim, sdk } = await createTestContext(queuedAuctionClaim);
+
+        await aeNames.claimPreclaimedNames();
+
+        expect(sdk.api.getAuctionEntryByName).toHaveBeenCalledWith(shortName);
+        expect(nameClaim).toHaveBeenCalledTimes(1);
+      });
+
+      // A claim with a salt is refused once the name is in auction
+      it.each([
+        ['the account, from a failed run', 'ak_test', false],
+        ['another account', 'ak_other', true],
+      ])('does not claim it again when %s has the highest bid', async (_, highestBidder, isTaken) => {
+        const {
+          aeNames,
+          nameClaim,
+          openDefaultModal,
+          sdk,
+        } = await createTestContext(queuedAuctionClaim);
+        sdk.api.getAuctionEntryByName.mockResolvedValue({ highestBidder, highestBid: 1n });
+
+        await aeNames.claimPreclaimedNames();
+
+        expect(nameClaim).not.toHaveBeenCalled();
+        expect(aeNames.preclaimedNames.value).toEqual({});
+        expect(openDefaultModal).toHaveBeenCalledTimes(isTaken ? 1 : 0);
+      });
+    });
+
+    it.each([
+      ['preclaimed', {}],
+      ['preclaim-submitted', { preclaimTxHash: 'th_preclaim' }],
+    ])('leaves a %s entry of a network switched away from mid-queue', async (status, fields) => {
+      const {
+        aeNames,
+        getAeSdk,
+        nameClaim,
+        nameGetState,
+        nodeNetworkId,
+        openDefaultModal,
+        sdk,
+      } = await createTestContext(queuedClaim({ status, ...fields }));
+      sdk.api.getTransactionByHash = vi.fn()
+        .mockRejectedValue(restError('Transaction not found', { statusCode: 404 }));
+      // The queue starts on the testnet, the switch settles before the entry is handled
+      getAeSdk
+        .mockImplementationOnce(async () => sdk)
+        .mockImplementationOnce(async () => {
+          nodeNetworkId.value = 'ae_mainnet';
+          return sdk;
+        });
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(sdk.api.getTransactionByHash).not.toHaveBeenCalled();
+      expect(nameGetState).not.toHaveBeenCalled();
+      expect(nameClaim).not.toHaveBeenCalled();
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName]).toMatchObject({
+        status,
+        salt: 123,
+      });
+      expect(openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    it('calls the name taken when another account registered it', async () => {
+      const { aeNames, nameGetState, openDefaultModal } = await createTestContext(queuedClaim());
+      nameGetState.mockResolvedValueOnce({ owner: 'ak_other' });
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(aeNames.preclaimedNames.value).toEqual({});
+      expect(openDefaultModal).toHaveBeenCalledWith(nameTakenModal);
     });
   });
 });
@@ -1451,5 +1689,43 @@ describe('useAeNames fetchNameAuction', () => {
 
     ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
     expect(ctx.aeNames.getNameAuctionHighestBid('test.chain').accountId).toBe('ak_carol');
+  });
+
+  const contractBidAuction = {
+    name: 'test.chain',
+    status: 'auction',
+    info: {
+      auctionEnd: 1000,
+      bids: [{ tx: { type: 'ContractCallTx', callerId: 'ak_dave' } }],
+    },
+  };
+
+  it('takes the highest bid from the node, which knows the amount of a contract call bid', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue(contractBidAuction);
+    ctx.sdk.api.getAuctionEntryByName.mockResolvedValue({
+      highestBidder: 'ak_dave',
+      highestBid: 600000000000000000001n,
+    });
+
+    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+
+    expect(ctx.sdk.api.getAuctionEntryByName).toHaveBeenCalledWith('test.chain');
+    expect(auction.bids).toEqual([]);
+    const highestBid = ctx.aeNames.getNameAuctionHighestBid('test.chain');
+    expect([highestBid.accountId, highestBid.nameFee.toFixed()])
+      .toEqual(['ak_dave', '600.000000000000000001']);
+  });
+
+  it('has no highest bid when every bid was made by a contract call and the node can\'t tell', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue(contractBidAuction);
+
+    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+
+    expect(auction.bids).toEqual([]);
+    expect(ctx.aeNames.getNameAuctionHighestBid('test.chain')).toBeUndefined();
   });
 });

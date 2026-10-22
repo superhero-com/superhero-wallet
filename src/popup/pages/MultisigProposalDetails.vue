@@ -15,6 +15,22 @@
           />
         </div>
         <div class="content">
+          <DetailsItem
+            v-if="activeMultisigAccount.txHash && !isTxVerified && !proposalCompleted"
+            warning
+            class="unverified-warning"
+            data-cy="unverified-warning"
+          >
+            <template #label>
+              <div class="label">
+                <WarningOutlineIcon class="icon" />
+                {{ $t('pages.proposalDetails.unverified.title') }}
+              </div>
+            </template>
+            <template #value>
+              {{ $t('pages.proposalDetails.unverified.msg') }}
+            </template>
+          </DetailsItem>
           <TransactionInfo
             v-if="multisigTx"
             class="transaction-overview"
@@ -144,12 +160,13 @@
             />
 
             <DetailsItem
-              v-if="multisigTx"
+              v-if="multisigTx && proposalGaMetaParams"
               :label="$t('modals.multisigTxProposal.fee')"
+              data-cy="proposal-fee"
             >
               <template #value>
                 <TokenAmount
-                  :amount="+aettosToAe(gaMetaParams.fee)"
+                  :amount="+aettosToAe(proposalGaMetaParams.fee)"
                   :symbol="AE_SYMBOL"
                   :protocol="PROTOCOLS.aeternity"
                 />
@@ -207,7 +224,8 @@
                 extend
                 nowrap
                 extra-padded
-                :disabled="isLoaderVisible || pendingMultisigTxExpired"
+                :disabled="isLoaderVisible || pendingMultisigTxExpired || !isTxVerified"
+                data-cy="send"
                 @click="processProposal()"
               >
                 {{ $t('common.send') }}
@@ -221,7 +239,9 @@
                   isLoaderVisible
                     || pendingMultisigTxConfirmedByLocalSigners
                     || pendingMultisigTxExpired
+                    || !isTxVerified
                 "
+                data-cy="sign"
                 @click="dispatchProposalAction(
                   TX_FUNCTIONS_MULTISIG.confirm,
                   $t('pages.proposalDetails.sign'),
@@ -294,7 +314,7 @@ import {
 } from '@/composables';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
-import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
+import type { IAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   aettosToAe,
   getTransactionPayload,
@@ -321,6 +341,7 @@ import Avatar from '../components/Avatar.vue';
 import TransactionAssetRows from '../components/TransactionAssetRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
+import WarningOutlineIcon from '../../icons/warning-outline.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -339,6 +360,7 @@ export default defineComponent({
     BtnMain,
     CopyText,
     AnimatedSpinner,
+    WarningOutlineIcon,
   },
   setup() {
     const router = useRouter();
@@ -349,7 +371,6 @@ export default defineComponent({
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { getTxAssetSymbol } = useFungibleTokens();
     const { nodeNetworkId } = useAeSdk();
-    const { gaMetaParams } = useAeGaMetaParams();
 
     const {
       activeMultisigAccount,
@@ -377,8 +398,16 @@ export default defineComponent({
     const protocolExplorer = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).getExplorer();
 
     const multisigTx = ref<ITx | null>(null);
+    /** Hash of the proposal `multisigTx` was loaded for, set only when it was built from it */
+    const verifiedTxHash = ref<string>();
+    const proposalGaMetaParams = ref<IAeGaMetaParams>();
     const transaction = ref<ITransaction>();
     const proposalCompleted = ref<boolean>(false);
+
+    /** Tied to the proposal checked: the vault can move on to another one while it is shown */
+    const isTxVerified = computed(() => (
+      !!verifiedTxHash.value && verifiedTxHash.value === activeMultisigAccount.value?.txHash
+    ));
 
     const { transactionAssets } = useTransactionData({ transaction });
 
@@ -406,18 +435,31 @@ export default defineComponent({
     async function getTransactionDetails() {
       const activeMultisigTx = await fetchActiveMultisigTx();
 
-      if (!activeMultisigTx) {
+      // Also when it was loaded for a proposal the vault has moved on from
+      if (!activeMultisigTx || activeMultisigTx.hash !== activeMultisigAccount.value?.txHash) {
+        return;
+      }
+      // A failed reload doesn't undo a match, the hash still commits to the transaction shown
+      if (!activeMultisigTx.isTxVerified && verifiedTxHash.value === activeMultisigTx.hash) {
         return;
       }
 
-      multisigTx.value = {
+      verifiedTxHash.value = activeMultisigTx.isTxVerified ? activeMultisigTx.hash : undefined;
+      proposalGaMetaParams.value = activeMultisigTx.gaMetaParams;
+      const tx = {
         ...activeMultisigTx.tx,
         type: Tag[Tag.GaMetaTx],
         tag: Tag.GaMetaTx,
       } as any;
       // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
 
-      transaction.value = { tx: multisigTx.value } as ITransaction;
+      // A new object would fetch the vault again, and that loads the details again
+      if (isEqual(tx, multisigTx.value)) {
+        return;
+      }
+      multisigTx.value = tx;
+      // Without the transaction only the consensus details are shown
+      transaction.value = activeMultisigTx.isTxVerified ? { tx } as ITransaction : undefined;
     }
 
     function handleInsufficientBalanceError(
@@ -452,9 +494,13 @@ export default defineComponent({
       action: TxFunctionMultisig,
       actionName: string | TranslateResult,
     ) {
-      if (!activeMultisigAccount.value) {
+      // The proposal shown now, the vault can move on to another one while the modal is open
+      const txHash = activeMultisigAccount.value?.txHash;
+      const isConfirm = action === TX_FUNCTIONS_MULTISIG.confirm;
+      if (!txHash || (isConfirm && !isTxVerified.value)) {
         return;
       }
+      const { contractId } = activeMultisigAccount.value!;
 
       setLoaderVisible(true);
       try {
@@ -466,12 +512,19 @@ export default defineComponent({
           },
         );
 
-        const { contractId, txHash } = activeMultisigAccount.value;
+        if (
+          activeMultisigAccount.value?.txHash !== txHash
+          || (isConfirm && !isTxVerified.value)
+        ) {
+          openDefaultModal({ icon: 'warning', msg: t('pages.proposalDetails.changed') });
+          return;
+        }
+
         const signingAccount = new AeAccountHdWallet(nodeNetworkId);
         await callContractMethod(
           action,
           contractId,
-          txHash as string,
+          txHash,
           (activeAccount.value.address !== chosenAddress)
             ? {
               onAccount: {
@@ -502,7 +555,11 @@ export default defineComponent({
      * Dispatch the proposal transaction if it has been signed by all necessary signatories.
      */
     async function processProposal() {
-      if (!activeMultisigAccount.value || !pendingMultisigTxCanBeSent.value) {
+      if (
+        !activeMultisigAccount.value
+        || !pendingMultisigTxCanBeSent.value
+        || !isTxVerified.value
+      ) {
         return;
       }
 
@@ -513,7 +570,12 @@ export default defineComponent({
         if (!rawTx) {
           throw Error('failed to load a transaction');
         }
-        transaction.value = await sendTx(gaAccountId as Encoded.AccountAddress, rawTx.tx, nonce);
+        transaction.value = await sendTx(
+          gaAccountId as Encoded.AccountAddress,
+          rawTx.tx,
+          nonce,
+          txHash as string,
+        );
 
         await updateMultisigAccounts();
 
@@ -527,7 +589,17 @@ export default defineComponent({
     watch(
       () => activeMultisigAccount.value,
       (value, oldValue) => {
-        if (value && !isEqual(value, oldValue)) {
+        if (!value) {
+          return;
+        }
+        // Not to be shown with the actions on the new proposal while that one loads
+        if (value.txHash && value.txHash !== oldValue?.txHash && !proposalCompleted.value) {
+          multisigTx.value = null;
+          transaction.value = undefined;
+          proposalGaMetaParams.value = undefined;
+        }
+        // Loaded again with every update while unverified, a failed load can succeed next time
+        if (!isEqual(value, oldValue) || (value.txHash && !isTxVerified.value)) {
           getTransactionDetails();
         }
       },
@@ -545,12 +617,13 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      gaMetaParams,
+      proposalGaMetaParams,
       PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       multisigTx,
+      isTxVerified,
       transaction,
       transactionAssets,
       totalSpent,
@@ -613,6 +686,17 @@ export default defineComponent({
 
     @include mixins.mobile {
       width: 100%;
+    }
+  }
+
+  .unverified-warning .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .icon {
+      width: 24px;
+      height: 24px;
     }
   }
 

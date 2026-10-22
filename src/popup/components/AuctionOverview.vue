@@ -42,7 +42,7 @@ export default defineComponent({
     const auction = computed(() => getNameAuction(props.name));
 
     const blocksToExpiry = computed<number>(() => auction.value.expiration - topBlockHeight.value);
-    const amount = computed(() => +getNameAuctionHighestBid(props.name).nameFee);
+    const amount = computed(() => +(getNameAuctionHighestBid(props.name)?.nameFee ?? 0));
     const endHeight = computed(() => blocksToRelativeTime(blocksToExpiry.value));
 
     return {

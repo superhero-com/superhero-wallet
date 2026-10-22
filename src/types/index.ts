@@ -29,6 +29,7 @@ import {
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
 import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import type { IAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   AE_CONTRACT_ID,
   MULTISIG_CREATION_PHASES,
@@ -577,7 +578,11 @@ export interface IDashboardTransaction extends ITransaction {
 export interface IActiveMultisigTransaction extends IMultisigAccount {
   totalConfirmations: number;
   hash: string;
+  /** Set only when it is the transaction the proposal hash was built from */
   tx?: ITx;
+  isTxVerified?: boolean;
+  /** The `GaMetaTx` fee and gas price the proposal hash was built with, set with `tx` */
+  gaMetaParams?: IAeGaMetaParams;
   isMultisig: true;
   microTime?: number;
   protocol: Protocol; // Required to match `ITransaction`
@@ -805,6 +810,8 @@ export interface IAuctionBid {
 export interface IAuction {
   bids: IAuctionBid[];
   expiration: number;
+  /** As the node has it: `bids` leaves out the bids made through a contract call */
+  highestBid?: IAuctionBid;
 }
 
 export interface INameAuctionBid {

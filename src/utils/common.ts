@@ -333,6 +333,18 @@ export function isNotFoundError(error: any) {
 }
 
 /**
+ * The server didn't answer, or answered to try again later. Any other failure rejects what was
+ * sent, or happened before anything was sent.
+ */
+export function isTransientRequestError(error: any) {
+  if (error?.name !== 'RestError') {
+    return false;
+  }
+  const { statusCode } = error;
+  return statusCode == null || statusCode >= 500 || statusCode === 408 || statusCode === 429;
+}
+
+/**
  * Check if object has at least one property with a value, where 0 is also a correct value.
  * `{ test: null }` => false
  * `{ test: 'Foo' }` => true

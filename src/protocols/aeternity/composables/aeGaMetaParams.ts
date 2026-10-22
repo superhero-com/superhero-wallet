@@ -20,6 +20,15 @@ export interface IAeGaMetaParams {
 }
 
 /**
+ * What wallets hashed proposals with before the price followed the node. Equal to the pair of
+ * mainnet and testnet. Keep in sync with `LEGACY_GA_META_PARAMS` of ga-multisig-backend.
+ */
+export const LEGACY_GA_META_PARAMS: IAeGaMetaParams = {
+  fee: '100000000000000',
+  gasPrice: '1000000000',
+};
+
+/**
  * Priced at the lowest gas price a transaction gets mined at. The consensus minimum alone is not
  * it: a node also refuses to pool anything under the minimum its miner is configured with, and on
  * mainnet and testnet that miner minimum is a thousand times the consensus one. `getFloorGasPrice`
