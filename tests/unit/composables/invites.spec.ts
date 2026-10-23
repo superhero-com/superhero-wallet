@@ -457,6 +457,72 @@ describe('useInvites: invite keys at rest', () => {
     expect(JSON.parse(localStorage.getItem('state'))).toEqual({});
   });
 
+  it('moves the Vuex invites the stored ones lack when the move was done already', async () => {
+    const { WalletStorage } = await import('@/lib/WalletStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const key = await createWallet();
+    const { encrypt } = await import('@/utils/crypto');
+    const moved = randomKey();
+    const onlyInVuex = randomKey();
+    WalletStorage.set(STORAGE_KEYS.invitesEncrypted, await encrypt(key, JSON.stringify([
+      { secretKey: moved.toJSON(), createdAt: 1 },
+    ])));
+    const vuexState = {
+      invites: {
+        invites: [
+          { secretKey: moved.toJSON(), createdAt: 1 },
+          { secretKey: onlyInVuex.toJSON(), createdAt: 2 },
+        ],
+      },
+    };
+    localStorage.setItem('state', JSON.stringify(vuexState));
+
+    const { invites } = await unlock();
+
+    await expectInvites(invites, [moved, onlyInVuex]);
+    await vi.waitFor(() => expect(JSON.parse(localStorage.getItem('state'))).toEqual({}));
+    expect(findKeyInStorage(onlyInVuex)).toEqual([]);
+    await expectInvites((await restart()).invites, [moved, onlyInVuex]);
+  });
+
+  it('keeps the Vuex invites another page wrote back until they are moved too', async () => {
+    const { WalletStorage } = await import('@/lib/WalletStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const { encrypt } = await import('@/utils/crypto');
+    const key = await createWallet();
+    const moved = randomKey();
+    const writtenBack = randomKey();
+    const invitesState = (secretKeys) => JSON.stringify({
+      invites: {
+        invites: secretKeys.map((secretKey) => ({ secretKey: secretKey.toJSON(), createdAt: 1 })),
+      },
+    });
+    WalletStorage.set(STORAGE_KEYS.invitesEncrypted, await encrypt(key, JSON.stringify([
+      { secretKey: moved.toJSON(), createdAt: 1 },
+    ])));
+    localStorage.setItem('state', invitesState([moved]));
+    // Another page writes back its state with an invite this one hasn't moved, just as the
+    // Vuex copy is about to be removed
+    const { get } = globalThis.browser.storage.local;
+    const getStored = vi.spyOn(globalThis.browser.storage.local, 'get')
+      .mockImplementation(async function getWrittenBack(keys) {
+        if (Array.isArray(keys) && keys.join() === 'state') {
+          localStorage.setItem('state', invitesState([moved, writtenBack]));
+        }
+        return get.call(this, keys);
+      });
+
+    await unlock();
+    await vi.waitFor(() => expect(getStored).toHaveBeenCalledWith(['state']));
+    await new Promise((resolve) => { setTimeout(resolve); });
+
+    expect(findKeyInStorage(writtenBack)).not.toEqual([]);
+
+    getStored.mockRestore();
+    await expectInvites((await restart()).invites, [moved, writtenBack]);
+    await vi.waitFor(() => expect(findKeyInStorage(writtenBack)).toEqual([]));
+  });
+
   it('does not bring back a moved invite that was removed', async () => {
     await createWallet();
     const secretKey = randomKey();

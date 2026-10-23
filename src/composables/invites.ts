@@ -15,7 +15,7 @@ import {
   handleUnknownError,
 } from '@/utils';
 import migrateInvitesVuexToComposable from '@/migrations/006-invites-vuex-to-composable';
-import { removeLegacySecrets } from '@/migrations/migrationHelpers';
+import { readStoredVuexState, removeLegacySecrets } from '@/migrations/migrationHelpers';
 import { useModals } from './modals';
 import { useAeSdk } from './aeSdk';
 import { useAuth } from './auth';
@@ -108,10 +108,32 @@ const useInvitesStorage = createCustomScopedComposable(() => {
    */
   async function moveLegacyInvites(key: CryptoKey) {
     const plaintextInvites = WalletStorage.get<IInviteSerialized[]>(STORAGE_KEYS.invites);
-    // Moved already, maybe by another window: the Vuex state read here may be outdated.
+    // Moved already, maybe by another window: the Vuex state cached here may be outdated.
     if (!plaintextInvites && WalletStorage.get(STORAGE_KEYS.invitesEncrypted)) {
       // A move cut off before removing it, or another page writing the state back, left it.
-      await removeLegacySecrets({ stateFields: { invites: () => true } });
+      // Its keys the stored invites lack may still hold funds, so they are moved too, even
+      // though one of them may be an invite removed since.
+      const vuexInvites = (await readStoredVuexState())?.invites?.invites;
+      if (!Array.isArray(vuexInvites)) {
+        return;
+      }
+      const storedInvites = await readInvites(key);
+      const missingInvites = parseInvites(vuexInvites).filter(({ secretKey }) => (
+        !storedInvites.some((invite) => isSameKey(invite.secretKey, secretKey))
+      ));
+      if (missingInvites.length) {
+        await storeInvites(key, [...storedInvites, ...missingInvites]);
+      }
+      // Read again, as another window may have stored its invites meanwhile.
+      const movedInvites = await readInvites(key);
+      await removeLegacySecrets({
+        stateFields: {
+          invites: (state) => Array.isArray(state?.invites)
+            && parseInvites(state.invites).every(({ secretKey }) => (
+              movedInvites.some((invite) => isSameKey(invite.secretKey, secretKey))
+            )),
+        },
+      });
       return;
     }
     const legacyInvites = await migrateInvitesVuexToComposable(plaintextInvites);
