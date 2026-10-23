@@ -476,7 +476,7 @@ export default defineComponent({
       address: Encoded.ContractAddress,
       posAddress: string,
       invoiceId: string,
-      amount: number,
+      amount: string,
       options: ContractInitializeOptions,
     ) {
       const aeSdk = await getAeSdk();
@@ -486,7 +486,7 @@ export default defineComponent({
         address,
       });
       return tokenContract.burn_trigger_pos(
-        amount.toFixed(),
+        amount,
         posAddress,
         invoiceId,
         options,
@@ -502,12 +502,12 @@ export default defineComponent({
       try {
         let actionResult;
 
-        if (props.transferData.invoiceId !== null) {
+        if (props.transferData.invoiceId != null) {
           actionResult = await burnTriggerPoS(
             selectedAsset.contractId as Encoded.ContractAddress,
-            new BigNumber(amount).toFixed().toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
+            new BigNumber(amount).toFixed(),
             {
               waitMined: false,
               nonce,
