@@ -881,6 +881,8 @@ export interface TransferFormModel extends IFormModel {
   gasPrice?: number;
   gasUsed?: number;
   fee?: BigNumber;
+  /** Bitcoin and Dogecoin: the fee of each recipient's send in turn, which add up to `fee` */
+  fees?: number[];
   estimatedFee?: BigNumber;
   estimatedTotal?: number;
   total?: number;

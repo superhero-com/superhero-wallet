@@ -52,7 +52,7 @@ import {
   fetchJson,
 } from '@/utils';
 import {
-  estimateSendVsize,
+  estimateSendsVsizes,
   fetchUtxoList,
   fetchUtxoTransactions,
   normalizeTransactionStructure,
@@ -355,7 +355,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const network = this.getBitcoinNetwork(activeNetwork.value.type);
 
     const amountInSatoshi = toSatoshi(amountInBtc);
-    const feeInSatoshi = toSatoshi(options.fee);
+    // The change output takes whole satoshis, `toSatoshi` doesn't round
+    const feeInSatoshi = Math.round(toSatoshi(options.fee));
 
     const psbt = new Psbt({ network });
 
@@ -416,36 +417,50 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return psbt.extractTransaction(true);
   }
 
-  /** Virtual sizes of the send at each of `feeRates` sat/vB, see `estimateSendVsize`. */
-  async estimateVsize(
+  /**
+   * Virtual sizes of the sends to each of `recipients` in turn at each of `feeRates` sat/vB,
+   * see `estimateSendsVsizes`.
+   */
+  async estimateSendsVsizes(
     amountInBtc: number,
-    recipient: string,
+    recipients: string[],
     feeRates: number[],
     options: {
       address: string;
       sweep?: boolean;
-      withChange?: boolean;
     },
-  ): Promise<number[]> {
+  ): Promise<number[][]> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const network = this.getBitcoinNetwork(activeNetwork.value.type);
     const getOutputWeight = (address: string) => 4 * (9 + toOutputScript(address, network).length);
-    const recipientWeight = getOutputWeight(recipient);
     const changeWeight = getOutputWeight(options.address);
+    // The form stops a send to an invalid address, the other sends are sized meanwhile
+    const recipientWeights = recipients.map((address) => {
+      try {
+        return getOutputWeight(address);
+      } catch {
+        return changeWeight;
+      }
+    });
     const utxos = await fetchUtxoList(nodeUrl, options.address);
 
-    return feeRates.map((feeRate) => estimateSendVsize(utxos, toSatoshi(amountInBtc), feeRate, {
-      dustAmount: DUST_AMOUNT,
-      sweep: options.sweep,
-      withChange: options.withChange,
-      getVsize: (inputCount, hasChange) => Math.ceil((
-        TX_OVERHEAD_WEIGHT
-        + P2WPKH_INPUT_WEIGHT * inputCount
-        + recipientWeight
-        + (hasChange ? changeWeight : 0)
-      ) / 4),
-    }));
+    return feeRates.map((feeRate) => estimateSendsVsizes(
+      utxos,
+      toSatoshi(amountInBtc),
+      recipients.length,
+      feeRate,
+      {
+        dustAmount: DUST_AMOUNT,
+        sweep: options.sweep,
+        getVsize: (inputCount, hasChange, sendIndex) => Math.ceil((
+          TX_OVERHEAD_WEIGHT
+          + P2WPKH_INPUT_WEIGHT * inputCount
+          + recipientWeights[sendIndex]
+          + (hasChange ? changeWeight : 0)
+        ) / 4),
+      },
+    ));
   }
 
   async spend(

@@ -95,24 +95,39 @@ export default defineComponent({
       return textAreaDiv.innerHTML;
     }
 
+    /**
+     * Each send pays the fee the form sized it at, as each of several spends the change
+     * of the one before.
+     */
+    function getSendFee(index: number): number | undefined {
+      const { fee, fees, addresses } = props.transferData;
+      const recipientsCount = addresses?.length || 1;
+      return fees?.length === recipientsCount
+        ? fees[index]
+        : fee?.dividedBy(recipientsCount).toNumber();
+    }
+
     async function transfer(
       { amount, recipient }: ITransferArgs,
+      fee: number | undefined,
+      paidRecipients: string[],
     ): Promise<string | undefined> {
       const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
       try {
         const { hash } = await adapter.spend(BigNumber(amount).toNumber(), recipient, {
-          fee: props.transferData.fee
-            ?.dividedBy(props.transferData.addresses?.length || 1).toNumber(),
+          fee,
           ...activeAccount.value,
         });
         return hash;
       } catch (error: any) {
         const processedErrorMessage = HtmlEncode(error.message);
-        if (processedErrorMessage.includes('dust')) {
-          openTransactionFailedModal(t('modals.transaction-failed.dustError'));
-        } else {
-          openTransactionFailedModal(processedErrorMessage);
-        }
+        const message = processedErrorMessage.includes('dust')
+          ? t('modals.transaction-failed.dustError')
+          : processedErrorMessage;
+        // Confirming the transfer again would pay them twice
+        openTransactionFailedModal(paidRecipients.length
+          ? `${message}<br /><br />${t('modals.transaction-failed.paidRecipients', { recipients: HtmlEncode(paidRecipients.join(', ')) })}`
+          : message);
         return undefined;
       }
     }
@@ -130,21 +145,22 @@ export default defineComponent({
       }
 
       loading.value = true;
-      let lastHash: string | undefined;
+      const paidRecipients: string[] = [];
       // eslint-disable-next-line no-restricted-syntax
       for (const [index, recipient] of recipients.entries()) {
+        const fee = getSendFee(index);
         // eslint-disable-next-line no-await-in-loop
         const hash = await transfer({
           amount,
           recipient,
           selectedAsset,
-        });
+        }, fee, paidRecipients);
 
         // The remaining sends would spend the same coins, so stop at the first failure.
         if (!hash) {
           break;
         }
-        lastHash = hash;
+        paidRecipients.push(recipient);
 
         const lastActiveBtcAccount = getLastActiveProtocolAccount(props.protocol);
         const transaction: ITransaction = {
@@ -160,7 +176,7 @@ export default defineComponent({
             type: 'SpendTx',
             recipientId: recipient,
             arguments: [],
-            fee: props.transferData.fee?.dividedBy(recipients.length).toNumber() ?? 0,
+            fee: fee ?? 0,
           },
         };
         addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
@@ -177,7 +193,7 @@ export default defineComponent({
       loading.value = false;
 
       // Leave the review once anything was sent, so Confirm can't send it again.
-      if (lastHash) {
+      if (paidRecipients.length) {
         // TODO - redirect after transfer function will be ready
         router.push({ name: homeRouteName.value });
         emit('success');
