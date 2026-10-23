@@ -30,6 +30,8 @@ export interface UseCurrenciesOptions {
 let composableInitialized = false;
 
 const POLLING_INTERVAL = 3600000;
+/** A failed request is tried once more after this, rather than an hour later. */
+const RETRY_DELAY = 60000;
 const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
 
 /**
@@ -54,6 +56,7 @@ const currentCurrencyCode = useStorageRef<CurrencyCode>(
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 const isCurrenciesUnavailable = ref(false);
+let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
 /**
  * `Intl.NumberFormat` construction is expensive; `formatCurrency` runs 1-3x per
@@ -120,7 +123,9 @@ export function useCurrencies({
     loadCoinsData();
   }
 
-  async function loadCurrencyRates() {
+  async function fetchCurrencyRates(isRetry: boolean) {
+    clearTimeout(retryTimeout);
+    retryTimeout = undefined;
     isLoadingCurrencies.value = true;
 
     const fetchedCurrencyRates = await CoinGecko.fetchCoinCurrencyRates(
@@ -150,8 +155,25 @@ export function useCurrencies({
     currencyRates.value = fullRates;
 
     // `fetchCoinCurrencyRates` returns null only when the request fails
-    isCurrenciesUnavailable.value = fetchedCurrencyRates === null;
+    const isFailed = fetchedCurrencyRates === null;
+    if (isFailed && !isRetry) {
+      // A single failure, such as a rate limit, should not leave the rates out for an hour
+      retryTimeout = setTimeout(() => fetchCurrencyRates(true), RETRY_DELAY);
+    }
+    // Until the retry, only while every coin has a cached rate to show
+    if (
+      !isFailed
+      || isRetry
+      || protocolsInUse.value.some((protocol) => !getCurrentCurrencyRate(protocol))
+    ) {
+      isCurrenciesUnavailable.value = isFailed;
+    }
     isLoadingCurrencies.value = false;
+  }
+
+  /** Takes no argument, so that one an event handler passes can't make it a retry. */
+  function loadCurrencyRates() {
+    return fetchCurrencyRates(false);
   }
 
   /**
