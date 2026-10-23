@@ -355,7 +355,7 @@ export function objectHasNonEmptyProperties(obj: object): boolean {
 }
 
 export function openInNewWindow(url: string) {
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 export function pipe<T = any[]>(fns: ((data: T) => T)[]) {

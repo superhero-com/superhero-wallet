@@ -64,7 +64,7 @@ import { PropType, computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { INotification } from '@/types';
-import { relativeTimeTo } from '@/utils';
+import { openInNewWindow, relativeTimeTo } from '@/utils';
 import {
   IS_MOBILE_APP,
   IS_EXTENSION,
@@ -145,7 +145,7 @@ export default defineComponent({
             event.preventDefault();
             window.open(props.notification.path, '_system');
           } else {
-            window.open(props.notification.path, '_blank');
+            openInNewWindow(props.notification.path);
           }
         } else {
           router.push(props.notification.path);
