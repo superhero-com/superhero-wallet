@@ -57,7 +57,11 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
       }
       const funding = fundings.find((tx) => u === `${nodeUrl}/tx/${tx.getId()}/hex`);
       if (funding) {
-        return Promise.resolve({ ok: true, text: () => Promise.resolve(funding.toHex()) });
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(funding.toHex()),
+        });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });
@@ -119,6 +123,29 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
 
     await expect(adapter.estimateVsize(1, recipient, [1000], keys))
       .rejects.toThrow('Unexpected UTXO response');
+  });
+
+  it('fetches the transactions of the selected UTXOs only', async () => {
+    const txids = mockUtxos([10_000_000, 120_000_000, 50_000_000]);
+
+    await adapter.constructAndSignTx(0.4, recipient, { ...keys, fee: 0.00226 });
+
+    expect(vi.mocked(global.fetch).mock.calls
+      .map(([url]) => String(url))
+      .filter((url) => url.endsWith('/hex')))
+      .toEqual([`${nodeUrl}/tx/${txids[2]}/hex`]);
+  });
+
+  it('refuses to sign when the transaction of a UTXO fails to load', async () => {
+    mockUtxos([120_000_000]);
+    const fetchUtxos = global.fetch;
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = vi.fn((url: any) => (String(url).endsWith('/hex')
+      ? Promise.resolve({ ok: false, status: 429, text: () => Promise.resolve('Too many requests') })
+      : fetchUtxos(url)));
+
+    await expect(adapter.constructAndSignTx(1, recipient, { ...keys, fee: 0.00226 }))
+      .rejects.toThrow('HTTP 429');
   });
 
   it('refuses a fee that is not a number instead of paying everything as fee', async () => {

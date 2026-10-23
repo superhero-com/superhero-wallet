@@ -1,7 +1,14 @@
 import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { fetchJson } from '@/utils';
 import { BTC_COIN_PRECISION } from '../config';
+
+interface IUtxo {
+  txid: string;
+  vout: number;
+  value: number;
+}
 
 export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
@@ -10,6 +17,26 @@ export function satoshiToBtc(amount: number) {
 export const sumValues = (
   items: { value: number }[],
 ) => items.reduce((sum, { value }) => sum + value, 0);
+
+/** All the unspent transaction outputs of `address`, confirmed or not */
+export async function fetchUtxoList(nodeUrl: string, address: string): Promise<IUtxo[]> {
+  const utxos = await fetchJson(`${nodeUrl}/address/${address}/utxo`);
+  if (!Array.isArray(utxos)) {
+    throw new Error('Unexpected UTXO response');
+  }
+  return utxos;
+}
+
+/** Signing needs the raw transaction of each UTXO spent. */
+export async function fetchUtxoTransactions<T extends IUtxo>(nodeUrl: string, utxos: T[]) {
+  return Promise.all(utxos.map(async (utxo) => {
+    const response = await fetch(`${nodeUrl}/tx/${utxo.txid}/hex`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} fetching the transaction of a UTXO`);
+    }
+    return { ...utxo, transactionInHex: await response.text() };
+  }));
+}
 
 /**
  * Picks the smallest UTXO that covers `targetValue` alone, else the largest ones first.

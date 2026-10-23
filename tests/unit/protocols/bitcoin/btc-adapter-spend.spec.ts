@@ -56,7 +56,11 @@ function mockUtxoFetch(
     }
     const m = u.match(/\/tx\/([0-9a-f]+)\/hex$/);
     if (m && fundingHexByTxid[m[1]]) {
-      return Promise.resolve({ text: () => Promise.resolve(fundingHexByTxid[m[1]]) });
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve(fundingHexByTxid[m[1]]),
+      });
     }
     if (u === `${nodeUrl}/tx`) {
       return Promise.resolve({ status: 200, text: () => Promise.resolve('broadcast-txid') });

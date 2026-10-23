@@ -53,6 +53,8 @@ import {
 } from '@/utils';
 import {
   estimateSendVsize,
+  fetchUtxoList,
+  fetchUtxoTransactions,
   normalizeTransactionStructure,
   selectUtxos,
   sumValues,
@@ -68,16 +70,6 @@ const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
 const TX_OVERHEAD_WEIGHT = 42;
 // Weight units of a P2WPKH input with the longest low-S signature (72 bytes)
 const P2WPKH_INPUT_WEIGHT = 272;
-
-interface IUtxo {
-  txid: string;
-  vout: number;
-  value: number;
-}
-
-interface IUtxoWithTransaction extends IUtxo {
-  transactionInHex: string;
-}
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.bitcoin;
@@ -337,35 +329,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return normalizeTransactionStructure(rawTransaction, transactionOwner);
   }
 
-  private async fetchUtxoList(address: string): Promise<IUtxo[]> {
-    const { activeNetwork } = useNetworks();
-    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
-
-    // Fetch all the Unspent transaction outputs, confirmed or not
-    const utxos = await fetchJson(`${nodeUrl}/address/${address}/utxo`);
-    if (!Array.isArray(utxos)) {
-      throw new Error('Unexpected UTXO response');
-    }
-    return utxos;
-  }
-
-  private async fetchUtxos(address: string): Promise<IUtxoWithTransaction[]> {
-    const { activeNetwork } = useNetworks();
-    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
-
-    // Signing needs the raw transaction of each UTXO.
-    return Promise.all((await this.fetchUtxoList(address))
-      .map(async ({ txid, vout, value }) => {
-        const rawTransactionBody = await fetch(`${nodeUrl}/tx/${txid}/hex`);
-        return {
-          txid,
-          vout, // Output vector index
-          value, // Amount
-          transactionInHex: await rawTransactionBody.text(),
-        };
-      }));
-  }
-
   /**
    * Construct and sign raw bitcoin transaction
    * @param amountInBtc
@@ -387,6 +350,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     },
   ): Promise<Transaction> {
     const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
     const network = this.getBitcoinNetwork(activeNetwork.value.type);
 
@@ -395,14 +359,15 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
     const psbt = new Psbt({ network });
 
-    const utxos = selectUtxos(
-      await this.fetchUtxos(options.address),
+    const selectedUtxos = selectUtxos(
+      await fetchUtxoList(nodeUrl, options.address),
       amountInSatoshi + feeInSatoshi,
     );
     // Also refuses a UTXO without a value
-    if (!(sumValues(utxos) >= amountInSatoshi + feeInSatoshi)) {
+    if (!(sumValues(selectedUtxos) >= amountInSatoshi + feeInSatoshi)) {
       throw new Error('Insufficient balance');
     }
+    const utxos = await fetchUtxoTransactions(nodeUrl, selectedUtxos);
 
     utxos.forEach(({
       txid, vout, value, transactionInHex,
@@ -463,11 +428,12 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     },
   ): Promise<number[]> {
     const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const network = this.getBitcoinNetwork(activeNetwork.value.type);
     const getOutputWeight = (address: string) => 4 * (9 + toOutputScript(address, network).length);
     const recipientWeight = getOutputWeight(recipient);
     const changeWeight = getOutputWeight(options.address);
-    const utxos = await this.fetchUtxoList(options.address);
+    const utxos = await fetchUtxoList(nodeUrl, options.address);
 
     return feeRates.map((feeRate) => estimateSendVsize(utxos, toSatoshi(amountInBtc), feeRate, {
       dustAmount: DUST_AMOUNT,

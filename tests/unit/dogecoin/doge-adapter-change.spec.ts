@@ -47,7 +47,11 @@ describe('DogecoinAdapter - change output', () => {
         });
       }
       if (u === `${nodeUrl}/tx/${txid}/hex`) {
-        return Promise.resolve({ text: () => Promise.resolve(funding.toHex()) });
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(funding.toHex()),
+        });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });

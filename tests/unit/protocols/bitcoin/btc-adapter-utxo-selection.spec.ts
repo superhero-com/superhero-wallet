@@ -57,7 +57,11 @@ describe('BitcoinAdapter - UTXO selection and fee sizing', () => {
       }
       const match = u.match(/\/tx\/([0-9a-f]+)\/hex$/);
       if (match && hexByTxid[match[1]]) {
-        return Promise.resolve({ text: () => Promise.resolve(hexByTxid[match[1]]) });
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(hexByTxid[match[1]]),
+        });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });
@@ -220,6 +224,29 @@ describe('BitcoinAdapter - UTXO selection and fee sizing', () => {
     // The change would be dust, but one P2WPKH input, the payment and change
     expect(await adapter.estimateVsize(0.000997, recipient, [2], { ...keys, withChange: true }))
       .toEqual([141]);
+  });
+
+  it('fetches the transactions of the selected UTXOs only', async () => {
+    const txids = mockUtxos([20_000, 100_000, 50_000]);
+
+    await adapter.constructAndSignTx(0.0004, recipient, { ...keys, fee: 0.00001 });
+
+    expect(vi.mocked(global.fetch).mock.calls
+      .map(([url]) => String(url))
+      .filter((url) => url.endsWith('/hex')))
+      .toEqual([`${nodeUrl}/tx/${txids[2]}/hex`]);
+  });
+
+  it('refuses to sign when the transaction of a UTXO fails to load', async () => {
+    mockUtxos([100_000]);
+    const fetchUtxos = global.fetch;
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = vi.fn((url: any) => (String(url).endsWith('/hex')
+      ? Promise.resolve({ ok: false, status: 429, text: () => Promise.resolve('Too many requests') })
+      : fetchUtxos(url)));
+
+    await expect(adapter.constructAndSignTx(0.0001, recipient, { ...keys, fee: 0.00001 }))
+      .rejects.toThrow('HTTP 429');
   });
 
   it('refuses UTXOs without a value', async () => {

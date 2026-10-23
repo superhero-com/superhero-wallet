@@ -90,7 +90,7 @@ describe('BitcoinAdapter - custom network uses the testnet address format everyw
         });
       }
       if (u === `${CUSTOM_NODE_URL}/tx/${txid}/hex`) {
-        return Promise.resolve({ text: () => Promise.resolve(fundingHex) });
+        return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(fundingHex) });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });
