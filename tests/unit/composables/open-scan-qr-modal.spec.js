@@ -47,6 +47,7 @@ const qrCodeSource = async () => {
     case (9):
     case (10): return Promise.resolve(foreignLinks[numberOfTheTest - 6]);
     case (11): return Promise.resolve('https://evil.example/pay?amount=99');
+    case (12): return Promise.resolve(`https://wallet.superhero.com/account?op=transferSend&token=unheld-token&amount=500&account=${STUB_ACCOUNT.addressAeternity}`);
     default:
       return '';
   }
@@ -96,7 +97,8 @@ vi.mock('@/composables', () => ({
 }));
 
 function getSelectedAssetValue(contractId) {
-  return contractId;
+  // A token the account doesn't hold
+  return contractId === 'unheld-token' ? undefined : contractId;
 }
 
 const transferData = {
@@ -173,6 +175,15 @@ describe('scanTransferQrCode', () => {
       expect(formModel.value.payload).toBe('');
     },
   );
+
+  it('does not apply the amount of a token the account does not hold to another asset', async () => {
+    numberOfTheTest = 12;
+    formModel.value.addresses = undefined;
+    formModel.value.amount = '1';
+    await scanTransferQrCode();
+    expect(formModel.value.addresses).toEqual([STUB_ACCOUNT.addressAeternity]);
+    expect(formModel.value.amount).toBe('1');
+  });
 
   it('fills in nothing from a link of another site without a recipient', async () => {
     numberOfTheTest = 11;

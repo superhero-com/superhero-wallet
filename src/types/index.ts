@@ -843,6 +843,10 @@ export interface IRawMultisigTx {
   id: number;
   hash: Encoded.TxHash;
   tx: Encoded.Transaction;
+  /** The `GaMetaTx` fee the proposer hashed with, in aettos, if the backend returns it */
+  fee?: string;
+  /** The `GaMetaTx` gas price the proposer hashed with, in aettos, if the backend returns it */
+  gasPrice?: string;
   createdAt: Date;
   updatedAt: Date;
 }

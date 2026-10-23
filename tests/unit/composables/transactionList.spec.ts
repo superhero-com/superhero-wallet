@@ -111,6 +111,23 @@ describe('useTransactionList on API errors', () => {
     list.stopTransactionListPolling();
   });
 
+  it('ends the list when the next page comes back with the cursor it was requested with', async () => {
+    const adapter = await getAdapter('bitcoin');
+    const fetchSpy = vi.spyOn(adapter, 'fetchAccountTransactions')
+      .mockResolvedValue(page(['tx1'], { lastTxId: 'tx1' }));
+    const list = await useTransactionList({ accountAddress: 'bc1qtest', protocol: 'bitcoin' });
+
+    await list.initializeTransactionListPolling();
+    expect(list.isEndReached.value).toBe(false);
+
+    await list.loadCurrentPageTransactions();
+    expect(list.isEndReached.value).toBe(true);
+    await list.loadCurrentPageTransactions();
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(list.transactionsLoaded.value.map(({ hash }) => hash)).toEqual(['tx1']);
+    list.stopTransactionListPolling();
+  });
+
   it('keeps polling after a failed polling request', async () => {
     const adapter = await getAdapter('bitcoin');
     const error = new Error('HTTP 500');

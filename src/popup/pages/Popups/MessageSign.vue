@@ -60,6 +60,7 @@
       />
       <BtnMain
         data-cy="accept"
+        :disabled="isConfirmBlocked"
         :text="$t('common.confirm')"
         @click="approve()"
       />
@@ -77,6 +78,7 @@ import {
 import type { IAccount, ISignModalResolution } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps, useModals } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 
 import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
 import SignAccountSelect from '@/popup/components/SignAccountSelect.vue';
@@ -97,6 +99,7 @@ export default defineComponent({
     SignAccountSelect,
   },
   setup() {
+    const { isConfirmBlocked } = useConfirmGuard();
     const {
       getAccountByProtocolAndAddress,
       getLastActiveProtocolAccount,
@@ -144,6 +147,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       protocol,
       selectedAccount,
       isUnknownDapp,

@@ -236,10 +236,10 @@ describe.each([
   });
 });
 
-// Avalanche has no token transfers.
 describe.each([
   PROTOCOLS.ethereum,
   PROTOCOLS.bnb,
+  PROTOCOLS.avalanche,
   PROTOCOLS.polygonPos,
 ])('%s TransferReview - token transfer', (protocol) => {
   beforeEach(() => {

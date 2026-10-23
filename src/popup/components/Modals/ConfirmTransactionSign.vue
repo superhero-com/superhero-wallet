@@ -228,7 +228,9 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="!!error || verifying || loading || !canSignWithSelectedAccount"
+        :disabled="
+          isConfirmBlocked || !!error || verifying || loading || !canSignWithSelectedAccount
+        "
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
@@ -295,6 +297,7 @@ import {
   usePopupProps,
   useTransactionData,
 } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 import { AE_SYMBOL, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -359,6 +362,7 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup() {
+    const { isConfirmBlocked } = useConfirmGuard();
     const { t } = useI18n();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
@@ -935,6 +939,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       AE_SYMBOL,
       aettosToAe,
       AnimatedSpinner,

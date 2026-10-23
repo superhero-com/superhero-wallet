@@ -214,7 +214,7 @@ describe('MultisigProposalDetails', () => {
     await wrapper.find('[data-cy=send]').trigger('click');
     await flushPromises();
 
-    expect(sendTx).toHaveBeenCalledWith(GA_ACCOUNT_ID, RAW_TX, 3, TX_HASH);
+    expect(sendTx).toHaveBeenCalledWith(GA_ACCOUNT_ID, RAW_TX, 3, TX_HASH, null);
   });
 
   it('does not warn about a proposal it sent', async () => {

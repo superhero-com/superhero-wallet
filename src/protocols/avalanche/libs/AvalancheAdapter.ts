@@ -2,6 +2,7 @@
 import * as ecc from '@bitcoinerlab/secp256k1';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
+import { Contract } from 'web3-eth-contract';
 import {
   privateKeyToAddress,
   bigIntToHex,
@@ -20,13 +21,18 @@ import Web3Eth, {
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
 import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
-import { getLegacyGasPrice } from '@/protocols/evm/helpers';
+import {
+  getLegacyGasPrice,
+  toTokenBaseUnits,
+  withGasHeadroom,
+} from '@/protocols/evm/helpers';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
+  AssetAmount,
   AssetContractId,
   IAccount,
   IAccountRaw,
@@ -59,6 +65,7 @@ import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/a
 import { EtherscanExplorer } from '@/protocols/ethereum/libs/EtherscanExplorer';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '@/protocols/ethereum/helpers';
+import { ERC20_ABI } from '@/protocols/ethereum/config';
 
 const TRANSACTION_POLLING_INTERVAL = 6000;
 const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
@@ -426,6 +433,62 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
   ): Promise<ITransferResponse> {
     const web3Eth = this.getWeb3EthInstance();
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
+    await broadcastSignedTransaction(web3Eth, raw);
+    return { hash };
+  }
+
+  /** An ERC-20 transfer, priced like the coin's: Avalanche takes legacy transactions. */
+  override async transferToken(
+    amount: AssetAmount,
+    recipient: AccountAddress,
+    contractId: AssetContractId,
+    options: {
+      fromAccount: AccountAddress;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+      nonce: number;
+    },
+  ): Promise<ITransferResponse> {
+    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+    const { getAccountByProtocolAndAddress } = useAccounts();
+
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.avalanche,
+      toChecksumAddress(options.fromAccount),
+    );
+    if (!account || account.protocol !== PROTOCOLS.avalanche) {
+      throw new Error(
+        'Token transfer was initiated from non-existing or non-avalanche account.',
+      );
+    }
+    const { chainId, nodeUrl } = avalancheActiveNetworkSettings.value;
+
+    const contract = new Contract(ERC20_ABI, contractId, { from: options.fromAccount });
+    contract.setProvider(nodeUrl);
+
+    const tokenDecimals = Number(await contract.methods.decimals().call());
+    const hexAmount = bigIntToHex(toTokenBaseUnits(new BigNumber(amount), tokenDecimals));
+
+    const web3Eth = this.getWeb3EthInstance();
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
+
+    const estimatedGas = await contract.methods.transfer(recipient, hexAmount)
+      .estimateGas({ from: options.fromAccount });
+    const gasLimit = withGasHeadroom(estimatedGas);
+
+    const txData: TxData = {
+      nonce: options.nonce,
+      gasPrice,
+      gasLimit: `0x${gasLimit.toString(16)}`,
+      to: contractId,
+      data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
+      value: '0x0',
+    };
+
+    const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
+    const signedTx = new Transaction(txData, { common }).sign(account.secretKey!);
+    const raw = `0x${Buffer.from(signedTx.serialize()).toString('hex')}`;
+    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
     await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
   }

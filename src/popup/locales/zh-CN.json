@@ -935,7 +935,8 @@
     "recentTransactions": {
       "noTransactionsFound": "该账户没有最近交易。",
       "unknownMode": "未知显示模式类型：",
-      "transactionListEnd": "该账户没有更早的交易了。"
+      "transactionListEnd": "该账户没有更早的交易了。",
+      "loadOlder": "加载更早的交易"
     },
     "auctionBid": {
       "current-highest-bid": "当前最高出价",

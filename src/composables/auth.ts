@@ -16,6 +16,7 @@ import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { WalletStorage } from '@/lib/WalletStorage';
 import {
   AUTHENTICATION_TIMEOUTS,
+  IN_FRAME,
   IS_EXTENSION,
   IS_IOS,
   IS_MOBILE_APP,
@@ -240,15 +241,32 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
-   * Setting/Resetting the password key logs the user in/out.
+   * Only a shown page keeps the session: not a hidden one, a dapp's confirmation popup,
+   * or a wallet page a website embeds in a frame.
    */
-  function setEncryptionKey(newEncryptionKey?: CryptoKey) {
+  function isSessionKeepingPage() {
+    return isAppActive.value && !RUNNING_IN_POPUP && !IN_FRAME;
+  }
+
+  /**
+   * Setting/Resetting the password key logs the user in/out.
+   * @param options.isFromSession The key was read from the session, where the background
+   * already times it out.
+   */
+  function setEncryptionKey(
+    newEncryptionKey?: CryptoKey,
+    { isFromSession = false }: { isFromSession?: boolean } = {},
+  ) {
     encryptionKey.value = newEncryptionKey;
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
+        const isKeepingSession = isSessionKeepingPage();
+        // Storing it again would restart the timeout, e.g. with each dapp's popup.
+        if (isFromSession && !isKeepingSession) {
+          return;
+        }
         sessionStart(newEncryptionKey);
-        // Only a shown page keeps the session, not a hidden one or a dapp's confirmation popup.
-        if (!isAppActive.value || RUNNING_IN_POPUP) {
+        if (!isKeepingSession) {
           sessionRelease();
         }
       } else {
@@ -412,6 +430,22 @@ export const useAuth = createCustomScopedComposable(() => {
       throw new Error('The password was changed in another window');
     }
     /**
+     * The invite keys hold funds and aren't derived from the seed. Moved to the new key in the
+     * same commit: left for later, a closed page in between would leave them under a key the
+     * new salt makes underivable. Ones the current key can't open are left as they are.
+     */
+    const invitesCiphertext = WalletStorage.get<string>(STORAGE_KEYS.invitesEncrypted);
+    const newInvitesCiphertext = (currentKey && invitesCiphertext)
+      ? await decrypt(currentKey, invitesCiphertext)
+        .then((invites) => encrypt(newEncryptionKey, invites), () => null)
+      : null;
+    if (encryptionKey.value !== currentKey) {
+      throw new Error('The wallet got locked while setting the password');
+    }
+    if (WalletStorage.get<string>(STORAGE_KEYS.invitesEncrypted) !== invitesCiphertext) {
+      throw new Error('The invites changed while setting the password');
+    }
+    /**
      * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
      * persisted by its own fire-and-forget watcher — assigning both reactive
      * refs below does not guarantee both storage writes land together. If the
@@ -428,6 +462,7 @@ export const useAuth = createCustomScopedComposable(() => {
      * disk.
      */
     const previousStoredSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    const previousStoredInvites = invitesCiphertext ?? null;
     const previousSecret = isDefaultPasswordSecret
       ? WalletStorage.get<string>(STORAGE_KEYS.defaultPasswordSecret)
       : null;
@@ -439,11 +474,17 @@ export const useAuth = createCustomScopedComposable(() => {
       if (isDefaultPasswordSecret) {
         WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, password);
       }
+      if (newInvitesCiphertext) {
+        WalletStorage.set(STORAGE_KEYS.invitesEncrypted, newInvitesCiphertext);
+      }
       WalletStorage.set(STORAGE_KEYS.mnemonic, newMnemonicCiphertext);
     } catch (error) {
       restore(STORAGE_KEYS.encryptionSalt, previousStoredSalt);
       if (isDefaultPasswordSecret) {
         restore(STORAGE_KEYS.defaultPasswordSecret, previousSecret);
+      }
+      if (newInvitesCiphertext) {
+        restore(STORAGE_KEYS.invitesEncrypted, previousStoredInvites);
       }
       throw error;
     }
@@ -520,7 +561,7 @@ export const useAuth = createCustomScopedComposable(() => {
         ciphertext,
       ).then(() => true, () => false);
       if (!isKeyUnchanged) {
-        setEncryptionKey(sessionEncryptionKey);
+        setEncryptionKey(sessionEncryptionKey, { isFromSession: true });
       }
       return true;
     } catch (error) {
@@ -839,7 +880,7 @@ export const useAuth = createCustomScopedComposable(() => {
             if (sessionEncryptionKey) {
               // Decrypt first: a key that can't open the mnemonic must not be published.
               const decryptedMnemonic = await decrypt(sessionEncryptionKey, mnemonic.value);
-              setEncryptionKey(sessionEncryptionKey);
+              setEncryptionKey(sessionEncryptionKey, { isFromSession: true });
               mnemonicDecrypted.value = decryptedMnemonic;
               markAuthenticated();
             }
@@ -983,7 +1024,7 @@ export const useAuth = createCustomScopedComposable(() => {
         updateSessionExpiredFromDeadline();
         sessionExpiresAt = null;
         // Before checking the key, so the background can't time it out after the check.
-        if (isAuthenticated.value && !isSessionExpired && !RUNNING_IN_POPUP) {
+        if (isAuthenticated.value && !isSessionExpired && isSessionKeepingPage()) {
           sessionHold();
         }
 

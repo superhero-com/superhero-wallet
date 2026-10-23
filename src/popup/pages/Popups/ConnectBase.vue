@@ -146,7 +146,7 @@
       <BtnMain
         data-cy="accept"
         wide
-        :disabled="!supported || !selectedAccount"
+        :disabled="isConfirmBlocked || !supported || !selectedAccount"
         :text="$t('common.confirm')"
         @click="confirm()"
       />
@@ -173,6 +173,7 @@ import {
   PROTOCOLS,
 } from '@/constants';
 import { useAccounts, usePopupProps } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 import { usePermissions } from '@/composables/permissions';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -221,6 +222,7 @@ export default defineComponent({
     supportedProtocols: { type: Array as PropType<Protocol[]>, default: undefined },
   },
   setup(props) {
+    const { isConfirmBlocked } = useConfirmGuard();
     const { t } = useI18n();
     const rememberMe = ref(true);
 
@@ -372,6 +374,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       rememberMe,
       isSelfReported,
       accessList,

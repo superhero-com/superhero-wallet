@@ -86,7 +86,8 @@ function answerNodeRequest(url: string, { id, method, params }: any) {
       transactions: [],
     }),
     eth_getTransactionCount: () => numberToHex(NONCE),
-    eth_call: () => '0x',
+    // `decimals()` of a token: 18
+    eth_call: () => (params[0]?.data?.startsWith('0x313ce567') ? `0x${'12'.padStart(64, '0')}` : '0x'),
     eth_sendRawTransaction: () => keccak256(params[0]),
     eth_blockNumber: () => '0x1',
     // Mined, so that web3 stops waiting for it
@@ -196,6 +197,18 @@ describe('eth_sendTransaction of a dapp', () => {
     const from = useAccounts().getLastActiveProtocolAccount(protocol)!.address;
     return { nodeUrl, from };
   }
+
+  it('signs nothing when the network was switched while the user confirmed', async () => {
+    useNetworks().switchNetwork('Testnet');
+    const { from } = getChain(PROTOCOLS.avalanche);
+    // As a dapp's `wallet_switchEthereumChain` while the modal is open
+    openModal.mockImplementation(async () => { useNetworks().switchNetwork('Mainnet'); });
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...TX }], 'Dapp', 'eip155:43113');
+
+    expect(response.error).toMatchObject({ code: -32602 });
+    expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
+  });
 
   it.each([
     ['Avalanche C-Chain', 'Mainnet', PROTOCOLS.avalanche, 43114],
@@ -327,6 +340,52 @@ describe('eth_sendTransaction of a dapp', () => {
 
     expect(response).toEqual({
       error: { code: -32603, message: expect.stringContaining('insufficient funds') },
+    });
+  });
+});
+
+describe('an Avalanche token transfer of the wallet', () => {
+  beforeAll(() => {
+    vi.spyOn(HttpProvider.prototype, 'request').mockImplementation(
+      async function request(this: any, payload: any) {
+        return answerNodeRequest(this.clientUrl, payload);
+      } as any,
+    );
+  });
+
+  beforeEach(() => {
+    nodeRequests = [];
+    nodeErrors = {};
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('sends the token transfer the user asked for', async () => {
+    const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.avalanche);
+    const from = useAccounts().getLastActiveProtocolAccount(PROTOCOLS.avalanche)!.address;
+    const token = '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E';
+
+    const { hash } = await adapter.transferToken!('1.5', TX.to, token, {
+      fromAccount: from,
+      maxFeePerGas: '0.00000003',
+      maxPriorityFeePerGas: '0',
+      nonce: 4,
+    });
+
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(hash).toBe(keccak256(raw));
+    const transferData = `0xa9059cbb${TX.to.slice(2).toLowerCase().padStart(64, '0')}${(15n * 10n ** 17n).toString(16).padStart(64, '0')}`;
+    expect(decodeTransaction(raw)).toMatchObject({
+      chainId: 43114n,
+      from: from.toLowerCase(),
+      nonce: 4n,
+      to: token.toLowerCase(),
+      value: 0n,
+      data: transferData,
+      gasPrice: 30_000_000_000n,
     });
   });
 });

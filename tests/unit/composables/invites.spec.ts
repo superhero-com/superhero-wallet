@@ -193,6 +193,24 @@ describe('useInvites: invite keys at rest', () => {
     expect(findKeyInStorage(secretKey)).toEqual([]);
   });
 
+  it('stores the invites under the new password together with it', async () => {
+    const { WalletStorage } = await import('@/lib/WalletStorage');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const { decrypt } = await import('@/utils/crypto');
+    await createWallet();
+    const { auth, addInvite } = await unlock();
+    const secretKey = randomKey();
+    await addInvite(secretKey);
+
+    await auth.updatePassword(PASSWORD, NEW_PASSWORD);
+    // Read at once, as left by a page closed right after the change.
+    const storedInvites = WalletStorage.get(STORAGE_KEYS.invitesEncrypted);
+
+    const invites = JSON.parse(await decrypt(auth.encryptionKey.value, storedInvites));
+    expect(invites.map(({ secretKey: key }) => toHex(Buffer.from(key))))
+      .toEqual([toHex(secretKey)]);
+  });
+
   it('keeps every invite added at the same time', async () => {
     await createWallet();
     const { addInvite } = await unlock();

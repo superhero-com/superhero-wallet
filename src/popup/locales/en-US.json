@@ -942,7 +942,8 @@
     "recentTransactions": {
       "noTransactionsFound": "There are no recent transactions for this account.",
       "unknownMode": "Unknown display mode type:",
-      "transactionListEnd": "There are no older transactions for this account."
+      "transactionListEnd": "There are no older transactions for this account.",
+      "loadOlder": "Load older transactions"
     },
     "auctionBid": {
       "current-highest-bid": "Current highest bid",
