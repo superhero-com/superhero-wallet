@@ -228,12 +228,6 @@ describe('Send modal', () => {
       .click()
       .get('[data-cy=review-recipient]')
       .should('contain', RECIPIENTS.aeternity.slice(0, 6))
-      .get('[data-cy=edit]')
-      .click();
-    // The form estimates the fee again
-    readAmount('[data-cy=review-fee]');
-    cy.get('[data-cy=next-step-button]')
-      .click()
       .get('[data-cy=accordion-item-label]')
       .contains('Advanced transaction details')
       .click()
