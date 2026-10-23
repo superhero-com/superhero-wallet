@@ -29,4 +29,32 @@ jobs:
       - run: npx cross-env NODE_ENV=production npm run lint:vue && npm run lint:css
       - run: npm run typecheck:baseline
       - run: npm run test:unit:coverage
-      - run: npm run test:e2e
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - shard: 1
+            spec_pattern: tests/e2e/integration/{account,aex2-popups,deeplinks,notifications,polling}.cy.js
+          - shard: 2
+            spec_pattern: tests/e2e/integration/{auth,invites,onboarding,other,receive,transactions}.cy.js
+    env:
+      APP_NAME: wallet
+      TOKEN_SALES_URL_MAINNET: ${{ secrets.TOKEN_SALES_URL_MAINNET }}
+      TOKEN_SALES_URL_TESTNET: ${{ secrets.TOKEN_SALES_URL_TESTNET }}
+      E2E_SPEC_PATTERN: ${{ matrix.spec_pattern }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install app dependencies
+        run: npm ci
+      - name: Verify E2E shard coverage
+        run: node scripts/check-e2e-shards.js
+      - name: Run E2E shard ${{ matrix.shard }}
+        run: npm run test:e2e

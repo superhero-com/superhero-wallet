@@ -16,7 +16,7 @@ module.exports = defineConfig({
   screenshotsFolder: 'tests/e2e/screenshots',
   videosFolder: 'tests/e2e/videos',
   e2e: {
-    specPattern: 'tests/e2e/integration/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: process.env.E2E_SPEC_PATTERN || 'tests/e2e/integration/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'tests/e2e/support/index.js',
     experimentalRunAllSpecs: true,
     baseUrl: 'http://localhost:8080',

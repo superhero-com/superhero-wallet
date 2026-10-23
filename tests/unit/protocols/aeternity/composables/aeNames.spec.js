@@ -1,10 +1,11 @@
 import { ref } from 'vue';
+import { AE_NETWORK_DEFAULT_SETTINGS } from '@/protocols/aeternity/config';
 import { restError } from '../../../helpers/restError';
 
 /**
  * `useAeNames` is exercised against REAL `useStorageRef`/`localStorage`,
- * `useNetworks`, `ProtocolAdapterFactory` (real adapter, `fetchPendingTransactions`
- * spied per test - the actual network boundary), `@/protocols/aeternity/config`
+ * `useNetworks`, `ProtocolAdapterFactory` (real registry with lightweight protocol
+ * adapter stubs for the pending-transaction boundary), `@/protocols/aeternity/config`
  * (plain constants), `@/protocols/aeternity/helpers`'s `isInsufficientBalanceError`
  * (simple predicate), `@/protocols/aeternity/composables/aeNetworkSettings` and
  * `aeTippingBackend` (both just route through the mocked `fetchJson` below), and
@@ -72,10 +73,8 @@ const createTestContext = async ({
     },
   };
 
-  // All `vi.doMock` calls must be registered here, before `registerAdapters` is
-  // imported below - it transitively loads the real `@/composables` barrel (and
-  // everything in it, including `aeNames.ts` and its dependencies), so mocking
-  // afterwards would be too late for this module generation.
+  // Avoid importing every real protocol adapter for each fresh module context. This
+  // composable only needs the Aeternity pending-transaction boundary from the registry.
   vi.doMock('@aeternity/aepp-sdk', async () => {
     const actual = await vi.importActual('@aeternity/aepp-sdk');
     return {
@@ -184,7 +183,7 @@ const createTestContext = async ({
     useAeAddressLinkBackend: () => ({ linkPreferredAensName, unlinkPreferredAensName }),
   }));
 
-  // Seed real `localStorage` BEFORE `registerAdapters` (below) is imported.
+  // Seed real `localStorage` before the protocol registry imports the composables barrel.
   // `AeternityAdapter` -> the aeternity composables barrel -> `aeTokenSales.ts`
   // imports `useNetworks` from the `@/composables` barrel, which transitively
   // (via `accountSelector.ts`) evaluates `aeNames.ts` itself - its module-level
@@ -211,11 +210,17 @@ const createTestContext = async ({
   WalletStorage.set(STORAGE_KEYS.pendingNameAutoExtendTxs, pendingAutoExtendTxs);
   WalletStorage.set(STORAGE_KEYS.pendingNameTransferTxs, pendingNameTransferTxs);
 
-  await import('@/protocols/registerAdapters');
-
   const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
-  const adapter = ProtocolAdapterFactory.getAdapter('aeternity');
-  vi.spyOn(adapter, 'fetchPendingTransactions').mockImplementation(fetchPendingTransactions);
+  const { PROTOCOL_LIST } = await import('@/constants');
+  function TestProtocolAdapter() {
+    this.getNetworkTypeDefaultValues = (type) => (type === 'mainnet' || type === 'testnet'
+      ? AE_NETWORK_DEFAULT_SETTINGS[type]
+      : {});
+    this.fetchPendingTransactions = fetchPendingTransactions;
+  }
+  PROTOCOL_LIST.forEach((protocol) => (
+    ProtocolAdapterFactory.registerAdapter(protocol, TestProtocolAdapter)
+  ));
 
   const aeNamesModule = await import('@/protocols/aeternity/composables/aeNames');
   const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });

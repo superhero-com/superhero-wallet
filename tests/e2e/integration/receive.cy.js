@@ -1,7 +1,10 @@
 import { STUB_ACCOUNT, STUB_TOKEN_CONTRACT_ADDRESS } from '@/constants/stubs';
-import { AE_NETWORK_DEFAULT_SETTINGS } from '../../../src/protocols/aeternity/config';
 
 const testAmount = 111.11;
+const testToken = {
+  contractId: STUB_TOKEN_CONTRACT_ADDRESS,
+  name: 'AMZ',
+};
 
 describe('Test cases for receive modal', () => {
   it('Generates, copies and opens a qr code for each blockchain', () => {
@@ -12,19 +15,12 @@ describe('Test cases for receive modal', () => {
 
     // aeternity fungibleToken as asset
 
-    cy.request(`${AE_NETWORK_DEFAULT_SETTINGS.testnet.middlewareUrl}/v3/aex9/${STUB_TOKEN_CONTRACT_ADDRESS}`).then((response) => {
-      const tokenSymbol = response.body.symbol;
-
-      cy.login()
-        .generateReceiveLinkAndVisit(
-          STUB_ACCOUNT.addressAeternity,
-          testAmount,
-          {
-            contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-            name: tokenSymbol,
-          },
-        );
-    });
+    cy.login()
+      .generateReceiveLinkAndVisit(
+        STUB_ACCOUNT.addressAeternity,
+        testAmount,
+        testToken,
+      );
 
     // bitcoin
 
