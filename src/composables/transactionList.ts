@@ -67,6 +67,9 @@ export function useTransactionList({
   let pollingIntervalId: NodeJS.Timeout | undefined;
   /** Time before which a failed page is not requested again */
   let retryAfter = 0;
+  let retryTimeoutId: NodeJS.Timeout | undefined;
+  /** A request still running when polling stops doesn't retry */
+  let isStopped = false;
   const isLoading = ref(false);
 
   const { isOnline } = useConnection();
@@ -125,16 +128,20 @@ export function useTransactionList({
       return;
     }
     isLoading.value = true;
+    const requestedPaginationParams = state.value.nextPagePaginationParams;
 
     try {
-      const requestedPaginationParams = state.value.nextPagePaginationParams;
       const {
         paginationParams,
         regularTransactions,
         pendingTransactions,
       } = await fetchTransactions(requestedPaginationParams);
 
-      if (isStateOfAnotherList()) {
+      if (
+        isStateOfAnotherList()
+        // The polling started the list again meanwhile, this page would leave a gap
+        || !isEqual(state.value.nextPagePaginationParams, requestedPaginationParams)
+      ) {
         return;
       }
 
@@ -173,12 +180,30 @@ export function useTransactionList({
       handleUnknownError(error);
       // Load-more fires again as soon as `isLoading` turns false
       retryAfter = Date.now() + POLLING_INTERVAL_TRANSACTIONS;
+      // Nothing else asks for a next page again unless the user scrolls. The polling asks for
+      // the first one.
+      if (!isStopped && objectHasNonEmptyProperties(requestedPaginationParams)) {
+        const retry = () => {
+          if (isStopped) return;
+          // Not while the app is hidden, like the polling of the first page
+          if (isAppActive.value && isOnline.value) {
+            // The timer waited already, a clock set back would keep the page out
+            retryAfter = 0;
+            loadCurrentPageTransactions();
+          } else {
+            retryTimeoutId = setTimeout(retry, POLLING_INTERVAL_TRANSACTIONS);
+          }
+        };
+        clearTimeout(retryTimeoutId);
+        retryTimeoutId = setTimeout(retry, POLLING_INTERVAL_TRANSACTIONS);
+      }
     } finally {
       isLoading.value = false;
     }
   }
 
   async function initializeTransactionListPolling() {
+    isStopped = false;
     if (!state.value.isInitialLoadDone || !transactionsLoaded.value.length) {
       if (state.value.isInitialLoadDone && !transactionsLoaded.value.length) {
         resetState();
@@ -240,7 +265,9 @@ export function useTransactionList({
   }
 
   function stopTransactionListPolling() {
+    isStopped = true;
     clearInterval(pollingIntervalId);
+    clearTimeout(retryTimeoutId);
   }
 
   if (isStateOfAnotherList()) {
