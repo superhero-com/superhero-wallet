@@ -300,6 +300,20 @@ describe('eth_sendTransaction of a dapp', () => {
     expect(decodeTransaction(raw)).toMatchObject({ gasLimit: 24150n, data: '0x', value: BigInt(TX.value) });
   });
 
+  it('sends the call data a dapp passed as `input`', async () => {
+    const { from } = getChain(PROTOCOLS.avalanche);
+    const { data: input, gas, ...tx } = TX;
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...tx, input }], 'Dapp', 'eip155:43114');
+
+    expect(response.error).toBeUndefined();
+    const [{ params: [estimation] }] = getNodeRequests('eth_estimateGas');
+    expect(estimation.data).toBe(input);
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).data).toBe(input);
+    expect(openModal.mock.calls[0][1].tx).toMatchObject({ data: input, type: 'ContractCallTx' });
+  });
+
   it('sends nothing when the user rejects', async () => {
     openModal.mockRejectedValue(new Error('Rejected by user'));
     const { from } = getChain(PROTOCOLS.avalanche);

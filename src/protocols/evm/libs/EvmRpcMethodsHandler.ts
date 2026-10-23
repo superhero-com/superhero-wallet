@@ -382,6 +382,8 @@ export async function handleEvmRpcMethod(
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
     const url = aepp;
+    // Dapps may send the call data as `input`, the name the execution API spec uses
+    const data = params.data ?? params.input;
 
     let gasHex = params.gas;
     if (!gasHex) {
@@ -389,7 +391,7 @@ export async function handleEvmRpcMethod(
         from: params.from,
         to: params.to,
         value: params.value,
-        data: params.data,
+        data,
       }]);
       if (estimation.error) return estimation;
       gasHex = numberToHex(withGasHeadroom(BigInt(estimation.result)));
@@ -400,7 +402,7 @@ export async function handleEvmRpcMethod(
     const gas = Number(gasHex);
     const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
-    const isCoinTransfer = !params.data;
+    const isCoinTransfer = !data;
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol,
@@ -419,7 +421,7 @@ export async function handleEvmRpcMethod(
         tag,
         senderId,
         recipientId,
-        data: params.data,
+        data,
       },
       fromAccount: senderId,
     };
@@ -439,6 +441,7 @@ export async function handleEvmRpcMethod(
         try {
           const actionResult = await adapter.transferPreparedTransaction({
             ...params,
+            data,
             from: senderId,
             gas: gasHex,
             ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
