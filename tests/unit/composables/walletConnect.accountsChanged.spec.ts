@@ -56,7 +56,7 @@ describe('WalletConnect accountsChanged behavior', () => {
       APP_URL: 'superhero.com',
       EVM_PROTOCOLS: ['ethereum'],
       PROTOCOLS: { ethereum: 'ethereum' },
-      STORAGE_KEYS: { walletConnectSession: 'wc' },
+      STORAGE_KEYS: { walletConnectSession: 'wc', walletConnectApprovedTopics: 'wc-topics' },
       WALLET_CONNECT_PROJECT_ID: 'pid',
     }));
     // Mock auth composable dependency chain
@@ -280,6 +280,18 @@ describe('WalletConnect dapp requests', () => {
     await send('wallet_revokePermissions', []);
 
     expect((await send('eth_requestAccounts', [])).response.result).toEqual([account.address]);
+    expect(openModalMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('asks to connect again after the dapp ended the session', async () => {
+    const send = await approveSession();
+    await send('eth_requestAccounts', []);
+    const anyWallet: any = (await import('@reown/walletkit')).WalletKit;
+    const web3wallet = await (anyWallet.init as vi.Mock).mock.results.at(-1).value;
+    await getLastHandler(web3wallet, 'session_delete')();
+
+    const sendAgain = await approveSession();
+    await sendAgain('eth_requestAccounts', []);
     expect(openModalMock).toHaveBeenCalledTimes(2);
   });
 

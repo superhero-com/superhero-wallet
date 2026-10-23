@@ -25,6 +25,7 @@ import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_NODE_METHODS } from '@/pr
 import type { Protocol, IAccount } from '@/types';
 import {
   approveWalletConnectSession,
+  forgetWalletConnectSession,
   handleEvmRpcRequest,
 } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 
@@ -90,6 +91,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
   function resetSessionAndState() {
     Object.keys(wcState).forEach((key) => { (wcState as Record<string, boolean>)[key] = false; });
+    if (wcSession.value?.topic) {
+      forgetWalletConnectSession(wcSession.value.topic);
+    }
     wcSession.value = null;
     web3wallet = null;
   }

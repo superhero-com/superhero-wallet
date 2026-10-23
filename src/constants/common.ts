@@ -175,6 +175,7 @@ export const STORAGE_KEYS = {
   secureLogin: 'secure-login',
   secureLoginTimeout: 'secure-login-timeout',
   walletConnectSession: 'wallet-connect-session',
+  walletConnectApprovedTopics: 'wallet-connect-approved-topics',
   addressBook: 'address-book',
   encryptionSalt: 'encryption-salt',
   /**

@@ -47,12 +47,14 @@ import {
   CONNECT_PERMISSIONS,
   EVM_PROTOCOLS,
   PROTOCOLS,
+  STORAGE_KEYS,
 } from '@/constants';
 import {
   useAccounts,
   useNetworks,
   usePermissions,
 } from '@/composables';
+import { useStorageRef } from '@/composables/storageRef';
 
 type EvmRpcResponse = { result?: any; error?: { code: number; message: string } };
 
@@ -76,11 +78,25 @@ const ERROR_UNAUTHORIZED = {
 
 const isCheckingPermissions = ref(false);
 
-/** WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants */
-const approvedSessionTopics = new Set<string>();
+/**
+ * WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants.
+ * Stored and synced, as a session outlives the window it was approved in and
+ * its requests are handled in the background.
+ */
+const approvedSessionTopics = useStorageRef<string[]>(
+  [],
+  STORAGE_KEYS.walletConnectApprovedTopics,
+  { backgroundSync: true },
+);
 
 export function approveWalletConnectSession(topic: string) {
-  approvedSessionTopics.add(topic);
+  if (!approvedSessionTopics.value.includes(topic)) {
+    approvedSessionTopics.value = [...approvedSessionTopics.value, topic];
+  }
+}
+
+export function forgetWalletConnectSession(topic: string) {
+  approvedSessionTopics.value = approvedSessionTopics.value.filter((t) => t !== topic);
 }
 
 /** A hex message as the user reads it: its text, or the hex when it is not text */
@@ -105,7 +121,7 @@ async function checkOrAskEvmPermission(
 
   isCheckingPermissions.value = true;
   try {
-    const isApprovedSession = !!sessionTopic && approvedSessionTopics.has(sessionTopic);
+    const isApprovedSession = !!sessionTopic && approvedSessionTopics.value.includes(sessionTopic);
     const permission = isApprovedSession || await checkOrAskPermission(
       METHODS.subscribeAddress,
       aepp,
@@ -340,7 +356,7 @@ export async function handleEvmRpcMethod(
 
   if (method === ETH_RPC_METHODS.revokePermissions) {
     if (sessionTopic) {
-      approvedSessionTopics.delete(sessionTopic);
+      forgetWalletConnectSession(sessionTopic);
     }
     // The URL a WalletConnect dapp claims may be a site the user connected,
     // and an `http:` page can't drop what was given to the `https:` one

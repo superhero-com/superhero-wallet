@@ -104,6 +104,8 @@ vi.mock('@/protocols/bnb/composables/bnbNetworkSettings', () => ({
 }));
 
 const { handleEvmRpcMethod, handleEvmRpcRequest } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+const { WalletStorage } = await import('@/lib/WalletStorage');
+const { STORAGE_KEYS } = await import('@/constants');
 const { usePermissions } = await import('@/composables');
 
 const DAPP = 'https://dapp.example';
@@ -893,5 +895,45 @@ describe('handleEvmRpcRequest', () => {
 
     expect(response.error?.code).toBe(-32603);
     expect(adapter.transferPreparedTransaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('the WalletConnect sessions the user approved', () => {
+  const getStoredTopics = () => WalletStorage.get(STORAGE_KEYS.walletConnectApprovedTopics);
+  const requestAccounts = (topic: string, handle = handleEvmRpcMethod) => handle(STRANGER, 'eth_requestAccounts', {}, 'Dapp', undefined, 'self-reported', topic);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    checkOrAskPermission.mockResolvedValue(true);
+  });
+
+  it('are not asked again', async () => {
+    expect(await requestAccounts('asked-once')).toEqual({ result: [SIGNER.address] });
+    await requestAccounts('asked-once');
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+  });
+
+  it('are stored, so that the session is not asked again in another window', async () => {
+    await requestAccounts('stored');
+    await vi.waitFor(() => expect(getStoredTopics()).toContain('stored'));
+
+    vi.resetModules();
+    const { handleEvmRpcMethod: handleInAnotherWindow } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+    expect(handleInAnotherWindow).not.toBe(handleEvmRpcMethod);
+    // Once its stored state is read
+    await new Promise((resolve) => { setTimeout(resolve); });
+    expect(await requestAccounts('stored', handleInAnotherWindow)).toEqual({ result: [SIGNER.address] });
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+  });
+
+  it('are forgotten once the dapp revokes its permissions', async () => {
+    await requestAccounts('revoked');
+    expect(await handleEvmRpcMethod(STRANGER, 'wallet_revokePermissions', {}, 'Dapp', undefined, 'self-reported', 'revoked'))
+      .toEqual({ result: null });
+    await vi.waitFor(() => expect(getStoredTopics()).not.toContain('revoked'));
+
+    await requestAccounts('revoked');
+    expect(checkOrAskPermission).toHaveBeenCalledTimes(2);
   });
 });
