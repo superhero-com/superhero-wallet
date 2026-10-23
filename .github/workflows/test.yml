@@ -35,9 +35,9 @@ jobs:
       matrix:
         include:
           - shard: 1
-            spec_pattern: tests/e2e/integration/{account,aex2-popups,deeplinks,notifications,polling}.cy.js
+            spec_pattern: tests/e2e/integration/{account,aex2-popups,deeplinks,networks,notifications,polling}.cy.js
           - shard: 2
-            spec_pattern: tests/e2e/integration/{auth,invites,onboarding,other,receive,transactions}.cy.js
+            spec_pattern: tests/e2e/integration/{auth,invites,onboarding,other,receive,transactions,transfer-send}.cy.js
     env:
       APP_NAME: wallet
       TOKEN_SALES_URL_MAINNET: ${{ secrets.TOKEN_SALES_URL_MAINNET }}
