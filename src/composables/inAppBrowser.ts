@@ -4,7 +4,11 @@ import { RPC_STATUS } from '@aeternity/aepp-sdk';
 import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import { executeAndSetInterval, handleUnknownError } from '@/utils';
 import { ETH_RPC_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
-import { handleEvmRpcMethod, handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import {
+  handleEvmRpcMethod,
+  handleEvmRpcRequest,
+  isSwitchingEvmChain,
+} from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 import { SUPERHERO_EIP6963_PROVIDER_INFO } from '@/content-scripts/eip6963ProviderInfo';
 // eslint-disable-next-line import/extensions
 import providerScript from '@/content-scripts/inAppBrowserProvider.js?raw';
@@ -223,8 +227,14 @@ export function useInAppBrowser() {
       );
       watch(isAuthenticated, (value) => !value && close());
       watch(
-        [() => activeAccount.value.globalIdx, () => activeNetwork.value.name, permissions],
-        () => emitEvmChanges().catch(handleUnknownError),
+        [
+          () => activeAccount.value.globalIdx,
+          () => activeNetwork.value.name,
+          permissions,
+          isSwitchingEvmChain,
+        ],
+        // Told once a switch to the chain of another EVM protocol is done
+        () => !isSwitchingEvmChain.value && emitEvmChanges().catch(handleUnknownError),
         { deep: true },
       );
     });

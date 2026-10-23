@@ -58,28 +58,19 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
     const eventResult = Array.isArray(rpcMethodParams) ? undefined : rpcMethodParams?.result;
     switch (msg.method) {
       case 'chainChanged':
-        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
-          if (tab.id) {
-            browser.tabs.sendMessage(tab.id, {
-              superheroWalletApproved: true,
-              method: msg.method,
-              result: eventResult,
-              type: 'result',
-            });
-          }
-        });
-        break;
       case 'accountsChanged':
-        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => {
+        // Every tab, as the one the user looks at can be a confirmation window. Each content
+        // script tells only its pages that may hear it.
+        browser.tabs.query({}).then((tabs) => tabs.forEach((tab) => {
           if (tab.id) {
             browser.tabs.sendMessage(tab.id, {
               superheroWalletApproved: true,
               method: msg.method,
               result: eventResult,
               type: 'result',
-            });
+            }).catch(() => {}); // A tab without the content script
           }
-        });
+        }));
         break;
       case 'openPopup':
         openPopup(popupType!, aepp!, popupProps, sidePanelWindowIds).then((popupConfig) => {

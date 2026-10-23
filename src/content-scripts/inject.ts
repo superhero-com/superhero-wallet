@@ -124,8 +124,8 @@ const runContentScript = () => {
     if (method === ETH_RPC_WALLET_EVENTS.chainChanged) {
       postWalletEvent(method, result);
     } else if (method === ETH_RPC_WALLET_EVENTS.accountsChanged && hasAccounts) {
-      // The event carries the wallet's account, the page may see only what it is permitted:
-      // a site removed meanwhile gets no accounts and no further events.
+      // The page may see only the accounts it is permitted: a site removed meanwhile gets no
+      // accounts and no further events.
       sendToOffscreen(ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts, {})
         .then((response: any) => {
           const permittedAccounts = Array.isArray(response?.result) ? response.result : [];

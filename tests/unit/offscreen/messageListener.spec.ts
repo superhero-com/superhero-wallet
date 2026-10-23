@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { ref } from 'vue';
+
 const WALLET_PAGE = { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/index.html?id=1' };
 const WEB_PAGE = { id: 'test-extension-id', url: 'https://aepp.example/', tab: { id: 1 } };
 
@@ -52,6 +54,7 @@ describe('offscreen message listener', () => {
     vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
       getConnectedSiteAccounts,
       handleEvmRpcRequest,
+      isSwitchingEvmChain: ref(false),
     }));
     vi.doMock('@/protocols/ethereum/config', () => ({
       ETH_CONTENT_SCRIPT_METHODS: { getPermittedAccounts: 'superhero_getPermittedAccounts' },

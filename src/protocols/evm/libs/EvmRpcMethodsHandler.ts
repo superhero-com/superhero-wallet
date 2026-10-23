@@ -76,7 +76,17 @@ const ERROR_UNAUTHORIZED = {
   },
 };
 
+/**
+ * While the user is asked to connect or switch. The requests waiting meanwhile all resume at
+ * once, so each looks again, and takes its turn with nothing awaited in between.
+ */
 const isCheckingPermissions = ref(false);
+
+/**
+ * While a dapp switches to the chain of another EVM protocol. The account changes before the
+ * network does, the chain between them is not one to tell the dapp of.
+ */
+export const isSwitchingEvmChain = ref(false);
 
 /**
  * WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants.
@@ -117,7 +127,10 @@ async function checkOrAskEvmPermission(
 ) {
   const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
-  await watchUntilTruthy(() => !isCheckingPermissions.value);
+  while (isCheckingPermissions.value) {
+    // eslint-disable-next-line no-await-in-loop
+    await watchUntilTruthy(() => !isCheckingPermissions.value);
+  }
 
   isCheckingPermissions.value = true;
   try {
@@ -157,6 +170,80 @@ function isConnectedApp(aepp: string, originSource?: AppOriginSource) {
   if (originSource === 'self-reported') return true;
   const { getPermissionForUrl } = usePermissions();
   return !!aepp && !!getPermissionForUrl(aepp);
+}
+
+/**
+ * Asks the user to let a dapp switch to the chain of another EVM protocol, as that makes an
+ * account of it active, and the dapp sees its address. Resolves once one is active on
+ * `networkName`.
+ */
+async function confirmProtocolSwitch(
+  aepp: string,
+  protocol: Protocol,
+  networkName: string,
+  originSource?: AppOriginSource,
+) {
+  const { askPermission } = usePermissions();
+  const {
+    activeAccount,
+    getLastActiveProtocolAccount,
+    setActiveAccountByGlobalIdx,
+  } = useAccounts();
+  const { activeNetwork, switchNetwork } = useNetworks();
+  while (isCheckingPermissions.value) {
+    // eslint-disable-next-line no-await-in-loop
+    await watchUntilTruthy(() => !isCheckingPermissions.value);
+  }
+  // Removed from the connected sites meanwhile
+  if (!isConnectedApp(aepp, originSource)) {
+    return false;
+  }
+  // Asked again while the user confirmed it, e.g. with a double click
+  if (activeAccount.value.protocol === protocol) {
+    if (networkName !== activeNetwork.value.name) {
+      switchNetwork(networkName);
+    }
+    return true;
+  }
+
+  isCheckingPermissions.value = true;
+  // The popup can make the account active before it answers
+  isSwitchingEvmChain.value = true;
+  try {
+    // Asked even for a connected site: its permission doesn't name the protocol
+    const isConfirmed = await askPermission(
+      METHODS.subscribeAddress,
+      aepp,
+      {
+        protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
+        access: [
+          CONNECT_PERMISSIONS.address,
+          CONNECT_PERMISSIONS.networks,
+          CONNECT_PERMISSIONS.transactions,
+        ],
+        isChainSwitch: true,
+      },
+    );
+    if (!isConfirmed) {
+      return false;
+    }
+    // The popup makes the account the user picked active, which reaches this context later
+    if (!await watchUntilTruthy(() => activeAccount.value.protocol === protocol, 3000)) {
+      const account = getLastActiveProtocolAccount(protocol);
+      if (!account) {
+        return false;
+      }
+      setActiveAccountByGlobalIdx(account.globalIdx);
+    }
+    if (networkName !== activeNetwork.value.name) {
+      switchNetwork(networkName);
+    }
+    return true;
+  } finally {
+    isSwitchingEvmChain.value = false;
+    isCheckingPermissions.value = false;
+  }
 }
 
 /**
@@ -301,7 +388,11 @@ export async function handleEvmRpcMethod(
     getPermissionForUrl,
     removePermission,
   } = usePermissions();
-  const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
+  const {
+    activeAccount,
+    getAccountByProtocolAndAddress,
+    getLastActiveProtocolAccount,
+  } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
 
   const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
@@ -383,23 +474,37 @@ export async function handleEvmRpcMethod(
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
     if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
-    const network = Object.values(networks.value)
-      .find(({ protocols }) => (
-        (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
-      ));
-    if (network) {
-      // A dapp can ask for the chain the wallet is already on
-      if (network.name !== activeNetwork.value.name) {
-        switchNetwork(network.name);
-      }
-      return { result: null };
+    const requestedChain = Number(params?.chainId).toString();
+    const targets = Object.values(networks.value).flatMap((network) => EVM_PROTOCOLS
+      .filter((evmProtocol) => (
+        (network.protocols[evmProtocol] as any)?.chainId?.toString() === requestedChain
+      ))
+      .map((evmProtocol) => ({ network, protocol: evmProtocol })));
+    const target = targets.find(({ network }) => network.name === activeNetwork.value.name)
+      ?? targets[0];
+    // The chain of another EVM protocol is reached through an account of it
+    const isOtherProtocol = !!target && target.protocol !== getActiveEvmProtocol();
+    // None are known while locked, the prompt unlocks first
+    const hasNoAccountOfIt = isOtherProtocol
+      && !isEmpty(activeAccount.value)
+      && !getLastActiveProtocolAccount(target.protocol);
+    if (!target || hasNoAccountOfIt) {
+      return {
+        error: {
+          code: 4902,
+          message: `Chain ${params?.chainId} is currently not supported`,
+        },
+      };
     }
-    return {
-      error: {
-        code: 4902,
-        message: `Chain ${params?.chainId} is currently not supported`,
-      },
-    };
+    if (isOtherProtocol) {
+      if (!await confirmProtocolSwitch(aepp, target.protocol, target.network.name, originSource)) {
+        return ERROR_USER_REJECTED_REQUEST;
+      }
+    } else if (target.network.name !== activeNetwork.value.name) {
+      // A dapp can ask for the chain the wallet is already on
+      switchNetwork(target.network.name);
+    }
+    return { result: null };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;

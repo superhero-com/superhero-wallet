@@ -747,6 +747,8 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   accountIdx?: number;
   /** Signed in the offscreen document, so the modal has to drive hardware wallets. */
   isOffscreenRequest?: boolean;
+  /** A connected site asks to switch to the chain of another protocol. */
+  isChainSwitch?: boolean;
 }
 
 /**

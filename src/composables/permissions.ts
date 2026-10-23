@@ -190,58 +190,18 @@ export function usePermissions() {
     }
   }
 
-  /**
-   * Depending on the environment open the modal or popup window with the modal
-   * where user is asked to give permission to do an action like connecting
-   * or listing user's accounts.
-   */
-  async function checkOrAskPermission(
+  /** Asks the user even when the app was given the permission already. */
+  async function askPermission(
     method: METHODS,
     fullUrl?: string,
     modalPropsArg?: IModalProps,
-    /**
-     * Called with whatever the modal/popup resolves with - but only when a
-     * modal was actually shown. Never called on the standing-permission fast
-     * path below, where nothing is shown and nothing was chosen, so callers
-     * can use "was this called" to tell the two cases apart.
-     */
     onModalResolved?: (payload: any) => void,
   ): Promise<boolean> {
     const modalProps = modalPropsArg || {};
     let app: IAppData | undefined;
     let props = getCleanModalOptions<typeof modalProps>(modalProps);
-    const { activeAccount } = useAccounts();
 
     if (fullUrl) {
-      if (
-        // Ahead of `checkPermission`, which counts a transaction towards the daily limit
-        !(method === METHODS.sign && (
-          modalProps.protocol !== PROTOCOLS.aeternity
-          || !DAILY_LIMIT_TX_TAGS.includes(modalProps.tx?.tag)
-        ))
-        // A host the dapp claims can't use a message signing right granted to the real one
-        && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
-        // The background page keeps the keys after the wallet locks
-        && !(
-          [METHODS.sign, METHODS.signMessage].includes(method)
-          && IS_OFFSCREEN_TAB
-          && !await getSessionEncryptionKey().catch(() => null)
-        )
-        && checkPermission(fullUrl, method, modalProps.tx)
-      ) {
-        try {
-          await Promise.race(
-            [
-              watchUntilTruthy(() => !isEmpty(activeAccount.value)),
-              new Promise((_r, reject) => setTimeout(reject, 1000)),
-            ],
-          );
-          return true;
-        } catch (error) {
-          // Intentionally ignoring the error
-        }
-      }
-
       app = createAppData(fullUrl, modalProps.app?.originSource);
       props = { ...props, app };
     }
@@ -286,6 +246,60 @@ export function usePermissions() {
     }
   }
 
+  /**
+   * Depending on the environment open the modal or popup window with the modal
+   * where user is asked to give permission to do an action like connecting
+   * or listing user's accounts.
+   */
+  async function checkOrAskPermission(
+    method: METHODS,
+    fullUrl?: string,
+    modalPropsArg?: IModalProps,
+    /**
+     * Called with whatever the modal/popup resolves with - but only when a
+     * modal was actually shown. Never called on the standing-permission fast
+     * path below, where nothing is shown and nothing was chosen, so callers
+     * can use "was this called" to tell the two cases apart.
+     */
+    onModalResolved?: (payload: any) => void,
+  ): Promise<boolean> {
+    const modalProps = modalPropsArg || {};
+    const { activeAccount } = useAccounts();
+
+    if (fullUrl) {
+      if (
+        // Ahead of `checkPermission`, which counts a transaction towards the daily limit
+        !(method === METHODS.sign && (
+          modalProps.protocol !== PROTOCOLS.aeternity
+          || !DAILY_LIMIT_TX_TAGS.includes(modalProps.tx?.tag)
+        ))
+        // A host the dapp claims can't use a message signing right granted to the real one
+        && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
+        // The background page keeps the keys after the wallet locks
+        && !(
+          [METHODS.sign, METHODS.signMessage].includes(method)
+          && IS_OFFSCREEN_TAB
+          && !await getSessionEncryptionKey().catch(() => null)
+        )
+        && checkPermission(fullUrl, method, modalProps.tx)
+      ) {
+        try {
+          await Promise.race(
+            [
+              watchUntilTruthy(() => !isEmpty(activeAccount.value)),
+              new Promise((_r, reject) => setTimeout(reject, 1000)),
+            ],
+          );
+          return true;
+        } catch (error) {
+          // Intentionally ignoring the error
+        }
+      }
+    }
+
+    return askPermission(method, fullUrl, modalProps, onModalResolved);
+  }
+
   function resetPermissions() {
     permissions.value = {};
   }
@@ -297,6 +311,7 @@ export function usePermissions() {
     getPermissionForUrl,
     checkPermission,
     checkOrAskPermission,
+    askPermission,
     checkTransactionSignLimit,
     resetPermissions,
   };

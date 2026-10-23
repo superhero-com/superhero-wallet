@@ -32,6 +32,7 @@ const wcSession = ref(null);
 const connectWalletConnect = vi.fn();
 const handleEvmRpcMethod = vi.fn();
 const handleEvmRpcRequest = vi.fn();
+const isSwitchingEvmChain = ref(false);
 const getAeSdk = vi.fn();
 const evmState = { accounts: [], chainId: '0x1' };
 let walletSdk;
@@ -48,6 +49,7 @@ vi.mock('@/composables/walletConnect', () => ({
 vi.mock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
   handleEvmRpcMethod,
   handleEvmRpcRequest,
+  isSwitchingEvmChain,
 }));
 
 const { useInAppBrowser } = await import('@/composables/inAppBrowser');
@@ -143,6 +145,7 @@ describe('useInAppBrowser', () => {
     window.cordova = { InAppBrowser: { open: vi.fn(() => browser) } };
 
     Object.assign(evmState, { accounts: [], chainId: '0x1' });
+    isSwitchingEvmChain.value = false;
     handleEvmRpcMethod.mockImplementation(async (_origin, method) => ({
       eth_accounts: { result: evmState.accounts },
       eth_chainId: { result: evmState.chainId },
@@ -317,6 +320,26 @@ describe('useInAppBrowser', () => {
       activeNetwork.value = { name: 'Testnet' };
       await vi.waitFor(() => expect(chainChanged).toHaveBeenCalledWith('0x38'));
       expect(accountsChanged).toHaveBeenCalledTimes(1);
+    });
+
+    it('get chainChanged once when a dapp switches to the chain of another EVM protocol', async () => {
+      const dappPage = await openDapp();
+      const chainChanged = vi.fn();
+      dappPage.ethereum.on('chainChanged', chainChanged);
+
+      // The account of the protocol is active before the network is switched
+      isSwitchingEvmChain.value = true;
+      evmState.chainId = '0x38';
+      activeAccount.value = { globalIdx: 2 };
+      await settle();
+      evmState.chainId = '0x61';
+      activeNetwork.value = { name: 'Testnet' };
+      await settle();
+      isSwitchingEvmChain.value = false;
+
+      await vi.waitFor(() => expect(chainChanged).toHaveBeenCalledWith('0x61'));
+      await settle();
+      expect(chainChanged).toHaveBeenCalledTimes(1);
     });
   });
 
