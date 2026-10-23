@@ -17,8 +17,11 @@ import {
   useLedger,
   useAccounts,
 } from '@/composables';
-import { handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
-import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
+import {
+  getConnectedSiteAccounts,
+  handleEvmRpcRequest,
+} from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import { ETH_CONTENT_SCRIPT_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
 import { isExtensionPageSender } from '../background/messageGuards';
@@ -120,6 +123,9 @@ browser.runtime.onMessage.addListener(
     // Content scripts relay whatever a web page posts: EVM RPC calls only,
     // so take the origin from the browser, not from the message.
     if (!isExtensionPageSender(sender)) {
+      if (method === ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts && sender.url) {
+        return Promise.resolve({ result: getConnectedSiteAccounts(new URL(sender.url).origin) });
+      }
       if (typeof aepp === 'string' && method && sender.url) {
         return handleEvmRpcRequest(new URL(sender.url).origin, method, rpcMethodParams);
       }

@@ -748,6 +748,23 @@ describe('handleEvmRpcMethod', () => {
   });
 });
 
+describe('the accounts a page hears of when the active one changes', () => {
+  it.each([
+    ['a connected site', DAPP],
+    ['a site connected without remembering it', 'https://unremembered.example'],
+  ])('are the active one for %s', async (_, aepp) => {
+    const { getConnectedSiteAccounts } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+
+    expect(getConnectedSiteAccounts(aepp)).toEqual([SIGNER.address]);
+  });
+
+  it('are none for a site that is not connected', async () => {
+    const { getConnectedSiteAccounts } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+
+    expect(getConnectedSiteAccounts(STRANGER)).toEqual([]);
+  });
+});
+
 describe('handleEvmRpcRequest', () => {
   beforeEach(() => {
     vi.clearAllMocks();

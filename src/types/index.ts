@@ -28,7 +28,7 @@ import {
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
-import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import type { EthContentScriptMethod, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 import type { IAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   AE_CONTRACT_ID,
@@ -709,7 +709,11 @@ export interface IMiddlewareStatus {
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
 export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
 export type SessionMethod = ObjectValues<typeof SESSION_METHODS>;
-export type BackgroundMethod = PopupMethod | SessionMethod | EthRpcSupportedMethods;
+export type BackgroundMethod =
+  | PopupMethod
+  | SessionMethod
+  | EthRpcSupportedMethods
+  | EthContentScriptMethod;
 
 export interface IPopupActions {
   resolve: ResolveCallback;

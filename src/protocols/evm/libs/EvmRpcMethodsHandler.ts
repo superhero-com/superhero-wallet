@@ -182,6 +182,17 @@ function getActiveEvmProtocol(): Protocol {
     : PROTOCOLS.ethereum;
 }
 
+/**
+ * The accounts a page of a connected site, also one not remembered, hears of when the active
+ * one changes. None once the site was removed from the connected sites.
+ */
+export function getConnectedSiteAccounts(aepp: string): string[] {
+  if (!isConnectedApp(aepp)) return [];
+  const { getLastActiveProtocolAccount } = useAccounts();
+  const address = getLastActiveProtocolAccount(getActiveEvmProtocol())?.address;
+  return address ? [address] : [];
+}
+
 /** `undefined` for a chain that is not on the active network */
 function selectProtocolByChainId(targetChainId?: string): Protocol | undefined {
   if (!targetChainId) return getActiveEvmProtocol();

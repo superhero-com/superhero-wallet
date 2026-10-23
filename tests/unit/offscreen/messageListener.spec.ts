@@ -11,12 +11,14 @@ describe('offscreen message listener', () => {
     signMessage: vi.fn(),
   };
   const handleEvmRpcRequest = vi.fn();
+  const getConnectedSiteAccounts = vi.fn();
   const wallet = { init: vi.fn(), disconnect: vi.fn() };
 
   function mockOffscreenDependencies() {
     Object.values(ledger).forEach((mock) => mock.mockReset());
     ledger.discoverAccounts.mockResolvedValue(['ledger-account']);
     handleEvmRpcRequest.mockReset().mockResolvedValue({ result: '0x1' });
+    getConnectedSiteAccounts.mockReset().mockReturnValue(['0xabc']);
     wallet.disconnect.mockReset();
 
     vi.doMock('vue', () => ({
@@ -47,8 +49,12 @@ describe('offscreen message listener', () => {
         activeAccount: { value: { protocol: 'ethereum' } },
       }),
     }));
-    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({ handleEvmRpcRequest }));
+    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
+      getConnectedSiteAccounts,
+      handleEvmRpcRequest,
+    }));
     vi.doMock('@/protocols/ethereum/config', () => ({
+      ETH_CONTENT_SCRIPT_METHODS: { getPermittedAccounts: 'superhero_getPermittedAccounts' },
       ETH_RPC_WALLET_EVENTS: {
         chainChanged: 'chainChanged',
         accountsChanged: 'accountsChanged',
@@ -162,6 +168,17 @@ describe('offscreen message listener', () => {
         .resolves.toEqual({ result: '0x1' });
       expect(handleEvmRpcRequest)
         .toHaveBeenCalledWith('https://aepp.example', 'eth_getBalance', ['0x0', 'latest']);
+    });
+
+    it('answers the accounts the page of the sender is permitted', async () => {
+      const listener = await loadListener();
+
+      await expect(listener(
+        relayed('superhero_getPermittedAccounts', { aepp: 'https://aescan.io' }),
+        WEB_PAGE,
+      )).resolves.toEqual({ result: ['0xabc'] });
+      expect(getConnectedSiteAccounts).toHaveBeenCalledWith('https://aepp.example');
+      expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
 
     it('takes the origin from the sender, not from the message', async () => {
