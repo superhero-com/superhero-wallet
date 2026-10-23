@@ -46,7 +46,7 @@ import {
   DOGE_PROTOCOL_NAME,
   DOGE_SYMBOL,
 } from '@/protocols/dogecoin/config';
-import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
+import { fetchJson, getLastNotEmptyAccountIndex, toShiftedBigNumber } from '@/utils';
 import { useDogeNetworkSettings } from '@/protocols/dogecoin/composables/dogeNetworkSettings';
 import {
   estimateSendVsize,
@@ -60,6 +60,11 @@ const TX_OVERHEAD_SIZE = 10;
 // Bytes of a P2PKH input with the longest low-S signature (72 bytes)
 const P2PKH_INPUT_SIZE = 148;
 const P2PKH_OUTPUT_SIZE = 34;
+
+// Keep DOGE conversion exact at koinu precision; multiplying larger amounts can round.
+const toKoinu = (doge: number) => toShiftedBigNumber(doge, DOGE_COIN_PRECISION)
+  .integerValue()
+  .toNumber();
 
 class DogeExplorer extends ProtocolExplorer {
   constructor(private baseUrl: string) { super(); }
@@ -318,8 +323,8 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       ? DogecoinAdapter.DOGE_TESTNET
       : DogecoinAdapter.DOGE_MAINNET;
 
-    const amountInSatoshi = Math.round(amountInDoge * 1e8);
-    const feeInSatoshi = Math.round(options.fee * 1e8);
+    const amountInSatoshi = toKoinu(amountInDoge);
+    const feeInSatoshi = toKoinu(options.fee);
 
     const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
     const fullUtxos = await Promise.all((utxos || []).map(async (u: any) => {
@@ -372,7 +377,7 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
 
     return feeRates.map((feeRate) => estimateSendVsize(
       utxos,
-      Math.round(amountInDoge * 1e8),
+      toKoinu(amountInDoge),
       feeRate,
       {
         dustAmount: DOGE_DUST_AMOUNT,

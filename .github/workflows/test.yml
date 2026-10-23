@@ -7,6 +7,8 @@ jobs:
       APP_NAME: wallet
       TOKEN_SALES_URL_MAINNET: ${{ secrets.TOKEN_SALES_URL_MAINNET }}
       TOKEN_SALES_URL_TESTNET: ${{ secrets.TOKEN_SALES_URL_TESTNET }}
+      # Only the extension job runs Chrome
+      PUPPETEER_SKIP_DOWNLOAD: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,3 +60,49 @@ jobs:
         run: node scripts/check-e2e-shards.js
       - name: Run E2E shard ${{ matrix.shard }}
         run: npm run test:e2e
+  extension:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: wallet
+      # Extensions run in new headless, which is the full Chrome
+      PUPPETEER_CHROME_HEADLESS_SHELL_SKIP_DOWNLOAD: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package-lock.json') }}
+      - name: Install app dependencies
+        run: npm ci
+      - run: npm run test:e2e:extension
+  webkit:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: wallet
+      PUPPETEER_SKIP_DOWNLOAD: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install app dependencies
+        run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+      # The WebKit of iOS 17, as pinned by playwright-core
+      - name: Install WebKit
+        run: npx playwright-core install --with-deps webkit
+      - run: npm run test:e2e:webkit

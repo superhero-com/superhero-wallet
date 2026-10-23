@@ -11,25 +11,73 @@ const toPlain = (value) => JSON.parse(JSON.stringify(
  * Decodes a signed transaction captured from a stubbed broadcast,
  * with the same libraries the wallet signs it with.
  */
-async function decodeSignedTx({ protocol, raw }) {
+async function decodeSignedTx({ protocol, raw, prevouts = [] }) {
   switch (protocol) {
     case 'aeternity': {
-      const { unpackTx, Tag } = await import('@aeternity/aepp-sdk');
+      const {
+        unpackTx, Tag, rebuildUnpackedTx, decode, hash, verifySignature,
+      } = await import('@aeternity/aepp-sdk');
       const { encodedTx, signatures } = unpackTx(raw, Tag.SignedTx);
-      return toPlain({ ...encodedTx, tag: Tag[encodedTx.tag], signatures: signatures.length });
+      const unsignedTx = decode(rebuildUnpackedTx(encodedTx));
+      const prefix = Buffer.from('ae_uat');
+      const isSignatureValid = signatures.length === 1 && (
+        verifySignature(Buffer.concat([prefix, unsignedTx]), signatures[0], encodedTx.senderId)
+        || verifySignature(
+          Buffer.concat([prefix, hash(unsignedTx)]),
+          signatures[0],
+          encodedTx.senderId,
+        )
+      );
+      return toPlain({
+        ...encodedTx,
+        tag: Tag[encodedTx.tag],
+        signatures: signatures.length,
+        isSignatureValid,
+      });
     }
     case 'bitcoin': {
-      const { Transaction, address, networks } = await import('bitcoinjs-lib');
+      const {
+        Transaction, address, networks, payments, script,
+      } = await import('bitcoinjs-lib');
+      const ecc = await import('@bitcoinerlab/secp256k1');
       const tx = Transaction.fromHex(raw);
+      const signatureValidity = tx.ins.map((input, inputIndex) => {
+        const previousOutput = prevouts.find(({ txid, vout }) => (
+          txid === Buffer.from(input.hash).reverse().toString('hex') && vout === input.index
+        ));
+        if (!previousOutput) return false;
+
+        const previousTx = Transaction.fromHex(previousOutput.hex);
+        const output = previousTx.outs[previousOutput.vout];
+        const [witnessSignature, publicKey] = input.witness;
+        if (!output || !witnessSignature || !publicKey) return false;
+
+        const key = Buffer.from(publicKey);
+        const p2wpkh = payments.p2wpkh({ pubkey: key, network: networks.testnet });
+        if (!p2wpkh.output || !Buffer.from(output.script).equals(Buffer.from(p2wpkh.output))) {
+          return false;
+        }
+        const p2pkh = payments.p2pkh({ pubkey: key, network: networks.testnet });
+        if (!p2pkh.output) return false;
+        const decoded = script.signature.decode(Buffer.from(witnessSignature));
+        const sighash = tx.hashForWitnessV0(
+          inputIndex,
+          p2pkh.output,
+          output.value,
+          decoded.hashType,
+        );
+        return ecc.verify(sighash, key, decoded.signature);
+      });
       return toPlain({
         ins: tx.ins.map(({ hash, index }) => ({
           txid: Buffer.from(hash).reverse().toString('hex'),
           vout: index,
         })),
-        outs: tx.outs.map(({ script, value }) => ({
-          address: address.fromOutputScript(script, networks.testnet),
+        outs: tx.outs.map(({ script: outputScript, value }) => ({
+          address: address.fromOutputScript(outputScript, networks.testnet),
           value,
         })),
+        signatureValidity,
       });
     }
     case 'evm': {
