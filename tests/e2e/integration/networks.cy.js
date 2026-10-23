@@ -1,7 +1,15 @@
-import { NETWORK_NAME_MAINNET } from '../../../src/constants/common';
-import { AE_NETWORK_DEFAULT_SETTINGS } from '../../../src/protocols/aeternity/config';
+import { NETWORK_NAME_MAINNET } from '@/constants';
+import { STUB_ACCOUNT } from '@/constants/stubs';
+import { AE_NETWORK_DEFAULT_SETTINGS } from '@/protocols/aeternity/config';
 
 const aeNetworkSettingsTestnet = AE_NETWORK_DEFAULT_SETTINGS.testnet;
+
+function goBackTo(pathname) {
+  cy.get('[data-cy=back-arrow]:visible')
+    .click()
+    .location('pathname')
+    .should('eq', pathname);
+}
 
 describe('Test cases for networks page', () => {
   it('Opens network page, cancels/adds network, can not add network with default name/invalid url', () => {
@@ -25,57 +33,78 @@ describe('Test cases for networks page', () => {
       .should('exist')
 
       // Test if it's possible to add network with invalid URLs
-      .enterNetworkDetails('test', 'test', 'test', 'test')
+      .enterNetworkDetails('test', 'test', 'test')
       .buttonShouldBeDisabled('[data-cy=btn-add-network]')
       .getByTestId('input-message')
       .should('exist')
 
       .getByTestId('cancel')
-      .should('be.visible')
       .click()
       .urlEquals('/more/settings/networks');
   });
 
-  it('Can add, select, edit, delete new network, can not add network with the same name', () => {
+  it('Can add, rename while active and delete a network, can not add network with the same name', () => {
+    const renamedNodeUrl = new URL('/renamed-node', Cypress.config('baseUrl')).href;
+
+    // The renamed network's node is the testnet one, apart from the balance
+    cy.intercept({ pathname: /^\/renamed-node\// }, (req) => {
+      /* eslint-disable no-param-reassign */
+      req.url = req.url.replace(renamedNodeUrl, aeNetworkSettingsTestnet.nodeUrl);
+      req.headers.host = new URL(aeNetworkSettingsTestnet.nodeUrl).host;
+      /* eslint-enable no-param-reassign */
+    });
+    cy.intercept({
+      method: 'GET',
+      pathname: `/renamed-node/v3/accounts/${STUB_ACCOUNT.addressAeternity}`,
+    }, {
+      headers: { 'content-type': 'application/json' },
+      body: `{"id":"${STUB_ACCOUNT.addressAeternity}","balance":12500000000000000000,"nonce":0,"payable":true,"kind":"basic"}`,
+    }).as('renamedNodeBalance');
+
     cy.login()
       .openNetworks()
       .addNetwork(
         'NewNetwork',
         aeNetworkSettingsTestnet.nodeUrl,
         aeNetworkSettingsTestnet.middlewareUrl,
-      )
-      .getByTestId('network-edit')
-      .should('be.visible')
+      );
+    // Adding a network switches to it
+    cy.contains('[data-cy=networks] .network-row', 'NewNetwork')
+      .should('have.class', 'checked');
+    cy.contains('[data-cy=networks] .network-row', 'NewNetwork')
+      .find('[data-cy=network-edit]')
       .click()
       .getInputByTestId('network-name')
       .should('have.value', 'NewNetwork')
-      .getInputByTestId('ae-node-url')
-      .should('have.value', aeNetworkSettingsTestnet.url)
-      .clear()
-      .type(aeNetworkSettingsTestnet.url)
-      .getInputByTestId('ae-middleware-url')
+      .clear({ scrollBehavior: 'center' })
+      .type('Renamed', { scrollBehavior: 'center' })
+      .get('[data-cy=group-aeternity] [data-cy=nodeUrl] input')
+      .should('have.value', aeNetworkSettingsTestnet.nodeUrl)
+      .clear({ scrollBehavior: 'center' })
+      .type(renamedNodeUrl, { scrollBehavior: 'center' })
+      .get('[data-cy=group-aeternity] [data-cy=middlewareUrl] input')
       .should('have.value', aeNetworkSettingsTestnet.middlewareUrl)
-      .clear()
-      .type(aeNetworkSettingsTestnet.middlewareUrl)
       .getByTestId('btn-add-network')
       .click()
-      .getByTestId('network-url')
-      .eq(-1)
-      .should('contain', aeNetworkSettingsTestnet.nodeUrl)
-      .getByTestId('network-middleware')
-      .eq(-1)
-      .should('contain', aeNetworkSettingsTestnet.middlewareUrl)
-      .goBack()
-      .goBack()
-      .goBack()
-      .getByTestId('account-card-base')
-      .should('exist')
+      .get('[data-cy=networks] .network-row')
+      .should('have.length', 3);
+    cy.contains('[data-cy=networks] .network-row', 'Renamed')
+      .should('have.class', 'checked')
+      .should('contain', renamedNodeUrl);
 
-      .openNetworks()
+    // The wallet keeps working on the renamed network's node
+    goBackTo('/more/settings');
+    goBackTo('/more');
+    goBackTo('/account');
+    cy.wait('@renamedNodeBalance')
+      .get('[data-cy=balance-info]')
+      .should('contain', '12.50');
+
+    cy.openNetworks()
       .get('[data-cy=to-add]')
       .click()
       .enterNetworkDetails(
-        'NewNetwork',
+        'Renamed',
         aeNetworkSettingsTestnet.nodeUrl,
         aeNetworkSettingsTestnet.middlewareUrl,
       )
@@ -83,16 +112,17 @@ describe('Test cases for networks page', () => {
       .getByTestId('input-message')
       .should('exist')
       .getByTestId('cancel')
-      .click()
+      .click();
 
-      .getByTestId('network-delete')
-      .should('be.visible')
+    cy.contains('[data-cy=networks] .network-row', 'Renamed')
+      .find('[data-cy=network-delete]')
+      .click()
+      .get('[data-cy=to-confirm]')
       .click()
       .get('[data-cy=networks] .network-row')
-      .should('have.length', 2)
-      .get('[data-cy=networks] .network-row')
-      .eq(0)
-      .find('.radio-dot')
+      .should('have.length', 2);
+    // Deleting the active network switches to Mainnet
+    cy.contains('[data-cy=networks] .network-row', NETWORK_NAME_MAINNET)
       .should('have.class', 'checked');
   });
 });
