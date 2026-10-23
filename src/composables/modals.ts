@@ -15,15 +15,22 @@ import {
   IS_WEB,
   MODAL_BIOMETRIC_LOGIN,
   MODAL_CONFIRM,
+  MODAL_CONFIRM_ACCOUNT_LIST,
+  MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
+  MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_DEFAULT,
   MODAL_ENABLE_BIOMETRIC_LOGIN,
   MODAL_ERROR_LOG,
+  MODAL_MESSAGE_SIGN,
   MODAL_PASSWORD_LOGIN,
   MODAL_SCAN_QR,
   MODAL_SET_PASSWORD,
   MODAL_SHARE_ADDRESS,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
+import { RejectedByUserError } from '@/lib/errors';
 import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
 
 import { usePopupProps } from './popupProps';
@@ -49,6 +56,19 @@ interface IOpenModalParams {
   inPopup: boolean;
   props: IModalProps;
 }
+
+/**
+ * Confirmations of a dapp's request. The dapp, and the requests queued after it,
+ * wait for an answer, so one closed by the wallet is answered as rejected.
+ */
+const DAPP_REQUEST_MODALS: string[] = [
+  MODAL_CONFIRM_ACCOUNT_LIST,
+  MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
+  MODAL_CONFIRM_UNSAFE_SIGN,
+  MODAL_MESSAGE_SIGN,
+];
 
 const modalsRegistered = new Map<string, IModalSettings>();
 const modalsOpenRaw = ref<IOpenModalParams[]>([]);
@@ -87,9 +107,14 @@ export function useModals() {
 
   function closeModalByKey(key: number) {
     const idx = modalsOpenRaw.value.findIndex((modal) => modal.key === key);
+    if (idx < 0) return;
+
     modalsOpenRaw.value[idx].props.show = false;
     nextTick(() => {
-      modalsOpenRaw.value.splice(idx, 1);
+      const currentIdx = modalsOpenRaw.value.findIndex((modal) => modal.key === key);
+      if (currentIdx > -1) {
+        modalsOpenRaw.value.splice(currentIdx, 1);
+      }
     });
   }
 
@@ -219,7 +244,14 @@ export function useModals() {
   }
 
   function closeAllModals() {
-    modalsOpenRaw.value?.forEach(({ key }) => closeModalByKey(key));
+    modalsOpenRaw.value?.forEach(({ key, name, props }) => {
+      // Others are left unsettled, as before: e.g. the reset modal resolves itself after this.
+      if (DAPP_REQUEST_MODALS.includes(name) && props.reject) {
+        props.reject?.(new RejectedByUserError());
+      } else {
+        closeModalByKey(key);
+      }
+    });
   }
 
   return {

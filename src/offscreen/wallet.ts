@@ -158,9 +158,14 @@ export async function init() {
         /**
          * A shown page keeps the session until the last one closes, locks or gets hidden.
          * Not a dapp's confirmation popup (`?id=`), which could keep it for as long as
-         * nobody answers.
+         * nobody answers, nor a wallet page a website embeds in a frame, which would keep it
+         * for as long as that website is open. The frame is reported only for a page in a tab:
+         * the popup and the side panel have none.
          */
-        const isKeepingSession = !new URL(port.sender!.url!).searchParams.has('id');
+        const { sender } = port;
+        const isTopLevelFrame = !sender!.tab || sender!.frameId === 0;
+        const isKeepingSession = isTopLevelFrame
+          && !new URL(sender!.url!).searchParams.has('id');
         if (isKeepingSession) {
           sessionKeepingPortsCount += 1;
           if (sessionKeepingPortsCount === 1) {

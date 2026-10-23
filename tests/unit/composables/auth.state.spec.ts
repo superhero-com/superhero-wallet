@@ -828,6 +828,26 @@ describe('useAuth state machine branches', () => {
         expect(heldPorts()).toHaveLength(0);
       });
 
+      it.each([
+        ['a dapp popup', { RUNNING_IN_POPUP: true }],
+        ['a wallet page a website frames', { IN_FRAME: true }],
+      ])('leaves the timeout running when %s unlocks with the session key', async (_, constants) => {
+        await openUnlockedExtensionPage();
+
+        vi.resetModules();
+        mockConstants({ IS_EXTENSION: true, ...constants });
+        globalThis.browser.runtime.connect.mockClear();
+        const { useAuth } = await import('@/composables/auth');
+        const { useUi } = await import('@/composables/ui');
+        const reopened = useAuth();
+        useUi().isAppActive.value = true;
+        await vi.waitFor(() => expect(reopened.isAuthenticated.value).toBe(true), WAIT_FOR_CRYPTO);
+        await flushAsync();
+
+        // A session port's disconnect restarts the background's timeout.
+        expect(globalThis.browser.runtime.connect).not.toHaveBeenCalled();
+      });
+
       it('leaves the session to the background once a page unlocked while hidden passed the key on', async () => {
         mockConstants({ IS_EXTENSION: true });
         const session = installExtensionStubs();

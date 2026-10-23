@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { uniqBy } from 'lodash-es';
+import { isEqual, uniqBy } from 'lodash-es';
 import type {
   AccountAddress,
   AssetContractId,
@@ -127,11 +127,12 @@ export function useTransactionList({
     isLoading.value = true;
 
     try {
+      const requestedPaginationParams = state.value.nextPagePaginationParams;
       const {
         paginationParams,
         regularTransactions,
         pendingTransactions,
-      } = await fetchTransactions(state.value.nextPagePaginationParams);
+      } = await fetchTransactions(requestedPaginationParams);
 
       if (isStateOfAnotherList()) {
         return;
@@ -142,7 +143,11 @@ export function useTransactionList({
       // page load instead of once per field.
       const next = { ...state.value };
 
-      if (objectHasNonEmptyProperties(paginationParams)) {
+      if (
+        objectHasNonEmptyProperties(paginationParams)
+        // The same page again would be requested forever
+        && !isEqual(paginationParams, requestedPaginationParams)
+      ) {
         next.nextPagePaginationParams = paginationParams;
       } else {
         next.isEndReached = true;

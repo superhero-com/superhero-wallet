@@ -95,7 +95,9 @@ export function useTransferSendForm({
     if (account) {
       result.addresses = [account, ...(formModel.value.addresses ?? [])];
     }
-    if (amount) {
+    // Not for another asset: a link's token the account doesn't hold yet stays pending
+    const isTokenMissing = !!tokenHandler && !!token && !selectedToken;
+    if (amount && !isTokenMissing) {
       result.amount = amount;
     }
     if (payload) {

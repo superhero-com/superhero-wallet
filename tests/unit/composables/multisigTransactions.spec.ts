@@ -34,6 +34,7 @@ import {
   ConsensusProtocolVersion,
   defaultProtocolParameters,
   getFloorGasPrice,
+  produceNameId,
   Tag,
   buildAuthTxHash as sdkBuildAuthTxHash,
 } from '@aeternity/aepp-sdk';
@@ -522,7 +523,7 @@ describe('useMultisigTransactions', () => {
       );
     }
 
-    function propose(txHash: string, storedTx: string) {
+    function propose(txHash: string, storedTx: string, storedGaMetaParams = {}) {
       activeMultisigAccount.value = {
         gaAccountId: ADDRESS_A,
         txHash,
@@ -532,7 +533,7 @@ describe('useMultisigTransactions', () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => ({ hash: txHash, tx: storedTx }),
+        json: async () => ({ hash: txHash, tx: storedTx, ...storedGaMetaParams }),
       }));
     }
 
@@ -627,6 +628,52 @@ describe('useMultisigTransactions', () => {
     it('does not take the fee of older wallets where it is below the floor', async () => {
       connectTo(makeNode(2000000000n));
       propose(await hashOf(TX_A, LEGACY_GA_META_PARAMS), TX_A);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(false);
+      expect(proposal.tx).toBeUndefined();
+    });
+
+    it('shows a proposal hashed with the pair stored with it, under an earlier floor', async () => {
+      const proposedPair = { gasPrice: '3000000', fee: '300000000000' };
+      // Proposed while the node's floor was another one
+      const txHash = Buffer.from(
+        await sdkBuildAuthTxHash(TX_A, { ...proposedPair, onNode: makeNode(3000000n) }),
+      ).toString('hex');
+      connectTo(makeNode(1000000n));
+      propose(txHash, TX_A, proposedPair);
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      const proposal = await fetchActiveMultisigTx();
+
+      expect(proposal.isTxVerified).toBe(true);
+      expect(proposal.gaMetaParams).toEqual(proposedPair);
+    });
+
+    it('does not take a stored pair the proposal was not hashed with', async () => {
+      connectTo(makeNode());
+      propose(await hashOf(TX_A, GA_META_PARAMS), TX_B, { gasPrice: '3000000', fee: '300000000000' });
+      const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
+      const { fetchActiveMultisigTx } = useMultisigTransactions();
+
+      expect((await fetchActiveMultisigTx()).isTxVerified).toBe(false);
+    });
+
+    it.each([
+      ['a spend from another account', () => buildTx({
+        tag: Tag.SpendTx, senderId: ADDRESS_B, recipientId: ADDRESS_A, amount: '100', nonce: 1,
+      })],
+      ['another transaction type', () => buildTx({
+        tag: Tag.NameRevokeTx, accountId: ADDRESS_A, nameId: produceNameId('vault.chain'), nonce: 1,
+      })],
+    ])('does not show %s as the vault\'s spend', async (_, makeTx) => {
+      connectTo(makeNode());
+      const tx = makeTx();
+      propose(await hashOf(tx, GA_META_PARAMS), tx);
       const { useMultisigTransactions } = await import('@/composables/multisigTransactions');
       const { fetchActiveMultisigTx } = useMultisigTransactions();
 

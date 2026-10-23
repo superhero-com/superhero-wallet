@@ -1,6 +1,6 @@
 import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
-import type { WalletKit as IWeb3Wallet } from '@reown/walletkit';
+import type { WalletKit as IWeb3Wallet, WalletKitTypes } from '@reown/walletkit';
 import {
   computed,
   reactive,
@@ -439,9 +439,16 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         web3wallet = await initWeb3wallet();
       }
       let proposalHandled = false;
-      web3wallet.on('session_proposal', async ({ id, params: proposal }) => {
+      const { topic: pairingTopic } = wcUtils.parseUri(uri);
+      // Only the proposal of this pairing: a listener left from an earlier one, e.g. made
+      // without a confirmation, must not approve the proposal of another without asking.
+      const onSessionProposal = async (
+        { id, params: proposal }: WalletKitTypes.EventArguments['session_proposal'],
+      ) => {
         if (proposalHandled) return;
+        if (pairingTopic && proposal.pairingTopic && proposal.pairingTopic !== pairingTopic) return;
         proposalHandled = true;
+        web3wallet?.off('session_proposal', onSessionProposal);
         const preferredProtocol = getPreferredEvmProtocolFromProposal(proposal);
         const { accounts, chains } = preferredProtocol
           ? getFormattedAccountsAndChainsForProtocol(preferredProtocol, proposal)
@@ -518,10 +525,16 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         } finally {
           wcState.connecting = false;
         }
-      });
+      };
+      web3wallet.on('session_proposal', onSessionProposal);
 
       // Ask the DAPP to send `session_proposal` event.
-      await web3wallet.pair({ uri });
+      try {
+        await web3wallet.pair({ uri });
+      } catch (error) {
+        web3wallet.off('session_proposal', onSessionProposal);
+        throw error;
+      }
     } catch (error: any) {
       handleConnectionError(error);
     }

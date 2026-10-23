@@ -108,8 +108,12 @@ export default defineComponent({
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           if (!isSelectedAssetEthCoin.value) {
+            // Or nothing would be sent, while it looks like a success
+            if (!adapter.transferToken) {
+              throw new Error(`Token transfers are not supported on ${adapter.protocolName}`);
+            }
             // eslint-disable-next-line no-await-in-loop
-            actionResult = await adapter.transferToken?.(
+            actionResult = await adapter.transferToken(
               amount,
               recipient,
               selectedAsset.contractId,

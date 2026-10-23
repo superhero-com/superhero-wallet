@@ -281,7 +281,10 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
   ): Promise<IFetchTransactionResult> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
-    const list = await fetchJson(`${nodeUrl}/address/${address}/txs`);
+    // Esplora API: the next page of confirmed transactions follows the last one shown
+    const list = await fetchJson(lastTxId
+      ? `${nodeUrl}/address/${address}/txs/chain/${lastTxId}`
+      : `${nodeUrl}/address/${address}/txs`);
     const rawTransactions: any[] = Array.isArray(list) ? list : [];
     const regularTransactions: ITransaction[] = rawTransactions.map(
       (t: any) => normalizeTransactionStructure(t, address, PROTOCOLS.dogecoin),
@@ -289,7 +292,8 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     return {
       regularTransactions,
       paginationParams: {
-        lastTxId: regularTransactions.at(-1)?.hash || lastTxId,
+        // None after an empty page, so the list ends
+        lastTxId: regularTransactions.at(-1)?.hash || undefined,
       },
     };
   }

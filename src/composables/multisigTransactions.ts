@@ -45,6 +45,31 @@ const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 /** The fee and gas price a stored transaction matched its proposal hash with */
 const proposalGaMetaParams = new Map<string, IAeGaMetaParams>();
 
+const isWholeNumber = (value: unknown) => /^\d+$/.test(String(value ?? ''));
+
+/**
+ * The fee and gas price the proposer sent along to the multisig backend, if it returns them.
+ * Only a candidate: a pair is taken only if the proposal hash matches with it.
+ */
+export function getStoredGaMetaParams(rawTx?: IRawMultisigTx | null): IAeGaMetaParams | null {
+  return (rawTx && isWholeNumber(rawTx.fee) && isWholeNumber(rawTx.gasPrice))
+    ? { fee: String(rawTx.fee), gasPrice: String(rawTx.gasPrice) }
+    : null;
+}
+
+/**
+ * The wallet proposes only spends from the vault, and shows a proposal as one.
+ * Any other transaction, e.g. a name transfer or a contract call, would be shown as a spend.
+ */
+function isSpendOfVault(tx: Encoded.Transaction, vaultId: string) {
+  try {
+    const unpacked = unpackTx(tx);
+    return unpacked.tag === Tag.SpendTx && unpacked.senderId === vaultId;
+  } catch {
+    return false;
+  }
+}
+
 export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { getDryAeSdk, getAeSdk } = useAeSdk();
@@ -103,10 +128,16 @@ export function useMultisigTransactions() {
   async function resolveGaMetaParams(
     tx: Encoded.Transaction,
     txHash: string,
+    storedGaMetaParams?: IAeGaMetaParams | null,
   ): Promise<IAeGaMetaParams | null> {
     const key = `${txHash}:${tx}`;
     if (!proposalGaMetaParams.has(key)) {
-      const candidates = uniqWith([await getGaMetaParams(), LEGACY_GA_META_PARAMS], isEqual);
+      // The stored pair covers a floor the node reported when it was proposed but not now
+      const candidates = uniqWith([
+        await getGaMetaParams(),
+        LEGACY_GA_META_PARAMS,
+        ...(storedGaMetaParams ? [storedGaMetaParams] : []),
+      ], isEqual);
       const hashes = await Promise.all(
         candidates.map((gaMetaParams) => buildAuthTxHashHex(tx, gaMetaParams)),
       );
@@ -137,11 +168,13 @@ export function useMultisigTransactions() {
     ) {
       const rawTx = await fetchTransactionByHash(txHash);
       // The backend could serve any transaction, only the hash is on chain
-      const gaMetaParams = rawTx && await resolveGaMetaParams(rawTx.tx, txHash)
-        .catch((error) => {
-          handleUnknownError(error);
-          return null;
-        });
+      const gaMetaParams = rawTx
+        && isSpendOfVault(rawTx.tx, activeMultisigAccount.value.gaAccountId)
+        && await resolveGaMetaParams(rawTx.tx, txHash, getStoredGaMetaParams(rawTx))
+          .catch((error) => {
+            handleUnknownError(error);
+            return null;
+          });
       const isTxVerified = !!gaMetaParams;
 
       return {
@@ -253,10 +286,12 @@ export function useMultisigTransactions() {
     spendTx: Encoded.Transaction,
     nonce: number,
     txHash: string,
+    storedGaMetaParams?: IAeGaMetaParams | null,
   ): Promise<any> {
+    // The hash pins the transaction that was shown, and checked to be a spend of the vault
     const [dryAeSdk, gaMetaParams] = await Promise.all([
       getDryAeSdk(),
-      resolveGaMetaParams(spendTx, txHash),
+      resolveGaMetaParams(spendTx, txHash, storedGaMetaParams),
     ]);
     if (!gaMetaParams) {
       throw new Error(tg('pages.proposalDetails.unverified.notSent'));

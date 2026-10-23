@@ -7,6 +7,7 @@ vi.mock('@reown/walletkit', () => ({
     init: vi.fn().mockResolvedValue({
       getActiveSessions: vi.fn(() => ({})),
       on: vi.fn(),
+      off: vi.fn(),
       emitSessionEvent: vi.fn().mockResolvedValue(undefined),
       updateSession: vi.fn().mockResolvedValue({ acknowledged: () => Promise.resolve() }),
       pair: vi.fn(),
@@ -115,6 +116,35 @@ describe('WalletConnect accountsChanged behavior', () => {
     // Some WC utils may strip unrequested events; ensure events array exists
     expect(Array.isArray(ns.events)).toBe(true);
     expect(ns.accounts[0]).toBe('eip155:1:0xbbb');
+  });
+
+  it('leaves the proposal of a pairing to the listener of that pairing', async () => {
+    const { useWalletConnect } = await import('@/composables/walletConnect');
+    const wc = useWalletConnect();
+    // Paired without a confirmation, but its dapp never sent a proposal
+    await wc.connect('wc:first@2?relay-protocol=irn&symKey=aa');
+    await wc.connect('wc:second@2?relay-protocol=irn&symKey=bb', true);
+    const anyWallet: any = (await import('@reown/walletkit')).WalletKit;
+    const web3wallet = await (anyWallet.init as vi.Mock).mock.results[0].value;
+    const [firstListener, secondListener] = (web3wallet.on as vi.Mock).mock.calls
+      .filter(([name]) => name === 'session_proposal')
+      .map(([, listener]) => listener)
+      .slice(-2);
+    const proposal = {
+      ...aescanProposal,
+      params: { ...aescanProposal.params, pairingTopic: 'second' },
+    };
+
+    // The spies of the wallet double are shared with the other tests
+    const approvals = web3wallet.approveSession.mock.calls.length;
+
+    await firstListener(proposal);
+    expect(web3wallet.approveSession.mock.calls.length).toBe(approvals);
+
+    await secondListener(proposal);
+    expect(openModalMock).toHaveBeenCalledWith(MODAL_CONFIRM_CONNECT, expect.anything());
+    expect(web3wallet.approveSession.mock.calls.length).toBe(approvals + 1);
+    expect(web3wallet.off).toHaveBeenCalledWith('session_proposal', secondListener);
   });
 
   it('marks the proposal URL as self-reported in the connect modal', async () => {

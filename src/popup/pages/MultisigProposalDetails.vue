@@ -312,6 +312,7 @@ import {
   useTransactionData,
   useUi,
 } from '@/composables';
+import { getStoredGaMetaParams } from '@/composables/multisigTransactions';
 import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import type { IAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
@@ -575,6 +576,7 @@ export default defineComponent({
           rawTx.tx,
           nonce,
           txHash as string,
+          getStoredGaMetaParams(rawTx),
         );
 
         await updateMultisigAccounts();

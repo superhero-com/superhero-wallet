@@ -78,7 +78,7 @@
       <BtnMain
         third
         :text="$t('common.confirm')"
-        :disabled="!canSignWithSelectedAccount"
+        :disabled="isConfirmBlocked || !canSignWithSelectedAccount"
         @click="confirm"
       />
     </template>
@@ -104,6 +104,7 @@ import { RejectedByUserError } from '@/lib/errors';
 import {
   useAccounts, useAeSdk, useModals, usePopupProps,
 } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 import {
   canRebuildTransactionForSigner,
   fetchAccountNextNonce,
@@ -134,6 +135,7 @@ export default defineComponent({
     CheckBox,
   },
   setup() {
+    const { isConfirmBlocked } = useConfirmGuard();
     const {
       isOffscreenRequest,
       isUnknownDapp,
@@ -272,6 +274,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       confirm,
       cancel,
       protocol,

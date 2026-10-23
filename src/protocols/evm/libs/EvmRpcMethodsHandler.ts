@@ -430,6 +430,11 @@ export async function handleEvmRpcMethod(
       modalProps,
     );
     if (permitted) {
+      // The adapter signs for the network active now, which the dapp can switch meanwhile
+      const { chainId: activeChainId } = getActiveEvmNetworkSettings(protocol);
+      if (String(activeChainId) !== String(chainId)) {
+        return getChainMismatchError(chainId, activeChainId);
+      }
       if (adapter?.transferPreparedTransaction) {
         try {
           const actionResult = await adapter.transferPreparedTransaction({
