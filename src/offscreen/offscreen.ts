@@ -153,7 +153,16 @@ browser.runtime.onMessage.addListener(
         return Promise.resolve({ result: getConnectedSiteAccounts(new URL(sender.url).origin) });
       }
       if (typeof aepp === 'string' && method && sender.url) {
-        return handleEvmRpcRequest(new URL(sender.url).origin, method, rpcMethodParams);
+        return handleEvmRpcRequest(
+          new URL(sender.url).origin,
+          method,
+          rpcMethodParams,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          sender.tab?.id,
+        );
       }
       return undefined;
     }

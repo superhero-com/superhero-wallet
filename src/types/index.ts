@@ -749,6 +749,8 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   isOffscreenRequest?: boolean;
   /** A connected site asks to switch to the chain of another protocol. */
   isChainSwitch?: boolean;
+  /** Of the browser tab the request came from, when the extension knows it. */
+  tabId?: number;
 }
 
 /**

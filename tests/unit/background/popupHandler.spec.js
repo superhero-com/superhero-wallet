@@ -126,8 +126,15 @@ describe('popupHandler', () => {
       mockCreate.mockClear();
     });
 
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     it('leaves the popup to the side panel of the focused window', async () => {
       mockGetLastFocused.mockResolvedValue({ id: 2, focused: true, state: 'normal' });
+      // Its active tab shows the site
+      vi.spyOn(global.browser.tabs, 'query')
+        .mockImplementation(async ({ windowId }) => (windowId === 2 ? [{ url: testAeppUrl }] : []));
       const { id, props, sidePanelWindowId } = await openPopup(
         POPUP_TYPE_CONNECT,
         testAeppUrl,
@@ -157,6 +164,125 @@ describe('popupHandler', () => {
       expect(sidePanelWindowId).toBeUndefined();
       expect(mockCreate).toHaveBeenCalledOnce();
       removePopup(id);
+    });
+
+    describe('with the active tab of the focused window known', () => {
+      const { query } = global.browser.tabs;
+
+      beforeEach(() => {
+        mockGetLastFocused.mockResolvedValue({ id: 2, focused: true, state: 'normal' });
+      });
+
+      afterEach(() => {
+        global.browser.tabs.query = query;
+      });
+
+      /** The tabs of the focused window */
+      function showTabs(tabs) {
+        global.browser.tabs.query = vi.fn(async ({ active, windowId }) => (
+          windowId === 2
+            ? tabs.filter((tab) => active === undefined || tab.active === active)
+            : []
+        ));
+      }
+
+      function showTab(url) {
+        showTabs([{ id: 5, url, active: true }]);
+      }
+
+      it('leaves the popup of the site in the tab to the side panel', async () => {
+        showTab(`${testAeppUrl}/swap?pair=ae`);
+        const { id, sidePanelWindowId } = await openPopup(POPUP_TYPE_CONNECT, testAeppUrl, {}, [2]);
+
+        expect(sidePanelWindowId).toBe(2);
+        expect(mockCreate).not.toHaveBeenCalled();
+        removePopup(id);
+      });
+
+      it('opens a popup window for a site in a tab in the background', async () => {
+        showTab('https://another.example/');
+        const { id, sidePanelWindowId } = await openPopup(POPUP_TYPE_CONNECT, testAeppUrl, {}, [2]);
+
+        expect(sidePanelWindowId).toBeUndefined();
+        expect(mockCreate).toHaveBeenCalledOnce();
+        removePopup(id);
+      });
+
+      it('opens a popup window when the URL of the tab can\'t be read', async () => {
+        showTab(undefined);
+        const { id, sidePanelWindowId } = await openPopup(POPUP_TYPE_CONNECT, testAeppUrl, {}, [2]);
+
+        expect(sidePanelWindowId).toBeUndefined();
+        expect(mockCreate).toHaveBeenCalledOnce();
+        removePopup(id);
+      });
+
+      it('leaves the popup of a site in a frame of the tab to the side panel', async () => {
+        showTab('https://another.example/');
+        const { id, sidePanelWindowId } = await openPopup(
+          POPUP_TYPE_CONNECT,
+          testAeppUrl,
+          { tabId: 5 },
+          [2],
+        );
+
+        expect(sidePanelWindowId).toBe(2);
+        expect(mockCreate).not.toHaveBeenCalled();
+        removePopup(id);
+      });
+
+      it('opens a popup window for the site in another tab of the same site', async () => {
+        showTab(`${testAeppUrl}/swap?pair=ae`);
+        const { id, sidePanelWindowId } = await openPopup(
+          POPUP_TYPE_CONNECT,
+          testAeppUrl,
+          { tabId: 7 },
+          [2],
+        );
+
+        expect(sidePanelWindowId).toBeUndefined();
+        expect(mockCreate).toHaveBeenCalledOnce();
+        removePopup(id);
+      });
+
+      it('opens a popup window for a tab in the background of the window', async () => {
+        showTabs([
+          { id: 5, url: testAeppUrl, active: false },
+          { id: 6, url: 'https://another.example/', active: true },
+        ]);
+        const { id, sidePanelWindowId } = await openPopup(
+          POPUP_TYPE_CONNECT,
+          testAeppUrl,
+          { tabId: 5 },
+          [2],
+        );
+
+        expect(sidePanelWindowId).toBeUndefined();
+        expect(mockCreate).toHaveBeenCalledOnce();
+        removePopup(id);
+      });
+
+      it('leaves a request without a site to the side panel', async () => {
+        showTab('https://another.example/');
+        const { id, sidePanelWindowId } = await openPopup(POPUP_TYPE_SIGN, undefined, {}, [2]);
+
+        expect(sidePanelWindowId).toBe(2);
+        expect(mockCreate).not.toHaveBeenCalled();
+        removePopup(id);
+      });
+
+      it('leaves the popup of a WalletConnect dapp to the side panel', async () => {
+        showTab('https://another.example/');
+        const { id, sidePanelWindowId } = await openPopup(
+          POPUP_TYPE_CONNECT,
+          testAeppUrl,
+          { app: { originSource: 'self-reported' } },
+          [2],
+        );
+
+        expect(sidePanelWindowId).toBe(2);
+        removePopup(id);
+      });
     });
   });
 });

@@ -152,6 +152,61 @@ describe('useAeSdk, an aepp asking for addresses', () => {
     expect(addresses[0]).toMatch(/^ak_/);
   });
 
+  /** Through the content script of the browser tab 7 */
+  async function connectAeppThroughExtension() {
+    await import('@/protocols/registerAdapters');
+    const { BrowserRuntimeConnection } = await import('@aeternity/aepp-sdk');
+    const { useAeSdk } = await import('@/composables/aeSdk');
+    const walletSdk = await useAeSdk().getAeSdk();
+
+    // A runtime port pair, as between the content script of the aepp's tab and the wallet
+    const createPort = (sender?) => {
+      const listeners = new Set();
+      return {
+        sender,
+        listeners,
+        onMessage: {
+          addListener: (fn) => listeners.add(fn),
+          removeListener: (fn) => listeners.delete(fn),
+        },
+        onDisconnect: { addListener: () => {}, removeListener: () => {} },
+        disconnect: () => {},
+      };
+    };
+    const aeppPort = createPort();
+    const walletPort = createPort({ url: DAPP_URL, tab: { id: 7 } });
+    const deliverTo = (port) => (msg) => setTimeout(() => {
+      port.listeners.forEach((fn) => fn(structuredClone(msg), port));
+    });
+    aeppPort.postMessage = deliverTo(walletPort);
+    walletPort.postMessage = deliverTo(aeppPort);
+    walletSdk.addRpcClient(new BrowserRuntimeConnection({ port: walletPort }));
+    const aepp = new AeSdkAepp({ name: 'Test aepp' });
+    await aepp.connectToWallet(new BrowserRuntimeConnection({ port: aeppPort }));
+    return aepp;
+  }
+
+  it.each([
+    ['listing the addresses', (aepp) => aepp.askAddresses()],
+    ['subscribing to the address', (aepp) => aepp.subscribeAddress(SUBSCRIPTION_TYPES.subscribe, 'connected')],
+  ])('tell the modal of %s the browser tab of an aepp connected through the extension', async (_, ask) => {
+    seedHdAccounts([PROTOCOLS.aeternity]);
+    const aepp = await connectAeppThroughExtension();
+
+    await ask(aepp);
+
+    expect(openModal.mock.calls[0][1]).toMatchObject({ tabId: 7 });
+  });
+
+  it('tell the modal no tab for an aepp in a frame', async () => {
+    seedHdAccounts([PROTOCOLS.aeternity]);
+    const { aepp } = await connectAepp();
+
+    await aepp.askAddresses();
+
+    expect(openModal.mock.calls[0][1].tabId).toBeUndefined();
+  });
+
   it('get nothing when the user rejects', async () => {
     seedHdAccounts([PROTOCOLS.aeternity, PROTOCOLS.ethereum]);
     openModal.mockRejectedValue(new Error('Rejected'));

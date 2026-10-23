@@ -124,6 +124,7 @@ async function checkOrAskEvmPermission(
   protocol: Protocol,
   originSource?: AppOriginSource,
   sessionTopic?: string,
+  tabId?: number,
 ) {
   const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
@@ -146,6 +147,7 @@ async function checkOrAskEvmPermission(
           CONNECT_PERMISSIONS.networks,
           CONNECT_PERMISSIONS.transactions,
         ],
+        tabId,
       },
     );
     if (permission && sessionTopic) {
@@ -182,6 +184,7 @@ async function confirmProtocolSwitch(
   protocol: Protocol,
   networkName: string,
   originSource?: AppOriginSource,
+  tabId?: number,
 ) {
   const { askPermission } = usePermissions();
   const {
@@ -223,6 +226,7 @@ async function confirmProtocolSwitch(
           CONNECT_PERMISSIONS.transactions,
         ],
         isChainSwitch: true,
+        tabId,
       },
     );
     if (!isConfirmed) {
@@ -381,6 +385,8 @@ export async function handleEvmRpcMethod(
   originSource?: AppOriginSource,
   /** Of the WalletConnect session the request came in */
   sessionTopic?: string,
+  /** Of the browser tab the request came from */
+  tabId?: number,
 ): Promise<EvmRpcResponse> {
   const {
     checkPermission,
@@ -405,7 +411,7 @@ export async function handleEvmRpcMethod(
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
@@ -425,7 +431,7 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic)) {
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId)) {
       // ensure we emit connect event for EIP-1193 consumers
       const account = getLastActiveProtocolAccount(protocol)!;
       try {
@@ -497,7 +503,13 @@ export async function handleEvmRpcMethod(
       };
     }
     if (isOtherProtocol) {
-      if (!await confirmProtocolSwitch(aepp, target.protocol, target.network.name, originSource)) {
+      if (!await confirmProtocolSwitch(
+        aepp,
+        target.protocol,
+        target.network.name,
+        originSource,
+        tabId,
+      )) {
         return ERROR_USER_REJECTED_REQUEST;
       }
     } else if (target.network.name !== activeNetwork.value.name) {
@@ -556,6 +568,7 @@ export async function handleEvmRpcMethod(
         data,
       },
       fromAccount: senderId,
+      tabId,
     };
 
     const permitted = await checkOrAskPermission(
@@ -617,6 +630,7 @@ export async function handleEvmRpcMethod(
         app: aepp ? createAppData(aepp, originSource) : undefined,
         message: isHexMessage ? getMessageText(messageHex) : data,
         fromAccount: requestedAccount?.address,
+        tabId,
       },
       (resolution: ISignModalResolution) => { selectedAddress = resolution?.selectedAddress; },
     );
@@ -664,6 +678,7 @@ export async function handleEvmRpcMethod(
         app: aepp ? createAppData(aepp, originSource) : undefined,
         message: JSON.stringify(getSignedTypedData(typedData), null, 2),
         fromAccount: evmAccount.address,
+        tabId,
       },
     );
     if (permitted && evmAccount.secretKey) {
@@ -704,6 +719,7 @@ export async function handleEvmRpcRequest(
   caipChainId?: string,
   originSource?: AppOriginSource,
   sessionTopic?: string,
+  tabId?: number,
 ): Promise<EvmRpcResponse> {
   const positionalParams = Array.isArray(params) ? params : [];
   // A dapp waits for an answer, also when e.g. its address is malformed
@@ -725,6 +741,7 @@ export async function handleEvmRpcRequest(
       caipChainId,
       originSource,
       sessionTopic,
+      tabId,
     );
   } catch (error: any) {
     return getUnknownError(error.message);

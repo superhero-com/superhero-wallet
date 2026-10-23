@@ -80,6 +80,11 @@ function assertAeppGivenAccounts(aeppRpcClientId?: string) {
   }
 }
 
+/** Of the browser tab the aepp asks from, see `IPopupProps.tabId` */
+function getAeppTabId(aeppRpcClientId?: string) {
+  return aeppRpcClientId ? useAeSdk().getAeppTabId(aeppRpcClientId) : undefined;
+}
+
 function getTxSigner(txBase64: Encoded.Transaction): string | undefined {
   try {
     return getTransactionSignerAddress(txBase64);
@@ -216,6 +221,7 @@ export class AeAccountHdWallet extends MemoryAccount {
             ...options,
             txBase64,
             tx,
+            tabId: getAeppTabId(options?.aeppRpcClientId),
             ...(mayUseDailyLimit ? { protocol: PROTOCOLS.aeternity } : {}),
           },
           (payload) => { modalResolution = payload; },
@@ -347,7 +353,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
         options.aeppOrigin,
-        { message },
+        { message, tabId: getAeppTabId(options.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
@@ -415,7 +421,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       const permissionGranted = await checkOrAskPermission(
         METHODS.signTypedData,
         options.aeppOrigin,
-        { message },
+        { message, tabId: getAeppTabId(options.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
@@ -473,7 +479,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       const permissionGranted = await checkOrAskPermission(
         METHODS.signDelegation,
         options.aeppOrigin,
-        { message },
+        { message, tabId: getAeppTabId(options.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
@@ -517,7 +523,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       const permissionGranted = await checkOrAskPermission(
         METHODS.unsafeSign,
         options?.aeppOrigin,
-        { ...options, data },
+        { ...options, data, tabId: getAeppTabId(options?.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {

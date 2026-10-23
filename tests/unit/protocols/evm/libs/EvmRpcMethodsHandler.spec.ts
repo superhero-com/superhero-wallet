@@ -1001,6 +1001,54 @@ describe('handleEvmRpcMethod', () => {
       expect((await signTypedData(permit)).error?.code).toBe(4001);
     });
   });
+
+  describe('from a browser tab', () => {
+    const TAB_ID = 5;
+
+    it.each([
+      ['eth_requestAccounts', {}, METHODS.subscribeAddress],
+      ['eth_sendTransaction', { from: SIGNER.address, to: RECIPIENT, gas: '0x5208' }, METHODS.sign],
+      ['personal_sign', { data: '0x68656c6c6f', address: SIGNER.address }, METHODS.signMessage],
+      ['eth_signTypedData_v4', { address: SIGNER.address, data: JSON.stringify(permit) }, METHODS.signTypedData],
+    ])('tells the prompt of %s the tab, for the side panel', async (method, params, permissionMethod) => {
+      await handleEvmRpcMethod(
+        DAPP,
+        method as any,
+        params,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TAB_ID,
+      );
+
+      expect(checkOrAskPermission.mock.calls[0].slice(0, 3))
+        .toEqual([permissionMethod, DAPP, expect.objectContaining({ tabId: TAB_ID })]);
+    });
+
+    it('tells the prompt of a chain switch the tab', async () => {
+      askPermission.mockImplementationOnce(async (_method, _url, { protocol }) => {
+        activeProtocol.value = protocol;
+        return true;
+      });
+      try {
+        await handleEvmRpcMethod(
+          DAPP,
+          'wallet_switchEthereumChain',
+          { chainId: '0x38' },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          TAB_ID,
+        );
+
+        expect(askPermission.mock.calls[0][2]).toMatchObject({ tabId: TAB_ID });
+      } finally {
+        activeProtocol.value = 'ethereum';
+      }
+    });
+  });
 });
 
 describe('the accounts a page hears of when the active one changes', () => {
@@ -1028,6 +1076,12 @@ describe('handleEvmRpcRequest', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('tells the prompt the tab of the request', async () => {
+    await handleEvmRpcRequest(DAPP, 'eth_requestAccounts', [], undefined, undefined, undefined, undefined, 5);
+
+    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ tabId: 5 });
   });
 
   it('passes a request that reads the chain to its node as is', async () => {

@@ -10,7 +10,8 @@ describe('background openPopup message', () => {
         getContexts: vi.fn().mockResolvedValue([{}]),
         onInstalled: { addListener: vi.fn() },
       },
-      tabs: { query: vi.fn().mockResolvedValue([]) },
+      // The active tab of a window shows the dapp
+      tabs: { query: vi.fn(async ({ windowId }) => (windowId ? [{ url: 'https://dapp.example/' }] : [])) },
       windows: {
         getLastFocused: vi.fn().mockResolvedValue({ id: 2, focused: true, state: 'normal' }),
         create: vi.fn().mockResolvedValue({ id: 9 }),

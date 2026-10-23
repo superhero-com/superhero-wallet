@@ -169,8 +169,16 @@ describe('offscreen message listener', () => {
 
       await expect(listener(relayed('eth_getBalance', params), WEB_PAGE))
         .resolves.toEqual({ result: '0x1' });
-      expect(handleEvmRpcRequest)
-        .toHaveBeenCalledWith('https://aepp.example', 'eth_getBalance', ['0x0', 'latest']);
+      expect(handleEvmRpcRequest).toHaveBeenCalledWith(
+        'https://aepp.example',
+        'eth_getBalance',
+        ['0x0', 'latest'],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        WEB_PAGE.tab.id,
+      );
     });
 
     it('answers the accounts the page of the sender is permitted', async () => {
@@ -184,13 +192,21 @@ describe('offscreen message listener', () => {
       expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
 
-    it('takes the origin from the sender, not from the message', async () => {
+    it('takes the origin and the tab from the sender, not from the message', async () => {
       const listener = await loadListener();
 
       await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), WEB_PAGE);
 
-      expect(handleEvmRpcRequest)
-        .toHaveBeenCalledWith('https://aepp.example', 'eth_requestAccounts', undefined);
+      expect(handleEvmRpcRequest).toHaveBeenCalledWith(
+        'https://aepp.example',
+        'eth_requestAccounts',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        WEB_PAGE.tab.id,
+      );
     });
   });
 });
