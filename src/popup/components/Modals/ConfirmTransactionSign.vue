@@ -228,7 +228,9 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="!!error || verifying || loading || !canSignWithSelectedAccount"
+        :disabled="
+          isConfirmBlocked || !!error || verifying || loading || !canSignWithSelectedAccount
+        "
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
@@ -278,7 +280,6 @@ import {
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
   EVM_PROTOCOLS,
-  RUNNING_IN_POPUP,
   SUPERHERO_CHAT_URLS,
   TX_DIRECTION,
 } from '@/constants';
@@ -296,6 +297,7 @@ import {
   usePopupProps,
   useTransactionData,
 } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 import { AE_SYMBOL, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -360,6 +362,7 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup() {
+    const { isConfirmBlocked } = useConfirmGuard();
     const { t } = useI18n();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
@@ -369,7 +372,12 @@ export default defineComponent({
       getAccountByProtocolAndAddress,
       setActiveAccountByAddressAndProtocol,
     } = useAccounts();
-    const { isUnknownDapp, popupProps, setPopupProps } = usePopupProps();
+    const {
+      isOffscreenRequest,
+      isUnknownDapp,
+      popupProps,
+      setPopupProps,
+    } = usePopupProps();
     const {
       loadSingleToken,
       getProtocolAvailableTokens,
@@ -546,7 +554,10 @@ export default defineComponent({
       .multipliedBy(gasPrice.value));
 
     const appName = computed((): string | undefined => {
-      if (SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)) {
+      if (
+        app.value?.originSource !== 'self-reported'
+        && SUPERHERO_CHAT_URLS.includes(`${app.value?.protocol}//${app.value?.name}`)
+      ) {
         return t('modals.confirmTransactionSign.superheroChat');
       }
       if (protocol !== PROTOCOLS.aeternity) {
@@ -691,7 +702,7 @@ export default defineComponent({
           selectedAccount.value.protocol,
         );
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.airGap) {
         const signedTransaction = await openModal<SignAirGapTransactionResolvedVal>(
           MODAL_SIGN_AIR_GAP_TRANSACTION,
           { txRaw: await getTransactionToSign() },
@@ -704,7 +715,7 @@ export default defineComponent({
           });
         }
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
         await openModal(MODAL_LEDGER_SIGN);
       }
       // Carried on the same round trip `checkOrAskPermission` already awaits, so
@@ -889,6 +900,7 @@ export default defineComponent({
           popupProps.value.tx.data,
           popupProps.value.tx.contractId,
           activeAccount.address,
+          protocol,
         );
         decodingCallData.value = false;
       }
@@ -927,6 +939,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       AE_SYMBOL,
       aettosToAe,
       AnimatedSpinner,

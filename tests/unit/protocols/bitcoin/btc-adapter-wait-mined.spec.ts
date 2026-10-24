@@ -34,4 +34,24 @@ describe('BitcoinAdapter - waitTransactionMined polling', () => {
     expect(res).toBeNull();
     expect(spy).toHaveBeenCalled();
   });
+
+  it('resolves null when every lookup rejects (Blockstream 404 "Transaction not found")', async () => {
+    vi.restoreAllMocks();
+    // Blockstream answers an unknown transaction with a text/plain 404
+    const fetchSpy = vi.fn(async () => new Response('Transaction not found', { status: 404 }));
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = fetchSpy;
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+
+    let result: any = 'pending';
+    adapter.waitTransactionMined('00'.repeat(32)).then((res) => { result = res; });
+    await vi.advanceTimersByTimeAsync(5000 * 10);
+    expect(result).toBeNull();
+
+    await vi.advanceTimersByTimeAsync(5000 * 5);
+    expect(fetchSpy).toHaveBeenCalledTimes(10);
+    process.off('unhandledRejection', unhandled);
+    expect(unhandled).not.toHaveBeenCalled();
+  });
 });

@@ -16,11 +16,13 @@ import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { WalletStorage } from '@/lib/WalletStorage';
 import {
   AUTHENTICATION_TIMEOUTS,
+  IN_FRAME,
   IS_EXTENSION,
   IS_IOS,
   IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
   MODAL_RESET_WALLET,
+  RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
   STORAGE_KEYS,
 } from '@/constants';
@@ -40,6 +42,8 @@ import {
   handleUnknownError,
   MobileEncryptionKeyMissingError,
   sessionEnd,
+  sessionHold,
+  sessionRelease,
   sessionStart,
   watchUntilTruthy,
 } from '@/utils';
@@ -48,11 +52,11 @@ import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-c
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import migrateMnemonicMobileToSecureStorage from '@/migrations/010-mnemonic-mobile-to-secure-storage';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
+import { removeLegacySecrets } from '@/migrations/migrationHelpers';
 import {
   LEGACY_DEFAULT_PASSWORD,
-  clearDefaultPasswordSecret,
+  generateDefaultPasswordSecret,
   getDefaultPasswordSecret,
-  getOrCreateDefaultPasswordSecret,
 } from './defaultPassword';
 
 import { useUi } from './ui';
@@ -96,6 +100,9 @@ export const useAuth = createCustomScopedComposable(() => {
   const isAuthenticated = ref(false);
   const isAuthenticating = ref(false);
   const isMnemonicRestored = ref(false);
+  /** The stored mnemonic couldn't be read, so it is empty but may still be stored. */
+  const isMnemonicUnreadable = ref(false);
+  let mnemonicReadError: unknown;
   /** User skipped setting password so the test one was used */
   const isUsingDefaultPassword = ref(false);
   const encryptionKey = ref<CryptoKey>();
@@ -123,6 +130,10 @@ export const useAuth = createCustomScopedComposable(() => {
          */
         (IS_MOBILE_APP) ? migrateMobileSensitiveDataEncryption : null,
       ].filter(excludeFalsy),
+      onRestoreFailed(error) {
+        mnemonicReadError = error;
+        isMnemonicUnreadable.value = true;
+      },
       onRestored() {
         isMnemonicRestored.value = true;
       },
@@ -187,6 +198,8 @@ export const useAuth = createCustomScopedComposable(() => {
 
   const biometricAuth = reactive({
     available: false,
+    /** Biometrics, or the device passcode the prompt falls back to. */
+    deviceCredentialAvailable: false,
     updating: false,
     checked: false,
   });
@@ -204,26 +217,58 @@ export const useAuth = createCustomScopedComposable(() => {
     } else if (!biometricAuth.checked || forceUpdate) {
       biometricAuth.updating = true;
       try {
-        biometricAuth.available = (await BiometricAuth.checkBiometry()).isAvailable;
+        // Patched on Android to ignore a locked SIM, and a passcode that Android 10
+        // can't prompt for without biometric hardware, see `patches/`.
+        const { isAvailable, deviceIsSecure } = await BiometricAuth.checkBiometry();
+        biometricAuth.available = isAvailable;
+        biometricAuth.deviceCredentialAvailable = isAvailable || deviceIsSecure;
         biometricAuth.checked = true;
       } finally {
         biometricAuth.updating = false;
       }
     }
-    if (!biometricAuth.available && isBiometricLoginEnabled.value) {
+    // Locked out or unenrolled biometrics still leave the passcode to unlock with.
+    if (!biometricAuth.deviceCredentialAvailable && isBiometricLoginEnabled.value) {
       setBiometricLoginEnabled(false);
     }
     return biometricAuth.available;
   }
 
+  /** Checks if the user can be verified on the device, with biometrics or the passcode. */
+  async function canAuthenticateWithDevice() {
+    await checkBiometricLoginAvailability();
+    return biometricAuth.deviceCredentialAvailable;
+  }
+
+  /**
+   * Only a shown page keeps the session: not a hidden one, a dapp's confirmation popup,
+   * or a wallet page a website embeds in a frame.
+   */
+  function isSessionKeepingPage() {
+    return isAppActive.value && !RUNNING_IN_POPUP && !IN_FRAME;
+  }
+
   /**
    * Setting/Resetting the password key logs the user in/out.
+   * @param options.isFromSession The key was read from the session, where the background
+   * already times it out.
    */
-  function setEncryptionKey(newEncryptionKey?: CryptoKey) {
+  function setEncryptionKey(
+    newEncryptionKey?: CryptoKey,
+    { isFromSession = false }: { isFromSession?: boolean } = {},
+  ) {
     encryptionKey.value = newEncryptionKey;
     if (IS_EXTENSION) {
       if (newEncryptionKey) {
+        const isKeepingSession = isSessionKeepingPage();
+        // Storing it again would restart the timeout, e.g. with each dapp's popup.
+        if (isFromSession && !isKeepingSession) {
+          return;
+        }
         sessionStart(newEncryptionKey);
+        if (!isKeepingSession) {
+          sessionRelease();
+        }
       } else {
         sessionEnd();
       }
@@ -254,13 +299,17 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
-   * The stored mnemonic can't be decrypted on this device, or its key can't be read.
+   * The stored mnemonic can't be decrypted on this device, or it or its key can't be read.
    * Reinstalling doesn't help on iOS (the Keychain survives it), so offer the in-app reset.
+   * After a failed read (`isReadFailed`) reopening may help, so that is suggested first.
    */
-  function surfaceUnreadableWalletData(error: unknown) {
-    const message = (error instanceof MobileEncryptionKeyMissingError)
-      ? t('auth.walletKeyUnavailableMessage')
-      : t('auth.walletDataUnreadableMessage');
+  function surfaceUnreadableWalletData(error: unknown, { isReadFailed = false } = {}) {
+    let message = t('auth.walletDataUnreadableMessage');
+    if (isReadFailed) {
+      message = t('auth.walletDataReadFailedMessage');
+    } else if (error instanceof MobileEncryptionKeyMissingError) {
+      message = t('auth.walletKeyUnavailableMessage');
+    }
     handleUnknownError(error);
     Logger.write({
       title: t('auth.walletDataUnreadableTitle'),
@@ -313,7 +362,26 @@ export const useAuth = createCustomScopedComposable(() => {
     mnemonic.value = ciphertext;
   }
 
-  async function setPassword(password: string, plaintextToEncrypt = mnemonicDecrypted.value) {
+  /**
+   * False once the password was changed in another window: pages other than the offscreen
+   * tab don't sync the storage, so they keep a key the stored salt no longer derives.
+   */
+  function isEncryptionKeyCurrent() {
+    if (IS_MOBILE_APP) return true;
+    const storedSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    return storedSalt === (encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null);
+  }
+
+  /**
+   * `isDefaultPasswordSecret` stores the password as the default-password secret
+   * together with the salt, so another window can't pair a different one with it.
+   * Web and extension only, mobile returns before the commit.
+   */
+  async function setPassword(
+    password: string,
+    plaintextToEncrypt = mnemonicDecrypted.value,
+    { isDefaultPasswordSecret = false } = {},
+  ) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
       throw new Error('The wallet is locked, there is no mnemonic to encrypt');
@@ -356,6 +424,27 @@ export const useAuth = createCustomScopedComposable(() => {
     if (encryptionKey.value !== currentKey) {
       throw new Error('The wallet got locked while setting the password');
     }
+    // A window that missed a password change in another one still holds the old salt:
+    // its new salt would leave the invites, stored under the other one, unreadable.
+    if (currentKey && !isEncryptionKeyCurrent()) {
+      throw new Error('The password was changed in another window');
+    }
+    /**
+     * The invite keys hold funds and aren't derived from the seed. Moved to the new key in the
+     * same commit: left for later, a closed page in between would leave them under a key the
+     * new salt makes underivable. Ones the current key can't open are left as they are.
+     */
+    const invitesCiphertext = WalletStorage.get<string>(STORAGE_KEYS.invitesEncrypted);
+    const newInvitesCiphertext = (currentKey && invitesCiphertext)
+      ? await decrypt(currentKey, invitesCiphertext)
+        .then((invites) => encrypt(newEncryptionKey, invites), () => null)
+      : null;
+    if (encryptionKey.value !== currentKey) {
+      throw new Error('The wallet got locked while setting the password');
+    }
+    if (WalletStorage.get<string>(STORAGE_KEYS.invitesEncrypted) !== invitesCiphertext) {
+      throw new Error('The invites changed while setting the password');
+    }
     /**
      * `encryptionSalt` and `mnemonic` are two independent `useStorageRef`s, each
      * persisted by its own fire-and-forget watcher — assigning both reactive
@@ -373,14 +462,29 @@ export const useAuth = createCustomScopedComposable(() => {
      * disk.
      */
     const previousStoredSalt = WalletStorage.get<string>(STORAGE_KEYS.encryptionSalt);
+    const previousStoredInvites = invitesCiphertext ?? null;
+    const previousSecret = isDefaultPasswordSecret
+      ? WalletStorage.get<string>(STORAGE_KEYS.defaultPasswordSecret)
+      : null;
+    const restore = (key: string, value: string | null) => (
+      (value === null) ? WalletStorage.remove(key) : WalletStorage.set(key, value)
+    );
     try {
       WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(newSalt));
+      if (isDefaultPasswordSecret) {
+        WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, password);
+      }
+      if (newInvitesCiphertext) {
+        WalletStorage.set(STORAGE_KEYS.invitesEncrypted, newInvitesCiphertext);
+      }
       WalletStorage.set(STORAGE_KEYS.mnemonic, newMnemonicCiphertext);
     } catch (error) {
-      if (previousStoredSalt === null) {
-        WalletStorage.remove(STORAGE_KEYS.encryptionSalt);
-      } else {
-        WalletStorage.set(STORAGE_KEYS.encryptionSalt, previousStoredSalt);
+      restore(STORAGE_KEYS.encryptionSalt, previousStoredSalt);
+      if (isDefaultPasswordSecret) {
+        restore(STORAGE_KEYS.defaultPasswordSecret, previousSecret);
+      }
+      if (newInvitesCiphertext) {
+        restore(STORAGE_KEYS.invitesEncrypted, previousStoredInvites);
       }
       throw error;
     }
@@ -457,7 +561,7 @@ export const useAuth = createCustomScopedComposable(() => {
         ciphertext,
       ).then(() => true, () => false);
       if (!isKeyUnchanged) {
-        setEncryptionKey(sessionEncryptionKey);
+        setEncryptionKey(sessionEncryptionKey, { isFromSession: true });
       }
       return true;
     } catch (error) {
@@ -549,7 +653,7 @@ export const useAuth = createCustomScopedComposable(() => {
         || force
       )
       && (isBiometricLoginEnabled.value || force)
-      && await checkBiometricLoginAvailability()
+      && await canAuthenticateWithDevice()
     ) {
       return BiometricAuth.authenticate({
         reason: t('biometricAuth.reason'),
@@ -576,6 +680,10 @@ export const useAuth = createCustomScopedComposable(() => {
    */
   async function checkUserAuth(): Promise<any> {
     await watchUntilTruthy(isMnemonicRestored);
+    if (isMnemonicUnreadable.value) {
+      surfaceUnreadableWalletData(mnemonicReadError, { isReadFailed: true });
+      return;
+    }
     updateSessionExpiredFromDeadline();
 
     if (
@@ -621,7 +729,7 @@ export const useAuth = createCustomScopedComposable(() => {
         }
         if (
           (isBiometricLoginEnabled.value || isManualMobileLockActive)
-          && await checkBiometricLoginAvailability()
+          && await canAuthenticateWithDevice()
         ) {
           try {
             await openBiometricLoginModal({
@@ -733,10 +841,8 @@ export const useAuth = createCustomScopedComposable(() => {
             /**
              * Transparently rotate legacy "skip password" installs off the
              * hardcoded `testPassword123` sentinel the moment we unlock
-             * with it. We drop any stale stored secret first (defensive —
-             * if one existed, `storedSecret` would have worked above and
-             * we would not be on this path), then mint a new per-install
-             * 256-bit random secret and hand it to `setPassword`, which:
+             * with it. We mint a new per-install 256-bit random secret and
+             * hand it to `setPassword`, which:
              *   - generates a fresh `encryptionSalt`,
              *   - derives a new AES-GCM key and publishes it on
              *     `encryptionKey`, which triggers every `decryptedComputed`
@@ -744,15 +850,18 @@ export const useAuth = createCustomScopedComposable(() => {
              *     preclaimed names in `aeNames.ts`, the secure-login
              *     timeout above) to re-encrypt its ciphertext under the
              *     new key,
-             *   - re-encrypts the mnemonic on top of that key.
+             *   - re-encrypts the mnemonic on top of that key,
+             *   - stores the secret in the same commit as the salt and the
+             *     mnemonic (replacing any stale one), so a popup and a side
+             *     panel rotating at once leave one pair that opens the wallet.
              * After this runs the on-disk state no longer depends on any
              * value shipped in source, and subsequent launches take the
              * `storedSecret` branch above.
              */
             try {
-              await clearDefaultPasswordSecret();
-              const rotatedSecret = await getOrCreateDefaultPasswordSecret();
-              await setPassword(rotatedSecret);
+              await setPassword(generateDefaultPasswordSecret(), undefined, {
+                isDefaultPasswordSecret: true,
+              });
             } catch (error) {
               // Rotation is best-effort — a failure here still leaves the
               // user authenticated under the legacy password, matching
@@ -771,7 +880,7 @@ export const useAuth = createCustomScopedComposable(() => {
             if (sessionEncryptionKey) {
               // Decrypt first: a key that can't open the mnemonic must not be published.
               const decryptedMnemonic = await decrypt(sessionEncryptionKey, mnemonic.value);
-              setEncryptionKey(sessionEncryptionKey);
+              setEncryptionKey(sessionEncryptionKey, { isFromSession: true });
               mnemonicDecrypted.value = decryptedMnemonic;
               markAuthenticated();
             }
@@ -812,6 +921,28 @@ export const useAuth = createCustomScopedComposable(() => {
     const key = await generateEncryptionKey(currentPassword, encryptionSalt.value!);
     await decrypt(key, mnemonicEncrypted.value!);
     await setPassword(newPassword);
+  }
+
+  /**
+   * Older versions kept the seed in plaintext in the browser storage. It goes only once
+   * the stored ciphertext opens to the same seed, so it is never the only readable copy.
+   */
+  async function removeLegacyPlaintextSeed() {
+    const key = encryptionKey.value;
+    const unlockedMnemonic = mnemonicDecrypted.value;
+    const seedHex = Buffer.from(mnemonicSeed.value!).toString('hex');
+    const isUnlockedMnemonic = (value: unknown) => value === unlockedMnemonic;
+    const isUnlockedAccount = (value: any) => value?.privateKey === seedHex;
+    await removeLegacySecrets({
+      stateFields: { mnemonic: isUnlockedMnemonic, account: isUnlockedAccount },
+      entries: { mnemonic: isUnlockedMnemonic, userAccount: isUnlockedAccount },
+      confirm: async () => {
+        const storage = (IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
+        const stored = await storage.get<string>(STORAGE_KEYS.mnemonic);
+        return !!key && !!stored
+          && await decrypt(key, stored).catch(() => null) === unlockedMnemonic;
+      },
+    });
   }
 
   (async () => {
@@ -873,6 +1004,15 @@ export const useAuth = createCustomScopedComposable(() => {
   );
 
   watch(
+    () => isAuthenticated.value && isMnemonicEncrypted.value && !!mnemonicDecrypted.value,
+    (isUnlocked) => {
+      if (isUnlocked) {
+        removeLegacyPlaintextSeed().catch(handleUnknownError);
+      }
+    },
+  );
+
+  watch(
     isAppActive,
     async (isActive, wasActive) => {
       // App resumed from background
@@ -883,6 +1023,10 @@ export const useAuth = createCustomScopedComposable(() => {
         clearInterval(expirationTimeout);
         updateSessionExpiredFromDeadline();
         sessionExpiresAt = null;
+        // Before checking the key, so the background can't time it out after the check.
+        if (isAuthenticated.value && !isSessionExpired && isSessionKeepingPage()) {
+          sessionHold();
+        }
 
         // If session exists user needs to stay logged in
         if (!isAuthenticating.value) {
@@ -895,6 +1039,8 @@ export const useAuth = createCustomScopedComposable(() => {
           }
         }
       } else if (wasActive && !isActive) {
+        // Once no page is shown, the background times the session out with the current timeout.
+        sessionRelease();
         if (!isAutoLockEnabled.value) {
           isSessionExpired = false;
           sessionExpiresAt = null;
@@ -920,6 +1066,7 @@ export const useAuth = createCustomScopedComposable(() => {
     isAuthenticated: readonly(isAuthenticated),
     isMnemonicRestored,
     isMnemonicEncrypted,
+    isMnemonicUnreadable,
     isUsingDefaultPassword,
     mnemonic,
     mnemonicDecrypted,
@@ -931,9 +1078,11 @@ export const useAuth = createCustomScopedComposable(() => {
     secureLoginTimeoutDecrypted,
     authenticateWithBiometry,
     authenticateWithPassword,
+    canAuthenticateWithDevice,
     checkBiometricLoginAvailability,
     checkUserAuth,
     getEncryptionKey,
+    isEncryptionKeyCurrent,
     lockWallet,
     logout,
     setMnemonicAndInitializeAuthentication,

@@ -21,6 +21,9 @@ export const SOL_TOKEN_LIST_URL = 'https://raw.githubusercontent.com/solana-labs
 // SPL Token Program ID (base58)
 export const SOL_TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
+// Burns what it receives, so the chain never holds it to the rent-exempt minimum.
+export const SOL_INCINERATOR_ADDRESS = '1nc1nerator11111111111111111111111111111111';
+
 export const SOL_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings<'explorerUrl'> = {
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: `https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,

@@ -2,6 +2,7 @@
 import * as ecc from '@bitcoinerlab/secp256k1';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
+import { Contract } from 'web3-eth-contract';
 import {
   privateKeyToAddress,
   bigIntToHex,
@@ -19,11 +20,19 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
+import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
+import {
+  getLegacyGasPrice,
+  toTokenBaseUnits,
+  withGasHeadroom,
+} from '@/protocols/evm/helpers';
 import { BIP32Factory } from 'bip32';
+import BigNumber from 'bignumber.js';
 
 import type {
   AccountAddress,
   AdapterNetworkSettingList,
+  AssetAmount,
   AssetContractId,
   IAccount,
   IAccountRaw,
@@ -56,6 +65,7 @@ import { useAvalancheNetworkSettings } from '@/protocols/avalanche/composables/a
 import { EtherscanExplorer } from '@/protocols/ethereum/libs/EtherscanExplorer';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '@/protocols/ethereum/helpers';
+import { ERC20_ABI } from '@/protocols/ethereum/config';
 
 const TRANSACTION_POLLING_INTERVAL = 6000;
 const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
@@ -226,7 +236,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
   }
 
   override async constructAndSignTx(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
@@ -244,11 +254,10 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     const { chainId } = avalancheActiveNetworkSettings.value;
 
     const web3Eth = this.getWeb3EthInstance();
-    const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const gasPrice = bigIntToHex(nodeGasPriceWei);
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
 
     const hexAmount = bigIntToHex(
-      BigInt(toWei(amount.toFixed(AVALANCHE_COIN_PRECISION), 'ether')),
+      BigInt(toWei(new BigNumber(amount).toFixed(AVALANCHE_COIN_PRECISION), 'ether')),
     );
 
     const txData: TxData = {
@@ -310,20 +319,20 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
       if (tokenTx) return tokenTx;
     }
 
-    const block = transaction?.blockHash
-      ? await getBlock(
-        web3Eth,
-        transaction.blockHash,
-        true,
-        DEFAULT_RETURN_FORMAT,
-      )
-      : undefined;
-    const normalized = normalizeWeb3EthTransactionStructure(
+    const [block, receipt] = transaction?.blockHash
+      ? await Promise.all([
+        getBlock(web3Eth, transaction.blockHash, false, DEFAULT_RETURN_FORMAT),
+        // Without the receipt the fee is the most the gas limit can cost
+        getTransactionReceipt(web3Eth, hash, DEFAULT_RETURN_FORMAT).catch(() => undefined),
+      ])
+      : [undefined, undefined];
+    return normalizeWeb3EthTransactionStructure(
+      this.protocol,
       transaction,
       block,
       transactionOwner,
+      receipt,
     );
-    return normalized;
   }
 
   override async fetchAccountTransactions(
@@ -366,6 +375,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
@@ -405,13 +415,14 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
   }
 
   override async spend(
-    amount: number,
+    amount: number | string,
     recipient: AccountAddress,
     options: {
       fromAccount: AccountAddress;
@@ -424,6 +435,71 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     const { raw, hash } = await this.constructAndSignTx(amount, recipient, options);
     await broadcastSignedTransaction(web3Eth, raw);
     return { hash };
+  }
+
+  /** An ERC-20 transfer, priced like the coin's: Avalanche takes legacy transactions. */
+  override async transferToken(
+    amount: AssetAmount,
+    recipient: AccountAddress,
+    contractId: AssetContractId,
+    options: {
+      fromAccount: AccountAddress;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+      nonce: number;
+    },
+  ): Promise<ITransferResponse> {
+    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+    const { getAccountByProtocolAndAddress } = useAccounts();
+
+    const account = getAccountByProtocolAndAddress(
+      PROTOCOLS.avalanche,
+      toChecksumAddress(options.fromAccount),
+    );
+    if (!account || account.protocol !== PROTOCOLS.avalanche) {
+      throw new Error(
+        'Token transfer was initiated from non-existing or non-avalanche account.',
+      );
+    }
+    const { chainId, nodeUrl } = avalancheActiveNetworkSettings.value;
+
+    const contract = new Contract(ERC20_ABI, contractId, { from: options.fromAccount });
+    contract.setProvider(nodeUrl);
+
+    const tokenDecimals = Number(await contract.methods.decimals().call());
+    const hexAmount = bigIntToHex(toTokenBaseUnits(new BigNumber(amount), tokenDecimals));
+
+    const web3Eth = this.getWeb3EthInstance();
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
+
+    const estimatedGas = await contract.methods.transfer(recipient, hexAmount)
+      .estimateGas({ from: options.fromAccount });
+    const gasLimit = withGasHeadroom(estimatedGas);
+
+    const txData: TxData = {
+      nonce: options.nonce,
+      gasPrice,
+      gasLimit: `0x${gasLimit.toString(16)}`,
+      to: contractId,
+      data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
+      value: '0x0',
+    };
+
+    const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
+    const signedTx = new Transaction(txData, { common }).sign(account.secretKey!);
+    const raw = `0x${Buffer.from(signedTx.serialize()).toString('hex')}`;
+    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
+    await broadcastSignedTransaction(web3Eth, raw);
+    return { hash };
+  }
+
+  override async transferPreparedTransaction(transaction: any = {}): Promise<ITransferResponse> {
+    const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
+    return transferPreparedLegacyTransaction(
+      this.protocol,
+      avalancheActiveNetworkSettings.value,
+      transaction,
+    );
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {

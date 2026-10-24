@@ -9,6 +9,7 @@ import initVeeValidateRules from '@/popup/plugins/veeValidate';
 import router from './router';
 import registerModals from './router/modals';
 import Logger from '../lib/logger';
+import { SidePanelConnection } from '../lib/SidePanelConnection';
 import AppRoot from './App.vue';
 
 import '@fontsource/ibm-plex-sans/300.css';
@@ -41,3 +42,4 @@ if (window.Cypress) {
 Logger.init({ app });
 
 initVeeValidateRules();
+SidePanelConnection.init();

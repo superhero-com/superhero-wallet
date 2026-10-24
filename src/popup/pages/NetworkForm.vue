@@ -116,6 +116,7 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Field, useForm } from 'vee-validate';
+import { cloneDeep } from 'lodash-es';
 import type {
   AdapterNetworkSettingList,
   INetwork,
@@ -176,6 +177,7 @@ export default defineComponent({
     const {
       networks,
       customNetworks,
+      activeNetworkName,
       switchNetwork,
       addCustomNetwork,
       updateCustomNetwork,
@@ -212,7 +214,10 @@ export default defineComponent({
       } else {
         addCustomNetwork(network);
       }
-      switchNetwork(newNetworkName.value);
+      // Editing the active network already switched to the new settings
+      if (activeNetworkName.value !== newNetworkName.value) {
+        switchNetwork(newNetworkName.value);
+      }
       goBack();
     }
 
@@ -271,7 +276,8 @@ export default defineComponent({
     onMounted(async () => {
       if (isEdit) {
         newNetworkName.value = savedNetworkName;
-        newNetworkProtocols.value = networks.value[newNetworkName.value].protocols;
+        // A copy, so that the network changes only when the form is saved
+        newNetworkProtocols.value = cloneDeep(networks.value[newNetworkName.value].protocols);
       } else {
         fillInFieldsWithDefaultValues();
         fillInFieldsWithQueryStringValues();

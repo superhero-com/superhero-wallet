@@ -7,6 +7,7 @@ import {
   PROTOCOL_LIST,
   PROTOCOLS,
 } from '@/constants';
+import { includes } from '@/utils';
 import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -20,6 +21,7 @@ export type RouteQueryActionMethod = (router: Router, query: Dictionary) => bool
  * The query object key whose value determines which controller method to use.
  */
 const ACTION_PROP = 'op';
+const PROTOCOL_PROP = 'protocol';
 const TOKEN_PROP = 'token';
 
 /**
@@ -52,13 +54,16 @@ export const RouteQueryActionsController = (() => {
       // Determine the active protocol for the current transfer
       const token = query[TOKEN_PROP];
 
-      const currentActionProtocol = PROTOCOL_LIST.find((protocol) => {
-        if (protocol === PROTOCOLS.ethereum && token?.startsWith('0x')) {
-          return true;
-        }
-        const adapter = ProtocolAdapterFactory.getAdapter(protocol);
-        return adapter.getUrlTokenKey() === token;
-      });
+      // Links created before the `protocol` param are resolved by their token
+      const currentActionProtocol = includes(PROTOCOL_LIST, query[PROTOCOL_PROP])
+        ? query[PROTOCOL_PROP]
+        : PROTOCOL_LIST.find((protocol) => {
+          if (protocol === PROTOCOLS.ethereum && token?.startsWith('0x')) {
+            return true;
+          }
+          const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+          return adapter.getUrlTokenKey() === token;
+        });
 
       /**
        * Default is Aeternity to support AEX9 token transfers.

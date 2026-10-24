@@ -51,7 +51,7 @@ import type {
   INameAuction,
   ObjectValues,
 } from '@/types';
-import { fetchAllPages } from '@/utils';
+import { fetchAllPages, handleUnknownError } from '@/utils';
 import { useTopHeaderData } from '@/composables';
 import { getAeFee } from '@/protocols/aeternity/helpers';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
@@ -117,19 +117,23 @@ export default defineComponent({
     onMounted(async () => {
       loading.value = true;
 
-      // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/ae_mdw/issues/666
-      activeAuctions.value = (
-        await fetchAllPages(
-          () => fetchFromMiddlewareCamelCased('/v3/names/auctions?limit=100&direction=forward'),
-          fetchFromMiddlewareCamelCased,
-        )
-      ).map(({ name, lastBid, auctionEnd }) => ({
-        name,
-        expiration: auctionEnd,
-        lastBid: lastBid.tx,
-      }));
-
-      loading.value = false;
+      try {
+        // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/ae_mdw/issues/666
+        activeAuctions.value = (
+          await fetchAllPages(
+            () => fetchFromMiddlewareCamelCased('/v3/names/auctions?limit=100&direction=forward'),
+            fetchFromMiddlewareCamelCased,
+          )
+        ).map(({ name, lastBid, auctionEnd }) => ({
+          name,
+          expiration: auctionEnd,
+          lastBid: lastBid.tx,
+        }));
+      } catch (error) {
+        handleUnknownError(error);
+      } finally {
+        loading.value = false;
+      }
     });
 
     return {

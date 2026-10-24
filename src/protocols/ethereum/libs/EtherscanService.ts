@@ -8,10 +8,10 @@ import type {
   ITransaction,
   Protocol,
 } from '@/types';
-import type { EthRpcEtherscanProxyMethod } from '@/protocols/ethereum/types';
 import { ETHERSCAN_API_KEY, TXS_PER_PAGE } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
+import { TX_RETURN_TYPE_REVERT } from '@/protocols/aeternity/config';
 import { ETH_SAFE_CONFIRMATION_COUNT } from '../config';
 import { toEthChecksumAddress } from '../helpers';
 
@@ -25,7 +25,7 @@ export interface EtherscanDefaultResponse {
 
 interface EtherscanApiCallParams {
   module: 'account' | 'contract' | 'transaction' | 'block' | 'logs' | 'proxy' | 'stats' | 'gastracker';
-  action: 'txlist' | 'tokentx' | 'getabi' | EthRpcEtherscanProxyMethod; // Extend in the future
+  action: 'txlist' | 'tokentx' | 'getabi'; // Extend in the future
   [key: string]: string | undefined;
 }
 
@@ -205,7 +205,9 @@ export class EtherscanService {
       to,
       value,
       input,
+      isError,
       tokenDecimal,
+      txreceipt_status: txReceiptStatus,
     } = transaction;
 
     const senderId = toEthChecksumAddress(from) as any;
@@ -219,7 +221,10 @@ export class EtherscanService {
     const gasPriceInEther = Number(fromWei(gasPrice, 'ether'));
     const fee = gasUsed * gasPriceInEther;
     const amount = tokenDecimal ? Number(new BigNumber(value).shiftedBy(-tokenDecimal)) : Number(fromWei(value, 'ether'));
-    const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
+    // Only `txlist` rows have these fields
+    const isReverted = isError === '1' || txReceiptStatus === '0';
+    // A revert is final, so it isn't shown as pending
+    const pending = !isReverted && parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
     const isEthTransfer = !contractAddress && (!input || input === '0x');
 
@@ -240,9 +245,12 @@ export class EtherscanService {
         callData: isEthTransfer ? null : input,
         contractId,
         function: functionName,
+        // Only `tokentx` rows have `tokenDecimal`
+        isTokenTransfer: tokenDecimal !== undefined,
         nonce,
         gasPrice: gasPriceInEther,
         gasUsed,
+        returnType: isReverted ? TX_RETURN_TYPE_REVERT : undefined,
       },
     };
   }

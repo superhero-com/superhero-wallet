@@ -9,6 +9,8 @@ import type {
 interface IPopupConfigNoActions {
   id: string;
   props: Omit<IPopupProps, 'resolve' | 'reject'>;
+  /** Set when the side panel of this window shows the popup instead. */
+  sidePanelWindowId?: number;
 }
 
 /**
@@ -31,10 +33,40 @@ const popups: Dictionary<IPopupConfigNoActions> = {};
 
 const storageSession = (browser.storage as any)?.session;
 
+/**
+ * Whether the page asking is in the tab the user looks at in the window, so that its side
+ * panel may show the request. Assumed for a request without a site and a WalletConnect
+ * dapp, which runs elsewhere. Without the tab of the request, the site of the tab is
+ * compared, unless its URL can't be read: a window shows it.
+ */
+async function isAppInActiveTab(
+  windowId: number,
+  app: IAppData,
+  popupProps: Partial<IPopupProps>,
+) {
+  if (!app.href || popupProps.app?.originSource === 'self-reported') {
+    return true;
+  }
+  const [activeTab] = await browser.tabs.query({ active: true, windowId });
+  // A page in a frame asks with the site of the frame
+  if (popupProps.tabId !== undefined) {
+    return activeTab?.id === popupProps.tabId;
+  }
+  if (!activeTab?.url) {
+    return false;
+  }
+  try {
+    return new URL(activeTab.url).origin === new URL(app.href).origin;
+  } catch {
+    return false;
+  }
+}
+
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | Record<string, any> | undefined, // TODO establish correct type for the object
   popupProps: Partial<IPopupProps> = {},
+  sidePanelWindowIds: number[] = [],
 ) => {
   const id = uuid();
 
@@ -60,23 +92,38 @@ export const openPopup = async (
     }
   });
 
-  const extUrl = browser.runtime.getURL('./index.html');
-  const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
-  const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
+  const focusedWindow = sidePanelWindowIds.length
+    ? await browser.windows.getLastFocused()
+    : undefined;
+  // `focused` stays true for a minimized window.
+  // A request of a tab in the background gets a window, as the side panel shows another site.
+  const sidePanelWindowId = (
+    focusedWindow?.focused
+    && focusedWindow.state !== 'minimized'
+    && sidePanelWindowIds.includes(focusedWindow.id!)
+    && await isAppInActiveTab(focusedWindow.id!, app, popupProps)
+  ) ? focusedWindow.id : undefined;
 
-  const popupWindow = await browser.windows.create({
-    url: popupUrl,
-    type: 'popup',
-    height: 630,
-    width: await isMacOsExtension ? 360 : 375,
-  });
+  if (sidePanelWindowId === undefined) {
+    const extUrl = browser.runtime.getURL('./index.html');
+    const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
+    const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
 
-  if (!popupWindow) {
-    return null;
+    const popupWindow = await browser.windows.create({
+      url: popupUrl,
+      type: 'popup',
+      height: 630,
+      width: await isMacOsExtension ? 360 : 375,
+    });
+
+    if (!popupWindow) {
+      return null;
+    }
   }
 
   popups[id] = {
     id,
+    sidePanelWindowId,
     props: {
       ...popupProps,
       app: {
@@ -84,6 +131,7 @@ export const openPopup = async (
         name: app.name || app.host,
         protocol: app.protocol,
         host: app.host,
+        ...(popupProps.app?.originSource ? { originSource: popupProps.app.originSource } : {}),
       },
     },
   };
@@ -97,7 +145,8 @@ export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
 let expirationTimeout: NodeJS.Timeout;
 let keepAliveInterval: NodeJS.Timeout;
 
-export const setSessionTimeout = async (sessionTimeout: number) => {
+/** `null` stops the timeout, e.g. while a wallet page is shown. */
+export const setSessionTimeout = async (sessionTimeout: number | null) => {
   if (expirationTimeout) {
     clearTimeout(expirationTimeout);
   }
@@ -106,11 +155,14 @@ export const setSessionTimeout = async (sessionTimeout: number) => {
   }
 
   /**
-   * This interval is set in order to keep service worker alive.
-   * By default service worker would be terminated in 30 seconds of inactivity.
+   * Keeps the service worker, or Firefox's event page, alive. Idle for 30 seconds it would be
+   * terminated with the timeout and, on Firefox, the count of shown pages.
    * https://stackoverflow.com/a/66618269
    */
   keepAliveInterval = setInterval(browser.runtime.getPlatformInfo, 20000);
+  if (sessionTimeout === null) {
+    return;
+  }
   expirationTimeout = setTimeout(
     async () => {
       try {

@@ -33,6 +33,9 @@ function flushAsync() {
   return new Promise((resolve) => { setTimeout(resolve, 0); });
 }
 
+// WebCrypto shares a small thread pool with every spec of a full run
+const WAIT_FOR_CRYPTO = { timeout: 10000 };
+
 function makeSessionStorageStub() {
   const store: Record<string, unknown> = {};
   return {
@@ -63,6 +66,7 @@ function installExtensionStubs() {
     onMessage: { addListener: vi.fn() },
     onDisconnect: { addListener: vi.fn() },
     postMessage: vi.fn(),
+    disconnect: vi.fn(),
   }));
   globalThis.browser.storage.session = makeSessionStorageStub();
   return globalThis.browser.storage.session;
@@ -265,7 +269,7 @@ describe('useAuth state machine branches', () => {
       expect(auth.mnemonic.value).toBe(mnemonicRefBeforeFailure);
 
       // Restore normal storage behavior before restarting - `useStorageRef`'s
-      // restore IIFE writes the restored value back to storage on every boot.
+      // restore IIFE writes back the values its migrations change.
       walletStorageSetMock.mockImplementation(
         (keys: any, value: any, realSet: any) => realSet(keys, value),
       );
@@ -400,6 +404,196 @@ describe('useAuth state machine branches', () => {
     });
   });
 
+  describe('legacy default-password rotation', () => {
+    const SECURE_LOGIN_TIMEOUT = '900000';
+    const IMPORTED_ACCOUNTS = JSON.stringify([{
+      type: 'private-key',
+      isRestored: false,
+      protocol: 'ethereum',
+      privateKey: Buffer.from('aa'.repeat(32), 'hex'),
+    }]);
+    const ENCRYPTED_DATA = {
+      mnemonic: VALID_MNEMONIC,
+      privateKeyAccountsRaw: IMPORTED_ACCOUNTS,
+      secureLoginTimeout: SECURE_LOGIN_TIMEOUT,
+    };
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function readStorage(name: string) {
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { composeStorageKeys } = await import('@/utils/common');
+      return JSON.parse(localStorage.getItem(composeStorageKeys(STORAGE_KEYS[name])));
+    }
+
+    async function storedKey() {
+      const { generateEncryptionKey, decodeBase64 } = await import('@/utils/crypto');
+      return generateEncryptionKey(
+        await readStorage('defaultPasswordSecret'),
+        decodeBase64(await readStorage('encryptionSalt')),
+      );
+    }
+
+    /** A wallet stored by the pre-upgrade "skip password" flow, with an imported account. */
+    async function seedWallet(password: string) {
+      const {
+        encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+      } = await import('@/utils/crypto');
+      const { WalletStorage } = await import('@/lib/WalletStorage');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const salt = generateSalt();
+      const key = await generateEncryptionKey(password, salt);
+      WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(salt));
+      WalletStorage.set(STORAGE_KEYS.accountsRaw, [
+        { isRestored: true, protocol: 'aeternity', type: 'hd-wallet' },
+      ]);
+      await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
+        WalletStorage.set(STORAGE_KEYS[name], await encrypt(key, plaintext))
+      )));
+      return key;
+    }
+
+    /** A popup or side panel: its own module instances over the shared storage. */
+    async function openWindow() {
+      vi.resetModules();
+      await import('@/protocols/registerAdapters');
+      const { useAuth } = await import('@/composables/auth');
+      const { useAccounts } = await import('@/composables/accounts');
+      const auth = useAuth();
+      const accounts = useAccounts(); // Re-encrypts the imported keys on a key change.
+      await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+      return { auth, accounts };
+    }
+
+    /** The imported keys and the timeout follow the new key in watchers, after the rotation. */
+    async function waitForDataUnderStoredSecret() {
+      const { decrypt } = await import('@/utils/crypto');
+      await vi.waitFor(async () => {
+        const key = await storedKey();
+        await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
+          expect(await decrypt(key, await readStorage(name))).toBe(plaintext)
+        )));
+      }, WAIT_FOR_CRYPTO);
+    }
+
+    async function expectOpensWithStoredSecret() {
+      // Another window gets no storage events, so it reads them once all are stored.
+      await waitForDataUnderStoredSecret();
+      const { auth, accounts } = await openWindow();
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(auth.isUsingDefaultPassword.value).toBe(true);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
+      await vi.waitFor(() => expect(accounts.accounts.value.map(({ type }) => type))
+        .toEqual(['hd-wallet', 'private-key']), WAIT_FOR_CRYPTO);
+      expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT);
+    }
+
+    it('moves the wallet and its data to a per-install secret', async () => {
+      const { decrypt } = await import('@/utils/crypto');
+      const legacyKey = await seedWallet('testPassword123');
+      const legacySalt = await readStorage('encryptionSalt');
+      const { auth } = await openWindow();
+
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(auth.isUsingDefaultPassword.value).toBe(true);
+
+      await waitForDataUnderStoredSecret();
+      expect(await readStorage('defaultPasswordSecret')).not.toBe('testPassword123');
+      expect(await readStorage('encryptionSalt')).not.toBe(legacySalt);
+      await Promise.all(Object.keys(ENCRYPTED_DATA).map(async (name) => (
+        expect(decrypt(legacyKey, await readStorage(name))).rejects.toThrow()
+      )));
+
+      await expectOpensWithStoredSecret();
+    });
+
+    it.each([
+      ['no secret', null],
+      // E.g. one written before a rotation that was cut off.
+      ['a stale secret', 'stale-secret'],
+    ])('leaves the legacy wallet with %s as it was when storing the new one fails, and rotates it later', async (_, storedSecret) => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await seedWallet('testPassword123');
+      const legacySalt = await readStorage('encryptionSalt');
+      const { composeStorageKeys } = await import('@/utils/common');
+      const { STORAGE_KEYS } = await import('@/constants');
+      if (storedSecret) {
+        const { WalletStorage } = await import('@/lib/WalletStorage');
+        WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, storedSecret);
+      }
+      walletStorageSetMock.mockImplementation((keys, value, realSet) => {
+        if (composeStorageKeys(keys) === composeStorageKeys(STORAGE_KEYS.mnemonic)) {
+          throw new Error('QuotaExceededError');
+        }
+        return realSet(keys, value);
+      });
+      const { auth } = await openWindow();
+
+      await auth.checkUserAuth();
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(await readStorage('defaultPasswordSecret')).toBe(storedSecret);
+      expect(await readStorage('encryptionSalt')).toBe(legacySalt);
+
+      walletStorageSetMock.mockImplementation((keys, value, realSet) => realSet(keys, value));
+      const { auth: reopened } = await openWindow();
+      await reopened.checkUserAuth();
+      expect(reopened.isUsingDefaultPassword.value).toBe(true);
+      await expectOpensWithStoredSecret();
+    });
+
+    it('asks for the password when neither the stored nor the legacy secret opens the wallet', async () => {
+      await seedWallet('a-real-password');
+      const { auth } = await openWindow();
+
+      await auth.checkUserAuth();
+
+      expect(openPasswordLoginModalMock).toHaveBeenCalledTimes(1);
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(await readStorage('defaultPasswordSecret')).toBeNull();
+    });
+
+    it('stores one secret and salt that open the wallet when two windows rotate at once', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await seedWallet('testPassword123');
+      const legacySalt = await readStorage('encryptionSalt');
+      const { encodeBase64 } = await import('@/utils/crypto');
+      const { auth: first } = await openWindow();
+      const { auth: second } = await openWindow();
+      // Each new key (fresh salt) waits until its turn.
+      const { subtle } = globalThis.crypto;
+      const deriveKey = subtle.deriveKey.bind(subtle);
+      const heldDerivations = [];
+      vi.spyOn(subtle, 'deriveKey').mockImplementation((params, ...rest) => (
+        encodeBase64(params.salt) === legacySalt
+          ? deriveKey(params, ...rest)
+          : new Promise((resolve) => {
+            heldDerivations.push(() => resolve(deriveKey(params, ...rest)));
+          })
+      ));
+
+      const firstCheck = first.checkUserAuth();
+      await vi.waitFor(() => expect(heldDerivations).toHaveLength(1), WAIT_FOR_CRYPTO);
+      const secondCheck = second.checkUserAuth();
+      await vi.waitFor(() => expect(heldDerivations).toHaveLength(2), WAIT_FOR_CRYPTO);
+      heldDerivations[0]();
+      await vi.waitFor(
+        async () => expect(await readStorage('encryptionSalt')).not.toBe(legacySalt),
+        WAIT_FOR_CRYPTO,
+      );
+      heldDerivations[1]();
+      await Promise.all([firstCheck, secondCheck]);
+      vi.mocked(subtle.deriveKey).mockRestore();
+
+      const { decrypt } = await import('@/utils/crypto');
+      expect(await decrypt(await storedKey(), await readStorage('mnemonic'))).toBe(VALID_MNEMONIC);
+      await expectOpensWithStoredSecret();
+    });
+  });
+
   describe('failed default-password guess (extension)', () => {
     it('clears only the reactive encryptionKey and does not call sessionEnd(), preserving a valid background session', async () => {
       mockConstants({ IS_EXTENSION: true });
@@ -446,6 +640,262 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.isUsingDefaultPassword.value).toBe(false);
       expect(authRestarted.encryptionKey.value).toBeDefined();
       expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auto-lock on resume', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function openUnlocked() {
+      const { useAuth } = await import('@/composables/auth');
+      const { useUi } = await import('@/composables/ui');
+      const auth = useAuth();
+      const ui = useUi();
+      ui.isAppActive.value = true;
+      await flushAsync();
+      await auth.setPassword('a-real-password', VALID_MNEMONIC);
+      return { auth, ui };
+    }
+
+    async function hideAndShow(ui, hiddenMs = 0) {
+      const { isAppActive } = ui;
+      // Frozen, so the deadline set on hiding is exactly `hiddenMs` before the return
+      const dateNow = vi.spyOn(Date, 'now').mockReturnValue(Date.now());
+      const now = Date.now();
+      isAppActive.value = false;
+      await nextTick();
+      dateNow.mockReturnValue(now + hiddenMs);
+      isAppActive.value = true;
+      await nextTick();
+    }
+
+    it('locks the web wallet hidden for longer than the timeout', async () => {
+      const { auth, ui } = await openUnlocked();
+
+      await hideAndShow(ui, 300000);
+
+      await vi.waitFor(() => expect(auth.isAuthenticated.value).toBe(false));
+    });
+
+    it('keeps the web wallet open when it comes back in time', async () => {
+      const { auth, ui } = await openUnlocked();
+
+      await hideAndShow(ui, 299999);
+      await flushAsync();
+
+      expect(auth.isAuthenticated.value).toBe(true);
+    });
+
+    it('locks the extension when the background dropped the session key meanwhile', async () => {
+      mockConstants({ IS_EXTENSION: true });
+      const session = installExtensionStubs();
+      const { auth, ui } = await openUnlocked();
+      await vi.waitFor(
+        () => expect(session.store.exportedEncryptionKey).toBeDefined(),
+        WAIT_FOR_CRYPTO,
+      );
+
+      // The session timeout ran out while no page was open.
+      delete session.store.exportedEncryptionKey;
+      await hideAndShow(ui);
+
+      await vi.waitFor(() => expect(auth.isAuthenticated.value).toBe(false));
+    });
+
+    describe('on the extension, while hidden', () => {
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      /** Session ports this page connected and hasn't disconnected yet. */
+      function heldPorts() {
+        return globalThis.browser.runtime.connect.mock.results
+          .map(({ value }) => value)
+          .filter(({ disconnect }) => !disconnect.mock.calls.length);
+      }
+
+      async function openUnlockedExtensionPage(constants = {}) {
+        mockConstants({ IS_EXTENSION: true, ...constants });
+        const session = installExtensionStubs();
+        const { auth, ui } = await openUnlocked();
+        await vi.waitFor(
+          () => expect(session.store.exportedEncryptionKey).toBeDefined(),
+          WAIT_FOR_CRYPTO,
+        );
+        return { auth, ui, session };
+      }
+
+      /**
+       * Returns a wait for the session key check of the next show, which may lock the page.
+       * It resolves to the count of session ports held when the check started.
+       */
+      function watchKeyCheck() {
+        const { subtle } = globalThis.crypto;
+        const importKey = subtle.importKey.bind(subtle);
+        let heldPortsAtCheck;
+        const spy = vi.spyOn(subtle, 'importKey').mockImplementation((...args) => {
+          heldPortsAtCheck ??= heldPorts().length;
+          return importKey(...args);
+        });
+        return async () => {
+          await vi.waitFor(() => expect(spy).toHaveBeenCalled());
+          await spy.mock.results[0].value;
+          await flushAsync();
+          return heldPortsAtCheck;
+        };
+      }
+
+      it('leaves the session to the background, keeping it past its own timeout', async () => {
+        const { auth, ui, session } = await openUnlockedExtensionPage();
+        expect(heldPorts()).toHaveLength(1);
+
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+        ui.isAppActive.value = false;
+        await nextTick();
+        await vi.advanceTimersByTimeAsync(+auth.secureLoginTimeoutDecrypted.value);
+
+        expect(heldPorts()).toHaveLength(0);
+        // Another page may still be shown, the background removes it once none is.
+        expect(session.store.exportedEncryptionKey).toBeDefined();
+      });
+
+      it.each([
+        ['keeps the session again when shown before the timeout', 299999, true],
+        ['locks when shown after the timeout, without keeping the session', 300000, false],
+      ])('%s', async (_, hiddenMs, isUnlocked) => {
+        const { auth, ui } = await openUnlockedExtensionPage();
+        const keyChecked = watchKeyCheck();
+
+        await hideAndShow(ui, hiddenMs);
+        // Held before the check, so the background can't time the key out in between.
+        expect(await keyChecked()).toBe(isUnlocked ? 1 : 0);
+
+        await vi.waitFor(() => {
+          expect(auth.isAuthenticated.value).toBe(isUnlocked);
+          expect(heldPorts()).toHaveLength(isUnlocked ? 1 : 0);
+        });
+      });
+
+      it.each([
+        ['stays unlocked when shown while another page still keeps the session', true],
+        ['locks when shown once the background timed the session out', false],
+      ])('a page unlocked while hidden %s', async (_, isKeyKept) => {
+        const { session } = await openUnlockedExtensionPage();
+
+        // Reopened in the background, unlocking with the session key.
+        vi.resetModules();
+        globalThis.browser.runtime.connect.mockClear();
+        const { useAuth } = await import('@/composables/auth');
+        const { useUi } = await import('@/composables/ui');
+        const reopened = useAuth();
+        const ui = useUi();
+        ui.isAppActive.value = false;
+        await vi.waitFor(() => expect(reopened.isAuthenticated.value).toBe(true), WAIT_FOR_CRYPTO);
+        await vi.waitFor(() => expect(heldPorts()).toHaveLength(0));
+
+        // Shown long after any timeout: whether the key ran out is the background's call.
+        vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 24 * 60 * 60 * 1000);
+        if (isKeyKept) {
+          const keyChecked = watchKeyCheck();
+          ui.isAppActive.value = true;
+          expect(await keyChecked()).toBe(1);
+        } else {
+          delete session.store.exportedEncryptionKey;
+          ui.isAppActive.value = true;
+        }
+
+        await vi.waitFor(() => {
+          expect(reopened.isAuthenticated.value).toBe(isKeyKept);
+          expect(heldPorts()).toHaveLength(isKeyKept ? 1 : 0);
+        });
+      });
+
+      it('leaves the session to the background from a dapp popup, even when shown', async () => {
+        const { ui } = await openUnlockedExtensionPage({ RUNNING_IN_POPUP: true });
+        const { SESSION_METHODS } = await import('@/constants');
+
+        await vi.waitFor(() => expect(heldPorts()).toHaveLength(0));
+        const [port] = globalThis.browser.runtime.connect.mock.results.map(({ value }) => value);
+        expect(port.postMessage).toHaveBeenCalledWith({ method: SESSION_METHODS.sessionKeyStored });
+        expect(port.postMessage.mock.invocationCallOrder[0])
+          .toBeLessThan(port.disconnect.mock.invocationCallOrder[0]);
+
+        const keyChecked = watchKeyCheck();
+        await hideAndShow(ui);
+        await keyChecked();
+        expect(heldPorts()).toHaveLength(0);
+      });
+
+      it.each([
+        ['a dapp popup', { RUNNING_IN_POPUP: true }],
+        ['a wallet page a website frames', { IN_FRAME: true }],
+      ])('leaves the timeout running when %s unlocks with the session key', async (_, constants) => {
+        await openUnlockedExtensionPage();
+
+        vi.resetModules();
+        mockConstants({ IS_EXTENSION: true, ...constants });
+        globalThis.browser.runtime.connect.mockClear();
+        const { useAuth } = await import('@/composables/auth');
+        const { useUi } = await import('@/composables/ui');
+        const reopened = useAuth();
+        useUi().isAppActive.value = true;
+        await vi.waitFor(() => expect(reopened.isAuthenticated.value).toBe(true), WAIT_FOR_CRYPTO);
+        await flushAsync();
+
+        // A session port's disconnect restarts the background's timeout.
+        expect(globalThis.browser.runtime.connect).not.toHaveBeenCalled();
+      });
+
+      it('leaves the session to the background once a page unlocked while hidden passed the key on', async () => {
+        mockConstants({ IS_EXTENSION: true });
+        const session = installExtensionStubs();
+        const { useAuth } = await import('@/composables/auth');
+        const { useUi } = await import('@/composables/ui');
+        const { SESSION_METHODS } = await import('@/constants');
+        const auth = useAuth();
+        useUi().isAppActive.value = false;
+        await flushAsync();
+
+        await auth.setPassword('a-real-password', VALID_MNEMONIC);
+        await vi.waitFor(() => {
+          expect(session.store.exportedEncryptionKey).toBeDefined();
+          expect(heldPorts()).toHaveLength(0);
+        }, WAIT_FOR_CRYPTO);
+
+        // The offscreen tab learns about the key only through the port.
+        const [port] = globalThis.browser.runtime.connect.mock.results.map(({ value }) => value);
+        expect(port.postMessage).toHaveBeenCalledWith({ method: SESSION_METHODS.sessionKeyStored });
+        expect(port.postMessage.mock.invocationCallOrder[0])
+          .toBeLessThan(port.disconnect.mock.invocationCallOrder[0]);
+      });
+
+      it('leaves the session to the background after rotating a legacy password while hidden', async () => {
+        mockConstants({ IS_EXTENSION: true });
+        const session = installExtensionStubs();
+        const {
+          encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+        } = await import('@/utils/crypto');
+        const { WalletStorage } = await import('@/lib/WalletStorage');
+        const { STORAGE_KEYS } = await import('@/constants');
+        // Stored by the pre-upgrade "skip password" flow.
+        const salt = generateSalt();
+        const legacySalt = encodeBase64(salt);
+        const legacyKey = await generateEncryptionKey('testPassword123', salt);
+        WalletStorage.set(STORAGE_KEYS.encryptionSalt, legacySalt);
+        WalletStorage.set(STORAGE_KEYS.mnemonic, await encrypt(legacyKey, VALID_MNEMONIC));
+
+        const { useAuth } = await import('@/composables/auth');
+        const auth = useAuth(); // Unlocks with it and rotates it, never shown.
+
+        await vi.waitFor(() => {
+          expect(auth.isAuthenticated.value).toBe(true);
+          expect(WalletStorage.get(STORAGE_KEYS.encryptionSalt)).not.toBe(legacySalt);
+          expect(session.store.exportedEncryptionKey).toBeDefined();
+          expect(heldPorts()).toHaveLength(0);
+        }, WAIT_FOR_CRYPTO);
+      });
     });
   });
 
@@ -516,6 +966,31 @@ describe('useAuth state machine branches', () => {
       // The key is intact, so this is the "can't decrypt" case, not "key unavailable".
       expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
         msg: en.auth.walletDataUnreadableMessage,
+      }));
+    });
+  });
+
+  describe('stored seed that cannot be read', () => {
+    it('stays locked on the web and suggests to reopen before the reset', async () => {
+      mockConstants();
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { composeStorageKeys } = await import('@/utils/common');
+      localStorage.setItem(composeStorageKeys(STORAGE_KEYS.mnemonic), '{"cut off');
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const { useAuth } = await import('@/composables/auth');
+      const auth = useAuth();
+
+      try {
+        await auth.checkUserAuth();
+      } finally {
+        warnSpy.mockRestore();
+      }
+
+      expect(auth.isMnemonicUnreadable.value).toBe(true);
+      expect(auth.isAuthenticated.value).toBe(false);
+      // Nothing was decrypted, and a failed extension storage read may work next time.
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        msg: en.auth.walletDataReadFailedMessage,
       }));
     });
   });

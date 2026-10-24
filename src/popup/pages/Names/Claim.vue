@@ -159,7 +159,8 @@ export default defineComponent({
       return (
         queuedClaim
         && (
-          queuedClaim.status === NAME_CLAIM_STATUS.preclaimed
+          queuedClaim.status === NAME_CLAIM_STATUS.preclaimSubmitted
+          || queuedClaim.status === NAME_CLAIM_STATUS.preclaimed
           || queuedClaim.status === NAME_CLAIM_STATUS.claimSubmitted
         )
       ) ? queuedClaim : null;

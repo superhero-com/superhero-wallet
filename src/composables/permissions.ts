@@ -1,4 +1,4 @@
-import { METHODS } from '@aeternity/aepp-sdk';
+import { METHODS, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 
@@ -27,10 +27,11 @@ import {
   PROTOCOLS,
   EVM_PROTOCOLS,
 } from '@/constants';
-import { getCleanModalOptions, watchUntilTruthy } from '@/utils';
+import { createAppData, getCleanModalOptions, watchUntilTruthy } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
-import { openPopup } from '@/offscreen/popupHandler';
+import { getSessionEncryptionKey, openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
+import migratePermissionsDropEmptyHost from '@/migrations/012-permissions-drop-empty-host';
 import { useAccounts } from '@/composables';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
@@ -49,9 +50,16 @@ const permissions = useStorageRef<PermissionRegistry>(
     backgroundSync: true,
     migrations: [
       migratePermissionsVuexToComposable,
+      migratePermissionsDropEmptyHost,
     ],
   },
 );
+
+/**
+ * Signed without asking under a daily spend limit, which counts only an amount,
+ * a fee and a name fee. A contract call, for one, can spend more than that.
+ */
+const DAILY_LIMIT_TX_TAGS: (Tag | undefined)[] = [Tag.SpendTx, Tag.NameClaimTx];
 
 const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType }>> = {
   [METHODS.subscribeAddress]: {
@@ -100,6 +108,10 @@ export function usePermissions() {
   }
 
   function addPermission(permission: IPermission) {
+    // The settings page can't route to an empty host
+    if (!permission.host) {
+      return;
+    }
     permissions.value[permission.host] = permission;
   }
 
@@ -140,17 +152,36 @@ export function usePermissions() {
     return true;
   }
 
+  /**
+   * The permission of the host, unless it was given to a more secure page,
+   * e.g. an `http:` page does not get the permission of the `https:` one.
+   */
+  function getPermissionForUrl(fullUrl: string): IPermission | undefined {
+    const { host, protocol } = new URL(fullUrl);
+    const permission = permissions.value[host];
+    return (
+      // One added by hand has no scheme
+      !permission?.protocol
+      || permission.protocol === protocol
+      // A site that moved to https keeps what its http page was given
+      || protocol === 'https:'
+    ) ? permission : undefined;
+  }
+
   function checkPermission(
-    host: string,
+    fullUrl: string,
     method: METHODS,
     transactionSignOptions: ITransactionSignPermissionOptions = {},
   ): boolean {
-    const permission = permissions.value[host];
+    const permission = getPermissionForUrl(fullUrl);
     if (!permission) {
       return false;
     }
     switch (method) {
-      case METHODS.sign: return checkTransactionSignLimit(host, transactionSignOptions);
+      case METHODS.sign: return checkTransactionSignLimit(
+        new URL(fullUrl).host,
+        transactionSignOptions,
+      );
       case METHODS.connect: return permission.address;
       case METHODS.address: return permission.addressList;
       case METHODS.signMessage: return permission.messageSign;
@@ -159,53 +190,19 @@ export function usePermissions() {
     }
   }
 
-  /**
-   * Depending on the environment open the modal or popup window with the modal
-   * where user is asked to give permission to do an action like connecting
-   * or listing user's accounts.
-   */
-  async function checkOrAskPermission(
+  /** Asks the user even when the app was given the permission already. */
+  async function askPermission(
     method: METHODS,
     fullUrl?: string,
     modalPropsArg?: IModalProps,
-    /**
-     * Called with whatever the modal/popup resolves with - but only when a
-     * modal was actually shown. Never called on the standing-permission fast
-     * path below, where nothing is shown and nothing was chosen, so callers
-     * can use "was this called" to tell the two cases apart.
-     */
     onModalResolved?: (payload: any) => void,
   ): Promise<boolean> {
     const modalProps = modalPropsArg || {};
     let app: IAppData | undefined;
     let props = getCleanModalOptions<typeof modalProps>(modalProps);
-    const { activeAccount } = useAccounts();
 
     if (fullUrl) {
-      const url = new URL(fullUrl);
-      if (
-        checkPermission(url.host, method, modalProps.tx)
-        && !(method === METHODS.sign && modalProps.protocol !== PROTOCOLS.aeternity)
-      ) {
-        try {
-          await Promise.race(
-            [
-              watchUntilTruthy(() => !isEmpty(activeAccount.value)),
-              new Promise((_r, reject) => setTimeout(reject, 1000)),
-            ],
-          );
-          return true;
-        } catch (error) {
-          // Intentionally ignoring the error
-        }
-      }
-
-      app = {
-        host: url.host,
-        name: url.hostname,
-        protocol: url.protocol,
-        href: url.href,
-      };
+      app = createAppData(fullUrl, modalProps.app?.originSource);
       props = { ...props, app };
     }
 
@@ -249,6 +246,60 @@ export function usePermissions() {
     }
   }
 
+  /**
+   * Depending on the environment open the modal or popup window with the modal
+   * where user is asked to give permission to do an action like connecting
+   * or listing user's accounts.
+   */
+  async function checkOrAskPermission(
+    method: METHODS,
+    fullUrl?: string,
+    modalPropsArg?: IModalProps,
+    /**
+     * Called with whatever the modal/popup resolves with - but only when a
+     * modal was actually shown. Never called on the standing-permission fast
+     * path below, where nothing is shown and nothing was chosen, so callers
+     * can use "was this called" to tell the two cases apart.
+     */
+    onModalResolved?: (payload: any) => void,
+  ): Promise<boolean> {
+    const modalProps = modalPropsArg || {};
+    const { activeAccount } = useAccounts();
+
+    if (fullUrl) {
+      if (
+        // Ahead of `checkPermission`, which counts a transaction towards the daily limit
+        !(method === METHODS.sign && (
+          modalProps.protocol !== PROTOCOLS.aeternity
+          || !DAILY_LIMIT_TX_TAGS.includes(modalProps.tx?.tag)
+        ))
+        // A host the dapp claims can't use a message signing right granted to the real one
+        && !(method === METHODS.signMessage && modalProps.app?.originSource === 'self-reported')
+        // The background page keeps the keys after the wallet locks
+        && !(
+          [METHODS.sign, METHODS.signMessage].includes(method)
+          && IS_OFFSCREEN_TAB
+          && !await getSessionEncryptionKey().catch(() => null)
+        )
+        && checkPermission(fullUrl, method, modalProps.tx)
+      ) {
+        try {
+          await Promise.race(
+            [
+              watchUntilTruthy(() => !isEmpty(activeAccount.value)),
+              new Promise((_r, reject) => setTimeout(reject, 1000)),
+            ],
+          );
+          return true;
+        } catch (error) {
+          // Intentionally ignoring the error
+        }
+      }
+    }
+
+    return askPermission(method, fullUrl, modalProps, onModalResolved);
+  }
+
   function resetPermissions() {
     permissions.value = {};
   }
@@ -257,8 +308,10 @@ export function usePermissions() {
     permissions,
     addPermission,
     removePermission,
+    getPermissionForUrl,
     checkPermission,
     checkOrAskPermission,
+    askPermission,
     checkTransactionSignLimit,
     resetPermissions,
   };

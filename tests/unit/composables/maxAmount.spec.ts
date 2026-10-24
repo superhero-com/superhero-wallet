@@ -1,7 +1,9 @@
 // @ts-nocheck
 import { ref } from 'vue';
 import BigNumber from 'bignumber.js';
+import { MemoryAccount, Tag, buildTx } from '@aeternity/aepp-sdk';
 import { AE_CONTRACT_ID, AE_COIN_PRECISION } from '@/protocols/aeternity/config';
+import { STUB_TIP_NOTE } from '@/constants/stubs';
 
 /**
  * `useMaxAmount` (the aeternity-specific max-amount composable) computes its `fee` ref
@@ -56,6 +58,7 @@ vi.mock('@aeternity/aepp-sdk', async (importOriginal) => {
 let balanceRef;
 let proposeTxMock;
 let getAeSdkMock;
+let getTippingContractsMock;
 
 const SENDER_ADDRESS = 'ak_2QAFYFFEKR75mnyxo3fJKrCiCU3Rmf9AbYXd6uURXY8Zzp3ndd';
 
@@ -63,6 +66,7 @@ async function setup({ balance }: { balance: string }) {
   vi.resetModules();
   balanceRef = ref(new BigNumber(balance));
   proposeTxMock = vi.fn();
+  getTippingContractsMock = vi.fn(async () => ({ tippingV1: null, tippingV2: null }));
   getAeSdkMock = vi.fn(async () => ({
     buildTx: vi.fn(async () => 'tx_stub'),
     getContext: () => ({}),
@@ -82,9 +86,7 @@ async function setup({ balance }: { balance: string }) {
     useMultisigTransactions: () => ({ proposeTx: proposeTxMock }),
   }));
   vi.doMock('@/composables/tippingContracts', () => ({
-    useTippingContracts: () => ({
-      getTippingContracts: vi.fn(async () => ({ tippingV1: null, tippingV2: null })),
-    }),
+    useTippingContracts: () => ({ getTippingContracts: getTippingContractsMock }),
   }));
 
   await import('@/protocols/registerAdapters');
@@ -217,5 +219,108 @@ describe('useMaxAmount', () => {
     // occurred), never `balance - fee`. If the AE fee leaked into the token branch, this
     // would instead reflect balance-minus-fee arithmetic (or throw on unrelated decimals).
     expect(result.max.value).toBe('0');
+  });
+});
+
+describe('useMaxAmount - tip to a URL', () => {
+  const TIP_URL = 'https://example.com';
+
+  // 1000 gas at 1e9 aettos and a fee of 0.0002 AE
+  const DRY_RUN = {
+    result: { gasUsed: 1000n, gasPrice: 1000000000n },
+    tx: { fee: '200000000000000' },
+  };
+
+  const makeTipFormModel = () => ref({
+    amount: '1',
+    selectedAsset: { protocol: 'aeternity', contractId: AE_CONTRACT_ID, decimals: 18 },
+    addresses: [TIP_URL],
+  });
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('prices the tip by its dry run and counts the tipped amount in the total', async () => {
+    const { useMaxAmount } = await setup({ balance: '5' });
+    const tip = vi.fn(async () => DRY_RUN);
+    getTippingContractsMock.mockResolvedValue({ tippingV1: null, tippingV2: { tip } });
+
+    const result = useMaxAmount({ formModel: makeTipFormModel() });
+    await waitForFee(result);
+
+    expect(tip).toHaveBeenCalledWith(TIP_URL, STUB_TIP_NOTE, {
+      amount: '1000000000000000000',
+      waitMined: false,
+      callStatic: true,
+    });
+    expect(result.fee.value.toFixed()).toBe('0.0002');
+    // 1 AE + 1000 gas at 1e9 aettos + the fee
+    expect(result.total.value.toFixed()).toBe('1.000201');
+  });
+
+  it('prices a token tip by its transfer and leaves the tokens out of the total', async () => {
+    const { useMaxAmount } = await setup({ balance: '5' });
+    const tip = vi.fn(async () => DRY_RUN);
+    getTippingContractsMock.mockResolvedValue({ tippingV1: null, tippingV2: { tip } });
+    mockTokenInstance.transfer.mockResolvedValue(DRY_RUN);
+    try {
+      const result = useMaxAmount({
+        formModel: ref({
+          ...makeTipFormModel().value,
+          selectedAsset: { protocol: 'aeternity', contractId: 'ct_mock_token', decimals: 18 },
+        }),
+      });
+      await waitForFee(result);
+
+      expect(tip).not.toHaveBeenCalled();
+      expect(result.fee.value.toFixed()).toBe('0.0002');
+      // 1000 gas at 1e9 aettos + the fee, no AE amount
+      expect(result.total.value.toFixed()).toBe('0.000201');
+    } finally {
+      // Back to the failing static call the other tests expect.
+      mockTokenInstance.transfer.mockReset();
+    }
+  });
+
+  it('drops the gas of the tip once the recipient is an account', async () => {
+    const { useMaxAmount } = await setup({ balance: '5' });
+    getTippingContractsMock.mockResolvedValue({
+      tippingV1: null,
+      tippingV2: { tip: async () => DRY_RUN },
+    });
+    const { address } = MemoryAccount.generate();
+    getAeSdkMock.mockResolvedValue({
+      buildTx: async () => buildTx({
+        tag: Tag.SpendTx, senderId: address, recipientId: address, amount: 1, nonce: 1,
+      }),
+      getHeight: async () => 100,
+    });
+    const formModel = makeTipFormModel();
+
+    const result = useMaxAmount({ formModel });
+    await vi.waitFor(() => expect(result.gasUsed.value).toBe(1000));
+    formModel.value = { ...formModel.value, addresses: [SENDER_ADDRESS] };
+
+    await vi.waitFor(() => expect(result.gasUsed.value).toBe(0), { timeout: 2000 });
+    expect(result.gasPrice.value).toBe(0);
+  });
+
+  it('keeps running on a network without tipping contracts', async () => {
+    const onUnhandledRejection = vi.fn();
+    process.on('unhandledRejection', onUnhandledRejection);
+    try {
+      const { useMaxAmount } = await setup({ balance: '5' });
+      getTippingContractsMock.mockRejectedValue(new Error('failed to initialize tipping contract'));
+
+      const result = useMaxAmount({ formModel: makeTipFormModel() });
+      await vi.waitFor(() => expect(getTippingContractsMock).toHaveBeenCalled());
+      await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+      expect(onUnhandledRejection).not.toHaveBeenCalled();
+      expect(result.fee.value.toFixed()).toBe('0');
+    } finally {
+      process.off('unhandledRejection', onUnhandledRejection);
+    }
   });
 });

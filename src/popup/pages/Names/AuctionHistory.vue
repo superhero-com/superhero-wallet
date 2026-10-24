@@ -8,6 +8,7 @@
         </span>
         <div class="item">
           <AccountItem
+            v-if="highestBid"
             :address="highestBid.accountId"
             :name="getName(highestBid.accountId).value"
             :protocol="protocol"
@@ -38,7 +39,6 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
-import { isEqual } from 'lodash-es';
 
 import { PROTOCOLS } from '@/constants';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -63,8 +63,12 @@ export default defineComponent({
 
     const highestBid = computed(() => getNameAuctionHighestBid(props.name));
 
+    // Compared by value: the highest bid comes from the node, not from this list
     const previousBids = computed(
-      () => getNameAuction(props.name).bids.filter((bid) => !isEqual(bid, highestBid.value)),
+      () => getNameAuction(props.name).bids.filter((bid) => !(
+        bid.accountId === highestBid.value?.accountId
+        && bid.nameFee.isEqualTo(highestBid.value.nameFee)
+      )),
     );
 
     return {

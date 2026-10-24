@@ -1,11 +1,16 @@
 // @ts-nocheck
 import { nextTick, ref } from 'vue';
+import { CONNECTION_TYPES, SESSION_METHODS } from '@/constants';
+
+const SECURE_LOGIN_TIMEOUT = 900000;
 
 describe('offscreen wallet connections', () => {
   let onConnectListener: vi.Mock;
   let disconnectListener: vi.Mock;
   let messageListener: vi.Mock;
   let syncBackgroundEncryptionKey: vi.Mock;
+  let secureLoginTimeoutDecrypted;
+  let addSidePanel: vi.Mock;
   let aeSdk: any;
   let aeSdkComposable: any;
   let activeNetwork;
@@ -36,6 +41,8 @@ describe('offscreen wallet connections', () => {
     disconnectListener = vi.fn();
     messageListener = vi.fn();
     syncBackgroundEncryptionKey = vi.fn();
+    secureLoginTimeoutDecrypted = ref(String(SECURE_LOGIN_TIMEOUT));
+    addSidePanel = vi.fn();
     activeNetwork = ref({});
     aeSdk = {
       _clients: new Map([['client-id', {}]]),
@@ -58,6 +65,7 @@ describe('offscreen wallet connections', () => {
     (global as any).browser = {
       runtime: {
         id: 'test-extension-id',
+        getURL: (path: string) => `chrome-extension://test-extension-id/${path}`,
         onConnect: {
           addListener: vi.fn((listener) => {
             onConnectListener = listener;
@@ -86,7 +94,7 @@ describe('offscreen wallet connections', () => {
       useAccounts: () => ({ activeAccount: ref({}) }),
       useAeSdk: () => aeSdkComposable,
       useAuth: () => ({
-        secureLoginTimeoutDecrypted: { value: '0' },
+        secureLoginTimeoutDecrypted,
         syncBackgroundEncryptionKey,
       }),
       useNetworks: () => ({ activeNetwork }),
@@ -96,6 +104,7 @@ describe('offscreen wallet connections', () => {
       IS_FIREFOX: false,
     }));
     vi.doMock('@/offscreen/popupHandler', () => ({
+      addSidePanel,
       getPopup: vi.fn(),
       removePopup: vi.fn(),
     }));
@@ -241,7 +250,6 @@ describe('offscreen wallet connections', () => {
     }
 
     it('syncs the session key once the popup reports it stored, ignoring other messages', async () => {
-      const { SESSION_METHODS } = await import('@/constants');
       const wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
       await onConnectListener(createSessionPort());
@@ -255,19 +263,227 @@ describe('offscreen wallet connections', () => {
       expect(syncBackgroundEncryptionKey).toHaveBeenCalledTimes(1);
     });
 
-    it('still starts the session timeout when the popup closes', async () => {
-      const { SESSION_METHODS } = await import('@/constants');
+    describe('with several pages', () => {
+      const SESSION_TIMEOUT = { target: 'background', method: SESSION_METHODS.setSessionTimeout };
+
+      /** Connects a session port and returns its disconnect. */
+      async function connect(url = 'chrome-extension://test-extension-id/index.html') {
+        const port = createSessionPort();
+        port.sender.url = url;
+        await onConnectListener(port);
+        return port.onDisconnect.addListener.mock.calls[0][0];
+      }
+
+      const connectDappPopup = () => connect(
+        'chrome-extension://test-extension-id/index.html?id=1&type=sign&url=https%3A%2F%2Fdapp.example',
+      );
+
+      it('stops the timeout when a page opens, and starts it when the last one closes', async () => {
+        const { sendMessage } = (global as any).browser.runtime;
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+        const closePopup = await connect();
+        const closeSidePanel = await connect('chrome-extension://test-extension-id/index.html?sidepanel');
+        // Once, it is stopped already for the second page.
+        expect(sendMessage.mock.calls).toEqual([[{ ...SESSION_TIMEOUT, payload: null }]]);
+
+        sendMessage.mockClear();
+        await closePopup();
+        expect(sendMessage).not.toHaveBeenCalled();
+
+        await closeSidePanel();
+        expect(sendMessage.mock.calls).toEqual([
+          [{ ...SESSION_TIMEOUT, payload: SECURE_LOGIN_TIMEOUT }],
+        ]);
+
+        sendMessage.mockClear();
+        await connect();
+        expect(sendMessage.mock.calls).toEqual([[{ ...SESSION_TIMEOUT, payload: null }]]);
+      });
+
+      it('does not let a dapp popup left open stop the timeout', async () => {
+        const { sendMessage } = (global as any).browser.runtime;
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+
+        const closeDappPopup = await connectDappPopup();
+        expect(sendMessage).not.toHaveBeenCalled();
+
+        // Starts it again as before, the page that unlocked it may have been this one.
+        await closeDappPopup();
+        expect(sendMessage.mock.calls).toEqual([
+          [{ ...SESSION_TIMEOUT, payload: SECURE_LOGIN_TIMEOUT }],
+        ]);
+      });
+
+      it('keeps the session of an open page when a dapp popup closes', async () => {
+        const { sendMessage } = (global as any).browser.runtime;
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+        await connect();
+        const closeDappPopup = await connectDappPopup();
+
+        sendMessage.mockClear();
+        await closeDappPopup();
+        expect(sendMessage).not.toHaveBeenCalled();
+      });
+
+      it('sends the timeout again once the setting is decrypted after a dapp popup unlocked and closed', async () => {
+        const { sendMessage } = (global as any).browser.runtime;
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+        const closeDappPopup = await connectDappPopup();
+        // The first unlock since the offscreen document started: the setting isn't decrypted yet.
+        messageListener({ method: SESSION_METHODS.sessionKeyStored });
+        await closeDappPopup();
+        expect(sendMessage.mock.calls).toEqual([
+          [{ ...SESSION_TIMEOUT, payload: SECURE_LOGIN_TIMEOUT }],
+        ]);
+
+        secureLoginTimeoutDecrypted.value = '60000';
+        await nextTick();
+        expect(sendMessage.mock.calls).toEqual([
+          [{ ...SESSION_TIMEOUT, payload: SECURE_LOGIN_TIMEOUT }],
+          [{ ...SESSION_TIMEOUT, payload: 60000 }],
+        ]);
+      });
+
+      it('leaves a stopped timeout alone when the setting is decrypted while a page is shown', async () => {
+        const { sendMessage } = (global as any).browser.runtime;
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+        const close = await connect();
+        sendMessage.mockClear();
+
+        secureLoginTimeoutDecrypted.value = '60000';
+        await nextTick();
+        expect(sendMessage).not.toHaveBeenCalled();
+
+        // Sent with the page's close, the setting is known by then.
+        await close();
+        expect(sendMessage.mock.calls).toEqual([[{ ...SESSION_TIMEOUT, payload: 60000 }]]);
+      });
+
+      it('sends nothing for a decrypted setting before any page asked for the timeout', async () => {
+        const { sendMessage } = (global as any).browser.runtime;
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+
+        secureLoginTimeoutDecrypted.value = '60000';
+        await nextTick();
+        expect(sendMessage).not.toHaveBeenCalled();
+      });
+
+      it('calls the background directly on Firefox', async () => {
+        vi.doMock('@/constants', async () => ({
+          ...(await vi.importActual('@/constants')),
+          IS_FIREFOX: true,
+        }));
+        const { setSessionTimeout } = await import('@/background/bgPopupHandler');
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+        const close = await connect();
+        expect(setSessionTimeout).toHaveBeenLastCalledWith(null);
+
+        await close();
+        expect(setSessionTimeout).toHaveBeenLastCalledWith(SECURE_LOGIN_TIMEOUT);
+        expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
+      });
+    });
+
+    it('is not taken from a content script, which could keep the wallet unlocked', async () => {
       const wallet = (await import('@/offscreen/wallet'));
       await wallet.init();
-      await onConnectListener(createSessionPort());
+      const port = createSessionPort();
+      port.sender.url = 'https://dapp.example/';
+      await onConnectListener(port);
 
       await disconnectListener();
 
-      expect((global as any).browser.runtime.sendMessage).toHaveBeenCalledWith({
-        target: 'background',
-        method: SESSION_METHODS.setSessionTimeout,
-        payload: 0,
+      // Served as any other port of a web page
+      expect(aeSdk.addRpcClient).toHaveBeenCalledOnce();
+      expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('side panel port', () => {
+    async function connectSidePanelFrom(url: string) {
+      const wallet = (await import('@/offscreen/wallet'));
+      await wallet.init();
+      const port = createPort();
+      port.name = CONNECTION_TYPES.SIDE_PANEL;
+      port.sender.url = url;
+      await onConnectListener(port);
+      return port;
+    }
+
+    it('is taken from the wallet page', async () => {
+      const port = await connectSidePanelFrom('chrome-extension://test-extension-id/index.html?sidepanel');
+
+      expect(addSidePanel).toHaveBeenCalledWith(port);
+    });
+
+    it('is taken as a dapp connection from a web page', async () => {
+      await connectSidePanelFrom('https://dapp.example/');
+
+      expect(addSidePanel).not.toHaveBeenCalled();
+      expect(aeSdk.addRpcClient).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('popup port', () => {
+    let popupHandler;
+    let popupCount;
+
+    beforeEach(async () => {
+      vi.doUnmock('@/offscreen/popupHandler');
+      const extensionBrowser = (global as any).browser;
+      const wallet = (await import('@/offscreen/wallet'));
+      popupHandler = await import('@/offscreen/popupHandler');
+      (global as any).browser = extensionBrowser;
+      await wallet.init();
+
+      popupCount = 0;
+      extensionBrowser.runtime.sendMessage.mockImplementation(async ({ method }) => {
+        if (method !== 'openPopup') return undefined;
+        popupCount += 1;
+        return { id: `popup-${popupCount}`, props: {} };
       });
+    });
+
+    async function openPopupWindow() {
+      const id = `popup-${popupCount + 1}`;
+      const request = popupHandler.openPopup('connect', 'https://dapp.example', {});
+      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      const port = createPort();
+      port.name = CONNECTION_TYPES.POPUP;
+      port.sender.url = `chrome-extension://test-extension-id/index.html?id=${id}`;
+      port.postMessage = vi.fn();
+      await onConnectListener(port);
+      return {
+        id, request, sendToOffscreen: messageListener, close: disconnectListener,
+      };
+    }
+
+    it('rejects the request of a popup closed without an answer', async () => {
+      const { id, request, close } = await openPopupWindow();
+      const onRejected = vi.fn();
+      request.catch(onRejected);
+
+      close();
+      await vi.waitFor(() => expect(onRejected).toHaveBeenCalled());
+      expect(popupHandler.getPopup(id)).toBeUndefined();
+    });
+
+    it('keeps the answer of a popup that closes once answered', async () => {
+      const {
+        id, request, sendToOffscreen, close,
+      } = await openPopupWindow();
+      await sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      close();
+
+      await expect(request).resolves.toBe('confirmed');
+      expect(popupHandler.getPopup(id)).toBeUndefined();
     });
   });
 

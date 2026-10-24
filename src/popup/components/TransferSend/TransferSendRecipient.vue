@@ -88,13 +88,21 @@ export default defineComponent({
 
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
-    const { value: fieldValue, handleBlur } = useField('addresses', {
-      required: true,
-      // TODO: currently it only shows the first warning/error, so give priority to error
-      ...(props.maxRecipients ? { max_recipients: props.maxRecipients } : {}),
-      ...props.validationRules,
-      address_not_same_as: [activeAccount.value.address, props.protocol],
-    }, {
+    // Computed, as the rules depend on the asset the form picks after this setup.
+    const rules = computed(() => {
+      const {
+        address_not_same_as: addressNotSameAs = [activeAccount.value.address, props.protocol],
+        ...validationRules
+      } = props.validationRules;
+      return {
+        required: true,
+        // TODO: currently it only shows the first warning/error, so give priority to error
+        ...(props.maxRecipients ? { max_recipients: props.maxRecipients } : {}),
+        ...validationRules,
+        address_not_same_as: addressNotSameAs,
+      };
+    });
+    const { value: fieldValue, handleBlur } = useField('addresses', rules, {
       bails: false, // TODO: validate all rules and show them all instead of the first
     });
 

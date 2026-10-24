@@ -69,7 +69,7 @@ vi.mock('../../src/composables', () => ({
     generateMnemonic: vi.fn(),
     setMnemonicAndInitializeAuthentication: vi.fn(),
     openEnableBiometricLoginModal: vi.fn(),
-    checkBiometricLoginAvailability: vi.fn(async () => false),
+    canAuthenticateWithDevice: vi.fn(async () => false),
     isMnemonicEncrypted: { value: false },
     isUsingDefaultPassword: { value: true },
     lockWallet: vi.fn(),
@@ -126,7 +126,8 @@ vi.mock('../../src/protocols/aeternity/composables', () => ({
   })),
 }));
 vi.mock('@/utils', () => ({
-  fetchJson: vi.fn(() => ({})),
+  fetchJson: vi.fn(async () => ({})),
+  handleUnknownError: vi.fn(),
 }));
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({})),

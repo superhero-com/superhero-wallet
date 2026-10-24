@@ -61,6 +61,29 @@ export const ERC20_ABI: ContractAbi = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_spender',
+        type: 'address',
+      },
+      {
+        name: '_value',
+        type: 'uint256',
+      },
+    ],
+    name: 'approve',
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+      },
+    ],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
 ];
 
 /**
@@ -98,26 +121,55 @@ export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testne
   ? ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
   : ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
 
-export const ETH_RPC_ETHERSCAN_PROXY_METHODS = {
+/** Answered by the node of the chain as is: they read it or broadcast a signed transaction */
+export const ETH_RPC_NODE_METHODS = {
+  blobBaseFee: 'eth_blobBaseFee',
   callContractOffChain: 'eth_call',
-  getBlockByNumber: 'eth_getBlockByNumber',
-  getUncleByBlockNumberAndIndex: 'eth_getUncleByBlockNumberAndIndex',
+  createAccessList: 'eth_createAccessList',
   estimateGas: 'eth_estimateGas',
+  feeHistory: 'eth_feeHistory',
+  gasPrice: 'eth_gasPrice',
+  getBlockByHash: 'eth_getBlockByHash',
+  getBlockByNumber: 'eth_getBlockByNumber',
+  getBlockNumber: 'eth_blockNumber',
+  getBlockReceipts: 'eth_getBlockReceipts',
+  getBlockTransactionCountByHash: 'eth_getBlockTransactionCountByHash',
+  getBlockTransactionCountByNumber: 'eth_getBlockTransactionCountByNumber',
+  getCode: 'eth_getCode',
+  getFilterChanges: 'eth_getFilterChanges',
+  getFilterLogs: 'eth_getFilterLogs',
+  getLogs: 'eth_getLogs',
+  getProof: 'eth_getProof',
+  getStorageAt: 'eth_getStorageAt',
+  getTransactionByBlockHashAndIndex: 'eth_getTransactionByBlockHashAndIndex',
+  getTransactionByBlockNumberAndIndex: 'eth_getTransactionByBlockNumberAndIndex',
   getTransactionByHash: 'eth_getTransactionByHash',
   getTransactionCount: 'eth_getTransactionCount',
-  gasPrice: 'eth_gasPrice',
   getTransactionReceipt: 'eth_getTransactionReceipt',
+  getUncleByBlockHashAndIndex: 'eth_getUncleByBlockHashAndIndex',
+  getUncleByBlockNumberAndIndex: 'eth_getUncleByBlockNumberAndIndex',
+  getUncleCountByBlockHash: 'eth_getUncleCountByBlockHash',
+  getUncleCountByBlockNumber: 'eth_getUncleCountByBlockNumber',
+  maxPriorityFeePerGas: 'eth_maxPriorityFeePerGas',
+  newBlockFilter: 'eth_newBlockFilter',
+  newFilter: 'eth_newFilter',
+  newPendingTransactionFilter: 'eth_newPendingTransactionFilter',
+  sendRawTransaction: 'eth_sendRawTransaction',
+  syncing: 'eth_syncing',
+  uninstallFilter: 'eth_uninstallFilter',
+  netListening: 'net_listening',
+  netVersion: 'net_version',
 } as const;
 
 export const ETH_RPC_METHODS = {
   getBalance: 'eth_getBalance',
-  getBlockNumber: 'eth_blockNumber',
   getChainId: 'eth_chainId',
   getAccounts: 'eth_accounts',
   requestAccounts: 'eth_requestAccounts',
   // signing
   sendTransaction: 'eth_sendTransaction',
   signPersonal: 'personal_sign',
+  signTypedDataV4: 'eth_signTypedData_v4',
   // wallet
   requestPermissions: 'wallet_requestPermissions',
   switchNetwork: 'wallet_switchEthereumChain',
@@ -129,4 +181,10 @@ export const ETH_RPC_METHODS = {
 export const ETH_RPC_WALLET_EVENTS = {
   chainChanged: 'chainChanged',
   accountsChanged: 'accountsChanged',
+} as const;
+
+/** Asked by the content script itself, it doesn't relay them from the page */
+export const ETH_CONTENT_SCRIPT_METHODS = {
+  /** The accounts to tell the page of when the active one changes */
+  getPermittedAccounts: 'superhero_getPermittedAccounts',
 } as const;

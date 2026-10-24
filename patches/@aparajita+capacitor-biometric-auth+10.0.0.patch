@@ -1,0 +1,30 @@
+diff --git a/node_modules/@aparajita/capacitor-biometric-auth/android/src/main/java/com/aparajita/capacitor/biometricauth/BiometricAuthNative.java b/node_modules/@aparajita/capacitor-biometric-auth/android/src/main/java/com/aparajita/capacitor/biometricauth/BiometricAuthNative.java
+--- a/node_modules/@aparajita/capacitor-biometric-auth/android/src/main/java/com/aparajita/capacitor/biometricauth/BiometricAuthNative.java
++++ b/node_modules/@aparajita/capacitor-biometric-auth/android/src/main/java/com/aparajita/capacitor/biometricauth/BiometricAuthNative.java
+@@ -6,6 +6,7 @@
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.pm.PackageManager;
++import android.os.Build;
+ import androidx.activity.result.ActivityResult;
+ import androidx.annotation.NonNull;
+ import androidx.biometric.BiometricManager;
+@@ -162,7 +163,17 @@
+       );
+ 
+     if (keyguardManager != null) {
+-      result.put("deviceIsSecure", keyguardManager.isKeyguardSecure());
++      // isKeyguardSecure() is also true for a locked SIM, which can't verify the user.
++      // On API 29 the prompt can't fall back to the credential screen without biometric
++      // hardware (androidx.biometric 1.1.0 does that itself only up to API 28).
++      result.put(
++        "deviceIsSecure",
++        keyguardManager.isDeviceSecure() &&
++        !(
++          Build.VERSION.SDK_INT == Build.VERSION_CODES.Q &&
++          biometryTypes.get(0) == BiometryType.NONE
++        )
++      );
+     } else {
+       result.put("deviceIsSecure", false);
+     }

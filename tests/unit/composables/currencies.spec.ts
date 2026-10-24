@@ -83,6 +83,127 @@ describe('useCurrencies', () => {
     expect(getCurrentCurrencyRate('aeternity')).toBe(0.05);
   });
 
+  it('flags unavailable when the retry fails too, clears on the next success, keeps old rates', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchCoinCurrencyRatesMock.mockResolvedValueOnce({ aeternity: { usd: 0.05 } });
+
+      const { useCurrencies } = await import('@/composables/currencies');
+      const {
+        loadCurrencyRates, getCurrentCurrencyRate, isCurrenciesUnavailable,
+      } = useCurrencies({ pollingDisabled: true });
+
+      await loadCurrencyRates();
+      expect(isCurrenciesUnavailable.value).toBe(false);
+
+      // CoinGecko.fetchCoinCurrencyRates returns null when the request fails
+      fetchCoinCurrencyRatesMock.mockResolvedValue(null);
+      await loadCurrencyRates();
+      expect(isCurrenciesUnavailable.value).toBe(false);
+      expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(60000);
+      expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledTimes(3);
+      expect(isCurrenciesUnavailable.value).toBe(true);
+      expect(getCurrentCurrencyRate('aeternity')).toBe(0.05);
+
+      // No further retries until the next poll
+      await vi.advanceTimersByTimeAsync(600000);
+      expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledTimes(3);
+
+      fetchCoinCurrencyRatesMock.mockResolvedValueOnce({ aeternity: { usd: 0.06 } });
+      await loadCurrencyRates();
+      expect(isCurrenciesUnavailable.value).toBe(false);
+      expect(getCurrentCurrencyRate('aeternity')).toBe(0.06);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps the rates available when the retry of a failed request succeeds', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchCoinCurrencyRatesMock
+        .mockResolvedValueOnce({ aeternity: { usd: 0.05 } })
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ aeternity: { usd: 0.07 } });
+
+      const { useCurrencies } = await import('@/composables/currencies');
+      const {
+        loadCurrencyRates, getCurrentCurrencyRate, isCurrenciesUnavailable,
+      } = useCurrencies({ pollingDisabled: true });
+
+      await loadCurrencyRates();
+      await loadCurrencyRates();
+      expect(isCurrenciesUnavailable.value).toBe(false);
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledTimes(3);
+      expect(isCurrenciesUnavailable.value).toBe(false);
+      expect(getCurrentCurrencyRate('aeternity')).toBe(0.07);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('drops the retry once a later request succeeds', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchCoinCurrencyRatesMock
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ aeternity: { usd: 0.05 } });
+
+      const { useCurrencies } = await import('@/composables/currencies');
+      const { loadCurrencyRates, isCurrenciesUnavailable } = useCurrencies({
+        pollingDisabled: true,
+      });
+
+      await loadCurrencyRates();
+      // E.g. a new protocol in use asks before the retry
+      await loadCurrencyRates();
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledTimes(2);
+      expect(isCurrenciesUnavailable.value).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('flags unavailable at once when a coin has no cached rate to show until the retry', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchCoinCurrencyRatesMock
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ aeternity: { usd: 0.07 } });
+
+      const { useCurrencies } = await import('@/composables/currencies');
+      const {
+        loadCurrencyRates, getCurrentCurrencyRate, isCurrenciesUnavailable,
+      } = useCurrencies({ pollingDisabled: true });
+
+      await loadCurrencyRates();
+      expect(isCurrenciesUnavailable.value).toBe(true);
+
+      await vi.advanceTimersByTimeAsync(60000);
+      expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledTimes(2);
+      expect(isCurrenciesUnavailable.value).toBe(false);
+      expect(getCurrentCurrencyRate('aeternity')).toBe(0.07);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not flag unavailable when the response has no rates for the coins in use', async () => {
+    const { useCurrencies } = await import('@/composables/currencies');
+    const { loadCurrencyRates, isCurrenciesUnavailable } = useCurrencies({
+      pollingDisabled: true,
+    });
+
+    await loadCurrencyRates();
+    expect(isCurrenciesUnavailable.value).toBe(false);
+  });
+
   it('setCurrentCurrency switches the currency code and reloads coin market data once logged in', async () => {
     fetchCoinMarketDataMock.mockResolvedValue([{ id: 'aeternity', currentPrice: 0.1 }]);
 

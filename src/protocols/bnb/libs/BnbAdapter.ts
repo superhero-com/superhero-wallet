@@ -20,7 +20,12 @@ import Web3Eth, {
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
-import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
+import {
+  getLegacyGasPrice,
+  toTokenBaseUnits,
+  withGasHeadroom,
+} from '@/protocols/evm/helpers';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
 
@@ -49,6 +54,7 @@ import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
+  BNB_COIN_NAME,
   BNB_COIN_PRECISION,
   BNB_COIN_SYMBOL,
   BNB_CONTRACT_ID,
@@ -61,7 +67,6 @@ import {
   ERC20_ABI, // reuse ERC20 ABI from ETH
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
-import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useBnbNetworkSettings } from '@/protocols/bnb/composables/bnbNetworkSettings';
 import { EtherscanExplorer } from '@/protocols/ethereum/libs/EtherscanExplorer';
 import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
@@ -78,7 +83,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override protocolName = BNB_PROTOCOL_NAME;
 
-  override coinName = BNB_PROTOCOL_NAME;
+  override coinName = BNB_COIN_NAME;
 
   override coinSymbol = BNB_COIN_SYMBOL;
 
@@ -294,7 +299,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
         const response = await new EthplorerService(apiUrl)
           .fetchAccountTokenBalances(address, PROTOCOLS.bnb);
         // Ensure protocol is BNB
-        return (response || [])?.map((b) => ({ ...b, protocol: PROTOCOLS.bnb }));
+        return response?.map((b) => ({ ...b, protocol: PROTOCOLS.bnb })) ?? null;
       }
       const response = await new AlchemyService(apiUrl).getTokenBalances(address);
       return response;
@@ -331,68 +336,13 @@ export class BnbAdapter extends BaseProtocolAdapter {
     }
   }
 
-  override async transferPreparedTransaction({
-    to,
-    from,
-    data = '0x',
-    value,
-    gas,
-  }: any = {}): Promise<ITransferResponse> {
+  override async transferPreparedTransaction(transaction: any = {}): Promise<ITransferResponse> {
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
-    const { getAccountByProtocolAndAddress } = useAccounts();
-    const { chainId } = bnbActiveNetworkSettings.value;
-    const { updateFeeList } = useEthFeeCalculation(this.protocol);
-
-    const account = getAccountByProtocolAndAddress(
-      PROTOCOLS.bnb,
-      toChecksumAddress(from),
+    return transferPreparedLegacyTransaction(
+      this.protocol,
+      bnbActiveNetworkSettings.value,
+      transaction,
     );
-    if (!account || account.protocol !== PROTOCOLS.bnb) {
-      throw new Error(
-        'Token transfer was initiated from non-existing or non-bnb account.',
-      );
-    }
-
-    const [nonce] = await Promise.all([
-      this.getTransactionCount(from),
-      updateFeeList(),
-    ]);
-
-    const web3Eth = this.getWeb3EthInstance();
-    const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const gasPrice = bigIntToHex(nodeGasPriceWei);
-
-    // Determine gas limit: prefer provided gas from dapp/estimator
-    let gasLimitHex: string;
-    if (gas != null) {
-      let gasNum: number;
-      if (typeof gas === 'string') {
-        gasNum = gas.startsWith('0x') ? Number(gas) : Number(gas);
-      } else {
-        gasNum = Number(gas);
-      }
-      gasLimitHex = `0x${gasNum.toString(16)}`;
-    } else {
-      gasLimitHex = toHex(String(BNB_GAS_LIMIT));
-    }
-
-    const txData: TxData = {
-      nonce,
-      gasPrice,
-      gasLimit: gasLimitHex,
-      to,
-      value,
-      data,
-    };
-
-    const common = Common.custom({ chainId: Number(chainId), networkId: Number(chainId) });
-    const tx = new Transaction(txData, { common });
-    const signedTx = tx.sign(account.secretKey!);
-    const serializedTx = signedTx.serialize();
-    const raw = `0x${Buffer.from(serializedTx).toString('hex')}`;
-    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
-    await broadcastSignedTransaction(web3Eth, raw);
-    return { hash };
   }
 
   override async transferToken(
@@ -406,12 +356,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
       nonce: number;
     },
   ): Promise<ITransferResponse> {
-    const {
-      bnbActiveNetworkSettings,
-      bnbActiveNetworkPredefinedSettings,
-    } = useBnbNetworkSettings();
+    const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
     const { getAccountByProtocolAndAddress } = useAccounts();
-    const apiUrl = bnbActiveNetworkPredefinedSettings.value.middlewareUrl;
 
     const account = getAccountByProtocolAndAddress(
       PROTOCOLS.bnb,
@@ -424,22 +370,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     }
     const { chainId, nodeUrl } = bnbActiveNetworkSettings.value;
 
-    const contractAbi = await new EtherscanService(
-      apiUrl,
-      chainId,
-    ).fetchFromApi({
-      module: 'contract',
-      action: 'getabi',
-      address: contractId,
-    });
-
-    const contract = new Contract(
-      contractAbi && Array.isArray(contractAbi?.result)
-        ? contractAbi.result
-        : ERC20_ABI,
-      contractId,
-      { from: options.fromAccount },
-    );
+    const contract = new Contract(ERC20_ABI, contractId, { from: options.fromAccount });
 
     contract.setProvider(nodeUrl);
 
@@ -447,19 +378,15 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const tokenDecimals = Number(await contract.methods.decimals().call());
     const hexAmount = bigIntToHex(toTokenBaseUnits(amountBN, tokenDecimals));
 
-    // Use node-provided gasPrice on BNB (no EIP-1559)
     const web3Eth = this.getWeb3EthInstance();
-    const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const gasPrice = bigIntToHex(nodeGasPriceWei);
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
 
-    const [nonce, estimatedGas] = await Promise.all([
-      this.getTransactionCount(options.fromAccount),
-      contract.methods.transfer(recipient, hexAmount).estimateGas({ from: options.fromAccount }),
-    ]);
+    const estimatedGas = await contract.methods.transfer(recipient, hexAmount)
+      .estimateGas({ from: options.fromAccount });
     const gasLimit = withGasHeadroom(estimatedGas);
 
     const txData: TxData = {
-      nonce,
+      nonce: options.nonce,
       gasPrice,
       gasLimit: `0x${gasLimit.toString(16)}`,
       to: contractId,
@@ -508,20 +435,20 @@ export class BnbAdapter extends BaseProtocolAdapter {
       if (tokenTx) return tokenTx;
     }
 
-    const block = transaction?.blockHash
-      ? await getBlock(
-        web3Eth,
-        transaction.blockHash,
-        true,
-        DEFAULT_RETURN_FORMAT,
-      )
-      : undefined;
-    const normalized = normalizeWeb3EthTransactionStructure(
+    const [block, receipt] = transaction?.blockHash
+      ? await Promise.all([
+        getBlock(web3Eth, transaction.blockHash, false, DEFAULT_RETURN_FORMAT),
+        // Without the receipt the fee is the most the gas limit can cost
+        getTransactionReceipt(web3Eth, hash, DEFAULT_RETURN_FORMAT).catch(() => undefined),
+      ])
+      : [undefined, undefined];
+    return normalizeWeb3EthTransactionStructure(
+      this.protocol,
       transaction,
       block,
       transactionOwner,
+      receipt,
     );
-    return normalized;
   }
 
   override async fetchAccountTransactions(
@@ -564,6 +491,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
@@ -603,13 +531,14 @@ export class BnbAdapter extends BaseProtocolAdapter {
       }
     } catch (error: any) {
       Logger.write(error);
+      throw error;
     }
 
     return { regularTransactions, paginationParams };
   }
 
   async constructAndSignTx(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<any> {
@@ -630,11 +559,10 @@ export class BnbAdapter extends BaseProtocolAdapter {
     const { chainId } = bnbActiveNetworkSettings.value;
 
     const web3Eth = this.getWeb3EthInstance();
-    const nodeGasPriceWei = await web3Eth.getGasPrice();
-    const gasPrice = bigIntToHex(nodeGasPriceWei);
+    const gasPrice = bigIntToHex(await getLegacyGasPrice(web3Eth, options.maxFeePerGas));
 
     const hexAmount = bigIntToHex(
-      BigInt(toWei(amount.toFixed(BNB_COIN_PRECISION), 'ether')),
+      BigInt(toWei(new BigNumber(amount).toFixed(BNB_COIN_PRECISION), 'ether')),
     );
 
     const txData: TxData = {
@@ -655,7 +583,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
   }
 
   override async spend(
-    amount: number,
+    amount: number | string,
     recipient: AccountAddress,
     options: {
       fromAccount: AccountAddress;

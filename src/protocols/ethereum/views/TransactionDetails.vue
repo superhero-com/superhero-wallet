@@ -6,6 +6,7 @@
     :amount-total="amountTotal"
     :fee="fee"
     :hash="hash"
+    :is-error-transaction="isErrorTransaction"
     :protocol="protocol"
     :hide-amount-total="!isTransactionCoin"
     :hide-fiat="!isTransactionCoin"
@@ -13,6 +14,7 @@
     <template #tokens>
       <TransactionAssetRows
         :assets="transactionAssets"
+        :error="isErrorTransaction"
         :protocol="protocol"
         icon-size="rg"
         multiple-rows
@@ -123,6 +125,7 @@ export default defineComponent({
       transactionAssets,
       isTransactionCoin,
       innerTx,
+      isErrorTransaction,
     } = useTransactionData({
       transaction,
       transactionCustomOwner: toRef(() => transactionOwner),
@@ -148,6 +151,7 @@ export default defineComponent({
             ? innerTx.value.contractId
             : innerTx.value.recipientId,
           activeAccount.value.address,
+          props.protocol,
         );
       }
       return null;
@@ -220,6 +224,7 @@ export default defineComponent({
       decodedCallData,
       decodingCallData,
       innerTx,
+      isErrorTransaction,
       isTransactionCoin,
       hash,
       fee,

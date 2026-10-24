@@ -18,9 +18,11 @@ import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
 import type {
   AccountAddress,
+  AppOriginSource,
   AssetContractId,
   BigNumberPublic,
   IAccount,
+  IAppData,
   ICommonTransaction,
   IDashboardTransaction,
   IFormSelectOption,
@@ -36,6 +38,7 @@ import type {
   Truthy,
 } from '@/types';
 import {
+  ACCOUNT_CHECK_TIMEOUT,
   ACCOUNT_TYPES,
   ADDRESS_GAP_LIMIT,
   DECIMAL_PLACES_HIGH_PRECISION,
@@ -51,6 +54,7 @@ import {
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
+import { AccountDiscoveryError } from '@/lib/errors';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
@@ -131,6 +135,17 @@ export function errorHasValidationKey(error: any, expectedKey: string): boolean 
   return error.validation?.some(({ key }: any) => expectedKey === key);
 }
 
+export function createAppData(href: string, originSource?: AppOriginSource): IAppData {
+  const url = new URL(href);
+  return {
+    host: url.host,
+    name: url.hostname,
+    protocol: url.protocol,
+    href: url.href,
+    ...(originSource ? { originSource } : {}),
+  };
+}
+
 /**
  * Create list of callbacks
  */
@@ -150,7 +165,13 @@ export function createCallbackRegistry<T extends(...args: any) => any>() {
       return () => callbackRegistry.delete(savedId);
     },
     runCallbacks: (...args: Parameters<T>) => {
-      callbackRegistry.forEach((callback) => callback?.(...args as Array<any>));
+      callbackRegistry.forEach((callback) => {
+        try {
+          callback?.(...args as Array<any>);
+        } catch (error) {
+          handleUnknownError(error);
+        }
+      });
     },
   };
 }
@@ -199,6 +220,25 @@ export async function fetchJson<T = any>(
   options?: RequestInit,
 ): Promise<T | null> {
   const response = await fetch(url, options);
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    let data;
+    try {
+      data = text ? JSON.parse(text) : undefined;
+    } catch {
+      data = text;
+    }
+    let host;
+    try {
+      host = new URL(url).host;
+    } catch { /* relative URL */ }
+    // Only the host: the path or query can carry an API key
+    const message = `HTTP ${response.status}${host ? ` from ${host}` : ''}`;
+    const error = Object.assign(new Error(message), { statusCode: response.status });
+    // Not enumerable, so the saved error log doesn't copy the body
+    Object.defineProperty(error, 'response', { value: { data } });
+    throw error;
+  }
   if (response.status === 204) {
     return null;
   }
@@ -293,6 +333,18 @@ export function isNotFoundError(error: any) {
 }
 
 /**
+ * The server didn't answer, or answered to try again later. Any other failure rejects what was
+ * sent, or happened before anything was sent.
+ */
+export function isTransientRequestError(error: any) {
+  if (error?.name !== 'RestError') {
+    return false;
+  }
+  const { statusCode } = error;
+  return statusCode == null || statusCode >= 500 || statusCode === 408 || statusCode === 429;
+}
+
+/**
  * Check if object has at least one property with a value, where 0 is also a correct value.
  * `{ test: null }` => false
  * `{ test: 'Foo' }` => true
@@ -303,7 +355,7 @@ export function objectHasNonEmptyProperties(obj: object): boolean {
 }
 
 export function openInNewWindow(url: string) {
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
@@ -523,6 +575,8 @@ export function watchUntilTruthy<T>(
 
 /**
  * @returns {number} between -1 and n where -1 means there are no accounts found.
+ * A check that fails or gets no answer in `ACCOUNT_CHECK_TIMEOUT` counts as unused, so the
+ * accounts after it are still found, and the result comes as an `AccountDiscoveryError`.
  */
 export async function getLastNotEmptyAccountIndex(
   isAccountUsed: (address: string) => Promise<boolean>,
@@ -535,30 +589,47 @@ export async function getLastNotEmptyAccountIndex(
   let lastNotEmptyIdx = 0;
   let lastIndex = 0;
   let isAccountUsedArray: boolean[] = [];
+  let failure: { reason: unknown } | undefined;
   do {
-    try {
-      lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
-      lastIndex += isAccountUsedArray.length;
+    lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
+    lastIndex += isAccountUsedArray.length;
 
-      // eslint-disable-next-line no-await-in-loop
-      isAccountUsedArray = await Promise.all(
-        Array.from(
-          Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1).keys(),
-          // eslint-disable-next-line no-loop-func
-          (x) => x + lastIndex,
-        )
-          .map((index) => isAccountUsed(
-            getHdWalletAccountFromMnemonicSeed(wallet, index).address,
-          )),
-      );
-    } catch (e) {
-      break;
-    }
+    // eslint-disable-next-line no-await-in-loop
+    isAccountUsedArray = await Promise.all(
+      Array.from(
+        Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1).keys(),
+        // eslint-disable-next-line no-loop-func
+        (x) => x + lastIndex,
+      )
+        // eslint-disable-next-line no-loop-func
+        .map(async (index) => {
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            return await Promise.race([
+              isAccountUsed(getHdWalletAccountFromMnemonicSeed(wallet, index).address),
+              new Promise<never>((_, reject) => {
+                timer = setTimeout(
+                  () => reject(new Error('Account check timed out')),
+                  ACCOUNT_CHECK_TIMEOUT,
+                );
+              }),
+            ]);
+          } catch (error) {
+            failure ??= { reason: error };
+            return false;
+          } finally {
+            clearTimeout(timer);
+          }
+        }),
+    );
   } while (!(
     isAccountUsedArray.lastIndexOf(true) === -1
     || isAccountUsedArray.filter((isAccountUsedValue) => !isAccountUsedValue)
       .length === ADDRESS_GAP_LIMIT
   ));
+  if (failure) {
+    throw new AccountDiscoveryError(failure.reason, lastNotEmptyIdx);
+  }
   return lastNotEmptyIdx;
 }
 

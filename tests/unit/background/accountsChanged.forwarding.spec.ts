@@ -1,16 +1,18 @@
 // @ts-nocheck
+const OFFSCREEN_DOCUMENT = { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/offscreen.html' };
+
 describe('background accountsChanged forwarding', () => {
   const sendMessageMock = vi.fn();
   const queryMock = vi.fn().mockResolvedValue([{ id: 123 }]);
 
   beforeEach(async () => {
-    sendMessageMock.mockClear();
+    sendMessageMock.mockReset().mockResolvedValue(undefined);
     queryMock.mockClear();
     (global as any).browser = {
       runtime: {
         id: 'test-extension-id',
         onMessage: { addListener: vi.fn() },
-        getURL: vi.fn(() => 'offscreen.html'),
+        getURL: vi.fn((path) => `chrome-extension://test-extension-id/${path}`),
         getContexts: vi.fn().mockResolvedValue([{}]),
         offscreen: { createDocument: vi.fn().mockResolvedValue(undefined) },
         onInstalled: { addListener: vi.fn() },
@@ -37,14 +39,11 @@ describe('background accountsChanged forwarding', () => {
         method: 'accountsChanged',
         params: { rpcMethodParams: { result: ['0xabc'] } },
       },
-      { id: 'test-extension-id' },
+      OFFSCREEN_DOCUMENT,
       vi.fn(),
     );
 
-    const queryCalls = ((global as any).browser.tabs.query as vi.Mock).mock.calls;
-    expect(queryCalls.some((args: any[]) => (
-      args[0]?.active === true && args[0]?.lastFocusedWindow === true
-    ))).toBe(true);
+    expect(queryMock).toHaveBeenCalledWith({});
 
     const sendCalls = ((global as any).browser.tabs.sendMessage as vi.Mock).mock.calls;
     expect(sendCalls.some((args: any[]) => (
@@ -55,6 +54,29 @@ describe('background accountsChanged forwarding', () => {
       && args[1]?.result[0] === '0xabc'
       && args[1]?.type === 'result'
     ))).toBe(true);
+  });
+
+  it.each([
+    'chainChanged',
+    'accountsChanged',
+  ])('forwards %s to every tab, also after one without the content script', async (method) => {
+    vi.resetModules();
+    (await import('@/background/index'));
+    const listener = (
+      (global as any).browser.runtime.onMessage.addListener as vi.Mock
+    ).mock.calls[0][0];
+    queryMock.mockResolvedValueOnce([{ id: 1 }, { id: 2 }]);
+    sendMessageMock.mockRejectedValueOnce(new Error('Could not establish connection. Receiving end does not exist.'));
+
+    listener(
+      { target: 'background', method, params: { rpcMethodParams: { result: '0x38' } } },
+      OFFSCREEN_DOCUMENT,
+      vi.fn(),
+    );
+    await new Promise((resolve) => { setTimeout(resolve); });
+
+    expect(sendMessageMock.mock.calls.map(([tabId, message]) => [tabId, message.method]))
+      .toEqual([[1, method], [2, method]]);
   });
 
   it.each([
@@ -102,7 +124,7 @@ describe('background accountsChanged forwarding', () => {
 
     const result = await listener(
       msg,
-      { id: 'test-extension-id' },
+      OFFSCREEN_DOCUMENT,
       vi.fn(),
     );
 

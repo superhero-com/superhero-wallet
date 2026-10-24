@@ -12,6 +12,7 @@ import {
   getPopup,
   getSessionEncryptionKey,
 } from '@/background/bgPopupHandler';
+import { isExtensionPageSender } from '@/background/messageGuards';
 import { getCleanModalOptions } from '@/utils';
 
 export const detectConnectionType = (port: Runtime.Port) => {
@@ -21,9 +22,14 @@ export const detectConnectionType = (port: Runtime.Port) => {
     senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
     || IS_FIREFOX
   );
-  if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
+  if (
+    [CONNECTION_TYPES.POPUP, CONNECTION_TYPES.SIDE_PANEL].includes(port.name)
+    && isExtensionSender
+  ) {
     return port.name;
-  } if (CONNECTION_TYPES.SESSION === port.name) {
+  }
+  // Its disconnect restarts the auto-lock timer, so content scripts can't open one.
+  if (CONNECTION_TYPES.SESSION === port.name && isExtensionPageSender(port.sender)) {
     return CONNECTION_TYPES.SESSION;
   }
   return CONNECTION_TYPES.OTHER;
@@ -41,7 +47,12 @@ export async function executeOrSendMessageToBackground(
   if (IS_FIREFOX) {
     switch (method) {
       case POPUP_METHODS.openPopup:
-        return openPopup(params?.popupType!, params?.aepp!, params?.popupProps);
+        return openPopup(
+          params?.popupType!,
+          params?.aepp!,
+          params?.popupProps,
+          params?.sidePanelWindowIds,
+        );
       case POPUP_METHODS.removePopup:
         return removePopup(params?.id!);
       case POPUP_METHODS.getPopup:

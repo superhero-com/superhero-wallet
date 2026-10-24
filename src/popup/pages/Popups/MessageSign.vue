@@ -28,7 +28,9 @@
       ({{ sender.address }}) {{ $t('pages.popupMessageSign.heading') }}
     </div>
 
+    <!-- A dapp that names the signer accepts only that account's signature -->
     <SignAccountSelect
+      v-if="!popupProps?.fromAccount"
       :account="selectedAccount"
       :protocol="protocol"
       :label="$t('modals.signAccountSelect.label')"
@@ -42,7 +44,9 @@
       class="message-text"
     >
       <template #value>
-        <CopyText :value="popupProps?.message" />
+        <CopyText :value="popupProps?.message">
+          <span class="message-value">{{ popupProps?.message }}</span>
+        </CopyText>
       </template>
     </DetailsItem>
 
@@ -56,6 +60,7 @@
       />
       <BtnMain
         data-cy="accept"
+        :disabled="isConfirmBlocked"
         :text="$t('common.confirm')"
         @click="approve()"
       />
@@ -69,11 +74,11 @@ import {
   ACCOUNT_TYPES,
   MODAL_LEDGER_SIGN,
   PROTOCOLS,
-  RUNNING_IN_POPUP,
 } from '@/constants';
 import type { IAccount, ISignModalResolution } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps, useModals } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 
 import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
 import SignAccountSelect from '@/popup/components/SignAccountSelect.vue';
@@ -94,8 +99,14 @@ export default defineComponent({
     SignAccountSelect,
   },
   setup() {
-    const { getLastActiveProtocolAccount, setActiveAccountByAddressAndProtocol } = useAccounts();
+    const { isConfirmBlocked } = useConfirmGuard();
     const {
+      getAccountByProtocolAndAddress,
+      getLastActiveProtocolAccount,
+      setActiveAccountByAddressAndProtocol,
+    } = useAccounts();
+    const {
+      isOffscreenRequest,
       isUnknownDapp,
       popupProps,
       sender,
@@ -103,7 +114,12 @@ export default defineComponent({
     } = usePopupProps();
 
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
-    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
+    const { fromAccount } = popupProps.value || {};
+    const selectedAccount = ref<IAccount | undefined>(
+      fromAccount
+        ? getAccountByProtocolAndAddress(protocol, fromAccount)
+        : getLastActiveProtocolAccount(protocol),
+    );
 
     async function approve() {
       const { openModal } = useModals();
@@ -113,7 +129,7 @@ export default defineComponent({
           selectedAccount.value.protocol,
         );
       }
-      if (RUNNING_IN_POPUP && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
+      if (isOffscreenRequest.value && selectedAccount.value?.type === ACCOUNT_TYPES.ledger) {
         await openModal(MODAL_LEDGER_SIGN);
       }
       const modalResolution: ISignModalResolution = {
@@ -131,6 +147,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       protocol,
       selectedAccount,
       isUnknownDapp,
@@ -163,6 +180,10 @@ export default defineComponent({
 
   .message-text {
     margin-top: 16px;
+  }
+
+  .message-value {
+    white-space: pre-wrap;
   }
 }
 </style>

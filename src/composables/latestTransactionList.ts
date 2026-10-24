@@ -4,11 +4,14 @@ import type {
   AccountAddress,
   IAccount,
   ICommonTransaction,
+  IFetchTransactionResult,
   ITokenBalance,
   ITransaction,
+  ITx,
 } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import {
+  handleUnknownError,
   pipe,
   removeDuplicatedTransactions,
   sortTransactionsByDate,
@@ -42,6 +45,7 @@ const accountsTransactionsPending = useStorageRef<AccountsTransactionList>(
 );
 
 const areLatestTransactionsUpdating = ref(false);
+let isLatestTransactionsReloadRequested = false;
 
 function getTokenBalancesByAccountKey(tokenBalanceList: ITokenBalance[]) {
   const result: Record<string, ITokenBalance[]> = {};
@@ -51,6 +55,13 @@ function getTokenBalancesByAccountKey(tokenBalanceList: ITokenBalance[]) {
     result[key].push(tokenBalance);
   });
   return result;
+}
+
+/**
+ * The account whose nonce the transaction uses.
+ */
+function getTransactionSender(tx?: ITx) {
+  return tx?.callerId || tx?.senderId || tx?.accountId || tx?.ownerId;
 }
 
 /**
@@ -83,19 +94,38 @@ export function useLatestTransactionList() {
     ).filter((transaction) => hash !== transaction.hash);
   }
 
-  function removeAccountPendingTransactionByNonce(address: AccountAddress, nonce?: number) {
-    if (!nonce) return;
+  /**
+   * Remove pending transactions that can't be mined anymore,
+   * because the account mined another one with the same nonce (e.g. sped up).
+   */
+  function removeAccountPendingTransactionByNonce(
+    address: AccountAddress,
+    { protocol, tx }: ITransaction,
+  ) {
+    // Incoming transactions carry the nonce of the sender
+    if (tx?.nonce == null || getTransactionSender(tx) !== address) return;
     accountsTransactionsPending.value[address] = (
       accountsTransactionsPending.value[address] || []
-    ).filter((transaction) => nonce !== transaction.tx?.nonce);
+    ).filter((transaction) => (
+      transaction.protocol !== protocol
+      // Etherscan returns the nonce as a string
+      || String(transaction.tx?.nonce) !== String(tx.nonce)
+    ));
   }
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const currentNetworkName = activeNetwork.value.name;
+    let response: IFetchTransactionResult;
+    try {
+      response = await adapter.fetchAccountTransactions(address);
+    } catch (error) {
+      handleUnknownError(error);
+      return true;
+    }
     const {
       regularTransactions,
       pendingTransactions,
-    } = await adapter.fetchAccountTransactions(address);
+    } = response;
 
     // This is necessary in case the user switches between networks faster,
     // than transactions are returned (limitations of the free Ethereum middleware)
@@ -108,6 +138,9 @@ export function useLatestTransactionList() {
       || pendingTransactions?.length
     ) {
       accountsTransactionsLatest.value[address] = [
+        // Ethereum, BNB and Polygon accounts share the address
+        ...(accountsTransactionsLatest.value[address] || [])
+          .filter((transaction) => transaction.protocol !== protocol),
         ...regularTransactions,
         ...(pendingTransactions || []),
       ];
@@ -117,7 +150,7 @@ export function useLatestTransactionList() {
           ({ hash }) => removeAccountPendingTransactionByHash(address, hash),
         );
         regularTransactions.forEach(
-          (transaction) => removeAccountPendingTransactionByNonce(address, transaction.tx?.nonce),
+          (transaction) => removeAccountPendingTransactionByNonce(address, transaction),
         );
       }
     }
@@ -129,11 +162,21 @@ export function useLatestTransactionList() {
    * Loads all latest transactions for every account.
    */
   async function loadAllLatestTransactions() {
-    if (!areLatestTransactionsUpdating.value) {
-      areLatestTransactionsUpdating.value = true;
-      await Promise.all(accounts.value.map(
-        async (account) => loadAccountLatestTransactions(account),
-      ));
+    if (areLatestTransactionsUpdating.value) {
+      // E.g. after a network switch the running batch is discarded
+      isLatestTransactionsReloadRequested = true;
+      return;
+    }
+    areLatestTransactionsUpdating.value = true;
+    try {
+      do {
+        isLatestTransactionsReloadRequested = false;
+        // eslint-disable-next-line no-await-in-loop
+        await Promise.all(accounts.value.map(
+          async (account) => loadAccountLatestTransactions(account),
+        ));
+      } while (isLatestTransactionsReloadRequested);
+    } finally {
       areLatestTransactionsUpdating.value = false;
     }
   }
@@ -171,12 +214,14 @@ export function useLatestTransactionList() {
     setInterval(() => {
       Object.entries(accountsTransactionsLatest.value)
         .forEach(([accountAddress, transactionList]) => {
-          if (transactionList.some(({ pending }) => !!pending)) {
-            const accProtocol = transactionList.find(Boolean)?.protocol;
-            if (!accProtocol) return;
-            const acc = getAccountByProtocolAndAddress(accProtocol, accountAddress)!;
-            loadAccountLatestTransactions(acc);
-          }
+          new Set(
+            transactionList
+              .filter(({ pending }) => !!pending)
+              .map(({ protocol }) => protocol),
+          ).forEach((accProtocol) => {
+            const acc = getAccountByProtocolAndAddress(accProtocol, accountAddress);
+            if (acc) loadAccountLatestTransactions(acc);
+          });
         });
     }, 60000);
 

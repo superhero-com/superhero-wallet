@@ -81,6 +81,7 @@
         third
         :text="$t('common.sign')"
         data-cy="accept"
+        :disabled="isConfirmBlocked"
         @click="confirm()"
       />
     </template>
@@ -104,6 +105,7 @@ import type { IAccount, ISignModalResolution } from '@/types';
 import { fromBase64Url, handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
@@ -124,6 +126,7 @@ export default defineComponent({
     SignAccountSelect,
   },
   setup() {
+    const { isConfirmBlocked } = useConfirmGuard();
     const {
       isUnknownDapp,
       popupProps,
@@ -180,6 +183,7 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       confirm,
       cancel,
       protocol,

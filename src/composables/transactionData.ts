@@ -116,11 +116,13 @@ export function useTransactionData({
   );
 
   const isNonTokenContract = computed(
-    (): boolean => (
-      !isEmpty(getProtocolAvailableTokens(protocol.value))
-      && !getProtocolAvailableTokens(protocol.value)[innerTx.value?.contractId]
-    )
-    || innerTxTag.value === Tag.ContractCreateTx,
+    (): boolean => !innerTx.value?.isTokenTransfer && (
+      (
+        !isEmpty(getProtocolAvailableTokens(protocol.value))
+        && !getProtocolAvailableTokens(protocol.value)[innerTx.value?.contractId]
+      )
+      || innerTxTag.value === Tag.ContractCreateTx
+    ),
   );
 
   const isTokenSale = computed(

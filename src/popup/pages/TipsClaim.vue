@@ -14,12 +14,6 @@
           class="help-button"
           :title="$t('modals.verify.title')"
           :msg="$t('modals.verify.msg')"
-          :option="{
-            attrs: {
-              href: AE_BLOG_CLAIM_TIP_URL,
-              target: '_blank',
-            },
-          }"
           icon="success"
         />
       </div>
@@ -60,7 +54,6 @@ import {
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
-import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 
@@ -125,7 +118,8 @@ export default defineComponent({
 
         router.push({ name: ROUTE_ACCOUNT });
       } catch (error: any) {
-        const { error: errorMessage = '' } = error.response ? error.response.data : {};
+        const backendError = error.response?.data?.error;
+        const errorMessage = (typeof backendError === 'string') ? backendError : '';
         let msg;
         if (errorMessage.includes('MORE_ORACLES_NEEDED')) {
           msg = t('pages.claim.moreOracles');
@@ -168,7 +162,6 @@ export default defineComponent({
       normalizedUrl,
       tipUrl,
       isTippingSupported,
-      AE_BLOG_CLAIM_TIP_URL,
       handleClaimTips,
     };
   },
