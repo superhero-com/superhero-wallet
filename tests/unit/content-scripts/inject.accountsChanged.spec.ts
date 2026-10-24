@@ -69,6 +69,13 @@ describe('inject.ts accountsChanged propagation', () => {
     const runtimeListener = ((global as any).browser.runtime.onMessage.addListener as vi.Mock)
       .mock.calls[0][0];
     await runtimeListener({ method, result });
+    await flushPromises();
+  }
+
+  /** The accounts the wallet gives the page when asked after a change */
+  function permitAccounts(accounts: string[]) {
+    ((global as any).browser.runtime.sendMessage as vi.Mock)
+      .mockResolvedValueOnce({ result: accounts });
   }
 
   const getPostedEvents = (method: string) => postMessageSpy.mock.calls
@@ -80,12 +87,44 @@ describe('inject.ts accountsChanged propagation', () => {
   ])('forwards accountsChanged to a page that got accounts from %s', async (method) => {
     await pageRequest(method, { result: ['0xabc'] });
 
+    permitAccounts(['0xdef']);
     await emitWalletEvent('accountsChanged', ['0xdef']);
 
     expect(getPostedEvents('accountsChanged')).toEqual([[
       expect.objectContaining({ result: ['0xdef'], superheroWalletApproved: true, type: 'result' }),
       origin,
     ]]);
+    expect((global as any).browser.runtime.sendMessage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ method: 'superhero_getPermittedAccounts', params: {} }),
+    );
+  });
+
+  it('forwards the accounts the page is permitted, not the ones of the event', async () => {
+    await pageRequest('eth_accounts', { result: ['0xabc'] });
+
+    permitAccounts(['0xabc']);
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+
+    expect(getPostedEvents('accountsChanged').map(([data]) => data.result)).toEqual([['0xabc']]);
+  });
+
+  it('tells a page removed from the connected sites once, then stops', async () => {
+    await pageRequest('eth_requestAccounts', { result: ['0xabc'] });
+
+    permitAccounts([]);
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+    await emitWalletEvent('accountsChanged', ['0x123']);
+
+    expect(getPostedEvents('accountsChanged').map(([data]) => data.result)).toEqual([[]]);
+  });
+
+  it('tells a page no accounts when the wallet does not answer which it is permitted', async () => {
+    await pageRequest('eth_requestAccounts', { result: ['0xabc'] });
+
+    ((global as any).browser.runtime.sendMessage as vi.Mock).mockResolvedValueOnce(undefined);
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+
+    expect(getPostedEvents('accountsChanged').map(([data]) => data.result)).toEqual([[]]);
   });
 
   it.each([
@@ -135,6 +174,16 @@ describe('inject.ts accountsChanged propagation', () => {
       data: { superheroWalletRequest: true, method: 'eth_chainId', params: [] },
       origin,
       source: { postMessage: vi.fn() },
+    })],
+    ['the method only the content script asks, as an EVM request', () => ({
+      data: { superheroWalletRequest: true, method: 'superhero_getPermittedAccounts', params: [] },
+      origin,
+      source: window,
+    })],
+    ['the method only the content script asks', () => ({
+      data: { method: 'superhero_getPermittedAccounts', aepp: origin },
+      origin,
+      source: window,
     })],
     ['a method that is not a string', () => ({
       // eslint-disable-next-line no-new-wrappers

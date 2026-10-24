@@ -213,7 +213,8 @@
       "title": "交易失败",
       "msg": "我们无法处理此交易。请稍后再试。",
       "dustError": "交易因尘埃 UTXO 错误被网络拒绝。{'<'}br /{'>'} {'<'}br /{'>'} 请尝试在选择较低手续费档位的情况下使用“最大金额”功能发送，或者在全部转出前先为账户充值。",
-      "solRentError": "Solana 账户必须至少持有 {0} SOL。请向 {2} 发送至少 {1} SOL。"
+      "solRentError": "Solana 账户必须至少持有 {0} SOL。请向 {2} 发送至少 {1} SOL。",
+      "paidRecipients": "已发送给 {recipients}。请勿再次向其发送。"
     },
     "required": {
       "msg": "请填写所有字段。"

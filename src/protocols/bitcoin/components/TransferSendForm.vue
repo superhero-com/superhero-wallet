@@ -169,19 +169,36 @@ export default defineComponent({
     const defaultFee = isDogecoin ? DOGE_DEFAULT_FEE : 0.00002;
 
     const feeSelectedIndex = ref(1);
-    const feeSlow = ref(new BigNumber(defaultFee));
-    const feeMedium = ref(new BigNumber(defaultFee));
-    const feeHigh = ref(new BigNumber(defaultFee));
     const recipientsCount = computed(() => formModel.value.addresses?.length || 1);
 
+    /** The fee of each recipient's send at the slow, medium and fast rate, in satoshi */
+    const speedSendFees = ref<number[][]>([]);
+    /** Of all the sends together */
+    function getSpeedFee(idx: number) {
+      const sendFees = speedSendFees.value[idx];
+      if (!sendFees?.length) {
+        return new BigNumber(defaultFee).multipliedBy(recipientsCount.value);
+      }
+      const total = sendFees.reduce((sum, value) => sum + value, 0);
+      // Until they are sized again for another number of recipients. Each send pays a share,
+      // in whole satoshis.
+      return new BigNumber(toBitcoin(sendFees.length === recipientsCount.value
+        ? total
+        : Math.ceil(total / sendFees.length) * recipientsCount.value));
+    }
     const feeList = computed((): IFeeItem[] => [
-      { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
-      { fee: feeMedium.value, time: 600, label: t('common.transferSpeed.medium') },
-      { fee: feeHigh.value, time: 25, label: t('common.transferSpeed.fast') },
+      { fee: getSpeedFee(0), time: 3540, label: t('common.transferSpeed.slow') },
+      { fee: getSpeedFee(1), time: 600, label: t('common.transferSpeed.medium') },
+      { fee: getSpeedFee(2), time: 25, label: t('common.transferSpeed.fast') },
     ]);
-    const fee = computed(() => (
-      feeList.value[feeSelectedIndex.value].fee.multipliedBy(recipientsCount.value)
-    ));
+    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
+    /** Of the picked speed, unless they were sized for another number of recipients */
+    const sendFees = computed(() => {
+      const fees = speedSendFees.value[feeSelectedIndex.value];
+      return fees?.length === recipientsCount.value
+        ? fees.map((value) => toBitcoin(value))
+        : undefined;
+    });
 
     const numericFee = computed(() => +fee.value.toFixed());
 
@@ -191,6 +208,7 @@ export default defineComponent({
       const inputPayload: TransferFormModel = {
         ...formModel.value,
         fee: fee.value as BigNumber,
+        fees: sendFees.value,
         total: numericFee.value + +(formModel.value?.amount || 0) * recipientsCount.value,
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
@@ -214,17 +232,18 @@ export default defineComponent({
       }
     }
 
-    async function getTransactionVsizes(feeRates: number[]): Promise<number[]> {
-      // Max spends every input, so the fee doesn't move its size. A later send to
-      // another recipient can have change.
-      return (bitcoinAdapter as BitcoinAdapter | DogecoinAdapter).estimateVsize(
+    async function getTransactionVsizes(feeRates: number[]): Promise<number[][]> {
+      // Max is sized by the UTXOs alone, as its amount follows the fee. Each later send spends
+      // the change of the one before.
+      return (bitcoinAdapter as BitcoinAdapter | DogecoinAdapter).estimateSendsVsizes(
         Number(formModel.value.amount) || 0,
-        formModel.value.addresses?.[0] || activeAccount.value.address,
+        formModel.value.addresses?.length
+          ? formModel.value.addresses
+          : [activeAccount.value.address],
         feeRates,
         {
           address: activeAccount.value.address,
           sweep: shouldUseMaxAmount.value,
-          withChange: recipientsCount.value > 1,
         },
       );
     }
@@ -252,17 +271,17 @@ export default defineComponent({
         ) ? feeRate! : DEFAULT_RATE_SAT_PER_VB;
         // Slow, medium and fast. Double the medium for the testnet to match relay fee.
         // TODO: Revisit this along with fee calculation
-        const feeRates = [0.5, activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1, 1.5]
+        const rates = [0.5, activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1, 1.5]
           // Dogecoin miners leave out transactions under 0.01 DOGE/kB by default.
           .map((factor) => Math.max(factor * baseRate, isDogecoin ? DOGE_DEFAULT_FEE_RATE : 0));
         // Each speed is sized at its own rate, as a higher fee can take another input.
-        const vsizes = await getTransactionVsizes(feeRates);
+        const vsizes = await getTransactionVsizes(rates);
         // Drop this result if a newer run was already applied.
         if (run < appliedFeeUpdateRun) return;
         appliedFeeUpdateRun = run;
 
-        [feeSlow.value, feeMedium.value, feeHigh.value] = feeRates.map((rate, idx) => (
-          new BigNumber(toBitcoin(Math.ceil(rate * vsizes[idx])))
+        speedSendFees.value = rates.map((rate, idx) => (
+          vsizes[idx].map((vsize) => Math.ceil(rate * vsize))
         ));
       } catch (error: any) {
         Logger.write(error);
@@ -279,7 +298,11 @@ export default defineComponent({
 
     const updateFeeListDebounced = debounce(updateFeeList, 300);
 
-    watch([() => formModel.value.amount, recipientsCount], () => updateFeeListDebounced());
+    // The address type of each recipient sizes its send, and Max spends every input
+    watch(
+      [() => formModel.value.amount, () => formModel.value.addresses?.join(), shouldUseMaxAmount],
+      () => updateFeeListDebounced(),
+    );
 
     onUnmounted(() => {
       updateFeeListDebounced.cancel();

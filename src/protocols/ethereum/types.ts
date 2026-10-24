@@ -1,5 +1,10 @@
 import type { Dictionary, INetworkProtocolSettings, ObjectValues } from '@/types';
-import { ETH_RPC_METHODS, ETH_RPC_NODE_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
+import {
+  ETH_CONTENT_SCRIPT_METHODS,
+  ETH_RPC_METHODS,
+  ETH_RPC_NODE_METHODS,
+  ETH_RPC_WALLET_EVENTS,
+} from '@/protocols/ethereum/config';
 
 /**
  * Settings specific to this protocol.
@@ -41,3 +46,4 @@ export type EthRpcMethod = ObjectValues<typeof ETH_RPC_METHODS>;
 export type EthRpcNodeMethod = ObjectValues<typeof ETH_RPC_NODE_METHODS>;
 export type ETHRpcWalletEvents = ObjectValues<typeof ETH_RPC_WALLET_EVENTS>;
 export type EthRpcSupportedMethods = EthRpcMethod | EthRpcNodeMethod | ETHRpcWalletEvents;
+export type EthContentScriptMethod = ObjectValues<typeof ETH_CONTENT_SCRIPT_METHODS>;

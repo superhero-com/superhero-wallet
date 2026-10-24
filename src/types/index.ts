@@ -28,7 +28,7 @@ import {
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
-import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import type { EthContentScriptMethod, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
 import type { IAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   AE_CONTRACT_ID,
@@ -709,7 +709,11 @@ export interface IMiddlewareStatus {
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
 export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
 export type SessionMethod = ObjectValues<typeof SESSION_METHODS>;
-export type BackgroundMethod = PopupMethod | SessionMethod | EthRpcSupportedMethods;
+export type BackgroundMethod =
+  | PopupMethod
+  | SessionMethod
+  | EthRpcSupportedMethods
+  | EthContentScriptMethod;
 
 export interface IPopupActions {
   resolve: ResolveCallback;
@@ -743,6 +747,10 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   accountIdx?: number;
   /** Signed in the offscreen document, so the modal has to drive hardware wallets. */
   isOffscreenRequest?: boolean;
+  /** A connected site asks to switch to the chain of another protocol. */
+  isChainSwitch?: boolean;
+  /** Of the browser tab the request came from, when the extension knows it. */
+  tabId?: number;
 }
 
 /**
@@ -873,6 +881,8 @@ export interface TransferFormModel extends IFormModel {
   gasPrice?: number;
   gasUsed?: number;
   fee?: BigNumber;
+  /** Bitcoin and Dogecoin: the fee of each recipient's send in turn, which add up to `fee` */
+  fees?: number[];
   estimatedFee?: BigNumber;
   estimatedTotal?: number;
   total?: number;

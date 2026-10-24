@@ -214,3 +214,39 @@ describe('ConnectBase.vue dapp identity', () => {
       .toBe(false);
   });
 });
+
+describe('ConnectBase.vue chain switch', () => {
+  const APP_URL = 'https://app.uniswap.org/';
+
+  function mountSwitch() {
+    return mountBaseWith({
+      protocol: PROTOCOLS.aeternity,
+      app: createAppData(APP_URL),
+      isChainSwitch: true,
+      resolve: vi.fn(),
+    });
+  }
+
+  it.each([true, false])('keeps whether a connected site is remembered: %s', async (address) => {
+    const { addPermission, permissions, resetPermissions } = usePermissions();
+    resetPermissions();
+    addPermission({ ...PERMISSION_DEFAULTS, ...createAppData(APP_URL), address });
+
+    const wrapper = mountSwitch();
+    expect(wrapper.find('[data-cy="checkbox"]').exists()).toBe(false);
+    await wrapper.find('[data-cy="accept"]').trigger('click');
+
+    expect(permissions.value['app.uniswap.org'].address).toBe(address);
+  });
+
+  it('offers to remember a site whose permission was removed meanwhile', async () => {
+    const { permissions, resetPermissions } = usePermissions();
+    resetPermissions();
+
+    const wrapper = mountSwitch();
+    expect(wrapper.find('[data-cy="checkbox"]').exists()).toBe(true);
+    await wrapper.find('[data-cy="accept"]').trigger('click');
+
+    expect(permissions.value['app.uniswap.org'].address).toBe(true);
+  });
+});

@@ -47,12 +47,14 @@ import {
   CONNECT_PERMISSIONS,
   EVM_PROTOCOLS,
   PROTOCOLS,
+  STORAGE_KEYS,
 } from '@/constants';
 import {
   useAccounts,
   useNetworks,
   usePermissions,
 } from '@/composables';
+import { useStorageRef } from '@/composables/storageRef';
 
 type EvmRpcResponse = { result?: any; error?: { code: number; message: string } };
 
@@ -74,13 +76,37 @@ const ERROR_UNAUTHORIZED = {
   },
 };
 
+/**
+ * While the user is asked to connect or switch. The requests waiting meanwhile all resume at
+ * once, so each looks again, and takes its turn with nothing awaited in between.
+ */
 const isCheckingPermissions = ref(false);
 
-/** WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants */
-const approvedSessionTopics = new Set<string>();
+/**
+ * While a dapp switches to the chain of another EVM protocol. The account changes before the
+ * network does, the chain between them is not one to tell the dapp of.
+ */
+export const isSwitchingEvmChain = ref(false);
+
+/**
+ * WalletConnect sessions whose dapp the user let connect, kept apart from the sites' grants.
+ * Stored and synced, as a session outlives the window it was approved in and
+ * its requests are handled in the background.
+ */
+const approvedSessionTopics = useStorageRef<string[]>(
+  [],
+  STORAGE_KEYS.walletConnectApprovedTopics,
+  { backgroundSync: true },
+);
 
 export function approveWalletConnectSession(topic: string) {
-  approvedSessionTopics.add(topic);
+  if (!approvedSessionTopics.value.includes(topic)) {
+    approvedSessionTopics.value = [...approvedSessionTopics.value, topic];
+  }
+}
+
+export function forgetWalletConnectSession(topic: string) {
+  approvedSessionTopics.value = approvedSessionTopics.value.filter((t) => t !== topic);
 }
 
 /** A hex message as the user reads it: its text, or the hex when it is not text */
@@ -98,14 +124,18 @@ async function checkOrAskEvmPermission(
   protocol: Protocol,
   originSource?: AppOriginSource,
   sessionTopic?: string,
+  tabId?: number,
 ) {
   const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
-  await watchUntilTruthy(() => !isCheckingPermissions.value);
+  while (isCheckingPermissions.value) {
+    // eslint-disable-next-line no-await-in-loop
+    await watchUntilTruthy(() => !isCheckingPermissions.value);
+  }
 
   isCheckingPermissions.value = true;
   try {
-    const isApprovedSession = !!sessionTopic && approvedSessionTopics.has(sessionTopic);
+    const isApprovedSession = !!sessionTopic && approvedSessionTopics.value.includes(sessionTopic);
     const permission = isApprovedSession || await checkOrAskPermission(
       METHODS.subscribeAddress,
       aepp,
@@ -117,6 +147,7 @@ async function checkOrAskEvmPermission(
           CONNECT_PERMISSIONS.networks,
           CONNECT_PERMISSIONS.transactions,
         ],
+        tabId,
       },
     );
     if (permission && sessionTopic) {
@@ -141,6 +172,82 @@ function isConnectedApp(aepp: string, originSource?: AppOriginSource) {
   if (originSource === 'self-reported') return true;
   const { getPermissionForUrl } = usePermissions();
   return !!aepp && !!getPermissionForUrl(aepp);
+}
+
+/**
+ * Asks the user to let a dapp switch to the chain of another EVM protocol, as that makes an
+ * account of it active, and the dapp sees its address. Resolves once one is active on
+ * `networkName`.
+ */
+async function confirmProtocolSwitch(
+  aepp: string,
+  protocol: Protocol,
+  networkName: string,
+  originSource?: AppOriginSource,
+  tabId?: number,
+) {
+  const { askPermission } = usePermissions();
+  const {
+    activeAccount,
+    getLastActiveProtocolAccount,
+    setActiveAccountByGlobalIdx,
+  } = useAccounts();
+  const { activeNetwork, switchNetwork } = useNetworks();
+  while (isCheckingPermissions.value) {
+    // eslint-disable-next-line no-await-in-loop
+    await watchUntilTruthy(() => !isCheckingPermissions.value);
+  }
+  // Removed from the connected sites meanwhile
+  if (!isConnectedApp(aepp, originSource)) {
+    return false;
+  }
+  // Asked again while the user confirmed it, e.g. with a double click
+  if (activeAccount.value.protocol === protocol) {
+    if (networkName !== activeNetwork.value.name) {
+      switchNetwork(networkName);
+    }
+    return true;
+  }
+
+  isCheckingPermissions.value = true;
+  // The popup can make the account active before it answers
+  isSwitchingEvmChain.value = true;
+  try {
+    // Asked even for a connected site: its permission doesn't name the protocol
+    const isConfirmed = await askPermission(
+      METHODS.subscribeAddress,
+      aepp,
+      {
+        protocol,
+        app: aepp ? createAppData(aepp, originSource) : undefined,
+        access: [
+          CONNECT_PERMISSIONS.address,
+          CONNECT_PERMISSIONS.networks,
+          CONNECT_PERMISSIONS.transactions,
+        ],
+        isChainSwitch: true,
+        tabId,
+      },
+    );
+    if (!isConfirmed) {
+      return false;
+    }
+    // The popup makes the account the user picked active, which reaches this context later
+    if (!await watchUntilTruthy(() => activeAccount.value.protocol === protocol, 3000)) {
+      const account = getLastActiveProtocolAccount(protocol);
+      if (!account) {
+        return false;
+      }
+      setActiveAccountByGlobalIdx(account.globalIdx);
+    }
+    if (networkName !== activeNetwork.value.name) {
+      switchNetwork(networkName);
+    }
+    return true;
+  } finally {
+    isSwitchingEvmChain.value = false;
+    isCheckingPermissions.value = false;
+  }
 }
 
 /**
@@ -180,6 +287,17 @@ function getActiveEvmProtocol(): Protocol {
   return EVM_PROTOCOLS.includes(activeAccount.value.protocol)
     ? activeAccount.value.protocol
     : PROTOCOLS.ethereum;
+}
+
+/**
+ * The accounts a page of a connected site, also one not remembered, hears of when the active
+ * one changes. None once the site was removed from the connected sites.
+ */
+export function getConnectedSiteAccounts(aepp: string): string[] {
+  if (!isConnectedApp(aepp)) return [];
+  const { getLastActiveProtocolAccount } = useAccounts();
+  const address = getLastActiveProtocolAccount(getActiveEvmProtocol())?.address;
+  return address ? [address] : [];
 }
 
 /** `undefined` for a chain that is not on the active network */
@@ -267,6 +385,8 @@ export async function handleEvmRpcMethod(
   originSource?: AppOriginSource,
   /** Of the WalletConnect session the request came in */
   sessionTopic?: string,
+  /** Of the browser tab the request came from */
+  tabId?: number,
 ): Promise<EvmRpcResponse> {
   const {
     checkPermission,
@@ -274,7 +394,11 @@ export async function handleEvmRpcMethod(
     getPermissionForUrl,
     removePermission,
   } = usePermissions();
-  const { getAccountByProtocolAndAddress, getLastActiveProtocolAccount } = useAccounts();
+  const {
+    activeAccount,
+    getAccountByProtocolAndAddress,
+    getLastActiveProtocolAccount,
+  } = useAccounts();
   const { activeNetwork, networks, switchNetwork } = useNetworks();
 
   const requestedChainId = parseCaipChainId(caipChainId) || parseCaipChainId(params?.chainId);
@@ -287,7 +411,7 @@ export async function handleEvmRpcMethod(
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
@@ -307,7 +431,7 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic)) {
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId)) {
       // ensure we emit connect event for EIP-1193 consumers
       const account = getLastActiveProtocolAccount(protocol)!;
       try {
@@ -329,7 +453,7 @@ export async function handleEvmRpcMethod(
 
   if (method === ETH_RPC_METHODS.revokePermissions) {
     if (sessionTopic) {
-      approvedSessionTopics.delete(sessionTopic);
+      forgetWalletConnectSession(sessionTopic);
     }
     // The URL a WalletConnect dapp claims may be a site the user connected,
     // and an `http:` page can't drop what was given to the `https:` one
@@ -356,23 +480,43 @@ export async function handleEvmRpcMethod(
   }
   if (method === ETH_RPC_METHODS.switchNetwork) {
     if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
-    const network = Object.values(networks.value)
-      .find(({ protocols }) => (
-        (protocols[protocol] as any).chainId === Number(params?.chainId).toString()
-      ));
-    if (network) {
-      // A dapp can ask for the chain the wallet is already on
-      if (network.name !== activeNetwork.value.name) {
-        switchNetwork(network.name);
-      }
-      return { result: null };
+    const requestedChain = Number(params?.chainId).toString();
+    const targets = Object.values(networks.value).flatMap((network) => EVM_PROTOCOLS
+      .filter((evmProtocol) => (
+        (network.protocols[evmProtocol] as any)?.chainId?.toString() === requestedChain
+      ))
+      .map((evmProtocol) => ({ network, protocol: evmProtocol })));
+    const target = targets.find(({ network }) => network.name === activeNetwork.value.name)
+      ?? targets[0];
+    // The chain of another EVM protocol is reached through an account of it
+    const isOtherProtocol = !!target && target.protocol !== getActiveEvmProtocol();
+    // None are known while locked, the prompt unlocks first
+    const hasNoAccountOfIt = isOtherProtocol
+      && !isEmpty(activeAccount.value)
+      && !getLastActiveProtocolAccount(target.protocol);
+    if (!target || hasNoAccountOfIt) {
+      return {
+        error: {
+          code: 4902,
+          message: `Chain ${params?.chainId} is currently not supported`,
+        },
+      };
     }
-    return {
-      error: {
-        code: 4902,
-        message: `Chain ${params?.chainId} is currently not supported`,
-      },
-    };
+    if (isOtherProtocol) {
+      if (!await confirmProtocolSwitch(
+        aepp,
+        target.protocol,
+        target.network.name,
+        originSource,
+        tabId,
+      )) {
+        return ERROR_USER_REJECTED_REQUEST;
+      }
+    } else if (target.network.name !== activeNetwork.value.name) {
+      // A dapp can ask for the chain the wallet is already on
+      switchNetwork(target.network.name);
+    }
+    return { result: null };
   }
   if (method === ETH_RPC_METHODS.sendTransaction) {
     if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
@@ -382,6 +526,8 @@ export async function handleEvmRpcMethod(
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
     const url = aepp;
+    // Dapps may send the call data as `input`, the name the execution API spec uses
+    const data = params.data ?? params.input;
 
     let gasHex = params.gas;
     if (!gasHex) {
@@ -389,7 +535,7 @@ export async function handleEvmRpcMethod(
         from: params.from,
         to: params.to,
         value: params.value,
-        data: params.data,
+        data,
       }]);
       if (estimation.error) return estimation;
       gasHex = numberToHex(withGasHeadroom(BigInt(estimation.result)));
@@ -400,7 +546,7 @@ export async function handleEvmRpcMethod(
     const gas = Number(gasHex);
     const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
-    const isCoinTransfer = !params.data;
+    const isCoinTransfer = !data;
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const modalProps: IModalProps = {
       protocol,
@@ -419,9 +565,10 @@ export async function handleEvmRpcMethod(
         tag,
         senderId,
         recipientId,
-        data: params.data,
+        data,
       },
       fromAccount: senderId,
+      tabId,
     };
 
     const permitted = await checkOrAskPermission(
@@ -439,6 +586,7 @@ export async function handleEvmRpcMethod(
         try {
           const actionResult = await adapter.transferPreparedTransaction({
             ...params,
+            data,
             from: senderId,
             gas: gasHex,
             ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
@@ -482,6 +630,7 @@ export async function handleEvmRpcMethod(
         app: aepp ? createAppData(aepp, originSource) : undefined,
         message: isHexMessage ? getMessageText(messageHex) : data,
         fromAccount: requestedAccount?.address,
+        tabId,
       },
       (resolution: ISignModalResolution) => { selectedAddress = resolution?.selectedAddress; },
     );
@@ -529,6 +678,7 @@ export async function handleEvmRpcMethod(
         app: aepp ? createAppData(aepp, originSource) : undefined,
         message: JSON.stringify(getSignedTypedData(typedData), null, 2),
         fromAccount: evmAccount.address,
+        tabId,
       },
     );
     if (permitted && evmAccount.secretKey) {
@@ -569,6 +719,7 @@ export async function handleEvmRpcRequest(
   caipChainId?: string,
   originSource?: AppOriginSource,
   sessionTopic?: string,
+  tabId?: number,
 ): Promise<EvmRpcResponse> {
   const positionalParams = Array.isArray(params) ? params : [];
   // A dapp waits for an answer, also when e.g. its address is malformed
@@ -590,6 +741,7 @@ export async function handleEvmRpcRequest(
       caipChainId,
       originSource,
       sessionTopic,
+      tabId,
     );
   } catch (error: any) {
     return getUnknownError(error.message);

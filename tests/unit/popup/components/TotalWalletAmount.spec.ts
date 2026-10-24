@@ -40,6 +40,17 @@ async function mountWithRates(cachedRates, protocolsInUse, isMultisig = false) {
 
 const getTotal = () => wrapper.find('.total-amount span').text();
 
+/** CoinGecko fails, and so does the retry a minute later */
+async function loadFailingRates(loadCurrencyRates) {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    await loadCurrencyRates();
+    await vi.advanceTimersByTimeAsync(60000);
+  } finally {
+    vi.useRealTimers();
+  }
+}
+
 describe('TotalWalletAmount', () => {
   afterEach(() => {
     wrapper?.unmount();
@@ -53,7 +64,7 @@ describe('TotalWalletAmount', () => {
       ['aeternity', 'ethereum'],
     );
 
-    await loadCurrencyRates();
+    await loadFailingRates(loadCurrencyRates);
     await nextTick();
 
     expect(isCurrenciesUnavailable.value).toBe(true);
@@ -67,10 +78,28 @@ describe('TotalWalletAmount', () => {
       ['aeternity', 'ethereum'],
     );
 
-    await loadCurrencyRates();
+    await loadFailingRates(loadCurrencyRates);
     await nextTick();
 
     expect(getTotal()).toBe(noCurrencyRateFiat.value);
+  });
+
+  it('shows no total on a fresh wallet while the retry of a failed request is pending', async () => {
+    fetchCoinCurrencyRatesMock.mockResolvedValue(null);
+    const { loadCurrencyRates, noCurrencyRateFiat } = await mountWithRates(
+      {},
+      ['aeternity', 'ethereum'],
+    );
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      await loadCurrencyRates();
+      await nextTick();
+
+      expect(getTotal()).toBe(noCurrencyRateFiat.value);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows the multisig total when CoinGecko fails and only another coin has no rate', async () => {
@@ -81,7 +110,7 @@ describe('TotalWalletAmount', () => {
       true,
     );
 
-    await loadCurrencyRates();
+    await loadFailingRates(loadCurrencyRates);
     await nextTick();
 
     expect(getTotal()).toBe(formatCurrency(12.34));

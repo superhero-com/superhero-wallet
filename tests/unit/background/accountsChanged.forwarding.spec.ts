@@ -6,7 +6,7 @@ describe('background accountsChanged forwarding', () => {
   const queryMock = vi.fn().mockResolvedValue([{ id: 123 }]);
 
   beforeEach(async () => {
-    sendMessageMock.mockClear();
+    sendMessageMock.mockReset().mockResolvedValue(undefined);
     queryMock.mockClear();
     (global as any).browser = {
       runtime: {
@@ -43,10 +43,7 @@ describe('background accountsChanged forwarding', () => {
       vi.fn(),
     );
 
-    const queryCalls = ((global as any).browser.tabs.query as vi.Mock).mock.calls;
-    expect(queryCalls.some((args: any[]) => (
-      args[0]?.active === true && args[0]?.lastFocusedWindow === true
-    ))).toBe(true);
+    expect(queryMock).toHaveBeenCalledWith({});
 
     const sendCalls = ((global as any).browser.tabs.sendMessage as vi.Mock).mock.calls;
     expect(sendCalls.some((args: any[]) => (
@@ -57,6 +54,29 @@ describe('background accountsChanged forwarding', () => {
       && args[1]?.result[0] === '0xabc'
       && args[1]?.type === 'result'
     ))).toBe(true);
+  });
+
+  it.each([
+    'chainChanged',
+    'accountsChanged',
+  ])('forwards %s to every tab, also after one without the content script', async (method) => {
+    vi.resetModules();
+    (await import('@/background/index'));
+    const listener = (
+      (global as any).browser.runtime.onMessage.addListener as vi.Mock
+    ).mock.calls[0][0];
+    queryMock.mockResolvedValueOnce([{ id: 1 }, { id: 2 }]);
+    sendMessageMock.mockRejectedValueOnce(new Error('Could not establish connection. Receiving end does not exist.'));
+
+    listener(
+      { target: 'background', method, params: { rpcMethodParams: { result: '0x38' } } },
+      OFFSCREEN_DOCUMENT,
+      vi.fn(),
+    );
+    await new Promise((resolve) => { setTimeout(resolve); });
+
+    expect(sendMessageMock.mock.calls.map(([tabId, message]) => [tabId, message.method]))
+      .toEqual([[1, method], [2, method]]);
   });
 
   it.each([

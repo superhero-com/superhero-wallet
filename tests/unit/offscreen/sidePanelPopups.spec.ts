@@ -232,7 +232,8 @@ describe('offscreen popups shown in a side panel', () => {
       ({ openPopup, addSidePanel } = await import('@/offscreen/popupHandler'));
       globalThis.browser = {
         runtime: { id: 'ext-id', getURL: (url) => url },
-        tabs: { query: vi.fn().mockResolvedValue([]) },
+        // The active tab of a window shows the dapp
+        tabs: { query: vi.fn(async ({ windowId }) => (windowId ? [{ url: 'https://dapp.example/' }] : [])) },
         windows: {
           getLastFocused: vi.fn().mockResolvedValue({ id: WINDOW_ID, focused: true, state: 'normal' }),
           create: vi.fn().mockResolvedValue({ id: 99 }),

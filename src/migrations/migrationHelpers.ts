@@ -28,6 +28,14 @@ export const collectVuexState = (() => {
   };
 })();
 
+/** The Vuex state stored now, which another window may have changed since it was collected. */
+export async function readStoredVuexState(): Promise<Record<string, any> | undefined> {
+  if (!window?.browser || IS_OFFSCREEN_TAB) {
+    return undefined;
+  }
+  return (await window.browser.storage.local.get('state'))?.state as any;
+}
+
 type LegacyValueCheck = (value: any) => boolean;
 
 let legacySecretsRemoval = Promise.resolve();

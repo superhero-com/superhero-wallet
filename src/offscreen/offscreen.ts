@@ -3,7 +3,7 @@ import '@/protocols/registerAdapters';
 import { watch } from 'vue';
 
 import type { Runtime } from 'webextension-polyfill';
-import type { IBackgroundMessageData } from '@/types';
+import type { IBackgroundMessageData, Protocol } from '@/types';
 
 import {
   IS_FIREFOX,
@@ -17,80 +17,109 @@ import {
   useLedger,
   useAccounts,
 } from '@/composables';
-import { handleEvmRpcRequest } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
-import { ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
+import {
+  getConnectedSiteAccounts,
+  handleEvmRpcRequest,
+  isSwitchingEvmChain,
+} from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import { ETH_CONTENT_SCRIPT_METHODS, ETH_RPC_WALLET_EVENTS } from '@/protocols/ethereum/config';
 import * as wallet from './wallet';
 import { registerInPageContentScript, updateDynamicRules } from '../background/utils';
 import { isExtensionPageSender } from '../background/messageGuards';
 import { isAcceptedOffscreenSender } from './messageGuards';
 
 const { activeNetworkName, networks } = useNetworks();
-const { activeAccount } = useAccounts();
+const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
 
-watch(activeNetworkName, async (newNetworkName, oldNetworkName) => {
-  if (oldNetworkName && newNetworkName !== oldNetworkName) {
-    const protocol = EVM_PROTOCOLS.includes(activeAccount.value.protocol)
-      ? activeAccount.value.protocol
-      : PROTOCOLS.ethereum;
-    const chainIdDec = networks.value[newNetworkName].protocols[protocol].chainId;
-    const chainIdHex = `0x${BigInt(chainIdDec).toString(16)}`;
-    if (IS_FIREFOX) {
-      const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-      if (tab.id) {
-        browser.tabs.sendMessage(tab.id, {
+/**
+ * Sends an EIP-1193 event to the content scripts of every tab, as the one the user looks at can
+ * be a confirmation window. Each tells only its pages that may hear it.
+ */
+async function emitWalletEvent(method: string, result?: string) {
+  if (IS_FIREFOX) {
+    (await browser.tabs.query({})).forEach(({ id }) => {
+      if (id) {
+        browser.tabs.sendMessage(id, {
           superheroWalletApproved: true,
-          method: ETH_RPC_WALLET_EVENTS.chainChanged,
-          result: chainIdHex,
+          method,
+          result,
           type: 'result',
-        });
+        }).catch(() => {}); // A tab without the content script
       }
-    } else {
-      browser.runtime.sendMessage<IBackgroundMessageData>({
-        target: 'background',
-        method: ETH_RPC_WALLET_EVENTS.chainChanged,
-        params: {
-          rpcMethodParams: {
-            result: chainIdHex,
-          },
+    });
+  } else {
+    browser.runtime.sendMessage<IBackgroundMessageData>({
+      target: 'background',
+      method: method as any,
+      params: {
+        rpcMethodParams: {
+          result,
         },
-      });
-    }
+      },
+    });
+  }
+}
+
+/** Dapps get the chain of the active EVM protocol, Ethereum while another one is active */
+const getEvmProtocol = (protocol?: Protocol) => (
+  (protocol && EVM_PROTOCOLS.includes(protocol)) ? protocol : PROTOCOLS.ethereum
+);
+
+let lastChainIdHex: string | undefined;
+
+function getChainIdHex(protocol: Protocol) {
+  const chainIdDec = networks.value[activeNetworkName.value].protocols[protocol].chainId;
+  return `0x${BigInt(chainIdDec).toString(16)}`;
+}
+
+function emitChainChanged(protocol: Protocol) {
+  // Told once the switch is done
+  if (isSwitchingEvmChain.value) return;
+  const chainIdHex = getChainIdHex(protocol);
+  // Switching the protocol and the network at once changes the chain once
+  if (chainIdHex !== lastChainIdHex) {
+    lastChainIdHex = chainIdHex;
+    emitWalletEvent(ETH_RPC_WALLET_EVENTS.chainChanged, chainIdHex);
+  }
+}
+
+watch(activeNetworkName, (newNetworkName, oldNetworkName) => {
+  if (oldNetworkName && newNetworkName !== oldNetworkName) {
+    emitChainChanged(getEvmProtocol(activeAccount.value.protocol));
   }
 });
 
-// Propagate EIP-1193 accountsChanged when the active EVM account changes
+watch(isSwitchingEvmChain, (isSwitching) => {
+  const protocol = getEvmProtocol(activeAccount.value.protocol);
+  if (isSwitching) {
+    // So that a rejected switch tells nothing
+    lastChainIdHex ??= getChainIdHex(protocol);
+  } else {
+    emitChainChanged(protocol);
+  }
+});
+
+// Propagate EIP-1193 accountsChanged when the account dapps see changes
 watch(activeAccount, async (newVal, oldVal) => {
   try {
-    // Only handle EVM protocols
-    if (!newVal || !EVM_PROTOCOLS.includes(newVal.protocol)) return;
+    // None while locked, dapps hear of the chain once there is an account again
+    if (!newVal?.protocol) return;
+    // E.g. a dapp switched to the chain of another EVM protocol, or one of another
+    // protocol made Ethereum's the chain
+    if (oldVal && getEvmProtocol(oldVal.protocol) !== getEvmProtocol(newVal.protocol)) {
+      emitChainChanged(getEvmProtocol(newVal.protocol));
+    }
     const oldAddress = (oldVal && EVM_PROTOCOLS.includes(oldVal.protocol))
       ? oldVal.address
       : undefined;
-    if (oldAddress === newVal.address) return;
+    const address = EVM_PROTOCOLS.includes(newVal.protocol)
+      ? newVal.address
+      // Ethereum's last active one, unchanged unless an EVM account was active before
+      : oldAddress && getLastActiveProtocolAccount(PROTOCOLS.ethereum)?.address;
+    if (oldAddress === address) return;
 
-    const accounts = newVal.address ? [newVal.address] : [];
-
-    if (IS_FIREFOX) {
-      const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-      if (tab?.id) {
-        browser.tabs.sendMessage(tab.id, {
-          superheroWalletApproved: true,
-          method: ETH_RPC_WALLET_EVENTS.accountsChanged,
-          result: accounts,
-          type: 'result',
-        });
-      }
-    } else {
-      browser.runtime.sendMessage<IBackgroundMessageData>({
-        target: 'background',
-        method: ETH_RPC_WALLET_EVENTS.accountsChanged,
-        params: {
-          rpcMethodParams: {
-            result: accounts,
-          },
-        },
-      });
-    }
+    // Each content script asks which accounts its page is permitted
+    await emitWalletEvent(ETH_RPC_WALLET_EVENTS.accountsChanged);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn('Failed to emit accountsChanged', e);
@@ -120,8 +149,20 @@ browser.runtime.onMessage.addListener(
     // Content scripts relay whatever a web page posts: EVM RPC calls only,
     // so take the origin from the browser, not from the message.
     if (!isExtensionPageSender(sender)) {
+      if (method === ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts && sender.url) {
+        return Promise.resolve({ result: getConnectedSiteAccounts(new URL(sender.url).origin) });
+      }
       if (typeof aepp === 'string' && method && sender.url) {
-        return handleEvmRpcRequest(new URL(sender.url).origin, method, rpcMethodParams);
+        return handleEvmRpcRequest(
+          new URL(sender.url).origin,
+          method,
+          rpcMethodParams,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          sender.tab?.id,
+        );
       }
       return undefined;
     }

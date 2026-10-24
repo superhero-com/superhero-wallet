@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { ref } from 'vue';
+
 const WALLET_PAGE = { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/index.html?id=1' };
 const WEB_PAGE = { id: 'test-extension-id', url: 'https://aepp.example/', tab: { id: 1 } };
 
@@ -11,12 +13,14 @@ describe('offscreen message listener', () => {
     signMessage: vi.fn(),
   };
   const handleEvmRpcRequest = vi.fn();
+  const getConnectedSiteAccounts = vi.fn();
   const wallet = { init: vi.fn(), disconnect: vi.fn() };
 
   function mockOffscreenDependencies() {
     Object.values(ledger).forEach((mock) => mock.mockReset());
     ledger.discoverAccounts.mockResolvedValue(['ledger-account']);
     handleEvmRpcRequest.mockReset().mockResolvedValue({ result: '0x1' });
+    getConnectedSiteAccounts.mockReset().mockReturnValue(['0xabc']);
     wallet.disconnect.mockReset();
 
     vi.doMock('vue', () => ({
@@ -47,8 +51,13 @@ describe('offscreen message listener', () => {
         activeAccount: { value: { protocol: 'ethereum' } },
       }),
     }));
-    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({ handleEvmRpcRequest }));
+    vi.doMock('@/protocols/evm/libs/EvmRpcMethodsHandler', () => ({
+      getConnectedSiteAccounts,
+      handleEvmRpcRequest,
+      isSwitchingEvmChain: ref(false),
+    }));
     vi.doMock('@/protocols/ethereum/config', () => ({
+      ETH_CONTENT_SCRIPT_METHODS: { getPermittedAccounts: 'superhero_getPermittedAccounts' },
       ETH_RPC_WALLET_EVENTS: {
         chainChanged: 'chainChanged',
         accountsChanged: 'accountsChanged',
@@ -160,17 +169,44 @@ describe('offscreen message listener', () => {
 
       await expect(listener(relayed('eth_getBalance', params), WEB_PAGE))
         .resolves.toEqual({ result: '0x1' });
-      expect(handleEvmRpcRequest)
-        .toHaveBeenCalledWith('https://aepp.example', 'eth_getBalance', ['0x0', 'latest']);
+      expect(handleEvmRpcRequest).toHaveBeenCalledWith(
+        'https://aepp.example',
+        'eth_getBalance',
+        ['0x0', 'latest'],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        WEB_PAGE.tab.id,
+      );
     });
 
-    it('takes the origin from the sender, not from the message', async () => {
+    it('answers the accounts the page of the sender is permitted', async () => {
+      const listener = await loadListener();
+
+      await expect(listener(
+        relayed('superhero_getPermittedAccounts', { aepp: 'https://aescan.io' }),
+        WEB_PAGE,
+      )).resolves.toEqual({ result: ['0xabc'] });
+      expect(getConnectedSiteAccounts).toHaveBeenCalledWith('https://aepp.example');
+      expect(handleEvmRpcRequest).not.toHaveBeenCalled();
+    });
+
+    it('takes the origin and the tab from the sender, not from the message', async () => {
       const listener = await loadListener();
 
       await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), WEB_PAGE);
 
-      expect(handleEvmRpcRequest)
-        .toHaveBeenCalledWith('https://aepp.example', 'eth_requestAccounts', undefined);
+      expect(handleEvmRpcRequest).toHaveBeenCalledWith(
+        'https://aepp.example',
+        'eth_requestAccounts',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        WEB_PAGE.tab.id,
+      );
     });
   });
 });

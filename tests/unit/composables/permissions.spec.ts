@@ -383,3 +383,41 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
     });
   });
 });
+
+describe('usePermissions - asking about the address of a connected site', () => {
+  const openModalMock = vi.fn();
+
+  beforeEach(() => {
+    openModalMock.mockReset().mockResolvedValue({});
+    vi.doMock('@/composables/modals', () => ({
+      useModals: () => ({ openModal: openModalMock }),
+    }));
+    vi.doMock('@/composables/accounts', async (importOriginal) => ({
+      ...(await importOriginal()),
+      useAccounts: () => ({ activeAccount: { value: { address: '0xactive' } } }),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('@/composables/modals');
+    vi.doUnmock('@/composables/accounts');
+  });
+
+  // A switch to the chain of another EVM protocol shows the site another address
+  it.each([
+    ['askPermission', 'asks again', 1],
+    ['checkOrAskPermission', 'does not ask again', 0],
+  ])('%s %s', async (name, _, modals) => {
+    vi.resetModules();
+    localStorage.clear();
+    const { usePermissions } = await import('@/composables/permissions');
+    const permissions = usePermissions();
+    permissions.resetPermissions();
+    permissions.addPermission(buildPermission());
+
+    expect(await permissions[name](METHODS.subscribeAddress, `https://${HOST}/`, {
+      protocol: 'bnb',
+    })).toBe(true);
+    expect(openModalMock).toHaveBeenCalledTimes(modals);
+  });
+});

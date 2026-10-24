@@ -7,6 +7,7 @@ import {
 
 import type { BackgroundMethod } from '@/types';
 import {
+  ETH_CONTENT_SCRIPT_METHODS,
   ETH_RPC_METHODS,
   ETH_RPC_NODE_METHODS,
   ETH_RPC_WALLET_EVENTS,
@@ -92,6 +93,8 @@ const runContentScript = () => {
       if (!method) method = 'pageMessage';
       // A `String` object slips past the checks below and turns into a string on the way out
       if (typeof method !== 'string') return;
+      // Its answer is for this script, a page asking it would learn the active account
+      if (Object.values(ETH_CONTENT_SCRIPT_METHODS).includes(method as any)) return;
 
       if (
         event.data.superheroWalletRequest
@@ -105,20 +108,32 @@ const runContentScript = () => {
     },
     false,
   );
+  function postWalletEvent(method: string, result: unknown) {
+    Object.entries(connectedDapps).forEach(([origin, source]) => {
+      source.postMessage({
+        jsonrpc: '2.0',
+        result,
+        method,
+        superheroWalletApproved: true,
+        type: 'result',
+      }, origin as any);
+    });
+  }
+
   browser.runtime.onMessage.addListener(({ method, result }: any): undefined => {
-    if (
-      method === ETH_RPC_WALLET_EVENTS.chainChanged
-      || (method === ETH_RPC_WALLET_EVENTS.accountsChanged && hasAccounts)
-    ) {
-      Object.entries(connectedDapps).forEach(([origin, source]) => {
-        source.postMessage({
-          jsonrpc: '2.0',
-          result,
-          method,
-          superheroWalletApproved: true,
-          type: 'result',
-        }, origin as any);
-      });
+    if (method === ETH_RPC_WALLET_EVENTS.chainChanged) {
+      postWalletEvent(method, result);
+    } else if (method === ETH_RPC_WALLET_EVENTS.accountsChanged && hasAccounts) {
+      // The page may see only the accounts it is permitted: a site removed meanwhile gets no
+      // accounts and no further events.
+      sendToOffscreen(ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts, {})
+        .then((response: any) => {
+          const permittedAccounts = Array.isArray(response?.result) ? response.result : [];
+          if (!permittedAccounts.length) {
+            hasAccounts = false;
+          }
+          postWalletEvent(method, permittedAccounts);
+        });
     }
     return undefined;
   });

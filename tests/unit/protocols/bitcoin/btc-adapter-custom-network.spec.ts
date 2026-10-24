@@ -36,6 +36,14 @@ describe('BitcoinAdapter - custom network uses the testnet address format everyw
     resetNetworks,
   } = useNetworks();
   const adapter = new BitcoinAdapter();
+  /** Of a send to one recipient, at each of `feeRates` */
+  const estimateVsize = async (
+    amount: number,
+    recipient: string,
+    feeRates: number[],
+    options: { address: string; sweep?: boolean },
+  ) => (await adapter.estimateSendsVsizes(amount, [recipient], feeRates, options))
+    .map(([vsize]) => vsize);
   const seed = mnemonicToSeedSync(MNEMONIC);
   const pubkey = Buffer.from('0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 'hex');
   const tb1qRecipient = payments.p2wpkh({ pubkey, network: bitcoinNetworks.testnet }).address!;
@@ -90,7 +98,7 @@ describe('BitcoinAdapter - custom network uses the testnet address format everyw
         });
       }
       if (u === `${CUSTOM_NODE_URL}/tx/${txid}/hex`) {
-        return Promise.resolve({ text: () => Promise.resolve(fundingHex) });
+        return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(fundingHex) });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });
@@ -125,7 +133,7 @@ describe('BitcoinAdapter - custom network uses the testnet address format everyw
       : Promise.reject(new Error(`Unhandled fetch: ${url}`))));
 
     // One P2WPKH input, the payment and change
-    expect(await adapter.estimateVsize(0.0001, tb1qRecipient, [10], { address: account.address }))
+    expect(await estimateVsize(0.0001, tb1qRecipient, [10], { address: account.address }))
       .toEqual([141]);
   });
 });

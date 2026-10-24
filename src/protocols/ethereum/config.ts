@@ -182,3 +182,9 @@ export const ETH_RPC_WALLET_EVENTS = {
   chainChanged: 'chainChanged',
   accountsChanged: 'accountsChanged',
 } as const;
+
+/** Asked by the content script itself, it doesn't relay them from the page */
+export const ETH_CONTENT_SCRIPT_METHODS = {
+  /** The accounts to tell the page of when the active one changes */
+  getPermittedAccounts: 'superhero_getPermittedAccounts',
+} as const;

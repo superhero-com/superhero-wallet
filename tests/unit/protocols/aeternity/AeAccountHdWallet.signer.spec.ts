@@ -177,6 +177,7 @@ beforeEach(async () => {
     ensureNodeNetworkId: vi.fn(),
     getAeSdk: vi.fn(async () => ({ api: { getAccountNextNonce } })),
     isAeppGivenAccounts: () => true,
+    getAeppTabId: () => undefined,
   });
 
   vi.resetModules();

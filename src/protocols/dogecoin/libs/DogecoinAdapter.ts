@@ -49,7 +49,9 @@ import {
 import { fetchJson, getLastNotEmptyAccountIndex, toShiftedBigNumber } from '@/utils';
 import { useDogeNetworkSettings } from '@/protocols/dogecoin/composables/dogeNetworkSettings';
 import {
-  estimateSendVsize,
+  estimateSendsVsizes,
+  fetchUtxoList,
+  fetchUtxoTransactions,
   normalizeTransactionStructure,
   selectUtxos,
   sumValues,
@@ -330,19 +332,14 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     const amountInSatoshi = toKoinu(amountInDoge);
     const feeInSatoshi = toKoinu(options.fee);
 
-    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
-    const fullUtxos = await Promise.all((utxos || []).map(async (u: any) => {
-      const { txid, vout, value } = u;
-      const hex = await fetch(`${nodeUrl}/tx/${txid}/hex`).then((r) => r.text());
-      return {
-        txid, vout, value, transactionInHex: hex,
-      };
-    }));
-
-    const selected = selectUtxos(fullUtxos, amountInSatoshi + feeInSatoshi);
-    const total = sumValues(selected);
+    const selectedUtxos = selectUtxos(
+      await fetchUtxoList(nodeUrl, options.address),
+      amountInSatoshi + feeInSatoshi,
+    );
+    const total = sumValues(selectedUtxos);
     // Also refuses a fee or UTXO without a value
     if (!(total >= amountInSatoshi + feeInSatoshi)) throw new Error('Insufficient balance');
+    const selected = await fetchUtxoTransactions(nodeUrl, selectedUtxos);
 
     const psbt = new Psbt({ network: network as any });
     selected.forEach(({ txid, vout, transactionInHex }) => {
@@ -365,28 +362,28 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     return psbt.extractTransaction(true);
   }
 
-  /** Virtual sizes of the send at each of `feeRates` koinu/vB, see `estimateSendVsize`. */
-  async estimateVsize(
+  /**
+   * Virtual sizes of the sends to each of `recipients` in turn at each of `feeRates` koinu/vB,
+   * see `estimateSendsVsizes`.
+   */
+  async estimateSendsVsizes(
     amountInDoge: number,
-    _recipient: string,
+    recipients: string[],
     feeRates: number[],
-    options: { address: string; sweep?: boolean; withChange?: boolean },
-  ): Promise<number[]> {
+    options: { address: string; sweep?: boolean },
+  ): Promise<number[][]> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
-    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
-    if (!Array.isArray(utxos)) {
-      throw new Error('Unexpected UTXO response');
-    }
+    const utxos = await fetchUtxoList(nodeUrl, options.address);
 
-    return feeRates.map((feeRate) => estimateSendVsize(
+    return feeRates.map((feeRate) => estimateSendsVsizes(
       utxos,
       toKoinu(amountInDoge),
+      recipients.length,
       feeRate,
       {
         dustAmount: DOGE_DUST_AMOUNT,
         sweep: options.sweep,
-        withChange: options.withChange,
         getVsize: (inputCount, hasChange) => (
           TX_OVERHEAD_SIZE + P2PKH_INPUT_SIZE * inputCount + P2PKH_OUTPUT_SIZE * (hasChange ? 2 : 1)
         ),

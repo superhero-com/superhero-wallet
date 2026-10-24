@@ -19,6 +19,14 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
   switchNetwork(NETWORK_NAME_MAINNET);
 
   const adapter = new DogecoinAdapter();
+  /** Of a send to one recipient, at each of `feeRates` */
+  const estimateVsize = async (
+    amount: number,
+    recipient: string,
+    feeRates: number[],
+    options: { address: string; sweep?: boolean },
+  ) => (await adapter.estimateSendsVsizes(amount, [recipient], feeRates, options))
+    .map(([vsize]) => vsize);
   const { nodeUrl } = activeNetwork.value.protocols.dogecoin;
   const senderKeys = ECPair.fromPrivateKey(Buffer.alloc(32, 7));
   const keys = {
@@ -57,7 +65,11 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
       }
       const funding = fundings.find((tx) => u === `${nodeUrl}/tx/${tx.getId()}/hex`);
       if (funding) {
-        return Promise.resolve({ ok: true, text: () => Promise.resolve(funding.toHex()) });
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(funding.toHex()),
+        });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });
@@ -77,7 +89,7 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
     const [, midTxid, bigTxid] = mockUtxos([10_000_000, 50_000_000, 60_000_000]);
     const feeRate = 1000;
 
-    const [vsize] = await adapter.estimateVsize(1, recipient, [feeRate], keys);
+    const [vsize] = await estimateVsize(1, recipient, [feeRate], keys);
     const tx = await adapter.constructAndSignTx(
       1,
       recipient,
@@ -98,14 +110,14 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
     // Exact conversion leaves the first UTXO sufficient; the legacy float conversion needs two.
     mockUtxos([exactAmount + 192_000, 500_000]);
 
-    expect(await adapter.estimateVsize(amount, recipient, [1000], keys)).toEqual([192]);
+    expect(await estimateVsize(amount, recipient, [1000], keys)).toEqual([192]);
   });
 
   it('sizes a sweep with every UTXO and no change', async () => {
     mockUtxos([10_000_000, 50_000_000, 60_000_000]);
 
     // Max after a fee sized with change: three P2PKH inputs and the payment
-    expect(await adapter.estimateVsize(1.19478, recipient, [1000], { ...keys, sweep: true }))
+    expect(await estimateVsize(1.19478, recipient, [1000], { ...keys, sweep: true }))
       .toEqual([10 + 3 * 148 + 34]);
   });
 
@@ -117,8 +129,71 @@ describe('DogecoinAdapter - UTXO selection and fee sizing', () => {
       json: () => Promise.resolve({ error: 'Too many requests' }),
     }));
 
-    await expect(adapter.estimateVsize(1, recipient, [1000], keys))
+    await expect(estimateVsize(1, recipient, [1000], keys))
       .rejects.toThrow('Unexpected UTXO response');
+  });
+
+  it('fetches the transactions of the selected UTXOs only', async () => {
+    const txids = mockUtxos([10_000_000, 120_000_000, 50_000_000]);
+
+    await adapter.constructAndSignTx(0.4, recipient, { ...keys, fee: 0.00226 });
+
+    expect(vi.mocked(global.fetch).mock.calls
+      .map(([url]) => String(url))
+      .filter((url) => url.endsWith('/hex')))
+      .toEqual([`${nodeUrl}/tx/${txids[2]}/hex`]);
+  });
+
+  it('refuses to sign when the transaction of a UTXO fails to load', async () => {
+    mockUtxos([120_000_000]);
+    const fetchUtxos = global.fetch;
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = vi.fn((url: any) => (String(url).endsWith('/hex')
+      ? Promise.resolve({ ok: false, status: 429, text: () => Promise.resolve('Too many requests') })
+      : fetchUtxos(url)));
+
+    await expect(adapter.constructAndSignTx(1, recipient, { ...keys, fee: 0.00226 }))
+      .rejects.toThrow('HTTP 429');
+  });
+
+  it('sizes each of several sends for what the one before leaves', async () => {
+    // At 1000 koinu/vB the first send takes the 1.2 DOGE UTXO and leaves change. The
+    // second takes the 0.6 DOGE UTXO and that change, and leaves change too.
+    mockUtxos([60_000_000, 120_000_000]);
+
+    expect(await adapter.estimateSendsVsizes(0.75, [recipient, recipient], [1000], keys))
+      .toEqual([[10 + 148 + 2 * 34, 10 + 2 * 148 + 2 * 34]]);
+  });
+
+  it('pays the picked rate with each send of a Max to several recipients, signed in turn', async () => {
+    mockUtxos([200_000_000]);
+    const feeRate = 1000;
+
+    const [vsizes] = await adapter.estimateSendsVsizes(0.999, [recipient, recipient], [feeRate], {
+      ...keys,
+      sweep: true,
+    });
+    const fees = vsizes.map((vsize) => feeRate * vsize);
+    // As the form's Max: what the fees leave, split between the recipients
+    const amount = Math.floor((200_000_000 - fees[0] - fees[1]) / 2) / 1e8;
+
+    const first = await adapter.constructAndSignTx(
+      amount,
+      recipient,
+      { ...keys, fee: fees[0] / 1e8 },
+    );
+    // The first leaves the second half as change
+    expect(first.outs).toHaveLength(2);
+    expect(fees[0]).toBeGreaterThanOrEqual(feeRate * first.virtualSize());
+
+    mockUtxos([Number(first.outs[1].value)]);
+    const second = await adapter.constructAndSignTx(
+      amount,
+      recipient,
+      { ...keys, fee: fees[1] / 1e8 },
+    );
+    expect(second.outs).toHaveLength(1);
+    expect(fees[1]).toBeGreaterThanOrEqual(feeRate * second.virtualSize());
   });
 
   it('refuses a fee that is not a number instead of paying everything as fee', async () => {

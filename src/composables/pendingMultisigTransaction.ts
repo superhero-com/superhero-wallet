@@ -31,6 +31,10 @@ const activeMultisigTransactionData = ref<ITransaction | null>(null);
 
 const isLoading = ref(false);
 
+/** An unverified proposal of an unchanged vault is loaded again at most this often */
+const UNVERIFIED_RETRY_INTERVAL = 60000;
+let lastLoadedAt = 0;
+
 export function usePendingMultisigTransaction() {
   const { getMiddleware } = useAeMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts();
@@ -201,10 +205,15 @@ export function usePendingMultisigTransaction() {
         scopedActiveMultisigAccount,
         async (newValue, oldValue) => {
           const pending = pendingMultisigTransaction.value;
-          // Loaded again with every update while unverified, a failed load can succeed next time
+          // Loaded again while unverified, a failed load can succeed next time. Not with every
+          // poll of the vault though, unless its data changed: it would keep hitting the backend.
           const isRetry = !!newValue?.txHash
             && pending?.hash === newValue.txHash
-            && !pending.isTxVerified;
+            && !pending.isTxVerified
+            && (
+              !isEqual(newValue, oldValue)
+              || Date.now() - lastLoadedAt >= UNVERIFIED_RETRY_INTERVAL
+            );
           if (newValue && (!isEqual(newValue, oldValue) || isRetry)) {
             if (!newValue?.txHash) {
               activeMultisigTransactionData.value = null;
@@ -212,6 +221,8 @@ export function usePendingMultisigTransaction() {
               isLoading.value = false;
             } else if (newValue.txHash !== oldValue?.txHash || isRetry) {
               const { txHash } = newValue;
+              // As it starts, so that the polls while a slow one runs don't start more
+              lastLoadedAt = Date.now();
               if (!isRetry) {
                 isLoading.value = true;
               }

@@ -21,7 +21,9 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('vue-i18n', () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({
+    t: (key: string, values?: object) => (values ? `${key} ${JSON.stringify(values)}` : key),
+  }),
 }));
 
 vi.mock('@/lib/ProtocolAdapterFactory', () => ({
@@ -43,13 +45,14 @@ vi.mock('@/composables', () => ({
 
 const TransferReview = (await import('@/protocols/bitcoin/components/TransferReview.vue')).default;
 
-function mountReview(addresses: string[]) {
+function mountReview(addresses: string[], fees?: number[]) {
   return mount(TransferReview, {
     props: {
       transferData: {
         amount: '0.001',
         addresses,
         fee: new BigNumber(0.0002),
+        fees,
         selectedAsset: { contractId: 'bitcoin', symbol: 'BTC' },
       } as any,
     },
@@ -129,10 +132,57 @@ describe('Bitcoin TransferReview - sending to several recipients', () => {
     expect(mockAdapter.spend).toHaveBeenCalledTimes(2);
     expect(addAccountPendingTransaction.mock.calls.map(([, tx]) => tx.hash)).toEqual(['hash-1']);
     expect(loggerWrite).toHaveBeenCalledTimes(1);
+    // So that the user doesn't pay them again
+    expect(loggerWrite.mock.calls[0][0].message).toBe(
+      'bad-txns-inputs-missingorspent<br /><br />modals.transaction-failed.paidRecipients {"recipients":"REC1"}',
+    );
     expect(routerPush).toHaveBeenCalledTimes(1);
     expect(routerPush).toHaveBeenCalledWith({ name: 'home' });
     expect(wrapper.emitted('success')).toHaveLength(1);
     expect((wrapper.vm as any).loading).toBe(false);
+  });
+
+  it('pays each send the fee the form sized it at', async () => {
+    mockAdapter.spend
+      .mockResolvedValueOnce({ hash: 'hash-1' })
+      .mockResolvedValueOnce({ hash: 'hash-2' });
+    const wrapper = mountReview(['REC1', 'REC2'], [0.0000141, 0.0000821]);
+
+    const submitted = (wrapper.vm as any).submit();
+    await vi.advanceTimersByTimeAsync(10000);
+    await submitted;
+
+    expect(mockAdapter.spend.mock.calls.map(([, recipient, { fee }]) => [recipient, fee]))
+      .toEqual([['REC1', 0.0000141], ['REC2', 0.0000821]]);
+    expect(addAccountPendingTransaction.mock.calls.map(([, tx]) => tx.tx.fee))
+      .toEqual([0.0000141, 0.0000821]);
+  });
+
+  it('splits the fee when the fees of each send are for another number of recipients', async () => {
+    mockAdapter.spend
+      .mockResolvedValueOnce({ hash: 'hash-1' })
+      .mockResolvedValueOnce({ hash: 'hash-2' });
+    const wrapper = mountReview(['REC1', 'REC2'], [0.0002]);
+
+    const submitted = (wrapper.vm as any).submit();
+    await vi.advanceTimersByTimeAsync(10000);
+    await submitted;
+
+    expect(mockAdapter.spend.mock.calls.map(([, , { fee }]) => fee)).toEqual([0.0001, 0.0001]);
+  });
+
+  it('shows the recipients already paid as text', async () => {
+    mockAdapter.spend
+      .mockResolvedValueOnce({ hash: 'hash-1' })
+      .mockRejectedValueOnce(new Error('bad-txns-inputs-missingorspent'));
+    const wrapper = mountReview(['<img src=x onerror=alert(1)>', 'REC2']);
+
+    const submitted = (wrapper.vm as any).submit();
+    await vi.advanceTimersByTimeAsync(10000);
+    await submitted;
+
+    expect(loggerWrite.mock.calls[0][0].message).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    expect(loggerWrite.mock.calls[0][0].message).not.toContain('<img');
   });
 
   it('ignores Confirm while the sends are running', async () => {

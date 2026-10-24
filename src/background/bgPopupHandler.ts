@@ -33,6 +33,35 @@ const popups: Dictionary<IPopupConfigNoActions> = {};
 
 const storageSession = (browser.storage as any)?.session;
 
+/**
+ * Whether the page asking is in the tab the user looks at in the window, so that its side
+ * panel may show the request. Assumed for a request without a site and a WalletConnect
+ * dapp, which runs elsewhere. Without the tab of the request, the site of the tab is
+ * compared, unless its URL can't be read: a window shows it.
+ */
+async function isAppInActiveTab(
+  windowId: number,
+  app: IAppData,
+  popupProps: Partial<IPopupProps>,
+) {
+  if (!app.href || popupProps.app?.originSource === 'self-reported') {
+    return true;
+  }
+  const [activeTab] = await browser.tabs.query({ active: true, windowId });
+  // A page in a frame asks with the site of the frame
+  if (popupProps.tabId !== undefined) {
+    return activeTab?.id === popupProps.tabId;
+  }
+  if (!activeTab?.url) {
+    return false;
+  }
+  try {
+    return new URL(activeTab.url).origin === new URL(app.href).origin;
+  } catch {
+    return false;
+  }
+}
+
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | Record<string, any> | undefined, // TODO establish correct type for the object
@@ -67,10 +96,12 @@ export const openPopup = async (
     ? await browser.windows.getLastFocused()
     : undefined;
   // `focused` stays true for a minimized window.
+  // A request of a tab in the background gets a window, as the side panel shows another site.
   const sidePanelWindowId = (
     focusedWindow?.focused
     && focusedWindow.state !== 'minimized'
     && sidePanelWindowIds.includes(focusedWindow.id!)
+    && await isAppInActiveTab(focusedWindow.id!, app, popupProps)
   ) ? focusedWindow.id : undefined;
 
   if (sidePanelWindowId === undefined) {

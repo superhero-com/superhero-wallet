@@ -339,6 +339,56 @@ describe('aeternity TransferReview - signed calls', () => {
     );
   });
 
+  it('transfers a token to the recipient when the QR code had no invoice id', async () => {
+    const wrapper = mountReview({
+      amount: '1',
+      addresses: [RECIPIENT],
+      selectedAsset: { contractId: TOKEN, protocol: PROTOCOLS.aeternity, decimals: 18 },
+      fee: new BigNumber('0.0002'),
+      nonce: 1,
+      invoiceId: undefined,
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(postedTxs).toHaveLength(1);
+    const { encodedTx } = unpackTx(postedTxs[0], Tag.SignedTx);
+    expect((encodedTx as { callData: string }).callData).toBe(
+      new Encoder(FungibleTokenFullACI as any).encode('FungibleTokenFull', 'transfer', [
+        RECIPIENT,
+        BigInt(toBaseUnits('1', 18)),
+      ]),
+    );
+  });
+
+  it('pays a point of sale invoice with every digit of the token amount', async () => {
+    const amount = '1234.567890123456789012';
+    const invoiceContract = 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z';
+    const wrapper = mountReview({
+      amount,
+      addresses: [TOKEN],
+      selectedAsset: { contractId: TOKEN, protocol: PROTOCOLS.aeternity, decimals: 18 },
+      fee: new BigNumber('0.0002'),
+      nonce: 1,
+      invoiceContract,
+      invoiceId: '42',
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+
+    expect(Logger.write).not.toHaveBeenCalled();
+    expect(postedTxs).toHaveLength(1);
+    const { encodedTx } = unpackTx(postedTxs[0], Tag.SignedTx);
+    expect(encodedTx).toMatchObject({ tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 1 });
+    expect((encodedTx as { callData: string }).callData).toBe(
+      new Encoder(FungibleTokenFullACI as any).encode('FungibleTokenFull', 'burn_trigger_pos', [
+        BigInt(toBaseUnits(amount, 18)),
+        invoiceContract,
+        42n,
+      ]),
+    );
+  });
+
   it('tips every digit of a coin amount', async () => {
     const wrapper = mountReview({
       amount: '1.499825123456789123',

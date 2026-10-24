@@ -110,7 +110,7 @@
           v-text="$t('pages.connectConfirm.ensureNetwork')"
         />
 
-        <div v-if="!isSelfReported">
+        <div v-if="!isSelfReported && !isRememberMeKept">
           <CheckBox
             v-model="rememberMe"
             class="remember-me"
@@ -306,6 +306,11 @@ export default defineComponent({
     // A WalletConnect dapp's permission is never saved, so there is nothing to remember
     const isSelfReported = computed(() => popupProps.value?.app?.originSource === 'self-reported');
 
+    // A chain switch doesn't change whether the site is remembered
+    const isRememberMeKept = computed(
+      () => !!popupProps.value?.isChainSwitch && !!permission.value,
+    );
+
     const trustedDapp = computed(() => {
       const { href, originSource } = popupProps.value?.app || {};
       if (!href || originSource === 'self-reported') {
@@ -351,7 +356,7 @@ export default defineComponent({
           ...app,
           ...permission.value,
           name: permission.value?.name || app.name || app.host,
-          address: rememberMe.value,
+          address: isRememberMeKept.value ? permission.value!.address : rememberMe.value,
           // Not the scheme of the permission it replaces
           protocol: app.protocol,
         });
@@ -376,6 +381,7 @@ export default defineComponent({
     return {
       isConfirmBlocked,
       rememberMe,
+      isRememberMeKept,
       isSelfReported,
       accessList,
       popupProps,

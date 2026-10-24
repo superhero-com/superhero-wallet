@@ -14,6 +14,14 @@ describe('DogecoinAdapter - change output', () => {
   switchNetwork(NETWORK_NAME_MAINNET);
 
   const adapter = new DogecoinAdapter();
+  /** Of a send to one recipient, at each of `feeRates` */
+  const estimateVsize = async (
+    amount: number,
+    recipient: string,
+    feeRates: number[],
+    options: { address: string; sweep?: boolean },
+  ) => (await adapter.estimateSendsVsizes(amount, [recipient], feeRates, options))
+    .map(([vsize]) => vsize);
   const { nodeUrl } = activeNetwork.value.protocols.dogecoin;
   const senderKeys = ECPair.fromPrivateKey(Buffer.alloc(32, 7));
   const sender = payments.p2pkh({
@@ -47,7 +55,11 @@ describe('DogecoinAdapter - change output', () => {
         });
       }
       if (u === `${nodeUrl}/tx/${txid}/hex`) {
-        return Promise.resolve({ text: () => Promise.resolve(funding.toHex()) });
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(funding.toHex()),
+        });
       }
       return Promise.reject(new Error(`Unhandled fetch: ${u}`));
     });
@@ -90,7 +102,7 @@ describe('DogecoinAdapter - change output', () => {
     }));
 
     // One P2PKH input and the payment
-    expect(await adapter.estimateVsize(AMOUNT / 1e8, recipient, [1000], { address: sender }))
+    expect(await estimateVsize(AMOUNT / 1e8, recipient, [1000], { address: sender }))
       .toEqual([10 + 148 + 34]);
   });
 });
