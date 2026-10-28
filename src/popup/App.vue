@@ -272,7 +272,10 @@ export default defineComponent({
         }
         StatusBar.setStyle({ style: Style.Dark });
         setMobileStatusBarColor(IS_ANDROID ? '#000000' : '#141414');
-        window.screen.orientation?.lock?.('portrait');
+        // iOS uses Info.plist: portrait on iPhone, all orientations on iPad.
+        if (IS_ANDROID) {
+          window.screen.orientation?.lock?.('portrait');
+        }
       }
     });
 

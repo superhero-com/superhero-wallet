@@ -4,36 +4,38 @@ PODS:
   - AparajitaCapacitorSecureStorage (8.0.1):
     - Capacitor
     - KeychainSwift (~> 21.0)
-  - Capacitor (8.4.1):
+  - Capacitor (8.5.3):
     - CapacitorCordova
-  - CapacitorApp (8.1.0):
+  - CapacitorApp (8.1.2):
     - Capacitor
-  - CapacitorCamera (8.2.1):
+  - CapacitorCamera (8.2.5):
     - Capacitor
-    - IONCameraLib (~> 1.0.4)
+    - IONCameraLib (~> 2.0.0)
   - CapacitorClipboard (8.0.1):
     - Capacitor
-  - CapacitorCordova (8.4.1)
-  - CapacitorFilesystem (8.1.2):
+  - CapacitorCordova (8.5.3)
+  - CapacitorFilesystem (8.1.4):
     - Capacitor
-    - IONFilesystemLib (~> 1.1.1)
+    - IONFilesystemLib (~> 2.0.0)
   - CapacitorHaptics (8.0.2):
     - Capacitor
-  - CapacitorKeyboard (8.0.5):
+  - CapacitorKeyboard (8.0.6):
     - Capacitor
-  - CapacitorMlkitBarcodeScanning (8.1.0):
+  - CapacitorMlkitBarcodeScanning (8.2.1):
     - Capacitor
     - GoogleMLKit/BarcodeScanning (~> 8.0.0)
-  - CapacitorNativeSettings (8.1.0):
+  - CapacitorNativeSettings (8.2.0):
     - Capacitor
   - CapacitorNetwork (8.0.1):
     - Capacitor
-  - CapacitorShare (8.0.1):
+  - CapacitorShare (8.0.3):
     - Capacitor
-  - CapacitorSplashScreen (8.0.1):
+  - CapacitorSplashScreen (8.0.2):
     - Capacitor
-  - CapacitorStatusBar (8.0.2):
+  - CapacitorStatusBar (8.0.4):
     - Capacitor
+  - CordovaPlugins (8.5.3):
+    - CapacitorCordova
   - GoogleDataTransport (10.1.1):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
@@ -57,8 +59,8 @@ PODS:
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GTMSessionFetcher/Core (3.5.0)
-  - IONCameraLib (1.0.5)
-  - IONFilesystemLib (1.1.4)
+  - IONCameraLib (2.0.0)
+  - IONFilesystemLib (2.0.1)
   - KeychainSwift (21.0.0)
   - MLImage (1.0.0-beta7)
   - MLKitBarcodeScanning (7.0.0):
@@ -101,6 +103,7 @@ DEPENDENCIES:
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
 
 SPEC REPOS:
   trunk:
@@ -152,31 +155,34 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
+  CordovaPlugins:
+    :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
   AparajitaCapacitorBiometricAuth: 1ae24ba90d7977dffb4bc9040f374a807a510c98
   AparajitaCapacitorSecureStorage: 64fcd783a62dce106dd73d54caa2d7232589eabe
-  Capacitor: 35242afe195b1e53c58ca1b827d1b444c5e6602b
-  CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
-  CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
+  Capacitor: 2f67eaeb8ed79909cd35b5e7439a5c2a9ca58e0f
+  CapacitorApp: 7b7e43debe505bc61beedb83796aa1368c86078b
+  CapacitorCamera: 2366a2b6d44417406ab33f8545d5c7b7b233028f
   CapacitorClipboard: c75fdaa6e622111119f35e7914ecfc67b05efecb
-  CapacitorCordova: eebe6bcf807b1b06f3f48237650f96bbcd0eef09
-  CapacitorFilesystem: 2db285a1ac6e475cc27cae2e1bea999000f9e2be
+  CapacitorCordova: 0b7326439c7a09fc5d20eced5e0dab986327a493
+  CapacitorFilesystem: 17ee1862a45ef2e5012311a87e18de1d45a6811b
   CapacitorHaptics: 296f771ecd89c7a1bd92a7b6826a7d268e2e70f5
-  CapacitorKeyboard: b6b0744890cdb1d9a96e2cafcc9253fdcc55de3b
-  CapacitorMlkitBarcodeScanning: 31c6af9f39873ff69e16ed5b39ebe2e1915f16fe
-  CapacitorNativeSettings: d512b84fdcc04948c32f267621079a0d7c0d452f
+  CapacitorKeyboard: f9e85e685082e9f63404de15db4a4291448b0912
+  CapacitorMlkitBarcodeScanning: 1070a9d56dd84c08a7354d12354293daeee28100
+  CapacitorNativeSettings: 3f12e9700e0a10cb5d0e22aec00de29d72589a12
   CapacitorNetwork: 8812ce60d11fb63d8f2e4ba51a49b2e59892ebe2
-  CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
-  CapacitorSplashScreen: 4b46c72298db552b3c57ce021ef028b6dc7f1fa7
-  CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
+  CapacitorShare: 5b5e53347556bee89ae6163ed20b5b3c25fe75f1
+  CapacitorSplashScreen: 7bf61c2001557ff9e195e601c6b87344480d3c65
+  CapacitorStatusBar: ff844df1f126da6c4fbc4028272425fa3a91e7e3
+  CordovaPlugins: 699ffda3293b6445a66de018bfe7702f78ccc619
   GoogleDataTransport: a24e58982ab3ba2f64d79613e027fe7f57e88539
   GoogleMLKit: ddd51d7dff36ff28defa69afedd9cdce684fd857
   GoogleToolboxForMac: d1a2cbf009c453f4d6ded37c105e2f67a32206d8
   GoogleUtilities: db34c1c11c6f2eccb6fab2340cb8ceb1451299dc
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  IONCameraLib: ecbd8ef0077d481df429cee267bbeb1a7b9bddd0
-  IONFilesystemLib: e6610c2b260d15e4b9cb9d5e37a87095479b669e
+  IONCameraLib: 729cae576e1a952602ce750a9790b6dc7d7e2e95
+  IONFilesystemLib: 306469e4c563f61de82d7bca2bbfed9e64d1b2d2
   KeychainSwift: 4a71a45c802fd9e73906457c2dcbdbdc06c9419d
   MLImage: 2ab9c968e75f57911c16f4c9d9e8a8e9604a86a1
   MLKitBarcodeScanning: 72c6437f13a900833b400136be53a8a5d86f42fa
@@ -185,6 +191,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
 
-PODFILE CHECKSUM: 6d781c732d761539aee5cd842b75396a797d3580
+PODFILE CHECKSUM: 404b2d8b0e73975aa8c9bf69a11b9ed8bc62f77f
 
 COCOAPODS: 1.16.2
