@@ -15,6 +15,7 @@ import {
   TX_FUNCTIONS,
 } from '@/protocols/aeternity/config';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
+import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
 
 const TEST_TOKEN_DECIMALS = 12;
 /** An Æternity token deliberately registered WITHOUT a `decimals` field. */
@@ -313,6 +314,28 @@ describe('getTxAmountTotal', () => {
       expect(getTxAmountTotal(tokenTx, TX_DIRECTION.received)).toBe(500);
     });
 
+    it('excludes the fee for a token transfer missing from the token list', () => {
+      const tokenTx = {
+        protocol: PROTOCOLS.ethereum,
+        tx: {
+          amount: 500, fee: 21000, contractId: '0xunlistedtoken', isTokenTransfer: true,
+        },
+      };
+
+      expect(getTxAmountTotal(tokenTx, TX_DIRECTION.sent)).toBe(500);
+      expect(getTxAmountTotal(tokenTx, TX_DIRECTION.received)).toBe(500);
+    });
+
+    it('adds the fee for a call to a contract missing from the token list', () => {
+      const callTx = {
+        protocol: PROTOCOLS.ethereum,
+        tx: { amount: 1000000, fee: 21000, contractId: '0xsomecontract' },
+      };
+
+      expect(getTxAmountTotal(callTx, TX_DIRECTION.sent)).toBe(1000000 + 21000);
+      expect(getTxAmountTotal(callTx, TX_DIRECTION.received)).toBe(1000000);
+    });
+
     it('adds the fee for a contract-creation / non-token contract call', () => {
       const createTx = {
         protocol: PROTOCOLS.ethereum,
@@ -327,5 +350,23 @@ describe('getTxAmountTotal', () => {
       expect(getTxAmountTotal(createTx, TX_DIRECTION.sent)).toBe(30000);
       expect(getTxAmountTotal(createTx, TX_DIRECTION.received)).toBe(0);
     });
+  });
+
+  describe('Bitcoin and Dogecoin', () => {
+    [PROTOCOLS.bitcoin, PROTOCOLS.dogecoin].forEach((protocol) => it(
+      `adds the fee for a sent ${protocol} transfer only`,
+      () => {
+        const transaction = normalizeTransactionStructure({
+          fee: 10000,
+          status: { confirmed: true, block_height: 1, block_time: 1700000000 },
+          txid: 'txid',
+          vin: [{ prevout: { scriptpubkey_address: 'sender' } }],
+          vout: [{ scriptpubkey_address: 'recipient', value: 1000000 }],
+        }, 'sender', protocol);
+
+        expect(getTxAmountTotal(transaction, TX_DIRECTION.sent)).toBe(0.0101);
+        expect(getTxAmountTotal(transaction, TX_DIRECTION.received)).toBe(0.01);
+      },
+    ));
   });
 });

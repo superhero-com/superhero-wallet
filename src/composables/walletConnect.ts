@@ -1,6 +1,6 @@
 import { uniq } from 'lodash-es';
 import type { SessionTypes } from '@walletconnect/types';
-import type { WalletKit as IWeb3Wallet } from '@reown/walletkit';
+import type { WalletKit as IWeb3Wallet, WalletKitTypes } from '@reown/walletkit';
 import {
   computed,
   reactive,
@@ -19,11 +19,15 @@ import {
   EVM_PROTOCOLS,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
+import { createAppData } from '@/utils';
 
-import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_ETHERSCAN_PROXY_METHODS } from '@/protocols/ethereum/config';
-import type { EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import { ETH_CHAIN_NAMESPACE, ETH_RPC_METHODS, ETH_RPC_NODE_METHODS } from '@/protocols/ethereum/config';
 import type { Protocol, IAccount } from '@/types';
-import { handleEvmRpcMethod } from '@/protocols/evm/libs/EvmRpcMethodsHandler';
+import {
+  approveWalletConnectSession,
+  forgetWalletConnectSession,
+  handleEvmRpcRequest,
+} from '@/protocols/evm/libs/EvmRpcMethodsHandler';
 
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
@@ -34,7 +38,8 @@ export type WalletConnectUri = `wc:${string}`;
 
 type SupportedRequestMethod =
   | 'eth_sendTransaction'
-  | 'personal_sign';
+  | 'personal_sign'
+  | 'eth_signTypedData_v4';
 
 const isOpenUsingDeeplink = ref(false);
 let composableInitialized = false;
@@ -86,6 +91,9 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
   function resetSessionAndState() {
     Object.keys(wcState).forEach((key) => { (wcState as Record<string, boolean>)[key] = false; });
+    if (wcSession.value?.topic) {
+      forgetWalletConnectSession(wcSession.value.topic);
+    }
     wcSession.value = null;
     web3wallet = null;
   }
@@ -310,14 +318,14 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
     // Connected DAPP requested action, e.g.: signing
     web3wallet?.on('session_request', async ({ topic, params: proposal, id }) => {
       const { url, name } = wcSession.value?.peer.metadata! || {};
-      const { result, error } = await handleEvmRpcMethod(
+      const { result, error } = await handleEvmRpcRequest(
         url,
-        proposal.request.method as EthRpcSupportedMethods,
-        proposal.request.method === ETH_RPC_METHODS.signPersonal
-          ? { data: proposal.request.params[0] }
-          : proposal.request.params[0],
+        proposal.request.method,
+        proposal.request.params,
         name,
         proposal.chainId,
+        'self-reported',
+        topic,
       );
 
       try {
@@ -331,14 +339,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           response: {
             id,
             jsonrpc: '2.0',
-            ...(result
-              ? { result }
-              : {
-                error: {
-                  code: error?.code || 5000,
-                  message: error?.message || 'User rejected.',
-                },
-              }),
+            // A read can answer null or false, e.g. the receipt of a pending transaction
+            ...(error
+              ? { error: { code: error.code || 5000, message: error.message || 'User rejected.' } }
+              : { result: result ?? null }),
           },
         });
       } catch (e) {
@@ -439,9 +443,16 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         web3wallet = await initWeb3wallet();
       }
       let proposalHandled = false;
-      web3wallet.on('session_proposal', async ({ id, params: proposal }) => {
+      const { topic: pairingTopic } = wcUtils.parseUri(uri);
+      // Only the proposal of this pairing: a listener left from an earlier one, e.g. made
+      // without a confirmation, must not approve the proposal of another without asking.
+      const onSessionProposal = async (
+        { id, params: proposal }: WalletKitTypes.EventArguments['session_proposal'],
+      ) => {
         if (proposalHandled) return;
+        if (pairingTopic && proposal.pairingTopic && proposal.pairingTopic !== pairingTopic) return;
         proposalHandled = true;
+        web3wallet?.off('session_proposal', onSessionProposal);
         const preferredProtocol = getPreferredEvmProtocolFromProposal(proposal);
         const { accounts, chains } = preferredProtocol
           ? getFormattedAccountsAndChainsForProtocol(preferredProtocol, proposal)
@@ -451,13 +462,14 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
           ETH_RPC_METHODS.requestAccounts,
           ETH_RPC_METHODS.getAccounts,
           ETH_RPC_METHODS.getChainId,
-          ETH_RPC_METHODS.getBlockNumber,
+          ETH_RPC_NODE_METHODS.getBlockNumber,
           ETH_RPC_METHODS.signPersonal,
+          ETH_RPC_METHODS.signTypedDataV4,
           ETH_RPC_METHODS.sendTransaction,
           // common proxy calls often used by dapps
-          ETH_RPC_ETHERSCAN_PROXY_METHODS.estimateGas,
-          ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionCount,
-          ETH_RPC_ETHERSCAN_PROXY_METHODS.gasPrice,
+          ETH_RPC_NODE_METHODS.estimateGas,
+          ETH_RPC_NODE_METHODS.getTransactionCount,
+          ETH_RPC_NODE_METHODS.gasPrice,
           // EIP-5792
           'wallet_getCapabilities' as any,
         ];
@@ -468,7 +480,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
 
         try {
           if (isConfirmRequired) {
-            const app = new URL(proposal.proposer.metadata.url);
+            const app = createAppData(proposal.proposer.metadata.url, 'self-reported');
             const { icons } = proposal.proposer.metadata;
             const icon = icons?.[0] ?? '';
 
@@ -484,7 +496,7 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             });
           }
 
-          wcSession.value = await web3wallet!.approveSession({
+          const session = await web3wallet!.approveSession({
             id,
             namespaces: wcUtils.buildApprovedNamespaces({
               proposal,
@@ -502,6 +514,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
               },
             }),
           });
+          if (isConfirmRequired) {
+            approveWalletConnectSession(session.topic);
+          }
+          wcSession.value = session;
 
           // Attach listeners only after session is approved
           monitorActiveSessionEvents();
@@ -513,10 +529,16 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
         } finally {
           wcState.connecting = false;
         }
-      });
+      };
+      web3wallet.on('session_proposal', onSessionProposal);
 
       // Ask the DAPP to send `session_proposal` event.
-      await web3wallet.pair({ uri });
+      try {
+        await web3wallet.pair({ uri });
+      } catch (error) {
+        web3wallet.off('session_proposal', onSessionProposal);
+        throw error;
+      }
     } catch (error: any) {
       handleConnectionError(error);
     }

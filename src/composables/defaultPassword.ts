@@ -22,7 +22,7 @@ const storage = IS_MOBILE_APP ? SecureMobileStorage : WalletStorage;
  * here because this value IS the "password" in default-password mode and
  * never reaches the user.
  */
-function generateRandomSecret(): string {
+export function generateDefaultPasswordSecret(): string {
   const bytes = globalThis.crypto.getRandomValues(new Uint8Array(32));
   return encodeBase64(bytes);
 }
@@ -57,7 +57,7 @@ export async function getOrCreateDefaultPasswordSecret(): Promise<string> {
       if (existing) {
         return existing;
       }
-      const secret = generateRandomSecret();
+      const secret = generateDefaultPasswordSecret();
       await storage.set(STORAGE_KEYS.defaultPasswordSecret, secret);
       return secret;
     })().finally(() => {

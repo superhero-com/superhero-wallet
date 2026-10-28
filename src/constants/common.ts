@@ -56,6 +56,12 @@ export const DISTINCT_PROTOCOL_VIEWS = [
 */
 export const ADDRESS_GAP_LIMIT = 5;
 
+/**
+ * A node that doesn't answer whether an account is used by then counts as failing the check,
+ * so a stalled one can't stall the account discovery.
+ */
+export const ACCOUNT_CHECK_TIMEOUT = 30000;
+
 export const SEED_LENGTH = 12;
 export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 
@@ -70,6 +76,7 @@ export const TX_DIRECTION = {
 export const CONNECTION_TYPES = {
   SESSION: 'SESSION',
   POPUP: 'POPUP',
+  SIDE_PANEL: 'SIDE_PANEL',
   OTHER: 'OTHER',
 };
 
@@ -127,6 +134,7 @@ export const STORAGE_KEYS = {
   activeAccountGlobalIdx: 'active-account-global-idx',
   protocolLastActiveAccountIdx: 'protocol-last-active-account-idx',
   balances: 'balances',
+  balancesNetworkName: 'balances-network-name',
   currency: 'currency',
   currencyRates: 'currency-rates',
   customNetworks: 'custom-networks',
@@ -134,7 +142,9 @@ export const STORAGE_KEYS = {
   hiddenCards: 'hidden-cards',
   otherSettings: 'other-settings',
   errorLog: 'error-log',
+  /** Plaintext invites of older versions, moved to `invitesEncrypted`. */
   invites: 'invites',
+  invitesEncrypted: 'invites-encrypted',
   multisigAccounts: 'multisig',
   multisigAccountsPending: 'multisig-pending',
   activeMultisigAccount: 'active-multisig-account',
@@ -146,6 +156,7 @@ export const STORAGE_KEYS = {
   lastAvailableTokensLoadTime: 'last-available-tokens-load-time',
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
+  fungibleTokenBalancesNetworkName: 'fungible-token-balances-network-name',
   preclaimedNames: 'preclaimed-names',
   pendingNameAutoExtendTxs: 'pending-name-auto-extend-txs',
   pendingNameTransferTxs: 'pending-name-transfer-txs',
@@ -164,6 +175,7 @@ export const STORAGE_KEYS = {
   secureLogin: 'secure-login',
   secureLoginTimeout: 'secure-login-timeout',
   walletConnectSession: 'wallet-connect-session',
+  walletConnectApprovedTopics: 'wallet-connect-approved-topics',
   addressBook: 'address-book',
   encryptionSalt: 'encryption-salt',
   /**
@@ -384,7 +396,6 @@ export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
-export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
@@ -507,15 +518,6 @@ export const TRANSFER_SEND_STEPS = {
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';
-
-/**
- * @description List of all possible actions through the in-app browser.
- */
-export const BROWSER_ACTIONS = {
-  refresh: 'refresh',
-  share: 'share',
-  favourite: 'favourite',
-} as const;
 
 /**
  * List of dapps that we are sure that we support.

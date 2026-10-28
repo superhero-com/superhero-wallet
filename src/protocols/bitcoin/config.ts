@@ -9,6 +9,7 @@ export const BTC_COINGECKO_COIN_ID = 'bitcoin';
 /**
  * Lower cap is 294 for segwit transactions and 546 upper cap for non-segwit transactions
  * https://github.com/bitcoin/bitcoin/blob/25.x/src/policy/policy.cpp#L36C1-L36C1
+ * Outputs below this are dust, an output of exactly this amount is not.
  */
 export const DUST_AMOUNT = 546;
 

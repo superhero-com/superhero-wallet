@@ -4,6 +4,7 @@ import {
 } from 'vue';
 import {
   AeSdk,
+  BrowserRuntimeConnection,
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
@@ -24,6 +25,7 @@ import {
   APP_NAME,
   IN_FRAME,
   IS_EXTENSION,
+  IS_MOBILE_APP,
   IS_OFFSCREEN_TAB,
   PROTOCOLS,
   RUNNING_IN_TESTS,
@@ -71,6 +73,16 @@ const isAeNodeError = ref(false);
 
 /** List of connected dapps */
 const aeppInfo: Record<string, AeppInfoData> = {};
+/** The connected dapps the user let see the accounts */
+const aeppsGivenAccounts = new Set<string>();
+
+/** Of the browser tab of a dapp connected through the extension */
+function getAeppTabId(aeppId: string): number | undefined {
+  const connection = aeSdk._clients.get(aeppId)?.rpc.connection;
+  return (connection instanceof BrowserRuntimeConnection)
+    ? connection.port.sender?.tab?.id
+    : undefined;
+}
 
 let dryAeSdk: AeSdk;
 
@@ -99,7 +111,7 @@ export function useAeSdk() {
     onNetworkChange,
   } = useNetworks();
   const {
-    accountsAddressList,
+    aeAccounts,
     getLastActiveProtocolAccount,
     onAccountChange,
   } = useAccounts();
@@ -216,7 +228,10 @@ export function useAeSdk() {
           instance: nodeInstance!,
         }],
         id: APP_NAME,
-        type: IS_EXTENSION || IS_OFFSCREEN_TAB ? WALLET_TYPE.extension : WALLET_TYPE.window,
+        // The in-app browser posts the wallet's messages from inside the dapp's own window.
+        type: IS_EXTENSION || IS_OFFSCREEN_TAB || IS_MOBILE_APP
+          ? WALLET_TYPE.extension
+          : WALLET_TYPE.window,
         // TODO: the ttl is set to 0 to avoid the timeout error when blockchain experiencing issues
         ttl: 0,
         onConnection(aeppId, params, origin) {
@@ -224,6 +239,7 @@ export function useAeSdk() {
         },
         onDisconnect(aeppId) {
           delete aeppInfo[aeppId];
+          aeppsGivenAccounts.delete(aeppId);
         },
         async onSubscription(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
@@ -231,7 +247,11 @@ export function useAeSdk() {
           // `onConnection` populates `aeppInfo`, so fall back to the `origin`
           // argument to avoid running the permission check with an undefined host.
           const host = (IS_OFFSCREEN_TAB ? aepp?.origin : origin) ?? origin;
-          if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
+          if (await checkOrAskPermission(
+            METHODS.subscribeAddress,
+            host,
+            { tabId: getAeppTabId(aeppId) },
+          )) {
             // The offscreen document may still be restoring accounts (e.g. right
             // after the extension is re-enabled), so wait (bounded) for the active
             // account to become available before reading its address. The timeout
@@ -247,6 +267,7 @@ export function useAeSdk() {
               // denial, so report it as such instead of `RpcRejectedByUserError`.
               return Promise.reject(new RpcInternalError());
             }
+            aeppsGivenAccounts.add(aeppId);
             return account.address;
           }
           return Promise.reject(new RpcRejectedByUserError());
@@ -254,16 +275,18 @@ export function useAeSdk() {
         async onAskAccounts(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
           const host = (IS_OFFSCREEN_TAB ? aepp?.origin : origin) ?? origin;
-          if (await checkOrAskPermission(METHODS.address, host)) {
+          if (await checkOrAskPermission(METHODS.address, host, { tabId: getAeppTabId(aeppId) })) {
             // Accounts may still be restoring in the long-lived offscreen
             // document, so wait (bounded) for the list to be populated before
             // answering. Without this a dApp listing accounts during a slow
             // restore could receive an empty list.
             await watchUntilTruthy(
-              () => accountsAddressList.value.length,
+              () => aeAccounts.value.length,
               ACCOUNT_RESTORE_TIMEOUT,
             );
-            return accountsAddressList.value;
+            aeppsGivenAccounts.add(aeppId);
+            // The SDK answers with `addresses()`, the æternity ones only
+            return undefined;
           }
           return Promise.reject(new RpcRejectedByUserError());
         },
@@ -350,6 +373,11 @@ export function useAeSdk() {
     }
   }
 
+  /** Whether the user let the dapp subscribe to, or list, the accounts */
+  function isAeppGivenAccounts(aeppId: string) {
+    return aeppsGivenAccounts.has(aeppId);
+  }
+
   async function waitTransactionMined(hash: Encoded.TxHash) {
     const aeSdkLocal = await getAeSdk();
     return aeSdkLocal.poll(hash);
@@ -391,6 +419,8 @@ export function useAeSdk() {
     createNodeInstance,
     ensureNodeNetworkId,
     disconnectDapps,
+    isAeppGivenAccounts,
+    getAeppTabId,
     waitTransactionMined,
   };
 }

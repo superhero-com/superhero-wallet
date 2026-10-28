@@ -12,7 +12,7 @@
           :virtual="true"
           :items="filteredTransactions"
           :key-extractor="txKey"
-          @load-more="loadMore()"
+          @load-more="loadOlder()"
         >
           <template #default="{ item }">
             <TransactionListItem
@@ -29,6 +29,17 @@
           class="spinner"
           data-cy="loader"
         />
+        <div
+          v-else-if="isAutoLoadPaused && !isEndReached"
+          class="load-older"
+        >
+          <BtnMain
+            variant="muted"
+            data-cy="load-older"
+            :text="$t('pages.recentTransactions.loadOlder')"
+            @click="loadOlder()"
+          />
+        </div>
         <p
           v-else-if="!filteredTransactions.length"
           class="message"
@@ -68,7 +79,7 @@ import { throttle } from 'lodash-es';
 
 import type { ICommonTransaction, ITransaction } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT, TX_DIRECTION } from '@/constants';
-import { pipe, sortTransactionsByDate, watchUntilTruthy } from '@/utils';
+import { pipe, sortTransactionsByDate } from '@/utils';
 import {
   useAccounts,
   useAeSdk,
@@ -95,6 +106,13 @@ import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 import InfiniteScroll from './InfiniteScroll.vue';
 import BackToTop from './BackToTop.vue';
+import BtnMain from './buttons/BtnMain.vue';
+
+/**
+ * Pages loaded in a row only to fill the screen. A filter or a token can match few
+ * transactions, so filling it can mean downloading the whole history.
+ */
+const AUTO_LOAD_PAGE_LIMIT = 3;
 
 export default defineComponent({
   components: {
@@ -104,6 +122,7 @@ export default defineComponent({
     MessageOffline,
     IonContent,
     BackToTop,
+    BtnMain,
   },
   props: {
     transactions: { type: Array as PropType<ICommonTransaction[]>, default: () => [] },
@@ -202,34 +221,55 @@ export default defineComponent({
       }
     }
 
+    // The viewport is shared with lists on pages hidden in the Ionic stack
+    function isOwnViewport(element?: Element): element is Element {
+      const ionContent = appInnerElem.value;
+      return !!element && !!ionContent && (
+        element === ionContent || element.getRootNode() === ionContent.shadowRoot
+      );
+    }
+
+    /** Pages loaded to fill the screen since the user last asked for more */
+    let autoLoadedPages = 0;
+    const isAutoLoadPaused = ref(false);
+
+    function resetAutoLoad() {
+      autoLoadedPages = 0;
+      isAutoLoadPaused.value = false;
+    }
+
+    /**
+     * A list that doesn't fill the viewport can't be scrolled to load the next page.
+     * For fungible tokens whose transactions were done long ago,
+     * this will result in a huge number of requests to load all user
+     * transactions that were done after and sort them out.
+     * TODO: Improve the fulfillment logic
+     * by moving to filtering on the mdw side
+     * and using the new fungible token endpoint https://github.com/aeternity/ae_mdw/issues/1678
+     */
     async function checkLoadMore() {
       // nextTick is required because viewportElement scrollHeight
       // is not being changed fast enough, after filter is applied
       await nextTick();
-      await watchUntilTruthy(() => !props.isLoading);
-      if (viewportElement.value) {
-        const {
-          scrollHeight,
-          scrollTop,
-          clientHeight,
-        } = viewportElement.value;
-
-        if (scrollHeight - scrollTop <= clientHeight + 100) {
-          loadMore();
-          if (!props.isEndReached) {
-            /**
-             * checkLoadMore is needed to populate the list with the right transaction type.
-             * For fungible tokens whose transactions were done long ago,
-             * this will result in a huge number of requests to load all user
-             *  transactions that were done after and sort them out.
-             * TODO: Improve the fulfillment logic
-             * by moving to filtering on the mdw side
-             * and using the new fungible token endpoint https://github.com/aeternity/ae_mdw/issues/1678
-             */
-            checkLoadMore();
-          }
-        }
+      const element = viewportElement.value;
+      if (props.isLoading || props.isEndReached || !isOwnViewport(element)) {
+        return;
       }
+      const { scrollHeight, scrollTop, clientHeight } = element;
+      if (clientHeight && scrollHeight - scrollTop <= clientHeight + 100) {
+        if (autoLoadedPages >= AUTO_LOAD_PAGE_LIMIT) {
+          isAutoLoadPaused.value = true;
+          return;
+        }
+        autoLoadedPages += 1;
+        loadMore();
+      }
+    }
+
+    /** Asked for by the user, by a scroll or the button */
+    function loadOlder() {
+      resetAutoLoad();
+      loadMore();
     }
 
     watch(
@@ -237,8 +277,11 @@ export default defineComponent({
       (value) => setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT),
     );
 
+    // Another filter or account is another list to fill
+    watch([displayMode, () => activeAccount.value.address], resetAutoLoad);
+
     watch(
-      displayMode,
+      [() => props.isLoading, () => props.isEndReached, displayMode, viewportElement],
       () => checkLoadMore(),
     );
 
@@ -266,8 +309,10 @@ export default defineComponent({
 
     return {
       activeAccount,
+      isAutoLoadPaused,
       isOnline,
       loadMore,
+      loadOlder,
       innerScrollElem,
       filteredTransactions,
       txKey,
@@ -307,6 +352,12 @@ export default defineComponent({
       color: $color-grey-light;
       text-align: center;
       padding: 48px 64px;
+    }
+
+    .load-older {
+      display: flex;
+      justify-content: center;
+      padding: 16px 0 48px;
     }
 
     .spinner {

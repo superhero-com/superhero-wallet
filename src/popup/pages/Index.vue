@@ -118,7 +118,6 @@ import {
   MODAL_ACCOUNT_IMPORT,
   MODAL_PROTOCOL_SELECT,
   MODAL_RESET_WALLET,
-  PROTOCOLS,
 } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { StoredWalletFoundError } from '@/lib/errors';
@@ -139,9 +138,6 @@ import SuperheroLogoIcon from '@/icons/logo.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 import CheckCircleIcon from '@/icons/check-circle-fill.svg?vue-component';
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
-
-/** Enough for a normal discovery; a stalled node falls back to the first account. */
-const ACCOUNTS_RESTORE_TIMEOUT = 30000;
 
 export default defineComponent({
   components: {
@@ -165,6 +161,7 @@ export default defineComponent({
     } = useAccounts();
     const {
       isAuthenticated,
+      isMnemonicUnreadable,
       mnemonic,
       generateMnemonic,
       setMnemonicAndInitializeAuthentication,
@@ -180,12 +177,14 @@ export default defineComponent({
     let isOpeningStoredWallet = false;
 
     /**
-     * On mobile this page is also reachable with a locked or unreadable wallet stored.
-     * Replacing it in place would keep its imported accounts, so offer the reset instead.
+     * On mobile this page is also reachable with a locked or unreadable wallet stored,
+     * and on any platform with a seed that failed to load. Replacing it in place would
+     * keep its imported accounts, so offer the reset instead.
      * Resolves `true` when such a wallet is in the way.
      */
     async function offerResetOfLockedWallet(): Promise<boolean> {
-      if (!IS_MOBILE_APP || !mnemonic.value || isAuthenticated.value) {
+      const isLockedWalletStored = IS_MOBILE_APP && !!mnemonic.value && !isAuthenticated.value;
+      if (!isLockedWalletStored && !isMnemonicUnreadable.value) {
         return false;
       }
       await openConfirmModal({
@@ -203,18 +202,10 @@ export default defineComponent({
       isRestoringAccounts.value = true;
       let isComplete = false;
       try {
-        isComplete = await discoverAccounts({ timeout: ACCOUNTS_RESTORE_TIMEOUT });
+        isComplete = await discoverAccounts();
       } catch (error) {
         handleUnknownError(error);
       } finally {
-        // Nothing found and no chain chosen, or the discovery didn't finish.
-        if (!accountsRaw.value.length) {
-          addRawAccount({
-            isRestored: true,
-            protocol: PROTOCOLS.aeternity,
-            type: ACCOUNT_TYPES.hdWallet,
-          });
-        }
         isRestoringAccounts.value = false;
       }
       if (!isComplete) {

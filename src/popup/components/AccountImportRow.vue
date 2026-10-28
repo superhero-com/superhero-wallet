@@ -17,6 +17,7 @@ import {
 } from 'vue';
 
 import type { IAccount } from '@/types';
+import { handleUnknownError } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_ACCOUNT_DETAILS } from '@/popup/router/routeNames';
 
@@ -35,7 +36,11 @@ export default defineComponent({
 
     onMounted(async () => {
       const adapter = ProtocolAdapterFactory.getAdapter(props.account.protocol);
-      balance.value = new BigNumber(await adapter.fetchBalance(props.account.address)).toNumber();
+      try {
+        balance.value = new BigNumber(await adapter.fetchBalance(props.account.address)).toNumber();
+      } catch (error) {
+        handleUnknownError(error);
+      }
     });
 
     return {

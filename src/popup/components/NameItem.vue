@@ -297,6 +297,7 @@ export default defineComponent({
     ));
     const pendingStatusLabel = computed(() => {
       switch (props.nameEntry.pendingStatus) {
+        case NAME_CLAIM_STATUS.preclaimSubmitted:
         case NAME_CLAIM_STATUS.preclaimed:
           return t('pages.names.list.status.preclaiming');
         case NAME_CLAIM_STATUS.claimSubmitted:

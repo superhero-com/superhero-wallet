@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Test dapp</title>
+  <script src="/aepp-sdk.js"></script>
+</head>
+<body>
+  <script>
+    const {
+      AeSdkAepp,
+      BrowserWindowMessageConnection,
+      METHODS,
+      SUBSCRIPTION_TYPES,
+      walletDetector,
+    } = window.Aeternity;
+
+    const toError = (error) => ({ code: error.code, name: error.name, message: error.message });
+    const toHex = (bytes) => Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+    // EIP-6963 discovery, as dapps find the wallet next to other ones
+    const announced = [];
+    window.addEventListener('eip6963:announceProvider', (event) => announced.push(event.detail));
+
+    async function getProvider() {
+      for (let i = 0; i < 100; i += 1) {
+        const detail = announced.find(({ info }) => info.rdns === 'wallet.superhero.com');
+        if (detail) return detail.provider;
+        window.dispatchEvent(new Event('eip6963:requestProvider'));
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      throw new Error('Superhero Wallet was not announced');
+    }
+
+    window.accountsChangedEvents = [];
+
+    window.evm = {
+      async request(method, params) {
+        const provider = await getProvider();
+        try {
+          return { result: await provider.request({ method, params }) };
+        } catch (error) {
+          return { error: toError(error) };
+        }
+      },
+      async listenAccountsChanged() {
+        const provider = await getProvider();
+        provider.on('accountsChanged', (accounts) => window.accountsChangedEvents.push(accounts));
+      },
+    };
+
+    let aeSdk;
+
+    window.ae = {
+      async connect() {
+        aeSdk = new AeSdkAepp({ name: 'Test dapp' });
+        return new Promise((resolve, reject) => {
+          const stop = walletDetector(new BrowserWindowMessageConnection(), ({ newWallet }) => {
+            stop();
+            aeSdk.connectToWallet(newWallet.getConnection())
+              .then(({ id }) => resolve(id), (error) => reject(toError(error)));
+          });
+        });
+      },
+      async subscribe() {
+        try {
+          const { address } = await aeSdk.subscribeAddress(SUBSCRIPTION_TYPES.subscribe, 'current');
+          return { result: Object.keys(address.current)[0] };
+        } catch (error) {
+          return { error: toError(error) };
+        }
+      },
+      async signMessage(message) {
+        try {
+          return { result: toHex(await aeSdk.signMessage(message)) };
+        } catch (error) {
+          return { error: toError(error) };
+        }
+      },
+      // Skips the aepp SDK's own check that the address was subscribed to
+      async signMessageAs(address, message) {
+        try {
+          return { result: await aeSdk.rpcClient.request(METHODS.signMessage, { onAccount: address, message }) };
+        } catch (error) {
+          return { error: toError(error) };
+        }
+      },
+    };
+
+    window.addFrame = (src) => new Promise((resolve) => {
+      const frame = document.createElement('iframe');
+      frame.src = src;
+      frame.onload = resolve;
+      document.body.append(frame);
+    });
+  </script>
+</body>
+</html>

@@ -40,14 +40,33 @@ import {
   DOGE_COIN_PRECISION,
   DOGE_COINGECKO_COIN_ID,
   DOGE_CONTRACT_ID,
+  DOGE_DUST_AMOUNT,
   DOGE_NETWORK_ADDITIONAL_SETTINGS,
   DOGE_NETWORK_DEFAULT_SETTINGS,
   DOGE_PROTOCOL_NAME,
   DOGE_SYMBOL,
 } from '@/protocols/dogecoin/config';
-import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
+import { fetchJson, getLastNotEmptyAccountIndex, toShiftedBigNumber } from '@/utils';
 import { useDogeNetworkSettings } from '@/protocols/dogecoin/composables/dogeNetworkSettings';
-import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
+import {
+  estimateSendsVsizes,
+  fetchUtxoList,
+  fetchUtxoTransactions,
+  normalizeTransactionStructure,
+  selectUtxos,
+  sumValues,
+} from '@/protocols/bitcoin/helpers';
+
+// Bytes of the version, locktime and input and output counts
+const TX_OVERHEAD_SIZE = 10;
+// Bytes of a P2PKH input with the longest low-S signature (72 bytes)
+const P2PKH_INPUT_SIZE = 148;
+const P2PKH_OUTPUT_SIZE = 34;
+
+// Keep DOGE conversion exact at koinu precision; multiplying larger amounts can round.
+const toKoinu = (doge: number) => toShiftedBigNumber(doge, DOGE_COIN_PRECISION)
+  .integerValue()
+  .toNumber();
 
 class DogeExplorer extends ProtocolExplorer {
   constructor(private baseUrl: string) { super(); }
@@ -181,6 +200,7 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
+    // An error means unused, not a failed discovery, while the mainnet API is retired
     try {
       const { activeNetwork } = useNetworks();
       const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
@@ -263,7 +283,10 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
   ): Promise<IFetchTransactionResult> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
-    const list = await fetchJson(`${nodeUrl}/address/${address}/txs`);
+    // Esplora API: the next page of confirmed transactions follows the last one shown
+    const list = await fetchJson(lastTxId
+      ? `${nodeUrl}/address/${address}/txs/chain/${lastTxId}`
+      : `${nodeUrl}/address/${address}/txs`);
     const rawTransactions: any[] = Array.isArray(list) ? list : [];
     const regularTransactions: ITransaction[] = rawTransactions.map(
       (t: any) => normalizeTransactionStructure(t, address, PROTOCOLS.dogecoin),
@@ -271,7 +294,8 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     return {
       regularTransactions,
       paginationParams: {
-        lastTxId: regularTransactions.at(-1)?.hash || lastTxId,
+        // None after an empty page, so the list ends
+        lastTxId: regularTransactions.at(-1)?.hash || undefined,
       },
     };
   }
@@ -305,43 +329,30 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       ? DogecoinAdapter.DOGE_TESTNET
       : DogecoinAdapter.DOGE_MAINNET;
 
-    const amountInSatoshi = Math.round(amountInDoge * 1e8);
-    const feeInSatoshi = Math.round(options.fee * 1e8);
+    const amountInSatoshi = toKoinu(amountInDoge);
+    const feeInSatoshi = toKoinu(options.fee);
 
-    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
-    const fullUtxos = await Promise.all((utxos || []).map(async (u: any) => {
-      const { txid, vout, value } = u;
-      const hex = await fetch(`${nodeUrl}/tx/${txid}/hex`).then((r) => r.text());
-      return {
-        txid, vout, value, transactionInHex: hex,
-      };
-    }));
+    const selectedUtxos = selectUtxos(
+      await fetchUtxoList(nodeUrl, options.address),
+      amountInSatoshi + feeInSatoshi,
+    );
+    const total = sumValues(selectedUtxos);
+    // Also refuses a fee or UTXO without a value
+    if (!(total >= amountInSatoshi + feeInSatoshi)) throw new Error('Insufficient balance');
+    const selected = await fetchUtxoTransactions(nodeUrl, selectedUtxos);
 
-    const sorted = fullUtxos.sort((a, b) => (
-      Math.abs(a.value - amountInSatoshi + feeInSatoshi)
-      - Math.abs(b.value - amountInSatoshi + feeInSatoshi)
-    ));
-
-    let total = 0;
-    let enough = false;
     const psbt = new Psbt({ network: network as any });
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const {
-      txid, vout, value, transactionInHex,
-    } of sorted) {
-      if (enough) break;
+    selected.forEach(({ txid, vout, transactionInHex }) => {
       psbt.addInput({ hash: txid, index: vout, nonWitnessUtxo: Buffer.from(transactionInHex, 'hex') });
-      total += value;
-      if (total >= amountInSatoshi + feeInSatoshi) enough = true;
-    }
-
-    if (!enough) throw new Error('Insufficient balance');
+    });
 
     // bitcoinjs-lib 7 represents satoshi amounts as bigint.
     psbt.addOutput({ address: recipient, value: BigInt(amountInSatoshi) });
     const change = total - amountInSatoshi - feeInSatoshi;
-    if (change > 0) psbt.addOutput({ address: options.address, value: BigInt(change) });
+    // Smaller change goes to the fee, as Dogecoin Core's wallet does.
+    if (change >= DOGE_DUST_AMOUNT) {
+      psbt.addOutput({ address: options.address, value: BigInt(change) });
+    }
 
     const signer = ECPairFactory(ecc).fromPrivateKey(Buffer.from(options.secretKey));
     for (let i = 0; i < psbt.inputCount; i += 1) psbt.signInput(i, signer);
@@ -349,6 +360,35 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
     // Dogecoin typical fee per vbyte can exceed bitcoinjs's default maximumFeeRate.
     // Pass `true` to bypass this safety check for Dogecoin.
     return psbt.extractTransaction(true);
+  }
+
+  /**
+   * Virtual sizes of the sends to each of `recipients` in turn at each of `feeRates` koinu/vB,
+   * see `estimateSendsVsizes`.
+   */
+  async estimateSendsVsizes(
+    amountInDoge: number,
+    recipients: string[],
+    feeRates: number[],
+    options: { address: string; sweep?: boolean },
+  ): Promise<number[][]> {
+    const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols[PROTOCOLS.dogecoin] as any;
+    const utxos = await fetchUtxoList(nodeUrl, options.address);
+
+    return feeRates.map((feeRate) => estimateSendsVsizes(
+      utxos,
+      toKoinu(amountInDoge),
+      recipients.length,
+      feeRate,
+      {
+        dustAmount: DOGE_DUST_AMOUNT,
+        sweep: options.sweep,
+        getVsize: (inputCount, hasChange) => (
+          TX_OVERHEAD_SIZE + P2PKH_INPUT_SIZE * inputCount + P2PKH_OUTPUT_SIZE * (hasChange ? 2 : 1)
+        ),
+      },
+    ));
   }
 
   async spend(
@@ -378,7 +418,12 @@ export class DogecoinAdapter extends BaseProtocolAdapter {
       const interval = setInterval(async () => {
         attemptNo += 1;
         const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
-        const tx = await this.fetchTransactionByHash(hash);
+        let tx = null;
+        try {
+          tx = await this.fetchTransactionByHash(hash);
+        } catch {
+          // The node answers 404 until it sees the transaction.
+        }
         if (tx) {
           clearInterval(interval);
           return resolve(tx);

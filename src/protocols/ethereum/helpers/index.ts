@@ -1,18 +1,27 @@
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
-import { FMT_BYTES, FMT_NUMBER } from 'web3-types';
-import { getBlock, getTransaction } from 'web3-eth';
+import { FMT_BYTES, FMT_NUMBER, type ContractAbi } from 'web3-types';
+import { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
 import { bigIntToHex } from 'web3-eth-accounts';
 import Contract from 'web3-eth-contract';
 import BigNumber from 'bignumber.js';
 
-import { AccountAddress, Dictionary, ITransaction } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import {
+  AccountAddress,
+  Dictionary,
+  ITransaction,
+  Protocol,
+} from '@/types';
 import { handleUnknownError } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { TX_RETURN_TYPE_REVERT } from '@/protocols/aeternity/config';
 import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
-import { ERC20_ABI, ETH_CONTRACT_ID } from '../config';
+import { getActiveEvmNetworkSettings } from '@/protocols/evm/helpers/activeEvmNetworkSettings';
+import { ERC20_ABI } from '../config';
 import { EthDecodedCallData } from '../types';
 import { EtherscanService } from '../libs/EtherscanService';
-import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
+
+/** `transfer` and `approve`, decoded with `ERC20_ABI` */
+const ERC20_METHOD_SIGNATURES = ['0xa9059cbb', '0x095ea7b3'];
 
 /**
  * Convert Gwei to Ether
@@ -22,9 +31,11 @@ export function etherFromGwei(gwei: number) {
 }
 
 export function normalizeWeb3EthTransactionStructure(
+  protocol: Protocol,
   transaction?: Awaited<ReturnType<typeof getTransaction>> & { gasPrice?: string },
   block?: Awaited<ReturnType<typeof getBlock>>,
   transactionOwner?: AccountAddress,
+  receipt?: Awaited<ReturnType<typeof getTransactionReceipt>>,
 ): ITransaction {
   const {
     blockNumber,
@@ -34,32 +45,38 @@ export function normalizeWeb3EthTransactionStructure(
     gasPrice,
     to,
     value,
-    type,
     input,
   } = transaction || {};
   const { timestamp } = block || {};
-  const isLegacy = (Number(type) === 0); // e.g.: faucet
   const transactionOwnerChecksumAddress: any = toChecksumAddress(transactionOwner!);
-  const isEthTransfer = input !== '0x';
-  const contractId = isEthTransfer && to ? toChecksumAddress(to) : ETH_CONTRACT_ID;
+  const isContractCall = !!input && input !== '0x';
+  const contractId = isContractCall && to
+    ? toChecksumAddress(to)
+    : ProtocolAdapterFactory.getAdapter(protocol).coinContractId;
+  // The fee paid once mined, the most it can cost before
+  const feeInWei = receipt
+    ? BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice ?? gasPrice ?? 0)
+    : BigInt(gas ?? 0) * BigInt(gasPrice ?? 0);
+  const isReverted = receipt?.status !== undefined && Number(receipt.status) === 0;
 
   return {
     transactionOwner: transactionOwnerChecksumAddress,
-    protocol: PROTOCOLS.ethereum,
+    protocol,
     hash: hash as any,
     microTime: timestamp ? new Date(Number(timestamp) * 1000).getTime() : undefined,
     pending: !blockNumber, // if blockNumber is falsy, transaction is pending
     blockHeight: Number(blockNumber),
     tx: {
       amount: Number(fromWei(value || 0, 'ether')),
-      fee: (!isLegacy) ? +fromWei(Number(gas || 0) * Number(gasPrice || 0), 'ether') : 0,
+      fee: Number(fromWei(feeInWei, 'ether')),
       senderId: from ? toChecksumAddress(from) : undefined,
       recipientId: to ? toChecksumAddress(to) : undefined,
-      type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
-      tag: (isEthTransfer ? 'SpendTx' : 'ContractCallTx') as any, // TODO: create own types
+      type: isContractCall ? 'ContractCallTx' : 'SpendTx', // TODO: create own types
+      tag: (isContractCall ? 'ContractCallTx' : 'SpendTx') as any, // TODO: create own types
       arguments: [],
       callerId: '',
       contractId,
+      returnType: isReverted ? TX_RETURN_TYPE_REVERT : undefined,
     },
   };
 }
@@ -104,32 +121,38 @@ export async function getTokenTransferGasLimit(
   return roundedToNextThousand;
 }
 
-export async function decodeTxData(
-  txData: string,
-  contractId: string,
-  fromAccount: string,
-): Promise<EthDecodedCallData | undefined> {
-  const {
-    ethActiveNetworkPredefinedSettings,
-    ethActiveNetworkSettings,
-  } = useEthNetworkSettings();
-  const { middlewareUrl: apiUrl } = ethActiveNetworkPredefinedSettings.value;
-  const { chainId } = ethActiveNetworkSettings.value;
-
-  const contractAbi = await new EtherscanService(apiUrl, chainId)
+async function fetchContractAbi(contractId: string, protocol: Protocol) {
+  const { middlewareUrl, chainId } = getActiveEvmNetworkSettings(protocol);
+  const contractAbi = await new EtherscanService(middlewareUrl, chainId)
     .fetchFromApi({
       module: 'contract',
       action: 'getabi',
       address: contractId,
     });
 
-  if (!contractAbi?.message?.startsWith('OK')) {
+  return contractAbi?.message?.startsWith('OK')
+    ? JSON.parse(contractAbi.result) as ContractAbi
+    : undefined;
+}
+
+export async function decodeTxData(
+  txData: string,
+  contractId: string,
+  fromAccount: string,
+  protocol: Protocol,
+): Promise<EthDecodedCallData | undefined> {
+  // web3 looks up the selector in lowercase
+  const data = txData.toLowerCase();
+  const abi = ERC20_METHOD_SIGNATURES.includes(data.slice(0, 10))
+    ? ERC20_ABI
+    : await fetchContractAbi(contractId, protocol);
+
+  if (!abi) {
     return undefined;
   }
-  const parsedAbi = JSON.parse(contractAbi.result);
 
   const contractInstance = new Contract(
-    parsedAbi,
+    abi,
     contractId,
     { from: fromAccount },
   );
@@ -138,11 +161,11 @@ export async function decodeTxData(
     // Decode the method and parameters from the input data
     // TODO contractInstance doesn't always have the method signatures
     // then we are not able to decode the method name and get the parameters
-    const methodSignature = txData.slice(0, 10);
+    const methodSignature = data.slice(0, 10);
     const method = contractInstance.options.jsonInterface
       .find((m) => m.signature === methodSignature);
 
-    const params = contractInstance.decodeMethodData(txData);
+    const params = contractInstance.decodeMethodData(data);
 
     return {
       functionName: (method as any).name,

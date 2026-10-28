@@ -176,6 +176,8 @@ beforeEach(async () => {
   (useAeSdk as vi.Mock).mockReturnValue({
     ensureNodeNetworkId: vi.fn(),
     getAeSdk: vi.fn(async () => ({ api: { getAccountNextNonce } })),
+    isAeppGivenAccounts: () => true,
+    getAeppTabId: () => undefined,
   });
 
   vi.resetModules();
@@ -342,6 +344,21 @@ describe('AeAccountHdWallet.signTransaction Air Gap message listener', () => {
     // here would only throw away a nonce request - or fail the signing outright
     // over a transaction the device has already signed.
     expect(getAccountNextNonce).not.toHaveBeenCalled();
+  });
+
+  it('keeps the daily spend limit of an aepp off, as only the modal gets the signature', async () => {
+    const pending = signTx(buildSpendTxFor(ADDRESS_AIR_GAP), {
+      aeppOrigin: 'https://dapp.example', aeppRpcClientId: 'client-id',
+    });
+    const { checkOrAskPermission } = (usePermissions as any)();
+    await vi.waitFor(() => expect(checkOrAskPermission).toHaveBeenCalled());
+    registeredHandler()({
+      type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+      payload: 'tx_signedByTheAirGapDevice',
+    });
+    await pending;
+
+    expect(checkOrAskPermission.mock.calls[0][2]).not.toHaveProperty('protocol');
   });
 
   it('registers no listener when the wallet holds no Air Gap account', async () => {

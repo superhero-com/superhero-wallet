@@ -17,11 +17,21 @@ import type {
 } from '@/types';
 import { useAccounts, useModals } from '@/composables';
 import { APP_LINK_WEB, IS_PRODUCTION } from '@/constants';
-import { toShiftedBigNumber, getMessageByFieldName, isUrlValid } from '@/utils';
+import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
 import Logger from '@/lib/logger';
 import { NoUserMediaPermissionError } from '@/lib/errors';
 import { useTransferSendHandler } from './transferSendHandler';
 import { useAccountAssetsList } from './accountAssetsList';
+
+/** The web link a scanned text is, whatever its host */
+function parseWebLink(text: string): URL | null {
+  try {
+    const url = new URL(text);
+    return ['http:', 'https:'].includes(url.protocol) ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 type SelectedAssetValueFunction = (
   tokenContractId?: string,
@@ -85,7 +95,9 @@ export function useTransferSendForm({
     if (account) {
       result.addresses = [account, ...(formModel.value.addresses ?? [])];
     }
-    if (amount) {
+    // Not for another asset: a link's token the account doesn't hold yet stays pending
+    const isTokenMissing = !!tokenHandler && !!token && !selectedToken;
+    if (amount && !isTokenMissing) {
       result.amount = amount;
     }
     if (payload) {
@@ -183,14 +195,16 @@ export function useTransferSendForm({
       if (!scanResult) {
         return;
       }
-      updateFormModelValues(Object.fromEntries([
-        ...new URL(
-          isUrlValid(scanResult)
-            ? scanResult
-            : `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`,
-        )
-          .searchParams.entries(),
-      ].map(([k, v]) => [k, v])));
+      const link = parseWebLink(scanResult);
+      // As for deep links, only the wallet's own links fill in more than the recipient
+      if (link && link.origin !== APP_LINK_WEB) {
+        updateFormModelValues({ account: link.searchParams.get('account') });
+      } else {
+        updateFormModelValues(Object.fromEntries(
+          (link ?? new URL(`${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`))
+            .searchParams.entries(),
+        ));
+      }
       invoiceId.value = null;
     }
     if (!formModel.value.addresses) {

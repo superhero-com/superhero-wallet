@@ -212,7 +212,9 @@
     "transaction-failed": {
       "title": "交易失败",
       "msg": "我们无法处理此交易。请稍后再试。",
-      "dustError": "交易因尘埃 UTXO 错误被网络拒绝。{'<'}br /{'>'} {'<'}br /{'>'} 请尝试在选择较低手续费档位的情况下使用“最大金额”功能发送，或者在全部转出前先为账户充值。"
+      "dustError": "交易因尘埃 UTXO 错误被网络拒绝。{'<'}br /{'>'} {'<'}br /{'>'} 请尝试在选择较低手续费档位的情况下使用“最大金额”功能发送，或者在全部转出前先为账户充值。",
+      "solRentError": "Solana 账户必须至少持有 {0} SOL。请向 {2} 发送至少 {1} SOL。",
+      "paidRecipients": "已发送给 {recipients}。请勿再次向其发送。"
     },
     "required": {
       "msg": "请填写所有字段。"
@@ -248,6 +250,7 @@
     "unreadablePrivateKeyAccounts": {
       "title": "无法读取导入的账户",
       "msg": "你通过私钥导入的账户在此设备上无法解密，也无法在此恢复。助记词账户不受影响，所有资产仍在区块链上。如需再次导入账户，请先移除无法读取的账户。你需要每个账户的私钥才能找回它。",
+      "readFailedMsg": "无法从此设备读取你通过私钥导入的账户。请关闭应用后重新打开。只有在问题持续出现且你有这些账户的私钥时才移除它们。没有私钥，移除后将无法再访问这些账户。助记词账户不受影响。",
       "btnText": "移除导入的账户"
     },
     "name-exist": {
@@ -455,8 +458,7 @@
       "button": "转移"
     },
     "receive": {
-      "funds": "资金",
-      "title": "接收 {name} 到公开地址",
+      "title": "在 {name} 上接收",
       "requestAmount": "请求特定金额（可选）",
       "copied": "已复制！",
       "shareTextNoAmount": "我的 {protocolName} 地址：{address} 或使用 Superhero 钱包发送：{walletLink}",
@@ -466,8 +468,7 @@
       "title": "接收资金到多签保管库"
     },
     "send": {
-      "sendTitle": "发送资金",
-      "sendAsset": "发送 {name}",
+      "sendTitle": "在 {name} 上发送",
       "reviewTitle": "审核交易",
       "recipientLabel": "收款人",
       "recipientPlaceholder": "输入公开地址或 .chain 名称",
@@ -511,10 +512,6 @@
       "redeemFull": "全部兑换",
       "redeemedBy": "{0} 兑换者",
       "alreadyRedeemed": "此礼品卡已被兑换。"
-    },
-    "appsBrowserError": {
-      "title": "需要 æternity 账户以浏览 æ 生态",
-      "createAccount":"创建账户"
     }
   },
   "airGap": {
@@ -939,7 +936,8 @@
     "recentTransactions": {
       "noTransactionsFound": "该账户没有最近交易。",
       "unknownMode": "未知显示模式类型：",
-      "transactionListEnd": "该账户没有更早的交易了。"
+      "transactionListEnd": "该账户没有更早的交易了。",
+      "loadOlder": "加载更早的交易"
     },
     "auctionBid": {
       "current-highest-bid": "当前最高出价",
@@ -1015,6 +1013,7 @@
     },
     "names": {
       "balance-error": "你的账户余额不足以执行该交易。",
+      "preclaim-not-mined": "{name} 的预注册交易未被打包。请重新注册该名称。",
       "pointer-added": "名称 {type} 成功！",
       "auto-extend": "自动延长",
       "tabs": {
@@ -1288,6 +1287,12 @@
       "refuse": "不批准",
       "sign": "批准",
       "expiresAt": "到期高度",
+      "unverified": {
+        "title": "交易未验证",
+        "msg": "为此提案存储的交易无法加载，或与金库被要求批准的交易不一致。验证通过前无法批准或发送，钱包会持续检查。你仍可拒绝或撤销该提案。",
+        "notSent": "为此提案存储的交易与提案不一致，因此未发送。"
+      },
+      "changed": "确认期间提案已更改。请重新查看。",
       "infoBox": {
         "signatures": "个签名",
         "signature": "个签名",
@@ -1377,7 +1382,9 @@
       "insufficient-invite-balance": "此邀请链接已过期，AE 代币已被领取。",
       "tip-attached": "礼品卡金额",
       "top-up-with": "充值方式",
-      "delete": "删除"
+      "delete": "删除",
+      "delete-confirm-title": "删除礼品卡？",
+      "delete-confirm-msg": "礼品卡的密钥将从此钱包中删除，其中剩余的代币将会丢失。显示的余额是当前网络上的余额，无法加载时显示为 0。"
     },
     "permissions": {
       "login": "不要请求登录",
@@ -1414,8 +1421,7 @@
     "appsBrowser": {
       "popularApps": "精选",
       "recentApps": "最近访问",
-      "inputPlaceholder": "输入 URL",
-      "iframeTitle": "已选择的应用"
+      "inputPlaceholder": "输入 URL"
     },
     "warningDappBrowser": {
       "title": "你将访问\n第三方网站",
@@ -1435,20 +1441,6 @@
     "confirmTransactionWarning": "确认此交易",
     "signDataAction": "签名数据",
     "signDataWarning": "签名此数据"
-  },
-  "dappActionBrowser": {
-    "refresh": {
-      "title": "刷新",
-      "description": "重新加载页面内容"
-    },
-    "bookmark": {
-      "title": "添加书签",
-      "description": "将此页面添加到收藏夹"
-    },
-    "share": {
-      "title": "分享",
-      "description": "将此页面分享给你的联系人"
-    }
   },
   "validation": {
     "formInvalid": "上方一个或多个字段无效。请检查你输入的信息。",
@@ -1485,6 +1477,7 @@
     "walletDataUnreadableMessage": "无法解密此设备上的加密钱包数据。重新安装应用无法解决此问题。请重置钱包，然后使用助记词恢复。你的资产仍在区块链上，但只有助记词才能恢复对它们的访问。",
     "walletDataUnreadableAction": "重置钱包",
     "walletKeyUnavailableMessage": "无法从此设备读取解锁钱包的密钥。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
+    "walletDataReadFailedMessage": "无法从此设备读取钱包数据。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
     "storedWalletFoundTitle": "在此设备上找到钱包",
     "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
     "storedWalletFoundAction": "重新加载"

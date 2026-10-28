@@ -212,7 +212,9 @@
     "transaction-failed": {
       "title": "Transaction failed",
       "msg": "We cannot process this transaction. Please, try again later.",
-      "dustError": "Transaction was rejected by the network due to dust UTXO error. {'<'}br /{'>'} {'<'}br /{'>'} Try to send funds using the MAX amount feature with a lower fee tier selected, or add more funds to your account before sending them all out."
+      "dustError": "Transaction was rejected by the network due to dust UTXO error. {'<'}br /{'>'} {'<'}br /{'>'} Try to send funds using the MAX amount feature with a lower fee tier selected, or add more funds to your account before sending them all out.",
+      "solRentError": "Solana accounts must hold at least {0} SOL. Send at least {1} SOL to {2}.",
+      "paidRecipients": "Sent already to {recipients}. Do not send to them again."
     },
     "required": {
       "msg": "Please fill in all fields."
@@ -248,6 +250,7 @@
     "unreadablePrivateKeyAccounts": {
       "title": "Imported accounts unreadable",
       "msg": "The accounts you imported with a private key can't be decrypted on this device, and they can't be recovered here. Your seed phrase accounts are not affected, and all funds stay on the blockchain. To import accounts again, remove the unreadable ones. You'll need each account's private key to get it back.",
+      "readFailedMsg": "The accounts you imported with a private key couldn't be read from this device. Close the app and open it again. Remove them only if this keeps happening and you have their private keys. Without them, removing loses access to these accounts. Your seed phrase accounts are not affected.",
       "btnText": "Remove imported accounts"
     },
     "name-exist": {
@@ -462,8 +465,7 @@
       "button": "Transfer"
     },
     "receive": {
-      "funds": "funds",
-      "title": "Receive {name} to public address",
+      "title": "Receive on {name}",
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
       "shareTextNoAmount": "My {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}",
@@ -473,8 +475,7 @@
       "title": "Receive funds to multisig vault"
     },
     "send": {
-      "sendTitle": "Send funds",
-      "sendAsset": "Send {name}",
+      "sendTitle": "Send on {name}",
       "reviewTitle": "Review transaction",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
@@ -518,10 +519,6 @@
       "redeemFull": "Redeem full amount",
       "redeemedBy": "{0} redeemed by",
       "alreadyRedeemed": "This gift card has already been redeemed."
-    },
-    "appsBrowserError": {
-      "title": "You need an æternity account to browse the æcosystem",
-      "createAccount":"Create account"
     }
   },
   "airGap": {
@@ -946,7 +943,8 @@
     "recentTransactions": {
       "noTransactionsFound": "There are no recent transactions for this account.",
       "unknownMode": "Unknown display mode type:",
-      "transactionListEnd": "There are no older transactions for this account."
+      "transactionListEnd": "There are no older transactions for this account.",
+      "loadOlder": "Load older transactions"
     },
     "auctionBid": {
       "current-highest-bid": "Current highest bid",
@@ -1022,6 +1020,7 @@
     },
     "names": {
       "balance-error": "Your account balance is not enough to execute this transaction.",
+      "preclaim-not-mined": "The preclaim of {name} was not mined. Please register the name again.",
       "pointer-added": "Name {type} successful!",
       "auto-extend": "Auto-extend",
       "tabs": {
@@ -1295,6 +1294,12 @@
       "refuse": "Disapprove",
       "sign": "Approve",
       "expiresAt": "Expires at height",
+      "unverified": {
+        "title": "Transaction not verified",
+        "msg": "The transaction stored for this proposal couldn't be loaded, or doesn't match the one the vault was asked to approve. Approve and Send stay disabled until it's verified; the wallet keeps checking. You can still disapprove or revoke it.",
+        "notSent": "The transaction stored for this proposal doesn't match it, so it was not sent."
+      },
+      "changed": "The proposal changed while you were confirming. Review it again.",
       "infoBox": {
         "signatures": "signatures",
         "signature": "signature",
@@ -1384,7 +1389,9 @@
       "insufficient-invite-balance": "This invite link expired and the AE coins are already claimed.",
       "tip-attached": "Gift card amount",
       "top-up-with": "Top up with",
-      "delete": "Delete"
+      "delete": "Delete",
+      "delete-confirm-title": "Delete gift card?",
+      "delete-confirm-msg": "The gift card's key will be removed from this wallet, and any coins still on it will be lost. The balance shown is for the current network and reads 0 when it can't be loaded."
     },
     "permissions": {
       "login": "Don't ask for login requests",
@@ -1421,8 +1428,7 @@
     "appsBrowser": {
       "popularApps": "Featured",
       "recentApps": "Latest visited",
-      "inputPlaceholder": "Enter URL",
-      "iframeTitle": "Selected app"
+      "inputPlaceholder": "Enter URL"
     },
     "warningDappBrowser": {
       "title": "You are going to visit a \n third-party website",
@@ -1442,20 +1448,6 @@
     "confirmTransactionWarning": "Confirming this transaction",
     "signDataAction": "sign data",
     "signDataWarning": "Signing this data"
-  },
-  "dappActionBrowser": {
-    "refresh": {
-      "title": "Refresh",
-      "description": "Reload contents of the page"
-    },
-    "bookmark": {
-      "title": "Add bookmark",
-      "description": "Add this page to your favorites"
-    },
-    "share": {
-      "title": "Share",
-      "description": "Share this page with your contacts"
-    }
   },
   "validation": {
     "formInvalid": "One or more fields above are not valid. Please review the information you entered.",
@@ -1492,6 +1484,7 @@
     "walletDataUnreadableMessage": "The encrypted wallet data on this device can't be decrypted. Reinstalling the app won't fix this. Reset the wallet, then restore it with your seed phrase. Your funds stay on the blockchain, but only your seed phrase can restore access to them.",
     "walletDataUnreadableAction": "Reset wallet",
     "walletKeyUnavailableMessage": "The key that unlocks your wallet couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
+    "walletDataReadFailedMessage": "Your wallet data couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
     "storedWalletFoundTitle": "Wallet found on this device",
     "storedWalletFoundMessage": "Your wallet couldn't be loaded when the app started, but it's still stored on this device. Reload the app to open it.",
     "storedWalletFoundAction": "Reload"

@@ -108,8 +108,12 @@ export default defineComponent({
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           if (!isSelectedAssetEthCoin.value) {
+            // Or nothing would be sent, while it looks like a success
+            if (!adapter.transferToken) {
+              throw new Error(`Token transfers are not supported on ${adapter.protocolName}`);
+            }
             // eslint-disable-next-line no-await-in-loop
-            actionResult = await adapter.transferToken?.(
+            actionResult = await adapter.transferToken(
               amount,
               recipient,
               selectedAsset.contractId,
@@ -123,7 +127,7 @@ export default defineComponent({
           } else {
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.spend(
-              Number(amount),
+              amount,
               recipient,
               {
                 fromAccount: lastActiveEthAccount?.address,
@@ -133,7 +137,6 @@ export default defineComponent({
               },
             );
           }
-          currentNonce += 1;
 
           if (actionResult) {
             const transaction: ITransaction = {
@@ -151,10 +154,12 @@ export default defineComponent({
                 recipientId: recipient,
                 arguments: [],
                 fee: 0,
+                nonce: currentNonce,
               },
             };
             addAccountPendingTransaction(lastActiveEthAccount?.address!, transaction);
           }
+          currentNonce += 1;
         }
       } catch (error: any) {
         openTransactionFailedModal(error.message);

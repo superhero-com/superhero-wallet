@@ -6,6 +6,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 
 import '@/protocols/registerAdapters';
 import TransferSendForm from '@/protocols/ethereum/components/TransferSendForm.vue';
+import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import { PROTOCOLS } from '@/constants';
 import { i18n } from '@/popup/plugins/i18n';
 
@@ -91,5 +92,36 @@ describe('EthTransferSendForm - multiple recipients', () => {
     expect(transferData.maxPriorityFeePerGas).toBe('0.000000001000000000');
     // (base fee 1 gwei + priority fee 1 gwei) * 50 000 gas * 3 recipients
     expect(transferData.fee.toFixed()).toBe('0.0003');
+  });
+});
+
+describe('EthTransferSendForm - no amount yet', () => {
+  it.each([
+    ['before an amount is typed', undefined],
+    ['after the amount is cleared', ''],
+  ])('shows the node fee %s', async (_, amount) => {
+    const wrapper = mount(TransferSendForm, {
+      props: {
+        protocol: PROTOCOLS.ethereum,
+        transferData: {
+          addresses: [],
+          amount,
+          selectedAsset: {
+            contractId: '0x0000000000000000000000000000000000000003',
+            protocol: PROTOCOLS.ethereum,
+            decimals: 18,
+            amount: '10',
+          },
+        },
+      },
+      global: {
+        plugins: [i18n],
+        stubs: { TransferSendFormBase: true },
+      },
+    });
+    await flushPromises();
+
+    // (base fee 1 gwei + priority fee 1 gwei) * 21 000 gas of a plain transfer
+    expect(wrapper.findComponent(TransferSendFormBase).props('fee')).toBe(0.000042);
   });
 });

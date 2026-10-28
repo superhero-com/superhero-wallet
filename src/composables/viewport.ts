@@ -34,12 +34,13 @@ function shouldUseIonPartScroll(ionContentHost: HTMLElement, partScroll: Element
     && (partOverflow === 'auto' || partOverflow === 'scroll' || ionOverflowVar === 'auto');
 }
 
-function shouldRetryIonPartResolution(ionContentHost: HTMLElement): boolean {
-  const style = getComputedStyle(ionContentHost);
-  const hostOverflow = style.overflowY;
-  const ionOverflowVar = style.getPropertyValue('--overflow').trim();
-
-  return hostOverflow === 'hidden' || ionOverflowVar === 'auto';
+/**
+ * Ionic renders the scroll part, and the browser computes the styles, only after every
+ * ion-content around the element has rendered, which takes a few frames on a new page.
+ */
+function isIonContentRendered(ionContentHost: HTMLElement): boolean {
+  return !!getIonContentPartScroll(ionContentHost)
+    && !!getComputedStyle(ionContentHost).overflowY;
 }
 
 export function resolveScrollableElement(element: Element | undefined): Element | undefined {
@@ -55,7 +56,8 @@ export function resolveScrollableElement(element: Element | undefined): Element 
 export function resolveScrollableElementWithRetry(
   element: Element | undefined,
   onResolved: (resolved: Element | undefined) => void,
-  maxAttempts = 12,
+  // Only a safety net, about 10 seconds
+  maxAttempts = 600,
 ): () => void {
   if (!element) {
     onResolved(undefined);
@@ -79,8 +81,8 @@ export function resolveScrollableElementWithRetry(
     onResolved(resolved);
 
     if (
-      resolved === ionContentHost
-      && shouldRetryIonPartResolution(ionContentHost)
+      !isIonContentRendered(ionContentHost)
+      && ionContentHost.isConnected
       && attempts < maxAttempts
     ) {
       rafId = requestAnimationFrame(step);

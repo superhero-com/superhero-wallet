@@ -36,4 +36,23 @@ describe('DogecoinAdapter - waitTransactionMined polling', () => {
     expect(res).toBeNull();
     expect(spy).toHaveBeenCalled();
   });
+
+  it('resolves null when every lookup rejects', async () => {
+    vi.restoreAllMocks();
+    const fetchSpy = vi.fn(async () => new Response('Transaction not found', { status: 404 }));
+    // @ts-ignore - test double for the fetch boundary
+    global.fetch = fetchSpy;
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+
+    let result: any = 'pending';
+    adapter.waitTransactionMined('abc').then((res) => { result = res; });
+    await vi.advanceTimersByTimeAsync(5000 * 10);
+    expect(result).toBeNull();
+
+    await vi.advanceTimersByTimeAsync(5000 * 5);
+    expect(fetchSpy).toHaveBeenCalledTimes(10);
+    process.off('unhandledRejection', unhandled);
+    expect(unhandled).not.toHaveBeenCalled();
+  });
 });

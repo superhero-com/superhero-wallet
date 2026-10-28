@@ -50,7 +50,16 @@ export class EthplorerService {
         await sleep(timeToWait);
       }
     }
-    return fetchJson(`${this.apiUrl}${action}?${query}`);
+    try {
+      return await fetchJson(`${this.apiUrl}${action}?${query}`);
+    } catch (error: any) {
+      // `fetchJson` throws on a non-OK response, so a rate limit has to be turned back into
+      // the error shape the callers check for, otherwise it surfaces as an unknown error.
+      if (error?.statusCode === TOO_MANY_REQUESTS_ERROR_CODE) {
+        return { error: { code: TOO_MANY_REQUESTS_ERROR_CODE } };
+      }
+      throw error;
+    }
   }
 
   normalizeTokenStructure(token: any, protocol: Protocol): IToken {

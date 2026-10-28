@@ -28,7 +28,8 @@ import {
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
-import type { EthRpcSupportedMethods, IEthRpcMethodParameters } from '@/protocols/ethereum/types';
+import type { EthContentScriptMethod, EthRpcSupportedMethods } from '@/protocols/ethereum/types';
+import type { IAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaParams';
 import {
   AE_CONTRACT_ID,
   MULTISIG_CREATION_PHASES,
@@ -120,11 +121,15 @@ export interface IPageableResponse<T> {
   next: string;
 }
 
+/** Set when the app's URL comes from the dapp itself (WalletConnect). */
+export type AppOriginSource = 'self-reported';
+
 export interface IAppData {
   name?: string;
   href?: string;
   host: string;
   protocol?: string;
+  originSource?: AppOriginSource;
 }
 
 export interface IWallet {
@@ -386,6 +391,8 @@ export interface IPermission {
   transactionSignLimit: number;
   /** Amount spent during that day */
   transactionSignSpent: number;
+  /** The scheme of the page it was given to, e.g. `https:` */
+  protocol?: string;
 }
 
 /**
@@ -504,6 +511,8 @@ export interface ITx {
   gasPrice?: number;
   gasUsed?: number;
   internalEvents?: any[]; // TODO: type internal events
+  /** The data source reported a token transfer, even if the token is not on the token list */
+  isTokenTransfer?: boolean;
   log?: any[]; // TODO find source
   name?: any;
   nameFee?: number;
@@ -569,7 +578,11 @@ export interface IDashboardTransaction extends ITransaction {
 export interface IActiveMultisigTransaction extends IMultisigAccount {
   totalConfirmations: number;
   hash: string;
+  /** Set only when it is the transaction the proposal hash was built from */
   tx?: ITx;
+  isTxVerified?: boolean;
+  /** The `GaMetaTx` fee and gas price the proposal hash was built with, set with `tx` */
+  gaMetaParams?: IAeGaMetaParams;
   isMultisig: true;
   microTime?: number;
   protocol: Protocol; // Required to match `ITransaction`
@@ -696,7 +709,11 @@ export interface IMiddlewareStatus {
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
 export type PopupMethod = ObjectValues<typeof POPUP_METHODS>;
 export type SessionMethod = ObjectValues<typeof SESSION_METHODS>;
-export type BackgroundMethod = PopupMethod | SessionMethod | EthRpcSupportedMethods;
+export type BackgroundMethod =
+  | PopupMethod
+  | SessionMethod
+  | EthRpcSupportedMethods
+  | EthContentScriptMethod;
 
 export interface IPopupActions {
   resolve: ResolveCallback;
@@ -728,6 +745,12 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   isSenderReplaced?: boolean;
   protocol?: Protocol;
   accountIdx?: number;
+  /** Signed in the offscreen document, so the modal has to drive hardware wallets. */
+  isOffscreenRequest?: boolean;
+  /** A connected site asks to switch to the chain of another protocol. */
+  isChainSwitch?: boolean;
+  /** Of the browser tab the request came from, when the extension knows it. */
+  tabId?: number;
 }
 
 /**
@@ -744,6 +767,18 @@ export interface ISignModalResolution {
   rebuildForSelectedAccount?: boolean;
 }
 
+/** Sent by the offscreen document to the side panel that shows the popup. */
+export interface ISidePanelRequest {
+  id: string;
+  popupType: PopupType;
+  props: Omit<IPopupProps, 'resolve' | 'reject'>;
+}
+
+/** Sent by a side panel to the offscreen document: its window and visibility, and the answers. */
+export type SidePanelMessage = { windowId: number; visible: boolean }
+  | { id: string; type: typeof POPUP_ACTIONS.resolve; payload?: any }
+  | { id: string; type: typeof POPUP_ACTIONS.reject };
+
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
 }
@@ -757,8 +792,10 @@ export interface IBackgroundMessageData {
     aepp?: string | object;
     popupType?: PopupType;
     popupProps?: Partial<IPopupProps>;
+    sidePanelWindowIds?: number[];
     id?: string;
-    rpcMethodParams?: IEthRpcMethodParameters | { result?: string | string[] };
+    /** The positional params of an EIP-1193 request, or the value of an event */
+    rpcMethodParams?: unknown[] | { result?: string | string[] };
   };
   payload?: any;
 }
@@ -781,6 +818,8 @@ export interface IAuctionBid {
 export interface IAuction {
   bids: IAuctionBid[];
   expiration: number;
+  /** As the node has it: `bids` leaves out the bids made through a contract call */
+  highestBid?: IAuctionBid;
 }
 
 export interface INameAuctionBid {
@@ -812,6 +851,10 @@ export interface IRawMultisigTx {
   id: number;
   hash: Encoded.TxHash;
   tx: Encoded.Transaction;
+  /** The `GaMetaTx` fee the proposer hashed with, in aettos, if the backend returns it */
+  fee?: string;
+  /** The `GaMetaTx` gas price the proposer hashed with, in aettos, if the backend returns it */
+  gasPrice?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -838,6 +881,8 @@ export interface TransferFormModel extends IFormModel {
   gasPrice?: number;
   gasUsed?: number;
   fee?: BigNumber;
+  /** Bitcoin and Dogecoin: the fee of each recipient's send in turn, which add up to `fee` */
+  fees?: number[];
   estimatedFee?: BigNumber;
   estimatedTotal?: number;
   total?: number;

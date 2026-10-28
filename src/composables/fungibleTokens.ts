@@ -5,7 +5,7 @@ import { uniqBy, isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Contract, Encoding, Tag } from '@aeternity/aepp-sdk';
 
-import { isAssetCoin, toShiftedBigNumber } from '@/utils';
+import { handleUnknownError, isAssetCoin, toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
   AssetContractId,
@@ -58,6 +58,15 @@ const ephemeralTokensAvailable = ref<ProtocolRecord<AssetList>>({});
 const tokenBalances = useStorageRef<ITokenBalance[]>(
   [],
   STORAGE_KEYS.fungibleTokenBalances,
+);
+
+/**
+ * The network `tokenBalances` was fetched for. A dapp can switch the network
+ * while the app is closed, so the stored balances can be of another one.
+ */
+const tokenBalancesNetworkName = useStorageRef<string | null>(
+  null,
+  STORAGE_KEYS.fungibleTokenBalancesNetworkName,
 );
 
 const lastAvailableTokensLoadTime = useStorageRef<number>(
@@ -158,6 +167,7 @@ interface LoadAvailableTokensOptions {
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(30000);
 
 let areTokenBalancesUpdating = false;
+let isTokenBalancesReloadRequested = false;
 
 /**
  * Store and provide the access to all protocol's fungible tokens.
@@ -252,7 +262,12 @@ export function useFungibleTokens() {
             };
           }
 
-          const response = await adapter.fetchAvailableTokensPage(nextPageUrl || undefined);
+          const response = await adapter.fetchAvailableTokensPage(nextPageUrl || undefined)
+            .catch((error) => {
+              // Other protocols still get their tokens
+              handleUnknownError(error);
+              return null;
+            });
 
           if (response == null) {
             return {
@@ -329,12 +344,8 @@ export function useFungibleTokens() {
     }
   }
 
-  async function loadTokenBalances() {
-    if (areTokenBalancesUpdating) {
-      return;
-    }
-
-    areTokenBalancesUpdating = true;
+  async function processTokenBalancesUpdate() {
+    const networkAtStart = activeNetwork.value.name;
     const tokenBalancesFetchPromisesByKey: Dictionary<Promise<ITokenBalance[] | null>> = {};
     accounts.value.map(
       ({ address, protocol }) => {
@@ -347,7 +358,9 @@ export function useFungibleTokens() {
 
     // for each promise check if it returned null, if so, use cached data
     // because it means that we couldn't fetch new data
-    const cachedTokenBalances = tokenBalances.value;
+    const cachedTokenBalances = (tokenBalancesNetworkName.value === networkAtStart)
+      ? tokenBalances.value
+      : [];
 
     const cachedTokenBalancesByKey: Dictionary<ITokenBalance[]> = {};
     cachedTokenBalances.map((tokenBalance) => {
@@ -359,13 +372,35 @@ export function useFungibleTokens() {
       return null;
     });
 
-    tokenBalances.value = (await Promise.all(
+    const newTokenBalances = (await Promise.all(
       (Object.entries(tokenBalancesFetchPromisesByKey)).map(
         async ([key, promise]) => await promise || cachedTokenBalancesByKey[key] || [],
       ),
     )).flat();
 
-    areTokenBalancesUpdating = false;
+    if (activeNetwork.value.name === networkAtStart) {
+      tokenBalances.value = newTokenBalances;
+      tokenBalancesNetworkName.value = networkAtStart;
+    }
+  }
+
+  async function loadTokenBalances() {
+    if (areTokenBalancesUpdating) {
+      // E.g. after a network switch the running batch is discarded
+      isTokenBalancesReloadRequested = true;
+      return;
+    }
+
+    areTokenBalancesUpdating = true;
+    try {
+      do {
+        isTokenBalancesReloadRequested = false;
+        // eslint-disable-next-line no-await-in-loop
+        await processTokenBalancesUpdate();
+      } while (isTokenBalancesReloadRequested);
+    } finally {
+      areTokenBalancesUpdating = false;
+    }
   }
 
   async function createOrChangeAllowance(contractId: AssetContractId, amount: number | string) {
@@ -384,12 +419,13 @@ export function useFungibleTokens() {
       for_account: tippingContractAddresses?.value?.tippingV2?.replace('ct_', 'ak_'),
     });
 
+    // Exact, as the tip and retip take it
     const allowanceAmount = (decodedResult !== undefined)
       ? new BigNumber(decodedResult)
         .multipliedBy(-1)
         .plus(toShiftedBigNumber(amount, tokenData?.decimals!))
-        .toNumber()
-      : toShiftedBigNumber(amount, tokenData?.decimals!).toNumber();
+        .toFixed()
+      : toShiftedBigNumber(amount, tokenData?.decimals!).toFixed();
 
     const getContractFunction = (tokenContract.methods as any)[
       decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
@@ -427,8 +463,10 @@ export function useFungibleTokens() {
     // This is out of place but since we are treating new protocols as fungible tokens
     // it is better to have it here than in the protocol specific helper file
     if (protocol && protocol !== PROTOCOLS.aeternity) {
-      const isNonTokenContract = !getProtocolAvailableTokens(protocol)[tx.contractId]
-        || tx.tag === Tag.ContractCreateTx;
+      const isNonTokenContract = !tx.isTokenTransfer && (
+        !getProtocolAvailableTokens(protocol)[tx.contractId]
+        || tx.tag === Tag.ContractCreateTx
+      );
 
       return new BigNumber(tx?.amount || 0)
         .plus(isReceived || (!isAssetCoin(tx.contractId) && !isNonTokenContract) ? 0 : tx?.fee || 0)
@@ -473,7 +511,12 @@ export function useFungibleTokens() {
       .plus(isReceived ? 0 : gasCost));
   }
 
-  tokenBalancesPooling(() => loadTokenBalances());
+  tokenBalancesPooling(() => {
+    // A batch outlasting the interval would get a rerun queued
+    if (!areTokenBalancesUpdating) {
+      loadTokenBalances();
+    }
+  });
 
   if (!composableInitialized) {
     composableInitialized = true;
@@ -489,13 +532,14 @@ export function useFungibleTokens() {
       const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
       const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
       if (newMiddlewareUrl !== oldMiddlewareUrl) {
-        tokenBalances.value = [];
         defaultTokensAvailable.value = {};
         ephemeralTokensAvailable.value = {};
         availableTokensNextPageUrls.value = {};
         lastAvailableTokensLoadTime.value = 0;
-        await loadTokenBalances();
       }
+      // The networks can share the middleware and differ in other protocols
+      tokenBalances.value = [];
+      await loadTokenBalances();
     });
   }
 

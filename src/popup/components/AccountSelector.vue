@@ -54,7 +54,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { AccountAddress, IFormSelectOption } from '@/types';
+import type { AccountAddress, IFormSelectOption, Protocol } from '@/types';
 import { useAccounts } from '@/composables';
 
 import Avatar from './Avatar.vue';
@@ -79,7 +79,7 @@ export default defineComponent({
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
     avatarOnly: Boolean,
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'select-account'],
   setup(props, { emit }) {
     const { accountsSelectOptions, getAccountByProtocolAndAddress } = useAccounts();
 
@@ -93,8 +93,9 @@ export default defineComponent({
     });
 
     function onSelect(value: string) {
-      const [, address] = String(value).split(':');
+      const [protocol, address] = String(value).split(':');
       emit('update:modelValue', address as AccountAddress);
+      emit('select-account', getAccountByProtocolAndAddress(protocol as Protocol, address as AccountAddress));
     }
     return {
       accountsSelectOptions,

@@ -291,10 +291,6 @@ export function getTxTag({ tag, type }: ITx = {} as any): Tag | null {
   return null;
 }
 
-export function isAccountNotFoundError(error: any) {
-  return isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
-}
-
 export function isInsufficientBalanceError(error: any) {
   return (
     error instanceof InvalidTxError

@@ -14,6 +14,7 @@ import {
 } from '@/constants';
 import { createCallbackRegistry } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { WalletStorage } from '@/lib/WalletStorage';
 import { tg } from '@/popup/plugins/i18n';
 import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
@@ -50,7 +51,17 @@ const activeNetworkName = useStorageRef<string>(
   STORAGE_KEYS.activeNetworkName,
   {
     backgroundSync: true,
-    onRestored: () => {
+    onRestored: (name) => {
+      const knownNames = [
+        NETWORK_NAME_MAINNET,
+        NETWORK_NAME_TESTNET,
+        ...customNetworks.value.map((network) => network.name),
+      ];
+      if (name && !knownNames.includes(name)) {
+        // The storage watcher is not set up yet, so persist it directly
+        activeNetworkName.value = NETWORK_NAME_MAINNET;
+        WalletStorage.set(STORAGE_KEYS.activeNetworkName, NETWORK_NAME_MAINNET);
+      }
       areNetworksRestored.value = true;
     },
   },
@@ -63,7 +74,9 @@ const networks = computed(
   ].map((network) => [network.name, network])),
 );
 
-const activeNetwork = computed(() => networks.value[activeNetworkName.value]);
+const activeNetwork = computed(
+  () => networks.value[activeNetworkName.value] ?? networks.value[NETWORK_NAME_MAINNET],
+);
 
 const isActiveNetworkTestnet = computed(() => activeNetwork.value.type === NETWORK_TYPE_TESTNET);
 
@@ -104,8 +117,13 @@ export function useNetworks() {
   }
 
   function updateCustomNetwork(index: number, networkData: INetwork): boolean {
-    if (customNetworks.value[index]) {
+    const previousNetwork = customNetworks.value[index];
+    if (previousNetwork) {
       customNetworks.value[index] = networkData;
+      if (previousNetwork.name === activeNetworkName.value) {
+        activeNetworkName.value = networkData.name;
+        runOnNetworkChangeCallbacks(activeNetwork.value, previousNetwork);
+      }
       return true;
     }
     return false;
@@ -140,10 +158,6 @@ export function useNetworks() {
     composableInitialized = true;
 
     ensureDefaultNetworksExists();
-
-    if (!activeNetwork.value) {
-      switchNetwork(NETWORK_NAME_MAINNET);
-    }
   }
 
   return {

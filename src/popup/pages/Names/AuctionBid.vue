@@ -33,7 +33,10 @@
                 />
               </template>
             </DetailsItem>
-            <DetailsItem :label="$t('common.total')">
+            <DetailsItem
+              :label="$t('common.total')"
+              class="total"
+            >
               <template #value>
                 <TokenAmount
                   :amount="+amountTotal"
@@ -44,7 +47,8 @@
           </div>
 
           <BtnMain
-            :disabled="!!amountError || !amount || !!errorName"
+            :disabled="!!amountError || !amount || !!errorName || !minBid"
+            data-cy="place-bid"
             class="button"
             extend
             @click="bid"
@@ -71,6 +75,7 @@ import { useI18n } from 'vue-i18n';
 import {
   AensName,
   buildTx,
+  getMinimumNameFee,
   unpackTx,
   Tag,
   Name,
@@ -122,8 +127,9 @@ export default defineComponent({
 
     const amount = ref('');
 
-    const highestBid = computed(
-      () => getNameAuctionHighestBid(props.name)?.nameFee || new BigNumber(0),
+    /** Unknown until the auction is loaded */
+    const minBid = computed(
+      () => getNameAuctionHighestBid(props.name)?.nameFee.multipliedBy(AE_AENS_BID_MIN_RATIO),
     );
     const txFee = computed<BigNumber>(
       () => BigNumber(unpackTx(
@@ -133,24 +139,27 @@ export default defineComponent({
           nonce: STUB_NONCE,
           name: props.name,
           nameSalt: 0,
-          nameFee: aeToAettos(highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO).toString()),
+          // Below the minimum name fee the transaction can't be built
+          nameFee: BigNumber.max(
+            aeToAettos(minBid.value ?? 0),
+            getMinimumNameFee(props.name),
+          ).toFixed(),
         }),
         Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION),
     );
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
-    const amountError = computed(() => {
-      const minBid = highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO);
-      return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
-        ? t('pages.names.auctions.min-bid', { minBid })
-        : null;
-    });
+    const amountError = computed(() => (
+      (minBid.value && amount.value !== '' && minBid.value.isGreaterThanOrEqualTo(+amount.value))
+        ? t('pages.names.auctions.min-bid', { minBid: minBid.value })
+        : null
+    ));
 
     async function bid() {
       if (!(await validate()).valid) {
         return;
       }
-      if (amountError.value) return;
+      if (amountError.value || !minBid.value) return;
       const aeSdk = await getAeSdk();
       const nameObj = new Name(props.name, aeSdk.getContext());
       try {
@@ -178,6 +187,7 @@ export default defineComponent({
       amountTotal,
       amountError,
       errorName,
+      minBid,
       txFee,
       bid,
     };
@@ -194,10 +204,21 @@ export default defineComponent({
 
     .tx-details {
       display: flex;
+      justify-content: space-between;
+      gap: 16px;
       padding-top: 16px;
 
-      .details-item {
-        margin-right: 24px;
+      .total {
+        :deep(.label),
+        :deep(.value),
+        :deep(.token-amount) {
+          justify-content: flex-end;
+        }
+
+        :deep(.token-amount) {
+          flex-wrap: wrap;
+          row-gap: 4px;
+        }
       }
     }
 

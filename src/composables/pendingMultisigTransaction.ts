@@ -31,6 +31,10 @@ const activeMultisigTransactionData = ref<ITransaction | null>(null);
 
 const isLoading = ref(false);
 
+/** An unverified proposal of an unchanged vault is loaded again at most this often */
+const UNVERIFIED_RETRY_INTERVAL = 60000;
+let lastLoadedAt = 0;
+
 export function usePendingMultisigTransaction() {
   const { getMiddleware } = useAeMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts();
@@ -200,19 +204,40 @@ export function usePendingMultisigTransaction() {
       watch(
         scopedActiveMultisigAccount,
         async (newValue, oldValue) => {
-          if (newValue && !isEqual(newValue, oldValue)) {
+          const pending = pendingMultisigTransaction.value;
+          // Loaded again while unverified, a failed load can succeed next time. Not with every
+          // poll of the vault though, unless its data changed: it would keep hitting the backend.
+          const isRetry = !!newValue?.txHash
+            && pending?.hash === newValue.txHash
+            && !pending.isTxVerified
+            && (
+              !isEqual(newValue, oldValue)
+              || Date.now() - lastLoadedAt >= UNVERIFIED_RETRY_INTERVAL
+            );
+          if (newValue && (!isEqual(newValue, oldValue) || isRetry)) {
             if (!newValue?.txHash) {
               activeMultisigTransactionData.value = null;
               pendingMultisigTransaction.value = null;
-            } else if (newValue.txHash !== oldValue?.txHash) {
-              isLoading.value = true;
-              [
-                activeMultisigTransactionData.value,
-                pendingMultisigTransaction.value,
-              ] = await Promise.all([
-                fetchLatestMultisigAccountTransaction(),
+              isLoading.value = false;
+            } else if (newValue.txHash !== oldValue?.txHash || isRetry) {
+              const { txHash } = newValue;
+              // As it starts, so that the polls while a slow one runs don't start more
+              lastLoadedAt = Date.now();
+              if (!isRetry) {
+                isLoading.value = true;
+              }
+              const [latestTransaction, activeMultisigTx] = await Promise.all([
+                isRetry
+                  ? activeMultisigTransactionData.value
+                  : fetchLatestMultisigAccountTransaction(),
                 fetchActiveMultisigTx(),
               ]);
+              // Loaded for a proposal the vault has moved on from
+              if (scopedActiveMultisigAccount.value?.txHash !== txHash) {
+                return;
+              }
+              activeMultisigTransactionData.value = latestTransaction;
+              pendingMultisigTransaction.value = activeMultisigTx;
               isLoading.value = false;
             } else if (
               !isEqual(newValue.confirmedBy, oldValue.confirmedBy)

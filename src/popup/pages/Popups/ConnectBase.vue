@@ -110,7 +110,7 @@
           v-text="$t('pages.connectConfirm.ensureNetwork')"
         />
 
-        <div>
+        <div v-if="!isSelfReported && !isRememberMeKept">
           <CheckBox
             v-model="rememberMe"
             class="remember-me"
@@ -146,7 +146,7 @@
       <BtnMain
         data-cy="accept"
         wide
-        :disabled="!supported || !selectedAccount"
+        :disabled="isConfirmBlocked || !supported || !selectedAccount"
         :text="$t('common.confirm')"
         @click="confirm()"
       />
@@ -173,6 +173,7 @@ import {
   PROTOCOLS,
 } from '@/constants';
 import { useAccounts, usePopupProps } from '@/composables';
+import { useConfirmGuard } from '@/composables/confirmGuard';
 import { usePermissions } from '@/composables/permissions';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -221,6 +222,7 @@ export default defineComponent({
     supportedProtocols: { type: Array as PropType<Protocol[]>, default: undefined },
   },
   setup(props) {
+    const { isConfirmBlocked } = useConfirmGuard();
     const { t } = useI18n();
     const rememberMe = ref(true);
 
@@ -236,7 +238,7 @@ export default defineComponent({
       sender,
       setPopupProps,
     } = usePopupProps();
-    const { permissions, addPermission } = usePermissions();
+    const { addPermission, getPermissionForUrl } = usePermissions();
 
     const accessLabels: Record<ConnectPermission, any> = {
       [CONNECT_PERMISSIONS.address]: {
@@ -295,16 +297,31 @@ export default defineComponent({
       selectedAccount.value = getAccountByProtocolAndAddress(protocol as Protocol, address);
     }
 
+    // Not one given to a more secure page: an `http:` page can't take what `https:` was given
     const permission = computed(() => {
-      const host = popupProps.value?.app?.host;
-      return (host) ? permissions.value[host] : undefined;
+      const href = popupProps.value?.app?.href;
+      return (href) ? getPermissionForUrl(href) : undefined;
     });
 
+    // A WalletConnect dapp's permission is never saved, so there is nothing to remember
+    const isSelfReported = computed(() => popupProps.value?.app?.originSource === 'self-reported');
+
+    // A chain switch doesn't change whether the site is remembered
+    const isRememberMeKept = computed(
+      () => !!popupProps.value?.isChainSwitch && !!permission.value,
+    );
+
     const trustedDapp = computed(() => {
-      const urlWithNoProtocol = prepareUrlToDisplay(popupProps.value?.app?.href);
-      return (urlWithNoProtocol)
-        ? TRUSTED_DAPPS.find(({ url }) => urlWithNoProtocol.startsWith(prepareUrlToDisplay(url)!))
-        : undefined;
+      const { href, originSource } = popupProps.value?.app || {};
+      if (!href || originSource === 'self-reported') {
+        return undefined;
+      }
+      try {
+        const { origin } = new URL(href);
+        return TRUSTED_DAPPS.find(({ url }) => new URL(url).origin === origin);
+      } catch {
+        return undefined;
+      }
     });
 
     const dappNameToDisplay = computed(
@@ -326,7 +343,9 @@ export default defineComponent({
     );
 
     function confirm() {
-      if (popupProps.value?.app?.host) {
+      // A WalletConnect session is approved by itself, apart from the site it claims to be
+      if (popupProps.value?.app?.host && !isSelfReported.value) {
+        const { originSource, ...app } = popupProps.value.app;
         /**
          * TODO: When a user disconnects, set the `rememberMe` permission to false
          * Currently, disconnecting through the dapp does not call the appropriate
@@ -334,10 +353,12 @@ export default defineComponent({
          * */
         addPermission({
           ...PERMISSION_DEFAULTS,
-          ...popupProps.value?.app,
+          ...app,
           ...permission.value,
-          name: permission.value?.name || popupProps.value.app.name || popupProps.value.app.host,
-          address: rememberMe.value,
+          name: permission.value?.name || app.name || app.host,
+          address: isRememberMeKept.value ? permission.value!.address : rememberMe.value,
+          // Not the scheme of the permission it replaces
+          protocol: app.protocol,
         });
       }
       if (selectedAccount.value) {
@@ -358,7 +379,10 @@ export default defineComponent({
     });
 
     return {
+      isConfirmBlocked,
       rememberMe,
+      isRememberMeKept,
+      isSelfReported,
       accessList,
       popupProps,
       activeAccount,

@@ -38,6 +38,7 @@
       </div>
       <TransferQRCodeGenerator
         v-if="isActiveAccountAirGap && !isMultisig"
+        ref="qrCodeGenerator"
         :transfer-data="displayTransferData"
       />
     </template>
@@ -218,7 +219,7 @@ import { useAeGaMetaParams } from '@/protocols/aeternity/composables/aeGaMetaPar
 import {
   aeToAettos,
   aettosToAe,
-  isAccountNotFoundError,
+  fetchAccountNextNonce,
 } from '@/protocols/aeternity/helpers';
 import {
   getAdjustedTransferTotal,
@@ -254,7 +255,6 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     recipientAddress: { type: String, default: null },
-    amount: { type: Number, default: null },
     isMultisig: Boolean,
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
@@ -285,6 +285,7 @@ export default defineComponent({
     } = useFungibleTokens();
     const { gaMetaParams } = useAeGaMetaParams();
 
+    const qrCodeGenerator = ref<InstanceType<typeof TransferQRCodeGenerator>>();
     const loading = ref<boolean>(false);
     const feeInput = ref(new BigNumber(props.transferData.fee || 0).toFixed());
     const nonceInput = ref(props.transferData.nonce?.toString() || '');
@@ -450,17 +451,16 @@ export default defineComponent({
       nonceInput.value = value;
     }
 
+    function copyQrCode() {
+      qrCodeGenerator.value?.copyAsSingleQR();
+    }
+
     async function fetchCurrentAccountNonce() {
       const aeSdk = await getAeSdk();
-      try {
-        const { nonce } = await aeSdk.api.getAccountByPubkey(activeAccount.value.address);
-        return nonce + 1;
-      } catch (error) {
-        if (isAccountNotFoundError(error)) {
-          return 1;
-        }
-        throw error;
-      }
+      return fetchAccountNextNonce(
+        aeSdk.api,
+        activeAccount.value.address as Encoded.AccountAddress,
+      );
     }
 
     async function openTransactionFailedModal(msg: string) {
@@ -476,7 +476,7 @@ export default defineComponent({
       address: Encoded.ContractAddress,
       posAddress: string,
       invoiceId: string,
-      amount: number,
+      amount: string,
       options: ContractInitializeOptions,
     ) {
       const aeSdk = await getAeSdk();
@@ -486,7 +486,7 @@ export default defineComponent({
         address,
       });
       return tokenContract.burn_trigger_pos(
-        amount.toFixed(),
+        amount,
         posAddress,
         invoiceId,
         options,
@@ -502,12 +502,12 @@ export default defineComponent({
       try {
         let actionResult;
 
-        if (props.transferData.invoiceId !== null) {
+        if (props.transferData.invoiceId != null) {
           actionResult = await burnTriggerPoS(
             selectedAsset.contractId as Encoded.ContractAddress,
-            new BigNumber(amount).toFixed().toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
+            new BigNumber(amount).toFixed(),
             {
               waitMined: false,
               nonce,
@@ -530,7 +530,7 @@ export default defineComponent({
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-          actionResult = await aeternityAdapter.spend(Number(amount), recipient, {
+          actionResult = await aeternityAdapter.spend(new BigNumber(amount).toFixed(), recipient, {
             payload: props.transferData.payload,
             waitMined: false,
             nonce,
@@ -573,6 +573,7 @@ export default defineComponent({
 
     async function sendTip({
       amount,
+      amountRaw,
       recipient,
       selectedAsset,
       note,
@@ -583,15 +584,12 @@ export default defineComponent({
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tippingV2 || tippingV1;
         if (selectedAsset.contractId !== AE_CONTRACT_ID && tippingV2) {
-          await createOrChangeAllowance(
-            selectedAsset.contractId,
-            props.amount,
-          );
+          await createOrChangeAllowance(selectedAsset.contractId, amountRaw);
           txResult = await tippingV2.tip_token(
             recipient,
             escapeSpecialChars(note),
             selectedAsset.contractId,
-            amount,
+            new BigNumber(amount).toFixed(),
           );
         } else {
           txResult = await tippingContract.tip(
@@ -701,32 +699,39 @@ export default defineComponent({
       } else if (props.isAddressUrl) {
         await sendTip({
           amount,
+          amountRaw,
           recipient: recipients[0],
           selectedAsset,
           note,
         });
       } else {
-        let hash;
+        let lastHash;
+        // Fees are whole aettos; rounding down keeps the total within the entered fee.
         const customFee = effectiveTransferData.fee
-          ? aeToAettos(
-            new BigNumber(effectiveTransferData.fee).dividedBy(recipients.length || 1),
-          )
+          ? new BigNumber(aeToAettos(effectiveTransferData.fee))
+            .dividedToIntegerBy(recipients.length || 1)
+            .toFixed()
           : undefined;
         let currentNonce = effectiveTransferData.nonce || await fetchCurrentAccountNonce();
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           // eslint-disable-next-line no-await-in-loop
-          hash = await transfer({
+          const hash = await transfer({
             amount,
             recipient,
             selectedAsset,
             nonce: currentNonce,
             fee: customFee,
           });
+          // A later nonce would stay pending until the gap is filled by a retry.
+          if (!hash) {
+            break;
+          }
+          lastHash = hash;
           currentNonce += 1;
         }
-        if (hash) {
-          router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
+        if (lastHash) {
+          router.push({ name: homeRouteName.value, query: { latestTxHash: lastHash } });
         }
       }
     }
@@ -777,6 +782,8 @@ export default defineComponent({
       handleFeeInput,
       handleNonceInput,
       showTotal,
+      qrCodeGenerator,
+      copyQrCode,
       submit,
     };
   },

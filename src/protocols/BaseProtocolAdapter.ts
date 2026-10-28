@@ -167,7 +167,7 @@ export abstract class BaseProtocolAdapter {
   abstract discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number>;
 
   abstract constructAndSignTx(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<any>;
@@ -226,7 +226,7 @@ export abstract class BaseProtocolAdapter {
    * @param options Protocol specific parameters
    */
   abstract spend(
-    amount: number,
+    amount: number | string,
     recipient: string,
     options: Record<string, any>,
   ): Promise<ITransferResponse>;

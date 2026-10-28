@@ -5,16 +5,18 @@ import {
   connectionProxy,
 } from '@aeternity/aepp-sdk';
 
-import type { IEthRpcMethodParameters } from '@/protocols/ethereum/types';
 import type { BackgroundMethod } from '@/types';
 import {
-  ETH_RPC_ETHERSCAN_PROXY_METHODS,
+  ETH_CONTENT_SCRIPT_METHODS,
   ETH_RPC_METHODS,
+  ETH_RPC_NODE_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
 import browser from 'webextension-polyfill';
 
 const connectedDapps: Record<string, any> = {};
+/** Whether the wallet gave this page accounts, so it may hear when they change */
+let hasAccounts = false;
 
 window.browser = browser;
 
@@ -48,7 +50,7 @@ const runContentScript = () => {
   async function handleEthRpcRequest(
     event: any,
     method: BackgroundMethod,
-    params: IEthRpcMethodParameters,
+    params: unknown,
   ) {
     const { result, error }: any = await sendToOffscreen(method, {
       rpcMethodParams: params,
@@ -56,6 +58,15 @@ const runContentScript = () => {
     });
     if (!connectedDapps[event.origin]) {
       connectedDapps[event.origin] = event.source;
+    }
+    if (
+      (method === ETH_RPC_METHODS.requestAccounts || method === ETH_RPC_METHODS.getAccounts)
+      && Array.isArray(result) && result.length
+    ) {
+      hasAccounts = true;
+    }
+    if (method === ETH_RPC_METHODS.revokePermissions && !error) {
+      hasAccounts = false;
     }
     event.source.postMessage({
       jsonrpc: '2.0',
@@ -80,36 +91,16 @@ const runContentScript = () => {
       }
       let { method } = event.data;
       if (!method) method = 'pageMessage';
+      // A `String` object slips past the checks below and turns into a string on the way out
+      if (typeof method !== 'string') return;
+      // Its answer is for this script, a page asking it would learn the active account
+      if (Object.values(ETH_CONTENT_SCRIPT_METHODS).includes(method as any)) return;
 
-      if (method === ETH_RPC_METHODS.getBalance) {
-        handleEthRpcRequest(event, method, { address: event.data.params[0] });
-      } else if (method === ETH_RPC_METHODS.signPersonal) {
-        handleEthRpcRequest(event, method, { data: event.data.params?.[0] });
-      } else if (
-        method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionByHash
-        || method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getTransactionReceipt
+      if (
+        event.data.superheroWalletRequest
+        || Object.values(ETH_RPC_METHODS).includes(method)
+        || Object.values(ETH_RPC_NODE_METHODS).includes(method)
       ) {
-        handleEthRpcRequest(event, method, { txhash: event.data.params?.[0] });
-      } else if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getBlockByNumber) {
-        handleEthRpcRequest(event, method, {
-          tag: event.data.params?.[0],
-          boolean: event.data.params?.[1],
-        });
-      } else if (method === ETH_RPC_ETHERSCAN_PROXY_METHODS.getUncleByBlockNumberAndIndex) {
-        handleEthRpcRequest(event, method, {
-          tag: event.data.params?.[0],
-          index: event.data.params?.[1],
-        });
-      } else if (
-        Object.values(ETH_RPC_METHODS).includes(method)
-        || Object.values(ETH_RPC_ETHERSCAN_PROXY_METHODS).includes(method)
-      ) {
-        handleEthRpcRequest(event, method, {
-          ...(event.data.params?.[0] || {}),
-          ...(event.data.params?.[1] && !event.data.params?.[0]?.tag
-            ? { tag: event.data.params[1] } : {}),
-        });
-      } else if (event.data.superheroWalletRequest) {
         handleEthRpcRequest(event, method, event.data.params);
       } else if (!event.data.resolve) {
         sendToOffscreen(method, event.data);
@@ -117,20 +108,32 @@ const runContentScript = () => {
     },
     false,
   );
+  function postWalletEvent(method: string, result: unknown) {
+    Object.entries(connectedDapps).forEach(([origin, source]) => {
+      source.postMessage({
+        jsonrpc: '2.0',
+        result,
+        method,
+        superheroWalletApproved: true,
+        type: 'result',
+      }, origin as any);
+    });
+  }
+
   browser.runtime.onMessage.addListener(({ method, result }: any): undefined => {
-    if (
-      method === ETH_RPC_WALLET_EVENTS.chainChanged
-      || method === ETH_RPC_WALLET_EVENTS.accountsChanged
-    ) {
-      Object.entries(connectedDapps).forEach(([origin, source]) => {
-        source.postMessage({
-          jsonrpc: '2.0',
-          result,
-          method,
-          superheroWalletApproved: true,
-          type: 'result',
-        }, origin as any);
-      });
+    if (method === ETH_RPC_WALLET_EVENTS.chainChanged) {
+      postWalletEvent(method, result);
+    } else if (method === ETH_RPC_WALLET_EVENTS.accountsChanged && hasAccounts) {
+      // The page may see only the accounts it is permitted: a site removed meanwhile gets no
+      // accounts and no further events.
+      sendToOffscreen(ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts, {})
+        .then((response: any) => {
+          const permittedAccounts = Array.isArray(response?.result) ? response.result : [];
+          if (!permittedAccounts.length) {
+            hasAccounts = false;
+          }
+          postWalletEvent(method, permittedAccounts);
+        });
     }
     return undefined;
   });

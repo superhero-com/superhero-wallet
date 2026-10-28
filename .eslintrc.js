@@ -1,3 +1,7 @@
+// An override replaces the rule's options, so airbnb's own restrictions are kept.
+const [, ...airbnbRestrictedProperties] = require('eslint-config-airbnb-base/rules/best-practices')
+  .rules['no-restricted-properties'];
+
 module.exports = {
   root: true,
   parserOptions: {
@@ -17,6 +21,7 @@ module.exports = {
     '@vue/eslint-config-airbnb',
     '@vue/eslint-config-typescript',
   ],
+  plugins: ['@stylistic'],
   // check if imports actually resolve
   settings: {
     'vue-i18n': {
@@ -62,16 +67,29 @@ module.exports = {
     'vue/no-v-model-argument': 'off',
     'vue/no-reserved-component-names': 'off',
     'vue/singleline-html-element-content-newline': 'off',
-    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
-    '@typescript-eslint/member-delimiter-style': ['error'],
+    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true, caughtErrors: 'none' }],
+    '@stylistic/member-delimiter-style': ['error'],
 
     // TODO: https://github.com/superhero-com/superhero-wallet/issues/2857
     'vuejs-accessibility/click-events-have-key-events': 'off',
   },
   overrides: [
     {
+      files: ['tests/**/*.{js,ts}'],
+      rules: {
+        'no-restricted-properties': ['error', ...airbnbRestrictedProperties, ...[
+          'describe', 'context', 'it', 'test',
+        ].map((object) => ({
+          object,
+          property: 'only',
+          message: 'A focused test skips all the others; remove .only.',
+        }))],
+      },
+    },
+    {
       files: [
         '**/tests/unit/**/*.spec.{j,t}s?(x)',
+        '**/tests/unit/helpers/**/*.{j,t}s',
       ],
       env: {
         jest: true,

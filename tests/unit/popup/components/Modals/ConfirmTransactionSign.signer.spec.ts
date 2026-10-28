@@ -1,5 +1,10 @@
-import { computed, ref } from 'vue';
-import { flushPromises, mount } from '@vue/test-utils';
+import { computed } from 'vue';
+import {
+  config,
+  enableAutoUnmount,
+  flushPromises,
+  mount,
+} from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import {
   AccountMemory,
@@ -10,6 +15,7 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
+import type { IAppData } from '@/types';
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
 import {
   useAccounts,
@@ -21,16 +27,13 @@ import {
 } from '@/composables';
 import {
   ACCOUNT_TYPES,
+  MODAL_LEDGER_SIGN,
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
 } from '@/constants';
+import { createAppData } from '@/utils';
+import { EtherscanService } from '@/protocols/ethereum/libs/EtherscanService';
 import en from '@/popup/locales/en-US.json';
-
-// The Air Gap branch of `confirm()` only runs inside the popup.
-vi.mock('@/constants', async (importOriginal) => ({
-  ...await importOriginal<any>(),
-  RUNNING_IN_POPUP: true,
-}));
 
 /**
  * A transaction carries its sender, so only the account it was built for can
@@ -63,11 +66,19 @@ const accountAirGap = {
   globalIdx: 2,
   type: ACCOUNT_TYPES.airGap,
 };
+const ADDRESS_LEDGER = AccountMemory.generate().address;
+const accountLedger = {
+  protocol: PROTOCOLS.aeternity,
+  address: ADDRESS_LEDGER,
+  idx: 3,
+  globalIdx: 4,
+  type: ACCOUNT_TYPES.ledger,
+};
 const ADDRESS_EVM = '0x1111111111111111111111111111111111111111';
 const accountEvm = {
   protocol: PROTOCOLS.ethereum, address: ADDRESS_EVM, idx: 0, globalIdx: 3, type: 'hd-wallet',
 };
-const walletAccounts = [accountActive, accountPrepared, accountAirGap, accountEvm];
+const walletAccounts = [accountActive, accountPrepared, accountAirGap, accountLedger, accountEvm];
 
 /** A real SpendTx, encoded, sent by `senderId`. */
 const buildSpendTxFor = (senderId: Encoded.AccountAddress) => buildTx({
@@ -94,12 +105,12 @@ const buildContractCallTxFor = (callerId: Encoded.AccountAddress) => buildTx({
   callData: 'cb_KxFE1kQfP4oEp9E=',
 }) as Encoded.Transaction;
 
-vi.mock('@/composables', () => ({
+vi.mock('@/composables', async () => ({
   useAccounts: vi.fn(),
   useAeSdk: vi.fn(),
   useFungibleTokens: vi.fn(),
   useModals: vi.fn(),
-  usePopupProps: vi.fn(),
+  usePopupProps: (await vi.importActual<any>('@/composables/popupProps')).usePopupProps,
   useTransactionData: vi.fn(),
 }));
 
@@ -115,6 +126,9 @@ vi.mock('@/protocols/aeternity/composables/aeTokenSales', () => ({
     tokenSaleAddressToTokenContractAddress: vi.fn(),
   })),
 }));
+
+// Unmounting clears the shared popup props, as it does in the app.
+enableAutoUnmount(afterEach);
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 
@@ -173,22 +187,19 @@ function mountModal(
   });
   getBalance = vi.fn(async () => '1000000000000000000000');
 
-  // @ts-ignore
-  (usePopupProps as vi.Mock).mockReturnValue({
-    isUnknownDapp: computed(() => false),
-    setPopupProps: vi.fn(),
-    popupProps: ref({
-      protocol: PROTOCOLS.aeternity,
-      txBase64: buildSpendTxFor(preparedFor),
-      tx: { fee: '20000000000000', amount: '1000000000000000000' },
-      app: {
-        host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
-      },
-      resolve,
-      reject: vi.fn(),
-      ...popupPropsOverrides,
-    }),
-  });
+  usePopupProps().setPopupProps({
+    protocol: PROTOCOLS.aeternity,
+    txBase64: buildSpendTxFor(preparedFor),
+    tx: { fee: '20000000000000', amount: '1000000000000000000' },
+    app: {
+      host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
+    },
+    // A dapp request, signed in the offscreen document behind the modal.
+    isOffscreenRequest: true,
+    resolve,
+    reject: vi.fn(),
+    ...popupPropsOverrides,
+  } as any);
 
   // @ts-ignore
   (useAccounts as vi.Mock).mockReturnValue({
@@ -479,6 +490,68 @@ describe('ConfirmTransactionSign.vue rebuilding for another signer', () => {
   });
 });
 
+/**
+ * The offscreen document that signs a dapp request has no UI, so the modal
+ * walks the user through the device. In the app the signer does that itself,
+ * and the modal doing it as well would prompt twice.
+ */
+describe('ConfirmTransactionSign.vue hardware wallets', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const devices = [
+    ['Ledger', ADDRESS_LEDGER, MODAL_LEDGER_SIGN],
+    ['Air Gap', ADDRESS_AIR_GAP, MODAL_SIGN_AIR_GAP_TRANSACTION],
+  ] as const;
+  const openedModals = () => openModal.mock.calls.map(([name]) => name);
+
+  it.each(devices)('drives the %s device for a dapp request', async (_device, address, modal) => {
+    const wrapper = mountModal(address);
+    await flushPromises();
+
+    await (wrapper.vm as any).confirm();
+
+    expect(openedModals()).toEqual([modal]);
+    expect(resolve).toHaveBeenCalledWith(expect.objectContaining({ selectedAddress: address }));
+  });
+
+  it.each(devices)('leaves the %s device to the signer in the app', async (_device, address) => {
+    const wrapper = mountModal(address, { isOffscreenRequest: false });
+    await flushPromises();
+
+    await (wrapper.vm as any).confirm();
+
+    expect(openedModals()).toEqual([]);
+    expect(resolve).toHaveBeenCalledWith(expect.objectContaining({ selectedAddress: address }));
+  });
+});
+
+describe('ConfirmTransactionSign.vue dapp label', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const mountEvmFrom = (app: IAppData) => mountModal(ADDRESS_PREPARED, {
+    protocol: PROTOCOLS.ethereum,
+    txBase64: undefined,
+    tx: { senderId: ADDRESS_EVM, fee: '21000', amount: '1000000000000000000' },
+    fromAccount: ADDRESS_EVM,
+    app,
+  });
+  const shownAppName = (wrapper: any) => wrapper.find('.app-name').text();
+
+  it('labels a transaction from Superhero Chat', async () => {
+    const wrapper = mountEvmFrom(createAppData('https://chat.superhero.com'));
+    await flushPromises();
+
+    expect(shownAppName(wrapper)).toBe(en.modals.confirmTransactionSign.superheroChat);
+  });
+
+  it('shows a self-reported Superhero Chat URL under its own host', async () => {
+    const wrapper = mountEvmFrom(createAppData('https://chat.superhero.com', 'self-reported'));
+    await flushPromises();
+
+    expect(shownAppName(wrapper)).toBe('chat.superhero.com');
+  });
+});
+
 describe('ConfirmTransactionSign.vue contract-call verification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -614,5 +687,62 @@ describe('ConfirmTransactionSign.vue contract-call verification', () => {
 
     expect((wrapper.vm as any).error).not.toBe('');
     expect(isAcceptDisabled(wrapper)).toBe(true);
+  });
+});
+
+describe('ConfirmTransactionSign.vue EVM call data', () => {
+  const TOKEN = '0x55d398326f99059fF775485246999027B3197955';
+  const SPENDER = '0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af';
+  const pad = (hex: string) => hex.replace(/^0x/, '').toLowerCase().padStart(64, '0');
+  let etherscanCalls: any[];
+
+  beforeEach(() => {
+    // The call data sits in the advanced details
+    config.global.renderStubDefaultSlot = true;
+    etherscanCalls = [];
+    vi.spyOn(EtherscanService.prototype, 'fetchFromApi').mockImplementation(
+      async function fetchFromApi(this: any, params: any) {
+        etherscanCalls.push({ chainId: this.chainId, ...params });
+        return { status: '0', message: 'NOTOK', result: '' } as any;
+      },
+    );
+  });
+
+  afterEach(() => {
+    config.global.renderStubDefaultSlot = false;
+    vi.restoreAllMocks();
+  });
+
+  const mountEvmCall = (data: string) => mountModal(ADDRESS_PREPARED, {
+    protocol: PROTOCOLS.bnb,
+    txBase64: undefined,
+    tx: {
+      senderId: ADDRESS_EVM, contractId: TOKEN, data, fee: 0.000021, amount: 0,
+    },
+    fromAccount: ADDRESS_EVM,
+  });
+
+  const getCallDataDetails = (wrapper: any) => wrapper.findComponent({ name: 'TransactionCallDataDetails' });
+
+  it('shows the spender and the amount of an approval', async () => {
+    const wrapper = mountEvmCall(`0x095ea7b3${pad(SPENDER)}${'f'.repeat(64)}`);
+    await flushPromises();
+
+    const decoded = getCallDataDetails(wrapper).props('callDataDecoded');
+    expect(decoded.functionName).toBe('approve');
+    expect(decoded.args[0]).toBe(SPENDER);
+    expect(decoded.args[1]).toBe(2n ** 256n - 1n);
+    expect(etherscanCalls).toEqual([]);
+  });
+
+  it('asks the explorer of the chain of the transaction for another contract', async () => {
+    // swapExactTokensForTokens
+    const wrapper = mountEvmCall(`0x38ed1739${'0'.repeat(64)}`);
+    await flushPromises();
+
+    expect(etherscanCalls).toEqual([
+      expect.objectContaining({ chainId: '56', action: 'getabi', address: TOKEN }),
+    ]);
+    expect(getCallDataDetails(wrapper).props('callDataDecoded')).toBeNull();
   });
 });

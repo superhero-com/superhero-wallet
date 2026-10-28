@@ -8,6 +8,7 @@ import {
   useAccounts,
   useAuth,
   useModals,
+  useNotifications,
   useUi,
 } from '@/composables';
 import { StoredWalletFoundError } from '@/lib/errors';
@@ -22,6 +23,7 @@ vi.mock('@/composables', () => ({
   useAccounts: vi.fn(),
   useAuth: vi.fn(),
   useModals: vi.fn(),
+  useNotifications: vi.fn(),
   useUi: vi.fn(),
 }));
 const routerPush = vi.fn();
@@ -48,11 +50,13 @@ async function importSeed({
   discoverAccounts = vi.fn().mockResolvedValue(true),
 } = {}) {
   const deps = {
+    addWalletNotification: vi.fn(),
     discoverAccounts,
     resolve: vi.fn(),
     setBackedUpSeed: vi.fn(),
   };
   useAccounts.mockReturnValue({ discoverAccounts: deps.discoverAccounts });
+  useNotifications.mockReturnValue({ addWalletNotification: deps.addWalletNotification });
   useAuth.mockReturnValue({ setMnemonicAndInitializeAuthentication });
   useModals.mockReturnValue({ openScanQrModal: vi.fn() });
   useUi.mockReturnValue({
@@ -150,6 +154,29 @@ describe('AccountImport while restoring the accounts of the imported seed', () =
 
     finishDiscovery(true);
     await flushPromises();
+    expect(resolve).toHaveBeenCalled();
+    expect(routerPush).toHaveBeenCalledWith({ name: 'account' });
+  });
+});
+
+describe('AccountImport restoring the accounts of the imported seed', () => {
+  it('restores the accounts, and says nothing when it completes', async () => {
+    const { discoverAccounts, addWalletNotification } = await importSeed();
+
+    expect(discoverAccounts).toHaveBeenCalledWith();
+    expect(addWalletNotification).not.toHaveBeenCalled();
+    expect(routerPush).toHaveBeenCalledWith({ name: 'account' });
+  });
+
+  it('says some accounts may be missing when it is incomplete', async () => {
+    const { addWalletNotification, resolve } = await importSeed({
+      discoverAccounts: vi.fn().mockResolvedValue(false),
+    });
+
+    expect(addWalletNotification).toHaveBeenCalledWith({
+      title: en.pages.index.restoreIncompleteTitle,
+      text: en.pages.index.restoreIncompleteText,
+    });
     expect(resolve).toHaveBeenCalled();
     expect(routerPush).toHaveBeenCalledWith({ name: 'account' });
   });

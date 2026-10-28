@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue';
 import type { IAccountOverview, IPopupProps } from '@/types';
+import { RUNNING_IN_POPUP } from '@/constants';
 
 const popupProps = ref<IPopupProps | null>(null);
 
@@ -20,7 +21,12 @@ export function usePopupProps() {
 
   const isUnknownDapp = computed(() => !popupProps.value?.app?.href);
 
+  const isOffscreenRequest = computed(
+    () => RUNNING_IN_POPUP || !!popupProps.value?.isOffscreenRequest,
+  );
+
   return {
+    isOffscreenRequest,
     isUnknownDapp,
     popupProps,
     sender,

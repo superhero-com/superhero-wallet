@@ -1,12 +1,13 @@
 /**
- * [BLACK-BOX] Polygon & BNB ERC-20 transfer encoding: token-decimals scaling and gas
- * headroom.
+ * [BLACK-BOX] EVM legacy ERC-20 transfer encoding: token-decimals scaling and gas
+ * headroom for Polygon, BNB, and Avalanche.
  *
- * Both adapters share one `loadAdapter()` - re-running the reset+doMock dance in one
+ * The adapters share one `loadAdapter()` - re-running the reset+doMock dance in one
  * file is unreliable (see tests/unit/protocols/ethereum/adapter-spend.spec.ts). RPC,
- * contract calls and broadcast are mocked; `web3-eth-accounts` signing stays real, so
- * only the built tx fields are observed.
+ * contract calls and broadcast are mocked; `web3-eth-accounts` signing stays real.
  */
+import { TransactionFactory } from 'web3-eth-accounts';
+import { hexToBytes } from 'web3-utils';
 import { PROTOCOLS, NETWORK_TYPE_MAINNET } from '@/constants';
 
 const SECRET_KEY = Buffer.alloc(32, 1);
@@ -22,6 +23,7 @@ const contractMockState = {
 
 /** Tx fields handed to the real signer, recorded per build. */
 const builtTxData: any[] = [];
+const broadcastSignedTransactionMock = vi.fn().mockResolvedValue(undefined);
 
 async function loadAdapter() {
   vi.resetModules();
@@ -29,10 +31,24 @@ async function loadAdapter() {
   vi.doMock('@/composables', () => ({
     useAccounts: () => ({
       getAccountByProtocolAndAddress: (protocol: string) => (
-        [PROTOCOLS.polygonPos, PROTOCOLS.bnb].includes(protocol as any)
+        [PROTOCOLS.polygonPos, PROTOCOLS.bnb, PROTOCOLS.avalanche].includes(protocol as any)
           ? { protocol, secretKey: SECRET_KEY }
           : undefined
       ),
+    }),
+  }));
+
+  vi.doMock('@/protocols/avalanche/composables/avalancheNetworkSettings', () => ({
+    useAvalancheNetworkSettings: () => ({
+      avalancheActiveNetworkSettings: {
+        value: {
+          chainId: '43114',
+          nodeUrl: 'http://localhost:9650/ext/bc/C/rpc',
+        },
+      },
+      avalancheActiveNetworkPredefinedSettings: {
+        value: { middlewareUrl: 'http://localhost/mdw' },
+      },
     }),
   }));
 
@@ -102,7 +118,7 @@ async function loadAdapter() {
   }));
 
   vi.doMock('@/protocols/evm/libs/broadcastSignedTransaction', () => ({
-    broadcastSignedTransaction: vi.fn().mockResolvedValue(undefined),
+    broadcastSignedTransaction: broadcastSignedTransactionMock,
   }));
 
   // The adapter signs with `new Transaction(...)`, so subclass rather than spy:
@@ -120,15 +136,17 @@ async function loadAdapter() {
 
   const { PolygonAdapter } = await import('@/protocols/polygonPos/libs/PolygonPosAdapter');
   const { BnbAdapter } = await import('@/protocols/bnb/libs/BnbAdapter');
-  return { PolygonAdapter, BnbAdapter };
+  const { AvalancheAdapter } = await import('@/protocols/avalanche/libs/AvalancheAdapter');
+  return { PolygonAdapter, BnbAdapter, AvalancheAdapter };
 }
 
 const adapters: Record<string, any> = {};
 
 beforeAll(async () => {
-  const { PolygonAdapter, BnbAdapter } = await loadAdapter();
+  const { PolygonAdapter, BnbAdapter, AvalancheAdapter } = await loadAdapter();
   adapters.Polygon = new PolygonAdapter();
   adapters.BNB = new BnbAdapter();
+  adapters.Avalanche = new AvalancheAdapter();
 });
 
 beforeEach(() => {
@@ -136,22 +154,25 @@ beforeEach(() => {
   contractMockState.estimateGas = 65000;
   contractMockState.transferCalls.length = 0;
   builtTxData.length = 0;
+  broadcastSignedTransactionMock.mockClear();
 });
 
 const transferToken = (
   name: string,
   amount: string,
+  options: { nonce?: number } = {},
 ) => adapters[name].transferToken(amount, RECIPIENT, TOKEN_CONTRACT, {
   fromAccount: FROM_ACCOUNT,
   maxPriorityFeePerGas: '0.000000002',
   maxFeePerGas: '0.00000003',
+  ...options,
 });
 
 const lastTransferAmount = () => BigInt(
   contractMockState.transferCalls.at(-1)!.amount as string,
 );
 
-describe.each(['Polygon', 'BNB'])('%s adapter transferToken', (name) => {
+describe.each(['Polygon', 'BNB', 'Avalanche'])('%s adapter transferToken', (name) => {
   it('scales the amount by a 6-decimal token\'s own decimals', async () => {
     contractMockState.decimals = 6;
 
@@ -183,5 +204,37 @@ describe.each(['Polygon', 'BNB'])('%s adapter transferToken', (name) => {
 
     const { gasLimit } = builtTxData.at(-1)!;
     expect(BigInt(gasLimit)).toBe(BigInt(74750));
+  });
+
+  it('signs with the nonce it is given, as for the next of several recipients', async () => {
+    await transferToken(name, '1', { nonce: 4 });
+
+    expect(Number(builtTxData.at(-1)!.nonce)).toBe(4);
+  });
+});
+
+describe('Avalanche adapter transferToken transaction', () => {
+  it('signs and broadcasts a legacy transaction with the expected token, fee, nonce, and chain', async () => {
+    contractMockState.decimals = 6;
+
+    const response = await transferToken('Avalanche', '1.5', { nonce: 4 });
+
+    expect(lastTransferAmount()).toBe(BigInt(1500000));
+    expect(contractMockState.transferCalls.at(-1)!.recipient).toBe(RECIPIENT);
+    expect(broadcastSignedTransactionMock).toHaveBeenCalledTimes(1);
+
+    const [web3Eth, raw] = broadcastSignedTransactionMock.mock.calls[0];
+    expect(web3Eth).toBeDefined();
+    expect(typeof raw).toBe('string');
+
+    const signedTx = TransactionFactory.fromSerializedData(hexToBytes(raw));
+    expect(response.hash).toBe(`0x${Buffer.from(signedTx.hash()).toString('hex')}`);
+    expect(signedTx.common.chainId()).toBe(BigInt(43114));
+    expect(signedTx.to?.toString()).toBe(TOKEN_CONTRACT);
+    expect(signedTx.value).toBe(BigInt(0));
+    expect(signedTx.nonce).toBe(BigInt(4));
+    expect(signedTx.gasPrice).toBe(BigInt(30000000000));
+    expect(signedTx.gasLimit).toBe(BigInt(74750));
+    expect(BigInt(builtTxData.at(-1)!.gasPrice)).toBe(BigInt(30000000000));
   });
 });

@@ -23,6 +23,22 @@ export class ImportedAccountsUnreadableError extends Error {
   }
 }
 
+/**
+ * A check failed or got no answer in time, with the accounts up to `lastUsedIndex` found used.
+ */
+export class AccountDiscoveryError extends Error {
+  reason: unknown;
+
+  lastUsedIndex: number;
+
+  constructor(reason: unknown, lastUsedIndex: number) {
+    super('Account discovery failed');
+    this.name = this.constructor.name;
+    this.reason = reason;
+    this.lastUsedIndex = lastUsedIndex;
+  }
+}
+
 export class NoUserMediaPermissionError extends Error {
   constructor() {
     super('No UserMedia permission');

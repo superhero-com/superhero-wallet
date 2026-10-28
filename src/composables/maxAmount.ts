@@ -145,15 +145,22 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
         ))?.callResult;
       }
 
-      if (val.address && !isNameValid(val.address) && isUrlValid(val.address)) {
-        const { tippingV1, tippingV2 } = await getTippingContracts();
-        const tippingContract = tippingV2 || tippingV1;
+      const recipient = val.addresses?.[0];
+      // A token tip is an allowance plus `tip_token`,
+      // and the token transfer above stands in for its price.
+      const isCoinTip = isAssetAe
+        && !!recipient
+        && !isNameValid(recipient)
+        && isUrlValid(recipient);
+      if (isCoinTip) {
         try {
+          const { tippingV1, tippingV2 } = await getTippingContracts();
+          const tippingContract = tippingV2 || tippingV1;
           callResult = await tippingContract.tip(
-            val.address ?? account.address,
+            recipient,
             STUB_TIP_NOTE,
             {
-              amount,
+              amount: amount.toFixed(),
               waitMined: false,
               callStatic: true,
             },
@@ -170,7 +177,9 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
         total.value = new BigNumber(callResult.result.gasUsed ?? 0)
           .multipliedBy(callResult.result.gasPrice.toString() ?? 0)
           .plus(aettosFee)
-          .shiftedBy(-AE_COIN_PRECISION);
+          .shiftedBy(-AE_COIN_PRECISION)
+          // Only a coin tip pays the amount out of the account's coins.
+          .plus(isCoinTip ? numericAmount : 0);
         fee.value = new BigNumber(aettosFee).shiftedBy(-AE_COIN_PRECISION);
         return;
       }
@@ -178,6 +187,9 @@ export function useMaxAmount({ formModel, multisigVault }: MaxAmountOptions) {
       if (isAssetAe && tokenInstance) {
         tokenInstance = null;
       }
+      // A spend uses no gas, so drop the gas of a tip or token transfer priced before.
+      gasUsed.value = 0;
+      gasPrice.value = 0;
 
       const minFee = BigNumber(unpackTx(
         await aeSdk.buildTx({

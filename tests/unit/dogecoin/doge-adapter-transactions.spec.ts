@@ -32,12 +32,29 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
       ],
     }];
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(list) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(list),
+    })) as any;
 
     const res = await adapter.fetchAccountTransactions('Addr');
+    expect((global.fetch as any).mock.calls[0][0]).toMatch(/\/address\/Addr\/txs$/);
     expect(res.regularTransactions.length).toBe(1);
     expect(res.paginationParams?.lastTxId).toBe('tx1');
     expect(res.regularTransactions[0].protocol).toBe('dogecoin');
+  });
+
+  it('requests the page after the last transaction and ends after an empty page', async () => {
+    // @ts-ignore
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve([]),
+    })) as any;
+
+    const res = await adapter.fetchAccountTransactions('Addr', { lastTxId: 'tx1' });
+    expect((global.fetch as any).mock.calls[0][0]).toMatch(/\/address\/Addr\/txs\/chain\/tx1$/);
+    expect(res.regularTransactions).toEqual([]);
+    expect(res.paginationParams?.lastTxId).toBeUndefined();
   });
 
   it('fetches single tx by hash and normalizes', async () => {
@@ -51,7 +68,10 @@ describe('DogecoinAdapter - transactions listing and pagination', () => {
       ],
     };
     // @ts-ignore
-    global.fetch = vi.fn(() => Promise.resolve({ json: () => Promise.resolve(tx) })) as any;
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(tx),
+    })) as any;
 
     const res = await adapter.fetchTransactionByHash('abc', 'S');
     expect(res.hash).toBe('abc');

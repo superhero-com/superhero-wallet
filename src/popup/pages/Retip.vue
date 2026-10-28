@@ -159,7 +159,7 @@ export default defineComponent({
       const precision = (formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID)
         ? (formModel.value.selectedAsset as IToken).decimals!
         : AE_COIN_PRECISION;
-      const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
+      const amount = toShiftedBigNumber(formModel.value.amount || 0, precision).toFixed();
       const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
       setLoaderVisible(true);
       try {
@@ -205,7 +205,7 @@ export default defineComponent({
           protocol: PROTOCOLS.aeternity,
           transactionOwner: account.address,
           tx: {
-            amount,
+            amount: Number(amount),
             callerId: account.address,
             contractId: tippingContract.$options.address!,
             type: Tag[Tag.ContractCallTx],

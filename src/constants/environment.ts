@@ -22,6 +22,12 @@ export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 export const POPUP_TYPE = url.searchParams.get('type') as PopupType || null;
 
 /**
+ * Running in the browser's side panel (Chrome) or sidebar (Firefox).
+ * The manifest opens them with the `sidepanel` query param.
+ */
+export const IS_SIDE_PANEL = PLATFORM === 'extension' && url.searchParams.has('sidepanel');
+
+/**
  * Running in a web frame, eg.: as a widget on the Superhero.com or in the Dex.
  * In this case we need to handle some UI actions differently.
  */

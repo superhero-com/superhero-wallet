@@ -1,14 +1,15 @@
 import { computed, ref } from 'vue';
-import { uniqBy } from 'lodash-es';
+import { isEqual, uniqBy } from 'lodash-es';
 import type {
   AccountAddress,
   AssetContractId,
   ICommonTransaction,
+  IFetchTransactionResult,
   ITransactionApiPaginationParams,
   Protocol,
 } from '@/types';
 import { POLLING_INTERVAL_TRANSACTIONS, STORAGE_KEYS } from '@/constants';
-import { objectHasNonEmptyProperties } from '@/utils';
+import { handleUnknownError, objectHasNonEmptyProperties } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useConnection } from './connection';
 import { useUi } from './ui';
@@ -64,6 +65,11 @@ export function useTransactionList({
   protocol,
 }: UseTransactionListOptions) {
   let pollingIntervalId: NodeJS.Timeout | undefined;
+  /** Time before which a failed page is not requested again */
+  let retryAfter = 0;
+  let retryTimeoutId: NodeJS.Timeout | undefined;
+  /** A request still running when polling stops doesn't retry */
+  let isStopped = false;
   const isLoading = ref(false);
 
   const { isOnline } = useConnection();
@@ -97,6 +103,13 @@ export function useTransactionList({
     };
   }
 
+  /** Another list (account, asset or network) uses the shared state */
+  function isStateOfAnotherList() {
+    return accountAddress !== state.value.accountAddress
+      || assetContractId !== state.value.assetContractId
+      || activeNetwork.value.name !== state.value.networkName;
+  }
+
   function fetchTransactions(paginationParams?: ITransactionApiPaginationParams) {
     return (assetContractId)
       ? adapter.fetchAccountAssetTransactions(accountAddress, assetContractId, paginationParams)
@@ -104,18 +117,31 @@ export function useTransactionList({
   }
 
   async function loadCurrentPageTransactions() {
-    if (isOnline.value && !isLoading.value && !state.value.isEndReached) {
-      isLoading.value = true;
+    if (
+      !isOnline.value
+      || isLoading.value
+      || state.value.isEndReached
+      || Date.now() < retryAfter
+      // Load-more fires again when `isLoading` turns false, a discarded page would loop
+      || isStateOfAnotherList()
+    ) {
+      return;
+    }
+    isLoading.value = true;
+    const requestedPaginationParams = state.value.nextPagePaginationParams;
 
+    try {
       const {
         paginationParams,
         regularTransactions,
         pendingTransactions,
-      } = await fetchTransactions(state.value.nextPagePaginationParams);
+      } = await fetchTransactions(requestedPaginationParams);
 
-      if (accountAddress !== state.value.accountAddress
-        || assetContractId !== state.value.assetContractId
-        || activeNetwork.value.name !== state.value.networkName) {
+      if (
+        isStateOfAnotherList()
+        // The polling started the list again meanwhile, this page would leave a gap
+        || !isEqual(state.value.nextPagePaginationParams, requestedPaginationParams)
+      ) {
         return;
       }
 
@@ -124,7 +150,11 @@ export function useTransactionList({
       // page load instead of once per field.
       const next = { ...state.value };
 
-      if (objectHasNonEmptyProperties(paginationParams)) {
+      if (
+        objectHasNonEmptyProperties(paginationParams)
+        // The same page again would be requested forever
+        && !isEqual(paginationParams, requestedPaginationParams)
+      ) {
         next.nextPagePaginationParams = paginationParams;
       } else {
         next.isEndReached = true;
@@ -146,39 +176,65 @@ export function useTransactionList({
 
       next.isInitialLoadDone = true;
       state.value = next;
-
+    } catch (error) {
+      handleUnknownError(error);
+      // Load-more fires again as soon as `isLoading` turns false
+      retryAfter = Date.now() + POLLING_INTERVAL_TRANSACTIONS;
+      // Nothing else asks for a next page again unless the user scrolls. The polling asks for
+      // the first one.
+      if (!isStopped && objectHasNonEmptyProperties(requestedPaginationParams)) {
+        const retry = () => {
+          if (isStopped) return;
+          // Not while the app is hidden, like the polling of the first page
+          if (isAppActive.value && isOnline.value) {
+            // The timer waited already, a clock set back would keep the page out
+            retryAfter = 0;
+            loadCurrentPageTransactions();
+          } else {
+            retryTimeoutId = setTimeout(retry, POLLING_INTERVAL_TRANSACTIONS);
+          }
+        };
+        clearTimeout(retryTimeoutId);
+        retryTimeoutId = setTimeout(retry, POLLING_INTERVAL_TRANSACTIONS);
+      }
+    } finally {
       isLoading.value = false;
     }
   }
 
   async function initializeTransactionListPolling() {
+    isStopped = false;
     if (!state.value.isInitialLoadDone || !transactionsLoaded.value.length) {
       if (state.value.isInitialLoadDone && !transactionsLoaded.value.length) {
         resetState();
       }
       await loadCurrentPageTransactions();
-      if (
-        accountAddress !== state.value.accountAddress
-        || assetContractId !== state.value.assetContractId
-        || activeNetwork.value.name !== state.value.networkName
-      ) {
-        isLoading.value = false;
+      if (isStateOfAnotherList()) {
         return;
       }
     }
 
     pollingIntervalId = setInterval(async () => {
+      // The check after the request isn't reached while requests fail
+      if (isStateOfAnotherList()) {
+        clearInterval(pollingIntervalId);
+        return;
+      }
       if (isAppActive.value) {
+        let response: IFetchTransactionResult;
+        try {
+          response = await fetchTransactions();
+        } catch (error) {
+          handleUnknownError(error);
+          return;
+        }
         const {
           paginationParams,
           regularTransactions,
           pendingTransactions,
-        } = await fetchTransactions();
+        } = response;
 
-        if (accountAddress !== state.value.accountAddress
-          || assetContractId !== state.value.assetContractId
-          || activeNetwork.value.name !== state.value.networkName) {
-          isLoading.value = false;
+        if (isStateOfAnotherList()) {
           clearInterval(pollingIntervalId);
           return;
         }
@@ -200,6 +256,8 @@ export function useTransactionList({
             ],
             nextPagePaginationParams: paginationParams,
             isEndReached: false,
+            // Also when the first load failed
+            isInitialLoadDone: true,
           };
         }
       }
@@ -207,14 +265,12 @@ export function useTransactionList({
   }
 
   function stopTransactionListPolling() {
+    isStopped = true;
     clearInterval(pollingIntervalId);
+    clearTimeout(retryTimeoutId);
   }
 
-  if (
-    state.value.accountAddress !== accountAddress
-    || state.value.assetContractId !== assetContractId
-    || state.value.networkName !== activeNetwork.value.name
-  ) {
+  if (isStateOfAnotherList()) {
     resetState();
   }
 

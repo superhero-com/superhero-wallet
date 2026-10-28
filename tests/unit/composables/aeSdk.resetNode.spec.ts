@@ -86,7 +86,7 @@ describe('useAeSdk().resetNode', () => {
     }));
     vi.doMock('@/composables/accounts', () => ({
       useAccounts: () => ({
-        accountsAddressList: ref([]),
+        aeAccounts: ref([]),
         getLastActiveProtocolAccount: vi.fn(),
         onAccountChange: vi.fn(),
       }),

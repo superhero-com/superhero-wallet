@@ -95,6 +95,7 @@ import {
   useAuth,
   useConnection,
   useCurrencies,
+  useInvites,
   useLanguages,
   useModals,
   useMultisigAccounts,
@@ -146,6 +147,8 @@ export default defineComponent({
     } = useAeNames({ pollingDisabled: true });
     const { topBlockHeight } = useTopHeaderData();
     const { navigateBack } = usePageNavigation();
+    // Moves the plaintext invites of older versions to the encrypted storage.
+    useInvites();
 
     const innerElement = ref<HTMLDivElement>();
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
@@ -269,7 +272,10 @@ export default defineComponent({
         }
         StatusBar.setStyle({ style: Style.Dark });
         setMobileStatusBarColor(IS_ANDROID ? '#000000' : '#141414');
-        window.screen.orientation?.lock?.('portrait');
+        // iOS uses Info.plist: portrait on iPhone, all orientations on iPad.
+        if (IS_ANDROID) {
+          window.screen.orientation?.lock?.('portrait');
+        }
       }
     });
 
