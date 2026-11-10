@@ -231,6 +231,7 @@ export function useModals() {
   function openBiometricLoginModal(options?: IModalProps & {
     force?: boolean;
     deferAuthStateUpdate?: boolean;
+    isLockScreen?: boolean;
   }) {
     return openModal(MODAL_BIOMETRIC_LOGIN, options);
   }

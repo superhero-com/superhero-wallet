@@ -7,7 +7,7 @@
     centered
     transparent
     @close="handleClose"
-    @click="initAuthenticate"
+    @click="initAuthenticate()"
   >
     <div class="content-wrapper">
       <div class="icon-wrapper">
@@ -44,10 +44,11 @@ import {
   ref,
   watch,
   defineComponent,
+  onMounted,
   PropType,
 } from 'vue';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { useAuth } from '@/composables';
+import { useAuth, useUi } from '@/composables';
 import { RejectedByUserError } from '@/lib/errors';
 
 import Modal from '../Modal.vue';
@@ -66,14 +67,20 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
     force: Boolean,
     deferAuthStateUpdate: Boolean,
+    /**
+     * Opened by `checkUserAuth`, so it may prompt without a tap, see
+     * `claimLockScreenAutoPrompt`.
+     */
+    isLockScreen: Boolean,
   },
   setup(props) {
     const isAuthCanceled = ref(false);
     const isAuthenticating = ref(false);
 
-    const { authenticateWithBiometry, isAuthenticated } = useAuth();
+    const { authenticateWithBiometry, claimLockScreenAutoPrompt, isAuthenticated } = useAuth();
+    const { isAppActive } = useUi();
 
-    async function initAuthenticate() {
+    async function initAuthenticate({ isAutoPrompt = false } = {}) {
       if (isAuthenticating.value || (isAuthenticated.value && !props.force)) {
         return;
       }
@@ -84,10 +91,19 @@ export default defineComponent({
           { setAuthenticated: !props.deferAuthStateUpdate },
         );
         props.resolve();
-      } catch (error) {
-        isAuthCanceled.value = true;
+      } catch {
+        // Android 11+ reports a prompt the system closed, e.g. as the app leaves, as a cancel.
+        if (!isAutoPrompt) {
+          isAuthCanceled.value = true;
+        }
       } finally {
         isAuthenticating.value = false;
+      }
+    }
+
+    function autoPrompt() {
+      if (props.isLockScreen && claimLockScreenAutoPrompt()) {
+        initAuthenticate({ isAutoPrompt: true });
       }
     }
 
@@ -104,6 +120,14 @@ export default defineComponent({
         props.resolve();
       }
     }, { immediate: true });
+
+    watch(isAppActive, (isActive) => {
+      if (isActive) {
+        autoPrompt();
+      }
+    });
+
+    onMounted(autoPrompt);
 
     return {
       LockIcon,

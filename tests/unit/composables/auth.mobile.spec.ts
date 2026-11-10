@@ -467,6 +467,7 @@ describe('useAuth on mobile', () => {
     expect(openBiometricLoginModalMock).toHaveBeenCalledWith({
       force: true,
       deferAuthStateUpdate: true,
+      isLockScreen: true,
     });
     expect(auth.isAuthenticated.value).toBe(true);
 
@@ -476,6 +477,52 @@ describe('useAuth on mobile', () => {
     await auth.authenticateWithBiometry(true);
     expect(biometricAuthenticateMock).toHaveBeenCalledTimes(1);
     expect(auth.isAuthenticated.value).toBe(true);
+  });
+
+  it('lets the lock screen prompt by itself once each time the app is shown', async () => {
+    const { auth, ui } = await boot();
+    ui.isAppActive.value = true;
+    await nextTick();
+
+    expect(auth.claimLockScreenAutoPrompt()).toBe(true);
+    expect(auth.claimLockScreenAutoPrompt()).toBe(false);
+
+    ui.isAppActive.value = false;
+    await nextTick();
+    expect(auth.claimLockScreenAutoPrompt()).toBe(false);
+
+    ui.isAppActive.value = true;
+    await nextTick();
+    expect(auth.claimLockScreenAutoPrompt()).toBe(true);
+  });
+
+  it('does not auto-prompt while another prompt is open', async () => {
+    const { auth, ui } = await boot();
+    ui.isAppActive.value = true;
+    let answerPrompt;
+    biometricAuthenticateMock.mockImplementation(() => new Promise((resolve) => {
+      answerPrompt = resolve;
+    }));
+
+    const prompting = auth.authenticateWithBiometry(true, { setAuthenticated: false });
+    expect(auth.claimLockScreenAutoPrompt()).toBe(false);
+
+    await vi.waitFor(() => expect(answerPrompt).toBeDefined());
+    answerPrompt();
+    await prompting;
+
+    // Refusing it didn't use up the turn.
+    expect(auth.claimLockScreenAutoPrompt()).toBe(true);
+  });
+
+  it('frees the auto-prompt again when the prompt fails', async () => {
+    const { auth, ui } = await boot();
+    ui.isAppActive.value = true;
+    biometricAuthenticateMock.mockRejectedValue(new Error('userCancel'));
+
+    await expect(auth.authenticateWithBiometry(true)).rejects.toThrow('userCancel');
+
+    expect(auth.claimLockScreenAutoPrompt()).toBe(true);
   });
 
   it('does not auto-lock on app resume when biometric login is disabled', async () => {

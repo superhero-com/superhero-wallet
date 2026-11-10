@@ -55,7 +55,8 @@ describe('More on mobile with biometric login on', () => {
     const { lockButton, lockWallet } = await mountMore({ canAuthenticateWithDevice: true });
 
     await lockButton.trigger('click');
-    expect(lockWallet).toHaveBeenCalled();
+    // So the lock screen doesn't prompt right away, Face ID would unlock it again.
+    expect(lockWallet).toHaveBeenCalledWith({ isUserInitiated: true });
   });
 
   it('does not offer the lock when nothing on the device could unlock it again', async () => {
