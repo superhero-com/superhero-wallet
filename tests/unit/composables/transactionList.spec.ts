@@ -379,7 +379,7 @@ describe('useTransactionList on API errors', () => {
     const fetchSpy = vi.spyOn(adapter, 'fetchAccountTransactions').mockResolvedValueOnce({
       regularTransactions: [{ hash: 'th_1', protocol: 'aeternity', tx: {} }],
       pendingTransactions: [],
-      paginationParams: { nextPageUrl: '/v2/accounts/ak_test/activities?cursor=next' },
+      paginationParams: { nextPageUrl: '/v3/accounts/ak_test/activities?cursor=next' },
     });
     const list = await useTransactionList({ accountAddress: 'ak_test', protocol: 'aeternity' });
     await list.loadCurrentPageTransactions();
@@ -394,7 +394,7 @@ describe('useTransactionList on API errors', () => {
     const [, stored] = Object.entries(localStorage).find(([key]) => key.includes('transactions-loaded'));
     expect(JSON.parse(stored)).toMatchObject({
       isEndReached: false,
-      nextPagePaginationParams: { nextPageUrl: '/v2/accounts/ak_test/activities?cursor=next' },
+      nextPagePaginationParams: { nextPageUrl: '/v3/accounts/ak_test/activities?cursor=next' },
     });
   });
 });
