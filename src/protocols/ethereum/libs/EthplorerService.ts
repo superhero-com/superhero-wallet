@@ -114,7 +114,8 @@ export class EthplorerService {
       amount: rawBalance,
       contractId: toEthChecksumAddress(contractId),
       convertedBalance: +amountRounded(toShiftedBigNumber(rawBalance, -decimals)),
-      decimals,
+      // Sent as a string
+      decimals: Number(decimals),
       symbol,
       name,
       protocol,
