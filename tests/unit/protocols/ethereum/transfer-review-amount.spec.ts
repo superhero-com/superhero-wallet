@@ -12,8 +12,10 @@ import { bytesToHex, hexToBytes } from 'web3-utils';
 import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/ethereum/components/TransferReview.vue';
 import { PROTOCOLS } from '@/constants';
+import { useNetworks } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { i18n } from '@/popup/plugins/i18n';
+import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 
 type Broadcast = (web3Eth: unknown, serializedTx: Uint8Array | string) => Promise<void>;
 
@@ -22,6 +24,8 @@ const {
   SECRET_KEY,
   broadcastSignedTransaction,
   explorerRequests,
+  tokenBalance,
+  nonceCount,
 } = vi.hoisted(() => {
   vi.resetModules();
   return {
@@ -29,6 +33,11 @@ const {
     SECRET_KEY: Buffer.alloc(32, 1),
     broadcastSignedTransaction: vi.fn<Broadcast>(async () => {}),
     explorerRequests: [] as unknown[],
+    // In the token's base units
+    tokenBalance: { value: 1000000000000n },
+    // Of the account's mined transactions, and with the ones in the node's mempool.
+    // Sends of earlier tests stay recorded, and only count while these two differ.
+    nonceCount: { mined: 3n, pending: 3n },
   };
 });
 
@@ -42,6 +51,7 @@ const TRANSFER_ABI = {
 } as const;
 const FROM_ACCOUNT = privateKeyToAddress(SECRET_KEY);
 const RECIPIENT = '0x0000000000000000000000000000000000000002';
+const OTHER_RECIPIENT = '0x0000000000000000000000000000000000000005';
 const TOKEN_CONTRACT = '0x0000000000000000000000000000000000000003';
 const CHAIN_IDS: Record<string, bigint> = {
   [PROTOCOLS.ethereum]: 1n,
@@ -76,7 +86,10 @@ vi.mock('web3-eth', async (importOriginal) => {
   // eslint-disable-next-line prefer-arrow-callback
   const Web3Eth = function Web3Eth() {
     return {
-      getTransactionCount: async () => 3n,
+      getBlockNumber: async () => 100n,
+      getTransactionCount: async (address: string, block: bigint | 'pending') => (
+        block === 'pending' ? nonceCount.pending : nonceCount.mined
+      ),
       getGasPrice: async () => 1000000000n,
     };
   };
@@ -84,7 +97,7 @@ vi.mock('web3-eth', async (importOriginal) => {
     ...await importOriginal<object>(),
     Web3Eth,
     default: Web3Eth,
-    getTransactionCount: async () => 3,
+    getTransactionCount: async () => Number(nonceCount.pending),
   };
 });
 
@@ -98,6 +111,7 @@ vi.mock('web3-eth-contract', async (importOriginal) => {
       setProvider: () => {},
       methods: {
         decimals: () => ({ call: async () => 6n }),
+        balanceOf: () => ({ call: async () => tokenBalance.value }),
         transfer: (to: string, value: string) => ({
           estimateGas: async () => 65000n,
           encodeABI: () => encodeFunctionCall(transferAbi as any, [to, value]),
@@ -123,6 +137,12 @@ vi.mock('@/protocols/ethereum/libs/EtherscanService', () => ({
 vi.mock('@/protocols/evm/libs/broadcastSignedTransaction', () => ({ broadcastSignedTransaction }));
 
 enableAutoUnmount(afterEach);
+
+afterEach(() => {
+  tokenBalance.value = 1000000000000n;
+  nonceCount.mined = 3n;
+  nonceCount.pending = 3n;
+});
 
 /** Base units of a plain decimal string, worked out without floating point. */
 function toBaseUnits(amount: string, decimals: number) {
@@ -184,6 +204,35 @@ async function signReviewed(protocol: string, contractId: string, amount: string
 async function signReviewedTransfer(protocol: string, amount: string) {
   const { coinContractId } = ProtocolAdapterFactory.getAdapter(protocol as any);
   return (await signReviewed(protocol, coinContractId, amount)).value;
+}
+
+/** Confirms a token send on the review screen and returns how many transactions it broadcast */
+async function submitTokenSend(
+  protocol: string,
+  amount: string,
+  recipients = [RECIPIENT],
+  contractId = TOKEN_CONTRACT,
+) {
+  broadcastSignedTransaction.mockClear();
+  const wrapper = mount(TransferReview, {
+    props: {
+      protocol,
+      transferData: {
+        amount,
+        addresses: recipients,
+        selectedAsset: { contractId, protocol, decimals: 6 },
+        maxFeePerGas: '0.00000002',
+        maxPriorityFeePerGas: '0.000000001',
+        payload: '',
+      },
+    },
+    global: {
+      plugins: [i18n],
+      stubs: { TransferReviewBase: true },
+    },
+  });
+  await (wrapper.vm as any).submit();
+  return broadcastSignedTransaction.mock.calls.length;
 }
 
 describe.each([
@@ -269,6 +318,32 @@ describe.each([
     await signReviewed(protocol, TOKEN_CONTRACT, '1.5');
 
     expect(explorerRequests).toEqual([]);
+  });
+});
+
+describe.each([
+  PROTOCOLS.ethereum,
+  PROTOCOLS.bnb,
+  PROTOCOLS.avalanche,
+  PROTOCOLS.polygonPos,
+])('%s TransferReview - unmined token sends', (protocol) => {
+  it('leaves the send to each recipient out until it is mined', async () => {
+    // A token of its own, which no other test sends
+    const contractId = '0x0000000000000000000000000000000000000010';
+    const { nodeUrl } = useNetworks().activeNetwork.value.protocols[protocol];
+    const getSpendable = async () => (
+      await useEthTokenBalance().getSpendableTokenBalance(contractId, FROM_ACCOUNT, nodeUrl)
+    ).toFixed();
+    tokenBalance.value = 3000000n;
+
+    expect(await submitTokenSend(protocol, '1', [RECIPIENT, OTHER_RECIPIENT], contractId)).toBe(2);
+    // Both are in the node's mempool
+    nonceCount.pending = 5n;
+    expect(await getSpendable()).toBe('1');
+    // The first one is mined
+    nonceCount.mined = 4n;
+    tokenBalance.value = 2000000n;
+    expect(await getSpendable()).toBe('1');
   });
 });
 

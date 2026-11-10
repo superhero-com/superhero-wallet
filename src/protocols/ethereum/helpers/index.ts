@@ -1,5 +1,10 @@
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
-import { FMT_BYTES, FMT_NUMBER, type ContractAbi } from 'web3-types';
+import {
+  FMT_BYTES,
+  FMT_NUMBER,
+  type BlockNumberOrTag,
+  type ContractAbi,
+} from 'web3-types';
 import { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
 import { bigIntToHex } from 'web3-eth-accounts';
 import Contract from 'web3-eth-contract';
@@ -122,18 +127,20 @@ export async function getTokenTransferGasLimit(
 }
 
 /**
- * The token balance at the latest block, which the token APIs can lag behind by a minute.
+ * The token balance at the block, the latest by default, which the token APIs can lag
+ * behind by a minute.
  */
 export async function getTokenBalance(
   contractId: string,
   owner: string,
   nodeUrl: string,
+  block?: BlockNumberOrTag,
 ): Promise<BigNumber> {
   const contract = new Contract(ERC20_ABI, contractId);
   contract.setProvider(nodeUrl);
 
   const [balance, decimals] = await Promise.all([
-    contract.methods.balanceOf(owner).call(),
+    contract.methods.balanceOf(owner).call(undefined, block),
     contract.methods.decimals().call(),
   ]);
   return new BigNumber(String(balance)).shiftedBy(-Number(decimals));

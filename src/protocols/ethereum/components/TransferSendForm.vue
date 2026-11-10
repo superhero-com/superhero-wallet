@@ -89,6 +89,7 @@ import {
   useAccounts,
 } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
+import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
@@ -99,7 +100,7 @@ import {
   ETH_COIN_SYMBOL,
   ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
-import { getTokenBalance, getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
+import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
@@ -140,6 +141,7 @@ export default defineComponent({
     const { balance } = useBalances();
     const { activeAccount } = useAccounts();
     const { accountAssets } = useAccountAssetsList();
+    const { getSpendableTokenBalance } = useEthTokenBalance();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       if (assetContractId) {
@@ -247,7 +249,7 @@ export default defineComponent({
       }
       const { nodeUrl } = activeNetwork.value.protocols[props.protocol];
       try {
-        const nodeTokenBalance = await getTokenBalance(contractId, owner, nodeUrl);
+        const nodeTokenBalance = await getSpendableTokenBalance(contractId, owner, nodeUrl);
         if (formModel.value.selectedAsset?.contractId === contractId) {
           tokenBalance.value = nodeTokenBalance;
         }

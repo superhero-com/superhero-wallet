@@ -12,6 +12,8 @@ const contractMockState = {
   decimals: 18n,
   /** Of the account, in the token's base units on the node */
   balance: BigInt(0),
+  /** The balance at the blocks before the latest one */
+  pastBalances: {} as Record<string, bigint>,
   estimateGas: 65000,
   transferCalls: [] as Array<{ recipient: string; amount: any }>,
 };
@@ -34,9 +36,9 @@ async function loadHelper() {
           decimals: () => ({ call: () => Promise.resolve(contractMockState.decimals) }),
           // Nothing for another account, token or node
           balanceOf: (owner: string) => ({
-            call: () => Promise.resolve(
+            call: (tx?: unknown, block?: bigint) => Promise.resolve(
               [owner, address, provider].join() === [FROM_ACCOUNT, TOKEN_CONTRACT, NODE_URL].join()
-                ? contractMockState.balance
+                ? contractMockState.pastBalances[String(block)] ?? contractMockState.balance
                 : 0n,
             ),
           }),
@@ -68,6 +70,7 @@ beforeAll(async () => {
 beforeEach(() => {
   contractMockState.decimals = 18n;
   contractMockState.balance = BigInt(0);
+  contractMockState.pastBalances = {};
   contractMockState.estimateGas = 65000;
   contractMockState.transferCalls.length = 0;
 });
@@ -117,5 +120,15 @@ describe('getTokenBalance', () => {
     const balance = await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
 
     expect(balance.toFixed()).toBe('123.456789');
+  });
+
+  it('reads the balance at the given block', async () => {
+    contractMockState.decimals = 6n;
+    contractMockState.balance = BigInt('1000000');
+    contractMockState.pastBalances['100'] = BigInt('2000000');
+
+    const balance = await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL, 100n);
+
+    expect(balance.toFixed()).toBe('2');
   });
 });

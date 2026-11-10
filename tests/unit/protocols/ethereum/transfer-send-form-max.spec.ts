@@ -14,6 +14,7 @@ import { useNetworks } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { i18n, tg } from '@/popup/plugins/i18n';
 import initVeeValidateRules from '@/popup/plugins/veeValidate';
+import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 
 // The setup files already loaded the form's deps with the real ones; reload them to apply mocks.
 const { realAccounts, getTokenBalance } = vi.hoisted(() => {
@@ -28,6 +29,7 @@ const OWNER = '0x0000000000000000000000000000000000000001';
 const TOKEN = '0x0000000000000000000000000000000000000003';
 const OTHER_TOKEN = '0x0000000000000000000000000000000000000004';
 const RECIPIENT = '0x0000000000000000000000000000000000000005';
+const UNMINED_TOKEN = '0x0000000000000000000000000000000000000006';
 const OTHER_RECIPIENT = '0x0000000000000000000000000000000000000007';
 
 vi.mock('web3-eth', async (importOriginal) => {
@@ -42,6 +44,11 @@ vi.mock('web3-eth', async (importOriginal) => {
       }),
       // Of the chains without EIP-1559
       getGasPrice: async () => 1000000000n,
+      getBlockNumber: async () => 100n,
+      // The account's send with nonce 5 is in the mempool
+      getTransactionCount: async (address: string, block: bigint | 'pending') => (
+        block === 'pending' ? 6n : 5n
+      ),
     };
   };
   return { ...await importOriginal<object>(), Web3Eth, default: Web3Eth };
@@ -194,6 +201,22 @@ describe('EthTransferSendForm - max token amount', () => {
     await flushPromises();
 
     expect(getAmountInput(wrapper).element.value).toBe('30');
+  });
+
+  it('leaves an unmined send of the token out', async () => {
+    const { nodeUrl } = useNetworks().activeNetwork.value.protocols[PROTOCOLS.ethereum];
+    useEthTokenBalance().addUnconfirmedTokenTransfer({
+      nodeUrl,
+      from: OWNER,
+      contractId: UNMINED_TOKEN,
+      nonce: 5,
+      amount: '10',
+    });
+    getTokenBalance.mockResolvedValue(new BigNumber('42.5'));
+    const wrapper = mountForm(token(UNMINED_TOKEN));
+    await flushPromises();
+
+    expect(await clickMax(wrapper)).toBe('32.5');
   });
 
   it('does not accept more than the balance the node reports', async () => {

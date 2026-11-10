@@ -41,8 +41,10 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAccounts,
   useLatestTransactionList,
+  useNetworks,
   useUi,
 } from '@/composables';
+import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -69,11 +71,15 @@ export default defineComponent({
     const { homeRouteName } = useUi();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { addAccountPendingTransaction } = useLatestTransactionList();
+    const { activeNetwork } = useNetworks();
+    const { addUnconfirmedTokenTransfer } = useEthTokenBalance();
 
     const loading = ref<boolean>(false);
 
     const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
     const { coinSymbol } = adapter;
+
+    const nodeUrl = computed((): string => activeNetwork.value.protocols[props.protocol].nodeUrl);
 
     const isSelectedAssetEthCoin = computed(
       () => props.transferData?.selectedAsset?.contractId === adapter.coinContractId,
@@ -124,6 +130,13 @@ export default defineComponent({
                 nonce: currentNonce,
               },
             );
+            addUnconfirmedTokenTransfer({
+              nodeUrl: nodeUrl.value,
+              from: lastActiveEthAccount?.address!,
+              contractId: selectedAsset.contractId,
+              nonce: currentNonce,
+              amount,
+            });
           } else {
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.spend(
