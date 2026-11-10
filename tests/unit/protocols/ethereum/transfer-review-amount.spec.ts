@@ -13,8 +13,9 @@ import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/ethereum/components/TransferReview.vue';
 import { PROTOCOLS } from '@/constants';
 import { useNetworks } from '@/composables';
+import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { i18n } from '@/popup/plugins/i18n';
+import { i18n, tg } from '@/popup/plugins/i18n';
 import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 
 type Broadcast = (web3Eth: unknown, serializedTx: Uint8Array | string) => Promise<void>;
@@ -33,8 +34,8 @@ const {
     SECRET_KEY: Buffer.alloc(32, 1),
     broadcastSignedTransaction: vi.fn<Broadcast>(async () => {}),
     explorerRequests: [] as unknown[],
-    // In the token's base units
-    tokenBalance: { value: 1000000000000n },
+    // In the token's base units, `null` for a failing read
+    tokenBalance: { value: 1000000000000n as bigint | null },
     // Of the account's mined transactions, and with the ones in the node's mempool.
     // Sends of earlier tests stay recorded, and only count while these two differ.
     nonceCount: { mined: 3n, pending: 3n },
@@ -111,7 +112,9 @@ vi.mock('web3-eth-contract', async (importOriginal) => {
       setProvider: () => {},
       methods: {
         decimals: () => ({ call: async () => 6n }),
-        balanceOf: () => ({ call: async () => tokenBalance.value }),
+        balanceOf: () => ({
+          call: async () => tokenBalance.value ?? Promise.reject(new Error('Node error')),
+        }),
         transfer: (to: string, value: string) => ({
           estimateGas: async () => 65000n,
           encodeABI: () => encodeFunctionCall(transferAbi as any, [to, value]),
@@ -273,6 +276,8 @@ describe.each([
   PROTOCOLS.polygonPos,
 ])('%s TransferReview - coin transfer', (protocol) => {
   it('signs a plain transfer to the recipient on the chain', async () => {
+    // The coin isn't checked against a token balance
+    tokenBalance.value = 0n;
     const { coinContractId } = ProtocolAdapterFactory.getAdapter(protocol as any);
     const signedTx = await signReviewed(protocol, coinContractId, '0.5');
 
@@ -327,6 +332,14 @@ describe.each([
   PROTOCOLS.avalanche,
   PROTOCOLS.polygonPos,
 ])('%s TransferReview - unmined token sends', (protocol) => {
+  beforeEach(() => {
+    vi.spyOn(Logger, 'write').mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.mocked(Logger.write).mockRestore();
+  });
+
   it('leaves the send to each recipient out until it is mined', async () => {
     // A token of its own, which no other test sends
     const contractId = '0x0000000000000000000000000000000000000010';
@@ -344,6 +357,83 @@ describe.each([
     nonceCount.mined = 4n;
     tokenBalance.value = 2000000n;
     expect(await getSpendable()).toBe('1');
+  });
+
+  it('does not send what an unmined send already spends', async () => {
+    const contractId = '0x0000000000000000000000000000000000000011';
+    tokenBalance.value = 3000000n;
+    expect(await submitTokenSend(protocol, '2', [RECIPIENT], contractId)).toBe(1);
+    // It is in the node's mempool
+    nonceCount.pending = 4n;
+
+    expect(await submitTokenSend(protocol, '1.5', [RECIPIENT], contractId)).toBe(0);
+    expect(Logger.write).toHaveBeenCalledWith(expect.objectContaining({
+      message: tg('modals.insufficient-balance.msg'),
+    }));
+    // It is mined
+    nonceCount.mined = 4n;
+    tokenBalance.value = 1000000n;
+    expect(await submitTokenSend(protocol, '1', [RECIPIENT], contractId)).toBe(1);
+  });
+
+  it('leaves out a send made before one that failed', async () => {
+    const contractId = '0x0000000000000000000000000000000000000012';
+    const { nodeUrl } = useNetworks().activeNetwork.value.protocols[protocol];
+    tokenBalance.value = 3000000n;
+    broadcastSignedTransaction
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('Rejected'));
+
+    expect(await submitTokenSend(protocol, '1', [RECIPIENT, OTHER_RECIPIENT], contractId)).toBe(2);
+    expect(Logger.write).toHaveBeenCalledWith(expect.objectContaining({ message: 'Rejected' }));
+    // Only the first one is in the node's mempool
+    nonceCount.pending = 4n;
+    expect((
+      await useEthTokenBalance().getSpendableTokenBalance(contractId, FROM_ACCOUNT, nodeUrl)
+    ).toFixed()).toBe('2');
+  });
+});
+
+describe.each([
+  PROTOCOLS.ethereum,
+  PROTOCOLS.bnb,
+  PROTOCOLS.avalanche,
+  PROTOCOLS.polygonPos,
+])('%s TransferReview - token balance', (protocol) => {
+  beforeEach(() => {
+    vi.spyOn(Logger, 'write').mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.mocked(Logger.write).mockRestore();
+  });
+
+  it('does not send more than the node balance and says why', async () => {
+    tokenBalance.value = 1000000n;
+
+    expect(await submitTokenSend(protocol, '1.000001')).toBe(0);
+    expect(Logger.write).toHaveBeenCalledWith(expect.objectContaining({
+      message: tg('modals.insufficient-balance.msg'),
+    }));
+  });
+
+  it('sends the whole balance split across recipients', async () => {
+    tokenBalance.value = 3000000n;
+
+    expect(await submitTokenSend(protocol, '1.5', [RECIPIENT, OTHER_RECIPIENT])).toBe(2);
+    expect(Logger.write).not.toHaveBeenCalled();
+  });
+
+  it('does not send more than the balance across recipients', async () => {
+    tokenBalance.value = 3000000n;
+
+    expect(await submitTokenSend(protocol, '1.6', [RECIPIENT, OTHER_RECIPIENT])).toBe(0);
+  });
+
+  it('sends if the node balance cannot be read', async () => {
+    tokenBalance.value = null;
+
+    expect(await submitTokenSend(protocol, '1.5')).toBe(1);
   });
 });
 

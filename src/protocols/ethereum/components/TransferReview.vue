@@ -36,6 +36,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import BigNumber from 'bignumber.js';
 import type { ITransaction, Protocol, TransferFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
@@ -72,7 +73,7 @@ export default defineComponent({
     const { getLastActiveProtocolAccount } = useAccounts();
     const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeNetwork } = useNetworks();
-    const { addUnconfirmedTokenTransfer } = useEthTokenBalance();
+    const { addUnconfirmedTokenTransfer, getSpendableTokenBalance } = useEthTokenBalance();
 
     const loading = ref<boolean>(false);
 
@@ -94,6 +95,15 @@ export default defineComponent({
       });
     }
 
+    /** Or the send fails on its gas estimate with a vague contract error */
+    async function isTokenBalanceEnough(contractId: string, owner: string, total: BigNumber) {
+      try {
+        return (await getSpendableTokenBalance(contractId, owner, nodeUrl.value)).gte(total);
+      } catch {
+        return true;
+      }
+    }
+
     async function submit(): Promise<void> {
       const {
         amount,
@@ -109,8 +119,20 @@ export default defineComponent({
       let actionResult;
       const lastActiveEthAccount = getLastActiveProtocolAccount(props.protocol);
       try {
-        let currentNonce = await (adapter as any)
-          .getTransactionCount(lastActiveEthAccount?.address!);
+        const [isBalanceEnough, nonce] = await Promise.all([
+          isSelectedAssetEthCoin.value || isTokenBalanceEnough(
+            selectedAsset.contractId,
+            lastActiveEthAccount?.address!,
+            new BigNumber(amount).times(recipients.length),
+          ),
+          (adapter as any).getTransactionCount(lastActiveEthAccount?.address!),
+        ]);
+        if (!isBalanceEnough) {
+          openTransactionFailedModal(t('modals.insufficient-balance.msg'));
+          return;
+        }
+
+        let currentNonce: number = nonce;
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
           if (!isSelectedAssetEthCoin.value) {
