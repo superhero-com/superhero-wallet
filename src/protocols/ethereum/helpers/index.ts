@@ -121,6 +121,24 @@ export async function getTokenTransferGasLimit(
   return roundedToNextThousand;
 }
 
+/**
+ * The token balance at the latest block, which the token APIs can lag behind by a minute.
+ */
+export async function getTokenBalance(
+  contractId: string,
+  owner: string,
+  nodeUrl: string,
+): Promise<BigNumber> {
+  const contract = new Contract(ERC20_ABI, contractId);
+  contract.setProvider(nodeUrl);
+
+  const [balance, decimals] = await Promise.all([
+    contract.methods.balanceOf(owner).call(),
+    contract.methods.decimals().call(),
+  ]);
+  return new BigNumber(String(balance)).shiftedBy(-Number(decimals));
+}
+
 async function fetchContractAbi(contractId: string, protocol: Protocol) {
   const { middlewareUrl, chainId } = getActiveEvmNetworkSettings(protocol);
   const contractAbi = await new EtherscanService(middlewareUrl, chainId)

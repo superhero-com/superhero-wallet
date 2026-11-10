@@ -86,7 +86,7 @@ const ERC20_TOKEN = {
 };
 
 /** Sepolia node, Ethplorer with a 50 TUSD balance and an empty Etherscan history */
-function stubSepolia() {
+function stubSepolia({ nodeTokenBalance = 50e6 } = {}) {
   const { baseFee, priorityFee, nonce } = SEPOLIA;
   const tokenInfo = {
     address: ERC20_TOKEN.address,
@@ -114,8 +114,10 @@ function stubSepolia() {
       miner: `0x${'00'.repeat(20)}`,
       transactions: [],
     },
-    // decimals() of the token
-    eth_call: `0x${ERC20_TOKEN.decimals.toString(16).padStart(64, '0')}`,
+    // balanceOf(address) or decimals() of the token
+    eth_call: ([{ data, input }]) => `0x${new BigNumber(
+      (data ?? input).startsWith('0x70a08231') ? nodeTokenBalance : ERC20_TOKEN.decimals,
+    ).toString(16).padStart(64, '0')}`,
     // Its 15% headroom is a whole thousand, which the form rounds the gas up to
     eth_estimateGas: toRpcHex(40000),
   }, 'eth_sendRawTransaction', `0x${'12'.repeat(32)}`);
@@ -395,6 +397,30 @@ describe('Send modal', () => {
         expectSepoliaFees(tx, this);
       });
     cy.get('[data-cy=pending-txs]').should('exist');
+  });
+
+  it('sends the ERC-20 balance the node reports with Max', () => {
+    // Ethplorer still shows 50 TUSD, e.g. right after a send
+    stubSepolia({ nodeTokenBalance: 42.5e6 });
+    loginWith(PROTOCOLS.ethereum);
+    cy.openSendModal();
+    cy.get('[data-cy=select-asset]').click();
+    cy.get('.asset-selector [data-cy=list]').contains(ERC20_TOKEN.name).click();
+    pasteAddress(RECIPIENTS.evm);
+    cy.get('[data-cy=amount] .max-button').click();
+
+    cy.get('[data-cy=amount] [data-cy=input]').should('have.value', '42.5');
+    cy.get('[data-cy=next-step-button]')
+      .should('not.have.class', 'disabled')
+      .click();
+    cy.get('[data-cy=review-amount]').should('contain', '42.5');
+    cy.get('[data-cy=next-step-button]').click();
+
+    cy.wait('@broadcast').then(({ request }) => decodeBroadcast('evm', request.body.params[0]))
+      .then((tx) => {
+        expect(new BigNumber(tx.data.slice(72), 16).toFixed())
+          .to.eq(new BigNumber(42.5).shiftedBy(ERC20_TOKEN.decimals).toFixed());
+      });
   });
 
   it('sends BNB with the legacy gas price shown on the review', () => {

@@ -99,7 +99,7 @@ import {
   ETH_COIN_SYMBOL,
   ETH_PROTOCOL_NAME,
 } from '@/protocols/ethereum/config';
-import { getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
+import { getTokenBalance, getTokenTransferGasLimit } from '@/protocols/ethereum/helpers';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
@@ -175,8 +175,9 @@ export default defineComponent({
     } = useEthFeeCalculation(props.protocol, recipientsCount);
 
     const shouldUseMaxAmount = ref(false);
+    const tokenBalance = ref<BigNumber | null>(null);
 
-    const { max } = useCoinMaxAmount({ formModel, fee: maxFee });
+    const { max } = useCoinMaxAmount({ formModel, fee: maxFee, tokenBalance });
 
     const numericFee = computed(() => +fee.value.toFixed());
     const numericMaxFee = computed(() => +maxFee.value.toFixed());
@@ -238,10 +239,28 @@ export default defineComponent({
       return undefined;
     }
 
+    async function updateTokenBalance() {
+      const contractId = formModel.value.selectedAsset?.contractId;
+      const owner = activeAccount.value?.address;
+      if (!contractId || isEvmContract(contractId) || !owner) {
+        return;
+      }
+      const { nodeUrl } = activeNetwork.value.protocols[props.protocol];
+      try {
+        const nodeTokenBalance = await getTokenBalance(contractId, owner, nodeUrl);
+        if (formModel.value.selectedAsset?.contractId === contractId) {
+          tokenBalance.value = nodeTokenBalance;
+        }
+      } catch {
+        // Max keeps the balance it had
+      }
+    }
+
     let polling: NodeJS.Timeout | null = null;
 
     onMounted(() => {
       polling = executeAndSetInterval(async () => {
+        updateTokenBalance();
         updateFeeList(await getTransferGasLimit());
       }, 5000);
     });
@@ -256,6 +275,14 @@ export default defineComponent({
       () => formModel.value.selectedAsset,
       async () => {
         updateFeeList(await getTransferGasLimit());
+      },
+    );
+
+    watch(
+      () => formModel.value.selectedAsset?.contractId,
+      () => {
+        tokenBalance.value = null;
+        updateTokenBalance();
       },
     );
 
