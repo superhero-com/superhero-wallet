@@ -103,7 +103,7 @@ vi.mock('@/composables', () => ({
   useLedger: vi.fn(() => ({ signTransaction: vi.fn(), signMessage: vi.fn() })),
 }));
 vi.mock('@/protocols/aeternity/composables', () => ({
-  useAeMiddleware: vi.fn(() => ({ getMiddleware: vi.fn() })),
+  useAeMiddleware: vi.fn(() => ({ fetchNameByHash: vi.fn() })),
 }));
 
 let sdk: typeof import('@aeternity/aepp-sdk');

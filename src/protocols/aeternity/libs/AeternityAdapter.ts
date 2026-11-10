@@ -540,7 +540,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const { middlewareUrl } = aeActiveNetworkSettings.value;
     let isSupported = tokenTransfersSupport.get(middlewareUrl);
     if (!isSupported) {
-      isSupported = fetchJson(`${middlewareUrl}/status`)
+      isSupported = fetchJson(`${middlewareUrl}/v3/status`)
         .then((status) => isTokenTransfersVersion(status?.mdw_version));
       tokenTransfersSupport.set(middlewareUrl, isSupported);
       isSupported.catch(() => tokenTransfersSupport.delete(middlewareUrl));
@@ -645,11 +645,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     hash: string,
     transactionOwner?: AccountAddress,
   ): Promise<ITransaction> {
-    const { getMiddleware } = useAeMiddleware();
-    const middleware = await getMiddleware();
+    const { fetchTransaction } = useAeMiddleware();
 
     return {
-      ...await middleware.getTx(hash),
+      ...await fetchTransaction(hash),
       protocol: PROTOCOLS.aeternity,
       transactionOwner,
     };

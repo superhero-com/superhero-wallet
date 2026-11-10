@@ -145,13 +145,23 @@ async function createContext({
           },
         });
       },
-      fetchAllPages: vi.fn().mockResolvedValue([]),
+      // The middleware still has the names restored from the storage
+      fetchAllPages: vi.fn().mockResolvedValue(ownedNames.map(({
+        name, owner, expiresAt, createdAtHeight,
+      }) => ({
+        name,
+        activeFrom: createdAtHeight,
+        expireHeight: expiresAt,
+        ownership: { current: owner },
+        pointers: [],
+      }))),
     };
   });
   vi.doMock('@/composables/accounts', () => ({
     useAccounts: () => ({
       aeAccounts: ref([{ address: activeAccount.address }, { address: otherAccount.address }]),
       activeAccount: ref({ address: activeAccount.address }),
+      areAccountsReady: ref(true),
       isLocalAccountAddress: () => true,
       getLastActiveProtocolAccount: () => ({ address: activeAccount.address }),
     }),
@@ -189,10 +199,9 @@ async function createContext({
   }));
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
     useAeMiddleware: () => ({
-      isMiddlewareReady: ref(false),
-      getMiddleware: vi.fn().mockResolvedValue({ getNames: vi.fn().mockResolvedValue([]) }),
       fetchFromMiddlewareCamelCased: vi.fn(),
       fetchFromMiddlewareCamelCasedPrecise: vi.fn(),
+      fetchNameByHash: vi.fn(),
     }),
   }));
   vi.doMock('@/protocols/aeternity/composables/aeAddressLinkContract', () => ({
@@ -234,10 +243,14 @@ async function createContext({
     .mockResolvedValue([]);
 
   const aeNamesModule = await import('@/protocols/aeternity/composables/aeNames');
-  const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+  // Restored from the storage before the names are loaded, as the requests of the app
+  // take longer than that.
   const { ensureVaultReady } = await import('@/lib/WalletVault');
   await ensureVaultReady();
   await new Promise((resolve) => { setTimeout(resolve, 0); });
+  await new Promise((resolve) => { setTimeout(resolve, 0); });
+  const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+  await vi.waitFor(() => expect(aeNames.areNamesFetching.value).toBe(false));
 
   return {
     aeNames,

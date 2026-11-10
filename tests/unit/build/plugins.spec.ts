@@ -18,25 +18,22 @@ describe('vendorManualChunks', () => {
     expect(vendorManualChunks('/repo/node_modules/@polkadot/wasm-crypto/index.js')).toBeUndefined();
     expect(vendorManualChunks('/repo/node_modules/libsodium/index.js')).toBeUndefined();
     expect(vendorManualChunks('/repo/node_modules/moment/moment.js')).toBeUndefined();
-    expect(vendorManualChunks('/repo/node_modules/ramda/index.js')).toBeUndefined();
   });
 
   it('excludes the lazy tree\'s prefix-sharing packages because they are listed, not by accident', () => {
-    // Both are reachable only from lazy roots (ramda-adjunct from swagger-client,
-    // libsodium-wrappers from airgap-coin-lib), so they belong outside vendor —
-    // but they must earn that via their own entry, not by `ramda`/`libsodium`
-    // matching them as a bare prefix.
-    expect(vendorManualChunks('/repo/node_modules/ramda-adjunct/es/index.js')).toBeUndefined();
+    // libsodium-wrappers is reachable only from airgap-coin-lib, so it belongs outside
+    // vendor — but it must earn that via its own entry, not by `libsodium` matching it
+    // as a bare prefix.
     expect(vendorManualChunks('/repo/node_modules/libsodium-wrappers/dist/index.js')).toBeUndefined();
   });
 
   it('does not let a bare lazy package name swallow unrelated packages that share its prefix', () => {
     expect(vendorManualChunks('/repo/node_modules/momentjs-fake/index.js')).toBe('vendor');
-    expect(vendorManualChunks('/repo/node_modules/swagger-client-extra/index.js')).toBe('vendor');
+    expect(vendorManualChunks('/repo/node_modules/libsodium-extra/index.js')).toBe('vendor');
   });
 
   it('matches lazy packages nested under another package\'s node_modules', () => {
-    expect(vendorManualChunks('/repo/node_modules/swagger-client/node_modules/ramda/index.js')).toBeUndefined();
+    expect(vendorManualChunks('/repo/node_modules/some-pkg/node_modules/moment/moment.js')).toBeUndefined();
   });
 
   it('matches lazy-vendor packages on a Windows-style backslash path', () => {

@@ -28,7 +28,7 @@
           <PanelTableItem
             v-if="middlewareStatus"
             :name="$t('pages.about.middleware-version')"
-            :href="`${middlewareUrl}/status`"
+            :href="`${middlewareUrl}/v3/status`"
             is-external-link
           >
             {{ middlewareStatus.mdwVersion }}

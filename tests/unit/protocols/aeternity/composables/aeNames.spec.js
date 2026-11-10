@@ -27,8 +27,9 @@ import { restError } from '../../../helpers/restError';
  *   - `@/lib/logger` - side-effecting telemetry, plus it dodges `Logger.ts`'s own
  *     direct (non-barrel) imports of `useUi`/`useModals`
  *   - `AeAccountHdWallet` - real HD-wallet signing needs a real mnemonic seed
- *   - `useAeMiddleware` - a real GraphQL/swagger client built from a fetched spec;
- *     too heavy for what these tests need (deterministic `getNames()` results)
+ *   - `useAeMiddleware` - the HTTP boundary of the middleware. With `middlewareResponses`
+ *     the real one runs instead, with the real `fetchAllPages`, and reads those responses
+ *     as the middleware renders them.
  */
 
 /**
@@ -47,15 +48,58 @@ const createTestContext = async ({
   preclaimedNames = {},
   pendingAutoExtendTxs = {},
   pendingNameTransferTxs = {},
+  startupNames = [],
+  storedOwnedNames = [],
+  preferredName,
+  accounts = [{ address: 'ak_test' }],
+  accountsReady = true,
+  middlewareResponses,
+  networkId = 'ae_testnet',
+  runningInPopup = false,
+  setUpStartup = () => {},
 } = {}) => {
   vi.resetModules();
   localStorage.clear();
+  if (runningInPopup) {
+    vi.doMock('@/constants/environment', async (importOriginal) => ({
+      ...await importOriginal(),
+      RUNNING_IN_POPUP: true,
+    }));
+  } else {
+    vi.doUnmock('@/constants/environment');
+  }
 
   const openDefaultModal = vi.fn();
   const fetchAllPages = vi.fn().mockResolvedValue([]);
   const fetchJson = vi.fn().mockResolvedValue({});
+  if (middlewareResponses) {
+    const responses = {
+      // Nothing owned unless the test says so
+      ...Object.fromEntries(accounts.map(({ address }) => [
+        `/v3/names?owned_by=${address}&state=active&limit=100`,
+        '{"data":[],"next":null}',
+      ])),
+      ...middlewareResponses,
+    };
+    const findResponse = (url) => responses[url.slice(url.indexOf('/mdw/') + '/mdw'.length)];
+    fetchJson.mockImplementation(async (url) => {
+      if (!url.includes('/mdw/')) {
+        return {};
+      }
+      const body = findResponse(url);
+      if (body === undefined) {
+        throw Object.assign(new Error('HTTP 404'), { statusCode: 404 });
+      }
+      return JSON.parse(body);
+    });
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      const body = findResponse(url);
+      return body === undefined
+        ? new Response('{"error":"not found"}', { status: 404 })
+        : new Response(body);
+    }));
+  }
   const fetchPendingTransactions = vi.fn().mockResolvedValue([]);
-  const getNames = vi.fn().mockResolvedValue([]);
   const nameExtendTtl = vi.fn().mockResolvedValue({ hash: 'th_extend' });
   const nameUpdate = vi.fn().mockResolvedValue({});
   const nameClaim = vi.fn().mockResolvedValue({ hash: 'th_claim' });
@@ -117,7 +161,7 @@ const createTestContext = async ({
           );
         },
       }),
-      fetchAllPages,
+      fetchAllPages: middlewareResponses ? actual.fetchAllPages : fetchAllPages,
       fetchJson,
     };
   });
@@ -127,17 +171,20 @@ const createTestContext = async ({
   // itself imports `useAuth` from the barrel) - overriding the barrel would leak
   // these incomplete fakes into code that isn't under test here. `useNetworks` and
   // `useStorageRef` are deliberately left real (see the file-level comment above).
+  const aeAccounts = ref(accounts);
+  const areAccountsReady = ref(accountsReady);
   vi.doMock('@/composables/accounts', () => ({
     useAccounts: () => ({
-      aeAccounts: ref([{ address: 'ak_test' }]),
+      aeAccounts,
       activeAccount: ref({ address: 'ak_test' }),
+      areAccountsReady,
       isLocalAccountAddress: () => true,
       getLastActiveProtocolAccount: () => ({ address: 'ak_test' }),
     }),
   }));
   // A single shared ref (not a fresh one per `useAeSdk()` call) so tests can switch
   // the active network and have the composable observe it.
-  const nodeNetworkId = ref('ae_testnet');
+  const nodeNetworkId = ref(networkId);
   const getAeSdk = vi.fn().mockResolvedValue(sdk);
   vi.doMock('@/composables/aeSdk', () => ({
     useAeSdk: () => ({ nodeNetworkId, getAeSdk }),
@@ -164,22 +211,24 @@ const createTestContext = async ({
     }),
   }));
 
-  // Controllable so tests can drive the "middleware became ready" transition that
-  // populates owned/default names on startup (the account-card path).
-  const isMiddlewareReady = ref(false);
+  const fetchFromMiddlewareCamelCased = vi.fn();
   const fetchFromMiddlewareCamelCasedPrecise = vi.fn();
-  vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
-    useAeMiddleware: () => ({
-      isMiddlewareReady,
-      getMiddleware: vi.fn().mockResolvedValue({ getNames }),
-      fetchFromMiddlewareCamelCased: vi.fn(),
-      fetchFromMiddlewareCamelCasedPrecise,
-    }),
-  }));
+  const fetchNameByHash = vi.fn();
+  if (middlewareResponses) {
+    vi.doUnmock('@/protocols/aeternity/composables/aeMiddleware');
+  } else {
+    vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
+      useAeMiddleware: () => ({
+        fetchFromMiddlewareCamelCased,
+        fetchFromMiddlewareCamelCasedPrecise,
+        fetchNameByHash,
+      }),
+    }));
+  }
 
   // The preferred (default) name now comes from the on-chain AddressLink contract.
   // Mock the reader so default-name polling is deterministic and offline.
-  const getPreferredName = vi.fn().mockResolvedValue(undefined);
+  const getPreferredName = vi.fn().mockResolvedValue(preferredName);
   // The AddressLink deployment exists on the default (mainnet/testnet) networks
   // these tests run against; flip `.value` to false to exercise the unsupported
   // (custom) network gate that skips the default-name sync.
@@ -214,6 +263,10 @@ const createTestContext = async ({
   WalletStorage.remove(STORAGE_KEYS.namesOwned);
   WalletStorage.remove(STORAGE_KEYS.namesOwnedNetworkId);
   WalletStorage.remove(STORAGE_KEYS.pendingDefaultNames);
+  if (storedOwnedNames.length) {
+    WalletStorage.set(STORAGE_KEYS.namesOwned, storedOwnedNames);
+    WalletStorage.set(STORAGE_KEYS.namesOwnedNetworkId, networkId);
+  }
   if (Object.keys(preclaimedNames).length) {
     // `decryptedComputed` is a passthrough above, so the "encrypted" storage
     // slot just holds the plain JSON string aeNames.ts expects to decode.
@@ -235,21 +288,32 @@ const createTestContext = async ({
   ));
 
   const aeNamesModule = await import('@/protocols/aeternity/composables/aeNames');
-  const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
-
-  // Let every storageRef finish restoring from localStorage before the test drives it.
+  // Let every storageRef finish restoring from localStorage, as the requests of the app
+  // take longer than that.
   const { ensureVaultReady } = await import('@/lib/WalletVault');
   await ensureVaultReady();
-  await new Promise((resolve) => { setTimeout(resolve, 0); });
+  await flushAsync();
+  await flushAsync();
+
+  // The names of the account are loaded as soon as the composable is used
+  fetchAllPages.mockResolvedValueOnce(startupNames);
+  setUpStartup({ fetchAllPages, fetchPendingTransactions });
+  const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+  await vi.waitFor(() => expect(aeNames.areNamesFetching.value).toBe(false));
+  await flushAsync();
+  vi.clearAllMocks();
 
   return {
     aeNames,
+    aeAccounts,
+    areAccountsReady,
     fetchPendingTransactions,
     fetchAllPages,
+    fetchFromMiddlewareCamelCased,
     fetchFromMiddlewareCamelCasedPrecise,
+    fetchNameByHash,
     getPreferredName,
     isAddressLinkSupported,
-    isMiddlewareReady,
     getAeSdk,
     linkPreferredAensName,
     unlinkPreferredAensName,
@@ -267,14 +331,17 @@ const createTestContext = async ({
   };
 };
 
+// `middlewareResponses` stubs `fetch`
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('useAeNames queued claims', () => {
   const middlewareName = (name, owner = 'ak_test') => ({
-    info: {
-      activeFrom: 1,
-      expireHeight: 50000,
-      ownership: { current: owner },
-      pointers: { accountPubkey: owner },
-    },
+    activeFrom: 1,
+    expireHeight: 50000,
+    ownership: { current: owner },
+    pointers: [{ key: 'account_pubkey', id: owner, encodedKey: 'ba_YWNjb3VudF9wdWJrZXn8jckR' }],
     name,
     hash: `nm_${name}`,
   });
@@ -1151,12 +1218,10 @@ describe('useAeNames auto-extend', () => {
 
 describe('useAeNames name transfers', () => {
   const middlewareName = (name, owner = 'ak_test') => ({
-    info: {
-      activeFrom: 1,
-      expireHeight: 150,
-      ownership: { current: owner },
-      pointers: { accountPubkey: owner },
-    },
+    activeFrom: 1,
+    expireHeight: 150,
+    ownership: { current: owner },
+    pointers: [{ key: 'account_pubkey', id: owner, encodedKey: 'ba_YWNjb3VudF9wdWJrZXn8jckR' }],
     name,
     hash: `nm_${name}`,
   });
@@ -1188,11 +1253,7 @@ describe('useAeNames name transfers', () => {
   it('marks still-owned names as transferring while the transfer tx is pending', async () => {
     const pendingName = 'transfer.chain';
     const pendingTxHash = 'th_transfer_pending';
-    const {
-      aeNames,
-      fetchAllPages,
-      fetchPendingTransactions,
-    } = await createTestContext({
+    const { aeNames } = await createTestContext({
       pendingNameTransferTxs: {
         ae_testnet: {
           [pendingName]: {
@@ -1204,18 +1265,19 @@ describe('useAeNames name transfers', () => {
           },
         },
       },
+      // The app started again while the transfer is pending
+      setUpStartup: (startup) => {
+        startup.fetchAllPages.mockReset().mockResolvedValue([middlewareName(pendingName)]);
+        startup.fetchPendingTransactions.mockResolvedValue([{
+          hash: pendingTxHash,
+          tx: {
+            type: 'NameTransferTx',
+            accountId: 'ak_test',
+            name: pendingName,
+          },
+        }]);
+      },
     });
-    fetchAllPages.mockResolvedValueOnce([middlewareName(pendingName)]);
-    fetchPendingTransactions
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{
-        hash: pendingTxHash,
-        tx: {
-          type: 'NameTransferTx',
-          accountId: 'ak_test',
-          name: pendingName,
-        },
-      }]);
 
     await aeNames.updateOwnedNames();
 
@@ -1228,12 +1290,7 @@ describe('useAeNames name transfers', () => {
 
   it('clears stale transfer state when the old owner still owns the name and tx is gone', async () => {
     const pendingName = 'transfer.chain';
-    const {
-      aeNames,
-      fetchAllPages,
-      fetchPendingTransactions,
-      getPendingNameTransferTxs,
-    } = await createTestContext({
+    const { aeNames, getPendingNameTransferTxs } = await createTestContext({
       pendingNameTransferTxs: {
         ae_testnet: {
           [pendingName]: {
@@ -1245,11 +1302,11 @@ describe('useAeNames name transfers', () => {
           },
         },
       },
+      // The app started again after the transfer was dropped
+      setUpStartup: (startup) => {
+        startup.fetchAllPages.mockReset().mockResolvedValue([middlewareName(pendingName)]);
+      },
     });
-    fetchAllPages.mockResolvedValueOnce([middlewareName(pendingName)]);
-    fetchPendingTransactions
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
 
     await aeNames.updateOwnedNames();
     await flushAsync();
@@ -1448,12 +1505,10 @@ describe('useAeNames changeDefaultName (set/clear the preferred name)', () => {
 describe('useAeNames last-claimed-name fallback', () => {
   /** Middleware-shaped name; `activeFrom` becomes the claim height (`createdAtHeight`). */
   const middlewareName = (name, activeFrom, owner = 'ak_test') => ({
-    info: {
-      activeFrom,
-      expireHeight: 50000,
-      ownership: { current: owner },
-      pointers: { accountPubkey: owner },
-    },
+    activeFrom,
+    expireHeight: 50000,
+    ownership: { current: owner },
+    pointers: [{ key: 'account_pubkey', id: owner, encodedKey: 'ba_YWNjb3VudF9wdWJrZXn8jckR' }],
     name,
     hash: `nm_${name}`,
   });
@@ -1563,14 +1618,11 @@ describe('useAeNames last-claimed-name fallback', () => {
 
   it('waits for the network id before the startup fetch, then fetches once', async () => {
     // Fetching before the id resolves keys the whole result under `undefined`.
-    const ctx = await createTestContext();
-    ctx.nodeNetworkId.value = undefined;
-    ctx.fetchAllPages.mockClear();
-    ctx.fetchAllPages.mockResolvedValue([middlewareName('claimed.chain', 30)]);
-
-    ctx.isMiddlewareReady.value = true;
-    await new Promise((resolve) => { setTimeout(resolve, 0); });
-    expect(ctx.fetchAllPages).not.toHaveBeenCalled();
+    const ctx = await createTestContext({
+      networkId: null,
+      startupNames: [middlewareName('claimed.chain', 30)],
+    });
+    expect(ctx.aeNames.ownedNames.value).toEqual([]);
 
     ctx.nodeNetworkId.value = 'ae_testnet';
 
@@ -1601,20 +1653,188 @@ describe('useAeNames last-claimed-name fallback', () => {
     expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
   });
 
-  it('loads owned names once the middleware is ready, without opening the Names page', async () => {
-    // Middleware starts not-ready, so nothing has been fetched: an account card
-    // would show no name. This is the account-card carousel scenario.
-    const ctx = await createTestContext();
-    expect(ctx.aeNames.getName('ak_test').value).toBe('');
+  it('loads owned names on startup, without opening the Names page', async () => {
+    // The account-card carousel scenario: no explicit updateOwnedNames() call, which is
+    // what visiting the Names page does.
+    const ctx = await createTestContext({ startupNames: [middlewareName('claimed.chain', 30)] });
 
-    ctx.fetchAllPages.mockResolvedValueOnce([middlewareName('claimed.chain', 30)]);
-    // Middleware becoming ready must populate the fallback on its own - no explicit
-    // updateOwnedNames() call (that is what visiting the Names page used to do).
-    ctx.isMiddlewareReady.value = true;
+    expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
+  });
 
-    await vi.waitFor(() => {
-      expect(ctx.aeNames.getName('ak_test').value).toBe('claimed.chain');
+  it('loads the default names on startup', async () => {
+    const ctx = await createTestContext({ preferredName: 'linked.chain' });
+
+    await vi.waitFor(() => expect(ctx.aeNames.getName('ak_test').value).toBe('linked.chain'));
+  });
+
+  it('shows the stored names in a request popup, without loading them', async () => {
+    const ctx = await createTestContext({
+      runningInPopup: true,
+      storedOwnedNames: [{
+        name: 'stored.chain',
+        hash: 'nm_stored',
+        owner: 'ak_test',
+        createdAtHeight: 20,
+        expiresAt: 50000,
+        pointers: { accountPubkey: 'ak_test' },
+      }],
+      startupNames: [middlewareName('claimed.chain', 30)],
+      preferredName: 'linked.chain',
     });
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('stored.chain');
+  });
+
+  it('loads the owned names once the imported accounts are decrypted too', async () => {
+    const ctx = await createTestContext({ accounts: [], accountsReady: false });
+
+    ctx.aeAccounts.value = [{ address: 'ak_test' }]; // unlocked
+    await flushAsync();
+    ctx.aeAccounts.value = [{ address: 'ak_test' }, { address: 'ak_imported' }];
+    ctx.areAccountsReady.value = true;
+    await vi.waitFor(() => expect(ctx.fetchAllPages).toHaveBeenCalledTimes(2));
+    await flushAsync();
+
+    expect(ctx.fetchAllPages).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads the owned names once per network switch', async () => {
+    const ctx = await createTestContext({ networkId: 'ae_mainnet' });
+    const { NETWORK_NAME_TESTNET } = await import('@/constants');
+    const { useNetworks } = await import('@/composables/networks');
+    ctx.fetchAllPages.mockResolvedValue([middlewareName('switched.chain', 30)]);
+
+    useNetworks().switchNetwork(NETWORK_NAME_TESTNET);
+    ctx.nodeNetworkId.value = 'ae_testnet'; // the node of the new network
+    await flushAsync();
+    await vi.waitFor(() => expect(ctx.aeNames.areNamesFetching.value).toBe(false));
+    await flushAsync();
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('switched.chain');
+    expect(ctx.fetchAllPages).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads the owned names again only when the accounts change', async () => {
+    const ctx = await createTestContext();
+
+    // A new list of the same accounts, as when an account of another chain is added
+    ctx.aeAccounts.value = [{ address: 'ak_test' }];
+    await flushAsync();
+    expect(ctx.fetchAllPages).not.toHaveBeenCalled();
+
+    ctx.aeAccounts.value = [{ address: 'ak_other' }];
+    await vi.waitFor(() => expect(ctx.fetchAllPages).toHaveBeenCalledTimes(1));
+
+    ctx.aeAccounts.value = [{ address: 'ak_other' }, { address: 'ak_new' }];
+    await vi.waitFor(() => expect(ctx.fetchAllPages).toHaveBeenCalledTimes(3));
+  });
+
+  it('loads every page of the active names the account owns', async () => {
+    const renderedName = (name, activeFrom, pointers) => ({
+      active: true,
+      name,
+      hash: `nm_${name}`,
+      name_fee: 1771100000000000000,
+      pointers,
+      revoke: null,
+      expire_height: 50000,
+      claims_count: 1,
+      auction_timeout: 0,
+      auction: null,
+      ownership: { current: 'ak_test', original: 'ak_original' },
+      active_from: activeFrom,
+      approximate_expire_time: 1826128070753,
+      approximate_activation_time: 1793725969162,
+    });
+    const next = '/v3/names?cursor=40%3Ac2Vjb25kLmNoYWlu&limit=100&owned_by=ak_test&state=active';
+    const ctx = await createTestContext({
+      middlewareResponses: {
+        '/v3/names?owned_by=ak_test&state=active&limit=100': JSON.stringify({
+          data: [renderedName('first.chain', 30, [
+            { encoded_key: 'ba_YWNjb3VudF9wdWJrZXn8jckR', id: 'ak_test', key: 'account_pubkey' },
+            { encoded_key: 'ba_YWNjb3VudF9wdWJrZXlfiWr7Uw==', id: 'ak_other', key: 'account_pubkey_' },
+          ])],
+          next,
+        }),
+        [next]: JSON.stringify({ data: [renderedName('second.chain', 40, [])], next: null }),
+      },
+    });
+
+    expect(ctx.aeNames.ownedNames.value.map(({
+      name, hash, owner, createdAtHeight, expiresAt, pointers,
+    }) => ({
+      name, hash, owner, createdAtHeight, expiresAt, pointers,
+    }))).toEqual([{
+      name: 'first.chain',
+      hash: 'nm_first.chain',
+      owner: 'ak_test',
+      createdAtHeight: 30,
+      expiresAt: 50000,
+      pointers: { accountPubkey: 'ak_test', 'ba_YWNjb3VudF9wdWJrZXlfiWr7Uw==': 'ak_other' },
+    }, {
+      name: 'second.chain',
+      hash: 'nm_second.chain',
+      owner: 'ak_test',
+      createdAtHeight: 40,
+      expiresAt: 50000,
+      pointers: {},
+    }]);
+  });
+
+  it('keeps the pointers of a name by their camelCased key', async () => {
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [{
+      ...middlewareName('pointing.chain', 30),
+      pointers: [
+        { key: 'account_pubkey', id: 'ak_test', encodedKey: 'ba_YWNjb3VudF9wdWJrZXn8jckR' },
+        { key: 'contract_pubkey', id: 'ct_test', encodedKey: 'ba_Y29udHJhY3RfcHVia2V5OCcARA==' },
+        { key: 'oracle_pubkey', id: 'ok_test', encodedKey: 'ba_b3JhY2xlX3B1YmtleV2vKNs=' },
+        { key: 'channel', id: 'ch_test', encodedKey: 'ba_Y2hhbm5lbG7hYdQ=' },
+      ],
+    }]);
+
+    expect(ctx.aeNames.ownedNames.value[0]).toMatchObject({
+      name: 'pointing.chain',
+      owner: 'ak_test',
+      createdAtHeight: 30,
+      expiresAt: 50000,
+    });
+    expect(ctx.aeNames.ownedNames.value[0].pointers).toEqual({
+      accountPubkey: 'ak_test',
+      contractPubkey: 'ct_test',
+      oraclePubkey: 'ok_test',
+      channel: 'ch_test',
+    });
+  });
+
+  it('keeps the other pointers by their encoded key, so none passes for the account', async () => {
+    // A name pushed to the account by a transfer, pointing to someone else
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [{
+      ...middlewareName('pushed.chain', 30),
+      pointers: [
+        { key: 'account_pubkey', id: 'ak_other', encodedKey: 'ba_YWNjb3VudF9wdWJrZXn8jckR' },
+        { key: 'account_pubkey_', id: 'ak_test', encodedKey: 'ba_YWNjb3VudF9wdWJrZXlfiWr7Uw==' },
+        { key: 'accountPubkey', id: 'ak_test', encodedKey: 'ba_YWNjb3VudFB1YmtleRNQC1g=' },
+        { key: 'ACCOUNT_PUBKEY', id: 'ak_test', encodedKey: 'ba_QUNDT1VOVF9QVUJLRVknItpB' },
+      ],
+    }]);
+
+    expect(ctx.aeNames.ownedNames.value[0].pointers).toEqual({
+      accountPubkey: 'ak_other',
+      'ba_YWNjb3VudF9wdWJrZXlfiWr7Uw==': 'ak_test',
+      'ba_YWNjb3VudFB1YmtleRNQC1g=': 'ak_test',
+      ba_QUNDT1VOVF9QVUJLRVknItpB: 'ak_test',
+    });
+  });
+
+  it('resolves a name hash once', async () => {
+    const ctx = await createTestContext();
+    ctx.fetchNameByHash.mockResolvedValue('hashed.chain');
+
+    expect(await ctx.aeNames.getNameByNameHash('nm_hashed')).toBe('hashed.chain');
+    expect(await ctx.aeNames.getNameByNameHash('nm_hashed')).toBe('hashed.chain');
+    expect(ctx.fetchNameByHash).toHaveBeenCalledTimes(1);
   });
 
   it('ignores names that are not confirmed on-chain yet', async () => {

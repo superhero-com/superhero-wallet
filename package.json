@@ -100,7 +100,6 @@
     "qr-code-styling": "^1.9.2",
     "qr-scanner": "^1.4.2",
     "satoshi-bitcoin": "^1.0.7",
-    "swagger-client": "3.39.0",
     "swiper": "^14.4.0",
     "uuid": "^14.0.3",
     "validator": "^13.15.35",
@@ -186,9 +185,6 @@
       "@typescript-eslint/eslint-plugin": "^8.72.2",
       "@typescript-eslint/parser": "$@typescript-eslint/parser",
       "eslint-plugin-vue": "$eslint-plugin-vue"
-    },
-    "@swagger-api/apidom-reference": {
-      "minimatch": "^11.0.8"
     },
     "@typescript-eslint/typescript-estree": {
       "minimatch": "^11.0.8"

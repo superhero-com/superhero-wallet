@@ -187,7 +187,7 @@ describe('AeternityAdapter token transactions', () => {
     vi.spyOn(global, 'fetch').mockImplementation(async (url) => {
       const { pathname, searchParams } = new URL(url);
       const path = pathname.replace(/^\/mdw/, '');
-      if (path === '/status') {
+      if (path === '/v3/status') {
         return jsonResponse({ mdw_version: mdw.version });
       }
       if (path === `/v3/aex9/${TOKEN}/transfers`) {
@@ -429,7 +429,7 @@ describe('AeternityAdapter token transactions', () => {
 
     const { regularTransactions } = await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
 
-    expect(requestedPaths()).toEqual(['/status', `/v2/accounts/${ACCOUNT}/activities?limit=30`]);
+    expect(requestedPaths()).toEqual(['/v3/status', `/v2/accounts/${ACCOUNT}/activities?limit=30`]);
     expect(getHashes(regularTransactions)).toEqual([TOKEN_CALL_HASH]);
   });
 
@@ -449,7 +449,7 @@ describe('AeternityAdapter token transactions', () => {
     await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
     await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
 
-    expect(requestedPaths().filter((path) => path === '/status')).toHaveLength(1);
+    expect(requestedPaths().filter((path) => path === '/v3/status')).toHaveLength(1);
   });
 
   it('asks the middleware for its version again when it failed to answer', async () => {
@@ -460,7 +460,7 @@ describe('AeternityAdapter token transactions', () => {
     await expect(adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN)).rejects.toThrow('HTTP 503');
     await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
 
-    expect(requestedPaths().filter((path) => path === '/status')).toHaveLength(2);
+    expect(requestedPaths().filter((path) => path === '/v3/status')).toHaveLength(2);
     expect(requestedPaths()).toContain(`/v3/aex9/${TOKEN}/transfers?account=${ACCOUNT}&limit=10`);
   });
 

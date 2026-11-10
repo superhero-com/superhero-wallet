@@ -446,7 +446,7 @@ export class AeAccountHdWallet extends MemoryAccount {
     let message;
     let resolvedName;
     let modalResolution: ISignModalResolution | undefined;
-    const { getMiddleware } = useAeMiddleware();
+    const { fetchNameByHash } = useAeMiddleware();
 
     if (isDappRequest(options)) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
@@ -454,7 +454,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       switch (params.tag) {
         case DelegationTag.AensName:
           try {
-            resolvedName = (await (await getMiddleware()).getName(params.nameId)).name;
+            resolvedName = await fetchNameByHash(params.nameId);
           } catch (e) {
             handleUnknownError(e);
           }

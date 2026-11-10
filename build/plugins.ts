@@ -130,10 +130,6 @@ export function devProcessPolyfillPlugin(): Plugin {
  * `vendor` chunk lets Rolldown move the whole subtree into an on-demand async
  * chunk instead of the always-loaded `vendor` bundle.
  *
- * `swagger-client` (+ its `@swagger-api/*` dependencies) is the same shape: its
- * sole consumer, `lib/swagger.js`'s `genSwaggerClient`, loads it via dynamic
- * `import()` and has no other static importer in `src`.
- *
  * WalletConnect (`@walletconnect/*`, `@reown/`) is also the same shape:
  * `composables/walletConnect.ts` loads `@walletconnect/core`, `@reown/walletkit`
  * AND `@walletconnect/utils` all via dynamic `import()` inside `initWeb3wallet`;
@@ -147,10 +143,6 @@ const LAZY_VENDOR_PACKAGES = [
   'libsodium',
   'libsodium-wrappers',
   'moment',
-  'ramda',
-  'ramda-adjunct',
-  'swagger-client',
-  '@swagger-api/',
   '@walletconnect/',
   '@reown/',
 ];
@@ -173,8 +165,8 @@ export function vendorManualChunks(id: string): string | undefined {
   if (!id.includes('node_modules')) return undefined;
   const normalized = id.replace(/\\/g, '/');
   // Entries ending in `/` are scope prefixes and match as-is; bare package names
-  // must match a whole path segment, so `ramda` does not also swallow
-  // `ramda-adjunct`. Every id Rolldown passes here is a file inside the package,
+  // must match a whole path segment, so `libsodium` does not also swallow
+  // `libsodium-wrappers`. Every id Rolldown passes here is a file inside the package,
   // so the trailing separator is always present.
   if (LAZY_VENDOR_PACKAGES.some((pkg) => normalized.includes(
     pkg.endsWith('/') ? `node_modules/${pkg}` : `node_modules/${pkg}/`,

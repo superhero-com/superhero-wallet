@@ -10,7 +10,7 @@ describe('Tests cases for transaction details page', () => {
     cy.get('@transactionHash')
       .then((transactionHash) => {
         cy.request(
-          `${AE_NETWORK_DEFAULT_SETTINGS.mainnet.middlewareUrl}/v2/txs/${transactionHash.trim()}`,
+          `${AE_NETWORK_DEFAULT_SETTINGS.mainnet.middlewareUrl}/v3/transactions/${transactionHash.trim()}`,
         ).then(
           ({
             body:
