@@ -3,9 +3,9 @@ import { mount } from '@vue/test-utils';
 import BigNumber from 'bignumber.js';
 
 /**
- * `fetchNameAuction` drops bids made through a contract call, so an auction can have none
- * the wallet can show. The highest bid then comes from the node, or is `undefined` when the
- * node can't tell either.
+ * The node gets a new bid before the middleware, so an auction can have no bids the wallet
+ * can show yet. The highest bid then comes from the node, or is `undefined` when the node
+ * can't tell either.
  */
 const { auction, getNameAuctionHighestBid } = vi.hoisted(() => {
   vi.resetModules();
@@ -88,13 +88,13 @@ describe('auction with no bids the wallet can show', () => {
       .toEqual(['500', '352.38']);
   });
 
-  // The node's highest bid is a copy, or one the middleware didn't list with its amount
+  // The node's highest bid is a copy, or one the middleware didn't list yet
   it.each([
     ['a copy of the highest listed bid', { accountId: 'ak_carol', nameFee: new BigNumber(500) }, [
       ['ak_carol', 'ak_alice'],
       ['500', '352.38'],
     ]],
-    ['a bid made by a contract call', { accountId: 'ak_dave', nameFee: new BigNumber(600) }, [
+    ['a bid the middleware has not listed yet', { accountId: 'ak_dave', nameFee: new BigNumber(600) }, [
       ['ak_dave', 'ak_carol', 'ak_alice'],
       ['600', '500', '352.38'],
     ]],

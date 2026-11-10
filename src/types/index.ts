@@ -781,7 +781,7 @@ export interface IAuctionBid {
 export interface IAuction {
   bids: IAuctionBid[];
   expiration: number;
-  /** As the node has it: `bids` leaves out the bids made through a contract call */
+  /** As the node has it, which can be ahead of the middleware `bids` */
   highestBid?: IAuctionBid;
 }
 

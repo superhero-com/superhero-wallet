@@ -1887,82 +1887,101 @@ describe('useAeNames last-claimed-name fallback', () => {
 });
 
 describe('useAeNames fetchNameAuction', () => {
-  const claimTx = (accountId, nameFee) => ({ type: 'NameClaimTx', accountId, nameFee });
-
-  it('takes the bids from the auction, not from the claims of the previous owner', async () => {
-    const ctx = await createTestContext();
-    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue({
+  // As the middleware renders them, with amounts too big for a JS number
+  const AUCTION = '{"name":"test.chain","activation_time":1793725969162,"auction_end":1000,'
+    + '"approximate_expire_time":1826128070753,"name_fee":352380000000000000000,'
+    + '"last_bid":{"hash":"th_carol","tx":{"account_id":"ak_carol","name":"test.chain",'
+    + '"name_fee":500000000000000000001,"type":"NameClaimTx"}},"claims_count":3}';
+  const CLAIMS = '/v3/names/auctions/test.chain/claims?limit=100';
+  const claim = (accountId, nameFee, internalSource = false) => JSON.stringify({
+    height: 900,
+    block_hash: 'mh_block',
+    source_tx_hash: `th_${accountId}`,
+    source_tx_type: internalSource ? 'ContractCallTx' : 'NameClaimTx',
+    internal_source: internalSource,
+    tx: {
+      account_id: accountId,
+      fee: 16500000000000,
       name: 'test.chain',
-      status: 'auction',
-      info: {
-        auctionEnd: 1000,
-        // Newest first, as the middleware lists them
-        bids: [
-          { tx: claimTx('ak_carol', '500000000000000000001') },
-          {
-            tx: {
-              type: 'GAMetaTx',
-              gaId: 'ak_bob',
-              tx: { signatures: [], tx: claimTx('ak_bob', '400000000000000000000') },
-            },
-          },
-          { tx: { type: 'ContractCallTx', callerId: 'ak_dave' } },
-          { tx: claimTx('ak_alice', '352380000000000000000') },
-        ],
+      name_fee: 'NAME_FEE',
+      name_salt: 0,
+      nonce: 1,
+    },
+  }).replace('"NAME_FEE"', nameFee); // unquoted, as the middleware has it
+  const claimsPage = (claims, next = null) => (
+    `{"data":[${claims.join()}],"next":${JSON.stringify(next)}}`
+  );
+  const auctionResponses = (claims) => ({
+    '/v3/names/auctions/test.chain': AUCTION,
+    [CLAIMS]: claimsPage(claims),
+  });
+
+  async function fetchAuction(ctx) {
+    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+    return auction;
+  }
+
+  it('takes the bids from every page of the claims, also those made through a contract call', async () => {
+    const nextClaims = '/v3/names/auctions/test.chain/claims?cursor=8962914&limit=100';
+    const ctx = await createTestContext({
+      middlewareResponses: {
+        ...auctionResponses([]),
+        [CLAIMS]: claimsPage([
+          claim('ak_carol', '500000000000000000001'),
+          claim('ak_dave', '450000000000000000000', true),
+        ], nextClaims),
+        [nextClaims]: claimsPage([claim('ak_alice', '352380000000000000001')]),
       },
-      // The previous lifecycle, where the old claims belong
-      previous: [{ info: { claims: [{ tx: claimTx('ak_old', '900000000000000000000') }] } }],
     });
 
-    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
+    const auction = await fetchAuction(ctx);
 
-    expect(ctx.fetchFromMiddlewareCamelCasedPrecise)
-      .toHaveBeenCalledWith('/v2/names/test.chain/auction?expand=true');
     expect(auction.expiration).toBe(1000);
     expect(auction.bids.map(({ accountId, nameFee }) => [accountId, nameFee.toFixed()]))
       .toEqual([
         ['ak_carol', '500.000000000000000001'],
-        ['ak_bob', '400'],
-        ['ak_alice', '352.38'],
+        ['ak_dave', '450'],
+        ['ak_alice', '352.380000000000000001'],
       ]);
-
-    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
     expect(ctx.aeNames.getNameAuctionHighestBid('test.chain').accountId).toBe('ak_carol');
   });
 
-  const contractBidAuction = {
-    name: 'test.chain',
-    status: 'auction',
-    info: {
-      auctionEnd: 1000,
-      bids: [{ tx: { type: 'ContractCallTx', callerId: 'ak_dave' } }],
-    },
-  };
+  it('keeps the name in its path segment', async () => {
+    // A name from the route, which would otherwise page through another endpoint
+    const ctx = await createTestContext({
+      middlewareResponses: {
+        '/v3/names/auctions/..%2F..%2Fkey-blocks%23': AUCTION,
+        '/v3/names/auctions/..%2F..%2Fkey-blocks%23/claims?limit=100': claimsPage([]),
+      },
+    });
 
-  it('takes the highest bid from the node, which knows the amount of a contract call bid', async () => {
-    const ctx = await createTestContext();
-    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue(contractBidAuction);
+    const auction = await ctx.aeNames.fetchNameAuction('../../key-blocks#');
+
+    expect(auction.expiration).toBe(1000);
+  });
+
+  it('takes the highest bid from the node, which can be ahead of the middleware', async () => {
+    const ctx = await createTestContext({
+      middlewareResponses: auctionResponses([claim('ak_carol', '500000000000000000000')]),
+    });
     ctx.sdk.api.getAuctionEntryByName.mockResolvedValue({
-      highestBidder: 'ak_dave',
+      highestBidder: 'ak_erin',
       highestBid: 600000000000000000001n,
     });
 
-    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
-    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+    await fetchAuction(ctx);
 
     expect(ctx.sdk.api.getAuctionEntryByName).toHaveBeenCalledWith('test.chain');
-    expect(auction.bids).toEqual([]);
     const highestBid = ctx.aeNames.getNameAuctionHighestBid('test.chain');
     expect([highestBid.accountId, highestBid.nameFee.toFixed()])
-      .toEqual(['ak_dave', '600.000000000000000001']);
+      .toEqual(['ak_erin', '600.000000000000000001']);
   });
 
-  it('has no highest bid when every bid was made by a contract call and the node can\'t tell', async () => {
-    const ctx = await createTestContext();
-    ctx.fetchFromMiddlewareCamelCasedPrecise.mockResolvedValue(contractBidAuction);
+  it('has no highest bid when the middleware lists no bid yet and the node can\'t tell', async () => {
+    const ctx = await createTestContext({ middlewareResponses: auctionResponses([]) });
 
-    const auction = await ctx.aeNames.fetchNameAuction('test.chain');
-    ctx.aeNames.setAuctionEntry({ name: 'test.chain', ...auction });
+    const auction = await fetchAuction(ctx);
 
     expect(auction.bids).toEqual([]);
     expect(ctx.aeNames.getNameAuctionHighestBid('test.chain')).toBeUndefined();

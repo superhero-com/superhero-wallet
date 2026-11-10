@@ -124,3 +124,14 @@ export interface AeMdwName {
   ownership: { current: Encoded.AccountAddress };
   pointers: { key: string; id: string; encodedKey: string }[];
 }
+
+export interface AeMdwNameAuction {
+  auctionEnd: number;
+}
+
+export interface AeMdwNameClaim {
+  tx: {
+    accountId: Encoded.AccountAddress;
+    nameFee: string | number;
+  };
+}

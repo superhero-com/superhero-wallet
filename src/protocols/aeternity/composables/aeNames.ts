@@ -19,7 +19,6 @@ import type {
   ChainName,
   IName,
   ITransaction,
-  ITx,
   NetworkId,
   IAddressNamePair,
   IAuction,
@@ -57,14 +56,10 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
-import {
-  aettosToAe,
-  getInnerTransaction,
-  isInsufficientBalanceError,
-} from '@/protocols/aeternity/helpers';
+import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
-import type { AeMdwName } from '@/protocols/aeternity/types';
+import type { AeMdwName, AeMdwNameAuction, AeMdwNameClaim } from '@/protocols/aeternity/types';
 
 import { useAeAddressLinkContract } from './aeAddressLinkContract';
 import { useAeAddressLinkBackend } from './aeAddressLinkBackend';
@@ -564,26 +559,25 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   /**
-   * For an expired name that is auctioned again the middleware returns the previous
-   * owner's claims and activities, so only the auction itself has the current bids.
-   * The highest bid comes from the node: the middleware lists a claim made by a contract
-   * call without its amount.
+   * The highest bid comes from the node too, as a new bid gets there before the middleware.
    */
   async function fetchNameAuction(name: string): Promise<IAuction> {
-    const [{ info }, highestBid] = await Promise.all([
-      fetchFromMiddlewareCamelCasedPrecise(`/v2/names/${name}/auction?expand=true`),
+    const auctionPath = `/v3/names/auctions/${encodeURIComponent(name)}`;
+    const [{ auctionEnd }, claims, highestBid] = await Promise.all([
+      fetchFromMiddlewareCamelCasedPrecise(auctionPath) as Promise<AeMdwNameAuction>,
+      fetchAllPages<AeMdwNameClaim>(
+        () => fetchFromMiddlewareCamelCasedPrecise(`${auctionPath}/claims?limit=100`),
+        fetchFromMiddlewareCamelCasedPrecise,
+      ),
       fetchNodeAuctionHighestBid(name),
     ]);
     return {
-      expiration: info.auctionEnd,
-      bids: info.bids
-        .map(({ tx }: ITransaction) => getInnerTransaction(tx))
-        // A claim made by a contract call carries no bid amount
-        .filter((tx: ITx) => tx.type === Tag[Tag.NameClaimTx])
-        .map(({ accountId, nameFee }: ITx) => ({
-          accountId,
-          nameFee: new BigNumber(aettosToAe(nameFee!)),
-        })),
+      expiration: auctionEnd,
+      // Newest first, also those made through a contract call
+      bids: claims.map(({ tx: { accountId, nameFee } }) => ({
+        accountId,
+        nameFee: new BigNumber(aettosToAe(nameFee)),
+      })),
       highestBid,
     };
   }
