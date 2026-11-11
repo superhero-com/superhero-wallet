@@ -42,6 +42,7 @@ import {
 } from '@/constants';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 import Logger from '@/lib/logger';
+import { readVault } from '@/lib/WalletVault';
 import {
   useAccounts,
   useAeSdk,
@@ -177,6 +178,8 @@ let ownedNamesPublishedGeneration = 0;
 let ownedNamesFetchesInFlight = 0;
 let preclaimedNamesEncryptionInitialized = false;
 let flushPreclaimedNamesWrites: () => Promise<void> = () => Promise.resolve();
+/** The stored names didn't decrypt with the current key: a change couldn't be stored. */
+let arePreclaimedNamesUnreadable = false;
 
 /**
  * In-memory cache + in-flight dedup for `updateExternalName` lookups.
@@ -303,7 +306,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     getLastActiveProtocolAccount,
   } = useAccounts();
   const { onNetworkChange } = useNetworks();
-  const { openDefaultModal } = useModals();
+  const { openConfirmModal, openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
   const { getPreferredName, isAddressLinkSupported } = useAeAddressLinkContract();
@@ -321,6 +324,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     preclaimedNamesEncryptionInitialized = true;
     const { encryptionKey, isEncryptionKeyCurrent } = useAuth();
     const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}', {
+      onDecrypted: () => { arePreclaimedNamesUnreadable = false; },
+      onDecryptFailed: () => { arePreclaimedNamesUnreadable = true; },
       isKeyCurrent: isEncryptionKeyCurrent,
     });
     type Registry = typeof preclaimedNames.value;
@@ -803,6 +808,31 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     });
   }
 
+  /** A new claim can't be stored next to names that don't decrypt, whose salts are lost. */
+  function offerToRemoveUnreadablePreclaimedNames() {
+    const ciphertext = preclaimedNamesEncrypted.value;
+    // What the user decides on, so a removal can't take names stored after it.
+    const vault = IS_MOBILE_APP ? undefined : readVault();
+    openConfirmModal({
+      title: tg('pages.names.claimStorageUnreadableTitle'),
+      msg: tg('pages.names.claimStorageUnreadable'),
+      icon: 'critical',
+      buttonMessage: tg('pages.names.claimStorageUnreadableRemove'),
+    })
+      .then(async () => {
+        if (!arePreclaimedNamesUnreadable || preclaimedNamesEncrypted.value !== ciphertext) {
+          return;
+        }
+        if (vault) {
+          await useAuth().removeUnreadableSecret(STORAGE_KEYS.preclaimedNames, vault);
+        } else {
+          preclaimedNamesEncrypted.value = null;
+        }
+        arePreclaimedNamesUnreadable = false;
+      }, () => { /* NOOP - kept */ })
+      .catch(handleUnknownError);
+  }
+
   function logSilentError(error: any) {
     Logger.write({
       message: error?.message || String(error),
@@ -1176,6 +1206,11 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   async function addNameToClaimQueue(name: AensName, address: string, autoExtend: boolean) {
     try {
       const networkId = nodeNetworkId.value!;
+      // Checked before sending: the fee is lost if its salt can't be stored afterwards.
+      if (arePreclaimedNamesUnreadable && preclaimedNamesEncrypted.value) {
+        offerToRemoveUnreadablePreclaimedNames();
+        return false;
+      }
       const aeSdk = await getAeSdk();
       const currentHeight = await aeSdk.getHeight();
       const nameObj = await createNameInstance(name, getClaimOptions(address));

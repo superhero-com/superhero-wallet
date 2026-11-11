@@ -15,16 +15,35 @@ describe('SetPassword', () => {
     mockGenerateDefaultPasswordSecret.mockReset();
   });
 
-  async function mountSetPassword() {
+  async function mountSetPassword(props = {}) {
     // eslint-disable-next-line global-require
     const SetPassword = (await import('@/popup/components/Modals/SetPassword.vue')).default;
     return shallowMount(SetPassword, {
       props: {
         resolve: mockResolve,
         reject: mockReject,
+        ...props,
       },
     });
   }
+
+  it('rejects as cancelled by the user when closed, which callers keep quiet about', async () => {
+    const { RejectedByUserError } = await import('@/lib/errors');
+    const wrapper = await mountSetPassword();
+
+    wrapper.findComponent({ name: 'Modal' }).vm.$emit('close');
+
+    expect(mockReject).toHaveBeenCalledWith(expect.any(RejectedByUserError));
+    expect(mockResolve).not.toHaveBeenCalled();
+  });
+
+  it('cannot be closed for a restored wallet, which needs a password', async () => {
+    const wrapper = await mountSetPassword({ isRestoredWallet: true });
+
+    wrapper.findComponent({ name: 'Modal' }).vm.$emit('close');
+
+    expect(mockReject).not.toHaveBeenCalled();
+  });
 
   it('resolves a generated secret marked as skipped, storing nothing before the password commit', async () => {
     mockGenerateDefaultPasswordSecret.mockReturnValue('default-secret');

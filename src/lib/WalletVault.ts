@@ -41,7 +41,17 @@ export class VaultResetError extends Error {
 }
 /** An older wallet version stored its own copies, which a new password wouldn't protect. */
 export class VaultLegacyConflictError extends Error {
-  constructor() { super('Another wallet version saved legacy data. Export its new keys before reloading it'); }
+  /** What the user is shown, so a removal can't take copies stored after it. */
+  constructor(public expected: { vault: VaultSnapshot; legacy: LegacyCopies }) {
+    super('Another wallet version saved legacy data. Export its new keys before reloading it');
+  }
+}
+/** The key opens the wallet but not this secret, which is kept: another key may open it. */
+export class VaultSecretUnreadableError extends Error {
+  /** `vault`: the one it failed on, so a removal can't take a newer secret. */
+  constructor(public storageKey: VaultKey, public vault: VaultSnapshot, public cause?: unknown) {
+    super(`The stored "${storageKey}" can't be decrypted`);
+  }
 }
 /** The browser storage holding the vault can't be opened or read, its data is unchanged. */
 export class VaultUnavailableError extends Error {
@@ -170,7 +180,7 @@ function cleanupLegacy(record: VaultRecord) {
   try {
     // All or none: a copy another version changed may need the old salt or secret beside it.
     if (hasLegacyConflict(record)) {
-      console.warn(new VaultLegacyConflictError());
+      console.warn('Another wallet version saved legacy data, keeping all of it');
       return;
     }
   } catch (error) { console.warn(error); return; }
@@ -274,7 +284,7 @@ export async function commitVault(
           throw new VaultConflictError();
         }
         if (previous && requireLegacyReconciled && hasLegacyConflict(previous)) {
-          throw new VaultLegacyConflictError();
+          throw new VaultLegacyConflictError({ vault: current, legacy: readLegacyCopies() });
         }
         assertCurrent();
         // Kept as a fallback without durability: an old password's copies mustn't stay.
@@ -324,11 +334,16 @@ export async function writeVaultField(
   if (current.values[key] === value) return;
   await commitVault(current, { ...current.values, [key]: value });
 }
+/**
+ * @param options.replace The new value doesn't depend on the stored one, which is then
+ * replaced without being decrypted, e.g. a setting the user picked again.
+ */
 export async function updateVaultSecret(
   key: VaultKey,
   encryptionKey: CryptoKey,
   update: (plaintext: string | null) => string,
   assertCurrent: () => void = () => {},
+  { replace = false }: { replace?: boolean } = {},
 ): Promise<string> {
   await ensureVaultReady();
   await refreshVault();
@@ -344,7 +359,12 @@ export async function updateVaultSecret(
       await decrypt(encryptionKey, current.values[STORAGE_KEYS.mnemonic]!);
     }
     const previous = current.values[key];
-    const plaintext = previous ? await decrypt(encryptionKey, previous) : null;
+    let plaintext: string | null = null;
+    if (previous && !replace) {
+      plaintext = await decrypt(encryptionKey, previous).catch((error) => {
+        throw new VaultSecretUnreadableError(key, current, error);
+      });
+    }
     const ciphertext = await encrypt(encryptionKey, update(plaintext));
     try {
       await commitVault(current, { ...current.values, [key]: ciphertext }, assertCurrent);
@@ -355,6 +375,25 @@ export async function updateVaultSecret(
     }
   }
   throw new VaultConflictError();
+}
+/**
+ * Removes the copies another wallet version stored, once the user agreed, so a new password
+ * can be set. Whatever only they hold is lost.
+ */
+export async function discardLegacyCopies(
+  expected: { vault: VaultSnapshot; legacy: LegacyCopies },
+): Promise<void> {
+  await refreshVault();
+  // The user decided on what they were shown, not on what was stored since.
+  if (
+    !cachedRecord
+    || cachedRecord.revision !== expected.vault.revision
+    || JSON.stringify(readLegacyCopies()) !== JSON.stringify(expected.legacy)
+  ) {
+    throw new VaultConflictError();
+  }
+  // All or none: a copy left without its salt or password couldn't be read.
+  VAULT_KEYS.forEach((key) => localStorage.removeItem(legacyKey(key)));
 }
 /** Old copies go only after the empty record is stored, a failed reset deletes nothing. */
 export async function clearVault(): Promise<void> {

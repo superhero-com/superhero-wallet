@@ -138,6 +138,7 @@ export default defineComponent({
           SecureMobileStorage.remove(STORAGE_KEYS.mnemonic),
           SecureMobileStorage.remove(STORAGE_KEYS.mobileDataKey),
           SecureMobileStorage.remove(STORAGE_KEYS.privateKeyAccountsRaw),
+          SecureMobileStorage.remove(STORAGE_KEYS.preclaimedNames),
         ]);
       }
 

@@ -9,6 +9,30 @@ function deferred() {
   return { promise, resolve };
 }
 
+// Delay one real crypto operation, without replacing its ciphertext or plaintext.
+function pauseOperation(
+  method: 'encrypt' | 'decrypt',
+  shouldPause: (bytes: BufferSource) => boolean = () => true,
+) {
+  const entered = deferred();
+  const release = deferred();
+  const finished = deferred();
+  const realOperation = globalThis.crypto.subtle[method].bind(globalThis.crypto.subtle);
+  let paused = false;
+  vi.spyOn(globalThis.crypto.subtle, method).mockImplementation(async (...args) => {
+    if (paused || !shouldPause(args[2])) return realOperation(...args);
+    paused = true;
+    entered.resolve();
+    try {
+      await release.promise;
+      return await realOperation(...args);
+    } finally {
+      finished.resolve();
+    }
+  });
+  return { entered: entered.promise, release: release.resolve, finished: finished.promise };
+}
+
 describe('decryptedComputed mobile updates', () => {
   let crypto: typeof import('@/utils/crypto');
   let common: typeof import('@/utils/common');
@@ -50,30 +74,6 @@ describe('decryptedComputed mobile updates', () => {
     return {
       key, dataKey, encrypted, value, scope, onDecrypted, onDecryptFailed,
     };
-  }
-
-  // Delay one real crypto operation, without replacing its ciphertext or plaintext.
-  function pauseOperation(
-    method: 'encrypt' | 'decrypt',
-    shouldPause: (bytes: BufferSource) => boolean = () => true,
-  ) {
-    const entered = deferred();
-    const release = deferred();
-    const finished = deferred();
-    const realOperation = globalThis.crypto.subtle[method].bind(globalThis.crypto.subtle);
-    let paused = false;
-    vi.spyOn(globalThis.crypto.subtle, method).mockImplementation(async (...args) => {
-      if (paused || !shouldPause(args[2])) return realOperation(...args);
-      paused = true;
-      entered.resolve();
-      try {
-        await release.promise;
-        return await realOperation(...args);
-      } finally {
-        finished.resolve();
-      }
-    });
-    return { entered: entered.promise, release: release.resolve, finished: finished.promise };
   }
 
   const append = (item: string) => (plaintext: string) => JSON.stringify([
@@ -209,6 +209,175 @@ describe('decryptedComputed mobile updates', () => {
     expect(JSON.parse(await crypto.decrypt(state.dataKey, state.encrypted.value!)))
       .toEqual(['existing', 'second-account']);
     await vi.waitFor(() => expect(state.value.value).toBe('["existing","second-account"]'));
+  });
+});
+
+describe('decryptedComputed vault writes', () => {
+  let crypto: typeof import('@/utils/crypto');
+  let common: typeof import('@/utils/common');
+  let vault: typeof import('@/lib/WalletVault');
+  let vue: typeof import('vue');
+  let STORAGE_KEYS: typeof import('@/constants').STORAGE_KEYS;
+  const scopes: EffectScope[] = [];
+
+  beforeEach(async () => {
+    vi.resetModules();
+    localStorage.clear();
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...await importOriginal<typeof import('@/constants')>(),
+      IS_MOBILE_APP: false,
+      IS_EXTENSION: false,
+      IS_OFFSCREEN_TAB: false,
+    }));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    crypto = await import('@/utils/crypto');
+    common = await import('@/utils/common');
+    vault = await import('@/lib/WalletVault');
+    vue = await import('vue');
+    ({ STORAGE_KEYS } = await import('@/constants'));
+  });
+
+  afterEach(() => {
+    scopes.splice(0).forEach((scope) => scope.stop());
+    vi.restoreAllMocks();
+  });
+
+  /** A wallet whose seed and `storageKey` are stored under one password key. */
+  async function createState(
+    storageKey: string,
+    plaintext: string,
+    options: Parameters<typeof common.decryptedComputed>[3] = {},
+  ) {
+    const dataKey = await crypto.generateEncryptionKey('password', crypto.generateSalt());
+    await vault.ensureVaultReady();
+    const empty = vault.readVault();
+    await vault.commitVault(empty, {
+      ...empty.values,
+      [STORAGE_KEYS.encryptionSalt]: 'salt',
+      [STORAGE_KEYS.mnemonic]: await crypto.encrypt(dataKey, 'seed'),
+      [storageKey]: await crypto.encrypt(dataKey, plaintext),
+    });
+    const key = vue.ref<CryptoKey | undefined>(dataKey);
+    const encrypted = vue.ref<string | null>(vault.readVault().values[storageKey]);
+    const { registerVaultRef } = await import('@/utils/vaultRef');
+    registerVaultRef(encrypted, {
+      storageKey,
+      apply: (value) => { encrypted.value = value; },
+    });
+    const scope = vue.effectScope();
+    scopes.push(scope);
+    const value = scope.run(() => common.decryptedComputed(key, encrypted, '{}', options))!;
+    await vi.waitFor(() => expect(value.value).toBe(plaintext));
+    return {
+      key, dataKey, encrypted, value,
+    };
+  }
+
+  const stored = (storageKey: string) => vault.readVault().values[storageKey];
+
+  async function settle() {
+    await vue.nextTick();
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+  }
+
+  it('drops a decrypt a lock overtook', async () => {
+    const onDecrypted = vi.fn();
+    const state = await createState(STORAGE_KEYS.preclaimedNames, '{"a":1}', { onDecrypted });
+    onDecrypted.mockClear();
+    const decrypting = pauseOperation('decrypt');
+    state.encrypted.value = await crypto.encrypt(state.dataKey, '{"a":2}');
+    await decrypting.entered;
+
+    state.key.value = undefined;
+    await vue.nextTick();
+    decrypting.release();
+    await decrypting.finished;
+    await settle();
+
+    expect(state.value.value).toBe('{}');
+    expect(onDecrypted).not.toHaveBeenCalled();
+  });
+
+  it('keeps a newer value when an older decrypt fails after it', async () => {
+    const onDecryptFailed = vi.fn();
+    const state = await createState(STORAGE_KEYS.preclaimedNames, '{"a":1}', { onDecryptFailed });
+    const otherKey = await crypto.generateEncryptionKey('other', crypto.generateSalt());
+    const decrypting = pauseOperation('decrypt');
+    state.encrypted.value = await crypto.encrypt(otherKey, '{"a":2}');
+    await decrypting.entered;
+
+    state.encrypted.value = await crypto.encrypt(state.dataKey, '{"a":3}');
+    await vi.waitFor(() => expect(state.value.value).toBe('{"a":3}'));
+    decrypting.release();
+    await decrypting.finished;
+    await settle();
+
+    expect(state.value.value).toBe('{"a":3}');
+    expect(onDecryptFailed).not.toHaveBeenCalled();
+  });
+
+  it('keeps the view while the stored data is under another key, until that key arrives', async () => {
+    let isKeyCurrent = true;
+    const onDecryptFailed = vi.fn();
+    const state = await createState(STORAGE_KEYS.privateKeyAccountsRaw, '["a"]', {
+      onDecryptFailed,
+      isKeyCurrent: () => isKeyCurrent,
+    });
+    const newKey = await crypto.generateEncryptionKey('new-password', crypto.generateSalt());
+    const decrypt = vi.spyOn(globalThis.crypto.subtle, 'decrypt');
+    const warn = vi.spyOn(console, 'warn');
+
+    // As this window's own password change publishes it, before its key.
+    isKeyCurrent = false;
+    state.encrypted.value = await crypto.encrypt(newKey, '["b"]');
+    await settle();
+    expect(decrypt).not.toHaveBeenCalled();
+    expect(state.value.value).toBe('["a"]');
+
+    isKeyCurrent = true;
+    state.key.value = newKey;
+    await vi.waitFor(() => expect(state.value.value).toBe('["b"]'));
+    expect(onDecryptFailed).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('replaces a setting the key cannot read only when picked again as a whole', async () => {
+    const state = await createState(
+      STORAGE_KEYS.secureLoginTimeout,
+      '60000',
+      { isReplacedWithoutReading: true },
+    );
+    const otherKey = await crypto.generateEncryptionKey('other', crypto.generateSalt());
+    await vault.writeVaultField(
+      STORAGE_KEYS.secureLoginTimeout,
+      await crypto.encrypt(otherKey, '60000'),
+    );
+
+    await state.value.set('0');
+    expect(await crypto.decrypt(state.dataKey, stored(STORAGE_KEYS.secureLoginTimeout)!)).toBe('0');
+
+    // An update depends on the stored value, so it still refuses one it can't read.
+    await vault.writeVaultField(
+      STORAGE_KEYS.secureLoginTimeout,
+      await crypto.encrypt(otherKey, '60000'),
+    );
+    const before = vault.readVault();
+    await expect(state.value.update((value) => value))
+      .rejects.toThrow(vault.VaultSecretUnreadableError);
+    expect(vault.readVault()).toEqual(before);
+  });
+
+  it('keeps read-before-update protection for data that is not a setting', async () => {
+    const state = await createState(STORAGE_KEYS.privateKeyAccountsRaw, '["import"]');
+    const otherKey = await crypto.generateEncryptionKey('other', crypto.generateSalt());
+    await vault.writeVaultField(
+      STORAGE_KEYS.privateKeyAccountsRaw,
+      await crypto.encrypt(otherKey, '["other-import"]'),
+    );
+    const before = vault.readVault();
+
+    await expect(state.value.set('[]')).rejects.toThrow(vault.VaultSecretUnreadableError);
+    expect(vault.readVault()).toEqual(before);
   });
 });
 

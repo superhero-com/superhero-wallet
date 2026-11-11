@@ -347,15 +347,19 @@ export const useAccounts = createCustomScopedComposable(() => {
   /**
    * Older versions could leave imported accounts encrypted with an unavailable key.
    * Removing unreadable entries lets the user import them again.
+   * @param options The text, e.g. for a password change they refused. The default explains it.
+   * @returns Settles once the offer was handled, never rejects.
    */
-  function offerToRemoveUnreadablePrivateKeyAccounts() {
+  function offerToRemoveUnreadablePrivateKeyAccounts(
+    { title, msg }: { title?: string; msg?: string } = {},
+  ) {
     // Nothing to decrypt means the secure-storage read failed, which reopening may fix.
     const isReadFailed = IS_MOBILE_APP && accountsPrivateKeysEncrypted.value === null;
     // What the user decides on, so a removal can't take keys stored after it.
     const offered = accountsPrivateKeysEncrypted.value;
-    openConfirmModal({
-      title: tg('modals.unreadablePrivateKeyAccounts.title'),
-      msg: tg(isReadFailed
+    return openConfirmModal({
+      title: title ?? tg('modals.unreadablePrivateKeyAccounts.title'),
+      msg: msg ?? tg(isReadFailed
         ? 'modals.unreadablePrivateKeyAccounts.readFailedMsg'
         : 'modals.unreadablePrivateKeyAccounts.msg'),
       icon: 'critical',
@@ -524,6 +528,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     isLocalAccountAddress,
     addRawAccount,
     addPrivateKeyAccount,
+    offerToRemoveUnreadablePrivateKeyAccounts,
     getAccountByProtocolAndAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,

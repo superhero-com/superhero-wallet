@@ -441,6 +441,108 @@ describe('useAuth with a vault shared across windows', () => {
     });
   });
 
+  describe('removing data the key cannot read (web)', () => {
+    /** Invites stored under another key refuse the password change, naming the data. */
+    async function refusedPasswordChange() {
+      const page = await openWindow();
+      await createWallet(page);
+      const { vault, crypto, STORAGE_KEYS } = page;
+      const otherKey = await crypto.generateEncryptionKey('other', crypto.generateSalt());
+      await vault.writeVaultField(
+        STORAGE_KEYS.invitesEncrypted,
+        await crypto.encrypt(otherKey, '[]'),
+      );
+      const error = await page.auth.updatePassword('old-password', 'new-password')
+        .catch((e) => e);
+      expect(error).toBeInstanceOf(vault.VaultSecretUnreadableError);
+      return { page, error };
+    }
+
+    it('removes it from the vault the error was raised for', async () => {
+      const { page, error } = await refusedPasswordChange();
+      const { vault, STORAGE_KEYS } = page;
+
+      await page.auth.removeUnreadableSecret(error.storageKey, error.vault);
+
+      expect(vault.readVault().values[STORAGE_KEYS.invitesEncrypted]).toBeNull();
+      await page.auth.updatePassword('old-password', 'new-password');
+      expect(await opensWith(page, 'new-password')).toBe(true);
+    });
+
+    it('removes nothing once another window stored a new password, even unnoticed', async () => {
+      const { page, error } = await refusedPasswordChange();
+      const other = await openWindow();
+      const { vault, crypto, STORAGE_KEYS } = other;
+      const salt = crypto.generateSalt();
+      const newKey = await crypto.generateEncryptionKey('new-password', salt);
+      const previous = vault.readVault();
+      // Readable with the new password, which the first window hasn't heard of yet.
+      const rotated = await vault.commitVault(previous, {
+        ...previous.values,
+        [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await crypto.encrypt(newKey, VALID_MNEMONIC),
+        [STORAGE_KEYS.invitesEncrypted]: await crypto.encrypt(newKey, '[]'),
+      });
+
+      await expect(page.auth.removeUnreadableSecret(error.storageKey, error.vault))
+        .rejects.toThrow(page.vault.VaultConflictError);
+
+      await vault.refreshVault();
+      expect(vault.readVault()).toEqual(rotated);
+    });
+
+    it('removes nothing after the wallet locked', async () => {
+      const { page, error } = await refusedPasswordChange();
+      const before = page.vault.readVault();
+      await page.auth.logout();
+
+      await expect(page.auth.removeUnreadableSecret(error.storageKey, error.vault))
+        .rejects.toThrow('locked');
+      expect(page.vault.readVault()).toEqual(before);
+    });
+
+    it('keeps data the key can read', async () => {
+      const page = await openWindow();
+      await createWallet(page);
+      const { vault, crypto, STORAGE_KEYS } = page;
+      await vault.writeVaultField(
+        STORAGE_KEYS.invitesEncrypted,
+        await crypto.encrypt(page.auth.encryptionKey.value, '[]'),
+      );
+      const before = vault.readVault();
+
+      await page.auth.removeUnreadableSecret(STORAGE_KEYS.invitesEncrypted, before);
+
+      expect(vault.readVault()).toEqual(before);
+    });
+  });
+
+  describe('copies an older wallet version stored (web)', () => {
+    it('refuses a new password until they are removed, as it would not protect them', async () => {
+      const page = await openWindow();
+      await createWallet(page);
+      const { vault, STORAGE_KEYS } = page;
+      const { LOCAL_STORAGE_PREFIX } = await import('@/constants');
+      const legacyImports = `${LOCAL_STORAGE_PREFIX}_${STORAGE_KEYS.privateKeyAccountsRaw}`;
+      // An older version, still open in another tab, stores an import of its own.
+      localStorage.setItem(legacyImports, JSON.stringify('import-of-an-older-version'));
+      const before = vault.readVault();
+
+      const error = await page.auth.updatePassword('old-password', 'new-password')
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(vault.VaultLegacyConflictError);
+      await vault.refreshVault();
+      expect(vault.readVault()).toEqual(before);
+      expect(page.auth.isAuthenticated.value).toBe(true);
+
+      await vault.discardLegacyCopies(error.expected);
+      await page.auth.updatePassword('old-password', 'new-password');
+      expect(await opensWith(page, 'new-password')).toBe(true);
+      expect(localStorage.getItem(legacyImports)).toBeNull();
+    });
+  });
+
   describe('setting the first password (web)', () => {
     it('does not write over a wallet another window created while the dialog was open', async () => {
       const page = await openWindow();

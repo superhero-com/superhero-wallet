@@ -380,16 +380,17 @@ describe('vault encrypted writers', () => {
     expect(JSON.parse(await modules.decrypt(newKey, ciphertext))).toHaveLength(1);
   });
 
-  it('preserves a newer generation when an old removal confirmation is accepted', async () => {
+  it('removes nothing once another window changed the password, though the removal was confirmed', async () => {
     await modules.ensureVaultReady();
     await modules.writeVaultField(modules.STORAGE_KEYS.privateKeyAccountsRaw, 'unreadable-ciphertext');
+    const accounts = await bootAccounts();
+    // Refused as the stored keys can't be decrypted; the removal it offers is dismissed.
+    await expect(accounts.addPrivateKeyAccount(importedAccount('aa'))).rejects.toThrow();
     let confirmRemoval;
     openConfirmModal.mockImplementation(() => new Promise((resolve) => {
       confirmRemoval = resolve;
     }));
-    const accounts = await bootAccounts();
-    await expect(accounts.addPrivateKeyAccount(importedAccount('aa'))).rejects.toThrow();
-    expect(openConfirmModal).toHaveBeenCalledOnce();
+    const offered = accounts.offerToRemoveUnreadablePrivateKeyAccounts();
 
     const salt = modules.generateSalt();
     const newKey = await modules.generateEncryptionKey('new-password', salt);
@@ -403,8 +404,45 @@ describe('vault encrypted writers', () => {
     });
     const committed = modules.readVault();
     confirmRemoval();
-    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    await offered;
 
     expect(modules.readVault()).toEqual(committed);
+  });
+
+  it('keeps a key another window imported while the removal was offered', async () => {
+    await modules.ensureVaultReady();
+    await modules.writeVaultField(modules.STORAGE_KEYS.privateKeyAccountsRaw, 'unreadable-ciphertext');
+    const accounts = await bootAccounts();
+    let confirmRemoval;
+    openConfirmModal.mockImplementation(() => new Promise((resolve) => {
+      confirmRemoval = resolve;
+    }));
+    const offered = accounts.offerToRemoveUnreadablePrivateKeyAccounts();
+
+    // The other window removes them and imports a key this window hasn't decrypted yet.
+    const imported = JSON.stringify([importedAccount('bb')]);
+    const decrypting = new Promise((resolve) => {
+      const realDecrypt = globalThis.crypto.subtle.decrypt.bind(globalThis.crypto.subtle);
+      vi.spyOn(globalThis.crypto.subtle, 'decrypt').mockImplementation(async (...args) => {
+        resolve(undefined);
+        await new Promise(() => {});
+        return realDecrypt(...args);
+      });
+    });
+    await modules.writeVaultField(
+      modules.STORAGE_KEYS.privateKeyAccountsRaw,
+      await modules.encrypt(encryptionKey.value, imported),
+    );
+    const committed = modules.readVault();
+    await decrypting;
+    confirmRemoval();
+    await offered;
+
+    expect(modules.readVault()).toEqual(committed);
+    vi.mocked(globalThis.crypto.subtle.decrypt).mockRestore();
+    expect(await modules.decrypt(
+      encryptionKey.value,
+      committed.values[modules.STORAGE_KEYS.privateKeyAccountsRaw],
+    )).toBe(imported);
   });
 });

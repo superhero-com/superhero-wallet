@@ -117,6 +117,7 @@ import { Form, Field } from 'vee-validate';
 
 import type { ISetPasswordResult, RejectCallback, ResolveCallback } from '@/types';
 import { generateDefaultPasswordSecret } from '@/composables/defaultPassword';
+import { RejectedByUserError } from '@/lib/errors';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -153,7 +154,7 @@ export default defineComponent({
 
     function handleClose() {
       if (!props.isRestoredWallet) {
-        props.reject();
+        props.reject(new RejectedByUserError());
       }
     }
 

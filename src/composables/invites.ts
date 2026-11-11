@@ -8,7 +8,7 @@ import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import { WalletStorage } from '@/lib/WalletStorage';
-import { updateVaultSecret } from '@/lib/WalletVault';
+import { updateVaultSecret, VaultSecretUnreadableError } from '@/lib/WalletVault';
 import {
   createCustomScopedComposable,
   decrypt,
@@ -91,7 +91,7 @@ const useInvitesStorage = createCustomScopedComposable(() => {
         checkKeyIsCurrent();
       });
     } catch (error) {
-      if ((error as Error)?.name === 'OperationError') {
+      if (error instanceof VaultSecretUnreadableError) {
         throw new Error('The stored invites are unreadable');
       }
       throw error;

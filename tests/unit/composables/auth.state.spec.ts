@@ -657,10 +657,12 @@ describe('useAuth state machine branches', () => {
       await expectReadableAfterRestart('new-password');
     });
 
-    it('keeps the old password when the current password is wrong', async () => {
+    it('keeps the old password when the current password is wrong, saying so', async () => {
       const auth = await createWallet();
+      const { WrongPasswordError } = await import('@/lib/errors');
 
-      await expect(auth.updatePassword('wrong-password', 'new-password')).rejects.toThrow();
+      await expect(auth.updatePassword('wrong-password', 'new-password'))
+        .rejects.toThrow(WrongPasswordError);
       expect(auth.isAuthenticated.value).toBe(true);
 
       await expectReadableAfterRestart('old-password');

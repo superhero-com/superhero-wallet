@@ -95,6 +95,9 @@ async function createContext({
   localStorage.clear();
 
   const node = createNode({ getTransactionByHash });
+  const isKeyCurrent = ref(true);
+  const removeUnreadableSecret = vi.fn().mockResolvedValue(undefined);
+  let decryptedComputedOptions = {};
   const sdk = {
     // As `AeSdkBase.getContext`; transactions are built as without `verify`
     getContext: (mergeWith = {}) => ({
@@ -108,6 +111,7 @@ async function createContext({
     api: node,
   };
   const openDefaultModal = vi.fn();
+  const openConfirmModal = vi.fn().mockResolvedValue(undefined);
 
   vi.doMock('@/utils', async () => {
     const actual = await vi.importActual('@/utils');
@@ -115,18 +119,21 @@ async function createContext({
     const { STORAGE_KEYS } = await vi.importActual('@/constants');
     return {
       ...actual,
-      decryptedComputed: (_key, encryptedState) => Object.assign(encryptedState, {
-        async update(transform) {
-          await beforePreclaimWrite?.();
-          await refreshVault();
-          const snapshot = readVault();
-          await writeVaultField(
-            STORAGE_KEYS.preclaimedNames,
-            transform(snapshot.values[STORAGE_KEYS.preclaimedNames] || '{}'),
-            snapshot,
-          );
-        },
-      }),
+      decryptedComputed: (_key, encryptedState, _defaultValue, options = {}) => {
+        decryptedComputedOptions = options;
+        return Object.assign(encryptedState, {
+          async update(transform) {
+            await beforePreclaimWrite?.();
+            await refreshVault();
+            const snapshot = readVault();
+            await writeVaultField(
+              STORAGE_KEYS.preclaimedNames,
+              transform(snapshot.values[STORAGE_KEYS.preclaimedNames] || '{}'),
+              snapshot,
+            );
+          },
+        });
+      },
       fetchAllPages: vi.fn().mockResolvedValue([]),
     };
   });
@@ -142,9 +149,15 @@ async function createContext({
     useAeSdk: () => ({ nodeNetworkId: ref(NETWORK_ID), getAeSdk: async () => sdk }),
   }));
   vi.doMock('@/composables/auth', () => ({
-    useAuth: () => ({ encryptionKey: ref('irrelevant-key-decryptedComputed-is-a-passthrough') }),
+    useAuth: () => ({
+      encryptionKey: ref('irrelevant-key-decryptedComputed-is-a-passthrough'),
+      isEncryptionKeyCurrent: () => isKeyCurrent.value,
+      removeUnreadableSecret,
+    }),
   }));
-  vi.doMock('@/composables/modals', () => ({ useModals: () => ({ openDefaultModal }) }));
+  vi.doMock('@/composables/modals', () => ({
+    useModals: () => ({ openConfirmModal, openDefaultModal }),
+  }));
   vi.doMock('@/composables/topHeader', () => ({
     useTopHeaderData: () => ({ topBlockHeight: ref(TOP_HEIGHT) }),
   }));
@@ -203,8 +216,13 @@ async function createContext({
 
   return {
     aeNames,
+    isKeyCurrent,
     node,
+    openConfirmModal,
     openDefaultModal,
+    removeUnreadableSecret,
+    /** As when the stored names don't decrypt with the current key */
+    failDecrypt: () => decryptedComputedOptions.onDecryptFailed?.(new Error('Unreadable')),
     NAME_CLAIM_STATUS: aeNamesModule.NAME_CLAIM_STATUS,
     /** As written to the storage, which settles a tick after the change */
     getStoredEntry: () => {
@@ -252,6 +270,55 @@ describe('useAeNames with the real SDK', () => {
     });
     expect(ctx.getStoredEntry()).toBeUndefined();
     expect(ctx.openDefaultModal).toHaveBeenCalled();
+  });
+
+  describe('names that cannot be read with the current key', () => {
+    const removalOffer = expect.objectContaining({
+      title: en.pages.names.claimStorageUnreadableTitle,
+      msg: en.pages.names.claimStorageUnreadable,
+      buttonMessage: en.pages.names.claimStorageUnreadableRemove,
+    });
+
+    it('sends nothing, as its salt could not be stored with them, and offers to remove them', async () => {
+      const ctx = await createContext();
+      ctx.openConfirmModal.mockReturnValue(new Promise(() => {}));
+      ctx.failDecrypt();
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+      expect(ctx.node.posted).toHaveLength(0);
+      expect(ctx.openConfirmModal).toHaveBeenCalledWith(removalOffer);
+      expect(ctx.openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    it('removes the vault the user was shown, after which a claim stores its salt', async () => {
+      const ctx = await createContext();
+      ctx.failDecrypt();
+      const { readVault } = await import('@/lib/WalletVault');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const shown = readVault();
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+      await vi.waitFor(() => expect(ctx.removeUnreadableSecret)
+        .toHaveBeenCalledWith(STORAGE_KEYS.preclaimedNames, shown));
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+      expect(ctx.node.posted).toHaveLength(1);
+      expect(ctx.getStoredEntry()?.salt).toBeTypeOf('number');
+    });
+
+    it('keeps them when the offer is dismissed, and offers again at the next claim', async () => {
+      const ctx = await createContext();
+      ctx.openConfirmModal.mockRejectedValue(new Error('Dismissed'));
+      ctx.failDecrypt();
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+      expect(ctx.openConfirmModal).toHaveBeenCalledTimes(2);
+      expect(ctx.removeUnreadableSecret).not.toHaveBeenCalled();
+      expect(ctx.node.posted).toHaveLength(0);
+    });
   });
 
   it('preclaims for the chosen account and stores the salt before the preclaim is mined', async () => {

@@ -15,6 +15,14 @@ export class StoredWalletFoundError extends Error {
   }
 }
 
+/** The password entered doesn't open the wallet; other failures leave it unanswered. */
+export class WrongPasswordError extends Error {
+  constructor() {
+    super('The password is incorrect');
+    this.name = this.constructor.name;
+  }
+}
+
 /** Adding an imported account now would replace the ones that can't be decrypted. */
 export class ImportedAccountsUnreadableError extends Error {
   constructor() {

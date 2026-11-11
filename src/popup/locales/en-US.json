@@ -885,7 +885,19 @@
       "newPasswordPlaceholder": "Enter strong new password",
       "confirmNewPassword": "Confirm new password",
       "reset": "Reset password",
-      "success": "Your password has been successfully reset. Please remember your new password."
+      "success": "Your password has been successfully reset. Please remember your new password.",
+      "notChangedTitle": "Password not changed",
+      "unreadableDataMsg": "Some wallet data on this device can't be decrypted: {data}. Nothing was changed. It can't be recovered in the app. Remove it, then try again.",
+      "unreadableDataRemove": "Remove it",
+      "unreadableData": {
+        "privateKeyAccounts": "the imported accounts",
+        "preclaimedNames": "the names being claimed",
+        "invites": "the invites",
+        "secureLoginTimeout": "the auto-lock setting"
+      },
+      "legacyCopiesMsg": "An older version of the wallet saved its own copy of your wallet data on this device, which the new password wouldn't protect. If you added accounts or invites in that version, export them there first. Then remove the old copy and change the password again.",
+      "legacyCopiesRemove": "Remove old copy",
+      "failed": "Something went wrong while saving it. Nothing was changed. Please try again."
     },
     "about": {
       "terms": "Terms",
@@ -1023,6 +1035,9 @@
     "names": {
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "preclaim-not-mined": "The preclaim of {name} was not mined. Please register the name again.",
+      "claimStorageUnreadableTitle": "Names being claimed unreadable",
+      "claimStorageUnreadable": "The names you are claiming can't be decrypted on this device and can't be recovered here, so their claims can't be completed. Nothing was sent. Remove them to claim names again. Names you already own are not affected.",
+      "claimStorageUnreadableRemove": "Remove them",
       "pointer-added": "Name {type} successful!",
       "auto-extend": "Auto-extend",
       "tabs": {

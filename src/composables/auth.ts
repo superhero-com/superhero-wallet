@@ -11,7 +11,7 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';
-import { StoredWalletFoundError } from '@/lib/errors';
+import { StoredWalletFoundError, WrongPasswordError } from '@/lib/errors';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { WalletStorage } from '@/lib/WalletStorage';
 import {
@@ -22,8 +22,9 @@ import {
   subscribeVault,
   VAULT_SECRET_KEYS,
   VaultConflictError,
+  VaultSecretUnreadableError,
 } from '@/lib/WalletVault';
-import type { VaultSnapshot } from '@/lib/WalletVault';
+import type { VaultKey, VaultSnapshot } from '@/lib/WalletVault';
 import { getVaultRef } from '@/utils/vaultRef';
 import {
   AUTHENTICATION_TIMEOUTS,
@@ -203,8 +204,12 @@ export const useAuth = createCustomScopedComposable(() => {
     encryptionKey,
     secureLoginTimeout,
     AUTHENTICATION_TIMEOUT_DEFAULT,
-    // eslint-disable-next-line no-use-before-define
-    { isKeyCurrent: isEncryptionKeyCurrent },
+    {
+      // Picking it again replaces a setting the key can't read, e.g. to change the password.
+      isReplacedWithoutReading: true,
+      // eslint-disable-next-line no-use-before-define
+      isKeyCurrent: isEncryptionKeyCurrent,
+    },
   );
   /**
    * If mnemonic is invalid, it is most likely encrypted.
@@ -488,10 +493,11 @@ export const useAuth = createCustomScopedComposable(() => {
       if (!currentKey) {
         throw new Error('The wallet is locked, its stored secrets cannot be re-encrypted');
       }
-      nextValues[storageKey] = await encrypt(
-        newEncryptionKey,
-        await decrypt(currentKey, ciphertext),
-      );
+      const plaintext = await decrypt(currentKey, ciphertext).catch((error) => {
+        // Maybe under an older password: kept, and the change refused.
+        throw new VaultSecretUnreadableError(storageKey, previousVault, error);
+      });
+      nextValues[storageKey] = await encrypt(newEncryptionKey, plaintext);
     }));
     nextValues[STORAGE_KEYS.encryptionSalt] = encodeBase64(newSalt);
     nextValues[STORAGE_KEYS.mnemonic] = newMnemonicCiphertext;
@@ -1118,6 +1124,32 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
+   * Removes the secret a `VaultSecretUnreadableError` named, once the user agreed: only from
+   * that vault, and only while the key still can't read it.
+   */
+  async function removeUnreadableSecret(storageKey: VaultKey, expectedVault: VaultSnapshot) {
+    const key = encryptionKey.value;
+    const { values } = expectedVault;
+    const ciphertext = values[storageKey];
+    if (
+      IS_MOBILE_APP
+      || !key
+      || !values[STORAGE_KEYS.mnemonic]
+      || values[STORAGE_KEYS.encryptionSalt] !== encryptionKeySalt
+    ) {
+      throw new Error('The wallet is locked or its password was changed');
+    }
+    await decrypt(key, values[STORAGE_KEYS.mnemonic]!);
+    if (!ciphertext || await decrypt(key, ciphertext).then(() => true, () => false)) return;
+    // Fails if anything changed since, e.g. a new password stored by another window.
+    await commitVault(expectedVault, { ...values, [storageKey]: null }, () => {
+      if (encryptionKey.value !== key) {
+        throw new Error('The wallet got locked while removing the data');
+      }
+    });
+  }
+
+  /**
    * Check if password provided by user is correct and if true update it to new one.
    */
   async function updatePassword(currentPassword: string, newPassword: string) {
@@ -1128,7 +1160,9 @@ export const useAuth = createCustomScopedComposable(() => {
       throw new Error('The password was changed in another window');
     }
     const key = await generateEncryptionKey(currentPassword, encryptionSalt.value!);
-    await decrypt(key, mnemonicEncrypted.value!);
+    await decrypt(key, mnemonicEncrypted.value!).catch(() => {
+      throw new WrongPasswordError();
+    });
     await setPassword(newPassword);
   }
 
@@ -1297,6 +1331,7 @@ export const useAuth = createCustomScopedComposable(() => {
     isEncryptionKeyCurrent,
     lockWallet,
     logout,
+    removeUnreadableSecret,
     setMnemonicAndInitializeAuthentication,
     setPassword,
     syncBackgroundEncryptionKey,

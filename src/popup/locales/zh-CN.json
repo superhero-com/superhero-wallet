@@ -878,7 +878,19 @@
       "newPasswordPlaceholder": "输入强新密码",
       "confirmNewPassword": "确认新密码",
       "reset": "重置密码",
-      "success": "你的密码已成功重置。请记住你的新密码。"
+      "success": "你的密码已成功重置。请记住你的新密码。",
+      "notChangedTitle": "密码未更改",
+      "unreadableDataMsg": "此设备上的部分钱包数据无法解密：{data}。没有任何更改。这些数据无法在应用内恢复。请先删除它，然后重试。",
+      "unreadableDataRemove": "删除它",
+      "unreadableData": {
+        "privateKeyAccounts": "导入的账户",
+        "preclaimedNames": "正在注册的名称",
+        "invites": "邀请",
+        "secureLoginTimeout": "自动锁定设置"
+      },
+      "legacyCopiesMsg": "旧版本的钱包在此设备上保存了一份你的钱包数据副本，新密码无法保护该副本。如果你在旧版本中添加了账户或邀请，请先在那里导出它们。然后删除旧副本并再次更改密码。",
+      "legacyCopiesRemove": "删除旧副本",
+      "failed": "保存时出错。没有做任何更改。请重试。"
     },
     "about": {
       "terms": "Terms",
@@ -1016,6 +1028,9 @@
     "names": {
       "balance-error": "你的账户余额不足以执行该交易。",
       "preclaim-not-mined": "{name} 的预注册交易未被打包。请重新注册该名称。",
+      "claimStorageUnreadableTitle": "正在注册的名称无法读取",
+      "claimStorageUnreadable": "此设备上无法解密你正在注册的名称，也无法在此恢复，因此无法完成它们的注册。没有发送任何交易。删除它们后即可再次注册名称。你已拥有的名称不受影响。",
+      "claimStorageUnreadableRemove": "删除它们",
       "pointer-added": "名称 {type} 成功！",
       "auto-extend": "自动延长",
       "tabs": {

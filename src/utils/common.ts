@@ -754,6 +754,8 @@ interface decryptedComputedOptions {
   onDecrypted?: (val: string | null) => any;
   /** The stored state can't be decrypted with the current key. */
   onDecryptFailed?: (error: unknown) => any;
+  /** Setting it replaces a stored value the key can't decrypt, e.g. a setting picked again. */
+  isReplacedWithoutReading?: boolean;
   /**
    * False while the stored data is already another key's, e.g. during a password change
    * before its key is published. The view is kept: a new key or a lock follows.
@@ -780,13 +782,14 @@ export function decryptedComputed(
   async function writeVaultSecret(
     encryptionKey: CryptoKey | undefined,
     transform: (plaintext: string | null) => string,
+    { replace = false } = {},
   ) {
     if (!encryptionKey) throw new Error('The wallet is locked');
     await updateVaultSecret(vaultBinding!.storageKey, encryptionKey, transform, () => {
       if (key.value !== encryptionKey) {
         throw new Error('The wallet key changed while storing encrypted data');
       }
-    });
+    }, { replace });
   }
 
   async function setEncryptedState(
@@ -795,7 +798,9 @@ export function decryptedComputed(
     assertCurrent: () => void = () => {},
   ) {
     if (vaultBinding) {
-      await writeVaultSecret(encryptionKey, () => val);
+      await writeVaultSecret(encryptionKey, () => val, {
+        replace: !!options.isReplacedWithoutReading,
+      });
       return;
     }
     updating = true;

@@ -177,6 +177,8 @@ describe('ResetWalletModal', () => {
       STORAGE_KEYS.mnemonic,
       STORAGE_KEYS.mobileDataKey,
       STORAGE_KEYS.privateKeyAccountsRaw,
+      // Names left under the old key would block every claim of the next wallet.
+      STORAGE_KEYS.preclaimedNames,
     ]));
   });
 });

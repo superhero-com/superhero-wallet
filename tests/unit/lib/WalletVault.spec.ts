@@ -337,19 +337,42 @@ describe('WalletVault', () => {
     expect(legacyOnly()).toEqual(legacyBefore);
   });
 
-  it('blocks only a new password over divergent legacy copies', async () => {
+  it('blocks a new password over divergent legacy copies until they are explicitly discarded', async () => {
     seedLegacy();
     const expected = await current();
     await vault.commitVault(expected, expected.values);
     seedLegacy();
     localStorage.setItem(rawKey(STORAGE_KEYS.privateKeyAccountsRaw), JSON.stringify('late-legacy-import'));
     vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const rotate = () => {
+      const latest = vault.readVault();
+      return vault.commitVault(latest, {
+        ...latest.values, [STORAGE_KEYS.encryptionSalt]: 'new-salt',
+      }, undefined, { requireLegacyReconciled: true });
+    };
     const before = vault.readVault();
-    const rotation = { ...before.values, [STORAGE_KEYS.encryptionSalt]: 'new-salt' };
-    await expect(vault.commitVault(before, rotation, undefined, { requireLegacyReconciled: true }))
-      .rejects.toThrow(vault.VaultLegacyConflictError);
+    const refused = await rotate().catch((error) => error);
+    expect(refused).toBeInstanceOf(vault.VaultLegacyConflictError);
+    expect(refused.expected.vault).toEqual(before);
     expect(vault.readVault()).toEqual(before);
     expect(localStorage.getItem(rawKey(STORAGE_KEYS.privateKeyAccountsRaw))).not.toBeNull();
+
+    // A decision made on an outdated vault isn't applied.
+    await vault.writeVaultField(STORAGE_KEYS.secureLoginTimeout, 'changed');
+    await expect(vault.discardLegacyCopies(refused.expected))
+      .rejects.toThrow(vault.VaultConflictError);
+    expect(localStorage.getItem(rawKey(STORAGE_KEYS.privateKeyAccountsRaw))).not.toBeNull();
+
+    // Nor one on copies the older version changed while the user decided.
+    const shown = (await rotate().catch((error) => error)).expected;
+    localStorage.setItem(rawKey(STORAGE_KEYS.invitesEncrypted), JSON.stringify('invite-added-meanwhile'));
+    const changedCopies = stored();
+    await expect(vault.discardLegacyCopies(shown)).rejects.toThrow(vault.VaultConflictError);
+    expect(stored()).toEqual(changedCopies);
+
+    await vault.discardLegacyCopies((await rotate().catch((error) => error)).expected);
+    expect(vault.VAULT_KEYS.every((key) => localStorage.getItem(rawKey(key)) === null)).toBe(true);
+    expect((await rotate()).values[STORAGE_KEYS.encryptionSalt]).toBe('new-salt');
   });
 
   it('requests strict durability for every commit and reset', async () => {
@@ -607,6 +630,34 @@ describe('WalletVault', () => {
       .rejects.toThrow();
     expect(update).not.toHaveBeenCalled();
     expect(vault.readVault()).toEqual(before);
+  });
+
+  it('names the unreadable secret, and replaces it only when asked to without reading it', async () => {
+    await current();
+    const {
+      decrypt, encrypt, generateEncryptionKey, generateSalt,
+    } = await import('@/utils/crypto');
+    const key = await generateEncryptionKey('password', generateSalt());
+    const wrongKey = await generateEncryptionKey('wrong', generateSalt());
+    await vault.writeVaultField(STORAGE_KEYS.secureLoginTimeout, await encrypt(wrongKey, '60000'));
+    const before = vault.readVault();
+    const error = await vault.updateVaultSecret(STORAGE_KEYS.secureLoginTimeout, key, () => '0')
+      .catch((e) => e);
+    expect(error).toBeInstanceOf(vault.VaultSecretUnreadableError);
+    expect(error.storageKey).toBe(STORAGE_KEYS.secureLoginTimeout);
+    expect(error.vault).toEqual(before);
+    expect(vault.readVault()).toEqual(before);
+
+    const update = vi.fn(() => '0');
+    const ciphertext = await vault.updateVaultSecret(
+      STORAGE_KEYS.secureLoginTimeout,
+      key,
+      update,
+      undefined,
+      { replace: true },
+    );
+    expect(update).toHaveBeenCalledWith(null);
+    expect(await decrypt(key, ciphertext)).toBe('0');
   });
 
   it('propagates encryption failure without modifying persisted data', async () => {
