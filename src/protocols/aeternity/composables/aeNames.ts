@@ -180,6 +180,11 @@ let preclaimedNamesEncryptionInitialized = false;
 let flushPreclaimedNamesWrites: () => Promise<void> = () => Promise.resolve();
 /** The stored names didn't decrypt with the current key: a change couldn't be stored. */
 let arePreclaimedNamesUnreadable = false;
+/**
+ * Taken before sending a preclaim, whose salt is stored with it even after a lock meanwhile.
+ * Set only while applying that entry.
+ */
+let preclaimedNamesWriteKey: CryptoKey | undefined;
 
 /**
  * In-memory cache + in-flight dedup for `updateExternalName` lookups.
@@ -397,10 +402,14 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       baseline = next;
       if (!changes.length) return;
       changes.forEach((change) => pending.set(changeKey(change), change));
+      // Taken now: a lock before the queue gets to it mustn't drop a change made unlocked.
+      const writeKey = preclaimedNamesWriteKey ?? encryptionKey.value;
       latestWrite = queue.then(async () => {
+        // Not with a key unlocked only later: that would authorize a change made locked.
+        if (!writeKey) throw new Error('The wallet is locked');
         await decryptedStr.update((plaintext) => JSON.stringify(
           applyChanges(JSON.parse(plaintext || '{}'), changes),
-        ));
+        ), { encryptionKey: writeKey, isLockAllowed: true });
       });
       queue = latestWrite.catch(handleUnknownError);
     }, { deep: true, flush: 'sync' });
@@ -1207,6 +1216,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     try {
       const networkId = nodeNetworkId.value!;
       // Checked before sending: the fee is lost if its salt can't be stored afterwards.
+      const writeKey = useAuth().encryptionKey.value;
+      if (!writeKey) throw new Error('The wallet is locked');
       if (arePreclaimedNamesUnreadable && preclaimedNamesEncrypted.value) {
         offerToRemoveUnreadablePreclaimedNames();
         return false;
@@ -1215,16 +1226,21 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       const currentHeight = await aeSdk.getHeight();
       const nameObj = await createNameInstance(name, getClaimOptions(address));
       const { nameSalt, hash } = await nameObj.preclaim({ waitMined: false });
-      upsertPreclaimedName(networkId, name, {
-        address,
-        name,
-        salt: nameSalt,
-        // Until the height the preclaim is mined at is known
-        blockHeight: currentHeight,
-        autoExtend,
-        status: NAME_CLAIM_STATUS.preclaimSubmitted,
-        preclaimTxHash: hash,
-      });
+      preclaimedNamesWriteKey = writeKey;
+      try {
+        upsertPreclaimedName(networkId, name, {
+          address,
+          name,
+          salt: nameSalt,
+          // Until the height the preclaim is mined at is known
+          blockHeight: currentHeight,
+          autoExtend,
+          status: NAME_CLAIM_STATUS.preclaimSubmitted,
+          preclaimTxHash: hash,
+        });
+      } finally {
+        preclaimedNamesWriteKey = undefined;
+      }
       // The salt cannot be recovered from the mnemonic. Success requires its write.
       await flushPreclaimedNamesWrites();
       return true;

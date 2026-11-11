@@ -341,6 +341,64 @@ describe('decryptedComputed vault writes', () => {
     expect(warn).not.toHaveBeenCalled();
   });
 
+  it('completes a write with the key taken before a lock, without unlocking the view', async () => {
+    const state = await createState(STORAGE_KEYS.preclaimedNames, '{"a":1}');
+    state.key.value = undefined;
+    await vue.nextTick();
+    expect(state.value.value).toBe('{}');
+
+    await state.value.update(() => '{"a":1,"b":2}', {
+      encryptionKey: state.dataKey,
+      isLockAllowed: true,
+    });
+
+    expect(await crypto.decrypt(state.dataKey, stored(STORAGE_KEYS.preclaimedNames)!))
+      .toBe('{"a":1,"b":2}');
+    await vue.nextTick();
+    expect(state.value.value).toBe('{}');
+  });
+
+  it('refuses that key after a lock without being asked to allow it', async () => {
+    const state = await createState(STORAGE_KEYS.preclaimedNames, '{"a":1}');
+    const before = vault.readVault();
+    state.key.value = undefined;
+
+    await expect(state.value.update(() => '{}', { encryptionKey: state.dataKey }))
+      .rejects.toThrow('changed while storing');
+    expect(vault.readVault()).toEqual(before);
+  });
+
+  it('refuses the key taken before a lock once another key replaced it', async () => {
+    const state = await createState(STORAGE_KEYS.preclaimedNames, '{"a":1}');
+    const before = vault.readVault();
+    state.key.value = await crypto.generateEncryptionKey('other', crypto.generateSalt());
+
+    await expect(state.value.update(() => '{}', {
+      encryptionKey: state.dataKey,
+      isLockAllowed: true,
+    })).rejects.toThrow();
+    expect(vault.readVault()).toEqual(before);
+  });
+
+  it('refuses the key taken before a lock after a password change in another window', async () => {
+    const state = await createState(STORAGE_KEYS.preclaimedNames, '{"a":1}');
+    state.key.value = undefined;
+    const newKey = await crypto.generateEncryptionKey('new', crypto.generateSalt());
+    const previous = vault.readVault();
+    const rotated = await vault.commitVault(previous, {
+      ...previous.values,
+      [STORAGE_KEYS.encryptionSalt]: 'new-salt',
+      [STORAGE_KEYS.mnemonic]: await crypto.encrypt(newKey, 'seed'),
+      [STORAGE_KEYS.preclaimedNames]: await crypto.encrypt(newKey, '{"a":1}'),
+    });
+
+    await expect(state.value.update(() => '{}', {
+      encryptionKey: state.dataKey,
+      isLockAllowed: true,
+    })).rejects.toThrow();
+    expect(vault.readVault()).toEqual(rotated);
+  });
+
   it('replaces a setting the key cannot read only when picked again as a whole', async () => {
     const state = await createState(
       STORAGE_KEYS.secureLoginTimeout,

@@ -34,6 +34,7 @@ const keys = Object.fromEntries([activeAccount, otherAccount].map((account) => [
 
 function createNode({
   getTransactionByHash = async (hash) => ({ hash, blockHeight: TOP_HEIGHT, tx: {} }),
+  onPost = undefined,
 } = {}) {
   const posted = [];
   const node = {
@@ -49,6 +50,7 @@ function createNode({
     getTopHeader: async () => ({ height: TOP_HEIGHT }),
     getCurrentKeyBlockHeight: async () => ({ height: TOP_HEIGHT }),
     postTransaction: async ({ tx }) => {
+      await onPost?.();
       posted.push(tx);
       return { txHash: buildTxHash(tx) };
     },
@@ -90,11 +92,15 @@ async function createContext({
   ownedNames = [],
   getTransactionByHash = undefined,
   beforePreclaimWrite = undefined,
+  onPost = undefined,
+  // The real `decryptedComputed` and a real key, instead of a plaintext stand-in.
+  realEncryption = false,
 } = {}) {
   vi.resetModules();
   localStorage.clear();
 
-  const node = createNode({ getTransactionByHash });
+  const node = createNode({ getTransactionByHash, onPost });
+  const authKey = ref('key-before-sending');
   const isKeyCurrent = ref(true);
   const removeUnreadableSecret = vi.fn().mockResolvedValue(undefined);
   let decryptedComputedOptions = {};
@@ -119,7 +125,12 @@ async function createContext({
     const { STORAGE_KEYS } = await vi.importActual('@/constants');
     return {
       ...actual,
-      decryptedComputed: (_key, encryptedState, _defaultValue, options = {}) => {
+      decryptedComputed: realEncryption ? actual.decryptedComputed : (
+        _key,
+        encryptedState,
+        _defaultValue,
+        options = {},
+      ) => {
         decryptedComputedOptions = options;
         return Object.assign(encryptedState, {
           async update(transform) {
@@ -149,8 +160,9 @@ async function createContext({
     useAeSdk: () => ({ nodeNetworkId: ref(NETWORK_ID), getAeSdk: async () => sdk }),
   }));
   vi.doMock('@/composables/auth', () => ({
+    // The value is irrelevant: `decryptedComputed` is a passthrough.
     useAuth: () => ({
-      encryptionKey: ref('irrelevant-key-decryptedComputed-is-a-passthrough'),
+      encryptionKey: authKey,
       isEncryptionKeyCurrent: () => isKeyCurrent.value,
       removeUnreadableSecret,
     }),
@@ -199,7 +211,20 @@ async function createContext({
   // Before `registerAdapters`, which loads `aeNames.ts` and its storage refs on the way.
   const { WalletStorage } = await import('@/lib/WalletStorage');
   const { STORAGE_KEYS } = await import('@/constants');
-  WalletStorage.set(STORAGE_KEYS.preclaimedNames, JSON.stringify(preclaimedNames));
+  const crypto = await import('@/utils/crypto');
+  if (realEncryption) {
+    // A wallet whose seed and names are stored under the password key.
+    const salt = crypto.generateSalt();
+    authKey.value = await crypto.generateEncryptionKey('password', salt);
+    WalletStorage.set(STORAGE_KEYS.encryptionSalt, crypto.encodeBase64(salt));
+    WalletStorage.set(STORAGE_KEYS.mnemonic, await crypto.encrypt(authKey.value, 'seed'));
+    WalletStorage.set(
+      STORAGE_KEYS.preclaimedNames,
+      await crypto.encrypt(authKey.value, JSON.stringify(preclaimedNames)),
+    );
+  } else {
+    WalletStorage.set(STORAGE_KEYS.preclaimedNames, JSON.stringify(preclaimedNames));
+  }
   WalletStorage.set(STORAGE_KEYS.namesOwned, ownedNames);
   WalletStorage.set(STORAGE_KEYS.namesOwnedNetworkId, NETWORK_ID);
 
@@ -216,6 +241,7 @@ async function createContext({
 
   return {
     aeNames,
+    authKey,
     isKeyCurrent,
     node,
     openConfirmModal,
@@ -228,6 +254,11 @@ async function createContext({
     getStoredEntry: () => {
       const stored = JSON.parse(WalletStorage.get(STORAGE_KEYS.preclaimedNames) || '{}');
       return stored[NETWORK_ID]?.[NAME];
+    },
+    /** With `realEncryption`: the stored entry, as `key` decrypts it. */
+    async decryptStoredEntry(key) {
+      const ciphertext = WalletStorage.get(STORAGE_KEYS.preclaimedNames);
+      return JSON.parse(await crypto.decrypt(key, ciphertext))[NETWORK_ID]?.[NAME];
     },
   };
 }
@@ -269,6 +300,60 @@ describe('useAeNames with the real SDK', () => {
       status: 'preclaim-submitted',
     });
     expect(ctx.getStoredEntry()).toBeUndefined();
+    expect(ctx.openDefaultModal).toHaveBeenCalled();
+  });
+
+  it('stores the salt of a sent preclaim with the key taken before sending, after a lock meanwhile', async () => {
+    let lock;
+    const ctx = await createContext({ realEncryption: true, onPost: () => lock() });
+    const keyBeforeSending = ctx.authKey.value;
+    lock = () => { ctx.authKey.value = undefined; };
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+
+    expect(ctx.node.posted).toHaveLength(1);
+    expect(ctx.authKey.value).toBeUndefined();
+    expect(await ctx.decryptStoredEntry(keyBeforeSending)).toMatchObject({
+      address: otherAccount.address,
+      salt: expect.any(Number),
+    });
+  });
+
+  it('reports a failed claim and stores nothing when the password changes while it is sent', async () => {
+    let changePassword;
+    const ctx = await createContext({ realEncryption: true, onPost: () => changePassword() });
+    const crypto = await import('@/utils/crypto');
+    const vault = await import('@/lib/WalletVault');
+    const { STORAGE_KEYS } = await import('@/constants');
+    let changed;
+    // As another window's `setPassword`: every secret under the new key, in one commit.
+    changePassword = async () => {
+      const salt = crypto.generateSalt();
+      const newKey = await crypto.generateEncryptionKey('new-password', salt);
+      const current = vault.readVault();
+      changed = await vault.commitVault(current, {
+        ...current.values,
+        [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await crypto.encrypt(newKey, 'seed'),
+        [STORAGE_KEYS.preclaimedNames]: await crypto.encrypt(newKey, '{}'),
+      });
+    };
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+    expect(ctx.node.posted).toHaveLength(1);
+    expect(ctx.openDefaultModal).toHaveBeenCalled();
+    await vault.refreshVault();
+    expect(vault.readVault()).toEqual(changed);
+  });
+
+  it('sends no preclaim while the wallet is locked', async () => {
+    const ctx = await createContext();
+    ctx.authKey.value = undefined;
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+    expect(ctx.node.posted).toHaveLength(0);
     expect(ctx.openDefaultModal).toHaveBeenCalled();
   });
 
@@ -318,6 +403,34 @@ describe('useAeNames with the real SDK', () => {
       expect(ctx.openConfirmModal).toHaveBeenCalledTimes(2);
       expect(ctx.removeUnreadableSecret).not.toHaveBeenCalled();
       expect(ctx.node.posted).toHaveLength(0);
+    });
+
+    it('does not take the names of a new password for unreadable ones before its key arrives', async () => {
+      const ctx = await createContext({ realEncryption: true });
+      const crypto = await import('@/utils/crypto');
+      const vault = await import('@/lib/WalletVault');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const salt = crypto.generateSalt();
+      const newKey = await crypto.generateEncryptionKey('new-password', salt);
+      // This window's own password change, which stores the names before its key is used.
+      ctx.isKeyCurrent.value = false;
+      const current = vault.readVault();
+      await vault.commitVault(current, {
+        ...current.values,
+        [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await crypto.encrypt(newKey, 'seed'),
+        [STORAGE_KEYS.preclaimedNames]: await crypto.encrypt(newKey, '{}'),
+      });
+      // Time for a decrypt with the old key to fail.
+      await new Promise((resolve) => { setTimeout(resolve, 50); });
+
+      // A claim right after the new key is published.
+      ctx.authKey.value = newKey;
+      ctx.isKeyCurrent.value = true;
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+
+      expect(ctx.openConfirmModal).not.toHaveBeenCalled();
+      expect(ctx.node.posted).toHaveLength(1);
     });
   });
 

@@ -763,6 +763,13 @@ interface decryptedComputedOptions {
   isKeyCurrent?: () => boolean;
 }
 
+interface decryptedComputedUpdateOptions {
+  /** Taken before a step that can't be undone, e.g. sending a transaction. */
+  encryptionKey?: CryptoKey;
+  /** A lock meanwhile doesn't stop the write; a new key, password or a reset does. */
+  isLockAllowed?: boolean;
+}
+
 /**
  * Creates computed property that serves as encryption layer for any Vue state.
  * It takes the encrypted state, the key and returns decrypted state.
@@ -782,11 +789,11 @@ export function decryptedComputed(
   async function writeVaultSecret(
     encryptionKey: CryptoKey | undefined,
     transform: (plaintext: string | null) => string,
-    { replace = false } = {},
+    { isLockAllowed = false, replace = false } = {},
   ) {
     if (!encryptionKey) throw new Error('The wallet is locked');
     await updateVaultSecret(vaultBinding!.storageKey, encryptionKey, transform, () => {
-      if (key.value !== encryptionKey) {
+      if ((key.value || !isLockAllowed) && key.value !== encryptionKey) {
         throw new Error('The wallet key changed while storing encrypted data');
       }
     }, { replace });
@@ -885,8 +892,11 @@ export function decryptedComputed(
   return Object.assign(result, {
     /** Resolves once stored, so a failed write reaches the caller. */
     set: setEncryptedState,
-    async update(transform: (plaintext: string) => string) {
-      const encryptionKey = key.value;
+    async update(
+      transform: (plaintext: string) => string,
+      { encryptionKey: capturedKey, isLockAllowed = false }: decryptedComputedUpdateOptions = {},
+    ) {
+      const encryptionKey = capturedKey ?? key.value;
       if (!encryptionKey) throw new Error('The wallet is locked');
       if (!vaultBinding) {
         const previousCiphertext = encryptedState.value;
@@ -903,7 +913,9 @@ export function decryptedComputed(
         });
         return;
       }
-      await writeVaultSecret(encryptionKey, (plaintext) => transform(plaintext ?? defaultVal));
+      await writeVaultSecret(encryptionKey, (plaintext) => transform(plaintext ?? defaultVal), {
+        isLockAllowed,
+      });
     },
   });
 }
