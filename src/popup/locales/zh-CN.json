@@ -1499,7 +1499,12 @@
     "storedWalletFoundTitle": "在此设备上找到钱包",
     "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
     "storedWalletFoundAction": "重新加载",
-    "walletCreatedElsewhereMessage": "已在另一个窗口中创建或导入了钱包。请重新加载此窗口以打开它。"
+    "walletCreatedElsewhereMessage": "已在另一个窗口中创建或导入了钱包。请重新加载此窗口以打开它。",
+    "walletStorageUnavailableTitle": "钱包存储不可用",
+    "walletStorageUnavailableMessage": "无法打开保存你钱包的浏览器存储。没有任何内容被更改或删除。请关闭其他钱包窗口后重试。如果问题持续，请检查浏览器是否允许钱包存储数据。",
+    "walletStorageRetryAction": "重试",
+    "walletDataSaveFailedTitle": "钱包数据未保存",
+    "walletDataSaveFailedMessage": "你的钱包数据已更新，但无法在此设备上保存该更新。请在关闭钱包前重试，并准备好你的助记词，以防无法保存。"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

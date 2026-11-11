@@ -1506,7 +1506,12 @@
     "storedWalletFoundTitle": "Wallet found on this device",
     "storedWalletFoundMessage": "Your wallet couldn't be loaded when the app started, but it's still stored on this device. Reload the app to open it.",
     "storedWalletFoundAction": "Reload",
-    "walletCreatedElsewhereMessage": "A wallet was created or imported in another window. Reload this one to open it."
+    "walletCreatedElsewhereMessage": "A wallet was created or imported in another window. Reload this one to open it.",
+    "walletStorageUnavailableTitle": "Wallet storage unavailable",
+    "walletStorageUnavailableMessage": "The browser storage that holds your wallet couldn't be opened. Nothing was changed or deleted. Close other wallet windows and try again. If this keeps happening, check that the browser lets the wallet store data.",
+    "walletStorageRetryAction": "Try again",
+    "walletDataSaveFailedTitle": "Wallet data not saved",
+    "walletDataSaveFailedMessage": "Your wallet data was updated, but the update couldn't be saved on this device. Try again before closing the wallet, and keep your seed phrase at hand in case it can't be saved."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

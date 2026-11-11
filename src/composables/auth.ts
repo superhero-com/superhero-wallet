@@ -23,6 +23,7 @@ import {
   VAULT_SECRET_KEYS,
   VaultConflictError,
   VaultSecretUnreadableError,
+  VaultUnavailableError,
 } from '@/lib/WalletVault';
 import type { VaultKey, VaultSnapshot } from '@/lib/WalletVault';
 import { getVaultRef } from '@/utils/vaultRef';
@@ -75,7 +76,11 @@ import {
 
 import { useUi } from './ui';
 import { useModals } from './modals';
-import { useStorageRef } from './storageRef';
+import {
+  hasFailedMigrationWrites,
+  retryFailedMigrationWrites,
+  useStorageRef,
+} from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 const CHECK_FOR_SESSION_KEY_TIMEOUT = 30000;
@@ -110,6 +115,7 @@ export const useAuth = createCustomScopedComposable(() => {
   let isSessionExpired = false;
   let isManualMobileLockActive = false;
   let isUnreadableWalletModalOpen = false;
+  let isMigrationWriteModalOpen = false;
   let biometricPromptsOpen = 0;
   /** The lock screen prompts by itself once each time the app is shown. */
   let canLockScreenAutoPrompt = true;
@@ -356,6 +362,30 @@ export const useAuth = createCustomScopedComposable(() => {
    * After a failed read (`isReadFailed`) reopening may help, so that is suggested first.
    */
   function surfaceUnreadableWalletData(error: unknown, { isReadFailed = false } = {}) {
+    if (error instanceof VaultUnavailableError) {
+      // Nothing is wrong with the data, so no reset is offered: it would fail or lose it.
+      handleUnknownError(error);
+      Logger.write({
+        title: t('auth.walletStorageUnavailableTitle'),
+        message: t('auth.walletStorageUnavailableMessage'),
+        type: 'api-response',
+        modal: false,
+      });
+      if (isUnreadableWalletModalOpen) return;
+      isUnreadableWalletModalOpen = true;
+      openConfirmModal({
+        title: t('auth.walletStorageUnavailableTitle'),
+        msg: t('auth.walletStorageUnavailableMessage'),
+        icon: 'critical',
+        buttonMessage: t('auth.walletStorageRetryAction'),
+      })
+        .then(() => window.location.reload())
+        .catch(() => { /* NOOP - dismissed */ })
+        .finally(() => {
+          isUnreadableWalletModalOpen = false;
+        });
+      return;
+    }
     let message = t('auth.walletDataUnreadableMessage');
     if (isReadFailed) {
       message = t('auth.walletDataReadFailedMessage');
@@ -384,6 +414,32 @@ export const useAuth = createCustomScopedComposable(() => {
       .catch(() => { /* NOOP - dismissed */ })
       .finally(() => {
         isUnreadableWalletModalOpen = false;
+      });
+  }
+
+  /** A migrated secret isn't stored, and iOS may have deleted the original: offer to store it. */
+  function surfaceMigrationWriteFailure() {
+    // Moot while the wallet can't be read, whose modal it mustn't hide.
+    if (isMigrationWriteModalOpen || isUnreadableWalletModalOpen) return;
+    isMigrationWriteModalOpen = true;
+    openConfirmModal({
+      title: t('auth.walletDataSaveFailedTitle'),
+      msg: t('auth.walletDataSaveFailedMessage'),
+      icon: 'critical',
+      buttonMessage: t('auth.walletStorageRetryAction'),
+    })
+      .then(
+        async () => {
+          try {
+            await retryFailedMigrationWrites();
+          } catch (retryError) {
+            handleUnknownError(retryError); // Offered again at the next check.
+          }
+        },
+        () => { /* NOOP - dismissed, offered again at the next check */ },
+      )
+      .finally(() => {
+        isMigrationWriteModalOpen = false;
       });
   }
 
@@ -849,6 +905,9 @@ export const useAuth = createCustomScopedComposable(() => {
       surfaceUnreadableWalletData(mnemonicReadError, { isReadFailed: true });
       return;
     }
+    if (hasFailedMigrationWrites()) {
+      surfaceMigrationWriteFailure();
+    }
     updateSessionExpiredFromDeadline();
 
     if (
@@ -987,7 +1046,13 @@ export const useAuth = createCustomScopedComposable(() => {
             return false;
           };
 
-          const storedSecret = await getDefaultPasswordSecret();
+          let storedSecret: string | null;
+          try {
+            storedSecret = await getDefaultPasswordSecret();
+          } catch (error) {
+            surfaceUnreadableWalletData(error);
+            return;
+          }
           if (storedSecret && await tryDefaultPassword(storedSecret)) {
             isUsingDefaultPassword.value = true;
           }

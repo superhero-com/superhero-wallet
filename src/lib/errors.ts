@@ -15,6 +15,23 @@ export class StoredWalletFoundError extends Error {
   }
 }
 
+/** A migrated value couldn't be stored and is kept in memory: `retry` stores it again. */
+export class StorageMigrationWriteError extends Error {
+  storageKey: string;
+
+  cause: unknown;
+
+  retry: () => Promise<void>;
+
+  constructor(storageKey: string, cause: unknown, retry: () => Promise<void>) {
+    super(`Saving the updated "${storageKey}" failed`);
+    this.name = this.constructor.name;
+    this.storageKey = storageKey;
+    this.cause = cause;
+    this.retry = retry;
+  }
+}
+
 /** The password entered doesn't open the wallet; other failures leave it unanswered. */
 export class WrongPasswordError extends Error {
   constructor() {

@@ -16,6 +16,7 @@ import {
 } from '@/lib/WalletVault';
 import type { VaultSnapshot } from '@/lib/WalletVault';
 import { registerStorageRefWrites, registerVaultRef } from '@/utils/vaultRef';
+import { StorageMigrationWriteError } from '@/lib/errors';
 
 export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
   /**
@@ -48,6 +49,26 @@ export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
    * Allows to run a callback whenever the state is synced with the background.
    */
   onBackgroundSync?: (val: T) => any;
+}
+
+/**
+ * Mobile secrets whose migrated value is only in memory, as storing it failed: on iOS the
+ * original may be gone already. Other values are only logged, their original stays and is
+ * migrated again at the next start.
+ */
+const failedMigrationWrites = new Map<object, StorageMigrationWriteError>();
+
+export function hasFailedMigrationWrites() {
+  return failedMigrationWrites.size > 0;
+}
+
+/** Each one stored, or written since by a change of its own, is no longer reported. */
+export async function retryFailedMigrationWrites() {
+  const results = await Promise.allSettled(
+    [...failedMigrationWrites.values()].map((error) => error.retry()),
+  );
+  const failure = results.find((result) => result.status === 'rejected');
+  if (failure) throw (failure as PromiseRejectedResult).reason;
 }
 
 /**
@@ -172,7 +193,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
   (async () => {
     let restoredValue: TSerialized | null = null;
     let isRestoreFailed = false;
-    let isMigrationWriteFailed = false;
+    let migrationWriteError: StorageMigrationWriteError | undefined;
     try {
       if (vaultBacked) await ensureVaultReady();
       const restoreSnapshot = vaultBacked ? readVault() : undefined;
@@ -189,11 +210,16 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
           } catch (error) {
             // Another window deleted the wallet: keeping its old copy would bring it back.
             if (error instanceof VaultResetError) throw error;
-            // Not unreadable: the migrated value is kept, as a failed iOS Keychain write
-            // may have deleted the original already.
-            isMigrationWriteFailed = true;
-            handleUnknownError(error);
-            writeLogEntry(`Saving the updated "${storageKey}" failed`, error);
+            // Not unreadable: the migrated value is here, only storing it failed.
+            migrationWriteError = new StorageMigrationWriteError(
+              storageKey,
+              error,
+              async () => {
+                // The value now, with any change whose own write failed too.
+                await setStorageState(state.value);
+                failedMigrationWrites.delete(state);
+              },
+            );
           }
         }
       }
@@ -214,6 +240,13 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
       isRestoreFailed = true;
       onRestoreFailed?.(error);
     }
+    if (migrationWriteError) {
+      handleUnknownError(migrationWriteError.cause);
+      writeLogEntry(migrationWriteError.message, migrationWriteError.cause);
+      if (enableSecureStorage && IS_MOBILE_APP) {
+        failedMigrationWrites.set(state, migrationWriteError);
+      }
+    }
     onRestored?.(
       restoredValue == null ? restoredValue as T : state.value,
     );
@@ -227,7 +260,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
       watch(state, (val) => {
         if (!watcherDisabled) {
           latestWrite = setStorageState(val);
-          latestWrite.catch((error) => {
+          latestWrite.then(() => failedMigrationWrites.delete(state), (error) => {
             handleUnknownError(error);
             writeLogEntry(`Saving "${storageKey}" failed`, error);
           });
@@ -250,7 +283,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
       });
       // Catches up with commits made during the restore, keeping a migrated value not stored.
       // Already cached: any later one, also of another window, reaches the listener.
-      if (!isRestoreFailed && !isMigrationWriteFailed) {
+      if (!isRestoreFailed && !migrationWriteError) {
         try {
           const value = WalletStorage.get<TSerialized>(storageKey);
           if (!isStateStoredAs(value)) applyVaultValue(value);

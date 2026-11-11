@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { watch } from 'vue';
+import { IDBDatabase } from 'fake-indexeddb';
 import en from '@/popup/locales/en-US.json';
 import { installSessionMutationHandler } from '../helpers/extensionSession';
 
@@ -645,6 +646,74 @@ describe('useAuth with a vault shared across windows', () => {
       expect(reopened.auth.isAuthenticated.value).toBe(false);
       expect(openPasswordLoginModalMock).toHaveBeenCalled();
       expect(await opensWith(reopened, 'a-real-password')).toBe(true);
+    });
+  });
+
+  describe('wallet storage that cannot be opened', () => {
+    it('offers to try again rather than a reset, and changes nothing', async () => {
+      const first = await openWindow();
+      await createWallet(first);
+      const before = { ...localStorage };
+      vi.spyOn(indexedDB, 'open').mockImplementation(() => {
+        throw new DOMException('Storage disabled', 'SecurityError');
+      });
+
+      const page = await openWindow();
+      await page.auth.checkUserAuth();
+
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        title: en.auth.walletStorageUnavailableTitle,
+        buttonMessage: en.auth.walletStorageRetryAction,
+      }));
+      expect(openModalMock).not.toHaveBeenCalled();
+      expect(page.auth.isAuthenticated.value).toBe(false);
+      expect({ ...localStorage }).toEqual(before);
+    });
+
+    it('reloads to try again, and offers it once while it is shown', async () => {
+      const first = await openWindow();
+      await createWallet(first);
+      vi.spyOn(indexedDB, 'open').mockImplementation(() => {
+        throw new DOMException('Storage disabled', 'SecurityError');
+      });
+      let tryAgain;
+      openConfirmModalMock.mockImplementation(() => new Promise((resolve) => {
+        tryAgain = resolve;
+      }));
+      const { location } = window;
+      const reload = vi.fn();
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: { ...location, reload },
+      });
+      try {
+        const page = await openWindow();
+        await page.auth.checkUserAuth();
+        await page.auth.checkUserAuth(); // E.g. after a lock, while the offer is shown
+
+        expect(openConfirmModalMock).toHaveBeenCalledOnce();
+        tryAgain();
+        await vi.waitFor(() => expect(reload).toHaveBeenCalled());
+      } finally {
+        Object.defineProperty(window, 'location', { configurable: true, value: location });
+      }
+    });
+
+    it('offers to try again when the storage fails after it opened', async () => {
+      const first = await openWindow();
+      await createWallet(first);
+      const page = await openWindow();
+      vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(() => {
+        throw new DOMException('Backing store failed', 'UnknownError');
+      });
+
+      await page.auth.checkUserAuth();
+
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        title: en.auth.walletStorageUnavailableTitle,
+        buttonMessage: en.auth.walletStorageRetryAction,
+      }));
+      expect(page.auth.isAuthenticated.value).toBe(false);
     });
   });
 });

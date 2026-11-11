@@ -774,4 +774,72 @@ describe('useAuth on mobile', () => {
     expect(openConfirmModalMock).toHaveBeenCalledTimes(2);
     expect(openModalMock).not.toHaveBeenCalled();
   });
+
+  describe('a migrated secret that could not be saved', () => {
+    /**
+     * Restarts over an auto-lock setting an older version stored in plaintext. The startup
+     * encrypts it, and saving that fails once.
+     */
+    async function restartFailingTimeoutMigration({ isMobileKeyReplaced = false } = {}) {
+      const { auth: authGen1 } = await boot();
+      await authGen1.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+      vi.resetModules();
+      const { SecureMobileStorage } = await import('@/lib/SecureMobileStorage');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { encodeBase64 } = await import('@/utils/crypto');
+      if (isMobileKeyReplaced) {
+        await SecureMobileStorage.set(
+          STORAGE_KEYS.mobileDataKey,
+          encodeBase64(globalThis.crypto.getRandomValues(new Uint8Array(32))),
+        );
+      }
+      await SecureMobileStorage.set(STORAGE_KEYS.secureLoginTimeout, '60000');
+      const realSet = SecureMobileStorage.set;
+      let isFailing = true;
+      vi.spyOn(SecureMobileStorage, 'set').mockImplementation((key, value) => {
+        if (key !== STORAGE_KEYS.secureLoginTimeout || !isFailing) return realSet(key, value);
+        isFailing = false;
+        return Promise.reject(new Error('Keychain write failed'));
+      });
+      const { auth } = await boot();
+      const { hasFailedMigrationWrites } = await import('@/composables/storageRef');
+      await vi.waitFor(() => expect(hasFailedMigrationWrites()).toBe(true), WAIT_FOR_CRYPTO);
+      return { auth, SecureMobileStorage, STORAGE_KEYS };
+    }
+
+    it('offers to save it again, and saves it once confirmed', async () => {
+      let confirm;
+      openConfirmModalMock.mockImplementation(() => new Promise((resolve) => {
+        confirm = resolve;
+      }));
+      const { auth, SecureMobileStorage, STORAGE_KEYS } = await restartFailingTimeoutMigration();
+
+      await auth.checkUserAuth();
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        title: en.auth.walletDataSaveFailedTitle,
+        buttonMessage: en.auth.walletStorageRetryAction,
+      }));
+      confirm();
+
+      const { decrypt } = await import('@/utils/crypto');
+      await vi.waitFor(async () => {
+        const stored = await SecureMobileStorage.get(STORAGE_KEYS.secureLoginTimeout);
+        expect(await decrypt(auth.encryptionKey.value, stored)).toBe('60000');
+      }, WAIT_FOR_CRYPTO);
+    });
+
+    it('still offers the wallet reset when the seed cannot be decrypted either', async () => {
+      const { auth } = await restartFailingTimeoutMigration({ isMobileKeyReplaced: true });
+
+      await auth.checkUserAuth();
+
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        title: en.auth.walletDataSaveFailedTitle,
+      }));
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        msg: en.auth.walletDataUnreadableMessage,
+        buttonMessage: en.auth.walletDataUnreadableAction,
+      }));
+    });
+  });
 });
