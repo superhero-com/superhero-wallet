@@ -89,6 +89,7 @@ import {
   useAccounts,
 } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
+import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { useCoinMaxAmount } from '@/composables/coinMaxAmount';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
@@ -140,6 +141,7 @@ export default defineComponent({
     const { balance } = useBalances();
     const { activeAccount } = useAccounts();
     const { accountAssets } = useAccountAssetsList();
+    const { getSpendableTokenBalance } = useEthTokenBalance();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       if (assetContractId) {
@@ -175,8 +177,9 @@ export default defineComponent({
     } = useEthFeeCalculation(props.protocol, recipientsCount);
 
     const shouldUseMaxAmount = ref(false);
+    const tokenBalance = ref<BigNumber | null>(null);
 
-    const { max } = useCoinMaxAmount({ formModel, fee: maxFee });
+    const { max } = useCoinMaxAmount({ formModel, fee: maxFee, tokenBalance });
 
     const numericFee = computed(() => +fee.value.toFixed());
     const numericMaxFee = computed(() => +maxFee.value.toFixed());
@@ -238,10 +241,28 @@ export default defineComponent({
       return undefined;
     }
 
+    async function updateTokenBalance() {
+      const contractId = formModel.value.selectedAsset?.contractId;
+      const owner = activeAccount.value?.address;
+      if (!contractId || isEvmContract(contractId) || !owner) {
+        return;
+      }
+      const { nodeUrl } = activeNetwork.value.protocols[props.protocol];
+      try {
+        const nodeTokenBalance = await getSpendableTokenBalance(contractId, owner, nodeUrl);
+        if (formModel.value.selectedAsset?.contractId === contractId) {
+          tokenBalance.value = nodeTokenBalance;
+        }
+      } catch {
+        // Max keeps the balance it had
+      }
+    }
+
     let polling: NodeJS.Timeout | null = null;
 
     onMounted(() => {
       polling = executeAndSetInterval(async () => {
+        updateTokenBalance();
         updateFeeList(await getTransferGasLimit());
       }, 5000);
     });
@@ -256,6 +277,14 @@ export default defineComponent({
       () => formModel.value.selectedAsset,
       async () => {
         updateFeeList(await getTransferGasLimit());
+      },
+    );
+
+    watch(
+      () => formModel.value.selectedAsset?.contractId,
+      () => {
+        tokenBalance.value = null;
+        updateTokenBalance();
       },
     );
 
