@@ -11,6 +11,7 @@ import {
   AccountMnemonicFactory,
 } from '@aeternity/aepp-sdk';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
+import { cloneDeep, sumBy, uniq } from 'lodash-es';
 
 import type {
   AccountAddress,
@@ -42,11 +43,13 @@ import { tg } from '@/popup/plugins/i18n';
 import {
   amountRounded,
   fetchAllPages,
+  fetchJson,
   getActivityHash,
   getLastNotEmptyAccountIndex,
   handleUnknownError,
   isNotFoundError,
   toShiftedBigNumber,
+  watchUntilTruthy,
 } from '@/utils';
 import Logger from '@/lib/logger';
 
@@ -70,6 +73,20 @@ import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
 
 import { aettosToAe } from '../helpers';
+
+/** Each transfer on a page can need the events of its transaction fetched */
+const TOKEN_TRANSFERS_PER_PAGE = 10;
+const TRANSACTION_ACTIVITIES_CACHE_SIZE = 500;
+/** Polling the first page of a token doesn't fetch the events of its transactions again */
+const transactionActivities = new Map<string, any[]>();
+/** By the middleware URL */
+const tokenTransfersSupport = new Map<string, Promise<boolean>>();
+
+/** The token transfers by account include the mints and burns since mdw 1.109 */
+function isTokenTransfersVersion(mdwVersion?: string) {
+  const [major, minor] = (mdwVersion || '').split('.').map(Number);
+  return major > 1 || (major === 1 && minor >= 109);
+}
 
 export class AeternityAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.aeternity;
@@ -481,21 +498,29 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     let regularTransactions: ITransaction[] = [];
 
     try {
-      // Aeternity protocol APIs has no way for fetching the AE Coin or Token transactions only.
-      // For this purpose we are fetching all transactions and filter the asset.
-      // TODO update the logic when this issue is closed: https://github.com/aeternity/ae_mdw/issues/1678
-      const res = await this.fetchAccountTransactions(address, { nextPageUrl });
-      paginationParams = res.paginationParams;
-
-      if (assetContractId === this.coinContractId) {
-        regularTransactions = res.regularTransactions
-          .filter(({ tx }) => !tx.contractId || tx.contractId === this.coinContractId);
+      if (
+        assetContractId !== this.coinContractId
+        // A list continues from where its pages were loaded
+        && (nextPageUrl ? nextPageUrl.startsWith('/v3/aex9/') : await this.isTokenTransfersSupported())
+      ) {
+        const res = await this.fetchTokenTransactions(address, assetContractId, nextPageUrl);
+        regularTransactions = res.regularTransactions;
+        if (res.nextPageUrl) {
+          paginationParams.nextPageUrl = res.nextPageUrl;
+        }
       } else {
-        regularTransactions = res.regularTransactions
-          .filter(({ tx }) => (
-            tx.contractId === assetContractId
-            || JSON.stringify({ ...tx.arguments, ...tx.log }).includes(assetContractId)
-          ));
+        // The middleware can't list the AE coin transactions only, nor the token ones
+        // with their mints and burns before 1.109, so they are filtered here
+        const res = await this.fetchAccountTransactions(address, { nextPageUrl });
+        paginationParams = res.paginationParams;
+        regularTransactions = res.regularTransactions.filter(({ tx }) => (
+          (assetContractId === this.coinContractId)
+            ? !tx.contractId || tx.contractId === this.coinContractId
+            : (
+              tx.contractId === assetContractId
+              || JSON.stringify({ ...tx.arguments, ...tx.log }).includes(assetContractId)
+            )
+        ));
       }
     } catch (error: any) {
       Logger.write(error);
@@ -506,6 +531,114 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       paginationParams,
       regularTransactions,
     };
+  }
+
+  private async isTokenTransfersSupported(): Promise<boolean> {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    await watchUntilTruthy(aeActiveNetworkSettings);
+    // Read once, so a network switch meanwhile can't store the answer of another middleware
+    const { middlewareUrl } = aeActiveNetworkSettings.value;
+    let isSupported = tokenTransfersSupport.get(middlewareUrl);
+    if (!isSupported) {
+      isSupported = fetchJson(`${middlewareUrl}/status`)
+        .then((status) => isTokenTransfersVersion(status?.mdw_version));
+      tokenTransfersSupport.set(middlewareUrl, isSupported);
+      isSupported.catch(() => tokenTransfersSupport.delete(middlewareUrl));
+    }
+    return isSupported;
+  }
+
+  private async fetchTokenTransactions(
+    address: AccountAddress,
+    contractId: AssetContractId,
+    nextPageUrl?: string,
+  ): Promise<{ regularTransactions: ITransaction[]; nextPageUrl?: string }> {
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+    const { data, next } = await fetchFromMiddlewareCamelCased(
+      nextPageUrl
+      || `/v3/aex9/${encodeURIComponent(contractId)}/transfers?account=${encodeURIComponent(address)}&limit=${TOKEN_TRANSFERS_PER_PAGE}`,
+    );
+    const transactions = await Promise.all(
+      uniq<string>(data.map(({ txHash }: any) => txHash))
+        .map((hash) => this.fetchTokenTransaction(address, contractId, hash)),
+    );
+    return {
+      regularTransactions: transactions.filter((transaction) => !!transaction) as ITransaction[],
+      nextPageUrl: next,
+    };
+  }
+
+  /**
+   * Like the activities, the account's own transactions are shown whole
+   * and the transactions of others only by the tokens they moved.
+   */
+  private async fetchTokenTransaction(
+    address: AccountAddress,
+    contractId: AssetContractId,
+    hash: string,
+  ): Promise<ITransaction | undefined> {
+    const {
+      normalizeActivitiesStructure,
+      normalizeMiddlewareTransactionStructure,
+    } = useAeMiddleware();
+    // Normalizing changes the objects, the cached ones stay as fetched
+    const activities = cloneDeep(await this.fetchTransactionActivities(address, hash));
+
+    // The account is in the transaction itself. Other transactions of the generation that
+    // come along have no such activity.
+    const [ownTransaction] = normalizeActivitiesStructure(activities)
+      .filter(({ type }) => (
+        type !== ACTIVITIES_TYPES.aex9TransferEvent
+        && type !== ACTIVITIES_TYPES.internalContractCallEvent
+      ));
+    if (ownTransaction) {
+      return normalizeMiddlewareTransactionStructure(ownTransaction, address);
+    }
+
+    const transfers = activities.filter(({ type, payload }) => (
+      type === ACTIVITIES_TYPES.aex9TransferEvent && payload.contractId === contractId
+    ));
+    if (transfers.length < 2) {
+      return transfers[0] && normalizeMiddlewareTransactionStructure(transfers[0], address);
+    }
+    // Several transfers are shown as one by the amount the account got or gave
+    const netAmount = sumBy(transfers, ({ payload }) => (
+      (payload.recipientId === address ? payload.amount : 0)
+      - (payload.senderId === address ? payload.amount : 0)
+    ));
+    if (!netAmount) {
+      return undefined;
+    }
+    const transfer = transfers.find(({ payload }) => (
+      (netAmount > 0)
+        ? payload.recipientId === address && payload.senderId !== address
+        : payload.senderId === address
+    ));
+    return normalizeMiddlewareTransactionStructure(
+      { ...transfer, payload: { ...transfer.payload, amount: Math.abs(netAmount) } },
+      address,
+    );
+  }
+
+  private async fetchTransactionActivities(
+    address: AccountAddress,
+    hash: string,
+  ): Promise<any[]> {
+    const key = `${address}:${hash}`;
+    let activities = transactionActivities.get(key);
+    if (!activities) {
+      const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+      // 100 is the most the middleware returns
+      const { data } = await fetchFromMiddlewareCamelCased(
+        `/v2/accounts/${encodeURIComponent(address)}/activities?scope=transaction:${encodeURIComponent(hash)}&limit=100`,
+      );
+      activities = data as any[];
+      if (transactionActivities.size >= TRANSACTION_ACTIVITIES_CACHE_SIZE) {
+        transactionActivities.clear();
+      }
+      transactionActivities.set(key, activities);
+    }
+    return activities;
   }
 
   async fetchTransactionByHash(
