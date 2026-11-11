@@ -115,10 +115,8 @@
 import { defineComponent, PropType, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 
-import type { RejectCallback, ResolveCallback } from '@/types';
-import { useAuth } from '@/composables/auth';
-import { getOrCreateDefaultPasswordSecret } from '@/composables/defaultPassword';
-import { handleUnknownError } from '@/utils';
+import type { ISetPasswordResult, RejectCallback, ResolveCallback } from '@/types';
+import { generateDefaultPasswordSecret } from '@/composables/defaultPassword';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -142,12 +140,15 @@ export default defineComponent({
     isRestoredWallet: Boolean,
   },
   setup(props) {
-    const { isUsingDefaultPassword } = useAuth();
     const password = ref('');
     const confirmPassword = ref('');
 
     function onSubmit() {
-      props.resolve(password.value);
+      const result: ISetPasswordResult = {
+        password: password.value,
+        isDefaultPasswordSecret: false,
+      };
+      props.resolve(result);
     }
 
     function handleClose() {
@@ -157,24 +158,15 @@ export default defineComponent({
     }
 
     /**
-     * "Skip password" still encrypts sensitive state, but the
-     * encryption password is now a per-install 256-bit random secret
-     * persisted to secure storage rather than the hardcoded stub that was
-     * committed in source. Each install holds an independent secret, so a
-     * repository leak no longer trivially unlocks every default-password
-     * wallet.
+     * "Skip password" still encrypts the wallet, with a per-install random secret that
+     * `setPassword` stores with the salt.
      */
-    async function useDefaultPassword() {
-      try {
-        const secret = await getOrCreateDefaultPasswordSecret();
-        isUsingDefaultPassword.value = true;
-        props.resolve(secret);
-      } catch (error) {
-        handleUnknownError(error);
-        if (!props.isRestoredWallet) {
-          props.reject();
-        }
-      }
+    function useDefaultPassword() {
+      const result: ISetPasswordResult = {
+        password: generateDefaultPasswordSecret(),
+        isDefaultPasswordSecret: true,
+      };
+      props.resolve(result);
     }
 
     return {

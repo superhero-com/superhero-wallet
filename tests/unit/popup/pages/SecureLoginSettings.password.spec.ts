@@ -7,10 +7,8 @@ import { defineRule } from 'vee-validate';
 import SecureLoginSettings from '@/popup/pages/SecureLoginSettings.vue';
 import SwitchButton from '@/popup/components/SwitchButton.vue';
 import { useAuth, useModals, useUi } from '@/composables';
-import {
-  getDefaultPasswordSecret,
-  getOrCreateDefaultPasswordSecret,
-} from '@/composables/defaultPassword';
+import { generateDefaultPasswordSecret } from '@/composables/defaultPassword';
+import { RejectedByUserError } from '@/lib/errors';
 import en from '@/popup/locales/en-US.json';
 
 vi.mock('@/constants', async (importOriginal) => ({
@@ -23,8 +21,7 @@ vi.mock('@/composables', () => ({
   useUi: vi.fn(),
 }));
 vi.mock('@/composables/defaultPassword', () => ({
-  getDefaultPasswordSecret: vi.fn(),
-  getOrCreateDefaultPasswordSecret: vi.fn(),
+  generateDefaultPasswordSecret: vi.fn(),
 }));
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
@@ -32,7 +29,10 @@ const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 async function mountSettings(usingDefault = true) {
   const isUsingDefaultPassword = ref(usingDefault);
   const setPassword = vi.fn().mockResolvedValue(undefined);
-  const openSetPasswordModal = vi.fn().mockResolvedValue('chosen-password');
+  const openSetPasswordModal = vi.fn().mockResolvedValue({
+    password: 'chosen-password',
+    isDefaultPasswordSecret: false,
+  });
   useAuth.mockReturnValue({
     canAuthenticateWithDevice: vi.fn().mockResolvedValue(false),
     secureLoginTimeoutDecrypted: ref('0'),
@@ -67,8 +67,7 @@ describe('SecureLoginSettings password protection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     ['password_min_len', 'passwords_match'].forEach((rule) => defineRule(rule, () => true));
-    getDefaultPasswordSecret.mockResolvedValue('old-default-secret');
-    getOrCreateDefaultPasswordSecret.mockResolvedValue('next-default-secret');
+    generateDefaultPasswordSecret.mockReturnValue('next-default-secret');
   });
 
   it('updates the enabled mode only after the password vault commit succeeds', async () => {
@@ -78,7 +77,9 @@ describe('SecureLoginSettings password protection', () => {
 
     await state.input.trigger('change');
     await flushPromises();
-    expect(state.setPassword).toHaveBeenCalledWith('chosen-password');
+    expect(state.setPassword).toHaveBeenCalledWith('chosen-password', undefined, {
+      isDefaultPasswordSecret: false,
+    });
     expect(state.isUsingDefaultPassword.value).toBe(true);
     completeCommit();
     await flushPromises();
@@ -88,7 +89,7 @@ describe('SecureLoginSettings password protection', () => {
 
   it('keeps default mode when the password dialog is cancelled', async () => {
     const state = await mountSettings();
-    state.openSetPasswordModal.mockRejectedValue(new Error('cancelled'));
+    state.openSetPasswordModal.mockRejectedValue(new RejectedByUserError());
 
     await state.input.trigger('change');
     await flushPromises();
@@ -107,24 +108,31 @@ describe('SecureLoginSettings password protection', () => {
     expect(state.isUsingDefaultPassword.value).toBe(true);
   });
 
-  it('keeps default mode when the selected password is its existing secret', async () => {
+  it('stays in default mode when the dialog is skipped, storing the new secret with its intent', async () => {
     const state = await mountSettings();
-    state.openSetPasswordModal.mockResolvedValue('old-default-secret');
+    state.openSetPasswordModal.mockResolvedValue({
+      password: 'skipped-secret',
+      isDefaultPasswordSecret: true,
+    });
 
     await state.input.trigger('change');
     await flushPromises();
 
-    expect(state.setPassword).toHaveBeenCalledWith('old-default-secret');
+    expect(state.setPassword).toHaveBeenCalledWith('skipped-secret', undefined, {
+      isDefaultPasswordSecret: true,
+    });
     expect(state.isUsingDefaultPassword.value).toBe(true);
   });
 
-  it('disables password protection after the default-secret rotation succeeds', async () => {
+  it('disables password protection with a new secret stored in the same commit', async () => {
     const state = await mountSettings(false);
 
     await state.input.trigger('change');
     await flushPromises();
 
-    expect(state.setPassword).toHaveBeenCalledWith('next-default-secret');
+    expect(state.setPassword).toHaveBeenCalledWith('next-default-secret', undefined, {
+      isDefaultPasswordSecret: true,
+    });
     expect(state.isUsingDefaultPassword.value).toBe(true);
   });
 

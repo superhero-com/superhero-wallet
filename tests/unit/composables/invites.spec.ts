@@ -98,7 +98,10 @@ describe('useInvites: invite keys at rest', () => {
     }));
     vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
-        openSetPasswordModal: vi.fn().mockResolvedValue(PASSWORD),
+        openSetPasswordModal: vi.fn().mockResolvedValue({
+          password: PASSWORD,
+          isDefaultPasswordSecret: false,
+        }),
         openPasswordLoginModal: vi.fn().mockResolvedValue(undefined),
         openBiometricLoginModal: vi.fn(),
         openEnableBiometricLoginModal: vi.fn(),

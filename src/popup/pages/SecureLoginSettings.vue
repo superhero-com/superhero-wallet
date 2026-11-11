@@ -28,6 +28,7 @@
             <SwitchButton
               :label="$t('pages.secureLogin.enablePasswordProtection')"
               :model-value="!isUsingDefaultPassword"
+              data-cy="password-protection"
               @update:modelValue="setPasswordEnabled"
             />
           </div>
@@ -181,10 +182,7 @@ import { Form, Field } from 'vee-validate';
 import type { ComponentRef } from '@/types';
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
 import { useAuth, useModals, useUi } from '@/composables';
-import {
-  getDefaultPasswordSecret,
-  getOrCreateDefaultPasswordSecret,
-} from '@/composables/defaultPassword';
+import { generateDefaultPasswordSecret } from '@/composables/defaultPassword';
 
 import PageWrapper from '@/popup/components/PageWrapper.vue';
 import RadioButton from '@/popup/components/RadioButton.vue';
@@ -255,10 +253,10 @@ export default defineComponent({
 
     /**
      * Toggling password protection on/off no longer pivots on
-     * the hardcoded `STUB_ACCOUNT.password`. When disabling, we generate
-     * (or reuse) a per-install 256-bit random secret; when enabling, we
-     * require the user to type a real password AND clear the stored
-     * random secret so nothing is left dangling. This function is also
+     * the hardcoded `STUB_ACCOUNT.password`. When disabling, a new per-install
+     * 256-bit random secret becomes the password; when enabling, the user's
+     * password replaces it. Either way `setPassword` stores the secret, or its
+     * removal, in the same commit as the salt. This function is also
      * the natural rotation point for legacy wallets still encrypted
      * with `LEGACY_DEFAULT_PASSWORD` — toggling off+on rotates them
      * onto a fresh per-install secret through the `setPassword` call.
@@ -269,24 +267,17 @@ export default defineComponent({
           /**
            * Do NOT flip `isUsingDefaultPassword` to `false` before the password
            * is actually set. `openSetPasswordModal()` can reject (user cancels
-           * the dialog), and this `catch` swallows the rejection — leaving the
-           * ref desynced from the on-disk state and producing knock-on UI bugs.
+           * the dialog), leaving the ref desynced from the on-disk state.
            */
-          const passwordToSet = await openSetPasswordModal();
-          const defaultPasswordSecret = await getDefaultPasswordSecret();
-          await setPassword(passwordToSet);
-
-          if (defaultPasswordSecret && passwordToSet === defaultPasswordSecret) {
-            isUsingDefaultPassword.value = true;
-            return;
-          }
-
-          isUsingDefaultPassword.value = false;
+          const { password, isDefaultPasswordSecret } = await openSetPasswordModal();
+          await setPassword(password, undefined, { isDefaultPasswordSecret });
+          isUsingDefaultPassword.value = isDefaultPasswordSecret;
           return;
         }
 
-        const passwordToSet = await getOrCreateDefaultPasswordSecret();
-        await setPassword(passwordToSet);
+        await setPassword(generateDefaultPasswordSecret(), undefined, {
+          isDefaultPasswordSecret: true,
+        });
         isUsingDefaultPassword.value = true;
       } catch (error) { /* NOOP */ }
     }

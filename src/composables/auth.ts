@@ -21,7 +21,9 @@ import {
   refreshVault,
   subscribeVault,
   VAULT_SECRET_KEYS,
+  VaultConflictError,
 } from '@/lib/WalletVault';
+import type { VaultSnapshot } from '@/lib/WalletVault';
 import { getVaultRef } from '@/utils/vaultRef';
 import {
   AUTHENTICATION_TIMEOUTS,
@@ -417,14 +419,19 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
-   * `isDefaultPasswordSecret` stores the password as the default-password secret
-   * together with the salt, so another window can't pair a different one with it.
+   * @param options.isDefaultPasswordSecret The password is the generated "skip password"
+   * secret, stored in the same commit as the salt. Any other password removes it.
+   * @param options.expectedVault The vault before asking for the password: a wallet created
+   * or reset meanwhile isn't written over.
    * Web and extension only, mobile returns before the commit.
    */
   async function setPassword(
     password: string,
     plaintextToEncrypt = mnemonicDecrypted.value,
-    { isDefaultPasswordSecret = false } = {},
+    {
+      isDefaultPasswordSecret = false,
+      expectedVault,
+    }: { isDefaultPasswordSecret?: boolean; expectedVault?: VaultSnapshot } = {},
   ) {
     // Empty while the wallet is locked, and encrypting that would replace the seed.
     if (!plaintextToEncrypt) {
@@ -454,6 +461,16 @@ export const useAuth = createCustomScopedComposable(() => {
     }
     // From the vault: secrets whose views were never mounted rotate too.
     const previousVault = readVault();
+    if (expectedVault && (
+      previousVault.values[STORAGE_KEYS.mnemonic] !== expectedVault.values[STORAGE_KEYS.mnemonic]
+      || previousVault.values[STORAGE_KEYS.encryptionSalt]
+        !== expectedVault.values[STORAGE_KEYS.encryptionSalt]
+      // A reset leaves an empty vault empty, but still ends what started before it.
+      || (!expectedVault.values[STORAGE_KEYS.mnemonic]
+        && previousVault.revision !== expectedVault.revision)
+    )) {
+      throw new VaultConflictError();
+    }
     const currentSalt = encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null;
     if (currentKey && !isEncryptionKeyCurrent()) {
       throw new Error('The password was changed in another window');
@@ -478,10 +495,7 @@ export const useAuth = createCustomScopedComposable(() => {
     }));
     nextValues[STORAGE_KEYS.encryptionSalt] = encodeBase64(newSalt);
     nextValues[STORAGE_KEYS.mnemonic] = newMnemonicCiphertext;
-    nextValues[STORAGE_KEYS.defaultPasswordSecret] = (
-      isDefaultPasswordSecret
-      || password === previousVault.values[STORAGE_KEYS.defaultPasswordSecret]
-    ) ? password : null;
+    nextValues[STORAGE_KEYS.defaultPasswordSecret] = isDefaultPasswordSecret ? password : null;
 
     ownRotationSalt = nextValues[STORAGE_KEYS.encryptionSalt];
     try {
@@ -546,15 +560,27 @@ export const useAuth = createCustomScopedComposable(() => {
       }
     } else {
       const { openSetPasswordModal } = useModals();
-      const password = await openSetPasswordModal(isRestored).catch(() => {
-        throw new Error(t('pages.index.passwordWasNotSet'));
-      });
-      await setPassword(password, newMnemonic);
-
-      const storedSecret = await getDefaultPasswordSecret();
-      if (storedSecret && storedSecret === password) {
-        isUsingDefaultPassword.value = true;
+      // Before the dialog: another window may create or reset a wallet while it is open.
+      await ensureVaultReady();
+      await refreshVault();
+      const expectedVault = readVault();
+      // Another window created or imported one: opened after a reload, not written over.
+      if (!isRestored && expectedVault.values[STORAGE_KEYS.mnemonic]) {
+        openConfirmModal({
+          title: t('auth.storedWalletFoundTitle'),
+          msg: t('auth.walletCreatedElsewhereMessage'),
+          buttonMessage: t('auth.storedWalletFoundAction'),
+        })
+          .then(() => window.location.reload())
+          .catch(() => { /* NOOP - dismissed */ });
+        throw new StoredWalletFoundError();
       }
+      const { password, isDefaultPasswordSecret } = await openSetPasswordModal(isRestored)
+        .catch(() => {
+          throw new Error(t('pages.index.passwordWasNotSet'));
+        });
+      await setPassword(password, newMnemonic, { isDefaultPasswordSecret, expectedVault });
+      isUsingDefaultPassword.value = isDefaultPasswordSecret;
     }
     mnemonicDecrypted.value = newMnemonic;
     /**
@@ -1084,6 +1110,8 @@ export const useAuth = createCustomScopedComposable(() => {
         // No salt: the wallet was reset, never this window's own rotation.
         && (storedSalt === null || storedSalt !== ownRotationSalt)
       ) {
+        // That window's `setPassword` stored the secret, or its removal, with the salt.
+        isUsingDefaultPassword.value = !!values[STORAGE_KEYS.defaultPasswordSecret];
         handleRemotePasswordChange();
       }
     });

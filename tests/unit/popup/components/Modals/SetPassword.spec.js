@@ -1,51 +1,54 @@
 import { shallowMount } from '@vue/test-utils';
-import { ref as mockRef } from 'vue';
 
 const mockResolve = vi.fn();
 const mockReject = vi.fn();
-const mockHandleUnknownError = vi.fn();
-const mockGetOrCreateDefaultPasswordSecret = vi.fn();
-const mockIsUsingDefaultPassword = mockRef(false);
-
-vi.mock('@/composables/auth', () => ({
-  useAuth: () => ({
-    isUsingDefaultPassword: mockIsUsingDefaultPassword,
-  }),
-}));
+const mockGenerateDefaultPasswordSecret = vi.fn();
 
 vi.mock('@/composables/defaultPassword', () => ({
-  getOrCreateDefaultPasswordSecret: mockGetOrCreateDefaultPasswordSecret,
-}));
-
-vi.mock('@/utils', () => ({
-  handleUnknownError: mockHandleUnknownError,
+  generateDefaultPasswordSecret: mockGenerateDefaultPasswordSecret,
 }));
 
 describe('SetPassword', () => {
   beforeEach(async () => {
     mockResolve.mockClear();
     mockReject.mockClear();
-    mockHandleUnknownError.mockClear();
-    mockGetOrCreateDefaultPasswordSecret.mockReset();
-    mockIsUsingDefaultPassword.value = false;
+    mockGenerateDefaultPasswordSecret.mockReset();
   });
 
-  it('marks auth as using the default password when password setup is skipped', async () => {
-    mockGetOrCreateDefaultPasswordSecret.mockResolvedValue('default-secret');
-
+  async function mountSetPassword() {
     // eslint-disable-next-line global-require
     const SetPassword = (await import('@/popup/components/Modals/SetPassword.vue')).default;
-    const wrapper = shallowMount(SetPassword, {
+    return shallowMount(SetPassword, {
       props: {
         resolve: mockResolve,
         reject: mockReject,
       },
     });
+  }
 
-    await wrapper.vm.useDefaultPassword();
+  it('resolves a generated secret marked as skipped, storing nothing before the password commit', async () => {
+    mockGenerateDefaultPasswordSecret.mockReturnValue('default-secret');
+    const wrapper = await mountSetPassword();
 
-    expect(mockIsUsingDefaultPassword.value).toBe(true);
-    expect(mockResolve).toHaveBeenCalledWith('default-secret');
+    wrapper.vm.useDefaultPassword();
+
+    expect(mockResolve).toHaveBeenCalledWith({
+      password: 'default-secret',
+      isDefaultPasswordSecret: true,
+    });
     expect(mockReject).not.toHaveBeenCalled();
+  });
+
+  it('resolves a typed password as not the default secret', async () => {
+    const wrapper = await mountSetPassword();
+    wrapper.vm.password = 'typed-password';
+
+    wrapper.vm.onSubmit();
+
+    expect(mockResolve).toHaveBeenCalledWith({
+      password: 'typed-password',
+      isDefaultPasswordSecret: false,
+    });
+    expect(mockGenerateDefaultPasswordSecret).not.toHaveBeenCalled();
   });
 });

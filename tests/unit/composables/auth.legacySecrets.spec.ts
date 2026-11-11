@@ -91,7 +91,10 @@ describe('useAuth: plaintext seed left by older versions', () => {
     localStorage.clear();
     originalLocalStorageApi = globalThis.browser.storage.local;
 
-    openSetPasswordModalMock = vi.fn().mockResolvedValue(PASSWORD);
+    openSetPasswordModalMock = vi.fn().mockResolvedValue({
+      password: PASSWORD,
+      isDefaultPasswordSecret: false,
+    });
     vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
         checkBiometry: vi.fn().mockResolvedValue({ isAvailable: false }),

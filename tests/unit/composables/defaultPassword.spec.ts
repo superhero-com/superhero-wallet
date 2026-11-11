@@ -7,16 +7,6 @@
  */
 describe('defaultPassword', () => {
   const storeMock = new Map<string, any>();
-  class VaultConflictError extends Error {}
-  const readVaultMock = vi.fn(() => ({
-    revision: 'test-revision',
-    values: { 'default-password-secret': storeMock.get('default-password-secret') ?? null },
-  }));
-  const writeVaultFieldMock = vi.fn((key: string, value: string | null) => {
-    if (value === null) storeMock.delete(key);
-    else storeMock.set(key, value);
-    return Promise.resolve();
-  });
   const walletStorageMock = {
     get: vi.fn((key: string) => Promise.resolve(storeMock.get(key) ?? null)),
     set: vi.fn((key: string, value: any) => {
@@ -35,8 +25,6 @@ describe('defaultPassword', () => {
     walletStorageMock.get.mockClear();
     walletStorageMock.set.mockClear();
     walletStorageMock.remove.mockClear();
-    readVaultMock.mockClear();
-    writeVaultFieldMock.mockClear();
 
     vi.doMock('@/constants', () => ({
       IS_MOBILE_APP: false,
@@ -44,9 +32,6 @@ describe('defaultPassword', () => {
     }));
     vi.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
     vi.doMock('@/lib/WalletVault', () => ({
-      readVault: readVaultMock,
-      writeVaultField: writeVaultFieldMock,
-      VaultConflictError,
       ensureVaultReady: vi.fn().mockResolvedValue(undefined),
       refreshVault: vi.fn().mockResolvedValue(undefined),
     }));
@@ -80,65 +65,13 @@ describe('defaultPassword', () => {
     await expect(getDefaultPasswordSecret()).resolves.toBeNull();
   });
 
-  it('getOrCreate generates a fresh 256-bit random secret and persists it on first call', async () => {
-    // eslint-disable-next-line global-require
-    const { getOrCreateDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
-
-    const secret = await getOrCreateDefaultPasswordSecret();
+  it('generates a 256-bit secret without storing it, which setPassword does with the salt', async () => {
+    const { generateDefaultPasswordSecret } = await import('@/composables/defaultPassword');
 
     // Random bytes are base64-encoded by the real `encodeBase64`; our stub
     // just records the byte count so we can assert the entropy size.
-    expect(secret).toBe('b64(32)');
-    expect(writeVaultFieldMock).toHaveBeenCalledWith('default-password-secret', 'b64(32)', {
-      revision: 'test-revision', values: { 'default-password-secret': null },
-    });
-    expect(writeVaultFieldMock).toHaveBeenCalledTimes(1);
+    expect(generateDefaultPasswordSecret()).toBe('b64(32)');
     expect(walletStorageMock.set).not.toHaveBeenCalled();
-  });
-
-  it('getOrCreate returns the persisted secret on subsequent calls without re-writing', async () => {
-    storeMock.set('default-password-secret', 'existing-secret-value');
-    // eslint-disable-next-line global-require
-    const { getOrCreateDefaultPasswordSecret } = (await import('@/composables/defaultPassword'));
-
-    const secret = await getOrCreateDefaultPasswordSecret();
-
-    expect(secret).toBe('existing-secret-value');
-    expect(writeVaultFieldMock).not.toHaveBeenCalled();
-    expect(walletStorageMock.set).not.toHaveBeenCalled();
-  });
-
-  it('shares one in-flight creation between overlapping callers', async () => {
-    const { getOrCreateDefaultPasswordSecret } = await import('@/composables/defaultPassword');
-
-    await expect(Promise.all([
-      getOrCreateDefaultPasswordSecret(), getOrCreateDefaultPasswordSecret(),
-    ])).resolves.toEqual(['b64(32)', 'b64(32)']);
-
-    expect(writeVaultFieldMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('uses another window\'s committed secret after a conflicting creation', async () => {
-    writeVaultFieldMock.mockImplementationOnce(() => {
-      storeMock.set('default-password-secret', 'another-window-secret');
-      return Promise.reject(new VaultConflictError());
-    });
-    const { getOrCreateDefaultPasswordSecret } = await import('@/composables/defaultPassword');
-
-    await expect(getOrCreateDefaultPasswordSecret()).resolves.toBe('another-window-secret');
-
-    expect(writeVaultFieldMock).toHaveBeenCalledTimes(1);
-    expect(walletStorageMock.set).not.toHaveBeenCalled();
-  });
-
-  it('allows a later creation attempt after a failed vault write', async () => {
-    writeVaultFieldMock.mockRejectedValueOnce(new Error('Storage unavailable'));
-    const { getOrCreateDefaultPasswordSecret } = await import('@/composables/defaultPassword');
-
-    await expect(getOrCreateDefaultPasswordSecret()).rejects.toThrow('Storage unavailable');
-    await expect(getOrCreateDefaultPasswordSecret()).resolves.toBe('b64(32)');
-
-    expect(writeVaultFieldMock).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -160,8 +93,7 @@ describe('defaultPassword on mobile', () => {
     set: vi.fn(),
     remove: vi.fn(),
   };
-  const readVaultMock = vi.fn();
-  const writeVaultFieldMock = vi.fn();
+  const refreshVaultMock = vi.fn();
 
   beforeEach(async () => {
     vi.resetModules();
@@ -172,8 +104,7 @@ describe('defaultPassword on mobile', () => {
     walletStorageMock.get.mockClear();
     walletStorageMock.set.mockClear();
     walletStorageMock.remove.mockClear();
-    readVaultMock.mockClear();
-    writeVaultFieldMock.mockClear();
+    refreshVaultMock.mockClear();
 
     vi.doMock('@/constants', () => ({
       IS_MOBILE_APP: true,
@@ -181,10 +112,8 @@ describe('defaultPassword on mobile', () => {
     }));
     vi.doMock('@/lib/WalletStorage', () => ({ WalletStorage: walletStorageMock }));
     vi.doMock('@/lib/WalletVault', () => ({
-      readVault: readVaultMock,
-      writeVaultField: writeVaultFieldMock,
       ensureVaultReady: vi.fn().mockResolvedValue(undefined),
-      refreshVault: vi.fn().mockResolvedValue(undefined),
+      refreshVault: refreshVaultMock,
     }));
     vi.doMock('@/lib/SecureMobileStorage', () => ({
       SecureMobileStorage: secureMobileStorageMock,
@@ -197,17 +126,37 @@ describe('defaultPassword on mobile', () => {
   it('uses SecureMobileStorage instead of WalletStorage', async () => {
     // eslint-disable-next-line global-require
     const defaultPassword = (await import('@/composables/defaultPassword'));
-    const { getDefaultPasswordSecret, getOrCreateDefaultPasswordSecret } = defaultPassword;
+    const { getDefaultPasswordSecret } = defaultPassword;
 
     await expect(getDefaultPasswordSecret()).resolves.toBeNull();
-    const secret = await getOrCreateDefaultPasswordSecret();
 
-    expect(secret).toBe('b64(32)');
     expect(secureMobileStorageMock.get).toHaveBeenCalledWith('default-password-secret');
-    expect(secureMobileStorageMock.set).toHaveBeenCalledWith('default-password-secret', 'b64(32)');
     expect(walletStorageMock.get).not.toHaveBeenCalled();
-    expect(walletStorageMock.set).not.toHaveBeenCalled();
-    expect(readVaultMock).not.toHaveBeenCalled();
-    expect(writeVaultFieldMock).not.toHaveBeenCalled();
+    expect(refreshVaultMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('defaultPassword over the vault shared with other windows', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    ['@/lib/WalletStorage', '@/lib/WalletVault', '@/lib/SecureMobileStorage', '@/utils/crypto']
+      .forEach((path) => vi.doUnmock(path));
+    vi.doMock('@/constants', async () => ({
+      ...await vi.importActual('@/constants'),
+      IS_MOBILE_APP: false,
+    }));
+  });
+
+  it('returns the secret another window stored, without waiting for its notification', async () => {
+    const { getDefaultPasswordSecret } = await import('@/composables/defaultPassword');
+    const { STORAGE_KEYS } = await import('@/constants');
+    expect(await getDefaultPasswordSecret()).toBeNull();
+
+    vi.resetModules();
+    const otherWindow = await import('@/lib/WalletVault');
+    await otherWindow.writeVaultField(STORAGE_KEYS.defaultPasswordSecret, 'other-window-secret');
+
+    expect(await getDefaultPasswordSecret()).toBe('other-window-secret');
   });
 });

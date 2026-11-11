@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { watch } from 'vue';
+import en from '@/popup/locales/en-US.json';
 import { installSessionMutationHandler } from '../helpers/extensionSession';
 
 /**
@@ -62,7 +63,10 @@ describe('useAuth with a vault shared across windows', () => {
     vi.resetModules();
     localStorage.clear();
     vi.doUnmock('@/lib/WalletVault');
-    openSetPasswordModalMock = vi.fn().mockResolvedValue('old-password');
+    openSetPasswordModalMock = vi.fn().mockResolvedValue({
+      password: 'old-password',
+      isDefaultPasswordSecret: false,
+    });
     openPasswordLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openConfirmModalMock = vi.fn(() => new Promise(() => {}));
     openModalMock = vi.fn();
@@ -189,6 +193,35 @@ describe('useAuth with a vault shared across windows', () => {
         .every(({ isAuthenticated }) => !isAuthenticated)).toBe(true);
       expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
       expect(await opensWith(first, 'new-password')).toBe(true);
+    });
+
+    it('follows whether that window turned the password protection off or on', async () => {
+      mockConstants({ IS_EXTENSION: true });
+      installExtensionStubs();
+      const first = await openWindow();
+      await createWallet(first);
+      const second = await openWindow();
+      await vi.waitFor(() => expect(second.auth.isAuthenticated.value).toBe(true), WAIT_FOR_CRYPTO);
+      const { generateDefaultPasswordSecret } = await import('@/composables/defaultPassword');
+      const changeIn = async (page, password, isDefaultPasswordSecret) => {
+        const key = first.auth.encryptionKey.value;
+        await page.auth.setPassword(password, undefined, { isDefaultPasswordSecret });
+        notifyCommit(first);
+        await vi.waitFor(() => {
+          expect(first.auth.isAuthenticated.value).toBe(true);
+          expect(first.auth.encryptionKey.value).not.toBe(key);
+        }, WAIT_FOR_CRYPTO);
+      };
+      expect(first.auth.isUsingDefaultPassword.value).toBe(false);
+
+      // As the password-protection toggle does.
+      await changeIn(second, generateDefaultPasswordSecret(), true);
+      // Its seed and keys are then shown without asking for a password nobody knows.
+      expect(first.auth.isUsingDefaultPassword.value).toBe(true);
+
+      await changeIn(second, 'new-password', false);
+      expect(first.auth.isUsingDefaultPassword.value).toBe(false);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
     });
 
     /** `second` changes the password; how its key reaches the session is up to `storeKey`. */
@@ -405,6 +438,111 @@ describe('useAuth with a vault shared across windows', () => {
       await vi.waitFor(() => (
         expect(loser.auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
       ));
+    });
+  });
+
+  describe('setting the first password (web)', () => {
+    it('does not write over a wallet another window created while the dialog was open', async () => {
+      const page = await openWindow();
+      const { vault, crypto, STORAGE_KEYS } = page;
+      let otherWallet;
+      openSetPasswordModalMock.mockImplementation(async () => {
+        const snapshot = vault.readVault();
+        otherWallet = await vault.commitVault(snapshot, {
+          ...snapshot.values,
+          [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(crypto.generateSalt()),
+          [STORAGE_KEYS.mnemonic]: 'other-window-wallet',
+        });
+        return { password: 'password', isDefaultPasswordSecret: false };
+      });
+
+      await expect(page.auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC))
+        .rejects.toThrow(vault.VaultConflictError);
+
+      await vault.refreshVault();
+      expect(vault.readVault()).toEqual(otherWallet);
+      expect(page.auth.isAuthenticated.value).toBe(false);
+    });
+
+    it('offers a reload rather than create a wallet over one another window stored', async () => {
+      const page = await openWindow();
+      const { vault, crypto, STORAGE_KEYS } = page;
+      const { StoredWalletFoundError } = await import('@/lib/errors');
+      const snapshot = vault.readVault();
+      const otherWallet = await vault.commitVault(snapshot, {
+        ...snapshot.values,
+        [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(crypto.generateSalt()),
+        [STORAGE_KEYS.mnemonic]: 'other-window-wallet',
+      });
+
+      await expect(page.auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC))
+        .rejects.toThrow(StoredWalletFoundError);
+
+      expect(openSetPasswordModalMock).not.toHaveBeenCalled();
+      expect(openConfirmModalMock).toHaveBeenCalledWith(expect.objectContaining({
+        msg: en.auth.walletCreatedElsewhereMessage,
+      }));
+      await vault.refreshVault();
+      expect(vault.readVault()).toEqual(otherWallet);
+      expect(page.auth.isAuthenticated.value).toBe(false);
+    });
+
+    it('does not create a wallet once another window reset the empty vault meanwhile', async () => {
+      const page = await openWindow();
+      const { vault } = page;
+      let resetVault;
+      openSetPasswordModalMock.mockImplementation(async () => {
+        await vault.clearVault();
+        resetVault = vault.readVault();
+        return { password: 'password', isDefaultPasswordSecret: false };
+      });
+
+      await expect(page.auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC))
+        .rejects.toThrow(vault.VaultConflictError);
+
+      await vault.refreshVault();
+      expect(vault.readVault()).toEqual(resetVault);
+      expect(page.auth.isAuthenticated.value).toBe(false);
+    });
+
+    it('stores a skipped password with its salt, whatever secret was stored before', async () => {
+      const page = await openWindow();
+      const { vault, STORAGE_KEYS } = page;
+      // E.g. left by an attempt that was cut off.
+      await vault.writeVaultField(STORAGE_KEYS.defaultPasswordSecret, 'another-secret');
+      openSetPasswordModalMock.mockResolvedValue({
+        password: 'generated-secret',
+        isDefaultPasswordSecret: true,
+      });
+
+      await page.auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+      expect(vault.readVault().values[STORAGE_KEYS.defaultPasswordSecret]).toBe('generated-secret');
+      expect(page.auth.isUsingDefaultPassword.value).toBe(true);
+      const reopened = await openWindow();
+      await reopened.auth.checkUserAuth();
+      expect(reopened.auth.isAuthenticated.value).toBe(true);
+      expect(reopened.auth.isUsingDefaultPassword.value).toBe(true);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
+    });
+
+    it('removes the skipped-password secret once a real password replaces it', async () => {
+      openSetPasswordModalMock.mockResolvedValue({
+        password: 'generated-secret',
+        isDefaultPasswordSecret: true,
+      });
+      const page = await openWindow();
+      const { vault, STORAGE_KEYS } = page;
+      await page.auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
+
+      await page.auth.setPassword('a-real-password');
+
+      expect(vault.readVault().values[STORAGE_KEYS.defaultPasswordSecret]).toBeNull();
+      const reopened = await openWindow();
+      await reopened.auth.checkUserAuth();
+      expect(reopened.auth.isAuthenticated.value).toBe(false);
+      expect(openPasswordLoginModalMock).toHaveBeenCalled();
+      expect(await opensWith(reopened, 'a-real-password')).toBe(true);
     });
   });
 });

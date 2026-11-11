@@ -1483,7 +1483,8 @@
     "walletDataReadFailedMessage": "无法从此设备读取钱包数据。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
     "storedWalletFoundTitle": "在此设备上找到钱包",
     "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
-    "storedWalletFoundAction": "重新加载"
+    "storedWalletFoundAction": "重新加载",
+    "walletCreatedElsewhereMessage": "已在另一个窗口中创建或导入了钱包。请重新加载此窗口以打开它。"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

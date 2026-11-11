@@ -779,6 +779,12 @@ export type SidePanelMessage = { windowId: number; visible: boolean }
   | { id: string; type: typeof POPUP_ACTIONS.resolve; payload?: any }
   | { id: string; type: typeof POPUP_ACTIONS.reject };
 
+/** `isDefaultPasswordSecret`: the user skipped it, `password` is a generated secret. */
+export interface ISetPasswordResult {
+  password: string;
+  isDefaultPasswordSecret: boolean;
+}
+
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
 }

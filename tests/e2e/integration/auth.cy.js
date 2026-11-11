@@ -188,6 +188,38 @@ describe('Test cases for login functionality', () => {
       .should('have.class', 'active');
   });
 
+  it('turns the password protection off and on again, then opens only with the new password', () => {
+    const newPassword = 'newPassword123';
+    const secretKey = STORAGE_KEYS.defaultPasswordSecret;
+
+    cy.login()
+      .openSecureLoginSettings()
+      .get('[data-cy=password-protection] input')
+      .should('be.checked')
+      .get('[data-cy=password-protection] .switch')
+      .click();
+    // Tests ask for the password even without protection, so the vault shows it is off.
+    cy.waitForStoredVault((vault) => !!vault?.values[secretKey])
+      .get('[data-cy=password-protection] input')
+      .should('not.be.checked')
+      .get('[data-cy=password-protection] .switch')
+      .click();
+    setPassword(newPassword);
+    cy.waitForStoredVault((vault) => vault?.values[secretKey] === null)
+      .get('[data-cy=password-protection] input')
+      .should('be.checked');
+
+    cy.reload();
+    unlock(TEST_ACCOUNT.password);
+    cy.get('[data-cy=password] [data-cy=input-field-message]')
+      .should('contain', locale.pages.secureLogin.login.error)
+      .get('[data-cy=password] input')
+      .clear();
+    unlock(newPassword);
+    cy.get('[data-cy=password]')
+      .should('not.exist');
+  });
+
   it('creates a wallet after a reset, which opens with its password after a restart', () => {
     const newPassword = 'newPassword123';
 

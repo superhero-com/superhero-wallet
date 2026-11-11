@@ -1490,7 +1490,8 @@
     "walletDataReadFailedMessage": "Your wallet data couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
     "storedWalletFoundTitle": "Wallet found on this device",
     "storedWalletFoundMessage": "Your wallet couldn't be loaded when the app started, but it's still stored on this device. Reload the app to open it.",
-    "storedWalletFoundAction": "Reload"
+    "storedWalletFoundAction": "Reload",
+    "walletCreatedElsewhereMessage": "A wallet was created or imported in another window. Reload this one to open it."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

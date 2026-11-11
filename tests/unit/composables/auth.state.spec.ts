@@ -109,7 +109,7 @@ describe('useAuth state machine branches', () => {
     vi.doUnmock('@/lib/WalletVault');
     vi.doUnmock('@/composables/defaultPassword');
 
-    openSetPasswordModalMock = vi.fn().mockResolvedValue('unused-modal-password');
+    openSetPasswordModalMock = vi.fn().mockResolvedValue({ password: 'unused-modal-password', isDefaultPasswordSecret: false });
     openBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openPasswordLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openEnableBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
@@ -270,7 +270,7 @@ describe('useAuth state machine branches', () => {
     }
 
     async function createWallet() {
-      openSetPasswordModalMock.mockResolvedValue('old-password');
+      openSetPasswordModalMock.mockResolvedValue({ password: 'old-password', isDefaultPasswordSecret: false });
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
       await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
@@ -1385,7 +1385,7 @@ describe('useAuth state machine branches', () => {
 
     // The popup dies after the new mnemonic is saved but before its key reaches the session.
     async function leaveStaleSessionKey() {
-      openSetPasswordModalMock.mockResolvedValue('old-password');
+      openSetPasswordModalMock.mockResolvedValue({ password: 'old-password', isDefaultPasswordSecret: false });
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
       await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
