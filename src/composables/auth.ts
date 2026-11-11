@@ -93,6 +93,9 @@ export const useAuth = createCustomScopedComposable(() => {
   let isSessionExpired = false;
   let isManualMobileLockActive = false;
   let isUnreadableWalletModalOpen = false;
+  let biometricPromptsOpen = 0;
+  /** The lock screen prompts by itself once each time the app is shown. */
+  let canLockScreenAutoPrompt = true;
   let sessionExpiresAt: number | null = null;
   let expirationTimeout: NodeJS.Timeout;
 
@@ -647,29 +650,44 @@ export const useAuth = createCustomScopedComposable(() => {
     force = false,
     { setAuthenticated = true }: { setAuthenticated?: boolean } = {},
   ): Promise<boolean> {
-    if (
-      (
-        !isAuthenticated.value
-        || force
-      )
-      && (isBiometricLoginEnabled.value || force)
-      && await canAuthenticateWithDevice()
-    ) {
-      return BiometricAuth.authenticate({
-        reason: t('biometricAuth.reason'),
-        cancelTitle: t('common.cancel'),
-        allowDeviceCredential: true,
-        iosFallbackTitle: t('biometricAuth.fallbackTitle'),
-        androidTitle: t('biometricAuth.title'),
-        androidSubtitle: t('biometricAuth.subtitle'),
-        androidConfirmationRequired: false,
-      }).then(() => {
+    biometricPromptsOpen += 1;
+    try {
+      if (
+        (
+          !isAuthenticated.value
+          || force
+        )
+        && (isBiometricLoginEnabled.value || force)
+        && await canAuthenticateWithDevice()
+      ) {
+        await BiometricAuth.authenticate({
+          reason: t('biometricAuth.reason'),
+          cancelTitle: t('common.cancel'),
+          allowDeviceCredential: true,
+          iosFallbackTitle: t('biometricAuth.fallbackTitle'),
+          androidTitle: t('biometricAuth.title'),
+          androidSubtitle: t('biometricAuth.subtitle'),
+          androidConfirmationRequired: false,
+        });
         if (setAuthenticated) {
           markAuthenticated();
         }
-        return true;
-      });
+      }
+      return true;
+    } finally {
+      biometricPromptsOpen -= 1;
     }
+  }
+
+  /**
+   * The lock screen prompts without a tap once each time the app is shown, only while it is
+   * shown and no other prompt is open. A `true` uses up that turn.
+   */
+  function claimLockScreenAutoPrompt() {
+    if (!isAppActive.value || biometricPromptsOpen || !canLockScreenAutoPrompt) {
+      return false;
+    }
+    canLockScreenAutoPrompt = false;
     return true;
   }
 
@@ -735,6 +753,7 @@ export const useAuth = createCustomScopedComposable(() => {
             await openBiometricLoginModal({
               force: isManualMobileLockActive,
               deferAuthStateUpdate: true,
+              isLockScreen: true,
             });
             isManualMobileLockActive = false;
           } catch {
@@ -906,9 +925,16 @@ export const useAuth = createCustomScopedComposable(() => {
     }
   }
 
-  async function lockWallet() {
+  /**
+   * @param options.isUserInitiated The user locked it, so the lock screen waits until the app
+   * is shown again before prompting, or Face ID would unlock it right away.
+   */
+  async function lockWallet({ isUserInitiated = false }: { isUserInitiated?: boolean } = {}) {
     if (IS_MOBILE_APP) {
       isManualMobileLockActive = true;
+    }
+    if (isUserInitiated) {
+      canLockScreenAutoPrompt = false;
     }
     logout();
     await checkUserAuth();
@@ -1039,6 +1065,8 @@ export const useAuth = createCustomScopedComposable(() => {
           }
         }
       } else if (wasActive && !isActive) {
+        // A prompt can hide the app itself (Android's passcode screen), so then it waits for a tap.
+        canLockScreenAutoPrompt = !biometricPromptsOpen;
         // Once no page is shown, the background times the session out with the current timeout.
         sessionRelease();
         if (!isAutoLockEnabled.value) {
@@ -1081,6 +1109,7 @@ export const useAuth = createCustomScopedComposable(() => {
     canAuthenticateWithDevice,
     checkBiometricLoginAvailability,
     checkUserAuth,
+    claimLockScreenAutoPrompt,
     getEncryptionKey,
     isEncryptionKeyCurrent,
     lockWallet,

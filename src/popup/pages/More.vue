@@ -101,7 +101,7 @@
         v-if="isLockWalletVisible"
         :title="$t('pages.secureLogin.lockWallet')"
         data-cy="lock-wallet"
-        @click="lockWallet()"
+        @click="lockWallet({ isUserInitiated: true })"
       >
         <template #icon>
           <SecureIcon />
