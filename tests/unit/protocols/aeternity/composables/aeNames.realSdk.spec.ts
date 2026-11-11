@@ -89,6 +89,7 @@ async function createContext({
   preclaimedNames = {},
   ownedNames = [],
   getTransactionByHash = undefined,
+  beforePreclaimWrite = undefined,
 } = {}) {
   vi.resetModules();
   localStorage.clear();
@@ -108,11 +109,27 @@ async function createContext({
   };
   const openDefaultModal = vi.fn();
 
-  vi.doMock('@/utils', async () => ({
-    ...(await vi.importActual('@/utils')),
-    decryptedComputed: (_key, encryptedState) => encryptedState,
-    fetchAllPages: vi.fn().mockResolvedValue([]),
-  }));
+  vi.doMock('@/utils', async () => {
+    const actual = await vi.importActual('@/utils');
+    const { readVault, refreshVault, writeVaultField } = await vi.importActual('@/lib/WalletVault');
+    const { STORAGE_KEYS } = await vi.importActual('@/constants');
+    return {
+      ...actual,
+      decryptedComputed: (_key, encryptedState) => Object.assign(encryptedState, {
+        async update(transform) {
+          await beforePreclaimWrite?.();
+          await refreshVault();
+          const snapshot = readVault();
+          await writeVaultField(
+            STORAGE_KEYS.preclaimedNames,
+            transform(snapshot.values[STORAGE_KEYS.preclaimedNames] || '{}'),
+            snapshot,
+          );
+        },
+      }),
+      fetchAllPages: vi.fn().mockResolvedValue([]),
+    };
+  });
   vi.doMock('@/composables/accounts', () => ({
     useAccounts: () => ({
       aeAccounts: ref([{ address: activeAccount.address }, { address: otherAccount.address }]),
@@ -180,6 +197,8 @@ async function createContext({
 
   const aeNamesModule = await import('@/protocols/aeternity/composables/aeNames');
   const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+  const { ensureVaultReady } = await import('@/lib/WalletVault');
+  await ensureVaultReady();
   await new Promise((resolve) => { setTimeout(resolve, 0); });
 
   return {
@@ -198,6 +217,41 @@ async function createContext({
 describe('useAeNames with the real SDK', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('reports preclaim success only after its asynchronous salt write resolves', async () => {
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const beforePreclaimWrite = vi.fn(() => gate);
+    const ctx = await createContext({ beforePreclaimWrite });
+    let settled = false;
+    const queued = ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)
+      .then((result) => { settled = true; return result; });
+    await vi.waitFor(() => expect(beforePreclaimWrite).toHaveBeenCalled());
+    try {
+      expect(settled).toBe(false);
+      expect(ctx.getStoredEntry()).toBeUndefined();
+    } finally {
+      release();
+    }
+    expect(await queued).toBe(true);
+    await vi.waitFor(() => expect(ctx.getStoredEntry()?.salt).toBeTypeOf('number'));
+  });
+
+  it('reports a failed salt write and keeps the unsaved preclaim in memory', async () => {
+    const ctx = await createContext({
+      beforePreclaimWrite: vi.fn().mockRejectedValue(new Error('Vault storage full')),
+    });
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+    expect(ctx.aeNames.preclaimedNames.value[NETWORK_ID][NAME]).toMatchObject({
+      address: otherAccount.address,
+      salt: expect.any(Number),
+      status: 'preclaim-submitted',
+    });
+    expect(ctx.getStoredEntry()).toBeUndefined();
+    expect(ctx.openDefaultModal).toHaveBeenCalled();
   });
 
   it('preclaims for the chosen account and stores the salt before the preclaim is mined', async () => {

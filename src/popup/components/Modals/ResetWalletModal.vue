@@ -37,6 +37,12 @@
           <strong v-text="$t('pages.resetWallet.warningConfirm')" />
         </p>
       </div>
+      <p
+        v-if="isResetFailed"
+        class="reset-failed"
+        role="alert"
+        v-text="$t('pages.resetWallet.failed')"
+      />
     </div>
 
     <template #footer>
@@ -49,6 +55,7 @@
         variant="danger"
         :text="$t('pages.resetWallet.reset')"
         wide
+        data-cy="btn-reset-wallet"
         @click="onReset"
       />
     </template>
@@ -56,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import {
@@ -103,8 +110,19 @@ export default defineComponent({
     const { disconnectDapps } = useAeSdk();
     const { resetPermissions } = usePermissions();
     const { closeAllModals } = useModals();
+    // Shown here: this dialog covers other modals.
+    const isResetFailed = ref(false);
 
     async function onReset() {
+      isResetFailed.value = false;
+      try {
+        // First: if this durable reset fails, nothing is deleted.
+        await WalletStorage.clear();
+      } catch (error) {
+        handleUnknownError(error);
+        isResetFailed.value = true;
+        return;
+      }
       resetAccounts();
       resetNetworks();
       resetUiSettings();
@@ -112,7 +130,6 @@ export default defineComponent({
       resetPermissions();
       closeAllModals();
 
-      WalletStorage.clear();
       if (IS_MOBILE_APP) {
         await SecureMobileStorage.clear().catch(handleUnknownError);
         // The native clear stops at the first failed delete. Leftover ciphertext under a new
@@ -141,6 +158,7 @@ export default defineComponent({
 
     return {
       ResetWalletIcon,
+      isResetFailed,
       onReset,
     };
   },
@@ -160,6 +178,10 @@ export default defineComponent({
 
   .subtitle {
     margin-bottom: 20px;
+  }
+
+  .reset-failed {
+    color: $color-danger;
   }
 }
 </style>

@@ -31,7 +31,7 @@
 
     <template #footer>
       <BtnMain
-        :disabled="!privateKey || !!error"
+        :disabled="!privateKey || !!error || isImporting"
         :text="$t('modals.privateKeyImport.btnText')"
         data-cy="btn-import"
         @click="importPrivateKey()"
@@ -74,17 +74,27 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { accounts, addPrivateKeyAccount, setActiveAccountByGlobalIdx } = useAccounts();
-    const { openModal } = useModals();
+    const { openModal, openDefaultModal } = useModals();
 
     const privateKey = ref('');
     const error = ref('');
+    const isImporting = ref(false);
 
     function getProtocolName(protocol: Protocol) {
       return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
 
-    async function importPrivateKey() {
+    function isImported(secretKey: Uint8Array) {
+      return accounts.value.some((item) => (
+        item.secretKey
+        && Buffer.from(item.secretKey).toString('hex') === Buffer.from(secretKey).toString('hex')
+        && item.protocol === props.protocol
+      ));
+    }
+
+    async function storePrivateKey() {
       const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      let secretKey: Uint8Array | undefined;
       try {
         const account = adapter.resolveAccountRaw(
           {
@@ -101,16 +111,11 @@ export default defineComponent({
           throw new Error(`Fail to resolve account with private key: ${privateKey.value}`);
         }
 
-        if (
-          accounts.value.find(({ protocol, secretKey }) => (
-            secretKey
-            && Buffer.from(secretKey).toString('hex') === Buffer.from(account.secretKey).toString('hex')
-            && protocol === props.protocol
-          ))
-        ) {
+        if (isImported(account.secretKey)) {
           error.value = t('modals.privateKeyImport.privateKeyExist');
           return;
         }
+        secretKey = account.secretKey;
       } catch (e) {
         error.value = t('modals.privateKeyImport.invalidPrivateKey', {
           protocol: getProtocolName(props.protocol),
@@ -129,8 +134,26 @@ export default defineComponent({
       } catch (e) {
         // The user is offered to remove them instead.
         if (!(e instanceof ImportedAccountsUnreadableError)) {
+          openDefaultModal({
+            icon: 'critical',
+            // Kept in memory when only the device storage failed (mobile).
+            msg: secretKey && isImported(secretKey)
+              ? t('modals.privateKeyImport.saveFailedUntilClosed')
+              : t('modals.privateKeyImport.saveFailed'),
+          });
           throw e;
         }
+      }
+    }
+
+    /** One at a time: a second submit meanwhile would import it again. */
+    async function importPrivateKey() {
+      if (isImporting.value) return;
+      isImporting.value = true;
+      try {
+        await storePrivateKey();
+      } finally {
+        isImporting.value = false;
       }
     }
 
@@ -148,6 +171,7 @@ export default defineComponent({
 
     return {
       error,
+      isImporting,
       privateKey,
       getProtocolName,
       importPrivateKey,

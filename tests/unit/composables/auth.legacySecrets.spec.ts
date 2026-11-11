@@ -173,40 +173,54 @@ describe('useAuth: plaintext seed left by older versions', () => {
     expect(store).toEqual(entries);
   });
 
-  it('removes nothing when the stored copy no longer opens with the password', async () => {
+  it('removes nothing when the stored copy no longer opens with the unlocking key', async () => {
     const entries = { state: VUEX_STATE, ...EARLY_ENTRIES };
     const store = installExtensionStorage(entries);
     await storeEncryptedMnemonic();
     const auth = await boot();
-    // Another window changed the password; this one still holds the copy it read at boot.
-    const { WalletStorage } = await import('@/lib/WalletStorage');
-    const { STORAGE_KEYS } = await import('@/constants');
-    const { encrypt, generateEncryptionKey, generateSalt } = await import('@/utils/crypto');
-    const otherKey = await generateEncryptionKey('N3w-Pa55-w0rd!', generateSalt());
-    WalletStorage.set(STORAGE_KEYS.mnemonic, await encrypt(otherKey, MNEMONIC));
-    const decrypt = vi.spyOn(globalThis.crypto.subtle, 'decrypt');
+    const { get } = globalThis.browser.storage.local;
+    let releaseRead;
+    globalThis.browser.storage.local.get = vi.fn(async (...args) => {
+      if (!releaseRead) await new Promise((resolve) => { releaseRead = resolve; });
+      return get(...args);
+    });
 
     expect(await auth.authenticateWithPassword(PASSWORD)).toBe(true);
-    // Trying the stored copy is the only decryption that fails.
-    await vi.waitFor(() => expect(decrypt.mock.settledResults)
-      .toContainEqual(expect.objectContaining({ type: 'rejected' })));
+    await vi.waitFor(() => expect(releaseRead).toBeDefined());
+    // Meanwhile another window resets the wallet and creates a new one.
+    const { clearVault, commitVault, readVault } = await import('@/lib/WalletVault');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const {
+      encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+    } = await import('@/utils/crypto');
+    await clearVault();
+    const salt = generateSalt();
+    const otherKey = await generateEncryptionKey(PASSWORD, salt);
+    const reset = readVault();
+    await commitVault(reset, {
+      ...reset.values,
+      [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
+      [STORAGE_KEYS.mnemonic]: await encrypt(otherKey, OTHER_MNEMONIC),
+    });
+    releaseRead();
     await flushAsync();
+    await new Promise((resolve) => { setTimeout(resolve, 100); });
 
     expect(store).toEqual(entries);
   });
 
-  it('opens the encrypted copy only when an older version left the seed', async () => {
+  it('does not decrypt the seed again for cleanup when no legacy seed remains', async () => {
     installExtensionStorage({ state: NON_SECRET_STATE });
     await storeEncryptedMnemonic();
     const auth = await boot();
-    const getItem = vi.spyOn(Storage.prototype, 'getItem');
+    const decrypt = vi.spyOn(globalThis.crypto.subtle, 'decrypt');
 
     expect(await auth.authenticateWithPassword(PASSWORD)).toBe(true);
     await vi.waitFor(() => expect(globalThis.browser.storage.local.get)
       .toHaveBeenCalledWith(['state', 'mnemonic', 'userAccount']));
     await flushAsync();
 
-    expect(getItem.mock.calls.filter(([key]) => key.endsWith('_mnemonic'))).toEqual([]);
+    expect(decrypt).toHaveBeenCalledTimes(1);
   });
 
   it('removes the seed of a wallet that only the Vuex state has, once its password is set', async () => {

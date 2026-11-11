@@ -81,6 +81,8 @@ jobs:
           key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package-lock.json') }}
       - name: Install app dependencies
         run: npm ci
+      # Independent renderers over real IndexedDB, which fake-indexeddb can't stand in for
+      - run: npm run test:vault:browser
       - run: npm run test:e2e:extension
   webkit:
     runs-on: ubuntu-latest

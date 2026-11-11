@@ -182,7 +182,6 @@ import type { ComponentRef } from '@/types';
 import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
 import { useAuth, useModals, useUi } from '@/composables';
 import {
-  clearDefaultPasswordSecret,
   getDefaultPasswordSecret,
   getOrCreateDefaultPasswordSecret,
 } from '@/composables/defaultPassword';
@@ -283,7 +282,6 @@ export default defineComponent({
           }
 
           isUsingDefaultPassword.value = false;
-          await clearDefaultPasswordSecret();
           return;
         }
 

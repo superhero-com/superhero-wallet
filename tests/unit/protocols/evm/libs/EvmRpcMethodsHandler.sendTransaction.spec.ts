@@ -40,6 +40,7 @@ vi.mock('@/composables/auth', () => ({
     isAuthenticated: ref(true),
     isMnemonicUnreadable: ref(false),
     encryptionKey: ref(undefined),
+    isEncryptionKeyCurrent: () => true,
   }),
 }));
 vi.mock('@/composables/modals', async (importOriginal) => {

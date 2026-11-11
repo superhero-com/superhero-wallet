@@ -176,6 +176,7 @@ let ownedNamesFetchGeneration = 0;
 let ownedNamesPublishedGeneration = 0;
 let ownedNamesFetchesInFlight = 0;
 let preclaimedNamesEncryptionInitialized = false;
+let flushPreclaimedNamesWrites: () => Promise<void> = () => Promise.resolve();
 
 /**
  * In-memory cache + in-flight dedup for `updateExternalName` lookups.
@@ -318,26 +319,86 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
 
   if (!preclaimedNamesEncryptionInitialized) {
     preclaimedNamesEncryptionInitialized = true;
-    const { encryptionKey } = useAuth();
-    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}');
+    const { encryptionKey, isEncryptionKeyCurrent } = useAuth();
+    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}', {
+      isKeyCurrent: isEncryptionKeyCurrent,
+    });
+    type Registry = typeof preclaimedNames.value;
+    type Change = { networkId: NetworkId; name: AensName; value: IPreclaimedName | null };
+    let baseline: Registry = {};
+    let applyingStoredNames = false;
+    let queue = Promise.resolve();
+    let latestWrite = queue;
+    // Keep unsaved salts visible even if a different pending write completes first.
+    const pending = new Map<string, Change>();
+    const changeKey = ({ networkId, name }: Change) => `${networkId}/${name}`;
+    const copy = (value: Registry): Registry => JSON.parse(JSON.stringify(value));
+    const applyChanges = (registry: Registry, changes: Change[]) => {
+      const updated = copy(registry);
+      changes.forEach(({ networkId, name, value }) => {
+        if (value) {
+          updated[networkId] ??= {};
+          updated[networkId][name] = value;
+        } else {
+          delete updated[networkId]?.[name];
+          if (isEmpty(updated[networkId])) delete updated[networkId];
+        }
+      });
+      return updated;
+    };
+    flushPreclaimedNamesWrites = () => latestWrite;
 
     watch(decryptedStr, (str) => {
       try {
-        const parsed = JSON.parse(str || '{}');
+        let parsed: Registry = JSON.parse(str || '{}');
+        pending.forEach((change, key) => {
+          if (isEqual(parsed[change.networkId]?.[change.name] ?? null, change.value)) {
+            pending.delete(key);
+          }
+        });
+        parsed = applyChanges(parsed, [...pending.values()]);
+        baseline = copy(parsed);
         if (!isEqual(parsed, preclaimedNames.value)) {
+          applyingStoredNames = true;
           preclaimedNames.value = parsed;
         }
       } catch {
-        preclaimedNames.value = {};
+        // A failed read must not discard the salt of an outstanding local preclaim.
+        baseline = applyChanges({}, [...pending.values()]);
+        applyingStoredNames = true;
+        preclaimedNames.value = baseline;
+      } finally {
+        applyingStoredNames = false;
       }
-    }, { immediate: true });
+    }, { immediate: true, flush: 'sync' });
 
     watch(preclaimedNames, (val) => {
-      const str = JSON.stringify(val);
-      if (decryptedStr.value !== str) {
-        decryptedStr.value = str;
-      }
-    }, { deep: true });
+      if (applyingStoredNames) return;
+      const next = copy(val);
+      const changes: Change[] = [];
+      new Set([...Object.keys(baseline), ...Object.keys(next)]).forEach((networkId) => {
+        const previousNames = baseline[networkId] || {};
+        const nextNames = next[networkId] || {};
+        new Set([...Object.keys(previousNames), ...Object.keys(nextNames)]).forEach((name) => {
+          if (!isEqual(previousNames[name as AensName], nextNames[name as AensName])) {
+            changes.push({
+              networkId,
+              name: name as AensName,
+              value: nextNames[name as AensName] ?? null,
+            });
+          }
+        });
+      });
+      baseline = next;
+      if (!changes.length) return;
+      changes.forEach((change) => pending.set(changeKey(change), change));
+      latestWrite = queue.then(async () => {
+        await decryptedStr.update((plaintext) => JSON.stringify(
+          applyChanges(JSON.parse(plaintext || '{}'), changes),
+        ));
+      });
+      queue = latestWrite.catch(handleUnknownError);
+    }, { deep: true, flush: 'sync' });
   }
 
   function ensureExternalNameRegistryExists() {
@@ -1129,6 +1190,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
         status: NAME_CLAIM_STATUS.preclaimSubmitted,
         preclaimTxHash: hash,
       });
+      // The salt cannot be recovered from the mnemonic. Success requires its write.
+      await flushPreclaimedNamesWrites();
       return true;
     } catch (error: any) {
       openClaimErrorModal(error);

@@ -15,7 +15,9 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
   }
 
   async function encryptMnemonicWith(key) {
-    auth.mnemonic.value = await crypto.encrypt(key, MNEMONIC);
+    const { STORAGE_KEYS } = await import('@/constants');
+    const { writeVaultField } = await import('@/lib/WalletVault');
+    await writeVaultField(STORAGE_KEYS.mnemonic, await crypto.encrypt(key, MNEMONIC));
   }
 
   beforeEach(async () => {
@@ -38,6 +40,7 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     crypto = await import('@/utils/crypto');
     const { useAuth } = await import('@/composables/auth');
     auth = useAuth();
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
   });
 
   afterEach(() => {
@@ -71,9 +74,12 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     const { key, exported } = await createSessionKey();
     await encryptMnemonicWith(key);
     vi.useFakeTimers();
+    const now = vi.spyOn(performance, 'now').mockReturnValue(0);
 
-    auth.syncBackgroundEncryptionKey(); // offscreen boot, nobody logged in yet
+    const initialSync = auth.syncBackgroundEncryptionKey(); // nobody logged in yet
+    now.mockReturnValue(30001);
     await vi.advanceTimersByTimeAsync(30000); // `CHECK_FOR_SESSION_KEY_TIMEOUT`
+    await initialSync;
     getSessionEncryptionKeyOffscreenMock.mockClear();
     await vi.advanceTimersByTimeAsync(60000);
     expect(getSessionEncryptionKeyOffscreenMock).not.toHaveBeenCalled();
@@ -159,10 +165,18 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
 
     // Password change: the new mnemonic arrives while this attempt decrypts with the old key.
     const second = await createSessionKey();
+    const { readVault, commitVault } = await import('@/lib/WalletVault');
+    const rotatedTimeout = await crypto.encrypt(second.key, '600000');
+    const rotatedMnemonic = await crypto.encrypt(second.key, MNEMONIC);
     const { subtle } = globalThis.crypto;
     const decryptOriginal = subtle.decrypt.bind(subtle);
     vi.spyOn(subtle, 'decrypt').mockImplementationOnce(async (...args) => {
-      await encryptMnemonicWith(second.key);
+      const snapshot = readVault();
+      await commitVault(snapshot, {
+        ...snapshot.values,
+        [STORAGE_KEYS.mnemonic]: rotatedMnemonic,
+        [STORAGE_KEYS.secureLoginTimeout]: rotatedTimeout,
+      });
       return decryptOriginal(...args);
     });
     await auth.syncBackgroundEncryptionKey();
@@ -170,7 +184,8 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     // A new object of the old key would re-encrypt the secrets under the old password.
     expect(auth.encryptionKey.value).toBe(firstKey);
     await new Promise((resolve) => { setTimeout(resolve, 50); });
-    expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBe(storedTimeout);
+    expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBe(rotatedTimeout);
+    expect(rotatedTimeout).not.toBe(storedTimeout);
 
     // The new key arrives: the real rotation.
     getSessionEncryptionKeyOffscreenMock.mockResolvedValue(second.exported);

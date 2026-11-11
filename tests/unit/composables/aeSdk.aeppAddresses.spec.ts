@@ -84,6 +84,7 @@ describe('useAeSdk, an aepp asking for addresses', () => {
         isAuthenticated: ref(true),
         isMnemonicUnreadable: ref(false),
         encryptionKey,
+        isEncryptionKeyCurrent: () => true,
       }),
     }));
   });

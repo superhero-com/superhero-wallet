@@ -51,6 +51,7 @@
       <PanelItem
         :to="{ name: 'settings-reset-wallet' }"
         :title="$t('pages.titles.resetWallet')"
+        data-cy="reset-wallet-settings"
       />
     </div>
   </PageWrapper>

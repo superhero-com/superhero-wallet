@@ -2,6 +2,13 @@ import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { encodeBase64 } from '@/utils/crypto';
+import {
+  ensureVaultReady,
+  readVault,
+  refreshVault,
+  writeVaultField,
+  VaultConflictError,
+} from '@/lib/WalletVault';
 
 /**
  * Legacy hardcoded "skip password" sentinel, kept only as a
@@ -32,6 +39,10 @@ export function generateDefaultPasswordSecret(): string {
  * has never entered default-password mode on this install.
  */
 export async function getDefaultPasswordSecret(): Promise<string | null> {
+  if (!IS_MOBILE_APP) {
+    await ensureVaultReady();
+    await refreshVault();
+  }
   const value = await storage.get<string | null>(STORAGE_KEYS.defaultPasswordSecret);
   return (typeof value === 'string' && value.length > 0) ? value : null;
 }
@@ -53,6 +64,25 @@ let pendingCreate: Promise<string> | null = null;
 export async function getOrCreateDefaultPasswordSecret(): Promise<string> {
   if (!pendingCreate) {
     pendingCreate = (async () => {
+      if (!IS_MOBILE_APP) {
+        await ensureVaultReady();
+        for (let attempt = 0; attempt < 10; attempt += 1) {
+          // eslint-disable-next-line no-await-in-loop
+          await refreshVault();
+          const snapshot = readVault();
+          const existing = snapshot.values[STORAGE_KEYS.defaultPasswordSecret];
+          if (existing) return existing;
+          const secret = generateDefaultPasswordSecret();
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            await writeVaultField(STORAGE_KEYS.defaultPasswordSecret, secret, snapshot);
+            return secret;
+          } catch (error) {
+            if (!(error instanceof VaultConflictError)) throw error;
+          }
+        }
+        throw new VaultConflictError();
+      }
       const existing = await getDefaultPasswordSecret();
       if (existing) {
         return existing;
@@ -65,13 +95,4 @@ export async function getOrCreateDefaultPasswordSecret(): Promise<string> {
     });
   }
   return pendingCreate;
-}
-
-/**
- * Removes the stored default-password secret. Called when the user opts
- * back into password protection, so the secret is not left lying around
- * after it stops being in use.
- */
-export async function clearDefaultPasswordSecret(): Promise<void> {
-  await storage.remove(STORAGE_KEYS.defaultPasswordSecret);
 }

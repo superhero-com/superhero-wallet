@@ -243,6 +243,8 @@
       "placeholder": "Enter or paste your private key here",
       "invalidPrivateKey": "This is not a valid {protocol} account private key.",
       "privateKeyExist": "This account is already in your wallet.",
+      "saveFailed": "The account couldn't be saved. Please try again.",
+      "saveFailedUntilClosed": "The account couldn't be saved on this device. It stays available until you close the wallet. Import it again after reopening it.",
       "helpTitle": "Account private key",
       "helpMsg": "An account imported into your wallet with private key cannot be restored with your seed phrase but with this private key only. Make sure you back up such accounts storing securely their private keys. <p> Never share your private key with anyone else as it provides full control over your account and funds! </p>",
       "btnText": "Import Account"
@@ -1423,7 +1425,8 @@
       "warning-3": "Make sure you backup your seed phrase and address book records before proceeding.",
       "warning-4": "This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
-      "reset": "Reset"
+      "reset": "Reset",
+      "failed": "The wallet couldn't be reset. Nothing was deleted. Please try again."
     },
     "appsBrowser": {
       "popularApps": "Featured",

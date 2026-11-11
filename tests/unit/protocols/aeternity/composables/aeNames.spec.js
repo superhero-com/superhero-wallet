@@ -102,9 +102,21 @@ const createTestContext = async ({
 
   vi.doMock('@/utils', async () => {
     const actual = await vi.importActual('@/utils');
+    const { readVault, refreshVault, writeVaultField } = await vi.importActual('@/lib/WalletVault');
+    const { STORAGE_KEYS } = await vi.importActual('@/constants');
     return {
       ...actual,
-      decryptedComputed: (_key, encryptedState) => encryptedState,
+      decryptedComputed: (_key, encryptedState) => Object.assign(encryptedState, {
+        async update(transform) {
+          await refreshVault();
+          const snapshot = readVault();
+          await writeVaultField(
+            STORAGE_KEYS.preclaimedNames,
+            transform(snapshot.values[STORAGE_KEYS.preclaimedNames] || '{}'),
+            snapshot,
+          );
+        },
+      }),
       fetchAllPages,
       fetchJson,
     };
@@ -226,6 +238,8 @@ const createTestContext = async ({
   const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
 
   // Let every storageRef finish restoring from localStorage before the test drives it.
+  const { ensureVaultReady } = await import('@/lib/WalletVault');
+  await ensureVaultReady();
   await new Promise((resolve) => { setTimeout(resolve, 0); });
 
   return {
