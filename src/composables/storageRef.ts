@@ -88,6 +88,12 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
     }
   }
 
+  /** Not decoded again: a new object, e.g. of the salt, would look like a change to watchers. */
+  function isStateStoredAs(value: TSerialized | null) {
+    if (value === null) return state.value === initialState;
+    return !!state.value && serializer.write(state.value) === value;
+  }
+
   function writeLogEntry(message: string, error: unknown) {
     const { message: reason, stack } = (error instanceof Error)
       ? error
@@ -236,15 +242,18 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
      */
     if (vaultBacked) {
       subscribeVault((snapshot) => {
-        const value = snapshot.values[storageKey as keyof typeof snapshot.values];
-        applyVaultValue(value as TSerialized | null);
+        const value = snapshot.values[storageKey as keyof typeof snapshot.values] as
+          TSerialized | null;
+        if (isStateStoredAs(value)) return;
+        applyVaultValue(value);
         if (backgroundSync) onBackgroundSync?.(state.value);
       });
       // Catches up with commits made during the restore, keeping a migrated value not stored.
       // Already cached: any later one, also of another window, reaches the listener.
       if (!isRestoreFailed && !isMigrationWriteFailed) {
         try {
-          applyVaultValue(WalletStorage.get<TSerialized>(storageKey));
+          const value = WalletStorage.get<TSerialized>(storageKey);
+          if (!isStateStoredAs(value)) applyVaultValue(value);
         } catch (error) {
           handleUnknownError(error);
           onRestoreFailed?.(error);

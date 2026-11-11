@@ -150,3 +150,51 @@ describe('useStorageRef', () => {
     }));
   });
 });
+
+describe('useStorageRef over the vault', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    vi.doUnmock('@/lib/WalletStorage');
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...await importOriginal(),
+      IS_MOBILE_APP: false,
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('@/constants');
+    vi.restoreAllMocks();
+  });
+
+  it('keeps the decoded salt through commits of other fields, so its watchers see no change', async () => {
+    const { watch } = await import('vue');
+    const { STORAGE_KEYS } = await import('@/constants');
+    const vault = await import('@/lib/WalletVault');
+    const { decodeBase64, encodeBase64, generateSalt } = await import('@/utils/crypto');
+    const { useStorageRef } = await import('@/composables/storageRef');
+    const firstSalt = encodeBase64(generateSalt());
+    await vault.writeVaultField(STORAGE_KEYS.encryptionSalt, firstSalt);
+    const salt = await new Promise((resolve) => {
+      const state = useStorageRef(null, STORAGE_KEYS.encryptionSalt, {
+        serializer: {
+          write: (value) => encodeBase64(value),
+          read: (value) => (value ? decodeBase64(value) : null),
+        },
+        onRestored: () => resolve(state),
+      });
+    });
+    const decoded = salt.value;
+    const changes = vi.fn();
+    watch(salt, changes, { flush: 'sync' });
+
+    await vault.writeVaultField(STORAGE_KEYS.secureLoginTimeout, 'another-field');
+    expect(salt.value).toBe(decoded);
+    expect(changes).not.toHaveBeenCalled();
+
+    const secondSalt = encodeBase64(generateSalt());
+    await vault.writeVaultField(STORAGE_KEYS.encryptionSalt, secondSalt);
+    expect(changes).toHaveBeenCalledTimes(1);
+    expect(encodeBase64(salt.value)).toBe(secondSalt);
+  });
+});

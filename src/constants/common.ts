@@ -455,6 +455,7 @@ export const SESSION_METHODS = {
   setSessionTimeout: 'setSessionTimeout',
   getSessionEncryptionKey: 'getSessionEncryptionKey',
   sessionKeyStored: 'sessionKeyStored',
+  mutateSessionKey: 'mutateSessionKey',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';

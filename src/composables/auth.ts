@@ -48,8 +48,10 @@ import {
   getOrCreateMobileEncryptionKey,
   getSessionEncryptionKey,
   handleUnknownError,
+  isSameEncryptionKey,
   MobileEncryptionKeyMissingError,
   sessionEnd,
+  sessionEndIfHolding,
   sessionHold,
   sessionRelease,
   sessionStart,
@@ -119,6 +121,9 @@ export const useAuth = createCustomScopedComposable(() => {
   const encryptionKey = ref<CryptoKey>();
   /** The salt of `encryptionKey`: the stored one may already be another window's. */
   let encryptionKeySalt: string | null = null;
+  /** Changes with each login, lock or key change here, so a slower attempt can't publish. */
+  let authEpoch = 0;
+  watch(encryptionKey, () => { authEpoch += 1; }, { flush: 'sync' });
 
   /**
    * Depending on environment and app version this value
@@ -313,6 +318,7 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   async function logout() {
+    authEpoch += 1;
     setEncryptionKey(undefined);
     mnemonicDecrypted.value = '';
     isAuthenticated.value = false;
@@ -539,47 +545,91 @@ export const useAuth = createCustomScopedComposable(() => {
     markAuthenticated();
   }
 
-  async function restoreEncryptionKeyFromBackground(): Promise<boolean> {
+  /** `null`: the vault changed meanwhile, so nothing was published. */
+  async function attemptSessionKeyRestore({
+    isSessionConfirmed = false,
+    setAuthenticated = false,
+  }: { isSessionConfirmed?: boolean; setAuthenticated?: boolean }): Promise<boolean | null> {
+    const epoch = authEpoch;
+    await ensureVaultReady();
+    await refreshVault();
+    const vault = readVault();
+    const salt = vault.values[STORAGE_KEYS.encryptionSalt];
+    const ciphertext = vault.values[STORAGE_KEYS.mnemonic];
+    const currentKey = encryptionKey.value;
+    const sessionEncryptionKey = await getSessionEncryptionKey();
+    if (!sessionEncryptionKey || !ciphertext || validateMnemonic(ciphertext, wordlist)) {
+      return false;
+    }
+    async function isVaultUnchanged() {
+      await refreshVault();
+      const { values } = readVault();
+      return values[STORAGE_KEYS.encryptionSalt] === salt
+        && values[STORAGE_KEYS.mnemonic] === ciphertext;
+    }
+    let plaintext: string;
     try {
-      await ensureVaultReady();
-      await refreshVault();
-      const sessionEncryptionKey = await getSessionEncryptionKey();
-      // A password change can replace both storage and local refs during decrypt.
-      const previousVault = readVault();
-      const currentKey = encryptionKey.value;
-      const salt = encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null;
-      const ciphertext = mnemonicEncrypted.value;
-      if (!sessionEncryptionKey || !ciphertext) {
-        return false;
+      plaintext = await decrypt(sessionEncryptionKey, ciphertext);
+    } catch (error) {
+      // Read before another window's commit, e.g. a password change: tried again with it.
+      if (!await isVaultUnchanged()) return null;
+      // E.g. a password change cut off before the session write: only that outdated key goes.
+      if (isSessionConfirmed && authEpoch === epoch) {
+        await sessionEndIfHolding(sessionEncryptionKey).catch(handleUnknownError);
       }
-      const plaintext = await decrypt(sessionEncryptionKey, ciphertext);
-      // Keep our object for the same key: `decryptedComputed` takes a new one for a rotation.
-      const isKeyUnchanged = !!currentKey && await decrypt(
-        currentKey,
-        ciphertext,
-      ).then(() => true, () => false);
-      await refreshVault();
-      const currentVault = readVault();
-      if (
-        encryptionKey.value !== currentKey
-        || mnemonicEncrypted.value !== ciphertext
-        || (encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null) !== salt
-        || currentVault.values[STORAGE_KEYS.encryptionSalt]
-          !== previousVault.values[STORAGE_KEYS.encryptionSalt]
-        || currentVault.values[STORAGE_KEYS.mnemonic]
-          !== previousVault.values[STORAGE_KEYS.mnemonic]
-      ) {
-        // A later storage/session notification retries. Never replace a current
-        // key object with the stale key whose decryption just finished.
+      throw error;
+    }
+    // Keep our object for the same key: `decryptedComputed` takes a new one for a rotation.
+    const isKeyUnchanged = !!currentKey && await decrypt(
+      currentKey,
+      ciphertext,
+    ).then(() => true, () => false);
+    // Nothing is published once the vault, or a lock or login here, overtook it.
+    if (!await isVaultUnchanged()) return null;
+    if (authEpoch !== epoch) return !!encryptionKey.value;
+    if (isSessionConfirmed) {
+      const storedKey = await getSessionEncryptionKey();
+      if (!storedKey || !await isSameEncryptionKey(storedKey, sessionEncryptionKey)) {
         return !!encryptionKey.value;
       }
-      if (!isKeyUnchanged) {
-        setEncryptionKey(sessionEncryptionKey, { isFromSession: true, salt });
-      } else {
-        encryptionKeySalt = salt;
+      if (!await isVaultUnchanged()) return null;
+      if (authEpoch !== epoch) return !!encryptionKey.value;
+    }
+    if (!isKeyUnchanged) {
+      // The salt read with the ciphertext, not one a storage event brought meanwhile.
+      setEncryptionKey(sessionEncryptionKey, { isFromSession: true, salt });
+    } else {
+      encryptionKeySalt = salt;
+    }
+    mnemonicDecrypted.value = plaintext;
+    if (setAuthenticated) markAuthenticated();
+    return true;
+  }
+
+  /**
+   * Publishes the session key once it opens the stored mnemonic, unless a password change,
+   * reset, lock or login overtook it. Never ends a session another window stored meanwhile.
+   * @param options.isSessionConfirmed Re-reads the session first: a page stores the key it
+   * publishes, which mustn't restore a session another window ended (a lock).
+   * @returns Whether this window has a key afterwards.
+   */
+  async function restoreSessionKey(
+    options: { isSessionConfirmed?: boolean; setAuthenticated?: boolean } = {},
+  ): Promise<boolean> {
+    for (let attempt = 1; ; attempt += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const result = await attemptSessionKeyRestore(options);
+      if (result !== null) return result;
+      // Overtaken by a commit, maybe the awaited one: try again unless the key here is current.
+      if ((encryptionKey.value && isEncryptionKeyCurrent()) || attempt >= 3) {
+        return !!encryptionKey.value;
       }
-      mnemonicDecrypted.value = plaintext;
-      return true;
+    }
+  }
+
+  async function restoreEncryptionKeyFromBackground(): Promise<boolean> {
+    try {
+      return await restoreSessionKey();
     } catch (error) {
       handleUnknownError(error);
       return false;
@@ -917,18 +967,11 @@ export const useAuth = createCustomScopedComposable(() => {
         if (!encryptionKey.value && !autoLoginDisabledEnv && IS_EXTENSION) {
           setLoaderVisible(true);
           try {
-            const sessionEncryptionKey = await getSessionEncryptionKey();
-            if (sessionEncryptionKey) {
-              // Decrypt first: a key that can't open the mnemonic must not be published.
-              const decryptedMnemonic = await decrypt(sessionEncryptionKey, mnemonic.value);
-              setEncryptionKey(sessionEncryptionKey, { isFromSession: true });
-              mnemonicDecrypted.value = decryptedMnemonic;
-              markAuthenticated();
-            }
+            // A key that can't open the mnemonic isn't published, and the stale one is dropped.
+            await restoreSessionKey({ isSessionConfirmed: true, setAuthenticated: true });
           } catch (error) {
             // Stale key, e.g. a password change cut off before the session write.
             handleUnknownError(error);
-            await sessionEnd().catch(handleUnknownError);
           } finally {
             setLoaderVisible(false);
           }

@@ -10,7 +10,9 @@ import {
   POPUP_METHODS,
   PROTOCOLS,
   EVM_PROTOCOLS,
+  SESSION_METHODS,
 } from '@/constants';
+import { handleSessionKeyMutation } from '@/lib/ExtensionSessionStorage';
 import {
   useWalletConnect,
   useNetworks,
@@ -165,6 +167,11 @@ browser.runtime.onMessage.addListener(
         );
       }
       return undefined;
+    }
+
+    // Firefox uses this page as its background owner. Chrome's worker handles mutations.
+    if (IS_FIREFOX && method === SESSION_METHODS.mutateSessionKey) {
+      return handleSessionKeyMutation(payload);
     }
 
     if (method === POPUP_METHODS.reload) {

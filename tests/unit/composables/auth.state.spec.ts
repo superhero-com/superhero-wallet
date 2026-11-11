@@ -2,6 +2,7 @@
 import { nextTick, watch } from 'vue';
 import { IDBDatabase } from 'fake-indexeddb';
 import en from '@/popup/locales/en-US.json';
+import { installSessionMutationHandler } from '../helpers/extensionSession';
 
 /**
  * Targeted branch coverage for `useAuth`'s state machine, extending
@@ -67,6 +68,7 @@ function installExtensionStubs() {
     disconnect: vi.fn(),
   }));
   globalThis.browser.storage.session = makeSessionStorageStub();
+  installSessionMutationHandler();
   return globalThis.browser.storage.session;
 }
 

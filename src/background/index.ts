@@ -1,4 +1,5 @@
 import type { IBackgroundMessageData } from '@/types';
+import { handleSessionKeyMutation } from '@/lib/ExtensionSessionStorage';
 import {
   openPopup,
   removePopup,
@@ -87,6 +88,9 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
         getSessionEncryptionKey().then((encryptionKey) => {
           sendResponse(encryptionKey);
         });
+        return true;
+      case 'mutateSessionKey':
+        handleSessionKeyMutation(msg.payload).then(sendResponse);
         return true;
       case 'setSessionTimeout':
         sendResponse(setSessionTimeout(msg.payload));

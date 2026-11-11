@@ -138,6 +138,29 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalledTimes(2);
   });
 
+  it('publishes no key when this tab locks while the attempt reads the session', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    let finishRead;
+    getSessionEncryptionKeyOffscreenMock
+      .mockReturnValueOnce(new Promise((resolve) => { finishRead = resolve; }))
+      .mockResolvedValue(exported);
+
+    const schedule = vi.spyOn(globalThis, 'setTimeout');
+    const syncing = auth.syncBackgroundEncryptionKey();
+    await vi.waitFor(() => expect(finishRead).toBeDefined());
+    await auth.logout();
+    finishRead(exported);
+    // The attempt is over once the next one is scheduled, `CHECK_FOR_SESSION_KEY_INTERVAL` later.
+    await vi.waitFor(() => expect(schedule.mock.calls.some(([, ms]) => ms > 1000)).toBe(true));
+
+    expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalledTimes(1);
+    expect(auth.encryptionKey.value).toBeUndefined();
+    expect(auth.mnemonicDecrypted.value).toBe('');
+    auth.syncBackgroundEncryptionKey(); // ends the wait for the next attempt
+    await syncing;
+  });
+
   it('keeps the current encryptionKey object when the same key is synced again', async () => {
     const { key, exported } = await createSessionKey();
     await encryptMnemonicWith(key);

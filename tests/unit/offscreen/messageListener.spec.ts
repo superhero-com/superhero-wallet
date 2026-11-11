@@ -16,7 +16,7 @@ describe('offscreen message listener', () => {
   const getConnectedSiteAccounts = vi.fn();
   const wallet = { init: vi.fn(), disconnect: vi.fn() };
 
-  function mockOffscreenDependencies() {
+  function mockOffscreenDependencies(isFirefox = false) {
     Object.values(ledger).forEach((mock) => mock.mockReset());
     ledger.discoverAccounts.mockResolvedValue(['ledger-account']);
     handleEvmRpcRequest.mockReset().mockResolvedValue({ result: '0x1' });
@@ -29,7 +29,8 @@ describe('offscreen message listener', () => {
     vi.doMock('@/lib/initPolyfills', () => ({}));
     vi.doMock('@/protocols/registerAdapters', () => ({}));
     vi.doMock('@/constants', () => ({
-      IS_FIREFOX: false,
+      IS_FIREFOX: isFirefox,
+      SESSION_METHODS: { mutateSessionKey: 'mutateSessionKey' },
       POPUP_METHODS: {
         reload: 'reload',
         ledgerDeriveAccount: 'ledgerDeriveAccount',
@@ -87,6 +88,7 @@ describe('offscreen message listener', () => {
         id: 'test-extension-id',
         getURL: (path) => `chrome-extension://test-extension-id/${path}`,
         onMessage: { addListener: vi.fn() },
+        onInstalled: { addListener: vi.fn() },
         sendMessage: vi.fn(),
       },
       tabs: {
@@ -136,6 +138,46 @@ describe('offscreen message listener', () => {
 
     expect(wallet.disconnect).toHaveBeenCalled();
     expect(window.location.reload).toHaveBeenCalled();
+  });
+
+  describe('Firefox session mutation owner', () => {
+    const key = Buffer.alloc(32, 3).toString('base64');
+    const message = {
+      target: 'offscreen', method: 'mutateSessionKey', payload: { operation: 'set', key },
+    };
+
+    async function loadFirefoxListener() {
+      mockOffscreenDependencies(true);
+      const stored = {};
+      browser.storage = {
+        session: {
+          set: vi.fn(async (values) => { Object.assign(stored, values); }),
+          get: vi.fn(async (name) => ({ [name]: stored[name] })),
+          remove: vi.fn(async (name) => { delete stored[name]; }),
+        },
+      };
+      return { listener: await loadListener(), stored };
+    }
+
+    it('accepts a wallet page mutation and returns the persisted result', async () => {
+      const { listener, stored } = await loadFirefoxListener();
+      await expect(listener(message, WALLET_PAGE)).resolves.toEqual({ ok: true });
+      expect(Buffer.from(stored.exportedEncryptionKey).toString('base64')).toBe(key);
+    });
+
+    it('rejects a content script mutation without touching storage', async () => {
+      const { listener, stored } = await loadFirefoxListener();
+      expect(listener(message, WEB_PAGE)).toBeUndefined();
+      expect(stored).toEqual({});
+      expect(browser.storage.session.set).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed storage mutation explicitly', async () => {
+      const { listener } = await loadFirefoxListener();
+      browser.storage.session.set.mockRejectedValueOnce(new Error('Storage unavailable'));
+      await expect(listener(message, WALLET_PAGE))
+        .resolves.toEqual({ ok: false, error: 'Storage unavailable' });
+    });
   });
 
   describe('messages a web page makes the content script relay', () => {
