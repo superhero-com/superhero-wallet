@@ -1857,6 +1857,27 @@ describe('useAeNames last-claimed-name fallback', () => {
     expect(ctx.aeNames.getName('ak_test').value).toBe('');
   });
 
+  it('does not label the account with a name leading to someone else', async () => {
+    // Transferred to the account, still pointing to the sender
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [
+      middlewareName('own.chain', 10),
+      {
+        ...middlewareName('pushed.chain', 30),
+        pointers: [{ key: 'account_pubkey', id: 'ak_sender', encodedKey: 'ba_YWNjb3VudF9wdWJrZXn8jckR' }],
+      },
+    ]);
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('own.chain');
+  });
+
+  it('labels the account with a name pointing nowhere, as one won in an auction', async () => {
+    const ctx = await createTestContext();
+    await publishOwnedNames(ctx, [{ ...middlewareName('won.chain', 30), pointers: [] }]);
+
+    expect(ctx.aeNames.getName('ak_test').value).toBe('won.chain');
+  });
+
   it('stops using the previous network\'s claimed names after a network switch', async () => {
     const ctx = await createTestContext();
     await publishOwnedNames(ctx, [middlewareName('testnet-only.chain', 30)]);

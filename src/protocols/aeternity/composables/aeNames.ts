@@ -271,9 +271,11 @@ const latestClaimedNames = computed((): Record<AccountAddress, ChainName> => {
     owner,
     pending,
     createdAtHeight,
+    pointers,
   }) => {
-    // Skip names that aren't confirmed on-chain yet (pending claims/transfers).
-    if (!owner || pending) {
+    // Skip names that aren't confirmed on-chain yet (pending claims/transfers),
+    // and names leading to someone else, e.g. one transferred to the account.
+    if (!owner || pending || (pointers?.accountPubkey && pointers.accountPubkey !== owner)) {
       return;
     }
     const height = createdAtHeight ?? 0;
