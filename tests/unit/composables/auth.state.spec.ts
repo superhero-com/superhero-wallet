@@ -438,18 +438,25 @@ describe('useAuth state machine branches', () => {
       },
     );
 
-    it('does not mistake a subscribed new salt for a key belonging to that password', async () => {
+    it('locks a web window whose password another window changed, without the old key or defaults', async () => {
       const auth = await createWallet();
-      const oldKey = auth.encryptionKey.value;
       const { STORAGE_KEYS } = await import('@/constants');
-      const { commitVault, readVault } = await import('@/lib/WalletVault');
+      const { commitVault, readVault, refreshVault } = await import('@/lib/WalletVault');
       const {
         encodeBase64, encrypt, generateEncryptionKey, generateSalt,
       } = await import('@/utils/crypto');
+      await vi.waitFor(() => (
+        expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
+      ));
       const salt = generateSalt();
       const key = await generateEncryptionKey('other-password', salt);
       const previous = readVault();
-      await commitVault(previous, {
+      // The other window's commit, as its storage notification makes this one read it.
+      const observed = [];
+      const stopWatching = watch(auth.secureLoginTimeoutDecrypted, (value) => {
+        observed.push({ value, isAuthenticated: auth.isAuthenticated.value });
+      }, { flush: 'sync' });
+      const committed = await commitVault(previous, {
         ...previous.values,
         [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
         [STORAGE_KEYS.mnemonic]: await encrypt(key, VALID_MNEMONIC),
@@ -457,9 +464,23 @@ describe('useAuth state machine branches', () => {
       });
 
       expect(encodeBase64(auth.encryptionSalt.value)).toBe(encodeBase64(salt));
-      expect(auth.encryptionKey.value).toBe(oldKey);
-      expect(auth.isEncryptionKeyCurrent()).toBe(false);
-      await expect(auth.setPassword('another-password')).rejects.toThrow('another window');
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(auth.mnemonicDecrypted.value).toBe('');
+      // The web has no shared session: it asks for the new password.
+      await vi.waitFor(() => expect(openPasswordLoginModalMock).toHaveBeenCalled());
+      await expect(auth.setPassword('another-password')).rejects.toThrow('locked');
+      await refreshVault();
+      expect(readVault()).toEqual(committed);
+
+      expect(await auth.authenticateWithPassword('other-password')).toBe(true);
+      await vi.waitFor(() => (
+        expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
+      ));
+      stopWatching();
+      // Locked rather than a failed decrypt: unlocked, never the default, longer, auto-lock time.
+      expect(observed.filter(({ value }) => value !== SECURE_LOGIN_TIMEOUT)
+        .every(({ isAuthenticated }) => !isAuthenticated)).toBe(true);
     });
 
     it('does not overwrite a newer generation when its own commit promise settles later', async () => {
@@ -509,6 +530,10 @@ describe('useAuth state machine branches', () => {
       await rejected;
       await vault.refreshVault();
       expect(vault.readVault()).toEqual(latest);
+      // Its key opens nothing any more: locked until the latest password is entered.
+      await vi.waitFor(() => expect(openPasswordLoginModalMock).toHaveBeenCalled());
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(auth.isAuthenticated.value).toBe(false);
       await expectReadableAfterRestart('latest-password');
     });
 
@@ -941,8 +966,12 @@ describe('useAuth state machine branches', () => {
         WAIT_FOR_CRYPTO,
       );
       heldDerivations[1]();
-      await Promise.all([firstCheck, secondCheck]);
+      // The window that lost unlocks again with the secret the other one stored.
       vi.mocked(subtle.deriveKey).mockRestore();
+      await Promise.all([firstCheck, secondCheck]);
+      expect(first.isAuthenticated.value).toBe(true);
+      expect(second.isAuthenticated.value).toBe(true);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
 
       const { decrypt } = await import('@/utils/crypto');
       expect(await decrypt(await storedKey(), await readStorage('mnemonic'))).toBe(VALID_MNEMONIC);

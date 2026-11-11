@@ -337,20 +337,22 @@ describe('useInvites: invite keys at rest', () => {
     await addInvite(createdBefore);
     await changePasswordInAnotherWindow(auth);
 
-    await expect(addInvite(randomKey())).rejects.toThrow('another window');
+    // Locked until the new password is entered here.
+    expect(auth.encryptionKey.value).toBeUndefined();
+    await expect(addInvite(randomKey())).rejects.toThrow('locked');
     const { invites } = await restart(NEW_PASSWORD);
     await expectInvites(invites, [createdBefore]);
   });
 
-  it('changes no password in a window that missed a password change in another one', async () => {
+  it('refuses a password change in a window that a change in another window locked', async () => {
     await createWallet();
     const { auth, addInvite } = await unlock();
     const createdBefore = randomKey();
     await addInvite(createdBefore);
     await changePasswordInAnotherWindow(auth);
 
-    // This window still opens its copy of the seed with the old password.
-    await expect(auth.updatePassword(PASSWORD, 'Th1rd-Pa55-w0rd!')).rejects.toThrow('another window');
+    // This window locked, rather than keep a key that opens nothing now.
+    await expect(auth.updatePassword(PASSWORD, 'Th1rd-Pa55-w0rd!')).rejects.toThrow('locked');
     const { invites } = await restart(NEW_PASSWORD);
     await expectInvites(invites, [createdBefore]);
   });

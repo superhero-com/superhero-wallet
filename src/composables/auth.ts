@@ -19,6 +19,7 @@ import {
   ensureVaultReady,
   readVault,
   refreshVault,
+  subscribeVault,
   VAULT_SECRET_KEYS,
 } from '@/lib/WalletVault';
 import { getVaultRef } from '@/utils/vaultRef';
@@ -75,6 +76,9 @@ import { useStorageRef } from './storageRef';
 
 const CHECK_FOR_SESSION_KEY_INTERVAL = 5000;
 const CHECK_FOR_SESSION_KEY_TIMEOUT = 30000;
+/** How long a page waits for the key of a password changed in another window. */
+const REMOTE_PASSWORD_CHANGE_SESSION_WAIT = 3000;
+const REMOTE_PASSWORD_CHANGE_SESSION_INTERVAL = 250;
 const AUTHENTICATION_TIMEOUT_DEFAULT = (IS_MOBILE_APP)
   ? AUTHENTICATION_TIMEOUTS[0]
   : AUTHENTICATION_TIMEOUTS[2];
@@ -123,6 +127,8 @@ export const useAuth = createCustomScopedComposable(() => {
   let encryptionKeySalt: string | null = null;
   /** Changes with each login, lock or key change here, so a slower attempt can't publish. */
   let authEpoch = 0;
+  /** The salt this window's own `setPassword` stores, before it publishes the key for it. */
+  let ownRotationSalt: string | null = null;
   watch(encryptionKey, () => { authEpoch += 1; }, { flush: 'sync' });
 
   /**
@@ -325,6 +331,19 @@ export const useAuth = createCustomScopedComposable(() => {
   }
 
   /**
+   * Locks this window only, unlike `logout`: the shared session may already hold the key of
+   * a password another window just set.
+   */
+  function invalidateLocalAuthentication() {
+    authEpoch += 1;
+    encryptionKey.value = undefined;
+    mnemonicDecrypted.value = '';
+    isAuthenticated.value = false;
+    // The session times out as after a lock, unless a key is restored here.
+    sessionRelease().catch(handleUnknownError);
+  }
+
+  /**
    * The stored mnemonic can't be decrypted on this device, or it or its key can't be read.
    * Reinstalling doesn't help on iOS (the Keychain survives it), so offer the in-app reset.
    * After a failed read (`isReadFailed`) reopening may help, so that is suggested first.
@@ -464,33 +483,40 @@ export const useAuth = createCustomScopedComposable(() => {
       || password === previousVault.values[STORAGE_KEYS.defaultPasswordSecret]
     ) ? password : null;
 
-    const committed = await commitVault(previousVault, nextValues, () => {
-      if (encryptionKey.value !== currentKey) {
-        throw new Error('The wallet got locked while setting the password');
+    ownRotationSalt = nextValues[STORAGE_KEYS.encryptionSalt];
+    try {
+      const committed = await commitVault(previousVault, nextValues, () => {
+        if (encryptionKey.value !== currentKey) {
+          throw new Error('The wallet got locked while setting the password');
+        }
+        const latestSalt = encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null;
+        if (latestSalt !== currentSalt || (currentKey && !isEncryptionKeyCurrent())) {
+          throw new Error('The password was changed in another window');
+        }
+      }, { requireLegacyReconciled: true });
+      // Stored already: a failed read now mustn't report the change as failed.
+      await refreshVault().catch(handleUnknownError);
+      const latest = readVault();
+      if (
+        latest.values[STORAGE_KEYS.encryptionSalt]
+          !== committed.values[STORAGE_KEYS.encryptionSalt]
+        || latest.values[STORAGE_KEYS.mnemonic] !== committed.values[STORAGE_KEYS.mnemonic]
+      ) {
+        throw new Error('The password was changed again in another window');
       }
-      const latestSalt = encryptionSalt.value ? encodeBase64(encryptionSalt.value) : null;
-      if (latestSalt !== currentSalt || (currentKey && !isEncryptionKeyCurrent())) {
-        throw new Error('The password was changed in another window');
-      }
-    }, { requireLegacyReconciled: true });
-    // The password is already persisted. A later read failure must not turn a
-    // completed rotation into a reported failure; the service retains its snapshot.
-    await refreshVault().catch(handleUnknownError);
-    const latest = readVault();
-    if (
-      latest.values[STORAGE_KEYS.encryptionSalt] !== committed.values[STORAGE_KEYS.encryptionSalt]
-      || latest.values[STORAGE_KEYS.mnemonic] !== committed.values[STORAGE_KEYS.mnemonic]
-    ) {
-      throw new Error('The password was changed again in another window');
+      // A lock while it settled still wins.
+      if (encryptionKey.value !== currentKey) return;
+      // Without a write, which could replace a newer commit of another window.
+      getVaultRef(encryptionSalt)?.apply(committed.values[STORAGE_KEYS.encryptionSalt]);
+      getVaultRef(mnemonic)?.apply(committed.values[STORAGE_KEYS.mnemonic]);
+      setEncryptionKey(newEncryptionKey, { salt: committed.values[STORAGE_KEYS.encryptionSalt] });
+      markAuthenticated();
+    } finally {
+      ownRotationSalt = null;
+      // E.g. changed again in another window: the key kept here doesn't open it any more.
+      // eslint-disable-next-line no-use-before-define
+      if (encryptionKey.value && !isEncryptionKeyCurrent()) handleRemotePasswordChange();
     }
-    // Persistence succeeded, but an explicit lock while it settled still wins.
-    if (encryptionKey.value !== currentKey) return;
-    // Apply without triggering persistence: another window may have committed a
-    // newer generation while our commit promise was settling.
-    getVaultRef(encryptionSalt)?.apply(committed.values[STORAGE_KEYS.encryptionSalt]);
-    getVaultRef(mnemonic)?.apply(committed.values[STORAGE_KEYS.mnemonic]);
-    setEncryptionKey(newEncryptionKey, { salt: committed.values[STORAGE_KEYS.encryptionSalt] });
-    markAuthenticated();
   }
 
   async function setMnemonicAndInitializeAuthentication(newMnemonic: string, isRestored = false) {
@@ -958,6 +984,11 @@ export const useAuth = createCustomScopedComposable(() => {
               // user authenticated under the legacy password, matching
               // pre-fix behavior, and the next successful login will retry.
               handleUnknownError(error);
+              // Unless another window rotated first, which locked this one: its secret opens it.
+              const rotatedSecret = !encryptionKey.value && await getDefaultPasswordSecret();
+              if (rotatedSecret && await tryDefaultPassword(rotatedSecret)) {
+                isUsingDefaultPassword.value = true;
+              }
             }
           }
         }
@@ -1005,10 +1036,65 @@ export const useAuth = createCustomScopedComposable(() => {
     await checkUserAuth();
   }
 
+  let remotePasswordChange: Promise<void> | null = null;
+
+  /**
+   * Another window changed the password or reset the wallet, so the key here opens nothing.
+   * Locked, so its decrypt failures don't look like lost data, until the new key arrives:
+   * from the session on the extension, else the password is asked.
+   */
+  function handleRemotePasswordChange() {
+    invalidateLocalAuthentication();
+    if (IS_OFFSCREEN_TAB) {
+      syncBackgroundEncryptionKey();
+      return;
+    }
+    if (remotePasswordChange) return;
+    remotePasswordChange = (async () => {
+      if (IS_EXTENSION) {
+        const deadline = performance.now() + REMOTE_PASSWORD_CHANGE_SESSION_WAIT;
+        for (;;) {
+          // eslint-disable-next-line no-await-in-loop
+          const isRestored = await restoreSessionKey({
+            isSessionConfirmed: true,
+            setAuthenticated: true,
+          }).catch(() => false);
+          if (isRestored || performance.now() >= deadline) break;
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((resolve) => {
+            setTimeout(resolve, REMOTE_PASSWORD_CHANGE_SESSION_INTERVAL);
+          });
+        }
+      }
+      if (!encryptionKey.value) await checkUserAuth();
+    })()
+      .catch(handleUnknownError)
+      .finally(() => {
+        remotePasswordChange = null;
+      });
+  }
+
+  if (!IS_MOBILE_APP) {
+    // Synchronous, so watchers see the lock rather than the new ciphertext under the old key.
+    subscribeVault(({ values }) => {
+      const storedSalt = values[STORAGE_KEYS.encryptionSalt];
+      if (
+        encryptionKey.value
+        && storedSalt !== encryptionKeySalt
+        // No salt: the wallet was reset, never this window's own rotation.
+        && (storedSalt === null || storedSalt !== ownRotationSalt)
+      ) {
+        handleRemotePasswordChange();
+      }
+    });
+  }
+
   /**
    * Check if password provided by user is correct and if true update it to new one.
    */
   async function updatePassword(currentPassword: string, newPassword: string) {
+    // E.g. locked by a password change in another window: there is no seed to encrypt.
+    if (!encryptionKey.value) throw new Error('The wallet is locked');
     if (!IS_MOBILE_APP) await refreshVault();
     if (encryptionKey.value && !isEncryptionKeyCurrent()) {
       throw new Error('The password was changed in another window');
