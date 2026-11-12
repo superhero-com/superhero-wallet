@@ -216,7 +216,7 @@ export default defineConfig(({ mode }) => {
       outDir,
       // The old webpack/babel build downleveled to '> 0.25%, not dead, not ie 11'
       // with core-js polyfills; that's gone, but syntax newer than the actual
-      // floor (Capacitor Android WebView defaults to 60+, iOS 15.5, extension
+      // floor (Capacitor Android WebView defaults to 60+, iOS 16.4, extension
       // manifest v3 Chrome 88+/Firefox 109+) can throw a parse-time SyntaxError
       // and blank the whole app. es2020 covers that floor without the cost of a
       // full legacy/polyfill toolchain for what's otherwise an evergreen-browser app.

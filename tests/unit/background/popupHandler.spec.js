@@ -86,12 +86,12 @@ const testCases = [{
 describe('popupHandler', () => {
   testCases.forEach(({
     name, params, type, resultType, propsField, connectedAepp = null,
-  }, index) => it(
+  }) => it(
     `should be able to create, get, remove popup for signing a/an ${name}`,
     async () => {
       openPopup(type, connectedAepp ?? testAeppUrl, params);
       await new Promise((r) => setTimeout(r, 50));
-      const call = mockCreate.mock.calls[index][0];
+      const call = mockCreate.mock.calls.at(-1)[0];
       const queryParams = Object.fromEntries(new URLSearchParams(call.url.split('?')[1]).entries());
       expect(queryParams.type).toEqual(resultType);
       expect(queryParams.url).toEqual(`${connectedAepp ? AE_DEX_URL : testAeppUrl}/`);

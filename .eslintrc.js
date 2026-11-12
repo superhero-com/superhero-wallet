@@ -16,8 +16,9 @@ module.exports = {
     es2021: true,
   },
   extends: [
-    'plugin:@intlify/vue-i18n/recommended',
-    'plugin:vue/recommended',
+    'plugin:@intlify/vue-i18n/recommended-legacy',
+    // v9's `recommended`; v10 gave that name to the Vue 3 rule set
+    'plugin:vue/vue2-recommended',
     '@vue/eslint-config-airbnb',
     '@vue/eslint-config-typescript',
   ],
