@@ -183,9 +183,7 @@ describe('offscreen message listener', () => {
   describe('messages a web page makes the content script relay', () => {
     /** The shape `sendToOffscreen` in `content-scripts/inject.ts` sends. */
     function relayed(method, params = {}) {
-      return {
-        target: 'offscreen', jsonrpc: '2.0', id: null, method, params,
-      };
+      return { target: 'offscreen', method, params };
     }
 
     it.each([

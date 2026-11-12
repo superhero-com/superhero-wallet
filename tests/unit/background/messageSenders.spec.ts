@@ -296,8 +296,6 @@ describe('background message senders', () => {
     expect(await sendMessage(
       {
         target: 'offscreen',
-        jsonrpc: '2.0',
-        id: null,
         method: 'eth_requestAccounts',
         params: { rpcMethodParams: [], aepp: 'https://example.com' },
       },

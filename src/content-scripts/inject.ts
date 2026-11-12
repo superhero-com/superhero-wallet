@@ -9,20 +9,20 @@ import type { BackgroundMethod } from '@/types';
 import {
   ETH_CONTENT_SCRIPT_METHODS,
   ETH_RPC_METHODS,
-  ETH_RPC_NODE_METHODS,
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
 import browser from 'webextension-polyfill';
 
-const connectedDapps: Record<string, any> = {};
+/** Whether the page asked the wallet anything, so it may hear when the chain changes */
+let hasAskedWallet = false;
 /** Whether the wallet gave this page accounts, so it may hear when they change */
 let hasAccounts = false;
 
-const ERROR_WALLET_UNAVAILABLE = {
+type WalletResponse = { result?: unknown; error?: unknown };
+
+const ERROR_WALLET_UNAVAILABLE: WalletResponse = {
   error: { code: -32603, message: 'Unable to communicate with the wallet. Please try again.' },
 };
-
-window.browser = browser;
 
 /**
  * Frames sandboxed without `allow-same-origin` (and `file://` documents) have an
@@ -39,92 +39,71 @@ window.browser = browser;
 const hasOpaqueOrigin = () => !window.origin || window.origin === 'null';
 
 const runContentScript = () => {
-  const sendToOffscreen = async (method: BackgroundMethod, params: any) => {
+  const sendToOffscreen = async (
+    method: BackgroundMethod,
+    params: object,
+  ): Promise<WalletResponse | undefined> => {
     try {
-      return await browser.runtime.sendMessage({
-        target: 'offscreen',
-        jsonrpc: '2.0',
-        id: params.id || null,
-        method,
-        params,
-      });
+      return await browser.runtime.sendMessage({ target: 'offscreen', method, params });
     } catch {
       // Settle the page's request so the provider can release its pending entry.
       return ERROR_WALLET_UNAVAILABLE;
     }
   };
 
-  async function handleEthRpcRequest(
-    event: any,
-    method: BackgroundMethod,
-    params: unknown,
-  ) {
-    const { result, error }: any = await sendToOffscreen(method, {
-      rpcMethodParams: params,
-      aepp: event.origin,
-    }) ?? ERROR_WALLET_UNAVAILABLE;
-    if (!connectedDapps[event.origin]) {
-      connectedDapps[event.origin] = event.source;
+  function postToPage(data: object) {
+    window.postMessage({
+      jsonrpc: '2.0',
+      superheroWalletApproved: true,
+      type: 'result',
+      ...data,
+    }, window.origin);
+  }
+
+  async function getWalletResponse(method: unknown, params: unknown): Promise<WalletResponse> {
+    // A `String` object slips past the checks below and turns into a string on the way out
+    if (typeof method !== 'string') {
+      return { error: { code: -32600, message: 'The method must be a string' } };
     }
+    // Its answer is for this script, a page asking it would learn the active account
+    if (Object.values(ETH_CONTENT_SCRIPT_METHODS).includes(method as any)) {
+      return { error: { code: -32004, message: `Method "${method}" is not supported` } };
+    }
+    const response = await sendToOffscreen(method as BackgroundMethod, {
+      rpcMethodParams: params,
+      aepp: window.origin,
+    }) ?? ERROR_WALLET_UNAVAILABLE;
+    hasAskedWallet = true;
     if (
       (method === ETH_RPC_METHODS.requestAccounts || method === ETH_RPC_METHODS.getAccounts)
-      && Array.isArray(result) && result.length
+      && Array.isArray(response.result) && response.result.length
     ) {
       hasAccounts = true;
     }
-    if (method === ETH_RPC_METHODS.revokePermissions && !error) {
+    if (method === ETH_RPC_METHODS.revokePermissions && !response.error) {
       hasAccounts = false;
     }
-    event.source.postMessage({
-      jsonrpc: '2.0',
-      result,
-      ...(error ? { error } : {}),
-      method: event.data.method,
-      superheroWalletApproved: true,
-      type: 'result',
-      requestId: event.data.requestId,
-    }, event.origin);
+    return response;
   }
 
-  // Subscribe from postMessages from page
-  window.addEventListener(
-    'message',
-    async (event) => {
-      if (event.origin !== window.origin || event.source !== window) {
-        return;
-      }
-      if (event.data?.type === 'result') {
-        return;
-      }
-      let { method } = event.data;
-      if (!method) method = 'pageMessage';
-      // A `String` object slips past the checks below and turns into a string on the way out
-      if (typeof method !== 'string') return;
-      // Its answer is for this script, a page asking it would learn the active account
-      if (Object.values(ETH_CONTENT_SCRIPT_METHODS).includes(method as any)) return;
-
-      if (
-        event.data.superheroWalletRequest
-        || Object.values(ETH_RPC_METHODS).includes(method)
-        || Object.values(ETH_RPC_NODE_METHODS).includes(method)
-      ) {
-        handleEthRpcRequest(event, method, event.data.params);
-      } else if (!event.data.resolve) {
-        sendToOffscreen(method, event.data);
-      }
-    },
-    false,
-  );
-  function postWalletEvent(method: string, result: unknown) {
-    Object.entries(connectedDapps).forEach(([origin, source]) => {
-      source.postMessage({
-        jsonrpc: '2.0',
-        result,
-        method,
-        superheroWalletApproved: true,
-        type: 'result',
-      }, origin as any);
+  // Requests of the inpage provider, the page posts other messages too
+  window.addEventListener('message', async (event) => {
+    if (event.origin !== window.origin || event.source !== window) return;
+    if (!event.data?.superheroWalletRequest) return;
+    const { method, params, requestId } = event.data;
+    const { result, error } = await getWalletResponse(method, params);
+    postToPage({
+      result,
+      ...(error ? { error } : {}),
+      method,
+      requestId,
     });
+  });
+
+  function postWalletEvent(method: string, result: unknown) {
+    if (hasAskedWallet) {
+      postToPage({ result, method });
+    }
   }
 
   browser.runtime.onMessage.addListener(({ method, result }: any): undefined => {
@@ -134,7 +113,7 @@ const runContentScript = () => {
       // The page may see only the accounts it is permitted: a site removed meanwhile gets no
       // accounts and no further events.
       sendToOffscreen(ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts, {})
-        .then((response: any) => {
+        .then((response) => {
           // A transport failure does not mean the site's permission was revoked.
           if (response?.error) return;
           const permittedAccounts = Array.isArray(response?.result) ? response.result : [];

@@ -58,7 +58,7 @@ describe('inject.ts accountsChanged propagation', () => {
     ((global as any).browser.runtime.sendMessage as vi.Mock).mockResolvedValueOnce(response);
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
     await messageHandler({
-      data: { method, params: [] },
+      data: { superheroWalletRequest: true, method, params: [] },
       origin,
       source: window,
     });
@@ -142,18 +142,6 @@ describe('inject.ts accountsChanged propagation', () => {
     expect(getPostedEvents('accountsChanged').map(([data]) => data.result)).toEqual([['0xdef']]);
   });
 
-  it('handles a failed fire-and-forget page message without posting an RPC reply', async () => {
-    ((global as any).browser.runtime.sendMessage as vi.Mock)
-      .mockRejectedValueOnce(new Error('Extension context invalidated'));
-    const messageHandler = (window.addEventListener as vi.Mock).mock.calls
-      .find((call) => call[0] === 'message')[1];
-
-    await messageHandler({ data: { method: 'pageMessage' }, origin, source: window });
-    await flushPromises();
-
-    expect(postMessageSpy).not.toHaveBeenCalled();
-  });
-
   it.each([
     ['only asked for the chain id', [
       ['eth_chainId', { result: '0x1' }],
@@ -191,6 +179,12 @@ describe('inject.ts accountsChanged propagation', () => {
     ]]);
   });
 
+  it('does not tell a page that never asked the wallet that the chain changed', async () => {
+    await emitWalletEvent('chainChanged', '0x38');
+
+    expect(getPostedEvents('chainChanged')).toHaveLength(0);
+  });
+
   it.each([
     ['a mismatched origin', () => ({
       data: { superheroWalletRequest: true, method: 'eth_chainId', params: [] },
@@ -202,22 +196,6 @@ describe('inject.ts accountsChanged propagation', () => {
       origin,
       source: { postMessage: vi.fn() },
     })],
-    ['the method only the content script asks, as an EVM request', () => ({
-      data: { superheroWalletRequest: true, method: 'superhero_getPermittedAccounts', params: [] },
-      origin,
-      source: window,
-    })],
-    ['the method only the content script asks', () => ({
-      data: { method: 'superhero_getPermittedAccounts', aepp: origin },
-      origin,
-      source: window,
-    })],
-    ['a method that is not a string', () => ({
-      // eslint-disable-next-line no-new-wrappers
-      data: { method: new String('eth_requestAccounts'), aepp: 'https://aescan.io' },
-      origin,
-      source: window,
-    })],
   ])('does not forward page requests from %s', async (_label, createEvent) => {
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
     ((global as any).browser.runtime.sendMessage as vi.Mock).mockClear();
@@ -225,6 +203,31 @@ describe('inject.ts accountsChanged propagation', () => {
     await messageHandler(createEvent());
 
     expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the method only the content script asks', 'superhero_getPermittedAccounts', -32004],
+    // eslint-disable-next-line no-new-wrappers
+    ['a method that is not a string', new String('eth_requestAccounts'), -32600],
+  ])('answers a request for %s with an error, not the wallet', async (_label, method, code) => {
+    const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
+    ((global as any).browser.runtime.sendMessage as vi.Mock).mockClear();
+
+    await messageHandler({
+      data: {
+        superheroWalletRequest: true, method, params: [], requestId: 7,
+      },
+      origin,
+      source: window,
+    });
+
+    expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
+    expect(postMessageSpy).toHaveBeenCalledWith(expect.objectContaining({
+      error: expect.objectContaining({ code }),
+      requestId: 7,
+      superheroWalletApproved: true,
+      type: 'result',
+    }), origin);
   });
 
   it('forwards the params of an EVM request as the page sent them', async () => {
@@ -242,39 +245,34 @@ describe('inject.ts accountsChanged propagation', () => {
 
     expect((global as any).browser.runtime.sendMessage).toHaveBeenCalledWith({
       target: 'offscreen',
-      jsonrpc: '2.0',
-      id: null,
       method: 'personal_sign',
       params: { rpcMethodParams: params, aepp: origin },
     });
   });
 
-  it('forwards aepp SDK page messages to the offscreen document', async () => {
+  it.each([
+    // The aepp SDK has its own port to the wallet
+    ['an aepp SDK message', {
+      type: 'to_waellet',
+      data: {
+        jsonrpc: '2.0', id: 1, method: 'connection.open', params: {},
+      },
+    }],
+    ['a wallet message the content script posted itself', {
+      type: 'to_aepp',
+      data: { jsonrpc: '2.0', method: 'connection.announcePresence', params: {} },
+    }],
+    ['an EVM call without the provider flag', { method: 'eth_requestAccounts', params: [] }],
+    ['a message of another script', 'ping'],
+    ['an empty message', null],
+  ])('ignores %s', async (_label, data) => {
     const messageHandler = (window.addEventListener as vi.Mock).mock.calls.find((c) => c[0] === 'message')[1];
     ((global as any).browser.runtime.sendMessage as vi.Mock).mockClear();
 
-    const aeppMessage = {
-      type: 'to_waellet',
-      data: {
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'connection.open',
-        params: {},
-      },
-    };
+    await messageHandler({ data, origin, source: window });
+    await flushPromises();
 
-    await messageHandler({
-      data: aeppMessage,
-      origin,
-      source: window,
-    });
-
-    expect((global as any).browser.runtime.sendMessage).toHaveBeenCalledWith({
-      target: 'offscreen',
-      jsonrpc: '2.0',
-      id: null,
-      method: 'pageMessage',
-      params: aeppMessage,
-    });
+    expect((global as any).browser.runtime.sendMessage).not.toHaveBeenCalled();
+    expect(postMessageSpy).not.toHaveBeenCalled();
   });
 });
