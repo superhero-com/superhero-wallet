@@ -18,6 +18,10 @@ const connectedDapps: Record<string, any> = {};
 /** Whether the wallet gave this page accounts, so it may hear when they change */
 let hasAccounts = false;
 
+const ERROR_WALLET_UNAVAILABLE = {
+  error: { code: -32603, message: 'Unable to communicate with the wallet. Please try again.' },
+};
+
 window.browser = browser;
 
 /**
@@ -35,17 +39,20 @@ window.browser = browser;
 const hasOpaqueOrigin = () => !window.origin || window.origin === 'null';
 
 const runContentScript = () => {
-  const sendToOffscreen = (method: BackgroundMethod, params: any) => new Promise((resolve) => {
-    browser.runtime
-      .sendMessage({
+  const sendToOffscreen = async (method: BackgroundMethod, params: any) => {
+    try {
+      return await browser.runtime.sendMessage({
         target: 'offscreen',
         jsonrpc: '2.0',
         id: params.id || null,
         method,
         params,
-      })
-      .then((res) => resolve(res));
-  });
+      });
+    } catch {
+      // Settle the page's request so the provider can release its pending entry.
+      return ERROR_WALLET_UNAVAILABLE;
+    }
+  };
 
   async function handleEthRpcRequest(
     event: any,
@@ -55,7 +62,7 @@ const runContentScript = () => {
     const { result, error }: any = await sendToOffscreen(method, {
       rpcMethodParams: params,
       aepp: event.origin,
-    });
+    }) ?? ERROR_WALLET_UNAVAILABLE;
     if (!connectedDapps[event.origin]) {
       connectedDapps[event.origin] = event.source;
     }
@@ -128,6 +135,8 @@ const runContentScript = () => {
       // accounts and no further events.
       sendToOffscreen(ETH_CONTENT_SCRIPT_METHODS.getPermittedAccounts, {})
         .then((response: any) => {
+          // A transport failure does not mean the site's permission was revoked.
+          if (response?.error) return;
           const permittedAccounts = Array.isArray(response?.result) ? response.result : [];
           if (!permittedAccounts.length) {
             hasAccounts = false;
