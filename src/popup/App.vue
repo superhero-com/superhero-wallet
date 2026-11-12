@@ -151,7 +151,7 @@ export default defineComponent({
     useInvites();
 
     const innerElement = ref<HTMLDivElement>();
-    const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
+    const routeMeta = computed(() => route.meta as WalletRouteMeta | undefined);
 
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
