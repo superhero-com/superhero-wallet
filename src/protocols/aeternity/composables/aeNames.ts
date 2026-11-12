@@ -42,6 +42,7 @@ import {
 } from '@/constants';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 import Logger from '@/lib/logger';
+import { readVault } from '@/lib/WalletVault';
 import {
   useAccounts,
   useAeSdk,
@@ -176,6 +177,14 @@ let ownedNamesFetchGeneration = 0;
 let ownedNamesPublishedGeneration = 0;
 let ownedNamesFetchesInFlight = 0;
 let preclaimedNamesEncryptionInitialized = false;
+let flushPreclaimedNamesWrites: () => Promise<void> = () => Promise.resolve();
+/** The stored names didn't decrypt with the current key: a change couldn't be stored. */
+let arePreclaimedNamesUnreadable = false;
+/**
+ * Taken before sending a preclaim, whose salt is stored with it even after a lock meanwhile.
+ * Set only while applying that entry.
+ */
+let preclaimedNamesWriteKey: CryptoKey | undefined;
 
 /**
  * In-memory cache + in-flight dedup for `updateExternalName` lookups.
@@ -302,7 +311,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     getLastActiveProtocolAccount,
   } = useAccounts();
   const { onNetworkChange } = useNetworks();
-  const { openDefaultModal } = useModals();
+  const { openConfirmModal, openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
   const { getPreferredName, isAddressLinkSupported } = useAeAddressLinkContract();
@@ -318,26 +327,92 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
 
   if (!preclaimedNamesEncryptionInitialized) {
     preclaimedNamesEncryptionInitialized = true;
-    const { encryptionKey } = useAuth();
-    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}');
+    const { encryptionKey, isEncryptionKeyCurrent } = useAuth();
+    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}', {
+      onDecrypted: () => { arePreclaimedNamesUnreadable = false; },
+      onDecryptFailed: () => { arePreclaimedNamesUnreadable = true; },
+      isKeyCurrent: isEncryptionKeyCurrent,
+    });
+    type Registry = typeof preclaimedNames.value;
+    type Change = { networkId: NetworkId; name: AensName; value: IPreclaimedName | null };
+    let baseline: Registry = {};
+    let applyingStoredNames = false;
+    let queue = Promise.resolve();
+    let latestWrite = queue;
+    // Keep unsaved salts visible even if a different pending write completes first.
+    const pending = new Map<string, Change>();
+    const changeKey = ({ networkId, name }: Change) => `${networkId}/${name}`;
+    const copy = (value: Registry): Registry => JSON.parse(JSON.stringify(value));
+    const applyChanges = (registry: Registry, changes: Change[]) => {
+      const updated = copy(registry);
+      changes.forEach(({ networkId, name, value }) => {
+        if (value) {
+          updated[networkId] ??= {};
+          updated[networkId][name] = value;
+        } else {
+          delete updated[networkId]?.[name];
+          if (isEmpty(updated[networkId])) delete updated[networkId];
+        }
+      });
+      return updated;
+    };
+    flushPreclaimedNamesWrites = () => latestWrite;
 
     watch(decryptedStr, (str) => {
       try {
-        const parsed = JSON.parse(str || '{}');
+        let parsed: Registry = JSON.parse(str || '{}');
+        pending.forEach((change, key) => {
+          if (isEqual(parsed[change.networkId]?.[change.name] ?? null, change.value)) {
+            pending.delete(key);
+          }
+        });
+        parsed = applyChanges(parsed, [...pending.values()]);
+        baseline = copy(parsed);
         if (!isEqual(parsed, preclaimedNames.value)) {
+          applyingStoredNames = true;
           preclaimedNames.value = parsed;
         }
       } catch {
-        preclaimedNames.value = {};
+        // A failed read must not discard the salt of an outstanding local preclaim.
+        baseline = applyChanges({}, [...pending.values()]);
+        applyingStoredNames = true;
+        preclaimedNames.value = baseline;
+      } finally {
+        applyingStoredNames = false;
       }
-    }, { immediate: true });
+    }, { immediate: true, flush: 'sync' });
 
     watch(preclaimedNames, (val) => {
-      const str = JSON.stringify(val);
-      if (decryptedStr.value !== str) {
-        decryptedStr.value = str;
-      }
-    }, { deep: true });
+      if (applyingStoredNames) return;
+      const next = copy(val);
+      const changes: Change[] = [];
+      new Set([...Object.keys(baseline), ...Object.keys(next)]).forEach((networkId) => {
+        const previousNames = baseline[networkId] || {};
+        const nextNames = next[networkId] || {};
+        new Set([...Object.keys(previousNames), ...Object.keys(nextNames)]).forEach((name) => {
+          if (!isEqual(previousNames[name as AensName], nextNames[name as AensName])) {
+            changes.push({
+              networkId,
+              name: name as AensName,
+              value: nextNames[name as AensName] ?? null,
+            });
+          }
+        });
+      });
+      baseline = next;
+      if (!changes.length) return;
+      changes.forEach((change) => pending.set(changeKey(change), change));
+      // Taken now: a lock before the queue gets to it mustn't drop a change made unlocked.
+      const writeKey = preclaimedNamesWriteKey ?? encryptionKey.value;
+      latestWrite = queue.then(async () => {
+        // Not with a key unlocked only later: that would authorize a change made locked.
+        if (!writeKey) throw new Error('The wallet is locked');
+        await decryptedStr.update((plaintext) => JSON.stringify(
+          applyChanges(JSON.parse(plaintext || '{}'), changes),
+        ), { encryptionKey: writeKey, isLockAllowed: true });
+      });
+      queue = latestWrite.catch(handleUnknownError);
+    }, { deep: true, flush: 'sync' });
   }
 
   function ensureExternalNameRegistryExists() {
@@ -742,6 +817,31 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     });
   }
 
+  /** A new claim can't be stored next to names that don't decrypt, whose salts are lost. */
+  function offerToRemoveUnreadablePreclaimedNames() {
+    const ciphertext = preclaimedNamesEncrypted.value;
+    // What the user decides on, so a removal can't take names stored after it.
+    const vault = IS_MOBILE_APP ? undefined : readVault();
+    openConfirmModal({
+      title: tg('pages.names.claimStorageUnreadableTitle'),
+      msg: tg('pages.names.claimStorageUnreadable'),
+      icon: 'critical',
+      buttonMessage: tg('pages.names.claimStorageUnreadableRemove'),
+    })
+      .then(async () => {
+        if (!arePreclaimedNamesUnreadable || preclaimedNamesEncrypted.value !== ciphertext) {
+          return;
+        }
+        if (vault) {
+          await useAuth().removeUnreadableSecret(STORAGE_KEYS.preclaimedNames, vault);
+        } else {
+          preclaimedNamesEncrypted.value = null;
+        }
+        arePreclaimedNamesUnreadable = false;
+      }, () => { /* NOOP - kept */ })
+      .catch(handleUnknownError);
+  }
+
   function logSilentError(error: any) {
     Logger.write({
       message: error?.message || String(error),
@@ -1115,20 +1215,34 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   async function addNameToClaimQueue(name: AensName, address: string, autoExtend: boolean) {
     try {
       const networkId = nodeNetworkId.value!;
+      // Checked before sending: the fee is lost if its salt can't be stored afterwards.
+      const writeKey = useAuth().encryptionKey.value;
+      if (!writeKey) throw new Error('The wallet is locked');
+      if (arePreclaimedNamesUnreadable && preclaimedNamesEncrypted.value) {
+        offerToRemoveUnreadablePreclaimedNames();
+        return false;
+      }
       const aeSdk = await getAeSdk();
       const currentHeight = await aeSdk.getHeight();
       const nameObj = await createNameInstance(name, getClaimOptions(address));
       const { nameSalt, hash } = await nameObj.preclaim({ waitMined: false });
-      upsertPreclaimedName(networkId, name, {
-        address,
-        name,
-        salt: nameSalt,
-        // Until the height the preclaim is mined at is known
-        blockHeight: currentHeight,
-        autoExtend,
-        status: NAME_CLAIM_STATUS.preclaimSubmitted,
-        preclaimTxHash: hash,
-      });
+      preclaimedNamesWriteKey = writeKey;
+      try {
+        upsertPreclaimedName(networkId, name, {
+          address,
+          name,
+          salt: nameSalt,
+          // Until the height the preclaim is mined at is known
+          blockHeight: currentHeight,
+          autoExtend,
+          status: NAME_CLAIM_STATUS.preclaimSubmitted,
+          preclaimTxHash: hash,
+        });
+      } finally {
+        preclaimedNamesWriteKey = undefined;
+      }
+      // The salt cannot be recovered from the mnemonic. Success requires its write.
+      await flushPreclaimedNamesWrites();
       return true;
     } catch (error: any) {
       openClaimErrorModal(error);

@@ -5,7 +5,12 @@ import { ref } from 'vue';
 
 import SecureLoginSettings from '@/popup/pages/SecureLoginSettings.vue';
 import SwitchButton from '@/popup/components/SwitchButton.vue';
-import { useAuth, useModals, useUi } from '@/composables';
+import {
+  useAccounts,
+  useAuth,
+  useModals,
+  useUi,
+} from '@/composables';
 import en from '@/popup/locales/en-US.json';
 
 vi.mock('@/constants', async (importOriginal) => ({
@@ -13,6 +18,7 @@ vi.mock('@/constants', async (importOriginal) => ({
   IS_MOBILE_APP: true,
 }));
 vi.mock('@/composables', () => ({
+  useAccounts: vi.fn(),
   useAuth: vi.fn(),
   useModals: vi.fn(),
   useUi: vi.fn(),
@@ -28,7 +34,9 @@ async function mountSettings({ canAuthenticateWithDevice, isBiometricLoginEnable
     secureLoginTimeoutDecrypted: ref('0'),
     isUsingDefaultPassword: ref(false),
   });
+  useAccounts.mockReturnValue({ offerToRemoveUnreadablePrivateKeyAccounts: vi.fn() });
   useModals.mockReturnValue({
+    openConfirmModal: vi.fn(),
     openEnableBiometricLoginModal,
     openSetPasswordModal: vi.fn(),
   });

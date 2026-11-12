@@ -32,6 +32,8 @@ import { tg } from '@/popup/plugins/i18n';
 import { AccountDiscoveryError, ImportedAccountsUnreadableError } from '@/lib/errors';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
+import { readVault, writeVaultField } from '@/lib/WalletVault';
+import { getVaultRef } from '@/utils/vaultRef';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 
@@ -60,6 +62,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     isAuthenticated,
     isMnemonicUnreadable,
     encryptionKey,
+    isEncryptionKeyCurrent,
   } = useAuth();
 
   const { openModal, openConfirmModal } = useModals();
@@ -121,6 +124,7 @@ export const useAccounts = createCustomScopedComposable(() => {
       onDecryptFailed: () => {
         arePrivateKeysAccountsUnreadable.value = true;
       },
+      isKeyCurrent: isEncryptionKeyCurrent,
     },
   );
 
@@ -341,21 +345,29 @@ export const useAccounts = createCustomScopedComposable(() => {
   }
 
   /**
-   * Imported accounts the key can't decrypt are lost, e.g. when the app closed while a
-   * password change re-encrypted them. Removing them lets the user import again.
+   * Older versions could leave imported accounts encrypted with an unavailable key.
+   * Removing unreadable entries lets the user import them again.
+   * @param options The text, e.g. for a password change they refused. The default explains it.
+   * @returns Settles once the offer was handled, never rejects.
    */
-  function offerToRemoveUnreadablePrivateKeyAccounts() {
+  function offerToRemoveUnreadablePrivateKeyAccounts(
+    { title, msg }: { title?: string; msg?: string } = {},
+  ) {
     // Nothing to decrypt means the secure-storage read failed, which reopening may fix.
     const isReadFailed = IS_MOBILE_APP && accountsPrivateKeysEncrypted.value === null;
-    openConfirmModal({
-      title: tg('modals.unreadablePrivateKeyAccounts.title'),
-      msg: tg(isReadFailed
+    // What the user decides on, so a removal can't take keys stored after it.
+    const offered = accountsPrivateKeysEncrypted.value;
+    return openConfirmModal({
+      title: title ?? tg('modals.unreadablePrivateKeyAccounts.title'),
+      msg: msg ?? tg(isReadFailed
         ? 'modals.unreadablePrivateKeyAccounts.readFailedMsg'
         : 'modals.unreadablePrivateKeyAccounts.msg'),
       icon: 'critical',
       buttonMessage: tg('modals.unreadablePrivateKeyAccounts.btnText'),
     })
       .then(async () => {
+        const expectedVault = IS_MOBILE_APP ? undefined : readVault();
+        if (!isAuthenticated.value || !isEncryptionKeyCurrent()) return;
         // Popups get no storage events, so the offscreen tab may have re-encrypted it meanwhile,
         // and a read that failed at startup may work now.
         let stored: string | null = null;
@@ -366,37 +378,56 @@ export const useAccounts = createCustomScopedComposable(() => {
           // As at startup, so mobile plaintext from before the encryption isn't taken as is.
           stored = await migrateMobileSensitiveDataEncryption(stored);
         } catch { /* Still unreadable */ }
-        if (!isAuthenticated.value || !arePrivateKeysAccountsUnreadable.value) {
+        if (!isAuthenticated.value || !isEncryptionKeyCurrent()
+          || !arePrivateKeysAccountsUnreadable.value) {
           return;
         }
         if (stored && stored !== accountsPrivateKeysEncrypted.value) {
-          accountsPrivateKeysEncrypted.value = stored;
+          const binding = getVaultRef(accountsPrivateKeysEncrypted);
+          if (binding) binding.apply(stored);
+          else accountsPrivateKeysEncrypted.value = stored;
           return;
         }
-        accountsPrivateKeysEncrypted.value = null;
+        // Replaced meanwhile, e.g. by an import in another window, whose decrypt is pending here.
+        if (expectedVault && stored && stored !== offered) return;
+        if (getVaultRef(accountsPrivateKeysEncrypted)) {
+          await writeVaultField(STORAGE_KEYS.privateKeyAccountsRaw, null, expectedVault);
+        } else {
+          accountsPrivateKeysEncrypted.value = null;
+        }
         arePrivateKeysAccountsUnreadable.value = false;
         // Imports reuse the removed accounts' indexes, possibly for another protocol.
         protocolLastActiveGlobalIdx.value = pickBy(
           protocolLastActiveGlobalIdx.value,
           (globalIdx) => globalIdx! < accountsRaw.value.length,
         );
-      })
-      .catch(() => { /* NOOP - dismissed */ });
+      }, () => { /* NOOP - dismissed */ })
+      .catch(handleUnknownError);
   }
 
   async function addPrivateKeyAccount(account: IAccountRaw): Promise<number> {
+    if (!isEncryptionKeyCurrent()) {
+      throw new Error('The password was changed in another window');
+    }
     if (arePrivateKeysAccountsUnreadable.value) {
       offerToRemoveUnreadablePrivateKeyAccounts();
       throw new ImportedAccountsUnreadableError();
     }
-    const length = privateKeyAccountsRaw.value.length || 0;
-    accountsPrivateKeysDecrypted.value = JSON.stringify([
-      ...privateKeyAccountsRaw.value,
-      account,
-    ]);
+    let importedIndex = 0;
+    await accountsPrivateKeysDecrypted.update((plaintext) => {
+      const currentAccounts: IAccountRaw[] = JSON.parse(plaintext || '[]');
+      // A second submit, or a retry after a conflict, finds it stored already.
+      const storedIdx = currentAccounts.findIndex(({ protocol, privateKey }) => (
+        protocol === account.protocol
+        && JSON.stringify(privateKey) === JSON.stringify(account.privateKey)
+      ));
+      importedIndex = storedIdx === -1 ? currentAccounts.length : storedIdx;
+      return JSON.stringify(storedIdx === -1 ? [...currentAccounts, account] : currentAccounts);
+    });
 
-    await watchUntilTruthy(() => privateKeyAccountsRaw.value.length === length + 1);
-    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+    await watchUntilTruthy(() => privateKeyAccountsRaw.value.length > importedIndex);
+    const globalIdx = accountsRaw.value.length + importedIndex;
+    return accounts.value.find((item) => item.globalIdx === globalIdx)?.globalIdx || 0;
   }
 
   /**
@@ -459,10 +490,13 @@ export const useAccounts = createCustomScopedComposable(() => {
     }
   }
 
+  /** On the web and the extension `WalletStorage.clear` empties the vault-backed refs first. */
   function resetAccounts() {
-    mnemonic.value = '';
+    if (IS_MOBILE_APP) {
+      mnemonic.value = '';
+      accountsPrivateKeysEncrypted.value = null;
+    }
     accountsRaw.value = [];
-    accountsPrivateKeysEncrypted.value = null;
     arePrivateKeysAccountsUnreadable.value = false;
     activeAccountGlobalIdx.value = 0;
   }
@@ -494,6 +528,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     isLocalAccountAddress,
     addRawAccount,
     addPrivateKeyAccount,
+    offerToRemoveUnreadablePrivateKeyAccounts,
     getAccountByProtocolAndAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,

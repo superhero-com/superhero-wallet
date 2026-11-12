@@ -6,6 +6,7 @@ import {
 } from 'vue';
 import type {
   IModalProps,
+  ISetPasswordResult,
   Protocol,
   ProtocolView,
   StatusIconType,
@@ -223,7 +224,7 @@ export function useModals() {
   }
 
   async function openSetPasswordModal(isRestoredWallet = false) {
-    return openModal<string>(MODAL_SET_PASSWORD, {
+    return openModal<ISetPasswordResult>(MODAL_SET_PASSWORD, {
       isRestoredWallet,
     });
   }

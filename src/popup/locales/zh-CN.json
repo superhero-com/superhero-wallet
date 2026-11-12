@@ -243,6 +243,8 @@
       "placeholder": "在此输入或粘贴你的私钥",
       "invalidPrivateKey": "这不是有效的 {protocol} 账户私钥。",
       "privateKeyExist": "该账户已在你的钱包中。",
+      "saveFailed": "无法保存该账户。请重试。",
+      "saveFailedUntilClosed": "无法在此设备上保存该账户。在你关闭钱包之前它仍可使用。重新打开钱包后请再次导入。",
       "helpTitle": "账户私钥",
       "helpMsg": "使用私钥导入到你钱包的账户无法通过你的助记词恢复，只能通过此私钥恢复。请确保安全备份此类账户的私钥。 <p> 切勿与任何人分享你的私钥，因为它可提供对你的账户与资金的完全控制！ </p>",
       "btnText": "导入账户"
@@ -876,7 +878,19 @@
       "newPasswordPlaceholder": "输入强新密码",
       "confirmNewPassword": "确认新密码",
       "reset": "重置密码",
-      "success": "你的密码已成功重置。请记住你的新密码。"
+      "success": "你的密码已成功重置。请记住你的新密码。",
+      "notChangedTitle": "密码未更改",
+      "unreadableDataMsg": "此设备上的部分钱包数据无法解密：{data}。没有任何更改。这些数据无法在应用内恢复。请先删除它，然后重试。",
+      "unreadableDataRemove": "删除它",
+      "unreadableData": {
+        "privateKeyAccounts": "导入的账户",
+        "preclaimedNames": "正在注册的名称",
+        "invites": "邀请",
+        "secureLoginTimeout": "自动锁定设置"
+      },
+      "legacyCopiesMsg": "旧版本的钱包在此设备上保存了一份你的钱包数据副本，新密码无法保护该副本。如果你在旧版本中添加了账户或邀请，请先在那里导出它们。然后删除旧副本并再次更改密码。",
+      "legacyCopiesRemove": "删除旧副本",
+      "failed": "保存时出错。没有做任何更改。请重试。"
     },
     "about": {
       "terms": "Terms",
@@ -1014,6 +1028,9 @@
     "names": {
       "balance-error": "你的账户余额不足以执行该交易。",
       "preclaim-not-mined": "{name} 的预注册交易未被打包。请重新注册该名称。",
+      "claimStorageUnreadableTitle": "正在注册的名称无法读取",
+      "claimStorageUnreadable": "此设备上无法解密你正在注册的名称，也无法在此恢复，因此无法完成它们的注册。没有发送任何交易。删除它们后即可再次注册名称。你已拥有的名称不受影响。",
+      "claimStorageUnreadableRemove": "删除它们",
       "pointer-added": "名称 {type} 成功！",
       "auto-extend": "自动延长",
       "tabs": {
@@ -1416,7 +1433,8 @@
       "warning-3": "继续之前请确保备份你的助记词和地址簿记录。",
       "warning-4": "此操作不可撤销！",
       "warningConfirm": "确定要继续吗？",
-      "reset": "重置"
+      "reset": "重置",
+      "failed": "无法重置钱包。没有删除任何内容。请重试。"
     },
     "appsBrowser": {
       "popularApps": "精选",
@@ -1480,7 +1498,13 @@
     "walletDataReadFailedMessage": "无法从此设备读取钱包数据。请关闭应用后重新打开。只有在问题持续出现且你有助记词时才重置钱包。没有助记词，重置后将无法再访问此钱包。",
     "storedWalletFoundTitle": "在此设备上找到钱包",
     "storedWalletFoundMessage": "应用启动时未能加载你的钱包，但它仍保存在此设备上。请重新加载应用以打开它。",
-    "storedWalletFoundAction": "重新加载"
+    "storedWalletFoundAction": "重新加载",
+    "walletCreatedElsewhereMessage": "已在另一个窗口中创建或导入了钱包。请重新加载此窗口以打开它。",
+    "walletStorageUnavailableTitle": "钱包存储不可用",
+    "walletStorageUnavailableMessage": "无法打开保存你钱包的浏览器存储。没有任何内容被更改或删除。请关闭其他钱包窗口后重试。如果问题持续，请检查浏览器是否允许钱包存储数据。",
+    "walletStorageRetryAction": "重试",
+    "walletDataSaveFailedTitle": "钱包数据未保存",
+    "walletDataSaveFailedMessage": "你的钱包数据已更新，但无法在此设备上保存该更新。请在关闭钱包前重试，并准备好你的助记词，以防无法保存。"
   },
   "biometricAuth": {
     "reason": "进行认证以访问你的钱包",

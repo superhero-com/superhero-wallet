@@ -2,6 +2,7 @@ import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import {
   APP_LINK_WEB,
+  LOCAL_STORAGE_PREFIX,
   NETWORK_NAME_TESTNET,
   PROTOCOLS,
   STORAGE_KEYS,
@@ -37,6 +38,62 @@ Cypress.Commands.add('getInputByTestId', (testId) => {
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(route || '', { onBeforeLoad });
 });
+
+// Cypress clears cookies and web storage, but IndexedDB needs an explicit reset
+// before a visit starts restoring the next fixture wallet.
+Cypress.Commands.add('clearAllIndexedDB', () => cy.then(() => (
+  window.indexedDB.databases().then((databases) => Cypress.Promise.all(databases
+    .filter(({ name }) => name)
+    .map(({ name }) => new Cypress.Promise((resolve, reject) => {
+      const request = window.indexedDB.deleteDatabase(name);
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => reject(new Error(`The fixture database "${name}" is still open`));
+    }))))
+)));
+
+// Read the persisted browser record directly; importing the app's vault service
+// here would create a separate cached instance in the Cypress support window.
+function readStoredVault(contentWindow) {
+  return new Cypress.Promise((resolve, reject) => {
+    const request = contentWindow.indexedDB.open(`${LOCAL_STORAGE_PREFIX}-vault`);
+    let missing = false;
+    request.onupgradeneeded = () => {
+      missing = true;
+      request.transaction.abort();
+    };
+    request.onerror = () => (missing ? resolve(null) : reject(request.error));
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('vault', 'readonly');
+      const read = transaction.objectStore('vault').get('current');
+      transaction.oncomplete = () => { db.close(); resolve(read.result ?? null); };
+      transaction.onabort = () => { db.close(); reject(transaction.error); };
+      transaction.onerror = () => { db.close(); reject(transaction.error); };
+    };
+  });
+}
+
+/** One read: `.should()` retries only the assertion, it never reads again. */
+Cypress.Commands.add('getStoredVault', () => cy.window().then(readStoredVault));
+
+/**
+ * Reads the stored vault again until `predicate` accepts it, as the app stores it
+ * asynchronously. Custom queries must be synchronous, so this polls instead of retrying.
+ */
+Cypress.Commands.add('waitForStoredVault', (predicate, { timeout = 10000 } = {}) => (
+  cy.window().then({ timeout: timeout + 1000 }, (contentWindow) => {
+    const deadline = Date.now() + timeout;
+    const poll = () => readStoredVault(contentWindow).then((vault) => {
+      if (predicate(vault)) return vault;
+      if (Date.now() > deadline) {
+        throw new Error(`The stored vault (revision ${vault?.revision}) never matched`);
+      }
+      return Cypress.Promise.delay(100).then(poll);
+    });
+    return poll();
+  })
+));
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
@@ -90,6 +147,7 @@ Cypress.Commands.add('loginUsingPassword', () => {
 });
 
 Cypress.Commands.add('login', (options, route) => {
+  cy.clearAllIndexedDB();
   cy.then(async () => {
     const salt = generateSalt();
     const encryptionKey = await generateEncryptionKey(TEST_ACCOUNT.password, salt);
@@ -110,7 +168,7 @@ Cypress.Commands.add('login', (options, route) => {
       activeAccountGlobalIdx = 0,
     } = options || {};
 
-    cy.openPopup(async (contentWindow) => {
+    cy.openPopup((contentWindow) => {
       /**
        * Full clear before seeding avoids stale keys from a prior test or
        * `cy.login` chain leaving half-initialized state that skips the
@@ -148,7 +206,8 @@ Cypress.Commands.add('login', (options, route) => {
 });
 
 Cypress.Commands.add('logout', () => {
-  cy.openPopup(() => localStorage.clear());
+  cy.clearAllIndexedDB();
+  cy.openPopup((contentWindow) => contentWindow.localStorage.clear());
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to, shouldLogin = false) => {

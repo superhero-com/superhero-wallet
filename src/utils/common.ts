@@ -11,8 +11,9 @@ import {
   Ref,
   ref,
   computed,
+  nextTick,
 } from 'vue';
-import { defer, isEqual, uniqWith } from 'lodash-es';
+import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
 import { ComposerTranslation } from 'vue-i18n';
@@ -61,6 +62,8 @@ import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { AVALANCHE_CONTRACT_ID } from '@/protocols/avalanche/config';
 import { POLYGON_POS_CONTRACT_ID } from '@/protocols/polygonPos/config';
+import { updateVaultSecret } from '@/lib/WalletVault';
+import { getStorageRefWrites, getVaultRef } from './vaultRef';
 import { decrypt, encrypt } from './crypto';
 
 /**
@@ -751,6 +754,20 @@ interface decryptedComputedOptions {
   onDecrypted?: (val: string | null) => any;
   /** The stored state can't be decrypted with the current key. */
   onDecryptFailed?: (error: unknown) => any;
+  /** Setting it replaces a stored value the key can't decrypt, e.g. a setting picked again. */
+  isReplacedWithoutReading?: boolean;
+  /**
+   * False while the stored data is already another key's, e.g. during a password change
+   * before its key is published. The view is kept: a new key or a lock follows.
+   */
+  isKeyCurrent?: () => boolean;
+}
+
+interface decryptedComputedUpdateOptions {
+  /** Taken before a step that can't be undone, e.g. sending a transaction. */
+  encryptionKey?: CryptoKey;
+  /** A lock meanwhile doesn't stop the write; a new key, password or a reset does. */
+  isLockAllowed?: boolean;
 }
 
 /**
@@ -766,54 +783,84 @@ export function decryptedComputed(
   let updating = false;
   let latestRun = 0;
   const decrypted = ref(defaultVal);
+  const vaultBinding = getVaultRef(encryptedState);
 
-  async function setEncryptedState(val: string, encryptionKey = key.value) {
+  /** The commit publishes the ciphertext to `encryptedState` before this resolves. */
+  async function writeVaultSecret(
+    encryptionKey: CryptoKey | undefined,
+    transform: (plaintext: string | null) => string,
+    { isLockAllowed = false, replace = false } = {},
+  ) {
+    if (!encryptionKey) throw new Error('The wallet is locked');
+    await updateVaultSecret(vaultBinding!.storageKey, encryptionKey, transform, () => {
+      if ((key.value || !isLockAllowed) && key.value !== encryptionKey) {
+        throw new Error('The wallet key changed while storing encrypted data');
+      }
+    }, { replace });
+  }
+
+  async function setEncryptedState(
+    val: string,
+    encryptionKey = key.value,
+    assertCurrent: () => void = () => {},
+  ) {
+    if (vaultBinding) {
+      await writeVaultSecret(encryptionKey, () => val, {
+        replace: !!options.isReplacedWithoutReading,
+      });
+      return;
+    }
     updating = true;
     try {
+      const ciphertext = await encrypt(encryptionKey!, val);
+      assertCurrent();
       // eslint-disable-next-line no-param-reassign
-      encryptedState.value = await encrypt(encryptionKey!, val);
-    } catch (e) {
-      handleUnknownError(e);
+      encryptedState.value = ciphertext;
     } finally {
       updating = false;
     }
+    // Resolved once the storage watcher saved it, e.g. a name's salt to the native storage.
+    const getLatestWrite = getStorageRefWrites(encryptedState);
+    if (getLatestWrite) {
+      await nextTick();
+      await getLatestWrite();
+    }
   }
 
-  watch([key, encryptedState], async ([newKey, newState], [oldKey]) => {
+  watch([key, encryptedState], async ([newKey, newState]) => {
+    if (vaultBinding) {
+      latestRun += 1;
+      const run = latestRun;
+      if (!newKey) {
+        decrypted.value = defaultVal;
+        return;
+      }
+      if (options.isKeyCurrent?.() === false) return;
+      try {
+        const plaintext = newState ? await decrypt(newKey, newState) : defaultVal;
+        if (run === latestRun && key.value === newKey && encryptedState.value === newState) {
+          decrypted.value = plaintext;
+          if (newState) options.onDecrypted?.(plaintext);
+        }
+      } catch (e) {
+        if (run === latestRun && key.value === newKey && encryptedState.value === newState) {
+          handleUnknownError(e);
+          decrypted.value = defaultVal;
+          options.onDecryptFailed?.(e);
+        }
+      }
+      return;
+    }
     if (!updating) {
       latestRun += 1;
       const run = latestRun;
       try {
-        /**
-         * Key rotation: re-encrypt under `newKey`. Must not use `decrypted.value`
-         * — a prior watch tick may still be awaiting `decrypt` for the old key
-         * (e.g. legacy-password rotation in `checkUserAuth` where `setEncryptionKey`
-         * changes twice in quick succession), leaving the ref on `defaultVal` and
-         * destroying real data if we encrypt that. Always recover plaintext from
-         * the persisted ciphertext with the key that produced it.
-         */
-        if (newKey && oldKey && !isEqual(newKey, oldKey) && newState) {
-          let plaintext: string;
-          try {
-            plaintext = await decrypt(oldKey, newState);
-          } catch {
-            /**
-             * Another watch tick may already have rewritten `newState` with
-             * `newKey`. In that case the old-key decrypt throws, but data is
-             * already safe at rest; refresh local plaintext without writing.
-             */
-            plaintext = await decrypt(newKey, newState);
+        if (newKey && newState) {
+          const plaintext = await decrypt(newKey, newState);
+          if (run === latestRun && key.value === newKey && encryptedState.value === newState) {
             decrypted.value = plaintext;
             options.onDecrypted?.(plaintext);
-            return;
           }
-          decrypted.value = plaintext;
-          options.onDecrypted?.(plaintext);
-          // Under the key the salt on disk derives, even if a lock cleared `key` meanwhile.
-          await setEncryptedState(plaintext, newKey);
-        } else if (newKey && newState) {
-          decrypted.value = await decrypt(newKey, newState);
-          options.onDecrypted?.(decrypted.value);
         } else if (newKey) {
           decrypted.value = defaultVal;
         }
@@ -838,9 +885,38 @@ export function decryptedComputed(
    * the same AES-GCM flow as extension/web, keyed by the per-install
    * mobile-data-key loaded in `useAuth`.
    */
-  return computed<string>({
+  const result = computed<string>({
     get: () => decrypted.value,
+    set: (val) => { setEncryptedState(val).catch(handleUnknownError); },
+  });
+  return Object.assign(result, {
+    /** Resolves once stored, so a failed write reaches the caller. */
     set: setEncryptedState,
+    async update(
+      transform: (plaintext: string) => string,
+      { encryptionKey: capturedKey, isLockAllowed = false }: decryptedComputedUpdateOptions = {},
+    ) {
+      const encryptionKey = capturedKey ?? key.value;
+      if (!encryptionKey) throw new Error('The wallet is locked');
+      if (!vaultBinding) {
+        const previousCiphertext = encryptedState.value;
+        const plaintext = previousCiphertext
+          ? await decrypt(encryptionKey, previousCiphertext)
+          : defaultVal;
+        // From the ciphertext: the decrypted view may lag behind a completed write.
+        await setEncryptedState(transform(plaintext), encryptionKey, () => {
+          // A lock keeps the mobile key; a new key or a newer ciphertext stops it.
+          if ((key.value && key.value !== encryptionKey)
+            || encryptedState.value !== previousCiphertext) {
+            throw new Error('The wallet changed while storing encrypted data');
+          }
+        });
+        return;
+      }
+      await writeVaultSecret(encryptionKey, (plaintext) => transform(plaintext ?? defaultVal), {
+        isLockAllowed,
+      });
+    },
   });
 }
 

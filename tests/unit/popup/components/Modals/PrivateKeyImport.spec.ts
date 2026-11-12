@@ -5,7 +5,8 @@ import { ref } from 'vue';
 
 import PrivateKeyImport from '@/popup/components/Modals/PrivateKeyImport.vue';
 import { useAccounts, useModals } from '@/composables';
-import { PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ImportedAccountsUnreadableError } from '@/lib/errors';
 import en from '@/popup/locales/en-US.json';
 
@@ -19,18 +20,19 @@ const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 const PRIVATE_KEY_HEX = 'aa'.repeat(32);
 const ModalStub = { template: '<div><slot /><slot name="footer" /></div>' };
 
-async function submitPrivateKey(addPrivateKeyAccount) {
+async function submitPrivateKey(addPrivateKeyAccount, accounts = ref([])) {
   const deps = {
     resolve: vi.fn(),
     setActiveAccountByGlobalIdx: vi.fn(),
     errorHandler: vi.fn(),
+    openDefaultModal: vi.fn(),
   };
   useAccounts.mockReturnValue({
-    accounts: ref([]),
+    accounts,
     addPrivateKeyAccount,
     setActiveAccountByGlobalIdx: deps.setActiveAccountByGlobalIdx,
   });
-  useModals.mockReturnValue({ openModal: vi.fn() });
+  useModals.mockReturnValue({ openModal: vi.fn(), openDefaultModal: deps.openDefaultModal });
 
   const wrapper = mount(PrivateKeyImport, {
     global: {
@@ -70,11 +72,53 @@ describe('PrivateKeyImport', () => {
     expect(wrapper.find('[data-cy=btn-import]').attributes('aria-disabled')).toBeUndefined();
   });
 
-  it('lets other import errors surface', async () => {
+  it('says the account was not saved when storing it fails', async () => {
     const error = new Error('Storage failed');
-    const { resolve, errorHandler } = await submitPrivateKey(vi.fn().mockRejectedValue(error));
+    const { resolve, errorHandler, openDefaultModal } = await submitPrivateKey(
+      vi.fn().mockRejectedValue(error),
+    );
 
     expect(resolve).not.toHaveBeenCalled();
+    expect(openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+      msg: en.modals.privateKeyImport.saveFailed,
+    }));
     expect(errorHandler).toHaveBeenCalledWith(error, expect.anything(), expect.anything());
+  });
+
+  it('says the account stays until the wallet closes when only the device storage failed', async () => {
+    const accounts = ref([]);
+    const { secretKey } = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum).resolveAccountRaw({
+      type: ACCOUNT_TYPES.privateKey,
+      isRestored: false,
+      protocol: PROTOCOLS.ethereum,
+      privateKey: Buffer.from(PRIVATE_KEY_HEX, 'hex'),
+    }, 0, 0);
+    const { openDefaultModal } = await submitPrivateKey(vi.fn(async () => {
+      // As on mobile: in the view, but its native write failed.
+      accounts.value = [{ protocol: PROTOCOLS.ethereum, secretKey }];
+      throw new Error('Keychain write failed');
+    }), accounts);
+
+    expect(openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+      msg: en.modals.privateKeyImport.saveFailedUntilClosed,
+    }));
+  });
+
+  it('imports once when submitted again before the first import is stored', async () => {
+    let finishImport;
+    const addPrivateKeyAccount = vi.fn(() => new Promise((resolve) => { finishImport = resolve; }));
+    const { wrapper, resolve } = await submitPrivateKey(addPrivateKeyAccount);
+    const button = wrapper.find('[data-cy=btn-import]');
+
+    expect(button.attributes('aria-disabled')).toBeDefined();
+    await button.trigger('click');
+    await wrapper.find('[data-cy=field-private-key] textarea').trigger('keydown.enter');
+    await flushPromises();
+    expect(addPrivateKeyAccount).toHaveBeenCalledTimes(1);
+
+    finishImport(1);
+    await flushPromises();
+    expect(resolve).toHaveBeenCalledTimes(1);
+    expect(button.attributes('aria-disabled')).toBeUndefined();
   });
 });

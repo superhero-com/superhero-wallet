@@ -28,6 +28,8 @@
             <SwitchButton
               :label="$t('pages.secureLogin.enablePasswordProtection')"
               :model-value="!isUsingDefaultPassword"
+              :disabled="isAuthenticating"
+              data-cy="password-protection"
               @update:modelValue="setPasswordEnabled"
             />
           </div>
@@ -179,13 +181,23 @@ import {
 import { Form, Field } from 'vee-validate';
 
 import type { ComponentRef } from '@/types';
-import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP } from '@/constants';
-import { useAuth, useModals, useUi } from '@/composables';
+import { AUTHENTICATION_TIMEOUTS, IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import {
-  clearDefaultPasswordSecret,
-  getDefaultPasswordSecret,
-  getOrCreateDefaultPasswordSecret,
-} from '@/composables/defaultPassword';
+  useAccounts,
+  useAuth,
+  useModals,
+  useUi,
+} from '@/composables';
+import { generateDefaultPasswordSecret } from '@/composables/defaultPassword';
+import {
+  discardLegacyCopies,
+  VaultLegacyConflictError,
+  VaultSecretUnreadableError,
+} from '@/lib/WalletVault';
+import type { VaultKey } from '@/lib/WalletVault';
+import { RejectedByUserError, WrongPasswordError } from '@/lib/errors';
+import { handleUnknownError } from '@/utils';
+import { tg } from '@/popup/plugins/i18n';
 
 import PageWrapper from '@/popup/components/PageWrapper.vue';
 import RadioButton from '@/popup/components/RadioButton.vue';
@@ -193,6 +205,13 @@ import SwitchButton from '@/popup/components/SwitchButton.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import InfoBox from '@/popup/components/InfoBox.vue';
+
+const UNREADABLE_DATA_LABELS: Partial<Record<VaultKey, string>> = {
+  [STORAGE_KEYS.privateKeyAccountsRaw]: 'pages.changePassword.unreadableData.privateKeyAccounts',
+  [STORAGE_KEYS.preclaimedNames]: 'pages.changePassword.unreadableData.preclaimedNames',
+  [STORAGE_KEYS.invitesEncrypted]: 'pages.changePassword.unreadableData.invites',
+  [STORAGE_KEYS.secureLoginTimeout]: 'pages.changePassword.unreadableData.secureLoginTimeout',
+};
 
 export default defineComponent({
   name: 'SecureLoginSettings',
@@ -221,14 +240,72 @@ export default defineComponent({
       canAuthenticateWithDevice,
       updatePassword,
       setPassword,
+      removeUnreadableSecret,
       secureLoginTimeoutDecrypted,
       isUsingDefaultPassword,
     } = useAuth();
+    const { offerToRemoveUnreadablePrivateKeyAccounts } = useAccounts();
     const {
       isBiometricLoginEnabled,
       setBiometricLoginEnabled,
     } = useUi();
-    const { openEnableBiometricLoginModal, openSetPasswordModal } = useModals();
+    const {
+      openConfirmModal,
+      openDefaultModal,
+      openEnableBiometricLoginModal,
+      openSetPasswordModal,
+    } = useModals();
+
+    /** Neither a wrong password nor data to remove: the change failed, e.g. storage full. */
+    function showPasswordNotChanged(error: unknown) {
+      handleUnknownError(error);
+      openDefaultModal({
+        icon: 'critical',
+        title: tg('pages.changePassword.notChangedTitle'),
+        msg: tg('pages.changePassword.failed'),
+      });
+    }
+
+    /**
+     * Says which data refused the password change, offering to remove it.
+     * `false` for other errors, e.g. a wrong password.
+     */
+    function offerPasswordChangeRecovery(error: unknown): boolean {
+      if (error instanceof VaultSecretUnreadableError) {
+        const label = UNREADABLE_DATA_LABELS[error.storageKey];
+        if (!label) return false;
+        const title = tg('pages.changePassword.notChangedTitle');
+        const msg = tg('pages.changePassword.unreadableDataMsg', { data: tg(label) });
+        // Their own removal also frees their indexes.
+        if (error.storageKey === STORAGE_KEYS.privateKeyAccountsRaw) {
+          offerToRemoveUnreadablePrivateKeyAccounts({ title, msg });
+          return true;
+        }
+        openConfirmModal({
+          title,
+          msg,
+          icon: 'critical',
+          buttonMessage: tg('pages.changePassword.unreadableDataRemove'),
+        }).then(
+          () => removeUnreadableSecret(error.storageKey, error.vault).catch(showPasswordNotChanged),
+          () => { /* NOOP - kept */ },
+        );
+        return true;
+      }
+      if (error instanceof VaultLegacyConflictError) {
+        openConfirmModal({
+          title: tg('pages.changePassword.notChangedTitle'),
+          msg: tg('pages.changePassword.legacyCopiesMsg'),
+          icon: 'critical',
+          buttonMessage: tg('pages.changePassword.legacyCopiesRemove'),
+        }).then(
+          () => discardLegacyCopies(error.expected).catch(showPasswordNotChanged),
+          () => { /* NOOP - kept */ },
+        );
+        return true;
+      }
+      return false;
+    }
 
     async function setNewPassword() {
       if (isAuthenticating.value) {
@@ -244,8 +321,12 @@ export default defineComponent({
         const scrollEl: HTMLElement = wrapper.value?.contentEl?.$el;
         scrollEl?.scrollBy(0, scrollEl?.scrollWidth);
       } catch (error) {
-        isAuthFailed.value = true;
         isPasswordChangedSuccessfully.value = false;
+        if (error instanceof WrongPasswordError) {
+          isAuthFailed.value = true;
+        } else if (!offerPasswordChangeRecovery(error)) {
+          showPasswordNotChanged(error);
+        }
       } finally {
         isAuthenticating.value = false;
         currentPassword.value = '';
@@ -256,41 +337,44 @@ export default defineComponent({
 
     /**
      * Toggling password protection on/off no longer pivots on
-     * the hardcoded `STUB_ACCOUNT.password`. When disabling, we generate
-     * (or reuse) a per-install 256-bit random secret; when enabling, we
-     * require the user to type a real password AND clear the stored
-     * random secret so nothing is left dangling. This function is also
+     * the hardcoded `STUB_ACCOUNT.password`. When disabling, a new per-install
+     * 256-bit random secret becomes the password; when enabling, the user's
+     * password replaces it. Either way `setPassword` stores the secret, or its
+     * removal, in the same commit as the salt. This function is also
      * the natural rotation point for legacy wallets still encrypted
      * with `LEGACY_DEFAULT_PASSWORD` — toggling off+on rotates them
      * onto a fresh per-install secret through the `setPassword` call.
      */
     async function setPasswordEnabled(val: boolean) {
+      // Both rotate the password: one at a time.
+      if (isAuthenticating.value) {
+        return;
+      }
+      isAuthenticating.value = true;
       try {
         if (val) {
           /**
            * Do NOT flip `isUsingDefaultPassword` to `false` before the password
            * is actually set. `openSetPasswordModal()` can reject (user cancels
-           * the dialog), and this `catch` swallows the rejection — leaving the
-           * ref desynced from the on-disk state and producing knock-on UI bugs.
+           * the dialog), leaving the ref desynced from the on-disk state.
            */
-          const passwordToSet = await openSetPasswordModal();
-          const defaultPasswordSecret = await getDefaultPasswordSecret();
-          await setPassword(passwordToSet);
-
-          if (defaultPasswordSecret && passwordToSet === defaultPasswordSecret) {
-            isUsingDefaultPassword.value = true;
-            return;
-          }
-
-          isUsingDefaultPassword.value = false;
-          await clearDefaultPasswordSecret();
+          const { password, isDefaultPasswordSecret } = await openSetPasswordModal();
+          await setPassword(password, undefined, { isDefaultPasswordSecret });
+          isUsingDefaultPassword.value = isDefaultPasswordSecret;
           return;
         }
 
-        const passwordToSet = await getOrCreateDefaultPasswordSecret();
-        await setPassword(passwordToSet);
+        await setPassword(generateDefaultPasswordSecret(), undefined, {
+          isDefaultPasswordSecret: true,
+        });
         isUsingDefaultPassword.value = true;
-      } catch (error) { /* NOOP */ }
+      } catch (error) {
+        if (!(error instanceof RejectedByUserError) && !offerPasswordChangeRecovery(error)) {
+          showPasswordNotChanged(error);
+        }
+      } finally {
+        isAuthenticating.value = false;
+      }
     }
 
     function msToMinutes(ms: number) {
@@ -313,6 +397,7 @@ export default defineComponent({
       isDeviceAuthenticationAvailable,
       isPasswordChangedSuccessfully,
       isAuthFailed,
+      isAuthenticating,
       isUsingDefaultPassword,
       secureLoginTimeoutDecrypted,
       currentPassword,

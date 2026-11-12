@@ -10,6 +10,7 @@ describe('ResetWalletModal', () => {
     isMobileApp = false,
     sendMessage = vi.fn(() => Promise.resolve()),
     beforeMount = async () => {},
+    resetAccounts = vi.fn(),
   }) {
     vi.resetModules();
     vi.doMock('@/constants', async () => ({
@@ -19,7 +20,7 @@ describe('ResetWalletModal', () => {
     }));
     vi.doMock('vue-router', () => ({ useRouter: () => ({ push: vi.fn() }) }));
     vi.doMock('@/composables', () => ({
-      useAccounts: () => ({ resetAccounts: vi.fn() }),
+      useAccounts: () => ({ resetAccounts }),
       useAeSdk: () => ({ disconnectDapps: vi.fn() }),
       useModals: () => ({ closeAllModals: vi.fn() }),
       useNetworks: () => ({ resetNetworks: vi.fn() }),
@@ -35,7 +36,7 @@ describe('ResetWalletModal', () => {
     await beforeMount();
     return shallowMount(ResetWalletModal, {
       props: { resolve: vi.fn(), reject: vi.fn() },
-      global: { mocks: { $t: (key) => key } },
+      global: { mocks: { $t: (key) => key }, renderStubDefaultSlot: true },
     });
   }
 
@@ -86,6 +87,68 @@ describe('ResetWalletModal', () => {
     expect(window.location.reload).toHaveBeenCalled();
   });
 
+  it('clears malformed vault data before resetting the account views', async () => {
+    let vault;
+    const resetAccounts = vi.fn(async () => {
+      await vault.ensureVaultReady();
+      expect(vault.readVault().values.mnemonic).toBeNull();
+    });
+    const wrapper = await mountResetWallet({
+      isExtension: false,
+      resetAccounts,
+      async beforeMount() {
+        vault = await import('@/lib/WalletVault');
+        await new Promise((resolve, reject) => {
+          const request = indexedDB.open(vault.VAULT_DB_NAME, 1);
+          request.onupgradeneeded = () => request.result.createObjectStore(vault.VAULT_STORE_NAME);
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            const db = request.result;
+            const transaction = db.transaction(vault.VAULT_STORE_NAME, 'readwrite');
+            transaction.objectStore(vault.VAULT_STORE_NAME)
+              .put({ malformed: true }, vault.VAULT_RECORD_KEY);
+            transaction.oncomplete = () => { db.close(); resolve(); };
+            transaction.onabort = () => { db.close(); reject(transaction.error); };
+          };
+        });
+        await expect(vault.ensureVaultReady()).rejects.toThrow('The stored wallet vault is invalid');
+      },
+    });
+
+    await wrapper.vm.onReset();
+
+    expect(resetAccounts).toHaveBeenCalledOnce();
+    expect(window.location.reload).toHaveBeenCalled();
+  });
+
+  it('deletes nothing, not even the older copies, and says so when the vault reset fails', async () => {
+    const resetAccounts = vi.fn();
+    const { LOCAL_STORAGE_PREFIX, STORAGE_KEYS } = await import('@/constants');
+    const legacyMnemonic = `${LOCAL_STORAGE_PREFIX}_${STORAGE_KEYS.mnemonic}`;
+    localStorage.setItem(legacyMnemonic, JSON.stringify('legacy-ciphertext'));
+    const wrapper = await mountResetWallet({
+      isExtension: true,
+      resetAccounts,
+      async beforeMount() {
+        vi.spyOn(indexedDB, 'open').mockImplementation(() => {
+          throw new DOMException('Storage disabled', 'SecurityError');
+        });
+      },
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await wrapper.vm.onReset();
+
+    // In this dialog, which covers the other modals.
+    expect(wrapper.find('[role=alert]').text()).toBe('pages.resetWallet.failed');
+    expect(wrapper.props('resolve')).not.toHaveBeenCalled();
+    expect(resetAccounts).not.toHaveBeenCalled();
+    expect(localStorage.getItem(legacyMnemonic)).toBe(JSON.stringify('legacy-ciphertext'));
+    expect(globalThis.browser.storage.local.clear).not.toHaveBeenCalled();
+    expect(globalThis.browser.runtime.sendMessage).not.toHaveBeenCalled();
+    expect(window.location.reload).not.toHaveBeenCalled();
+  });
+
   it('removes the wallet secrets on mobile before reloading, even when the native clear fails', async () => {
     // jsdom's `localStorage.clear()` also wipes the web fallback, so record the native deletes.
     const removedFromKeychain = new Set();
@@ -114,6 +177,8 @@ describe('ResetWalletModal', () => {
       STORAGE_KEYS.mnemonic,
       STORAGE_KEYS.mobileDataKey,
       STORAGE_KEYS.privateKeyAccountsRaw,
+      // Names left under the old key would block every claim of the next wallet.
+      STORAGE_KEYS.preclaimedNames,
     ]));
   });
 });

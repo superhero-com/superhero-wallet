@@ -101,6 +101,7 @@ describe('useAccounts', () => {
         isAuthenticated: isAuthenticatedRef,
         isMnemonicUnreadable: isMnemonicUnreadableRef,
         encryptionKey: encryptionKeyRef,
+        isEncryptionKeyCurrent: () => true,
       }),
     }));
   });
@@ -407,8 +408,7 @@ describe('useAccounts', () => {
       const accounts = await bootUnreadable();
 
       await attemptImport(accounts);
-      await flushAsync();
-      expect(storedPrivateKeyAccounts()).toBeNull();
+      await vi.waitFor(() => expect(storedPrivateKeyAccounts()).toBeNull());
       expect(WalletStorage.get(STORAGE_KEYS.protocolLastActiveAccountIdx))
         .toEqual({ [PROTOCOLS.aeternity]: 0 });
 
@@ -500,13 +500,22 @@ describe('useAccounts', () => {
       expect(openConfirmModalMock).not.toHaveBeenCalled();
     });
 
-    it('accepts imports again after a reset', async () => {
+    it('accepts imports again after a reset, without the ones from before it', async () => {
       const accounts = await bootUnreadable();
+      // The instances the app uses, not the ones imported before `resetModules`.
+      const { WalletStorage: walletStorage } = await import('@/lib/WalletStorage');
+      const { writeVaultField } = await import('@/lib/WalletVault');
 
+      // As the reset modal does it: one vault reset, then the views.
+      await walletStorage.clear();
       accounts.resetAccounts();
       await flushAsync();
       expect(accounts.areAccountsReady.value).toBe(true);
+      expect(walletStorage.get(STORAGE_KEYS.privateKeyAccountsRaw)).toBeNull();
+      expect(accountTypes(accounts)).toEqual([]);
 
+      // The wallet created next stores its seed under the new key.
+      await writeVaultField(STORAGE_KEYS.mnemonic, await encrypt(currentKey, 'new-wallet-seed'));
       accounts.addRawAccount(seedAccount);
       await expect(accounts.addPrivateKeyAccount(secondImportedRaw)).resolves.toBe(1);
       expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);
@@ -637,7 +646,8 @@ describe('useAccounts', () => {
         const accounts = await bootWithFailingRead({ isMobile });
 
         await attemptImport(accounts);
-        await flushAsync();
+        if (isMobile) await flushAsync();
+        else await vi.waitFor(async () => expect(await readStored()).toBeNull());
         await accounts.addPrivateKeyAccount(secondImportedRaw);
 
         expect(accountTypes(accounts)).toEqual([ACCOUNT_TYPES.hdWallet, ACCOUNT_TYPES.privateKey]);

@@ -1,4 +1,4 @@
-import { AUTHENTICATION_TIMEOUTS, STORAGE_KEYS } from '@/constants';
+import { AUTHENTICATION_TIMEOUTS, NETWORK_NAME_TESTNET, STORAGE_KEYS } from '@/constants';
 import {
   encrypt,
   generateEncryptionKey,
@@ -7,6 +7,22 @@ import {
 } from '@/utils';
 import locale from '../../../src/popup/locales/en-US.json';
 import { TEST_ACCOUNT } from '../../fixtures/account';
+
+function setPassword(password) {
+  cy.get('[data-cy=password] input')
+    .type(password)
+    .get('[data-cy=confirm-password] input')
+    .type(password)
+    .get('[data-cy=btn-set-password]')
+    .click();
+}
+
+function unlock(password) {
+  cy.get('[data-cy=password] input')
+    .type(password)
+    .get('[data-cy=login-btn]')
+    .click();
+}
 
 function submitPasswordChange(currentPassword, newPassword) {
   cy.get('[data-cy=current-password] input')
@@ -73,10 +89,7 @@ describe('Test cases for login functionality', () => {
     cy.contains('.modal', locale.modals.unreadablePrivateKeyAccounts.title)
       .find('[data-cy=to-confirm]')
       .click();
-    cy.window()
-      .its('localStorage')
-      .invoke('getItem', prepareStorageKey([STORAGE_KEYS.privateKeyAccountsRaw]))
-      .should('eq', 'null');
+    cy.waitForStoredVault((vault) => vault?.values[STORAGE_KEYS.privateKeyAccountsRaw] === null);
 
     cy.get('[data-cy=btn-import]')
       .click();
@@ -124,6 +137,11 @@ describe('Test cases for login functionality', () => {
       .eq(timeoutIdx)
       .click()
       .should('have.class', 'active');
+    // The copy the older version stored goes once the first commit is on the disk.
+    cy.window()
+      .its('localStorage')
+      .invoke('getItem', prepareStorageKey([STORAGE_KEYS.mnemonic]))
+      .should('be.null');
 
     submitPasswordChange('wrong-password', newPassword);
     cy.get('[data-cy=current-password] [data-cy=input-field-message]')
@@ -133,17 +151,19 @@ describe('Test cases for login functionality', () => {
 
     submitPasswordChange(TEST_ACCOUNT.password, newPassword);
     cy.get('.info-box')
-      .should('contain', locale.pages.changePassword.success)
+      .should('contain', locale.pages.changePassword.success);
 
-      // Pages left behind stay mounted, each with its own header.
-      .get('[data-cy=back-arrow]:visible')
+    // Pages left behind stay mounted, each with its own header.
+    cy.get('[data-cy=back-arrow]:visible')
       .click()
       .location('pathname')
       .should('eq', '/more/settings')
       .get('[data-cy=back-arrow]:visible')
       .click()
       .get('[data-cy=lock-wallet]')
-      .click()
+      .should('be.visible');
+    // A restart reads the new password's data back from the storage.
+    cy.reload()
       .get('[data-cy=password] input')
       .type(TEST_ACCOUNT.password)
       .get('[data-cy=login-btn]')
@@ -166,5 +186,78 @@ describe('Test cases for login functionality', () => {
       .get('.timeout')
       .eq(timeoutIdx)
       .should('have.class', 'active');
+  });
+
+  it('turns the password protection off and on again, then opens only with the new password', () => {
+    const newPassword = 'newPassword123';
+    const secretKey = STORAGE_KEYS.defaultPasswordSecret;
+
+    cy.login()
+      .openSecureLoginSettings()
+      .get('[data-cy=password-protection] input')
+      .should('be.checked')
+      .get('[data-cy=password-protection] .switch')
+      .click();
+    // Tests ask for the password even without protection, so the vault shows it is off.
+    cy.waitForStoredVault((vault) => !!vault?.values[secretKey])
+      .get('[data-cy=password-protection] input')
+      .should('not.be.checked')
+      .get('[data-cy=password-protection] .switch')
+      .click();
+    setPassword(newPassword);
+    cy.waitForStoredVault((vault) => vault?.values[secretKey] === null)
+      .get('[data-cy=password-protection] input')
+      .should('be.checked');
+
+    cy.reload();
+    unlock(TEST_ACCOUNT.password);
+    cy.get('[data-cy=password] [data-cy=input-field-message]')
+      .should('contain', locale.pages.secureLogin.login.error)
+      .get('[data-cy=password] input')
+      .clear();
+    unlock(newPassword);
+    cy.get('[data-cy=password]')
+      .should('not.exist');
+  });
+
+  it('creates a wallet after a reset, which opens with its password after a restart', () => {
+    const newPassword = 'newPassword123';
+
+    cy.login()
+      .openPageMore()
+      .get('[data-cy=settings]')
+      .click()
+      .get('[data-cy=reset-wallet-settings]')
+      .click()
+      .get('.reset-wallet-button')
+      .click()
+      .get('[data-cy=btn-reset-wallet]')
+      .click();
+    cy.waitForStoredVault((vault) => vault?.reset === true)
+      .get('[data-cy=checkbox]')
+      .should('be.visible');
+    // The reset removed the network too.
+    cy.window().then((win) => {
+      // eslint-disable-next-line no-param-reassign
+      win.localStorage[prepareStorageKey([STORAGE_KEYS.activeNetworkName])] = (
+        JSON.stringify(NETWORK_NAME_TESTNET)
+      );
+    });
+    cy.reload()
+      .get('[data-cy=checkbox]')
+      .click()
+      .get('[data-cy=generate-wallet]')
+      .click()
+      .get('[data-cy=btn-add-aeternity]')
+      .click();
+    setPassword(newPassword);
+    cy.get('[data-cy=balance-info]')
+      .should('be.visible');
+    cy.waitForStoredVault((vault) => !!vault?.values[STORAGE_KEYS.mnemonic] && !vault.reset);
+
+    cy.reload();
+    unlock(newPassword);
+    cy.get('[data-cy=balance-info]')
+      .should('be.visible');
   });
 });

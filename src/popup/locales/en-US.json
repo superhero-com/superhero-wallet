@@ -243,6 +243,8 @@
       "placeholder": "Enter or paste your private key here",
       "invalidPrivateKey": "This is not a valid {protocol} account private key.",
       "privateKeyExist": "This account is already in your wallet.",
+      "saveFailed": "The account couldn't be saved. Please try again.",
+      "saveFailedUntilClosed": "The account couldn't be saved on this device. It stays available until you close the wallet. Import it again after reopening it.",
       "helpTitle": "Account private key",
       "helpMsg": "An account imported into your wallet with private key cannot be restored with your seed phrase but with this private key only. Make sure you back up such accounts storing securely their private keys. <p> Never share your private key with anyone else as it provides full control over your account and funds! </p>",
       "btnText": "Import Account"
@@ -883,7 +885,19 @@
       "newPasswordPlaceholder": "Enter strong new password",
       "confirmNewPassword": "Confirm new password",
       "reset": "Reset password",
-      "success": "Your password has been successfully reset. Please remember your new password."
+      "success": "Your password has been successfully reset. Please remember your new password.",
+      "notChangedTitle": "Password not changed",
+      "unreadableDataMsg": "Some wallet data on this device can't be decrypted: {data}. Nothing was changed. It can't be recovered in the app. Remove it, then try again.",
+      "unreadableDataRemove": "Remove it",
+      "unreadableData": {
+        "privateKeyAccounts": "the imported accounts",
+        "preclaimedNames": "the names being claimed",
+        "invites": "the invites",
+        "secureLoginTimeout": "the auto-lock setting"
+      },
+      "legacyCopiesMsg": "An older version of the wallet saved its own copy of your wallet data on this device, which the new password wouldn't protect. If you added accounts or invites in that version, export them there first. Then remove the old copy and change the password again.",
+      "legacyCopiesRemove": "Remove old copy",
+      "failed": "Something went wrong while saving it. Nothing was changed. Please try again."
     },
     "about": {
       "terms": "Terms",
@@ -1021,6 +1035,9 @@
     "names": {
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "preclaim-not-mined": "The preclaim of {name} was not mined. Please register the name again.",
+      "claimStorageUnreadableTitle": "Names being claimed unreadable",
+      "claimStorageUnreadable": "The names you are claiming can't be decrypted on this device and can't be recovered here, so their claims can't be completed. Nothing was sent. Remove them to claim names again. Names you already own are not affected.",
+      "claimStorageUnreadableRemove": "Remove them",
       "pointer-added": "Name {type} successful!",
       "auto-extend": "Auto-extend",
       "tabs": {
@@ -1423,7 +1440,8 @@
       "warning-3": "Make sure you backup your seed phrase and address book records before proceeding.",
       "warning-4": "This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
-      "reset": "Reset"
+      "reset": "Reset",
+      "failed": "The wallet couldn't be reset. Nothing was deleted. Please try again."
     },
     "appsBrowser": {
       "popularApps": "Featured",
@@ -1487,7 +1505,13 @@
     "walletDataReadFailedMessage": "Your wallet data couldn't be read from this device. Close the app and open it again. Reset the wallet only if this keeps happening and you have your seed phrase. Without it, a reset loses access to this wallet.",
     "storedWalletFoundTitle": "Wallet found on this device",
     "storedWalletFoundMessage": "Your wallet couldn't be loaded when the app started, but it's still stored on this device. Reload the app to open it.",
-    "storedWalletFoundAction": "Reload"
+    "storedWalletFoundAction": "Reload",
+    "walletCreatedElsewhereMessage": "A wallet was created or imported in another window. Reload this one to open it.",
+    "walletStorageUnavailableTitle": "Wallet storage unavailable",
+    "walletStorageUnavailableMessage": "The browser storage that holds your wallet couldn't be opened. Nothing was changed or deleted. Close other wallet windows and try again. If this keeps happening, check that the browser lets the wallet store data.",
+    "walletStorageRetryAction": "Try again",
+    "walletDataSaveFailedTitle": "Wallet data not saved",
+    "walletDataSaveFailedMessage": "Your wallet data was updated, but the update couldn't be saved on this device. Try again before closing the wallet, and keep your seed phrase at hand in case it can't be saved."
   },
   "biometricAuth": {
     "reason": "Authenticate to access your wallet",

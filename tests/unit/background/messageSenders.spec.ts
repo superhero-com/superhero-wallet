@@ -52,6 +52,7 @@ describe('background message senders', () => {
       storage: {
         session: {
           get: async (key) => ({ [key]: session[key] }),
+          set: async (values) => { Object.assign(session, values); },
           remove: async (key) => { delete session[key]; },
         },
       },
@@ -194,6 +195,60 @@ describe('background message senders', () => {
       await sendMessage(setSessionTimeout(null), CONTENT_SCRIPT);
       await vi.advanceTimersByTimeAsync(1000);
 
+      expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBeNull();
+    });
+  });
+
+  describe('session mutations', () => {
+    const replacement = Buffer.alloc(32, 7).toString('base64');
+    const mutation = (payload) => ({ target: 'background', method: 'mutateSessionKey', payload });
+
+    it('stores the key requested by an extension page and reports the result', async () => {
+      await loadListener();
+      expect(await sendMessage(mutation({ operation: 'set', key: replacement }), POPUP_WINDOW))
+        .toEqual({ ok: true });
+      expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBe(replacement);
+    });
+
+    it.each(['set', 'clear', 'clearIfMatching'])('rejects a content script mutation: %s', async (operation) => {
+      await loadListener();
+      expect(await sendMessage(mutation({ operation, key: replacement }), CONTENT_SCRIPT))
+        .toBe(NO_RESPONSE);
+      expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBe(SESSION_KEY_BASE64);
+    });
+
+    it('does not let a cancelled expiry waiting behind a write delete the new session', async () => {
+      await loadListener();
+      vi.useFakeTimers();
+      let releaseWrite;
+      browser.storage.session.set = (values) => new Promise((resolve) => {
+        releaseWrite = () => { Object.assign(session, values); resolve(); };
+      });
+      const writing = sendMessage(mutation({ operation: 'set', key: replacement }), POPUP_WINDOW);
+      await vi.waitFor(() => expect(releaseWrite).toBeDefined());
+      await sendMessage(setSessionTimeout(1000), OFFSCREEN_DOCUMENT);
+      vi.advanceTimersByTime(1000);
+      await sendMessage(setSessionTimeout(null), OFFSCREEN_DOCUMENT);
+      releaseWrite();
+      await writing;
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBe(replacement);
+      const { getPlatformInfo } = browser.runtime;
+      getPlatformInfo.mockClear();
+      await vi.advanceTimersByTimeAsync(20000);
+      expect(getPlatformInfo).toHaveBeenCalledTimes(1);
+      await sendMessage(setSessionTimeout(0), OFFSCREEN_DOCUMENT);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    it('expires a replacement key at the existing deadline without a holding page', async () => {
+      await loadListener();
+      vi.useFakeTimers();
+      await sendMessage(setSessionTimeout(1000), OFFSCREEN_DOCUMENT);
+      await vi.advanceTimersByTimeAsync(500);
+      await sendMessage(mutation({ operation: 'set', key: replacement }), POPUP_WINDOW);
+      await vi.advanceTimersByTimeAsync(500);
       expect(await sendMessage(GET_SESSION_KEY, OFFSCREEN_DOCUMENT)).toBeNull();
     });
   });

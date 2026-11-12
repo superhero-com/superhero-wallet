@@ -11,6 +11,7 @@ import { encode, Encoding } from '@aeternity/aepp-sdk';
 const MNEMONIC = 'legal winner thank year wave sausage worth useful legal winner thank yellow';
 const PASSWORD = 'Pa55-w0rd!';
 const NEW_PASSWORD = 'N3w-Pa55-w0rd!';
+let vaultReader;
 
 function randomKey() {
   return Buffer.from(globalThis.crypto.getRandomValues(new Uint8Array(32)));
@@ -19,8 +20,11 @@ function randomKey() {
 const toHex = (secretKey) => Buffer.from(secretKey).toString('hex');
 
 function readStorage() {
-  return Object.fromEntries(Object.keys(localStorage)
+  const stored = Object.fromEntries(Object.keys(localStorage)
     .map((key) => [key, localStorage.getItem(key)]));
+  // Include the authoritative database snapshot when inspecting encrypted data.
+  if (vaultReader) stored['sh-wallet_vault-v1'] = JSON.stringify(vaultReader());
+  return stored;
 }
 
 /** Names the encodings of the key found anywhere in the storage. */
@@ -44,10 +48,11 @@ async function waitForInvitesUnderCurrentKey(auth) {
   const { WalletStorage } = await import('@/lib/WalletStorage');
   const { STORAGE_KEYS } = await import('@/constants');
   const { decrypt } = await import('@/utils/crypto');
-  await vi.waitFor(() => decrypt(
-    auth.encryptionKey.value,
-    WalletStorage.get(STORAGE_KEYS.invitesEncrypted),
-  ));
+  const { refreshVault } = await import('@/lib/WalletVault');
+  await vi.waitFor(async () => {
+    await refreshVault();
+    await decrypt(auth.encryptionKey.value, WalletStorage.get(STORAGE_KEYS.invitesEncrypted));
+  });
 }
 
 /** Stores what changing the password in another window does. This one doesn't see it. */
@@ -67,9 +72,14 @@ async function changePasswordInAnotherWindow(auth) {
     auth.encryptionKey.value,
     WalletStorage.get(STORAGE_KEYS.invitesEncrypted),
   );
-  WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(salt));
-  WalletStorage.set(STORAGE_KEYS.mnemonic, await encrypt(newKey, MNEMONIC));
-  WalletStorage.set(STORAGE_KEYS.invitesEncrypted, await encrypt(newKey, storedInvites));
+  const { readVault, commitVault } = await import('@/lib/WalletVault');
+  const snapshot = readVault();
+  await commitVault(snapshot, {
+    ...snapshot.values,
+    [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
+    [STORAGE_KEYS.mnemonic]: await encrypt(newKey, MNEMONIC),
+    [STORAGE_KEYS.invitesEncrypted]: await encrypt(newKey, storedInvites),
+  });
 }
 
 describe('useInvites: invite keys at rest', () => {
@@ -78,6 +88,7 @@ describe('useInvites: invite keys at rest', () => {
     vi.doUnmock('@/constants');
     vi.doUnmock('@/lib/SecureMobileStorage');
     localStorage.clear();
+    vaultReader = undefined;
 
     vi.doMock('@aparajita/capacitor-biometric-auth', () => ({
       BiometricAuth: {
@@ -87,7 +98,10 @@ describe('useInvites: invite keys at rest', () => {
     }));
     vi.doMock('@/composables/modals', () => ({
       useModals: () => ({
-        openSetPasswordModal: vi.fn().mockResolvedValue(PASSWORD),
+        openSetPasswordModal: vi.fn().mockResolvedValue({
+          password: PASSWORD,
+          isDefaultPasswordSecret: false,
+        }),
         openPasswordLoginModal: vi.fn().mockResolvedValue(undefined),
         openBiometricLoginModal: vi.fn(),
         openEnableBiometricLoginModal: vi.fn(),
@@ -122,6 +136,9 @@ describe('useInvites: invite keys at rest', () => {
 
   /** Loads the modules after a restart, as the app does. */
   async function load() {
+    const { ensureVaultReady, readVault } = await import('@/lib/WalletVault');
+    await ensureVaultReady();
+    vaultReader = readVault;
     await import('@/protocols/registerAdapters');
     const { useAuth } = await import('@/composables/auth');
     const { useInvites } = await import('@/composables/invites');
@@ -323,20 +340,22 @@ describe('useInvites: invite keys at rest', () => {
     await addInvite(createdBefore);
     await changePasswordInAnotherWindow(auth);
 
-    await expect(addInvite(randomKey())).rejects.toThrow('another window');
+    // Locked until the new password is entered here.
+    expect(auth.encryptionKey.value).toBeUndefined();
+    await expect(addInvite(randomKey())).rejects.toThrow('locked');
     const { invites } = await restart(NEW_PASSWORD);
     await expectInvites(invites, [createdBefore]);
   });
 
-  it('changes no password in a window that missed a password change in another one', async () => {
+  it('refuses a password change in a window that a change in another window locked', async () => {
     await createWallet();
     const { auth, addInvite } = await unlock();
     const createdBefore = randomKey();
     await addInvite(createdBefore);
     await changePasswordInAnotherWindow(auth);
 
-    // This window still opens its copy of the seed with the old password.
-    await expect(auth.updatePassword(PASSWORD, 'Th1rd-Pa55-w0rd!')).rejects.toThrow('another window');
+    // This window locked, rather than keep a key that opens nothing now.
+    await expect(auth.updatePassword(PASSWORD, 'Th1rd-Pa55-w0rd!')).rejects.toThrow('locked');
     const { invites } = await restart(NEW_PASSWORD);
     await expectInvites(invites, [createdBefore]);
   });
@@ -352,6 +371,7 @@ describe('useInvites: invite keys at rest', () => {
     const expectedKeys = [toHex(createdLater), toHex(migratedFromVuex)].sort();
     const legacyInvitesKey = composeStorageKeys(STORAGE_KEYS.invites);
     const encryptedInvitesKey = composeStorageKeys(STORAGE_KEYS.invitesEncrypted);
+    const { VAULT_STORAGE_KEY } = await import('@/lib/WalletVault');
     const vuexState = {
       invites: { invites: [{ secretKey: migratedFromVuex.toJSON(), createdAt: 1 }] },
       permissions: { 'aepp.example.com': { host: 'aepp.example.com', address: true } },
@@ -371,7 +391,7 @@ describe('useInvites: invite keys at rest', () => {
       const inviteState = JSON.stringify({
         stateInvites: state?.invites?.invites || [],
         plaintextInvites: storage[legacyInvitesKey] || null,
-        encryptedInvites: storage[encryptedInvitesKey] || null,
+        encryptedInvites: storage[VAULT_STORAGE_KEY] || storage[encryptedInvitesKey] || null,
       });
       if (inviteState !== previousInviteState) {
         snapshots.push(JSON.stringify(storage));
@@ -405,7 +425,9 @@ describe('useInvites: invite keys at rest', () => {
       const stored = JSON.parse(snapshot);
       const stateInvites = JSON.parse(stored.state || 'null')?.invites?.invites || [];
       const plaintextInvites = JSON.parse(stored[legacyInvitesKey] || 'null') || [];
-      const ciphertext = JSON.parse(stored[encryptedInvitesKey] || 'null');
+      const vault = JSON.parse(stored[VAULT_STORAGE_KEY] || 'null');
+      const ciphertext = vault ? vault.values[STORAGE_KEYS.invitesEncrypted]
+        : JSON.parse(stored[encryptedInvitesKey] || 'null');
       const encryptedInvites = ciphertext
         ? JSON.parse(await decrypt(encryptionKey, ciphertext))
         : [];
@@ -604,14 +626,19 @@ describe('useInvites: invite keys at rest', () => {
     expect(changedEntries).toHaveLength(1);
     const [invitesEntry] = changedEntries;
     // E.g. left encrypted with the previous password by a crash during a password change.
-    const unreadable = storedAfter[invitesEntry].replace(/^"(.)/, (_, char) => `"${char === 'A' ? 'B' : 'A'}`);
-    localStorage.setItem(invitesEntry, unreadable);
+    const { commitVault, readVault } = await import('@/lib/WalletVault');
+    const record = readVault();
+    const { STORAGE_KEYS } = await import('@/constants');
+    const ciphertext = record.values[STORAGE_KEYS.invitesEncrypted];
+    record.values[STORAGE_KEYS.invitesEncrypted] = `${ciphertext[0] === 'A' ? 'B' : 'A'}${ciphertext.slice(1)}`;
+    await commitVault(readVault(), record.values);
+    const unreadable = JSON.stringify(readVault());
 
     const restarted = await restart();
     await vi.waitFor(() => expect(warn).toHaveBeenCalled());
 
     await expect(restarted.addInvite(randomKey())).rejects.toThrow('unreadable');
-    expect(localStorage.getItem(invitesEntry)).toBe(unreadable);
+    expect(readStorage()[invitesEntry]).toBe(unreadable);
     warn.mockRestore();
   });
 

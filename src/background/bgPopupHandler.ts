@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import { mutateSessionKey } from '@/lib/ExtensionSessionStorage';
 import type {
   Dictionary,
   IAppData,
@@ -144,9 +145,12 @@ export const getPopup = (id: string): IPopupConfigNoActions => popups[id];
 
 let expirationTimeout: NodeJS.Timeout;
 let keepAliveInterval: NodeJS.Timeout;
+let timeoutGeneration = 0;
 
 /** `null` stops the timeout, e.g. while a wallet page is shown. */
 export const setSessionTimeout = async (sessionTimeout: number | null) => {
+  timeoutGeneration += 1;
+  const generation = timeoutGeneration;
   if (expirationTimeout) {
     clearTimeout(expirationTimeout);
   }
@@ -166,9 +170,10 @@ export const setSessionTimeout = async (sessionTimeout: number | null) => {
   expirationTimeout = setTimeout(
     async () => {
       try {
-        await storageSession.remove(SESSION_STORAGE_KEYS.exportedEncryptionKey);
+        await mutateSessionKey({ operation: 'clear' }, () => generation === timeoutGeneration);
       } finally {
-        clearInterval(keepAliveInterval);
+        // A cancelled callback must not stop the newer session's keepalive.
+        if (generation === timeoutGeneration) clearInterval(keepAliveInterval);
       }
     },
     sessionTimeout,

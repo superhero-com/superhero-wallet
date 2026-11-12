@@ -1,22 +1,21 @@
 // @ts-nocheck
-import { nextTick } from 'vue';
+import { nextTick, watch } from 'vue';
+import { IDBDatabase } from 'fake-indexeddb';
 import en from '@/popup/locales/en-US.json';
+import { installSessionMutationHandler } from '../helpers/extensionSession';
 
 /**
  * Targeted branch coverage for `useAuth`'s state machine, extending
  * `auth.mobile.spec.ts` / `auth.offscreenSessionSync.spec.ts` rather than duplicating
  * their scenarios. Same mocking style: REAL WebCrypto (`@/utils/crypto`, unmocked
  * except in one test that narrowly wraps `encrypt`), REAL `useStorageRef`/localStorage
- * (including a thin pass-through wrapper around `@/lib/WalletStorage`'s `set` so one
- * test can inject a write failure for a single storage key), REAL
+ * (with failures injected at the atomic vault write), REAL
  * `@/composables/defaultPassword`. Only mocked:
  *   - `@aparajita/capacitor-biometric-auth` - native hardware, unavailable in jsdom.
  *   - `@/composables/modals` - modal *components* aren't mounted here.
  *   - `@/lib/logger` - side-effecting telemetry.
  *   - `@/constants` - to force `IS_MOBILE_APP`/`IS_EXTENSION`/etc per test, since
  *     jsdom has no real platform to detect; every other constant stays real.
- *   - `@/lib/WalletStorage` (one test only) - to make a single storage key's `set`
- *     throw, simulating e.g. a `QuotaExceededError` mid-persistence.
  *   - `@/utils/crypto` (one test only) - to make the second call to `encrypt` throw,
  *     simulating a crypto-derivation failure mid-`setPassword`.
  *
@@ -69,6 +68,7 @@ function installExtensionStubs() {
     disconnect: vi.fn(),
   }));
   globalThis.browser.storage.session = makeSessionStorageStub();
+  installSessionMutationHandler();
   return globalThis.browser.storage.session;
 }
 
@@ -79,7 +79,6 @@ describe('useAuth state machine branches', () => {
   let openEnableBiometricLoginModalMock;
   let openConfirmModalMock;
   let loggerWriteMock;
-  let walletStorageSetMock;
 
   function mockConstants(overrides = {}) {
     vi.doMock('@/constants', async () => {
@@ -107,16 +106,15 @@ describe('useAuth state machine branches', () => {
     // (`vi.doUnmock`, not `vi.unmock` - the latter is hoisted to the top of the
     // file and would run once, before any test, instead of per-test.)
     vi.doUnmock('@/utils/crypto');
+    vi.doUnmock('@/lib/WalletVault');
+    vi.doUnmock('@/composables/defaultPassword');
 
-    openSetPasswordModalMock = vi.fn().mockResolvedValue('unused-modal-password');
+    openSetPasswordModalMock = vi.fn().mockResolvedValue({ password: 'unused-modal-password', isDefaultPasswordSecret: false });
     openBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openPasswordLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openEnableBiometricLoginModalMock = vi.fn().mockResolvedValue(undefined);
     openConfirmModalMock = vi.fn(() => new Promise(() => {}));
     loggerWriteMock = vi.fn();
-    // Default: pure pass-through to the real WalletStorage.set implementation.
-    // Individual tests may override this to inject a failure for one storage key.
-    walletStorageSetMock = vi.fn((keys, value, realSet) => realSet(keys, value));
 
     // All `vi.doMock` calls must be registered here, before any dynamic import -
     // vitest's global `registerAdapters` setup file transitively loads the real
@@ -153,18 +151,10 @@ describe('useAuth state machine branches', () => {
     vi.doMock('@/offscreen/popupHandler', () => ({
       getSessionEncryptionKey: vi.fn().mockResolvedValue(null),
     }));
-    vi.doMock('@/lib/WalletStorage', async (importOriginal) => {
-      const actual: any = await importOriginal();
-      return {
-        ...actual,
-        WalletStorage: {
-          ...actual.WalletStorage,
-          set: (keys: any, value: any) => (
-            walletStorageSetMock(keys, value, actual.WalletStorage.set)
-          ),
-        },
-      };
-    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('setPassword atomicity', () => {
@@ -219,14 +209,7 @@ describe('useAuth state machine branches', () => {
       expect(authRestarted.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
     });
 
-    // `setPassword` commits the new salt+ciphertext PAIR to the underlying
-    // storage synchronously (with rollback on failure) before touching the
-    // reactive `encryptionSalt`/`mnemonic` refs. If the salt's write succeeds
-    // but the mnemonic's write then fails, the salt write is rolled back to its
-    // previous on-disk value and `setPassword` rejects - disk never ends up
-    // holding a NEW salt paired with the OLD ciphertext (which would be
-    // undecryptable by either password).
-    it('rolls back the salt and rejects when the mnemonic storage write fails after the salt write already succeeded', async () => {
+    it('preserves the complete old vault when the atomic storage write fails', async () => {
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
 
@@ -234,35 +217,23 @@ describe('useAuth state machine branches', () => {
       await nextTick();
       await flushAsync();
 
-      const { composeStorageKeys } = await import('@/utils/common');
-      const { STORAGE_KEYS } = await import('@/constants');
-      const mnemonicComposedKey = composeStorageKeys(STORAGE_KEYS.mnemonic);
-      const saltComposedKey = composeStorageKeys(STORAGE_KEYS.encryptionSalt);
-      const oldCiphertextOnDisk = localStorage.getItem(mnemonicComposedKey);
-      const oldSaltOnDisk = localStorage.getItem(saltComposedKey);
+      const { readVault, refreshVault } = await import('@/lib/WalletVault');
+      const oldVaultOnDisk = readVault();
       const saltRefBeforeFailure = auth.encryptionSalt.value;
       const mnemonicRefBeforeFailure = auth.mnemonic.value;
-      expect(oldCiphertextOnDisk).toBeTruthy();
-      expect(oldSaltOnDisk).toBeTruthy();
+      expect(oldVaultOnDisk).toBeTruthy();
 
-      // The mnemonic write throws (e.g. QuotaExceededError); the encryptionSalt
-      // write is left untouched and succeeds normally.
-      walletStorageSetMock.mockImplementation((keys: any, value: any, realSet: any) => {
-        if (composeStorageKeys(keys) === mnemonicComposedKey) {
-          throw new Error('simulated storage quota exceeded on mnemonic write');
-        }
-        return realSet(keys, value);
+      const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
+        throw new Error('simulated storage quota exceeded on vault write');
       });
 
       await expect(auth.setPassword('new-password', VALID_MNEMONIC))
-        .rejects.toThrow('simulated storage quota exceeded on mnemonic write');
+        .rejects.toThrow('simulated storage quota exceeded on vault write');
       await nextTick();
       await flushAsync();
 
-      // Disk still holds the OLD salt (rolled back) and the OLD ciphertext
-      // (never overwritten) - a consistent pair, not a mismatched one.
-      expect(localStorage.getItem(saltComposedKey)).toBe(oldSaltOnDisk);
-      expect(localStorage.getItem(mnemonicComposedKey)).toBe(oldCiphertextOnDisk);
+      await refreshVault();
+      expect(readVault()).toEqual(oldVaultOnDisk);
       // The reactive refs were never assigned either - `setPassword` threw
       // before reaching them.
       expect(auth.encryptionSalt.value).toEqual(saltRefBeforeFailure);
@@ -270,9 +241,7 @@ describe('useAuth state machine branches', () => {
 
       // Restore normal storage behavior before restarting - `useStorageRef`'s
       // restore IIFE writes back the values its migrations change.
-      walletStorageSetMock.mockImplementation(
-        (keys: any, value: any, realSet: any) => realSet(keys, value),
-      );
+      put.mockRestore();
 
       vi.resetModules();
       const { useAuth: useAuthRestarted } = await import('@/composables/auth');
@@ -296,12 +265,12 @@ describe('useAuth state machine branches', () => {
 
     async function readStorage(name: string) {
       const { STORAGE_KEYS } = await import('@/constants');
-      const { composeStorageKeys } = await import('@/utils/common');
-      return localStorage.getItem(composeStorageKeys(STORAGE_KEYS[name]));
+      const { WalletStorage } = await import('@/lib/WalletStorage');
+      return WalletStorage.get(STORAGE_KEYS[name]);
     }
 
     async function createWallet() {
-      openSetPasswordModalMock.mockResolvedValue('old-password');
+      openSetPasswordModalMock.mockResolvedValue({ password: 'old-password', isDefaultPasswordSecret: false });
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
       await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
@@ -329,11 +298,349 @@ describe('useAuth state machine branches', () => {
       const timeoutCiphertext = await readStorage('secureLoginTimeout');
 
       await auth.updatePassword('old-password', 'new-password');
-      // A watcher re-encrypts it after the key switch.
-      await vi.waitFor(async () => (
-        expect(await readStorage('secureLoginTimeout')).not.toBe(timeoutCiphertext)
-      ));
+      expect(await readStorage('secureLoginTimeout')).not.toBe(timeoutCiphertext);
 
+      await expectReadableAfterRestart('new-password');
+    });
+
+    it('keeps the decrypted data in view while its own password change settles', async () => {
+      let isArmed = false;
+      let isAfterCommit = false;
+      let releaseRefresh;
+      vi.doMock('@/lib/WalletVault', async (importOriginal) => {
+        const actual = await importOriginal();
+        return {
+          ...actual,
+          commitVault: async (...args) => {
+            const result = await actual.commitVault(...args);
+            isAfterCommit = isArmed;
+            return result;
+          },
+          refreshVault: async (...args) => {
+            // The read before the new key is published: the commit already reached the views.
+            if (isAfterCommit) {
+              isAfterCommit = false;
+              await new Promise((resolve) => { releaseRefresh = resolve; });
+            }
+            return actual.refreshVault(...args);
+          },
+        };
+      });
+      const auth = await createWallet();
+      await vi.waitFor(() => (
+        expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
+      ));
+      const warn = vi.spyOn(console, 'warn');
+      const observed = [];
+      const stopWatching = watch(auth.secureLoginTimeoutDecrypted, (value) => {
+        observed.push(value);
+      }, { flush: 'sync' });
+
+      isArmed = true;
+      const change = auth.updatePassword('old-password', 'new-password');
+      await vi.waitFor(() => expect(releaseRefresh).toBeDefined(), WAIT_FOR_CRYPTO);
+      // Time for a decrypt with the old key to fail.
+      await new Promise((resolve) => { setTimeout(resolve, 50); });
+      releaseRefresh();
+      await change;
+      await flushAsync();
+      stopWatching();
+
+      expect(observed.every((value) => value === SECURE_LOGIN_TIMEOUT)).toBe(true);
+      expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT);
+      expect(warn).not.toHaveBeenCalledWith('Unknown rejection', expect.anything());
+    });
+
+    it('waits for imported-key encryption and commits unmounted secrets before reporting success', async () => {
+      const auth = await createWallet();
+      const { STORAGE_KEYS } = await import('@/constants');
+      const {
+        commitVault, readVault, refreshVault, VAULT_SECRET_KEYS,
+      } = await import('@/lib/WalletVault');
+      const {
+        decodeBase64, decrypt, encrypt, generateEncryptionKey,
+      } = await import('@/utils/crypto');
+      const imported = JSON.stringify([{ protocol: 'ethereum', privateKey: 'ab'.repeat(32) }]);
+      const plaintexts = {
+        [STORAGE_KEYS.mnemonic]: VALID_MNEMONIC,
+        [STORAGE_KEYS.privateKeyAccountsRaw]: imported,
+        [STORAGE_KEYS.preclaimedNames]: JSON.stringify({ ae_mainnet: { 'pending.chain': { salt: 123 } } }),
+        [STORAGE_KEYS.secureLoginTimeout]: SECURE_LOGIN_TIMEOUT,
+        [STORAGE_KEYS.invitesEncrypted]: JSON.stringify([{ secretKey: { type: 'Buffer', data: [1, 2, 3] } }]),
+      };
+      const oldKey = auth.encryptionKey.value;
+      const beforeSetup = readVault();
+      const values = { ...beforeSetup.values };
+      await Promise.all(Object.entries(plaintexts).map(async ([key, plaintext]) => {
+        values[key] = await encrypt(oldKey, plaintext);
+      }));
+      // Neither useAccounts nor useAeNames is initialized in this wallet instance.
+      await commitVault(beforeSetup, values);
+      const oldStoredVault = readVault();
+      let releaseEncryption;
+      const pendingEncryption = new Promise((resolve) => { releaseEncryption = resolve; });
+      let encryptionStarted = false;
+      const subtleEncrypt = globalThis.crypto.subtle.encrypt.bind(globalThis.crypto.subtle);
+      vi.spyOn(globalThis.crypto.subtle, 'encrypt').mockImplementation(async (...args) => {
+        if (new TextDecoder().decode(args[2]) === imported) {
+          encryptionStarted = true;
+          await pendingEncryption;
+        }
+        return subtleEncrypt(...args);
+      });
+      let completed = false;
+      const changing = auth.updatePassword('old-password', 'new-password')
+        .then(() => { completed = true; });
+      try {
+        await vi.waitFor(() => expect(encryptionStarted).toBe(true), WAIT_FOR_CRYPTO);
+        expect(completed).toBe(false);
+        expect(auth.encryptionKey.value).toBe(oldKey);
+        await refreshVault();
+        expect(readVault()).toEqual(oldStoredVault);
+      } finally {
+        releaseEncryption();
+        await changing;
+      }
+
+      const stored = readVault();
+      const key = await generateEncryptionKey(
+        'new-password',
+        decodeBase64(stored.values[STORAGE_KEYS.encryptionSalt]),
+      );
+      await Promise.all(VAULT_SECRET_KEYS.map(async (slot) => {
+        expect(await decrypt(key, stored.values[slot])).toBe(plaintexts[slot]);
+        await expect(decrypt(oldKey, stored.values[slot])).rejects.toThrow();
+      }));
+      await expectReadableAfterRestart('new-password');
+    });
+
+    it.each(['privateKeyAccountsRaw', 'preclaimedNames', 'invitesEncrypted', 'secureLoginTimeout'])(
+      'preserves the password and unreadable %s ciphertext when rotation cannot prepare it',
+      async (name) => {
+        const auth = await createWallet();
+        const { STORAGE_KEYS } = await import('@/constants');
+        const { commitVault, readVault, refreshVault } = await import('@/lib/WalletVault');
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const previous = readVault();
+        await commitVault(previous, { ...previous.values, [STORAGE_KEYS[name]]: 'unreadable-ciphertext' });
+        const oldVault = readVault();
+        const oldKey = auth.encryptionKey.value;
+
+        await expect(auth.updatePassword('old-password', 'new-password')).rejects.toThrow();
+
+        await refreshVault();
+        expect(readVault()).toEqual(oldVault);
+        expect(auth.encryptionKey.value).toBe(oldKey);
+        const { decodeBase64, decrypt, generateEncryptionKey } = await import('@/utils/crypto');
+        const stored = readVault();
+        const key = await generateEncryptionKey('old-password', decodeBase64(stored.values[STORAGE_KEYS.encryptionSalt]));
+        expect(await decrypt(key, stored.values[STORAGE_KEYS.mnemonic])).toBe(VALID_MNEMONIC);
+      },
+    );
+
+    it('locks a web window whose password another window changed, without the old key or defaults', async () => {
+      const auth = await createWallet();
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { commitVault, readVault, refreshVault } = await import('@/lib/WalletVault');
+      const {
+        encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+      } = await import('@/utils/crypto');
+      await vi.waitFor(() => (
+        expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
+      ));
+      const salt = generateSalt();
+      const key = await generateEncryptionKey('other-password', salt);
+      const previous = readVault();
+      // The other window's commit, as its storage notification makes this one read it.
+      const observed = [];
+      const stopWatching = watch(auth.secureLoginTimeoutDecrypted, (value) => {
+        observed.push({ value, isAuthenticated: auth.isAuthenticated.value });
+      }, { flush: 'sync' });
+      const committed = await commitVault(previous, {
+        ...previous.values,
+        [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await encrypt(key, VALID_MNEMONIC),
+        [STORAGE_KEYS.secureLoginTimeout]: await encrypt(key, SECURE_LOGIN_TIMEOUT),
+      });
+
+      expect(encodeBase64(auth.encryptionSalt.value)).toBe(encodeBase64(salt));
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(auth.isAuthenticated.value).toBe(false);
+      expect(auth.mnemonicDecrypted.value).toBe('');
+      // The web has no shared session: it asks for the new password.
+      await vi.waitFor(() => expect(openPasswordLoginModalMock).toHaveBeenCalled());
+      await expect(auth.setPassword('another-password')).rejects.toThrow('locked');
+      await refreshVault();
+      expect(readVault()).toEqual(committed);
+
+      expect(await auth.authenticateWithPassword('other-password')).toBe(true);
+      await vi.waitFor(() => (
+        expect(auth.secureLoginTimeoutDecrypted.value).toBe(SECURE_LOGIN_TIMEOUT)
+      ));
+      stopWatching();
+      // Locked rather than a failed decrypt: unlocked, never the default, longer, auto-lock time.
+      expect(observed.filter(({ value }) => value !== SECURE_LOGIN_TIMEOUT)
+        .every(({ isAuthenticated }) => !isAuthenticated)).toBe(true);
+    });
+
+    it('does not overwrite a newer generation when its own commit promise settles later', async () => {
+      let pauseCommit = false;
+      let committed = false;
+      let releaseCommit;
+      const gate = new Promise((resolve) => { releaseCommit = resolve; });
+      vi.doMock('@/lib/WalletVault', async (importOriginal) => {
+        const actual = await importOriginal();
+        return {
+          ...actual,
+          commitVault: async (...args) => {
+            const result = await actual.commitVault(...args);
+            if (pauseCommit) {
+              committed = true;
+              await gate;
+            }
+            return result;
+          },
+        };
+      });
+      const auth = await createWallet();
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const vault = await vi.importActual('@/lib/WalletVault');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const {
+        encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+      } = await import('@/utils/crypto');
+      pauseCommit = true;
+      const changing = auth.updatePassword('old-password', 'new-password');
+      const rejected = expect(changing).rejects.toThrow('changed again');
+      let latest;
+      try {
+        await vi.waitFor(() => expect(committed).toBe(true), WAIT_FOR_CRYPTO);
+        const first = vault.readVault();
+        const salt = generateSalt();
+        const key = await generateEncryptionKey('latest-password', salt);
+        latest = await vault.commitVault(first, {
+          ...first.values,
+          [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
+          [STORAGE_KEYS.mnemonic]: await encrypt(key, VALID_MNEMONIC),
+          [STORAGE_KEYS.secureLoginTimeout]: await encrypt(key, SECURE_LOGIN_TIMEOUT),
+        });
+      } finally {
+        releaseCommit();
+      }
+      await rejected;
+      await vault.refreshVault();
+      expect(vault.readVault()).toEqual(latest);
+      // Its key opens nothing any more: locked until the latest password is entered.
+      await vi.waitFor(() => expect(openPasswordLoginModalMock).toHaveBeenCalled());
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(auth.isAuthenticated.value).toBe(false);
+      await expectReadableAfterRestart('latest-password');
+    });
+
+    it('reports rotation success when the subsequent vault refresh cannot read storage', async () => {
+      let failReadAfterCommit = false;
+      const failure = new Error('post-commit database read unavailable');
+      vi.doMock('@/lib/WalletVault', async (importOriginal) => {
+        const actual = await importOriginal();
+        return {
+          ...actual,
+          commitVault: async (...args) => {
+            const result = await actual.commitVault(...args);
+            if (failReadAfterCommit) {
+              vi.spyOn(IDBObjectStore.prototype, 'get').mockImplementationOnce(() => {
+                throw failure;
+              });
+            }
+            return result;
+          },
+        };
+      });
+      const auth = await createWallet();
+      const oldKey = auth.encryptionKey.value;
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      failReadAfterCommit = true;
+
+      await expect(auth.updatePassword('old-password', 'new-password')).resolves.toBeUndefined();
+
+      expect(warn).toHaveBeenCalledWith('Unknown rejection', expect.objectContaining({ cause: failure }));
+      expect(auth.encryptionKey.value).not.toBe(oldKey);
+      expect(auth.isAuthenticated.value).toBe(true);
+      failReadAfterCommit = false;
+      await expectReadableAfterRestart('new-password');
+    });
+
+    it('does not publish an old password key after the stored generation changes during unlock', async () => {
+      const auth = await createWallet();
+      const { STORAGE_KEYS } = await import('@/constants');
+      const { commitVault, readVault } = await import('@/lib/WalletVault');
+      const {
+        encodeBase64, encrypt, generateEncryptionKey, generateSalt,
+      } = await import('@/utils/crypto');
+      const salt = generateSalt();
+      const key = await generateEncryptionKey('other-password', salt);
+      const previous = readVault();
+      const values = {
+        ...previous.values,
+        [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await encrypt(key, VALID_MNEMONIC),
+        [STORAGE_KEYS.secureLoginTimeout]: await encrypt(key, SECURE_LOGIN_TIMEOUT),
+      };
+      await auth.logout();
+      let releaseDerivation;
+      const gate = new Promise((resolve) => { releaseDerivation = resolve; });
+      let deriving = false;
+      const original = globalThis.crypto.subtle.deriveKey.bind(globalThis.crypto.subtle);
+      vi.spyOn(globalThis.crypto.subtle, 'deriveKey').mockImplementationOnce(async (...args) => {
+        deriving = true;
+        await gate;
+        return original(...args);
+      });
+      const unlocking = auth.authenticateWithPassword('old-password');
+      const rejected = expect(unlocking).rejects.toThrow('changed while unlocking');
+      try {
+        await vi.waitFor(() => expect(deriving).toBe(true));
+        await commitVault(previous, values);
+      } finally {
+        releaseDerivation();
+      }
+      await rejected;
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(auth.isAuthenticated.value).toBe(false);
+    });
+
+    it('keeps the wallet locked when locking occurs after the persistent rotation commit', async () => {
+      let pauseCommit = false;
+      let committed = false;
+      let releaseCommit;
+      const gate = new Promise((resolve) => { releaseCommit = resolve; });
+      vi.doMock('@/lib/WalletVault', async (importOriginal) => {
+        const actual = await importOriginal();
+        return {
+          ...actual,
+          commitVault: async (...args) => {
+            const result = await actual.commitVault(...args);
+            if (pauseCommit) {
+              committed = true;
+              await gate;
+            }
+            return result;
+          },
+        };
+      });
+      const auth = await createWallet();
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      pauseCommit = true;
+      const changing = auth.updatePassword('old-password', 'new-password');
+      try {
+        await vi.waitFor(() => expect(committed).toBe(true), WAIT_FOR_CRYPTO);
+        await auth.logout();
+      } finally {
+        releaseCommit();
+        await changing;
+      }
+
+      expect(auth.encryptionKey.value).toBeUndefined();
+      expect(auth.isAuthenticated.value).toBe(false);
       await expectReadableAfterRestart('new-password');
     });
 
@@ -342,19 +649,20 @@ describe('useAuth state machine branches', () => {
       const timeoutCiphertext = await readStorage('secureLoginTimeout');
 
       await auth.updatePassword('old-password', 'new-password');
-      // The watcher is still re-encrypting under the new key.
       await auth.lockWallet();
-      await vi.waitFor(async () => (
-        expect(await readStorage('secureLoginTimeout')).not.toBe(timeoutCiphertext)
-      ));
+      // Writers that captured the key before locking can still finish safely.
+      expect(auth.isEncryptionKeyCurrent()).toBe(true);
+      expect(await readStorage('secureLoginTimeout')).not.toBe(timeoutCiphertext);
 
       await expectReadableAfterRestart('new-password');
     });
 
-    it('keeps the old password when the current password is wrong', async () => {
+    it('keeps the old password when the current password is wrong, saying so', async () => {
       const auth = await createWallet();
+      const { WrongPasswordError } = await import('@/lib/errors');
 
-      await expect(auth.updatePassword('wrong-password', 'new-password')).rejects.toThrow();
+      await expect(auth.updatePassword('wrong-password', 'new-password'))
+        .rejects.toThrow(WrongPasswordError);
       expect(auth.isAuthenticated.value).toBe(true);
 
       await expectReadableAfterRestart('old-password');
@@ -424,8 +732,8 @@ describe('useAuth state machine branches', () => {
 
     async function readStorage(name: string) {
       const { STORAGE_KEYS } = await import('@/constants');
-      const { composeStorageKeys } = await import('@/utils/common');
-      return JSON.parse(localStorage.getItem(composeStorageKeys(STORAGE_KEYS[name])));
+      const { WalletStorage } = await import('@/lib/WalletStorage');
+      return WalletStorage.get(STORAGE_KEYS[name]);
     }
 
     async function storedKey() {
@@ -462,24 +770,21 @@ describe('useAuth state machine branches', () => {
       const { useAuth } = await import('@/composables/auth');
       const { useAccounts } = await import('@/composables/accounts');
       const auth = useAuth();
-      const accounts = useAccounts(); // Re-encrypts the imported keys on a key change.
+      const accounts = useAccounts();
       await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
       return { auth, accounts };
     }
 
-    /** The imported keys and the timeout follow the new key in watchers, after the rotation. */
+    /** Every stored secret must use the new password when rotation reports success. */
     async function waitForDataUnderStoredSecret() {
       const { decrypt } = await import('@/utils/crypto');
-      await vi.waitFor(async () => {
-        const key = await storedKey();
-        await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
-          expect(await decrypt(key, await readStorage(name))).toBe(plaintext)
-        )));
-      }, WAIT_FOR_CRYPTO);
+      const key = await storedKey();
+      await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
+        expect(await decrypt(key, await readStorage(name))).toBe(plaintext)
+      )));
     }
 
     async function expectOpensWithStoredSecret() {
-      // Another window gets no storage events, so it reads them once all are stored.
       await waitForDataUnderStoredSecret();
       const { auth, accounts } = await openWindow();
       await auth.checkUserAuth();
@@ -511,6 +816,42 @@ describe('useAuth state machine branches', () => {
       await expectOpensWithStoredSecret();
     });
 
+    it('leaves no older copy that opens without the password set later, where the vault is not stored durably', async () => {
+      // E.g. Firefox before 126, which keeps the copies of older versions as a fallback.
+      const realTransaction = IDBDatabase.prototype.transaction;
+      vi.spyOn(IDBDatabase.prototype, 'transaction')
+        .mockImplementation(function transaction(...args) {
+          const result = realTransaction.apply(this, args);
+          Object.defineProperty(result, 'durability', { value: undefined });
+          return result;
+        });
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const { WalletStorage } = await import('@/lib/WalletStorage');
+      const { LOCAL_STORAGE_PREFIX, STORAGE_KEYS } = await import('@/constants');
+      const { decodeBase64, decrypt, generateEncryptionKey } = await import('@/utils/crypto');
+      const skipped = 'a-per-install-secret';
+      await seedWallet(skipped);
+      WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, skipped);
+      const { auth } = await openWindow();
+      await auth.checkUserAuth();
+      expect(auth.isUsingDefaultPassword.value).toBe(true);
+
+      // As the password-protection toggle does.
+      await auth.setPassword('a-user-chosen-password', undefined, {
+        isDefaultPasswordSecret: false,
+      });
+
+      const copy = (key) => JSON.parse(localStorage.getItem(`${LOCAL_STORAGE_PREFIX}_${key}`));
+      expect(copy(STORAGE_KEYS.defaultPasswordSecret)).toBeNull();
+      const key = await generateEncryptionKey(
+        'a-user-chosen-password',
+        decodeBase64(copy(STORAGE_KEYS.encryptionSalt)),
+      );
+      await Promise.all(Object.entries(ENCRYPTED_DATA).map(async ([name, plaintext]) => (
+        expect(await decrypt(key, copy(STORAGE_KEYS[name]))).toBe(plaintext)
+      )));
+    });
+
     it.each([
       ['no secret', null],
       // E.g. one written before a rotation that was cut off.
@@ -519,17 +860,15 @@ describe('useAuth state machine branches', () => {
       vi.spyOn(console, 'warn').mockImplementation(() => {});
       await seedWallet('testPassword123');
       const legacySalt = await readStorage('encryptionSalt');
-      const { composeStorageKeys } = await import('@/utils/common');
       const { STORAGE_KEYS } = await import('@/constants');
       if (storedSecret) {
         const { WalletStorage } = await import('@/lib/WalletStorage');
         WalletStorage.set(STORAGE_KEYS.defaultPasswordSecret, storedSecret);
       }
-      walletStorageSetMock.mockImplementation((keys, value, realSet) => {
-        if (composeStorageKeys(keys) === composeStorageKeys(STORAGE_KEYS.mnemonic)) {
-          throw new Error('QuotaExceededError');
-        }
-        return realSet(keys, value);
+      const { ensureVaultReady } = await import('@/lib/WalletVault');
+      await ensureVaultReady();
+      const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
+        throw new Error('QuotaExceededError');
       });
       const { auth } = await openWindow();
 
@@ -538,7 +877,7 @@ describe('useAuth state machine branches', () => {
       expect(await readStorage('defaultPasswordSecret')).toBe(storedSecret);
       expect(await readStorage('encryptionSalt')).toBe(legacySalt);
 
-      walletStorageSetMock.mockImplementation((keys, value, realSet) => realSet(keys, value));
+      put.mockRestore();
       const { auth: reopened } = await openWindow();
       await reopened.checkUserAuth();
       expect(reopened.isUsingDefaultPassword.value).toBe(true);
@@ -553,6 +892,50 @@ describe('useAuth state machine branches', () => {
 
       expect(openPasswordLoginModalMock).toHaveBeenCalledTimes(1);
       expect(auth.isAuthenticated.value).toBe(false);
+      expect(await readStorage('defaultPasswordSecret')).toBeNull();
+    });
+
+    it('keeps a real password when an unlock lands during the legacy password attempt', async () => {
+      let isNextRefreshHeld = false;
+      let isRefreshHeld = false;
+      let releaseRefresh;
+      vi.doMock('@/lib/WalletVault', async (importOriginal) => {
+        const actual = await importOriginal();
+        return {
+          ...actual,
+          refreshVault: async (...args) => {
+            if (isNextRefreshHeld) {
+              isNextRefreshHeld = false;
+              isRefreshHeld = true;
+              await new Promise((resolve) => { releaseRefresh = resolve; });
+            }
+            return actual.refreshVault(...args);
+          },
+        };
+      });
+      // No stored secret, so the next read is the legacy attempt's.
+      vi.doMock('@/composables/defaultPassword', async (importOriginal) => ({
+        ...await importOriginal(),
+        getDefaultPasswordSecret: async () => null,
+      }));
+      await seedWallet('a-real-password');
+      const salt = await readStorage('encryptionSalt');
+      const { auth } = await openWindow();
+
+      isNextRefreshHeld = true;
+      const check = auth.checkUserAuth();
+      await vi.waitFor(() => expect(isRefreshHeld).toBe(true));
+      // E.g. the session restore after another window changed the password.
+      await auth.authenticateWithPassword('a-real-password');
+      const key = auth.encryptionKey.value;
+      releaseRefresh();
+      await check;
+
+      expect(auth.isAuthenticated.value).toBe(true);
+      expect(auth.encryptionKey.value).toBe(key);
+      expect(auth.isUsingDefaultPassword.value).toBe(false);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
+      expect(await readStorage('encryptionSalt')).toBe(salt);
       expect(await readStorage('defaultPasswordSecret')).toBeNull();
     });
 
@@ -585,8 +968,12 @@ describe('useAuth state machine branches', () => {
         WAIT_FOR_CRYPTO,
       );
       heldDerivations[1]();
-      await Promise.all([firstCheck, secondCheck]);
+      // The window that lost unlocks again with the secret the other one stored.
       vi.mocked(subtle.deriveKey).mockRestore();
+      await Promise.all([firstCheck, secondCheck]);
+      expect(first.isAuthenticated.value).toBe(true);
+      expect(second.isAuthenticated.value).toBe(true);
+      expect(openPasswordLoginModalMock).not.toHaveBeenCalled();
 
       const { decrypt } = await import('@/utils/crypto');
       expect(await decrypt(await storedKey(), await readStorage('mnemonic'))).toBe(VALID_MNEMONIC);
@@ -595,7 +982,7 @@ describe('useAuth state machine branches', () => {
   });
 
   describe('failed default-password guess (extension)', () => {
-    it('clears only the reactive encryptionKey and does not call sessionEnd(), preserving a valid background session', async () => {
+    it('keeps a valid background session when the default-password guesses fail', async () => {
       mockConstants({ IS_EXTENSION: true });
       installExtensionStubs();
 
@@ -1000,7 +1387,7 @@ describe('useAuth state machine branches', () => {
 
     // The popup dies after the new mnemonic is saved but before its key reaches the session.
     async function leaveStaleSessionKey() {
-      openSetPasswordModalMock.mockResolvedValue('old-password');
+      openSetPasswordModalMock.mockResolvedValue({ password: 'old-password', isDefaultPasswordSecret: false });
       const { useAuth } = await import('@/composables/auth');
       const auth = useAuth();
       await auth.setMnemonicAndInitializeAuthentication(VALID_MNEMONIC);
