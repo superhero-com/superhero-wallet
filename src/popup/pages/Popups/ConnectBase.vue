@@ -446,7 +446,7 @@ export default defineComponent({
 
     .network-button {
       align-self: stretch;
-      margin: -6px -8px -6px 0px;
+      margin: -6px -10px -6px 0px;
       border-radius: 0px;
       pointer-events: none;
     }

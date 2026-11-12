@@ -177,6 +177,8 @@ export default defineComponent({
 @use '@/styles/typography';
 @use '@/styles/mixins';
 
+$container-shadow: 0 0 0 1px $color-border, 2px 4px 12px rgba($color-black, 0.22);
+
 .modal {
   --screen-padding-x: 24px; // Default spacing
   --screen-bg-color: #{$color-bg-modal};
@@ -202,9 +204,7 @@ export default defineComponent({
     margin: auto;
     background-color: var(--screen-bg-color);
     border-radius: $border-radius-modal;
-    box-shadow:
-      0 0 0 1px $color-border,
-      2px 4px 12px rgba($color-black, 0.22);
+    box-shadow: $container-shadow;
 
     @include mixins.desktop {
       width: calc(#{$extension-width} - 32px);
@@ -301,6 +301,11 @@ export default defineComponent({
     .container {
       height: 100%;
       border-radius: 0;
+    }
+
+    &:not(.transparent) .container {
+      // Fill the home-indicator area without changing the content or footer position.
+      box-shadow: 0 env(safe-area-inset-bottom) 0 var(--screen-bg-color), $container-shadow;
     }
   }
 
