@@ -200,6 +200,21 @@ describe('inpage.ts provider', () => {
     provider.removeListener('chainChanged', listener);
   });
 
+  it.each([
+    ['by assigning it', (wallet) => { window.ethereum = wallet; }],
+    ['by defining it', (wallet) => {
+      Object.defineProperty(window, 'ethereum', { value: wallet, configurable: true, writable: true });
+    }],
+  ])('lets a wallet loaded later take window.ethereum %s', (_label, take) => {
+    const otherWallet = { isMetaMask: true };
+
+    take(otherWallet);
+
+    expect(window.ethereum).toBe(otherWallet);
+    expect(window.superheroWallet).toBe(provider);
+    window.ethereum = provider;
+  });
+
   it('announces itself to EIP-6963 dapps that ask', () => {
     const announcements = [];
     const onAnnounce = (event) => announcements.push(event.detail);

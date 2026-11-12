@@ -246,49 +246,27 @@ function createProvider() {
   return { provider, onMessage };
 }
 
-function injectEthereumIntoWindow(provider: WindowEthereum) {
-  Object.defineProperties(window, {
-    superheroWallet: {
-      value: provider,
-      configurable: false,
-      writable: false,
-    },
-    ethereum: {
-      get() {
-        // @ts-expect-error
-        return window.superheroWalletRouter.currentProvider;
-      },
-      set(newProvider) {
-        // @ts-expect-error
-        window.superheroWalletRouter?.addProvider(newProvider);
-      },
-      configurable: false,
-    },
-    superheroWalletRouter: {
-      value: {
-        superheroWalletProvider: provider,
-        lastInjectedProvider: window.ethereum,
-        currentProvider: provider,
-        providers: [
-          provider,
-          ...(window.ethereum ? [window.ethereum] : []),
-        ],
-        addProvider(newProvider: any) {
-          // @ts-expect-error
-          if (!window.superheroWalletRouter?.providers?.includes(newProvider)) {
-            // @ts-expect-error
-            window.superheroWalletRouter?.providers?.push(newProvider);
-          }
-          if (provider !== newProvider) {
-            // @ts-expect-error
-            window.superheroWalletRouter.lastInjectedProvider = newProvider;
-          }
-        },
-      },
-      configurable: false,
-      writable: false,
-    },
-  });
+/**
+ * `window.ethereum` stays with a wallet that set it first, and another wallet may replace ours.
+ * Except Brave Wallet's: by default Brave sets it but leaves it to extensions.
+ * Dapps find every wallet through EIP-6963.
+ */
+function setGlobals(provider: WindowEthereum) {
+  try {
+    Object.defineProperty(window, 'superheroWallet', { value: provider });
+  } catch {
+    // Defined by the page
+  }
+  try {
+    if (
+      window.ethereum === undefined
+      || (window.ethereum as { isBraveWallet?: boolean }).isBraveWallet
+    ) {
+      window.ethereum = provider;
+    }
+  } catch {
+    // Locked by another wallet, or by Brave set to use only its own
+  }
 }
 
 function injectSuperheroWallet() {
@@ -301,22 +279,16 @@ function injectSuperheroWallet() {
   // `location.origin` comes from the URL and stays real in a sandboxed frame.
   // Messaging still uses it: a page global named `origin` replaces `window.origin`.
   if (!window.origin || window.origin === 'null') return;
+  if (!shouldInjectProvider()) return;
 
   const { provider, onMessage } = createProvider();
-  if (shouldInjectProvider()) {
-    injectEthereumIntoWindow(provider);
-  }
-  const announceProvider = () => {
-    if (window.ethereum === undefined || !window.ethereum.isSuperheroWallet) {
-      injectEthereumIntoWindow(provider);
-    }
-    window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
-      detail: Object.freeze({ info: SUPERHERO_EIP6963_PROVIDER_INFO, provider }),
-    }));
-  };
+  window.addEventListener('message', onMessage);
+  setGlobals(provider);
+  const announceProvider = () => window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
+    detail: Object.freeze({ info: SUPERHERO_EIP6963_PROVIDER_INFO, provider }),
+  }));
   window.addEventListener('eip6963:requestProvider', announceProvider);
   announceProvider();
-  window.addEventListener('message', onMessage);
   window.dispatchEvent(new Event('ethereum#initialized'));
 }
 
