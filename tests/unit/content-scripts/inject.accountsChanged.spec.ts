@@ -127,6 +127,33 @@ describe('inject.ts accountsChanged propagation', () => {
     expect(getPostedEvents('accountsChanged').map(([data]) => data.result)).toEqual([[]]);
   });
 
+  it('keeps listening after a transport failure while checking permitted accounts', async () => {
+    await pageRequest('eth_requestAccounts', { result: ['0xabc'] });
+
+    ((global as any).browser.runtime.sendMessage as vi.Mock)
+      .mockRejectedValueOnce(new Error('Receiving end does not exist'));
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+
+    expect(getPostedEvents('accountsChanged')).toHaveLength(0);
+
+    permitAccounts(['0xdef']);
+    await emitWalletEvent('accountsChanged', ['0xdef']);
+
+    expect(getPostedEvents('accountsChanged').map(([data]) => data.result)).toEqual([['0xdef']]);
+  });
+
+  it('handles a failed fire-and-forget page message without posting an RPC reply', async () => {
+    ((global as any).browser.runtime.sendMessage as vi.Mock)
+      .mockRejectedValueOnce(new Error('Extension context invalidated'));
+    const messageHandler = (window.addEventListener as vi.Mock).mock.calls
+      .find((call) => call[0] === 'message')[1];
+
+    await messageHandler({ data: { method: 'pageMessage' }, origin, source: window });
+    await flushPromises();
+
+    expect(postMessageSpy).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['only asked for the chain id', [
       ['eth_chainId', { result: '0x1' }],
