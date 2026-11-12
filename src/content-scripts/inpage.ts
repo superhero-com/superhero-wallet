@@ -21,7 +21,10 @@ interface IJsonRpcError {
 
 type RequestArguments = { readonly method: string; readonly params?: readonly unknown[] };
 type LegacyPayload = RequestArguments & { readonly id: string | number | null };
-type LegacyCallback = (error: IJsonRpcError | null, response: IJsonRpcSuccess | null) => void;
+type LegacyCallback = (
+  error: IJsonRpcError | null,
+  response: IJsonRpcSuccess | (IJsonRpcSuccess | IJsonRpcError)[] | null,
+) => void;
 type Listener = (payload: any) => void;
 
 /** The content script's answer to a request, or an event of the wallet without `requestId` */
@@ -130,13 +133,21 @@ function createProvider() {
     }
   }
 
+  const getLegacyResponse = ({ id, method, params }: LegacyPayload) => request({ method, params })
+    .then(
+      (result): IJsonRpcSuccess => ({ jsonrpc: '2.0', id, result }),
+      (error): IJsonRpcError => ({ jsonrpc: '2.0', id, error: toJsonRpcError(error) }),
+    );
+
   function sendAsync(payload: LegacyPayload | LegacyPayload[], callback: LegacyCallback) {
-    (Array.isArray(payload) ? payload : [payload]).forEach(({ id, method, params }) => {
-      request({ method, params }).then(
-        (result) => callback(null, { jsonrpc: '2.0', id, result }),
-        (error) => callback({ jsonrpc: '2.0', id, error: toJsonRpcError(error) }, null),
-      );
-    });
+    // A batch gets one answer, as in MetaMask
+    if (Array.isArray(payload)) {
+      Promise.all(payload.map(getLegacyResponse)).then((responses) => callback(null, responses));
+      return;
+    }
+    getLegacyResponse(payload).then((response) => (
+      'error' in response ? callback(response, null) : callback(null, response)
+    ));
   }
 
   const unsupported = (method: string) => {

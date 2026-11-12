@@ -171,6 +171,24 @@ describe('inpage.ts provider', () => {
     }, null);
   });
 
+  it('calls back a batch from sendAsync once, with every answer', async () => {
+    answer = (method) => (method === 'personal_sign'
+      ? { error: { code: 4001, message: 'User rejected' } }
+      : { result: `${method}-result` });
+    const callback = vi.fn();
+
+    provider.sendAsync([
+      { id: 1, method: 'eth_blockNumber', params: [] },
+      { id: 2, method: 'personal_sign', params: [] },
+    ], callback);
+    await flushMessages();
+
+    expect(callback.mock.calls).toEqual([[null, [
+      { jsonrpc: '2.0', id: 1, result: 'eth_blockNumber-result' },
+      { jsonrpc: '2.0', id: 2, error: expect.objectContaining({ code: 4001, message: 'User rejected' }) },
+    ]]]);
+  });
+
   it('tells listeners when the account changes, once per change', async () => {
     const listener = vi.fn();
     expect(provider.on('accountsChanged', listener)).toBe(provider);
