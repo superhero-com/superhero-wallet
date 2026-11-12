@@ -131,6 +131,9 @@ module.exports = defineConfig({
   // Ensure Cypress waits long enough for initial webpack compile
   pageLoadTimeout: 120000,
   requestTimeout: 120000,
+  // Cypress 15 behavior: the specs rely on it waiting out modal transitions and amount formatting
+  visibilityStrategy: 'legacy',
+  keystrokeDelay: 10,
   fixturesFolder: 'tests/e2e/fixtures',
   screenshotsFolder: 'tests/e2e/screenshots',
   videosFolder: 'tests/e2e/videos',
