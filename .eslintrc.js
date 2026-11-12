@@ -16,7 +16,7 @@ module.exports = {
     es2021: true,
   },
   extends: [
-    'plugin:@intlify/vue-i18n/recommended',
+    'plugin:@intlify/vue-i18n/recommended-legacy',
     'plugin:vue/recommended',
     '@vue/eslint-config-airbnb',
     '@vue/eslint-config-typescript',

@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable no-console */
 /* eslint-disable no-return-await */
 /* eslint-disable no-empty */
@@ -8,7 +9,6 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-use-before-define */
 /* eslint-disable vue/max-len */
-// eslint-disable-next-line max-classes-per-file
 import { SUPERHERO_EIP6963_PROVIDER_INFO } from './eip6963ProviderInfo';
 
 const METAMASK_ERROR_USER_REJECTED_REQUEST = 4001;

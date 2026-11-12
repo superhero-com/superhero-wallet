@@ -1,0 +1,40 @@
+diff --git a/node_modules/web3-validator/lib/commonjs/validator.js b/node_modules/web3-validator/lib/commonjs/validator.js
+index 48663840f..e736ce71c 100644
+--- a/node_modules/web3-validator/lib/commonjs/validator.js
++++ b/node_modules/web3-validator/lib/commonjs/validator.js
+@@ -67,9 +67,12 @@ const convertToZod = (schema) => {
+         if (!formats_js_1.default[schema.format]) {
+             throw new web3_errors_1.SchemaFormatError(schema.format);
+         }
+-        return zod_1.z.any().refine(formats_js_1.default[schema.format], (value) => ({
+-            params: { value, format: schema.format },
+-        }));
++        // zod 4 ignores refine()'s params callback
++        return zod_1.z.any().superRefine((value, ctx) => {
++            if (!formats_js_1.default[schema.format](value)) {
++                ctx.addIssue({ code: 'custom', params: { value, format: schema.format } });
++            }
++        });
+     }
+     if ((schema === null || schema === void 0 ? void 0 : schema.type) &&
+         (schema === null || schema === void 0 ? void 0 : schema.type) !== 'object' &&
+diff --git a/node_modules/web3-validator/lib/esm/validator.js b/node_modules/web3-validator/lib/esm/validator.js
+index 32f52acb2..033359969 100644
+--- a/node_modules/web3-validator/lib/esm/validator.js
++++ b/node_modules/web3-validator/lib/esm/validator.js
+@@ -61,9 +61,12 @@ const convertToZod = (schema) => {
+         if (!formats[schema.format]) {
+             throw new SchemaFormatError(schema.format);
+         }
+-        return z.any().refine(formats[schema.format], (value) => ({
+-            params: { value, format: schema.format },
+-        }));
++        // zod 4 ignores refine()'s params callback
++        return z.any().superRefine((value, ctx) => {
++            if (!formats[schema.format](value)) {
++                ctx.addIssue({ code: 'custom', params: { value, format: schema.format } });
++            }
++        });
+     }
+     if ((schema === null || schema === void 0 ? void 0 : schema.type) &&
+         (schema === null || schema === void 0 ? void 0 : schema.type) !== 'object' &&
