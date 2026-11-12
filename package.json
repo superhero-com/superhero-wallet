@@ -127,7 +127,7 @@
     "@types/webextension-polyfill": "^0.12.6",
     "@typescript-eslint/parser": "^8.72.2",
     "@vitejs/plugin-vue": "^6.0.10",
-    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/coverage-v8": "^5.1.0",
     "@vue/eslint-config-airbnb": "^8.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/test-utils": "^2.5.1",
@@ -159,7 +159,7 @@
     "vite-plugin-node-polyfills": "^0.24.0",
     "vite-plugin-static-copy": "^4.1.1",
     "vite-svg-loader": "^5.1.3",
-    "vitest": "^4.1.12",
+    "vitest": "^5.1.0",
     "vue-eslint-parser": "^10.4.2",
     "vue-tsc": "^3.3.14",
     "xml-js": "^1.6.11"
