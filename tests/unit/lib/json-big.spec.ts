@@ -36,6 +36,18 @@ describe('JsonBig', () => {
         '12345678901234567890': '12345678901234567890',
       });
     });
+
+    it.each([
+      ['an unterminated string', ''],
+      ['a string ending in a backslash', '\\'],
+      ['a string with a backslash before a line break', '\\\n"}'],
+    ])('fails on %s without scanning it again from every quote', (_shape, end) => {
+      const text = `{"note":"${'\\"'.repeat(65536)}${end}`; // 128 KB
+      const start = performance.now();
+
+      expect(() => JsonBig.parse(text)).toThrow(SyntaxError);
+      expect(performance.now() - start).toBeLessThan(1000);
+    });
   });
 
   describe('stringify', () => {

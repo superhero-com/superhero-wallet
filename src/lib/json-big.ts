@@ -1,7 +1,8 @@
 /**
  * A string literal is matched whole, so the digits inside it are not taken for a number.
+ * A broken or unterminated one is matched too, so it isn't scanned again from every quote.
  */
-const STRING_OR_NUMBER = /"[^"\\]*(?:\\.[^"\\]*)*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+const STRING_OR_NUMBER = /"[^"\\]*(?:\\[\s\S][^"\\]*)*(?:"|\\?$)|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
 
 export default {
   /**
