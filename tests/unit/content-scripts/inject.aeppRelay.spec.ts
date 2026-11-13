@@ -87,6 +87,7 @@ describe('inject.ts aepp relay', () => {
     vi.spyOn(document, 'readyState', 'get').mockImplementation(() => readyState);
     (globalThis as any).browser = {
       runtime: {
+        getURL: (path: string) => `chrome-extension://extension-id/${path}`,
         onMessage: { addListener: vi.fn() },
         sendMessage: vi.fn().mockResolvedValue({}),
         connect: vi.fn(() => {
@@ -193,6 +194,98 @@ describe('inject.ts aepp relay', () => {
 
       expect(injectPort().postMessage).not.toHaveBeenCalled();
       expect(sdkPort!.postMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('on a page restored from the back/forward cache', () => {
+    const request = {
+      type: MESSAGE_DIRECTION.to_waellet,
+      data: { jsonrpc: '2.0', id: 1, method: 'message.sign' },
+    };
+    const sessionEnd = {
+      type: 'to_aepp',
+      data: { jsonrpc: '2.0', method: 'connection.close', params: { reason: 'bye' } },
+    };
+    let windowPostMessage: ReturnType<typeof vi.spyOn>;
+
+    function showPage(persisted: boolean) {
+      window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted }));
+    }
+
+    beforeEach(async () => {
+      windowPostMessage = vi.spyOn(window, 'postMessage').mockImplementation(() => {});
+      await loadInject();
+    });
+
+    it('relays through a new port, as Chrome closed the old one', () => {
+      showPage(true);
+      postFromPage(request);
+      ports[1].receive({ jsonrpc: '2.0', id: 1, result: 'signature' });
+
+      expect(ports).toHaveLength(2);
+      expect(ports[0].disconnect).toHaveBeenCalled();
+      expect(ports[0].postMessage).not.toHaveBeenCalled();
+      expect(ports[1].postMessage).toHaveBeenCalledWith(request.data);
+      expect(windowPostMessage).toHaveBeenCalledWith(
+        { type: 'to_aepp', data: { jsonrpc: '2.0', id: 1, result: 'signature' } },
+        window.origin,
+      );
+    });
+
+    it('tells the aepp its session ended', () => {
+      postFromPage(request);
+      showPage(true);
+
+      expect(windowPostMessage).toHaveBeenCalledWith(sessionEnd, window.origin);
+    });
+
+    it('tells nothing to a page that did not talk to the wallet', () => {
+      showPage(true);
+
+      expect(ports).toHaveLength(2);
+      expect(windowPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('tells the aepp again when restored again', () => {
+      postFromPage(request);
+      showPage(true);
+      postFromPage(request);
+      showPage(true);
+
+      expect(ports).toHaveLength(3);
+      expect(windowPostMessage.mock.calls).toEqual([
+        [sessionEnd, window.origin],
+        [sessionEnd, window.origin],
+      ]);
+    });
+
+    it('keeps the port of a page shown for the first time', () => {
+      postFromPage(request);
+      showPage(false);
+
+      expect(ports).toHaveLength(1);
+      expect(windowPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('stays off once the wallet has disconnected, as after an update', () => {
+      ports[0].close();
+      showPage(true);
+      postFromPage(request);
+
+      expect(ports).toHaveLength(1);
+      expect(ports[0].postMessage).not.toHaveBeenCalled();
+    });
+
+    it('keeps the port in Firefox, which leaves it open', () => {
+      (globalThis as any).browser.runtime.getURL = (path: string) => `moz-extension://uuid/${path}`;
+      postFromPage(request);
+      showPage(true);
+      postFromPage(request);
+
+      expect(ports).toHaveLength(1);
+      expect(ports[0].disconnect).not.toHaveBeenCalled();
+      expect(ports[0].postMessage).toHaveBeenCalledTimes(2);
+      expect(windowPostMessage).not.toHaveBeenCalled();
     });
   });
 });

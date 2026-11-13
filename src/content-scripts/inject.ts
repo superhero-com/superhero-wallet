@@ -126,17 +126,37 @@ const runContentScript = () => {
    */
   function relayAeppMessages() {
     const port = browser.runtime.connect();
+    const pageListeners = new AbortController();
+    /** Whether the page talked to the wallet, which keeps a session per port */
+    let isUsed = false;
     function onPageMessage({ data, origin, source }: MessageEvent) {
       if ((data?.jsonrpc ?? data?.data?.jsonrpc) !== '2.0') return;
       if (origin !== window.origin || source !== window) return;
       if (data.type != null && data.type !== 'to_waellet') return;
+      isUsed = true;
       port.postMessage(data.type != null ? data.data : data);
     }
-    window.addEventListener('message', onPageMessage);
+    // Chrome closes the ports of a page it keeps in the back/forward cache, without telling
+    // this script. Firefox keeps them open.
+    function onPageShow({ persisted }: PageTransitionEvent) {
+      if (!persisted || browser.runtime.getURL('').startsWith('moz-extension:')) return;
+      pageListeners.abort();
+      port.disconnect();
+      if (isUsed) {
+        // As the wallet ends a session, so the aepp can connect again
+        window.postMessage({
+          type: 'to_aepp',
+          data: { jsonrpc: '2.0', method: 'connection.close', params: { reason: 'bye' } },
+        }, window.origin);
+      }
+      relayAeppMessages();
+    }
+    window.addEventListener('message', onPageMessage, { signal: pageListeners.signal });
+    window.addEventListener('pageshow', onPageShow, { signal: pageListeners.signal });
     port.onMessage.addListener((message) => {
       window.postMessage({ type: 'to_aepp', data: message }, window.origin);
     });
-    port.onDisconnect.addListener(() => window.removeEventListener('message', onPageMessage));
+    port.onDisconnect.addListener(() => pageListeners.abort());
   }
 
   if (document.readyState === 'complete') {

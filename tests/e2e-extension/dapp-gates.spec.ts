@@ -203,4 +203,24 @@ describe('aeternity aepp', () => {
       await otherDapp.close();
     }
   });
+
+  it('can connect again after the page comes back from the back/forward cache', async () => {
+    await aepp.evaluate(() => { (window as any).isCached = true; });
+    await aepp.goto(DAPP_URL);
+    await aepp.goBack();
+    // Else the page was loaded again, which is not the case of this test
+    expect(await aepp.evaluate(() => (window as any).isCached)).toBe(true);
+
+    // Chrome closed the port, so the wallet dropped the session
+    await aepp.waitForFunction(() => (window as any).aeDisconnects.length, { timeout: 10000 });
+    expect(await aepp.evaluate(() => (window as any).aeDisconnects)).toEqual([{ reason: 'bye' }]);
+    await aepp.evaluate(() => (window as any).ae.connect());
+    const { result } = await withoutPopup(
+      browser,
+      extensionId,
+      () => aepp.evaluate(() => (window as any).ae.subscribe()),
+    );
+
+    expect(result).toBe(address);
+  });
 });
