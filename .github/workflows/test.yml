@@ -1,5 +1,7 @@
 name: Test
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -10,13 +12,13 @@ jobs:
       # Only the extension job runs Chrome
       PUPPETEER_SKIP_DOWNLOAD: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
-          fetch-depth: 100
-      - uses: actions/setup-node@v4
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -45,21 +47,33 @@ jobs:
       TOKEN_SALES_URL_MAINNET: ${{ secrets.TOKEN_SALES_URL_MAINNET }}
       TOKEN_SALES_URL_TESTNET: ${{ secrets.TOKEN_SALES_URL_TESTNET }}
       E2E_SPEC_PATTERN: ${{ matrix.spec_pattern }}
+      PUPPETEER_SKIP_DOWNLOAD: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
       - name: Install app dependencies
         run: npm ci
       - name: Verify E2E shard coverage
         run: node scripts/check-e2e-shards.js
       - name: Run E2E shard ${{ matrix.shard }}
         run: npm run test:e2e
+      - name: Upload E2E failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-screenshots-${{ matrix.shard }}
+          path: tests/e2e/screenshots
+          if-no-files-found: ignore
   extension:
     runs-on: ubuntu-latest
     env:
@@ -67,15 +81,15 @@ jobs:
       # Extensions run in new headless, which is the full Chrome
       PUPPETEER_CHROME_HEADLESS_SHELL_SKIP_DOWNLOAD: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/puppeteer
           key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package-lock.json') }}
@@ -90,17 +104,17 @@ jobs:
       APP_NAME: wallet
       PUPPETEER_SKIP_DOWNLOAD: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install app dependencies
         run: npm ci
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}

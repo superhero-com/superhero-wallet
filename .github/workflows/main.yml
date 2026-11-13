@@ -3,6 +3,9 @@ on: [push, pull_request]
 jobs:
   main:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       APP_NAME: wallet
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
@@ -14,17 +17,23 @@ jobs:
       # Chrome is only for the extension tests
       PUPPETEER_SKIP_DOWNLOAD: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 100
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           java-version: '21'
-      - uses: actions/setup-node@v4
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle
+            android/gradle.properties
+            android/gradle/wrapper/gradle-wrapper.properties
+            package-lock.json
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -55,23 +64,19 @@ jobs:
           publish_dir: dist/web/root
           cname: wallet.superhero.com
 
-      - uses: softprops/action-gh-release@v2.2.1
+      - uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: Release ${{ github.ref }}
-      - uses: alexellis/upload-assets@0.4.1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          asset_paths: '["./dist-stage/artifacts/superhero-wallet-*"]'
+          files: ./dist-stage/artifacts/superhero-wallet-*
+          fail_on_unmatched_files: true
 
-      - uses: rlespinasse/github-slug-action@v4.x
+      - uses: rlespinasse/github-slug-action@v5
       - name: Deploy to stage
-        uses: easingthemes/ssh-deploy@v5.1.0
-        if: github.event_name == 'push'
+        uses: easingthemes/ssh-deploy@v6.0.3
+        if: github.event_name == 'push' && github.actor != 'dependabot[bot]'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.STAGE_PRIVATE_KEY }}
           SOURCE: dist-stage/
@@ -81,7 +86,7 @@ jobs:
           TARGET: ${{ format('/data/{0}/{1}', env.APP_NAME, env.GITHUB_REF_SLUG_URL) }}
 
       - uses: unsplash/comment-on-pr@a9bf050e744c8282dee4bb0dbcf063186d8316c4
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOST: ${{ format('{0}.{1}.z52da5wt.xyz', env.GITHUB_HEAD_REF_SLUG_URL, env.APP_NAME) }}
