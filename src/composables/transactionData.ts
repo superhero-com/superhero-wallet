@@ -1,5 +1,5 @@
 import { computed, Ref } from 'vue';
-import { Tag } from '@aeternity/aepp-sdk';
+import { isAuctionName, isName, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 
 import type {
@@ -18,8 +18,10 @@ import {
   isAssetCoin,
 } from '@/utils';
 import { ASSET_TYPES, PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
+  AE_AENS_DOMAIN,
   AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
   TX_FUNCTIONS,
@@ -87,17 +89,31 @@ export function useTransactionData({
   const txFunctionParsed = computed(() => getTxFunctionParsed(innerTx.value?.function));
   const txFunctionRaw = computed(() => getTxFunctionRaw(innerTx.value?.function));
 
+  const isNameBid = computed(() => {
+    const { name } = outerTx.value || {};
+    // Both the initial short-name claim and subsequent claims are auction bids.
+    return protocol.value === PROTOCOLS.aeternity
+      && outerTxTag.value === Tag.NameClaimTx
+      && isName(name)
+      && name.length > AE_AENS_DOMAIN.length
+      && isAuctionName(name);
+  });
+
   /**
    * Transaction TX type value converted into human readable label
    * displayed on the transaction details page.
    */
-  const txTypeLabel = computed((): string => txType.value ? getTxTypeLabel(txType.value) : '');
+  const txTypeLabel = computed((): string => {
+    if (isNameBid.value) return tg('transaction.type.nameBid');
+    return txType.value ? getTxTypeLabel(txType.value) : '';
+  });
 
   /**
    * Transaction TX type value converted into human readable label
    * displayed on the transaction lists.
    */
   const txTypeListLabel = computed((): string => {
+    if (isNameBid.value) return tg('transaction.listType.nameBid');
     const listTranslation = (txType.value) ? getTxTypeListLabel(txType.value) : '';
     return listTranslation ?? txTypeLabel.value;
   });
