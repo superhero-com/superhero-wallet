@@ -326,6 +326,7 @@ const createTestContext = async ({
     nameExtendTtl,
     nameTransfer,
     nameUpdate,
+    getPreclaimedNames: () => JSON.parse(WalletStorage.get(STORAGE_KEYS.preclaimedNames) || '{}'),
     getPendingAutoExtendTxs: () => WalletStorage.get(STORAGE_KEYS.pendingNameAutoExtendTxs),
     getPendingNameTransferTxs: () => WalletStorage.get(STORAGE_KEYS.pendingNameTransferTxs),
   };
@@ -687,6 +688,119 @@ describe('useAeNames queued claims', () => {
         claimTxHash: 'th_existing',
       });
       expect(openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    it('drops a sent claim the node no longer knows', async () => {
+      const {
+        aeNames,
+        nameClaim,
+        openDefaultModal,
+        sdk,
+      } = await createTestContext(queuedClaim({
+        status: 'claim-submitted',
+        claimTxHash: 'th_existing',
+      }));
+      sdk.poll.mockRejectedValueOnce(restError('Transaction not found', { statusCode: 404 }));
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(aeNames.preclaimedNames.value).toEqual({});
+      expect(openDefaultModal).toHaveBeenCalledWith({ msg: 'Transaction not found' });
+      expect(nameClaim).not.toHaveBeenCalled();
+    });
+
+    it('keeps monitoring the same claim after repeated timeouts and finalizes it once mined', async () => {
+      const fixture = queuedClaim({
+        status: 'claim-submitted',
+        claimTxHash: 'th_existing',
+        autoExtend: true,
+      });
+      const {
+        aeNames,
+        fetchAllPages,
+        nameClaim,
+        nameUpdate,
+        openDefaultModal,
+        sdk,
+      } = await createTestContext(fixture);
+      const { TxTimedOutError } = await import('@aeternity/aepp-sdk');
+      sdk.poll.mockRejectedValueOnce(new TxTimedOutError(5, 'th_existing'))
+        .mockRejectedValueOnce(new TxTimedOutError(5, 'th_existing'));
+
+      await aeNames.claimPreclaimedNames();
+      expect(aeNames.preclaimedNames.value).toEqual(fixture.preclaimedNames);
+      await aeNames.claimPreclaimedNames();
+
+      expect(aeNames.preclaimedNames.value).toEqual(fixture.preclaimedNames);
+      expect(sdk.poll.mock.calls).toEqual([['th_existing'], ['th_existing']]);
+      expect(nameClaim).not.toHaveBeenCalled();
+      expect(nameUpdate).not.toHaveBeenCalled();
+      expect(openDefaultModal).not.toHaveBeenCalled();
+
+      fetchAllPages.mockResolvedValue([middlewareName(longName)]);
+      await aeNames.claimPreclaimedNames();
+
+      expect(sdk.poll.mock.calls).toEqual([['th_existing'], ['th_existing'], ['th_existing']]);
+      expect(nameClaim).not.toHaveBeenCalled();
+      expect(nameUpdate).toHaveBeenCalledTimes(1);
+      expect(nameUpdate).toHaveBeenCalledWith(
+        { account_pubkey: 'ak_test' },
+        { extendPointers: true },
+      );
+      expect(aeNames.preclaimedNames.value).toEqual({});
+      expect(aeNames.ownedNames.value).toEqual([
+        expect.objectContaining({ name: longName, autoExtend: true }),
+      ]);
+    });
+
+    it('restores the submitted claim after a polling timeout without sending another claim', async () => {
+      const ctx = await createTestContext(queuedClaim());
+      const { TxTimedOutError } = await import('@aeternity/aepp-sdk');
+      ctx.sdk.poll.mockRejectedValueOnce(new TxTimedOutError(5, 'th_claim'));
+
+      await ctx.aeNames.claimPreclaimedNames();
+      await vi.waitFor(() => expect(ctx.getPreclaimedNames().ae_testnet?.[longName]).toMatchObject({
+        status: 'claim-submitted',
+        salt: 123,
+        claimTxHash: 'th_claim',
+      }));
+      expect(ctx.nameClaim).toHaveBeenCalledTimes(1);
+
+      const restored = await createTestContext({ preclaimedNames: ctx.getPreclaimedNames() });
+      await restored.aeNames.claimPreclaimedNames();
+
+      expect(restored.sdk.poll).toHaveBeenCalledWith('th_claim');
+      expect(restored.nameClaim).not.toHaveBeenCalled();
+      expect(restored.nameUpdate).toHaveBeenCalledTimes(1);
+      expect(restored.aeNames.preclaimedNames.value.ae_testnet[longName].status).toBe('claimed');
+    });
+
+    it('continues processing later queued names when a submitted claim times out', async () => {
+      const fixture = queuedClaim({ status: 'claim-submitted', claimTxHash: 'th_existing' });
+      const nextName = 'nextsuperlongname.chain';
+      fixture.preclaimedNames.ae_testnet[nextName] = {
+        ...fixture.preclaimedNames.ae_testnet[longName],
+        name: nextName,
+        blockHeight: 100,
+        claimTxHash: 'th_next',
+      };
+      const {
+        aeNames,
+        nameClaim,
+        nameUpdate,
+        sdk,
+      } = await createTestContext(fixture);
+      const { TxTimedOutError } = await import('@aeternity/aepp-sdk');
+      sdk.poll.mockRejectedValueOnce(new TxTimedOutError(5, 'th_existing'));
+
+      await aeNames.claimPreclaimedNames();
+
+      expect(sdk.poll.mock.calls).toEqual([['th_existing'], ['th_next']]);
+      expect(aeNames.preclaimedNames.value.ae_testnet[longName])
+        .toEqual(fixture.preclaimedNames.ae_testnet[longName]);
+      expect(aeNames.preclaimedNames.value.ae_testnet[nextName].status).toBe('claimed');
+      expect(nameClaim).not.toHaveBeenCalled();
+      expect(nameUpdate).toHaveBeenCalledTimes(1);
     });
 
     const nameTakenModal = expect.objectContaining({ msg: expect.stringContaining('already') });

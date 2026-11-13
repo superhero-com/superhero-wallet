@@ -10,6 +10,7 @@ import {
   Encoded,
   Name,
   Tag,
+  TxTimedOutError,
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
@@ -1459,6 +1460,10 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       try {
         await aeSdk.poll(currentClaimTxHash);
       } catch (error: any) {
+        // A polling deadline does not mean the node rejected the claim.
+        if (error instanceof TxTimedOutError) {
+          return;
+        }
         if (isTransientRequestError(error)) {
           logSilentError(error);
           return;
