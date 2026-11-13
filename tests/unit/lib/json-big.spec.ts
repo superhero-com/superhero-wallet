@@ -1,4 +1,14 @@
+import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import JsonBig from '@/lib/json-big';
+
+const ADDRESS = 'ak_2swhLkgBPeeADxVTAVCJnZLY5NZtCFiM93JxsEaMuC59euuFRQ';
+
+/** A call argument as the sign modal gets it from the decoded call data */
+function decodeCallArgument(type: string | object, value: unknown) {
+  const encoder = new ContractByteArrayEncoder();
+  const fateType = new TypeResolver().resolveType(type);
+  return encoder.decodeWithType(encoder.encodeWithType(value, fateType), fateType);
+}
 
 describe('JsonBig', () => {
   describe('parse', () => {
@@ -31,15 +41,21 @@ describe('JsonBig', () => {
   describe('stringify', () => {
     it('writes bigints as strings next to any other value', () => {
       expect(JsonBig.stringify([
-        'ak_2swhLkgBPeeADxVTAVCJnZLY5NZtCFiM93JxsEaMuC59euuFRQ',
+        ADDRESS,
         '',
         100n,
         true,
         { amount: 20000000000000000000n, nonce: 5 },
       ])).toBe(
-        '["ak_2swhLkgBPeeADxVTAVCJnZLY5NZtCFiM93JxsEaMuC59euuFRQ","",'
-        + '"100",true,{"amount":"20000000000000000000","nonce":5}]',
+        `["${ADDRESS}","","100",true,{"amount":"20000000000000000000","nonce":5}]`,
       );
+    });
+
+    it('writes the maps and bytes of decoded call arguments as arrays', () => {
+      expect(JsonBig.stringify([
+        decodeCallArgument({ map: ['address', 'int'] }, new Map([[ADDRESS, 5n]])),
+        decodeCallArgument({ bytes: 2 }, 0xabcdn),
+      ])).toBe(`[[["${ADDRESS}","5"]],[171,205]]`);
     });
   });
 });
