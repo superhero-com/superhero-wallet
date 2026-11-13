@@ -85,6 +85,7 @@ async function openSavedAbout(platform: string, { slowParent = false } = {}) {
   await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
   expect(await getCurrentPath('fullPath')).toBe(SAVED_PATH);
   await page.waitForFunction(() => document.querySelector('ion-router-outlet')?.swipeGesture === true);
+  return url;
 }
 
 async function launchWithSavedRoute(savedRoute: string, options = '') {
@@ -111,6 +112,21 @@ it('restores an iOS page with working canceled and completed swipe-back gestures
   await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
   expect(await getCurrentPath()).toBe('/more');
   expect(await page.locator('#about').count()).toBe(0);
+});
+
+it('saves the parent reached by a swipe back and restores it on the next launch', async () => {
+  const url = await openSavedAbout('ios');
+  await swipeBack(page, '#more', '#about');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
+  expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!).path, LAST_ROUTE_KEY))
+    .toBe('/more');
+
+  await page.goto(url);
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
+  expect(await getCurrentPath('fullPath')).toBe('/more');
+  await page.waitForSelector('#account.ion-page-hidden', { state: 'attached' });
+  await swipeBack(page, '#account', '#more');
+  expect(await getCurrentPath()).toBe('/account');
 });
 
 it('retains direct route restoration outside iOS', async () => {
