@@ -1,7 +1,9 @@
 import path from 'path';
 import {
   afterAll,
+  afterEach,
   beforeAll,
+  beforeEach,
   expect,
   it,
 } from 'vitest';
@@ -12,9 +14,12 @@ import { startEdgeDrag, swipeBack } from './swipe';
 const ROOT = path.resolve(__dirname, '../..');
 const FIXTURE = path.join(ROOT, 'tests/fixtures/route-restoration');
 const SAVED_PATH = '/more/about?details=1#version';
+const LAST_ROUTE_KEY = 'route-restoration-test:last-route';
 let server: ViteDevServer;
 let browser: Browser;
 let fixtureUrl: string;
+let page: Page;
+let pageErrors: string[];
 
 beforeAll(async () => {
   server = await createServer({
@@ -48,7 +53,25 @@ afterAll(async () => {
   await server?.close();
 });
 
-async function openSavedAbout(page: Page, platform: string, { slowParent = false } = {}) {
+beforeEach(async () => {
+  page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+});
+
+afterEach(async () => {
+  await page.close();
+  expect(pageErrors).toEqual([]);
+});
+
+async function getCurrentPath(key: 'path' | 'fullPath' = 'path') {
+  return page.evaluate(
+    (routeKey) => window.routeRestoration.router.currentRoute.value[routeKey],
+    key,
+  );
+}
+
+async function openSavedAbout(platform: string, { slowParent = false } = {}) {
   const url = `${fixtureUrl}?platform=${platform}&slowParent=${slowParent}`;
   await page.goto(url);
   await page.waitForFunction(() => document.documentElement.dataset.entered === 'account');
@@ -60,175 +83,120 @@ async function openSavedAbout(page: Page, platform: string, { slowParent = false
   // Relaunch without Ionic history to reproduce a cold app start.
   await page.goto(url);
   await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
-  expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
-    .toBe(SAVED_PATH);
+  expect(await getCurrentPath('fullPath')).toBe(SAVED_PATH);
   await page.waitForFunction(() => document.querySelector('ion-router-outlet')?.swipeGesture === true);
 }
 
-async function launchWithSavedRoute(page: Page, savedRoute: string, options = '') {
+async function launchWithSavedRoute(savedRoute: string, options = '') {
   // Seed before the app starts: relaunching a setup page cancels its pending imports.
-  await page.addInitScript((savedPath) => localStorage.setItem('route-restoration-test:last-route', JSON.stringify({
+  await page.addInitScript(({ key, savedPath }) => localStorage.setItem(key, JSON.stringify({
     path: savedPath, time: new Date().toISOString(),
-  })), savedRoute);
+  })), { key: LAST_ROUTE_KEY, savedPath: savedRoute });
   await page.goto(`${fixtureUrl}?platform=ios${options && `&${options}`}`);
 }
 
 it('restores an iOS page with working canceled and completed swipe-back gestures (#3679)', async () => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  try {
-    await openSavedAbout(page, 'ios');
-    expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(true);
-    expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
+  await openSavedAbout('ios');
+  expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(true);
+  expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
 
-    await startEdgeDrag(page, '#more', '#about');
-    await page.mouse.move(1, 400, { steps: 8 });
-    await page.mouse.up();
-    await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
-      .toBe(SAVED_PATH);
-    expect(await page.locator('#about:not(.ion-page-hidden)').count()).toBe(1);
+  await startEdgeDrag(page, '#more', '#about');
+  await page.mouse.move(1, 400, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
+  expect(await getCurrentPath('fullPath')).toBe(SAVED_PATH);
+  expect(await page.locator('#about:not(.ion-page-hidden)').count()).toBe(1);
 
-    await swipeBack(page, '#more', '#about');
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more');
-    expect(await page.locator('#about').count()).toBe(0);
-    expect(errors).toEqual([]);
-  } finally {
-    await page.close();
-  }
+  await swipeBack(page, '#more', '#about');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
+  expect(await getCurrentPath()).toBe('/more');
+  expect(await page.locator('#about').count()).toBe(0);
 });
 
 it('retains direct route restoration outside iOS', async () => {
-  const page = await browser.newPage();
-  try {
-    await openSavedAbout(page, 'web');
-    expect(await page.locator('#more').count()).toBe(0);
-    expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(false);
-  } finally {
-    await page.close();
-  }
+  await openSavedAbout('web');
+  expect(await page.locator('#more').count()).toBe(0);
+  expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(false);
 });
 
 it('waits for an async inner parent page before restoring the swipe stack', async () => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  try {
-    await openSavedAbout(page, 'ios', { slowParent: true });
-    expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
-    expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(true);
-    await swipeBack(page, '#more', '#about');
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more');
-    expect(errors).toEqual([]);
-  } finally {
-    await page.close();
-  }
+  await openSavedAbout('ios', { slowParent: true });
+  expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
+  expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(true);
+  await swipeBack(page, '#more', '#about');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
+  expect(await getCurrentPath()).toBe('/more');
 });
 
 it('abandons restoration when another navigation starts while its parent is loading', async () => {
-  const page = await browser.newPage();
-  try {
-    await launchWithSavedRoute(page, SAVED_PATH, 'holdParent=true');
-    await page.waitForFunction(() => window.routeRestoration.router.currentRoute.value.path === '/more');
-    await page.evaluate(() => window.routeRestoration.router.push('/account'));
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'account');
-    await page.evaluate(() => window.routeRestoration.releaseParent());
-    // A stale restoration would navigate a frame after the parent page mounts.
-    await page.waitForSelector('#more', { state: 'attached' });
-    await page.evaluate(() => new Promise((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
-    }));
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/account');
-    expect(await page.locator('#about').count()).toBe(0);
-  } finally {
-    await page.close();
-  }
+  await launchWithSavedRoute(SAVED_PATH, 'holdParent=true');
+  await page.waitForFunction(() => window.routeRestoration.router.currentRoute.value.path === '/more');
+  await page.evaluate(() => window.routeRestoration.router.push('/account'));
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'account');
+  await page.evaluate(() => window.routeRestoration.releaseParent());
+  // A stale restoration would navigate a frame after the parent page mounts.
+  await page.waitForSelector('#more', { state: 'attached' });
+  await page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
+  expect(await getCurrentPath()).toBe('/account');
+  expect(await page.locator('#about').count()).toBe(0);
 });
 
 it('waits for the parent page in nested async Ionic outlets', async () => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  try {
-    await launchWithSavedRoute(page, '/nested/names/auctions');
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'auctions');
-    expect(await page.locator('#names.ion-page-hidden').count()).toBe(1);
-    expect(await page.$eval('#nested-names > ion-router-outlet', (outlet) => outlet.swipeHandler.canStart()))
-      .toBe(true);
+  await launchWithSavedRoute('/nested/names/auctions');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'auctions');
+  expect(await page.locator('#names.ion-page-hidden').count()).toBe(1);
+  expect(await page.$eval('#nested-names > ion-router-outlet', (outlet) => outlet.swipeHandler.canStart()))
+    .toBe(true);
 
-    await swipeBack(page, '#names', '#auctions');
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'names');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path))
-      .toBe('/nested/names');
-    expect(errors).toEqual([]);
-  } finally {
-    await page.close();
-  }
+  await swipeBack(page, '#names', '#auctions');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'names');
+  expect(await getCurrentPath()).toBe('/nested/names');
 });
 
 it('restores a nested URL when an offline parent intentionally omits its child outlet', async () => {
-  const page = await browser.newPage();
-  try {
-    await launchWithSavedRoute(page, '/nested/names/auctions', 'offline=true');
-    await page.waitForFunction(() => window.routeRestoration.router.currentRoute.value.path
-      === '/nested/names/auctions');
-    expect(await page.locator('#nested-names').count()).toBe(1);
-    expect(await page.locator('#auctions').count()).toBe(0);
-  } finally {
-    await page.close();
-  }
+  await launchWithSavedRoute('/nested/names/auctions', 'offline=true');
+  await page.waitForFunction(() => window.routeRestoration.router.currentRoute.value.path
+    === '/nested/names/auctions');
+  expect(await page.locator('#nested-names').count()).toBe(1);
+  expect(await page.locator('#auctions').count()).toBe(0);
 });
 
 it('retains the saved destination through a locked launch and restores its swipe stack after unlock', async () => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  try {
-    await launchWithSavedRoute(page, SAVED_PATH, 'locked=true');
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'index');
-    expect(await page.locator('#about, #more').count()).toBe(0);
+  await launchWithSavedRoute(SAVED_PATH, 'locked=true');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'index');
+  expect(await page.locator('#about, #more').count()).toBe(0);
 
-    await page.locator('#unlock').click();
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
-      .toBe(SAVED_PATH);
-    await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
-    await swipeBack(page, '#more', '#about');
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more');
-  } finally {
-    await page.close();
-  }
+  await page.locator('#unlock').click();
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
+  expect(await getCurrentPath('fullPath')).toBe(SAVED_PATH);
+  await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
+  await swipeBack(page, '#more', '#about');
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
+  expect(await getCurrentPath()).toBe('/more');
 });
 
 it.each(['terms', 'privacy'])('restores public %s for locked and authenticated launches', async (name) => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const savedPath = `/more/about/${name}?language=en#policy`;
-  try {
-    await launchWithSavedRoute(page, savedPath, 'locked=true');
-    await page.waitForFunction(
-      (entered) => document.documentElement.dataset.entered === entered,
-      name,
-    );
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
-      .toBe(savedPath);
-    expect(await page.locator('#index, #about').count()).toBe(0);
+  await launchWithSavedRoute(savedPath, 'locked=true');
+  await page.waitForFunction(
+    (entered) => document.documentElement.dataset.entered === entered,
+    name,
+  );
+  expect(await getCurrentPath('fullPath')).toBe(savedPath);
+  expect(await page.locator('#index, #about').count()).toBe(0);
 
-    await launchWithSavedRoute(page, savedPath, 'locked=false');
-    await page.waitForFunction(
-      (entered) => document.documentElement.dataset.entered === entered,
-      name,
-    );
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
-      .toBe(savedPath);
-    await page.waitForSelector('#about.ion-page-hidden', { state: 'attached' });
-    await swipeBack(page, '#about', `#${name}`);
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more/about');
-  } finally {
-    await page.close();
-  }
+  await launchWithSavedRoute(savedPath, 'locked=false');
+  await page.waitForFunction(
+    (entered) => document.documentElement.dataset.entered === entered,
+    name,
+  );
+  expect(await getCurrentPath('fullPath')).toBe(savedPath);
+  await page.waitForSelector('#about.ion-page-hidden', { state: 'attached' });
+  await swipeBack(page, '#about', `#${name}`);
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
+  expect(await getCurrentPath()).toBe('/more/about');
 });
 
 it.each([
@@ -237,44 +205,32 @@ it.each([
 ])(
   'restores %s coin pages after account readiness with the supported swipe-back parent',
   async (protocol, coinPath, parent, parentPath) => {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const savedPath = `${coinPath}?details=1#symbol`;
-    try {
-      await launchWithSavedRoute(page, savedPath, `protocol=${protocol}&deferAuth=true`);
-      await page.waitForFunction(() => document.documentElement.dataset.authPending === 'true');
-      expect(await page.locator('#coin, #assets, #transactions').count()).toBe(0);
-      await page.evaluate(() => window.routeRestoration.releaseAuth());
-      await page.waitForFunction(() => document.documentElement.dataset.entered === 'coin');
-      expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
-        .toBe(savedPath);
-      await page.waitForSelector('#account-root.ion-page-hidden', { state: 'attached' });
-      await swipeBack(page, '#account-root', '#coin');
-      expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path))
-        .toBe(parentPath);
-      expect(await page.locator(`#${parent}`).isVisible()).toBe(true);
-    } finally {
-      await page.close();
-    }
+    await launchWithSavedRoute(savedPath, `protocol=${protocol}&deferAuth=true`);
+    await page.waitForFunction(() => document.documentElement.dataset.authPending === 'true');
+    expect(await page.locator('#coin, #assets, #transactions').count()).toBe(0);
+    await page.evaluate(() => window.routeRestoration.releaseAuth());
+    await page.waitForFunction(() => document.documentElement.dataset.entered === 'coin');
+    expect(await getCurrentPath('fullPath')).toBe(savedPath);
+    await page.waitForSelector('#account-root.ion-page-hidden', { state: 'attached' });
+    await swipeBack(page, '#account-root', '#coin');
+    expect(await getCurrentPath()).toBe(parentPath);
+    expect(await page.locator(`#${parent}`).isVisible()).toBe(true);
   },
 );
 
 it('lets navigation during authentication cancel saved-page restoration', async () => {
-  const page = await browser.newPage();
-  try {
-    await launchWithSavedRoute(page, SAVED_PATH, 'deferAuth=true');
-    await page.waitForFunction(() => document.documentElement.dataset.authPending === 'true');
-    await page.evaluate(() => {
-      document.documentElement.dataset.authPending = 'false';
-      window.routeRestoration.router.push('/account');
-    });
-    // vue-router follows redirects even from superseded navigations, so finish authentication
-    // only once the newer navigation has reached it, as a user's tap would have.
-    await page.waitForFunction(() => document.documentElement.dataset.authPending === 'true');
-    await page.evaluate(() => window.routeRestoration.releaseAuth());
-    await page.waitForFunction(() => document.documentElement.dataset.entered === 'account');
-    expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/account');
-    expect(await page.locator('#about, #more').count()).toBe(0);
-  } finally {
-    await page.close();
-  }
+  await launchWithSavedRoute(SAVED_PATH, 'deferAuth=true');
+  await page.waitForFunction(() => document.documentElement.dataset.authPending === 'true');
+  await page.evaluate(() => {
+    document.documentElement.dataset.authPending = 'false';
+    window.routeRestoration.router.push('/account');
+  });
+  // vue-router follows redirects even from superseded navigations, so finish authentication
+  // only once the newer navigation has reached it, as a user's tap would have.
+  await page.waitForFunction(() => document.documentElement.dataset.authPending === 'true');
+  await page.evaluate(() => window.routeRestoration.releaseAuth());
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'account');
+  expect(await getCurrentPath()).toBe('/account');
+  expect(await page.locator('#about, #more').count()).toBe(0);
 });
