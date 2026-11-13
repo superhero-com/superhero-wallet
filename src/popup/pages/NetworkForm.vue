@@ -185,9 +185,6 @@ export default defineComponent({
 
     const isEdit = route.name === ROUTE_NETWORK_EDIT;
     const savedNetworkName = route.params.name?.toString();
-    const networkToEditIndex = (isEdit)
-      ? customNetworks.value.findIndex(({ name }) => name === savedNetworkName)
-      : null;
 
     const emptyNetworkSettings = Object.fromEntries(PROTOCOL_LIST.map(
       (protocol) => [protocol, {}],
@@ -210,7 +207,12 @@ export default defineComponent({
         protocols: newNetworkProtocols.value,
       };
       if (isEdit) {
-        updateCustomNetwork(networkToEditIndex!, network);
+        // Another window may have added or removed networks meanwhile
+        const index = customNetworks.value.findIndex(({ name }) => name === savedNetworkName);
+        if (!updateCustomNetwork(index, network)) {
+          goBack();
+          return;
+        }
       } else {
         addCustomNetwork(network);
       }

@@ -6,6 +6,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
+  POPUP_TYPE_NETWORK_SWITCH,
 } from '../../../src/constants';
 import { STUB_POPUP_PROPS, STUB_TX_PARAMS } from '../../../src/constants/stubs';
 import locale from '../../../src/popup/locales/en-US.json';
@@ -15,6 +16,7 @@ const popups = [
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
+  POPUP_TYPE_NETWORK_SWITCH,
 ];
 
 const txTags = [
@@ -70,6 +72,22 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .should('contain', props3.app.name)
       .should('contain', props3.app.host);
+  });
+
+  it('Network switch popup displays the requesting site and the target network', () => {
+    const props = STUB_POPUP_PROPS[POPUP_TYPE_NETWORK_SWITCH];
+    cy.openAex2Popup(POPUP_TYPE_NETWORK_SWITCH)
+      .get('[data-cy=aepp]')
+      .should('be.visible')
+      .should('contain', props.app.href)
+      .get('[data-cy=new-network-warning]')
+      .should('be.visible')
+      .get('[data-cy=network-name]')
+      .should('contain', props.networkName)
+      .get('[data-cy=network-id]')
+      .should('contain', props.networkId)
+      .get('[data-cy=node-url]')
+      .should('contain', props.nodeUrl);
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {

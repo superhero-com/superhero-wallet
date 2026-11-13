@@ -49,6 +49,7 @@ import {
   ROUTE_POPUP_ACCOUNT_LIST,
   ROUTE_POPUP_SIGN_TX,
   ROUTE_POPUP_CONNECT,
+  ROUTE_POPUP_NETWORK_SWITCH,
   ROUTE_POPUP_RAW_SIGN,
   ROUTE_POPUP_UNSAFE_SIGN,
   ROUTE_POPUP_MESSAGE_SIGN,
@@ -103,6 +104,7 @@ import AuctionList from '../pages/Names/AuctionList.vue';
 import NameClaim from '../pages/Names/Claim.vue';
 import About from '../pages/About.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
+import NetworkSwitch from '../pages/Popups/NetworkSwitch.vue';
 import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
@@ -369,6 +371,14 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/popup-unsafe-sign',
     component: ConfirmUnsafeSign,
     props: true,
+    meta: {
+      notPersist: true,
+    },
+  },
+  {
+    name: ROUTE_POPUP_NETWORK_SWITCH,
+    path: '/popup-network-switch',
+    component: NetworkSwitch,
     meta: {
       notPersist: true,
     },
