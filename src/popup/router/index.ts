@@ -21,6 +21,7 @@ import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAccounts,
   useAuth,
@@ -51,6 +52,7 @@ const router = createRouter({
 });
 
 const {
+  activeAccount,
   isLoggedIn,
   areAccountsReady,
 } = useAccounts();
@@ -59,7 +61,10 @@ const { setLoginTargetLocation } = useUi();
 const { checkUserAuth, isAuthenticated } = useAuth();
 
 RouteQueryActionsController.init(router);
-RouteLastUsedRoutes.init(router);
+const routeRestoration = RouteLastUsedRoutes.init(
+  router,
+  () => ProtocolAdapterFactory.getAdapter(activeAccount.value.protocol).hasTokensSupport,
+);
 
 router.beforeEach(async (to, from, next) => {
   let popupProps: IPopupProps | null = null;
@@ -78,7 +83,7 @@ router.beforeEach(async (to, from, next) => {
     if (meta?.ifNotAuthOnly || meta?.ifNotAuth) {
       next();
     } else {
-      setLoginTargetLocation(to);
+      setLoginTargetLocation(routeRestoration?.waitForLogin(to) ?? to);
       next({ name: ROUTE_INDEX });
     }
     return;
@@ -117,7 +122,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (meta?.ifNotAuthOnly) next({ name: ROUTE_ACCOUNT });
-  else next();
+  else {
+    const parentPath = routeRestoration?.restoreAfterAuth(to);
+    if (parentPath) next(parentPath);
+    else next();
+  }
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));
