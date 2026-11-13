@@ -10,7 +10,7 @@ import {
   ETH_CONTENT_SCRIPT_METHODS,
   ETH_RPC_METHODS,
   ETH_RPC_WALLET_EVENTS,
-} from '@/protocols/ethereum/config';
+} from '@/protocols/ethereum/rpcMethods';
 import browser from 'webextension-polyfill';
 
 /** Whether the page asked the wallet anything, so it may hear when the chain changes */
