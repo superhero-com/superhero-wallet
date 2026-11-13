@@ -1,6 +1,7 @@
 <template>
   <BtnIcon
     class="btn-close"
+    :aria-label="$t('a11y.close')"
     v-bind="$attrs"
     :icon="CloseIcon"
   />

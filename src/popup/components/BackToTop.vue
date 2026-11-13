@@ -11,6 +11,7 @@
       >
         <BtnPlain
           class="back-to-top-btn"
+          :aria-label="$t('a11y.backToTop')"
           @click="scrollTop"
         >
           <Chevron class="chevron" />

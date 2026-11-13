@@ -18,6 +18,7 @@
         <BtnIcon
           key="btn-wallet-connect"
           data-cy="btn-wallet-connect"
+          :aria-label="$t('a11y.openWalletConnect')"
           :icon="WalletConnectLogo"
           :icon-variant="(isOnline && wcSession) ? 'success' : 'default'"
           :dimmed="!isOnline || !wcSession"
@@ -36,6 +37,7 @@
         <BtnIcon
           key="btn-more"
           data-cy="page-more"
+          :aria-label="$t('pages.titles.more')"
           :to="{ name: ROUTE_MORE }"
           :icon="ThreeDotsIcon"
         />

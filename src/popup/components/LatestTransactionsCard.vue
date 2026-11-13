@@ -12,6 +12,7 @@
       <BtnIcon
         class="btn-refresh"
         size="sm"
+        :aria-label="$t('a11y.refreshTransactions')"
         :icon="RefreshIcon"
         :loading="areLatestTransactionsUpdating"
         @click="loadAllLatestTransactions()"

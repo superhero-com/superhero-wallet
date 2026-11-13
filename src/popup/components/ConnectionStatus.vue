@@ -29,6 +29,7 @@
       </template>
       <template v-else>
         <BtnIcon
+          :aria-label="$t('a11y.showConnectionStatus')"
           :icon="WarningOutlineIcon"
           icon-variant="warning"
           class="icon"

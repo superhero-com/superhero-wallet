@@ -7,6 +7,7 @@
       id="camera-close-btn"
       class="close-button"
       type="button"
+      :aria-label="$t('a11y.closeQrScanner')"
     >
       <CloseIcon />
     </button>

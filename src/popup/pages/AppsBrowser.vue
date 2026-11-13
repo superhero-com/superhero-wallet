@@ -31,6 +31,7 @@
             <BtnIcon
               v-else
               size="sm"
+              :aria-label="$t('a11y.clearSearch')"
               :icon="CloseIcon"
               @click="resetField({ value: '' })"
             />

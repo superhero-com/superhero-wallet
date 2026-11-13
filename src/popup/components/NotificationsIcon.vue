@@ -2,6 +2,9 @@
   <BtnIcon
     class="notifications"
     data-cy="notifications-btn"
+    :aria-label="notificationsCount
+      ? $t('a11y.notificationsWithUnread', { count: notificationsCount })
+      : $t('pages.titles.notifications')"
     :icon="BellIcon"
     :to="{ name: ROUTE_NOTIFICATIONS }"
     :badge-text="notificationsCount"

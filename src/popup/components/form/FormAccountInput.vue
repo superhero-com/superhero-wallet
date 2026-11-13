@@ -38,6 +38,7 @@
     <template #after>
       <BtnIcon
         v-if="!hideClearIcon && (selectedAddresses.length || inputValue.length)"
+        :aria-label="$t('a11y.clearAddresses')"
         :icon="CircleCloseIcon"
         data-cy="clear-address-button"
         class="close-icon"
@@ -74,6 +75,7 @@
           />
           <BtnIcon
             v-if="!hideClearIcon"
+            :aria-label="$t('a11y.removeAddress', { address: account.address })"
             :icon="TrashIcon"
             data-cy="clear-address-button"
             class="close-icon"

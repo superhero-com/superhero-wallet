@@ -22,6 +22,7 @@
           size="sm"
           data-cy="network-edit"
           dimmed
+          :aria-label="$t('a11y.editNetwork', { name: network.name })"
           :to="{ name: ROUTE_NETWORK_EDIT, params: { name: network.name } }"
           :icon="PencilIcon"
         />
@@ -29,6 +30,7 @@
           size="sm"
           data-cy="network-delete"
           dimmed
+          :aria-label="$t('a11y.deleteNetwork', { name: network.name })"
           :icon="TrashIcon"
           @click="$emit('network-delete', network.name);"
         />

@@ -81,6 +81,12 @@ describe('SignAccountSelect.vue', () => {
     ).toEqual(accountActive);
   });
 
+  it('names the selector when no account is selected', () => {
+    const wrapper = mountWith({ account: undefined });
+
+    expect(wrapper.get('.form-select-stub').text()).toBe('Select account to sign with');
+  });
+
   it('emits the resolved account when a different one is picked', async () => {
     const wrapper = mountWith();
 

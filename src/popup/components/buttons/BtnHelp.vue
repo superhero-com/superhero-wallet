@@ -2,6 +2,7 @@
   <BtnPlain
     class="btn-help"
     type="button"
+    :aria-label="title ? $t('a11y.helpAbout', { topic: title }) : $t('a11y.help')"
     :class="{ small, warning }"
     @click="showHelpModal"
   >

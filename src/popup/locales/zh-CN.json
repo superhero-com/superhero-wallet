@@ -1,4 +1,40 @@
 {
+  "a11y": {
+    "back": "返回",
+    "backToTop": "返回顶部",
+    "clearAddresses": "清除所有地址",
+    "clearSearch": "清除搜索",
+    "clearSigner": "清除签名者 {number} 的地址",
+    "close": "关闭",
+    "closeQrScanner": "关闭二维码扫描器",
+    "deleteNetwork": "删除网络 {name}",
+    "dismissCard": "关闭卡片",
+    "editNetwork": "编辑网络 {name}",
+    "editPayload": "编辑附加数据",
+    "help": "帮助",
+    "helpAbout": "帮助：{topic}",
+    "nameDetails": "{name} 的详情",
+    "nextAccount": "下一个账户",
+    "notificationsWithUnread": "通知，未读：{count}",
+    "openWalletConnect": "打开 WalletConnect",
+    "previousAccount": "上一个账户",
+    "refreshTransactions": "刷新交易",
+    "removeAddress": "移除地址 {address}",
+    "removePayload": "移除附加数据",
+    "removeSigner": "移除签名者 {number}",
+    "removeTokenSalesUrl": "移除代币销售网址 {url}",
+    "saveNamePointer": "保存 {name} 的地址",
+    "scanSignerAddress": "扫描签名者 {number} 的地址",
+    "selectAccount": "选择账户 {number}",
+    "selectActiveAccount": "选择当前账户（{current} / {total}）",
+    "selectAsset": "选择资产",
+    "selectRecipientAddress": "从地址簿选择收款人",
+    "selectSignerAddress": "选择签名者 {number} 的地址",
+    "shareAddress": "分享地址",
+    "showConnectionStatus": "显示连接状态",
+    "transferName": "转让 {name}",
+    "urlStatusDetails": "显示详情：{status}"
+  },
   "common": {
     "activeAccount": "活跃账户",
     "address": "地址",
@@ -421,6 +457,9 @@
         "title": "交易警告",
         "content": "交易数据已损坏或 Superhero 钱包尚不支持此类交易。签名可能导致意外结果，包括资金损失或其他恶意影响。{0}{0}请谨慎操作，仅在你信任该 aepp 及其所有者时签名数据。"
       }
+    },
+    "signAccountSelect": {
+      "selectAccount": "选择用于签名的账户"
     },
     "confirmUnsafeSign": {
       "heading": "希望你签名数据。",

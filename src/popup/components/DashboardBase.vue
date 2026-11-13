@@ -19,12 +19,13 @@
         />
 
         <BtnPill
+          v-if="accounts.length > 5 && accountsSelectOptions"
           class="account-select-btn"
           hollow
         >
           <FormSelect
-            v-if="accounts.length > 5 && accountsSelectOptions"
             :default-text="$t('dashboard.selectAccount')"
+            :aria-label="$t('a11y.selectActiveAccount', { current: activeIdx + 1, total: accounts.length })"
             :options="accountsSelectOptions"
             :model-value="`${activeAccountProtocol}:${activeAccountAddress}`"
             class="account-select-input"

@@ -36,6 +36,7 @@
     >
       <template #label-after>
         <BtnIcon
+          :aria-label="$t('modals.qrCodeReader.scanQr')"
           :icon="QrScanIcon"
           :disabled="discovering"
           data-cy="scan-button"

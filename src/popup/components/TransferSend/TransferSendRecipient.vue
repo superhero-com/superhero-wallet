@@ -21,11 +21,13 @@
       <template #label-after>
         <div class="buttons">
           <BtnIcon
+            :aria-label="$t('a11y.selectRecipientAddress')"
             :icon="AddressBookIcon"
             data-cy="address-book-button"
             @click="selectFromAddressBook()"
           />
           <BtnIcon
+            :aria-label="$t('modals.qrCodeReader.scanQr')"
             :icon="QrScanIcon"
             data-cy="scan-button"
             @click="$emit('openQrModal')"

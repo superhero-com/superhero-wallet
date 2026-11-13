@@ -15,6 +15,7 @@
         <FormSelect
           v-bind="$attrs"
           :avatar="avatarOnly"
+          :aria-label="avatarOnly ? $t('modals.createMultisigAccount.selectAccount') : undefined"
           :model-value="modelValue"
           :options="options || accountsSelectOptions"
           :hide-arrow="avatarOnly"

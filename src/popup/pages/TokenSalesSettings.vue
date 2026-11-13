@@ -64,6 +64,7 @@
             />
           </LinkButton>
           <BtnIcon
+            :aria-label="$t('a11y.removeTokenSalesUrl', { url })"
             :icon="TrashIcon"
             class="btn-icon"
             @click="removeCustomTokenSalesUrl(url)"
