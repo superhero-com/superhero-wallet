@@ -66,16 +66,15 @@ export default defineConfig(({ mode, command }) => {
   };
 
   // inpage runs in the host page's main world — do not pollute its globals.
-  // On the dev server `process` stays the global (see devProcessPolyfillPlugin):
-  // an injected `import process` would hide the `process.env.*` defines, which
-  // Vite applies there only on the global.
+  // On the dev server the polyfills stay plain globals, set by the pre-bundled
+  // deps and devProcessPolyfillPlugin. Imports injected into the source would
+  // hide the `process.env.*` defines, which Vite applies there only on the
+  // global, and the dependency scan misses them, so the first page load
+  // re-runs the optimizer and reloads.
+  const globalPolyfill = command === 'serve' ? 'dev' as const : true as const;
   const polyfillGlobals = isExtension && BUILD_STEP === 'inpage'
     ? { Buffer: false as const, global: false as const, process: false as const }
-    : {
-      Buffer: true as const,
-      global: true as const,
-      process: command === 'serve' ? 'dev' as const : true as const,
-    };
+    : { Buffer: globalPolyfill, global: globalPolyfill, process: globalPolyfill };
 
   const plugins: PluginOption[] = [
     devProcessPolyfillPlugin(),
