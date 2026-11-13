@@ -1,0 +1,17 @@
+diff --git a/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift b/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift
+index 4a00ed6..fe1415f 100644
+--- a/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift
++++ b/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift
+@@ -117,6 +117,12 @@ import Capacitor
+     // Update the bounds for the splash image. This will also be called when
+     // the parent view observers fire
+     private func updateSplashImageBounds() {
++        // Keep the splash fixed in its window when the status bar moves the parent web view.
++        if let parentWindow = parentView.window {
++            viewController.view.frame = parentView.convert(parentWindow.bounds, from: parentWindow)
++            return
++        }
++
+         var window: UIWindow? = UIApplication.shared.delegate?.window ?? nil
+ 
+         if window == nil {
