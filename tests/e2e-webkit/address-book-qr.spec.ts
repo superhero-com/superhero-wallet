@@ -1,4 +1,3 @@
-import os from 'os';
 import path from 'path';
 import {
   afterAll,
@@ -55,8 +54,9 @@ beforeAll(async () => {
     root: ROOT,
     configFile: path.join(ROOT, 'vite.config.mts'),
     mode: 'development',
-    // Apart from the prebundled dependencies of `npm run dev`
-    cacheDir: path.join(os.tmpdir(), 'superhero-wallet-e2e-webkit'),
+    // Apart from the prebundled dependencies of `npm run dev`. Vite resolves the
+    // polyfill shims they import from this folder, so it has to be in node_modules.
+    cacheDir: path.join(ROOT, 'node_modules/.vite-e2e-webkit'),
     server: { port: PORT, strictPort: true },
     logLevel: 'error',
   });

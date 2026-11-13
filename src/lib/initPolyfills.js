@@ -1,6 +1,6 @@
 if (process.env.IS_EXTENSION) {
   // In extension builds the bare `browser` global is provided everywhere by
-  // @rollup/plugin-inject (webextension-polyfill). Mirror it onto window /
+  // the bundler's `transform.inject` (webextension-polyfill). Mirror it onto window /
   // globalThis for code that reads `window.browser` explicitly. In the service
   // worker `window` is undefined, so fall back to globalThis.
   try {

@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { transformWithEsbuild } from 'vite';
+import { transformWithOxc } from 'vite';
 import puppeteer from 'puppeteer';
 
 // Exercise the actual storage service in independent browser renderers. Only
@@ -18,8 +18,8 @@ for (const [url, file] of [
   ['/common.js', 'src/constants/common.ts'],
 ]) {
   const source = await readFile(path.join(root, file), 'utf8');
-  const compiled = await transformWithEsbuild(source, file, {
-    loader: 'ts', format: 'esm', target: 'es2022', tsconfigRaw: {},
+  const compiled = await transformWithOxc(source, file, {
+    lang: 'ts', target: 'es2022', tsconfig: false,
   });
   modules.set(url, compiled.code
     .replaceAll('"@/constants"', '"/constants.js"')
