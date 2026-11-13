@@ -141,9 +141,6 @@ module.exports = defineConfig({
     supportFile: 'tests/e2e/support/index.js',
     experimentalRunAllSpecs: true,
     baseUrl: 'http://localhost:8080',
-    excludeSpecPattern: [
-      'tests/e2e/integration/transaction-details.cy.js',
-    ],
     setupNodeEvents(on) {
       on('task', { decodeSignedTx });
     },
