@@ -1030,6 +1030,7 @@
     "names": {
       "balance-error": "你的账户余额不足以执行该交易。",
       "preclaim-not-mined": "{name} 的预注册交易未被打包。请重新注册该名称。",
+      "claim-context-changed": "注册名称时账户或网络发生了变化，因此未注册该名称。请重试。",
       "claimStorageUnreadableTitle": "正在注册的名称无法读取",
       "claimStorageUnreadable": "此设备上无法解密你正在注册的名称，也无法在此恢复，因此无法完成它们的注册。没有发送任何交易。删除它们后即可再次注册名称。你已拥有的名称不受影响。",
       "claimStorageUnreadableRemove": "删除它们",
@@ -1073,6 +1074,11 @@
         "name-placeholder": "输入 .chain 名称",
         "button": "注册名称",
         "button-price": "用 {0} AE 注册名称",
+        "in-auction": "该名称正在拍卖中。请打开拍卖页面出价。",
+        "view-auction": "查看拍卖",
+        "availability-error": "无法查询该名称。请重试后再注册。",
+        "auction-loading-error": "暂时无法加载拍卖。请重试。",
+        "retry": "重试",
         "short-names": {
           "message": "{0} 的 .chain 名称所有权将通过拍卖由最高出价账户获得。",
           "insertion": "少于 13 个字符"

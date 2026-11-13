@@ -57,6 +57,7 @@ import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
 import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { getNameRegistrationState } from '@/protocols/aeternity/helpers/nameRegistration';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import type { AeMdwName, AeMdwNameAuction, AeMdwNameClaim } from '@/protocols/aeternity/types';
@@ -178,6 +179,7 @@ type PendingDefaultNamesRegistry = Record<NetworkId, Record<AccountAddress, IPen
 
 let composableInitialized = false;
 let claimPreclaimedNamesPromise: Promise<void> | null = null;
+const pendingNamePreclaims = new Set<string>();
 let extendExpiringOwnedNamesPromise: Promise<void> | null = null;
 let updateDefaultNamesPromise: Promise<void> | null = null;
 let ownedNamesFetchGeneration = 0;
@@ -320,7 +322,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     isLocalAccountAddress,
     getLastActiveProtocolAccount,
   } = useAccounts();
-  const { onNetworkChange } = useNetworks();
+  const { activeNetwork, onNetworkChange } = useNetworks();
   const { openConfirmModal, openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
@@ -1227,8 +1229,10 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   async function addNameToClaimQueue(name: AensName, address: string, autoExtend: boolean) {
+    let pendingKey: string | undefined;
     try {
-      const networkId = nodeNetworkId.value!;
+      const selectedNetwork = activeNetwork.value;
+      const selectedAddress = activeAccount.value.address;
       // Checked before sending: the fee is lost if its salt can't be stored afterwards.
       const writeKey = useAuth().encryptionKey.value;
       if (!writeKey) throw new Error('The wallet is locked');
@@ -1237,12 +1241,70 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
         return false;
       }
       const aeSdk = await getAeSdk();
-      const currentHeight = await aeSdk.getHeight();
-      const nameObj = await createNameInstance(name, getClaimOptions(address));
+      const networkId = nodeNetworkId.value;
+      const node = aeSdk.api;
+      const isContextCurrent = () => (
+        !!networkId
+        && nodeNetworkId.value === networkId
+        && activeNetwork.value === selectedNetwork
+        && activeAccount.value.address === selectedAddress
+        && aeSdk.api === node
+      );
+      if (!isContextCurrent()) return false;
+
+      const claimKey = `${networkId}:${name}`;
+      if (pendingNamePreclaims.has(claimKey)) return false;
+      pendingKey = claimKey;
+      pendingNamePreclaims.add(claimKey);
+
+      const hasPendingClaim = () => {
+        const queuedClaim = preclaimedNames.value[networkId!]?.[name];
+        return queuedClaim && [
+          NAME_CLAIM_STATUS.preclaimSubmitted,
+          NAME_CLAIM_STATUS.preclaimed,
+          NAME_CLAIM_STATUS.claimSubmitted,
+        ].some((status) => status === queuedClaim.status);
+      };
+      if (hasPendingClaim()) return false;
+
+      const registrationState = await getNameRegistrationState(name, node);
+      if (!isContextCurrent()) return false;
+      if (registrationState !== 'available') {
+        openDefaultModal({
+          title: tg('modals.name-exist.title'),
+          msg: tg('modals.name-exist.msg'),
+        });
+        return false;
+      }
+
+      const currentHeight = (await node.getCurrentKeyBlockHeight()).height;
+      if (!isContextCurrent() || hasPendingClaim()) return false;
+      if (useAuth().encryptionKey.value !== writeKey) return false;
+
+      // SDK defaults follow the live account and node, including while a transaction is built.
+      const signingAccount = new AeAccountHdWallet(ref(networkId));
+      const assertContext = () => {
+        if (!isContextCurrent()) throw new Error(tg('pages.names.claim-context-changed'));
+      };
+      const nameObj = new Name(name, aeSdk.getContext({
+        onNode: node,
+        onAccount: {
+          address,
+          signTransaction: async (...args: Parameters<AeAccountHdWallet['signTransaction']>) => {
+            assertContext();
+            const signedTx = await signingAccount.signTransaction(args[0], {
+              ...args[1],
+              fromAccount: address as Encoded.AccountAddress,
+            });
+            assertContext();
+            return signedTx;
+          },
+        },
+      } as any));
       const { nameSalt, hash } = await nameObj.preclaim({ waitMined: false });
       preclaimedNamesWriteKey = writeKey;
       try {
-        upsertPreclaimedName(networkId, name, {
+        upsertPreclaimedName(networkId!, name, {
           address,
           name,
           salt: nameSalt,
@@ -1261,6 +1323,8 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     } catch (error: any) {
       openClaimErrorModal(error);
       return false;
+    } finally {
+      if (pendingKey) pendingNamePreclaims.delete(pendingKey);
     }
   }
 
