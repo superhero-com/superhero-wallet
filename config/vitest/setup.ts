@@ -47,7 +47,7 @@ if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
 }
 
 /**
- * The webextension `browser` global is provided by @rollup/plugin-inject in the
+ * The webextension `browser` global is injected by the bundler (`transform.inject`) in the
  * real extension build. In unit tests we expose a minimal stub on globalThis so
  * source code that reads the bare `browser` global does not throw.
  */

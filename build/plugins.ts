@@ -127,7 +127,7 @@ export function devProcessPolyfillPlugin(): Plugin {
  * only for the AirGap import/sign flow, which `composables/airGap.ts` loads via
  * dynamic `import()`. None of them has a static importer in `src`, so they are
  * reachable only through that dynamic boundary — leaving them OUT of the forced
- * `vendor` chunk lets Rollup move the whole subtree into an on-demand async
+ * `vendor` chunk lets Rolldown move the whole subtree into an on-demand async
  * chunk instead of the always-loaded `vendor` bundle.
  *
  * `swagger-client` (+ its `@swagger-api/*` dependencies) is the same shape: its
@@ -167,14 +167,14 @@ const LAZY_VENDOR_PACKAGES = [
  * called on non-object"). Keeping every dependency together avoids cross-chunk
  * CJS. The only exception is the AirGap tree (see `LAZY_VENDOR_PACKAGES`),
  * which is dynamically imported and self-contained, so returning `undefined`
- * lets Rollup code-split it out.
+ * lets Rolldown code-split it out.
  */
 export function vendorManualChunks(id: string): string | undefined {
   if (!id.includes('node_modules')) return undefined;
   const normalized = id.replace(/\\/g, '/');
   // Entries ending in `/` are scope prefixes and match as-is; bare package names
   // must match a whole path segment, so `ramda` does not also swallow
-  // `ramda-adjunct`. Every id Rollup passes here is a file inside the package,
+  // `ramda-adjunct`. Every id Rolldown passes here is a file inside the package,
   // so the trailing separator is always present.
   if (LAZY_VENDOR_PACKAGES.some((pkg) => normalized.includes(
     pkg.endsWith('/') ? `node_modules/${pkg}` : `node_modules/${pkg}/`,
