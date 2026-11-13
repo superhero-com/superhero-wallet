@@ -62,6 +62,9 @@ function createNode({
       }
       return node.nameEntry;
     },
+    getAuctionEntryByName: vi.fn().mockRejectedValue(
+      restError('Auction not found', { statusCode: 404 }),
+    ),
   };
   return node;
 }
@@ -101,6 +104,8 @@ async function createContext({
 
   const node = createNode({ getTransactionByHash, onPost });
   const authKey = ref('key-before-sending');
+  const selectedAccount = ref({ address: activeAccount.address });
+  const selectedNetworkId = ref(NETWORK_ID);
   const isKeyCurrent = ref(true);
   const removeUnreadableSecret = vi.fn().mockResolvedValue(undefined);
   let decryptedComputedOptions = {};
@@ -160,14 +165,14 @@ async function createContext({
   vi.doMock('@/composables/accounts', () => ({
     useAccounts: () => ({
       aeAccounts: ref([{ address: activeAccount.address }, { address: otherAccount.address }]),
-      activeAccount: ref({ address: activeAccount.address }),
+      activeAccount: selectedAccount,
       areAccountsReady: ref(true),
       isLocalAccountAddress: () => true,
       getLastActiveProtocolAccount: () => ({ address: activeAccount.address }),
     }),
   }));
   vi.doMock('@/composables/aeSdk', () => ({
-    useAeSdk: () => ({ nodeNetworkId: ref(NETWORK_ID), getAeSdk: async () => sdk }),
+    useAeSdk: () => ({ nodeNetworkId: selectedNetworkId, getAeSdk: async () => sdk }),
   }));
   vi.doMock('@/composables/auth', () => ({
     // The value is irrelevant: `decryptedComputed` is a passthrough.
@@ -256,6 +261,9 @@ async function createContext({
     aeNames,
     authKey,
     isKeyCurrent,
+    selectedAccount,
+    networkId: selectedNetworkId,
+    sdk,
     node,
     openConfirmModal,
     openDefaultModal,
@@ -279,6 +287,142 @@ async function createContext({
 describe('useAeNames with the real SDK', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('registration admission', () => {
+    it('sends no preclaim for an already registered name', async () => {
+      const ctx = await createContext();
+      ctx.node.nameEntry = nameEntry(otherAccount.address);
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+      expect(ctx.node.posted).toHaveLength(0);
+      expect(ctx.getStoredEntry()).toBeUndefined();
+    });
+
+    it.each([activeAccount.address, otherAccount.address])(
+      'sends no preclaim for an auction led by %s',
+      async (highestBidder) => {
+        const ctx = await createContext();
+        ctx.node.getAuctionEntryByName.mockResolvedValue({ highestBidder });
+
+        expect(await ctx.aeNames.addNameToClaimQueue('short.chain', otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.aeNames.preclaimedNames.value).toEqual({});
+      },
+    );
+
+    it('still preclaims a free short name to start its first auction', async () => {
+      const ctx = await createContext();
+
+      expect(await ctx.aeNames.addNameToClaimQueue('short.chain', otherAccount.address, false))
+        .toBe(true);
+
+      expect(postedTxs(ctx.node)).toMatchObject([{ tag: Tag.NamePreclaimTx }]);
+      expect(ctx.node.getAuctionEntryByName).toHaveBeenCalledWith('short.chain');
+      expect(ctx.aeNames.preclaimedNames.value[NETWORK_ID]['short.chain']).toMatchObject({
+        address: otherAccount.address,
+        status: 'preclaim-submitted',
+        salt: expect.any(Number),
+      });
+    });
+
+    it.each(['name', 'auction'])('does not spend on a failed %s lookup', async (lookup) => {
+      const ctx = await createContext();
+      const error = restError('Temporarily unavailable', { statusCode: 503 });
+      if (lookup === 'name') {
+        ctx.node.getNameEntryByName = vi.fn().mockRejectedValue(error);
+      } else {
+        ctx.node.getAuctionEntryByName.mockRejectedValue(error);
+      }
+
+      expect(await ctx.aeNames.addNameToClaimQueue('short.chain', otherAccount.address, false))
+        .toBe(false);
+
+      expect(ctx.node.posted).toHaveLength(0);
+      expect(ctx.openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+        msg: error.message,
+      }));
+    });
+
+    it.each(['preclaim-submitted', 'preclaimed', 'claim-submitted'])(
+      'keeps the original salt of a %s name',
+      async (status) => {
+        const original = {
+          name: NAME,
+          address: otherAccount.address,
+          salt: 123,
+          status,
+          blockHeight: TOP_HEIGHT,
+          autoExtend: false,
+        };
+        const ctx = await createContext({
+          preclaimedNames: { [NETWORK_ID]: { [NAME]: original } },
+        });
+
+        expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.getStoredEntry()).toEqual(original);
+      },
+    );
+
+    it('sends only one preclaim for concurrent admissions', async () => {
+      const ctx = await createContext();
+
+      const results = await Promise.all([
+        ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false),
+        ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false),
+      ]);
+
+      expect(results).toEqual([true, false]);
+      expect(ctx.node.posted).toHaveLength(1);
+      expect(ctx.getStoredEntry()?.salt).toBeTypeOf('number');
+    });
+
+    it.each(['account', 'network', 'node', 'lock'])(
+      'does not send when the %s changes while availability is checked',
+      async (change) => {
+        const ctx = await createContext();
+        ctx.node.getNameEntryByName = async () => {
+          if (change === 'account') ctx.selectedAccount.value = { address: otherAccount.address };
+          if (change === 'network') ctx.networkId.value = 'ae_other';
+          if (change === 'node') ctx.sdk.api = createNode();
+          if (change === 'lock') ctx.authKey.value = undefined;
+          throw restError('Name not found', { statusCode: 404 });
+        };
+
+        expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.getStoredEntry()).toBeUndefined();
+      },
+    );
+
+    it.each(['account', 'network'])(
+      'does not send when the %s changes while the SDK obtains the nonce',
+      async (change) => {
+        const ctx = await createContext();
+        ctx.node.getAccountNextNonce = async () => {
+          if (change === 'account') ctx.selectedAccount.value = { address: otherAccount.address };
+          else ctx.networkId.value = 'ae_other';
+          return { nextNonce: 5 };
+        };
+
+        expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.getStoredEntry()).toBeUndefined();
+        expect(ctx.openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+          msg: en.pages.names['claim-context-changed'],
+        }));
+      },
+    );
   });
 
   it('reports preclaim success only after its asynchronous salt write resolves', async () => {

@@ -178,7 +178,6 @@ export default () => {
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
     REGISTERED_ADDRESS: Symbol('name state: registered and points to address'),
-    UNREGISTERED: Symbol('name state: unregistered'),
     NOT_SAME: Symbol('name state: not same as provided'),
   };
   type CheckNameRequest = {
@@ -208,17 +207,13 @@ export default () => {
         resolve(({
           [NAME_STATES.REGISTERED]: true,
           [NAME_STATES.REGISTERED_ADDRESS]: !!address,
-          [NAME_STATES.UNREGISTERED]: false,
           [NAME_STATES.NOT_SAME]: comparedAddress !== address,
         }[expectedNameState]));
       } catch (error) {
         if (!isNotFoundError(error)) {
           reject(error);
         } else {
-          resolve(
-            expectedNameState === NAME_STATES.UNREGISTERED
-            || expectedNameState === NAME_STATES.NOT_SAME,
-          );
+          resolve(expectedNameState === NAME_STATES.NOT_SAME);
         }
       } finally {
         if (latestCheckNameRequest === request) {
@@ -268,14 +263,6 @@ export default () => {
   defineRule(
     'aens_name',
     (value: string) => isNameValid(`${value}${AE_AENS_DOMAIN}`) || tg('validation.name'),
-  );
-
-  defineRule(
-    'aens_name_unregistered',
-    async (value: string) => (
-      (await checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []))
-      || tg('validation.nameUnregistered')
-    ),
   );
 
   defineRule(
