@@ -7,6 +7,7 @@ import {
 } from 'vitest';
 import { webkit, type Browser, type Page } from 'playwright-core';
 import { createServer, type ViteDevServer } from 'vite';
+import { startEdgeDrag, swipeBack } from './swipe';
 
 const ROOT = path.resolve(__dirname, '../..');
 const FIXTURE = path.join(ROOT, 'tests/fixtures/route-restoration');
@@ -64,19 +65,6 @@ async function openSavedAbout(page: Page, platform: string, { slowParent = false
   await page.waitForFunction(() => document.querySelector('ion-router-outlet')?.swipeGesture === true);
 }
 
-async function startEdgeDrag(page: Page, entering = '#more', leaving = '#about') {
-  await page.waitForFunction((selector) => document.querySelector(selector)
-    ?.closest('ion-router-outlet')?.swipeGesture === true, leaving);
-  // Ionic shares the same gesture recognizer for mouse and touch.
-  await page.mouse.move(1, 400);
-  await page.mouse.down();
-  await page.mouse.move(80, 400, { steps: 8 });
-  // The progress animation must initialize before the drag ends.
-  await page.waitForSelector(`${entering}:not(.ion-page-hidden)`, { state: 'attached' });
-  await page.waitForFunction((selector) => document.querySelector(selector)
-    ?.getAnimations({ subtree: true }).some((animation) => animation.playState === 'paused'), leaving);
-}
-
 async function launchWithSavedRoute(page: Page, savedRoute: string, options = '') {
   // Seed before the app starts: relaunching a setup page cancels its pending imports.
   await page.addInitScript((savedPath) => localStorage.setItem('route-restoration-test:last-route', JSON.stringify({
@@ -94,7 +82,7 @@ it('restores an iOS page with working canceled and completed swipe-back gestures
     expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(true);
     expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
 
-    await startEdgeDrag(page);
+    await startEdgeDrag(page, '#more', '#about');
     await page.mouse.move(1, 400, { steps: 8 });
     await page.mouse.up();
     await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
@@ -102,9 +90,7 @@ it('restores an iOS page with working canceled and completed swipe-back gestures
       .toBe(SAVED_PATH);
     expect(await page.locator('#about:not(.ion-page-hidden)').count()).toBe(1);
 
-    await startEdgeDrag(page);
-    await page.mouse.move(370, 400, { steps: 20 });
-    await page.mouse.up();
+    await swipeBack(page, '#more', '#about');
     await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more');
     expect(await page.locator('#about').count()).toBe(0);
@@ -133,9 +119,7 @@ it('waits for an async inner parent page before restoring the swipe stack', asyn
     await openSavedAbout(page, 'ios', { slowParent: true });
     expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
     expect(await page.$eval('ion-router-outlet', (outlet) => outlet.swipeHandler.canStart())).toBe(true);
-    await startEdgeDrag(page);
-    await page.mouse.move(370, 400, { steps: 20 });
-    await page.mouse.up();
+    await swipeBack(page, '#more', '#about');
     await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more');
     expect(errors).toEqual([]);
@@ -175,9 +159,7 @@ it('waits for the parent page in nested async Ionic outlets', async () => {
     expect(await page.$eval('#nested-names > ion-router-outlet', (outlet) => outlet.swipeHandler.canStart()))
       .toBe(true);
 
-    await startEdgeDrag(page, '#names', '#auctions');
-    await page.mouse.move(370, 400, { steps: 20 });
-    await page.mouse.up();
+    await swipeBack(page, '#names', '#auctions');
     await page.waitForFunction(() => document.documentElement.dataset.entered === 'names');
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path))
       .toBe('/nested/names');
@@ -212,9 +194,7 @@ it('retains the saved destination through a locked launch and restores its swipe
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
       .toBe(SAVED_PATH);
     await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
-    await startEdgeDrag(page);
-    await page.mouse.move(370, 400, { steps: 20 });
-    await page.mouse.up();
+    await swipeBack(page, '#more', '#about');
     await page.waitForFunction(() => document.documentElement.dataset.entered === 'more');
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more');
   } finally {
@@ -243,9 +223,7 @@ it.each(['terms', 'privacy'])('restores public %s for locked and authenticated l
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
       .toBe(savedPath);
     await page.waitForSelector('#about.ion-page-hidden', { state: 'attached' });
-    await startEdgeDrag(page, '#about', `#${name}`);
-    await page.mouse.move(370, 400, { steps: 20 });
-    await page.mouse.up();
+    await swipeBack(page, '#about', `#${name}`);
     await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
     expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path)).toBe('/more/about');
   } finally {
@@ -270,10 +248,7 @@ it.each([
       expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.fullPath))
         .toBe(savedPath);
       await page.waitForSelector('#account-root.ion-page-hidden', { state: 'attached' });
-      await startEdgeDrag(page, '#account-root', '#coin');
-      await page.mouse.move(370, 400, { steps: 20 });
-      await page.mouse.up();
-      await page.waitForSelector('#coin', { state: 'detached' });
+      await swipeBack(page, '#account-root', '#coin');
       expect(await page.evaluate(() => window.routeRestoration.router.currentRoute.value.path))
         .toBe(parentPath);
       expect(await page.locator(`#${parent}`).isVisible()).toBe(true);
