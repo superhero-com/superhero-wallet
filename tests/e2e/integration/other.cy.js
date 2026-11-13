@@ -1,15 +1,17 @@
 import { STUB_ACCOUNT, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
+import locale from '../../../src/popup/locales/en-US.json';
 
-const txs = [
-  STUB_TRANSACTIONS.pendingSpend,
-  STUB_TRANSACTIONS.pendingTransfer,
+const RECEIVING = `${locale.transaction.type.receivedTx}...`;
+// TODO: add `pendingTipToken` once a pending token tip stops showing its amount in AE
+const pendingTransactions = [
+  { transaction: STUB_TRANSACTIONS.pendingSpend, text: ['0.74 AE', RECEIVING] },
+  { transaction: STUB_TRANSACTIONS.pendingTransfer, text: ['0.20 AMZ', RECEIVING] },
   {
-    ...STUB_TRANSACTIONS.pendingTipToken,
-    tx: { ...STUB_TRANSACTIONS.pendingTipToken.tx, callerId: STUB_ACCOUNT.addressAeternity },
-  },
-  {
-    ...STUB_TRANSACTIONS.pendingTipAe,
-    tx: { ...STUB_TRANSACTIONS.pendingTipAe.tx, callerId: STUB_ACCOUNT.addressAeternity },
+    transaction: {
+      ...STUB_TRANSACTIONS.pendingTipAe,
+      tx: { ...STUB_TRANSACTIONS.pendingTipAe.tx, callerId: STUB_ACCOUNT.addressAeternity },
+    },
+    text: ['− 0.20 AE', locale.common.pending],
   },
 ];
 
@@ -20,6 +22,8 @@ describe('Tests cases not connected to specific page', () => {
       { path: '/account-details/names', redirect: true },
       { path: '/more/about', redirect: true },
       { path: '/account-details/', redirect: true },
+      { path: '/more/about?source=e2e#version', redirect: true },
+      { path: '/coins/aeternity', redirect: true },
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)
         // The route is saved before its page mounts, which can wait for a lazy chunk
@@ -27,26 +31,40 @@ describe('Tests cases not connected to specific page', () => {
         .should('exist')
         .visit('')
         .loginUsingPassword()
-        .urlEquals(redirect ? path : '/account');
+        .location()
+        .should(({ pathname, search, hash }) => {
+          expect(pathname + search + hash).to.equal(redirect ? path : '/account');
+        });
     });
   });
 
-  it('Shows pending tx', () => {
-    txs.forEach((pendingTransaction) => {
+  it('shows the amount and state of each pending transaction type', () => {
+    pendingTransactions.forEach(({ transaction, text }) => {
       cy.login({
         isSeedBackedUp: true,
-        pendingTransaction: {
-          ...pendingTransaction,
+        pendingTransactions: [{
+          ...transaction,
           hash: 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
           transactionOwner: STUB_ACCOUNT.addressAeternity,
-        },
+        }],
       })
         .get('[data-cy=pending-txs]')
-        .should('be.visible');
+        .should('have.length', 1)
+        .should(($item) => {
+          const itemText = $item.text().replace(/\s/g, '');
+          text.forEach((part) => expect(itemText).to.contain(part.replace(/\s/g, '')));
+        });
     });
   });
 
-  it('Connection message disappear', () => {
-    cy.login().get('[data-cy=connection-status]').should('not.exist');
+  it('shows the offline message until the connection is back', () => {
+    const message = locale.connectionStatus.offline.statusMessage;
+    cy.login();
+    cy.window().then((win) => win.dispatchEvent(new win.Event('offline')));
+    cy.get('[data-cy=connection-status]')
+      .should('contain', message);
+    cy.window().then((win) => win.dispatchEvent(new win.Event('online')));
+    cy.contains('[data-cy=connection-status]', message)
+      .should('not.exist');
   });
 });
