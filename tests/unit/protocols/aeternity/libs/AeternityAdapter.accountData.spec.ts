@@ -32,15 +32,21 @@ function contractCallEvent(type, payload) {
 }
 
 let responses;
+let pendingTransactions;
 
 describe('AeternityAdapter account data', () => {
   beforeEach(async () => {
     vi.resetModules();
     responses = {};
+    pendingTransactions = [];
     vi.doMock('@/composables/aeSdk', () => ({
       useAeSdk: () => ({
         getAeSdk: async () => ({
-          api: { getPendingAccountTransactionsByPubkey: async () => ({ transactions: [] }) },
+          api: {
+            getPendingAccountTransactionsByPubkey: async () => ({
+              transactions: pendingTransactions,
+            }),
+          },
         }),
         setAeNodeError: vi.fn(),
       }),
@@ -169,6 +175,38 @@ describe('AeternityAdapter account data', () => {
       expect(await adapter.fetchTokenInfo('ct_unknown')).toBeUndefined();
       expect(requestedPaths()).toEqual(['/v3/aex9/ct_unknown']);
     });
+  });
+
+  it('reads the pending transactions of the account with their amounts as strings', async () => {
+    const pending = {
+      blockHash: 'none',
+      blockHeight: -1,
+      hash: 'th_pending',
+      signatures: ['sg_1'],
+    };
+    const spendTx = {
+      nonce: 5,
+      recipientId: 'ak_recipient',
+      senderId: ACCOUNT,
+      ttl: 0,
+      type: 'SpendTx',
+      version: 1,
+    };
+    // As the node client returns them, with bigints
+    pendingTransactions = [{
+      ...pending,
+      tx: { ...spendTx, amount: 20000000000000000000n, fee: 16840000000000n },
+    }];
+    const adapter = await getAdapter();
+
+    expect(await adapter.fetchPendingTransactions(ACCOUNT)).toEqual([{
+      ...pending,
+      tx: { ...spendTx, amount: '20000000000000000000', fee: '16840000000000' },
+      pending: true,
+      protocol: 'aeternity',
+      microTime: expect.any(Number),
+      transactionOwner: ACCOUNT,
+    }]);
   });
 
   it('reads a transaction by its hash with its big amounts exact', async () => {
