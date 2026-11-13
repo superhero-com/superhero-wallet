@@ -24,16 +24,8 @@ describe('the inpage provider through the content-script transport', () => {
         },
       },
     }));
-    // The AE connection proxy is independent of the EVM message transport.
-    vi.doMock('@aeternity/aepp-sdk', async () => ({
-      ...(await vi.importActual('@aeternity/aepp-sdk')),
-      BrowserRuntimeConnection: vi.fn(),
-      BrowserWindowMessageConnection: vi.fn(),
-      connectionProxy: vi.fn(),
-    }));
-    vi.spyOn(globalThis, 'setInterval').mockReturnValue(
-      0 as unknown as ReturnType<typeof setInterval>,
-    );
+    // The aepp relay is independent of the EVM message transport.
+    vi.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
     // jsdom's postMessage does not supply the browser's source and origin fields.
     vi.spyOn(window, 'postMessage').mockImplementation((data) => {
       queueMicrotask(() => window.dispatchEvent(new MessageEvent('message', {

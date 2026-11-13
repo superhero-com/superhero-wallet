@@ -50,10 +50,14 @@
     };
 
     let aeSdk;
+    window.aeDisconnects = [];
 
     window.ae = {
       async connect() {
-        aeSdk = new AeSdkAepp({ name: 'Test dapp' });
+        aeSdk = new AeSdkAepp({
+          name: 'Test dapp',
+          onDisconnect: (params) => window.aeDisconnects.push(params),
+        });
         return new Promise((resolve, reject) => {
           const stop = walletDetector(new BrowserWindowMessageConnection(), ({ newWallet }) => {
             stop();

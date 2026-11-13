@@ -53,13 +53,6 @@
         "index.html"
       ],
       "matches": ["https://wallet.superhero.com/*"]
-    },
-    {
-      "resources": [
-        "js/inject.js",
-        "js/inpage.js"
-      ],
-      "matches": ["*://*/*"]
     }
   ],
   "side_panel": {
