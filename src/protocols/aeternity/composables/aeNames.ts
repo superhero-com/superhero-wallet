@@ -19,7 +19,6 @@ import type {
   ChainName,
   IName,
   ITransaction,
-  ITx,
   NetworkId,
   IAddressNamePair,
   IAuction,
@@ -38,6 +37,7 @@ import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   IS_MOBILE_APP,
   PROTOCOLS,
+  RUNNING_IN_POPUP,
   STORAGE_KEYS,
 } from '@/constants';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
@@ -56,13 +56,10 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
-import {
-  aettosToAe,
-  getInnerTransaction,
-  isInsufficientBalanceError,
-} from '@/protocols/aeternity/helpers';
+import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
+import type { AeMdwName, AeMdwNameAuction, AeMdwNameClaim } from '@/protocols/aeternity/types';
 
 import { useAeAddressLinkContract } from './aeAddressLinkContract';
 import { useAeAddressLinkBackend } from './aeAddressLinkBackend';
@@ -88,6 +85,16 @@ const PENDING_DEFAULT_NAME_MAX_AGE = 5 * 60 * 1000;
  * entry is dropped even if it never showed up, so it cannot linger forever.
  */
 const CLAIMED_NAME_INDEXING_MAX_AGE = 5 * 60 * 1000;
+/**
+ * The pointer keys of the protocol. The others are kept by their encoded key,
+ * so that one like `account_pubkey_` can't pass for `accountPubkey`.
+ */
+const AENS_POINTER_KEYS = new Map([
+  ['account_pubkey', 'accountPubkey'],
+  ['oracle_pubkey', 'oraclePubkey'],
+  ['contract_pubkey', 'contractPubkey'],
+  ['channel', 'channel'],
+]);
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -264,9 +271,11 @@ const latestClaimedNames = computed((): Record<AccountAddress, ChainName> => {
     owner,
     pending,
     createdAtHeight,
+    pointers,
   }) => {
-    // Skip names that aren't confirmed on-chain yet (pending claims/transfers).
-    if (!owner || pending) {
+    // Skip names that aren't confirmed on-chain yet (pending claims/transfers),
+    // and names leading to someone else, e.g. one transferred to the account.
+    if (!owner || pending || (pointers?.accountPubkey && pointers.accountPubkey !== owner)) {
       return;
     }
     const height = createdAtHeight ?? 0;
@@ -307,6 +316,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   const {
     aeAccounts,
     activeAccount,
+    areAccountsReady,
     isLocalAccountAddress,
     getLastActiveProtocolAccount,
   } = useAccounts();
@@ -319,10 +329,9 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   const { topBlockHeight } = useTopHeaderData();
 
   const {
-    isMiddlewareReady,
-    getMiddleware,
     fetchFromMiddlewareCamelCased,
     fetchFromMiddlewareCamelCasedPrecise,
+    fetchNameByHash,
   } = useAeMiddleware();
 
   if (!preclaimedNamesEncryptionInitialized) {
@@ -517,8 +526,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       return '';
     }
     if (!resolvedChainNames.value[address]) {
-      const middleware = await getMiddleware();
-      resolvedChainNames.value[address] = (await middleware.getName(address)).name;
+      resolvedChainNames.value[address] = await fetchNameByHash(address);
     }
     return resolvedChainNames.value[address];
   }
@@ -553,26 +561,25 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   /**
-   * For an expired name that is auctioned again the middleware returns the previous
-   * owner's claims and activities, so only the auction itself has the current bids.
-   * The highest bid comes from the node: the middleware lists a claim made by a contract
-   * call without its amount.
+   * The highest bid comes from the node too, as a new bid gets there before the middleware.
    */
   async function fetchNameAuction(name: string): Promise<IAuction> {
-    const [{ info }, highestBid] = await Promise.all([
-      fetchFromMiddlewareCamelCasedPrecise(`/v2/names/${name}/auction?expand=true`),
+    const auctionPath = `/v3/names/auctions/${encodeURIComponent(name)}`;
+    const [{ auctionEnd }, claims, highestBid] = await Promise.all([
+      fetchFromMiddlewareCamelCasedPrecise(auctionPath) as Promise<AeMdwNameAuction>,
+      fetchAllPages<AeMdwNameClaim>(
+        () => fetchFromMiddlewareCamelCasedPrecise(`${auctionPath}/claims?limit=100`),
+        fetchFromMiddlewareCamelCasedPrecise,
+      ),
       fetchNodeAuctionHighestBid(name),
     ]);
     return {
-      expiration: info.auctionEnd,
-      bids: info.bids
-        .map(({ tx }: ITransaction) => getInnerTransaction(tx))
-        // A claim made by a contract call carries no bid amount
-        .filter((tx: ITx) => tx.type === Tag[Tag.NameClaimTx])
-        .map(({ accountId, nameFee }: ITx) => ({
-          accountId,
-          nameFee: new BigNumber(aettosToAe(nameFee!)),
-        })),
+      expiration: auctionEnd,
+      // Newest first, also those made through a contract call
+      bids: claims.map(({ tx: { accountId, nameFee } }) => ({
+        accountId,
+        nameFee: new BigNumber(aettosToAe(nameFee)),
+      })),
       highestBid,
     };
   }
@@ -929,18 +936,25 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   async function fetchAllNames(address: AccountAddress) {
-    const middleware = await getMiddleware();
-
-    const names = await fetchAllPages(
-      () => middleware.getNames({ owned_by: address as Encoded.AccountAddress, state: 'active', limit: 100 }),
+    const names = await fetchAllPages<AeMdwName>(
+      () => fetchFromMiddlewareCamelCased(`/v3/names?owned_by=${address}&state=active&limit=100`),
       fetchFromMiddlewareCamelCased,
     );
 
-    return names.map(({ info, name, hash }) => ({
-      createdAtHeight: info.activeFrom,
-      expiresAt: info.expireHeight,
-      owner: info.ownership.current,
-      pointers: info.pointers,
+    return names.map(({
+      activeFrom,
+      expireHeight,
+      ownership,
+      pointers,
+      name,
+      hash,
+    }) => ({
+      createdAtHeight: activeFrom,
+      expiresAt: expireHeight,
+      owner: ownership.current,
+      pointers: Object.fromEntries(pointers.map(
+        ({ key, id, encodedKey }) => [AENS_POINTER_KEYS.get(key) ?? encodedKey, id],
+      )),
       autoExtend: (
         ownedNames.value.find((n) => n.name === name)?.autoExtend
         || pendingAutoExtendNames.value?.includes(name)
@@ -1581,12 +1595,18 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       await extendExpiringOwnedNames();
     });
 
-    // Populate owned + default names once accounts, middleware and network id exist,
+    // Populate owned + default names once accounts and network id exist,
     // so account cards show a name without opening the Names page.
+    // The imported accounts are decrypted after the others, so wait for them too.
+    // A request popup shows the stored ones. A switch is handled by `onNetworkChange`.
     watch(
-      [aeAccounts, isMiddlewareReady, nodeNetworkId] as const,
-      async ([accounts, middlewareReady, networkId]) => {
-        if (middlewareReady && networkId && accounts.length) {
+      [
+        () => aeAccounts.value.map(({ address }) => address).join(),
+        () => !!nodeNetworkId.value,
+        areAccountsReady,
+      ] as const,
+      async ([addresses, hasNetworkId, accountsReady]) => {
+        if (accountsReady && hasNetworkId && addresses && !RUNNING_IN_POPUP) {
           await Promise.all([
             updateOwnedNames(),
             updateDefaultNames(),

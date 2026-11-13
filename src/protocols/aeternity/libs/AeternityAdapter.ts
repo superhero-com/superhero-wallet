@@ -287,11 +287,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     : Promise<IToken | undefined> {
     const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
     try {
-      const token = await fetchFromMiddlewareCamelCased(`/v3/aex9/${contractId}`);
-      if (token.error) {
-        return undefined;
-      }
-      return token;
+      return await fetchFromMiddlewareCamelCased(`/v3/aex9/${contractId}`);
     } catch (error) {
       return undefined;
     }
@@ -324,7 +320,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     nextPageUrl?: string,
   ): Promise<IPageableResponse<IToken> | null> {
     return this.fetchAex9TokensPage(
-      nextPageUrl || '/v2/aex9?by=name&limit=100&direction=forward',
+      nextPageUrl || '/v3/aex9?by=name&limit=100&direction=forward',
     );
   }
 
@@ -333,7 +329,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     searchBy: 'name' | 'symbol',
     nextPageUrl?: string,
   ): Promise<IPageableResponse<IToken> | null> {
-    const searchPath = `/v2/aex9?by=${searchBy}&prefix=${encodeURIComponent(
+    const searchPath = `/v3/aex9?by=${searchBy}&prefix=${encodeURIComponent(
       searchTerm,
     )}&limit=100&direction=forward`;
 
@@ -347,7 +343,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       const [tokens]: ITokenBalanceResponse[][] = await Promise.all(
         [
           camelCaseKeysDeep(await fetchAllPages(
-            () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+            () => fetchFromMiddleware(`/v3/accounts/${address}/aex9/balances?limit=100`),
             fetchFromMiddleware,
           )),
           loadAllTokenSalesInfoByAccount(address as Encoded.AccountAddress),
@@ -406,13 +402,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       normalizeActivitiesStructure,
       normalizeMiddlewareTransactionStructure,
     } = useAeMiddleware();
-    /** @link https://github.com/aeternity/ae_mdw?tab=readme-ov-file#v2accountsidactivities */
-    const url = nextPageUrl || `/v2/accounts/${address}/activities?limit=${limit}`;
+    const url = nextPageUrl || `/v3/accounts/${address}/activities?limit=${limit}`;
 
-    let { data, next } = await fetchFromMiddlewareCamelCased(url);
+    const { data, next } = await fetchFromMiddlewareCamelCased(url);
 
-    // Some contract calls consist of several events
-    // this condition checking edge case when not all events in one chunk
+    // The events of a contract call can continue on the next page
     const lastActivity = data.at(-1);
     const lastActivityType = lastActivity?.type;
     if (
@@ -431,7 +425,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         }
       });
     }
-    let regularTransactions = normalizeActivitiesStructure(data || [])
+    const regularTransactions = normalizeActivitiesStructure(data || [])
       .map((responseData: any) => normalizeMiddlewareTransactionStructure(responseData, address));
 
     return {
@@ -540,7 +534,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const { middlewareUrl } = aeActiveNetworkSettings.value;
     let isSupported = tokenTransfersSupport.get(middlewareUrl);
     if (!isSupported) {
-      isSupported = fetchJson(`${middlewareUrl}/status`)
+      isSupported = fetchJson(`${middlewareUrl}/v3/status`)
         .then((status) => isTokenTransfersVersion(status?.mdw_version));
       tokenTransfersSupport.set(middlewareUrl, isSupported);
       isSupported.catch(() => tokenTransfersSupport.delete(middlewareUrl));
@@ -630,7 +624,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
       // 100 is the most the middleware returns
       const { data } = await fetchFromMiddlewareCamelCased(
-        `/v2/accounts/${encodeURIComponent(address)}/activities?scope=transaction:${encodeURIComponent(hash)}&limit=100`,
+        `/v3/accounts/${encodeURIComponent(address)}/activities?scope=transaction:${encodeURIComponent(hash)}&limit=100`,
       );
       activities = data as any[];
       if (transactionActivities.size >= TRANSACTION_ACTIVITIES_CACHE_SIZE) {
@@ -645,11 +639,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     hash: string,
     transactionOwner?: AccountAddress,
   ): Promise<ITransaction> {
-    const { getMiddleware } = useAeMiddleware();
-    const middleware = await getMiddleware();
+    const { fetchTransaction } = useAeMiddleware();
 
     return {
-      ...await middleware.getTx(hash),
+      ...await fetchTransaction(hash),
       protocol: PROTOCOLS.aeternity,
       transactionOwner,
     };

@@ -40,18 +40,18 @@ function mockMobileNames({
     fetchAllPages: vi.fn().mockResolvedValue(indexedNames.map((name) => ({
       name,
       hash: `nm_${name}`,
-      info: {
-        activeFrom: 1,
-        expireHeight: 50000,
-        ownership: { current: ADDRESS },
-        pointers: {},
-      },
+      activeFrom: 1,
+      expireHeight: 50000,
+      ownership: { current: ADDRESS },
+      pointers: [],
     }))),
   }));
   vi.doMock('@/composables/accounts', () => ({
     useAccounts: () => ({
       aeAccounts: ref([{ address: ADDRESS }]),
       activeAccount: ref({ address: ADDRESS }),
+      // The test updates the names itself
+      areAccountsReady: ref(false),
       isLocalAccountAddress: () => true,
       getLastActiveProtocolAccount: () => ({ address: ADDRESS }),
     }),
@@ -74,10 +74,9 @@ function mockMobileNames({
   }));
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
     useAeMiddleware: () => ({
-      isMiddlewareReady: ref(false),
-      getMiddleware: async () => ({ getNames: vi.fn() }),
       fetchFromMiddlewareCamelCased: vi.fn(),
       fetchFromMiddlewareCamelCasedPrecise: vi.fn(),
+      fetchNameByHash: vi.fn(),
     }),
   }));
   vi.doMock('@/protocols/aeternity/composables/aeTippingBackend', () => ({

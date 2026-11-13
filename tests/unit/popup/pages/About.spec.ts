@@ -8,7 +8,7 @@ import About from '@/popup/pages/About.vue';
  */
 function stubStatuses({ middleware, node }) {
   vi.stubGlobal('fetch', vi.fn(async (url) => {
-    if (url.endsWith('/mdw/status')) return middleware;
+    if (url.endsWith('/mdw/v3/status')) return middleware;
     if (url.endsWith('/v3/status')) return node;
     throw new Error(`Unexpected request ${url}`);
   }));
@@ -23,8 +23,8 @@ function mountAbout() {
         Panel: { template: '<div><slot /></div>' },
         PanelItem: true,
         PanelTableItem: {
-          props: ['name'],
-          template: '<p :data-cy="name"><slot /></p>',
+          props: ['name', 'href'],
+          template: '<a :data-cy="name" :href="href"><slot /></a>',
         },
       },
     },
@@ -47,6 +47,8 @@ describe('About page', () => {
     await flushPromises();
 
     expect(wrapper.find('[data-cy="pages.about.middleware-version"]').text()).toBe('1.108.3');
+    expect(wrapper.find('[data-cy="pages.about.middleware-version"]').attributes('href'))
+      .toMatch(/\/mdw\/v3\/status$/);
     expect(wrapper.find('[data-cy="pages.about.node-version"]').text()).toBe('7.3.0');
   });
 

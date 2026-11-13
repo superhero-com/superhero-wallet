@@ -1,6 +1,11 @@
 /* eslint-disable camelcase */
 
-import { Contract, ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk';
+import {
+  AensName,
+  Contract,
+  ContractMethodsBase,
+  Encoded,
+} from '@aeternity/aepp-sdk';
 import type { AccountAddress, INetworkProtocolSettings } from '@/types';
 
 /**
@@ -106,4 +111,27 @@ export interface BackendHealth {
   redisHealth: boolean;
   aeHealth: boolean;
   allHealthy: boolean;
+}
+
+/**
+ * Middleware v3 responses, with the keys camelCased.
+ */
+export interface AeMdwName {
+  name: AensName;
+  hash: Encoded.Name;
+  activeFrom: number;
+  expireHeight: number;
+  ownership: { current: Encoded.AccountAddress };
+  pointers: { key: string; id: string; encodedKey: string }[];
+}
+
+export interface AeMdwNameAuction {
+  auctionEnd: number;
+}
+
+export interface AeMdwNameClaim {
+  tx: {
+    accountId: Encoded.AccountAddress;
+    nameFee: string | number;
+  };
 }

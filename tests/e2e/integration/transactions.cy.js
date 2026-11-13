@@ -43,7 +43,7 @@ function getSpendActivities(from, count, { isReceived = false } = {}) {
 function interceptActivities(firstPageSize) {
   cy.intercept({ method: 'GET', url: new RegExp(`/activities\\?limit=${TXS_PER_PAGE}$`) }, {
     data: getSpendActivities(0, firstPageSize),
-    next: `/v2/accounts/${addressAeternity}/activities?cursor=1&limit=${TXS_PER_PAGE}`,
+    next: `/v3/accounts/${addressAeternity}/activities?cursor=1&limit=${TXS_PER_PAGE}`,
   }).as('firstPage');
   cy.intercept({ method: 'GET', url: new RegExp(`/activities\\?cursor=1&limit=${TXS_PER_PAGE}$`) }, {
     data: getSpendActivities(firstPageSize, 20, { isReceived: true }),

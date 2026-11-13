@@ -11,6 +11,7 @@ import {
   decode,
   encode,
   packDelegation,
+  produceNameId,
 } from '@aeternity/aepp-sdk';
 
 import { useAccounts } from '@/composables/accounts';
@@ -54,8 +55,9 @@ vi.mock('@/composables', () => ({
   useAeSdk: vi.fn(),
   useLedger: vi.fn(() => ({ signTransaction: vi.fn(), signMessage: vi.fn() })),
 }));
+const { fetchNameByHash } = vi.hoisted(() => ({ fetchNameByHash: vi.fn() }));
 vi.mock('@/protocols/aeternity/composables', () => ({
-  useAeMiddleware: vi.fn(() => ({ getMiddleware: vi.fn() })),
+  useAeMiddleware: vi.fn(() => ({ fetchNameByHash })),
 }));
 
 let sdk: typeof import('@aeternity/aepp-sdk');
@@ -204,6 +206,37 @@ describe('signDelegation', () => {
     await wallet().signDelegation(delegation, {});
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+
+  describe('of a name', () => {
+    const nameId = produceNameId('delegated.chain');
+    const nameDelegation = packDelegation({
+      tag: DelegationTag.AensName,
+      accountAddress: ADDRESS_ACTIVE as Encoded.AccountAddress,
+      contractAddress: encode(new Uint8Array(32), Encoding.ContractAddress),
+      nameId,
+    });
+
+    it('names the name in the prompt', async () => {
+      fetchNameByHash.mockResolvedValueOnce('delegated.chain');
+
+      await wallet().signDelegation(nameDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+      expect(fetchNameByHash).toHaveBeenCalledWith(nameId);
+      expect(checkOrAskPermission.mock.calls[0][2].message)
+        .toMatch(/^sign delegation of delegated\.chain to ct_/);
+    });
+
+    it('shows the name hash when the name can\'t be looked up', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      onTestFinished(() => warn.mockRestore());
+      fetchNameByHash.mockRejectedValueOnce(new Error('Failed to fetch'));
+
+      await wallet().signDelegation(nameDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+      expect(checkOrAskPermission.mock.calls[0][2].message)
+        .toMatch(new RegExp(`^sign delegation of ${nameId} to ct_`));
+    });
   });
 });
 
