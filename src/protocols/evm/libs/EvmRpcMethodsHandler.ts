@@ -37,7 +37,6 @@ import {
   ETH_CONTRACT_ID,
   ETH_RPC_METHODS,
   ETH_RPC_NODE_METHODS,
-  ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
 import { AVALANCHE_CONTRACT_ID } from '@/protocols/avalanche/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
@@ -432,21 +431,7 @@ export async function handleEvmRpcMethod(
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
     if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId)) {
-      // ensure we emit connect event for EIP-1193 consumers
-      const account = getLastActiveProtocolAccount(protocol)!;
-      try {
-        const preferredChainId = `0x${BigInt(chainId).toString(16)}`;
-        // Guard browser for non-extension environments
-        if (typeof browser !== 'undefined' && browser?.runtime?.sendMessage) {
-          browser.runtime.sendMessage({
-            superheroWalletApproved: true,
-            method: ETH_RPC_WALLET_EVENTS.chainChanged,
-            result: preferredChainId,
-            type: 'result',
-          });
-        }
-      } catch (_) { /* noop */ }
-      return { result: [account.address] };
+      return { result: [getLastActiveProtocolAccount(protocol)!.address] };
     }
     return ERROR_USER_REJECTED_REQUEST;
   }
