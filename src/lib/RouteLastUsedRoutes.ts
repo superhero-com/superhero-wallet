@@ -1,4 +1,10 @@
-import { Router, type RouteLocation, type RouteLocationNormalized } from 'vue-router';
+import {
+  isNavigationFailure,
+  NavigationFailureType,
+  Router,
+  type RouteLocation,
+  type RouteLocationNormalized,
+} from 'vue-router';
 import { nextTick } from 'vue';
 import dayjs from 'dayjs';
 import type { WalletRouteMeta } from '@/types';
@@ -22,6 +28,9 @@ interface IRestoration {
   waitingForLogin?: boolean;
   parentPath?: string;
 }
+
+/** How long to wait for the parent page before opening the saved page without it. */
+const PARENT_PAGE_TIMEOUT = 3000;
 
 export const RouteLastUsedRoutes = (() => {
   const lastRouteKey = STORAGE_KEYS.lastRoute;
@@ -78,6 +87,7 @@ export const RouteLastUsedRoutes = (() => {
     function waitForParentPage(to: RouteLocationNormalized) {
       return new Promise<void>((resolve) => {
         let observer: MutationObserver;
+        let timeout: ReturnType<typeof setTimeout>;
         function hasMountedPage(index = 0): boolean {
           const record = to.matched[index];
           if (!record) return true;
@@ -90,6 +100,7 @@ export const RouteLastUsedRoutes = (() => {
         }
         const finish = () => {
           observer.disconnect();
+          clearTimeout(timeout);
           cancelParentMount = undefined;
           resolve();
         };
@@ -99,6 +110,8 @@ export const RouteLastUsedRoutes = (() => {
         observer = new MutationObserver(checkMounted);
         cancelParentMount = finish;
         observer.observe(document.body, { childList: true, subtree: true });
+        // Some parents render no page in some states, like multisig details without its account.
+        timeout = setTimeout(finish, PARENT_PAGE_TIMEOUT);
         checkMounted();
       });
     }
@@ -149,7 +162,9 @@ export const RouteLastUsedRoutes = (() => {
     router.afterEach(async (to, _from, failure) => {
       const attempt = restoration;
       if (failure) {
-        if (to === activeNavigation) stopRestoration();
+        // Opening the page already shown skips the guards and fails as a duplicate.
+        if (to === activeNavigation
+          || isNavigationFailure(failure, NavigationFailureType.duplicated)) stopRestoration();
         return;
       }
       if (attempt && to === activeNavigation) {

@@ -359,6 +359,38 @@ describe('last visited route restoration', () => {
     expect(storage.set).not.toHaveBeenCalled();
   });
 
+  it('does not restore after the parent that is still loading is opened again', async () => {
+    saveRoute();
+    const { router, visited, mountPage } = makeRouter([], { mountAutomatically: false });
+
+    await router.push('/');
+    await flushPromises();
+    // Like a deep link to the page already shown: vue-router skips the guards for it
+    await router.push('/more');
+    mountPage();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await flushPromises();
+
+    expect(visited).toEqual(['/more']);
+    expect(router.currentRoute.value.fullPath).toBe('/more');
+  });
+
+  it('opens the saved page when its parent shows no page', async () => {
+    vi.useFakeTimers({ now: NOW, toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    saveRoute();
+    const { router, visited } = makeRouter([], { mountAutomatically: false });
+
+    await router.push('/');
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(2900);
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await flushPromises();
+    expect(visited).toEqual(['/more']);
+
+    await vi.advanceTimersByTimeAsync(100);
+    await vi.waitFor(() => expect(visited).toEqual(['/more', '/more/about']));
+  });
+
   it.each([false, true])('restores a public page with logged-in state %s', async (isLoggedIn) => {
     const saved = saveRoute('/more/about/terms?section=privacy#terms');
     const { router, visited, auth } = makeRouter([
