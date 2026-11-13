@@ -282,23 +282,19 @@ Cypress.Commands.add('openSecureLoginSettings', () => {
     .urlEquals('/more/settings/secure-login');
 });
 
-/**
- * The form has a group of fields per protocol, each field's `data-cy` is its setting key.
- * Scrolling a field to the top would put it under the page header.
- */
+/** The form has a group of fields per protocol, each field's `data-cy` is its setting key. */
 Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl) => {
-  const options = { scrollBehavior: 'center' };
   cy.get('[data-cy=network-form]')
     .should('exist')
     .getInputByTestId('network-name')
-    .clear(options)
-    .type(name, options)
+    .clear()
+    .type(name)
     .get('[data-cy=group-aeternity] [data-cy=nodeUrl] input')
-    .clear(options)
-    .type(nodeUrl, options)
+    .clear()
+    .type(nodeUrl)
     .get('[data-cy=group-aeternity] [data-cy=middlewareUrl] input')
-    .clear(options)
-    .type(middlewareUrl, options);
+    .clear()
+    .type(middlewareUrl);
 });
 
 Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {
