@@ -29,7 +29,7 @@ const transactionLabels = {
   ],
   nameClaim: [
     AENS,
-    tg('transaction.type.nameClaimTx'),
+    tg('transaction.type.nameBid'),
   ],
   transfer: [
     tg('transaction.type.spendTx'),
@@ -57,7 +57,7 @@ const testCases = [
     STUB_TRANSACTIONS.spend,
   ].map((t) => ({
     props: { transaction: t },
-    labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
+    labels: t.pending ? [] : [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
   })),
   // ...[
   //   STUB_TRANSACTIONS.pendingSpend,
@@ -84,6 +84,28 @@ const testCases = [
     props: { transaction: t },
     labels: [t.tx.function, tg('transaction.type.contractCallTx')],
   })),
+  {
+    props: {
+      transaction: {
+        ...STUB_TRANSACTIONS.nameClaim,
+        tx: { ...STUB_TRANSACTIONS.nameClaim.tx, name: 'ordinarylongname.chain', nameSalt: '0' },
+      },
+    },
+    labels: [AENS, tg('transaction.type.nameClaimTx')],
+  },
+  {
+    props: {
+      transaction: {
+        ...STUB_TRANSACTIONS.nameClaim,
+        tx: { ...STUB_TRANSACTIONS.nameClaim.tx, nameSalt: '0' },
+      },
+    },
+    labels: [AENS, tg('transaction.type.nameBid')],
+  },
+  {
+    props: { transaction: { ...STUB_TRANSACTIONS.nameClaim, pending: true } },
+    labels: [],
+  },
   {
     props: { transaction: { tx: { type: 'ContractCreateTx' } } },
     labels: [tg('transaction.type.contractCreateTx')],
@@ -115,9 +137,7 @@ describe('TransactionTagList', () => {
       tokensAvailable.value[PROTOCOLS.aeternity] = {};
       tokensAvailable.value[PROTOCOLS.aeternity][STUB_TOKEN_CONTRACT_ADDRESS] = {};
 
-      wrapper.findAll('.transaction-tag').forEach((el, index) => {
-        expect(el.text()).toEqual(labels[index] || '');
-      });
+      expect(wrapper.findAll('.transaction-tag').map((el) => el.text())).toEqual(labels);
     },
   ));
 });
