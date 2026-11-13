@@ -57,8 +57,14 @@ function makeRouter(extraRoutes: RouteRecordRaw[] = [], {
       {
         path: '/login', name: 'login', component: Page, meta: { notPersist: true },
       },
-      // Like the app, unknown paths match a redirecting catch-all.
-      { path: '/:pathMatch(.*)*', redirect: '/' },
+      // Like the app, unknown paths redirect to the not-found page.
+      {
+        path: '/page-not-found',
+        name: 'not-found',
+        component: Page,
+        meta: { ifNotAuth: true, notPersist: true },
+      },
+      { path: '/:pathMatch(.*)*', redirect: { name: 'not-found' } },
       ...extraRoutes,
     ],
   });
@@ -112,6 +118,7 @@ beforeEach(() => {
 afterEach(() => {
   mountedPages.splice(0).forEach((element) => element.remove());
   vi.useRealTimers();
+  expect(handleUnknownError).not.toHaveBeenCalled();
 });
 
 describe('last visited route restoration', () => {
@@ -205,6 +212,35 @@ describe('last visited route restoration', () => {
     expect(visited).toEqual(['/']);
     expect(storage.set).not.toHaveBeenCalled();
     expect(storage.remove).toHaveBeenCalledExactlyOnceWith('last-route');
+  });
+
+  it.each([
+    ['iOS', { IS_IOS: true }],
+    ['Android', { IS_IOS: false }],
+  ])('opens the not-found page on %s for a saved page that no longer exists', async (_description, flags) => {
+    Object.assign(platform, flags);
+    saveRoute('/removed/page');
+    const { router, visited } = makeRouter();
+
+    await router.push('/');
+    await flushPromises();
+
+    expect(visited).toEqual(['/page-not-found']);
+    expect(storage.remove).toHaveBeenCalledExactlyOnceWith('last-route');
+  });
+
+  it('does not save a navigation that a guard blocks or that repeats the current page', async () => {
+    const { router, visited } = makeRouter([], { beforeAuth: (to) => to.path !== '/more' });
+
+    await router.push('/');
+    await router.push('/more');
+    await router.push('/account');
+    await flushPromises();
+
+    expect(visited).toEqual(['/account']);
+    expect(storage.set).toHaveBeenCalledExactlyOnceWith('last-route', {
+      path: '/account', time: expect.any(String),
+    });
   });
 
   it('restores a route just under ten minutes old', async () => {
