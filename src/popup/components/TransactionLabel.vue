@@ -12,7 +12,7 @@
       class="error"
     >
       <WarningIcon
-        v-if="transaction.tx.returnType === TX_RETURN_TYPE_ABORT"
+        v-if="executionResult?.returnType === TX_RETURN_TYPE_ABORT"
         class="icon"
       />
       <RevertedIcon
@@ -118,6 +118,7 @@ export default defineComponent({
       direction,
       innerTx,
       isDex,
+      isDexSwap,
       isAllowance,
       isDexLiquidityAdd,
       isDexLiquidityRemove,
@@ -125,6 +126,7 @@ export default defineComponent({
       isTokenSaleFactory,
       isTokenSaleSell,
       isErrorTransaction,
+      executionResult,
       isTip,
       txTypeListLabel,
     } = useTransactionData({
@@ -156,9 +158,21 @@ export default defineComponent({
       } else if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
         text = t('transaction.type.multisigVaultCreated');
       } else if (outerTxTag.value === Tag.PayingForTx) {
-        text = props.showTransactionOwner
-          ? t('transaction.type.transactionFeePaidBy')
-          : t('transaction.type.transactionFeePaid');
+        const rowOwner = props.transaction.transactionOwner
+          || (props.showTransactionOwner ? undefined : activeAccount.value.address);
+        if (
+          isDex.value
+          && isDexSwap.value
+          && !!rowOwner
+          && innerTx.value.callerId === rowOwner
+        ) {
+          text = t('common.swap');
+          hasComma = true;
+        } else {
+          text = props.showTransactionOwner
+            ? t('transaction.type.transactionFeePaidBy')
+            : t('transaction.type.transactionFeePaid');
+        }
       } else if (isAllowance.value) {
         text = t('transaction.dexType.allowToken');
       } else if (isDexLiquidityAdd.value) {
@@ -213,7 +227,7 @@ export default defineComponent({
     });
 
     const errorTypeName = computed((): string | null => {
-      switch (props.transaction.tx.returnType) {
+      switch (executionResult.value?.returnType) {
         case TX_RETURN_TYPE_ABORT: return t('transaction.returnType.abort');
         case TX_RETURN_TYPE_REVERT: return t('transaction.returnType.revert');
         default: return null;
@@ -223,6 +237,7 @@ export default defineComponent({
     return {
       TX_RETURN_TYPE_ABORT,
       isErrorTransaction,
+      executionResult,
       ownerName,
       label,
       errorTypeName,

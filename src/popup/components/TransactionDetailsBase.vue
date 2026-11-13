@@ -6,7 +6,7 @@
       <div class="header">
         <TransactionErrorStatus
           v-if="isErrorTransaction"
-          :return-type="transaction?.tx?.returnType"
+          :return-type="resolvedExecutionResult?.returnType"
         />
         <slot name="tokens" />
       </div>
@@ -33,9 +33,9 @@
           />
           <!-- EVM transactions have no reason -->
           <DetailsItem
-            v-if="isErrorTransaction && transaction.tx.return"
+            v-if="isErrorTransaction && resolvedExecutionResult?.return"
             :label="$t('pages.transactionDetails.reason')"
-            :value="transaction.tx.return"
+            :value="resolvedExecutionResult?.return"
             class="reason"
             data-cy="reason"
           />
@@ -185,6 +185,7 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useFungibleTokens } from '@/composables';
 import { isContract } from '@/protocols/aeternity/helpers';
+import type { TransactionExecutionResult } from '@/protocols/aeternity/helpers';
 
 import PageWrapper from '@/popup/components/PageWrapper.vue';
 import TransactionOverview from '@/popup/components/TransactionOverview.vue';
@@ -211,6 +212,7 @@ export default defineComponent({
   },
   props: {
     transaction: { type: Object as PropType<ITransaction>, default: null },
+    executionResult: { type: Object as PropType<TransactionExecutionResult>, default: undefined },
     /**
      * Amount without fee
      */
@@ -234,6 +236,7 @@ export default defineComponent({
     const { coinSymbol } = adapter;
 
     const { getTxAssetSymbol } = useFungibleTokens();
+    const resolvedExecutionResult = computed(() => props.executionResult ?? props.transaction?.tx);
 
     const explorerUrl = computed(
       () => adapter.getExplorer().prepareUrlForHash(props?.transaction?.hash || ''),
@@ -252,6 +255,7 @@ export default defineComponent({
       coinSymbol,
       contractId,
       explorerUrl,
+      resolvedExecutionResult,
     };
   },
 });
