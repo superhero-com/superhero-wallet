@@ -5,7 +5,7 @@ import {
   expect,
   it,
 } from 'vitest';
-import { webkit, type Browser } from 'playwright-core';
+import { devices, webkit, type Browser } from 'playwright-core';
 import { createServer, type ViteDevServer } from 'vite';
 import { TEST_ACCOUNT } from '../fixtures/account';
 
@@ -71,7 +71,8 @@ afterAll(async () => {
 
 // #3379: WebKit before 27 (iOS 26 and older) doesn't shrink a canvas wider than its box
 it('keeps the address book QR code inside its box', async () => {
-  const page = await browser.newPage();
+  // An iPhone's user agent turns on Ionic's iOS mode, as in the app
+  const page = await browser.newPage({ ...devices['iPhone 13'] });
   await page.goto(APP_URL);
   // A string, so Vitest leaves the dev server imports alone
   await page.evaluate(`(${seedWallet})(${JSON.stringify(TEST_ACCOUNT)})`);
