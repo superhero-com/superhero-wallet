@@ -29,6 +29,7 @@
         <IonRouterOutlet
           v-show="showRouter"
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
+          :animation="IS_IOS ? undefined : fadeAnimation"
           :class="{ ios: IS_IOS }"
           class="router-outlet"
         />
@@ -89,6 +90,7 @@ import {
 import { hideSplashScreen, setMobileStatusBarColor } from '@/utils/systemBars';
 import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { fadeAnimation } from '@/popup/animations';
 import {
   useAccounts,
   useAuth,
@@ -310,6 +312,7 @@ export default defineComponent({
       IS_MOBILE_APP,
       IS_MOBILE_DEVICE,
       RUNNING_IN_TESTS,
+      fadeAnimation,
       isAuthenticated,
       isLoaderVisible,
       isMobileQrScannerVisible,

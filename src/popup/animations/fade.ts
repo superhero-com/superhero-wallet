@@ -7,13 +7,12 @@ export const fadeAnimation: IonAnimationBuilder = (
   baseEl: Element,
   opts: { enteringEl?: Element; leavingEl?: Element },
 ) => {
-  const animation = createAnimation();
+  const animation = createAnimation().duration(ANIMATION_DURATION);
 
   if (opts.enteringEl) {
     const enteringAnimation = createAnimation()
       .addElement(opts.enteringEl)
-      .fromTo('opacity', 0, 1)
-      .duration(ANIMATION_DURATION);
+      .fromTo('opacity', 0, 1);
 
     animation.addAnimation(enteringAnimation);
   }
