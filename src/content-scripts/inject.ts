@@ -1,10 +1,3 @@
-import {
-  BrowserRuntimeConnection,
-  BrowserWindowMessageConnection,
-  MESSAGE_DIRECTION,
-  connectionProxy,
-} from '@aeternity/aepp-sdk';
-
 import type { BackgroundMethod } from '@/types';
 import {
   ETH_CONTENT_SCRIPT_METHODS,
@@ -127,22 +120,35 @@ const runContentScript = () => {
   });
 
   /**
-   * Aex-2 Aepp communication
+   * Aex-2 aepp communication, as the SDK's `connectionProxy` of a
+   * `BrowserWindowMessageConnection` and a `BrowserRuntimeConnection`.
+   * Importing those put 47 KB, mostly core-js, into every frame.
    */
-  const readyStateCheckInterval = setInterval(() => {
-    if (document.readyState === 'complete') {
-      clearInterval(readyStateCheckInterval);
-      const port = browser.runtime.connect();
-      const extConnection = new BrowserRuntimeConnection({ port, debug: false });
-      const pageConnection = new BrowserWindowMessageConnection({
-        target: window,
-        origin: window.origin,
-        sendDirection: MESSAGE_DIRECTION.to_aepp,
-        receiveDirection: MESSAGE_DIRECTION.to_waellet,
-      });
-      connectionProxy(pageConnection, extConnection);
+  function relayAeppMessages() {
+    const port = browser.runtime.connect();
+    function onPageMessage({ data, origin, source }: MessageEvent) {
+      if ((data?.jsonrpc ?? data?.data?.jsonrpc) !== '2.0') return;
+      if (origin !== window.origin || source !== window) return;
+      if (data.type != null && data.type !== 'to_waellet') return;
+      port.postMessage(data.type != null ? data.data : data);
     }
-  }, 10);
+    window.addEventListener('message', onPageMessage);
+    port.onMessage.addListener((message) => {
+      window.postMessage({ type: 'to_aepp', data: message }, window.origin);
+    });
+    port.onDisconnect.addListener(() => window.removeEventListener('message', onPageMessage));
+  }
+
+  if (document.readyState === 'complete') {
+    relayAeppMessages();
+  } else {
+    const onReadyStateChange = () => {
+      if (document.readyState !== 'complete') return;
+      document.removeEventListener('readystatechange', onReadyStateChange, true);
+      relayAeppMessages();
+    };
+    document.addEventListener('readystatechange', onReadyStateChange, true);
+  }
 };
 
 if (!hasOpaqueOrigin()) {

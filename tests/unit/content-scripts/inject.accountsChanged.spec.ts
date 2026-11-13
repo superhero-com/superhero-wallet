@@ -24,23 +24,10 @@ describe('inject.ts accountsChanged propagation', () => {
     };
     vi.doMock('webextension-polyfill', () => ({ default: (global as any).browser }), { virtual: true });
 
-    // Isolate inject.ts's own window-message handler: stub out the aepp-sdk
-    // connection proxy so it doesn't register a competing 'message' listener.
-    vi.doMock('@aeternity/aepp-sdk', async () => ({
-      ...(await vi.importActual('@aeternity/aepp-sdk')),
-      BrowserRuntimeConnection: vi.fn(),
-      BrowserWindowMessageConnection: vi.fn(),
-      connectionProxy: vi.fn(),
-    }));
-
     vi.spyOn(window, 'addEventListener');
     vi.spyOn(window, 'postMessage').mockImplementation(postMessageSpy);
-
-    // inject.ts polls `document.readyState` via setInterval at module load.
-    // These tests don't exercise that path, and a leaked interval would fire
-    // after the jsdom environment is torn down (`document is not defined`),
-    // crashing the worker. Stub it out so no real timer is scheduled.
-    vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>);
+    // Keeps the aepp relay and its 'message' listener out of the way
+    vi.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
 
     // Load script
     vi.resetModules();
