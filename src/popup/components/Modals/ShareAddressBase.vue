@@ -156,6 +156,7 @@ export default defineComponent({
     disableAssetSelection: Boolean,
     isReceive: Boolean,
   },
+  emits: ['close'],
   setup(props) {
     const { t } = useI18n();
 

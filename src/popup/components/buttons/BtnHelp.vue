@@ -29,6 +29,7 @@ export default defineComponent({
     fullScreen: Boolean,
     showAboveAll: Boolean,
   },
+  emits: ['help'],
   setup(props, { emit }) {
     const { openModal } = useModals();
 

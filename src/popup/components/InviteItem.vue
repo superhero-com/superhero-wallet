@@ -142,6 +142,7 @@ export default defineComponent({
     secretKey: { type: Buffer, required: true },
     createdAt: { type: Number, required: true },
   },
+  emits: ['loading'],
   setup(props, { emit }) {
     const router = useRouter();
     const { t } = useI18n();

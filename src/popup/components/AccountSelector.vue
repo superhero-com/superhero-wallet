@@ -21,7 +21,7 @@
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
           unstyled
-          @update:modelValue="onSelect"
+          @update:model-value="onSelect"
         >
           <template #current-text="{ text }">
             <slot>
@@ -70,9 +70,6 @@ export default defineComponent({
     BtnPill,
     FormSelect,
     Truncate,
-  },
-  model: {
-    event: 'select',
   },
   props: {
     modelValue: { type: String as PropType<AccountAddress>, default: null },

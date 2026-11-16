@@ -53,7 +53,7 @@
               error: checkIfSignerAddressDuplicated(signer),
             }"
             :protocol="PROTOCOLS.aeternity"
-            @update:modelValue="($event) => updateSigner(index, $event[0])"
+            @update:model-value="($event) => updateSigner(index, $event[0])"
           >
             <template #label-after>
               <div class="buttons">
