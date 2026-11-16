@@ -1,4 +1,4 @@
-import { Router } from 'vue-router';
+import type { NavigationGuardReturn, Router } from 'vue-router';
 import { Dictionary } from '@/types';
 import { useAccounts, useModals } from '@/composables';
 import {
@@ -14,8 +14,8 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 // Allowed action names
 export type RouteQueryActionName = 'transferSend' | 'addNetwork';
 
-// Returned state controls if the requested page should be opened.
-export type RouteQueryActionMethod = (router: Router, query: Dictionary) => boolean;
+// Returned guard result: `true` opens the requested page, a location redirects to it.
+export type RouteQueryActionMethod = (query: Dictionary) => NavigationGuardReturn;
 
 /**
  * The query object key whose value determines which controller method to use.
@@ -27,7 +27,7 @@ const TOKEN_PROP = 'token';
 /**
  * Function that handles URLs that has the `op` key present in the query string.
  * E.g.: wallet.superhero.com?op=<ACTION_NAME>
- * Each handler decides if requested page should be opened or blocked by returning bool value.
+ * Each handler returns the navigation guard result for the requested page.
  */
 export const RouteQueryActionsController = (() => {
   /**
@@ -47,7 +47,7 @@ export const RouteQueryActionsController = (() => {
     /**
      * Take action after opening the link copied in the transfer receive modal.
      */
-    transferSend: (_, query) => {
+    transferSend: (query) => {
       const { openModal, closeAllModals } = useModals();
       const { setActiveAccountByProtocol } = useAccounts();
 
@@ -82,30 +82,24 @@ export const RouteQueryActionsController = (() => {
     /**
      * Used by external apps to automate adding new networks to the wallet.
      */
-    addNetwork: (router, query) => {
-      router.push({ name: ROUTE_NETWORK_ADD, query });
-      return false;
-    },
+    addNetwork: (query) => ({ name: ROUTE_NETWORK_ADD, query }),
   };
 
   /**
    * Monitor the action arguments in the query string and perform assigned action method.
    */
   function init(router: Router) {
-    router.beforeResolve(({ query }, from, next) => {
-      const action = query?.[ACTION_PROP] as null | RouteQueryActionName;
+    router.beforeResolve(({ query }) => {
+      const action = query?.[ACTION_PROP];
 
-      if (action && typeof action === 'string' && availableActions[action]) {
+      // Own keys only, so `op=toString` can't call an inherited method.
+      if (includes(Object.keys(availableActions) as RouteQueryActionName[], action)) {
         const queryWithoutAction = { ...query };
         delete queryWithoutAction[ACTION_PROP];
 
-        const shouldOpenRequestedPage = availableActions[action](router, queryWithoutAction);
-        if (shouldOpenRequestedPage) {
-          next();
-        }
-      } else {
-        next();
+        return availableActions[action](queryWithoutAction);
       }
+      return true;
     });
   }
 

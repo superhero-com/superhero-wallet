@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { routes } from '../../../../src/popup/router/routes';
 import {
+  ROUTE_ACCOUNT,
   ROUTE_SEED_PHRASE_DETAILS,
   ROUTE_SEED_PHRASE_VERIFY,
 } from '../../../../src/popup/router/routeNames';
@@ -53,14 +54,13 @@ describe('seed phrase reveal routes', () => {
     platform.isMobileApp = true;
     mockIsBiometricLoginEnabled.value = true;
     mockCanAuthenticateWithDevice.mockResolvedValue(true);
-    const next = vi.fn();
     const route = routes.find(({ name }) => name === ROUTE_SEED_PHRASE_DETAILS);
 
-    await route.beforeEnter({}, {}, next);
+    const result = await route.beforeEnter({}, {});
 
     expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true });
     expect(mockOpenConfirmModal).not.toHaveBeenCalled();
-    expect(next).toHaveBeenCalledWith();
+    expect(result).toBe(true);
   });
 
   it('does not show it on mobile when the device check fails', async () => {
@@ -68,40 +68,49 @@ describe('seed phrase reveal routes', () => {
     mockIsBiometricLoginEnabled.value = true;
     mockCanAuthenticateWithDevice.mockResolvedValue(true);
     mockOpenBiometricLoginModal.mockRejectedValue(new Error('noDeviceCredential'));
-    const next = vi.fn();
     const route = routes.find(({ name }) => name === ROUTE_SEED_PHRASE_DETAILS);
 
-    await route.beforeEnter({}, { matched: [{}] }, next);
+    const result = await route.beforeEnter({}, { matched: [{}] });
 
     expect(mockOpenConfirmModal).not.toHaveBeenCalled();
-    expect(next).toHaveBeenCalledWith(false);
+    expect(result).toBe(false);
+  });
+
+  it('opens the account page when a failed check has no page to stay on', async () => {
+    platform.isMobileApp = true;
+    mockIsBiometricLoginEnabled.value = true;
+    mockCanAuthenticateWithDevice.mockResolvedValue(true);
+    mockOpenBiometricLoginModal.mockRejectedValue(new Error('noDeviceCredential'));
+    const route = routes.find(({ name }) => name === ROUTE_SEED_PHRASE_DETAILS);
+
+    const result = await route.beforeEnter({}, { matched: [] });
+
+    expect(result).toEqual({ name: ROUTE_ACCOUNT });
   });
 
   it('asks to confirm on mobile when the device can verify the user in no way', async () => {
     platform.isMobileApp = true;
     mockIsBiometricLoginEnabled.value = true;
     mockCanAuthenticateWithDevice.mockResolvedValue(false);
-    const next = vi.fn();
     const route = routes.find(({ name }) => name === ROUTE_SEED_PHRASE_DETAILS);
 
-    await route.beforeEnter({}, {}, next);
+    const result = await route.beforeEnter({}, {});
 
     expect(mockOpenConfirmModal).toHaveBeenCalledTimes(1);
     expect(mockOpenBiometricLoginModal).not.toHaveBeenCalled();
-    expect(next).toHaveBeenCalledWith();
+    expect(result).toBe(true);
   });
 
   [ROUTE_SEED_PHRASE_DETAILS, ROUTE_SEED_PHRASE_VERIFY].forEach((routeName) => {
     it(`requires password re-auth on ${routeName} for password-protected web installs`, async () => {
-      const next = vi.fn();
       const route = routes.find(({ name }) => name === routeName);
 
-      await route.beforeEnter({}, {}, next);
+      const result = await route.beforeEnter({}, {});
 
       expect(mockOpenPasswordLoginModal).toHaveBeenCalledTimes(1);
       expect(mockOpenConfirmModal).not.toHaveBeenCalled();
       expect(mockOpenBiometricLoginModal).not.toHaveBeenCalled();
-      expect(next).toHaveBeenCalledWith();
+      expect(result).toBe(true);
     });
   });
 });

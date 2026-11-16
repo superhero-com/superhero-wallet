@@ -68,13 +68,12 @@ describe('seed phrase reveal gate on a device', () => {
     const { routes } = await import('@/popup/router/routes');
     const { useUi } = await import('@/composables/ui');
     useUi().setBiometricLoginEnabled(true);
-    const next = vi.fn();
     const route = routes.find(({ name }) => name === ROUTE_SEED_PHRASE_DETAILS);
 
-    await route.beforeEnter({}, {}, next);
+    const result = await route.beforeEnter({}, {});
 
     expect(openBiometricLoginModalMock).toHaveBeenCalledTimes(biometricModalCalls);
     expect(openConfirmModalMock).toHaveBeenCalledTimes(confirmModalCalls);
-    expect(next).toHaveBeenCalledWith();
+    expect(result).toBe(true);
   });
 });
