@@ -26,6 +26,7 @@ export default defineComponent({
     searchPlaceholder: { type: String, default: '' },
     hideSearch: Boolean,
   },
+  emits: ['update:modelValue'],
   setup(props, { emit }) {
     function filterOptions(searchPhrase: string) {
       emit('update:modelValue', searchPhrase ? searchPhrase.toLowerCase() : '');

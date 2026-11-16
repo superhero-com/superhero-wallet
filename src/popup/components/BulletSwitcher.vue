@@ -71,6 +71,7 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ['change'],
   setup(props) {
     const isResizing = computed(() => props.optionsSize > RESIZE_THRESHOLD);
 

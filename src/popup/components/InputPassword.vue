@@ -46,6 +46,7 @@ export default defineComponent({
     showPasswordStrength: Boolean,
     hideEyeIcon: Boolean,
   },
+  emits: ['update:modelValue'],
   setup(props) {
     const { t } = useI18n();
     const isPasswordVisible = ref(false);

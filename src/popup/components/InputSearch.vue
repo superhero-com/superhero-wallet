@@ -28,6 +28,7 @@ export default {
     Search,
     Eraser,
   },
+  emits: ['update:modelValue'],
 };
 </script>
 

@@ -64,6 +64,7 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
   },
+  emits: ['success'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const router = useRouter();

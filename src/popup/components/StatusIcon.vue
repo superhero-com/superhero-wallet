@@ -35,6 +35,7 @@ export default defineComponent({
       validator: (val: StatusIconType) => ALLOWED_ICON_STATUSES.includes(val),
     },
   },
+  emits: ['click'],
   setup(props) {
     const statusIcons: Record<StatusIconType, Component> = {
       critical: TimesCircle,

@@ -69,6 +69,7 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     protocol: { type: String as PropType<Protocol>, default: PROTOCOLS.bitcoin },
   },
+  emits: ['success'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const router = useRouter();
