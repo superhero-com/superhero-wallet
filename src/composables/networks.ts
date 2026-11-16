@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { isEqual } from 'lodash-es';
 import type {
   INetwork,
   NetworkProtocolsSettings,
@@ -12,7 +13,7 @@ import {
   PROTOCOL_LIST,
   STORAGE_KEYS,
 } from '@/constants';
-import { createCallbackRegistry } from '@/utils';
+import { composeStorageKeys, createCallbackRegistry } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { tg } from '@/popup/plugins/i18n';
@@ -40,7 +41,6 @@ const areNetworksRestored = ref(false);
 const customNetworks = useStorageRef<INetwork[]>(
   [],
   STORAGE_KEYS.customNetworks,
-  { backgroundSync: true },
 );
 
 /**
@@ -50,7 +50,6 @@ const activeNetworkName = useStorageRef<string>(
   NETWORK_NAME_MAINNET,
   STORAGE_KEYS.activeNetworkName,
   {
-    backgroundSync: true,
     onRestored: (name) => {
       const knownNames = [
         NETWORK_NAME_MAINNET,
@@ -79,6 +78,25 @@ const activeNetwork = computed(
 );
 
 const isActiveNetworkTestnet = computed(() => activeNetwork.value.type === NETWORK_TYPE_TESTNET);
+
+function synchronizeNetworks(event: StorageEvent) {
+  const networkKeys = [STORAGE_KEYS.customNetworks, STORAGE_KEYS.activeNetworkName]
+    .map((key) => composeStorageKeys(key));
+  if (!networkKeys.includes(event.key!)) return;
+  if (event.storageArea && event.storageArea !== localStorage) return;
+
+  const oldNetwork = activeNetwork.value;
+  // A custom network and its active name can be saved in the same turn.
+  const storedNetworks = WalletStorage.get<INetwork[]>(STORAGE_KEYS.customNetworks) ?? [];
+  const storedName = WalletStorage.get<string>(STORAGE_KEYS.activeNetworkName);
+  if (!isEqual(customNetworks.value, storedNetworks)) customNetworks.value = storedNetworks;
+  activeNetworkName.value = (storedName && networks.value[storedName])
+    ? storedName
+    : NETWORK_NAME_MAINNET;
+  if (!isEqual(activeNetwork.value, oldNetwork)) {
+    runOnNetworkChangeCallbacks(activeNetwork.value, oldNetwork);
+  }
+}
 
 function ensureDefaultNetworksExists() {
   if (defaultNetworks.length === 0) {
@@ -129,21 +147,24 @@ export function useNetworks() {
     return false;
   }
 
+  /** Without asking, e.g. to undo a network a dapp added. */
+  function removeCustomNetwork(name: string): boolean {
+    const index = customNetworks.value.findIndex((network) => network.name === name);
+    if (index < 0) {
+      return false;
+    }
+    if (name === activeNetwork.value.name) {
+      switchNetwork(NETWORK_NAME_MAINNET);
+    }
+    const [oldNetwork] = customNetworks.value.splice(index, 1);
+    runOnNetworkRemovedCallbacks(oldNetwork);
+    return true;
+  }
+
   async function deleteCustomNetwork(name: string): Promise<boolean> {
     try {
       await openConfirmModal({ msg: tg('pages.network.confirmDelete') });
-
-      const index = customNetworks.value.findIndex((network) => network.name === name);
-      if (index > -1) {
-        if (name === activeNetwork.value.name) {
-          switchNetwork(NETWORK_NAME_MAINNET);
-        }
-        const oldNetwork = customNetworks.value[index];
-        customNetworks.value.splice(index, 1);
-        runOnNetworkRemovedCallbacks(oldNetwork);
-        return true;
-      }
-      return false;
+      return removeCustomNetwork(name);
     } catch (error) {
       return false;
     }
@@ -158,6 +179,7 @@ export function useNetworks() {
     composableInitialized = true;
 
     ensureDefaultNetworksExists();
+    window.addEventListener('storage', synchronizeNetworks);
   }
 
   return {
@@ -171,6 +193,7 @@ export function useNetworks() {
     switchNetwork,
     addCustomNetwork,
     updateCustomNetwork,
+    removeCustomNetwork,
     deleteCustomNetwork,
     resetNetworks,
     onNetworkChange,

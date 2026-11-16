@@ -19,6 +19,7 @@ import {
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_NETWORK_SWITCH,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_UNSAFE_SIGN,
   POPUP_TYPE_SIGN,
@@ -70,6 +71,13 @@ export const STUB_POPUP_PROPS: Record<PopupType | 'base', IPopupData> = {
   },
   [POPUP_TYPE_ACCOUNT_LIST]: {
     app: STUB_APP_DATA,
+  },
+  [POPUP_TYPE_NETWORK_SWITCH]: {
+    app: STUB_APP_DATA,
+    networkName: 'Hyperchain',
+    networkId: 'hc_test',
+    nodeUrl: 'https://node.example.com',
+    isNewNetwork: true,
   },
   [POPUP_TYPE_MESSAGE_SIGN]: {
     app: STUB_APP_DATA,

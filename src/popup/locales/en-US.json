@@ -1366,6 +1366,13 @@
       "heading": "would like to sign message.",
       "message": "Message"
     },
+    "popupNetworkSwitch": {
+      "title": "Switch network",
+      "request": "This dApp would like to switch your wallet network.",
+      "origin": "Requesting website",
+      "networkId": "Network ID",
+      "confirm": "Switch network"
+    },
     "network": {
       "connectToNetwork": "Connect to network",
       "connectTo": "Connect to {name}",

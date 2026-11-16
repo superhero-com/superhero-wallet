@@ -402,7 +402,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             topic: wcSession.value.topic,
             namespaces: wcSession.value.namespaces,
           });
-          await acknowledged();
+          await acknowledged().catch((error) => {
+            // INVALID_UPDATE_REQUEST: another window of the wallet sent a newer update first
+            if (error?.code !== 1003) throw error;
+          });
 
           // Emit accountsChanged only when address actually changes
           if (!oldAccount || oldAccount.address !== newAccount.address) {

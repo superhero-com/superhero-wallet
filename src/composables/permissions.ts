@@ -13,12 +13,14 @@ import {
   IS_OFFSCREEN_TAB,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_NETWORK_SWITCH,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
+  POPUP_TYPE_NETWORK_SWITCH,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_UNSAFE_SIGN,
   POPUP_TYPE_RAW_SIGN,
@@ -62,6 +64,10 @@ const permissions = useStorageRef<PermissionRegistry>(
 const DAILY_LIMIT_TX_TAGS: (Tag | undefined)[] = [Tag.SpendTx, Tag.NameClaimTx];
 
 const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType }>> = {
+  [METHODS.updateNetwork]: {
+    modal: MODAL_CONFIRM_NETWORK_SWITCH,
+    popup: POPUP_TYPE_NETWORK_SWITCH,
+  },
   [METHODS.subscribeAddress]: {
     modal: MODAL_CONFIRM_CONNECT,
     popup: POPUP_TYPE_CONNECT,

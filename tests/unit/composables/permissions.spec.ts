@@ -39,6 +39,7 @@ import {
   encode,
   unpackTx,
 } from '@aeternity/aepp-sdk';
+import { MODAL_CONFIRM_NETWORK_SWITCH, POPUP_TYPE_NETWORK_SWITCH } from '@/constants';
 
 const HOST = 'dapp.example';
 const AETTO = 1; // smallest aettos unit
@@ -419,5 +420,66 @@ describe('usePermissions - asking about the address of a connected site', () => 
       protocol: 'bnb',
     })).toBe(true);
     expect(openModalMock).toHaveBeenCalledTimes(modals);
+  });
+});
+
+describe('usePermissions - asking to switch the network for a dapp', () => {
+  const openModalMock = vi.fn();
+  const openPopupMock = vi.fn();
+  const target = {
+    networkName: 'Hyperchain',
+    nodeUrl: 'https://node.example',
+    networkId: 'hc_test',
+    isNewNetwork: true,
+  };
+
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    openModalMock.mockReset().mockResolvedValue(undefined);
+    openPopupMock.mockReset().mockResolvedValue(undefined);
+    vi.doMock('@/composables/modals', () => ({
+      useModals: () => ({ openModal: openModalMock }),
+    }));
+    vi.doMock('@/offscreen/popupHandler', () => ({
+      openPopup: openPopupMock,
+      getSessionEncryptionKey: vi.fn(),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('@/composables/modals');
+    vi.doUnmock('@/offscreen/popupHandler');
+    vi.doUnmock('@/constants');
+  });
+
+  it('shows the target in the network switch modal', async () => {
+    const { usePermissions } = await import('@/composables/permissions');
+
+    expect(await usePermissions().askPermission(METHODS.updateNetwork, `https://${HOST}`, target))
+      .toBe(true);
+    expect(openModalMock).toHaveBeenCalledWith(
+      MODAL_CONFIRM_NETWORK_SWITCH,
+      expect.objectContaining({
+        ...target,
+        app: expect.objectContaining({ href: `https://${HOST}/` }),
+      }),
+    );
+  });
+
+  it('shows the target in the network switch popup of the background page', async () => {
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...(await importOriginal()),
+      IS_OFFSCREEN_TAB: true,
+    }));
+    const { usePermissions } = await import('@/composables/permissions');
+
+    expect(await usePermissions().askPermission(METHODS.updateNetwork, `https://${HOST}`, target))
+      .toBe(true);
+    expect(openPopupMock).toHaveBeenCalledWith(
+      POPUP_TYPE_NETWORK_SWITCH,
+      `https://${HOST}/`,
+      expect.objectContaining(target),
+    );
   });
 });

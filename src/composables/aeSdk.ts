@@ -9,7 +9,7 @@ import {
   WALLET_TYPE,
   RpcRejectedByUserError,
   RpcInternalError,
-  RpcMethodNotFoundError,
+  RpcNotAuthorizeError,
   METHODS,
   RPC_STATUS,
   Encoded,
@@ -40,6 +40,7 @@ import {
   DEX_CONTRACTS,
 } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { selectAeppNetwork } from '@/protocols/aeternity/helpers/selectAeppNetwork';
 
 import { useAccounts } from './accounts';
 import { usePermissions } from './permissions';
@@ -61,6 +62,7 @@ let composableInitialized = false;
 let aeSdk: AeSdkSuperhero;
 let aeSdkInitialization: Promise<void> | undefined;
 let latestNodeResetId = 0;
+let networkSelectionQueue = Promise.resolve();
 
 const nodeNetworkId = ref<NetworkId>();
 
@@ -97,11 +99,11 @@ const dexContracts = computed(
   () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
 );
 
-function replaceNode(sdk: AeSdk, name: string, node: Node) {
+function replaceNode(sdk: AeSdk, name: string, node: Node): Promise<void> {
   sdk.pool.clear();
   sdk.addNode(name, node);
   // `AeSdkWallet.selectNode` is async and rejects when the node is down.
-  Promise.resolve(sdk.selectNode(name)).catch(handleUnknownError);
+  return Promise.resolve(sdk.selectNode(name)).catch(handleUnknownError);
 }
 
 export function useAeSdk() {
@@ -115,8 +117,23 @@ export function useAeSdk() {
     getLastActiveProtocolAccount,
     onAccountChange,
   } = useAccounts();
-  const { checkOrAskPermission } = usePermissions();
+  const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
+
+  /** Still connected, and the user let it see the accounts now or on an earlier visit */
+  function isAeppConnectedSite(aeppId: string, host: string) {
+    if (aeSdk._clients.get(aeppId)?.status !== RPC_STATUS.CONNECTED) {
+      return false;
+    }
+    if (aeppsGivenAccounts.has(aeppId)) {
+      return true;
+    }
+    try {
+      return !!getPermissionForUrl(host);
+    } catch {
+      return false;
+    }
+  }
 
   /** Create Node instance and get connection status (stored only while `isCurrent()`). */
   async function createNodeInstance(url: string, isCurrent = () => true) {
@@ -189,11 +206,13 @@ export function useAeSdk() {
         if (!isCurrent()) {
           return;
         }
-        if (aeSdk) {
-          replaceNode(aeSdk, newNetwork.name, nodeInstance!);
-        }
-        if (dryAeSdk) {
-          replaceNode(dryAeSdk, newNetwork.name, nodeInstance!);
+        const replacing = Promise.all([aeSdk, dryAeSdk].filter(Boolean).map(
+          (sdk) => replaceNode(sdk, newNetwork.name, nodeInstance!),
+        ));
+        // A node that answered has its network id cached, so the aepps are told at once.
+        // One that didn't would hold the SDK for another round of retries.
+        if (isAeNodeReady.value) {
+          await replacing;
         }
       } catch (error) {
         handleUnknownError(error);
@@ -290,9 +309,38 @@ export function useAeSdk() {
           }
           return Promise.reject(new RpcRejectedByUserError());
         },
-        onAskToSelectNetwork() {
-          // TODO: add popup asking user to confirm network switch by aepp request
-          throw new RpcMethodNotFoundError();
+        onAskToSelectNetwork(aeppId, params, origin) {
+          const selection = networkSelectionQueue.catch(() => {}).then(async () => {
+            const aepp = aeppInfo[aeppId];
+            const host = (IS_OFFSCREEN_TAB ? aepp?.origin : origin) ?? origin;
+            // Checked once its turn comes: the page may have left meanwhile
+            if (!isAeppConnectedSite(aeppId, host)) {
+              throw new RpcNotAuthorizeError();
+            }
+            const target = await selectAeppNetwork(
+              params,
+              host,
+              nodeNetworkId.value,
+              getAeppTabId(aeppId),
+            );
+            // The RPC response must follow the SDK's network-change notification.
+            await watchUntilTruthy(() => !isAeSdkUpdating.value);
+            // The user switched meanwhile
+            if (activeNetworkName.value !== target.name) {
+              throw new RpcInternalError();
+            }
+            if (
+              !isAeNodeReady.value
+              || (target.networkId && nodeNetworkId.value !== target.networkId)
+            ) {
+              // Not the network the user approved, e.g. its node reports another one now
+              target.revert?.();
+              await watchUntilTruthy(() => !isAeSdkUpdating.value);
+              throw new RpcInternalError();
+            }
+          });
+          networkSelectionQueue = selection;
+          return selection;
         },
       },
       nodeNetworkId,

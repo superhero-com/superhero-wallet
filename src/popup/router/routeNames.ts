@@ -54,6 +54,7 @@ export const ROUTE_SEED_PHRASE_DETAILS = 'settings-seed-phrase-details';
  * Popup pages
  */
 export const ROUTE_POPUP_CONNECT = 'connect';
+export const ROUTE_POPUP_NETWORK_SWITCH = 'popup-network-switch';
 export const ROUTE_POPUP_SIGN_TX = 'popup-sign-tx';
 export const ROUTE_POPUP_ACCOUNT_LIST = 'account-list';
 export const ROUTE_POPUP_RAW_SIGN = 'popup-raw-sign';

@@ -20,16 +20,24 @@ vi.mock('vue-router', () => ({
 
 enableAutoUnmount(afterEach);
 
-async function mountEditingActiveNetwork() {
-  const { networks, addCustomNetwork, switchNetwork } = useNetworks();
+function createProtocols() {
+  const { networks } = useNetworks();
   const protocols = cloneDeep(networks.value.Testnet.protocols);
   // The form requires an explorer for every protocol
   Object.keys(protocols).forEach((protocol) => {
     protocols[protocol] = { explorerUrl: 'https://explorer.example', ...protocols[protocol] };
   });
   protocols.aeternity.middlewareUrl = OLD_MIDDLEWARE_URL;
-  addCustomNetwork({ name: 'Custom A', type: 'custom', protocols });
-  switchNetwork('Custom A');
+  return protocols;
+}
+
+/** Edits "Custom A", saved between the networks named before and after it. */
+async function mountEditing({ before = [], after = [], isActive = true } = {}) {
+  const { addCustomNetwork, switchNetwork } = useNetworks();
+  [...before, 'Custom A', ...after].forEach((name) => {
+    addCustomNetwork({ name, type: 'custom', protocols: createProtocols() });
+  });
+  if (isActive) switchNetwork('Custom A');
 
   const wrapper = mount(NetworkForm, {
     global: {
@@ -53,7 +61,7 @@ describe('NetworkForm editing the active network', () => {
   });
 
   it('keeps the network as it was when the edit is cancelled', async () => {
-    const wrapper = await mountEditingActiveNetwork();
+    const wrapper = await mountEditing();
 
     await wrapper.find('[data-cy="cancel"]').trigger('click');
 
@@ -67,7 +75,7 @@ describe('NetworkForm editing the active network', () => {
     const { onNetworkChange, activeNetwork } = useNetworks();
     const callback = vi.fn();
     const unsubscribe = onNetworkChange(callback);
-    const wrapper = await mountEditingActiveNetwork();
+    const wrapper = await mountEditing();
     callback.mockClear();
 
     await wrapper.find('[data-cy="btn-add-network"]').trigger('click');
@@ -79,5 +87,32 @@ describe('NetworkForm editing the active network', () => {
     const [newNetwork, oldNetwork] = callback.mock.calls[0];
     expect(newNetwork.protocols.aeternity.middlewareUrl).toBe(NEW_MIDDLEWARE_URL);
     expect(oldNetwork.protocols.aeternity.middlewareUrl).toBe(OLD_MIDDLEWARE_URL);
+  });
+
+  it('saves the edited network after another window removed an earlier one', async () => {
+    const wrapper = await mountEditing({ before: ['Earlier'], after: ['Later'], isActive: false });
+    const { customNetworks, networks } = useNetworks();
+    customNetworks.value.splice(0, 1);
+
+    await wrapper.find('[data-cy="btn-add-network"]').trigger('click');
+    await flushPromises();
+
+    expect(customNetworks.value.map(({ name }) => name)).toEqual(['Custom A', 'Later']);
+    expect(networks.value['Custom A'].protocols.aeternity.middlewareUrl).toBe(NEW_MIDDLEWARE_URL);
+    expect(networks.value.Later.protocols.aeternity.middlewareUrl).toBe(OLD_MIDDLEWARE_URL);
+  });
+
+  it('goes back without saving when another window removed the edited network', async () => {
+    const wrapper = await mountEditing({ before: ['Earlier'], after: ['Later'], isActive: false });
+    const { customNetworks, networks, activeNetworkName } = useNetworks();
+    customNetworks.value.splice(1, 1);
+
+    await wrapper.find('[data-cy="btn-add-network"]').trigger('click');
+    await flushPromises();
+
+    expect(router.replace).toHaveBeenCalled();
+    expect(customNetworks.value.map(({ name }) => name)).toEqual(['Earlier', 'Later']);
+    expect(networks.value.Later.protocols.aeternity.middlewareUrl).toBe(OLD_MIDDLEWARE_URL);
+    expect(activeNetworkName.value).toBe('Mainnet');
   });
 });

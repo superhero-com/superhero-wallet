@@ -690,6 +690,10 @@ export interface IPopupData {
   txBase64?: Encoded.Transaction;
   aeppOrigin?: string;
   data?: string | Uint8Array;
+  networkName?: string;
+  nodeUrl?: string;
+  networkId?: string;
+  isNewNetwork?: boolean;
 }
 
 /**
