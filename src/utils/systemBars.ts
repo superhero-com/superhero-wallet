@@ -1,5 +1,6 @@
 import { registerPlugin } from '@capacitor/core';
 import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
+import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar } from '@capacitor/status-bar';
 
 import {
@@ -18,13 +19,20 @@ interface NavigationBarPlugin {
 
 const NavigationBar = registerPlugin<NavigationBarPlugin>('NavigationBar');
 
+/** The launch splash is black. */
+const SPLASH_COLOR = '#000000';
+
+const [navigation] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+
+// The splash shows only at launch, never after a reload.
+let isSplashShown = navigation?.type !== 'reload';
+let pageColor = SPLASH_COLOR;
+
 /**
  * Capacitor's StatusBar background API does not work on Android 15+,
  * so Android must use the EdgeToEdge plugin to color the system area.
  */
-export async function setMobileStatusBarColor(color: string) {
-  if (!IS_MOBILE_APP) return;
-
+async function applyColor(color: string) {
   if (IS_ANDROID) {
     await Promise.all([
       EdgeToEdge.setStatusBarColor({ color }),
@@ -36,4 +44,21 @@ export async function setMobileStatusBarColor(color: string) {
   }
 
   await StatusBar.setBackgroundColor({ color });
+}
+
+/** While the launch splash shows, the bars stay black and take the last color once it hides. */
+export async function setMobileStatusBarColor(color: string) {
+  if (!IS_MOBILE_APP) return;
+
+  pageColor = color;
+  await applyColor(isSplashShown ? SPLASH_COLOR : color);
+}
+
+export async function hideSplashScreen() {
+  try {
+    await SplashScreen.hide({ fadeOutDuration: 300 });
+  } finally {
+    isSplashShown = false;
+    await setMobileStatusBarColor(pageColor);
+  }
 }
