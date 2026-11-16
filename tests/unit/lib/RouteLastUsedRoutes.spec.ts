@@ -409,6 +409,10 @@ describe('last visited route restoration', () => {
 
     expect(visited).toEqual(['/more']);
     expect(router.currentRoute.value.fullPath).toBe('/more');
+    // The parent is what stays shown, so it is the page to reopen.
+    expect(storage.set).toHaveBeenCalledExactlyOnceWith('last-route', {
+      path: '/more', time: expect.any(String),
+    });
   });
 
   it('opens the saved page when its parent shows no page', async () => {
@@ -552,10 +556,14 @@ describe('last visited route restoration', () => {
     await vi.waitFor(() => expect(destinationGuard).toHaveBeenCalledOnce());
     await flushPromises();
 
+    const shownPath = accepted ? saved.path : '/account';
     expect(visited).toEqual(accepted ? ['/account', saved.path] : ['/account']);
-    expect(router.currentRoute.value.fullPath).toBe(accepted ? saved.path : '/account');
+    expect(router.currentRoute.value.fullPath).toBe(shownPath);
     expect(parentGuard).not.toHaveBeenCalled();
-    if (!accepted) expect(storage.set).not.toHaveBeenCalled();
+    // A canceled reauthentication must not ask again on the next launch.
+    expect(storage.set).toHaveBeenCalledExactlyOnceWith('last-route', {
+      path: shownPath, time: expect.any(String),
+    });
   });
 
   it.each([
