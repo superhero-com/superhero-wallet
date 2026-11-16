@@ -71,9 +71,6 @@ export default defineComponent({
     FormSelect,
     Truncate,
   },
-  model: {
-    event: 'select',
-  },
   props: {
     modelValue: { type: String as PropType<AccountAddress>, default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },

@@ -4,7 +4,7 @@
       <AccountSelector
         v-model="creatorAddress"
         :options="aeAccountsSelectOptions"
-        @select="setActiveAccountByAddressAndProtocol($event, PROTOCOLS.aeternity)"
+        @update:model-value="setActiveAccountByAddressAndProtocol($event, PROTOCOLS.aeternity)"
       />
       <div class="comment-text">
         {{ text }}
