@@ -322,7 +322,7 @@ Cypress.Commands.add('openTransactions', () => {
 Cypress.Commands.add('splittedStringToBeEqual', (component, string) => {
   cy.get(component)
     .should('be.visible')
-    .then((splittedString) => {
+    .should((splittedString) => {
       expect(splittedString.text().replaceAll(' ', '')).to.equal(string);
     });
 });
@@ -348,7 +348,10 @@ Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = nu
       .get('.modal .header [data-cy=input]')
       .type(token.contractId)
       .get('.tokens-list-item:first-child', { timeout: 16000 })
-      .click();
+      .click()
+      // The fading asset selector still has its search field
+      .get('.modal .header [data-cy=input]')
+      .should('not.exist');
   }
   cy.splittedStringToBeEqual('[data-cy=qr-code-info]', address)
     .get('[data-cy=input]')
