@@ -17,7 +17,6 @@ import {
   flattenHtmlPlugin,
   copyWebPlugin,
   stripWebOnlyHtmlPlugin,
-  vendorManualChunks,
   devProcessPolyfillPlugin,
 } from './build/plugins';
 
@@ -186,6 +185,11 @@ export default defineConfig(({ mode, command }) => {
     return { [name]: entry };
   })();
 
+  // Dependencies the pages load at startup share one chunk that changes only when they do,
+  // so an app-only release doesn't re-download them. Dependencies reached only through
+  // `import()` (WalletConnect, AirGap, QR, Capacitor web plugins) load on demand.
+  const vendorGroup = { name: 'vendor', test: /node_modules/, tags: ['$initial' as const] };
+
   return {
     base,
     publicDir: isExtension ? false : 'public',
@@ -255,12 +259,12 @@ export default defineConfig(({ mode, command }) => {
               assetFileNames: (info: any) => (/\.css$/.test(info.name ?? '')
                 ? 'css/[name][extname]'
                 : 'img/[name][extname]'),
-              codeSplitting: { groups: [{ name: vendorManualChunks, debugName: 'vendor' }] },
+              codeSplitting: { groups: [vendorGroup] },
             }
             : {
               codeSplitting: {
                 groups: [
-                  { name: vendorManualChunks, debugName: 'vendor' },
+                  vendorGroup,
                   // Unlike Rollup, Rolldown leaves app modules that the entry shares
                   // with lazy routes in small chunks of their own (65 initial files
                   // instead of 2). Not for the extension: its pages would all load

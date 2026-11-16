@@ -46,7 +46,7 @@ let composableInitialized = false;
 let web3wallet: Awaited<ReturnType<typeof IWeb3Wallet.init>> | null;
 /**
  * Populated by `initWeb3wallet`. Kept out of the static import graph so the
- * WalletConnect tree stays in its own async chunk (see LAZY_VENDOR_PACKAGES).
+ * WalletConnect tree stays in its own async chunk.
  * Every consumer below runs only after a session exists, so it is always set
  * by the time it's read.
  */

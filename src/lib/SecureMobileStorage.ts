@@ -4,7 +4,10 @@ import type { StorageKeysInput } from '@/types';
 import { composeStorageKeys } from '@/utils';
 import type { IWalletStorage } from './WalletStorage';
 
-SecureStorage.setDefaultKeychainAccess(KeychainAccess.whenUnlocked);
+// Elsewhere there is no keychain, and the call would only load the plugin's web implementation.
+if (Capacitor.isNativePlatform()) {
+  SecureStorage.setDefaultKeychainAccess(KeychainAccess.whenUnlocked);
+}
 
 interface ISecureWalletStorage extends Omit<IWalletStorage, 'get' | 'remove' | 'clear'> {
   get: <T = Record<string, any>>(keys: StorageKeysInput) => Promise<T | null>;
