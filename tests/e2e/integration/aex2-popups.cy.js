@@ -74,6 +74,22 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('contain', props3.app.host);
   });
 
+  // #3678: the badge left a 2px strip of the account card showing
+  it('Connect popup network badge reaches the account card edge', () => {
+    cy.openAex2Popup(POPUP_TYPE_CONNECT)
+      .get('[data-cy=popup-aex2] .account-select-input .option-wrapper')
+      .then(([card]) => {
+        cy.get('[data-cy=popup-aex2] .network-button').should(([badge]) => {
+          const cardBox = card.getBoundingClientRect();
+          const badgeBox = badge.getBoundingClientRect();
+          expect(badgeBox.right).to.be.closeTo(cardBox.right, 0.5);
+          expect(badgeBox.top).to.be.closeTo(cardBox.top, 0.5);
+          expect(badgeBox.bottom).to.be.closeTo(cardBox.bottom, 0.5);
+          expect(badge.scrollWidth, 'network name fits').to.be.at.most(badge.clientWidth);
+        });
+      });
+  });
+
   it('Network switch popup displays the requesting site and the target network', () => {
     const props = STUB_POPUP_PROPS[POPUP_TYPE_NETWORK_SWITCH];
     cy.openAex2Popup(POPUP_TYPE_NETWORK_SWITCH)
