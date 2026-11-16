@@ -98,12 +98,10 @@ export default {
     Avatar,
     Truncate,
   },
-  model: {
-    prop: 'transferData',
-  },
   props: {
     transferData: { type: Object, required: true },
   },
+  emits: ['update:transferData', 'error', 'success'],
   setup() {
     const { activeAccount } = useAccounts();
 
@@ -116,7 +114,7 @@ export default {
       AGGREGATOR_URL,
       AE_CONTRACT_ID,
       PROTOCOLS,
-      note: '',
+      note: this.transferData.note || '',
       noteMaxLength: 280,
     };
   },
@@ -137,11 +135,14 @@ export default {
     },
   },
   watch: {
-    noteError(value) {
-      this.$emit('error', !!value);
+    noteError: {
+      handler(value) {
+        this.$emit('error', !!value);
+      },
+      immediate: true,
     },
     note(val) {
-      this.$emit('input', {
+      this.$emit('update:transferData', {
         ...this.transferData,
         note: val,
       });
