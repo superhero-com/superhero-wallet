@@ -142,6 +142,16 @@ export const RouteLastUsedRoutes = (() => {
       return expectRedirect(to, parent.fullPath);
     }
 
+    function saveRoute(route: RouteLocationNormalized) {
+      if ((route.meta as WalletRouteMeta | undefined)?.notPersist) {
+        WalletStorage.remove(lastRouteKey);
+      } else {
+        // Store fullPath to preserve query and hash parameters across reloads
+        const routeInfo: ILastRouteInfo = { path: route.fullPath, time: dayjs().toISOString() };
+        WalletStorage.set(lastRouteKey, routeInfo);
+      }
+    }
+
     const unbind = router.beforeEach((to, from, next) => {
       unbind();
       if (to.name === ROUTE_INDEX) {
@@ -180,20 +190,15 @@ export const RouteLastUsedRoutes = (() => {
           }
           if (isCurrent()) {
             stopRestoration();
-            router.push(attempt.path).catch(handleUnknownError);
+            await router.push(attempt.path).catch(handleUnknownError);
           }
-          // Do not overwrite the saved destination with its temporary parent.
+          // Save the parent only when it stays shown, e.g. after a canceled reauthentication.
+          if (router.currentRoute.value === to) saveRoute(to);
           return;
         }
         if (!(attempt.waitingForLogin && to.name === ROUTE_INDEX)) stopRestoration();
       }
-      if ((to.meta as WalletRouteMeta | undefined)?.notPersist) {
-        WalletStorage.remove(lastRouteKey);
-      } else {
-        // Store fullPath to preserve query and hash parameters across reloads
-        const routeInfo: ILastRouteInfo = { path: to.fullPath, time: dayjs().toISOString() };
-        WalletStorage.set(lastRouteKey, routeInfo);
-      }
+      saveRoute(to);
     });
 
     return { restoreAfterAuth, waitForLogin };

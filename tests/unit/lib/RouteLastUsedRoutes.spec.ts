@@ -57,23 +57,36 @@ function makeRouter(extraRoutes: RouteRecordRaw[] = [], {
       {
         path: '/login', name: 'login', component: Page, meta: { notPersist: true },
       },
-      // Like the app, unknown paths match a redirecting catch-all.
-      { path: '/:pathMatch(.*)*', redirect: '/' },
+      // Like the app, unknown paths redirect to the not-found page.
+      {
+        path: '/page-not-found',
+        name: 'not-found',
+        component: Page,
+        meta: { ifNotAuth: true, notPersist: true },
+      },
+      { path: '/:pathMatch(.*)*', redirect: { name: 'not-found' } },
       ...extraRoutes,
     ],
   });
   const visited: string[] = [];
+  const failed: string[] = [];
   // Keep controller tests independent of Ionic rendering.
-  function mountPage(route: RouteLocationNormalizedLoaded = router.currentRoute.value) {
-    const record = route.matched[0];
+  function mountPage(
+    route: RouteLocationNormalizedLoaded = router.currentRoute.value,
+    { depth = 0, withOutlet = false } = {},
+  ) {
+    const record = route.matched[depth];
     const element = document.createElement('div');
     element.classList.add('ion-page');
+    if (withOutlet) element.append(document.createElement('ion-router-outlet'));
     document.body.append(element);
     mountedPages.push(element);
     record.instances.default = { $el: element } as typeof record.instances.default;
   }
   router.afterEach((to, _from, failure) => {
-    if (!failure) {
+    if (failure) {
+      failed.push(to.fullPath);
+    } else {
       visited.push(to.fullPath);
       if (mountAutomatically) mountPage();
     }
@@ -91,9 +104,12 @@ function makeRouter(extraRoutes: RouteRecordRaw[] = [], {
     return restoration?.restoreAfterAuth(to);
   });
   return {
-    router, visited, mountPage, auth,
+    router, visited, failed, mountPage, auth,
   };
 }
+
+/** Restoration waits a frame after the parent mounts, so "nothing happened" checks wait too. */
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 function saveRoute(path = '/more/about', age = 0) {
   const saved = { path, time: new Date(NOW.getTime() - age).toISOString() };
@@ -112,6 +128,7 @@ beforeEach(() => {
 afterEach(() => {
   mountedPages.splice(0).forEach((element) => element.remove());
   vi.useRealTimers();
+  expect(handleUnknownError).not.toHaveBeenCalled();
 });
 
 describe('last visited route restoration', () => {
@@ -180,12 +197,14 @@ describe('last visited route restoration', () => {
 
   it('restores the dashboard without pushing it twice', async () => {
     saveRoute('/account');
-    const { router, visited } = makeRouter();
+    const { router, visited, failed } = makeRouter();
 
     await router.push('/');
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/account']);
+    expect(failed).toEqual([]);
   });
 
   it.each([
@@ -205,6 +224,35 @@ describe('last visited route restoration', () => {
     expect(visited).toEqual(['/']);
     expect(storage.set).not.toHaveBeenCalled();
     expect(storage.remove).toHaveBeenCalledExactlyOnceWith('last-route');
+  });
+
+  it.each([
+    ['iOS', { IS_IOS: true }],
+    ['Android', { IS_IOS: false }],
+  ])('opens the not-found page on %s for a saved page that no longer exists', async (_description, flags) => {
+    Object.assign(platform, flags);
+    saveRoute('/removed/page');
+    const { router, visited } = makeRouter();
+
+    await router.push('/');
+    await flushPromises();
+
+    expect(visited).toEqual(['/page-not-found']);
+    expect(storage.remove).toHaveBeenCalledExactlyOnceWith('last-route');
+  });
+
+  it('does not save a navigation that a guard blocks or that repeats the current page', async () => {
+    const { router, visited } = makeRouter([], { beforeAuth: (to) => to.path !== '/more' });
+
+    await router.push('/');
+    await router.push('/more');
+    await router.push('/account');
+    await flushPromises();
+
+    expect(visited).toEqual(['/account']);
+    expect(storage.set).toHaveBeenCalledExactlyOnceWith('last-route', {
+      path: '/account', time: expect.any(String),
+    });
   });
 
   it('restores a route just under ten minutes old', async () => {
@@ -323,6 +371,7 @@ describe('last visited route restoration', () => {
     });
 
     await router.push('/');
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/more', '/login']);
@@ -352,7 +401,7 @@ describe('last visited route restoration', () => {
     const parent = router.currentRoute.value;
     await router.push('/login');
     mountPage(parent);
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/more', '/login']);
@@ -368,11 +417,54 @@ describe('last visited route restoration', () => {
     // Like a deep link to the page already shown: vue-router skips the guards for it
     await router.push('/more');
     mountPage();
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/more']);
     expect(router.currentRoute.value.fullPath).toBe('/more');
+    // The parent is what stays shown, so it is the page to reopen.
+    expect(storage.set).toHaveBeenCalledExactlyOnceWith('last-route', {
+      path: '/more', time: expect.any(String),
+    });
+  });
+
+  const nestedRoutes: RouteRecordRaw[] = [{
+    path: '/nested',
+    component: Page,
+    children: [{
+      path: 'names',
+      component: Page,
+      children: [{ path: '', component: Page }, { path: 'auctions', component: Page }],
+    }],
+  }];
+
+  it('waits for the page of every nested outlet in the parent', async () => {
+    saveRoute('/nested/names/auctions');
+    const { router, visited, mountPage } = makeRouter(nestedRoutes, { mountAutomatically: false });
+
+    await router.push('/');
+    await flushPromises();
+    mountPage(undefined, { depth: 0, withOutlet: true });
+    mountPage(undefined, { depth: 1, withOutlet: true });
+    await nextFrame();
+    await flushPromises();
+    expect(visited).toEqual(['/nested/names']);
+
+    mountPage(undefined, { depth: 2 });
+    await vi.waitFor(() => expect(visited).toEqual(['/nested/names', '/nested/names/auctions']));
+  });
+
+  it('does not wait for the nested pages of a parent without its outlet, like offline', async () => {
+    saveRoute('/nested/names/auctions');
+    const { router, visited, mountPage } = makeRouter(nestedRoutes, { mountAutomatically: false });
+
+    await router.push('/');
+    await flushPromises();
+    mountPage(undefined, { depth: 0, withOutlet: true });
+    mountPage(undefined, { depth: 1 });
+
+    // Well within the 3 s fallback for parents that show no page
+    await vi.waitFor(() => expect(visited).toEqual(['/nested/names', '/nested/names/auctions']));
   });
 
   it('opens the saved page when its parent shows no page', async () => {
@@ -383,7 +475,7 @@ describe('last visited route restoration', () => {
     await router.push('/');
     await flushPromises();
     await vi.advanceTimersByTimeAsync(2900);
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await nextFrame();
     await flushPromises();
     expect(visited).toEqual(['/more']);
 
@@ -516,10 +608,14 @@ describe('last visited route restoration', () => {
     await vi.waitFor(() => expect(destinationGuard).toHaveBeenCalledOnce());
     await flushPromises();
 
+    const shownPath = accepted ? saved.path : '/account';
     expect(visited).toEqual(accepted ? ['/account', saved.path] : ['/account']);
-    expect(router.currentRoute.value.fullPath).toBe(accepted ? saved.path : '/account');
+    expect(router.currentRoute.value.fullPath).toBe(shownPath);
     expect(parentGuard).not.toHaveBeenCalled();
-    if (!accepted) expect(storage.set).not.toHaveBeenCalled();
+    // A canceled reauthentication must not ask again on the next launch.
+    expect(storage.set).toHaveBeenCalledExactlyOnceWith('last-route', {
+      path: shownPath, time: expect.any(String),
+    });
   });
 
   it.each([

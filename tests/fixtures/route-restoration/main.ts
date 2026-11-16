@@ -108,9 +108,7 @@ const router = createRouter({
     { path: '/account', name: ROUTE_ACCOUNT, component: page('account') },
     { path: '/more', component: useSlowParent ? slowParent : page('more') },
     { path: '/more/about', component: page('about') },
-    ...['terms', 'privacy'].map((name) => ({
-      path: `/more/about/${name}`, component: page(name), meta: { ifNotAuth: true },
-    })),
+    { path: '/more/about/terms', component: page('terms'), meta: { ifNotAuth: true } },
     {
       path: '/account-details',
       component: page('account-root', true),
