@@ -69,17 +69,24 @@ function makeRouter(extraRoutes: RouteRecordRaw[] = [], {
     ],
   });
   const visited: string[] = [];
+  const failed: string[] = [];
   // Keep controller tests independent of Ionic rendering.
-  function mountPage(route: RouteLocationNormalizedLoaded = router.currentRoute.value) {
-    const record = route.matched[0];
+  function mountPage(
+    route: RouteLocationNormalizedLoaded = router.currentRoute.value,
+    { depth = 0, withOutlet = false } = {},
+  ) {
+    const record = route.matched[depth];
     const element = document.createElement('div');
     element.classList.add('ion-page');
+    if (withOutlet) element.append(document.createElement('ion-router-outlet'));
     document.body.append(element);
     mountedPages.push(element);
     record.instances.default = { $el: element } as typeof record.instances.default;
   }
   router.afterEach((to, _from, failure) => {
-    if (!failure) {
+    if (failure) {
+      failed.push(to.fullPath);
+    } else {
       visited.push(to.fullPath);
       if (mountAutomatically) mountPage();
     }
@@ -97,9 +104,12 @@ function makeRouter(extraRoutes: RouteRecordRaw[] = [], {
     return restoration?.restoreAfterAuth(to);
   });
   return {
-    router, visited, mountPage, auth,
+    router, visited, failed, mountPage, auth,
   };
 }
+
+/** Restoration waits a frame after the parent mounts, so "nothing happened" checks wait too. */
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 function saveRoute(path = '/more/about', age = 0) {
   const saved = { path, time: new Date(NOW.getTime() - age).toISOString() };
@@ -187,12 +197,14 @@ describe('last visited route restoration', () => {
 
   it('restores the dashboard without pushing it twice', async () => {
     saveRoute('/account');
-    const { router, visited } = makeRouter();
+    const { router, visited, failed } = makeRouter();
 
     await router.push('/');
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/account']);
+    expect(failed).toEqual([]);
   });
 
   it.each([
@@ -359,6 +371,7 @@ describe('last visited route restoration', () => {
     });
 
     await router.push('/');
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/more', '/login']);
@@ -388,7 +401,7 @@ describe('last visited route restoration', () => {
     const parent = router.currentRoute.value;
     await router.push('/login');
     mountPage(parent);
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/more', '/login']);
@@ -404,7 +417,7 @@ describe('last visited route restoration', () => {
     // Like a deep link to the page already shown: vue-router skips the guards for it
     await router.push('/more');
     mountPage();
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await nextFrame();
     await flushPromises();
 
     expect(visited).toEqual(['/more']);
@@ -415,6 +428,45 @@ describe('last visited route restoration', () => {
     });
   });
 
+  const nestedRoutes: RouteRecordRaw[] = [{
+    path: '/nested',
+    component: Page,
+    children: [{
+      path: 'names',
+      component: Page,
+      children: [{ path: '', component: Page }, { path: 'auctions', component: Page }],
+    }],
+  }];
+
+  it('waits for the page of every nested outlet in the parent', async () => {
+    saveRoute('/nested/names/auctions');
+    const { router, visited, mountPage } = makeRouter(nestedRoutes, { mountAutomatically: false });
+
+    await router.push('/');
+    await flushPromises();
+    mountPage(undefined, { depth: 0, withOutlet: true });
+    mountPage(undefined, { depth: 1, withOutlet: true });
+    await nextFrame();
+    await flushPromises();
+    expect(visited).toEqual(['/nested/names']);
+
+    mountPage(undefined, { depth: 2 });
+    await vi.waitFor(() => expect(visited).toEqual(['/nested/names', '/nested/names/auctions']));
+  });
+
+  it('does not wait for the nested pages of a parent without its outlet, like offline', async () => {
+    saveRoute('/nested/names/auctions');
+    const { router, visited, mountPage } = makeRouter(nestedRoutes, { mountAutomatically: false });
+
+    await router.push('/');
+    await flushPromises();
+    mountPage(undefined, { depth: 0, withOutlet: true });
+    mountPage(undefined, { depth: 1 });
+
+    // Well within the 3 s fallback for parents that show no page
+    await vi.waitFor(() => expect(visited).toEqual(['/nested/names', '/nested/names/auctions']));
+  });
+
   it('opens the saved page when its parent shows no page', async () => {
     vi.useFakeTimers({ now: NOW, toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     saveRoute();
@@ -423,7 +475,7 @@ describe('last visited route restoration', () => {
     await router.push('/');
     await flushPromises();
     await vi.advanceTimersByTimeAsync(2900);
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await nextFrame();
     await flushPromises();
     expect(visited).toEqual(['/more']);
 

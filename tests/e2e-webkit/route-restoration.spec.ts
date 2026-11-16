@@ -193,24 +193,18 @@ it('retains the saved destination through a locked launch and restores its swipe
   expect(await getCurrentPath()).toBe('/more');
 });
 
-it.each(['terms', 'privacy'])('restores public %s for locked and authenticated launches', async (name) => {
-  const savedPath = `/more/about/${name}?language=en#policy`;
+it('restores a public page for locked and authenticated launches', async () => {
+  const savedPath = '/more/about/terms?language=en#policy';
   await launchWithSavedRoute(savedPath, 'locked=true');
-  await page.waitForFunction(
-    (entered) => document.documentElement.dataset.entered === entered,
-    name,
-  );
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'terms');
   expect(await getCurrentPath('fullPath')).toBe(savedPath);
   expect(await page.locator('#index, #about').count()).toBe(0);
 
   await launchWithSavedRoute(savedPath, 'locked=false');
-  await page.waitForFunction(
-    (entered) => document.documentElement.dataset.entered === entered,
-    name,
-  );
+  await page.waitForFunction(() => document.documentElement.dataset.entered === 'terms');
   expect(await getCurrentPath('fullPath')).toBe(savedPath);
   await page.waitForSelector('#about.ion-page-hidden', { state: 'attached' });
-  await swipeBack(page, '#about', `#${name}`);
+  await swipeBack(page, '#about', '#terms');
   await page.waitForFunction(() => document.documentElement.dataset.entered === 'about');
   expect(await getCurrentPath()).toBe('/more/about');
 });

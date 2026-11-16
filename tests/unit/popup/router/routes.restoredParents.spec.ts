@@ -47,17 +47,20 @@ async function getRestoredParent(path: string) {
 it('restores every saved page over its parent, skipping only the guarded seed phrase parent', async () => {
   const dashboard = makeRouter().resolve({ name: ROUTE_ACCOUNT }).path;
   const withoutParent: string[] = [];
+  const topLevelElsewhere: string[] = [];
   const nestedOverDashboard: string[] = [];
   await listSavedPages().reduce(async (previous, path) => {
     await previous;
     const parent = await getRestoredParent(path);
+    const isTopLevel = path.split('/').filter(Boolean).length === 1;
     if (!parent) withoutParent.push(path);
-    else if (parent === dashboard && path.split('/').filter(Boolean).length > 1) {
-      nestedOverDashboard.push(path);
-    }
+    else if (isTopLevel && parent !== dashboard) topLevelElsewhere.push(path);
+    else if (!isTopLevel && parent === dashboard) nestedOverDashboard.push(path);
   }, Promise.resolve());
 
   expect(withoutParent).toEqual([dashboard]);
+  // Like the More tab, top-level pages open over the dashboard.
+  expect(topLevelElsewhere).toEqual([]);
   // Its parent asks for the password again.
   expect(nestedOverDashboard).toEqual(['/more/settings/seed-phrase/details/verify']);
 });
