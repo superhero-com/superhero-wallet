@@ -152,21 +152,21 @@ export const RouteLastUsedRoutes = (() => {
       }
     }
 
-    const unbind = router.beforeEach((to, from, next) => {
+    const unbind = router.beforeEach((to) => {
       unbind();
       if (to.name === ROUTE_INDEX) {
         const { path, time } = WalletStorage.get<ILastRouteInfo>(lastRouteKey) || {};
         if (path && time && dayjs().isBefore(dayjs(time).add(10, 'minutes'))) {
           if (IS_MOBILE_APP && IS_IOS) {
             restoration = { path: router.resolve(path).fullPath };
-            return next(expectRedirect(to, restoration.path));
+            return expectRedirect(to, restoration.path);
           }
           stopRestoration();
-          return next(path);
+          return path;
         }
       }
       stopRestoration();
-      return next();
+      return true;
     });
 
     router.afterEach(async (to, _from, failure) => {

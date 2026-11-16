@@ -68,7 +68,7 @@ const routeRestoration = RouteLastUsedRoutes.init(
   () => ProtocolAdapterFactory.getAdapter(activeAccount.value.protocol).hasTokensSupport,
 );
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   let popupProps: IPopupProps | null = null;
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND && !Object.keys(to.params).length) {
@@ -83,20 +83,15 @@ router.beforeEach(async (to, from, next) => {
 
   if (!isLoggedIn.value) {
     if (meta?.ifNotAuthOnly || meta?.ifNotAuth) {
-      next();
-    } else {
-      setLoginTargetLocation(routeRestoration?.waitForLogin(to) ?? to);
-      next({ name: ROUTE_INDEX });
+      return true;
     }
-    return;
+    setLoginTargetLocation(routeRestoration?.waitForLogin(to) ?? to);
+    return { name: ROUTE_INDEX };
   }
 
-  if (to.name === ROUTE_APPS_BROWSER) {
-    // In-app browser is mobile-only
-    if (!IS_MOBILE_APP && !UNFINISHED_FEATURES) {
-      next({ name: ROUTE_NOT_FOUND });
-      return;
-    }
+  // In-app browser is mobile-only
+  if (to.name === ROUTE_APPS_BROWSER && !IS_MOBILE_APP && !UNFINISHED_FEATURES) {
+    return { name: ROUTE_NOT_FOUND };
   }
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
@@ -110,26 +105,20 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_UNSAFE_SIGN]: ROUTE_POPUP_UNSAFE_SIGN,
     }[POPUP_TYPE];
 
-    if (!Object.keys(to.params).length) {
-      if (!popupProps?.app) {
-        next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
-        return;
-      }
+    if (!Object.keys(to.params).length && !popupProps?.app) {
+      return { name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } };
     }
 
     if (name !== to.name) {
       setPopupProps(popupProps);
-      next({ name });
-      return;
+      return { name };
     }
   }
 
-  if (meta?.ifNotAuthOnly) next({ name: ROUTE_ACCOUNT });
-  else {
-    const parentPath = routeRestoration?.restoreAfterAuth(to);
-    if (parentPath) next(parentPath);
-    else next();
+  if (meta?.ifNotAuthOnly) {
+    return { name: ROUTE_ACCOUNT };
   }
+  return routeRestoration?.restoreAfterAuth(to) || true;
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));

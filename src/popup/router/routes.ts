@@ -310,13 +310,7 @@ export const routes: WalletAppRouteConfig[] = [
          */
         path: 'coins/:id?',
         component: AssetDetails,
-        beforeEnter: (to, from, next) => {
-          if (!to.params.id) {
-            next({ name: ROUTE_MULTISIG_ACCOUNT });
-            return;
-          }
-          next();
-        },
+        beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_MULTISIG_ACCOUNT }),
         children: [
           {
             name: ROUTE_MULTISIG_COIN,
@@ -444,19 +438,15 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings/seed-phrase/details',
     name: ROUTE_SEED_PHRASE_DETAILS,
     component: () => import('../pages/SeedPhraseDetailsSettings.vue'),
-    beforeEnter: async (_to, from, next) => {
+    beforeEnter: async (_to, from) => {
       try {
         await requireSeedPhraseReauth();
-        next();
+        return true;
       } catch {
-        // `next(false)` would leave the router with no matched route (and thus a blank
+        // Aborting would leave the router with no matched route (and thus a blank
         // page) when this route is entered directly, e.g. on a hard refresh, since there
         // is no previous in-app route to fall back to.
-        if (from.matched.length) {
-          next(false);
-        } else {
-          next({ name: ROUTE_ACCOUNT });
-        }
+        return from.matched.length ? false : { name: ROUTE_ACCOUNT };
       }
     },
   },
@@ -464,17 +454,13 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings/seed-phrase/details/verify',
     name: ROUTE_SEED_PHRASE_VERIFY,
     component: () => import('../pages/SeedPhraseVerifySettings.vue'),
-    beforeEnter: async (_to, from, next) => {
+    beforeEnter: async (_to, from) => {
       try {
         await requireSeedPhraseReauth();
-        next();
+        return true;
       } catch {
         // See comment in the `ROUTE_SEED_PHRASE_DETAILS` guard above.
-        if (from.matched.length) {
-          next(false);
-        } else {
-          next({ name: ROUTE_ACCOUNT });
-        }
+        return from.matched.length ? false : { name: ROUTE_ACCOUNT };
       }
     },
   },
@@ -652,13 +638,7 @@ export const routes: WalletAppRouteConfig[] = [
     // see https://github.com/vuejs/router/issues/845
     path: '/coins/:id?',
     component: AssetDetails,
-    beforeEnter: (to, from, next) => {
-      if (!to.params.id) {
-        next({ name: ROUTE_ACCOUNT });
-        return;
-      }
-      next();
-    },
+    beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_ACCOUNT }),
     children: [
       {
         name: ROUTE_COIN,
@@ -686,13 +666,7 @@ export const routes: WalletAppRouteConfig[] = [
     // see https://github.com/vuejs/router/issues/845
     path: '/tokens/:id?',
     component: AssetDetails,
-    beforeEnter: (to, from, next) => {
-      if (!to.params.id) {
-        next({ name: ROUTE_ACCOUNT });
-        return;
-      }
-      next();
-    },
+    beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_ACCOUNT }),
     children: [
       {
         name: ROUTE_TOKEN,
@@ -752,13 +726,12 @@ export const routes: WalletAppRouteConfig[] = [
       useDefaultHardwareBackButton: true,
       notPersist: true,
     },
-    beforeEnter: async (to, from, next) => {
+    beforeEnter: async (to) => {
       const { connect, wcSession } = useWalletConnect();
       const uriParam = to.query.uri as string | undefined;
 
       if (!uriParam) {
-        next({ name: ROUTE_NOT_FOUND });
-        return;
+        return { name: ROUTE_NOT_FOUND };
       }
 
       try {
@@ -769,7 +742,7 @@ export const routes: WalletAppRouteConfig[] = [
         // Let the error modal from connect handle user feedback
       }
 
-      next({ name: ROUTE_ACCOUNT });
+      return { name: ROUTE_ACCOUNT };
     },
   },
   {
