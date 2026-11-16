@@ -52,6 +52,7 @@ import {
   SEED_LENGTH,
   TX_FUNCTIONS,
   TX_FUNCTIONS_TYPE_DEX,
+  TX_RETURN_TYPE_OK,
   TX_TAGS_SUPPORTED,
 } from '../config';
 
@@ -289,6 +290,24 @@ export function getTxTag({ tag, type }: ITx = {} as any): Tag | null {
     return Tag[type as TxType];
   }
   return null;
+}
+
+export interface TransactionExecutionResult {
+  returnType?: string;
+  return?: ITx['return'];
+}
+
+export function getTransactionExecutionResult(tx?: ITx): TransactionExecutionResult | undefined {
+  let currentTx = tx;
+  while (currentTx) {
+    if (currentTx.returnType && currentTx.returnType !== TX_RETURN_TYPE_OK) {
+      return currentTx;
+    }
+    const tag = getTxTag(currentTx);
+    if (tag !== Tag.PayingForTx && tag !== Tag.GaMetaTx) break;
+    currentTx = currentTx.tx?.tx as ITx | undefined;
+  }
+  return tx;
 }
 
 export function isInsufficientBalanceError(error: any) {

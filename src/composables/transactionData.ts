@@ -33,6 +33,7 @@ import {
   aettosToAe,
   getInnerTransaction,
   getOwnershipStatus,
+  getTransactionExecutionResult,
   getTransactionTokenInfoResolver,
   getTxDirection,
   getTxFunctionParsed,
@@ -82,6 +83,7 @@ export function useTransactionData({
 
   const protocol = computed(() => transaction.value?.protocol || PROTOCOLS.aeternity);
   const outerTx = computed(() => transaction.value?.tx);
+  const executionResult = computed(() => getTransactionExecutionResult(outerTx.value));
   const innerTx = computed(() => outerTx.value ? getInnerTransaction(outerTx.value) : undefined);
   const outerTxTag = computed(() => outerTx.value ? getTxTag(outerTx.value) : null);
   const innerTxTag = computed(() => innerTx.value ? getTxTag(innerTx.value) : null);
@@ -225,7 +227,7 @@ export function useTransactionData({
 
   const isErrorTransaction = computed(
     (): boolean => {
-      const { returnType } = outerTx.value || {};
+      const { returnType } = executionResult.value || {};
       return !!(returnType && returnType !== TX_RETURN_TYPE_OK);
     },
   );
@@ -384,6 +386,7 @@ export function useTransactionData({
     txFunctionRaw,
     isAex9,
     isErrorTransaction,
+    executionResult,
 
     isTokenSale,
     isTokenSaleBuy,

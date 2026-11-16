@@ -6,6 +6,7 @@
     :amount-total="amountTotal"
     :fee="transactionFee"
     :is-error-transaction="isErrorTransaction"
+    :execution-result="executionResult"
     :payload="transaction ? getTransactionPayload(transaction) : ''"
     :hide-amount-total="(
       isDex
@@ -288,6 +289,7 @@ export default defineComponent({
       direction,
       isAex9,
       isErrorTransaction,
+      executionResult,
       isDex,
       isAllowance,
       isDexPool,
@@ -445,6 +447,7 @@ export default defineComponent({
       hideFiat,
       isAex9,
       isErrorTransaction,
+      executionResult,
       isDex,
       isAllowance,
       isDexPool,
