@@ -17,7 +17,7 @@
         :validation-rules="{
           account_address: [protocol, activeNetwork.type],
         }"
-        @openQrModal="scanTransferQrCode()"
+        @open-qr-modal="scanTransferQrCode()"
       />
     </template>
 
@@ -125,9 +125,6 @@ export default defineComponent({
     TransferSendAmount,
     TransferSendRecipient,
     TransferSendFormBase,
-  },
-  model: {
-    prop: 'transferData',
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },

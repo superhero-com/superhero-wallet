@@ -152,7 +152,7 @@
           :label="$t('transaction.fee')"
           type="number"
           :message="feeInputMessage"
-          @update:modelValue="handleFeeInput"
+          @update:model-value="handleFeeInput"
         />
 
         <InputField
@@ -162,7 +162,7 @@
           type="number"
           integer
           :message="nonceInputMessage"
-          @update:modelValue="handleNonceInput"
+          @update:model-value="handleNonceInput"
         />
       </AccordionItem>
     </template>
@@ -248,9 +248,6 @@ export default defineComponent({
     TransferReviewBase,
     AccountItem,
     BtnHelp,
-  },
-  model: {
-    prop: 'transferData',
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },

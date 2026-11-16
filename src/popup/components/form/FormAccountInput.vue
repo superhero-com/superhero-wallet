@@ -9,7 +9,7 @@
     :disable-label-focus="isSingleRecipient"
     auto-height
     enter-submit
-    @update:modelValue="($event: any) => inputValue = $event"
+    @update:model-value="($event: any) => inputValue = $event"
     @submit="handleEnter"
   >
     <template

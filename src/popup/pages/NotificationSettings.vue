@@ -15,7 +15,7 @@
           :disabled="type === NOTIFICATION_TYPES.wallet"
           :model-value="isNotificationTypeAllowed(type)"
           :label="label"
-          @update:modelValue="toggleNotificationsSetting(type)"
+          @update:model-value="toggleNotificationsSetting(type)"
         />
       </div>
     </div>

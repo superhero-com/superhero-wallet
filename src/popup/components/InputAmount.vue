@@ -8,7 +8,7 @@
     :label="label"
     :message="$attrs.message"
     :blink-on-change="blinkOnChange"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
     <template
       v-for="(index, name) in $slots"

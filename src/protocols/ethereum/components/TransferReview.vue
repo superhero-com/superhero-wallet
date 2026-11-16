@@ -59,9 +59,6 @@ export default defineComponent({
     DetailsItem,
     TransferReviewBase,
   },
-  model: {
-    prop: 'transferData',
-  },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     protocol: { type: String as PropType<Protocol>, required: true },

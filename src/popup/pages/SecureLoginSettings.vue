@@ -15,7 +15,7 @@
               :label="$t('pages.secureLogin.enableSecureLogin')"
               :model-value="isBiometricLoginEnabled"
               :disabled="!isDeviceAuthenticationAvailable"
-              @update:modelValue="setBiometricLoginEnabled"
+              @update:model-value="setBiometricLoginEnabled"
             />
           </div>
         </template>
@@ -30,7 +30,7 @@
               :model-value="!isUsingDefaultPassword"
               :disabled="isAuthenticating"
               data-cy="password-protection"
-              @update:modelValue="setPasswordEnabled"
+              @update:model-value="setPasswordEnabled"
             />
           </div>
         </template>

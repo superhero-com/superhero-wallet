@@ -14,7 +14,7 @@
       :label="$t('modals.send.recipientLabel')"
       :placeholder="placeholder"
       :message="addressMessage"
-      @update:modelValue="$emit('update:modelValue', $event)"
+      @update:model-value="$emit('update:modelValue', $event)"
       @help="showRecipientHelp()"
       @blur="handleBlur($event, true)"
     >

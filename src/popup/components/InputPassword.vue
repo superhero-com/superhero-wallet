@@ -4,7 +4,7 @@
     v-bind="$attrs"
     :model-value="modelValue"
     :type="isPasswordVisible ? 'text' : 'password'"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
     <template #after>
       <component

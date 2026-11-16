@@ -83,7 +83,7 @@
           token_to_an_address: [!isAe],
           airgap_to_an_address: isActiveAccountAirGap,
         }"
-        @openQrModal="scanTransferQrCode()"
+        @open-qr-modal="scanTransferQrCode()"
       />
     </template>
 
@@ -241,9 +241,6 @@ export default defineComponent({
     ModalHeader,
     AccountItem,
     FormSelect,
-  },
-  model: {
-    prop: 'transferData',
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },

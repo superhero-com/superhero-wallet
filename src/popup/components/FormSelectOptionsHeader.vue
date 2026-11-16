@@ -6,7 +6,7 @@
       :value="value"
       :placeholder="searchPlaceholder || $t('common.search')"
       class="search-field"
-      @update:modelValue="filterOptions"
+      @update:model-value="filterOptions"
     />
   </div>
 </template>

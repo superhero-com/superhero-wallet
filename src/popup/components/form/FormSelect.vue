@@ -50,9 +50,6 @@ export default defineComponent({
     ChevronDownIcon,
     InputField,
   },
-  model: {
-    event: 'select',
-  },
   props: {
     modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },

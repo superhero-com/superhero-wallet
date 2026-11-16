@@ -17,8 +17,7 @@ module.exports = {
   },
   extends: [
     'plugin:@intlify/vue-i18n/recommended-legacy',
-    // v9's `recommended`; v10 gave that name to the Vue 3 rule set
-    'plugin:vue/vue2-recommended',
+    'plugin:vue/recommended',
     '@vue/eslint-config-airbnb',
     '@vue/eslint-config-typescript',
   ],
@@ -65,9 +64,10 @@ module.exports = {
     '@intlify/vue-i18n/no-missing-keys': 'off',
     '@intlify/vue-i18n/no-raw-text': 'off',
     'vue/multi-word-component-names': 'off',
-    'vue/no-v-model-argument': 'off',
     'vue/no-reserved-component-names': 'off',
     'vue/singleline-html-element-content-newline': 'off',
+    // an undeclared event's listener also falls through to the root
+    'vue/require-explicit-emits': 'error',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true, caughtErrors: 'none' }],
     '@stylistic/member-delimiter-style': ['error'],
 
