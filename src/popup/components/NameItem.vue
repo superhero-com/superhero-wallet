@@ -75,6 +75,8 @@
       <BtnPlain
         v-if="!nameEntry.pending"
         class="btn-toggle"
+        :aria-label="$t('a11y.nameDetails', { name: nameEntry.name })"
+        :aria-expanded="expand"
         @click="onExpandCollapse"
       >
         <ChevronDownIcon class="icon" :class="{ rotated: expand }" />
@@ -102,6 +104,7 @@
           <template #after>
             <BtnPlain
               v-show="newPointer.length"
+              :aria-label="$t('a11y.saveNamePointer', { name: nameEntry.name })"
               @click="setPointer"
             >
               <Save class="input-address-icon" />
@@ -121,6 +124,7 @@
           <template #after>
             <BtnPlain
               v-show="transferAddress.length"
+              :aria-label="$t('a11y.transferName', { name: nameEntry.name })"
               @click="transferName"
             >
               <Save class="input-address-icon" />

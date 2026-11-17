@@ -1,9 +1,14 @@
 import { mount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
 import Modal from '../../../../src/popup/components/Modal.vue';
+import en from '../../../../src/popup/locales/en-US.json';
 
 describe('Modal', () => {
   it('should close on button close click', async () => {
     const wrapper = mount(Modal, {
+      global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: { en } })],
+      },
       props: {
         show: true,
         hasCloseButton: true,

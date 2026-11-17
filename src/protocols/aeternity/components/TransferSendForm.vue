@@ -144,6 +144,7 @@
           <BtnIcon
             size="sm"
             dimmed
+            :aria-label="$t('a11y.editPayload')"
             :icon="EditIcon"
             @click="editPayload"
           />
@@ -151,6 +152,7 @@
             size="sm"
             icon-variant="danger"
             dimmed
+            :aria-label="$t('a11y.removePayload')"
             :icon="DeleteIcon"
             @click="clearPayload"
           />

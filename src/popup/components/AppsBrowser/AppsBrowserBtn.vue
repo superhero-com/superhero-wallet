@@ -2,6 +2,7 @@
   <BtnIcon
     class="open-apps-browser-button"
     data-cy="apps-browser-btn"
+    :aria-label="$t('pages.titles.appsBrowser')"
     :icon="GlobeSmallIcon"
     :to="{ name: ROUTE_APPS_BROWSER }"
     dimmed

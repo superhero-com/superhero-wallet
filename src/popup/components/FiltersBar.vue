@@ -17,6 +17,7 @@
           v-if="showBookmark && (hasBookmarkedEntries || !isSelector)"
           :is-active="accountSelectType === ACCOUNT_SELECT_TYPE_FILTER.bookmarked"
           data-cy="bookmarked-filter"
+          :aria-label="$t('pages.addressBook.entry.bookmarked')"
           @click="() => setAccountSelectType(ACCOUNT_SELECT_TYPE_FILTER.bookmarked, !isSelector)"
         >
           <IconWrapper

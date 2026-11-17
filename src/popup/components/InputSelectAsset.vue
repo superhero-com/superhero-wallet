@@ -2,6 +2,7 @@
   <BtnPlain
     class="select-asset"
     :class="{ focused, disabled }"
+    :aria-label="displayToken ? undefined : $t('a11y.selectAsset')"
     @click="openAssetSelector"
   >
     {{ displayToken }}

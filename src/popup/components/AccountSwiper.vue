@@ -49,6 +49,7 @@
             v-if="!isSwiping && currentIdx !== 0"
             class="nav-btn prev"
             data-cy="account-card-btn-prev"
+            :aria-label="$t('a11y.previousAccount')"
             @click.prevent="setCurrentSlide(currentIdx - 1)"
           >
             <ChevronIcon />
@@ -60,6 +61,7 @@
             v-if="!isSwiping && currentIdx < addressList.length"
             class="nav-btn next"
             data-cy="account-card-btn-next"
+            :aria-label="$t('a11y.nextAccount')"
             @click.prevent="setCurrentSlide(currentIdx + 1)"
           >
             <ChevronIcon />

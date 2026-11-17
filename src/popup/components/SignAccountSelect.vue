@@ -28,6 +28,7 @@
             <ChevronDown class="chevron" />
           </template>
         </AccountSelectOptionsItem>
+        <span v-else>{{ $t('modals.signAccountSelect.selectAccount') }}</span>
       </template>
     </FormSelect>
 
