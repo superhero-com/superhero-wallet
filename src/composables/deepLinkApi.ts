@@ -46,7 +46,14 @@ function applyTemplateParams(template: string, templateParams: Record<string, st
 
 function openCallbackUrl(callbackUrl: string) {
   if (!IS_MOBILE_APP) {
-    window.open(callbackUrl, '_self');
+    // In Firefox and Safari `window.open(url, '_self')` makes the window its own opener,
+    // so a dapp's callback page in a popup couldn't reach the dapp. Other windows keep
+    // `_self`, as `location.assign` can replace the history entry instead of adding one.
+    if (window.opener && window.opener !== window) {
+      window.location.assign(callbackUrl);
+    } else {
+      window.open(callbackUrl, '_self');
+    }
     return;
   }
 
