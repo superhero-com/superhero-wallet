@@ -9,7 +9,7 @@ import {
 } from 'vitest';
 import { webkit, type Browser, type Page } from 'playwright-core';
 import { createServer, type ViteDevServer } from 'vite';
-import { startEdgeDrag, swipeBack } from './swipe';
+import { cancelEdgeDrag, startEdgeDrag, swipeBack } from './swipe';
 
 const ROOT = path.resolve(__dirname, '../..');
 const FIXTURE = path.join(ROOT, 'tests/fixtures/route-restoration');
@@ -102,8 +102,7 @@ it('restores an iOS page with working canceled and completed swipe-back gestures
   expect(await page.locator('#more.ion-page-hidden').count()).toBe(1);
 
   await startEdgeDrag(page, '#more', '#about');
-  await page.mouse.move(1, 400, { steps: 8 });
-  await page.mouse.up();
+  await cancelEdgeDrag(page);
   await page.waitForSelector('#more.ion-page-hidden', { state: 'attached' });
   expect(await getCurrentPath('fullPath')).toBe(SAVED_PATH);
   expect(await page.locator('#about:not(.ion-page-hidden)').count()).toBe(1);
