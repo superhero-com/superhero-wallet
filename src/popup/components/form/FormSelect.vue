@@ -20,11 +20,21 @@
     v-else
     v-bind="$attrs"
     class="form-select"
-    @click="openOptionsModal"
+    :readonly="readonly"
   >
-    <div class="input-field-text-wrapper">
-      {{ currentText }}
-    </div>
+    <template #default="{ inputId, labelId }">
+      <!-- The field labels click this button, so a label click opens the options once -->
+      <button
+        :id="inputId"
+        type="button"
+        class="input-field-text-wrapper"
+        :aria-labelledby="`${labelId} ${inputId}`"
+        :disabled="readonly"
+        @click="openOptionsModal"
+      >
+        {{ currentText }}
+      </button>
+    </template>
 
     <template #after>
       <ChevronDownIcon class="arrow-icon" />
@@ -68,6 +78,7 @@ export default defineComponent({
      * Decides if the dropdown arrow is visible
      */
     hideArrow: Boolean,
+    readonly: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
@@ -135,6 +146,18 @@ export default defineComponent({
 
   .input-field-text-wrapper {
     flex-grow: 1;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    line-height: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: inherit;
+  }
+
+  &:has(.input-field-text-wrapper:focus-visible) {
+    --color-border: #{$color-primary};
   }
 }
 </style>

@@ -6,7 +6,6 @@
     :resizable="false"
     :placeholder="placeholder"
     :message="message"
-    :disable-label-focus="isSingleRecipient"
     auto-height
     enter-submit
     @update:model-value="($event: any) => inputValue = $event"
