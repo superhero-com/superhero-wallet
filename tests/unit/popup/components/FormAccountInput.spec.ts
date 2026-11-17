@@ -1,5 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, type Ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import en from '@/popup/locales/en-US.json';
 import { PROTOCOLS } from '@/constants';
@@ -9,17 +9,20 @@ import FormAccountInput from '@/popup/components/form/FormAccountInput.vue';
 const ALICE = 'ak_2dATVcZ9KJU5a8hdsVtTv21pYiGWiPbmVcU1Pz72FFqpk9pSRR';
 const ALICIA = 'ak_2swhLkgBPeeADxVTAVCJnZLY5NZtCFiM93JxsEaMuC59euuFRQ';
 
-const { addressBookFiltered } = vi.hoisted(() => ({
+const mocks = vi.hoisted(() => ({
   addressBookFiltered: { value: [] as IAddressBookEntry[] },
+  allAccounts: null as unknown as Ref<IAddressBookEntry[]>,
 }));
+const { addressBookFiltered } = mocks;
 
 vi.mock('@/composables', async (importOriginal) => {
   const vue = await import('vue');
+  mocks.allAccounts = vue.ref([]);
   return {
     ...(await importOriginal<typeof import('@/composables')>()),
     useAddressBook: () => ({ addressBookFiltered, protocolFilter: vue.ref(null) }),
     useNetworks: () => ({ activeNetwork: vue.ref({ type: 'mainnet' }) }),
-    useAccountSelector: () => ({ allAccounts: vue.ref([]) }),
+    useAccountSelector: () => ({ allAccounts: mocks.allAccounts }),
   };
 });
 
@@ -37,6 +40,7 @@ vi.stubGlobal('ResizeObserver', class {
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 
 beforeEach(() => {
+  mocks.allAccounts.value = [];
   addressBookFiltered.value = [
     {
       name: 'Alice', address: ALICE, isBookmarked: false, protocol: PROTOCOLS.aeternity,
@@ -183,5 +187,52 @@ describe('FormAccountInput suggestions', () => {
     await nextTick();
 
     expect(wrapper.get('.dropdown-wrapper').classes()).not.toContain('open');
+  });
+});
+
+describe('FormAccountInput typed text', () => {
+  it('keeps a half-typed recipient when the account list refreshes', async () => {
+    const { wrapper } = await mountWithOpenList();
+
+    mocks.allAccounts.value = [...addressBookFiltered.value];
+    await flushPromises();
+
+    expect((wrapper.get('textarea').element as HTMLTextAreaElement).value).toBe('Ali');
+  });
+
+  it('keeps a half-typed vault signer when the account list refreshes', async () => {
+    const signer = ref<string>();
+    // Bound as in MultisigVaultCreate. The placeholder makes the parent update it on a refresh.
+    const wrapper = mount({
+      components: { FormAccountInput },
+      template: `
+        <FormAccountInput
+          :model-value="signer ? [signer] : undefined"
+          :placeholder="String(accounts.length)"
+          :protocol="protocol"
+          single-default-format
+          @update:model-value="signer = $event[0]"
+        />
+      `,
+      setup: () => ({ signer, accounts: mocks.allAccounts, protocol: PROTOCOLS.aeternity }),
+    }, {
+      attachTo: document.body,
+      global: { plugins: [i18n], stubs: { Avatar: true } },
+    });
+    await wrapper.get('textarea').setValue('Ali');
+
+    mocks.allAccounts.value = [...addressBookFiltered.value];
+    await flushPromises();
+
+    expect((wrapper.get('textarea').element as HTMLTextAreaElement).value).toBe('Ali');
+  });
+
+  it('clears the typed text when the recipients are reset', async () => {
+    const { wrapper, value } = await mountWithOpenList();
+
+    value.value = [];
+    await flushPromises();
+
+    expect((wrapper.get('textarea').element as HTMLTextAreaElement).value).toBe('');
   });
 });

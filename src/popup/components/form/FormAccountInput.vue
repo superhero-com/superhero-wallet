@@ -350,7 +350,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      watch(() => [props.modelValue, allAccounts.value], () => {
+      watch(() => [props.modelValue, allAccounts.value] as const, (_, previous) => {
         // Check and remove duplicates
         if (new Set(props.modelValue).size !== props.modelValue.length) {
           emit('update:modelValue', props.modelValue.filter(removeDuplicates));
@@ -380,7 +380,10 @@ export default defineComponent({
             inputValue.value = selectedAddresses.value[0].address;
           }
         } else {
-          inputValue.value = '';
+          // Only for new recipients: the account list refreshes while one is being typed
+          if (props.modelValue !== previous?.[0]) {
+            inputValue.value = '';
+          }
           selectedAddresses.value = [];
         }
       }, { immediate: true });
