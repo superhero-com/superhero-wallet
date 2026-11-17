@@ -76,8 +76,10 @@
         <BackToTop sticky />
       </div>
 
+      <!-- Keyboard users close with Escape or the close button -->
       <div
         class="cover"
+        aria-hidden="true"
         @click="handleClose"
       />
     </div>
@@ -91,6 +93,7 @@ import {
   ref,
   onBeforeUnmount,
   onMounted,
+  watch,
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
 
@@ -109,6 +112,9 @@ function isTextField(el: Element | null): el is HTMLInputElement | HTMLTextAreaE
   return el instanceof HTMLTextAreaElement
     || (el instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.includes(el.type));
 }
+
+/** Shown modals in opening order; Escape closes only the last one. */
+const shownModals: symbol[] = [];
 
 export default defineComponent({
   components: {
@@ -154,6 +160,44 @@ export default defineComponent({
       emit('close');
     }
 
+    const modalKey = Symbol('modal');
+
+    function forgetModal() {
+      const idx = shownModals.indexOf(modalKey);
+      if (idx > -1) {
+        shownModals.splice(idx, 1);
+      }
+    }
+
+    // `show` turns false before the leave transition, while the modal is still mounted
+    watch(
+      () => props.show,
+      (show) => {
+        if (!show) {
+          forgetModal();
+        } else if (!shownModals.includes(modalKey)) {
+          shownModals.push(modalKey);
+        }
+      },
+      { immediate: true },
+    );
+
+    function handleKeydown(event: KeyboardEvent) {
+      if (
+        event.key !== 'Escape'
+        || event.defaultPrevented
+        || event.isComposing
+        || event.repeat
+        || shownModals.at(-1) !== modalKey
+        // Stands in for the close button or the backdrop, which full-screen modals cover
+        || (props.fullScreen && !props.hasCloseButton)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      handleClose();
+    }
+
     /**
      * Native focus scrolling ignores the sticky footer, and the iOS keyboard
      * shrinks the view only after the field is focused.
@@ -196,6 +240,7 @@ export default defineComponent({
         initViewport(scrollElem.value!);
       }
       document.addEventListener('ionBackButton', onBackButtonHandler);
+      document.addEventListener('keydown', handleKeydown);
       window.addEventListener('resize', scheduleFocusedFieldReveal);
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
@@ -208,6 +253,8 @@ export default defineComponent({
         initViewport(undefined);
       }
       document.removeEventListener('ionBackButton', onBackButtonHandler);
+      document.removeEventListener('keydown', handleKeydown);
+      forgetModal();
       window.removeEventListener('resize', scheduleFocusedFieldReveal);
       if (revealFrame !== undefined) {
         cancelAnimationFrame(revealFrame);
