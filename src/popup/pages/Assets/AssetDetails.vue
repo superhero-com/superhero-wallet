@@ -56,6 +56,7 @@
             :text="$t('common.swap')"
             :icon="SwapIcon"
             :href="AE_DEX_URL"
+            in-app-browser
           />
         </div>
 

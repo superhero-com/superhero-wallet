@@ -56,6 +56,8 @@ export const btnBaseProps = {
   hollow: Boolean,
   outlined: Boolean,
   selected: Boolean,
+  /** On mobile, opens `href` in the in-app browser instead of the system one. */
+  inAppBrowser: Boolean,
 };
 
 export default defineComponent({
@@ -72,7 +74,13 @@ export default defineComponent({
     async function onClick(event: any) {
       if (IS_MOBILE_APP && props.href) {
         event.preventDefault();
-        window.open(props.href, '_system');
+        if (props.inAppBrowser) {
+          // BtnBase is in the main bundle, the browser is only needed on mobile.
+          const { useInAppBrowser } = await import('@/composables/inAppBrowser');
+          useInAppBrowser().openInAppBrowser(props.href);
+        } else {
+          window.open(props.href, '_system');
+        }
       }
     }
 
