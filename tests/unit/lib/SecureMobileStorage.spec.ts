@@ -101,3 +101,32 @@ describe('SecureMobileStorage creation on Android', () => {
       .toHaveBeenCalledWith('sh-wallet_mobile-data-key', JSON.stringify('new-key'));
   });
 });
+
+describe('SecureMobileStorage default keychain access', () => {
+  let setDefaultKeychainAccess;
+
+  async function load(isNativePlatform) {
+    vi.resetModules();
+    setDefaultKeychainAccess = vi.fn();
+    vi.doMock('@aparajita/capacitor-secure-storage', async (importOriginal) => ({
+      ...(await importOriginal()),
+      SecureStorage: { setDefaultKeychainAccess },
+    }));
+    const { Capacitor } = await import('@capacitor/core');
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(isNativePlatform);
+    await import('@/lib/SecureMobileStorage');
+  }
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it('keeps device keychain items readable only while the device is unlocked', async () => {
+    await load(true);
+    const { KeychainAccess } = await import('@aparajita/capacitor-secure-storage');
+    expect(setDefaultKeychainAccess).toHaveBeenCalledWith(KeychainAccess.whenUnlocked);
+  });
+
+  it('leaves the plugin unloaded on the web and in the extension', async () => {
+    await load(false);
+    expect(setDefaultKeychainAccess).not.toHaveBeenCalled();
+  });
+});
