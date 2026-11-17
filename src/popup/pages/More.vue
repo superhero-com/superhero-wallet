@@ -81,6 +81,8 @@
       <PanelItem
         :href="AE_DEX_URL"
         :title="$t('pages.more.dex')"
+        data-cy="dex"
+        in-app-browser
       >
         <template #icon>
           <DexIcon />

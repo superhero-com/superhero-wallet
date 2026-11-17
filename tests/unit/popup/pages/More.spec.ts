@@ -11,7 +11,9 @@ import {
   useAuth,
   useUi,
 } from '@/composables';
+import { useInAppBrowser } from '@/composables/inAppBrowser';
 import { PROTOCOLS } from '@/constants';
+import { AE_DEX_URL } from '@/protocols/aeternity/config';
 import en from '@/popup/locales/en-US.json';
 
 vi.mock('@/constants', async (importOriginal) => ({
@@ -25,11 +27,17 @@ vi.mock('@/composables', () => ({
   useAuth: vi.fn(),
   useUi: vi.fn(),
 }));
+vi.mock('@/composables/inAppBrowser', () => ({ useInAppBrowser: vi.fn() }));
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
 
-async function mountMore({ canAuthenticateWithDevice }) {
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+async function mountMore({ canAuthenticateWithDevice = false } = {}) {
   const lockWallet = vi.fn();
+  const openInAppBrowser = vi.fn();
   useAccounts.mockReturnValue({ activeAccount: ref({ protocol: PROTOCOLS.aeternity }) });
   useAddressBook.mockReturnValue({ addressBook: ref({}) });
   useAeSdk.mockReturnValue({ isNodeMainnet: ref(false), isNodeTestnet: ref(true) });
@@ -40,6 +48,7 @@ async function mountMore({ canAuthenticateWithDevice }) {
     lockWallet,
   });
   useUi.mockReturnValue({ isBiometricLoginEnabled: ref(true) });
+  useInAppBrowser.mockReturnValue({ openInAppBrowser });
   const wrapper = mount(More, {
     global: {
       plugins: [i18n],
@@ -47,7 +56,12 @@ async function mountMore({ canAuthenticateWithDevice }) {
     },
   });
   await flushPromises();
-  return { lockButton: wrapper.find('[data-cy=lock-wallet]'), lockWallet };
+  return {
+    wrapper,
+    lockButton: wrapper.find('[data-cy=lock-wallet]'),
+    lockWallet,
+    openInAppBrowser,
+  };
 }
 
 describe('More on mobile with biometric login on', () => {
@@ -63,5 +77,16 @@ describe('More on mobile with biometric login on', () => {
     const { lockButton } = await mountMore({ canAuthenticateWithDevice: false });
 
     expect(lockButton.exists()).toBe(false);
+  });
+});
+
+describe('More on mobile', () => {
+  it('opens the DEX in the in-app browser', async () => {
+    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const { wrapper, openInAppBrowser } = await mountMore();
+
+    await wrapper.find('[data-cy=dex]').trigger('click');
+    await vi.waitFor(() => expect(openInAppBrowser).toHaveBeenCalledWith(AE_DEX_URL));
+    expect(windowOpen).not.toHaveBeenCalled();
   });
 });
