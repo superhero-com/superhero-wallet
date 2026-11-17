@@ -53,6 +53,14 @@
   flex-flow: $flow;
 }
 
+// global.scss removes the focus outline from buttons
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid variables.$color-primary;
+    outline-offset: 2px;
+  }
+}
+
 /**
  * Allows to add custom dashed outline to elements with control on the dash width
  * and space between the dashes.
