@@ -7,6 +7,7 @@ import {
   Encoded,
   Encoding,
   isAddressValid,
+  isEncoded,
   MemoryAccount,
   AccountMnemonicFactory,
 } from '@aeternity/aepp-sdk';
@@ -33,6 +34,7 @@ import type {
   ITransferResponse,
   MarketData,
   NetworkTypeDefault,
+  PrivateKeyFormat,
 } from '@/types';
 import JsonBig from '@/lib/json-big';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
@@ -273,6 +275,42 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       } as any as IAccount; // https://github.com/superhero-com/superhero-wallet/issues/3312
     }
     return null;
+  }
+
+  /**
+   * Accepts `sk_…`, the 32-byte seed in hex, or the legacy hex of the seed and its public key.
+   */
+  override parsePrivateKey(input: string): Uint8Array {
+    const value = input.trim();
+    // Not a bare `decode`: it accepts any prefix, and its errors quote the input.
+    if (isEncoded(value, Encoding.AccountSecretKey)) {
+      return decode(value);
+    }
+    const isHexOfSeed = [SEED_LENGTH * 2, SEED_LENGTH * 4].includes(value.length)
+      && /^[0-9a-f]*$/i.test(value);
+    if (!isHexOfSeed) {
+      throw new Error('Invalid æternity private key');
+    }
+    const bytes = Buffer.from(value, 'hex');
+    const privateKey = Buffer.from(bytes.subarray(0, SEED_LENGTH));
+    if (bytes.length > SEED_LENGTH) {
+      const { address } = new MemoryAccount(encode(privateKey, Encoding.AccountSecretKey));
+      if (!bytes.subarray(SEED_LENGTH).equals(decode(address))) {
+        throw new Error('The private key does not match its public key');
+      }
+    }
+    return privateKey;
+  }
+
+  override getPrivateKeyFormats(): PrivateKeyFormat[] {
+    return ['hex', 'sk'];
+  }
+
+  override formatPrivateKey(secretKey: Uint8Array, format?: PrivateKeyFormat): string {
+    if (format === 'sk') {
+      return encode(secretKey.subarray(0, SEED_LENGTH), Encoding.AccountSecretKey);
+    }
+    return super.formatPrivateKey(secretKey, format);
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {

@@ -42,6 +42,16 @@ describe('imported private key addresses', () => {
       );
     });
 
+    it.each(PRIVATE_KEY_VECTORS)('%s reads and shows the key in hex as before', (protocol, privateKeyHex) => {
+      const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+      const { secretKey } = importPrivateKey(protocol, privateKeyHex)!;
+
+      expect(Buffer.from(adapter.parsePrivateKey(privateKeyHex)).toString('hex')).toBe(privateKeyHex);
+      expect(Buffer.from(adapter.parsePrivateKey(` ${privateKeyHex}\n`)).toString('hex')).toBe(privateKeyHex);
+      expect(adapter.getPrivateKeyFormats()[0]).toBe('hex');
+      expect(adapter.formatPrivateKey(secretKey)).toBe(Buffer.from(secretKey).toString('hex'));
+    });
+
     it.each([
       [PROTOCOLS.bitcoin, SECP256K1_SECRET_1_PUBLIC_KEY],
       [PROTOCOLS.dogecoin, SECP256K1_SECRET_1_PUBLIC_KEY],

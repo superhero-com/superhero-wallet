@@ -304,6 +304,8 @@ export interface IAccountRaw {
   privateKey?: Uint8Array; // This is used for the imported private key accounts
 }
 
+export type PrivateKeyFormat = 'hex' | 'sk';
+
 /**
  * Account stored on the application store.
  */

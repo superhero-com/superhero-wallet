@@ -21,6 +21,7 @@ import type {
   AssetAmount,
   IAccountRaw,
   IAccount,
+  PrivateKeyFormat,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -158,6 +159,28 @@ export abstract class BaseProtocolAdapter {
     globalIdx: number,
     seed?: Uint8Array
   ): IAccount | null;
+
+  /**
+   * Bytes of a private key entered by the user.
+   * This default reads hex leniently and never throws: `resolveAccountRaw` rejects a non-key.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  parsePrivateKey(input: string): Uint8Array {
+    return Buffer.from(input.trim(), 'hex');
+  }
+
+  /**
+   * Formats the private key can be shown in, the default first.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  getPrivateKeyFormats(): PrivateKeyFormat[] {
+    return ['hex'];
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  formatPrivateKey(secretKey: Uint8Array, format?: PrivateKeyFormat): string {
+    return Buffer.from(secretKey).toString('hex');
+  }
 
   /**
    * Discover accounts that have been used in the past
