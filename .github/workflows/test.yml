@@ -39,7 +39,7 @@ jobs:
       matrix:
         include:
           - shard: 1
-            spec_pattern: tests/e2e/integration/{accessibility,account,aex2-popups,deeplinks,networks,notifications,polling}.cy.js
+            spec_pattern: tests/e2e/integration/{accessibility,account,aex2-popups,deeplinks,networks,notifications,polling,transaction-details}.cy.js
           - shard: 2
             spec_pattern: tests/e2e/integration/{auth,invites,onboarding,other,receive,transactions,transfer-send}.cy.js
     env:

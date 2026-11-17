@@ -5,7 +5,7 @@ const workflowPath = path.join(__dirname, '..', '.github', 'workflows', 'test.ym
 const repositoryRoot = path.join(__dirname, '..');
 const integrationDirectory = path.join(repositoryRoot, 'tests', 'e2e', 'integration');
 const workflow = fs.readFileSync(workflowPath, 'utf8');
-const excludedPatterns = require('../cypress.config').e2e.excludeSpecPattern;
+const excludedPatterns = require('../cypress.config').e2e.excludeSpecPattern ?? [];
 
 function listSpecs(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

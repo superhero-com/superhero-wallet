@@ -12,20 +12,10 @@ import {
   generateEncryptionKey,
   encrypt,
   encodeBase64,
-  formatDate,
-  formatTime,
   generateSalt,
   prepareStorageKey,
 } from '@/utils';
 import { TEST_ACCOUNT } from '../../fixtures/account';
-
-export function preparePendingTransactionToLocalStorage(pendingTransaction) {
-  const { address } = STUB_ACCOUNT;
-
-  return {
-    [address]: { loaded: [], localPendingTransaction: pendingTransaction },
-  };
-}
 
 Cypress.Commands.add('getByTestId', (testId) => {
   cy.get(`[data-cy=${testId}]`);
@@ -156,7 +146,7 @@ Cypress.Commands.add('login', (options, route) => {
   }).then(([mnemonicEncryptionResult, salt]) => {
     const {
       isSeedBackedUp = false,
-      pendingTransaction,
+      pendingTransactions = [],
       network = null,
       accountsRaw = [{
         idx: 0,
@@ -188,7 +178,7 @@ Cypress.Commands.add('login', (options, route) => {
           isSeedBackedUp,
         },
         [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
-          [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
+          [STUB_ACCOUNT.addressAeternity]: pendingTransactions,
         },
         [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: activeAccountGlobalIdx,
         ...privateKeyAccountsRaw && {
@@ -226,18 +216,6 @@ Cypress.Commands.add('openPageMore', () => {
 
 Cypress.Commands.add('openSendModal', () => {
   cy.get('[data-cy=send]').click();
-});
-
-Cypress.Commands.add('pendingTx', (tx = {}) => {
-  cy.pendingTxItem().should((txItem) => {
-    txItem.find('[data-cy=amount]').should('contain', tx.amount);
-    txItem.find('[data-cy=status]').should('contain', 'Pending');
-    if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
-    if (tx.time) {
-      txItem.find('[data-cy=date]').should('contain', formatDate(tx.time));
-      txItem.find('[data-cy=time]').should('contain', formatTime(tx.time));
-    }
-  });
 });
 
 Cypress.Commands.add('enterInputAmount', (amount = 0) => {
@@ -282,23 +260,19 @@ Cypress.Commands.add('openSecureLoginSettings', () => {
     .urlEquals('/more/settings/secure-login');
 });
 
-/**
- * The form has a group of fields per protocol, each field's `data-cy` is its setting key.
- * Scrolling a field to the top would put it under the page header.
- */
+/** The form has a group of fields per protocol, each field's `data-cy` is its setting key. */
 Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl) => {
-  const options = { scrollBehavior: 'center' };
   cy.get('[data-cy=network-form]')
     .should('exist')
     .getInputByTestId('network-name')
-    .clear(options)
-    .type(name, options)
+    .clear()
+    .type(name)
     .get('[data-cy=group-aeternity] [data-cy=nodeUrl] input')
-    .clear(options)
-    .type(nodeUrl, options)
+    .clear()
+    .type(nodeUrl)
     .get('[data-cy=group-aeternity] [data-cy=middlewareUrl] input')
-    .clear(options)
-    .type(middlewareUrl, options);
+    .clear()
+    .type(middlewareUrl);
 });
 
 Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {

@@ -121,8 +121,6 @@ async function decodeSignedTx({ protocol, raw, prevouts = [] }) {
 }
 
 module.exports = defineConfig({
-  userAgent:
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1',
   video: false,
   retries: {
     runMode: 2,
@@ -133,6 +131,8 @@ module.exports = defineConfig({
   requestTimeout: 120000,
   // Cypress 15 typing speed: the amount total doesn't keep up with instant typing
   keystrokeDelay: 10,
+  // Scrolling an element to the top would put it under the sticky page header
+  scrollBehavior: 'center',
   fixturesFolder: 'tests/e2e/fixtures',
   screenshotsFolder: 'tests/e2e/screenshots',
   videosFolder: 'tests/e2e/videos',
@@ -141,9 +141,6 @@ module.exports = defineConfig({
     supportFile: 'tests/e2e/support/index.js',
     experimentalRunAllSpecs: true,
     baseUrl: 'http://localhost:8080',
-    excludeSpecPattern: [
-      'tests/e2e/integration/transaction-details.cy.js',
-    ],
     setupNodeEvents(on) {
       on('task', { decodeSignedTx });
     },
