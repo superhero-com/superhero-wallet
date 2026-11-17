@@ -109,3 +109,42 @@ https://wallet.superhero.com/sign-jwt
 ```
 https://wallet.superhero.com/sign-jwt?payload=%7B%22test%22%3A1%7D&x-success=https%3A%2F%2Fexample.com%3Fsigned-payload%3D%7Bsigned-payload%7D&x-cancel=https%3A%2F%2Fexample.com%2Ffail-sign-jwt
 ```
+
+## Opening a deep link in a popup (desktop)
+
+On a desktop browser, a dApp can open any of the deep links above in a small window instead of leaving its page. The wallet asks the user in that window and then loads your `x-success` or `x-cancel` URL there. Your callback page hands the result to your app and closes the window. On phones, keep the full-page deep link: there the link opens the Superhero app.
+
+1. Call `window.open` in the click handler, before any `await`. Browsers block it a few seconds after the click. If you need async work first (e.g. building the transaction), open `about:blank` right away and set the window's `location.href` once the deep link is ready.
+2. Don't pass `noopener` or `noreferrer`. If `window.open` returns `null`, the popup was blocked: fall back to a full-page deep link.
+3. Point `x-success` and `x-cancel` at a page on your own origin, with a new random `state` for each request, so your app can tell its result from another request's or another tab's.
+4. On that page, send the result over a `BroadcastChannel` and close the window. In the Firefox extension the popup can't reach `window.opener`, and `popup.closed` turns `true` as soon as the wallet opens, so don't treat it as a cancel.
+
+```js
+// In your app
+const walletUrl = (state, popup) => {
+  const callback = `${location.origin}/wallet-callback.html?state=${state}${popup ? '&popup=1' : ''}`;
+  return 'https://wallet.superhero.com/sign-message?message=hello'
+    + `&x-success=${encodeURIComponent(`${callback}&signature={signature}&address={address}`)}`
+    + `&x-cancel=${encodeURIComponent(`${callback}&cancelled=true`)}`;
+};
+signButton.onclick = () => {
+  const state = crypto.randomUUID();
+  const channel = new BroadcastChannel('superhero-wallet-callback');
+  channel.onmessage = ({ data }) => {
+    if (data.state !== state) return;
+    channel.close();
+    // data has `signature` and `address`, or `cancelled`
+  };
+  const popup = window.open(walletUrl(state, true), 'superhero-wallet', 'popup,width=375,height=600');
+  if (!popup) location.href = walletUrl(state, false);
+};
+
+// wallet-callback.html
+const params = Object.fromEntries(new URLSearchParams(location.search));
+if (params.popup) {
+  new BroadcastChannel('superhero-wallet-callback').postMessage(params);
+  window.close();
+} else {
+  // A full-page deep link came back: handle `params` here
+}
+```
