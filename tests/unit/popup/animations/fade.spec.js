@@ -1,48 +1,39 @@
 import { fadeAnimation } from '@/popup/animations';
 
-const mockAnimations = [];
-
-function mockCreateAnimation() {
-  const animation = {
-    addElement: vi.fn(() => animation),
-    fromTo: vi.fn(() => animation),
-    duration: vi.fn(() => animation),
-    addAnimation: vi.fn(() => animation),
-  };
-
-  mockAnimations.push(animation);
-  return animation;
-}
-
-vi.mock('@ionic/vue', () => ({
-  createAnimation: vi.fn(mockCreateAnimation),
-}));
-
 describe('fadeAnimation', () => {
-  beforeEach(() => {
-    mockAnimations.length = 0;
-  });
-
-  it('animates both route elements when Ionic provides them', () => {
+  it('crossfades both route elements for the same duration without moving them', () => {
     const enteringEl = document.createElement('div');
     const leavingEl = document.createElement('div');
 
     const animation = fadeAnimation(document.createElement('div'), { enteringEl, leavingEl });
+    const [entering, leaving] = animation.childAnimations;
 
-    expect(mockAnimations[1].addElement).toHaveBeenCalledWith(enteringEl);
-    expect(mockAnimations[2].addElement).toHaveBeenCalledWith(leavingEl);
-    expect(animation.addAnimation).toHaveBeenCalledTimes(2);
+    expect(animation.childAnimations).toHaveLength(2);
+    expect(entering.elements).toEqual([enteringEl]);
+    expect(leaving.elements).toEqual([leavingEl]);
+    expect([entering.getDuration(), leaving.getDuration()]).toEqual([100, 100]);
+    expect(entering.getKeyframes()).toEqual([
+      { offset: 0, opacity: 0 },
+      { offset: 1, opacity: 1 },
+    ]);
+    expect(leaving.getKeyframes()).toEqual([
+      { offset: 0, opacity: 1 },
+      { offset: 1, opacity: 0 },
+    ]);
   });
 
-  it('does not pass undefined elements to Ionic animations', () => {
-    const enteringEl = document.createElement('div');
+  it.each(['enteringEl', 'leavingEl'])('handles an absent route element when only %s is provided', (key) => {
+    const element = document.createElement('div');
+    const animation = fadeAnimation(document.createElement('div'), { [key]: element });
 
-    const animation = fadeAnimation(document.createElement('div'), { enteringEl });
+    expect(animation.childAnimations).toHaveLength(1);
+    expect(animation.childAnimations[0].elements).toEqual([element]);
+    expect(animation.childAnimations[0].getDuration()).toBe(100);
+  });
 
-    expect(mockAnimations[1].addElement).toHaveBeenCalledWith(enteringEl);
-    expect(mockAnimations.some(({ addElement }) => addElement.mock.calls.some(
-      ([element]) => element === undefined,
-    ))).toBe(false);
-    expect(animation.addAnimation).toHaveBeenCalledTimes(1);
+  it('handles an empty outlet without adding element animations', () => {
+    const animation = fadeAnimation(document.createElement('div'), {});
+
+    expect(animation.childAnimations).toHaveLength(0);
   });
 });
