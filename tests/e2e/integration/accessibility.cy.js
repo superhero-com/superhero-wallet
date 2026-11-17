@@ -78,13 +78,7 @@ describe('Accessible names of buttons and links', () => {
  */
 describe('Keyboard operation', () => {
   function typeContactName() {
-    // The recent recipients arriving later would clear a half-typed recipient
-    cy.intercept({ method: 'GET', url: /\/accounts\/ak_\w+\/activities\?limit=/ }, {
-      data: [],
-      next: null,
-    }).as('activities');
     cy.login({ addressBook: [CONTACT] });
-    cy.wait('@activities');
     cy.openSendModal();
     cy.get('[data-cy=address] [data-cy=textarea]').type('Keyb');
     cy.get('[data-cy=address] .dropdown-wrapper').should('have.class', 'open');

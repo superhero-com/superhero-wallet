@@ -99,7 +99,10 @@
         class="dropdown-wrapper styled-scrollbar"
         :class="{ open: isDropdownOpen }"
       >
-        <!-- Always rendered, so kept out of the tab order; ArrowDown in the field moves here -->
+        <!--
+          Always rendered, so kept out of the tab order; ArrowDown in the field moves here.
+          A press keeps the focus in the field: its blur would show an error that moves the list.
+        -->
         <button
           v-for="option in filteredOptions"
           :key="option.address"
@@ -107,6 +110,7 @@
           tabindex="-1"
           class="dropdown-item"
           data-cy="address-suggestion"
+          @mousedown.prevent
           @click="selectValue(option, $event)"
           @keydown="handleOptionKeydown"
         >
@@ -297,9 +301,18 @@ export default defineComponent({
           (getField() ?? wrapper?.querySelector<HTMLElement>('[data-cy=clear-address-button]'))
             ?.focus();
         });
-      } else if (dropdownEl.value?.contains(document.activeElement)) {
-        // Like before the options were buttons; refocusing the field would open the keyboard
-        (document.activeElement as HTMLElement).blur();
+      } else {
+        // A pointer pick leaves the field, closing a phone keyboard. Blur after the re-render:
+        // the field's blur sends the text it shows.
+        nextTick(() => {
+          const active = document.activeElement;
+          if (
+            active instanceof HTMLElement
+            && (active === getField() || dropdownEl.value?.contains(active))
+          ) {
+            active.blur();
+          }
+        });
       }
     }
 
@@ -350,7 +363,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      watch(() => [props.modelValue, allAccounts.value], () => {
+      watch(() => [props.modelValue, allAccounts.value] as const, (_, previous) => {
         // Check and remove duplicates
         if (new Set(props.modelValue).size !== props.modelValue.length) {
           emit('update:modelValue', props.modelValue.filter(removeDuplicates));
@@ -380,7 +393,10 @@ export default defineComponent({
             inputValue.value = selectedAddresses.value[0].address;
           }
         } else {
-          inputValue.value = '';
+          // Only for new recipients: the account list refreshes while one is being typed
+          if (props.modelValue !== previous?.[0]) {
+            inputValue.value = '';
+          }
           selectedAddresses.value = [];
         }
       }, { immediate: true });
