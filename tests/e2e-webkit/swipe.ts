@@ -15,6 +15,18 @@ export async function startEdgeDrag(page: Page, entering: string, leaving: strin
     ?.getAnimations({ subtree: true }).some((animation) => animation.playState === 'paused'), leaving);
 }
 
+/** Drags back to the edge from `startEdgeDrag` and lets go, which cancels the swipe. */
+export async function cancelEdgeDrag(page: Page) {
+  // Ionic reads one move per frame: a faster reversal goes unseen and the swipe completes
+  /* eslint-disable no-await-in-loop */
+  for (let x = 71; x > 0; x -= 10) {
+    await page.mouse.move(x, 400);
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+  }
+  /* eslint-enable no-await-in-loop */
+  await page.mouse.up();
+}
+
 /** Swipes back from the leaving page to the entering one. */
 export async function swipeBack(page: Page, entering: string, leaving: string) {
   await startEdgeDrag(page, entering, leaving);
