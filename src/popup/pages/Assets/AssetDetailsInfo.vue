@@ -369,11 +369,17 @@ export default defineComponent({
     }
   }
 
+  // A long link label wraps rather than squeezing the row title
+  .link :deep(.title) {
+    flex-shrink: 0;
+  }
+
   .link a {
     color: $color-grey-light;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    overflow-wrap: anywhere;
 
     svg {
       width: 22px;
