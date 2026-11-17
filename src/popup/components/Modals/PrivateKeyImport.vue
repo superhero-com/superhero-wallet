@@ -49,7 +49,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { Protocol, ResolveCallback } from '@/types';
+import type { IAccountRaw, Protocol, ResolveCallback } from '@/types';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ImportedAccountsUnreadableError } from '@/lib/errors';
@@ -95,20 +95,19 @@ export default defineComponent({
     async function storePrivateKey() {
       const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
       let secretKey: Uint8Array | undefined;
+      let rawAccount: IAccountRaw;
       try {
-        const account = adapter.resolveAccountRaw(
-          {
-            type: ACCOUNT_TYPES.privateKey,
-            isRestored: false,
-            protocol: props.protocol,
-            privateKey: Buffer.from(privateKey.value, 'hex'),
-          },
-          0,
-          0,
-        );
+        rawAccount = {
+          type: ACCOUNT_TYPES.privateKey,
+          isRestored: false,
+          protocol: props.protocol,
+          // A Buffer, as only that is read back from the stored JSON.
+          privateKey: Buffer.from(adapter.parsePrivateKey(privateKey.value)),
+        };
+        const account = adapter.resolveAccountRaw(rawAccount, 0, 0);
 
         if (!account) {
-          throw new Error(`Fail to resolve account with private key: ${privateKey.value}`);
+          throw new Error('Failed to resolve the account of the private key');
         }
 
         if (isImported(account.secretKey)) {
@@ -123,12 +122,7 @@ export default defineComponent({
         return;
       }
       try {
-        const globalIdx = await addPrivateKeyAccount({
-          type: ACCOUNT_TYPES.privateKey,
-          isRestored: false,
-          protocol: props.protocol,
-          privateKey: Buffer.from(privateKey.value, 'hex'),
-        });
+        const globalIdx = await addPrivateKeyAccount(rawAccount);
         setActiveAccountByGlobalIdx(globalIdx);
         props.resolve();
       } catch (e) {
