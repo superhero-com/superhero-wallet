@@ -1,4 +1,16 @@
 import { PROTOCOLS } from '@/constants';
+import { STUB_ACCOUNT } from '@/constants/stubs';
+
+const {
+  DOWN, ENTER, ESC, SPACE,
+} = Cypress.Keyboard.Keys;
+
+const CONTACT = {
+  name: 'Keyboard contact',
+  address: 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4',
+  isBookmarked: false,
+  protocol: PROTOCOLS.aeternity,
+};
 
 // axe-core runs in the app window, so it audits the app document.
 function checkAccessibleNames() {
@@ -57,5 +69,84 @@ describe('Accessible names of buttons and links', () => {
     cy.get('[data-cy=checkbox]').click();
     cy.get('[data-cy=generate-wallet]').should('be.visible');
     checkAccessibleNames();
+  });
+});
+
+/**
+ * `cy.press` sends native key events. In Chromium its Enter has no character,
+ * which a native button needs to activate, so native buttons get Space here.
+ */
+describe('Keyboard operation', () => {
+  function typeContactName() {
+    // The recent recipients arriving later would clear a half-typed recipient
+    cy.intercept({ method: 'GET', url: /\/accounts\/ak_\w+\/activities\?limit=/ }, {
+      data: [],
+      next: null,
+    }).as('activities');
+    cy.login({ addressBook: [CONTACT] });
+    cy.wait('@activities');
+    cy.openSendModal();
+    cy.get('[data-cy=address] [data-cy=textarea]').type('Keyb');
+    cy.get('[data-cy=address] .dropdown-wrapper').should('have.class', 'open');
+  }
+
+  it('opens and closes an accordion item from the keyboard', () => {
+    cy.login({}, '/more/about/terms');
+    cy.get('[data-cy=accordion-item-label]:visible').first().focus();
+
+    cy.press(SPACE);
+    cy.focused().should('have.attr', 'aria-expanded', 'true');
+    cy.get('[data-cy=accordion-item-content]').should('have.length', 1);
+
+    cy.press(SPACE);
+    cy.focused().should('have.attr', 'aria-expanded', 'false');
+    cy.get('[data-cy=accordion-item-content]').should('not.exist');
+  });
+
+  it('picks an address book suggestion with the arrow keys', () => {
+    typeContactName();
+
+    cy.press(DOWN);
+    cy.focused().should('have.attr', 'data-cy', 'address-suggestion');
+    cy.press(SPACE);
+
+    // The æternity form takes several recipients, so the field stays for the next one
+    cy.get('[data-cy=address] .selected-address-container')
+      .should('have.length', 1)
+      .find('.address-chunk')
+      .first()
+      .should(($chunk) => {
+        expect($chunk.text().trim()).to.have.length.greaterThan(3);
+        expect(CONTACT.address.startsWith($chunk.text().trim())).to.eq(true);
+      });
+    cy.get('[data-cy=address] .dropdown-wrapper').should('not.have.class', 'open');
+    cy.focused().should('have.attr', 'data-cy', 'textarea').and('have.value', '');
+  });
+
+  it('closes the suggestions first, then the send modal, with Escape', () => {
+    typeContactName();
+
+    cy.press(ESC);
+    cy.get('[data-cy=address] .dropdown-wrapper').should('not.have.class', 'open');
+    // Let a wrongly handled Escape close the modal before checking that it stayed
+    cy.wait(500);
+    cy.get('[data-cy=address] [data-cy=textarea]').should('exist');
+
+    cy.press(ESC);
+    cy.get('[data-cy=address]').should('not.exist');
+  });
+
+  it('copies the account address with Enter', () => {
+    cy.login({}, '/account-details');
+    cy.get('.account-address[role=button]:visible').focus();
+
+    cy.press(ENTER);
+
+    cy.get('.account-address .copied:visible').should('exist');
+    cy.window()
+      .its('navigator.clipboard')
+      .then(async (clipboard) => {
+        expect(await clipboard.readText()).to.eq(STUB_ACCOUNT.addressAeternity);
+      });
   });
 });

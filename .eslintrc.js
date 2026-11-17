@@ -70,9 +70,6 @@ module.exports = {
     'vue/require-explicit-emits': 'error',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true, caughtErrors: 'none' }],
     '@stylistic/member-delimiter-style': ['error'],
-
-    // TODO: https://github.com/superhero-com/superhero-wallet/issues/2857
-    'vuejs-accessibility/click-events-have-key-events': 'off',
   },
   overrides: [
     {

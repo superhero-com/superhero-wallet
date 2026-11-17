@@ -156,6 +156,7 @@ Cypress.Commands.add('login', (options, route) => {
       }],
       privateKeyAccountsRaw,
       activeAccountGlobalIdx = 0,
+      addressBook,
     } = options || {};
 
     cy.openPopup((contentWindow) => {
@@ -183,6 +184,9 @@ Cypress.Commands.add('login', (options, route) => {
         [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: activeAccountGlobalIdx,
         ...privateKeyAccountsRaw && {
           [prepareStorageKey([STORAGE_KEYS.privateKeyAccountsRaw])]: privateKeyAccountsRaw,
+        },
+        ...addressBook && {
+          [prepareStorageKey([STORAGE_KEYS.addressBook])]: addressBook,
         },
       };
 

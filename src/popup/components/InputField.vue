@@ -15,9 +15,9 @@
       class="label"
     >
       <label
+        :id="labelId"
         :for="inputId"
         class="text-label"
-        @click="$emit('click', $event)"
       >
         <slot name="label">{{ label }}</slot>
       </label>
@@ -44,10 +44,14 @@
       </div>
     </div>
 
+    <!--
+      `for` keeps the label from clicking the first button inside it
+      when a slot replaces the input
+    -->
     <label
       data-cy="input-wrapper"
       class="input-wrapper"
-      @click="handleLabelClick"
+      :for="inputId"
       @focusin="focused = true"
       @focusout="focused = false"
     >
@@ -62,6 +66,7 @@
         <slot
           :id="uid"
           :input-id="inputId"
+          :label-id="labelId"
         >
           <!--
             Remove `type` attribute check logic after
@@ -183,18 +188,16 @@ export default defineComponent({
     },
     /** Forces the error to be hidden, i.e. when the autocomplete dropdown is open */
     hideError: Boolean,
-    /** Makes the label not clickable to prevent unwanted presses on buttons inside the label */
-    disableLabelFocus: Boolean,
   },
   emits: [
     'update:modelValue',
     'focus-change',
-    'click',
     'help',
   ],
   setup(props, { emit }) {
     const uid = getCurrentInstance()?.uid;
     const inputId = `input-${uid}`;
+    const labelId = `input-label-${uid}`;
 
     const focused = ref(false);
     const inputEl = ref<HTMLInputElement | null>(null);
@@ -246,13 +249,6 @@ export default defineComponent({
       emit('update:modelValue', props.type === 'number' ? value?.replace(',', '.') : value);
     }
 
-    function handleLabelClick(event: Event) {
-      if (props.disableLabelFocus) {
-        event.preventDefault();
-      }
-      emit('click', event);
-    }
-
     watch(
       () => focused.value,
       (val) => emit('focus-change', val),
@@ -284,6 +280,7 @@ export default defineComponent({
       focused,
       uid,
       inputId,
+      labelId,
       inputMode,
       autoCapitalize,
       messageAsObject,
@@ -293,7 +290,6 @@ export default defineComponent({
       availableTextLimit,
       checkIfNumber,
       handleInput,
-      handleLabelClick,
     };
   },
 });

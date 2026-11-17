@@ -6,11 +6,11 @@
     :resizable="false"
     :placeholder="placeholder"
     :message="message"
-    :disable-label-focus="isSingleRecipient"
     auto-height
     enter-submit
     @update:model-value="($event: any) => inputValue = $event"
     @submit="handleEnter"
+    @keydown="handleFieldKeydown"
   >
     <template
       v-if="isSingleRecipient"
@@ -95,14 +95,20 @@
 
     <template #before-main>
       <div
+        ref="dropdownEl"
         class="dropdown-wrapper styled-scrollbar"
         :class="{ open: isDropdownOpen }"
       >
-        <div
+        <!-- Always rendered, so kept out of the tab order; ArrowDown in the field moves here -->
+        <button
           v-for="option in filteredOptions"
           :key="option.address"
+          type="button"
+          tabindex="-1"
           class="dropdown-item"
+          data-cy="address-suggestion"
           @click="selectValue(option, $event)"
+          @keydown="handleOptionKeydown"
         >
           <Avatar
             size="sm"
@@ -121,7 +127,7 @@
             :protocol="protocol"
             class="truncated-address"
           />
-        </div>
+        </button>
       </div>
     </template>
   </FormTextarea>
@@ -131,6 +137,7 @@
 import {
   computed,
   defineComponent,
+  nextTick,
   onMounted, PropType,
   ref,
   watch,
@@ -210,6 +217,7 @@ export default defineComponent({
 
     const inputValue = ref(props.singleDefaultFormat ? (props.modelValue[0] ?? '') : '');
     const isDropdownOpen = ref(false);
+    const dropdownEl = ref<HTMLElement>();
     const selectedAddresses = ref<IAddressBookEntry[]>([]);
     const filteredOptions = computed(() => (
       addressBookFiltered.value.filter((entry: IAddressBookEntry) => (
@@ -259,7 +267,19 @@ export default defineComponent({
       emit('update:modelValue', []);
     }
 
-    function selectValue(entry: IAddressBookEntry, $event: Event) {
+    function getOptionElements() {
+      return Array.from(dropdownEl.value?.querySelectorAll<HTMLElement>('.dropdown-item') ?? []);
+    }
+
+    function getField() {
+      return dropdownEl.value?.closest('.input-wrapper')?.querySelector('textarea');
+    }
+
+    function focusOption(index: number) {
+      getOptionElements()[index]?.focus();
+    }
+
+    function selectValue(entry: IAddressBookEntry, $event: MouseEvent) {
       $event.preventDefault();
       if (props.singleDefaultFormat) {
         inputValue.value = entry.address;
@@ -268,6 +288,61 @@ export default defineComponent({
         emit('update:modelValue', [entry.address, ...props.modelValue]);
       }
       isDropdownOpen.value = false;
+
+      // A click from Enter or Space has no click count
+      if ($event.detail === 0) {
+        const wrapper = dropdownEl.value?.closest('.input-wrapper');
+        nextTick(() => {
+          // The single recipient view replaces the field with the chosen address
+          (getField() ?? wrapper?.querySelector<HTMLElement>('[data-cy=clear-address-button]'))
+            ?.focus();
+        });
+      } else if (dropdownEl.value?.contains(document.activeElement)) {
+        // Like before the options were buttons; refocusing the field would open the keyboard
+        (document.activeElement as HTMLElement).blur();
+      }
+    }
+
+    function handleFieldKeydown(event: KeyboardEvent) {
+      if (
+        !isDropdownOpen.value
+        || event.isComposing
+        || !(event.target instanceof HTMLTextAreaElement)
+      ) {
+        return;
+      }
+      if (event.key === 'ArrowDown' && getOptionElements().length) {
+        event.preventDefault();
+        focusOption(0);
+      } else if (event.key === 'Escape') {
+        // Keeps a surrounding modal open
+        event.preventDefault();
+        isDropdownOpen.value = false;
+      }
+    }
+
+    function handleOptionKeydown(event: KeyboardEvent) {
+      const index = getOptionElements().indexOf(event.currentTarget as HTMLElement);
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          focusOption(Math.min(index + 1, getOptionElements().length - 1));
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          if (index > 0) {
+            focusOption(index - 1);
+          } else {
+            getField()?.focus();
+          }
+          break;
+        case 'Escape':
+          event.preventDefault();
+          isDropdownOpen.value = false;
+          getField()?.focus();
+          break;
+        default:
+      }
     }
 
     function handleEnter() {
@@ -356,8 +431,11 @@ export default defineComponent({
       clearAll,
       selectValue,
       handleEnter,
+      handleFieldKeydown,
+      handleOptionKeydown,
       inputValue,
       isDropdownOpen,
+      dropdownEl,
       isNameValid,
       isAccountAddressValid,
       isSingleRecipient,
@@ -416,9 +494,21 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       display: flex;
+      width: 100%;
       padding: 8px;
       gap: 6px;
+      background: none;
+      font: inherit;
+      line-height: inherit;
+      color: inherit;
+      text-align: inherit;
       cursor: pointer;
+
+      &:focus-visible {
+        // The list clips anything outside it
+        outline: 2px solid $color-primary;
+        outline-offset: -2px;
+      }
     }
 
     .dropdown-item:not(:last-child) {
@@ -447,7 +537,8 @@ export default defineComponent({
   &:where(
     &:has(input:focus),
     &:has(textarea:focus),
-    &:has(label:active)
+    &:has(label:active),
+    &:has(.dropdown-wrapper:focus-within)
   ) {
     .dropdown-wrapper.open {
       top: calc(100% + 4px);
