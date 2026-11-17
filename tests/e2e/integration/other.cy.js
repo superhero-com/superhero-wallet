@@ -22,6 +22,9 @@ describe('Tests cases not connected to specific page', () => {
       { path: '/account-details/', redirect: true },
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)
+        // The route is saved before its page mounts, which can wait for a lazy chunk
+        .get('.router-outlet .ion-page', { timeout: 10000 })
+        .should('exist')
         .visit('')
         .loginUsingPassword()
         .urlEquals(redirect ? path : '/account');
