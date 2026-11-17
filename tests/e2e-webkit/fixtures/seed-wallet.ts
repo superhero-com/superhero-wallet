@@ -1,7 +1,8 @@
 import type { Page } from 'playwright-core';
+import type { IAddressBookEntry } from '../../../src/types';
 import { TEST_ACCOUNT } from '../../fixtures/account';
 
-const SEED_WALLET = `async ({ mnemonic, password }) => {
+const SEED_WALLET = `async ({ mnemonic, password, addressBook }) => {
   const {
     encodeBase64,
     encrypt,
@@ -24,6 +25,7 @@ const SEED_WALLET = `async ({ mnemonic, password }) => {
     }],
     [STORAGE_KEYS.activeAccountGlobalIdx]: 0,
     [STORAGE_KEYS.otherSettings]: { isSeedBackedUp: true },
+    ...(addressBook && { [STORAGE_KEYS.addressBook]: addressBook }),
   };
   localStorage.clear();
   Object.entries(stored).forEach(([key, value]) => {
@@ -35,7 +37,10 @@ const SEED_WALLET = `async ({ mnemonic, password }) => {
  * Stores `TEST_ACCOUNT`'s wallet the way the app does, with the app's own helpers.
  * The page has to be on the app's dev server.
  */
-export async function seedWallet(page: Page) {
+export async function seedWallet(
+  page: Page,
+  { addressBook }: { addressBook?: IAddressBookEntry[] } = {},
+) {
   // A string, so Vitest leaves the dev server imports alone
-  await page.evaluate(`(${SEED_WALLET})(${JSON.stringify(TEST_ACCOUNT)})`);
+  await page.evaluate(`(${SEED_WALLET})(${JSON.stringify({ ...TEST_ACCOUNT, addressBook })})`);
 }

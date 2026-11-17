@@ -154,6 +154,43 @@ describe('FormAccountInput suggestions', () => {
     expect((document.activeElement as HTMLElement).dataset.cy).toBe('clear-address-button');
   });
 
+  it('leaves nothing focused when a pointer pick replaces the field', async () => {
+    const { wrapper, value } = await mountWithOpenList(true);
+    const [first] = wrapper.findAll('[data-cy=address-suggestion]').map((o) => o.element);
+
+    clickOption(first, 1);
+    await flushPromises();
+    await nextTick();
+
+    expect(value.value).toEqual([ALICE]);
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('stops a press on a suggestion from moving the focus', async () => {
+    const { wrapper } = await mountWithOpenList();
+    const [first] = wrapper.findAll('[data-cy=address-suggestion]').map((o) => o.element);
+    const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+
+    first.dispatchEvent(mousedown);
+
+    // The default action would move the focus, and the field's blur shows its error
+    expect(mousedown.defaultPrevented).toBe(true);
+  });
+
+  it('leaves the field empty and unfocused after a pointer pick', async () => {
+    const { wrapper, value } = await mountWithOpenList();
+    const field = wrapper.get('textarea').element as HTMLTextAreaElement;
+    const [first] = wrapper.findAll('[data-cy=address-suggestion]').map((o) => o.element);
+
+    clickOption(first, 1);
+    await flushPromises();
+
+    expect(value.value).toEqual([ALICE]);
+    expect(field.value).toBe('');
+    expect(document.activeElement).toBe(document.body);
+  });
+
   it('leaves focus off the list after a pointer pick, without refocusing the field', async () => {
     const { wrapper, value } = await mountWithOpenList();
     const [first] = wrapper.findAll('[data-cy=address-suggestion]').map((o) => o.element);
