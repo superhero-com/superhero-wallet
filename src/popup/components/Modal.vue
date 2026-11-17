@@ -24,9 +24,11 @@
       <div
         ref="scrollElem"
         class="container"
+        @focusin="scheduleFocusedFieldReveal"
       >
         <div
           v-if="showHeader"
+          ref="headerElem"
           class="header"
           :class="{
             transparent: hasCloseButton && !($slots.header || header),
@@ -66,6 +68,7 @@
 
         <FixedScreenFooter
           v-if="$slots.footer"
+          ref="footerComponent"
         >
           <slot name="footer" />
         </FixedScreenFooter>
@@ -98,6 +101,15 @@ import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
 import BackToTop from './BackToTop.vue';
 
+const NON_TEXT_INPUT_TYPES = [
+  'button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit',
+];
+
+function isTextField(el: Element | null): el is HTMLInputElement | HTMLTextAreaElement {
+  return el instanceof HTMLTextAreaElement
+    || (el instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.includes(el.type));
+}
+
 export default defineComponent({
   components: {
     FixedScreenFooter,
@@ -124,16 +136,54 @@ export default defineComponent({
   emits: ['close', 'open'],
   setup(props, { slots, emit }) {
     const scrollElem = ref<HTMLElement>();
+    const headerElem = ref<HTMLElement>();
+    const footerComponent = ref<InstanceType<typeof FixedScreenFooter>>();
+    let revealFrame: number | undefined;
 
     const { setScrollConf } = useScrollConfig();
     const { initViewport } = useViewport();
 
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
+    /** Only these variants scroll inside the container, under the sticky footer. */
+    const isScrollable = computed(() => props.fromBottom || props.fullScreen);
+
     const transitionName = computed(() => props.fromBottom ? 'from-bottom-transition' : 'pop-in-transition');
 
     function handleClose() {
       emit('close');
+    }
+
+    /**
+     * Native focus scrolling ignores the sticky footer, and the iOS keyboard
+     * shrinks the view only after the field is focused.
+     */
+    function revealFocusedField() {
+      revealFrame = undefined;
+      const container = scrollElem.value;
+      const footer: HTMLElement | undefined = footerComponent.value?.$el;
+      const field = document.activeElement;
+      if (!container || !footer || !isTextField(field) || !container.contains(field)) {
+        return;
+      }
+      // InputField's visible box
+      const fieldRect = (field.closest('.input-wrapper') ?? field).getBoundingClientRect();
+      const visibleTop = headerElem.value?.getBoundingClientRect().bottom
+        ?? container.getBoundingClientRect().top;
+      const lift = Math.min(
+        fieldRect.bottom - footer.getBoundingClientRect().top,
+        fieldRect.top - visibleTop,
+      );
+      if (lift > 0) {
+        // A fractional scroll offset can be rounded down
+        container.scrollTop += Math.ceil(lift);
+      }
+    }
+
+    function scheduleFocusedFieldReveal() {
+      if (isScrollable.value && revealFrame === undefined) {
+        revealFrame = requestAnimationFrame(revealFocusedField);
+      }
     }
 
     function onBackButtonHandler(event: BackButtonEvent) {
@@ -146,6 +196,7 @@ export default defineComponent({
         initViewport(scrollElem.value!);
       }
       document.addEventListener('ionBackButton', onBackButtonHandler);
+      window.addEventListener('resize', scheduleFocusedFieldReveal);
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
       }
@@ -157,14 +208,21 @@ export default defineComponent({
         initViewport(undefined);
       }
       document.removeEventListener('ionBackButton', onBackButtonHandler);
+      window.removeEventListener('resize', scheduleFocusedFieldReveal);
+      if (revealFrame !== undefined) {
+        cancelAnimationFrame(revealFrame);
+      }
       document.body.style.overflow = '';
     });
 
     return {
       handleClose,
+      scheduleFocusedFieldReveal,
       IS_FIREFOX,
       IS_EXTENSION,
       scrollElem,
+      headerElem,
+      footerComponent,
       showHeader,
       transitionName,
     };

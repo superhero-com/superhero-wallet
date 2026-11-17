@@ -163,6 +163,28 @@ it('asks for Face ID once and reopens a coin page with the assets behind it', as
   }
 });
 
+// #3410: the keyboard left the receive amount behind the modal footer
+it('keeps a focused field between the modal header and footer when the keyboard opens', async () => {
+  const { context, page } = await createWallet({ hasFaceId: false });
+  try {
+    // The iPhone 13 screen below the status bar
+    await page.setViewportSize({ width: 390, height: 797 });
+    await page.click('[data-cy=receive]');
+    await page.click('.modal [data-cy=input]');
+    // The keyboard shrinks the web view
+    await page.setViewportSize({ width: 390, height: 506 });
+
+    await expect.poll(() => page.$eval('.modal', (modal) => {
+      const field = modal.querySelector('[data-cy=input-wrapper]')!.getBoundingClientRect();
+      const header = modal.querySelector('.header')!.getBoundingClientRect();
+      const footer = modal.querySelector('.fixed-screen-footer')!.getBoundingClientRect();
+      return { belowHeader: field.top >= header.bottom, aboveFooter: field.bottom <= footer.top };
+    })).toEqual({ belowHeader: true, aboveFooter: true });
+  } finally {
+    await context.close();
+  }
+});
+
 // #3673: the status bar turned grey over the black splash
 it('keeps the status bar black like the splash until the splash hides', async () => {
   const { context, page } = await install({ hasFaceId: false });
