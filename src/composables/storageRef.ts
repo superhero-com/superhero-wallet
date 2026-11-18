@@ -1,7 +1,7 @@
 import { Ref, ref, watch } from 'vue';
 import type { Migration, StorageKey } from '@/types';
 import { WalletStorage } from '@/lib/WalletStorage';
-import { asyncPipe, handleUnknownError } from '@/utils';
+import { asyncPipe, composeStorageKeys, handleUnknownError } from '@/utils';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
 import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import {
@@ -28,6 +28,12 @@ export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
    * Enable state synchronization between the extension and the background.
    */
   backgroundSync?: boolean;
+  /**
+   * Follow the value other windows store, e.g. other tabs or the offscreen tab.
+   * Their values skip `migrations`, so a migration of the key must handle them as well.
+   * Replaces the listener of `backgroundSync`.
+   */
+  syncWithOtherWindows?: boolean;
   /**
    * Callbacks run on the data that will be saved and read from the browser storage.
    */
@@ -88,6 +94,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
       write: (a: unknown) => a,
     } as unknown as NonNullable<typeof options['serializer']>,
     backgroundSync = false,
+    syncWithOtherWindows = false,
     migrations,
     onRestored,
     onRestoreFailed,
@@ -99,6 +106,37 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
   const storage = (enableSecureStorage && IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
   const vaultBacked = isVaultKey(storageKey);
+  const isSyncedWithOtherWindows = syncWithOtherWindows && !IS_MOBILE_APP && !vaultBacked
+    && storage === WalletStorage;
+  const storageItemKey = composeStorageKeys(storageKey);
+  /** The stored value as this window last saw it, which it doesn't write again. */
+  let lastKnownRaw: string | null = null;
+  let isRestoring = true;
+
+  /** The value stored now: an event's own may be older than one this window wrote since. */
+  function applyStoredValue() {
+    const raw = localStorage.getItem(storageItemKey);
+    if (raw === null || raw === lastKnownRaw) return;
+    let value: T;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed === null) return;
+      value = serializer.read(parsed);
+    } catch {
+      return;
+    }
+    lastKnownRaw = raw;
+    state.value = value;
+  }
+
+  if (isSyncedWithOtherWindows) {
+    window.addEventListener('storage', (event) => {
+      // The restore catches up when it's done.
+      if (isRestoring || event.key !== storageItemKey) return;
+      if (event.storageArea && event.storageArea !== localStorage) return;
+      applyStoredValue();
+    });
+  }
 
   function applyVaultValue(value: TSerialized | null) {
     watcherDisabled = true;
@@ -197,6 +235,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
     try {
       if (vaultBacked) await ensureVaultReady();
       const restoreSnapshot = vaultBacked ? readVault() : undefined;
+      if (isSyncedWithOtherWindows) lastKnownRaw = localStorage.getItem(storageItemKey);
       restoredValue = await storage.get<TSerialized | null>(storageKey);
       // Not once the vault exists, which older copies mustn't replace.
       if (migrations?.length && (!vaultBacked || restoreSnapshot?.revision === null)) {
@@ -247,6 +286,8 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
         failedMigrationWrites.set(state, migrationWriteError);
       }
     }
+    isRestoring = false;
+    if (isSyncedWithOtherWindows) applyStoredValue();
     onRestored?.(
       restoredValue == null ? restoredValue as T : state.value,
     );
@@ -258,13 +299,20 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
      */
     if (!isRestoreFailed || onRestoreFailed) {
       watch(state, (val) => {
-        if (!watcherDisabled) {
-          latestWrite = setStorageState(val);
-          latestWrite.then(() => failedMigrationWrites.delete(state), (error) => {
-            handleUnknownError(error);
-            writeLogEntry(`Saving "${storageKey}" failed`, error);
-          });
+        if (isSyncedWithOtherWindows) {
+          const raw = JSON.stringify(val ? serializer.write(val) : val);
+          if (raw === lastKnownRaw) return;
+          lastKnownRaw = raw;
+        } else if (watcherDisabled) {
+          return;
         }
+        latestWrite = setStorageState(val);
+        latestWrite.then(() => failedMigrationWrites.delete(state), (error) => {
+          // Unknown now, so neither saving it again nor another window's value is skipped.
+          if (isSyncedWithOtherWindows) lastKnownRaw = null;
+          handleUnknownError(error);
+          writeLogEntry(`Saving "${storageKey}" failed`, error);
+        });
       }, { deep: true, flush: vaultBacked ? 'sync' : 'pre' });
     }
 
@@ -292,7 +340,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
           onRestoreFailed?.(error);
         }
       }
-    } else if (backgroundSync) {
+    } else if (backgroundSync && !isSyncedWithOtherWindows) {
       storage.watch?.(storageKey, (val) => {
         setLocalState(val);
         onBackgroundSync?.(val);

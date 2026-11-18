@@ -483,3 +483,76 @@ describe('usePermissions - asking to switch the network for a dapp', () => {
     );
   });
 });
+
+describe('usePermissions with another window', () => {
+  const ITEM_KEY = 'sh-wallet_permissions';
+  const OTHER_HOST = 'other.example';
+  let usePermissions;
+  let storageListeners;
+
+  const nextTask = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+  const storedPermissions = () => JSON.parse(localStorage.getItem(ITEM_KEY));
+
+  function storeInOtherWindow(registry) {
+    const newValue = JSON.stringify(registry);
+    localStorage.setItem(ITEM_KEY, newValue);
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: ITEM_KEY, newValue, storageArea: localStorage,
+    }));
+  }
+
+  beforeEach(async () => {
+    vi.resetModules();
+    localStorage.clear();
+    storageListeners = [];
+    const addEventListener = window.addEventListener.bind(window);
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, listener, ...rest) => {
+      if (type === 'storage') storageListeners.push(listener);
+      addEventListener(type, listener, ...rest);
+    });
+    ({ usePermissions } = await import('@/composables/permissions'));
+    await nextTask();
+    usePermissions().addPermission(buildPermission({ transactionSignLimit: 10 }));
+    usePermissions().addPermission(buildPermission({ host: OTHER_HOST }));
+    await nextTask();
+  });
+
+  afterEach(() => {
+    storageListeners.forEach((listener) => window.removeEventListener('storage', listener));
+    vi.restoreAllMocks();
+  });
+
+  /** What the other window stores after spending `spent` AE of the daily limit. */
+  function spendInOtherWindow(spent) {
+    const registry = storedPermissions();
+    registry[HOST].transactionSignSpent = spent;
+    storeInOtherWindow(registry);
+  }
+
+  it('counts what another window spent towards the daily limit', () => {
+    const { checkTransactionSignLimit } = usePermissions();
+    spendInOtherWindow(8);
+
+    expect(checkTransactionSignLimit(HOST, { amount: 8 * ONE_AE_IN_AETTOS })).toBe(false);
+    expect(checkTransactionSignLimit(HOST, { amount: 2 * ONE_AE_IN_AETTOS })).toBe(true);
+  });
+
+  it('keeps what another window spent when the permission of another site is removed', async () => {
+    spendInOtherWindow(8);
+
+    usePermissions().removePermission(OTHER_HOST);
+    await nextTask();
+
+    expect(storedPermissions()[HOST].transactionSignSpent).toBe(8);
+    expect(storedPermissions()[OTHER_HOST]).toBeUndefined();
+  });
+
+  it('stops signing without asking once another window removed the permission', () => {
+    const registry = storedPermissions();
+    delete registry[HOST];
+    storeInOtherWindow(registry);
+
+    expect(usePermissions().checkTransactionSignLimit(HOST, { amount: ONE_AE_IN_AETTOS }))
+      .toBe(false);
+  });
+});

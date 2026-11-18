@@ -280,3 +280,283 @@ describe('useStorageRef over the vault', () => {
     vi.doUnmock('@/lib/logger');
   });
 });
+
+describe('useStorageRef synced with other windows', () => {
+  const ITEM_KEY = 'sh-wallet_key';
+  let storageListeners;
+
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    vi.doUnmock('@/lib/WalletStorage');
+    vi.doUnmock('@/lib/logger');
+    storageListeners = [];
+    const addEventListener = window.addEventListener.bind(window);
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, listener, ...rest) => {
+      if (type === 'storage') storageListeners.push(listener);
+      addEventListener(type, listener, ...rest);
+    });
+  });
+
+  afterEach(() => {
+    storageListeners.forEach((listener) => window.removeEventListener('storage', listener));
+    vi.doUnmock('@/constants');
+    vi.restoreAllMocks();
+  });
+
+  const nextTask = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+
+  function storeInOtherWindow(raw, { key = ITEM_KEY, storageArea = localStorage } = {}) {
+    if (raw !== null && storageArea === localStorage) localStorage.setItem(key, raw);
+    window.dispatchEvent(new StorageEvent('storage', { key, newValue: raw, storageArea }));
+  }
+
+  async function restore(options = {}, key = 'key') {
+    const { useStorageRef } = await import('@/composables/storageRef');
+    const state = await new Promise((resolve) => {
+      const ref = useStorageRef({ list: [] }, key, {
+        syncWithOtherWindows: true,
+        ...options,
+        onRestored: () => resolve(ref),
+      });
+    });
+    await nextTask();
+    return state;
+  }
+
+  it('follows a value another window stores, without writing it back', async () => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    const state = await restore();
+
+    storeInOtherWindow('{"list":[1,2]}');
+    // Before its watcher runs
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    await nextTask();
+
+    expect(state.value).toEqual({ list: [1, 2] });
+    expect(setItem).not.toHaveBeenCalled();
+  });
+
+  it('saves a change made right after a value of another window', async () => {
+    const state = await restore();
+
+    storeInOtherWindow('{"list":[1]}');
+    state.value.list.push(2);
+    await nextTask();
+
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[1,2]}');
+  });
+
+  it('saves a change back to the value another window stored before', async () => {
+    const state = await restore();
+    storeInOtherWindow('{"list":[1]}');
+    state.value = { list: [1, 2] };
+    await nextTask();
+
+    state.value = { list: [1] };
+    await nextTask();
+
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[1]}');
+  });
+
+  it('does not write an unchanged value over a newer one of another window', async () => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    const state = await restore();
+    // Stored there, its event is still on the way.
+    localStorage.setItem(ITEM_KEY, '{"list":[1,2]}');
+
+    state.value = { list: [1] };
+    await nextTask();
+
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[1,2]}');
+  });
+
+  it('keeps its own later save when the event of an earlier one arrives', async () => {
+    const state = await restore();
+    state.value.list.push('Bob');
+    await nextTask();
+
+    // Stored by another window before the save above, its event comes after it.
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: ITEM_KEY, newValue: '{"list":["Alice"]}', storageArea: localStorage,
+    }));
+    expect(state.value).toEqual({ list: ['Bob'] });
+
+    state.value.list.push('Carol');
+    await nextTask();
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":["Bob","Carol"]}');
+  });
+
+  it('follows a value another window stored while its own save failed', async () => {
+    const state = await restore();
+    const { setItem } = Storage.prototype;
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(function storeOtherAndFail(key) {
+      setItem.call(this, key, '{"list":["W"]}');
+      throw new DOMException('Full', 'QuotaExceededError');
+    });
+
+    state.value.list.push('X');
+    await nextTask();
+    storeInOtherWindow('{"list":["W"]}');
+
+    expect(state.value).toEqual({ list: ['W'] });
+  });
+
+  /** The ref's next save fails, e.g. as the storage is full. Other keys' saves still work. */
+  function failNextSave() {
+    const { setItem } = Storage.prototype;
+    let hasFailed = false;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function failOnce(key, value) {
+      if (key === ITEM_KEY && !hasFailed) {
+        hasFailed = true;
+        throw new DOMException('Full', 'QuotaExceededError');
+      }
+      return setItem.call(this, key, value);
+    });
+  }
+
+  it('saves a value again after its save failed', async () => {
+    const state = await restore();
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    failNextSave();
+    state.value.list.push('X');
+    await nextTask();
+    expect(localStorage.getItem(ITEM_KEY)).toBeNull();
+
+    state.value = { list: ['X'] };
+    await nextTask();
+
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":["X"]}');
+  });
+
+  it('follows another window after its own value could not be read', async () => {
+    localStorage.setItem(ITEM_KEY, '{');
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { useStorageRef } = await import('@/composables/storageRef');
+    const onRestored = vi.fn();
+    // The failed read calls it before this returns, so `restore` can't be used.
+    const state = useStorageRef({ list: [] }, 'key', { syncWithOtherWindows: true, onRestored });
+    await vi.waitFor(() => expect(onRestored).toHaveBeenCalled());
+
+    storeInOtherWindow('{"list":[1]}');
+
+    expect(state.value).toEqual({ list: [1] });
+  });
+
+  it('keeps its migrated value when storing it failed', async () => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    failNextSave();
+
+    const state = await restore({ migrations: [(value) => ({ ...value, version: 2 })] });
+
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[1]}');
+    expect(state.value).toEqual({ list: [1], version: 2 });
+  });
+
+  it('follows other windows in the offscreen tab, not an event older than its own save', async () => {
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...await importOriginal(),
+      IS_OFFSCREEN_TAB: true,
+    }));
+    const state = await restore({ backgroundSync: true });
+    storeInOtherWindow('{"list":["Alice"]}');
+    expect(state.value).toEqual({ list: ['Alice'] });
+    state.value.list.push('Bob');
+    await nextTask();
+
+    // Stored by another window before the save above, its event comes after it.
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: ITEM_KEY, newValue: '{"list":["Carol"]}', storageArea: localStorage,
+    }));
+    await nextTask();
+
+    expect(state.value).toEqual({ list: ['Alice', 'Bob'] });
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":["Alice","Bob"]}');
+  });
+
+  it('applies a value another window stored during the restore, without its migrations', async () => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    let finishMigration;
+    const migration = vi.fn((value) => new Promise((resolve) => {
+      finishMigration = () => resolve(value);
+    }));
+    const restoring = restore({ migrations: [migration] });
+    await vi.waitFor(() => expect(migration).toHaveBeenCalled());
+
+    storeInOtherWindow('{"list":[1,2]}');
+    finishMigration();
+    const state = await restoring;
+    expect(state.value).toEqual({ list: [1, 2] });
+    storeInOtherWindow('{"list":[1,2,3]}');
+
+    expect(state.value).toEqual({ list: [1, 2, 3] });
+    expect(migration).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the migrated value it stored after a value of another window', async () => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    let finishMigration;
+    const restoring = restore({
+      migrations: [() => new Promise((resolve) => {
+        finishMigration = () => resolve({ list: [1], version: 2 });
+      })],
+    });
+    await vi.waitFor(() => expect(finishMigration).toBeDefined());
+
+    storeInOtherWindow('{"list":[1,2]}');
+    finishMigration();
+    const state = await restoring;
+
+    expect(state.value).toEqual({ list: [1], version: 2 });
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[1],"version":2}');
+  });
+
+  it.each([
+    ['of another key', ['{"list":[9]}', { key: 'sh-wallet_other' }]],
+    ['of the session storage', ['{"list":[9]}', { storageArea: sessionStorage }]],
+    ['of a removal', [null]],
+    ['that is not JSON', ['{']],
+    ['of null', ['null']],
+  ])('ignores an event %s', async (_, args) => {
+    const state = await restore();
+
+    storeInOtherWindow(...args);
+
+    expect(state.value).toEqual({ list: [] });
+  });
+
+  it.each([
+    ['without the option', false, false],
+    ['on mobile', true, true],
+  ])('does not listen %s', async (_, syncWithOtherWindows, isMobile) => {
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...await importOriginal(),
+      IS_MOBILE_APP: isMobile,
+    }));
+    const { useStorageRef } = await import('@/composables/storageRef');
+    storageListeners.length = 0;
+
+    await new Promise((resolve) => {
+      useStorageRef({ list: [] }, 'key', { syncWithOtherWindows, onRestored: resolve });
+    });
+
+    expect(storageListeners).toEqual([]);
+  });
+
+  it('does not listen for a key of the vault, which syncs itself', async () => {
+    const { STORAGE_KEYS } = await import('@/constants');
+    const { useStorageRef } = await import('@/composables/storageRef');
+    storageListeners.length = 0;
+
+    await new Promise((resolve) => {
+      useStorageRef('', STORAGE_KEYS.secureLoginTimeout, {
+        syncWithOtherWindows: true,
+        onRestored: resolve,
+      });
+    });
+
+    expect(storageListeners).toEqual([]);
+  });
+});

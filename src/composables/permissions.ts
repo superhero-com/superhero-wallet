@@ -50,6 +50,7 @@ const permissions = useStorageRef<PermissionRegistry>(
   STORAGE_KEYS.permissions,
   {
     backgroundSync: true,
+    syncWithOtherWindows: true,
     migrations: [
       migratePermissionsVuexToComposable,
       migratePermissionsDropEmptyHost,

@@ -75,6 +75,7 @@ const tokenFactories = useStorageRef<TokenFactory[]>(
 const customTokenSalesUrls = useStorageRef<Record<string, string[]>>(
   {},
   STORAGE_KEYS.customTokenSalesUrls,
+  { syncWithOtherWindows: true },
 );
 
 export const useAeTokenSales = createCustomScopedComposable(() => {

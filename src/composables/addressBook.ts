@@ -27,7 +27,11 @@ interface IAddressBookOptions {
   isBookmarked?: boolean;
 }
 
-const addressBook = useStorageRef<IAddressBookEntry[]>([], STORAGE_KEYS.addressBook);
+const addressBook = useStorageRef<IAddressBookEntry[]>(
+  [],
+  STORAGE_KEYS.addressBook,
+  { syncWithOtherWindows: true },
+);
 
 export const useAddressBook = createCustomScopedComposable(() => {
   const { openModal, openDefaultModal } = useModals();
