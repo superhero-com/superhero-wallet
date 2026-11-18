@@ -793,6 +793,19 @@ describe('useAccounts', () => {
       expect(WalletStorage.get(STORAGE_KEYS.activeAccountGlobalIdx)).toBe(2);
     });
 
+    it('activates the created account, not an imported one of its chain', async () => {
+      const accounts = await bootWithActiveImportedAccount();
+
+      accounts.setActiveAccountByGlobalIdx(accounts.addRawAccount({
+        isRestored: false, protocol: PROTOCOLS.ethereum, type: ACCOUNT_TYPES.hdWallet,
+      }));
+      await flushAsync();
+
+      expect(accounts.activeAccount.value).toMatchObject({
+        protocol: PROTOCOLS.ethereum, type: ACCOUNT_TYPES.hdWallet, globalIdx: 1,
+      });
+    });
+
     it('reports the switch from the imported account to the added one', async () => {
       const accounts = await bootWithActiveImportedAccount();
       const imported = accounts.activeAccount.value;

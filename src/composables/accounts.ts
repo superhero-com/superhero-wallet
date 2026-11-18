@@ -290,13 +290,6 @@ export const useAccounts = createCustomScopedComposable(() => {
     return accounts.value.find((account) => account.protocol === protocol);
   }
 
-  function getLastProtocolAccount(protocol: Protocol): IAccount | undefined {
-    const protocolAccounts = accountsGroupedByProtocol.value[protocol];
-    return (protocolAccounts)
-      ? protocolAccounts[protocolAccounts.length - 1]
-      : undefined;
-  }
-
   function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
     const accountCurrent = activeAccount.value;
     const accountNew = getAccountByGlobalIdx(globalIdx);
@@ -357,11 +350,10 @@ export const useAccounts = createCustomScopedComposable(() => {
     }
   }
 
-  /** Imported accounts keep their indexes. */
+  /** @returns Its global index. Imported accounts come after it, also those of its protocol. */
   function appendRawAccount(account: IAccountRaw): number {
     shiftImportedAccountIndexes(1);
-    accountsRaw.value.push(account);
-    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+    return accountsRaw.value.push(account) - 1;
   }
 
   /** Another window may have added accounts since this one read them. */
