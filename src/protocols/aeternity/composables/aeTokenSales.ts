@@ -127,10 +127,12 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < tokenSalesUrls.length; i++) {
       try {
-        // eslint-disable-next-line no-await-in-loop
-        const response = await fetchJson(`${tokenSalesUrls[i]}/tokens/${contractId}`);
+        const response = camelCaseKeysDeep(
+          // eslint-disable-next-line no-await-in-loop
+          await fetchJson(`${tokenSalesUrls[i]}/tokens/${contractId}`),
+        );
         tokenSales.value = uniqBy(
-          [...tokenSales.value, ...(response ? [normalizeTokenSales(response)] : [])],
+          [...(response ? [normalizeTokenSales(response)] : []), ...tokenSales.value],
           'address',
         );
         return;

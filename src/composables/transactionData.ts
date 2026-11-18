@@ -145,7 +145,7 @@ export function useTransactionData({
   );
 
   const isTokenSale = computed(
-    (): boolean => tokenSaleAddresses.value
+    (): boolean => !!innerTx.value?.contractId && tokenSaleAddresses.value
       .some((address) => address === innerTx.value?.contractId),
   );
 
