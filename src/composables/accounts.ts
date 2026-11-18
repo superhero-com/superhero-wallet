@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { pickBy, uniq } from 'lodash-es';
+import { mapValues, pickBy, uniq } from 'lodash-es';
 
 import type {
   AccountAddress,
@@ -339,7 +339,26 @@ export const useAccounts = createCustomScopedComposable(() => {
     return accountsAddressList.value.includes(address);
   }
 
+  /** Imported accounts come after `accountsRaw`, so adding to it moves their global indexes. */
+  function shiftImportedAccountIndexes(count: number) {
+    const rawCount = accountsRaw.value.length;
+    // Also one that can't be read now. A new wallet's index 0 is its first account.
+    const isImported = (globalIdx?: number) => globalIdx !== undefined
+      && rawCount > 0 && globalIdx >= rawCount;
+    const lastActive = protocolLastActiveGlobalIdx.value;
+    if (isImported(activeAccountGlobalIdx.value)) {
+      activeAccountGlobalIdx.value += count;
+    }
+    if (Object.values(lastActive).some(isImported)) {
+      protocolLastActiveGlobalIdx.value = mapValues(
+        lastActive,
+        (globalIdx) => (isImported(globalIdx) ? globalIdx! + count : globalIdx),
+      );
+    }
+  }
+
   function addRawAccount(account: IAccountRaw): number {
+    shiftImportedAccountIndexes(1);
     accountsRaw.value.push(account);
     return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
   }

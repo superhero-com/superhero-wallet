@@ -384,6 +384,50 @@ describe('useAccounts', () => {
         .toMatchObject({ globalIdx: 1, type: ACCOUNT_TYPES.hdWallet });
     });
 
+    describe('when an account is added', () => {
+      const btcSeedRaw = {
+        isRestored: false, protocol: PROTOCOLS.bitcoin, type: ACCOUNT_TYPES.hdWallet,
+      };
+
+      /** The imported Ethereum account (1) was the last active one of its protocol. */
+      async function bootAndAddBtcAccount() {
+        WalletStorage.set(STORAGE_KEYS.protocolLastActiveAccountIdx, {
+          [PROTOCOLS.aeternity]: 0,
+          [PROTOCOLS.ethereum]: 1,
+        });
+        const accounts = await bootUnreadable();
+        accounts.setActiveAccountByGlobalIdx(accounts.addRawAccount(btcSeedRaw));
+        await flushAsync();
+        return accounts;
+      }
+
+      it('keeps the last active one of their protocol, handed out once they can be read', async () => {
+        const accounts = await bootAndAddBtcAccount();
+        // Not the Bitcoin account at its old index
+        expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum)).toBeUndefined();
+
+        encryptionKeyRef.value = readingKey;
+        expect(await watchUntilTruthy(() => accounts.accounts.value.length === 3, 5000))
+          .toBe(true);
+
+        expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum))
+          .toMatchObject({ globalIdx: 2, type: ACCOUNT_TYPES.privateKey });
+      });
+
+      it('forgets the last active one of their protocol when they are removed', async () => {
+        openConfirmModalMock.mockResolvedValue(undefined);
+        const accounts = await bootAndAddBtcAccount();
+
+        accounts.offerToRemoveUnreadablePrivateKeyAccounts();
+        await vi.waitFor(() => expect(storedPrivateKeyAccounts()).toBeNull());
+
+        expect(WalletStorage.get(STORAGE_KEYS.protocolLastActiveAccountIdx)).toEqual({
+          [PROTOCOLS.aeternity]: 0,
+          [PROTOCOLS.bitcoin]: 1,
+        });
+      });
+    });
+
     it('refuses to import a private key over them, and offers to remove them', async () => {
       const accounts = await bootUnreadable();
 
@@ -689,6 +733,92 @@ describe('useAccounts', () => {
     const restarted = await boot();
     // Decrypting and deriving every protocol takes a while in a full run.
     await vi.waitFor(() => expect(importedAddresses(restarted)).toEqual(expected), 5000);
+  });
+
+  describe('adding an account', () => {
+    const importedEthRaw = {
+      type: ACCOUNT_TYPES.privateKey,
+      isRestored: false,
+      protocol: PROTOCOLS.ethereum,
+      privateKey: Buffer.from(IMPORTED_ETH_PRIVATE_KEY_HEX, 'hex'),
+    };
+    const newBtcRaw = {
+      isRestored: false, protocol: PROTOCOLS.bitcoin, type: ACCOUNT_TYPES.hdWallet,
+    };
+
+    /** An æternity seed account (0), and the imported Ethereum one (1), active. */
+    async function bootWithActiveImportedAccount() {
+      seedAccountsRaw([
+        { isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet },
+      ]);
+      encryptionKeyRef.value = await seedImportedEthAccount(importedEthRaw);
+      WalletStorage.set(STORAGE_KEYS.activeAccountGlobalIdx, 1);
+      WalletStorage.set(STORAGE_KEYS.protocolLastActiveAccountIdx, {
+        [PROTOCOLS.aeternity]: 0,
+        [PROTOCOLS.ethereum]: 1,
+      });
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsReady);
+      await flushAsync();
+      return accounts;
+    }
+
+    it('keeps the last active imported account of its protocol, as AccountCreate adds one', async () => {
+      const accounts = await bootWithActiveImportedAccount();
+
+      accounts.setActiveAccountByGlobalIdx(accounts.addRawAccount(newBtcRaw));
+      await flushAsync();
+
+      expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum))
+        .toMatchObject({
+          protocol: PROTOCOLS.ethereum, type: ACCOUNT_TYPES.privateKey, globalIdx: 2,
+        });
+      expect(accounts.activeAccount.value)
+        .toMatchObject({ protocol: PROTOCOLS.bitcoin, globalIdx: 1 });
+      expect(WalletStorage.get(STORAGE_KEYS.protocolLastActiveAccountIdx)).toEqual({
+        [PROTOCOLS.aeternity]: 0,
+        [PROTOCOLS.ethereum]: 2,
+        [PROTOCOLS.bitcoin]: 1,
+      });
+    });
+
+    it('keeps the active imported account active', async () => {
+      const accounts = await bootWithActiveImportedAccount();
+      const { address } = accounts.activeAccount.value;
+
+      accounts.addRawAccount(newBtcRaw);
+      await flushAsync();
+
+      expect(accounts.activeAccount.value).toMatchObject({ address, globalIdx: 2 });
+      expect(WalletStorage.get(STORAGE_KEYS.activeAccountGlobalIdx)).toBe(2);
+    });
+
+    it('reports the switch from the imported account to the added one', async () => {
+      const accounts = await bootWithActiveImportedAccount();
+      const imported = accounts.activeAccount.value;
+      const onChange = vi.fn();
+      accounts.onAccountChange(onChange);
+
+      accounts.setActiveAccountByGlobalIdx(accounts.addRawAccount(newBtcRaw));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange.mock.calls[0][0]).toMatchObject({ protocol: PROTOCOLS.bitcoin });
+      expect(onChange.mock.calls[0][1]).toMatchObject({ address: imported.address });
+    });
+
+    it('keeps the first account of a new wallet active', async () => {
+      const accounts = await boot();
+      await watchUntilTruthy(accounts.areAccountsReady);
+
+      accounts.addRawAccount({
+        isRestored: false, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet,
+      });
+      await flushAsync();
+
+      expect(accounts.activeAccountGlobalIdx.value).toBe(0);
+      expect(accounts.activeAccount.value)
+        .toMatchObject({ protocol: PROTOCOLS.aeternity, globalIdx: 0 });
+    });
   });
 
   describe('discoverAccounts', () => {
