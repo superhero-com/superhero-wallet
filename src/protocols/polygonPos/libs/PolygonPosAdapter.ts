@@ -56,6 +56,7 @@ import { tg } from '@/popup/plugins/i18n';
 import {
   POLYGON_POS_COIN_PRECISION,
   POLYGON_POS_COIN_SYMBOL,
+  POLYGON_POS_COINGECKO_COIN_ID,
   POLYGON_POS_CONTRACT_ID,
   POLYGON_POS_GAS_LIMIT,
   POLYGON_MDW_TO_NODE_APPROX_DELAY_TIME,
@@ -86,7 +87,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
 
   override coinContractId = POLYGON_POS_CONTRACT_ID;
 
-  override coinGeckoCoinId = 'matic-network';
+  override coinGeckoCoinId = POLYGON_POS_COINGECKO_COIN_ID;
 
   override coinPrecision = POLYGON_POS_COIN_PRECISION;
 

@@ -220,6 +220,39 @@ describe('useCurrencies', () => {
     expect(marketData.value.aeternity.currentPrice).toBe(0.1);
   });
 
+  it('prices Polygon PoS by POL, not the retired MATIC coin', async () => {
+    protocolsInUseRef.value = ['aeternity', 'polygonPos'];
+    fetchCoinCurrencyRatesMock.mockResolvedValue({
+      aeternity: { usd: 0.05 },
+      'polygon-ecosystem-token': { usd: 0.08 },
+      'matic-network': { usd: 0.126 },
+    });
+    fetchCoinMarketDataMock.mockResolvedValue([
+      { id: 'polygon-ecosystem-token', currentPrice: 0.08 },
+      { id: 'matic-network', currentPrice: 0.126 },
+    ]);
+
+    const { useCurrencies } = await import('@/composables/currencies');
+    const {
+      loadCurrencyRates, loadCoinsData, currencyRates, getCurrentCurrencyRate,
+      getFormattedFiat, marketData,
+    } = useCurrencies({ pollingDisabled: true });
+    await flushPromises();
+
+    // A MATIC rate cached by an older version
+    currencyRates.value = { polygonPos: { usd: 0.126 } };
+
+    await loadCurrencyRates();
+    await loadCoinsData();
+
+    expect(fetchCoinCurrencyRatesMock).toHaveBeenCalledWith('aeternity,polygon-ecosystem-token');
+    expect(fetchCoinMarketDataMock).toHaveBeenCalledWith('aeternity,polygon-ecosystem-token', 'usd');
+    expect(getCurrentCurrencyRate('polygonPos')).toBe(0.08);
+    expect(getCurrentCurrencyRate('aeternity')).toBe(0.05);
+    expect(getFormattedFiat(10, 'polygonPos')).toContain('0.80');
+    expect(marketData.value.polygonPos.currentPrice).toBe(0.08);
+  });
+
   it('formats fiat values, falling back to "no rate" and rounding tiny fractions to <0.01', async () => {
     fetchCoinCurrencyRatesMock.mockResolvedValue({ aeternity: { usd: 2 } });
 

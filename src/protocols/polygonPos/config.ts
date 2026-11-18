@@ -7,7 +7,7 @@ export const POLYGON_POS_CONTRACT_ID = 'polygonPos';
 export const POLYGON_POS_COIN_SYMBOL = 'POL';
 export const POLYGON_POS_COIN_PRECISION = 18;
 
-export const POLYGON_POS_COINGECKO_COIN_ID = 'polygon';
+export const POLYGON_POS_COINGECKO_COIN_ID = 'polygon-ecosystem-token';
 export const POLYGON_POS_GAS_LIMIT = 21000;
 
 /** Estimated time we need to wait for the middleware to sync with node */
