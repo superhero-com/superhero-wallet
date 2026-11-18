@@ -547,6 +547,83 @@ describe('usePermissions with another window', () => {
     expect(storedPermissions()[OTHER_HOST]).toBeUndefined();
   });
 
+  describe('saving an edited permission', () => {
+    /** The copy the permission form takes when it opens. */
+    const openForm = () => ({ ...usePermissions().permissions.value[HOST] });
+
+    it('keeps what was spent since the form opened', async () => {
+      const form = openForm();
+      spendInOtherWindow(8);
+
+      usePermissions().updatePermission(HOST, { ...form, transactionSignLimit: 20 });
+      await nextTask();
+
+      expect(storedPermissions()[HOST])
+        .toMatchObject({ transactionSignLimit: 20, transactionSignSpent: 8 });
+    });
+
+    it('keeps the day another window started counting since the form opened', async () => {
+      const registry = storedPermissions();
+      registry[HOST].transactionSignFirstAskedOn = new Date(Date.now() - 25 * 60 * 60 * 1000)
+        .toISOString();
+      storeInOtherWindow(registry);
+      const form = openForm();
+      const today = new Date().toISOString();
+      registry[HOST] = {
+        ...registry[HOST], transactionSignFirstAskedOn: today, transactionSignSpent: 8,
+      };
+      storeInOtherWindow(registry);
+
+      usePermissions().updatePermission(HOST, form);
+      await nextTask();
+
+      expect(storedPermissions()[HOST])
+        .toMatchObject({ transactionSignFirstAskedOn: today, transactionSignSpent: 8 });
+      // 2 AE are left of today's 10.
+      expect(usePermissions().checkTransactionSignLimit(HOST, { amount: 8 * ONE_AE_IN_AETTOS }))
+        .toBe(false);
+    });
+
+    it('keeps the scheme a connection set since the form opened', async () => {
+      const registry = storedPermissions();
+      registry[HOST] = { ...registry[HOST], protocol: 'http:' };
+      storeInOtherWindow(registry);
+      const form = openForm();
+      // Its https page connected.
+      registry[HOST] = { ...registry[HOST], protocol: 'https:' };
+      storeInOtherWindow(registry);
+
+      usePermissions().updatePermission(HOST, { ...form, name: 'Renamed' });
+      await nextTask();
+
+      expect(storedPermissions()[HOST]).toMatchObject({ name: 'Renamed', protocol: 'https:' });
+      expect(usePermissions().getPermissionForUrl(`http://${HOST}`)).toBeUndefined();
+    });
+
+    it('keeps what was spent when the host is renamed', async () => {
+      const form = openForm();
+      spendInOtherWindow(8);
+
+      usePermissions().updatePermission(HOST, { ...form, host: 'renamed.example' });
+      await nextTask();
+
+      expect(storedPermissions()[HOST]).toBeUndefined();
+      expect(storedPermissions()['renamed.example']).toMatchObject({ transactionSignSpent: 8 });
+    });
+
+    it('saves the form as it is when the permission was removed meanwhile', async () => {
+      const form = { ...openForm(), transactionSignSpent: 3 };
+      const registry = storedPermissions();
+      delete registry[HOST];
+      storeInOtherWindow(registry);
+
+      usePermissions().updatePermission(HOST, form);
+      await nextTask();
+
+      expect(storedPermissions()[HOST]).toMatchObject({ transactionSignSpent: 3 });
+    });
+  });
+
   it('stops signing without asking once another window removed the permission', () => {
     const registry = storedPermissions();
     delete registry[HOST];

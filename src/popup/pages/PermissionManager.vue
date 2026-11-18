@@ -207,7 +207,12 @@ export default defineComponent({
 
     const { balance } = useBalances();
     const { marketData } = useCurrencies();
-    const { permissions, addPermission, removePermission } = usePermissions();
+    const {
+      permissions,
+      addPermission,
+      removePermission,
+      updatePermission,
+    } = usePermissions();
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;
@@ -235,15 +240,15 @@ export default defineComponent({
         `${hostValue.includes('http') ? '' : 'http://'}${hostValue}`,
       ));
 
-      if (host !== routeHost) {
-        removePermission(routeHost);
-      }
-
       if (!permission.value.dailySpendLimit) {
         permission.value.transactionSignLimit = 0;
       }
 
-      addPermission({ ...permission.value, host });
+      if (editView) {
+        updatePermission(routeHost, { ...permission.value, host });
+      } else {
+        addPermission({ ...permission.value, host });
+      }
       router.replace({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 

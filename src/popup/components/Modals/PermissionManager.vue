@@ -210,7 +210,12 @@ export default defineComponent({
 
     const { balance } = useBalances();
     const { marketData } = useCurrencies();
-    const { permissions, addPermission, removePermission } = usePermissions();
+    const {
+      permissions,
+      addPermission,
+      removePermission,
+      updatePermission,
+    } = usePermissions();
 
     const editView = !!props.host;
 
@@ -237,15 +242,15 @@ export default defineComponent({
         `${hostValue.includes('http') ? '' : 'http://'}${hostValue}`,
       ));
 
-      if (host !== props.host) {
-        removePermission(props.host);
-      }
-
       if (!permission.value.dailySpendLimit) {
         permission.value.transactionSignLimit = 0;
       }
 
-      addPermission({ ...permission.value, host });
+      if (editView) {
+        updatePermission(props.host, { ...permission.value, host });
+      } else {
+        addPermission({ ...permission.value, host });
+      }
       props.resolve();
     }
 

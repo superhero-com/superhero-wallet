@@ -126,6 +126,27 @@ export function usePermissions() {
     delete permissions.value[host];
   }
 
+  /**
+   * Saves an edited permission. What the form doesn't edit is kept as stored,
+   * as it may have changed meanwhile, e.g. in another window.
+   */
+  function updatePermission(previousHost: string, permission: IPermission) {
+    const {
+      protocol,
+      transactionSignSpent,
+      transactionSignFirstAskedOn,
+    } = permissions.value[previousHost] ?? permission;
+    if (previousHost !== permission.host) {
+      removePermission(previousHost);
+    }
+    addPermission({
+      ...permission,
+      protocol,
+      transactionSignSpent,
+      transactionSignFirstAskedOn,
+    });
+  }
+
   function hasDayPassed(isoDate: string) {
     return new Date().getTime() - new Date(isoDate).getTime() >= 24 * 60 * 60 * 1000;
   }
@@ -315,6 +336,7 @@ export function usePermissions() {
     permissions,
     addPermission,
     removePermission,
+    updatePermission,
     getPermissionForUrl,
     checkPermission,
     checkOrAskPermission,
