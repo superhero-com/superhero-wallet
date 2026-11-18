@@ -1,4 +1,4 @@
-import { computed, Ref } from 'vue';
+import { computed, Ref, watch } from 'vue';
 import { isAuctionName, isName, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 
@@ -51,11 +51,15 @@ import { useAeSdk } from './aeSdk';
 
 import { useTippingContracts } from './tippingContracts';
 
+const TOKEN_SALE_TRADE_FUNCTIONS = Object.values(TX_FUNCTIONS_TOKEN_SALE).flat();
+
 interface UseTransactionOptions {
   transaction: Ref<ITransaction | undefined>;
   transactionCustomOwner?: Ref<AccountAddress | undefined>;
   showDetailedAllowanceInfo?: boolean;
   hideFeeFromAssets?: boolean;
+  /** Look up the sale of a buy or sell that the token sales list is missing */
+  lookUpTokenSale?: boolean;
 }
 
 /**
@@ -66,6 +70,7 @@ export function useTransactionData({
   transactionCustomOwner,
   showDetailedAllowanceInfo = false,
   hideFeeFromAssets = false,
+  lookUpTokenSale = false,
 }: UseTransactionOptions) {
   const { dexContracts, superheroContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
@@ -79,6 +84,7 @@ export function useTransactionData({
   const {
     tokenFactories,
     tokenSaleAddresses,
+    loadTokenSaleOnce,
     tokenSaleAddressToTokenContractAddress,
   } = useAeTokenSales();
 
@@ -162,6 +168,22 @@ export function useTransactionData({
       && includes(TX_FUNCTIONS_TOKEN_SALE.sell, txFunctionRaw.value)
     ),
   );
+
+  if (lookUpTokenSale) {
+    watch(
+      () => (
+        protocol.value === PROTOCOLS.aeternity
+        && includes(TOKEN_SALE_TRADE_FUNCTIONS, txFunctionRaw.value)
+        && !isTokenSale.value
+      ) ? innerTx.value?.contractId : undefined,
+      (contractId) => {
+        if (contractId) {
+          loadTokenSaleOnce(contractId);
+        }
+      },
+      { immediate: true },
+    );
+  }
 
   const isTokenSaleFactory = computed(
     (): boolean => tokenFactories.value

@@ -5,14 +5,14 @@ import { uniqBy } from 'lodash-es';
 
 import { tg as t } from '@/popup/plugins/i18n';
 import { ITokenSale } from '@/types';
-import { NETWORK_TYPE_CUSTOM, STORAGE_KEYS } from '@/constants';
+import { NETWORK_TYPE_CUSTOM, PROTOCOLS, STORAGE_KEYS } from '@/constants';
 import {
   createCustomScopedComposable,
   fetchAllPages,
   fetchJson,
   handleUnknownError,
 } from '@/utils';
-import { useNetworks } from '@/composables';
+import { useFungibleTokens, useNetworks } from '@/composables';
 import { AE_TOKEN_SALES_URLS } from '@/protocols/aeternity/config';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
 import { useStorageRef } from '@/composables/storageRef';
@@ -29,6 +29,8 @@ const TIMEOUT_LIMIT = 5000;
 const PER_ACCOUNT_TOKEN_SALES_REFRESH_INTERVAL = 60_000;
 const lastTokenSalesByAccountRefreshTime = new Map<string, number>();
 const inFlightTokenSalesByAccount = new Map<string, Promise<void>>();
+/** Contracts of transactions looked up once per network, sale or not */
+const tokenSaleLookups = new Map<string, Promise<void>>();
 
 let composableInitialized = false;
 
@@ -113,17 +115,19 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
    * about contractId and saving it in tokenSales list,
    * if contractId belongs to token sale.
    * @param contractId - sale address or token address
-   * @returns void
+   * @returns false if no token sales API answered
    */
   async function loadTokenSalesInfoByContractId(
     contractId: Encoded.ContractAddress,
-  ): Promise<void> {
+  ): Promise<boolean> {
+    const currentNetworkName = activeNetwork.value.name;
     const tokenSalesUrls = [
       ...(activeNetwork.value.type !== NETWORK_TYPE_CUSTOM
         ? [AE_TOKEN_SALES_URLS[activeNetwork.value.type]]
         : []),
       ...(customTokenSalesUrls.value[activeNetwork.value.name] || []),
     ];
+    let isAnswered = false;
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < tokenSalesUrls.length; i++) {
       try {
@@ -131,15 +135,42 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
           // eslint-disable-next-line no-await-in-loop
           await fetchJson(`${tokenSalesUrls[i]}/tokens/${contractId}`),
         );
+        if (currentNetworkName !== activeNetwork.value.name) {
+          return true;
+        }
         tokenSales.value = uniqBy(
           [...(response ? [normalizeTokenSales(response)] : []), ...tokenSales.value],
           'address',
         );
-        return;
-      } catch (e) {
-        /** NOOP */
+        return true;
+      } catch (e: any) {
+        // An unknown contract comes back as an empty body or a 404
+        isAnswered ||= e instanceof SyntaxError || e?.statusCode === 404;
       }
     }
+    return isAnswered;
+  }
+
+  /**
+   * For transactions of sales missing from `tokenSales`, e.g. of tokens the account sold all of.
+   */
+  function loadTokenSaleOnce(contractId: Encoded.ContractAddress): Promise<void> {
+    let lookup = tokenSaleLookups.get(contractId);
+    if (!lookup) {
+      lookup = (async () => {
+        if (!await loadTokenSalesInfoByContractId(contractId)) {
+          // Ask again next time
+          tokenSaleLookups.delete(contractId);
+          return;
+        }
+        const tokenAddress = tokenSaleAddressToTokenContractAddress(contractId);
+        if (tokenAddress !== contractId) {
+          await useFungibleTokens().loadSingleToken(tokenAddress, PROTOCOLS.aeternity);
+        }
+      })();
+      tokenSaleLookups.set(contractId, lookup);
+    }
+    return lookup;
   }
 
   async function loadTokenSalesInfoByAccount(
@@ -281,6 +312,7 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
         tokenFactories.value = [];
         lastTokenSalesByAccountRefreshTime.clear();
         inFlightTokenSalesByAccount.clear();
+        tokenSaleLookups.clear();
         await loadAllTokenFactoriesInfo();
       }
     });
@@ -301,6 +333,7 @@ export const useAeTokenSales = createCustomScopedComposable(() => {
     addCustomTokenSalesUrl,
     loadTokenSalesInfoByContractId,
     loadAllTokenSalesInfoByAccount,
+    loadTokenSaleOnce,
     removeCustomTokenSalesUrl,
     tokenSaleAddressToTokenContractAddress,
     validateTokenSalesUrl,

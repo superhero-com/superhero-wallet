@@ -15,12 +15,15 @@ import SwapRoute from '@/popup/components/SwapRoute.vue';
 const HASH = 'th_2QcxMg7FmhousM56HEagXQ6ke29FrddG98bSKKB9Z9gCibyxy6';
 const CALLER = 'ak_AzQPCBHpxSdNURATT41CZANu8WTxtvxeUY33z4dgbDfyA6PtJ';
 const TARGET = 'ak_FfKJsMbXte7J8JNAfZzxvEaVRLXvAtm857vWME4oJz33hFYnk';
+const UNLISTED_SALE = 'ct_wS3iFu3UkvprrkreRdjJJ8RrK9tLou5LeBBSbiPbmf6g51gvt';
 const contracts = SUPERHERO_CONTRACTS[AE_NETWORK_MAINNET_ID];
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({ push: vi.fn() })),
   useRoute: vi.fn(() => ({ params: { hash: HASH, transactionOwner: CALLER } })),
 }));
+
+let fetchMock: ReturnType<typeof vi.fn>;
 
 function contractCall(contractId: string, fn: string, args: any[]): ITransaction {
   return {
@@ -66,7 +69,8 @@ describe('Superhero transaction details', () => {
   });
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 200 })));
+    fetchMock = vi.fn(async () => new Response('', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
   });
 
   afterEach(() => {
@@ -115,5 +119,12 @@ describe('Superhero transaction details', () => {
 
     expect(wrapper.find('.transaction-details-base .content').exists()).toBe(true);
     expect(wrapper.find('[data-cy=post-content]').exists()).toBe(false);
+  });
+
+  it('looks up the sale of a buy missing from the token sales', async () => {
+    await mountDetails(contractCall(UNLISTED_SALE, 'buy', [{ type: 'int', value: '1' }]));
+
+    await vi.waitFor(() => expect(fetchMock.mock.calls.map(([url]) => url))
+      .toContainEqual(expect.stringMatching(new RegExp(`/tokens/${UNLISTED_SALE}$`))));
   });
 });

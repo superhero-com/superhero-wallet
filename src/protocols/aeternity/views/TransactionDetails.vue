@@ -314,6 +314,7 @@ export default defineComponent({
       transaction,
       transactionCustomOwner,
       showDetailedAllowanceInfo: true,
+      lookUpTokenSale: true,
     });
 
     const hideFiat = computed(() => (
