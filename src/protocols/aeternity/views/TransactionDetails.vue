@@ -48,6 +48,14 @@
       />
 
       <DetailsItem
+        v-if="postContent"
+        :label="$t('transaction.superhero.postContent')"
+        :value="postContent"
+        class="post-content"
+        data-cy="post-content"
+      />
+
+      <DetailsItem
         v-if="aensName"
         :label="$t('pages.transactionDetails.name')"
         :value="aensName"
@@ -300,11 +308,13 @@ export default defineComponent({
       innerTx,
       innerTxTag,
       outerTxTag,
+      superheroTxAction,
       transactionAssets,
     } = useTransactionData({
       transaction,
       transactionCustomOwner,
       showDetailedAllowanceInfo: true,
+      lookUpTokenSale: true,
     });
 
     const hideFiat = computed(() => (
@@ -331,6 +341,11 @@ export default defineComponent({
     const preclaimCommitment = computed(() => (
       innerTxTag.value === Tag.NamePreclaimTx
         ? (innerTx.value?.commitmentId || (innerTx.value as ITx & { commitment_id?: string })?.commitment_id || '')
+        : ''
+    ));
+    const postContent = computed((): string => (
+      superheroTxAction.value === 'post' || superheroTxAction.value === 'comment'
+        ? String(innerTx.value?.arguments?.[0]?.value ?? '')
         : ''
     ));
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
@@ -457,6 +472,7 @@ export default defineComponent({
       getTransactionPayload,
       aensName,
       preclaimCommitment,
+      postContent,
       tipUrl,
       tipLink,
       direction,
@@ -499,7 +515,8 @@ export default defineComponent({
     }
   }
 
-  .aens-name:deep() {
+  .aens-name:deep(),
+  .post-content:deep() {
     width: 100%;
 
     .value {
@@ -508,6 +525,10 @@ export default defineComponent({
       max-width: 100%;
       overflow-wrap: anywhere;
     }
+  }
+
+  .post-content:deep() .value {
+    white-space: pre-line;
   }
 
   .aens-commitment:deep() {

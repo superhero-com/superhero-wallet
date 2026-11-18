@@ -743,6 +743,40 @@
       "tokenName": "Token name",
       "bought": "Bought",
       "sold": "Sold"
+    },
+    "superhero": {
+      "tag": "Superhero",
+      "type": {
+        "post": "Post",
+        "comment": "Comment",
+        "follow": "Follow",
+        "unfollow": "Unfollow",
+        "block": "Block",
+        "unblock": "Unblock",
+        "delegate": "Delegate",
+        "revokeDelegation": "Revoke delegation",
+        "addPoll": "Create poll",
+        "createInvites": "Create invites",
+        "revokeInvite": "Revoke invite",
+        "collectRewards": "Collect rewards",
+        "redeemInvite": "Redeem invite"
+      },
+      "listType": {
+        "post": "Posted",
+        "comment": "Commented",
+        "follow": "Followed",
+        "unfollow": "Unfollowed",
+        "block": "Blocked",
+        "unblock": "Unblocked",
+        "delegate": "Voting power delegated",
+        "revokeDelegation": "Delegation revoked",
+        "addPoll": "Poll created",
+        "createInvites": "Invites created",
+        "revokeInvite": "Invite revoked",
+        "collectRewards": "Rewards collected",
+        "redeemInvite": "Invite redeemed"
+      },
+      "postContent": "Content"
     }
   },
   "pages": {

@@ -125,6 +125,7 @@ export default defineComponent({
       transaction: currentTransaction,
       transactionCustomOwner,
       hideFeeFromAssets: props.hideFeeFromAssets,
+      lookUpTokenSale: true,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {

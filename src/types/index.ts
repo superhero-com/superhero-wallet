@@ -615,6 +615,29 @@ export type DexFunctionType =
 
 export type TokenSaleFunctionType = 'buy' | 'sell';
 
+export type SuperheroContractType =
+  | 'posts'
+  | 'socialGraph'
+  | 'governance'
+  | 'affiliation';
+
+export type ISuperheroContracts = Record<SuperheroContractType, Encoded.ContractAddress[]>;
+
+export type SuperheroTxAction =
+  | 'post'
+  | 'comment'
+  | 'follow'
+  | 'unfollow'
+  | 'block'
+  | 'unblock'
+  | 'delegate'
+  | 'revokeDelegation'
+  | 'addPoll'
+  | 'createInvites'
+  | 'revokeInvite'
+  | 'collectRewards'
+  | 'redeemInvite';
+
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 
 export interface IFeeItem {

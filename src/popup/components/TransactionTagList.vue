@@ -25,7 +25,7 @@ import { Tag } from '@aeternity/aepp-sdk';
 
 import type { ITransaction } from '@/types';
 import { useFungibleTokens, useTippingContracts, useTransactionData } from '@/composables';
-import { excludeFalsy, includes } from '@/utils';
+import { excludeFalsy, getSuperheroTxLabel, includes } from '@/utils';
 import {
   AENS,
   DEX,
@@ -64,6 +64,7 @@ export default defineComponent({
       isTokenSaleBuy,
       isTokenSaleFactory,
       isTokenSaleSell,
+      superheroTxAction,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
     });
@@ -104,7 +105,7 @@ export default defineComponent({
           t('transaction.type.contractCallTx'),
           t('transaction.type.multisigProposal'),
         );
-      } else if (innerTxTag.value === Tag.SpendTx) {
+      } else if (innerTxTag.value === Tag.SpendTx && !superheroTxAction.value) {
         arr.push(
           t('transaction.type.spendTx'),
           direction.value === TX_DIRECTION.received
@@ -132,6 +133,11 @@ export default defineComponent({
         );
       } else if (isTokenSaleFactory.value) {
         arr.push(t('transaction.tokenSale.createToken'));
+      } else if (superheroTxAction.value) {
+        arr.push(
+          t('transaction.superhero.tag'),
+          getSuperheroTxLabel(superheroTxAction.value),
+        );
       } else if (
         props.transaction.claim
         || (
