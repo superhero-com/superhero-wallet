@@ -357,10 +357,41 @@ export const useAccounts = createCustomScopedComposable(() => {
     }
   }
 
-  function addRawAccount(account: IAccountRaw): number {
+  /** Imported accounts keep their indexes. */
+  function appendRawAccount(account: IAccountRaw): number {
     shiftImportedAccountIndexes(1);
     accountsRaw.value.push(account);
     return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+  }
+
+  /** Another window may have added accounts since this one read them. */
+  function adoptAccountsAddedElsewhere() {
+    const current = accountsRaw.value;
+    // An empty list is a wallet being set up, or one that couldn't be read.
+    if (IS_MOBILE_APP || !current.length) return;
+    const stored = WalletStorage.get<IAccountRaw[]>(STORAGE_KEYS.accountsRaw);
+    if (
+      !Array.isArray(stored)
+      || stored.length <= current.length
+      || JSON.stringify(stored.slice(0, current.length)) !== JSON.stringify(current)
+    ) {
+      return;
+    }
+    const added = stored.slice(current.length);
+    shiftImportedAccountIndexes(added.length);
+    accountsRaw.value.push(...added);
+  }
+
+  function addRawAccount(account: IAccountRaw): number {
+    adoptAccountsAddedElsewhere();
+    // E.g. a Ledger account another window added meanwhile
+    const existingIdx = (account.type !== ACCOUNT_TYPES.hdWallet && account.address)
+      ? accountsRaw.value.findIndex(({ type, protocol, address }) => (
+        type === account.type && protocol === account.protocol && address === account.address
+      ))
+      : -1;
+    if (existingIdx !== -1) return existingIdx;
+    return appendRawAccount(account);
   }
 
   /**
@@ -432,6 +463,8 @@ export const useAccounts = createCustomScopedComposable(() => {
       offerToRemoveUnreadablePrivateKeyAccounts();
       throw new ImportedAccountsUnreadableError();
     }
+    // Its global index comes after them.
+    adoptAccountsAddedElsewhere();
     let importedIndex = 0;
     await accountsPrivateKeysDecrypted.update((plaintext) => {
       const currentAccounts: IAccountRaw[] = JSON.parse(plaintext || '[]');
@@ -470,9 +503,10 @@ export const useAccounts = createCustomScopedComposable(() => {
         })),
     );
 
+    // Not added to the accounts of another window, which may have discovered them too.
     PROTOCOL_LIST.forEach((protocol, index) => {
       for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
-        addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
+        appendRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       }
     });
 
@@ -483,11 +517,11 @@ export const useAccounts = createCustomScopedComposable(() => {
           title: tg('modals.createAccount.title'),
           subtitle: tg('modals.createAccount.generateOrImport'),
         });
-        addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
+        appendRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       } catch (error) { /* NOOP */ }
     }
     if (!accountsRaw.value.length) {
-      addRawAccount({
+      appendRawAccount({
         isRestored: true,
         protocol: PROTOCOLS.aeternity,
         type: ACCOUNT_TYPES.hdWallet,

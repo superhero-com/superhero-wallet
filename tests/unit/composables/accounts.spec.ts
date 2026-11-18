@@ -26,7 +26,7 @@ import {
   STORAGE_KEYS,
 } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
-import { watchUntilTruthy } from '@/utils';
+import { composeStorageKeys, watchUntilTruthy } from '@/utils';
 import {
   generateEncryptionKey,
   generateSalt,
@@ -806,6 +806,94 @@ describe('useAccounts', () => {
       expect(onChange.mock.calls[0][1]).toMatchObject({ address: imported.address });
     });
 
+    describe('after another window added accounts', () => {
+      const aeSeedRaw = {
+        isRestored: true, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet,
+      };
+      const ethSeedRaw = {
+        isRestored: false, protocol: PROTOCOLS.ethereum, type: ACCOUNT_TYPES.hdWallet,
+      };
+      const ledgerRaw = {
+        idx: 0,
+        address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+        type: ACCOUNT_TYPES.ledger,
+        publicKey: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+        protocol: PROTOCOLS.aeternity,
+        isRestored: false,
+      };
+      const storedAccountsRaw = () => WalletStorage.get(STORAGE_KEYS.accountsRaw);
+
+      async function bootSeedAccount() {
+        seedAccountsRaw([aeSeedRaw]);
+        const accounts = await boot();
+        await watchUntilTruthy(accounts.areAccountsReady);
+        await flushAsync();
+        return accounts;
+      }
+
+      it('keeps them', async () => {
+        const accounts = await bootSeedAccount();
+        seedAccountsRaw([aeSeedRaw, ethSeedRaw]);
+
+        accounts.addRawAccount(newBtcRaw);
+        await flushAsync();
+
+        expect(storedAccountsRaw()).toEqual([aeSeedRaw, ethSeedRaw, newBtcRaw]);
+      });
+
+      it('keeps the active imported account active', async () => {
+        const accounts = await bootWithActiveImportedAccount();
+        const { address } = accounts.activeAccount.value;
+        seedAccountsRaw([aeSeedRaw, ethSeedRaw]);
+
+        accounts.addRawAccount(newBtcRaw);
+        await flushAsync();
+
+        expect(accounts.activeAccount.value).toMatchObject({ address, globalIdx: 3 });
+        expect(accounts.getLastActiveProtocolAccount(PROTOCOLS.ethereum))
+          .toMatchObject({ address, globalIdx: 3 });
+      });
+
+      it('stores its own list over one that does not continue it', async () => {
+        const accounts = await bootSeedAccount();
+        // Another window rewrote it instead of adding to it.
+        seedAccountsRaw([ethSeedRaw, aeSeedRaw]);
+
+        accounts.addRawAccount(newBtcRaw);
+        await flushAsync();
+
+        expect(storedAccountsRaw()).toEqual([aeSeedRaw, newBtcRaw]);
+      });
+
+      it('does not add a Ledger account twice', async () => {
+        const accounts = await bootSeedAccount();
+        seedAccountsRaw([aeSeedRaw, ledgerRaw]);
+
+        expect(accounts.addRawAccount(ledgerRaw)).toBe(1);
+        await flushAsync();
+
+        expect(storedAccountsRaw()).toEqual([aeSeedRaw, ledgerRaw]);
+      });
+
+      it('gives an imported account the index other windows read', async () => {
+        encryptionKeyRef.value = await generateEncryptionKey('test-password', generateSalt());
+        isAuthenticatedRef.value = true;
+        const accounts = await bootSeedAccount();
+        seedAccountsRaw([aeSeedRaw, ethSeedRaw]);
+
+        accounts.setActiveAccountByGlobalIdx(await accounts.addPrivateKeyAccount(importedEthRaw));
+        await flushAsync();
+        const { address } = accounts.activeAccount.value;
+
+        // E.g. the offscreen tab after a reload
+        vi.resetModules();
+        const restarted = await boot();
+        await vi.waitFor(() => expect(restarted.accounts.value).toHaveLength(3), 5000);
+        expect(restarted.activeAccount.value)
+          .toMatchObject({ type: ACCOUNT_TYPES.privateKey, address });
+      });
+    });
+
     it('keeps the first account of a new wallet active', async () => {
       const accounts = await boot();
       await watchUntilTruthy(accounts.areAccountsReady);
@@ -818,6 +906,23 @@ describe('useAccounts', () => {
       expect(accounts.activeAccountGlobalIdx.value).toBe(0);
       expect(accounts.activeAccount.value)
         .toMatchObject({ protocol: PROTOCOLS.aeternity, globalIdx: 0 });
+    });
+
+    it('adds an account when the stored accounts can\'t be read', async () => {
+      localStorage.setItem(composeStorageKeys(STORAGE_KEYS.accountsRaw), '{');
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const account = {
+        isRestored: false, protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.hdWallet,
+      };
+      try {
+        const accounts = await boot();
+        await watchUntilTruthy(accounts.areAccountsRestored);
+
+        expect(() => accounts.addRawAccount(account)).not.toThrow();
+        expect(accounts.accountsRaw.value).toEqual([account]);
+      } finally {
+        warnSpy.mockRestore();
+      }
     });
   });
 
@@ -888,6 +993,23 @@ describe('useAccounts', () => {
 
       await expect(accounts.discoverAccounts()).resolves.toBe(true);
       expect(protocolsOf(accounts)).toEqual([AE, AE]);
+    });
+
+    it('does not add the found accounts to those another window found meanwhile', async () => {
+      const accounts = await bootRestored();
+      const release = await stubNodes(usedUpTo({ [AE]: 1, [ETH]: 0 }));
+      const { PROTOCOL_LIST } = await import('@/constants');
+      const counts = { [AE]: 2, [ETH]: 1 };
+      // In the order a discovery stores them
+      const found = PROTOCOL_LIST.flatMap((protocol) => Array(counts[protocol] ?? 0)
+        .fill({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet }));
+      seedAccountsRaw(found);
+      release();
+
+      await accounts.discoverAccounts();
+      await flushAsync();
+
+      expect(WalletStorage.get(STORAGE_KEYS.accountsRaw)).toEqual(found);
     });
 
     it('asks for a protocol when a complete discovery finds nothing', async () => {
