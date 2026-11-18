@@ -145,7 +145,9 @@ export default defineComponent({
       let hasComma = !props.transaction.transactionOwner;
       let text = txTypeListLabel.value; // Default value
 
-      if (
+      if (outerTxTag.value === Tag.SpendTx && superheroTxAction.value) {
+        text = getSuperheroTxListLabel(superheroTxAction.value);
+      } else if (
         outerTxTag.value === Tag.SpendTx
         || (outerTxTag.value === Tag.GaMetaTx && innerTxTag.value === Tag.SpendTx)
       ) {

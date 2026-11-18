@@ -354,6 +354,19 @@ export function getSuperheroTxAction(
   superheroContracts?: ISuperheroContracts,
 ): SuperheroTxAction | null {
   const tx: ITx | undefined = transaction?.tx && getInnerTransaction(transaction.tx);
+
+  // An invite is redeemed with its own key, so the invitee only sees the treasury's payout.
+  // A transaction to sign has no hash yet and can name any sender.
+  if (
+    transaction?.hash
+    && tx
+    && getTxTag(tx) === Tag.SpendTx
+    && superheroContracts?.affiliation
+      .some((contractId) => contractId.replace('ct_', 'ak_') === tx.senderId)
+  ) {
+    return 'redeemInvite';
+  }
+
   if (!tx?.contractId || !tx.function || !superheroContracts) {
     return null;
   }

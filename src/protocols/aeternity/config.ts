@@ -306,6 +306,7 @@ export const SUPERHERO_TX_FUNCTIONS: Record<
   affiliation: {
     register_invitation_code: 'createInvites',
     revoke_invitation_code: 'revokeInvite',
+    redeem_invitation_code: 'redeemInvite',
     withdraw: 'collectRewards',
   },
 };

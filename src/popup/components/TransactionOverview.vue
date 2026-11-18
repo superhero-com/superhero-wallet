@@ -113,7 +113,9 @@ export default defineComponent({
               address: senderId,
               name: getName(senderId).value,
               url: protocolExplorer.prepareUrlForAccount(senderId),
-              label: t('transaction.overview.accountAddress'),
+              label: superheroTxAction.value
+                ? t('transaction.superhero.tag')
+                : t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,

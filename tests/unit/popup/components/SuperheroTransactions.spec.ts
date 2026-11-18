@@ -1,5 +1,6 @@
 import { defineComponent, ref } from 'vue';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
+import { Tag } from '@aeternity/aepp-sdk';
 import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { i18n } from '@/popup/plugins/i18n';
@@ -8,7 +9,9 @@ import {
   DEX_CONTRACTS,
   SUPERHERO_CONTRACTS,
 } from '@/protocols/aeternity/config';
+import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { useAeSdk } from '@/composables/aeSdk';
+import { useAeMiddleware } from '@/protocols/aeternity/composables/aeMiddleware';
 import { useTransactionData } from '@/composables/transactionData';
 import TransactionTagList from '@/popup/components/TransactionTagList.vue';
 import TransactionLabel from '@/popup/components/TransactionLabel.vue';
@@ -59,6 +62,36 @@ const collectRewards = contractCall(contracts.affiliation[0], 'withdraw');
 const waeWithdraw = contractCall(wae, 'withdraw', [{ type: 'int', value: '1000' }]);
 const unknownPost = contractCall(OTHER_CONTRACT, 'post_without_tip', post.tx.arguments);
 
+const INVITEE = 'ak_2SYHAH6gvgSiCrb7vgAdB29nTB4EhLosea7ptFRGWoxQaVJqhm';
+const TREASURY = 'ak_2GG42rs2FDPTXuUCWHMn98bu5Ab6mgNxY7KdGAKUNsrLqutNxZ';
+const redeemCall = contractCall(contracts.affiliation[0], 'redeem_invitation_code', [
+  { type: 'address', value: INVITEE },
+]);
+
+// The invitee's mainnet activity for th_2C8i6i99…, where the factory is the `contract_id`
+const inviteRedeem = useAeMiddleware().normalizeMiddlewareTransactionStructure(
+  camelCaseKeysDeep({
+    type: 'InternalContractCallEvent',
+    block_time: 1780479539506,
+    payload: {
+      function: 'Chain.spend',
+      contract_id: 'ct_25cqTw85wkF5cbcozmHHUCuybnfH9WaRZXSgEcNNXG9LsCJWTN',
+      call_tx_hash: 'th_2C8i6i99eUz3c8iCPJnGBqWfqxu9cSAS843pTfocgkRLVAYv6x',
+      internal_tx: {
+        amount: 1000000000000000000,
+        fee: 0,
+        nonce: 0,
+        payload: 'ba_Q2hhaW4uc3BlbmRFa4Tl',
+        recipient_id: INVITEE,
+        sender_id: TREASURY,
+        type: 'SpendTx',
+        version: 1,
+      },
+    },
+  }),
+  INVITEE,
+);
+
 const global = { plugins: [i18n] };
 
 enableAutoUnmount(afterEach);
@@ -90,6 +123,8 @@ describe('Superhero app transactions', () => {
     ['comment', comment, 'Comment'],
     ['follow', follow, 'Follow'],
     ['affiliation withdraw', collectRewards, 'Collect rewards'],
+    ['redeemed invite', inviteRedeem, 'Redeem invite'],
+    ['invite redeem call', redeemCall, 'Redeem invite'],
   ])('tags a %s as a Superhero transaction', (_, transaction, tag) => {
     expect(getTags(transaction)).toEqual(['Superhero', tag]);
   });
@@ -99,6 +134,7 @@ describe('Superhero app transactions', () => {
     ['comment', comment, 'Commented'],
     ['follow', follow, 'Followed'],
     ['affiliation withdraw', collectRewards, 'Rewards collected'],
+    ['redeemed invite', inviteRedeem, 'Invite redeemed'],
   ])('labels a %s on the transaction list', (_, transaction, label) => {
     const wrapper = mount(TransactionLabel, { global, props: { transaction } });
     expect(wrapper.find('.type').text().replace(',', '').trim()).toBe(label);
@@ -117,6 +153,34 @@ describe('Superhero app transactions', () => {
     const data = getTransactionData(contractCall(OTHER_CONTRACT, 'swap_exact_ae_for_tokens'));
     expect(data.isDexSwap.value).toBe(false);
     expect(data.isDexMinReceived.value).toBe(false);
+  });
+
+  it('shows Superhero as the sender of a redeemed invite', () => {
+    const wrapper = mount(TransactionOverview, {
+      global: { ...global, stubs: { TransactionInfo: true } },
+      props: { transaction: inviteRedeem },
+    });
+    const { sender, recipient } = wrapper.findComponent({ name: 'TransactionInfo' }).props();
+    expect(sender.label).toBe('Superhero');
+    expect(recipient.address).toBe(INVITEE);
+  });
+
+  // The sign modal passes the dapp's transaction, which has no hash
+  it('does not take a transaction to sign from the treasury for a redeemed invite', () => {
+    const transaction = {
+      protocol: PROTOCOLS.aeternity,
+      tx: {
+        tag: Tag.SpendTx, senderId: TREASURY, recipientId: CALLER, amount: 1e18, fee: 2e13,
+      },
+    } as unknown as ITransaction;
+
+    expect(getTags(transaction)).toEqual(['Spend', 'in']);
+    const wrapper = mount(TransactionOverview, {
+      global: { ...global, stubs: { TransactionInfo: true } },
+      props: { transaction },
+    });
+    expect(wrapper.findComponent({ name: 'TransactionInfo' }).props('sender').label)
+      .toBe('Account address');
   });
 
   it('shows the followed account as the recipient', () => {

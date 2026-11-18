@@ -758,7 +758,8 @@
         "addPoll": "Create poll",
         "createInvites": "Create invites",
         "revokeInvite": "Revoke invite",
-        "collectRewards": "Collect rewards"
+        "collectRewards": "Collect rewards",
+        "redeemInvite": "Redeem invite"
       },
       "listType": {
         "post": "Posted",
@@ -772,7 +773,8 @@
         "addPoll": "Poll created",
         "createInvites": "Invites created",
         "revokeInvite": "Invite revoked",
-        "collectRewards": "Rewards collected"
+        "collectRewards": "Rewards collected",
+        "redeemInvite": "Invite redeemed"
       },
       "postContent": "Content"
     }

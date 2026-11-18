@@ -754,7 +754,8 @@
         "addPoll": "创建投票",
         "createInvites": "创建邀请",
         "revokeInvite": "撤销邀请",
-        "collectRewards": "领取奖励"
+        "collectRewards": "领取奖励",
+        "redeemInvite": "兑换邀请"
       },
       "listType": {
         "post": "已发帖",
@@ -768,7 +769,8 @@
         "addPoll": "已创建投票",
         "createInvites": "已创建邀请",
         "revokeInvite": "已撤销邀请",
-        "collectRewards": "已领取奖励"
+        "collectRewards": "已领取奖励",
+        "redeemInvite": "已兑换邀请"
       },
       "postContent": "内容"
     }

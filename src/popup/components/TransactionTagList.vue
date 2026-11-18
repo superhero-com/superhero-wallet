@@ -105,7 +105,7 @@ export default defineComponent({
           t('transaction.type.contractCallTx'),
           t('transaction.type.multisigProposal'),
         );
-      } else if (innerTxTag.value === Tag.SpendTx) {
+      } else if (innerTxTag.value === Tag.SpendTx && !superheroTxAction.value) {
         arr.push(
           t('transaction.type.spendTx'),
           direction.value === TX_DIRECTION.received

@@ -55,6 +55,9 @@ describe('getSuperheroTxAction', () => {
     ['createInvites', contractCall(affiliation, 'register_invitation_code')],
     ['revokeInvite', contractCall(affiliation, 'revoke_invitation_code')],
     ['collectRewards', contractCall(affiliation, 'withdraw')],
+    ['redeemInvite', contractCall(affiliation, 'redeem_invitation_code', [
+      { type: 'address', value: TARGET },
+    ])],
   ])('recognises %s', (action, transaction) => {
     expect(getSuperheroTxAction(transaction, contracts)).toBe(action);
   });
@@ -65,6 +68,30 @@ describe('getSuperheroTxAction', () => {
       tx: { type: 'PayingForTx', payerId: TARGET, tx: { tx } },
     } as unknown as ITransaction;
     expect(getSuperheroTxAction(transaction, contracts)).toBe('post');
+  });
+
+  describe('payout of a redeemed invite', () => {
+    const tx = {
+      type: 'SpendTx',
+      senderId: affiliation.replace('ct_', 'ak_'),
+      recipientId: TARGET,
+      amount: 1e18,
+    } as unknown as ITx;
+    const payout = { hash: 'th_2C8i6i99eUz3c8iCPJnGBqWfqxu9cSAS843pTfocgkRLVAYv6x', tx } as ITransaction;
+
+    it('is recognised', () => {
+      expect(getSuperheroTxAction(payout, contracts)).toBe('redeemInvite');
+    });
+
+    it('needs the treasury as the sender', () => {
+      expect(getSuperheroTxAction({ ...payout, tx: { ...tx, senderId: TARGET } }, contracts))
+        .toBeNull();
+      expect(getSuperheroTxAction(payout, SUPERHERO_CONTRACTS[AE_NETWORK_TESTNET_ID])).toBeNull();
+    });
+
+    it('is no transaction to sign, which has no hash', () => {
+      expect(getSuperheroTxAction({ tx } as ITransaction, contracts)).toBeNull();
+    });
   });
 
   it('reads comments from the call data decoded by the sign modal', () => {

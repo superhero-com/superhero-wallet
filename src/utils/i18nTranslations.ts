@@ -93,6 +93,7 @@ const SUPERHERO_TX_TRANSLATIONS: Record<SuperheroTxAction, () => string> = {
   createInvites: () => tg('transaction.superhero.type.createInvites'),
   revokeInvite: () => tg('transaction.superhero.type.revokeInvite'),
   collectRewards: () => tg('transaction.superhero.type.collectRewards'),
+  redeemInvite: () => tg('transaction.superhero.type.redeemInvite'),
 };
 export function getSuperheroTxLabel(action: SuperheroTxAction): string {
   return SUPERHERO_TX_TRANSLATIONS[action]();
@@ -114,6 +115,7 @@ const SUPERHERO_TX_LIST_TRANSLATIONS: Record<SuperheroTxAction, () => string> = 
   createInvites: () => tg('transaction.superhero.listType.createInvites'),
   revokeInvite: () => tg('transaction.superhero.listType.revokeInvite'),
   collectRewards: () => tg('transaction.superhero.listType.collectRewards'),
+  redeemInvite: () => tg('transaction.superhero.listType.redeemInvite'),
 };
 export function getSuperheroTxListLabel(action: SuperheroTxAction): string {
   return SUPERHERO_TX_LIST_TRANSLATIONS[action]();

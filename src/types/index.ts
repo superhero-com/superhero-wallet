@@ -635,7 +635,8 @@ export type SuperheroTxAction =
   | 'addPoll'
   | 'createInvites'
   | 'revokeInvite'
-  | 'collectRewards';
+  | 'collectRewards'
+  | 'redeemInvite';
 
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 
