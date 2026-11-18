@@ -20,6 +20,7 @@
               :transaction="getTransaction(item)"
               :multisig-transaction="getMultisigTransaction(item)"
               :is-multisig="isMultisig"
+              :transaction-route="transactionRoute"
             />
           </template>
         </InfiniteScroll>
@@ -129,6 +130,11 @@ export default defineComponent({
     isLoading: Boolean,
     isEndReached: Boolean, // TODO implement visual indication of the end of the list
     isMultisig: Boolean,
+    /** See `TransactionListItem` */
+    transactionRoute: {
+      type: Object as PropType<{ name: string; params?: Record<string, string> }>,
+      default: null,
+    },
   },
   emits: [
     'load-more',

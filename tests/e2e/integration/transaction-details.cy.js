@@ -37,24 +37,98 @@ function checkDetails() {
   shouldShow('timestamp', `${formatDate(TIME)} ${formatTime(TIME)}`);
 }
 
+/** The list, and the lookups of the details page when the transaction isn't in its cache */
+function stubTransaction() {
+  cy.intercept({ method: 'GET', url: /\/accounts\/ak_\w+\/activities\?limit=/ }, {
+    data: [{ type: 'SpendTxEvent', block_time: TIME, payload: TRANSACTION }],
+    next: null,
+  });
+  cy.intercept({ method: 'GET', url: /\/accounts\/ak_\w+\/activities\?scope=/ }, { data: [], next: null });
+  cy.intercept({ method: 'GET', url: new RegExp(`/v3/transactions/${TRANSACTION.hash}$`) }, TRANSACTION);
+}
+
+function openFromList(pathname) {
+  cy.get('.transaction-item:visible')
+    .first()
+    .click()
+    .location('pathname')
+    .should('eq', `${pathname}/transactions/${TRANSACTION.hash}/${addressAeternity}`);
+  checkDetails();
+}
+
+function goBackTo(pathname) {
+  cy.location('pathname').should('eq', pathname)
+    .get('.transaction-item:visible')
+    .should('have.length', 1);
+}
+
+function openCoinPage() {
+  cy.login({}, '/account-details')
+    .get('[data-cy=account-details-assets]')
+    .click()
+    .get('.tokens-list-item:visible')
+    .first()
+    .click()
+    .location('pathname')
+    .should('eq', '/coins/aeternity');
+}
+
 describe('Tests cases for transaction details page', () => {
-  it('shows a transaction opened from the list', () => {
-    cy.intercept({ method: 'GET', url: /\/accounts\/ak_\w+\/activities\?limit=/ }, {
-      data: [{ type: 'SpendTxEvent', block_time: TIME, payload: TRANSACTION }],
-      next: null,
-    });
-    cy.login()
-      .get('.transaction-item')
-      .first()
-      .click()
-      .location('pathname')
-      .should('eq', `/account-details/transactions/${TRANSACTION.hash}/${addressAeternity}`);
-    checkDetails();
+  it('shows a transaction opened from the dashboard and goes back to it', () => {
+    stubTransaction();
+    cy.login();
+    openFromList('/account');
+    cy.get('[data-cy=back-arrow]:visible').click();
+    goBackTo('/account');
+  });
+
+  it('goes back to the dashboard by the browser history', () => {
+    stubTransaction();
+    cy.login();
+    openFromList('/account');
+    cy.go('back');
+    goBackTo('/account');
   });
 
   it('shows a transaction opened by its link', () => {
-    cy.intercept({ method: 'GET', url: new RegExp(`/v3/transactions/${TRANSACTION.hash}$`) }, TRANSACTION);
+    stubTransaction();
     cy.login({}, `/account-details/transactions/${TRANSACTION.hash}/${addressAeternity}`);
     checkDetails();
+  });
+
+  it('goes back to the coin page it was opened from, with its details', () => {
+    stubTransaction();
+    openCoinPage();
+    openFromList('/coins/aeternity');
+    cy.get('[data-cy=back-arrow]:visible').click();
+    goBackTo('/coins/aeternity');
+    cy.contains('.tab:visible', 'Coin details')
+      .click()
+      .get('.token-details:visible')
+      .should('contain', 'Decimals');
+  });
+
+  it('goes back to the coin page by the browser history', () => {
+    stubTransaction();
+    openCoinPage();
+    openFromList('/coins/aeternity');
+    cy.go('back');
+    goBackTo('/coins/aeternity');
+  });
+
+  it('goes back to the account details by the browser history', () => {
+    stubTransaction();
+    cy.login({}, '/account-details');
+    openFromList('/account-details');
+    cy.go('back');
+    goBackTo('/account-details');
+  });
+
+  it('goes back to the coin page from its transaction link', () => {
+    stubTransaction();
+    cy.login({}, `/coins/aeternity/transactions/${TRANSACTION.hash}/${addressAeternity}`);
+    checkDetails();
+    cy.get('[data-cy=back-arrow]:visible').click();
+    goBackTo('/coins/aeternity');
   });
 });

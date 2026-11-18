@@ -6,6 +6,7 @@
       :is-multisig="isMultisig"
       :is-loading="isLoading"
       :is-end-reached="isEndReached"
+      :transaction-route="isMultisig ? undefined : transactionRoute"
       @load-more="loadCurrentPageTransactions()"
     />
   </IonPage>
@@ -33,8 +34,10 @@ import {
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
+  ROUTE_COIN_TX_DETAILS,
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
+  ROUTE_TOKEN_TX_DETAILS,
 } from '@/popup/router/routeNames';
 
 import TransactionList from '@/popup/components/TransactionList.vue';
@@ -62,6 +65,11 @@ export default defineComponent({
       routeGroup.includes(route.name as string)
     )) || [];
     const assetContractId = route.params.id as AssetContractId;
+    /** The transaction details go back to this asset page */
+    const transactionRoute = {
+      name: (route.name === ROUTE_TOKEN) ? ROUTE_TOKEN_TX_DETAILS : ROUTE_COIN_TX_DETAILS,
+      params: { id: assetContractId },
+    };
     let initialized = false;
 
     const { sharedAssetDetails } = useAssetDetails();
@@ -134,6 +142,7 @@ export default defineComponent({
       isPageActive,
       isMultisig,
       loadCurrentPageTransactions,
+      transactionRoute,
     };
   },
 });

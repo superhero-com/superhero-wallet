@@ -34,11 +34,14 @@ import {
   ROUTE_MULTISIG_DETAILS_ASSETS,
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
+  ROUTE_ACCOUNT_TX_DETAILS,
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
   ROUTE_MULTISIG_COIN,
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_COIN_DETAILS,
   ROUTE_TOKEN_DETAILS,
+  ROUTE_COIN_TX_DETAILS,
+  ROUTE_TOKEN_TX_DETAILS,
   ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE,
@@ -162,6 +165,15 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/account',
     name: ROUTE_ACCOUNT,
     component: Dashboard,
+  },
+  {
+    path: '/account/transactions/:hash/:transactionOwner',
+    name: ROUTE_ACCOUNT_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      backRoute: { name: ROUTE_ACCOUNT },
+    },
   },
   {
     path: '/account-details',
@@ -639,6 +651,9 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/coins/:id?',
     component: AssetDetails,
     beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_ACCOUNT }),
+    meta: {
+      isRestorableParent: true,
+    },
     children: [
       {
         name: ROUTE_COIN,
@@ -667,6 +682,9 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/tokens/:id?',
     component: AssetDetails,
     beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_ACCOUNT }),
+    meta: {
+      isRestorableParent: true,
+    },
     children: [
       {
         name: ROUTE_TOKEN,
@@ -689,6 +707,24 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
     ],
+  },
+  {
+    path: '/coins/:id/transactions/:hash/:transactionOwner',
+    name: ROUTE_COIN_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      backRoute: ({ params }) => ({ name: ROUTE_COIN, params: { id: params.id } }),
+    },
+  },
+  {
+    path: '/tokens/:id/transactions/:hash/:transactionOwner',
+    name: ROUTE_TOKEN_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      backRoute: ({ params }) => ({ name: ROUTE_TOKEN, params: { id: params.id } }),
+    },
   },
   {
     name: 'sign-message',

@@ -122,15 +122,19 @@ export const RouteLastUsedRoutes = (() => {
         || attempt.parentPath || attempt.waitingForLogin) return undefined;
       const targetPath = to.path.replace(/\/$/, '');
       const parentPath = targetPath.slice(0, targetPath.lastIndexOf('/'));
+      const { backRoute } = to.meta as WalletRouteMeta;
       let parent = router.resolve(
-        (to.meta as WalletRouteMeta).backRoute || parentPath || { name: ROUTE_ACCOUNT },
+        (typeof backRoute === 'function' ? backRoute(to) : backRoute)
+          || parentPath
+          || { name: ROUTE_ACCOUNT },
       );
       // The assets page redirects away for protocols without tokens.
       if (parent.name === ROUTE_ACCOUNT_DETAILS_ASSETS && !hasTokensSupport()) {
         parent = router.resolve({ name: (parent.meta as WalletRouteMeta).redirectIfNull });
       }
       // Skip redirecting (also unknown) and guarded parents, like seed-phrase reauthentication.
-      if (parent.matched.some((record) => record.redirect || record.beforeEnter)) {
+      if (parent.matched.some((record) => record.redirect
+        || (record.beforeEnter && !(record.meta as WalletRouteMeta).isRestorableParent))) {
         parent = router.resolve({ name: ROUTE_ACCOUNT });
       }
       if (parent.path === to.path) {
