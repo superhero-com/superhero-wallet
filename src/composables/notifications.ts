@@ -40,6 +40,7 @@ const notificationsSettings = useStorageRef<Partial<INotificationSettings>>(
   {},
   STORAGE_KEYS.notificationsSettings,
   {
+    syncWithOtherWindows: true,
     migrations: [
       migrateNotificationsSettingsVuexToComposable,
     ],
