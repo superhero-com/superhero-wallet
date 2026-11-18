@@ -1,6 +1,12 @@
 // @ts-nocheck
-import { ref } from 'vue';
-import { POLLING_INTERVAL_TRANSACTIONS } from '@/constants';
+import {
+  defineComponent,
+  h,
+  nextTick,
+  ref,
+} from 'vue';
+import { mount } from '@vue/test-utils';
+import { NETWORK_NAME_TESTNET, POLLING_INTERVAL_TRANSACTIONS } from '@/constants';
 
 /**
  * A failed history request must not leave the list loading forever or mark it as complete
@@ -17,47 +23,56 @@ function page(hashes, paginationParams = {}) {
   };
 }
 
+const isAppActive = ref(true);
+const isOnline = ref(true);
+
+async function setUpModules() {
+  isAppActive.value = true;
+  isOnline.value = true;
+  vi.resetModules();
+  localStorage.clear();
+  vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
+  vi.doMock('@/composables/connection', () => ({
+    useConnection: () => ({ isOnline }),
+  }));
+  vi.doMock('@/composables/ui', () => ({
+    useUi: () => ({ isAppActive }),
+  }));
+  vi.doMock('@/composables/latestTransactionList', () => ({
+    useLatestTransactionList: () => ({
+      accountsTransactionsLatest: ref({}),
+      accountsTransactionsPending: ref({}),
+    }),
+  }));
+  await import('@/protocols/registerAdapters');
+}
+
+function tearDown() {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+}
+
+async function getAdapter(protocol) {
+  const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
+  return ProtocolAdapterFactory.getAdapter(protocol);
+}
+
+async function useTransactionList(options) {
+  const { useTransactionList: useList } = await import('@/composables/transactionList');
+  return useList(options);
+}
+
+const getHashes = (transactions) => transactions.map(({ hash }) => hash);
+
 describe('useTransactionList on API errors', () => {
   let warnSpy;
-  const isAppActive = ref(true);
-  const isOnline = ref(true);
 
   beforeEach(async () => {
-    isAppActive.value = true;
-    isOnline.value = true;
-    vi.resetModules();
-    localStorage.clear();
-    vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
-    vi.doMock('@/composables/connection', () => ({
-      useConnection: () => ({ isOnline }),
-    }));
-    vi.doMock('@/composables/ui', () => ({
-      useUi: () => ({ isAppActive }),
-    }));
-    vi.doMock('@/composables/latestTransactionList', () => ({
-      useLatestTransactionList: () => ({
-        accountsTransactionsLatest: ref({}),
-        accountsTransactionsPending: ref({}),
-      }),
-    }));
-    await import('@/protocols/registerAdapters');
+    await setUpModules();
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-  });
-
-  async function getAdapter(protocol) {
-    const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
-    return ProtocolAdapterFactory.getAdapter(protocol);
-  }
-
-  async function useTransactionList(options) {
-    const { useTransactionList: useList } = await import('@/composables/transactionList');
-    return useList(options);
-  }
+  afterEach(tearDown);
 
   /** The first page loads, the next one fails `failures` times */
   function mockNextPageFailing(adapter, failures = Infinity) {
@@ -75,7 +90,6 @@ describe('useTransactionList on API errors', () => {
 
   const getNextPageRequests = (fetchSpy) => fetchSpy.mock.calls
     .filter(([, params]) => params?.lastTxId === 'tx2');
-  const getHashes = (list) => list.transactionsLoaded.value.map(({ hash }) => hash);
 
   it('stops loading when the request fails and retries after the polling interval', async () => {
     const adapter = await getAdapter('bitcoin');
@@ -113,7 +127,7 @@ describe('useTransactionList on API errors', () => {
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
     // The retry of the page with its cursor, besides the poll of the first page
     expect(getNextPageRequests(fetchSpy)).toHaveLength(2);
-    expect(getHashes(list)).toEqual(['tx2', 'tx1']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx2', 'tx1']);
     list.stopTransactionListPolling();
   });
 
@@ -130,7 +144,7 @@ describe('useTransactionList on API errors', () => {
 
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
     expect(getNextPageRequests(fetchSpy)).toHaveLength(2);
-    expect(getHashes(list)).toEqual(['tx2', 'tx1']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx2', 'tx1']);
     list.stopTransactionListPolling();
   });
 
@@ -151,11 +165,11 @@ describe('useTransactionList on API errors', () => {
     // A new transaction meanwhile
     firstPage = page(['tx3'], { lastTxId: 'tx3' });
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
-    expect(getHashes(list)).toEqual(['tx3']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx3']);
     resolveNextPage(page(['tx1'], { lastTxId: 'tx1' }));
     await loadingNextPage;
 
-    expect(getHashes(list)).toEqual(['tx3']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx3']);
     await list.loadCurrentPageTransactions();
     expect(fetchSpy.mock.lastCall[1]).toEqual({ lastTxId: 'tx3' });
     list.stopTransactionListPolling();
@@ -188,7 +202,7 @@ describe('useTransactionList on API errors', () => {
 
     isAppActive.value = true;
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
-    expect(getHashes(list)).toEqual(['tx2', 'tx1']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx2', 'tx1']);
     list.stopTransactionListPolling();
   });
 
@@ -206,7 +220,7 @@ describe('useTransactionList on API errors', () => {
     isOnline.value = true;
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
     expect(getNextPageRequests(fetchSpy)).toHaveLength(2);
-    expect(getHashes(list)).toEqual(['tx2', 'tx1']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx2', 'tx1']);
     list.stopTransactionListPolling();
   });
 
@@ -221,7 +235,7 @@ describe('useTransactionList on API errors', () => {
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
 
     expect(getNextPageRequests(fetchSpy)).toHaveLength(2);
-    expect(getHashes(list)).toEqual(['tx2', 'tx1']);
+    expect(getHashes(list.transactionsLoaded.value)).toEqual(['tx2', 'tx1']);
     list.stopTransactionListPolling();
   });
 
@@ -396,5 +410,77 @@ describe('useTransactionList on API errors', () => {
       isEndReached: false,
       nextPagePaginationParams: { nextPageUrl: '/v3/accounts/ak_test/activities?cursor=next' },
     });
+  });
+});
+
+describe('useTransactionList beside other lists and pages', () => {
+  beforeEach(setUpModules);
+  afterEach(() => {
+    tearDown();
+    document.body.innerHTML = '';
+  });
+
+  it('gives the cached transactions of an account only while it holds its whole list', async () => {
+    const adapter = await getAdapter('bitcoin');
+    vi.spyOn(adapter, 'fetchAccountTransactions').mockResolvedValue(page(['tx0', 'tx1']));
+    vi.spyOn(adapter, 'fetchAccountAssetTransactions').mockResolvedValue(page(['tx1']));
+    const { getCachedAccountTransactions } = await import('@/composables/transactionList');
+    const accountList = await useTransactionList({ accountAddress: 'bc1qtest', protocol: 'bitcoin' });
+    await accountList.loadCurrentPageTransactions();
+
+    expect(getHashes(getCachedAccountTransactions('bc1qtest'))).toEqual(['tx0', 'tx1']);
+    expect(getCachedAccountTransactions('bc1qother')).toEqual([]);
+
+    const assetList = await useTransactionList({
+      accountAddress: 'bc1qtest', assetContractId: 'bitcoin', protocol: 'bitcoin',
+    });
+    await assetList.loadCurrentPageTransactions();
+    expect(getCachedAccountTransactions('bc1qtest')).toEqual([]);
+    expect(getHashes(assetList.transactionsLoaded.value)).toEqual(['tx1']);
+  });
+
+  it('gives no cached transactions of another network', async () => {
+    const adapter = await getAdapter('bitcoin');
+    vi.spyOn(adapter, 'fetchAccountTransactions').mockResolvedValue(page(['tx1']));
+    const { getCachedAccountTransactions } = await import('@/composables/transactionList');
+    const { useNetworks } = await import('@/composables/networks');
+    const list = await useTransactionList({ accountAddress: 'bc1qtest', protocol: 'bitcoin' });
+    await list.loadCurrentPageTransactions();
+
+    useNetworks().switchNetwork(NETWORK_NAME_TESTNET);
+    expect(getCachedAccountTransactions('bc1qtest')).toEqual([]);
+  });
+
+  it('skips polling while its page is hidden and polls again once shown', async () => {
+    const adapter = await getAdapter('bitcoin');
+    const fetchSpy = vi.spyOn(adapter, 'fetchAccountTransactions')
+      .mockResolvedValue(page(['tx1'], { lastTxId: 'tx1' }));
+    const { useTransactionList: useList } = await import('@/composables/transactionList');
+    const ionPage = document.createElement('div');
+    ionPage.classList.add('ion-page');
+    document.body.append(ionPage);
+    let list;
+    mount(defineComponent({
+      setup() {
+        list = useList({ accountAddress: 'bc1qtest', protocol: 'bitcoin' });
+        return {};
+      },
+      render: () => h('div'),
+    }), { attachTo: ionPage });
+    async function setPageHidden(isHidden) {
+      ionPage.classList.toggle('ion-page-hidden', isHidden);
+      await Promise.resolve();
+      await nextTick();
+    }
+
+    await list.initializeTransactionListPolling();
+    await setPageHidden(true);
+    await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS * 2);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    await setPageHidden(false);
+    await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    list.stopTransactionListPolling();
   });
 });

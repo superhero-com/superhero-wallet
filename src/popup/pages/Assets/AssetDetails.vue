@@ -69,7 +69,7 @@
               v-for="tab in tabs"
               :key="tab.routeName"
               :exact-path="tab.exact"
-              :to="{ name: tab.routeName, params: route.params }"
+              :to="{ name: tab.routeName, params: { id: contractId } }"
               :text="tab.text"
             />
           </Tabs>
@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { IonRouterOutlet, onIonViewDidLeave } from '@ionic/vue';
+import { IonRouterOutlet } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -135,6 +135,7 @@ import {
   useUi,
   usePendingMultisigTransaction,
 } from '@/composables';
+import { usePageVisibility } from '@/composables/composablesHelpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fadeAnimation } from '@/popup/animations';
 import AedexV2PairACI from '@/protocols/aeternity/aci/AedexV2PairACI.json';
@@ -177,8 +178,9 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { t } = useI18n();
-    const { setSharedAssetDetails, resetSharedAssetDetails } = useAssetDetails();
+    const { setSharedAssetDetails } = useAssetDetails();
     const { setLoaderVisible } = useUi();
+    const isPageVisible = usePageVisibility();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
@@ -379,20 +381,19 @@ export default defineComponent({
       }, 250);
     });
 
-    watch(assetData, (newAssetData) => {
-      setSharedAssetDetails({
-        contractId,
-        tokenPairs: tokenPairs.value,
-        tokenData: newAssetData,
-        tokenBalance: fungibleTokenBalance.value,
-        tokens: tokens.value,
-        isMultisig: isMultisig.value,
-      });
+    // The page stays mounted under pages pushed over it, like another asset's page
+    watch([assetData, isPageVisible], ([newAssetData, isVisible]) => {
+      if (isVisible) {
+        setSharedAssetDetails({
+          contractId,
+          tokenPairs: tokenPairs.value,
+          tokenData: newAssetData,
+          tokenBalance: fungibleTokenBalance.value,
+          tokens: tokens.value,
+          isMultisig: isMultisig.value,
+        });
+      }
     }, { immediate: true });
-
-    onIonViewDidLeave(() => {
-      resetSharedAssetDetails();
-    });
 
     return {
       PROTOCOLS,
@@ -427,7 +428,6 @@ export default defineComponent({
       showFilterBar,
       routeName,
       isMultisig,
-      route,
       routerHeight,
       fadeAnimation,
     };

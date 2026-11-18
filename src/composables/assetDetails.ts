@@ -27,15 +27,8 @@ export function useAssetDetails() {
     });
   }
 
-  function resetSharedAssetDetails() {
-    Object.keys(sharedAssetDetails).forEach((key: keyof ISharedAssetDetails) => {
-      sharedAssetDetails[key] = undefined;
-    });
-  }
-
   return {
     sharedAssetDetails,
     setSharedAssetDetails,
-    resetSharedAssetDetails,
   };
 }
