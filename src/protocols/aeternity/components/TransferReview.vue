@@ -180,7 +180,13 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Contract, Encoded, Tag } from '@aeternity/aepp-sdk';
+import {
+  Contract,
+  Encoded,
+  Encoding,
+  Tag,
+  isAddressValid,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -189,7 +195,7 @@ import type {
   ITransaction,
   ITransferArgs,
 } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
   toShiftedBigNumber,
@@ -527,12 +533,22 @@ export default defineComponent({
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-          actionResult = await aeternityAdapter.spend(new BigNumber(amount).toFixed(), recipient, {
-            payload: props.transferData.payload,
-            waitMined: false,
-            nonce,
-            fee,
-          });
+          // The Ledger app signs a spend to an account or a name only. A contract's
+          // `ak_` address is the same account on chain.
+          const recipientId = activeAccount.value.type === ACCOUNT_TYPES.ledger
+            && isAddressValid(recipient, Encoding.ContractAddress)
+            ? `ak_${recipient.slice(3)}`
+            : recipient;
+          actionResult = await aeternityAdapter.spend(
+            new BigNumber(amount).toFixed(),
+            recipientId,
+            {
+              payload: props.transferData.payload,
+              waitMined: false,
+              nonce,
+              fee,
+            },
+          );
         }
 
         if (actionResult) {

@@ -82,6 +82,7 @@
             : {}),
           token_to_an_address: [!isAe],
           airgap_to_an_address: isActiveAccountAirGap,
+          ae_recipient_payable: isAe,
         }"
         @open-qr-modal="scanTransferQrCode()"
       />
@@ -169,6 +170,7 @@ import {
   nextTick,
   PropType,
   ref,
+  shallowRef,
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
@@ -188,6 +190,7 @@ import {
 } from '@/constants';
 import {
   checkIfSuperheroCallbackUrl,
+  getMessageByFieldName,
   isUrlValid,
   prepareAccountSelectOptions,
 } from '@/utils';
@@ -302,6 +305,7 @@ export default defineComponent({
       clearPayload,
       handleAssetChange,
       scanTransferQrCode,
+      validateField,
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
@@ -388,11 +392,49 @@ export default defineComponent({
       return nextTick();
     }
 
+    /** The form as a Next press saw it: the recipient rules depend on the asset too */
+    function getPressedForm() {
+      return {
+        addresses: formModel.value.addresses,
+        assetContractId: formModel.value.selectedAsset?.contractId,
+      };
+    }
+
+    function isFormAsPressed(press: ReturnType<typeof getPressedForm>) {
+      return formModel.value.addresses === press.addresses
+        && formModel.value.selectedAsset?.contractId === press.assetContractId;
+    }
+
+    const pendingPress = shallowRef<ReturnType<typeof getPressedForm>>();
+
+    /** Next waits for the node about this form. The send modal reads it. */
+    const isSubmitting = computed(() => (
+      !!pendingPress.value && isFormAsPressed(pendingPress.value)
+    ));
+
     // Method called from a parent scope - avoid changing its name.
     async function submit() {
-      if (!hasError.value) {
+      const press = getPressedForm();
+      pendingPress.value = press;
+      try {
+        // Next can come before the node answers the recipient rules. The run's own result
+        // counts: one superseded by a newer run (another press) doesn't update `errors`.
+        const { errors: addressErrors } = await validateField('addresses');
+        if (
+          hasError.value
+          || addressErrors.some((error) => getMessageByFieldName(error).status === 'error')
+          // Changed meanwhile: the change is validated on its own
+          || !isFormAsPressed(press)
+        ) {
+          return;
+        }
         await emitCurrentFormModelState();
         emit('success');
+      } finally {
+        // A newer press waits for its own answer
+        if (pendingPress.value === press) {
+          pendingPress.value = undefined;
+        }
       }
     }
 
@@ -465,6 +507,7 @@ export default defineComponent({
       toggleMaxAmount,
       selectAccount,
       submit,
+      isSubmitting,
       EditIcon,
       DeleteIcon,
       PlusCircleIcon,
