@@ -46,6 +46,12 @@ const TokenAmountStub = {
   template: '<span class="token-amount-stub">{{ amount }} {{ symbol }}</span>',
 };
 
+const EvmCallSimulationStub = {
+  name: 'EvmCallSimulation',
+  props: ['protocol', 'evmCall'],
+  template: '<div class="evm-call-simulation-stub" />',
+};
+
 const EvmCallSummaryStub = {
   name: 'EvmCallSummary',
   props: ['protocol', 'evmCall'],
@@ -131,6 +137,7 @@ function mountModal(
         TokenAmount: TokenAmountStub,
         BtnMain: BtnMainStub,
         EvmCallSummary: EvmCallSummaryStub,
+        EvmCallSimulation: EvmCallSimulationStub,
       },
     },
   });
@@ -206,6 +213,8 @@ describe('ConfirmTransactionSign summary of an EVM dapp request', () => {
 
     expect(wrapper.findComponent(EvmCallSummaryStub).props())
       .toEqual({ protocol: PROTOCOLS.ethereum, evmCall });
+    expect(wrapper.findComponent(EvmCallSimulationStub).props())
+      .toEqual({ protocol: PROTOCOLS.ethereum, evmCall });
     const accept = wrapper.find('[data-cy=accept]');
     expect(accept.attributes('disabled')).toBeUndefined();
     await accept.trigger('click');
@@ -217,5 +226,19 @@ describe('ConfirmTransactionSign summary of an EVM dapp request', () => {
     await flushPromises();
 
     expect(wrapper.findComponent(EvmCallSummaryStub).exists()).toBe(false);
+    expect(wrapper.findComponent(EvmCallSimulationStub).exists()).toBe(false);
+  });
+
+  it.each([['0x'], ['']])('previews no balances of a coin transfer, data %j', async (data) => {
+    const wrapper = mountModal({
+      tag: Tag.SpendTx,
+      amount: 0.01,
+      fee: 0.000003729,
+      contractId: 'ethereum',
+      recipientId: USDC,
+    }, 0.010003729, { evmCall: { ...evmCall, value: '0x2386f26fc10000', data } });
+    await flushPromises();
+
+    expect(wrapper.findComponent(EvmCallSimulationStub).exists()).toBe(false);
   });
 });

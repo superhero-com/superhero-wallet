@@ -86,6 +86,12 @@
         :protocol="protocol"
         :evm-call="popupProps.evmCall"
       />
+      <!-- A coin transfer is told in full above -->
+      <EvmCallSimulation
+        v-if="isEvm && popupProps?.evmCall && !['', '0x'].includes(popupProps.evmCall.data)"
+        :protocol="protocol"
+        :evm-call="popupProps.evmCall"
+      />
       <DetailsItem
         v-if="decodedCallData?.functionName"
         :label="$t('modals.confirmTransactionSign.functionName')"
@@ -320,6 +326,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import type { EthDecodedCallData } from '@/protocols/ethereum/types';
 import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
+import EvmCallSimulation from '@/protocols/evm/components/EvmCallSimulation.vue';
 import EvmCallSummary from '@/protocols/evm/components/EvmCallSummary.vue';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
@@ -368,6 +375,7 @@ export default defineComponent({
     SignAccountSelect,
     CheckBox,
     AnimatedSpinner,
+    EvmCallSimulation,
     EvmCallSummary,
   },
   setup() {

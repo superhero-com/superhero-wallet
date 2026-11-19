@@ -75,7 +75,7 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
-    const { getTokenMeta } = useEvmTokenMeta(props.protocol);
+    const { getTokenMeta } = useEvmTokenMeta(props.protocol, props.evmCall);
 
     const intent = decodeEvmCallIntent(props.evmCall.to, props.evmCall.data);
     const tokenMeta = ref<IEvmTokenMeta>();

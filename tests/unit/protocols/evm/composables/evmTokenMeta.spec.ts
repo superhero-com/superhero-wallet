@@ -71,6 +71,21 @@ describe('useEvmTokenMeta', () => {
     expect(await getTokenMeta(NODE, USDC)).toEqual({ symbol: 'USDC', decimals: 6 });
   });
 
+  it('gives one request the same answer each time, also of no token', async () => {
+    const lookUp = (request: object, address = USDC) => useEvmTokenMeta(PROTOCOLS.ethereum, request)
+      .getTokenMeta(NODE, address);
+    stubNode(false);
+    const request = {};
+    const first = await lookUp(request);
+    stubNode(true);
+
+    expect(await lookUp(request, USDC.toLowerCase())).toEqual(first);
+    expect(first.decimals).toBeUndefined();
+    expect(calls).toEqual([]);
+    // Another request asks again
+    expect(await lookUp({})).toEqual({ symbol: 'USDC', decimals: 6 });
+  });
+
   it('asks each node for itself', async () => {
     stubNode(true);
     const { getTokenMeta } = useEvmTokenMeta(PROTOCOLS.ethereum);

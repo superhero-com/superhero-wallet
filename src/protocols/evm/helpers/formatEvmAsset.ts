@@ -31,15 +31,16 @@ export function formatEvmTokenAmount(
   token: string,
   meta?: IEvmTokenMeta,
   canBeUnlimited = true,
+  /** The symbol, or the address while that isn't known or can't be shown */
+  label = getEvmAssetLabel(token, meta),
 ) {
-  const symbol = getEvmAssetLabel(token, meta);
   if (meta?.decimals === undefined) {
-    return tg('modals.evmCallSummary.baseUnits', { amount, token: symbol });
+    return tg('modals.evmCallSummary.baseUnits', { amount, token: label });
   }
   if (canBeUnlimited && isUnlimitedAmount(amount)) {
-    return tg('modals.evmCallSummary.unlimited', { symbol });
+    return tg('modals.evmCallSummary.unlimited', { symbol: label });
   }
-  return `${new BigNumber(amount).shiftedBy(-meta.decimals).toFormat()} ${symbol}`;
+  return `${new BigNumber(amount).shiftedBy(-meta.decimals).toFormat()} ${label}`;
 }
 
 /** A time given in Unix seconds; far beyond what a date can hold is never */
