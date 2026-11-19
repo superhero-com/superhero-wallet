@@ -99,7 +99,8 @@ jobs:
       - run: npm run test:vault:browser
       - run: npm run test:e2e:extension
   webkit:
-    runs-on: ubuntu-latest
+    # The newest Ubuntu whose apt packages playwright-core 1.45.3 knows
+    runs-on: ubuntu-24.04
     env:
       APP_NAME: wallet
       PUPPETEER_SKIP_DOWNLOAD: true
