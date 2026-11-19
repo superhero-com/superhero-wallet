@@ -219,7 +219,7 @@ import {
   useLatestTransactionList,
   useMultisigAccounts,
   useTransactionData,
-  useTransactionList,
+  getCachedAccountTransactions,
   useUi,
 } from '@/composables';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
@@ -285,10 +285,9 @@ export default defineComponent({
           : activeAccount.value.address
       )));
 
-    const { transactionsLoaded } = useTransactionList({
-      accountAddress: transactionCustomOwner.value,
-      protocol: PROTOCOLS.aeternity,
-    });
+    const transactionsLoaded = computed(
+      () => getCachedAccountTransactions(transactionCustomOwner.value),
+    );
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();

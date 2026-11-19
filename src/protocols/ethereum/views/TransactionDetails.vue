@@ -80,7 +80,7 @@ import {
   useAccounts,
   useLatestTransactionList,
   useTransactionData,
-  useTransactionList,
+  getCachedAccountTransactions,
   useUi,
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -131,10 +131,9 @@ export default defineComponent({
       transactionCustomOwner: toRef(() => transactionOwner),
     });
 
-    const { transactionsLoaded } = useTransactionList({
-      accountAddress: transactionOwner || activeAccount.value.address,
-      protocol: props.protocol,
-    });
+    const transactionsLoaded = computed(
+      () => getCachedAccountTransactions(transactionOwner || activeAccount.value.address),
+    );
 
     // TODO move these calculations to base component after unifying ITransaction AE values
     const fee = computed((): number => transaction.value?.tx?.fee || 0);

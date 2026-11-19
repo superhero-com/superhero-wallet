@@ -3,7 +3,7 @@
     class="transaction-item"
     :to="redirectRoute"
     :data-cy="currentTransaction.pending ? 'pending-txs' : null"
-    replace
+    :replace="isMultisig || !!multisigTransaction"
   >
     <div class="body">
       <TransactionAssetRows
@@ -99,6 +99,11 @@ export default defineComponent({
     isMultisig: Boolean,
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
+    /** The details route of the page's own transactions, without the transaction params */
+    transactionRoute: {
+      type: Object as PropType<{ name: string; params?: Record<string, string> }>,
+      default: null,
+    },
   },
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
@@ -134,10 +139,13 @@ export default defineComponent({
       }
 
       return {
-        name: props.isMultisig
-          ? ROUTE_MULTISIG_TX_DETAILS
-          : ROUTE_TX_DETAILS,
+        name: props.transactionRoute?.name || (
+          props.isMultisig
+            ? ROUTE_MULTISIG_TX_DETAILS
+            : ROUTE_TX_DETAILS
+        ),
         params: {
+          ...props.transactionRoute?.params,
           hash: props.transaction.hash,
           transactionOwner: props.transaction.transactionOwner || '',
         },

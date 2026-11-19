@@ -1,4 +1,4 @@
-import { RouteLocationRaw, RouteRecordRaw } from 'vue-router';
+import { RouteLocationNormalizedLoaded, RouteLocationRaw, RouteRecordRaw } from 'vue-router';
 
 export interface WalletRouteMeta {
   /**
@@ -6,7 +6,7 @@ export interface WalletRouteMeta {
    * the app header back arrow.
    * TODO: Temporary solution.
    */
-  backRoute?: RouteLocationRaw;
+  backRoute?: RouteLocationRaw | ((route: RouteLocationNormalizedLoaded) => RouteLocationRaw);
   /**
    * Defines the route that should be used if a protocol does not support the view.
    */
@@ -41,6 +41,11 @@ export interface WalletRouteMeta {
   hideSearchBar?: boolean;
   hideFilterButton?: boolean;
   isMultisig?: boolean;
+  /**
+   * The route's `beforeEnter` only checks its params, so iOS restoration
+   * can open it as the parent page of a restored page.
+   */
+  isRestorableParent?: boolean;
 }
 
 export type WalletAppRouteConfig = Omit<RouteRecordRaw, 'meta'> & {

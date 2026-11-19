@@ -9,6 +9,7 @@ import {
   devices,
   webkit,
   type Browser,
+  type BrowserContext,
   type Page,
 } from 'playwright-core';
 import { createServer, type ViteDevServer } from 'vite';
@@ -26,6 +27,7 @@ const MORE = pageWith('[data-cy=about]');
 const ABOUT = pageWith('.icon-github');
 const ACCOUNT_DETAILS = pageWith('[data-cy=account-details-assets]');
 const COIN = pageWith('.token-container');
+const TRANSACTION = pageWith('[data-cy=hash]');
 /** The launch splash is black. */
 const SPLASH_COLOR = '#000000';
 
@@ -158,6 +160,78 @@ it('asks for Face ID once and reopens a coin page with the assets behind it', as
 
     await swipeBack(page, ACCOUNT_DETAILS, COIN);
     expect(await getRoute(page)).toBe('#/account-details/assets');
+  } finally {
+    await context.close();
+  }
+});
+
+/** One spend from the account, in its list and on the details page. */
+async function stubTransaction(context: BrowserContext) {
+  let sender = '';
+  const transaction = () => ({
+    hash: 'th_26iZQ1pXFevyyytFCM9MMFwu1otqW9yHmHgpUFU9evR2r8MV9A',
+    block_hash: 'mh_wHszo4QNgYqGW7TgaoHAVytNsvdAEQ9weZUoCN98WA6MXGQhc',
+    block_height: 1293234,
+    micro_time: 1789513172252,
+    tx: {
+      amount: 200000000000000000,
+      fee: 16860000000000,
+      nonce: 15539,
+      recipient_id: 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4',
+      sender_id: sender,
+      type: 'SpendTx',
+      version: 1,
+    },
+  });
+  await context.route(/\/v3\/accounts\/ak_\w+\/activities\?/, (route) => {
+    const url = route.request().url();
+    [, sender] = url.match(/accounts\/(ak_\w+)\//)!;
+    route.fulfill({
+      json: url.includes('scope=')
+        ? { data: [], next: null }
+        : {
+          data: [{ type: 'SpendTxEvent', block_time: 1789513172252, payload: transaction() }],
+          next: null,
+        },
+    });
+  });
+  await context.route(/\/v3\/transactions\/th_\w+$/, (route) => route.fulfill({ json: transaction() }));
+}
+
+async function openCoinTransaction(page: Page) {
+  await page.click('[data-cy=account-card-base]');
+  await page.click('[data-cy=account-details-assets]');
+  await page.click('a[href="#/coins/aeternity"]');
+  await page.click(`${COIN} .transaction-item`);
+  await page.waitForSelector(`${TRANSACTION}:not(.ion-page-hidden)`);
+}
+
+// #2680: the coin page was unmounted, so there was nothing to swipe back to
+it('swipes back from a transaction to the coin page it was opened from', async () => {
+  const { context, page } = await createWallet({ hasFaceId: false });
+  try {
+    await stubTransaction(context);
+    await openCoinTransaction(page);
+
+    await swipeBack(page, COIN, TRANSACTION);
+    expect(await getRoute(page)).toBe('#/coins/aeternity');
+    await page.waitForSelector(`${COIN}:not(.ion-page-hidden) .transaction-item`);
+  } finally {
+    await context.close();
+  }
+});
+
+it('reopens a coin transaction with the coin page behind it', async () => {
+  const { context, page } = await createWallet({ hasFaceId: false });
+  try {
+    await stubTransaction(context);
+    await openCoinTransaction(page);
+
+    await relaunch(page);
+    await page.waitForSelector(`${TRANSACTION}:not(.ion-page-hidden)`);
+    await page.waitForSelector(`${COIN}.ion-page-hidden`, { state: 'attached' });
+    await swipeBack(page, COIN, TRANSACTION);
+    expect(await getRoute(page)).toBe('#/coins/aeternity');
   } finally {
     await context.close();
   }

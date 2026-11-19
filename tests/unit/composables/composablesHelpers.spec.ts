@@ -3,6 +3,7 @@ import {
   h,
   nextTick,
   ref,
+  type Ref,
 } from 'vue';
 import { mount } from '@vue/test-utils';
 
@@ -12,6 +13,30 @@ const isOnline = ref(true);
 const isAppActive = ref(true);
 
 type PollingWatcher = (callback: () => void) => void;
+
+function createPage(parent: Element = document.body) {
+  const page = document.createElement('div');
+  page.classList.add('ion-page');
+  parent.appendChild(page);
+  return page;
+}
+
+/** Waits for the MutationObserver and the Vue watcher it triggers. */
+async function setPageHidden(page: Element, isHidden: boolean) {
+  page.classList.toggle('ion-page-hidden', isHidden);
+  await Promise.resolve();
+  await nextTick();
+}
+
+function mountWithSetup(setup: () => void, attachTo?: Element, render: () => any = () => h('div')) {
+  return mount(defineComponent({
+    setup() {
+      setup();
+      return {};
+    },
+    render,
+  }), { attachTo });
+}
 
 describe('createPollingBasedOnMountedComponents', () => {
   beforeEach(() => {
@@ -33,33 +58,13 @@ describe('createPollingBasedOnMountedComponents', () => {
     return createPollingBasedOnMountedComponents(INTERVAL);
   }
 
-  function createPage(parent: Element = document.body) {
-    const page = document.createElement('div');
-    page.classList.add('ion-page');
-    parent.appendChild(page);
-    return page;
-  }
-
-  /** Waits for the MutationObserver and the Vue watcher it triggers. */
-  async function setPageHidden(page: Element, isHidden: boolean) {
-    page.classList.toggle('ion-page-hidden', isHidden);
-    await Promise.resolve();
-    await nextTick();
-  }
-
   function mountConsumer(
     pollingWatcher: PollingWatcher,
     callback: () => void,
     attachTo?: Element,
     render: () => any = () => h('div'),
   ) {
-    return mount(defineComponent({
-      setup() {
-        pollingWatcher(callback);
-        return {};
-      },
-      render,
-    }), { attachTo });
+    return mountWithSetup(() => pollingWatcher(callback), attachTo, render);
   }
 
   it('calls immediately on mount, then every interval until unmounted', async () => {
@@ -278,5 +283,53 @@ describe('createPollingBasedOnMountedComponents', () => {
 
     vi.advanceTimersByTime(INTERVAL);
     expect(callback).not.toHaveBeenCalled();
+  });
+});
+
+describe('usePageVisibility', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.doMock('@/composables/connection', () => ({ useConnection: () => ({ isOnline }) }));
+    vi.doMock('@/composables/ui', () => ({ useUi: () => ({ isAppActive }) }));
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  async function mountWithVisibility(attachTo?: Element) {
+    const { usePageVisibility } = await import('@/composables/composablesHelpers');
+    let isPageVisible: Ref<boolean> | undefined;
+    mountWithSetup(() => {
+      isPageVisible = usePageVisibility();
+    }, attachTo);
+    return isPageVisible!;
+  }
+
+  it('follows the page and the outer pages of nested router outlets', async () => {
+    const outerPage = createPage();
+    const page = createPage(outerPage);
+    const isPageVisible = await mountWithVisibility(page);
+    expect(isPageVisible.value).toBe(true);
+
+    await setPageHidden(outerPage, true);
+    expect(isPageVisible.value).toBe(false);
+    await setPageHidden(outerPage, false);
+    expect(isPageVisible.value).toBe(true);
+    await setPageHidden(page, true);
+    expect(isPageVisible.value).toBe(false);
+  });
+
+  it('is hidden when mounted on a hidden page', async () => {
+    const page = createPage();
+    page.classList.add('ion-page-hidden');
+
+    expect((await mountWithVisibility(page)).value).toBe(false);
+  });
+
+  it('is visible outside of Ionic pages and outside of a component', async () => {
+    expect((await mountWithVisibility(document.body)).value).toBe(true);
+    const { usePageVisibility } = await import('@/composables/composablesHelpers');
+    expect(usePageVisibility().value).toBe(true);
   });
 });

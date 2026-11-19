@@ -16,6 +16,7 @@ import { useUi } from './ui';
 import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
 import { useLatestTransactionList } from './latestTransactionList';
+import { usePageVisibility } from './composablesHelpers';
 
 interface UseTransactionListOptions {
   accountAddress: AccountAddress;
@@ -53,6 +54,22 @@ const isEndReached = computed(() => state.value.isEndReached);
 const transactionsLoaded = computed(() => state.value.transactionsLoaded);
 
 /**
+ * The cached transactions of an account's whole list, read without taking the cache over,
+ * so a list page left open under the transaction details keeps its own list.
+ */
+export function getCachedAccountTransactions(accountAddress: AccountAddress) {
+  const { activeNetwork } = useNetworks();
+  const { value } = state;
+  return (
+    value.accountAddress === accountAddress
+    && !value.assetContractId
+    && value.networkName === activeNetwork.value.name
+  )
+    ? value.transactionsLoaded
+    : [];
+}
+
+/**
  * Manages the state of transaction list for the components. Allows to cache the results
  * when switching between pages or closing and opening the extension window.
  * The list is stored only for one account and list type (assetContractId).
@@ -75,6 +92,8 @@ export function useTransactionList({
   const { isOnline } = useConnection();
   const { isAppActive } = useUi();
   const { activeNetwork } = useNetworks();
+  /** A list page stays mounted under the transaction details, but doesn't need updates there */
+  const isPageVisible = usePageVisibility();
   const { accountsTransactionsLatest, accountsTransactionsPending } = useLatestTransactionList();
 
   const adapter = ProtocolAdapterFactory.getAdapter(protocol);
@@ -220,7 +239,7 @@ export function useTransactionList({
         clearInterval(pollingIntervalId);
         return;
       }
-      if (isAppActive.value) {
+      if (isAppActive.value && isPageVisible.value) {
         let response: IFetchTransactionResult;
         try {
           response = await fetchTransactions();

@@ -1,11 +1,11 @@
 import {
   Ref,
-  computed,
   getCurrentInstance,
   onBeforeUnmount,
   onMounted,
   ref,
   watch,
+  watchEffect,
 } from 'vue';
 import { useConnection } from './connection';
 import { useUi } from './ui';
@@ -38,6 +38,26 @@ function getIonPageAncestors(node: Node | null) {
     page = page.parentElement?.closest('.ion-page');
   }
   return pages;
+}
+
+/**
+ * Whether the Ionic pages holding the component are shown.
+ * Stays `true` until it is mounted and outside of a component.
+ */
+export function usePageVisibility() {
+  const instance = getCurrentInstance();
+  const isPageVisible = ref(true);
+  if (instance) {
+    onMounted(() => {
+      const hiddenStates = getIonPageAncestors(instance.vnode.el as Node | null)
+        .map(getPageHiddenState);
+      // Created in a hook so it stops with the component
+      watchEffect(() => {
+        isPageVisible.value = hiddenStates.every((isHidden) => !isHidden.value);
+      });
+    });
+  }
+  return isPageVisible;
 }
 
 /**
@@ -104,11 +124,12 @@ export function createPollingBasedOnMountedComponents(interval: number) {
       return;
     }
 
+    const isPageVisible = usePageVisibility();
     let isMounted = false;
     let isCounted = false;
 
-    function updateActiveComponents(isPageVisible: boolean) {
-      const shouldBeCounted = isMounted && isPageVisible;
+    function updateActiveComponents(isVisible: boolean) {
+      const shouldBeCounted = isMounted && isVisible;
       if (shouldBeCounted === isCounted) {
         return;
       }
@@ -123,12 +144,7 @@ export function createPollingBasedOnMountedComponents(interval: number) {
     }
 
     onMounted(() => {
-      const pageHiddenStatesOfComponent = getIonPageAncestors(instance.vnode.el as Node | null)
-        .map(getPageHiddenState);
       // Created in a hook so it stops with the component even if called from a detached scope
-      const isPageVisible = computed(
-        () => pageHiddenStatesOfComponent.every((isHidden) => !isHidden.value),
-      );
       watch(isPageVisible, updateActiveComponents);
       isMounted = true;
       updateActiveComponents(isPageVisible.value);

@@ -175,6 +175,35 @@ describe('last visited route restoration', () => {
     ]));
   });
 
+  it('uses a back route that depends on the saved page, and a parent whose guard only checks params', async () => {
+    saveRoute('/coins/ae/transactions/hash');
+    const guard = vi.fn(() => true);
+    const { router, visited } = makeRouter([
+      {
+        path: '/coins/:id',
+        name: 'coin',
+        component: Page,
+        beforeEnter: guard,
+        meta: { isRestorableParent: true },
+      },
+      {
+        path: '/coins/:id/transactions/:hash',
+        component: Page,
+        meta: {
+          backRoute: ({ params }: RouteLocationNormalizedLoaded) => ({
+            name: 'coin', params: { id: params.id },
+          }),
+        },
+      },
+    ]);
+
+    await router.push('/');
+    await flushPromises();
+
+    await vi.waitFor(() => expect(visited).toEqual(['/coins/ae', '/coins/ae/transactions/hash']));
+    expect(guard).toHaveBeenCalled();
+  });
+
   it.each([
     ['a missing parent', []],
     ['a parent with a guard', [{ path: '/guarded', component: Page, beforeEnter: vi.fn() }]],

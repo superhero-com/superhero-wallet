@@ -61,6 +61,9 @@ it('restores every saved page over its parent, skipping only the guarded seed ph
   expect(withoutParent).toEqual([dashboard]);
   // Like the More tab, top-level pages open over the dashboard.
   expect(topLevelElsewhere).toEqual([]);
-  // Its parent asks for the password again.
-  expect(nestedOverDashboard).toEqual(['/more/settings/seed-phrase/details/verify']);
+  // The dashboard opens its transactions; the seed phrase parent asks for the password again.
+  expect(nestedOverDashboard).toEqual([
+    '/more/settings/seed-phrase/details/verify',
+    '/account/transactions/x/x',
+  ]);
 });
