@@ -78,7 +78,7 @@ import { useI18n } from 'vue-i18n';
 import { IonContent } from '@ionic/vue';
 import { throttle } from 'lodash-es';
 
-import type { ICommonTransaction, ITransaction } from '@/types';
+import type { ICommonTransaction, ITransaction, ITransactionRoute } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT, TX_DIRECTION } from '@/constants';
 import { pipe, sortTransactionsByDate } from '@/utils';
 import {
@@ -132,7 +132,7 @@ export default defineComponent({
     isMultisig: Boolean,
     /** See `TransactionListItem` */
     transactionRoute: {
-      type: Object as PropType<{ name: string; params?: Record<string, string> }>,
+      type: Object as PropType<ITransactionRoute>,
       default: null,
     },
   },

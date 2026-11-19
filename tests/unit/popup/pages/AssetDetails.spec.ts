@@ -2,6 +2,7 @@ import { enableAutoUnmount, shallowMount } from '@vue/test-utils';
 import { nextTick, type Ref } from 'vue';
 import { useAssetDetails } from '@/composables';
 import AssetDetails from '@/popup/pages/Assets/AssetDetails.vue';
+import { createIonPage, setIonPageHidden } from '../../helpers/ionPage';
 
 const mocks = vi.hoisted(() => ({
   marketData: undefined as unknown as Ref<Record<string, unknown> | null>,
@@ -47,34 +48,52 @@ vi.stubGlobal('ResizeObserver', class {
 });
 enableAutoUnmount(afterEach);
 
-/** Waits for the MutationObserver and the Vue watchers it triggers. */
-async function setPageHidden(page: Element, isHidden: boolean) {
-  page.classList.toggle('ion-page-hidden', isHidden);
-  await Promise.resolve();
-  await nextTick();
-}
-
 describe('AssetDetails', () => {
   afterEach(() => {
     document.body.innerHTML = '';
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  // The page can be left before the delayed observing starts
+  it('observes the height of its tabs only while it is mounted', async () => {
+    vi.useFakeTimers();
+    const observe = vi.spyOn(ResizeObserver.prototype, 'observe');
+    const disconnect = vi.spyOn(ResizeObserver.prototype, 'disconnect');
+    const mountPage = () => shallowMount(AssetDetails, {
+      attachTo: document.body,
+      global: {
+        mocks: { $t: (key: string) => key },
+        // Renders the tabs
+        stubs: { PageWrapper: { template: '<div><slot /></div>' } },
+      },
+    });
+
+    mountPage().unmount();
+    await vi.advanceTimersByTimeAsync(250);
+    expect(observe).not.toHaveBeenCalled();
+
+    const wrapper = mountPage();
+    await vi.advanceTimersByTimeAsync(250);
+    expect(observe).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 
   it('shares its details only while its page is shown', async () => {
     const { sharedAssetDetails, setSharedAssetDetails } = useAssetDetails();
-    const page = document.createElement('div');
-    page.classList.add('ion-page');
-    document.body.append(page);
+    const page = createIonPage();
     shallowMount(AssetDetails, { attachTo: page, global: { mocks: { $t: (key: string) => key } } });
     expect(sharedAssetDetails.tokenData).toMatchObject({ contractId: 'aeternity' });
 
     // Another asset's page opened over it shares its own details
-    await setPageHidden(page, true);
+    await setIonPageHidden(page, true);
     setSharedAssetDetails({ contractId: 'ct_other', tokenData: { contractId: 'ct_other' } });
     mocks.marketData.value = { aeternity: { currentPrice: 1 } };
     await nextTick();
     expect(sharedAssetDetails.tokenData).toEqual({ contractId: 'ct_other' });
 
-    await setPageHidden(page, false);
+    await setIonPageHidden(page, false);
     expect(sharedAssetDetails).toMatchObject({
       contractId: 'aeternity',
       tokenData: { contractId: 'aeternity', currentPrice: 1 },

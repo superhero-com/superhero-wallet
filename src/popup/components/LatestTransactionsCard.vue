@@ -31,6 +31,7 @@
           class="transaction-item"
           :transaction="transaction"
           :transaction-route="TRANSACTION_ROUTE"
+          keeps-page
           show-transaction-owner
           hide-fee-from-assets
         />

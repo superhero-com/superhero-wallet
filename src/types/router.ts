@@ -48,6 +48,12 @@ export interface WalletRouteMeta {
   isRestorableParent?: boolean;
 }
 
+/** The details route of a list's transactions, without the transaction params */
+export interface ITransactionRoute {
+  name: string;
+  params?: Record<string, string>;
+}
+
 export type WalletAppRouteConfig = Omit<RouteRecordRaw, 'meta'> & {
   meta?: WalletRouteMeta;
   children?: WalletAppRouteConfig[];

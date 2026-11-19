@@ -1,3 +1,4 @@
+import { PROTOCOLS } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import { formatDate, formatTime } from '@/utils';
 
@@ -108,20 +109,33 @@ describe('Tests cases for transaction details page', () => {
       .should('contain', 'Decimals');
   });
 
-  it('goes back to the coin page by the browser history', () => {
+  // X keeps the pages under the one it closes, and opening one again shows the previous account
+  it('shows the account switched to after a transaction is closed', () => {
     stubTransaction();
-    openCoinPage();
-    openFromList('/coins/aeternity');
-    cy.go('back');
-    goBackTo('/coins/aeternity');
-  });
-
-  it('goes back to the account details by the browser history', () => {
-    stubTransaction();
-    cy.login({}, '/account-details');
+    cy.login({
+      accountsRaw: [0, 1].map((idx) => ({
+        idx,
+        protocol: PROTOCOLS.aeternity,
+        isRestored: true,
+        type: 'hd-wallet',
+      })),
+    }, '/account-details');
     openFromList('/account-details');
-    cy.go('back');
-    goBackTo('/account-details');
+    cy.get('[data-cy=btn-close]:visible')
+      .click()
+      .location('pathname')
+      .should('eq', '/account')
+      .get('[data-cy=account-card-btn-next]')
+      .click()
+      .get('.swiper-slide-active [data-cy=account-card-base]')
+      .click()
+      .location('pathname')
+      .should('eq', '/account-details')
+      .get('.transaction-item:visible')
+      .should('have.length', 1)
+      .and('have.attr', 'href')
+      .and('match', /\/ak_\w+$/)
+      .and('not.contain', addressAeternity);
   });
 
   it('goes back to the coin page from its transaction link', () => {
