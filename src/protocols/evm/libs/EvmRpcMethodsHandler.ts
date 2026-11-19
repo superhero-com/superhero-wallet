@@ -15,6 +15,7 @@ import { isEmpty } from 'lodash-es';
 
 import type {
   AppOriginSource,
+  IEvmTypedData,
   IModalProps,
   ISignModalResolution,
   Protocol,
@@ -23,7 +24,7 @@ import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocol
 
 import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { toRpcQuantity, toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { getActiveEvmNetworkSettings } from '@/protocols/evm/helpers/activeEvmNetworkSettings';
 import {
   getSignedTypedData,
@@ -512,7 +513,16 @@ export async function handleEvmRpcMethod(
 
     const url = aepp;
     // Dapps may send the call data as `input`, the name the execution API spec uses
-    const data = params.data ?? params.input;
+    const rawData = params.data ?? params.input;
+    // Hex text only: the signer throws on e.g. an array, which the confirmation can't read
+    if (
+      rawData != null && rawData !== ''
+      && (typeof rawData !== 'string' || !/^0x[\da-fA-F]*$/.test(rawData))
+    ) {
+      return { error: { code: -32602, message: 'Expected the call data in hex' } };
+    }
+    // As the signer and MetaMask read odd-length hex, for all below to show and sign the same
+    const data = (rawData && rawData.length % 2) ? `0x0${rawData.slice(2)}` : rawData;
 
     let gasHex = params.gas;
     if (!gasHex) {
@@ -527,12 +537,22 @@ export async function handleEvmRpcMethod(
     }
 
     const { gasPrice, maxFeePerGas, maxPriorityFeePerGas } = await getFeePerGas(protocol);
+    /** As signed, and for the confirmation to simulate the call with */
+    const feeFields = {
+      ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
+      ...(maxFeePerGas !== undefined) ? {
+        maxFeePerGas: numberToHex(maxFeePerGas),
+        maxPriorityFeePerGas: numberToHex(maxPriorityFeePerGas!),
+      } : {},
+    };
 
     const gas = Number(gasHex);
     const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
     const isCoinTransfer = !data;
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
+    const valueQuantity = toRpcQuantity(params.value ?? 0);
+    const gasQuantity = toRpcQuantity(gasHex);
     const modalProps: IModalProps = {
       protocol,
       app: {
@@ -552,6 +572,15 @@ export async function handleEvmRpcMethod(
         recipientId,
         data,
       },
+      evmCall: (valueQuantity !== undefined && gasQuantity !== undefined) ? {
+        from: senderId,
+        to: recipientId,
+        value: valueQuantity,
+        data: data ?? '0x',
+        gas: gasQuantity,
+        chainId: String(chainId),
+        ...feeFields,
+      } : undefined,
       fromAccount: senderId,
       tabId,
     };
@@ -574,11 +603,7 @@ export async function handleEvmRpcMethod(
             data,
             from: senderId,
             gas: gasHex,
-            ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
-            ...(maxFeePerGas !== undefined) ? {
-              maxFeePerGas: numberToHex(maxFeePerGas),
-              maxPriorityFeePerGas: numberToHex(maxPriorityFeePerGas!),
-            } : {},
+            ...feeFields,
           });
           return actionResult?.hash
             ? { result: actionResult?.hash }
@@ -655,13 +680,15 @@ export async function handleEvmRpcMethod(
     const evmAccount = getRequestedAccount(protocol, params.address, originSource);
     if (!evmAccount) return ERROR_UNAUTHORIZED;
 
+    const signedTypedData = getSignedTypedData(typedData);
     const permitted = await checkOrAskPermission(
       METHODS.signTypedData,
       aepp,
       {
         protocol,
         app: aepp ? createAppData(aepp, originSource) : undefined,
-        message: JSON.stringify(getSignedTypedData(typedData), null, 2),
+        message: JSON.stringify(signedTypedData, null, 2),
+        evmTypedData: { types: typedData.types, ...signedTypedData } as IEvmTypedData,
         fromAccount: evmAccount.address,
         tabId,
       },

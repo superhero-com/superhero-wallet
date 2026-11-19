@@ -15,6 +15,16 @@ export function toTokenBaseUnits(amount: BigNumberPublic, decimals: number): big
   return BigInt(amount.shiftedBy(decimals).toFixed(0, BigNumber.ROUND_DOWN));
 }
 
+/** A JSON-RPC quantity (`0x…`, no leading zeros), `undefined` for what isn't a whole number */
+export function toRpcQuantity(value: unknown): string | undefined {
+  try {
+    const quantity = BigInt(value as any);
+    return quantity < BigInt(0) ? undefined : `0x${quantity.toString(16)}`;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Gas price in wei for a chain without EIP-1559: the one picked on the send form
  * (in the coin's unit), or the node's when there is none.
