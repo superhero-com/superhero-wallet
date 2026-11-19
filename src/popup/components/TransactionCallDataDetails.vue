@@ -36,7 +36,7 @@
                     variant="left-aligned-name-bolder"
                   >
                     <div class="value">
-                      {{ typeof value === 'bigint' ? Number(value) : value }}
+                      {{ formatArgument(value) }}
                     </div>
                   </PanelTableItem>
                 </Panel>
@@ -120,6 +120,14 @@ export default defineComponent({
         : undefined,
     );
 
+    /** Vue prints arrays and structs as JSON, which has no bigints */
+    function formatArgument(value: unknown) {
+      if (typeof value === 'bigint') return value.toString();
+      return (value && typeof value === 'object')
+        ? JSON.stringify(value, (_key, item) => (typeof item === 'bigint' ? item.toString() : item), 2)
+        : value;
+    }
+
     function setActiveTab(tabName: string) {
       activeTab.value = tabName;
     }
@@ -128,6 +136,7 @@ export default defineComponent({
       dataTabs,
       activeTab,
       argumentsEntries,
+      formatArgument,
       setActiveTab,
     };
   },

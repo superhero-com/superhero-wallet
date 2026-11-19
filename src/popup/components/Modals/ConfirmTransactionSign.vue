@@ -181,8 +181,10 @@
           :label="$t('common.total')"
         >
           <TokenAmount
-            :amount="executionCost || amountTotal"
-            :symbol="isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol"
+            :amount="isEvm ? evmCoinTotal : (executionCost || amountTotal)"
+            :symbol="isEvm
+              ? coinSymbol
+              : (isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol)"
             :hide-fiat="isAex9"
             :protocol="protocol"
             high-precision
@@ -548,6 +550,14 @@ export default defineComponent({
     const fee = computed(() => (protocol === PROTOCOLS.aeternity)
       ? getAeFee(popupProps.value?.tx?.fee!)
       : popupProps.value?.tx?.fee!);
+
+    const isEvm = EVM_PROTOCOLS.includes(protocol);
+    const { coinSymbol } = adapter;
+
+    /** What leaves the account in the coin: the value sent and the fee */
+    const evmCoinTotal = computed(() => new BigNumber(popupProps.value?.tx?.amount || 0)
+      .plus(popupProps.value?.tx?.fee || 0)
+      .toNumber());
 
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
     const gasCost = computed(() => new BigNumber(popupProps.value?.tx?.gasLimit ?? 0)
@@ -990,6 +1000,9 @@ export default defineComponent({
       tokenSymbol,
       tokenList,
       amountTotal,
+      isEvm,
+      coinSymbol,
+      evmCoinTotal,
       transaction,
       transactionArguments,
       fee,
