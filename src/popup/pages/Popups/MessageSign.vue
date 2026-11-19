@@ -38,6 +38,12 @@
       @select="selectedAccount = $event"
     />
 
+    <EvmTypedDataSummary
+      v-if="EVM_PROTOCOLS.includes(protocol) && popupProps?.evmTypedData"
+      :protocol="protocol"
+      :typed-data="popupProps.evmTypedData"
+    />
+
     <DetailsItem
       :label="$t('pages.popupMessageSign.message')"
       data-cy="message"
@@ -72,6 +78,7 @@
 import { defineComponent, onUnmounted, ref } from 'vue';
 import {
   ACCOUNT_TYPES,
+  EVM_PROTOCOLS,
   MODAL_LEDGER_SIGN,
   PROTOCOLS,
 } from '@/constants';
@@ -80,6 +87,7 @@ import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps, useModals } from '@/composables';
 import { useConfirmGuard } from '@/composables/confirmGuard';
 
+import EvmTypedDataSummary from '@/protocols/evm/components/EvmTypedDataSummary.vue';
 import NoOriginWarning from '@/popup/components/NoOriginWarning.vue';
 import SignAccountSelect from '@/popup/components/SignAccountSelect.vue';
 import Modal from '../../components/Modal.vue';
@@ -97,6 +105,7 @@ export default defineComponent({
     CopyText,
     NoOriginWarning,
     SignAccountSelect,
+    EvmTypedDataSummary,
   },
   setup() {
     const { isConfirmBlocked } = useConfirmGuard();
@@ -147,6 +156,7 @@ export default defineComponent({
     });
 
     return {
+      EVM_PROTOCOLS,
       isConfirmBlocked,
       protocol,
       selectedAccount,

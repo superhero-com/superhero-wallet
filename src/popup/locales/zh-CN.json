@@ -466,8 +466,11 @@
         "revokeAll": "撤销对某系列所有 NFT 的授权",
         "nftTransfer": "发送一个 NFT",
         "permit2Approve": "通过 Permit2 批准花费代币",
+        "permit2Transfer": "通过 Permit2 批准一次性转账",
         "revoke": "撤销授权"
       },
+      "signatureValidUntil": "签名有效期至",
+      "orderIncluded": "该签名还会确认一个订单，详情见下方的消息。",
       "amount": "金额",
       "nft": "NFT",
       "collection": "系列",
@@ -480,9 +483,11 @@
       "baseUnits": "{amount} 个 {token} 基本单位",
       "nftItems": "{amount} × {nft}",
       "thisBlockOnly": "仅限本区块",
+      "blockOfUse": "仅限被授权方使用此签名的区块",
       "never": "永不",
       "warnings": {
         "unlimitedApproval": "无限授权：被授权方现在及以后都可以拿走你所有的 {symbol}，直到你撤销授权。",
+        "unlimitedTransfer": "凭此签名，被授权方可以拿走你所有的 {symbol}。",
         "spenderNotContract": "被授权方不是合约。盗币者常用普通账户收集授权。",
         "unlimitedUntilExpiry": "无限授权：在授权到期前，被授权方可以拿走你所有的 {symbol}。",
         "approveAll": "操作方可以转移你在该系列中的所有 NFT，包括你以后获得的。",

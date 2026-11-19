@@ -466,8 +466,11 @@
         "revokeAll": "Remove the approval for all NFTs of a collection",
         "nftTransfer": "Send an NFT",
         "permit2Approve": "Allow spending tokens through Permit2",
+        "permit2Transfer": "Allow a one-time transfer through Permit2",
         "revoke": "Remove the approval"
       },
+      "signatureValidUntil": "Signature valid until",
+      "orderIncluded": "The signature also confirms an order. Its details are in the message below.",
       "amount": "Amount",
       "nft": "NFT",
       "collection": "Collection",
@@ -480,9 +483,11 @@
       "baseUnits": "{amount} base units of {token}",
       "nftItems": "{amount} × {nft}",
       "thisBlockOnly": "In this block only",
+      "blockOfUse": "Only in the block where the spender uses this signature",
       "never": "Never",
       "warnings": {
         "unlimitedApproval": "Unlimited approval: the spender can take all your {symbol}, now and later, until you revoke it.",
+        "unlimitedTransfer": "The spender can take all your {symbol} with this signature.",
         "spenderNotContract": "The spender is not a contract. Drainers often collect approvals with plain accounts.",
         "unlimitedUntilExpiry": "Unlimited approval: the spender can take all your {symbol} until the approval expires.",
         "approveAll": "The operator can transfer all your NFTs of this collection, also the ones you get later.",
