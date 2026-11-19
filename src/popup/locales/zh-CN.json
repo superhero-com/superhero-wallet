@@ -453,6 +453,43 @@
       "notEnoughAE": "你的 AE 余额不足以支付此交易。",
       "paidByDapp": "仅当 dapp 支付交易与 gas 费用时才会执行。"
     },
+    "evmCallSummary": {
+      "action": "操作",
+      "actions": {
+        "transfer": "发送代币",
+        "approve": "批准花费代币",
+        "approveNft": "批准转移一个 NFT",
+        "increaseAllowance": "批准花费更多代币",
+        "transferFrom": "转移代币",
+        "transferFromNft": "转移一个 NFT",
+        "approveAll": "批准转移某系列的所有 NFT",
+        "revokeAll": "撤销对某系列所有 NFT 的授权",
+        "nftTransfer": "发送一个 NFT",
+        "permit2Approve": "通过 Permit2 批准花费代币",
+        "revoke": "撤销授权"
+      },
+      "amount": "金额",
+      "nft": "NFT",
+      "collection": "系列",
+      "recipient": "接收地址",
+      "spender": "被授权方",
+      "operator": "操作方",
+      "from": "从",
+      "expires": "到期时间",
+      "unlimited": "无限 {symbol}",
+      "baseUnits": "{amount} 个 {token} 基本单位",
+      "nftItems": "{amount} × {nft}",
+      "thisBlockOnly": "仅限本区块",
+      "never": "永不",
+      "warnings": {
+        "unlimitedApproval": "无限授权：被授权方现在及以后都可以拿走你所有的 {symbol}，直到你撤销授权。",
+        "spenderNotContract": "被授权方不是合约。盗币者常用普通账户收集授权。",
+        "unlimitedUntilExpiry": "无限授权：在授权到期前，被授权方可以拿走你所有的 {symbol}。",
+        "approveAll": "操作方可以转移你在该系列中的所有 NFT，包括你以后获得的。",
+        "sendToTokenContract": "代币将发送到代币合约本身，通常会因此丢失。",
+        "operatorNotContract": "操作方不是合约。盗币者常用普通账户收集授权。"
+      }
+    },
     "confirm-raw-sign": {
       "title": "签名原始交易",
       "warning": {

@@ -81,6 +81,11 @@
           {{ $t('modals.confirmTransactionSign.paidByDapp') }}
         </p>
       </span>
+      <EvmCallSummary
+        v-if="isEvm && popupProps?.evmCall"
+        :protocol="protocol"
+        :evm-call="popupProps.evmCall"
+      />
       <DetailsItem
         v-if="decodedCallData?.functionName"
         :label="$t('modals.confirmTransactionSign.functionName')"
@@ -315,6 +320,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import type { EthDecodedCallData } from '@/protocols/ethereum/types';
 import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
+import EvmCallSummary from '@/protocols/evm/components/EvmCallSummary.vue';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
@@ -362,6 +368,7 @@ export default defineComponent({
     SignAccountSelect,
     CheckBox,
     AnimatedSpinner,
+    EvmCallSummary,
   },
   setup() {
     const { isConfirmBlocked } = useConfirmGuard();

@@ -453,6 +453,43 @@
       "notEnoughAE": "Your AE balance is not enough to pay for this transaction.",
       "paidByDapp": "It will only be executed if the dapp pays for the transaction and gas cost."
     },
+    "evmCallSummary": {
+      "action": "Action",
+      "actions": {
+        "transfer": "Send tokens",
+        "approve": "Allow spending tokens",
+        "approveNft": "Allow transferring an NFT",
+        "increaseAllowance": "Allow spending more tokens",
+        "transferFrom": "Move tokens",
+        "transferFromNft": "Move an NFT",
+        "approveAll": "Allow transferring all NFTs of a collection",
+        "revokeAll": "Remove the approval for all NFTs of a collection",
+        "nftTransfer": "Send an NFT",
+        "permit2Approve": "Allow spending tokens through Permit2",
+        "revoke": "Remove the approval"
+      },
+      "amount": "Amount",
+      "nft": "NFT",
+      "collection": "Collection",
+      "recipient": "Recipient",
+      "spender": "Spender",
+      "operator": "Operator",
+      "from": "From",
+      "expires": "Expires",
+      "unlimited": "Unlimited {symbol}",
+      "baseUnits": "{amount} base units of {token}",
+      "nftItems": "{amount} × {nft}",
+      "thisBlockOnly": "In this block only",
+      "never": "Never",
+      "warnings": {
+        "unlimitedApproval": "Unlimited approval: the spender can take all your {symbol}, now and later, until you revoke it.",
+        "spenderNotContract": "The spender is not a contract. Drainers often collect approvals with plain accounts.",
+        "unlimitedUntilExpiry": "Unlimited approval: the spender can take all your {symbol} until the approval expires.",
+        "approveAll": "The operator can transfer all your NFTs of this collection, also the ones you get later.",
+        "sendToTokenContract": "The tokens go to the token contract itself, where they are usually lost.",
+        "operatorNotContract": "The operator is not a contract. Drainers often collect approvals with plain accounts."
+      }
+    },
     "confirm-raw-sign": {
       "title": "Sign raw transaction",
       "warning": {

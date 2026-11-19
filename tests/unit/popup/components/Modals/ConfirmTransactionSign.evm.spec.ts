@@ -46,8 +46,28 @@ const TokenAmountStub = {
   template: '<span class="token-amount-stub">{{ amount }} {{ symbol }}</span>',
 };
 
+const EvmCallSummaryStub = {
+  name: 'EvmCallSummary',
+  props: ['protocol', 'evmCall'],
+  template: '<div class="evm-call-summary-stub" />',
+};
+
+const BtnMainStub = {
+  name: 'BtnMain',
+  props: ['disabled', 'text'],
+  emits: ['click'],
+  template: '<button :disabled="disabled" @click="$emit(\'click\')">{{ text }}</button>',
+};
+
+let resolve: ReturnType<typeof vi.fn>;
+
 /** Mounts the confirmation of an EVM dapp request; `amountTotal` is what the shared logic gives */
-function mountModal(tx: Record<string, any>, amountTotal: number) {
+function mountModal(
+  tx: Record<string, any>,
+  amountTotal: number,
+  popupPropsOverrides: Record<string, any> = {},
+) {
+  resolve = vi.fn();
   usePopupProps().setPopupProps({
     protocol: PROTOCOLS.ethereum,
     tx: {
@@ -58,8 +78,9 @@ function mountModal(tx: Record<string, any>, amountTotal: number) {
       host: 'dapp.test', name: 'dapp.test', protocol: 'https:', href: 'https://dapp.test/',
     },
     fromAccount: ADDRESS,
-    resolve: vi.fn(),
+    resolve,
     reject: vi.fn(),
+    ...popupPropsOverrides,
   } as any);
 
   const account = {
@@ -108,7 +129,8 @@ function mountModal(tx: Record<string, any>, amountTotal: number) {
         NoOriginWarning: true,
         SignAccountSelect: true,
         TokenAmount: TokenAmountStub,
-        BtnMain: true,
+        BtnMain: BtnMainStub,
+        EvmCallSummary: EvmCallSummaryStub,
       },
     },
   });
@@ -162,5 +184,38 @@ describe('ConfirmTransactionSign total of an EVM dapp request', () => {
     await flushPromises();
 
     expect(getTotal(wrapper).props('amount')).toBe(0.010003729);
+  });
+});
+
+describe('ConfirmTransactionSign summary of an EVM dapp request', () => {
+  const evmCall = {
+    from: ADDRESS, to: USDC, value: '0x0', data: TRANSFER_DATA, gas: '0x186a0', chainId: '1',
+  };
+  const callTx = {
+    tag: Tag.ContractCallTx,
+    amount: 0,
+    fee: 0.00002,
+    contractId: USDC,
+    recipientId: USDC,
+    data: TRANSFER_DATA,
+  };
+
+  it('shows what the call does, and leaves confirming to the user', async () => {
+    const wrapper = mountModal(callTx, 0, { evmCall });
+    await flushPromises();
+
+    expect(wrapper.findComponent(EvmCallSummaryStub).props())
+      .toEqual({ protocol: PROTOCOLS.ethereum, evmCall });
+    const accept = wrapper.find('[data-cy=accept]');
+    expect(accept.attributes('disabled')).toBeUndefined();
+    await accept.trigger('click');
+    expect(resolve).toHaveBeenCalledWith(expect.objectContaining({ selectedAddress: ADDRESS }));
+  });
+
+  it('shows no summary without the call, as for a value that is no quantity', async () => {
+    const wrapper = mountModal(callTx, 0);
+    await flushPromises();
+
+    expect(wrapper.findComponent(EvmCallSummaryStub).exists()).toBe(false);
   });
 });
