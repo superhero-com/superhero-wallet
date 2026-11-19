@@ -51,6 +51,33 @@ enableAutoUnmount(afterEach);
 describe('AssetDetails', () => {
   afterEach(() => {
     document.body.innerHTML = '';
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  // The page can be left before the delayed observing starts
+  it('observes the height of its tabs only while it is mounted', async () => {
+    vi.useFakeTimers();
+    const observe = vi.spyOn(ResizeObserver.prototype, 'observe');
+    const disconnect = vi.spyOn(ResizeObserver.prototype, 'disconnect');
+    const mountPage = () => shallowMount(AssetDetails, {
+      attachTo: document.body,
+      global: {
+        mocks: { $t: (key: string) => key },
+        // Renders the tabs
+        stubs: { PageWrapper: { template: '<div><slot /></div>' } },
+      },
+    });
+
+    mountPage().unmount();
+    await vi.advanceTimersByTimeAsync(250);
+    expect(observe).not.toHaveBeenCalled();
+
+    const wrapper = mountPage();
+    await vi.advanceTimersByTimeAsync(250);
+    expect(observe).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 
   it('shares its details only while its page is shown', async () => {

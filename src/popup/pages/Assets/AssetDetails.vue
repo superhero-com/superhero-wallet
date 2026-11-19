@@ -98,6 +98,7 @@ import { IonRouterOutlet } from '@ionic/vue';
 import {
   computed,
   defineComponent,
+  onBeforeUnmount,
   onMounted,
   ref,
   nextTick,
@@ -302,8 +303,10 @@ export default defineComponent({
      * Observe tabs wrapper height changes and recalculate router height.
      * Tabs change height when filters are shown/hidden
      */
+    let resizeObserver: ResizeObserver | undefined;
+
     function observeTabsWrapperHeight() {
-      const resizeObserver = new ResizeObserver(() => {
+      resizeObserver = new ResizeObserver(() => {
         calculateRouterHeight();
       });
       resizeObserver.observe(stickyTabsWrapperEl.value!);
@@ -376,9 +379,16 @@ export default defineComponent({
         setLoaderVisible(false);
       }
       setTimeout(() => {
-        observeTabsWrapperHeight();
-        calculateRouterHeight();
+        // The page can be left before this runs
+        if (stickyTabsWrapperEl.value) {
+          observeTabsWrapperHeight();
+          calculateRouterHeight();
+        }
       }, 250);
+    });
+
+    onBeforeUnmount(() => {
+      resizeObserver?.disconnect();
     });
 
     // The page stays mounted under pages pushed over it, like another asset's page
