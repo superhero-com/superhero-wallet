@@ -3,7 +3,7 @@
     class="transaction-item"
     :to="redirectRoute"
     :data-cy="currentTransaction.pending ? 'pending-txs' : null"
-    :replace="isMultisig || !!multisigTransaction"
+    :replace="!keepsPage"
   >
     <div class="body">
       <TransactionAssetRows
@@ -100,6 +100,12 @@ export default defineComponent({
     isMultisig: Boolean,
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
+    /**
+     * Opens the transaction over the page, so browser back and iOS swipe-back return to it.
+     * Only for the dashboard: X keeps the pages under the closed one, and opening one again
+     * would reuse it with the previous account or network.
+     */
+    keepsPage: Boolean,
     /** The details route of the page's own transactions, without the transaction params */
     transactionRoute: {
       type: Object as PropType<ITransactionRoute>,

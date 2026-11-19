@@ -206,21 +206,6 @@ async function openCoinTransaction(page: Page) {
   await page.waitForSelector(`${TRANSACTION}:not(.ion-page-hidden)`);
 }
 
-// #2680: the coin page was unmounted, so there was nothing to swipe back to
-it('swipes back from a transaction to the coin page it was opened from', async () => {
-  const { context, page } = await createWallet({ hasFaceId: false });
-  try {
-    await stubTransaction(context);
-    await openCoinTransaction(page);
-
-    await swipeBack(page, COIN, TRANSACTION);
-    expect(await getRoute(page)).toBe('#/coins/aeternity');
-    await page.waitForSelector(`${COIN}:not(.ion-page-hidden) .transaction-item`);
-  } finally {
-    await context.close();
-  }
-});
-
 it('reopens a coin transaction with the coin page behind it', async () => {
   const { context, page } = await createWallet({ hasFaceId: false });
   try {
