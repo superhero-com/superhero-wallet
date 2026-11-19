@@ -2,6 +2,7 @@ import { enableAutoUnmount, shallowMount } from '@vue/test-utils';
 import { nextTick, type Ref } from 'vue';
 import { useAssetDetails } from '@/composables';
 import AssetDetails from '@/popup/pages/Assets/AssetDetails.vue';
+import { createIonPage, setIonPageHidden } from '../../helpers/ionPage';
 
 const mocks = vi.hoisted(() => ({
   marketData: undefined as unknown as Ref<Record<string, unknown> | null>,
@@ -47,13 +48,6 @@ vi.stubGlobal('ResizeObserver', class {
 });
 enableAutoUnmount(afterEach);
 
-/** Waits for the MutationObserver and the Vue watchers it triggers. */
-async function setPageHidden(page: Element, isHidden: boolean) {
-  page.classList.toggle('ion-page-hidden', isHidden);
-  await Promise.resolve();
-  await nextTick();
-}
-
 describe('AssetDetails', () => {
   afterEach(() => {
     document.body.innerHTML = '';
@@ -61,20 +55,18 @@ describe('AssetDetails', () => {
 
   it('shares its details only while its page is shown', async () => {
     const { sharedAssetDetails, setSharedAssetDetails } = useAssetDetails();
-    const page = document.createElement('div');
-    page.classList.add('ion-page');
-    document.body.append(page);
+    const page = createIonPage();
     shallowMount(AssetDetails, { attachTo: page, global: { mocks: { $t: (key: string) => key } } });
     expect(sharedAssetDetails.tokenData).toMatchObject({ contractId: 'aeternity' });
 
     // Another asset's page opened over it shares its own details
-    await setPageHidden(page, true);
+    await setIonPageHidden(page, true);
     setSharedAssetDetails({ contractId: 'ct_other', tokenData: { contractId: 'ct_other' } });
     mocks.marketData.value = { aeternity: { currentPrice: 1 } };
     await nextTick();
     expect(sharedAssetDetails.tokenData).toEqual({ contractId: 'ct_other' });
 
-    await setPageHidden(page, false);
+    await setIonPageHidden(page, false);
     expect(sharedAssetDetails).toMatchObject({
       contractId: 'aeternity',
       tokenData: { contractId: 'aeternity', currentPrice: 1 },

@@ -2,11 +2,11 @@
 import {
   defineComponent,
   h,
-  nextTick,
   ref,
 } from 'vue';
 import { mount } from '@vue/test-utils';
 import { NETWORK_NAME_TESTNET, POLLING_INTERVAL_TRANSACTIONS } from '@/constants';
+import { createIonPage, setIonPageHidden } from '../helpers/ionPage';
 
 /**
  * A failed history request must not leave the list loading forever or mark it as complete
@@ -456,9 +456,7 @@ describe('useTransactionList beside other lists and pages', () => {
     const fetchSpy = vi.spyOn(adapter, 'fetchAccountTransactions')
       .mockResolvedValue(page(['tx1'], { lastTxId: 'tx1' }));
     const { useTransactionList: useList } = await import('@/composables/transactionList');
-    const ionPage = document.createElement('div');
-    ionPage.classList.add('ion-page');
-    document.body.append(ionPage);
+    const ionPage = createIonPage();
     let list;
     mount(defineComponent({
       setup() {
@@ -467,18 +465,13 @@ describe('useTransactionList beside other lists and pages', () => {
       },
       render: () => h('div'),
     }), { attachTo: ionPage });
-    async function setPageHidden(isHidden) {
-      ionPage.classList.toggle('ion-page-hidden', isHidden);
-      await Promise.resolve();
-      await nextTick();
-    }
 
     await list.initializeTransactionListPolling();
-    await setPageHidden(true);
+    await setIonPageHidden(ionPage, true);
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS * 2);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
 
-    await setPageHidden(false);
+    await setIonPageHidden(ionPage, false);
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_TRANSACTIONS);
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     list.stopTransactionListPolling();

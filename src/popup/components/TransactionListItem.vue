@@ -61,6 +61,7 @@ import dayjs from 'dayjs';
 import type {
   IActiveMultisigTransaction,
   ITransaction,
+  ITransactionRoute,
 } from '@/types';
 import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
@@ -101,7 +102,7 @@ export default defineComponent({
     hasConsensus: Boolean,
     /** The details route of the page's own transactions, without the transaction params */
     transactionRoute: {
-      type: Object as PropType<{ name: string; params?: Record<string, string> }>,
+      type: Object as PropType<ITransactionRoute>,
       default: null,
     },
   },
