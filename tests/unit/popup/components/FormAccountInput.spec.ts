@@ -8,6 +8,7 @@ import FormAccountInput from '@/popup/components/form/FormAccountInput.vue';
 
 const ALICE = 'ak_2dATVcZ9KJU5a8hdsVtTv21pYiGWiPbmVcU1Pz72FFqpk9pSRR';
 const ALICIA = 'ak_2swhLkgBPeeADxVTAVCJnZLY5NZtCFiM93JxsEaMuC59euuFRQ';
+const CONTRACT = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 
 const mocks = vi.hoisted(() => ({
   addressBookFiltered: { value: [] as IAddressBookEntry[] },
@@ -262,6 +263,29 @@ describe('FormAccountInput typed text', () => {
     await flushPromises();
 
     expect((wrapper.get('textarea').element as HTMLTextAreaElement).value).toBe('Ali');
+  });
+
+  /** Types the text into the field and returns the addresses it takes. */
+  async function typeAddress(text: string, isRecipient: boolean) {
+    const value = ref<string[]>([]);
+    const wrapper = mount({
+      components: { FormAccountInput },
+      template: '<FormAccountInput v-model="value" :protocol="protocol" :is-recipient="isRecipient" />',
+      setup: () => ({ value, protocol: PROTOCOLS.aeternity, isRecipient }),
+    }, {
+      global: { plugins: [i18n], stubs: { Avatar: true } },
+    });
+    await wrapper.get('textarea').setValue(text);
+    await flushPromises();
+    return value.value;
+  }
+
+  it('takes a contract address as a recipient', async () => {
+    expect(await typeAddress(CONTRACT, true)).toEqual([CONTRACT]);
+  });
+
+  it('does not take a contract address as a vault signer', async () => {
+    expect(await typeAddress(CONTRACT, false)).toEqual([]);
   });
 
   it('clears the typed text when the recipients are reset', async () => {

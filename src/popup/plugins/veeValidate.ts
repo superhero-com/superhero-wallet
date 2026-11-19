@@ -2,7 +2,7 @@ import { defineRule } from 'vee-validate';
 import { numeric, required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce, throttle } from 'lodash-es';
-import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
+import { Encoding, isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import {
   IAddressBookEntry,
   INetwork,
@@ -27,8 +27,15 @@ import {
   useAeSdk,
 } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
-import { getAddressByNameEntry } from '@/protocols/aeternity/helpers';
+import {
+  fetchAeNotPayableRecipients,
+  getAddressByNameEntry,
+} from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
+
+function isAeRecipientAddressValid(value: string) {
+  return ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).isRecipientAddressValid(value);
+}
 
 defineRule(
   'required',
@@ -276,7 +283,7 @@ export default () => {
         validationResults.push(isNameValid(item)
         // eslint-disable-next-line no-await-in-loop
           ? await checkNameRegisteredAddress(item)
-          : isAddressValid(item));
+          : isAeRecipientAddressValid(item));
       }
 
       const invalidItems = value.filter((_, index) => !validationResults[index]);
@@ -298,7 +305,7 @@ export default () => {
         validationResults.push(isNameValid(item)
         // eslint-disable-next-line no-await-in-loop
           ? await checkNameRegisteredAddress(item)
-          : isAddressValid(item) || isUrlValid(item));
+          : isAeRecipientAddressValid(item) || isUrlValid(item));
       }
 
       // Collect invalid items
@@ -311,15 +318,43 @@ export default () => {
   );
 
   /**
-   * AEX-9 tokens can be sent only to an address
+   * AEX-9 tokens can be sent only to an account address
    */
   defineRule(
     'token_to_an_address',
     (value: string[], [isToken]: [boolean]) => (
       !isToken
-      || !value?.some((address) => isNameValid(address))
+      || !value?.some((address) => (
+        isNameValid(address) || isAddressValid(address, Encoding.ContractAddress)
+      ))
       || tg('validation.tokenToAnAddress')
     ),
+  );
+
+  /**
+   * A spend to a contract that isn't payable always fails, and the transactions sent
+   * after it wait behind it. A recipient the node can't be asked about passes.
+   */
+  defineRule(
+    'ae_recipient_payable',
+    async (value: string[]) => {
+      if (!Array.isArray(value)) return true;
+
+      let notPayableRecipients: string[];
+      try {
+        const dryAeSdk = await getDryAeSdk();
+        notPayableRecipients = await fetchAeNotPayableRecipients(dryAeSdk.api, value);
+      } catch (error) {
+        return true;
+      }
+
+      if (notPayableRecipients.length === 0) return true;
+
+      return [
+        tg('validation.recipientNotPayable', [AE_SYMBOL]),
+        notPayableRecipients.join(','),
+      ].join('||');
+    },
   );
 
   /**

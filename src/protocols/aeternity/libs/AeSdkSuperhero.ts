@@ -70,7 +70,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
 
   spendWithCustomOptions(
     amount: string | number,
-    recipientId: Encoded.AccountAddress | AensName,
+    recipientId: Encoded.AccountAddress | Encoded.ContractAddress | AensName,
     options: ISpendOptions,
   ): ReturnType<typeof sendTransaction> {
     return super.spend(amount, recipientId, options);

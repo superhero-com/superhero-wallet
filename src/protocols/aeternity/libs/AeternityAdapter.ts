@@ -204,6 +204,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return isAddressValid(address, Encoding.AccountAddress);
   }
 
+  override isRecipientAddressValid(address: string) {
+    return isAddressValid(address, Encoding.AccountAddress, Encoding.ContractAddress);
+  }
+
   override isValidAddressOrNameEncoding(address: string) {
     return isAddressValid(address, Encoding.ContractAddress)
       || isAddressValid(address, Encoding.AccountAddress)
@@ -699,7 +703,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const aeSdk = await getAeSdk();
     return aeSdk.spendWithCustomOptions(
       amount,
-      recipient as Encoded.AccountAddress,
+      recipient as Encoded.AccountAddress | Encoded.ContractAddress,
       {
         waitMined: false,
         payload: encode(Buffer.from(options.payload), Encoding.Bytearray),

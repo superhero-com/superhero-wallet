@@ -150,6 +150,7 @@ describe('Send modal', () => {
     const address = STUB_ACCOUNT.addressAeternity;
     const amount = 0.1;
     const txHash = 'th_8WwpJCixn9cKe3jAyXvxNeo5JrBFKj43ULkUeTfeLMqLiZPjj';
+    const notPayableContract = 'ct_Xu6GSyjLWhwEvseUpdscRNr5H7LQ6KepqqYrP8QuVNRfZd5HF';
 
     cy.intercept({ method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${address}` }, {
       headers: { 'content-type': 'application/json' },
@@ -160,6 +161,9 @@ describe('Send modal', () => {
     cy.intercept({ method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${RECIPIENTS.aeternity}` }, {
       statusCode: 404,
       body: { reason: 'Account not found' },
+    });
+    cy.intercept({ method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${notPayableContract}` }, {
+      id: notPayableContract, balance: 0, nonce: 0, payable: false, kind: 'basic',
     });
     cy.intercept({ method: 'GET', hostname: nodeHost, pathname: '/v3/key-blocks/current/height' }, { height: 1000000 });
     // The SDK uses these endpoints to price transactions. A 404 makes it use
@@ -216,6 +220,15 @@ describe('Send modal', () => {
       .should('have.class', 'warning')
       .get('[data-cy=clear-address-button]')
       .first()
+      .click();
+    // Coins sent to it would never be mined
+    pasteAddress(notPayableContract);
+    cy.inputShouldHaveError('[data-cy=address]')
+      .get('[data-cy=address]')
+      .should('contain', "Contracts that don't accept AE can't be recipients.")
+      .buttonShouldBeDisabled('[data-cy=next-step-button]')
+      .get('[data-cy=clear-address-button]')
+      .first()
       .click()
       .enterAddress(RECIPIENTS.aeternity)
       .get('[data-cy=address]')
@@ -225,10 +238,22 @@ describe('Send modal', () => {
     // pricing inputs before asserting the asynchronously updated fee in the UI.
     cy.wait(['@protocolParameters', '@nodeSettings', '@recentGasPrices']);
     readAmount('[data-cy=review-fee]');
+    // Next asks the node about the recipient again; slowed down to see Next wait
+    cy.intercept(
+      { method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${RECIPIENTS.aeternity}` },
+      { statusCode: 404, body: { reason: 'Account not found' }, delay: 1000 },
+    ).as('recipientAtNext');
     cy.get('[data-cy=next-step-button]')
       .should('not.have.class', 'disabled')
-      .click()
-      .get('[data-cy=review-recipient]')
+      .click();
+    // Still the form's Next, not the review's Send that also has an icon while it loads
+    cy.get('[data-cy=next-step-button]').should(($button) => {
+      expect($button).to.have.class('disabled');
+      expect($button).to.contain('Next');
+      expect($button.find('.btn-main-icon')).to.have.length(1);
+    });
+    cy.wait('@recipientAtNext');
+    cy.get('[data-cy=review-recipient]')
       .should('contain', RECIPIENTS.aeternity.slice(0, 6))
       .get('[data-cy=accordion-item-label]')
       .contains('Advanced transaction details')

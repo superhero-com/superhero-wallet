@@ -83,6 +83,13 @@ export abstract class BaseProtocolAdapter {
   abstract isAccountAddressValid(address: AccountAddress, networkType?: NetworkType): boolean;
 
   /**
+   * Validates if coins of the protocol can be sent to the address.
+   */
+  isRecipientAddressValid(address: AccountAddress, networkType?: NetworkType): boolean {
+    return this.isAccountAddressValid(address, networkType);
+  }
+
+  /**
    * Validates if the address or name encoding matches the protocol.
    */
     abstract isValidAddressOrNameEncoding(

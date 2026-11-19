@@ -12,6 +12,7 @@ import {
   formatAmount,
   getTransactionSignerAddress,
   isAddressValid,
+  isNameValid,
   rebuildUnpackedTx,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -503,6 +504,34 @@ export async function fetchAccountNextNonce(
       return { nextNonce: 1 };
     });
   return nextNonce;
+}
+
+/**
+ * The recipients that can't receive coins: contracts that aren't payable, given by their
+ * `ak_`/`ct_` address or by a name pointing to one. A spend to them is never mined.
+ * A recipient whose account can't be looked up is left out.
+ */
+export async function fetchAeNotPayableRecipients(
+  api: Pick<Node, 'getAccountByPubkey' | 'getNameEntryByName'>,
+  recipients: string[],
+): Promise<string[]> {
+  const results = await Promise.all(recipients.map(async (recipient) => {
+    try {
+      // The chain resolves the name's account pointer, whatever the pointer's type
+      const address = isNameValid(recipient)
+        ? getAddressByNameEntry(await api.getNameEntryByName(recipient))
+        : recipient;
+      if (!address || !isAddressValid(address, Encoding.AccountAddress, Encoding.ContractAddress)) {
+        return false;
+      }
+      // An account the node doesn't know is created by the spend, so it is payable
+      const { payable } = await api.getAccountByPubkey(address);
+      return payable === false;
+    } catch (error) {
+      return false;
+    }
+  }));
+  return recipients.filter((_, index) => results[index]);
 }
 
 /**

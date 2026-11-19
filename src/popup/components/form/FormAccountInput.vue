@@ -26,7 +26,7 @@
       />
       <AddressTruncated
         v-if="!isNameValid(selectedAddresses[0].address)
-          && isAccountAddressValid(selectedAddresses[0].address)"
+          && isAddressValid(selectedAddresses[0].address)"
         :address="selectedAddresses[0].address"
         :protocol="protocol"
         :class="{
@@ -65,7 +65,7 @@
             :str="account.name"
           />
           <AddressTruncated
-            v-if="!isNameValid(account.address) && isAccountAddressValid(account.address)"
+            v-if="!isNameValid(account.address) && isAddressValid(account.address)"
             :address="account.address"
             :protocol="protocol"
             :class="{
@@ -206,6 +206,8 @@ export default defineComponent({
     singleRecipient: Boolean,
     singleDefaultFormat: Boolean,
     isTipUrlEnabled: Boolean,
+    /** Accepts any address the coins can be sent to, not only account ones */
+    isRecipient: Boolean,
     protocol: { type: String as PropType<Protocol>, default: null },
   },
   emits: ['update:modelValue', 'submit'],
@@ -248,16 +250,17 @@ export default defineComponent({
       () => (messageAsObject.value?.status === INPUT_MESSAGE_STATUSES.warning),
     );
 
-    function isAccountAddressValid(value: string) {
-      return ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .isAccountAddressValid(value, activeNetwork.value?.type);
+    function isAddressValid(value: string) {
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      return props.isRecipient
+        ? adapter.isRecipientAddressValid(value, activeNetwork.value?.type)
+        : adapter.isAccountAddressValid(value, activeNetwork.value?.type);
     }
 
     const isSingleRecipient = computed(() => !!(
       props.singleDefaultFormat
       && selectedAddresses.value.length
-      && (!props.isTipUrlEnabled || isAccountAddressValid(selectedAddresses.value[0].address))
+      && (!props.isTipUrlEnabled || isAddressValid(selectedAddresses.value[0].address))
     ));
 
     function clearAddress(idx: number) {
@@ -378,7 +381,7 @@ export default defineComponent({
               let name = address;
               if (isNameValid(address)) {
                 name = address;
-              } else if (isAccountAddressValid(address)) {
+              } else if (isAddressValid(address)) {
                 name = t('modals.send.recipientLabel');
               }
 
@@ -417,7 +420,7 @@ export default defineComponent({
           } else {
             // Otherwise append only if the user has typed a valid address
             values.forEach((value) => {
-              if (value && (isNameValid(value) || isAccountAddressValid(value))) {
+              if (value && (isNameValid(value) || isAddressValid(value))) {
                 parsedValues.push(value);
               }
             });
@@ -453,7 +456,7 @@ export default defineComponent({
       isDropdownOpen,
       dropdownEl,
       isNameValid,
-      isAccountAddressValid,
+      isAddressValid,
       isSingleRecipient,
       CircleCloseIcon,
       TrashIcon,
