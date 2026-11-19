@@ -134,8 +134,11 @@ export default defineConfig(({ mode, command }) => {
       // expects them (`icons/icon_48.png`, etc.).
       viteStaticCopy({
         targets: [
-          { src: 'public/favicons/favicon-48.png', dest: 'icons', rename: { stripBase: true, name: 'icon_48.png' } },
-          { src: 'public/favicons/favicon-128.png', dest: 'icons', rename: { stripBase: true, name: 'icon_128.png' } },
+          ...[16, 24, 32, 48, 128].map((size) => ({
+            src: `public/favicons/favicon-${size}.png`,
+            dest: 'icons',
+            rename: { stripBase: true, name: `icon_${size}.png` },
+          })),
           // keep the `cameraRequestPermission` folder, drop the `public/icons/` prefix
           { src: 'public/icons/cameraRequestPermission', dest: 'icons', rename: { stripBase: 2 } },
           { src: 'src/icons/logo.svg', dest: 'icons/cameraRequestPermission', rename: { stripBase: true } },
