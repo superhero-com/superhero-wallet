@@ -19,6 +19,8 @@ const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 const BAYC = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D';
 const COIN = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+/** Reth's, e.g. Sepolia's default node */
+const RETH_COIN = '0xfffffffffffffffffffffffffffffffffffffffe';
 
 const ZERO = `0x${'0'.repeat(40)}`;
 const ONE_ETH = 10n ** 18n;
@@ -42,8 +44,11 @@ const withdrawal = (asset: string, src: string, wad: bigint) => log(
 );
 
 describe('readSimulatedLogs', () => {
-  it('reads a coin transfer of the user, as `traceTransfers` gives it', () => {
-    expect(readSimulatedLogs([transfer(COIN, USER, OTHER, 10n ** 16n)], USER)).toEqual({
+  it.each([
+    ['geth', COIN],
+    ['reth', RETH_COIN],
+  ])('reads a coin transfer of the user, as `traceTransfers` of %s gives it', (_, coin) => {
+    expect(readSimulatedLogs([transfer(coin, USER, OTHER, 10n ** 16n)], USER)).toEqual({
       changes: [{ asset: undefined, tokenId: undefined, amount: (-(10n ** 16n)).toString() }],
       wraps: [],
       approvals: [],
