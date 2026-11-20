@@ -216,7 +216,7 @@ export default defineComponent({
           && isBiometricLoginEnabled.value
           && await canAuthenticateWithDevice()
         ) {
-          const authenticated = await openBiometricLoginModal({ force: true })
+          const authenticated = await openBiometricLoginModal({ force: true, isCancelable: true })
             .then(() => true)
             .catch(() => false);
           if (!authenticated) {

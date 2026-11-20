@@ -128,7 +128,7 @@ async function requireSeedPhraseReauth() {
 
   if (IS_MOBILE_APP) {
     if (isBiometricLoginEnabled.value && await canAuthenticateWithDevice()) {
-      await openBiometricLoginModal({ force: true });
+      await openBiometricLoginModal({ force: true, isCancelable: true });
       return;
     }
     await openConfirmModal({
@@ -146,7 +146,7 @@ async function requireSeedPhraseReauth() {
     return;
   }
 
-  await openPasswordLoginModal();
+  await openPasswordLoginModal({ isCancelable: true });
 }
 
 export const routes: WalletAppRouteConfig[] = [

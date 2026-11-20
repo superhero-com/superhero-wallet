@@ -6,6 +6,7 @@
     no-padding
     centered
     transparent
+    :has-close-button="isCancelable"
     @close="handleClose"
     @click="initAuthenticate()"
   >
@@ -22,16 +23,20 @@
       </div>
       <div class="info">
         <h3 class="title">
-          {{ !isAuthCanceled
-            ? $t('pages.secureLogin.walletLocked')
-            : $t('pages.secureLogin.authFailed')
+          {{ isAuthCanceled
+            ? $t('pages.secureLogin.authFailed')
+            : (isCancelable)
+              ? $t('pages.secureLogin.confirmIdentity')
+              : $t('pages.secureLogin.walletLocked')
           }}
         </h3>
 
         <div class="text">
-          {{ !isAuthCanceled
-            ? $t('pages.secureLogin.walletLockedSubtitle')
-            : $t('pages.secureLogin.authFailedSubtitle')
+          {{ isAuthCanceled
+            ? $t('pages.secureLogin.authFailedSubtitle')
+            : (isCancelable)
+              ? $t('pages.secureLogin.confirmIdentitySubtitle')
+              : $t('pages.secureLogin.walletLockedSubtitle')
           }}
         </div>
       </div>
@@ -72,16 +77,20 @@ export default defineComponent({
      * `claimLockScreenAutoPrompt`.
      */
     isLockScreen: Boolean,
+    /** Asked to confirm an action, not to unlock: it may be dismissed */
+    isCancelable: Boolean,
   },
   setup(props) {
     const isAuthCanceled = ref(false);
     const isAuthenticating = ref(false);
+    // The tap on the close button also reaches the modal's click
+    let isClosed = false;
 
     const { authenticateWithBiometry, claimLockScreenAutoPrompt, isAuthenticated } = useAuth();
     const { isAppActive } = useUi();
 
     async function initAuthenticate({ isAutoPrompt = false } = {}) {
-      if (isAuthenticating.value || (isAuthenticated.value && !props.force)) {
+      if (isClosed || isAuthenticating.value || (isAuthenticated.value && !props.force)) {
         return;
       }
       isAuthenticating.value = true;
@@ -108,6 +117,7 @@ export default defineComponent({
     }
 
     function handleClose() {
+      isClosed = true;
       if (isAuthenticated.value && !props.force) {
         props.resolve();
         return;

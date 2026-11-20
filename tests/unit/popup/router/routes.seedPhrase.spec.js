@@ -58,7 +58,7 @@ describe('seed phrase reveal routes', () => {
 
     const result = await route.beforeEnter({}, {});
 
-    expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true });
+    expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true, isCancelable: true });
     expect(mockOpenConfirmModal).not.toHaveBeenCalled();
     expect(result).toBe(true);
   });
@@ -107,7 +107,7 @@ describe('seed phrase reveal routes', () => {
 
       const result = await route.beforeEnter({}, {});
 
-      expect(mockOpenPasswordLoginModal).toHaveBeenCalledTimes(1);
+      expect(mockOpenPasswordLoginModal).toHaveBeenCalledExactlyOnceWith({ isCancelable: true });
       expect(mockOpenConfirmModal).not.toHaveBeenCalled();
       expect(mockOpenBiometricLoginModal).not.toHaveBeenCalled();
       expect(result).toBe(true);
