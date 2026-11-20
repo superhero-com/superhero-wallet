@@ -176,11 +176,16 @@ function hasLegacyConflict(record: VaultRecord) {
     return value !== null && digest(value) !== record.legacyDigests?.[key];
   });
 }
+/** Once per page: every refresh finds the same copies again. */
+let hasWarnedOfLegacyConflict = false;
 function cleanupLegacy(record: VaultRecord) {
   try {
     // All or none: a copy another version changed may need the old salt or secret beside it.
     if (hasLegacyConflict(record)) {
-      console.warn('Another wallet version saved legacy data, keeping all of it');
+      if (!hasWarnedOfLegacyConflict) {
+        hasWarnedOfLegacyConflict = true;
+        console.warn('Another wallet version saved legacy data, keeping all of it');
+      }
       return;
     }
   } catch (error) { console.warn(error); return; }

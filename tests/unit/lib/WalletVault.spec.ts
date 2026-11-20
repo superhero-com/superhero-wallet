@@ -337,6 +337,19 @@ describe('WalletVault', () => {
     expect(legacyOnly()).toEqual(legacyBefore);
   });
 
+  it('warns once of divergent legacy copies, which each refresh finds again', async () => {
+    seedLegacy();
+    const expected = await current();
+    await vault.commitVault(expected, expected.values);
+    localStorage.setItem(rawKey(STORAGE_KEYS.privateKeyAccountsRaw), JSON.stringify('late-legacy-import'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await vault.refreshVault();
+    await vault.refreshVault();
+    await vault.refreshVault();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith('Another wallet version saved legacy data, keeping all of it');
+  });
+
   it('blocks a new password over divergent legacy copies until they are explicitly discarded', async () => {
     seedLegacy();
     const expected = await current();
