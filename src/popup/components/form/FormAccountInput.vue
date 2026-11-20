@@ -11,6 +11,8 @@
     @update:model-value="($event: any) => inputValue = $event"
     @submit="handleEnter"
     @keydown="handleFieldKeydown"
+    @focusin="handleFocusIn"
+    @focusout="hasFocus = false"
   >
     <template
       v-if="isSingleRecipient"
@@ -98,6 +100,8 @@
         ref="dropdownEl"
         class="dropdown-wrapper styled-scrollbar"
         :class="{ open: isDropdownOpen }"
+        :aria-hidden="(isDropdownOpen && hasFocus) ? undefined : 'true'"
+        :inert="!isDropdownOpen || undefined"
       >
         <!--
           Always rendered, so kept out of the tab order; ArrowDown in the field moves here.
@@ -223,6 +227,8 @@ export default defineComponent({
 
     const inputValue = ref(props.singleDefaultFormat ? (props.modelValue[0] ?? '') : '');
     const isDropdownOpen = ref(false);
+    /** The CSS shows the open list only while the field or the list is focused */
+    const hasFocus = ref(false);
     const dropdownEl = ref<HTMLElement>();
     const selectedAddresses = ref<IAddressBookEntry[]>([]);
     const filteredOptions = computed(() => (
@@ -361,6 +367,11 @@ export default defineComponent({
       }
     }
 
+    function handleFocusIn(event: FocusEvent) {
+      hasFocus.value = event.target instanceof HTMLTextAreaElement
+        || !!dropdownEl.value?.contains(event.target as Node);
+    }
+
     function handleEnter() {
       inputValue.value += ',';
     }
@@ -452,8 +463,10 @@ export default defineComponent({
       handleEnter,
       handleFieldKeydown,
       handleOptionKeydown,
+      handleFocusIn,
       inputValue,
       isDropdownOpen,
+      hasFocus,
       dropdownEl,
       isNameValid,
       isAddressValid,

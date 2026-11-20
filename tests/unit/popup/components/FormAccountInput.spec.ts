@@ -1,3 +1,4 @@
+import axe from 'axe-core';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { nextTick, ref, type Ref } from 'vue';
 import { createI18n } from 'vue-i18n';
@@ -5,6 +6,7 @@ import en from '@/popup/locales/en-US.json';
 import { PROTOCOLS } from '@/constants';
 import type { IAddressBookEntry } from '@/types';
 import FormAccountInput from '@/popup/components/form/FormAccountInput.vue';
+import { accessibleName } from '../../helpers/accessibleName';
 
 const ALICE = 'ak_2dATVcZ9KJU5a8hdsVtTv21pYiGWiPbmVcU1Pz72FFqpk9pSRR';
 const ALICIA = 'ak_2swhLkgBPeeADxVTAVCJnZLY5NZtCFiM93JxsEaMuC59euuFRQ';
@@ -52,7 +54,7 @@ beforeEach(() => {
   ];
 });
 
-async function mountWithOpenList(singleDefaultFormat = false) {
+function mountInput(singleDefaultFormat = false) {
   const value = ref<string[]>([]);
   const wrapper = mount({
     components: { FormAccountInput },
@@ -62,6 +64,11 @@ async function mountWithOpenList(singleDefaultFormat = false) {
     attachTo: document.body,
     global: { plugins: [i18n], stubs: { Avatar: true } },
   });
+  return { wrapper, value };
+}
+
+async function mountWithOpenList(singleDefaultFormat = false) {
+  const { wrapper, value } = mountInput(singleDefaultFormat);
   const field = wrapper.get('textarea');
   (field.element as HTMLTextAreaElement).focus();
   await field.setValue('Ali');
@@ -79,6 +86,15 @@ function press(element: Element, key: string, init: KeyboardEventInit = {}) {
 
 function clickOption(element: Element, detail: number) {
   element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail }));
+}
+
+function isExposed(element: Element) {
+  axe.setup(document);
+  try {
+    return axe.commons.dom.isVisibleToScreenReaders(element);
+  } finally {
+    axe.teardown();
+  }
 }
 
 describe('FormAccountInput suggestions', () => {
@@ -225,6 +241,52 @@ describe('FormAccountInput suggestions', () => {
     await nextTick();
 
     expect(wrapper.get('.dropdown-wrapper').classes()).not.toContain('open');
+  });
+});
+
+describe('FormAccountInput suggestions for screen readers', () => {
+  it('hides them while the list is closed', async () => {
+    const { wrapper } = mountInput();
+    const field = wrapper.get('textarea');
+    const list = wrapper.get('.dropdown-wrapper').element;
+    const [option] = wrapper.findAll('[data-cy=address-suggestion]').map((o) => o.element);
+
+    // The list sits inside the field's label
+    expect(accessibleName(field.element)).not.toContain('Alice');
+    expect(isExposed(option)).toBe(false);
+    // Keeps its options from being activated
+    expect(list.hasAttribute('inert')).toBe(true);
+
+    (field.element as HTMLTextAreaElement).focus();
+    await field.setValue('Ali');
+    await flushPromises();
+
+    expect(isExposed(option)).toBe(true);
+    expect(list.hasAttribute('inert')).toBe(false);
+    press(field.element, 'ArrowDown');
+    await nextTick();
+    expect(document.activeElement).toBe(option);
+    expect(isExposed(option)).toBe(true);
+  });
+
+  it.each([
+    ['outside', () => {
+      const button = document.body.appendChild(document.createElement('button'));
+      onTestFinished(() => button.remove());
+      return button;
+    }],
+    ['on the clear button', () => document.querySelector<HTMLElement>('[data-cy=clear-address-button]')!],
+  ])('hides the open list when the focus moves %s', async (_, getTarget) => {
+    const { wrapper } = await mountWithOpenList();
+    const [option] = wrapper.findAll('[data-cy=address-suggestion]').map((o) => o.element);
+    const target = getTarget();
+
+    target.focus();
+    await nextTick();
+
+    expect(document.activeElement).toBe(target);
+    expect(wrapper.get('.dropdown-wrapper').classes()).toContain('open');
+    expect(isExposed(option)).toBe(false);
   });
 });
 
