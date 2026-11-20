@@ -12,6 +12,7 @@ import {
   hexToBytes,
   keccak256,
   numberToHex,
+  toChecksumAddress,
 } from 'web3-utils';
 
 import type { Protocol } from '@/types';
@@ -405,20 +406,30 @@ describe('eth_sendTransaction of a dapp', () => {
     });
   });
 
-  it('hands the confirmation the Ethereum fees as they will be signed', async () => {
+  it('hands the confirmation the Ethereum call as it will be signed', async () => {
     const { from } = getChain(PROTOCOLS.ethereum);
+    const { gas, ...tx } = TX;
+    const value = '0x2386f26fc10001';
 
-    await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...TX }], 'Dapp', 'eip155:1');
+    await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...tx, value }], 'Dapp', 'eip155:1');
 
     const { evmCall } = openModal.mock.calls[0][1];
+    expect(evmCall.value).toBe(value);
     const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
-    const tx = TransactionFactory
+    // Ethereum has a signer of its own
+    const signed = TransactionFactory
       .fromSerializedData(hexToBytes(raw)) as FeeMarketEIP1559Transaction;
-    expect(evmCall).toMatchObject({
-      maxFeePerGas: numberToHex(tx.maxFeePerGas),
-      maxPriorityFeePerGas: numberToHex(tx.maxPriorityFeePerGas),
+    expect(signed.type).toBe(2);
+    expect(evmCall).toEqual({
+      from: toChecksumAddress(signed.getSenderAddress().toString()),
+      to: toChecksumAddress(signed.to!.toString()),
+      value: numberToHex(signed.value),
+      data: bytesToHex(signed.data),
+      gas: numberToHex(signed.gasLimit),
+      chainId: String(signed.common.chainId()),
+      maxFeePerGas: numberToHex(signed.maxFeePerGas),
+      maxPriorityFeePerGas: numberToHex(signed.maxPriorityFeePerGas),
     });
-    expect(evmCall).not.toHaveProperty('gasPrice');
   });
 
   it.each([
