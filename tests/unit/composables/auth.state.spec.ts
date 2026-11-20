@@ -895,6 +895,47 @@ describe('useAuth state machine branches', () => {
       expect(await readStorage('defaultPasswordSecret')).toBeNull();
     });
 
+    it('opens a wallet stored before the vault with its password, also after the first commit', async () => {
+      const password = 'a-real-password';
+      await seedWallet(password);
+      // As the password modal does
+      openPasswordLoginModalMock.mockImplementation(async () => {
+        const { useAuth } = await import('@/composables/auth');
+        if (!await useAuth().authenticateWithPassword(password)) throw new Error('Wrong password');
+      });
+      async function unlock() {
+        const { auth, accounts } = await openWindow();
+        await auth.checkUserAuth();
+        expect(auth.isAuthenticated.value).toBe(true);
+        expect(auth.isUsingDefaultPassword.value).toBe(false);
+        expect(auth.mnemonicDecrypted.value).toBe(VALID_MNEMONIC);
+        await vi.waitFor(() => expect(accounts.accounts.value.map(({ type }) => type))
+          .toEqual(['hd-wallet', 'private-key']), WAIT_FOR_CRYPTO);
+        await vi.waitFor(() => expect(auth.secureLoginTimeoutDecrypted.value)
+          .toBe(SECURE_LOGIN_TIMEOUT), WAIT_FOR_CRYPTO);
+        return auth;
+      }
+
+      const auth = await unlock();
+      const { LOCAL_STORAGE_PREFIX, STORAGE_KEYS } = await import('@/constants');
+      const { readVault, updateVaultSecret } = await import('@/lib/WalletVault');
+      expect(readVault().revision).toBeNull();
+      // An unrelated secret, as a new invite stores it
+      await updateVaultSecret(STORAGE_KEYS.invitesEncrypted, auth.encryptionKey.value, () => '[]');
+
+      // A restart
+      const reopened = await unlock();
+      expect(openPasswordLoginModalMock).toHaveBeenCalledTimes(2);
+      const { decrypt } = await import('@/utils/crypto');
+      const vault = (await import('@/lib/WalletVault')).readVault();
+      expect(vault.revision).not.toBeNull();
+      const invites = vault.values[STORAGE_KEYS.invitesEncrypted];
+      expect(await decrypt(reopened.encryptionKey.value, invites)).toBe('[]');
+      [...Object.keys(ENCRYPTED_DATA), 'encryptionSalt'].forEach((name) => {
+        expect(localStorage.getItem(`${LOCAL_STORAGE_PREFIX}_${STORAGE_KEYS[name]}`)).toBeNull();
+      });
+    });
+
     it('keeps a real password when an unlock lands during the legacy password attempt', async () => {
       let isNextRefreshHeld = false;
       let isRefreshHeld = false;
