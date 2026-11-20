@@ -6,6 +6,9 @@ import {
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   getTransactionSignerAddress,
+  hash,
+  isName,
+  produceNameId,
   unpackDelegation,
   unpackTx,
   Encoded,
@@ -466,7 +469,11 @@ export class AeAccountHdWallet extends MemoryAccount {
       switch (params.tag) {
         case DelegationTag.AensName:
           try {
-            resolvedName = await fetchNameByHash(params.nameId);
+            const name = await fetchNameByHash(params.nameId);
+            // The middleware isn't trusted to name the signed name. It spells a name as
+            // claimed: in Unicode, or in punycode, which `produceNameId` refuses.
+            const nameId = isName(name) ? produceNameId(name) : encode(hash(name), Encoding.Name);
+            if (nameId === params.nameId) resolvedName = name;
           } catch (e) {
             handleUnknownError(e);
           }
