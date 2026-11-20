@@ -49,6 +49,14 @@
       },
     };
 
+    // When the wallet's announcements reached the page
+    window.announcements = [];
+    window.addEventListener('message', ({ data }) => {
+      if (data?.type === 'to_aepp' && data.data?.method === 'connection.announcePresence') {
+        window.announcements.push(Date.now());
+      }
+    });
+
     let aeSdk;
     window.aeDisconnects = [];
 

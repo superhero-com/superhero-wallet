@@ -5,6 +5,7 @@ import {
   ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/rpcMethods';
 import browser from 'webextension-polyfill';
+import type { Runtime } from 'webextension-polyfill';
 
 /** Whether the page asked the wallet anything, so it may hear when the chain changes */
 let hasAskedWallet = false;
@@ -119,29 +120,54 @@ const runContentScript = () => {
     return undefined;
   });
 
+  /** What the current relay does when Chrome freezes or resumes the page */
+  let onPageLifecycle: ((event: Event) => void) | undefined;
+  // Registered before the page's scripts, so the page can't keep these events from the relay
+  ['freeze', 'resume', 'visibilitychange'].forEach((type) => {
+    window.addEventListener(type, (event) => onPageLifecycle?.(event), true);
+  });
+
   /**
    * Aex-2 aepp communication, as the SDK's `connectionProxy` of a
    * `BrowserWindowMessageConnection` and a `BrowserRuntimeConnection`.
    * Importing those put 47 KB, mostly core-js, into every frame.
    */
   function relayAeppMessages() {
-    const port = browser.runtime.connect();
+    let port: Runtime.Port | undefined;
     const pageListeners = new AbortController();
     /** Whether the page talked to the wallet, which keeps a session per port */
     let isUsed = false;
+    let isEnteringCache = false;
+    function connect() {
+      try {
+        port = browser.runtime.connect();
+      } catch {
+        // The extension was updated or removed while the page was frozen
+        port = undefined;
+        pageListeners.abort();
+        return;
+      }
+      port.onMessage.addListener((message) => {
+        window.postMessage({ type: 'to_aepp', data: message }, window.origin);
+      });
+      // A port this script closed itself is not told
+      port.onDisconnect.addListener(() => pageListeners.abort());
+    }
     function onPageMessage({ data, origin, source }: MessageEvent) {
       if ((data?.jsonrpc ?? data?.data?.jsonrpc) !== '2.0') return;
       if (origin !== window.origin || source !== window) return;
       if (data.type != null && data.type !== 'to_waellet') return;
       isUsed = true;
-      port.postMessage(data.type != null ? data.data : data);
+      if (!port) connect();
+      port?.postMessage(data.type != null ? data.data : data);
     }
     // Chrome closes the ports of a page it keeps in the back/forward cache, without telling
     // this script. Firefox keeps them open.
     function onPageShow({ persisted }: PageTransitionEvent) {
+      isEnteringCache = false;
       if (!persisted || browser.runtime.getURL('').startsWith('moz-extension:')) return;
       pageListeners.abort();
-      port.disconnect();
+      port?.disconnect();
       if (isUsed) {
         // As the wallet ends a session, so the aepp can connect again
         window.postMessage({
@@ -153,10 +179,27 @@ const runContentScript = () => {
     }
     window.addEventListener('message', onPageMessage, { signal: pageListeners.signal });
     window.addEventListener('pageshow', onPageShow, { signal: pageListeners.signal });
-    port.onMessage.addListener((message) => {
-      window.postMessage({ type: 'to_aepp', data: message }, window.origin);
-    });
-    port.onDisconnect.addListener(() => pageListeners.abort());
+    window.addEventListener('pagehide', ({ persisted }) => {
+      isEnteringCache = persisted;
+    }, { signal: pageListeners.signal });
+    /**
+     * Chrome keeps the port of a frozen page and queues each wallet announcement for it, every
+     * 3 s, all delivered at once on resume. A page that never talked to the wallet gets nothing
+     * else, so it lets the port go and connects again on resume, when the wallet announces itself
+     * at once. An aepp keeps its port, and so its session.
+     */
+    onPageLifecycle = (event) => {
+      if (pageListeners.signal.aborted || isEnteringCache) return;
+      if (event.type === 'freeze') {
+        if (isUsed || !port) return;
+        port.disconnect();
+        port = undefined;
+      } else if (!port) {
+        // `visibilitychange` covers a resume this script did not hear about
+        connect();
+      }
+    };
+    connect();
   }
 
   if (document.readyState === 'complete') {
