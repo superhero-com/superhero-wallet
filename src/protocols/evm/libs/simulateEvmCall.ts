@@ -39,7 +39,7 @@ export type EvmSimulation =
   }
   | { status: 'reverted'; reason?: string }
   | { status: 'insufficientFunds' }
-  /** The node has no `eth_simulateV1`, e.g. Avalanche's */
+  /** The node has no `eth_simulateV1`, e.g. Avalanche's, or doesn't trace the coin sent */
   | { status: 'unsupported' }
   | { status: 'failed' };
 
@@ -103,6 +103,7 @@ function getBatch(data: string): [string, bigint][] | undefined {
  * What a simulated call does to the assets of `owner`: the net change of each,
  * and the rights given on them. Only the standard events are read.
  * `spentApprovals` are of tokens the call also sends, which may only tell the allowance spent.
+ * `sendsCoin` tells that the node traced a move of the coin from `owner`, even one refunded.
  */
 export function readSimulatedLogs(rawLogs: unknown, owner: string) {
   const user = owner.toLowerCase();
@@ -115,6 +116,7 @@ export function readSimulatedLogs(rawLogs: unknown, owner: string) {
   const burns = new Set<string>();
   const wrapEvents: { asset: string; emitter: string; amount: bigint; isDeposit: boolean }[] = [];
   let hasUnreadEvents = false;
+  let sendsCoin = false;
 
   function addChange(asset: string | undefined, tokenId: string | undefined, delta: bigint) {
     const key = `${asset ?? ''}#${tokenId ?? ''}`;
@@ -162,6 +164,7 @@ export function readSimulatedLogs(rawLogs: unknown, owner: string) {
           addTransfer(asset, from, to, amount);
           if (!asset) {
             coinMoves.push({ from, to, amount });
+            if (from === user && to !== user) sendsCoin = true;
           } else if (from === ZERO_ADDRESS && to === user) {
             mints.add(asset);
           } else if (from === user && to === ZERO_ADDRESS) {
@@ -312,6 +315,7 @@ export function readSimulatedLogs(rawLogs: unknown, owner: string) {
     approvals: approvals.filter((approval) => isGranted(approval) && !isOfSentToken(approval)),
     spentApprovals: [...lastOfSentTokens.values()].filter(isGranted),
     hasUnreadEvents,
+    sendsCoin,
   };
 }
 
@@ -488,8 +492,16 @@ export async function simulateEvmCall(
     if (simulated?.status === '0x0') {
       return { status: 'reverted', reason: readRevertReason(simulated.error?.message) };
     }
-    if (simulated?.status !== '0x1') return { status: 'failed' };
-    const { spentApprovals, ...read } = readSimulatedLogs(simulated.logs, call.from);
+    if (simulated?.status !== '0x1' || !Array.isArray(simulated.logs)) return { status: 'failed' };
+    const { spentApprovals, sendsCoin, ...read } = readSimulatedLogs(simulated.logs, call.from);
+    // A node that traces no transfers would hide the coin the call sends
+    if (
+      BigInt(call.value) > BigInt(0)
+      && call.to.toLowerCase() !== call.from.toLowerCase()
+      && !sendsCoin
+    ) {
+      return { status: 'unsupported' };
+    }
     const isRaised = await Promise.all(
       spentApprovals.map((approval) => isAllowanceRaised(nodeUrl, call.from, approval)),
     );

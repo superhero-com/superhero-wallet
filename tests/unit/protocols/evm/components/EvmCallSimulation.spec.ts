@@ -88,12 +88,15 @@ afterEach(() => vi.unstubAllGlobals());
 
 const ok = (logs: object[]) => ({ result: [{ calls: [{ status: '0x1', logs }] }] });
 
-function mountSimulation(to = ROUTER, data = SWAP_DATA) {
+const HALF_ETH = '0x6f05b59d3b20000';
+const ONE_ETH = '0xde0b6b3a7640000';
+
+function mountSimulation(to = ROUTER, data = SWAP_DATA, value = '0x0') {
   // With the fees, as the handler always sets them
   const evmCall: IEvmCall = {
     from: USER,
     to,
-    value: '0x6f05b59d3b20000',
+    value,
     data,
     gas: '0x30d40',
     chainId: '1',
@@ -115,7 +118,7 @@ describe('EvmCallSimulation', () => {
       log(COIN, [TOPICS.transfer, USER, ROUTER], words(5n * 10n ** 17n)),
       log(USDC, [TOPICS.transfer, ROUTER, USER], words(1_234_500_000n)),
     ]);
-    const wrapper = mountSimulation();
+    const wrapper = mountSimulation(ROUTER, SWAP_DATA, HALF_ETH);
     await flushPromises();
 
     expect(wrapper.find('[data-cy=evm-call-simulation]').attributes('aria-busy')).toBe('false');
@@ -130,7 +133,7 @@ describe('EvmCallSimulation', () => {
       log(USDC, [TOPICS.transfer, ROUTER, USER], words(1_234_500_000n)),
       log(COIN, [TOPICS.transfer, USER, ROUTER], words(5n * 10n ** 17n)),
     ]);
-    const wrapper = mountSimulation();
+    const wrapper = mountSimulation(ROUTER, SWAP_DATA, HALF_ETH);
     await flushPromises();
 
     expect(texts(wrapper, 'evm-call-change')).toEqual(['−0.5 ETH', `+1,234.5 USDC (${USDC})`]);
@@ -197,7 +200,7 @@ describe('EvmCallSimulation', () => {
       log(COIN, [TOPICS.transfer, USER, ROUTER], words(5n * 10n ** 17n)),
       log(FAKE, [TOPICS.transfer, ROUTER, USER], words(1_000_000_000n)),
     ]);
-    const wrapper = mountSimulation();
+    const wrapper = mountSimulation(ROUTER, SWAP_DATA, HALF_ETH);
     await flushPromises();
 
     expect(texts(wrapper, 'evm-call-change')).toEqual(['−0.5 ETH', `+1,000 ${FAKE}`]);
@@ -208,7 +211,7 @@ describe('EvmCallSimulation', () => {
       log(COIN, [TOPICS.transfer, USER, WETH], words(10n ** 18n)),
       log(WETH, [TOPICS.deposit, USER], words(10n ** 18n)),
     ]);
-    const wrapper = mountSimulation(WETH, '0xd0e30db0');
+    const wrapper = mountSimulation(WETH, '0xd0e30db0', ONE_ETH);
     await flushPromises();
 
     expect(texts(wrapper, 'evm-call-change')).toEqual(['−1 ETH', `+1 WETH (${WETH})`]);
@@ -219,7 +222,7 @@ describe('EvmCallSimulation', () => {
       log(COIN, [TOPICS.transfer, USER, MULTISIG], words(10n ** 18n)),
       log(MULTISIG, [TOPICS.deposit, USER], words(10n ** 18n)),
     ]);
-    const wrapper = mountSimulation(MULTISIG, '0x12345678');
+    const wrapper = mountSimulation(MULTISIG, '0x12345678', ONE_ETH);
     await flushPromises();
 
     expect(texts(wrapper, 'evm-call-change')).toEqual(['−1 ETH']);
@@ -449,7 +452,7 @@ describe('EvmCallSimulation', () => {
 
   it('warns of a value the account does not have', async () => {
     simulation = { error: { code: -38014, message: 'insufficient funds for gas * price + value' } };
-    const wrapper = mountSimulation();
+    const wrapper = mountSimulation(ROUTER, SWAP_DATA, HALF_ETH);
     await flushPromises();
 
     expect(texts(wrapper, 'evm-call-warning'))
@@ -467,6 +470,16 @@ describe('EvmCallSimulation', () => {
     expect(texts(wrapper, 'evm-call-simulation-note'))
       .toEqual(["Balance changes can't be previewed on this network."]);
     expect(texts(wrapper, 'evm-call-warning')).toEqual([]);
+  });
+
+  it('tells that a node that traced no coin transfer can not preview', async () => {
+    simulation = ok([log(USDC, [TOPICS.transfer, ROUTER, USER], words(1_234_500_000n))]);
+    const wrapper = mountSimulation(ROUTER, SWAP_DATA, HALF_ETH);
+    await flushPromises();
+
+    expect(texts(wrapper, 'evm-call-simulation-note'))
+      .toEqual(["Balance changes can't be previewed on this network."]);
+    expect(texts(wrapper, 'evm-call-change')).toEqual([]);
   });
 
   it('tells that the preview failed when the node is down', async () => {
