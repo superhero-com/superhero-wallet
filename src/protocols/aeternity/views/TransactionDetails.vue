@@ -379,9 +379,8 @@ export default defineComponent({
      */
     const transactionFee = computed((): number => {
       const { tx } = transaction.value ?? {};
-      const fee = tx?.fee ?? 0;
-      const extraFee = tx?.tx?.tx?.fee ?? 0;
-      return +aettosToAe(fee + extraFee);
+      // Big values come as strings (pending node txs, precise middleware reads)
+      return +aettosToAe(new BigNumber(tx?.fee ?? 0).plus(tx?.tx?.tx?.fee ?? 0));
     });
 
     onMounted(async () => {

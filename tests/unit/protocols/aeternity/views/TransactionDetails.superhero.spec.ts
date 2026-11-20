@@ -9,8 +9,11 @@ import {
   SUPERHERO_CONTRACTS,
 } from '@/protocols/aeternity/config';
 import { useAeSdk } from '@/composables/aeSdk';
+import { useLatestTransactionList } from '@/composables/latestTransactionList';
+import JsonBig from '@/lib/json-big';
 import TransactionDetails from '@/protocols/aeternity/views/TransactionDetails.vue';
 import SwapRoute from '@/popup/components/SwapRoute.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 const HASH = 'th_2QcxMg7FmhousM56HEagXQ6ke29FrddG98bSKKB9Z9gCibyxy6';
 const CALLER = 'ak_AzQPCBHpxSdNURATT41CZANu8WTxtvxeUY33z4dgbDfyA6PtJ';
@@ -45,9 +48,11 @@ function contractCall(contractId: string, fn: string, args: any[]): ITransaction
 
 enableAutoUnmount(afterEach);
 
-async function mountDetails(transaction: ITransaction) {
-  vi.spyOn(ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity), 'fetchTransactionByHash')
-    .mockResolvedValue(transaction);
+async function mountDetails(transaction?: ITransaction) {
+  if (transaction) {
+    vi.spyOn(ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity), 'fetchTransactionByHash')
+      .mockResolvedValue(transaction);
+  }
   const wrapper = mount(TransactionDetails, {
     shallow: true,
     global: {
@@ -119,6 +124,69 @@ describe('Superhero transaction details', () => {
 
     expect(wrapper.find('.transaction-details-base .content').exists()).toBe(true);
     expect(wrapper.find('[data-cy=post-content]').exists()).toBe(false);
+  });
+
+  describe('fee', () => {
+    const spendTx = (fee: bigint) => ({
+      type: 'SpendTx',
+      senderId: CALLER,
+      recipientId: TARGET,
+      amount: BigInt('1000'),
+      fee,
+      nonce: 5,
+    });
+
+    /** As `AeternityAdapter.fetchPendingTransactions` gives the node's answer */
+    function storePending(tx: object) {
+      const [pending] = JsonBig.parse(JsonBig.stringify([{ tx, blockHeight: -1, hash: HASH }]));
+      useLatestTransactionList().accountsTransactionsLatest.value = {
+        [CALLER]: [{
+          ...pending,
+          pending: true,
+          protocol: PROTOCOLS.aeternity,
+          microTime: Date.now(),
+          transactionOwner: CALLER,
+        }],
+      };
+    }
+
+    async function getFee() {
+      const wrapper = await mountDetails();
+      return wrapper.find('[data-cy=fee]').findComponent(TokenAmount).props('amount');
+    }
+
+    afterEach(() => {
+      useLatestTransactionList().accountsTransactionsLatest.value = {};
+    });
+
+    it('of a pending transaction', async () => {
+      storePending(spendTx(BigInt('16820000000000')));
+
+      expect(await getFee()).toBe(0.00001682);
+    });
+
+    it('of a pending sponsored transaction', async () => {
+      storePending({
+        type: 'PayingForTx',
+        payerId: TARGET,
+        fee: BigInt('20000000000000'),
+        nonce: 3,
+        tx: { signatures: [], tx: spendTx(BigInt('16820000000000')) },
+      });
+
+      expect(await getFee()).toBe(0.00003682);
+    });
+
+    it('of a transaction read from the middleware', async () => {
+      fetchMock.mockImplementation(async (url: string) => new Response(
+        url.endsWith(`/v3/transactions/${HASH}`)
+          ? `{"hash":"${HASH}","block_height":800000,"tx":{"type":"SpendTx","sender_id":"${CALLER}","recipient_id":"${TARGET}","amount":1000,"fee":1000000000000000,"nonce":5}}`
+          : '',
+        { status: 200 },
+      ));
+
+      expect(await getFee()).toBe(0.001);
+    });
   });
 
   it('looks up the sale of a buy missing from the token sales', async () => {
