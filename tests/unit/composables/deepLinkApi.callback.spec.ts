@@ -396,6 +396,25 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   });
 
   describe('template expansion', () => {
+    it('returns the signed transaction in the fragment after callback approval', async () => {
+      vi.useFakeTimers();
+      const callbackPage = 'https://dapp.example/transaction-callback.html';
+      const state = 'payment-42';
+      const transaction = 'tx_+/8=';
+      route.query['x-success'] = `${callbackPage}#state=${state}&transaction={transaction}`;
+
+      await (await loadApi()).openCallbackOrGoHome(true, { transaction });
+      vi.runAllTimers();
+
+      expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
+      expect(windowOpen).toHaveBeenCalledTimes(1);
+      const callback = new URL(windowOpen.mock.calls[0][0]);
+      expect(callback.href.split('#')[0]).toBe(callbackPage);
+      expect(Object.fromEntries(new URLSearchParams(callback.hash.slice(1)))).toEqual({
+        state, transaction,
+      });
+    });
+
     it('does not double-decode an already-decoded callback template', async () => {
       vi.useFakeTimers();
       route = {
