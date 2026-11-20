@@ -80,6 +80,19 @@ describe('inject.ts aepp relay', () => {
     window.dispatchEvent(new MessageEvent('message', { data, origin, source }));
   }
 
+  /** What the listeners threw that `action` reached */
+  function getUncaughtErrors(action: () => void) {
+    const errors: unknown[] = [];
+    const onError = (event: ErrorEvent) => errors.push(event.error);
+    window.addEventListener('error', onError);
+    try {
+      action();
+    } finally {
+      window.removeEventListener('error', onError);
+    }
+    return errors;
+  }
+
   beforeEach(() => {
     ports = [];
     sdkPort = undefined;
@@ -126,6 +139,43 @@ describe('inject.ts aepp relay', () => {
     it('starts at once on a page that has loaded', async () => {
       await loadInject();
       expect(ports).toHaveLength(1);
+    });
+
+    it('starts as usual on a page hidden or frozen while it loaded', async () => {
+      readyState = 'loading';
+      await loadInject();
+
+      const errors = getUncaughtErrors(() => {
+        ['visibilitychange', 'freeze', 'resume'].forEach((type) => {
+          document.dispatchEvent(new Event(type));
+        });
+      });
+
+      expect(errors).toEqual([]);
+      expect(ports).toHaveLength(0);
+
+      setReadyState('complete');
+      expect(ports).toHaveLength(1);
+    });
+
+    it('hears freeze and resume even when the page stops them', async () => {
+      readyState = 'loading';
+      await loadInject();
+      // The page's scripts run after the content script's start, before the page has loaded
+      const stop = (event: Event) => event.stopImmediatePropagation();
+      window.addEventListener('freeze', stop, true);
+      window.addEventListener('resume', stop, true);
+      setReadyState('complete');
+      try {
+        document.dispatchEvent(new Event('freeze'));
+        document.dispatchEvent(new Event('resume'));
+      } finally {
+        window.removeEventListener('freeze', stop, true);
+        window.removeEventListener('resume', stop, true);
+      }
+
+      expect(ports[0].disconnect).toHaveBeenCalled();
+      expect(ports).toHaveLength(2);
     });
   });
 
@@ -286,6 +336,148 @@ describe('inject.ts aepp relay', () => {
       expect(ports[0].disconnect).not.toHaveBeenCalled();
       expect(ports[0].postMessage).toHaveBeenCalledTimes(2);
       expect(windowPostMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('on a page Chrome freezes', () => {
+    const request = {
+      type: MESSAGE_DIRECTION.to_waellet,
+      data: { jsonrpc: '2.0', id: 1, method: 'message.sign' },
+    };
+    const announcement = {
+      jsonrpc: '2.0', method: 'connection.announcePresence', params: { id: 'superhero' },
+    };
+    let windowPostMessage: ReturnType<typeof vi.spyOn>;
+
+    /** Chrome fires these at the document */
+    function fire(type: 'freeze' | 'resume' | 'visibilitychange') {
+      document.dispatchEvent(new Event(type));
+    }
+
+    function hidePage(persisted: boolean) {
+      window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted }));
+    }
+
+    function showPage(persisted: boolean) {
+      window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted }));
+    }
+
+    beforeEach(async () => {
+      windowPostMessage = vi.spyOn(window, 'postMessage').mockImplementation(() => {});
+      await loadInject();
+    });
+
+    it('lets the port go, and relays through a new port after resume', () => {
+      fire('freeze');
+
+      expect(ports[0].disconnect).toHaveBeenCalled();
+      expect(ports).toHaveLength(1);
+
+      fire('resume');
+      ports[1].receive(announcement);
+      postFromPage(request);
+
+      expect(ports).toHaveLength(2);
+      expect(windowPostMessage).toHaveBeenCalledWith(
+        { type: 'to_aepp', data: announcement },
+        window.origin,
+      );
+      expect(ports[1].postMessage).toHaveBeenCalledWith(request.data);
+    });
+
+    it('keeps the port of an aepp that talked to the wallet', () => {
+      postFromPage(request);
+      fire('freeze');
+      fire('resume');
+      postFromPage(request);
+
+      expect(ports).toHaveLength(1);
+      expect(ports[0].disconnect).not.toHaveBeenCalled();
+      expect(ports[0].postMessage).toHaveBeenCalledTimes(2);
+    });
+
+    it('connects again when the page turns visible without a resume', () => {
+      fire('freeze');
+      fire('visibilitychange');
+      ports[1].receive(announcement);
+
+      expect(ports).toHaveLength(2);
+      expect(windowPostMessage).toHaveBeenCalledWith(
+        { type: 'to_aepp', data: announcement },
+        window.origin,
+      );
+    });
+
+    it('connects at once when the page posts while its port is gone', () => {
+      fire('freeze');
+      postFromPage(request);
+      fire('resume');
+
+      expect(ports).toHaveLength(2);
+      expect(ports[1].postMessage).toHaveBeenCalledWith(request.data);
+    });
+
+    it('leaves a page entering the back/forward cache to `pageshow`', () => {
+      hidePage(true);
+      fire('freeze');
+
+      expect(ports[0].disconnect).not.toHaveBeenCalled();
+
+      fire('resume');
+      showPage(true);
+
+      expect(ports).toHaveLength(2);
+      expect(ports[0].disconnect).toHaveBeenCalledTimes(1);
+
+      // The restored page is frozen like any other
+      fire('freeze');
+
+      expect(ports[1].disconnect).toHaveBeenCalled();
+    });
+
+    it('stays off when the extension went away while the page was frozen', () => {
+      const { connect } = (globalThis as any).browser.runtime;
+      connect.mockImplementation(() => {
+        throw new Error('Extension context invalidated.');
+      });
+
+      const errors = getUncaughtErrors(() => {
+        fire('freeze');
+        fire('resume');
+        postFromPage(request);
+      });
+
+      expect(errors).toEqual([]);
+      expect(connect).toHaveBeenCalledTimes(2);
+      expect(ports).toHaveLength(1);
+      expect(ports[0].postMessage).not.toHaveBeenCalled();
+    });
+
+    it('stays off once the wallet has disconnected', () => {
+      ports[0].close();
+      fire('freeze');
+      fire('resume');
+      postFromPage(request);
+
+      expect(ports).toHaveLength(1);
+      expect(ports[0].disconnect).not.toHaveBeenCalled();
+      expect(ports[0].postMessage).not.toHaveBeenCalled();
+    });
+
+    it('opens one port per resume, whatever the order of the events', () => {
+      fire('resume');
+      fire('visibilitychange');
+
+      expect(ports).toHaveLength(1);
+
+      fire('freeze');
+      fire('freeze');
+      fire('resume');
+      fire('resume');
+      fire('visibilitychange');
+
+      expect(ports).toHaveLength(2);
+      expect(ports[0].disconnect).toHaveBeenCalledTimes(1);
     });
   });
 });

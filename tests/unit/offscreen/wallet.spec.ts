@@ -32,6 +32,7 @@ describe('offscreen wallet connections', () => {
         addListener: vi.fn((listener) => {
           messageListener = listener;
         }),
+        removeListener: vi.fn(),
       },
     };
   }
@@ -202,6 +203,85 @@ describe('offscreen wallet connections', () => {
 
       expect(aeSdk.addRpcClient).not.toHaveBeenCalled();
       expect(aeSdk.shareWalletInfo).not.toHaveBeenCalled();
+    });
+
+    describe('for an aepp that asks meanwhile', () => {
+      const request = (id: number) => ({ jsonrpc: '2.0', id, method: 'connection.open' });
+      /** Of the SDK's client, which takes the aepp's messages */
+      let handleMessage: vi.Mock;
+      let connection;
+      let port;
+      let finishReset;
+      let connecting;
+
+      beforeEach(async () => {
+        // The real connection, which starts listening to the port once the SDK has the client
+        vi.doMock('@aeternity/aepp-sdk', async () => ({
+          BrowserRuntimeConnection: (await vi.importActual('@aeternity/aepp-sdk')).BrowserRuntimeConnection,
+        }));
+        handleMessage = vi.fn();
+        aeSdk.addRpcClient.mockImplementation((rpcConnection) => {
+          connection = rpcConnection;
+          connection.connect(handleMessage, vi.fn());
+          return 'client-id';
+        });
+        const listeners = new Set();
+        port = createPort();
+        port.disconnect = vi.fn();
+        port.onMessage = {
+          addListener: (listener) => listeners.add(listener),
+          removeListener: (listener) => listeners.delete(listener),
+        };
+        /** A message of the aepp */
+        port.receive = (message) => [...listeners].forEach((listener) => listener(message, port));
+
+        const wallet = (await import('@/offscreen/wallet'));
+        await wallet.init();
+        aeSdkComposable.getAeSdk.mockReturnValueOnce(
+          new Promise((resolve) => { finishReset = resolve; }),
+        );
+        connecting = onConnectListener(port);
+      });
+
+      it('gives the SDK its requests once the reset is done, in their order and each once', async () => {
+        port.receive(request(1));
+        port.receive(request(2));
+        expect(handleMessage).not.toHaveBeenCalled();
+
+        finishReset(aeSdk);
+        await connecting;
+        port.receive(request(3));
+
+        expect(handleMessage.mock.calls).toEqual([1, 2, 3].map((id) => (
+          [request(id), 'https://dapp.example', port]
+        )));
+      });
+
+      it('keeps only the first 10 requests of a page that floods it', async () => {
+        const requests = Array.from({ length: 1000 }, (_, id) => request(id));
+        requests.forEach(port.receive);
+
+        finishReset(aeSdk);
+        await connecting;
+
+        expect(handleMessage.mock.calls.map(([message]) => message)).toEqual(requests.slice(0, 10));
+      });
+
+      it('gives the SDK nothing more once a request closed the connection', async () => {
+        const close = { jsonrpc: '2.0', method: 'connection.close', params: { reason: 'bye' } };
+        // As the SDK's handler of `connection.close` does
+        handleMessage.mockImplementation((message) => {
+          if (message.method === close.method) connection.disconnect();
+        });
+        port.receive(close);
+        port.receive(request(1));
+
+        finishReset(aeSdk);
+        await connecting;
+
+        expect(handleMessage.mock.calls.map(([message]) => message)).toEqual([close]);
+        expect(port.disconnect).toHaveBeenCalled();
+      });
     });
 
     it('does not announce the wallet until the SDK is ready, then keeps retrying', async () => {

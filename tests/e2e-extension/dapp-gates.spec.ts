@@ -6,7 +6,12 @@ import {
   it,
 } from 'vitest';
 import type http from 'http';
-import type { Browser, Frame, Page } from 'puppeteer';
+import type {
+  Browser,
+  CDPSession,
+  Frame,
+  Page,
+} from 'puppeteer';
 import { verifyMessage } from '@aeternity/aepp-sdk';
 import { recover } from 'web3-eth-accounts';
 import {
@@ -45,6 +50,19 @@ function evm(page: Page | Frame, method: string, params?: unknown[]) {
 async function answerPopup<T>(request: Promise<T>, button: 'accept' | 'deny') {
   await click(await waitForPopup(browser, extensionId), `[data-cy=${button}]`);
   return request;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+/** Keeps the page frozen as Chrome does with a tab in a collapsed group, for `ms` */
+async function freeze(cdp: CDPSession, ms: number, whileFrozen?: () => Promise<unknown>) {
+  await cdp.send('Page.setWebLifecycleState', { state: 'frozen' });
+  try {
+    await whileFrozen?.();
+    await sleep(ms);
+  } finally {
+    await cdp.send('Page.setWebLifecycleState', { state: 'active' });
+  }
 }
 
 beforeAll(async () => {
@@ -204,6 +222,62 @@ describe('aeternity aepp', () => {
     }
   });
 
+  it('finds the wallet after its page was frozen, without a backlog of announcements', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.goto(AEPP_URL);
+      await page.waitForFunction(() => (window as any).announcements.length, { timeout: 10000 });
+      const countBefore = await page.evaluate(() => (window as any).announcements.length);
+
+      // Chrome would queue an announcement every 3 s for the frozen page, all delivered on resume
+      await freeze(await page.createCDPSession(), 15000);
+      await sleep(1000);
+
+      const count = await page.evaluate(
+        (n) => (window as any).announcements.length - n,
+        countBefore,
+      );
+      expect(count).toBeGreaterThanOrEqual(1);
+      expect(count).toBeLessThanOrEqual(2);
+      await page.evaluate(() => (window as any).ae.connect());
+      const { result } = await withoutPopup(
+        browser,
+        extensionId,
+        () => page.evaluate(() => (window as any).ae.subscribe()),
+      );
+      expect(result).toBe(address);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('keeps its session across a freeze, also for a signature approved while frozen', async () => {
+    const cdp = await aepp.createCDPSession();
+    const verify = (signature: string) => verifyMessage(
+      MESSAGE,
+      Buffer.from(signature, 'hex'),
+      address as any,
+    );
+    try {
+      await freeze(cdp, 5000);
+      const { result } = await answerPopup(
+        aepp.evaluate((message) => (window as any).ae.signMessage(message), MESSAGE),
+        'accept',
+      );
+      expect(verify(result)).toBe(true);
+
+      const signing = aepp.evaluate((message) => (window as any).ae.signMessage(message), MESSAGE);
+      const popup = await waitForPopup(browser, extensionId);
+      await popup.waitForSelector('[data-cy=accept]', { timeout: 30000 });
+      await freeze(cdp, 3000, () => click(popup, '[data-cy=accept]'));
+
+      expect(verify((await signing).result)).toBe(true);
+      expect(await aepp.evaluate(() => (window as any).aeDisconnects)).toEqual([]);
+    } finally {
+      await cdp.detach();
+    }
+  });
+
   it('can connect again after the page comes back from the back/forward cache', async () => {
     await aepp.evaluate(() => { (window as any).isCached = true; });
     await aepp.goto(DAPP_URL);
@@ -222,5 +296,35 @@ describe('aeternity aepp', () => {
     );
 
     expect(result).toBe(address);
+  });
+
+  it('finds the wallet after its page comes back from the cache without having used it', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.goto(AEPP_URL);
+      await page.waitForFunction(() => (window as any).announcements.length, { timeout: 10000 });
+      await page.evaluate(() => { (window as any).isCached = true; });
+      await page.goto(DAPP_URL);
+      await page.goBack();
+      expect(await page.evaluate(() => (window as any).isCached)).toBe(true);
+      const countBefore = await page.evaluate(() => (window as any).announcements.length);
+
+      await page.waitForFunction(
+        (n) => (window as any).announcements.length > n,
+        { timeout: 10000 },
+        countBefore,
+      );
+      await page.evaluate(() => (window as any).ae.connect());
+      const { result } = await withoutPopup(
+        browser,
+        extensionId,
+        () => page.evaluate(() => (window as any).ae.subscribe()),
+      );
+      expect(result).toBe(address);
+      // It had no session to end
+      expect(await page.evaluate(() => (window as any).aeDisconnects)).toEqual([]);
+    } finally {
+      await page.close();
+    }
   });
 });
