@@ -311,6 +311,17 @@ describe('useStorageRef synced with other windows', () => {
     window.dispatchEvent(new StorageEvent('storage', { key, newValue: raw, storageArea }));
   }
 
+  /** As a wallet reset in another window does */
+  function removeInOtherWindow({ clear = false, storageArea = localStorage } = {}) {
+    if (storageArea === localStorage) {
+      if (clear) localStorage.clear();
+      else localStorage.removeItem(ITEM_KEY);
+    }
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: clear ? null : ITEM_KEY, newValue: null, storageArea,
+    }));
+  }
+
   async function restore(options = {}, key = 'key') {
     const { useStorageRef } = await import('@/composables/storageRef');
     const state = await new Promise((resolve) => {
@@ -514,9 +525,61 @@ describe('useStorageRef synced with other windows', () => {
   });
 
   it.each([
-    ['of another key', ['{"list":[9]}', { key: 'sh-wallet_other' }]],
-    ['of the session storage', ['{"list":[9]}', { storageArea: sessionStorage }]],
-    ['of a removal', [null]],
+    ['removed', {}],
+    ['cleared', { clear: true }],
+  ])('follows to the initial value a storage another window %s, without writing it back', async (_, options) => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    const state = await restore();
+
+    removeInOtherWindow(options);
+    // Before its watcher runs
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    await nextTask();
+
+    expect(state.value).toEqual({ list: [] });
+    expect(setItem).not.toHaveBeenCalled();
+    expect(localStorage.getItem(ITEM_KEY)).toBeNull();
+  });
+
+  it('follows a removal to the initial value, not to the state changed in place', async () => {
+    const state = await restore();
+    state.value.list.push(1);
+    await nextTask();
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[1]}');
+
+    removeInOtherWindow();
+
+    expect(state.value).toEqual({ list: [] });
+  });
+
+  it('saves a change made after a removal of another window', async () => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    const state = await restore();
+    removeInOtherWindow();
+    await nextTask();
+
+    state.value.list.push(2);
+    await nextTask();
+
+    expect(localStorage.getItem(ITEM_KEY)).toBe('{"list":[2]}');
+  });
+
+  it.each([
+    ['a value of another key', () => storeInOtherWindow('{"list":[9]}', { key: 'sh-wallet_other' })],
+    ['a value of the session storage', () => storeInOtherWindow('{"list":[9]}', { storageArea: sessionStorage })],
+    ['a clear of the session storage', () => removeInOtherWindow({ clear: true, storageArea: sessionStorage })],
+  ])('ignores %s', async (_, changeOtherStorage) => {
+    localStorage.setItem(ITEM_KEY, '{"list":[1]}');
+    const state = await restore();
+    // Its own event is yet to come
+    localStorage.setItem(ITEM_KEY, '{"list":[2]}');
+
+    changeOtherStorage();
+
+    expect(state.value).toEqual({ list: [1] });
+  });
+
+  it.each([
     ['that is not JSON', ['{']],
     ['of null', ['null']],
   ])('ignores an event %s', async (_, args) => {
