@@ -15,7 +15,7 @@
               :label="$t('pages.secureLogin.enableSecureLogin')"
               :model-value="isBiometricLoginEnabled"
               :disabled="!isDeviceAuthenticationAvailable"
-              @update:model-value="setBiometricLoginEnabled"
+              @update:model-value="setBiometricLogin"
             />
           </div>
         </template>
@@ -250,6 +250,7 @@ export default defineComponent({
       setBiometricLoginEnabled,
     } = useUi();
     const {
+      openBiometricLoginModal,
       openConfirmModal,
       openDefaultModal,
       openEnableBiometricLoginModal,
@@ -380,6 +381,18 @@ export default defineComponent({
       }
     }
 
+    async function setBiometricLogin(val: boolean) {
+      // As the password on desktop: unlocked isn't enough to turn it off
+      if (!val) {
+        try {
+          await openBiometricLoginModal({ force: true, isCancelable: true });
+        } catch {
+          return;
+        }
+      }
+      setBiometricLoginEnabled(val);
+    }
+
     function msToMinutes(ms: number) {
       return Math.floor(ms / 60000);
     }
@@ -407,7 +420,7 @@ export default defineComponent({
       newPassword,
       confirmNewPassword,
       setNewPassword,
-      setBiometricLoginEnabled,
+      setBiometricLogin,
       msToMinutes,
       setPasswordEnabled,
     };
