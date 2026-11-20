@@ -122,6 +122,17 @@ describe('offscreen message listener', () => {
     expect(listener({ target: 'offscreen', method: 'unknownMethod' }, WALLET_PAGE)).toBeUndefined();
   });
 
+  it('has a Ledger sign for the network the wallet page asks for', async () => {
+    const listener = await loadListener();
+    const payload = {
+      address: 'ak_ledger', accountIndex: 1, transaction: 'tx_unsigned', networkId: 'ae_uat',
+    };
+
+    listener({ target: 'offscreen', method: 'ledgerSignTransaction', payload }, WALLET_PAGE);
+
+    expect(ledger.signTransaction).toHaveBeenCalledWith('ak_ledger', 1, 'tx_unsigned', 'ae_uat');
+  });
+
   it('still returns responses for handled offscreen messages', async () => {
     const listener = await loadListener();
 

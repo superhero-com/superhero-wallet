@@ -80,10 +80,12 @@ export function useLedger() {
     );
   }
 
+  /** For `networkId`, by default the one of the node */
   async function signTransaction(
     address: Encoded.AccountAddress,
     accountIndex: number,
     transaction: Encoded.Transaction,
+    networkId?: string,
   ): Promise<Encoded.Transaction> {
     const { openModal } = useModals();
     openModal(MODAL_LEDGER_SIGN, undefined);
@@ -95,6 +97,7 @@ export function useLedger() {
           address,
           accountIndex,
           transaction,
+          networkId,
         },
         target: 'offscreen',
       });
@@ -104,7 +107,7 @@ export function useLedger() {
 
     return withTransport(
       (transport) => new AccountLedger(transport, accountIndex, address)
-        .signTransaction(transaction, { networkId: nodeNetworkId.value }),
+        .signTransaction(transaction, { networkId: networkId ?? nodeNetworkId.value }),
     );
   }
 
