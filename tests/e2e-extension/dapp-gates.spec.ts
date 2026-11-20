@@ -31,6 +31,9 @@ import {
 const MESSAGE = 'Superhero Wallet e2e';
 const UNKNOWN_CHAIN_ID = '0x7a69';
 const SEPOLIA_CHAIN_ID = '0xaa36a7';
+const PERMIT2 = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
+const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const ROUTER = '0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD';
 
 let servers: http.Server[];
 let browser: Browser;
@@ -106,6 +109,47 @@ describe('EVM dapp', () => {
     const { error } = await answerPopup(evm(dapp, 'personal_sign', [MESSAGE, account]), 'deny');
 
     expect(error.code).toBe(4001);
+  });
+
+  it('warns of an unlimited Permit2 allowance before the user signs it', async () => {
+    const { result: chainId } = await evm(dapp, 'eth_chainId');
+    const request = evm(dapp, 'eth_signTypedData_v4', [account, JSON.stringify({
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        PermitSingle: [
+          { name: 'details', type: 'PermitDetails' },
+          { name: 'spender', type: 'address' },
+          { name: 'sigDeadline', type: 'uint256' },
+        ],
+        PermitDetails: [
+          { name: 'token', type: 'address' },
+          { name: 'amount', type: 'uint160' },
+          { name: 'expiration', type: 'uint48' },
+          { name: 'nonce', type: 'uint48' },
+        ],
+      },
+      primaryType: 'PermitSingle',
+      domain: { name: 'Permit2', chainId, verifyingContract: PERMIT2 },
+      message: {
+        details: {
+          token: USDC, amount: (2n ** 160n - 1n).toString(), expiration: '1795000000', nonce: '0',
+        },
+        spender: ROUTER,
+        sigDeadline: '1795000000',
+      },
+    })]);
+    const popup = await waitForPopup(browser, extensionId);
+    // Shown before the node tells the token's details
+    const warning = await popup.waitForSelector('[data-cy=evm-sign-warning]', { timeout: 30000 });
+
+    // The symbol may still be the token's address
+    expect(await warning!.evaluate((el) => el.textContent)).toContain('until the approval expires');
+    await click(popup, '[data-cy=deny]');
+    expect((await request).error.code).toBe(4001);
   });
 
   it('gets -32602 for a chain that is not on the active network', async () => {

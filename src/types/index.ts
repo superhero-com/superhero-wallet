@@ -721,12 +721,36 @@ export interface IPopupData {
   isNewNetwork?: boolean;
 }
 
+/** An EVM dapp's call as it will be signed, in hex: popup props travel as JSON */
+export interface IEvmCall {
+  from: string;
+  to: string;
+  value: string;
+  data: string;
+  gas: string;
+  chainId: string;
+  /** The fee per gas as signed: `gasPrice`, or the two EIP-1559 fields */
+  gasPrice?: string;
+  maxFeePerGas?: string;
+  maxPriorityFeePerGas?: string;
+}
+
+/** EVM typed data as it will be signed */
+export interface IEvmTypedData {
+  types: Record<string, { name: string; type: string }[]>;
+  primaryType: string;
+  domain: Record<string, unknown>;
+  message?: Record<string, unknown>;
+}
+
 /**
  * Popups are the modal windows opened inside of the browser window popup.
  * This set of properties relates only to `PopupType` modals.
  */
 export interface IPopupProps extends IPopupActions, IPopupData {
   show?: boolean; // Decides if the modal window should be open
+  evmCall?: IEvmCall;
+  evmTypedData?: IEvmTypedData;
   fromAccount?: string;
   isSenderReplaced?: boolean;
   protocol?: Protocol;

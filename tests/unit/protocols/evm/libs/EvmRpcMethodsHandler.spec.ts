@@ -874,6 +874,12 @@ describe('handleEvmRpcMethod', () => {
       expect(JSON.parse(checkOrAskPermission.mock.calls[0][2].message)).toEqual({
         primaryType: permit.primaryType, domain: permit.domain, message: permit.message,
       });
+      expect(checkOrAskPermission.mock.calls[0][2].evmTypedData).toEqual({
+        types: permit.types,
+        primaryType: permit.primaryType,
+        domain: permit.domain,
+        message: permit.message,
+      });
     });
 
     it.each([

@@ -746,3 +746,27 @@ describe('ConfirmTransactionSign.vue EVM call data', () => {
     expect(getCallDataDetails(wrapper).props('callDataDecoded')).toBeNull();
   });
 });
+
+describe('ConfirmTransactionSign.vue total', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // The total sits in a DetailsItem
+    config.global.renderStubDefaultSlot = true;
+  });
+
+  afterEach(() => {
+    config.global.renderStubDefaultSlot = false;
+  });
+
+  it('keeps the total of an aeternity request as its execution cost', async () => {
+    const wrapper = mountModal();
+    await flushPromises();
+
+    const total = wrapper.findAllComponents({ name: 'TokenAmount' })
+      .find((amount: any) => amount.attributes('data-cy') === 'total');
+    // The 1 AE sent and the fee of the SpendTx
+    expect(total!.props('amount')).toBe(1.00002);
+    // No symbol: TokenAmount takes the coin's
+    expect(total!.props('symbol')).toBeNull();
+  });
+});

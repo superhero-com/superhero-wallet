@@ -81,6 +81,17 @@
           {{ $t('modals.confirmTransactionSign.paidByDapp') }}
         </p>
       </span>
+      <EvmCallSummary
+        v-if="isEvm && popupProps?.evmCall"
+        :protocol="protocol"
+        :evm-call="popupProps.evmCall"
+      />
+      <!-- A coin transfer is told in full above -->
+      <EvmCallSimulation
+        v-if="isEvm && popupProps?.evmCall && !['', '0x'].includes(popupProps.evmCall.data)"
+        :protocol="protocol"
+        :evm-call="popupProps.evmCall"
+      />
       <DetailsItem
         v-if="decodedCallData?.functionName"
         :label="$t('modals.confirmTransactionSign.functionName')"
@@ -181,8 +192,10 @@
           :label="$t('common.total')"
         >
           <TokenAmount
-            :amount="executionCost || amountTotal"
-            :symbol="isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol"
+            :amount="isEvm ? evmCoinTotal : (executionCost || amountTotal)"
+            :symbol="isEvm
+              ? coinSymbol
+              : (isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol)"
             :hide-fiat="isAex9"
             :protocol="protocol"
             high-precision
@@ -313,6 +326,8 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import type { EthDecodedCallData } from '@/protocols/ethereum/types';
 import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
+import EvmCallSimulation from '@/protocols/evm/components/EvmCallSimulation.vue';
+import EvmCallSummary from '@/protocols/evm/components/EvmCallSummary.vue';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
@@ -360,6 +375,8 @@ export default defineComponent({
     SignAccountSelect,
     CheckBox,
     AnimatedSpinner,
+    EvmCallSimulation,
+    EvmCallSummary,
   },
   setup() {
     const { isConfirmBlocked } = useConfirmGuard();
@@ -548,6 +565,14 @@ export default defineComponent({
     const fee = computed(() => (protocol === PROTOCOLS.aeternity)
       ? getAeFee(popupProps.value?.tx?.fee!)
       : popupProps.value?.tx?.fee!);
+
+    const isEvm = EVM_PROTOCOLS.includes(protocol);
+    const { coinSymbol } = adapter;
+
+    /** What leaves the account in the coin: the value sent and the fee */
+    const evmCoinTotal = computed(() => new BigNumber(popupProps.value?.tx?.amount || 0)
+      .plus(popupProps.value?.tx?.fee || 0)
+      .toNumber());
 
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
     const gasCost = computed(() => new BigNumber(popupProps.value?.tx?.gasLimit ?? 0)
@@ -990,6 +1015,9 @@ export default defineComponent({
       tokenSymbol,
       tokenList,
       amountTotal,
+      isEvm,
+      coinSymbol,
+      evmCoinTotal,
       transaction,
       transactionArguments,
       fee,
