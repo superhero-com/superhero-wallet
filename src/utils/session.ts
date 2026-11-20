@@ -6,13 +6,13 @@ import {
   IS_OFFSCREEN_TAB,
   SESSION_METHODS,
 } from '@/constants';
-import type { SessionKeyMutation, SessionKeyMutationResult } from '@/lib/ExtensionSessionStorage';
+import {
+  SESSION_ENCRYPTION_KEY,
+  type SessionKeyMutation,
+  type SessionKeyMutationResult,
+} from '@/lib/ExtensionSessionStorage';
 import { getSessionEncryptionKey as getSessionEncryptionKeyOffscreen } from '@/offscreen/popupHandler';
 import { exportEncryptionKey, importEncryptionKey } from './crypto';
-
-const SESSION_STORAGE_KEYS = {
-  exportedEncryptionKey: 'exportedEncryptionKey',
-};
 
 const storageSession = (browser.storage as any)?.session;
 
@@ -115,8 +115,8 @@ export async function getSessionEncryptionKey() {
       return importEncryptionKey(Buffer.from(sessionEncryptionKey, 'base64'));
     }
   } else if (IS_EXTENSION) {
-    const { exportedEncryptionKey } = await storageSession.get(
-      SESSION_STORAGE_KEYS.exportedEncryptionKey,
+    const { [SESSION_ENCRYPTION_KEY]: exportedEncryptionKey } = await storageSession.get(
+      SESSION_ENCRYPTION_KEY,
     );
     if (exportedEncryptionKey) {
       return importEncryptionKey(exportedEncryptionKey);

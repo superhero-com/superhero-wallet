@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import type { Tabs, Windows } from 'webextension-polyfill';
 import { getHttpOrigin } from '@/lib/approvalSourceTab';
-import { mutateSessionKey } from '@/lib/ExtensionSessionStorage';
+import { mutateSessionKey, SESSION_ENCRYPTION_KEY } from '@/lib/ExtensionSessionStorage';
 import type {
   Dictionary,
   IAppData,
@@ -27,10 +27,6 @@ export interface IPopupConfigNoActions {
 const PLATFORM = process.env.PLATFORM as 'web' | 'extension' | 'ionic';
 const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
 const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
-
-const SESSION_STORAGE_KEYS = {
-  exportedEncryptionKey: 'exportedEncryptionKey',
-};
 
 const POPUP_TYPE_CONNECT = 'connectConfirm';
 const POPUP_HEIGHT = 630;
@@ -250,8 +246,8 @@ export const setSessionTimeout = async (sessionTimeout: number | null) => {
 
 export const getSessionEncryptionKey = async (): Promise<string | null> => {
   try {
-    const { exportedEncryptionKey } = await storageSession.get(
-      SESSION_STORAGE_KEYS.exportedEncryptionKey,
+    const { [SESSION_ENCRYPTION_KEY]: exportedEncryptionKey } = await storageSession.get(
+      SESSION_ENCRYPTION_KEY,
     );
     if (exportedEncryptionKey) {
       return Buffer.from(exportedEncryptionKey).toString('base64');
