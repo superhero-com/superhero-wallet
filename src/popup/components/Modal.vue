@@ -24,7 +24,11 @@
       <div
         ref="scrollElem"
         class="container"
-        @focusin="scheduleFocusedFieldReveal"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="labelId"
+        :tabindex="isContainerFocusable ? -1 : undefined"
+        @focusin="handleFocusIn"
       >
         <div
           v-if="showHeader"
@@ -93,11 +97,12 @@ import {
   ref,
   onBeforeUnmount,
   onMounted,
+  useId,
   watch,
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
 
-import { IS_EXTENSION, IS_FIREFOX } from '@/constants';
+import { IS_EXTENSION, IS_FIREFOX, IS_MOBILE_DEVICE } from '@/constants';
 import { useScrollConfig, useViewport } from '@/composables';
 
 import BtnClose from './buttons/BtnClose.vue';
@@ -112,6 +117,8 @@ function isTextField(el: Element | null): el is HTMLInputElement | HTMLTextAreaE
   return el instanceof HTMLTextAreaElement
     || (el instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.includes(el.type));
 }
+
+const TITLE_SELECTOR = '.header-default-text:not(:empty), h1, h2, h3, h4, h5, h6';
 
 /** Shown modals in opening order; Escape closes only the last one. */
 const shownModals: symbol[] = [];
@@ -144,7 +151,13 @@ export default defineComponent({
     const scrollElem = ref<HTMLElement>();
     const headerElem = ref<HTMLElement>();
     const footerComponent = ref<InstanceType<typeof FixedScreenFooter>>();
+    const titleId = useId();
+    const labelId = ref<string>();
+    /** Only until the focus moves on: on iOS a tap inside would focus it and close the keyboard */
+    const isContainerFocusable = ref(true);
     let revealFrame: number | undefined;
+    /** Focused when the modal showed, gets the focus back when it closes */
+    let opener: Element | null = null;
 
     const { setScrollConf } = useScrollConfig();
     const { initViewport } = useViewport();
@@ -169,14 +182,31 @@ export default defineComponent({
       }
     }
 
+    function restoreFocus() {
+      const target = opener;
+      opener = null;
+      const active = document.activeElement;
+      if (
+        target instanceof HTMLElement
+        && target !== document.body
+        && (active === document.body || !!scrollElem.value?.contains(active))
+        // Would raise a phone keyboard
+        && !(IS_MOBILE_DEVICE && isTextField(target))
+      ) {
+        target.focus({ preventScroll: true });
+      }
+    }
+
     // `show` turns false before the leave transition, while the modal is still mounted
     watch(
       () => props.show,
       (show) => {
         if (!show) {
           forgetModal();
+          restoreFocus();
         } else if (!shownModals.includes(modalKey)) {
           shownModals.push(modalKey);
+          opener = document.activeElement;
         }
       },
       { immediate: true },
@@ -230,6 +260,13 @@ export default defineComponent({
       }
     }
 
+    function handleFocusIn(event: FocusEvent) {
+      if (event.target !== scrollElem.value) {
+        isContainerFocusable.value = false;
+      }
+      scheduleFocusedFieldReveal();
+    }
+
     function onBackButtonHandler(event: BackButtonEvent) {
       event.detail.register(100, handleClose);
     }
@@ -245,9 +282,20 @@ export default defineComponent({
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
       }
+      // Most consumers render their title in the content
+      const title = scrollElem.value?.querySelector(TITLE_SELECTOR);
+      if (title) {
+        title.id ||= titleId;
+        labelId.value = title.id;
+      }
+      // A field the content focused keeps the focus
+      if (!scrollElem.value?.contains(document.activeElement)) {
+        scrollElem.value?.focus({ preventScroll: true });
+      }
     });
 
     onBeforeUnmount(() => {
+      restoreFocus();
       if (props.initializeViewport) {
         setScrollConf(false);
         initViewport(undefined);
@@ -264,7 +312,9 @@ export default defineComponent({
 
     return {
       handleClose,
-      scheduleFocusedFieldReveal,
+      handleFocusIn,
+      isContainerFocusable,
+      labelId,
       IS_FIREFOX,
       IS_EXTENSION,
       scrollElem,
@@ -310,6 +360,10 @@ $container-shadow: 0 0 0 1px $color-border, 2px 4px 12px rgba($color-black, 0.22
     background-color: var(--screen-bg-color);
     border-radius: $border-radius-modal;
     box-shadow: $container-shadow;
+
+    &:focus {
+      outline: none;
+    }
 
     @include mixins.desktop {
       width: calc(#{$extension-width} - 32px);
