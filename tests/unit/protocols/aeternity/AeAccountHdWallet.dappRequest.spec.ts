@@ -227,6 +227,39 @@ describe('signDelegation', () => {
         .toMatch(/^sign delegation of delegated\.chain to ct_/);
     });
 
+    // As spelled in Unicode or ASCII, and in punycode, which takes the other check
+    it.each(['other.chain', 'xn--fiq228c.chain'])(
+      'shows the name hash when the middleware names another name, %s',
+      async (otherName) => {
+        fetchNameByHash.mockResolvedValueOnce(otherName);
+
+        await wallet().signDelegation(nameDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+        const { message } = checkOrAskPermission.mock.calls[0][2];
+        expect(message).toMatch(new RegExp(`^sign delegation of ${nameId} to ct_`));
+        expect(message).not.toContain(otherName);
+      },
+    );
+
+    it.each([
+      ['in Unicode', 'rozciągnikmchuś77.chain'],
+      ['in punycode', 'xn--rozcignikmchu77-7zb48l.chain'],
+    ])('names a non-ASCII name the middleware spells %s', async (_, spelling) => {
+      // The middleware answers with the spelling the name was claimed in
+      fetchNameByHash.mockResolvedValueOnce(spelling);
+      const idnDelegation = packDelegation({
+        tag: DelegationTag.AensName,
+        accountAddress: ADDRESS_ACTIVE as Encoded.AccountAddress,
+        contractAddress: encode(new Uint8Array(32), Encoding.ContractAddress),
+        nameId: produceNameId('rozciągnikmchuś77.chain'),
+      });
+
+      await wallet().signDelegation(idnDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+      expect(checkOrAskPermission.mock.calls[0][2].message)
+        .toContain(`sign delegation of ${spelling} to ct_`);
+    });
+
     it('shows the name hash when the name can\'t be looked up', async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       onTestFinished(() => warn.mockRestore());
