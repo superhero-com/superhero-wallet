@@ -112,27 +112,34 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
   /** The stored value as this window last saw it, which it doesn't write again. */
   let lastKnownRaw: string | null = null;
   let isRestoring = true;
+  /** Taken now, before the state can change it in place */
+  const initialRaw = isSyncedWithOtherWindows
+    ? JSON.stringify(initialState ? serializer.write(initialState) : initialState)
+    : null;
 
   /** The value stored now: an event's own may be older than one this window wrote since. */
   function applyStoredValue() {
     const raw = localStorage.getItem(storageItemKey);
-    if (raw === null || raw === lastKnownRaw) return;
+    if (raw === lastKnownRaw) return;
+    // Removed, e.g. by a reset in another window: the initial value, not written back
+    const stored = raw ?? initialRaw;
+    if (stored === null) return;
     let value: T;
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(stored);
       if (parsed === null) return;
       value = serializer.read(parsed);
     } catch {
       return;
     }
-    lastKnownRaw = raw;
+    lastKnownRaw = stored;
     state.value = value;
   }
 
   if (isSyncedWithOtherWindows) {
     window.addEventListener('storage', (event) => {
-      // The restore catches up when it's done.
-      if (isRestoring || event.key !== storageItemKey) return;
+      // The restore catches up when it's done. `null` is a cleared storage.
+      if (isRestoring || (event.key !== null && event.key !== storageItemKey)) return;
       if (event.storageArea && event.storageArea !== localStorage) return;
       applyStoredValue();
     });
