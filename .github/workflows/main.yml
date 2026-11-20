@@ -57,14 +57,14 @@ jobs:
           cp -r ./android/app/build/outputs/apk/debug ./dist-stage/artifacts/android
       - run: cp ./dist/web/root/index.html ./dist/web/root/404.html
       - name: Deploy to production
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         if: github.ref == 'refs/heads/master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: dist/web/root
           cname: wallet.superhero.com
 
-      - uses: softprops/action-gh-release@v3
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,9 +73,9 @@ jobs:
           files: ./dist-stage/artifacts/superhero-wallet-*
           fail_on_unmatched_files: true
 
-      - uses: rlespinasse/github-slug-action@v5
+      - uses: rlespinasse/github-slug-action@0e3299190dac9a700da92a90de4556116ea965ed # v5.7.1
       - name: Deploy to stage
-        uses: easingthemes/ssh-deploy@v6.0.3
+        uses: easingthemes/ssh-deploy@35647dbb6c84e9f4c4ff546acffbfe40e5650576 # v6.0.3
         if: github.event_name == 'push' && github.actor != 'dependabot[bot]'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.STAGE_PRIVATE_KEY }}
