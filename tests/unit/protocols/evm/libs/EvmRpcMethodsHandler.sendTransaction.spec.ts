@@ -4,6 +4,7 @@
  */
 import { ref } from 'vue';
 import { mnemonicToSeedSync } from '@scure/bip39';
+import { Tag } from '@aeternity/aepp-sdk';
 import HttpProvider from 'web3-providers-http';
 import { FeeMarketEIP1559Transaction, Transaction, TransactionFactory } from 'web3-eth-accounts';
 import {
@@ -22,6 +23,7 @@ import {
   STORAGE_KEYS,
 } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { watchUntilTruthy } from '@/utils';
 
 const { openModal } = vi.hoisted(() => {
@@ -342,6 +344,19 @@ describe('eth_sendTransaction of a dapp', () => {
     expect(response.error).toBeUndefined();
     const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
     expect(decodeTransaction(raw).data).toBe(signed);
+  });
+
+  it.each(['0x', '', undefined])('shows call data %j as a coin transfer', async (data) => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, data }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toBeUndefined();
+    const { tx } = openModal.mock.calls[0][1];
+    expect(tx).toMatchObject({ tag: Tag.SpendTx, type: 'SpendTx', contractId: BNB_CONTRACT_ID });
+    expect(tx.data).toBeUndefined();
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).data).toBe('0x');
   });
 
   it('shows, estimates and signs odd-length call data with a 0 in front, as MetaMask does', async () => {

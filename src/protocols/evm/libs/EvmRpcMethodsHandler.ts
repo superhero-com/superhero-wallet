@@ -549,7 +549,8 @@ export async function handleEvmRpcMethod(
     const gas = Number(gasHex);
     const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
-    const isCoinTransfer = !data;
+    // `0x` is no call data either, as the chain reads it
+    const isCoinTransfer = !data || data === '0x';
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
     const valueQuantity = toRpcQuantity(params.value ?? 0);
     const gasQuantity = toRpcQuantity(gasHex);
@@ -570,7 +571,7 @@ export async function handleEvmRpcMethod(
         tag,
         senderId,
         recipientId,
-        data,
+        data: isCoinTransfer ? undefined : data,
       },
       evmCall: (valueQuantity !== undefined && gasQuantity !== undefined) ? {
         from: senderId,
