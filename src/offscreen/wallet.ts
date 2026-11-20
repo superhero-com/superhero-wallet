@@ -42,18 +42,44 @@ function isExpectedDisconnectedClientError(error: unknown): boolean {
   );
 }
 
+/** An aepp sends a request and waits for its answer, a page sending more is not one */
+const EARLY_MESSAGES_LIMIT = 10;
+
+/** Keeps the SDK's handler, for the messages a page sent before the SDK took its port */
+class AeppConnection extends BrowserRuntimeConnection {
+  handleMessage?: Parameters<BrowserRuntimeConnection['connect']>[0];
+
+  override connect(...args: Parameters<BrowserRuntimeConnection['connect']>) {
+    [this.handleMessage] = args;
+    super.connect(...args);
+  }
+}
+
 const addAeppConnection = async (port: Runtime.Port) => {
   const { getAeSdk, isAeSdkReady } = useAeSdk();
   let isDisconnected = false;
   // The port may close while `getAeSdk` waits for an SDK update.
   const onDisconnectWhileWaiting = () => { isDisconnected = true; };
   port.onDisconnect.addListener(onDisconnectWhileWaiting);
+  // Or an aepp that found the wallet on an earlier port asks already. Unheard, it is lost.
+  const earlyMessages: unknown[] = [];
+  const keepEarlyMessage = (message: unknown) => {
+    if (earlyMessages.length < EARLY_MESSAGES_LIMIT) earlyMessages.push(message);
+  };
+  port.onMessage.addListener(keepEarlyMessage);
   const aeSdk = await getAeSdk();
   port.onDisconnect.removeListener(onDisconnectWhileWaiting);
+  port.onMessage.removeListener(keepEarlyMessage);
   if (isDisconnected) return;
 
-  const connection = new BrowserRuntimeConnection({ port, debug: false });
+  const connection = new AeppConnection({ port, debug: false });
   const clientId = aeSdk.addRpcClient(connection);
+  // Emptied: the connection's closures keep this scope, and so the array, alive
+  earlyMessages.splice(0).forEach((message) => {
+    // As Chrome delivers nothing more once a request closed the connection
+    if (!connection.isConnected()) return;
+    connection.handleMessage?.(message, port.sender?.url ?? '', port);
+  });
   let shareWalletInfoInterval: NodeJS.Timeout | undefined;
 
   const cleanup = () => {
