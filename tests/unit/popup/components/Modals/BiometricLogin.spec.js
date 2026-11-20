@@ -1,6 +1,7 @@
-import { enableAutoUnmount, shallowMount } from '@vue/test-utils';
+import { enableAutoUnmount, mount, shallowMount } from '@vue/test-utils';
 import { nextTick, ref } from 'vue';
 import BiometricLogin from '../../../../../src/popup/components/Modals/BiometricLogin.vue';
+import { RejectedByUserError } from '../../../../../src/lib/errors';
 
 // Mounted modals would keep watching the shared `isAppActive` across tests.
 enableAutoUnmount(afterEach);
@@ -19,6 +20,9 @@ vi.mock('@/composables', () => ({
   useUi: () => ({
     isAppActive: mockIsAppActive,
   }),
+  // For the real `Modal`
+  useScrollConfig: () => ({ setScrollConf: vi.fn() }),
+  useViewport: () => ({ initViewport: vi.fn() }),
 }));
 
 function flushAsync() {
@@ -81,6 +85,50 @@ describe('BiometricLogin', () => {
     expect(mockAuthenticateWithBiometry).toHaveBeenCalledWith(true, { setAuthenticated: false });
     expect(resolve).toHaveBeenCalledTimes(1);
     expect(reject).not.toHaveBeenCalled();
+  });
+
+  it('can be closed only when it is cancelable, without prompting', async () => {
+    const options = {
+      global: { mocks: { $t: (key) => key }, stubs: { BackToTop: true } },
+    };
+    const lockScreen = mount(BiometricLogin, {
+      ...options,
+      props: {
+        resolve: vi.fn(), reject: vi.fn(), show: true, force: true, isLockScreen: true,
+      },
+    });
+    const resolve = vi.fn();
+    const reject = vi.fn();
+    const prompt = mount(BiometricLogin, {
+      ...options,
+      props: {
+        resolve, reject, show: true, force: true, isCancelable: true,
+      },
+    });
+
+    expect(lockScreen.find('[data-cy=btn-close]').exists()).toBe(false);
+    await prompt.get('[data-cy=btn-close]').trigger('click');
+    await flushAsync();
+
+    expect(reject).toHaveBeenCalledWith(expect.any(RejectedByUserError));
+    expect(resolve).not.toHaveBeenCalled();
+    expect(mockAuthenticateWithBiometry).not.toHaveBeenCalled();
+  });
+
+  it('asks to confirm, not to unlock, when it can be dismissed', async () => {
+    mockIsAuthenticated.value = false;
+    const { wrapper: lockScreen } = mountLogin({ isLockScreen: true });
+    const { wrapper: prompt } = mountLogin({ force: true, isCancelable: true });
+
+    expect(getTitle(lockScreen)).toBe('pages.secureLogin.walletLocked');
+    expect(getTitle(prompt)).toBe('pages.secureLogin.confirmIdentity');
+    expect(prompt.find('.text').text()).toBe('pages.secureLogin.confirmIdentitySubtitle');
+
+    mockAuthenticateWithBiometry.mockRejectedValueOnce(biometryError('userCancel'));
+    await prompt.trigger('click');
+    await flushAsync();
+
+    expect(getTitle(prompt)).toBe('pages.secureLogin.authFailed');
   });
 
   it('still allows closing a non-forced modal when already authenticated', async () => {

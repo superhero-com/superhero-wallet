@@ -99,7 +99,7 @@ describe('PrivateKeyExport', () => {
     wrapper.vm.handleMainButtonClick();
     await flushPromises();
 
-    expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true });
+    expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true, isCancelable: true });
     expect(mockOpenConfirmModal).not.toHaveBeenCalled();
     expect(wrapper.vm.privateKey).toBe(Buffer.from('abc123').toString('hex'));
   });

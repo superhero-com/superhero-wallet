@@ -958,6 +958,8 @@
       },
       "walletLocked": "钱包已锁定",
       "walletLockedSubtitle": "点击屏幕登录！",
+      "confirmIdentity": "确认是你本人",
+      "confirmIdentitySubtitle": "点击屏幕继续！",
       "lockWallet": "锁定钱包",
       "enterPassword": "输入密码",
       "toUnlock": "以解锁你的钱包",

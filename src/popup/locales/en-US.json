@@ -958,6 +958,8 @@
       },
       "walletLocked": "Wallet locked",
       "walletLockedSubtitle": "Tap on the screen to login!",
+      "confirmIdentity": "Confirm it's you",
+      "confirmIdentitySubtitle": "Tap on the screen to continue!",
       "lockWallet": "Lock Wallet",
       "enterPassword": "Enter password",
       "toUnlock": "to unlock your wallet",

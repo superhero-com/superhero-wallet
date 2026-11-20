@@ -235,6 +235,7 @@ export function useModals() {
     force?: boolean;
     deferAuthStateUpdate?: boolean;
     isLockScreen?: boolean;
+    isCancelable?: boolean;
   }) {
     return openModal(MODAL_BIOMETRIC_LOGIN, options);
   }
