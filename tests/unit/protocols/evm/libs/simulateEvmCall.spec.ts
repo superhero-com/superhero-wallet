@@ -54,6 +54,7 @@ describe('readSimulatedLogs', () => {
       approvals: [],
       spentApprovals: [],
       hasUnreadEvents: false,
+      sendsCoin: true,
     });
   });
 
@@ -165,6 +166,7 @@ describe('readSimulatedLogs', () => {
       approvals: [],
       spentApprovals: [],
       hasUnreadEvents: false,
+      sendsCoin: true,
     });
   });
 
@@ -695,6 +697,42 @@ describe('simulateEvmCall', () => {
     expect(await simulate(CALL)).toEqual({ status: 'unsupported' });
   });
 
+  describe('a call that sends the coin', () => {
+    const VALUE_CALL = { ...CALL, to: ROUTER, value: '0x5' };
+    const okWith = (logs: object[]) => ({ result: [{ calls: [{ status: '0x1', logs }] }] });
+
+    it('is not previewed by a node that traced no coin transfer', async () => {
+      answer(okWith([transfer(USDC, ROUTER, USER, 7n)]));
+
+      expect(await simulate(VALUE_CALL)).toEqual({ status: 'unsupported' });
+    });
+
+    it('is previewed when sent to oneself, which nodes may leave out', async () => {
+      answer(okWith([]));
+
+      expect(await simulate({ ...VALUE_CALL, to: USER.toLowerCase() }))
+        .toMatchObject({ status: 'ok', changes: [] });
+    });
+
+    it('is previewed with the coin refunded', async () => {
+      answer(okWith([transfer(COIN, USER, ROUTER, 5n), transfer(COIN, ROUTER, USER, 5n)]));
+
+      expect(await simulate(VALUE_CALL)).toMatchObject({ status: 'ok', changes: [] });
+    });
+
+    it('is previewed with the coin sent', async () => {
+      answer(okWith([transfer(RETH_COIN, USER, ROUTER, 5n), transfer(USDC, ROUTER, USER, 7n)]));
+
+      expect(await simulate(VALUE_CALL)).toMatchObject({
+        status: 'ok',
+        changes: [
+          { asset: undefined, amount: '-5' },
+          { asset: USDC, amount: '7' },
+        ],
+      });
+    });
+  });
+
   it('tells a value the account does not have', async () => {
     answer({ error: { code: -38014, message: 'err: insufficient funds for gas * price + value' } });
 
@@ -705,6 +743,7 @@ describe('simulateEvmCall', () => {
     ['another error', { error: { code: -32000, message: 'header not found' } }],
     ['an empty result', { result: [] }],
     ['a result without a status', { result: [{ calls: [{ logs: [] }] }] }],
+    ['a result without logs', { result: [{ calls: [{ status: '0x1' }] }] }],
   ])('fails on %s', async (_, body) => {
     answer(body);
 
