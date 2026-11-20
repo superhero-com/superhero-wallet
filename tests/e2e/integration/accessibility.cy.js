@@ -128,6 +128,17 @@ describe('Keyboard operation', () => {
 
     cy.press(ESC);
     cy.get('[data-cy=address]').should('not.exist');
+    // Back on the button that opened the modal
+    cy.focused().should('have.attr', 'data-cy', 'send');
+  });
+
+  it('moves the focus into the send modal it opens', () => {
+    cy.login();
+    cy.get('[data-cy=send]').focus();
+
+    cy.press(SPACE);
+    cy.focused().should('have.attr', 'role', 'dialog');
+    cy.get('[data-cy=address]').should('exist');
   });
 
   it('copies the account address with Enter', () => {
