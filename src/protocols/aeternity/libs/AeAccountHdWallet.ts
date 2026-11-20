@@ -211,6 +211,8 @@ export class AeAccountHdWallet extends MemoryAccount {
        * that choice get to override `fromAccount` or trigger a rebuild.
        */
       let modalResolution: ISignModalResolution | undefined;
+      // Signed for, as approved, even if a switch lands while a rebuild awaits the node
+      const promptNetworkId = this.nodeNetworkId.value;
 
       if (wasConfirmationAsked) {
         const { checkOrAskPermission } = usePermissions();
@@ -227,6 +229,10 @@ export class AeAccountHdWallet extends MemoryAccount {
           (payload) => { modalResolution = payload; },
         );
         if (!permissionGranted) {
+          throw new RpcRejectedByUserError();
+        }
+        // The prompt was for this network: a dapp can switch it meanwhile, e.g. over EVM
+        if (this.nodeNetworkId.value !== promptNetworkId) {
           throw new RpcRejectedByUserError();
         }
       }
@@ -263,6 +269,7 @@ export class AeAccountHdWallet extends MemoryAccount {
           signingAccount.address as Encoded.AccountAddress,
           signingAccount.idx,
           txToSign,
+          promptNetworkId,
         );
         if (!signedTransaction) {
           throw new RpcRejectedByUserError();
@@ -277,7 +284,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         // to name the same account the transaction was just rebuilt for. Leaving the
         // caller's value here would sign the rebuilt transaction with the wrong key.
         fromAccount: signingAccount?.address ?? options?.fromAccount,
-        networkId: this.nodeNetworkId.value,
+        networkId: promptNetworkId,
       } as any);
     } finally {
       // The listener has to be registered before the confirmation modal opens,
@@ -450,6 +457,11 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     if (isDappRequest(options)) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      // Known before the prompt, as in `signTransaction`, so the check after it applies
+      if (!this.nodeNetworkId.value) {
+        await useAeSdk().ensureNodeNetworkId();
+      }
+      const promptNetworkId = this.nodeNetworkId.value;
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -483,6 +495,11 @@ export class AeAccountHdWallet extends MemoryAccount {
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+      // As in `signTransaction`, unless the request came while the node connected:
+      // it connects to the network the prompt showed
+      if (promptNetworkId && this.nodeNetworkId.value !== promptNetworkId) {
         throw new RpcRejectedByUserError();
       }
     }

@@ -191,7 +191,12 @@ browser.runtime.onMessage.addListener(
     }
     if (method === POPUP_METHODS.ledgerSignTransaction) {
       const { signTransaction } = useLedger();
-      return signTransaction(payload.address, payload.accountIndex, payload.transaction);
+      return signTransaction(
+        payload.address,
+        payload.accountIndex,
+        payload.transaction,
+        payload.networkId,
+      );
     }
 
     if (method === POPUP_METHODS.ledgerSignMessage) {

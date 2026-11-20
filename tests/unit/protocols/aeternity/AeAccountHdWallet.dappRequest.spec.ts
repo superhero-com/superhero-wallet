@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
 import {
   AccountMemory,
   DelegationTag,
@@ -237,6 +237,84 @@ describe('signDelegation', () => {
       expect(checkOrAskPermission.mock.calls[0][2].message)
         .toMatch(new RegExp(`^sign delegation of ${nameId} to ct_`));
     });
+  });
+});
+
+describe('a network switched while the prompt is open', () => {
+  let signDelegation: any;
+  let nodeNetworkId: Ref<string | undefined>;
+
+  beforeEach(() => {
+    nodeNetworkId = ref('ae_uat');
+    signDelegation = vi
+      .spyOn(sdk.MemoryAccount.prototype, 'signDelegation')
+      .mockResolvedValue('sg_signed' as Encoded.Signature);
+  });
+
+  afterEach(() => signDelegation.mockRestore());
+
+  /** A wallet on Testnet whose network becomes `networkId` while its prompt is open */
+  function walletSwitchedTo(networkId: string) {
+    checkOrAskPermission = vi.fn(async () => {
+      // E.g. a site's `wallet_switchEthereumChain` meanwhile
+      nodeNetworkId.value = networkId;
+      return true;
+    });
+    // @ts-ignore
+    (usePermissions as vi.Mock).mockReturnValue({ checkOrAskPermission });
+    return new AeAccountHdWallet(nodeNetworkId);
+  }
+
+  const requests = [
+    ['a spend', (account: any) => account.signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN }), 'tx_signed'],
+    ['a delegation', (account: any) => account.signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN }), 'sg_signed'],
+  ] as const;
+
+  it.each(requests)('rejects %s', async (_, sign) => {
+    await expect(sign(walletSwitchedTo('ae_mainnet')))
+      .rejects.toBeInstanceOf(RpcRejectedByUserError);
+    expect(superSignTransaction).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
+  });
+
+  it.each(requests)('signs %s when the network stayed', async (_, sign, signed) => {
+    await expect(sign(walletSwitchedTo('ae_uat'))).resolves.toBe(signed);
+  });
+
+  describe('whose id the request recovers', () => {
+    // E.g. the first status request failed as the browser started offline
+    beforeEach(() => {
+      nodeNetworkId.value = undefined;
+      // @ts-ignore
+      (useAeSdk as vi.Mock).mockReturnValue({
+        ...(useAeSdk as any)(),
+        ensureNodeNetworkId: vi.fn(async () => { nodeNetworkId.value = 'ae_uat'; }),
+      });
+    });
+
+    it('rejects a delegation', async () => {
+      await expect(walletSwitchedTo('ae_mainnet')
+        .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
+        .rejects.toBeInstanceOf(RpcRejectedByUserError);
+      expect(signDelegation).not.toHaveBeenCalled();
+    });
+
+    it('signs a delegation for that network when it stayed', async () => {
+      await expect(walletSwitchedTo('ae_uat')
+        .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
+        .resolves.toBe('sg_signed');
+      expect(signDelegation).toHaveBeenCalledWith(delegation, { networkId: 'ae_uat' });
+    });
+  });
+
+  it('signs a delegation that came while the node was connecting, for its network', async () => {
+    // `ensureNodeNetworkId` leaves the id to the connection, which ends during the prompt
+    nodeNetworkId.value = undefined;
+
+    await expect(walletSwitchedTo('ae_uat')
+      .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
+      .resolves.toBe('sg_signed');
+    expect(signDelegation).toHaveBeenCalledWith(delegation, { networkId: 'ae_uat' });
   });
 });
 
