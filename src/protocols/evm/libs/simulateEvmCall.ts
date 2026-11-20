@@ -49,8 +49,11 @@ interface ILog {
   data: string;
 }
 
-/** `traceTransfers` gives the moves of the chain's coin as ERC-20 transfers of this address */
-const COIN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+/** `traceTransfers` gives the coin's moves as ERC-20 transfers of one of these (geth, reth) */
+const COIN_ADDRESSES = [
+  '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  '0xfffffffffffffffffffffffffffffffffffffffe',
+];
 const ZERO_ADDRESS = `0x${'0'.repeat(40)}`;
 const TOPICS = {
   transfer: '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
@@ -147,7 +150,7 @@ export function readSimulatedLogs(rawLogs: unknown, owner: string) {
       topics.slice(1).some((topic) => toAddress(topic) === user)
       || getAllWords(data).includes(userWord)
     );
-    const asset = (address === COIN_ADDRESS) ? undefined : toChecksumAddress(address);
+    const asset = COIN_ADDRESSES.includes(address) ? undefined : toChecksumAddress(address);
 
     switch (topics[0]) {
       case TOPICS.transfer: {
