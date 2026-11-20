@@ -10,14 +10,14 @@ function flatten(messages: object, prefix = ''): [string, string][] {
 
 const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort();
 
-describe('the texts of the EVM call summary', () => {
-  it('are translated to Chinese, with the same placeholders', () => {
-    const translations = Object.fromEntries(flatten(zh.modals.evmCallSummary));
+describe('the Chinese texts', () => {
+  it('translate every English text, with the same placeholders', () => {
+    const translations = Object.fromEntries(flatten(zh));
 
-    flatten(en.modals.evmCallSummary).forEach(([path, text]) => {
+    flatten(en).forEach(([path, text]) => {
       expect(translations[path], path).toBeTypeOf('string');
       expect(placeholders(translations[path]), path).toEqual(placeholders(text));
     });
-    expect(Object.keys(translations)).toHaveLength(flatten(en.modals.evmCallSummary).length);
+    expect(Object.keys(translations)).toHaveLength(flatten(en).length);
   });
 });

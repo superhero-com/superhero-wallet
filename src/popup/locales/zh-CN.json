@@ -515,7 +515,11 @@
       }
     },
     "signAccountSelect": {
-      "selectAccount": "选择用于签名的账户"
+      "label": "签名账户",
+      "selectAccount": "选择用于签名的账户",
+      "preparedForOtherAccount": "此交易是为 {0} 准备的。使用其他账户签名将被网络拒绝。",
+      "preparedForMissingAccount": "此交易是为 {0} 准备的，但该账户不在此钱包中。",
+      "rebuildForSelectedAccount": "重新构建交易，使其由所选账户发送"
     },
     "confirmUnsafeSign": {
       "heading": "希望你签名数据。",
@@ -1487,6 +1491,13 @@
       "title": "签名消息",
       "heading": "希望签名消息。",
       "message": "消息"
+    },
+    "popupNetworkSwitch": {
+      "title": "切换网络",
+      "request": "该 dApp 想要切换你的钱包网络。",
+      "origin": "请求网站",
+      "networkId": "网络 ID",
+      "confirm": "切换网络"
     },
     "network": {
       "connectToNetwork": "连接到网络",
