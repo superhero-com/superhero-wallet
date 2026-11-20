@@ -4,6 +4,8 @@
     from-bottom
     centered
     no-bg-blur
+    :has-close-button="isCancelable"
+    @close="cancel"
   >
     <div class="content-wrapper">
       <div class="icon-wrapper">
@@ -21,6 +23,7 @@
         />
 
         <div
+          v-if="!isCancelable"
           class="text-description"
           v-text="$t('pages.secureLogin.toUnlock')"
         />
@@ -55,7 +58,7 @@
           variant="primary"
           type="submit"
           :disabled="!password.length || isAuthenticating || isAuthFailed"
-          :text="$t('pages.secureLogin.login.unlock')"
+          :text="isCancelable ? $t('common.confirm') : $t('pages.secureLogin.login.unlock')"
           extend
         />
       </form>
@@ -70,10 +73,11 @@ import {
   PropType,
 } from 'vue';
 
-import type { ResolveCallback } from '@/types';
+import type { RejectCallback, ResolveCallback } from '@/types';
 import { MODAL_RESET_WALLET } from '@/constants';
 import { decrypt, generateEncryptionKey } from '@/utils';
 import { useAuth, useModals, useAccounts } from '@/composables';
+import { RejectedByUserError } from '@/lib/errors';
 
 import Modal from '@/popup/components/Modal.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
@@ -94,6 +98,9 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
+    /** Asked to confirm an action, not to unlock: it may be dismissed */
+    isCancelable: Boolean,
   },
   setup(props) {
     const isAuthFailed = ref(false);
@@ -109,12 +116,23 @@ export default defineComponent({
     const { accountsRaw } = useAccounts();
     const { openModal } = useModals();
 
+    function cancel() {
+      if (props.isCancelable) {
+        props.reject(new RejectedByUserError());
+      }
+    }
+
     async function openForgotPasswordModal() {
       await openModal(MODAL_RESET_WALLET, {
         isResetPassword: true,
       });
       if (accountsRaw.value.length === 0) {
-        props.resolve();
+        // A reset wallet confirms nothing
+        if (props.isCancelable) {
+          cancel();
+        } else {
+          props.resolve();
+        }
       }
     }
 
@@ -162,6 +180,7 @@ export default defineComponent({
       password,
       isAuthenticating,
       isAuthFailed,
+      cancel,
       login,
       openForgotPasswordModal,
       LockIcon,

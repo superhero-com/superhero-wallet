@@ -239,8 +239,8 @@ export function useModals() {
     return openModal(MODAL_BIOMETRIC_LOGIN, options);
   }
 
-  function openPasswordLoginModal() {
-    return openModal(MODAL_PASSWORD_LOGIN);
+  function openPasswordLoginModal(props?: { isCancelable?: boolean }) {
+    return openModal(MODAL_PASSWORD_LOGIN, props);
   }
 
   async function openEnableBiometricLoginModal() {

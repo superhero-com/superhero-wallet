@@ -32,14 +32,23 @@ async function type(page: Page, selector: string, text: string) {
   await input!.type(text);
 }
 
+async function unlock(page: Page, password: string) {
+  await type(page, '[data-cy=password] input', password);
+  // Enabled once the typed password is validated.
+  await click(page, '[data-cy=login-btn]:not(.disabled)');
+}
+
 /** Flips the password protection switch and waits until it shows `isOn`. */
-async function setProtection(page: Page, isOn: boolean, password?: string) {
+async function setProtection(page: Page, isOn: boolean) {
   await page.waitForSelector(PASSWORD_PROTECTION, { timeout: 60000 });
   await click(page, `${PASSWORD_PROTECTION} .switch`);
-  if (password) {
-    await type(page, '[data-cy=password] input', password);
-    await type(page, '[data-cy=confirm-password] input', password);
+  if (isOn) {
+    await type(page, '[data-cy=password] input', PASSWORD);
+    await type(page, '[data-cy=confirm-password] input', PASSWORD);
     await click(page, '[data-cy=btn-set-password]');
+  } else {
+    // Turning it off asks for the password
+    await unlock(page, PASSWORD);
   }
   await page.waitForFunction(
     (selector, expected) => (
@@ -49,12 +58,6 @@ async function setProtection(page: Page, isOn: boolean, password?: string) {
     `${PASSWORD_PROTECTION} input`,
     isOn,
   );
-}
-
-async function unlock(page: Page, password: string) {
-  await type(page, '[data-cy=password] input', password);
-  // Enabled once the typed password is validated.
-  await click(page, '[data-cy=login-btn]:not(.disabled)');
 }
 
 /**
@@ -91,7 +94,7 @@ describe('the password across pages of the extension', () => {
 
   it('keeps the other pages open, without asking, once a password is set in one', async () => {
     const settings = await openWallet('/more/settings/secure-login');
-    await setProtection(settings, true, PASSWORD);
+    await setProtection(settings, true);
 
     // They locked, and took the new key from the session rather than asking for it.
     await new Promise((resolve) => { setTimeout(resolve, SESSION_RESTORE_WAIT); });

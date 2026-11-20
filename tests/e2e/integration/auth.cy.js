@@ -198,6 +198,19 @@ describe('Test cases for login functionality', () => {
       .should('be.checked')
       .get('[data-cy=password-protection] .switch')
       .click();
+    // Not without the password
+    unlock('wrong-password');
+    cy.get('[data-cy=password] [data-cy=input-field-message]')
+      .should('contain', locale.pages.secureLogin.login.error)
+      .get('.password-login [data-cy=btn-close]')
+      .click()
+      .get('[data-cy=password]')
+      .should('not.exist')
+      .get('[data-cy=password-protection] input')
+      .should('be.checked')
+      .get('[data-cy=password-protection] .switch')
+      .click();
+    unlock(TEST_ACCOUNT.password);
     // Tests ask for the password even without protection, so the vault shows it is off.
     cy.waitForStoredVault((vault) => !!vault?.values[secretKey])
       .get('[data-cy=password-protection] input')
