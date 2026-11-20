@@ -139,9 +139,9 @@ describe('Keyboard operation', () => {
 
     cy.press(ESC);
     cy.get('[data-cy=address] .dropdown-wrapper').should('not.have.class', 'open');
-    // Let a wrongly handled Escape close the modal before checking that it stayed
-    cy.wait(500);
-    cy.get('[data-cy=address] [data-cy=textarea]').should('exist');
+    // Had the modal handled this Escape too, its leave transition would have started already
+    cy.get('[data-cy=address]').closest('.modal')
+      .should('not.match', '[class*="-leave-"]');
 
     cy.press(ESC);
     cy.get('[data-cy=address]').should('not.exist');
