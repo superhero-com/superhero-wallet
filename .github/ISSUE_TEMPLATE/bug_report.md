@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+For a suspected security vulnerability, use the [private disclosure contact](https://developer.superhero.com/resources/support/#security-disclosure). Remove recovery phrases, private keys, unclaimed gift card links, and identifying details from screenshots and logs before posting.
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
@@ -19,6 +21,11 @@ Steps to reproduce the behavior:
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
+
+**Wallet details**
+- Wallet version (More → About):
+- Wallet platform (extension, hosted web, Android, or iOS):
+- Blockchain and network (for example, Ethereum Sepolia):
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
