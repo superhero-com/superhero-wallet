@@ -54,6 +54,7 @@ async function mountSettings(usingDefault = true) {
   const offerToRemoveUnreadablePrivateKeyAccounts = vi.fn();
   const openConfirmModal = vi.fn().mockResolvedValue(undefined);
   const openDefaultModal = vi.fn();
+  const openPasswordLoginModal = vi.fn().mockResolvedValue(undefined);
   const openSetPasswordModal = vi.fn().mockResolvedValue({
     password: 'chosen-password',
     isDefaultPasswordSecret: false,
@@ -71,6 +72,7 @@ async function mountSettings(usingDefault = true) {
     openConfirmModal,
     openDefaultModal,
     openEnableBiometricLoginModal: vi.fn(),
+    openPasswordLoginModal,
     openSetPasswordModal,
   });
   useUi.mockReturnValue({
@@ -94,6 +96,7 @@ async function mountSettings(usingDefault = true) {
     offerToRemoveUnreadablePrivateKeyAccounts,
     openConfirmModal,
     openDefaultModal,
+    openPasswordLoginModal,
     openSetPasswordModal,
   };
 }
@@ -197,6 +200,47 @@ describe('SecureLoginSettings password protection', () => {
       isDefaultPasswordSecret: true,
     });
     expect(state.isUsingDefaultPassword.value).toBe(true);
+  });
+
+  it('asks for the password before turning the protection off', async () => {
+    const state = await mountSettings(false);
+    let confirmPassword;
+    state.openPasswordLoginModal.mockReturnValue(new Promise((resolve) => {
+      confirmPassword = resolve;
+    }));
+
+    await state.input.trigger('change');
+    await flushPromises();
+    expect(state.openPasswordLoginModal).toHaveBeenCalledWith({ isCancelable: true });
+    expect(state.setPassword).not.toHaveBeenCalled();
+    confirmPassword();
+    await flushPromises();
+
+    expect(state.setPassword).toHaveBeenCalledTimes(1);
+    expect(state.isUsingDefaultPassword.value).toBe(true);
+  });
+
+  it('keeps the protection on when the password is not given', async () => {
+    const state = await mountSettings(false);
+    state.openPasswordLoginModal.mockRejectedValue(new RejectedByUserError());
+
+    await state.input.setValue(false);
+    await flushPromises();
+
+    expect(state.setPassword).not.toHaveBeenCalled();
+    expect(state.isUsingDefaultPassword.value).toBe(false);
+    expect(state.input.element.checked).toBe(true);
+    expect(state.openDefaultModal).not.toHaveBeenCalled();
+  });
+
+  it('does not ask for a password to turn the protection on', async () => {
+    const state = await mountSettings();
+
+    await state.input.trigger('change');
+    await flushPromises();
+
+    expect(state.openPasswordLoginModal).not.toHaveBeenCalled();
+    expect(state.setPassword).toHaveBeenCalledTimes(1);
   });
 
   it('changes the protection once when the switch is clicked again while it is saved', async () => {

@@ -253,6 +253,7 @@ export default defineComponent({
       openConfirmModal,
       openDefaultModal,
       openEnableBiometricLoginModal,
+      openPasswordLoginModal,
       openSetPasswordModal,
     } = useModals();
 
@@ -364,6 +365,8 @@ export default defineComponent({
           return;
         }
 
+        // Unlocked isn't enough: the password also guards the seed phrase
+        await openPasswordLoginModal({ isCancelable: true });
         await setPassword(generateDefaultPasswordSecret(), undefined, {
           isDefaultPasswordSecret: true,
         });
