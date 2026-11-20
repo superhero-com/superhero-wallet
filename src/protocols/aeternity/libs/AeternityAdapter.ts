@@ -530,7 +530,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     assetContractId: AssetContractId,
     { nextPageUrl }: ITransactionApiPaginationParams = {},
   ): Promise<IFetchTransactionResult> {
-    let paginationParams: ITransactionApiPaginationParams = {};
+    const paginationParams: ITransactionApiPaginationParams = {};
     let regularTransactions: ITransaction[] = [];
 
     try {
@@ -547,8 +547,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       } else {
         // The middleware can't list the AE coin transactions only, nor the token ones
         // with their mints and burns before 1.109, so they are filtered here
-        const res = await this.fetchAccountTransactions(address, { nextPageUrl });
-        paginationParams = res.paginationParams;
+        const res = await this.fetchRegularTransactions(address, TXS_PER_PAGE, nextPageUrl);
+        if (res.nextPageUrl) {
+          paginationParams.nextPageUrl = res.nextPageUrl;
+        }
         regularTransactions = res.regularTransactions.filter(({ tx }) => (
           (assetContractId === this.coinContractId)
             ? !tx.contractId || tx.contractId === this.coinContractId

@@ -105,6 +105,9 @@ function jsonResponse(body, status = 200) {
 
 /** What the fake middleware serves */
 let mdw;
+/** What `getAeSdk` resolves with */
+let aeSdk;
+let getAeSdk;
 
 describe('AeternityAdapter token transactions', () => {
   beforeEach(async () => {
@@ -177,9 +180,11 @@ describe('AeternityAdapter token transactions', () => {
         next: null,
       },
     };
+    aeSdk = {};
+    getAeSdk = vi.fn(async () => aeSdk);
     vi.doMock('@/composables/aeSdk', () => ({
       useAeSdk: () => ({
-        getAeSdk: async () => ({}),
+        getAeSdk,
         setAeNodeError: vi.fn(),
       }),
     }));
@@ -488,5 +493,21 @@ describe('AeternityAdapter token transactions', () => {
 
     expect(requestedPaths()).toEqual([`/v3/accounts/${ACCOUNT}/activities?limit=30`]);
     expect(getHashes(regularTransactions)).toEqual(['th_spend']);
+  });
+
+  it('lists the coin and the tokens without waiting for the node', async () => {
+    mdw.version = '1.108.0';
+    const getPendingAccountTransactionsByPubkey = vi.fn(async () => ({ transactions: [] }));
+    aeSdk = { api: { getPendingAccountTransactionsByPubkey } };
+    const adapter = await getAdapter();
+    adapter.fetchPendingTransactions.mockRestore();
+
+    await adapter.fetchAccountAssetTransactions(ACCOUNT, adapter.coinContractId);
+    await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
+    expect(getAeSdk).not.toHaveBeenCalled();
+
+    // Only the account list shows the node's pending transactions
+    await adapter.fetchAccountTransactions(ACCOUNT);
+    expect(getPendingAccountTransactionsByPubkey).toHaveBeenCalledWith(ACCOUNT);
   });
 });
