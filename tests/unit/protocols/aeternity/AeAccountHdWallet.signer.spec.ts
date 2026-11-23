@@ -177,6 +177,7 @@ beforeEach(async () => {
   // @ts-ignore
   (useAeSdk as vi.Mock).mockReturnValue({
     ensureNodeNetworkId: vi.fn(),
+    isAeSdkUpdating: ref(false),
     getAeSdk: vi.fn(async () => ({ api: { getAccountNextNonce } })),
     isAeppGivenAccounts: () => true,
     getAeppSourceTab: () => ({}),
@@ -324,6 +325,7 @@ describe('AeAccountHdWallet.signTransaction Air Gap message listener', () => {
     mockModalRanAndChose(ADDRESS_AIR_GAP);
 
     const pending = signTx(buildSpendTxFor(ADDRESS_PREPARED), { fromAccount: ADDRESS_AIR_GAP });
+    await vi.waitFor(() => expect(onMessage().addListener).toHaveBeenCalled());
     // Stand in for the confirmation popup sending the signed transaction back.
     registeredHandler()({
       type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
@@ -374,6 +376,7 @@ describe('AeAccountHdWallet.signTransaction Air Gap message listener', () => {
     mockModalRanAndChose(ADDRESS_AIR_GAP, true);
 
     const pending = signTx(buildSpendTxFor(ADDRESS_PREPARED), { fromAccount: ADDRESS_PREPARED });
+    await vi.waitFor(() => expect(onMessage().addListener).toHaveBeenCalled());
     registeredHandler()({
       type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
       payload: 'tx_signedByTheAirGapDevice',
