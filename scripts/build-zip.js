@@ -114,6 +114,8 @@ const main = async () => {
     { type: 'dir', src: path.join(__dirname, '../tests'), dest: 'tests' },
     { type: 'file', src: path.join(__dirname, '../package.json'), dest: 'package.json' },
     { type: 'file', src: path.join(__dirname, '../package-lock.json'), dest: 'package-lock.json' },
+    // Applied by `npm ci`, some change bundled code
+    { type: 'dir', src: path.join(__dirname, '../patches'), dest: 'patches' },
     { type: 'dir', src: path.join(__dirname, '../build'), dest: 'build' },
     { type: 'file', src: path.join(__dirname, '../vite.config.mts'), dest: 'vite.config.mts' },
     { type: 'file', src: path.join(__dirname, '../vitest.config.ts'), dest: 'vitest.config.ts' },
