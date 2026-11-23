@@ -660,6 +660,57 @@ describe('offscreen wallet connections', () => {
       popupHandler.handlePopupWindowRemoved(popupTab.windowId);
       await declined;
     });
+
+    it('does not listen to a frame inside the approval page', async () => {
+      const { id, request } = startRequest();
+      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      const frame = createPort();
+      frame.name = CONNECTION_TYPES.POPUP;
+      frame.sender.url = `chrome-extension://test-extension-id/index.html?id=${id}`;
+      frame.sender.tab = popupTab;
+      frame.sender.frameId = 1;
+
+      await onConnectListener(frame);
+
+      expect(frame.onMessage.addListener).not.toHaveBeenCalled();
+      const { sendToOffscreen, close } = await connectPopupPort(id);
+      await sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      await close();
+      await expect(request).resolves.toBe('confirmed');
+    });
+
+    it('answers a second page of a connected approval without exposing props', async () => {
+      const { request, sendToOffscreen, id } = await openPopupWindow();
+      const second = await connectPopupPort(id);
+
+      await second.sendToOffscreen({ type: 'getProps', uuid: 'props' });
+      await second.sendToOffscreen({ type: 'resolve', payload: 'second page' });
+
+      expect(second.port.postMessage).toHaveBeenCalledWith({ uuid: 'props', res: undefined });
+      await sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      await expect(request).resolves.toBe('confirmed');
+    });
+  });
+
+  it('does not take a web page for an approval on Firefox, which accepts any sender', async () => {
+    vi.doMock('@/constants', async () => ({
+      ...(await vi.importActual('@/constants')),
+      IS_FIREFOX: true,
+    }));
+    vi.doUnmock('@/offscreen/popupHandler');
+    const extensionBrowser = (global as any).browser;
+    const wallet = (await import('@/offscreen/wallet'));
+    (global as any).browser = extensionBrowser;
+    await wallet.init();
+    const port = createPort();
+    port.name = CONNECTION_TYPES.POPUP;
+    port.sender.url = 'https://dapp.example/index.html?id=popup-id';
+    port.sender.tab = { id: 9, windowId: 3 };
+
+    await onConnectListener(port);
+
+    expect(port.onMessage.addListener).not.toHaveBeenCalled();
+    expect(aeSdk.addRpcClient).not.toHaveBeenCalled();
   });
 
   describe('disconnect()', () => {

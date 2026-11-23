@@ -44,10 +44,6 @@ describe('Network switch confirmation', () => {
         mocks: { $t: (key: string) => key },
         stubs: {
           Modal: { template: '<div><slot /><slot name="footer" /></div>' },
-          BtnMain: {
-            props: ['disabled', 'text'],
-            template: '<button :disabled="disabled">{{ text }}</button>',
-          },
         },
       },
     });
@@ -79,13 +75,14 @@ describe('Network switch confirmation', () => {
   it('confirms only after the guard permits the click', async () => {
     isConfirmBlocked.value = true;
     mountConfirmation();
-    const confirm = wrapper.get('[data-cy="accept"]');
-    expect(confirm.attributes('disabled')).toBeDefined();
-    await confirm.trigger('click');
+    const confirm = wrapper.get<HTMLButtonElement>('[data-cy="accept"]');
+    expect(confirm.attributes('aria-disabled')).toBe('true');
+    // Only marked disabled, so the click reaches the page
+    confirm.element.click();
     expect(request.resolve).not.toHaveBeenCalled();
     isConfirmBlocked.value = false;
     await wrapper.vm.$nextTick();
-    await confirm.trigger('click');
+    confirm.element.click();
     expect(request.resolve).toHaveBeenCalledOnce();
     wrapper.unmount();
     expect(request.reject).not.toHaveBeenCalled();
