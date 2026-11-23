@@ -11,6 +11,8 @@ import {
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   SUBSCRIPTION_TYPES,
+  Tag,
+  buildTx,
 } from '@aeternity/aepp-sdk';
 
 import type { INetwork } from '@/types';
@@ -22,6 +24,7 @@ const MAINNET_URL = 'https://mainnet.example';
 const TESTNET_URL = 'https://testnet.example';
 const HYPERCHAIN_URL = 'https://hyperchain.example';
 const NEW_NODE_URL = 'https://new-hyperchain.example';
+const AE_ACCOUNT = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
 
 function createNetwork(name: string, nodeUrl: string): INetwork {
   return {
@@ -114,7 +117,7 @@ describe('aepp network selection', () => {
     }));
     vi.doMock('@/composables/accounts', () => ({
       useAccounts: () => ({
-        aeAccounts: ref([]),
+        aeAccounts: ref(aeAccount ? [aeAccount] : []),
         getLastActiveProtocolAccount: () => aeAccount,
         onAccountChange: vi.fn(),
       }),
@@ -168,6 +171,22 @@ describe('aepp network selection', () => {
     return {
       aepp, walletSdk, composable, onNetworkChange,
     };
+  }
+
+  /** The status request of a switch to Testnet answers once `nodeReady` resolves */
+  function holdSwitchToTestnet() {
+    const nodeReady = deferred<Awaited<ReturnType<Node['getStatus']>>>();
+    const getStatus = vi.mocked(Node.prototype.getStatus).getMockImplementation()!;
+    const target = { statusRequests: 0 };
+    vi.mocked(Node.prototype.getStatus).mockImplementation(function waitForNode(this: Node) {
+      if (this.$host === TESTNET_URL) {
+        target.statusRequests += 1;
+        // Testnet is known by its id, so the first request is the one of the switch
+        if (target.statusRequests === 1) return nodeReady.promise;
+      }
+      return getStatus.call(this);
+    });
+    return { nodeReady, target };
   }
 
   it('changes the node and notifies the aepp only after approval', async () => {
@@ -267,23 +286,13 @@ describe('aepp network selection', () => {
 
   it('keeps the request pending until the selected node is ready', async () => {
     const { aepp, walletSdk, onNetworkChange } = await connectAepp();
-    const nodeReady = deferred<Awaited<ReturnType<Node['getStatus']>>>();
-    const getStatus = vi.mocked(Node.prototype.getStatus).getMockImplementation()!;
-    let targetStatusRequests = 0;
-    vi.mocked(Node.prototype.getStatus).mockImplementation(function waitForNode(this: Node) {
-      if (this.$host === TESTNET_URL) {
-        targetStatusRequests += 1;
-        // Testnet is known by its id, so the first request is the one of the switch
-        if (targetStatusRequests === 1) return nodeReady.promise;
-      }
-      return getStatus.call(this);
-    });
+    const { nodeReady, target } = holdSwitchToTestnet();
     let answered = false;
     const selecting = aepp.askToSelectNetwork({ networkId: 'ae_uat' }).then(() => {
       answered = true;
     });
 
-    await vi.waitFor(() => expect(targetStatusRequests).toBe(1));
+    await vi.waitFor(() => expect(target.statusRequests).toBe(1));
     expect(networkState.activeNetworkName.value).toBe('Testnet');
     expect(answered).toBe(false);
     expect(walletSdk.api.$host).toBe(MAINNET_URL);
@@ -293,6 +302,45 @@ describe('aepp network selection', () => {
     await selecting;
     expect(walletSdk.api.$host).toBe(TESTNET_URL);
     expect(onNetworkChange).toHaveBeenCalledWith(expect.objectContaining({ networkId: 'ae_uat' }));
+  });
+
+  it('asks to sign for the network a dapp switched to only once its node answered', async () => {
+    aeAccount = { address: AE_ACCOUNT };
+    const { aepp, composable } = await connectAepp();
+    const promptedFor: (string | undefined)[] = [];
+    checkOrAskPermission.mockImplementation(async (method: string) => {
+      if (method !== METHODS.sign) return true;
+      promptedFor.push(composable.nodeNetworkId.value);
+      return false;
+    });
+    await aepp.subscribeAddress(SUBSCRIPTION_TYPES.subscribe, 'connected');
+    const { nodeReady, target } = holdSwitchToTestnet();
+    const selecting = aepp.askToSelectNetwork({ networkId: 'ae_uat' });
+    await vi.waitFor(() => expect(target.statusRequests).toBe(1));
+
+    const signRequested = new Promise<void>((resolve) => {
+      pages[0].window.addEventListener('message', ({ data }) => {
+        if (data.type === MESSAGE_DIRECTION.to_waellet && data.data?.method === METHODS.sign) {
+          resolve();
+        }
+      });
+    });
+    const signing = aepp._resolveAccount().signTransaction(buildTx({
+      tag: Tag.SpendTx,
+      senderId: AE_ACCOUNT,
+      recipientId: AE_ACCOUNT,
+      amount: 1,
+      fee: 20000000000000,
+      nonce: 1,
+    }), { networkId: 'ae_uat' });
+    await signRequested;
+    // Time enough for a wallet that doesn't wait to ask
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    nodeReady.resolve({ networkId: 'ae_uat', nodeVersion: '7.3.0' } as Awaited<ReturnType<Node['getStatus']>>);
+
+    await expect(signing).rejects.toBeInstanceOf(RpcRejectedByUserError);
+    expect(promptedFor).toEqual(['ae_uat']);
+    await selecting;
   });
 
   it('reuses a saved node URL with a trailing slash', async () => {
@@ -447,7 +495,7 @@ describe('aepp network selection', () => {
   it('lets a dapp switch once it was given the accounts in this connection', async () => {
     getPermissionForUrl.mockReturnValue(undefined);
     checkOrAskPermission.mockResolvedValue(true);
-    aeAccount = { address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' };
+    aeAccount = { address: AE_ACCOUNT };
     const { aepp, walletSdk } = await connectAepp();
 
     await aepp.subscribeAddress(SUBSCRIPTION_TYPES.subscribe, 'connected');
