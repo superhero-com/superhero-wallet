@@ -67,6 +67,7 @@
             :amount="fee"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>

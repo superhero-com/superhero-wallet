@@ -17,7 +17,6 @@ import type {
   NetworkType,
   NetworkTypeDefault,
   Protocol,
-  IAmountDecimalPlaces,
   AssetAmount,
   IAccountRaw,
   IAccount,
@@ -57,7 +56,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract getExplorer(): ProtocolExplorer;
 
-  abstract getAmountPrecision(args?: IAmountDecimalPlaces): number;
+  abstract getAmountPrecision(): number;
 
   abstract getUrlTokenKey(): string;
 

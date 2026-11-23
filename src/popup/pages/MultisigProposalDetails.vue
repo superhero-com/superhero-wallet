@@ -134,6 +134,7 @@
                 <TokenAmount
                   :amount="+(aettosToAe(multisigTx.gasPrice))"
                   :protocol="PROTOCOLS.aeternity"
+                  high-precision
                   :symbol="AE_SYMBOL"
                   hide-fiat
                 />
@@ -149,6 +150,7 @@
                   :amount="+aettosToAe(transaction.tx.gasPrice)"
                   :symbol="AE_SYMBOL"
                   :protocol="PROTOCOLS.aeternity"
+                  high-precision
                 />
               </template>
             </DetailsItem>
@@ -169,6 +171,7 @@
                   :amount="+aettosToAe(proposalGaMetaParams.fee)"
                   :symbol="AE_SYMBOL"
                   :protocol="PROTOCOLS.aeternity"
+                  high-precision
                 />
               </template>
             </DetailsItem>
@@ -182,6 +185,7 @@
                   :amount="+aettosToAe(transaction.tx.fee)"
                   :symbol="AE_SYMBOL"
                   :protocol="PROTOCOLS.aeternity"
+                  high-precision
                 />
               </template>
             </DetailsItem>

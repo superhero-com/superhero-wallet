@@ -2,7 +2,6 @@ import { toChecksumAddress } from 'web3-utils';
 
 import type { IToken, ITokenBalance, Protocol } from '@/types';
 import {
-  amountRounded,
   postJson,
   toShiftedBigNumber,
 } from '@/utils';
@@ -79,7 +78,7 @@ export class AlchemyService {
           ? BigInt(rawHex).toString()
           : String(rawHex || '0');
         const convertedBalance = decimals
-          ? +amountRounded(toShiftedBigNumber(rawAmount, -decimals))
+          ? toShiftedBigNumber(rawAmount, -decimals).toNumber()
           : 0;
         return {
           address,

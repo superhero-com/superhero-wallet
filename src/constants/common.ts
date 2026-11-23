@@ -67,6 +67,8 @@ export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 
 export const DECIMAL_PLACES_HIGH_PRECISION = 9;
 export const DECIMAL_PLACES_LOW_PRECISION = 2;
+/** Balances and lists cut amounts to these significant digits */
+export const AMOUNT_SIGNIFICANT_DIGITS = 6;
 
 export const TX_DIRECTION = {
   sent: 'sent',

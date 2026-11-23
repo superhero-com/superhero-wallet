@@ -29,6 +29,7 @@
                 <TokenAmount
                   :amount="+txFee"
                   :protocol="PROTOCOLS.aeternity"
+                  high-precision
                   hide-fiat
                 />
               </template>
@@ -41,6 +42,7 @@
                 <TokenAmount
                   :amount="+amountTotal"
                   :protocol="PROTOCOLS.aeternity"
+                  high-precision
                 />
               </template>
             </DetailsItem>

@@ -9,6 +9,7 @@
           v-if="!hideAmount && amount"
           :amount="amount"
           :protocol="protocol"
+          high-precision
           hide-fiat
           hide-symbol
         />

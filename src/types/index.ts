@@ -1006,11 +1006,6 @@ export interface ITransferResponse {
   hash: string;
 }
 
-export interface IAmountDecimalPlaces {
-  highPrecision?: boolean;
-  amount?: number;
-}
-
 export interface IAddressBookEntry {
   name: string;
   address: AccountAddress;

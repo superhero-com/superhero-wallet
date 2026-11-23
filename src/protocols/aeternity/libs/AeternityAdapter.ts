@@ -21,7 +21,6 @@ import type {
   AssetContractId,
   IAccount,
   IAccountRaw,
-  IAmountDecimalPlaces,
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
@@ -43,7 +42,6 @@ import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  amountRounded,
   fetchAllPages,
   fetchJson,
   getActivityHash,
@@ -154,8 +152,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     );
   }
 
-  override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces = {}): number {
-    return (highPrecision || (amount && amount < 0.01)) ? 9 : 2;
+  override getAmountPrecision(): number {
+    return 9;
   }
 
   override getUrlTokenKey(): string {
@@ -397,7 +395,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         address,
         amount,
         contractId,
-        convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
+        convertedBalance: toShiftedBigNumber(amount, -decimals).toNumber(),
         decimals,
         name: tokenName,
         symbol: tokenSymbol,

@@ -45,6 +45,7 @@
         :symbol="tokenSymbol"
         :hide-fiat="isAex9"
         :protocol="PROTOCOLS.aeternity"
+        high-precision
         data-cy="review-total"
       />
       <span class="lowercase">{{ $t('pages.send.to') }}</span>

@@ -130,6 +130,7 @@
           <TokenAmount
             :amount="nameAeFee"
             :protocol="protocol"
+            high-precision
           />
         </DetailsItem>
 
@@ -142,6 +143,7 @@
             :symbol="tokenSymbol"
             :hide-fiat="!swapTokenData.isWrappedCoin || isAex9"
             :protocol="protocol"
+            high-precision
             data-cy="total"
           />
         </DetailsItem>
@@ -162,6 +164,7 @@
               :amount="+aettosToAe(gasPrice)"
               :symbol="AE_SYMBOL"
               :protocol="PROTOCOLS.aeternity"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -175,6 +178,7 @@
               :amount="+aettosToAe(gasCost)"
               :symbol="AE_SYMBOL"
               :protocol="PROTOCOLS.aeternity"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -183,6 +187,7 @@
           <TokenAmount
             :amount="fee"
             :protocol="protocol"
+            high-precision
             data-cy="fee"
           />
         </DetailsItem>
