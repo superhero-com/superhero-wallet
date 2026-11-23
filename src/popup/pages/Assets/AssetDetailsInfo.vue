@@ -250,12 +250,17 @@ import { IonContent, IonPage } from '@ionic/vue';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   amountRounded,
+  formatAmount,
   formatNumber,
   isAssetCoin,
   toShiftedBigNumber,
 } from '@/utils';
 import { useAssetDetails, useCurrencies } from '@/composables';
-import { PROTOCOLS } from '@/constants';
+import {
+  AMOUNT_SIGNIFICANT_DIGITS,
+  DECIMAL_PLACES_HIGH_PRECISION,
+  PROTOCOLS,
+} from '@/constants';
 import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
 
 import DetailsRow from '@/popup/components/Assets/DetailsRow.vue';
@@ -330,8 +335,9 @@ export default defineComponent({
         .times(100).div(tokenPairs.value.totalSupply))}%`;
     });
 
-    const getPooledTokenAmount = (token: any) => amountRounded(
+    const getPooledTokenAmount = (token: any) => formatAmount(
       toShiftedBigNumber(token.amount, -token.decimals),
+      { maxDecimals: DECIMAL_PLACES_HIGH_PRECISION, significantDigits: AMOUNT_SIGNIFICANT_DIGITS },
     );
 
     return {

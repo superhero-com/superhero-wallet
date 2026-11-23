@@ -45,6 +45,24 @@ describe('EthplorerService', () => {
     expect(tokenBalance.convertedBalance).toBe(50);
   });
 
+  it('keeps every digit of the token balance', async () => {
+    stubResponse(200, {
+      tokens: [{
+        rawBalance: '1490000',
+        tokenInfo: {
+          address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+          decimals: '8',
+          name: 'Wrapped BTC',
+          symbol: 'WBTC',
+        },
+      }],
+    });
+
+    const [tokenBalance] = (await service.fetchAccountTokenBalances('0x0', PROTOCOLS.ethereum))!;
+
+    expect(tokenBalance.convertedBalance).toBe(0.0149);
+  });
+
   it('throws other HTTP errors', async () => {
     stubResponse(500, {});
 

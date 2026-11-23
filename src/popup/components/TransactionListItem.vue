@@ -65,7 +65,6 @@ import type {
 } from '@/types';
 import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
-  amountRounded,
   formatDate,
   formatTime,
   relativeTimeTo,
@@ -172,11 +171,9 @@ export default defineComponent({
         return 0;
       }
       return getFormattedAndRoundedFiat(
-        +amountRounded(
-          tokenAsset?.price && tokenAsset?.amount
-            ? +tokenAsset.amount * tokenAsset.price
-            : protocolCoin?.amount || 0,
-        ),
+        tokenAsset?.price && tokenAsset?.amount
+          ? +tokenAsset.amount * tokenAsset.price
+          : +(protocolCoin?.amount || 0),
         transactionProtocol.value,
       );
     });

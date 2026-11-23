@@ -28,7 +28,8 @@
 import { computed, defineComponent } from 'vue';
 import BigNumber from 'bignumber.js';
 
-import { amountRounded, formatNumber } from '@/utils';
+import { AMOUNT_SIGNIFICANT_DIGITS, DECIMAL_PLACES_HIGH_PRECISION } from '@/constants';
+import { formatAmount, formatNumber } from '@/utils';
 
 export default defineComponent({
   props: {
@@ -88,14 +89,11 @@ export default defineComponent({
         };
       }
 
-      if (amount.lt(1)) {
-        return {
-          number: amountRounded(props.amount),
-        };
-      }
-
       return {
-        number: formatLongNumber(amountRounded(props.amount)),
+        number: formatAmount(amount, {
+          maxDecimals: DECIMAL_PLACES_HIGH_PRECISION,
+          significantDigits: AMOUNT_SIGNIFICANT_DIGITS,
+        }),
       };
     });
 

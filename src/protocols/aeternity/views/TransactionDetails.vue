@@ -173,6 +173,7 @@
             :amount="+aettosToAe(gasPrice)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>
@@ -186,6 +187,7 @@
             :amount="+aettosToAe(gasCost)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>

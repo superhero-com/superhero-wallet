@@ -98,6 +98,7 @@
             :amount="transferData.gasPrice"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>
@@ -114,6 +115,7 @@
             :amount="+gasCost.toString()"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>

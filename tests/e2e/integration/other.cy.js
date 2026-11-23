@@ -4,14 +4,15 @@ import locale from '../../../src/popup/locales/en-US.json';
 const RECEIVING = `${locale.transaction.type.receivedTx}...`;
 // TODO: add `pendingTipToken` once a pending token tip stops showing its amount in AE
 const pendingTransactions = [
-  { transaction: STUB_TRANSACTIONS.pendingSpend, text: ['0.74 AE', RECEIVING] },
-  { transaction: STUB_TRANSACTIONS.pendingTransfer, text: ['0.20 AMZ', RECEIVING] },
+  { transaction: STUB_TRANSACTIONS.pendingSpend, text: ['0.743 AE', RECEIVING] },
+  // 0.19569777... cut down, not rounded up
+  { transaction: STUB_TRANSACTIONS.pendingTransfer, text: ['0.195697 AMZ', RECEIVING] },
   {
     transaction: {
       ...STUB_TRANSACTIONS.pendingTipAe,
       tx: { ...STUB_TRANSACTIONS.pendingTipAe.tx, callerId: STUB_ACCOUNT.addressAeternity },
     },
-    text: ['− 0.20 AE', locale.common.pending],
+    text: ['− 0.195697 AE', locale.common.pending],
   },
 ];
 

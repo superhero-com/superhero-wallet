@@ -66,6 +66,7 @@
           :amount="+transferData.amount"
           :symbol="tokenSymbol"
           :protocol="protocol"
+          high-precision
           :hide-fiat="!showFiat"
           :price="transferData.selectedAsset?.price"
           data-cy="review-amount"
@@ -83,6 +84,7 @@
           :amount="multipleAmount"
           :symbol="tokenSymbol"
           :protocol="protocol"
+          high-precision
           :hide-fiat="!showFiat"
           :price="transferData.selectedAsset?.price"
           data-cy="review-amount"

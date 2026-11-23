@@ -157,6 +157,24 @@ describe('AeternityAdapter account data', () => {
       .toEqual([['ct_a', 1.5], ['ct_b', 2]]);
   });
 
+  it('keeps every digit of a token balance', async () => {
+    responses[`/v3/accounts/${ACCOUNT}/aex9/balances?limit=100`] = jsonResponse({
+      data: [{
+        amount: 1234567890000000000,
+        contract_id: 'ct_a',
+        decimals: 18,
+        token_name: 'Token',
+        token_symbol: 'TKN',
+      }],
+      next: null,
+    });
+    const adapter = await getAdapter();
+
+    const [balance] = await adapter.fetchAccountTokenBalances(ACCOUNT);
+
+    expect(balance.convertedBalance).toBe(1.23456789);
+  });
+
   describe('fetchTokenInfo', () => {
     it('reads the token from the middleware', async () => {
       responses['/v3/aex9/ct_token'] = jsonResponse({
