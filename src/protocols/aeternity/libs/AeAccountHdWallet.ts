@@ -29,7 +29,7 @@ import {
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
 } from '@/constants';
-import { handleUnknownError, isAccountAirGap } from '@/utils';
+import { handleUnknownError, isAccountAirGap, watchUntilTruthy } from '@/utils';
 
 import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
@@ -82,6 +82,21 @@ function assertAeppGivenAccounts(aeppRpcClientId?: string) {
   if (aeppRpcClientId && !useAeSdk().isAeppGivenAccounts(aeppRpcClientId)) {
     throw new RpcNotAuthorizeError();
   }
+}
+
+/** A node switch keeps the previous network's id until the new node answers */
+export const NODE_SWITCH_TIMEOUT = 10000;
+
+async function waitForNodeSwitch() {
+  const { isAeSdkUpdating } = useAeSdk();
+  if (!isAeSdkUpdating.value) return;
+  if (!await watchUntilTruthy(() => !isAeSdkUpdating.value, NODE_SWITCH_TIMEOUT)) {
+    throw new Error('Not connected to any network');
+  }
+}
+
+function isNodeSwitching() {
+  return useAeSdk().isAeSdkUpdating.value;
 }
 
 function getAeppSourceTab(aeppRpcClientId?: string) {
@@ -159,6 +174,9 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Encoded.Transaction> {
     // Also before the Air Gap modal below
     assertAeppGivenAccounts(options?.aeppRpcClientId);
+    if (isDappRequest(options)) {
+      await waitForNodeSwitch();
+    }
     if (!this.nodeNetworkId.value) {
       // The initial node status request may have failed (e.g. no connectivity
       // right after a fresh browser start), leaving `nodeNetworkId` empty even
@@ -235,7 +253,7 @@ export class AeAccountHdWallet extends MemoryAccount {
           throw new RpcRejectedByUserError();
         }
         // The prompt was for this network: a dapp can switch it meanwhile, e.g. over EVM
-        if (this.nodeNetworkId.value !== promptNetworkId) {
+        if (isNodeSwitching() || this.nodeNetworkId.value !== promptNetworkId) {
           throw new RpcRejectedByUserError();
         }
       }
@@ -460,11 +478,15 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     if (isDappRequest(options)) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      await waitForNodeSwitch();
       // Known before the prompt, as in `signTransaction`, so the check after it applies
       if (!this.nodeNetworkId.value) {
         await useAeSdk().ensureNodeNetworkId();
       }
       const promptNetworkId = this.nodeNetworkId.value;
+      if (!promptNetworkId) {
+        throw new Error('Not connected to any network');
+      }
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
@@ -504,9 +526,8 @@ export class AeAccountHdWallet extends MemoryAccount {
       if (!permissionGranted) {
         throw new RpcRejectedByUserError();
       }
-      // As in `signTransaction`, unless the request came while the node connected:
-      // it connects to the network the prompt showed
-      if (promptNetworkId && this.nodeNetworkId.value !== promptNetworkId) {
+      // As in `signTransaction`
+      if (isNodeSwitching() || this.nodeNetworkId.value !== promptNetworkId) {
         throw new RpcRejectedByUserError();
       }
     }

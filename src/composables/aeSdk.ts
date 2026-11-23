@@ -462,6 +462,7 @@ export function useAeSdk() {
     isNodeMainnet,
     isNodeTestnet,
     isAeSdkReady,
+    isAeSdkUpdating,
     nodeNetworkId,
     isTippingSupported,
     dexContracts,

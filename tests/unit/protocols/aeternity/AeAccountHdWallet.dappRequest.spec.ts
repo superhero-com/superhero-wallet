@@ -62,8 +62,10 @@ vi.mock('@/protocols/aeternity/composables', () => ({
 
 let sdk: typeof import('@aeternity/aepp-sdk');
 let AeAccountHdWallet: typeof import('@/protocols/aeternity/libs/AeAccountHdWallet').AeAccountHdWallet;
+let NODE_SWITCH_TIMEOUT: number;
 let checkOrAskPermission: ReturnType<typeof vi.fn>;
 let superSignTransaction: any;
+let isAeSdkUpdating: Ref<boolean>;
 
 const buildSpendTx = () => sdk.buildTx({
   tag: Tag.SpendTx,
@@ -105,9 +107,11 @@ beforeEach(async () => {
       ),
     ),
   });
+  isAeSdkUpdating = ref(false);
   // @ts-ignore
   (useAeSdk as vi.Mock).mockReturnValue({
     ensureNodeNetworkId: vi.fn(),
+    isAeSdkUpdating,
     getAeSdk: vi.fn(async () => ({ api: {} })),
     // The aepps the user let see the accounts
     isAeppGivenAccounts: (id: string) => id === 'subscribed',
@@ -120,7 +124,7 @@ beforeEach(async () => {
   // alongside it so the spy lands on the class the fresh module extends.
   vi.resetModules();
   sdk = await import('@aeternity/aepp-sdk');
-  ({ AeAccountHdWallet } = await import('@/protocols/aeternity/libs/AeAccountHdWallet'));
+  ({ AeAccountHdWallet, NODE_SWITCH_TIMEOUT } = await import('@/protocols/aeternity/libs/AeAccountHdWallet'));
 
   superSignTransaction = vi
     .spyOn(sdk.MemoryAccount.prototype, 'signTransaction')
@@ -314,6 +318,20 @@ describe('a network switched while the prompt is open', () => {
     await expect(sign(walletSwitchedTo('ae_uat'))).resolves.toBe(signed);
   });
 
+  it.each(requests)('rejects %s while a switch begun meanwhile waits for its node', async (_, sign) => {
+    checkOrAskPermission = vi.fn(async () => {
+      isAeSdkUpdating.value = true;
+      return true;
+    });
+    // @ts-ignore
+    (usePermissions as vi.Mock).mockReturnValue({ checkOrAskPermission });
+
+    await expect(sign(new AeAccountHdWallet(nodeNetworkId)))
+      .rejects.toBeInstanceOf(RpcRejectedByUserError);
+    expect(superSignTransaction).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
+  });
+
   describe('whose id the request recovers', () => {
     // E.g. the first status request failed as the browser started offline
     beforeEach(() => {
@@ -340,14 +358,83 @@ describe('a network switched while the prompt is open', () => {
     });
   });
 
-  it('signs a delegation that came while the node was connecting, for its network', async () => {
-    // `ensureNodeNetworkId` leaves the id to the connection, which ends during the prompt
+  it('rejects a delegation without asking when no network is known', async () => {
     nodeNetworkId.value = undefined;
 
     await expect(walletSwitchedTo('ae_uat')
       .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
-      .resolves.toBe('sg_signed');
+      .rejects.toThrow('Not connected to any network');
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
+  });
+});
+
+describe('a request that came while the network switched', () => {
+  let signDelegation: any;
+  let nodeNetworkId: Ref<string | undefined>;
+
+  beforeEach(() => {
+    // The previous network's id stays until the new node answers
+    nodeNetworkId = ref('ae_mainnet');
+    isAeSdkUpdating.value = true;
+    signDelegation = vi
+      .spyOn(sdk.MemoryAccount.prototype, 'signDelegation')
+      .mockResolvedValue('sg_signed' as Encoded.Signature);
+  });
+
+  afterEach(() => {
+    signDelegation.mockRestore();
+    vi.useRealTimers();
+  });
+
+  const nextTask = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+
+  async function settleSwitch(networkId: string) {
+    await nextTask();
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    nodeNetworkId.value = networkId;
+    isAeSdkUpdating.value = false;
+  }
+
+  it('asks about a spend once the new node answered, and signs it for that network', async () => {
+    const signing = new AeAccountHdWallet(nodeNetworkId)
+      .signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN } as any);
+    await settleSwitch('ae_uat');
+
+    await expect(signing).resolves.toBe('tx_signed');
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(superSignTransaction)
+      .toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ networkId: 'ae_uat' }));
+  });
+
+  it.each([
+    ['the previous network', 'ae_mainnet'],
+    ['the connecting node', undefined],
+  ])('asks about a delegation once the switch from %s settled, and signs it for the new one', async (_, previousId) => {
+    nodeNetworkId.value = previousId;
+    const signing = new AeAccountHdWallet(nodeNetworkId)
+      .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any);
+    await settleSwitch('ae_uat');
+
+    await expect(signing).resolves.toBe('sg_signed');
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
     expect(signDelegation).toHaveBeenCalledWith(delegation, { networkId: 'ae_uat' });
+  });
+
+  it.each([
+    ['a spend', (account: any) => account.signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN })],
+    ['a delegation', (account: any) => account.signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN })],
+  ] as const)('rejects %s without asking when the new node never answers', async (_, sign) => {
+    vi.useFakeTimers();
+    const signing = sign(new AeAccountHdWallet(nodeNetworkId));
+    const rejection = expect(signing).rejects.toThrow('Not connected to any network');
+
+    await vi.advanceTimersByTimeAsync(NODE_SWITCH_TIMEOUT);
+
+    await rejection;
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(superSignTransaction).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
   });
 });
 
