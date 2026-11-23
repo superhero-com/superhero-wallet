@@ -78,7 +78,8 @@
       <BtnMain
         third
         :text="$t('common.confirm')"
-        :disabled="isConfirmBlocked || !canSignWithSelectedAccount"
+        data-cy="accept"
+        :disabled="isConfirmDisabled"
         @click="confirm"
       />
     </template>
@@ -213,6 +214,10 @@ export default defineComponent({
       || (isSignerReplaceable.value && rebuildForSelectedAccount.value)
     ));
 
+    const isConfirmDisabled = computed(() => (
+      isConfirmBlocked.value || !canSignWithSelectedAccount.value
+    ));
+
     const dataAsString = computed((): string => popupProps.value?.txBase64?.toString() || '');
 
     /**
@@ -239,6 +244,7 @@ export default defineComponent({
     }
 
     async function confirm() {
+      if (isConfirmDisabled.value) return;
       if (selectedAccount.value) {
         setActiveAccountByAddressAndProtocol(
           selectedAccount.value.address!,
@@ -274,7 +280,7 @@ export default defineComponent({
     });
 
     return {
-      isConfirmBlocked,
+      isConfirmDisabled,
       confirm,
       cancel,
       protocol,

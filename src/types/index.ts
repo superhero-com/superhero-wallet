@@ -743,11 +743,17 @@ export interface IEvmTypedData {
   message?: Record<string, unknown>;
 }
 
+export interface IApprovalSourceTab {
+  tabId?: number;
+  /** The embedding site's origin at request time, distinct from a requesting frame's origin. */
+  topLevelOrigin?: string;
+}
+
 /**
  * Popups are the modal windows opened inside of the browser window popup.
  * This set of properties relates only to `PopupType` modals.
  */
-export interface IPopupProps extends IPopupActions, IPopupData {
+export interface IPopupProps extends IPopupActions, IPopupData, IApprovalSourceTab {
   show?: boolean; // Decides if the modal window should be open
   evmCall?: IEvmCall;
   evmTypedData?: IEvmTypedData;
@@ -759,8 +765,6 @@ export interface IPopupProps extends IPopupActions, IPopupData {
   isOffscreenRequest?: boolean;
   /** A connected site asks to switch to the chain of another protocol. */
   isChainSwitch?: boolean;
-  /** Of the browser tab the request came from, when the extension knows it. */
-  tabId?: number;
 }
 
 /**

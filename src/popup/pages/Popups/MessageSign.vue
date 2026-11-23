@@ -131,6 +131,7 @@ export default defineComponent({
     );
 
     async function approve() {
+      if (isConfirmBlocked.value) return;
       const { openModal } = useModals();
       if (selectedAccount.value) {
         setActiveAccountByAddressAndProtocol(

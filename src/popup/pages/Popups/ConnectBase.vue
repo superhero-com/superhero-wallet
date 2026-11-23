@@ -146,7 +146,7 @@
       <BtnMain
         data-cy="accept"
         wide
-        :disabled="isConfirmBlocked || !supported || !selectedAccount"
+        :disabled="isConfirmDisabled"
         :text="$t('common.confirm')"
         @click="confirm()"
       />
@@ -291,6 +291,9 @@ export default defineComponent({
     });
 
     const supported = computed(() => options.value.length > 0);
+    const isConfirmDisabled = computed(() => (
+      isConfirmBlocked.value || !supported.value || !selectedAccount.value
+    ));
 
     function onSelectAccount(addressWithProtocol: string) {
       const [protocol, address] = addressWithProtocol.split(':');
@@ -343,6 +346,7 @@ export default defineComponent({
     );
 
     function confirm() {
+      if (isConfirmDisabled.value) return;
       // A WalletConnect session is approved by itself, apart from the site it claims to be
       if (popupProps.value?.app?.host && !isSelfReported.value) {
         const { originSource, ...app } = popupProps.value.app;
@@ -379,7 +383,7 @@ export default defineComponent({
     });
 
     return {
-      isConfirmBlocked,
+      isConfirmDisabled,
       rememberMe,
       isRememberMeKept,
       isSelfReported,

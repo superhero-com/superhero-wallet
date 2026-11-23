@@ -513,7 +513,8 @@ describe('offscreen wallet connections', () => {
 
   describe('popup port', () => {
     let popupHandler;
-    let popupCount;
+    const popupTab = { id: 53, windowId: 7 };
+    const detached = { detachedTabId: popupTab.id, detachedWindowId: popupTab.windowId };
 
     beforeEach(async () => {
       vi.doUnmock('@/offscreen/popupHandler');
@@ -523,26 +524,40 @@ describe('offscreen wallet connections', () => {
       (global as any).browser = extensionBrowser;
       await wallet.init();
 
-      popupCount = 0;
-      extensionBrowser.runtime.sendMessage.mockImplementation(async ({ method }) => {
+      extensionBrowser.runtime.sendMessage.mockImplementation(async ({ method, params }) => {
         if (method !== 'openPopup') return undefined;
-        popupCount += 1;
-        return { id: `popup-${popupCount}`, props: {} };
+        return { id: params.id, props: {}, ...detached };
       });
     });
 
-    async function openPopupWindow() {
-      const id = `popup-${popupCount + 1}`;
+    function startRequest() {
       const request = popupHandler.openPopup('connect', 'https://dapp.example', {});
-      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      const { id } = browser.runtime.sendMessage.mock.lastCall[0].params;
+      return { id, request };
+    }
+
+    function startDelayedRequest() {
+      let reply;
+      browser.runtime.sendMessage.mockImplementationOnce(() => new Promise((resolve) => {
+        reply = resolve;
+      }));
+      return { ...startRequest(), reply };
+    }
+
+    async function connectPopupPort(id, tab = popupTab) {
       const port = createPort();
       port.name = CONNECTION_TYPES.POPUP;
       port.sender.url = `chrome-extension://test-extension-id/index.html?id=${id}`;
+      port.sender.tab = tab;
       port.postMessage = vi.fn();
       await onConnectListener(port);
-      return {
-        id, request, sendToOffscreen: messageListener, close: disconnectListener,
-      };
+      return { port, sendToOffscreen: messageListener, close: disconnectListener };
+    }
+
+    async function openPopupWindow() {
+      const { id, request } = startRequest();
+      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      return { id, request, ...await connectPopupPort(id) };
     }
 
     it('rejects the request of a popup closed without an answer', async () => {
@@ -550,7 +565,7 @@ describe('offscreen wallet connections', () => {
       const onRejected = vi.fn();
       request.catch(onRejected);
 
-      close();
+      await close();
       await vi.waitFor(() => expect(onRejected).toHaveBeenCalled());
       expect(popupHandler.getPopup(id)).toBeUndefined();
     });
@@ -560,10 +575,90 @@ describe('offscreen wallet connections', () => {
         id, request, sendToOffscreen, close,
       } = await openPopupWindow();
       await sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
-      close();
+      await close();
 
       await expect(request).resolves.toBe('confirmed');
       expect(popupHandler.getPopup(id)).toBeUndefined();
+    });
+
+    it('settles a popup closed before its page connects or creation replies', async () => {
+      const { id, request, reply } = startDelayedRequest();
+      const declined = expect(request).rejects.toBeUndefined();
+      popupHandler.handlePopupWindowRemoved(popupTab.windowId);
+      reply({ id, props: {}, ...detached });
+      await declined;
+      expect(popupHandler.getPopup(id)).toBeUndefined();
+
+      const next = await openPopupWindow();
+      await next.sendToOffscreen({ type: 'resolve', payload: 'next' });
+      await expect(next.request).resolves.toBe('next');
+      await next.close();
+    });
+
+    it('settles an unconnected popup only when its own window closes', async () => {
+      const { id, request } = startRequest();
+      const declined = expect(request).rejects.toBeUndefined();
+      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      popupHandler.handlePopupWindowRemoved(99);
+      expect(popupHandler.getPopup(id)).toBeDefined();
+
+      popupHandler.handlePopupWindowRemoved(popupTab.windowId);
+      await declined;
+      expect(popupHandler.getPopup(id)).toBeUndefined();
+    });
+
+    it('keeps a connected popup whose tab moved out of its window', async () => {
+      const { id, request } = startRequest();
+      await vi.waitFor(() => expect(popupHandler.getPopup(id)).toBeDefined());
+      const { sendToOffscreen, close } = await connectPopupPort(id, { ...popupTab, windowId: 22 });
+      popupHandler.handlePopupWindowRemoved(popupTab.windowId);
+
+      await sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      await close();
+      await expect(request).resolves.toBe('confirmed');
+    });
+
+    it('keeps an early approval even when creation reports only its window ID', async () => {
+      const { id, request, reply } = startDelayedRequest();
+      const { sendToOffscreen, close } = await connectPopupPort(id);
+      const answered = sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      const closed = close();
+      popupHandler.handlePopupWindowRemoved(popupTab.windowId);
+      reply({ id, props: {}, detachedWindowId: popupTab.windowId });
+      await Promise.all([answered, closed]);
+      await expect(request).resolves.toBe('confirmed');
+      expect(popupHandler.getPopup(id)).toBeUndefined();
+    });
+
+    it('serves an early port in the moved tab and preserves its answer when the tab closes', async () => {
+      const { id, request, reply } = startDelayedRequest();
+      const movedTab = { ...popupTab, windowId: 22 };
+      const { port, sendToOffscreen, close } = await connectPopupPort(id, movedTab);
+      const propsRequest = sendToOffscreen({ type: 'getProps', uuid: 'props' });
+      popupHandler.handlePopupWindowRemoved(popupTab.windowId);
+      const props = { message: 'Expected message' };
+      reply({ id, props, ...detached });
+      await propsRequest;
+      expect(port.postMessage).toHaveBeenCalledExactlyOnceWith({ uuid: 'props', res: props });
+      popupHandler.handlePopupWindowRemoved(movedTab.windowId);
+      const answered = sendToOffscreen({ type: 'resolve', payload: 'confirmed' });
+      await close();
+      await answered;
+      await expect(request).resolves.toBe('confirmed');
+    });
+
+    it.each(['copied', 'unknown'])('answers a %s approval URL without exposing props', async (kind) => {
+      const { id, request } = startRequest();
+      const requestId = kind === 'copied' ? id : 'unknown';
+      const otherTab = { ...popupTab, id: 54 };
+      const { port, sendToOffscreen, close } = await connectPopupPort(requestId, otherTab);
+      await sendToOffscreen({ type: 'getProps', uuid: 'props' });
+      expect(port.postMessage).toHaveBeenCalledWith({ uuid: 'props', res: undefined });
+      await sendToOffscreen({ type: 'resolve', payload: 'wrong tab' });
+      await close();
+      const declined = expect(request).rejects.toBeUndefined();
+      popupHandler.handlePopupWindowRemoved(popupTab.windowId);
+      await declined;
     });
   });
 

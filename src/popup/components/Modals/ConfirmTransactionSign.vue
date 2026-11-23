@@ -241,9 +241,7 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="
-          isConfirmBlocked || !!error || verifying || loading || !canSignWithSelectedAccount
-        "
+        :disabled="isConfirmDisabled"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
@@ -560,6 +558,11 @@ export default defineComponent({
     const decodingCallData = ref(false);
     const dappBalanceError = ref(false);
 
+    const isConfirmDisabled = computed(() => (
+      isConfirmBlocked.value || !!error.value || verifying.value
+      || loading.value || !canSignWithSelectedAccount.value
+    ));
+
     const app = computed(() => popupProps.value?.app);
 
     const fee = computed(() => (protocol === PROTOCOLS.aeternity)
@@ -721,6 +724,7 @@ export default defineComponent({
     }
 
     async function confirm() {
+      if (isConfirmDisabled.value) return;
       if (selectedAccount.value) {
         setActiveAccountByAddressAndProtocol(
           selectedAccount.value.address!,
@@ -949,10 +953,9 @@ export default defineComponent({
 
     onMounted(async () => {
       if (popupProps.value) {
-        await loadContractInfo(popupProps.value?.tx?.contractId);
         await Promise.all([
           verifyTransaction(),
-          loadAdditionalContractCallInfo(),
+          loadContractInfo(popupProps.value.tx?.contractId).then(loadAdditionalContractCallInfo),
         ]);
       } else {
         error.value = t('modals.transaction-failed.msg');
@@ -964,7 +967,7 @@ export default defineComponent({
     });
 
     return {
-      isConfirmBlocked,
+      isConfirmDisabled,
       AE_SYMBOL,
       aettosToAe,
       AnimatedSpinner,

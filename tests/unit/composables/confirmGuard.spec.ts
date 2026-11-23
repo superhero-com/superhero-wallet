@@ -3,7 +3,14 @@ import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { CONFIRM_GUARD_DELAY, useConfirmGuard } from '@/composables/confirmGuard';
 
-function mountWithGuard(isEnabled) {
+const environment = vi.hoisted(() => ({
+  IS_SIDE_PANEL: false,
+  IS_EXTENSION: false,
+  RUNNING_IN_POPUP: false,
+}));
+vi.mock('@/constants', () => environment);
+
+function mountWithGuard(isEnabled?: boolean) {
   let guard;
   const wrapper = mount(defineComponent({
     setup() {
@@ -34,9 +41,18 @@ describe('useConfirmGuard', () => {
     expect(guard.isConfirmBlocked.value).toBe(false);
   });
 
-  it('does not block outside the side panel', () => {
-    const { guard } = mountWithGuard(false);
-    expect(guard.isConfirmBlocked.value).toBe(false);
+  it.each([
+    ['extension', 'side panel', true],
+    ['extension', 'approval popup', true],
+    ['extension', 'toolbar', false],
+    ['web', 'approval popup', false],
+  ])('sets the initial guard for %s %s to %s', (platform, view, blocked) => {
+    environment.IS_SIDE_PANEL = view === 'side panel';
+    environment.IS_EXTENSION = platform === 'extension';
+    environment.RUNNING_IN_POPUP = view === 'approval popup';
+    const { wrapper, guard } = mountWithGuard();
+    expect(guard.isConfirmBlocked.value).toBe(blocked);
+    wrapper.unmount();
   });
 
   it('stops its timer once closed', () => {

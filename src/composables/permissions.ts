@@ -1,4 +1,4 @@
-import { METHODS, Tag } from '@aeternity/aepp-sdk';
+import { METHODS, RpcInternalError, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 
@@ -30,6 +30,7 @@ import {
   EVM_PROTOCOLS,
 } from '@/constants';
 import { createAppData, getCleanModalOptions, watchUntilTruthy } from '@/utils';
+import { ApprovalWindowError } from '@/lib/errors';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { getSessionEncryptionKey, openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
@@ -269,7 +270,10 @@ export function usePermissions() {
       );
       onModalResolved?.(resolvedWith);
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof ApprovalWindowError) {
+        throw Object.assign(new RpcInternalError(), { message: error.message });
+      }
       return false;
     }
   }

@@ -1,24 +1,30 @@
 import '../lib/initPolyfills';
+import { v4 as uuid } from 'uuid';
 import type { Runtime } from 'webextension-polyfill';
+import type { IPopupConfigNoActions } from '@/background/bgPopupHandler';
 import type {
   Dictionary,
+  IBackgroundMessageData,
   IPopupProps,
   ISidePanelRequest,
   PopupType,
   SidePanelMessage,
 } from '@/types';
 import { POPUP_ACTIONS, POPUP_METHODS, SESSION_METHODS } from '@/constants';
+import { ApprovalWindowError } from '@/lib/errors';
 import { executeOrSendMessageToBackground } from './utils';
 
-interface IPopupConfig {
-  id: string;
+interface IPopupConfig extends IPopupConfigNoActions {
   actions: Pick<IPopupProps, 'resolve' | 'reject'>;
-  props: Omit<IPopupProps, 'resolve' | 'reject'>;
-  sidePanelWindowId?: number;
+  popupPort?: Runtime.Port;
   sidePanel?: Runtime.Port;
 }
 
-const popups: Dictionary<IPopupConfig> = {};
+const popups: Dictionary<IPopupConfig> = Object.create(null);
+const opening = new Map<string, {
+  config: Promise<IPopupConfigNoActions | null>;
+  closedWindows: Set<number>;
+}>();
 
 /** Ports of the open side panels by their browser window id. */
 const sidePanels = new Map<number, Runtime.Port>();
@@ -30,51 +36,113 @@ export const removePopup = async (id: string) => {
 
 export const getPopup = (id: string) => popups[id];
 
+/** A connected page settles its request through its port instead. */
+function checkClosedWindow(id: string) {
+  const popup = getPopup(id);
+  if (popup?.detachedWindowId === undefined || popup.popupPort) return;
+  popup.actions.reject();
+  removePopup(id);
+}
+
+export function handlePopupWindowRemoved(windowId: number) {
+  opening.forEach(({ closedWindows }) => closedWindows.add(windowId));
+  Object.values(popups).forEach((popup) => {
+    if (popup.detachedWindowId === windowId) checkClosedWindow(popup.id);
+  });
+}
+
+async function bindPopupPort(id: string, port: Runtime.Port) {
+  const pending = opening.get(id);
+  if (pending) await pending.config;
+  const popup = getPopup(id);
+  const tab = port.sender?.tab;
+  if (!popup || popup.popupPort || !tab) return undefined;
+  const isExpectedTab = popup.detachedTabId !== undefined
+    ? popup.detachedTabId === tab.id
+    : popup.detachedWindowId !== undefined && popup.detachedWindowId === tab.windowId;
+  if (!isExpectedTab) return undefined;
+  popup.popupPort = port;
+  return popup;
+}
+
+export function addPopupPort(port: Runtime.Port) {
+  const { url, frameId } = port.sender ?? {};
+  if (url?.split('?')[0] !== browser.runtime.getURL('index.html') || (frameId ?? 0) !== 0) return;
+  const id = new URL(url).searchParams.get('id');
+  const ready = id ? bindPopupPort(id, port) : undefined;
+  let disconnected = false;
+  port.onMessage.addListener(async (msg: IBackgroundMessageData) => {
+    const popup = await ready;
+    if (msg.type === POPUP_ACTIONS.getProps) {
+      if (!disconnected) port.postMessage({ uuid: msg.uuid, res: popup?.props });
+    } else if (msg.type === POPUP_ACTIONS.resolve || msg.type === POPUP_ACTIONS.reject) {
+      popup?.actions[msg.type](msg.payload);
+    }
+  });
+  port.onDisconnect.addListener(async () => {
+    disconnected = true;
+    const popup = await ready;
+    if (popup) {
+      popup.actions.reject();
+      removePopup(popup.id);
+    }
+  });
+}
+
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | object | undefined,
   popupProps: Partial<IPopupProps> = {},
-) => executeOrSendMessageToBackground(
-  POPUP_METHODS.openPopup,
-  {
+) => {
+  const requestId = uuid();
+  const config = executeOrSendMessageToBackground(POPUP_METHODS.openPopup, {
+    id: requestId,
     popupProps,
     popupType,
     aepp,
     sidePanelWindowIds: [...sidePanels.keys()],
-  },
-)
-  .then((popupConfig: IPopupConfig) => (
-    // The resolution value comes from whatever the confirmation modal passes to
-    // its `resolve` prop (e.g. the account the user chose to sign with), not
-    // from `popupConfig`, so it can't be typed as `IPopupConfig`.
-    new Promise<any>((resolve, reject) => {
-      const { id, props, sidePanelWindowId } = popupConfig;
-      const sidePanel = (sidePanelWindowId === undefined)
-        ? undefined
-        : sidePanels.get(sidePanelWindowId);
-      popups[id] = {
-        ...popupConfig,
-        sidePanel,
-        actions: { resolve, reject },
-      };
-      if (sidePanelWindowId === undefined) {
-        return;
+  }).catch(() => null) as Promise<IPopupConfigNoActions | null>;
+  // A fast popup page or window removal can arrive before the creation reply.
+  const closedWindows = new Set<number>();
+  opening.set(requestId, { config, closedWindows });
+  const popupConfig = await config;
+  opening.delete(requestId);
+  if (!popupConfig || popupConfig.id !== requestId) throw new ApprovalWindowError();
+
+  // The confirmation modal chooses the result, e.g. which account to sign with.
+  return new Promise<any>((resolve, reject) => {
+    const { id, props, sidePanelWindowId } = popupConfig;
+    const sidePanel = (sidePanelWindowId === undefined)
+      ? undefined
+      : sidePanels.get(sidePanelWindowId);
+    popups[id] = {
+      ...popupConfig,
+      sidePanel,
+      actions: { resolve, reject },
+    };
+    if (sidePanelWindowId === undefined) {
+      const { detachedWindowId } = popupConfig;
+      if (detachedWindowId !== undefined && closedWindows.has(detachedWindowId)) {
+        // A port already awaiting this config gets its queued answer first.
+        queueMicrotask(() => checkClosedWindow(id));
       }
-      if (!sidePanel) {
-        // The side panel was closed in the meantime.
-        removePopup(id);
-        resolve(openPopup(popupType, aepp, popupProps));
-        return;
-      }
-      try {
-        sidePanel.postMessage({ id, popupType, props } as ISidePanelRequest);
-      } catch {
-        // The port can't take the message: it is closed or the props don't clone.
-        removePopup(id);
-        reject();
-      }
-    })
-  ));
+      return;
+    }
+    if (!sidePanel) {
+      // The side panel was closed in the meantime.
+      removePopup(id);
+      resolve(openPopup(popupType, aepp, popupProps));
+      return;
+    }
+    try {
+      sidePanel.postMessage({ id, popupType, props } as ISidePanelRequest);
+    } catch {
+      // The port can't take the message: it is closed or the props don't clone.
+      removePopup(id);
+      reject(new ApprovalWindowError());
+    }
+  });
+};
 
 /**
  * The side panel shows the popups of its browser window instead of popup windows.

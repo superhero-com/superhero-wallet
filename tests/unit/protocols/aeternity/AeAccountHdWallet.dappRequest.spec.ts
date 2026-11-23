@@ -112,7 +112,7 @@ beforeEach(async () => {
     // The aepps the user let see the accounts
     isAeppGivenAccounts: (id: string) => id === 'subscribed',
     // Of the browser tab of the aepp
-    getAeppTabId: (id: string) => (id === 'subscribed' ? 5 : undefined),
+    getAeppSourceTab: (id: string) => (id === 'subscribed' ? { tabId: 5, topLevelOrigin: 'https://host.example' } : {}),
   });
 
   // `AeAccountHdWallet` is pulled in by `registerAdapters` (a setup file)
@@ -447,7 +447,7 @@ describe('a request of an aepp in a browser tab', () => {
     // Signing itself is not what this is about
     await sign().catch(() => {});
 
-    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ tabId: 5 });
+    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ tabId: 5, topLevelOrigin: 'https://host.example' });
   });
 });
 
