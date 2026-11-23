@@ -419,14 +419,19 @@ describe('useAuth state machine branches', () => {
       async (name) => {
         const auth = await createWallet();
         const { STORAGE_KEYS } = await import('@/constants');
-        const { commitVault, readVault, refreshVault } = await import('@/lib/WalletVault');
+        const {
+          VaultSecretUnreadableError, commitVault, readVault, refreshVault,
+        } = await import('@/lib/WalletVault');
         vi.spyOn(console, 'warn').mockImplementation(() => {});
         const previous = readVault();
         await commitVault(previous, { ...previous.values, [STORAGE_KEYS[name]]: 'unreadable-ciphertext' });
         const oldVault = readVault();
         const oldKey = auth.encryptionKey.value;
 
-        await expect(auth.updatePassword('old-password', 'new-password')).rejects.toThrow();
+        // The settings page offers to remove the secret it names
+        const error = await auth.updatePassword('old-password', 'new-password').catch((e) => e);
+        expect(error).toBeInstanceOf(VaultSecretUnreadableError);
+        expect(error.storageKey).toBe(STORAGE_KEYS[name]);
 
         await refreshVault();
         expect(readVault()).toEqual(oldVault);

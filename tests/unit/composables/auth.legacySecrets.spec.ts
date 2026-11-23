@@ -205,9 +205,12 @@ describe('useAuth: plaintext seed left by older versions', () => {
       [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
       [STORAGE_KEYS.mnemonic]: await encrypt(otherKey, OTHER_MNEMONIC),
     });
+    const decrypt = vi.spyOn(globalThis.crypto.subtle, 'decrypt');
     releaseRead();
+    // Trying the new wallet's copy is the only decryption that fails.
+    await vi.waitFor(() => expect(decrypt.mock.settledResults)
+      .toContainEqual(expect.objectContaining({ type: 'rejected' })));
     await flushAsync();
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
 
     expect(store).toEqual(entries);
   });
