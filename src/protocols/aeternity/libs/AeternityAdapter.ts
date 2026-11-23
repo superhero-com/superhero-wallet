@@ -83,6 +83,8 @@ const TRANSACTION_ACTIVITIES_CACHE_SIZE = 500;
 const transactionActivities = new Map<string, any[]>();
 /** By the middleware URL */
 const tokenTransfersSupport = new Map<string, Promise<boolean>>();
+/** A status request with no answer would stay cached and hold the token tab */
+export const MIDDLEWARE_STATUS_TIMEOUT = 30000;
 
 /** The token transfers by account include the mints and burns since mdw 1.109 */
 function isTokenTransfersVersion(mdwVersion?: string) {
@@ -578,8 +580,18 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const { middlewareUrl } = aeActiveNetworkSettings.value;
     let isSupported = tokenTransfersSupport.get(middlewareUrl);
     if (!isSupported) {
-      isSupported = fetchJson(`${middlewareUrl}/v3/status`)
-        .then((status) => isTokenTransfersVersion(status?.mdw_version));
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      isSupported = Promise.race([
+        fetchJson(`${middlewareUrl}/v3/status`),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('Middleware status timed out')),
+            MIDDLEWARE_STATUS_TIMEOUT,
+          );
+        }),
+      ])
+        .then((status) => isTokenTransfersVersion(status?.mdw_version))
+        .finally(() => clearTimeout(timer));
       tokenTransfersSupport.set(middlewareUrl, isSupported);
       isSupported.catch(() => tokenTransfersSupport.delete(middlewareUrl));
     }
