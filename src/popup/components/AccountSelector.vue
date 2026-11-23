@@ -6,41 +6,37 @@
       size="lg"
     />
     <div>
-      <BtnPill
+      <FormSelect
+        v-bind="$attrs"
         class="account-select"
         :class="{ 'avatar-only': avatarOnly }"
         :avatar="avatarOnly"
+        :aria-label="avatarOnly ? $t('modals.createMultisigAccount.selectAccount') : undefined"
+        :model-value="modelValue"
+        :options="options || accountsSelectOptions"
+        :hide-arrow="avatarOnly"
+        :default-text="$t('modals.createMultisigAccount.selectAccount')"
+        account-select
+        pill
         dense
+        @update:model-value="onSelect"
       >
-        <FormSelect
-          v-bind="$attrs"
-          :avatar="avatarOnly"
-          :aria-label="avatarOnly ? $t('modals.createMultisigAccount.selectAccount') : undefined"
-          :model-value="modelValue"
-          :options="options || accountsSelectOptions"
-          :hide-arrow="avatarOnly"
-          :default-text="$t('modals.createMultisigAccount.selectAccount')"
-          account-select
-          unstyled
-          @update:model-value="onSelect"
-        >
-          <template #current-text="{ text }">
-            <slot>
-              <div v-if="!avatarOnly">
-                <Truncate
-                  class="account-select-text"
-                  :str="text"
-                />
-              </div>
-              <Avatar
-                v-if="avatarOnly"
-                :address="modelValue.toString()"
-                size="sm"
+        <template #current-text="{ text }">
+          <slot>
+            <div v-if="!avatarOnly">
+              <Truncate
+                class="account-select-text"
+                :str="text"
               />
-            </slot>
-          </template>
-        </FormSelect>
-      </BtnPill>
+            </div>
+            <Avatar
+              v-if="avatarOnly"
+              :address="modelValue.toString()"
+              size="sm"
+            />
+          </slot>
+        </template>
+      </FormSelect>
       <AddressTruncated
         v-if="!avatarOnly"
         show-explorer-link
@@ -60,7 +56,6 @@ import { useAccounts } from '@/composables';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
-import BtnPill from './buttons/BtnPill.vue';
 import FormSelect from './form/FormSelect.vue';
 import Truncate from './Truncate.vue';
 
@@ -68,7 +63,6 @@ export default defineComponent({
   components: {
     Avatar,
     AddressTruncated,
-    BtnPill,
     FormSelect,
     Truncate,
   },
@@ -121,6 +115,10 @@ export default defineComponent({
     margin-bottom: 4px;
     margin-left: -3px; // Compensate roundness
     color: $color-white;
+
+    &:active {
+      color: $color-white;
+    }
 
     &.avatar-only {
       margin-bottom: 0;

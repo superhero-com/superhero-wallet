@@ -1,3 +1,4 @@
+import axe from 'axe-core';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
@@ -70,18 +71,27 @@ describe('DashboardBase account selector', () => {
     const wrapper = mountDashboard(locale);
 
     expect(wrapper.get('.account-number').text()).toBe('2 / 6');
-    expect(accessibleName(wrapper.get('.account-select-input').element)).toBe(expectedName);
+    expect(accessibleName(wrapper.get('.account-select-btn').element)).toBe(expectedName);
   });
 
   it('updates the name when the selected position or account total changes', async () => {
     const wrapper = mountDashboard();
 
     await wrapper.setProps({ activeIdx: 3, activeAccountAddress: accounts[3].address });
-    expect(accessibleName(wrapper.get('.account-select-input').element)).toBe('Select active account (4 / 6)');
+    expect(accessibleName(wrapper.get('.account-select-btn').element)).toBe('Select active account (4 / 6)');
 
     await wrapper.setProps({ accounts });
     expect(wrapper.get('.account-number').text()).toBe('4 / 7');
-    expect(accessibleName(wrapper.get('.account-select-input').element)).toBe('Select active account (4 / 7)');
+    expect(accessibleName(wrapper.get('.account-select-btn').element)).toBe('Select active account (4 / 7)');
+  });
+
+  it('is a single button', async () => {
+    const wrapper = mountDashboard();
+
+    const { violations } = await axe.run(wrapper.element, { runOnly: ['nested-interactive'] });
+
+    expect(violations.flatMap(({ nodes }) => nodes.map(({ html }) => html))).toEqual([]);
+    expect(wrapper.findAll('button')).toHaveLength(1);
   });
 
   it('only shows the selector with more than five accounts and available options', async () => {
@@ -94,7 +104,7 @@ describe('DashboardBase account selector', () => {
     expect(wrapper.find('.account-select-btn').exists()).toBe(false);
 
     await wrapper.setProps({ accountsSelectOptions: options });
-    expect(wrapper.find('.account-select-input').exists()).toBe(true);
+    expect(wrapper.find('.account-select-btn').exists()).toBe(true);
   });
 
   it('retains the modal title and selected account identifier', async () => {
@@ -102,7 +112,7 @@ describe('DashboardBase account selector', () => {
     openModal.mockResolvedValueOnce(selectedValue);
     const wrapper = mountDashboard();
 
-    await wrapper.get('.account-select-input').trigger('click');
+    await wrapper.get('.account-select-btn').trigger('click');
     await flushPromises();
 
     expect(openModal).toHaveBeenCalledOnce();

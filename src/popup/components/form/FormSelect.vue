@@ -1,7 +1,9 @@
 <template>
-  <BtnPlain
-    v-if="unstyled"
-    class="form-select unstyled"
+  <Component
+    :is="pill ? 'BtnPill' : 'BtnPlain'"
+    v-if="unstyled || pill"
+    class="form-select"
+    :class="{ unstyled: !pill }"
     v-bind="$attrs"
     @click="openOptionsModal"
   >
@@ -15,7 +17,7 @@
       v-if="!hideArrow"
       class="arrow-icon"
     />
-  </BtnPlain>
+  </Component>
   <InputField
     v-else
     v-bind="$attrs"
@@ -48,6 +50,7 @@ import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '@/const
 import type { IFormSelectOption } from '@/types';
 import { useModals } from '@/composables';
 
+import BtnPill from '../buttons/BtnPill.vue';
 import BtnPlain from '../buttons/BtnPlain.vue';
 import InputField from '../InputField.vue';
 
@@ -56,6 +59,7 @@ import ChevronDownIcon from '../../../icons/chevron-down.svg?vue-component';
 export default defineComponent({
   name: 'FormSelect',
   components: {
+    BtnPill,
     BtnPlain,
     ChevronDownIcon,
     InputField,
@@ -74,6 +78,10 @@ export default defineComponent({
      * Decides if the input looks like a regular text instead of a form input element
      */
     unstyled: Boolean,
+    /**
+     * Looks like a pill button instead of a form input
+     */
+    pill: Boolean,
     /**
      * Decides if the dropdown arrow is visible
      */

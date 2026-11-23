@@ -18,29 +18,25 @@
           class="total-amount"
         />
 
-        <BtnPill
+        <FormSelect
           v-if="accounts.length > 5 && accountsSelectOptions"
+          :default-text="$t('dashboard.selectAccount')"
+          :aria-label="$t('a11y.selectActiveAccount', { current: activeIdx + 1, total: accounts.length })"
+          :options="accountsSelectOptions"
+          :model-value="`${activeAccountProtocol}:${activeAccountAddress}`"
           class="account-select-btn"
+          pill
           hollow
+          account-select
+          @update:model-value="(address) => $emit('select-account', address)"
         >
-          <FormSelect
-            :default-text="$t('dashboard.selectAccount')"
-            :aria-label="$t('a11y.selectActiveAccount', { current: activeIdx + 1, total: accounts.length })"
-            :options="accountsSelectOptions"
-            :model-value="`${activeAccountProtocol}:${activeAccountAddress}`"
-            class="account-select-input"
-            unstyled
-            account-select
-            @update:model-value="(address) => $emit('select-account', address)"
-          >
-            <template #current-text>
-              <div class="account-number">
-                <span class="account-number-current">{{ activeIdx + 1 }}</span>
-                / {{ accounts.length }}
-              </div>
-            </template>
-          </FormSelect>
-        </BtnPill>
+          <template #current-text>
+            <div class="account-number">
+              <span class="account-number-current">{{ activeIdx + 1 }}</span>
+              / {{ accounts.length }}
+            </div>
+          </template>
+        </FormSelect>
       </div>
     </div>
 
@@ -94,7 +90,6 @@ import DashboardCard from './DashboardCard.vue';
 import DashboardHeader from './DashboardHeader.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
 import FormSelect from './form/FormSelect.vue';
-import BtnPill from './buttons/BtnPill.vue';
 
 import WarningTriangleIcon from '../../icons/warning-triangle.svg?vue-component';
 import PageWrapper from './PageWrapper.vue';
@@ -104,7 +99,6 @@ export default defineComponent({
   components: {
     PageWrapper,
     DashboardHeader,
-    BtnPill,
     DashboardCard,
     FormSelect,
     TotalWalletAmount,
@@ -153,12 +147,12 @@ export default defineComponent({
     min-height: 35px;
 
     .account-select-btn {
-      padding: 0;
-      margin-left: auto;
-    }
-
-    .account-select-input {
       padding: 4px 8px;
+      margin-left: auto;
+
+      &:active {
+        color: $color-white;
+      }
     }
 
     .account-number {
