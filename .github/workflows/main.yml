@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 100
+          # The token can push gh-pages; `npm ci` runs every dependency's install script
+          persist-credentials: false
       - uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
