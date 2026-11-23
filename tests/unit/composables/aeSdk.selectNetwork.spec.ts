@@ -15,6 +15,7 @@ import {
 
 import type { INetwork } from '@/types';
 import { NETWORK_NAME_MAX_LENGTH, NETWORK_TYPE_CUSTOM, PROTOCOLS } from '@/constants';
+import { NODE_STATUS_TIMEOUT } from '@/protocols/aeternity/helpers/selectAeppNetwork';
 
 const DAPP_URL = 'https://dapp.example/';
 const MAINNET_URL = 'https://mainnet.example';
@@ -246,6 +247,22 @@ describe('aepp network selection', () => {
     expect(networkState.activeNetworkName.value).toBe('Hyperchain');
     expect(walletSdk.api.$host).toBe(HYPERCHAIN_URL);
     expect(networkState.addCustomNetwork).not.toHaveBeenCalled();
+  });
+
+  it('finds a saved hyperchain by its node-reported network ID before a hanging node times out', async () => {
+    const { aepp, walletSdk } = await connectAepp();
+    const getStatus = vi.mocked(Node.prototype.getStatus).getMockImplementation()!;
+    vi.mocked(Node.prototype.getStatus).mockImplementation(function hang(this: Node, ...args) {
+      return this.$host.replace(/\/$/, '') === 'https://offline.example'
+        ? new Promise(() => {})
+        : getStatus.apply(this, args);
+    });
+    const startedAt = Date.now();
+
+    await aepp.askToSelectNetwork({ networkId: 'ae_hyperchain' });
+
+    expect(Date.now() - startedAt).toBeLessThan(NODE_STATUS_TIMEOUT);
+    expect(walletSdk.api.$host).toBe(HYPERCHAIN_URL);
   });
 
   it('keeps the request pending until the selected node is ready', async () => {
