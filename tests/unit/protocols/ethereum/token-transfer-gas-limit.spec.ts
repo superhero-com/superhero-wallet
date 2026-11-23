@@ -16,6 +16,11 @@ const contractMockState = {
   pastBalances: {} as Record<string, bigint>,
   estimateGas: 65000,
   transferCalls: [] as Array<{ recipient: string; amount: any }>,
+  /** The node of each `decimals()` call */
+  decimalsRequests: [] as Array<string | undefined>,
+  failDecimalsOnce: false,
+  /** The next `decimals()` call never answers */
+  hangDecimalsOnce: false,
 };
 
 async function loadHelper() {
@@ -33,7 +38,20 @@ async function loadHelper() {
       return {
         setProvider: (url: string) => { provider = url; },
         methods: {
-          decimals: () => ({ call: () => Promise.resolve(contractMockState.decimals) }),
+          decimals: () => ({
+            call: () => {
+              contractMockState.decimalsRequests.push(provider);
+              if (contractMockState.hangDecimalsOnce) {
+                contractMockState.hangDecimalsOnce = false;
+                return new Promise(() => {});
+              }
+              if (contractMockState.failDecimalsOnce) {
+                contractMockState.failDecimalsOnce = false;
+                return Promise.reject(new Error('Node unavailable'));
+              }
+              return Promise.resolve(contractMockState.decimals);
+            },
+          }),
           // Nothing for another account, token or node
           balanceOf: (owner: string) => ({
             call: (tx?: unknown, block?: bigint) => Promise.resolve(
@@ -60,7 +78,8 @@ let getTokenBalance: any;
 let getTokenTransferGasLimit: any;
 let BigNumber: any;
 
-beforeAll(async () => {
+// Fresh, as the module keeps the decimals it read
+beforeEach(async () => {
   const loaded = await loadHelper();
   getTokenBalance = loaded.getTokenBalance;
   getTokenTransferGasLimit = loaded.getTokenTransferGasLimit;
@@ -73,6 +92,9 @@ beforeEach(() => {
   contractMockState.pastBalances = {};
   contractMockState.estimateGas = 65000;
   contractMockState.transferCalls.length = 0;
+  contractMockState.decimalsRequests.length = 0;
+  contractMockState.failDecimalsOnce = false;
+  contractMockState.hangDecimalsOnce = false;
 });
 
 const estimate = (amount: string) => getTokenTransferGasLimit(
@@ -110,6 +132,16 @@ describe('getTokenTransferGasLimit', () => {
 
     expect(await estimate('1')).toBe(75000);
   });
+
+  it('estimates with the decimals the balance read', async () => {
+    contractMockState.decimals = 6n;
+
+    await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+    await estimate('1');
+
+    expect(lastTransferAmount()).toBe(BigInt(1000000));
+    expect(contractMockState.decimalsRequests).toHaveLength(1);
+  });
 });
 
 describe('getTokenBalance', () => {
@@ -130,5 +162,42 @@ describe('getTokenBalance', () => {
     const balance = await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL, 100n);
 
     expect(balance.toFixed()).toBe('2');
+  });
+
+  it('asks a node for the decimals of a token once', async () => {
+    await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+    await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+
+    expect(contractMockState.decimalsRequests).toEqual([NODE_URL]);
+  });
+
+  it('asks each node for the decimals of a token', async () => {
+    // A deployer's first contract has the same address on every chain
+    const otherNodeUrl = 'http://other-node.example';
+
+    await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+    await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, otherNodeUrl);
+
+    expect(contractMockState.decimalsRequests).toEqual([NODE_URL, otherNodeUrl]);
+  });
+
+  it('asks for the decimals again when the node failed to answer', async () => {
+    contractMockState.failDecimalsOnce = true;
+
+    await expect(getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL)).rejects.toThrow('Node unavailable');
+    await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+
+    expect(contractMockState.decimalsRequests).toEqual([NODE_URL, NODE_URL]);
+  });
+
+  it('asks for the decimals again while an earlier request has no answer', async () => {
+    contractMockState.hangDecimalsOnce = true;
+    contractMockState.balance = BigInt('2000000000000000000');
+    getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+
+    const balance = await getTokenBalance(TOKEN_CONTRACT, FROM_ACCOUNT, NODE_URL);
+
+    expect(balance.toFixed()).toBe('2');
+    expect(contractMockState.decimalsRequests).toEqual([NODE_URL, NODE_URL]);
   });
 });
