@@ -60,7 +60,17 @@ async function clickApproval(popup: Page, button: 'accept' | 'deny') {
       rect.y + rect.height / 2,
     ));
   }, { timeout: 30000 }, selector);
-  await popup.locator(selector).setVisibility('visible').click();
+  // The approval closes itself on the click, at times before the click returns
+  const closed = new Promise<void>((resolve) => { popup.once('close', () => resolve()); });
+  const controller = new AbortController();
+  try {
+    await Promise.race([
+      popup.locator(selector).setVisibility('visible').click({ signal: controller.signal }),
+      closed,
+    ]);
+  } finally {
+    controller.abort();
+  }
 }
 
 async function answerPopup<T>(request: Promise<T>, button: 'accept' | 'deny') {
