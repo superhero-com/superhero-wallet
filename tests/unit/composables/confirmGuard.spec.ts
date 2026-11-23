@@ -10,14 +10,15 @@ const environment = vi.hoisted(() => ({
 }));
 vi.mock('@/constants', () => environment);
 
-function mountWithGuard(isEnabled?: boolean) {
+function mountWithGuard(isEnabled?: boolean, attachTo?: HTMLElement) {
   let guard;
   const wrapper = mount(defineComponent({
     setup() {
       guard = useConfirmGuard(isEnabled);
-      return () => h('div');
+      // A control of the page may keep its presses to itself
+      return () => h('button', { onPointerdown: (event) => event.stopPropagation() });
     },
-  }));
+  }), { attachTo });
   return { wrapper, guard };
 }
 
@@ -59,5 +60,50 @@ describe('useConfirmGuard', () => {
     const { wrapper } = mountWithGuard(true);
     wrapper.unmount();
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  const press = () => window.dispatchEvent(new Event('pointerdown'));
+
+  it('stays blocked until no click came for as long', () => {
+    const { wrapper, guard } = mountWithGuard(true, document.body);
+
+    vi.advanceTimersByTime(CONFIRM_GUARD_DELAY - 100);
+    wrapper.get('button').element.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    vi.advanceTimersByTime(CONFIRM_GUARD_DELAY - 1);
+    expect(guard.isConfirmBlocked.value).toBe(true);
+
+    vi.advanceTimersByTime(1);
+    expect(guard.isConfirmBlocked.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('is not blocked again by a click once it let the confirmation through', () => {
+    const { wrapper, guard } = mountWithGuard(true);
+    vi.advanceTimersByTime(CONFIRM_GUARD_DELAY);
+
+    press();
+
+    expect(guard.isConfirmBlocked.value).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+    wrapper.unmount();
+  });
+
+  it('ignores clicks once closed', () => {
+    const { wrapper } = mountWithGuard(true);
+    wrapper.unmount();
+
+    press();
+
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('ignores clicks when disabled', () => {
+    const { wrapper, guard } = mountWithGuard(false);
+
+    press();
+
+    expect(guard.isConfirmBlocked.value).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+    wrapper.unmount();
   });
 });

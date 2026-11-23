@@ -9,13 +9,26 @@ export function useConfirmGuard(isEnabled = IS_SIDE_PANEL || (IS_EXTENSION && RU
   const isConfirmBlocked = ref(isEnabled);
   let timeout: ReturnType<typeof setTimeout> | undefined;
 
+  /** Clicks keep it blocked: a dapp may ask for many, to have one land on the approval */
+  function unblockLater() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      window.removeEventListener('pointerdown', unblockLater, true);
+      isConfirmBlocked.value = false;
+    }, CONFIRM_GUARD_DELAY);
+  }
+
   onMounted(() => {
     if (isEnabled) {
-      timeout = setTimeout(() => { isConfirmBlocked.value = false; }, CONFIRM_GUARD_DELAY);
+      window.addEventListener('pointerdown', unblockLater, true);
+      unblockLater();
     }
   });
 
-  onBeforeUnmount(() => clearTimeout(timeout));
+  onBeforeUnmount(() => {
+    clearTimeout(timeout);
+    window.removeEventListener('pointerdown', unblockLater, true);
+  });
 
   return { isConfirmBlocked };
 }
