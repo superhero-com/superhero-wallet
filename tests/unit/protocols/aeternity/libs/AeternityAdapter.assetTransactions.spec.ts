@@ -469,6 +469,48 @@ describe('AeternityAdapter token transactions', () => {
     expect(requestedPaths()).toContain(`/v3/aex9/${TOKEN}/transfers?account=${ACCOUNT}&limit=10`);
   });
 
+  it('asks the middleware for its version again when it gave no answer', async () => {
+    const { MIDDLEWARE_STATUS_TIMEOUT } = await import('@/protocols/aeternity/libs/AeternityAdapter');
+    const adapter = await getAdapter();
+    await silenceErrorLog();
+    vi.useFakeTimers();
+    try {
+      global.fetch.mockImplementationOnce(() => new Promise(() => {}));
+      const unanswered = expect(adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN))
+        .rejects.toThrow('Middleware status timed out');
+      await vi.advanceTimersByTimeAsync(MIDDLEWARE_STATUS_TIMEOUT);
+      await unanswered;
+    } finally {
+      vi.useRealTimers();
+    }
+
+    await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
+
+    expect(requestedPaths().filter((path) => path === '/v3/status')).toHaveLength(2);
+    expect(requestedPaths()).toContain(`/v3/aex9/${TOKEN}/transfers?account=${ACCOUNT}&limit=10`);
+  });
+
+  it('asks each middleware for its own version', async () => {
+    const { useNetworks } = await import('@/composables/networks');
+    const adapter = await getAdapter();
+    const statusHosts = () => global.fetch.mock.calls
+      .map(([url]) => new URL(url))
+      .filter(({ pathname }) => pathname.endsWith('/v3/status'))
+      .map(({ host }) => host);
+
+    await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
+    useNetworks().switchNetwork('Testnet');
+    try {
+      await adapter.fetchAccountAssetTransactions(ACCOUNT, TOKEN);
+    } finally {
+      // The stored choice would outlive the test
+      useNetworks().switchNetwork('Mainnet');
+    }
+
+    expect(statusHosts()).toHaveLength(2);
+    expect(new Set(statusHosts()).size).toBe(2);
+  });
+
   it('continues a token list loaded from the account activities from them', async () => {
     const nextPageUrl = `/v3/accounts/${ACCOUNT}/activities?cursor=next&limit=30`;
     const adapter = await getAdapter();
