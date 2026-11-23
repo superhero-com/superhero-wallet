@@ -39,7 +39,7 @@ describe('Accessible names of buttons and links', () => {
       activeAccountGlobalIdx: 1,
     });
     cy.get('[data-cy=account-card-btn-prev]').should('be.visible');
-    cy.get('.account-select-input').should('be.visible');
+    cy.get('.account-select-btn').should('be.visible');
     checkAccessibleNames();
 
     cy.openSendModal();

@@ -69,4 +69,15 @@ describe('FormSelect', () => {
 
     expect(openModal).not.toHaveBeenCalled();
   });
+
+  it('renders the pill look as a single button that opens the options', () => {
+    const wrapper = mountSelect({ pill: true });
+    const buttons = wrapper.findAll('button');
+
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0].classes()).toContain('btn-pill');
+    (buttons[0].element as HTMLButtonElement).click();
+
+    expect(openModal).toHaveBeenCalledTimes(1);
+  });
 });
