@@ -162,6 +162,7 @@ export default defineComponent({
     const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
 
     function confirm() {
+      if (isConfirmBlocked.value) return;
       if (selectedAccount.value) {
         setActiveAccountByAddressAndProtocol(
           selectedAccount.value.address!,

@@ -224,6 +224,7 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
     const openModalMock = vi.fn();
     const SENDER = AccountMemory.generate().address;
     const RECIPIENT = AccountMemory.generate().address;
+    const EVM_ADDRESS = '0x1111111111111111111111111111111111111111';
 
     beforeEach(() => {
       openModalMock.mockReset();
@@ -234,7 +235,10 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       }));
       vi.doMock('@/composables/accounts', async (importOriginal) => ({
         ...(await importOriginal()),
-        useAccounts: () => ({ activeAccount: { value: { address: SENDER } } }),
+        useAccounts: () => ({
+          activeAccount: { value: { address: SENDER } },
+          getLastActiveProtocolAccount: () => ({ address: EVM_ADDRESS }),
+        }),
       }));
     });
 
@@ -341,6 +345,61 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       afterEach(() => {
         vi.doUnmock('@/constants');
         vi.doUnmock('@/offscreen/popupHandler');
+      });
+
+      it('distinguishes a failed approval window from a declined EVM connection', async () => {
+        vi.resetModules();
+        localStorage.clear();
+        await import('@/protocols/registerAdapters');
+        const { ApprovalWindowError } = await import('@/lib/errors');
+        const { handleEvmRpcRequest } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+        openPopupMock
+          .mockRejectedValueOnce(new ApprovalWindowError())
+          .mockRejectedValueOnce(undefined);
+        const connect = () => handleEvmRpcRequest(`https://${HOST}`, 'eth_requestAccounts', []);
+
+        await expect(connect()).resolves.toEqual({
+          error: { code: -32603, message: 'Could not open the approval window' },
+        });
+        await expect(connect()).resolves.toMatchObject({ error: { code: 4001 } });
+      });
+
+      it('releases a queued site when an approval closes before its page connects', async () => {
+        vi.doUnmock('@/offscreen/popupHandler');
+        vi.doMock('@/constants', async (importOriginal) => ({
+          ...(await importOriginal()), IS_OFFSCREEN_TAB: true, IS_FIREFOX: true,
+        }));
+        vi.resetModules();
+        localStorage.clear();
+        // Ahead of the adapters, so that the barrel binds the mocked accounts
+        const { usePermissions: useFreshPermissions } = await import('@/composables/permissions');
+        await import('@/protocols/registerAdapters');
+        const { handleEvmRpcRequest } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+        const { handlePopupWindowRemoved } = await import('@/offscreen/popupHandler');
+        const stored = useFreshPermissions();
+        stored.resetPermissions();
+        stored.addPermission(buildPermission({ host: 'connected.example' }));
+        const windowId = 7;
+        const create = vi.fn(async () => ({ id: windowId, tabs: [{ id: 53, windowId }] }));
+        vi.stubGlobal('browser', {
+          ...globalThis.browser,
+          runtime: { ...globalThis.browser.runtime, getURL: (path) => `moz-extension://wallet/${path}` },
+          tabs: { query: async () => [] },
+          windows: { create },
+        });
+        try {
+          const connect = (host) => handleEvmRpcRequest(`https://${host}`, 'eth_requestAccounts', []);
+          const first = connect(HOST);
+          await vi.waitFor(() => expect(create).toHaveBeenCalledOnce());
+          const second = connect('connected.example');
+
+          handlePopupWindowRemoved(windowId);
+          await expect(first).resolves.toMatchObject({ error: { code: 4001 } });
+          await expect(second).resolves.toEqual({ result: [EVM_ADDRESS] });
+          expect(create).toHaveBeenCalledOnce();
+        } finally {
+          vi.unstubAllGlobals();
+        }
       });
 
       it('signs a spend under the limit while the wallet is unlocked', async () => {

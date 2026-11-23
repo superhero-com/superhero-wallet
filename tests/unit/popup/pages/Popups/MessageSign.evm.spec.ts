@@ -1,8 +1,10 @@
 import { enableAutoUnmount, mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import MessageSign from '@/popup/pages/Popups/MessageSign.vue';
 import { useAccounts, useModals, usePopupProps } from '@/composables';
+import { CONFIRM_GUARD_DELAY } from '@/composables/confirmGuard';
 import { PROTOCOLS } from '@/constants';
 import en from '@/popup/locales/en-US.json';
 
@@ -18,6 +20,12 @@ vi.mock('@/composables', async () => ({
   useAccounts: vi.fn(),
   useModals: vi.fn(),
   usePopupProps: (await vi.importActual<any>('@/composables/popupProps')).usePopupProps,
+}));
+vi.mock('@/constants', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/constants')>(),
+  IS_EXTENSION: true,
+  RUNNING_IN_POPUP: true,
+  IS_SIDE_PANEL: false,
 }));
 
 enableAutoUnmount(afterEach);
@@ -55,7 +63,6 @@ function mountModal(props: Record<string, any>) {
         SignAccountSelect: true,
         TransactionInfo: true,
         NoOriginWarning: true,
-        BtnMain: true,
         CopyText: { template: '<div><slot /></div>' },
         EvmTypedDataSummary: EvmTypedDataSummaryStub,
       },
@@ -63,7 +70,37 @@ function mountModal(props: Record<string, any>) {
   });
 }
 
-describe('MessageSign of EVM typed data', () => {
+describe('MessageSign', () => {
+  it('accepts a detached signature request only after its confirmation guard expires', async () => {
+    vi.useFakeTimers();
+    try {
+      const resolve = vi.fn();
+      const wrapper = mountModal({ protocol: PROTOCOLS.ethereum, resolve });
+      const accept = wrapper.get<HTMLButtonElement>('[data-cy=accept]');
+      const { setActiveAccountByAddressAndProtocol } = useAccounts();
+
+      accept.element.click();
+      expect(accept.attributes('aria-disabled')).toBe('true');
+      expect(setActiveAccountByAddressAndProtocol).not.toHaveBeenCalled();
+      expect(resolve).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(CONFIRM_GUARD_DELAY);
+      await nextTick();
+      expect(accept.attributes('aria-disabled')).toBeUndefined();
+      accept.element.click();
+      expect(resolve).toHaveBeenCalledExactlyOnceWith({ selectedAddress: ADDRESS });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('can reject a newly opened signature request immediately', () => {
+    const reject = vi.fn();
+    const wrapper = mountModal({ protocol: PROTOCOLS.ethereum, reject });
+    wrapper.get<HTMLButtonElement>('[data-cy=deny]').element.click();
+    expect(reject).toHaveBeenCalledOnce();
+  });
+
   it('explains the typed data, and still shows the message as it is', () => {
     const wrapper = mountModal({ protocol: PROTOCOLS.ethereum, evmTypedData: TYPED_DATA });
 

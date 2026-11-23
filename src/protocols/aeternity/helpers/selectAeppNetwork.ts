@@ -7,7 +7,7 @@ import {
   RpcRejectedByUserError,
 } from '@aeternity/aepp-sdk';
 import { cloneDeep } from 'lodash-es';
-import type { INetwork } from '@/types';
+import type { IApprovalSourceTab, INetwork } from '@/types';
 import {
   NETWORK_NAME_MAINNET,
   NETWORK_NAME_MAX_LENGTH,
@@ -93,7 +93,7 @@ export async function selectAeppNetwork(
   params: NetworkToSelect,
   origin: string,
   currentNetworkId?: string,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ): Promise<IAeppNetworkSelection> {
   const {
     activeNetwork,
@@ -152,7 +152,7 @@ export async function selectAeppNetwork(
   const name = target?.name ?? getUniqueName();
   if (!await askPermission(METHODS.updateNetwork, origin, {
     protocol: PROTOCOLS.aeternity,
-    tabId,
+    ...sourceTab,
     networkName: name,
     nodeUrl,
     networkId,

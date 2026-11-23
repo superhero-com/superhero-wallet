@@ -8,7 +8,7 @@ import {
 import { STUB_TX_BASE_64 } from '../../../src/constants/stubs';
 import { AE_DEX_URL } from '../../../src/protocols/aeternity/config';
 
-const mockCreate = vi.fn(() => true);
+const mockCreate = vi.fn(() => ({ id: 9 }));
 const mockGetLastFocused = vi.fn();
 const mockGetUrl = vi.fn((text) => text);
 
@@ -16,7 +16,7 @@ const testAeppUrl = 'http://test.com';
 
 global.browser = {
   tabs: {
-    query: () => [],
+    query: vi.fn().mockResolvedValue([]),
     remove: () => undefined,
   },
   windows: {
@@ -131,10 +131,9 @@ describe('popupHandler', () => {
     });
 
     it('leaves the popup to the side panel of the focused window', async () => {
-      mockGetLastFocused.mockResolvedValue({ id: 2, focused: true, state: 'normal' });
-      // Its active tab shows the site
-      vi.spyOn(global.browser.tabs, 'query')
-        .mockImplementation(async ({ windowId }) => (windowId === 2 ? [{ url: testAeppUrl }] : []));
+      mockGetLastFocused.mockResolvedValue({
+        id: 2, focused: true, state: 'normal', tabs: [{ active: true, url: testAeppUrl }],
+      });
       const { id, props, sidePanelWindowId } = await openPopup(
         POPUP_TYPE_CONNECT,
         testAeppUrl,
@@ -167,23 +166,10 @@ describe('popupHandler', () => {
     });
 
     describe('with the active tab of the focused window known', () => {
-      const { query } = global.browser.tabs;
-
-      beforeEach(() => {
-        mockGetLastFocused.mockResolvedValue({ id: 2, focused: true, state: 'normal' });
-      });
-
-      afterEach(() => {
-        global.browser.tabs.query = query;
-      });
-
-      /** The tabs of the focused window */
       function showTabs(tabs) {
-        global.browser.tabs.query = vi.fn(async ({ active, windowId }) => (
-          windowId === 2
-            ? tabs.filter((tab) => active === undefined || tab.active === active)
-            : []
-        ));
+        mockGetLastFocused.mockResolvedValue({
+          id: 2, focused: true, state: 'normal', tabs,
+        });
       }
 
       function showTab(url) {

@@ -32,6 +32,7 @@ import {
 } from '@/constants';
 import { handleUnknownError, watchUntilTruthy } from '@/utils';
 import { FramesConnection } from '@/lib/FramesConnection';
+import { getApprovalSourceTab } from '@/lib/approvalSourceTab';
 
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import {
@@ -80,11 +81,11 @@ const aeppInfo: Record<string, AeppInfoData> = {};
 const aeppsGivenAccounts = new Set<string>();
 
 /** Of the browser tab of a dapp connected through the extension */
-function getAeppTabId(aeppId: string): number | undefined {
+function getAeppSourceTab(aeppId: string) {
   const connection = aeSdk._clients.get(aeppId)?.rpc.connection;
-  return (connection instanceof BrowserRuntimeConnection)
-    ? connection.port.sender?.tab?.id
-    : undefined;
+  return getApprovalSourceTab(
+    connection instanceof BrowserRuntimeConnection ? connection.port.sender : undefined,
+  );
 }
 
 let dryAeSdk: AeSdk;
@@ -274,7 +275,7 @@ export function useAeSdk() {
           if (await checkOrAskPermission(
             METHODS.subscribeAddress,
             host,
-            { tabId: getAeppTabId(aeppId) },
+            getAeppSourceTab(aeppId),
           )) {
             // The offscreen document may still be restoring accounts (e.g. right
             // after the extension is re-enabled), so wait (bounded) for the active
@@ -299,7 +300,7 @@ export function useAeSdk() {
         async onAskAccounts(aeppId, _params, origin) {
           const aepp = aeppInfo[aeppId];
           const host = (IS_OFFSCREEN_TAB ? aepp?.origin : origin) ?? origin;
-          if (await checkOrAskPermission(METHODS.address, host, { tabId: getAeppTabId(aeppId) })) {
+          if (await checkOrAskPermission(METHODS.address, host, getAeppSourceTab(aeppId))) {
             // Accounts may still be restoring in the long-lived offscreen
             // document, so wait (bounded) for the list to be populated before
             // answering. Without this a dApp listing accounts during a slow
@@ -326,7 +327,7 @@ export function useAeSdk() {
               params,
               host,
               nodeNetworkId.value,
-              getAeppTabId(aeppId),
+              getAeppSourceTab(aeppId),
             );
             // The RPC response must follow the SDK's network-change notification.
             await watchUntilTruthy(() => !isAeSdkUpdating.value);
@@ -474,7 +475,7 @@ export function useAeSdk() {
     ensureNodeNetworkId,
     disconnectDapps,
     isAeppGivenAccounts,
-    getAeppTabId,
+    getAeppSourceTab,
     waitTransactionMined,
   };
 }

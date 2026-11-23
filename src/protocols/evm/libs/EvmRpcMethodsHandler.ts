@@ -15,6 +15,7 @@ import { isEmpty } from 'lodash-es';
 
 import type {
   AppOriginSource,
+  IApprovalSourceTab,
   IEvmTypedData,
   IModalProps,
   ISignModalResolution,
@@ -124,7 +125,7 @@ async function checkOrAskEvmPermission(
   protocol: Protocol,
   originSource?: AppOriginSource,
   sessionTopic?: string,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ) {
   const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
@@ -147,17 +148,18 @@ async function checkOrAskEvmPermission(
           CONNECT_PERMISSIONS.networks,
           CONNECT_PERMISSIONS.transactions,
         ],
-        tabId,
+        ...sourceTab,
       },
     );
-    if (permission && sessionTopic) {
+    if (!permission) return false;
+    if (sessionTopic) {
       approveWalletConnectSession(sessionTopic);
-    } else if (permission && aepp && originSource !== 'self-reported') {
+    } else if (aepp && originSource !== 'self-reported') {
       // The popup answers before the permission it stores reaches this context
       await watchUntilTruthy(() => getPermissionForUrl(aepp), 3000);
     }
     await watchUntilTruthy(() => !isEmpty(activeAccount.value));
-    return permission;
+    return true;
   } finally {
     isCheckingPermissions.value = false;
   }
@@ -184,7 +186,7 @@ async function confirmProtocolSwitch(
   protocol: Protocol,
   networkName: string,
   originSource?: AppOriginSource,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ) {
   const { askPermission } = usePermissions();
   const {
@@ -226,7 +228,7 @@ async function confirmProtocolSwitch(
           CONNECT_PERMISSIONS.transactions,
         ],
         isChainSwitch: true,
-        tabId,
+        ...sourceTab,
       },
     );
     if (!isConfirmed) {
@@ -385,8 +387,7 @@ export async function handleEvmRpcMethod(
   originSource?: AppOriginSource,
   /** Of the WalletConnect session the request came in */
   sessionTopic?: string,
-  /** Of the browser tab the request came from */
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ): Promise<EvmRpcResponse> {
   const {
     checkPermission,
@@ -411,7 +412,7 @@ export async function handleEvmRpcMethod(
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, sourceTab))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
@@ -431,7 +432,7 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId)) {
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, sourceTab)) {
       return { result: [getLastActiveProtocolAccount(protocol)!.address] };
     }
     return ERROR_USER_REJECTED_REQUEST;
@@ -494,7 +495,7 @@ export async function handleEvmRpcMethod(
         target.protocol,
         target.network.name,
         originSource,
-        tabId,
+        sourceTab,
       )) {
         return ERROR_USER_REJECTED_REQUEST;
       }
@@ -583,7 +584,7 @@ export async function handleEvmRpcMethod(
         ...feeFields,
       } : undefined,
       fromAccount: senderId,
-      tabId,
+      ...sourceTab,
     };
 
     const permitted = await checkOrAskPermission(
@@ -641,7 +642,7 @@ export async function handleEvmRpcMethod(
         app: aepp ? createAppData(aepp, originSource) : undefined,
         message: isHexMessage ? getMessageText(messageHex) : data,
         fromAccount: requestedAccount?.address,
-        tabId,
+        ...sourceTab,
       },
       (resolution: ISignModalResolution) => { selectedAddress = resolution?.selectedAddress; },
     );
@@ -691,7 +692,7 @@ export async function handleEvmRpcMethod(
         message: JSON.stringify(signedTypedData, null, 2),
         evmTypedData: { types: typedData.types, ...signedTypedData } as IEvmTypedData,
         fromAccount: evmAccount.address,
-        tabId,
+        ...sourceTab,
       },
     );
     if (permitted && evmAccount.secretKey) {
@@ -732,7 +733,7 @@ export async function handleEvmRpcRequest(
   caipChainId?: string,
   originSource?: AppOriginSource,
   sessionTopic?: string,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ): Promise<EvmRpcResponse> {
   const positionalParams = Array.isArray(params) ? params : [];
   // A dapp waits for an answer, also when e.g. its address is malformed
@@ -754,7 +755,7 @@ export async function handleEvmRpcRequest(
       caipChainId,
       originSource,
       sessionTopic,
-      tabId,
+      sourceTab,
     );
   } catch (error: any) {
     return getUnknownError(error.message);

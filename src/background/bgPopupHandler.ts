@@ -1,4 +1,6 @@
 import { v4 as uuid } from 'uuid';
+import type { Tabs, Windows } from 'webextension-polyfill';
+import { getHttpOrigin } from '@/lib/approvalSourceTab';
 import { mutateSessionKey } from '@/lib/ExtensionSessionStorage';
 import type {
   Dictionary,
@@ -7,8 +9,10 @@ import type {
   PopupType,
 } from '@/types';
 
-interface IPopupConfigNoActions {
+export interface IPopupConfigNoActions {
   id: string;
+  detachedWindowId?: number;
+  detachedTabId?: number;
   props: Omit<IPopupProps, 'resolve' | 'reject'>;
   /** Set when the side panel of this window shows the popup instead. */
   sidePanelWindowId?: number;
@@ -29,8 +33,11 @@ const SESSION_STORAGE_KEYS = {
 };
 
 const POPUP_TYPE_CONNECT = 'connectConfirm';
+const POPUP_HEIGHT = 630;
 
 const popups: Dictionary<IPopupConfigNoActions> = {};
+let creatingDetachedWindows = 0;
+let detachedWindowsCreated = 0;
 
 const storageSession = (browser.storage as any)?.session;
 
@@ -40,20 +47,23 @@ const storageSession = (browser.storage as any)?.session;
  * dapp, which runs elsewhere. Without the tab of the request, the site of the tab is
  * compared, unless its URL can't be read: a window shows it.
  */
-async function isAppInActiveTab(
-  windowId: number,
+function isAppInActiveTab(
+  activeTab: Tabs.Tab | undefined,
   app: IAppData,
   popupProps: Partial<IPopupProps>,
 ) {
-  if (!app.href || popupProps.app?.originSource === 'self-reported') {
+  if (popupProps.app?.originSource === 'self-reported' || (!app.href && !popupProps.topLevelOrigin)) {
     return true;
   }
-  const [activeTab] = await browser.tabs.query({ active: true, windowId });
-  // A page in a frame asks with the site of the frame
   if (popupProps.tabId !== undefined) {
-    return activeTab?.id === popupProps.tabId;
+    if (activeTab?.id !== popupProps.tabId) return false;
+    const { topLevelOrigin } = popupProps;
+    return !topLevelOrigin || (
+      getHttpOrigin(activeTab.url) === topLevelOrigin
+      && (!activeTab.pendingUrl || getHttpOrigin(activeTab.pendingUrl) === topLevelOrigin)
+    );
   }
-  if (!activeTab?.url) {
+  if (!activeTab?.url || !app.href) {
     return false;
   }
   try {
@@ -63,14 +73,51 @@ async function isAppInActiveTab(
   }
 }
 
+function getPopupPosition(parent: Windows.Window | undefined, popupWidth: number) {
+  if (!parent?.focused || parent.type !== 'normal'
+    || (parent.state !== 'normal' && parent.state !== 'maximized')) return undefined;
+
+  const {
+    left = NaN, top = NaN, width = 0, height = 0,
+  } = parent;
+  const popupLeft = left + (width - popupWidth);
+  if (![left, top, width, height, popupLeft].every(Number.isSafeInteger)
+    || width < popupWidth || height < POPUP_HEIGHT) return undefined;
+
+  return { left: popupLeft, top };
+}
+
+function getPopupQuery(popupUrlPrefix: string, url?: string) {
+  return url?.startsWith(popupUrlPrefix) ? new URL(url).searchParams : undefined;
+}
+
+async function createDetachedWindow(
+  url: string,
+  width: number,
+  position: ReturnType<typeof getPopupPosition>,
+) {
+  const options: Windows.CreateCreateDataType = {
+    url, type: 'popup', width, height: POPUP_HEIGHT,
+  };
+  if (!position) return browser.windows.create(options);
+  try {
+    return await browser.windows.create({ ...options, ...position });
+  } catch (error) {
+    // Chromium rejects out-of-display bounds before opening the window.
+    if (error instanceof Error && error.message.startsWith('Invalid value for bounds.')) {
+      return browser.windows.create(options);
+    }
+    throw error;
+  }
+}
+
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | Record<string, any> | undefined, // TODO establish correct type for the object
   popupProps: Partial<IPopupProps> = {},
   sidePanelWindowIds: number[] = [],
+  id = uuid(),
 ) => {
-  const id = uuid();
-
   let app: IAppData;
 
   if (typeof aepp === 'object') {
@@ -81,52 +128,73 @@ export const openPopup = async (
     app = new URL(aepp);
   }
 
-  const tabs = await browser.tabs.query({ active: true });
-
-  tabs.forEach(({ url: tabURL, id: tabId }) => {
-    const tabUrl = new URL(tabURL as string);
-    if (
-      tabUrl.searchParams.get('type') === POPUP_TYPE_CONNECT
-      && decodeURIComponent(tabUrl.searchParams.get('url') || '') === app.href
-    ) {
+  const createdBeforeQuery = detachedWindowsCreated;
+  const [tabs, platform] = await Promise.all([
+    browser.tabs.query({ active: true }).catch(() => undefined),
+    IS_EXTENSION ? browser.runtime.getPlatformInfo().catch(() => null) : undefined,
+  ]);
+  const popupUrlPrefix = `${browser.runtime.getURL('index.html')}?`;
+  let hasOpenPopupTab = tabs === undefined;
+  tabs?.forEach(({ url, pendingUrl, id: tabId }) => {
+    const currentQuery = getPopupQuery(popupUrlPrefix, url);
+    // Open windows outlive a restart of the background worker.
+    const queries = [currentQuery, getPopupQuery(popupUrlPrefix, pendingUrl)];
+    if (queries.some((query) => query?.has('id') && query.has('type'))) {
+      hasOpenPopupTab = true;
+    }
+    if (currentQuery?.get('type') === POPUP_TYPE_CONNECT && currentQuery.get('url') === app.href) {
       browser.tabs.remove(tabId as number);
     }
   });
 
-  const focusedWindow = sidePanelWindowIds.length
-    ? await browser.windows.getLastFocused()
+  const { topLevelOrigin, ...approvalProps } = popupProps;
+  const needsSourceTab = (!!app.href || !!topLevelOrigin)
+    && popupProps.app?.originSource !== 'self-reported';
+  // Firefox can place a popup off-screen on mixed-DPI Windows displays (bug 2089311).
+  const isFirefoxOnWindows = platform?.os === 'win' && popupUrlPrefix.startsWith('moz-extension:');
+  const canCheckPlacement = needsSourceTab && popupProps.tabId !== undefined && !!topLevelOrigin
+    && !isFirefoxOnWindows && !hasOpenPopupTab && platform !== null;
+  const focusedWindow = (sidePanelWindowIds.length || canCheckPlacement)
+    ? await browser.windows.getLastFocused({ populate: needsSourceTab }).catch(() => undefined)
     : undefined;
-  // `focused` stays true for a minimized window.
-  // A request of a tab in the background gets a window, as the side panel shows another site.
+  const activeTab = focusedWindow?.tabs?.find((tab) => tab.active);
+  const matchesActiveTab = isAppInActiveTab(activeTab, app, popupProps);
+  // A minimized window can still report itself as focused.
   const sidePanelWindowId = (
     focusedWindow?.focused
     && focusedWindow.state !== 'minimized'
     && sidePanelWindowIds.includes(focusedWindow.id!)
-    && await isAppInActiveTab(focusedWindow.id!, app, popupProps)
+    && matchesActiveTab
   ) ? focusedWindow.id : undefined;
 
+  let detachedWindowId: number | undefined;
+  let detachedTabId: number | undefined;
   if (sidePanelWindowId === undefined) {
-    const extUrl = browser.runtime.getURL('./index.html');
-    const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
-    const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
-
-    const popupWindow = await browser.windows.create({
-      url: popupUrl,
-      type: 'popup',
-      height: 630,
-      width: await isMacOsExtension ? 360 : 375,
-    });
-
-    if (!popupWindow) {
-      return null;
+    const popupUrl = `${popupUrlPrefix}id=${id}&type=${popupType}&url=${encodeURIComponent(app.href!)}`;
+    const width = platform?.os === 'mac' ? 360 : 375;
+    // Another approval may have started after the active tabs were read.
+    const canPosition = canCheckPlacement && matchesActiveTab
+      && !creatingDetachedWindows && detachedWindowsCreated === createdBeforeQuery;
+    const position = canPosition ? getPopupPosition(focusedWindow, width) : undefined;
+    creatingDetachedWindows += 1;
+    try {
+      const popupWindow = await createDetachedWindow(popupUrl, width, position);
+      if (popupWindow?.id === undefined) return null;
+      detachedWindowId = popupWindow.id;
+      detachedTabId = popupWindow.tabs?.[0]?.id;
+      detachedWindowsCreated += 1;
+    } finally {
+      creatingDetachedWindows -= 1;
     }
   }
 
   popups[id] = {
     id,
+    detachedWindowId,
+    detachedTabId,
     sidePanelWindowId,
     props: {
-      ...popupProps,
+      ...approvalProps,
       app: {
         href: app.href,
         name: app.name || app.host,

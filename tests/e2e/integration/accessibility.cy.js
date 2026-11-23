@@ -1,4 +1,4 @@
-import { PROTOCOLS } from '@/constants';
+import { POPUP_TYPE_CONNECT, PROTOCOLS } from '@/constants';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 
 const {
@@ -77,6 +77,23 @@ describe('Accessible names of buttons and links', () => {
  * which a native button needs to activate, so native buttons get Space here.
  */
 describe('Keyboard operation', () => {
+  it('can decline an aepp connection from the keyboard when no account can approve it', () => {
+    cy.login({
+      accountsRaw: [{
+        idx: 0, protocol: PROTOCOLS.ethereum, isRestored: true, type: 'hd-wallet',
+      }],
+    });
+    cy.openAex2Popup(POPUP_TYPE_CONNECT);
+    cy.get('[data-cy=accept]').should('have.attr', 'aria-disabled', 'true');
+    cy.get('[data-cy=accept]').focus();
+    cy.press(SPACE);
+    cy.window().should((win) => expect(win.resolve).not.to.equal('send'));
+
+    cy.get('[data-cy=deny]').focus();
+    cy.press(SPACE);
+    cy.window().should((win) => expect(win.reject).to.equal('send'));
+  });
+
   function typeContactName() {
     cy.login({ addressBook: [CONTACT] });
     cy.openSendModal();

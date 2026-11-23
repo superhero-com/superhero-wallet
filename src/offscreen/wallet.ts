@@ -6,7 +6,6 @@ import type { IBackgroundMessageData } from '@/types';
 import {
   CONNECTION_TYPES,
   IS_FIREFOX,
-  POPUP_ACTIONS,
   SESSION_METHODS,
 } from '@/constants';
 import {
@@ -17,8 +16,10 @@ import {
 } from '@/composables';
 import { setSessionTimeout } from '@/background/bgPopupHandler';
 import browser from 'webextension-polyfill';
-import { removePopup, getPopup, addSidePanel } from './popupHandler';
+import { addPopupPort, addSidePanel } from './popupHandler';
 import { detectConnectionType } from './utils';
+
+export { handlePopupWindowRemoved } from './popupHandler';
 
 window.browser = browser;
 
@@ -152,24 +153,7 @@ export async function init() {
 
     switch (detectConnectionType(port as Runtime.Port)) {
       case CONNECTION_TYPES.POPUP: {
-        const id = new URL(port?.sender?.url!).searchParams.get('id');
-        port.onMessage.addListener(async (msg: IBackgroundMessageData) => {
-          const popup = getPopup(id!);
-
-          if (msg.type === POPUP_ACTIONS.getProps) {
-            port.postMessage({ uuid: msg.uuid, res: popup?.props });
-            return;
-          }
-          if (msg.type && popup?.actions?.[msg.type]) {
-            popup.actions[msg.type](msg.payload);
-          }
-        });
-
-        port.onDisconnect.addListener(() => {
-          // Settles the request of a popup closed without an answer
-          getPopup(id!)?.actions.reject();
-          removePopup(id!);
-        });
+        addPopupPort(port);
         break;
       }
       case CONNECTION_TYPES.SIDE_PANEL: {

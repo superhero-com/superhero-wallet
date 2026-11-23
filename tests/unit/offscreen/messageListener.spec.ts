@@ -2,7 +2,9 @@
 import { ref } from 'vue';
 
 const WALLET_PAGE = { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/index.html?id=1' };
-const WEB_PAGE = { id: 'test-extension-id', url: 'https://aepp.example/', tab: { id: 1 } };
+const WEB_PAGE = {
+  id: 'test-extension-id', url: 'https://aepp.example/', frameId: 0, tab: { id: 1 },
+};
 
 describe('offscreen message listener', () => {
   const originalLocation = window.location;
@@ -14,7 +16,7 @@ describe('offscreen message listener', () => {
   };
   const handleEvmRpcRequest = vi.fn();
   const getConnectedSiteAccounts = vi.fn();
-  const wallet = { init: vi.fn(), disconnect: vi.fn() };
+  const wallet = { init: vi.fn(), disconnect: vi.fn(), handlePopupWindowRemoved: vi.fn() };
 
   function mockOffscreenDependencies(isFirefox = false) {
     Object.values(ledger).forEach((mock) => mock.mockReset());
@@ -22,6 +24,7 @@ describe('offscreen message listener', () => {
     handleEvmRpcRequest.mockReset().mockResolvedValue({ result: '0x1' });
     getConnectedSiteAccounts.mockReset().mockReturnValue(['0xabc']);
     wallet.disconnect.mockReset();
+    wallet.handlePopupWindowRemoved.mockReset();
 
     vi.doMock('vue', () => ({
       watch: vi.fn(),
@@ -32,6 +35,7 @@ describe('offscreen message listener', () => {
       IS_FIREFOX: isFirefox,
       SESSION_METHODS: { mutateSessionKey: 'mutateSessionKey' },
       POPUP_METHODS: {
+        popupWindowRemoved: 'popupWindowRemoved',
         reload: 'reload',
         ledgerDeriveAccount: 'ledgerDeriveAccount',
         ledgerDiscoverAccounts: 'ledgerDiscoverAccounts',
@@ -96,6 +100,7 @@ describe('offscreen message listener', () => {
         sendMessage: vi.fn(),
       },
     };
+    browser.windows = { onRemoved: { addListener: vi.fn() } };
     Object.defineProperty(window, 'location', {
       configurable: true,
       value: { ...originalLocation, reload: vi.fn() },
@@ -142,6 +147,17 @@ describe('offscreen message listener', () => {
     )).resolves.toEqual(['ledger-account']);
   });
 
+  it('accepts a popup window removal only from the Chrome worker', async () => {
+    const listener = await loadListener();
+    const message = { target: 'offscreen', method: 'popupWindowRemoved', payload: 2 };
+    const worker = { id: 'test-extension-id', url: browser.runtime.getURL('js/background.js') };
+    [WEB_PAGE, WALLET_PAGE, { ...worker, tab: WEB_PAGE.tab }, { ...worker, id: 'other' }]
+      .forEach((sender) => listener(message, sender));
+    expect(wallet.handlePopupWindowRemoved).not.toHaveBeenCalled();
+    listener(message, worker);
+    expect(wallet.handlePopupWindowRemoved).toHaveBeenCalledExactlyOnceWith(2);
+  });
+
   it('reloads when the wallet resets', async () => {
     const listener = await loadListener();
 
@@ -169,6 +185,13 @@ describe('offscreen message listener', () => {
       };
       return { listener: await loadListener(), stored };
     }
+
+    it('handles native window closures in the Firefox background page', async () => {
+      await loadFirefoxListener();
+      const [[onRemoved]] = browser.windows.onRemoved.addListener.mock.calls;
+      onRemoved(2);
+      expect(wallet.handlePopupWindowRemoved).toHaveBeenCalledExactlyOnceWith(2);
+    });
 
     it('accepts a wallet page mutation and returns the persisted result', async () => {
       const { listener, stored } = await loadFirefoxListener();
@@ -228,7 +251,7 @@ describe('offscreen message listener', () => {
         undefined,
         undefined,
         undefined,
-        WEB_PAGE.tab.id,
+        { tabId: WEB_PAGE.tab.id, topLevelOrigin: 'https://aepp.example' },
       );
     });
 
@@ -243,10 +266,14 @@ describe('offscreen message listener', () => {
       expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
 
-    it('takes the origin and the tab from the sender, not from the message', async () => {
+    it.each([
+      ['https://embedding.example/checkout', 'https://embedding.example'],
+      ['about:blank', undefined],
+      [undefined, undefined],
+    ])('uses the frame identity and the embedding tab at %s', async (url, topLevelOrigin) => {
       const listener = await loadListener();
-
-      await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), WEB_PAGE);
+      const sender = { ...WEB_PAGE, frameId: 1, tab: { id: 1, url } };
+      await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), sender);
 
       expect(handleEvmRpcRequest).toHaveBeenCalledWith(
         'https://aepp.example',
@@ -256,7 +283,7 @@ describe('offscreen message listener', () => {
         undefined,
         undefined,
         undefined,
-        WEB_PAGE.tab.id,
+        { tabId: WEB_PAGE.tab.id, topLevelOrigin },
       );
     });
   });

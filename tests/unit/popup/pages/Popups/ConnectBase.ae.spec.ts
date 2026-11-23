@@ -57,7 +57,6 @@ function mountBaseWith(popupProps: any = {}, props: any = {}) {
         NetworkButton: true,
         AccountSkeleton: true,
         InfoBox: true,
-        BtnMain: { props: ['text', 'disabled'], template: '<button :disabled="disabled">{{ text }}</button>' },
         Avatar: { template: '<div><slot /></div>' },
         Card: { template: '<div><slot name="icon" /><slot /></div>' },
         DappIcon: true,
@@ -71,18 +70,31 @@ function mountBaseWith(popupProps: any = {}, props: any = {}) {
 }
 
 describe('ConnectBase.vue AE selection', () => {
-  it('shows AE account when AE popup and accounts present', async () => {
-    const wrapper = mountBaseWith({ protocol: PROTOCOLS.aeternity }, {});
-    // Ensures supported state is true by checking confirm button is not disabled
-    const confirm = wrapper.find('[data-cy="accept"]');
-    expect(confirm.exists()).toBe(true);
+  it('allows the connection when the requested account is available', () => {
+    const resolve = vi.fn();
+    const wrapper = mountBaseWith({ protocol: PROTOCOLS.aeternity, resolve });
+    const confirm = wrapper.get<HTMLButtonElement>('[data-cy="accept"]');
+    expect(confirm.attributes('aria-disabled')).toBeUndefined();
+    confirm.element.click();
+    expect(resolve).toHaveBeenCalledOnce();
   });
 
-  it('renders no account template when no options', async () => {
-    // Provide a popup with unsupported protocol and no accounts returned
-    const wrapper = mountBaseWith({ protocol: 'unknown' }, {});
-    const danger = wrapper.find('.danger');
-    expect(danger.exists()).toBe(true);
+  it('keeps the connection unapproved when the wallet has no matching account', () => {
+    const { permissions, resetPermissions } = usePermissions();
+    resetPermissions();
+    const resolve = vi.fn();
+    const reject = vi.fn();
+    const wrapper = mountBaseWith({
+      protocol: PROTOCOLS.ethereum, app: createAppData('https://dapp.test/'), resolve, reject,
+    });
+    expect(wrapper.find('.danger').exists()).toBe(true);
+    const confirm = wrapper.get<HTMLButtonElement>('[data-cy="accept"]');
+    expect(confirm.attributes('aria-disabled')).toBe('true');
+    confirm.element.click();
+    expect(permissions.value).toEqual({});
+    expect(resolve).not.toHaveBeenCalled();
+    wrapper.get<HTMLButtonElement>('[data-cy="deny"]').element.click();
+    expect(reject).toHaveBeenCalledOnce();
   });
 });
 

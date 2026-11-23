@@ -45,6 +45,7 @@ describe('background message senders', () => {
         id: EXTENSION_ID,
         getURL: (path) => `${extensionUrl}${path}`,
         getContexts: vi.fn().mockResolvedValue([{}]),
+        sendMessage: vi.fn().mockResolvedValue(undefined),
         getPlatformInfo: vi.fn().mockResolvedValue({ os: 'linux' }),
         onMessage: { addListener: vi.fn() },
         onInstalled: { addListener: vi.fn() },
@@ -61,6 +62,7 @@ describe('background message senders', () => {
         sendMessage: vi.fn(),
       },
       windows: {
+        onRemoved: { addListener: vi.fn() },
         getLastFocused: vi.fn().mockResolvedValue({ id: 2, focused: true, state: 'normal' }),
         create: vi.fn().mockResolvedValue({ id: 9 }),
       },
@@ -85,6 +87,16 @@ describe('background message senders', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('relays only popup-window closures after a worker restart', async () => {
+    await loadListener();
+    const [[onRemoved, filter]] = browser.windows.onRemoved.addListener.mock.calls;
+    expect(filter.windowTypes).toEqual(['popup']);
+    onRemoved(7);
+    expect(browser.runtime.sendMessage).toHaveBeenCalledExactlyOnceWith({
+      target: 'offscreen', method: 'popupWindowRemoved', payload: 7,
+    });
   });
 
   describe('session encryption key', () => {

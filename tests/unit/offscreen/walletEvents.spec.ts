@@ -31,6 +31,7 @@ describe('offscreen wallet events', () => {
         sendMessage: vi.fn(),
       },
       tabs: { query: vi.fn(), sendMessage: vi.fn() },
+      windows: { onRemoved: { addListener: vi.fn() } },
     };
     vi.doMock('@/lib/initPolyfills', () => ({}));
     vi.doMock('@/protocols/registerAdapters', () => ({}));
@@ -61,7 +62,9 @@ describe('offscreen wallet events', () => {
       registerInPageContentScript: vi.fn(),
       updateDynamicRules: vi.fn(),
     }));
-    vi.doMock('@/offscreen/wallet', () => ({ init: vi.fn(), disconnect: vi.fn() }));
+    vi.doMock('@/offscreen/wallet', () => ({
+      init: vi.fn(), disconnect: vi.fn(), handlePopupWindowRemoved: vi.fn(),
+    }));
     await import('@/offscreen/offscreen');
   });
 

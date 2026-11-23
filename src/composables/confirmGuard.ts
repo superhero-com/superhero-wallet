@@ -1,16 +1,11 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { IS_SIDE_PANEL } from '@/constants';
+import { IS_EXTENSION, IS_SIDE_PANEL, RUNNING_IN_POPUP } from '@/constants';
 
 /** Longer than a double click. */
 export const CONFIRM_GUARD_DELAY = 500;
 
-/**
- * The side panel shows a dapp's request next to the website, the moment it arrives,
- * so a dapp can time it to appear under the cursor. Keeps the confirmation blocked
- * for a moment, so that a click meant for the website can't confirm it.
- * Popup windows open elsewhere and are not blocked.
- */
-export function useConfirmGuard(isEnabled = IS_SIDE_PANEL) {
+/** A new approval can appear under a click meant for the dapp. */
+export function useConfirmGuard(isEnabled = IS_SIDE_PANEL || (IS_EXTENSION && RUNNING_IN_POPUP)) {
   const isConfirmBlocked = ref(isEnabled);
   let timeout: ReturnType<typeof setTimeout> | undefined;
 

@@ -1,5 +1,12 @@
 /* eslint-disable max-classes-per-file */
 
+export class ApprovalWindowError extends Error {
+  constructor() {
+    super('Could not open the approval window');
+    this.name = this.constructor.name;
+  }
+}
+
 export class RejectedByUserError extends Error {
   constructor() {
     super('Rejected by user');

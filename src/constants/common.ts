@@ -445,6 +445,7 @@ export const POPUP_ACTIONS = {
 
 export const POPUP_METHODS = {
   openPopup: 'openPopup',
+  popupWindowRemoved: 'popupWindowRemoved',
   removePopup: 'removePopup',
   getPopup: 'getPopup',
   reload: 'reload',
