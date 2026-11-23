@@ -210,6 +210,8 @@ describe('eth_sendTransaction of a dapp', () => {
 
     const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...TX }], 'Dapp', 'eip155:43113');
 
+    // Refused after the confirmation, not by the check before it
+    expect(openModal).toHaveBeenCalledOnce();
     expect(response.error).toMatchObject({ code: -32602 });
     expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
   });
@@ -465,10 +467,12 @@ describe('eth_sendTransaction of a dapp', () => {
   it('hands the confirmation no call where the value is no quantity', async () => {
     const { from } = getChain(PROTOCOLS.bnb);
 
-    await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, value: '-1' }], 'Dapp', 'eip155:56');
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, value: '-1' }], 'Dapp', 'eip155:56');
 
     expect(openModal).toHaveBeenCalledTimes(1);
     expect(openModal.mock.calls[0][1].evmCall).toBeUndefined();
+    expect(response.error).toBeDefined();
+    expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
   });
 
   it('sends nothing when the user rejects', async () => {

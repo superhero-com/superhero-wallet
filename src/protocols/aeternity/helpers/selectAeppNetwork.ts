@@ -31,7 +31,7 @@ export interface IAeppNetworkSelection {
   revert?: () => void;
 }
 
-const NODE_STATUS_TIMEOUT = 5000;
+export const NODE_STATUS_TIMEOUT = 5000;
 
 /** E.g. `ae_mainnet`, `ae_uat` and the ids of hyperchains */
 const NETWORK_ID_REGEX = /^[\w.-]{1,64}$/;
