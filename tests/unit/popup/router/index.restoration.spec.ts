@@ -4,9 +4,11 @@
  */
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
-const { storage, setLoginTargetLocation } = vi.hoisted(() => ({
+const { storage, setLoginTargetLocation, auth } = vi.hoisted(() => ({
   storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
   setLoginTargetLocation: vi.fn(),
+  /** Resolves `checkUserAuth`, none to resolve it at once */
+  auth: { gate: undefined as Promise<void> | undefined, checks: [] as string[] },
 }));
 
 vi.mock('@/constants', async (importOriginal) => ({
@@ -35,6 +37,19 @@ vi.mock('@/popup/router/routes', () => {
       { path: '/account', name: 'account', component: Page },
       { path: '/more', name: 'more', component: Page },
       { path: '/more/about', name: 'about', component: Page },
+      { path: '/account-details', name: 'account-details', component: Page },
+      {
+        path: '/account-details/assets',
+        name: 'account-details-assets',
+        component: Page,
+        meta: { redirectIfNull: 'account-details' },
+      },
+      {
+        path: '/coins/bitcoin/details',
+        name: 'coin-details',
+        component: Page,
+        meta: { backRoute: { name: 'account-details-assets' } },
+      },
       {
         path: '/page-not-found',
         name: 'not-found',
@@ -53,14 +68,22 @@ vi.mock('@/composables', async () => {
   };
   return {
     useAccounts: () => accounts,
-    useAuth: () => ({ checkUserAuth: async () => {}, isAuthenticated: ref(true) }),
+    useAuth: () => ({
+      checkUserAuth: async () => {
+        auth.checks.push('checked');
+        await auth.gate;
+      },
+      isAuthenticated: ref(true),
+    }),
     usePopupProps: () => ({ setPopupProps: vi.fn() }),
     useUi: () => ({ setLoginTargetLocation }),
   };
 });
 vi.mock('@/lib/WalletStorage', () => ({ WalletStorage: storage }));
 vi.mock('@/lib/ProtocolAdapterFactory', () => ({
-  ProtocolAdapterFactory: { getAdapter: () => ({ hasTokensSupport: true }) },
+  ProtocolAdapterFactory: {
+    getAdapter: (protocol: string) => ({ hasTokensSupport: protocol === 'aeternity' }),
+  },
 }));
 vi.mock('@/popup/plugins/i18n', () => ({ tg: (key: string) => key }));
 vi.mock('@/utils/getPopupProps', () => ({ getPopupProps: vi.fn() }));
@@ -78,24 +101,33 @@ function mountPage(route: RouteLocationNormalized) {
 }
 
 /** A restart of the app with a page saved a moment ago */
-async function openApp({ isLoggedIn }: { isLoggedIn: boolean }) {
+async function openApp({ isLoggedIn, areAccountsReady = true }: {
+  isLoggedIn: boolean;
+  areAccountsReady?: boolean;
+}) {
   vi.resetModules();
   const { default: router }: { default: Router } = await import('@/popup/router');
   const { useAccounts } = await import('@/composables');
   const accounts = useAccounts();
   accounts.isLoggedIn.value = isLoggedIn;
+  accounts.areAccountsReady.value = areAccountsReady;
   const visited: string[] = [];
   router.afterEach((to, _from, failure) => {
     if (failure) return;
     visited.push(to.fullPath);
     mountPage(to);
   });
-  await router.push('/');
-  return { router, visited, accounts };
+  const opening = router.push('/');
+  if (areAccountsReady && !auth.gate) await opening;
+  return {
+    router, visited, accounts, opening,
+  };
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
+  auth.gate = undefined;
+  auth.checks = [];
   storage.get.mockReturnValue({ path: SAVED_PATH, time: new Date().toISOString() });
   // The router's scroll behavior; jsdom has none
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
@@ -125,5 +157,40 @@ describe('the popup router restoring the last page on iOS', () => {
     await router.push(setLoginTargetLocation.mock.lastCall![0]);
     await vi.waitFor(() => expect(visited).toEqual(['/', '/more', SAVED_PATH]));
     expect(router.currentRoute.value.fullPath).toBe(SAVED_PATH);
+  });
+
+  it('picks the parent of a coin page by the account the wallet has once it is ready', async () => {
+    const coinPath = '/coins/bitcoin/details';
+    storage.get.mockReturnValue({ path: coinPath, time: new Date().toISOString() });
+    const { router, visited, accounts } = await openApp({
+      isLoggedIn: true,
+      areAccountsReady: false,
+    });
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    expect(visited).toEqual([]);
+
+    // The account had another protocol before, which has tokens
+    accounts.activeAccount.value = { protocol: 'bitcoin' };
+    accounts.areAccountsReady.value = true;
+
+    await vi.waitFor(() => expect(visited).toEqual(['/account-details', coinPath]));
+    expect(router.currentRoute.value.fullPath).toBe(coinPath);
+  });
+
+  it('opens the page the user went to while the wallet checked the login, not the saved one', async () => {
+    let unlock: () => void;
+    auth.gate = new Promise((resolve) => { unlock = resolve; });
+    const { router, visited, opening } = await openApp({ isLoggedIn: true });
+    // On the way to the saved page
+    await vi.waitFor(() => expect(auth.checks).toHaveLength(1));
+
+    const going = router.push('/account');
+    await vi.waitFor(() => expect(auth.checks).toHaveLength(2));
+    unlock!();
+    await Promise.allSettled([opening, going]);
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+    expect(router.currentRoute.value.fullPath).toBe('/account');
+    expect(visited).toEqual(['/account']);
   });
 });
