@@ -56,7 +56,8 @@ export class AlchemyService {
       'alchemy_getTokenBalances',
       [toChecksumAddress(address), 'erc20'],
     );
-    const balances = result?.tokenBalances || [];
+    const balances = (result?.tokenBalances || [])
+      .filter((b) => !b.error && b.contractAddress);
 
     const metadataList = await Promise.all(
       balances.map(async (b) => {
@@ -69,7 +70,6 @@ export class AlchemyService {
     );
 
     return balances
-      .filter((b) => !b.error && b.contractAddress)
       .map((b, idx) => {
         const md = metadataList[idx];
         const decimals = Number(md?.decimals ?? 0);
