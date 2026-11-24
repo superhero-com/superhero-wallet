@@ -1,7 +1,12 @@
 /* eslint-disable no-param-reassign */
 
-import { computed, ref, watch } from 'vue';
-import { uniqBy, isEmpty } from 'lodash-es';
+import {
+  computed,
+  ref,
+  toRaw,
+  watch,
+} from 'vue';
+import { uniqBy, isEmpty, isEqual } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Contract, Encoding, Tag } from '@aeternity/aepp-sdk';
 
@@ -379,7 +384,10 @@ export function useFungibleTokens() {
     )).flat();
 
     if (activeNetwork.value.name === networkAtStart) {
-      tokenBalances.value = newTokenBalances;
+      // An unchanged list would still be saved again and recompute `tokensAvailable`
+      if (!isEqual(toRaw(tokenBalances.value), newTokenBalances)) {
+        tokenBalances.value = newTokenBalances;
+      }
       tokenBalancesNetworkName.value = networkAtStart;
     }
   }
