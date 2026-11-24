@@ -29,6 +29,13 @@ type TokenMetadataResult = {
   logo?: string;
 };
 
+/** By endpoint, protocol and contract; only found tokens are kept */
+const tokenMetadataCache = new Map<string, Promise<IToken | undefined>>();
+
+export function clearAlchemyTokenMetadataCache() {
+  tokenMetadataCache.clear();
+}
+
 export class AlchemyService {
   apiUrl: string;
 
@@ -95,6 +102,25 @@ export class AlchemyService {
   }
 
   async getTokenMetadata(contractAddress: string): Promise<IToken | undefined> {
+    const key = `${this.apiUrl}|${this.protocol}|${contractAddress.toLowerCase()}`;
+    if (!tokenMetadataCache.has(key)) {
+      tokenMetadataCache.set(key, this.fetchTokenMetadata(contractAddress).then(
+        (token) => {
+          if (!token) tokenMetadataCache.delete(key);
+          return token;
+        },
+        (error) => {
+          tokenMetadataCache.delete(key);
+          throw error;
+        },
+      ));
+    }
+    const token = await tokenMetadataCache.get(key)!;
+    // Callers may change what they get
+    return token && { ...token };
+  }
+
+  private async fetchTokenMetadata(contractAddress: string): Promise<IToken | undefined> {
     const result = await this.rpcCall<TokenMetadataResult>(
       'alchemy_getTokenMetadata',
       [toChecksumAddress(contractAddress)],
