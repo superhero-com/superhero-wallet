@@ -195,12 +195,6 @@ export abstract class BaseProtocolAdapter {
    */
   abstract discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number>;
 
-  abstract constructAndSignTx(
-    amount: number | string,
-    recipient: string,
-    options: Record<string, any>,
-  ): Promise<any>;
-
   fetchAvailableTokens?(): Promise<IToken[] | null>;
 
   fetchAvailableTokensPage?(nextPageUrl?: string): Promise<IPageableResponse<IToken> | null>;

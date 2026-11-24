@@ -704,10 +704,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override constructAndSignTx(): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-
   override async spend(
     amount: number | string,
     recipient: string,

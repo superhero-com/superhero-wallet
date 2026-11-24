@@ -540,8 +540,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
   async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
-  ): Promise<any> {
+    options: { fromAccount: AccountAddress; nonce: number; maxFeePerGas: string },
+  ): Promise<{ raw: Uint8Array; hash: string }> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
 
@@ -566,7 +566,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     );
 
     const txData: TxData = {
-      nonce: toHex(nonce),
+      nonce: toHex(String(nonce)),
       gasPrice,
       gasLimit: toHex(String(BNB_GAS_LIMIT)),
       to: recipient,

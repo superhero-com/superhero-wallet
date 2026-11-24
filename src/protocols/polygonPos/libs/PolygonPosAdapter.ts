@@ -523,8 +523,8 @@ export class PolygonAdapter extends BaseProtocolAdapter {
   async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
-  ): Promise<any> {
+    options: { fromAccount: AccountAddress; nonce: number; maxFeePerGas: string },
+  ): Promise<{ raw: Uint8Array; hash: string }> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
 
@@ -549,7 +549,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     );
 
     const txData: TxData = {
-      nonce: toHex(nonce),
+      nonce: toHex(String(nonce)),
       gasPrice,
       gasLimit: toHex(String(POLYGON_POS_GAS_LIMIT)),
       to: recipient,
