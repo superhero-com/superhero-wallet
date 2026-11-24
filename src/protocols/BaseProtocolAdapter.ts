@@ -82,6 +82,15 @@ export abstract class BaseProtocolAdapter {
   abstract isAccountAddressValid(address: AccountAddress, networkType?: NetworkType): boolean;
 
   /**
+   * The form of a valid address that the wallet stores and compares, e.g. EIP-55 for EVM.
+   * Any other value is returned as it is.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return address;
+  }
+
+  /**
    * Validates if coins of the protocol can be sent to the address.
    */
   isRecipientAddressValid(address: AccountAddress, networkType?: NetworkType): boolean {

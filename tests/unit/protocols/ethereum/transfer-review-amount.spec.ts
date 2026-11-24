@@ -1,8 +1,8 @@
 /**
- * [BLACK-BOX] The EVM review screen signs exactly the amount the user confirmed, on
- * every chain it serves. The component, the adapters and the signing are real; only
- * the account store, the RPC client (nonce, gas price, token contract calls), the block
- * explorer and the broadcast are stubbed.
+ * [BLACK-BOX] The EVM review screen signs exactly the amount and recipient the user
+ * confirmed, on every chain it serves. The component, the adapters and the signing are
+ * real; only the account store, the RPC client (nonce, gas price, token contract calls),
+ * the block explorer and the broadcast are stubbed.
  */
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { Transaction, TransactionFactory, privateKeyToAddress } from 'web3-eth-accounts';
@@ -27,6 +27,7 @@ const {
   explorerRequests,
   tokenBalance,
   nonceCount,
+  addAccountPendingTransaction,
 } = vi.hoisted(() => {
   vi.resetModules();
   return {
@@ -39,6 +40,7 @@ const {
     // Of the account's mined transactions, and with the ones in the node's mempool.
     // Sends of earlier tests stay recorded, and only count while these two differ.
     nonceCount: { mined: 3n, pending: 3n },
+    addAccountPendingTransaction: vi.fn(),
   };
 });
 
@@ -78,7 +80,7 @@ vi.mock('@/composables/accounts', () => ({
 }));
 
 vi.mock('@/composables/latestTransactionList', () => ({
-  useLatestTransactionList: () => ({ addAccountPendingTransaction: vi.fn() }),
+  useLatestTransactionList: () => ({ addAccountPendingTransaction }),
 }));
 
 // RPC client: the nonce (in both ways the adapters ask for it) and the gas price.
@@ -168,14 +170,19 @@ function randomAmount(random: () => number, decimals: number) {
 }
 
 /** Confirms a transfer on the review screen and returns the transaction it signed. */
-async function signReviewed(protocol: string, contractId: string, amount: string) {
+async function signReviewed(
+  protocol: string,
+  contractId: string,
+  amount: string,
+  recipients = [RECIPIENT],
+) {
   broadcastSignedTransaction.mockClear();
   const wrapper = mount(TransferReview, {
     props: {
       protocol,
       transferData: {
         amount,
-        addresses: [RECIPIENT],
+        addresses: recipients,
         selectedAsset: {
           contractId,
           protocol,
@@ -452,5 +459,47 @@ describe('TransferReview - chains without EIP-1559', () => {
 
     // The form's 20 gwei rather than the node's 1 gwei.
     expect(signedTx.gasPrice).toBe(20000000000n);
+  });
+});
+
+describe.each([
+  PROTOCOLS.ethereum,
+  PROTOCOLS.bnb,
+  PROTOCOLS.avalanche,
+  PROTOCOLS.polygonPos,
+])('%s TransferReview - recipient in another format', (protocol) => {
+  // With letters, so that the case matters
+  const CHECKSUMMED = '0x5F00d657054991f0cb23Ce9EbAf073133a130762';
+  const lowercase = CHECKSUMMED.toLowerCase();
+
+  beforeEach(() => {
+    addAccountPendingTransaction.mockClear();
+  });
+
+  const pendingRecipient = () => addAccountPendingTransaction.mock.lastCall?.[1].tx.recipientId;
+
+  it.each([
+    lowercase,
+    `0x${CHECKSUMMED.slice(2).toUpperCase()}`,
+    lowercase.slice(2),
+    `0X${CHECKSUMMED.slice(2)}`,
+  ])('sends the coin to %s and keeps the recipient checksummed', async (typed) => {
+    const { coinContractId } = ProtocolAdapterFactory.getAdapter(protocol as any);
+    const signedTx = await signReviewed(protocol, coinContractId, '0.5', [typed]);
+
+    expect(signedTx.to?.toString()).toBe(lowercase);
+    expect(pendingRecipient()).toBe(CHECKSUMMED);
+  });
+
+  it.each([
+    lowercase,
+    lowercase.slice(2),
+  ])('sends the token to %s and keeps the recipient checksummed', async (typed) => {
+    const signedTx = await signReviewed(protocol, TOKEN_CONTRACT, '1.5', [typed]);
+
+    expect(decodeFunctionCall(TRANSFER_ABI, bytesToHex(signedTx.data))).toMatchObject({
+      to: CHECKSUMMED,
+    });
+    expect(pendingRecipient()).toBe(CHECKSUMMED);
   });
 });

@@ -19,6 +19,7 @@ import {
   getProtocolByAddress,
   isNotFoundError,
   isUrlValid,
+  normalizeAccountAddress,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
@@ -164,9 +165,10 @@ defineRule(
 defineRule(
   'address_book_entry_exists',
   (value: string, [entries, savedValue, type]: [IAddressBookEntry[], string, 'name' | 'address']) => {
-    const exists = Object.values(entries).some(
-      (entry) => entry[type] === value && value
-       !== savedValue,
+    // Also the same address in another case. The edited entry itself is left out.
+    const searched = (type === 'address') ? normalizeAccountAddress(value) : value;
+    const exists = value !== savedValue && Object.values(entries).some(
+      (entry) => entry[type] !== savedValue && (entry[type] === searched || entry[type] === value),
     );
 
     const entryTypeText = type === 'name' ? tg('common.name') : tg('common.address');
@@ -373,14 +375,16 @@ export default () => {
     (value: string[], [comparedAddress, protocol]: [string, Protocol]) => {
       if (typeof value === 'string' || !value) return false;
 
-      const invalidAddresses = value.filter((address) => address === comparedAddress);
+      const adapter = protocol ? ProtocolAdapterFactory.getAdapter(protocol) : undefined;
+      const normalize = (address: string) => adapter?.normalizeAddress(address) ?? address;
+      const ownAddress = normalize(comparedAddress);
+      // Listed as typed, as the field marks the recipients by it
+      const invalidAddresses = value.filter((address) => normalize(address) === ownAddress);
 
       if (invalidAddresses.length === 0) return true;
 
       return [tg('validation.addressNotSameAs', [
-        protocol
-          ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
-          : tg('common.tokens'),
+        adapter ? adapter.coinSymbol : tg('common.tokens'),
       ]), invalidAddresses.join(',')].join('||');
     },
   );

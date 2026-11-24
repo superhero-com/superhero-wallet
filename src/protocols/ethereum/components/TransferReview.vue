@@ -133,6 +133,8 @@ export default defineComponent({
         let currentNonce: number = nonce;
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
+          // E.g. adds a missing `0x`, without which a coin transfer can't be signed
+          const recipientAddress = adapter.normalizeAddress(recipient);
           if (!isSelectedAssetEthCoin.value) {
             // Or nothing would be sent, while it looks like a success
             if (!adapter.transferToken) {
@@ -141,7 +143,7 @@ export default defineComponent({
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.transferToken(
               amount,
-              recipient,
+              recipientAddress,
               selectedAsset.contractId,
               {
                 fromAccount: lastActiveEthAccount?.address,
@@ -161,7 +163,7 @@ export default defineComponent({
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.spend(
               amount,
-              recipient,
+              recipientAddress,
               {
                 fromAccount: lastActiveEthAccount?.address,
                 maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
@@ -184,7 +186,7 @@ export default defineComponent({
                 senderId: lastActiveEthAccount?.address,
                 type: (isSelectedAssetEthCoin.value) ? 'SpendTx' : 'ContractCallTx',
                 function: 'transfer',
-                recipientId: recipient,
+                recipientId: recipientAddress,
                 arguments: [],
                 fee: 0,
                 nonce: currentNonce,

@@ -231,13 +231,23 @@ export default defineComponent({
     const hasFocus = ref(false);
     const dropdownEl = ref<HTMLElement>();
     const selectedAddresses = ref<IAddressBookEntry[]>([]);
+
+    /** An address in another case or format, e.g. lowercase EVM, is the same recipient */
+    function normalizeRecipient(address: string) {
+      return props.protocol
+        ? ProtocolAdapterFactory.getAdapter(props.protocol).normalizeAddress(address)
+        : address;
+    }
+
+    const selectedAddressesNormalized = computed(
+      () => selectedAddresses.value.map((account) => normalizeRecipient(account.address)),
+    );
     const filteredOptions = computed(() => (
       addressBookFiltered.value.filter((entry: IAddressBookEntry) => (
         (entry.address.toLowerCase().includes(inputValue.value.toLowerCase())
             || entry.name.toLowerCase().includes(inputValue.value.toLowerCase()))
             && (
-              !selectedAddresses.value.map((account) => account.address)
-                .includes(entry.address)
+              !selectedAddressesNormalized.value.includes(entry.address)
               || !selectedAddresses.value.map((account) => account.name)
                 .includes(entry.name)
             )
@@ -378,16 +388,27 @@ export default defineComponent({
 
     onMounted(() => {
       watch(() => [props.modelValue, allAccounts.value] as const, (_, previous) => {
+        const normalizedAddresses = props.modelValue.map(normalizeRecipient);
         // Check and remove duplicates
-        if (new Set(props.modelValue).size !== props.modelValue.length) {
-          emit('update:modelValue', props.modelValue.filter(removeDuplicates));
+        if (new Set(normalizedAddresses).size !== normalizedAddresses.length) {
+          emit('update:modelValue', props.modelValue.filter(
+            (_address, index) => removeDuplicates(
+              normalizedAddresses[index],
+              index,
+              normalizedAddresses,
+            ),
+          ));
         } else if (props.modelValue.length > 0) {
           selectedAddresses.value = props.modelValue
             .filter(excludeFalsy)
             .map((address) => {
+              const normalizedAddress = normalizeRecipient(address);
+              // Found in another case: keeps the typed address, which the messages name
               const existingAccount = allAccounts.value.find((account) => (
                 account.address === address
-              ));
+              )) || allAccounts.value
+                .filter((account) => account.address === normalizedAddress)
+                .map((account) => ({ ...account, address }))[0];
 
               let name = address;
               if (isNameValid(address)) {

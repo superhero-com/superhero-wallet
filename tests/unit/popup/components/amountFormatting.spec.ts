@@ -13,7 +13,11 @@ import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBa
  */
 vi.mock('@/lib/ProtocolAdapterFactory', () => ({
   ProtocolAdapterFactory: {
-    getAdapter: () => ({ coinSymbol: 'AE', getAmountPrecision: () => 9 }),
+    getAdapter: () => ({
+      coinSymbol: 'AE',
+      getAmountPrecision: () => 9,
+      normalizeAddress: (address) => address,
+    }),
   },
 }));
 vi.mock('@/composables', () => ({

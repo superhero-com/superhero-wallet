@@ -23,6 +23,7 @@ import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSigned
 import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
 import {
   getLegacyGasPrice,
+  toEvmChecksumAddress,
   toTokenBaseUnits,
   withGasHeadroom,
 } from '@/protocols/evm/helpers';
@@ -154,6 +155,10 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
 
   override isAccountAddressValid(address: AccountAddress): boolean {
     return isAddress(address);
+  }
+
+  override normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return toEvmChecksumAddress(address);
   }
 
   override isValidAddressOrNameEncoding(address: AccountAddress): boolean {
