@@ -20,7 +20,7 @@ import Web3Eth, {
   getTransactionReceipt,
 } from 'web3-eth';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
-import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { toEvmChecksumAddress, toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
@@ -182,6 +182,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override isAccountAddressValid(address: AccountAddress) {
     return isAddress(address);
+  }
+
+  override normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return toEvmChecksumAddress(address);
   }
 
   override isValidAddressOrNameEncoding(address: string) {

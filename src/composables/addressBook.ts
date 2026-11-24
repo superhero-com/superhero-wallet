@@ -17,6 +17,8 @@ import {
   isEvm,
 } from '@/utils';
 import { tg as t } from '@/popup/plugins/i18n';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import migrateAddressBookEvmChecksum from '@/migrations/013-address-book-evm-checksum';
 
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';
@@ -30,7 +32,10 @@ interface IAddressBookOptions {
 const addressBook = useStorageRef<IAddressBookEntry[]>(
   [],
   STORAGE_KEYS.addressBook,
-  { syncWithOtherWindows: true },
+  {
+    syncWithOtherWindows: true,
+    migrations: [migrateAddressBookEvmChecksum],
+  },
 );
 
 export const useAddressBook = createCustomScopedComposable(() => {
@@ -114,18 +119,25 @@ export const useAddressBook = createCustomScopedComposable(() => {
    * Passing a savedEntryAddress will update the entry instead of adding a new one
    */
   function addAddressBookEntry(
-    { name, address, isBookmarked }: IAddressBookOptions,
+    { name, address: typedAddress, isBookmarked }: IAddressBookOptions,
     savedEntryAddress?: AccountAddress,
   ) {
-    if (!name || !address) {
+    if (!name || !typedAddress) {
       throw new AddressBookRequiredFields();
     }
 
-    if (!savedEntryAddress && !!getAddressBookEntryByAddress(address)) {
+    const protocol = getProtocolByAddress(typedAddress);
+    // The same address in another case or format, e.g. lowercase EVM
+    const normalizedAddress = protocol
+      ? ProtocolAdapterFactory.getAdapter(protocol).normalizeAddress(typedAddress)
+      : typedAddress;
+    const existingEntry = getAddressBookEntryByAddress(normalizedAddress)
+      ?? getAddressBookEntryByAddress(typedAddress);
+
+    if (!savedEntryAddress && !!existingEntry) {
       throw new AddressBookEntryExists();
     }
 
-    const protocol = getProtocolByAddress(address);
     if (!protocol) {
       throw new AddressBookInvalidAddress();
     }
@@ -135,7 +147,8 @@ export const useAddressBook = createCustomScopedComposable(() => {
 
     const entry = {
       name,
-      address,
+      // As typed if another entry, e.g. a duplicate saved earlier, already holds it
+      address: (existingEntry && existingEntry !== savedEntry) ? typedAddress : normalizedAddress,
       protocol,
       isBookmarked: isBookmarked || defaultIsBookmarked,
     };

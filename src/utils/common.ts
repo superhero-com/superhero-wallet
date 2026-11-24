@@ -675,6 +675,12 @@ export function getProtocolByAddress(address: AccountAddress) {
   )?.protocol;
 }
 
+/** The address as its protocol stores it, see `normalizeAddress`. Others as they are. */
+export function normalizeAccountAddress<T extends AccountAddress | undefined>(address: T): T {
+  const protocol = address ? getProtocolByAddress(address) : undefined;
+  return protocol ? ProtocolAdapterFactory.getAdapter(protocol).normalizeAddress(address) : address;
+}
+
 export function convertBlobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

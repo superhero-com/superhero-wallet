@@ -44,7 +44,7 @@
     >
       <template #value>
         <div
-          v-for="address in transferData.addresses"
+          v-for="address in recipientAddresses"
           :key="address"
           class="receiving-address"
         >
@@ -131,6 +131,7 @@ import {
 } from 'vue';
 import { isNameValid } from '@aeternity/aepp-sdk';
 import { useAccounts } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { tg } from '@/popup/plugins/i18n';
 import type { TransferFormModel, Protocol } from '@/types';
@@ -175,6 +176,13 @@ export default defineComponent({
       () => props.recipientAddress && isNameValid(props.recipientAddress),
     );
 
+    /** As the app stores them, e.g. EIP-55, so the name and avatar match the address elsewhere */
+    const recipientAddresses = computed(() => {
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      return props.transferData.addresses?.map(
+        (address) => adapter.normalizeAddress(address),
+      ) ?? [];
+    });
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
     const recipientsCount = computed(() => (props.transferData.addresses?.length || 1));
     const multipleAmount = computed(() => (
@@ -188,6 +196,7 @@ export default defineComponent({
       isRecipientName,
       tokenSymbol,
       activeAccount,
+      recipientAddresses,
       recipientsCount,
       multipleAmount,
       isNameValid,

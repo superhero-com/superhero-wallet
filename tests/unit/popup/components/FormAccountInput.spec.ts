@@ -359,3 +359,62 @@ describe('FormAccountInput typed text', () => {
     expect((wrapper.get('textarea').element as HTMLTextAreaElement).value).toBe('');
   });
 });
+
+describe('FormAccountInput EVM recipients in another case', () => {
+  const CHECKSUM = '0x5F00d657054991f0cb23Ce9EbAf073133a130762';
+  const LOWER = CHECKSUM.toLowerCase();
+  const OTHER = '0x909C407d6FD235DE14db97e2234fCB71E99d6E1c';
+  const BOB: IAddressBookEntry = {
+    name: 'Bob', address: CHECKSUM, isBookmarked: false, protocol: PROTOCOLS.ethereum,
+  };
+
+  beforeEach(() => {
+    addressBookFiltered.value = [BOB];
+    mocks.allAccounts.value = [BOB];
+  });
+
+  async function mountRecipients(recipients: string[], message?: object) {
+    const value = ref(recipients);
+    const wrapper = mount({
+      components: { FormAccountInput },
+      template: '<FormAccountInput v-model="value" :protocol="protocol" :message="message" />',
+      setup: () => ({ value, protocol: PROTOCOLS.ethereum, message }),
+    }, {
+      attachTo: document.body,
+      global: { plugins: [i18n], stubs: { Avatar: true } },
+    });
+    await flushPromises();
+    const chips = () => wrapper.findAll('.selected-address-container');
+    return { wrapper, value, chips };
+  }
+
+  it('keeps one recipient for an address given twice', async () => {
+    const { value } = await mountRecipients([LOWER, OTHER, CHECKSUM]);
+
+    expect(value.value).toEqual([LOWER, OTHER]);
+  });
+
+  it('names one after its entry and keeps it as typed', async () => {
+    const { value, chips } = await mountRecipients([LOWER, OTHER]);
+
+    expect(chips().map((chip) => chip.text().includes('Bob'))).toEqual([true, false]);
+    expect(value.value).toEqual([LOWER, OTHER]);
+  });
+
+  it('marks one that a message names as typed', async () => {
+    const { chips } = await mountRecipients([LOWER, OTHER], { status: 'warning', text: `Same||${LOWER}` });
+
+    expect(chips().map((chip) => chip.find('.warning').exists())).toEqual([true, false]);
+  });
+
+  it('does not suggest its entry again', async () => {
+    const { wrapper } = await mountRecipients([LOWER, OTHER]);
+    const field = wrapper.get('textarea');
+    (field.element as HTMLTextAreaElement).focus();
+    await field.setValue('Bo');
+    await flushPromises();
+
+    expect(wrapper.findAll('.dropdown-item').filter((item) => item.text().includes('Bob')))
+      .toHaveLength(0);
+  });
+});
