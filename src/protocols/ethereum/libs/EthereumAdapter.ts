@@ -578,7 +578,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       type: '0x02',
     };
 
-    return FeeMarketEIP1559Transaction.fromTxData(txData).sign(account.secretKey);
+    return FeeMarketEIP1559Transaction.fromTxData(txData).sign(account.secretKey!);
   }
 
   override async spend(

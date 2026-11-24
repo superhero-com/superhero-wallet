@@ -106,7 +106,7 @@ export default defineComponent({
         };
         const account = adapter.resolveAccountRaw(rawAccount, 0, 0);
 
-        if (!account) {
+        if (!account?.secretKey) {
           throw new Error('Failed to resolve the account of the private key');
         }
 

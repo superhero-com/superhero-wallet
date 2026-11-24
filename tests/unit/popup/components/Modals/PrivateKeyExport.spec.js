@@ -1,6 +1,6 @@
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { ref as mockRef } from 'vue';
-import { PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 
 const mockActiveAccount = mockRef();
 const mockCopy = vi.fn();
@@ -199,6 +199,18 @@ describe('PrivateKeyExport', () => {
       await flushPromises();
 
       expect(getShownKey(wrapper)).toBe(SEED_HEX);
+    });
+
+    it('closes without revealing a key when the account changes to one without it', async () => {
+      mockDecrypt.mockImplementationOnce(async () => {
+        mockActiveAccount.value = { protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.ledger };
+        return 'decrypted mnemonic';
+      });
+      const wrapper = await reveal();
+
+      expect(mockDecrypt).toHaveBeenCalledTimes(1);
+      expect(wrapper.find('[data-cy=copy]').exists()).toBe(false);
+      expect(wrapper.props('resolve')).toHaveBeenCalledTimes(1);
     });
 
     it('offers no choice for a protocol with one format', async () => {
