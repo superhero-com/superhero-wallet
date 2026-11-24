@@ -144,7 +144,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
-  setup() {
+  setup(props) {
     const { t } = useI18n();
 
     const isAuthFailed = ref(false);
@@ -241,9 +241,15 @@ export default defineComponent({
             return;
           }
         }
-        const adapter = ProtocolAdapterFactory.getAdapter(activeAccount.value.protocol);
+        const { protocol, secretKey } = activeAccount.value;
+        // Another window can switch to a Ledger or AirGap account meanwhile.
+        if (!secretKey) {
+          props.resolve();
+          return;
+        }
+        const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         [selectedFormat.value] = adapter.getPrivateKeyFormats();
-        revealedKey.value = { adapter, secretKey: Buffer.from(activeAccount.value.secretKey) };
+        revealedKey.value = { adapter, secretKey: Buffer.from(secretKey) };
       } finally {
         isAuthenticating.value = false;
       }

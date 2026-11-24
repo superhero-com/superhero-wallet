@@ -309,10 +309,12 @@ export type PrivateKeyFormat = 'hex' | 'sk';
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IHdWalletAccount, Omit<IAccountRaw, 'publicKey'> {
+export interface IAccount extends Omit<IHdWalletAccount, 'secretKey'>, Omit<IAccountRaw, 'publicKey'> {
   address: AccountAddress;
   globalIdx: number;
   idx: number;
+  /** Missing for Ledger and AirGap accounts: their key stays on the device. */
+  secretKey?: Uint8Array;
 }
 
 /**

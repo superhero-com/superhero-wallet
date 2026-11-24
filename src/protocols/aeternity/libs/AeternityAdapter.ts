@@ -271,12 +271,14 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       };
     }
     if (rawAccount.type === ACCOUNT_TYPES.airGap || rawAccount.type === ACCOUNT_TYPES.ledger) {
+      const address = rawAccount.address as Encoded.AccountAddress;
       return {
         globalIdx,
         idx,
         ...rawAccount,
-        publicKey: Buffer.from(decode(rawAccount.address as Encoded.AccountAddress)),
-      } as any as IAccount; // https://github.com/superhero-com/superhero-wallet/issues/3312
+        address,
+        publicKey: Buffer.from(decode(address)),
+      };
     }
     return null;
   }
