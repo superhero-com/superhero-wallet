@@ -69,6 +69,20 @@ describe('useFungibleTokens token balances', () => {
     return (await import('@/composables/fungibleTokens')).useFungibleTokens();
   }
 
+  /** Wait for the stored values to be restored, after which changes are saved */
+  async function useRestoredFungibleTokens() {
+    const result = await useFungibleTokens();
+    await new Promise((resolve) => { setTimeout(resolve); });
+    return result;
+  }
+
+  function spyOnSavedTokenBalances() {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+    return () => setItemSpy.mock.calls
+      .filter(([key]) => key.endsWith('fungible-token-balances'))
+      .map(([, value]) => JSON.parse(value));
+  }
+
   /** Reload the modules with stored token balances, as when the app opens */
   async function loadStoredTokenBalances(networkName) {
     const { WalletStorage } = await import('@/lib/WalletStorage');
@@ -79,8 +93,7 @@ describe('useFungibleTokens token balances', () => {
     await import('@/protocols/registerAdapters');
     const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');
     adapter = ProtocolAdapterFactory.getAdapter('aeternity');
-    const result = await useFungibleTokens();
-    await new Promise((resolve) => { setTimeout(resolve); });
+    const result = await useRestoredFungibleTokens();
     expect(result.tokenBalances.value).toEqual([tokenBalance('ct_stored')]);
     return result;
   }
@@ -212,6 +225,62 @@ describe('useFungibleTokens token balances', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     expect(tokenBalances.value).toEqual([tokenBalance('ct_custom')]);
+  });
+
+  it('does not save the same balances again', async () => {
+    vi.spyOn(adapter, 'fetchAccountTokenBalances')
+      .mockResolvedValueOnce([tokenBalance('ct_a')])
+      .mockResolvedValueOnce([tokenBalance('ct_a')])
+      .mockResolvedValueOnce([tokenBalance('ct_a', '2')]);
+    const { tokenBalances, loadTokenBalances } = await useRestoredFungibleTokens();
+    const getSavedTokenBalances = spyOnSavedTokenBalances();
+
+    await loadTokenBalances();
+    await flushPromises();
+    expect(getSavedTokenBalances()).toEqual([[tokenBalance('ct_a')]]);
+    const loadedTokenBalances = tokenBalances.value;
+
+    await loadTokenBalances();
+    await flushPromises();
+    expect(getSavedTokenBalances()).toHaveLength(1);
+    expect(tokenBalances.value).toBe(loadedTokenBalances);
+
+    await loadTokenBalances();
+    await flushPromises();
+    expect(getSavedTokenBalances()).toEqual([
+      [tokenBalance('ct_a')],
+      [tokenBalance('ct_a', '2')],
+    ]);
+    expect(tokenBalances.value).toEqual([tokenBalance('ct_a', '2')]);
+  });
+
+  it('does not recompute the available tokens when the balances are the same', async () => {
+    vi.spyOn(adapter, 'fetchAccountTokenBalances')
+      .mockResolvedValue([{ ...tokenBalance('ct_custom'), symbol: 'CSTM' }]);
+    const { tokensAvailable, loadTokenBalances } = await useRestoredFungibleTokens();
+
+    await loadTokenBalances();
+    const availableTokens = tokensAvailable.value;
+    await loadTokenBalances();
+
+    expect(availableTokens.aeternity.ct_custom.symbol).toBe('CSTM');
+    expect(tokensAvailable.value).toBe(availableTokens);
+  });
+
+  it('saves the network of the balances when they are the same', async () => {
+    vi.spyOn(adapter, 'fetchAccountTokenBalances').mockResolvedValue([]);
+    const { tokenBalances, loadTokenBalances } = await useRestoredFungibleTokens();
+    const { WalletStorage } = await import('@/lib/WalletStorage');
+    const { STORAGE_KEYS, NETWORK_NAME_MAINNET } = await import('@/constants');
+    const getSavedTokenBalances = spyOnSavedTokenBalances();
+
+    await loadTokenBalances();
+    await flushPromises();
+
+    expect(tokenBalances.value).toEqual([]);
+    expect(getSavedTokenBalances()).toEqual([]);
+    expect(WalletStorage.get(STORAGE_KEYS.fungibleTokenBalancesNetworkName))
+      .toBe(NETWORK_NAME_MAINNET);
   });
 
   it('replaces the balances with an empty list when the account has no tokens', async () => {
