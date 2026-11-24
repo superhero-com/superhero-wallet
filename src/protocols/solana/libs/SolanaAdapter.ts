@@ -779,11 +779,11 @@ export class SolanaAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async constructAndSignTx(
+  async constructAndSignTx(
     amount: number,
     recipient: string,
     options: { fromAccount: AccountAddress },
-  ): Promise<any> {
+  ): Promise<Transaction> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const account = getAccountByProtocolAndAddress(PROTOCOLS.solana, options.fromAccount);
     if (!account || account.protocol !== PROTOCOLS.solana) {

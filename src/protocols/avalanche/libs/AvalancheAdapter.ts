@@ -235,11 +235,11 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     );
   }
 
-  override async constructAndSignTx(
+  async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
-  ): Promise<any> {
+    options: { fromAccount: AccountAddress; nonce: number; maxFeePerGas: string },
+  ): Promise<{ raw: Uint8Array; hash: string }> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { avalancheActiveNetworkSettings } = useAvalancheNetworkSettings();
 
@@ -261,7 +261,7 @@ export class AvalancheAdapter extends BaseProtocolAdapter {
     );
 
     const txData: TxData = {
-      nonce: toHex(nonce),
+      nonce: toHex(String(nonce)),
       gasPrice,
       gasLimit: toHex(String(AVALANCHE_GAS_LIMIT)),
       to: recipient,

@@ -542,10 +542,15 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async constructAndSignTx(
+  async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
+    options: {
+      fromAccount: AccountAddress;
+      nonce: number;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+    },
   ): Promise<FeeMarketEIP1559Transaction> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
