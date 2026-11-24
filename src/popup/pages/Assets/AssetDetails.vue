@@ -391,8 +391,9 @@ export default defineComponent({
       resizeObserver?.disconnect();
     });
 
-    // The page stays mounted under pages pushed over it, like another asset's page
-    watch([assetData, isPageVisible], ([newAssetData, isVisible]) => {
+    // The page stays mounted under pages pushed over it, like another asset's page.
+    // The pairs load after it's mounted.
+    watch([assetData, isPageVisible, tokenPairs], ([newAssetData, isVisible]) => {
       if (isVisible) {
         setSharedAssetDetails({
           contractId,
