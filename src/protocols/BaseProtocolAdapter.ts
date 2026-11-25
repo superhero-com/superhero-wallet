@@ -20,6 +20,7 @@ import type {
   AssetAmount,
   IAccountRaw,
   IAccount,
+  IRecipientDetails,
   PrivateKeyFormat,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
@@ -226,6 +227,11 @@ export abstract class BaseProtocolAdapter {
   transferPreparedTransaction?(transactionData: any): Promise<ITransferResponse | undefined>;
 
   async fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
+
+  /**
+   * @returns `null` when the recipient is a name that points to no account
+   */
+  fetchRecipientDetails?(addressOrName: string): Promise<IRecipientDetails | null>;
 
   abstract fetchBalance(address: AccountAddress): Promise<string>;
 

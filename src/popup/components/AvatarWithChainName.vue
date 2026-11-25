@@ -1,7 +1,7 @@
 <template>
   <div
     class="avatar-with-chain-name"
-    :class="{ 'only-name': !showAddress && !hideAvatar }"
+    :class="{ 'only-name': !showAddress && !hideAvatar, 'has-footer': $slots.default }"
     :style="{
       'background-color': color,
     }"
@@ -28,6 +28,13 @@
         class="text-address"
         columns
       />
+    </div>
+
+    <div
+      v-if="$slots.default"
+      class="footer"
+    >
+      <slot :shown-address="showAddress ? (localChainNameAddress || address) : undefined" />
     </div>
   </div>
 </template>
@@ -170,6 +177,22 @@ export default defineComponent({
     .avatar {
       margin-top: 0;
     }
+  }
+
+  &.has-footer {
+    flex-wrap: wrap;
+
+    // Else the address wraps below the avatar
+    .address-container {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .footer {
+    // Edge to edge, on the card's own color
+    flex-basis: calc(100% + 16px);
+    margin: 0 -8px -8px;
   }
 }
 </style>

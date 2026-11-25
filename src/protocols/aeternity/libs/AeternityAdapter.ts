@@ -8,6 +8,7 @@ import {
   Encoding,
   isAddressValid,
   isEncoded,
+  isNameValid,
   MemoryAccount,
   AccountMnemonicFactory,
 } from '@aeternity/aepp-sdk';
@@ -25,6 +26,7 @@ import type {
   IFetchTransactionResult,
   IHdWalletAccount,
   IPageableResponse,
+  IRecipientDetails,
   IToken,
   ITokenBalance,
   ITokenBalanceResponse,
@@ -37,6 +39,7 @@ import type {
 } from '@/types';
 import JsonBig from '@/lib/json-big';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 import { ACCOUNT_TYPES, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -56,6 +59,7 @@ import Logger from '@/lib/logger';
 import type {
   AeNetworkProtocolSettings,
   ContractInitializeOptions,
+  SimpleGAMultiSigContractApi,
 } from '@/protocols/aeternity/types';
 import {
   AE_COIN_PRECISION,
@@ -72,7 +76,7 @@ import {
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
 
-import { aettosToAe } from '../helpers';
+import { aettosToAe, getAddressByNameEntry } from '../helpers';
 
 /** Each transfer on a page can need the events of its transaction fetched */
 const TOKEN_TRANSFERS_PER_PAGE = 10;
@@ -83,11 +87,26 @@ const transactionActivities = new Map<string, any[]>();
 const tokenTransfersSupport = new Map<string, Promise<boolean>>();
 /** A status request with no answer would stay cached and hold the token tab */
 export const MIDDLEWARE_STATUS_TIMEOUT = 30000;
+/** The middleware and a vault contract only add to a recipient's account, so they get this long */
+const RECIPIENT_EXTRAS_TIMEOUT = 5000;
 
 /** The token transfers by account include the mints and burns since mdw 1.109 */
 function isTokenTransfersVersion(mdwVersion?: string) {
   const [major, minor] = (mdwVersion || '').split('.').map(Number);
   return major > 1 || (major === 1 && minor >= 109);
+}
+
+/** `undefined` when the lookup takes longer */
+async function resolveWithin<T>(lookup: Promise<T>, ms: number): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      lookup,
+      new Promise<undefined>((resolve) => { timer = setTimeout(() => resolve(undefined), ms); }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
@@ -212,6 +231,90 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return isAddressValid(address, Encoding.ContractAddress)
       || isAddressValid(address, Encoding.AccountAddress)
       || isAddressValid(address, Encoding.Name);
+  }
+
+  override async fetchRecipientDetails(addressOrName: string): Promise<IRecipientDetails | null> {
+    const { getDryAeSdk } = useAeSdk();
+    const aeSdk = await getDryAeSdk();
+    const { api } = aeSdk;
+    const address = isNameValid(addressOrName)
+      ? await api.getNameEntryByName(addressOrName).then(
+        (nameEntry) => getAddressByNameEntry(nameEntry),
+        (error) => {
+          // Not claimed, expired, revoked, or still in its auction
+          if (isNotFoundError(error)) return undefined;
+          throw error;
+        },
+      )
+      : addressOrName;
+    if (!address) {
+      return null;
+    }
+
+    const isContract = isAddressValid(address, Encoding.ContractAddress);
+    const account = await api.getAccountByPubkey(address).catch((error) => {
+      if (isNotFoundError(error)) return null;
+      throw error;
+    });
+    if (!account) {
+      return { address, isUnused: true, type: isContract ? 'contract' : undefined };
+    }
+
+    // A basic account's nonce counts what it signed. A generalized account's stops at its
+    // attach transaction, so it is never 0.
+    const hasSent = !isContract && account.nonce > 0;
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+    // `undefined` when the middleware can't tell
+    const fetchActivityTime = (query: string): Promise<number | null | undefined> => (
+      fetchFromMiddlewareCamelCased(
+        `/v3/accounts/${encodeURIComponent(address)}/activities?limit=1&${query}`,
+      ).then(
+        (response) => (response?.data ? (response.data[0]?.blockTime ?? null) : undefined),
+        () => undefined,
+      )
+    );
+    // A generalized account is a vault when its contract has the multisig interface
+    const fetchVaultConsensus = async (contractId: Encoded.ContractAddress) => {
+      try {
+        const vault = await Contract.initialize<SimpleGAMultiSigContractApi>({
+          ...aeSdk.getContext(),
+          aci: SimpleGAMultiSigAci,
+          address: contractId,
+        });
+        const [signers, consensus] = await Promise.all([
+          vault.get_signers(),
+          vault.get_consensus_info(),
+        ]);
+        return {
+          signersCount: signers.decodedResult.length,
+          confirmationsRequired: Number(consensus.decodedResult.confirmations_required),
+        };
+      } catch {
+        // Another interface, or the node didn't answer
+        return undefined;
+      }
+    };
+    // Left out when slow, rather than hold back the account
+    const inTime = <T>(lookup: Promise<T>) => resolveWithin(lookup, RECIPIENT_EXTRAS_TIMEOUT);
+    const [createdAt, lastSentAt, vaultConsensus] = await Promise.all([
+      inTime(fetchActivityTime('direction=forward')),
+      hasSent ? inTime(fetchActivityTime('direction=backward&owned_only=true')) : undefined,
+      account.kind === 'generalized' && account.contractId
+        ? inTime(fetchVaultConsensus(account.contractId as Encoded.ContractAddress))
+        : undefined,
+    ]);
+
+    return {
+      address,
+      isUnused: false,
+      type: (isContract && 'contract') || (vaultConsensus && 'multisig') || account.kind,
+      ...vaultConsensus,
+      balance: aettosToAe(account.balance.toString()),
+      // The genesis block's time is 0
+      createdAt: createdAt || undefined,
+      // A middleware that hasn't indexed what the account sent can't tell
+      lastSentAt: isContract || hasSent ? (lastSentAt || undefined) : null,
+    };
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {

@@ -1008,6 +1008,26 @@ export interface ITransferResponse {
   hash: string;
 }
 
+export type RecipientType = 'basic' | 'generalized' | 'multisig' | 'contract';
+
+/** What the transfer review shows about a recipient */
+export interface IRecipientDetails {
+  /** The account itself, also when the recipient was given by a name */
+  address: AccountAddress;
+  /** The chain has never seen the account */
+  isUnused: boolean;
+  type?: RecipientType;
+  /** For a multisig vault: how many of its `signersCount` signers approve each transaction */
+  confirmationsRequired?: number;
+  signersCount?: number;
+  /** In coins */
+  balance?: string;
+  /** In ms */
+  createdAt?: number;
+  /** In ms, for an account; `null` when it has never sent a transaction */
+  lastSentAt?: number | null;
+}
+
 export interface IAddressBookEntry {
   name: string;
   address: AccountAddress;

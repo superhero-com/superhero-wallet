@@ -255,6 +255,9 @@ describe('Send modal', () => {
     cy.wait('@recipientAtNext');
     cy.get('[data-cy=review-recipient]')
       .should('contain', RECIPIENTS.aeternity.slice(0, 6))
+      // The node doesn't know the recipient
+      .find('[data-cy=recipient-unused]')
+      .should('contain', 'This address has no transactions yet.')
       .get('[data-cy=accordion-item-label]')
       .contains('Advanced transaction details')
       .click()
