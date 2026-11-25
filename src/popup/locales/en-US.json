@@ -1362,7 +1362,26 @@
       "messageUrlOwner": "Message the URL owner (optional)",
       "scanAddress": "Scan the recipient’s account address QR code in order to send {assetName} to them.",
       "singleAccountLabel": "Single transfer amount",
-      "multipleAccountLabel": "All transfers amount"
+      "multipleAccountLabel": "All transfers amount",
+      "recipientDetails": {
+        "title": "Recipient details",
+        "nameAddress": "Name points to",
+        "noAccount": "The recipient name points to no account.",
+        "type": "Type",
+        "basic": "Basic account",
+        "generalized": "Generalized account",
+        "contract": "Smart contract",
+        "consensus": "{required} of {total} signers",
+        "balance": "Balance",
+        "createdAt": "Date created",
+        "lastSentAt": "Last sent transaction",
+        "never": "Never",
+        "moreDetails": "More details",
+        "viewInExplorer": "View in explorer",
+        "unused": "This address has no transactions yet.",
+        "noContract": "No contract exists at this address.",
+        "error": "Couldn't load the recipient details."
+      }
     },
     "signTransaction": {
       "reject": "Reject",

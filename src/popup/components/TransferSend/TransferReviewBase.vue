@@ -52,7 +52,18 @@
             :address="address"
             :name="isNameValid(address) ? address : undefined"
             :protocol="protocol"
-          />
+          >
+            <template
+              v-if="hasRecipientDetails"
+              #default="{ shownAddress }"
+            >
+              <RecipientDetails
+                :address="address"
+                :shown-address="shownAddress"
+                :protocol="protocol"
+              />
+            </template>
+          </AvatarWithChainName>
         </div>
       </template>
     </DetailsItem>
@@ -142,11 +153,13 @@ import TokenAmount from '../TokenAmount.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
+import RecipientDetails from './RecipientDetails.vue';
 
 export default defineComponent({
   name: 'TransferReviewBase',
   components: {
     PayloadDetails,
+    RecipientDetails,
     ModalHeader,
     AvatarWithChainName,
     DetailsItem,
@@ -183,6 +196,10 @@ export default defineComponent({
         (address) => adapter.normalizeAddress(address),
       ) ?? [];
     });
+    const hasRecipientDetails = computed(() => (
+      recipientAddresses.value.length === 1
+      && !!ProtocolAdapterFactory.getAdapter(props.protocol).fetchRecipientDetails
+    ));
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
     const recipientsCount = computed(() => (props.transferData.addresses?.length || 1));
     const multipleAmount = computed(() => (
@@ -197,6 +214,7 @@ export default defineComponent({
       tokenSymbol,
       activeAccount,
       recipientAddresses,
+      hasRecipientDetails,
       recipientsCount,
       multipleAmount,
       isNameValid,

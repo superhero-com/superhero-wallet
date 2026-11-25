@@ -1362,7 +1362,26 @@
       "messageUrlOwner": "给 URL 所有者留言（可选）",
       "scanAddress": "扫描收款账户地址二维码以向其发送 {assetName}。",
       "singleAccountLabel": "单笔转账金额",
-      "multipleAccountLabel": "全部转账金额"
+      "multipleAccountLabel": "全部转账金额",
+      "recipientDetails": {
+        "title": "收款方详情",
+        "nameAddress": "名称指向",
+        "noAccount": "收款方名称未指向任何账户。",
+        "type": "类型",
+        "basic": "基础账户",
+        "generalized": "通用账户",
+        "contract": "智能合约",
+        "consensus": "{total} 位签名人中需 {required} 位",
+        "balance": "余额",
+        "createdAt": "创建日期",
+        "lastSentAt": "最近发出的交易",
+        "never": "从未",
+        "moreDetails": "更多详情",
+        "viewInExplorer": "在浏览器中查看",
+        "unused": "该地址尚无任何交易。",
+        "noContract": "该地址不存在合约。",
+        "error": "无法加载收款方详情。"
+      }
     },
     "signTransaction": {
       "reject": "拒绝",
