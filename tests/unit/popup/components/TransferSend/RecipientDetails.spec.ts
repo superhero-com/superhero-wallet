@@ -160,7 +160,7 @@ describe('RecipientDetails', () => {
     await flushPromises();
 
     expect(wrapper.get('[data-cy=recipient-unused]').text())
-      .toBe('This address has no transactions yet.');
+      .toBe('The recipient has no transactions yet.');
     expect(wrapper.find('[data-cy=recipient-details-toggle]').exists()).toBe(false);
     expect(wrapper.find('dl').exists()).toBe(false);
   });
@@ -171,7 +171,7 @@ describe('RecipientDetails', () => {
     await flushPromises();
 
     const message = wrapper.get('[data-cy=recipient-unused]');
-    expect(message.text()).toBe('No contract exists at this address.');
+    expect(message.text()).toBe('No contract exists at the recipient address.');
     expect(message.classes()).toContain('warning');
     expect(wrapper.find('[data-cy=recipient-details-toggle]').exists()).toBe(false);
   });

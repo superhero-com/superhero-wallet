@@ -257,7 +257,7 @@ describe('Send modal', () => {
       .should('contain', RECIPIENTS.aeternity.slice(0, 6))
       // The node doesn't know the recipient
       .find('[data-cy=recipient-unused]')
-      .should('contain', 'This address has no transactions yet.')
+      .should('contain', 'The recipient has no transactions yet.')
       .get('[data-cy=accordion-item-label]')
       .contains('Advanced transaction details')
       .click()

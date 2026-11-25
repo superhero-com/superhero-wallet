@@ -134,6 +134,12 @@ describe('Tests cases for AEX-2 popups', () => {
       } else {
         receiver = 'Contract create';
       }
+      if (txTag === Tag.SpendTx) {
+        cy.intercept(
+          { method: 'GET', hostname: 'testnet.aeternity.io', pathname: `/v3/accounts/${receiver}` },
+          { statusCode: 404, body: { reason: 'Account not found' } },
+        );
+      }
       cy.openAex2Popup(POPUP_TYPE_SIGN, Tag[txTag])
         .get('[data-cy=label]')
         .should('be.visible')
@@ -151,6 +157,14 @@ describe('Tests cases for AEX-2 popups', () => {
         .get('[data-cy=total]')
         .should('be.visible')
         .should('contain', parseFloat(amount + fee).toFixed(2));
+
+      if (txTag === Tag.SpendTx) {
+        // The node doesn't know the recipient
+        cy.get('[data-cy=recipient-unused]')
+          .should('contain', 'The recipient has no transactions yet.');
+      } else {
+        cy.get('[data-cy=recipient-details]').should('not.exist');
+      }
     });
   });
 });

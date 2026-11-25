@@ -76,7 +76,7 @@ import {
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
 
-import { aettosToAe, getAddressByNameEntry } from '../helpers';
+import { aettosToAe, getAddressByNameEntry, getNameIdOfSpelling } from '../helpers';
 
 /** Each transfer on a page can need the events of its transaction fetched */
 const TOKEN_TRANSFERS_PER_PAGE = 10;
@@ -233,12 +233,21 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       || isAddressValid(address, Encoding.Name);
   }
 
-  override async fetchRecipientDetails(addressOrName: string): Promise<IRecipientDetails | null> {
+  override async fetchRecipientDetails(recipient: string): Promise<IRecipientDetails | null> {
     const { getDryAeSdk } = useAeSdk();
     const aeSdk = await getDryAeSdk();
     const { api } = aeSdk;
-    const address = isNameValid(addressOrName)
-      ? await api.getNameEntryByName(addressOrName).then(
+    const { fetchFromMiddlewareCamelCased, fetchNameByHash } = useAeMiddleware();
+    let name = isNameValid(recipient) ? recipient : undefined;
+    if (isAddressValid(recipient, Encoding.Name)) {
+      // The node can't look a name up by its hash, and the middleware isn't trusted to name it
+      name = await fetchNameByHash(recipient);
+      if (getNameIdOfSpelling(name) !== recipient) {
+        throw new Error(`The middleware gave ${recipient} the name ${name}`);
+      }
+    }
+    const address = name
+      ? await api.getNameEntryByName(name).then(
         (nameEntry) => getAddressByNameEntry(nameEntry),
         (error) => {
           // Not claimed, expired, revoked, or still in its auction
@@ -246,7 +255,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
           throw error;
         },
       )
-      : addressOrName;
+      : recipient;
     if (!address) {
       return null;
     }
@@ -263,7 +272,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     // A basic account's nonce counts what it signed. A generalized account's stops at its
     // attach transaction, so it is never 0.
     const hasSent = !isContract && account.nonce > 0;
-    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
     // `undefined` when the middleware can't tell
     const fetchActivityTime = (query: string): Promise<number | null | undefined> => (
       fetchFromMiddlewareCamelCased(

@@ -229,9 +229,10 @@ export abstract class BaseProtocolAdapter {
   async fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
 
   /**
+   * @param recipient An address, a name, or a name's id
    * @returns `null` when the recipient is a name that points to no account
    */
-  fetchRecipientDetails?(addressOrName: string): Promise<IRecipientDetails | null>;
+  fetchRecipientDetails?(recipient: string): Promise<IRecipientDetails | null>;
 
   abstract fetchBalance(address: AccountAddress): Promise<string>;
 

@@ -11,8 +11,10 @@ import {
   encode,
   formatAmount,
   getTransactionSignerAddress,
+  hash as blake2b,
   isAddressValid,
   isNameValid,
+  produceNameId,
   rebuildUnpackedTx,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -177,6 +179,14 @@ type NameEntry = Awaited<ReturnType<InstanceType<typeof Node>['getNameEntryByNam
 
 export function getAddressByNameEntry(nameEntry: NameEntry, pointer = 'account_pubkey') {
   return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
+}
+
+/**
+ * The id of a name as the middleware spells it: as claimed, in Unicode, or in punycode,
+ * which `produceNameId` refuses.
+ */
+export function getNameIdOfSpelling(name: string): Encoded.Name {
+  return isNameValid(name) ? produceNameId(name) : encode(blake2b(name), Encoding.Name);
 }
 
 /**

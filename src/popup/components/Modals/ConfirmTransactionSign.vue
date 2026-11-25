@@ -16,6 +16,15 @@
         :additional-tag="isUnknownDapp ? $t('common.unknown') : appName"
         :first-label-warning="isUnknownDapp"
       />
+      <div
+        v-if="spendRecipientId"
+        class="recipient-details-card"
+      >
+        <RecipientDetails
+          :address="spendRecipientId"
+          :protocol="protocol"
+        />
+      </div>
       <NoOriginWarning
         v-if="isUnknownDapp"
         :action="$t('unknownDapp.confirmTransactionAction')"
@@ -336,6 +345,7 @@ import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.v
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TransactionOverview from '../TransactionOverview.vue';
+import RecipientDetails from '../TransferSend/RecipientDetails.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
@@ -370,6 +380,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     TransactionOverview,
+    RecipientDetails,
     DetailsItem,
     TokenAmount,
     TransactionDetailsPoolTokenRow,
@@ -618,6 +629,13 @@ export default defineComponent({
     const decodedPayload = computed(() => popupProps.value?.tx?.payload
       ? decode(popupProps.value?.tx?.payload).toString()
       : undefined);
+
+    /** Where a spend sends the coins: an address, or a name's id */
+    const spendRecipientId = computed(() => (
+      outerTxTag.value === Tag.SpendTx && adapter.fetchRecipientDetails
+        ? popupProps.value?.tx?.recipientId
+        : undefined
+    ));
 
     const filteredTxFields = computed(
       () => (Object.keys(TX_FIELDS_TO_DISPLAY) as ITxKey[])
@@ -984,6 +1002,7 @@ export default defineComponent({
       cancel,
       decodedCallData,
       decodedPayload,
+      spendRecipientId,
       decodingCallData,
       direction,
       dappBalanceError,
@@ -1066,6 +1085,15 @@ export default defineComponent({
 
   .transaction-overview {
     margin-bottom: 16px;
+  }
+
+  // As the recipient's card on the transfer review
+  .recipient-details-card {
+    margin-bottom: 16px;
+    padding-top: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: $color-border;
   }
 
   .rebuild-for-signer {

@@ -17,6 +17,7 @@ import {
 
 import type { IAppData } from '@/types';
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
+import RecipientDetails from '@/popup/components/TransferSend/RecipientDetails.vue';
 import {
   useAccounts,
   useAeSdk,
@@ -252,7 +253,7 @@ function mountModal(
     isTokenSaleFactory: computed(() => false),
     txFunctionParsed: computed(() => undefined),
     transactionAssets: computed(() => []),
-    outerTxTag: computed(() => undefined),
+    outerTxTag: computed(() => usePopupProps().popupProps.value?.tx?.tag),
   });
 
   return mount(ConfirmTransactionSign, {
@@ -268,6 +269,7 @@ function mountModal(
         NoOriginWarning: true,
         DetailsItem: true,
         TokenAmount: true,
+        RecipientDetails: true,
       },
     },
   });
@@ -809,5 +811,30 @@ describe('ConfirmTransactionSign.vue total', () => {
     expect(total!.props('amount')).toBe(1.00002);
     // No symbol: TokenAmount takes the coin's
     expect(total!.props('symbol')).toBeNull();
+  });
+});
+
+describe('ConfirmTransactionSign.vue recipient details', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('shows the details of the account a spend sends the coins to', async () => {
+    const txBase64 = buildSpendTxFor(ADDRESS_PREPARED);
+    const wrapper = mountModal(ADDRESS_PREPARED, { txBase64, tx: unpackTx(txBase64) });
+    await flushPromises();
+
+    expect(wrapper.getComponent(RecipientDetails).props()).toMatchObject({
+      address: ADDRESS_RECIPIENT,
+      protocol: PROTOCOLS.aeternity,
+    });
+  });
+
+  it('has none for a contract call', async () => {
+    const wrapper = mountModal(ADDRESS_PREPARED, {
+      txBase64: buildContractCallTxFor(ADDRESS_PREPARED),
+      tx: { tag: Tag.ContractCallTx, fee: '200000000000000', amount: '0' },
+    });
+    await flushPromises();
+
+    expect(wrapper.findComponent(RecipientDetails).exists()).toBe(false);
   });
 });

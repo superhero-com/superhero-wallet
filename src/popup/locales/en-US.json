@@ -1378,8 +1378,8 @@
         "never": "Never",
         "moreDetails": "More details",
         "viewInExplorer": "View in explorer",
-        "unused": "This address has no transactions yet.",
-        "noContract": "No contract exists at this address.",
+        "unused": "The recipient has no transactions yet.",
+        "noContract": "No contract exists at the recipient address.",
         "error": "Couldn't load the recipient details."
       }
     },
