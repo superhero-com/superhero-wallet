@@ -1378,8 +1378,8 @@
         "never": "从未",
         "moreDetails": "更多详情",
         "viewInExplorer": "在浏览器中查看",
-        "unused": "该地址尚无任何交易。",
-        "noContract": "该地址不存在合约。",
+        "unused": "收款方尚无任何交易。",
+        "noContract": "收款地址不存在合约。",
         "error": "无法加载收款方详情。"
       }
     },

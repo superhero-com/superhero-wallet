@@ -186,7 +186,7 @@ export default defineComponent({
     TokenAmount,
   },
   props: {
-    /** An address or a name */
+    /** An address, a name, or a name's id */
     address: { type: String, required: true },
     protocol: { type: String as PropType<Protocol>, required: true },
     /** The address the recipient card already shows */

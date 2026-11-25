@@ -3,13 +3,14 @@
  * and the times of its first and last sent activity from the middleware. The node, the contract
  * calls and the middleware are stubbed.
  */
-import { Contract } from '@aeternity/aepp-sdk';
+import { Contract, produceNameId } from '@aeternity/aepp-sdk';
 
 const BASIC = 'ak_wTPFpksUJFjjntonTvwK4LJvDw11DPma7kZBneKbumb8yPeFq';
 const GENERALIZED = 'ak_2iNDCz2sRLyxrASkGr2TGTqCsFU4crzuhEdRckF8fdqQ7jiwnC';
 const CONTRACT = 'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3';
 const GA_CONTRACT = 'ct_2iNDCz2sRLyxrASkGr2TGTqCsFU4crzuhEdRckF8fdqQ7jiwnC';
 const NAME = 'recipient.chain';
+const NAME_ID = produceNameId(NAME);
 const CREATED_AT = 1565798572713;
 const LAST_SENT_AT = 1795575794289;
 
@@ -202,6 +203,27 @@ describe('AeternityAdapter - fetchRecipientDetails', () => {
     getAccountByPubkey.mockRejectedValue(nodeError(404));
 
     await expect(fetchRecipientDetails(NAME)).resolves.toEqual({ address: BASIC, isUnused: true });
+  });
+
+  it('shows the account a name id points to, as the node resolves the name', async () => {
+    responses[`/v3/names/${NAME_ID}`] = jsonResponse({ name: NAME });
+    getNameEntryByName.mockResolvedValue({
+      pointers: [{ key: 'account_pubkey', id: BASIC }],
+    });
+    getAccountByPubkey.mockResolvedValue({
+      id: BASIC, balance: 0n, nonce: 0, kind: 'basic', payable: true,
+    });
+    respondActivities(BASIC, CREATED_AT);
+
+    expect(await fetchRecipientDetails(NAME_ID)).toMatchObject({ address: BASIC, type: 'basic' });
+    expect(getNameEntryByName).toHaveBeenCalledWith(NAME);
+  });
+
+  it('fails when the middleware gives a name id another name', async () => {
+    responses[`/v3/names/${NAME_ID}`] = jsonResponse({ name: 'other.chain' });
+
+    await expect(fetchRecipientDetails(NAME_ID)).rejects.toThrow();
+    expect(getNameEntryByName).not.toHaveBeenCalled();
   });
 
   it('fails when the node does not resolve the name', async () => {

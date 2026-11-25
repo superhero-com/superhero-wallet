@@ -6,9 +6,6 @@ import {
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   getTransactionSignerAddress,
-  hash,
-  isName,
-  produceNameId,
   unpackDelegation,
   unpackTx,
   Encoded,
@@ -39,6 +36,7 @@ import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import {
   canRebuildTransactionForSigner,
   fetchAccountNextNonce,
+  getNameIdOfSpelling,
   rebuildTransactionForSigner,
 } from '@/protocols/aeternity/helpers';
 import { SEED_LENGTH } from '@/protocols/aeternity/config';
@@ -492,10 +490,8 @@ export class AeAccountHdWallet extends MemoryAccount {
         case DelegationTag.AensName:
           try {
             const name = await fetchNameByHash(params.nameId);
-            // The middleware isn't trusted to name the signed name. It spells a name as
-            // claimed: in Unicode, or in punycode, which `produceNameId` refuses.
-            const nameId = isName(name) ? produceNameId(name) : encode(hash(name), Encoding.Name);
-            if (nameId === params.nameId) resolvedName = name;
+            // The middleware isn't trusted to name the signed name
+            if (getNameIdOfSpelling(name) === params.nameId) resolvedName = name;
           } catch (e) {
             handleUnknownError(e);
           }
