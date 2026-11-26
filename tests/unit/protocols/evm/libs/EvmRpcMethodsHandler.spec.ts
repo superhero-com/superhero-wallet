@@ -796,10 +796,19 @@ describe('handleEvmRpcMethod', () => {
       expect(checkOrAskPermission).toHaveBeenCalledOnce();
     });
 
-    it('rejects a request without a message without asking', async () => {
-      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { address: SIGNER.address });
+    it.each([undefined, ''])('rejects a request with the message %j without asking', async (data) => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data, address: SIGNER.address });
       expect(response.error?.code).toBe(-32602);
       expect(checkOrAskPermission).not.toHaveBeenCalled();
+    });
+
+    // What ethers and viem send for an empty message, and MetaMask lets through
+    it('signs "0x" as an empty message', async () => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x', address: SIGNER.address });
+
+      // EIP-191 of no bytes, by @noble/curves
+      expect(response.result).toBe('0x68c36703cfae77b264e66cf9587aa39dd76b66ff1317e563b4566d9ea5d8d60e5b9be8c58a324e1dbb424365aa778a2faec2d3f922bf0339cda43d76c492a5ab1c');
+      expect(checkOrAskPermission).toHaveBeenCalledOnce();
     });
 
     it('returns the rejection of the user', async () => {
