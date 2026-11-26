@@ -135,6 +135,22 @@ describe('/sign-jwt deep link', () => {
       expect(verify().payload).toEqual(shownClaims);
     });
 
+    /**
+     * Vue's reactivity shows an object with `"__v_isRef": true` as its `value`, so claims
+     * read through it could hide the others, here the `aud` the token is for.
+     */
+    it.each([
+      ['the claims', { __v_isRef: true, value: { aud: 'harmless.example' }, aud: 'bank.example' }],
+      ['a claim', { aud: { __v_isRef: true, value: 'harmless.example' }, challenge: 'n0nce' }],
+    ])('shows every claim it signs when the dapp marks %s as a Vue ref', async (_, claims) => {
+      const app = await openSignJwt(JSON.stringify(claims), [createAeAccount(0)]);
+
+      const { shownClaims, verify } = await approveAndVerify(app);
+
+      expect(shownClaims).toEqual({ ...claims, sub_jwk: expect.any(Object) });
+      expect(verify().payload).toEqual(shownClaims);
+    });
+
     it('signs with the account the user picks on the confirmation, shows its key, and returns it', async () => {
       const first = createAeAccount(0);
       const picked = createAeAccount(1);
