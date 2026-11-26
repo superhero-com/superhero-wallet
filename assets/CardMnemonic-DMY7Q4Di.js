@@ -1,0 +1,1 @@
+import{La as e,Ua as t,eo as n,no as r}from"./vendor-Cc4nLXwW.js";import{Wt as i}from"./index-0exM044p.js";var a=t({name:`CardMnemonic`}),o={class:`card-mnemonic`};function s(t,i,a,s,c,l){return n(),e(`div`,o,[r(t.$slots,`default`,{},void 0,!0)])}var c=i(a,[[`render`,s],[`__scopeId`,`data-v-8b574368`]]);export{c as t};

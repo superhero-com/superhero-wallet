@@ -1,0 +1,1 @@
+import{Fa as e,Ua as t,eo as n,ro as r}from"./vendor-Cc4nLXwW.js";import{Wt as i,co as a}from"./index-0exM044p.js";import{t as o}from"./AccountDetailsBase-UbY-zs2d.js";var s=t({name:a,components:{AccountDetailsBase:o}});function c(t,i,a,o,s,c){let l=r(`AccountDetailsBase`);return n(),e(l,{class:`account-details-bitcoin`})}var l=i(s,[[`render`,c]]);export{l as default};
