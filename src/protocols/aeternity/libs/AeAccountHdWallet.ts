@@ -3,6 +3,7 @@ import {
   AccountBase,
   DelegationTag,
   MemoryAccount,
+  RpcInternalError,
   RpcInvalidTransactionError,
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
@@ -392,6 +393,11 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     if (isDappRequest(options)) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      // The prompt would be blank for an empty message, and shows anything but a string as JSON
+      // while its bytes are signed. A hex deep link, which has no RPC client, passes a Buffer.
+      if (options?.aeppRpcClientId && (typeof message !== 'string' || !message)) {
+        throw new RpcInternalError();
+      }
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,

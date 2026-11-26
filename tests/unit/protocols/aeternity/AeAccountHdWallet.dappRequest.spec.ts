@@ -5,6 +5,7 @@ import {
   Encoded,
   Encoding,
   METHODS,
+  RpcInternalError,
   RpcInvalidTransactionError,
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
@@ -13,6 +14,7 @@ import {
   encode,
   packDelegation,
   produceNameId,
+  verifyMessageSignature,
 } from '@aeternity/aepp-sdk';
 
 import { useAccounts } from '@/composables/accounts';
@@ -226,6 +228,40 @@ describe('signMessage', () => {
     await wallet().signMessage('hello', {} as any);
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+
+  // Anything but a string would be shown as JSON and signed as bytes, [72, 105] as "Hi"
+  it.each([
+    ['an empty string', ''],
+    ['no message', undefined],
+    ['null', null],
+    ['a number', 5],
+    ['an array', [72, 105]],
+    ['bytes', new Uint8Array([72, 105])],
+  ])('rejects %s from an aepp without asking', async (_, message) => {
+    await expect(wallet().signMessage(message as any, {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any)).rejects.toBeInstanceOf(RpcInternalError);
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+
+  it('signs the text of an aepp after asking', async () => {
+    const signature = await wallet().signMessage('Hi', {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any);
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(verifyMessageSignature('Hi', signature, ADDRESS_ACTIVE)).toBe(true);
+  });
+
+  // A hex deep link passes a Buffer and no options, so it's asked about only in a framed
+  // wallet, for which the origin stands in here
+  it('signs the bytes of a request without an RPC client', async () => {
+    const signature = await wallet()
+      .signMessage(Buffer.from('Hi') as any, { aeppOrigin: DAPP_ORIGIN } as any);
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(verifyMessageSignature('Hi', signature, ADDRESS_ACTIVE)).toBe(true);
   });
 });
 
