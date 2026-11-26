@@ -68,6 +68,11 @@ export default defineComponent({
           transaction, networkId, broadcast, 'replace-caller': replaceCaller, innerTx,
         } = route.query;
 
+        // Missing, valueless (null), empty or repeated (an array)
+        if (typeof transaction !== 'string' || !transaction) {
+          throw new Error(t('pages.signTransaction.noTransaction'));
+        }
+
         if (networkId !== nodeNetworkId.value) {
           await openDefaultModal({
             icon: 'warning',

@@ -1386,6 +1386,7 @@
       }
     },
     "signTransaction": {
+      "noTransaction": "There is no transaction to sign.",
       "reject": "Reject",
       "maxSpent": "Maximum spent",
       "minReceived": "Minimum received",
