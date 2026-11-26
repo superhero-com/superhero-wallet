@@ -6,6 +6,8 @@ import {
   createAeAccount,
   createEthAccount,
   openDeepLinkPage,
+  PROPERTY_RUNS,
+  PROPERTY_TIMEOUT,
   type IWalletAccount,
 } from '../../helpers/deepLinkPage';
 
@@ -19,8 +21,6 @@ import {
  */
 
 const CALLBACK = 'https://superhero.com/callback';
-/** Each run opens the page anew */
-const PROPERTY_TIMEOUT = 60_000;
 
 function signJwtLink(payload?: string) {
   return {
@@ -114,7 +114,7 @@ describe('/sign-jwt deep link', () => {
 
           expect(verify().payload).toEqual(shownClaims);
         }),
-        { numRuns: 12 },
+        { numRuns: PROPERTY_RUNS },
       );
     }, PROPERTY_TIMEOUT);
 
