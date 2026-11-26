@@ -3,7 +3,7 @@
     class="transaction-item"
     :to="redirectRoute"
     :data-cy="currentTransaction.pending ? 'pending-txs' : null"
-    replace
+    :replace="!keepsPage"
   >
     <div class="body">
       <TransactionAssetRows
@@ -61,10 +61,10 @@ import dayjs from 'dayjs';
 import type {
   IActiveMultisigTransaction,
   ITransaction,
+  ITransactionRoute,
 } from '@/types';
 import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
-  amountRounded,
   formatDate,
   formatTime,
   relativeTimeTo,
@@ -99,6 +99,17 @@ export default defineComponent({
     isMultisig: Boolean,
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
+    /**
+     * Opens the transaction over the page, so browser back and iOS swipe-back return to it.
+     * Only for the dashboard: X keeps the pages under the closed one, and opening one again
+     * would reuse it with the previous account or network.
+     */
+    keepsPage: Boolean,
+    /** The details route of the page's own transactions, without the transaction params */
+    transactionRoute: {
+      type: Object as PropType<ITransactionRoute>,
+      default: null,
+    },
   },
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
@@ -125,6 +136,7 @@ export default defineComponent({
       transaction: currentTransaction,
       transactionCustomOwner,
       hideFeeFromAssets: props.hideFeeFromAssets,
+      lookUpTokenSale: true,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {
@@ -133,10 +145,13 @@ export default defineComponent({
       }
 
       return {
-        name: props.isMultisig
-          ? ROUTE_MULTISIG_TX_DETAILS
-          : ROUTE_TX_DETAILS,
+        name: props.transactionRoute?.name || (
+          props.isMultisig
+            ? ROUTE_MULTISIG_TX_DETAILS
+            : ROUTE_TX_DETAILS
+        ),
         params: {
+          ...props.transactionRoute?.params,
           hash: props.transaction.hash,
           transactionOwner: props.transaction.transactionOwner || '',
         },
@@ -156,11 +171,9 @@ export default defineComponent({
         return 0;
       }
       return getFormattedAndRoundedFiat(
-        +amountRounded(
-          tokenAsset?.price && tokenAsset?.amount
-            ? +tokenAsset.amount * tokenAsset.price
-            : protocolCoin?.amount || 0,
-        ),
+        tokenAsset?.price && tokenAsset?.amount
+          ? +tokenAsset.amount * tokenAsset.price
+          : +(protocolCoin?.amount || 0),
         transactionProtocol.value,
       );
     });

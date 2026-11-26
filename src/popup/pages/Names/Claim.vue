@@ -8,7 +8,6 @@
           :rules="{
             required: true,
             aens_name: true,
-            aens_name_unregistered: true,
             max_len: maxNameLength,
             enough_coin: totalNameClaimAmount.toString(),
           }"
@@ -19,7 +18,7 @@
             name="name"
             class="chain-name"
             :label="$t('pages.names.claim.register-name')"
-            :message="errorMessage"
+            :message="availability === 'registered' ? $t('validation.nameUnregistered') : errorMessage"
             :placeholder="$t('pages.names.claim.name-placeholder')"
             :text-limit="maxNameLength"
           >
@@ -36,6 +35,24 @@
             </template>
           </InputField>
         </Field>
+
+        <div
+          v-if="availability === 'auction' || availabilityError"
+          class="availability"
+          role="status"
+        >
+          <p>{{ availabilityError ? $t('pages.names.claim.availability-error') : $t('pages.names.claim.in-auction') }}</p>
+          <p v-if="auctionLoadError">
+            {{ $t('pages.names.claim.auction-loading-error') }}
+          </p>
+          <BtnPlain
+            :disabled="isOpeningAuction || isCheckingAvailability || isSubmitting"
+            data-cy="name-availability-action"
+            @click="availability === 'auction' ? viewAuction() : refreshAvailability()"
+          >
+            {{ availabilityError || auctionLoadError ? $t('pages.names.claim.retry') : $t('pages.names.claim.view-auction') }}
+          </BtnPlain>
+        </div>
 
         <CheckBox v-model="autoExtend">
           <div class="auto-extend-label">
@@ -60,7 +77,8 @@
         <BtnMain
           class="btn-register"
           extend
-          :disabled="isLoaderVisible || !name || !!errorName"
+          :disabled="isLoaderVisible || isSubmitting || isCheckingAvailability || availability !== 'available' || !name || !!errorName"
+          data-cy="register-name"
           @click="claim"
         >
           {{
@@ -79,6 +97,8 @@ import {
   defineComponent,
   ref,
   computed,
+  watch,
+  onBeforeUnmount,
 } from 'vue';
 import {
   AensName,
@@ -87,11 +107,15 @@ import {
   getExecutionCost,
   getMinimumNameFee,
   isNameValid as isAensNameValid,
-  Name,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
-import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
+import {
+  IonPage,
+  IonContent,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+} from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
@@ -103,20 +127,24 @@ import {
   useModals,
   useAeSdk,
   useUi,
+  useNetworks,
 } from '@/composables';
-import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
+import { ROUTE_ACCOUNT_DETAILS_NAMES, ROUTE_AUCTION_BID } from '@/popup/router/routeNames';
 import {
   AE_COIN_PRECISION,
   AE_AENS_DOMAIN,
   AE_AENS_NAME_MAX_LENGTH,
 } from '@/protocols/aeternity/config';
 import { NAME_CLAIM_STATUS, useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { getNameRegistrationState } from '@/protocols/aeternity/helpers/nameRegistration';
+import type { NameRegistrationState } from '@/protocols/aeternity/helpers/nameRegistration';
 import { MODAL_NAME_CLAIM_INFO } from '@/constants';
 
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import BtnHelp from '../../components/buttons/BtnHelp.vue';
+import BtnPlain from '../../components/buttons/BtnPlain.vue';
 
 const STUB_NAME_SALT = 4204563566073083;
 
@@ -127,6 +155,7 @@ export default defineComponent({
     CheckBox,
     BtnMain,
     BtnHelp,
+    BtnPlain,
     Field,
     IonPage,
     IonContent,
@@ -139,21 +168,97 @@ export default defineComponent({
 
     const { activeAccount } = useAccounts();
     const { openDefaultModal, openModal } = useModals();
-    const { getAeSdk, nodeNetworkId } = useAeSdk();
+    const { getAeSdk, nodeNetworkId, ensureNodeNetworkId } = useAeSdk();
+    const { activeNetwork } = useNetworks();
     const {
       isLoaderVisible,
       isNameClaimInfoModalHidden,
       setLoaderVisible,
       setNameClaimInfoModalHidden,
     } = useUi();
-    const { addNameToClaimQueue, preclaimedNames } = useAeNames();
+    const {
+      addNameToClaimQueue, preclaimedNames, fetchNameAuction, setAuctionEntry,
+    } = useAeNames();
 
     const name = ref('');
     const autoExtend = ref(false);
+    const availability = ref<NameRegistrationState | null>(null);
+    const availabilityError = ref(false);
+    const auctionLoadError = ref(false);
+    const isCheckingAvailability = ref(false);
+    const isSubmitting = ref(false);
+    const isOpeningAuction = ref(false);
+    const isPageActive = ref(true);
+    let contextRevision = 0;
+    let availabilityRequestId = 0;
+    let ownsLoader = false;
     const maxNameLength = AE_AENS_NAME_MAX_LENGTH - AE_AENS_DOMAIN.length;
 
     const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
     const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
+    const contextKey = computed(() => JSON.stringify([
+      fullName.value, activeAccount.value.address, activeNetwork.value, nodeNetworkId.value,
+    ]));
+
+    function captureContext() {
+      return {
+        name: fullName.value,
+        address: activeAccount.value.address,
+        autoExtend: autoExtend.value,
+        revision: contextRevision,
+      };
+    }
+
+    const isCurrentContext = (context: ReturnType<typeof captureContext>) => (
+      isPageActive.value && context.revision === contextRevision
+    );
+
+    async function refreshAvailability(context = captureContext()) {
+      availabilityRequestId += 1;
+      const requestId = availabilityRequestId;
+      availability.value = null;
+      availabilityError.value = false;
+      auctionLoadError.value = false;
+      if (!isNameValid.value) return null;
+      isCheckingAvailability.value = true;
+      try {
+        const aeSdk = await getAeSdk();
+        // Registration stores the salt under it, a failed startup status request leaves it empty
+        await ensureNodeNetworkId();
+        if (!isCurrentContext(context)) return null;
+        const node = aeSdk.api;
+        const state = await getNameRegistrationState(context.name, node);
+        if (!isCurrentContext(context) || requestId !== availabilityRequestId) return null;
+        if (aeSdk.api !== node) {
+          availabilityError.value = true;
+          return null;
+        }
+        availability.value = state;
+        return state;
+      } catch (error) {
+        if (isCurrentContext(context) && requestId === availabilityRequestId) {
+          availabilityError.value = true;
+        }
+        return null;
+      } finally {
+        if (requestId === availabilityRequestId) isCheckingAvailability.value = false;
+      }
+    }
+
+    watch([contextKey, isPageActive], (_, __, onCleanup) => {
+      contextRevision += 1;
+      availabilityRequestId += 1;
+      availability.value = null;
+      availabilityError.value = false;
+      auctionLoadError.value = false;
+      isCheckingAvailability.value = false;
+      if (!isPageActive.value || !isNameValid.value) return;
+      isCheckingAvailability.value = true;
+      const context = captureContext();
+      const timeout = setTimeout(() => { refreshAvailability(context); }, 300);
+      onCleanup(() => clearTimeout(timeout));
+    }, { immediate: true, flush: 'sync' });
+
     const queuedClaimInProgress = computed(() => {
       const queuedClaim = preclaimedNames.value[nodeNetworkId.value!]?.[fullName.value];
       return (
@@ -187,66 +292,100 @@ export default defineComponent({
         }) as any).toString())
         .shiftedBy(-AE_COIN_PRECISION));
 
-    async function claim() {
-      // Show loader at the beginning because the validation is also fetching some data
-      // so we need to block user from double clicking the claim button.
-      setLoaderVisible(true);
+    function setSubmissionLoader(visible: boolean) {
+      if (visible || ownsLoader) setLoaderVisible(visible);
+      ownsLoader = visible;
+    }
 
-      if (!(await validate()).valid) {
-        setLoaderVisible(false);
-        return;
-      }
-      if (queuedClaimInProgress.value) {
-        setLoaderVisible(false);
+    async function claim() {
+      if (isSubmitting.value) return;
+      isSubmitting.value = true;
+      setSubmissionLoader(true);
+      const context = captureContext();
+      function rejectQueuedClaim() {
+        if (!queuedClaimInProgress.value) return false;
         openDefaultModal({
           title: t('modals.name-exist.title'),
-          msg: queuedClaimInProgress.value.address === activeAccount.value.address
+          msg: queuedClaimInProgress.value.address === context.address
             ? t('modals.name-already-preclaimed.msg')
             : t('modals.name-already-preclaimed.other-account'),
         });
-        return;
+        return true;
       }
-
-      const aeSdk = await getAeSdk();
-      const nameObj = new Name(fullName.value, aeSdk.getContext());
-      const isNameRegistered = await nameObj.getState().then(() => true, () => false);
-
-      if (isNameRegistered) {
-        setLoaderVisible(false);
-        openDefaultModal({
-          title: t('modals.name-exist.title'),
-          msg: t('modals.name-exist.msg'),
-        });
-      } else {
+      try {
+        if (rejectQueuedClaim()) return;
+        if (await refreshAvailability(context) !== 'available') return;
+        if (!(await validate()).valid || !isCurrentContext(context)) return;
         if (!isNameClaimInfoModalHidden.value) {
-          setLoaderVisible(false);
+          setSubmissionLoader(false);
           const shouldHideInfoModal = await openModal<boolean>(MODAL_NAME_CLAIM_INFO);
           if (shouldHideInfoModal) {
             setNameClaimInfoModalHidden(true);
           }
-          setLoaderVisible(true);
+          if (!isCurrentContext(context)) return;
+          setSubmissionLoader(true);
         }
-
+        if (!isCurrentContext(context) || rejectQueuedClaim()) return;
         const isClaimQueued = await addNameToClaimQueue(
-          fullName.value,
-          activeAccount.value.address,
-          autoExtend.value,
+          context.name,
+          context.address,
+          context.autoExtend,
         );
-        setLoaderVisible(false);
+        if (!isCurrentContext(context)) return;
         if (isClaimQueued) {
+          setSubmissionLoader(false);
           name.value = '';
-          router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
+          await router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
+        } else {
+          await refreshAvailability(context);
         }
+      } catch (error: any) {
+        if (isCurrentContext(context)) openDefaultModal({ msg: error.message });
+      } finally {
+        isSubmitting.value = false;
+        setSubmissionLoader(false);
+      }
+    }
+
+    async function viewAuction() {
+      if (isOpeningAuction.value || isSubmitting.value) return;
+      isOpeningAuction.value = true;
+      const context = captureContext();
+      try {
+        if (await refreshAvailability(context) !== 'auction') return;
+        const auction = await fetchNameAuction(context.name);
+        if (!isCurrentContext(context)) return;
+        setAuctionEntry({ name: context.name, ...auction });
+        await router.push({ name: ROUTE_AUCTION_BID, params: { name: context.name } });
+      } catch (error) {
+        if (isCurrentContext(context)) auctionLoadError.value = true;
+      } finally {
+        isOpeningAuction.value = false;
       }
     }
 
     onIonViewWillEnter(() => {
+      isPageActive.value = true;
       setLoaderVisible(false);
+    });
+    onIonViewWillLeave(() => {
+      setSubmissionLoader(false);
+      isPageActive.value = false;
+    });
+    onBeforeUnmount(() => {
+      setSubmissionLoader(false);
+      isPageActive.value = false;
     });
 
     return {
       AE_AENS_DOMAIN,
       autoExtend,
+      availability,
+      availabilityError,
+      auctionLoadError,
+      isCheckingAvailability,
+      isSubmitting,
+      isOpeningAuction,
       isLoaderVisible,
       isNameValid,
       name,
@@ -254,6 +393,8 @@ export default defineComponent({
       errorName,
       maxNameLength,
       claim,
+      refreshAvailability,
+      viewAuction,
     };
   },
 });
@@ -288,6 +429,14 @@ export default defineComponent({
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  .availability {
+    margin-top: 12px;
+
+    .button-plain {
+      color: $color-primary;
+    }
   }
 
   .explanation {

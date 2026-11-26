@@ -16,7 +16,7 @@ module.exports = {
     es2021: true,
   },
   extends: [
-    'plugin:@intlify/vue-i18n/recommended',
+    'plugin:@intlify/vue-i18n/recommended-legacy',
     'plugin:vue/recommended',
     '@vue/eslint-config-airbnb',
     '@vue/eslint-config-typescript',
@@ -64,14 +64,12 @@ module.exports = {
     '@intlify/vue-i18n/no-missing-keys': 'off',
     '@intlify/vue-i18n/no-raw-text': 'off',
     'vue/multi-word-component-names': 'off',
-    'vue/no-v-model-argument': 'off',
     'vue/no-reserved-component-names': 'off',
     'vue/singleline-html-element-content-newline': 'off',
+    // an undeclared event's listener also falls through to the root
+    'vue/require-explicit-emits': 'error',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true, caughtErrors: 'none' }],
     '@stylistic/member-delimiter-style': ['error'],
-
-    // TODO: https://github.com/superhero-com/superhero-wallet/issues/2857
-    'vuejs-accessibility/click-events-have-key-events': 'off',
   },
   overrides: [
     {

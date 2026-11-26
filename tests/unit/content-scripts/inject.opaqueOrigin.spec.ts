@@ -33,17 +33,9 @@ describe('inject.ts opaque origin frames', () => {
       },
     };
     vi.doMock('webextension-polyfill', () => ({ default: (global as any).browser }), { virtual: true });
-    vi.doMock('@aeternity/aepp-sdk', async () => ({
-      ...(await vi.importActual('@aeternity/aepp-sdk')),
-      BrowserRuntimeConnection: vi.fn(),
-      BrowserWindowMessageConnection: vi.fn(),
-      connectionProxy: vi.fn(),
-    }));
 
     vi.spyOn(window, 'addEventListener');
-    // inject.ts polls `document.readyState` via setInterval at module load; a
-    // leaked interval would fire after the jsdom environment is torn down.
-    vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>);
+    vi.spyOn(document, 'readyState', 'get').mockReturnValue('complete');
 
     stubOrigin(origin);
     vi.resetModules();
@@ -67,7 +59,7 @@ describe('inject.ts opaque origin frames', () => {
 
     expect(getMessageListener()).toBeUndefined();
     expect((global as any).browser.runtime.onMessage.addListener).not.toHaveBeenCalled();
-    expect(global.setInterval).not.toHaveBeenCalled();
+    expect((global as any).browser.runtime.connect).not.toHaveBeenCalled();
   });
 
   it('runs as usual on a real origin', async () => {
@@ -75,5 +67,6 @@ describe('inject.ts opaque origin frames', () => {
 
     expect(getMessageListener()).toBeDefined();
     expect((global as any).browser.runtime.onMessage.addListener).toHaveBeenCalled();
+    expect((global as any).browser.runtime.connect).toHaveBeenCalled();
   });
 });

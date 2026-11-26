@@ -36,13 +36,16 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import BigNumber from 'bignumber.js';
 import type { ITransaction, Protocol, TransferFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAccounts,
   useLatestTransactionList,
+  useNetworks,
   useUi,
 } from '@/composables';
+import { useEthTokenBalance } from '@/protocols/ethereum/composables/ethTokenBalance';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -56,24 +59,26 @@ export default defineComponent({
     DetailsItem,
     TransferReviewBase,
   },
-  model: {
-    prop: 'transferData',
-  },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     protocol: { type: String as PropType<Protocol>, required: true },
   },
+  emits: ['success'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const router = useRouter();
     const { homeRouteName } = useUi();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { addAccountPendingTransaction } = useLatestTransactionList();
+    const { activeNetwork } = useNetworks();
+    const { addUnconfirmedTokenTransfer, getSpendableTokenBalance } = useEthTokenBalance();
 
     const loading = ref<boolean>(false);
 
     const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
     const { coinSymbol } = adapter;
+
+    const nodeUrl = computed((): string => activeNetwork.value.protocols[props.protocol].nodeUrl);
 
     const isSelectedAssetEthCoin = computed(
       () => props.transferData?.selectedAsset?.contractId === adapter.coinContractId,
@@ -86,6 +91,15 @@ export default defineComponent({
         type: 'api-response',
         modal: true,
       });
+    }
+
+    /** Or the send fails on its gas estimate with a vague contract error */
+    async function isTokenBalanceEnough(contractId: string, owner: string, total: BigNumber) {
+      try {
+        return (await getSpendableTokenBalance(contractId, owner, nodeUrl.value)).gte(total);
+      } catch {
+        return true;
+      }
     }
 
     async function submit(): Promise<void> {
@@ -103,10 +117,24 @@ export default defineComponent({
       let actionResult;
       const lastActiveEthAccount = getLastActiveProtocolAccount(props.protocol);
       try {
-        let currentNonce = await (adapter as any)
-          .getTransactionCount(lastActiveEthAccount?.address!);
+        const [isBalanceEnough, nonce] = await Promise.all([
+          isSelectedAssetEthCoin.value || isTokenBalanceEnough(
+            selectedAsset.contractId,
+            lastActiveEthAccount?.address!,
+            new BigNumber(amount).times(recipients.length),
+          ),
+          (adapter as any).getTransactionCount(lastActiveEthAccount?.address!),
+        ]);
+        if (!isBalanceEnough) {
+          openTransactionFailedModal(t('modals.insufficient-balance.msg'));
+          return;
+        }
+
+        let currentNonce: number = nonce;
         // eslint-disable-next-line no-restricted-syntax
         for (const recipient of recipients) {
+          // E.g. adds a missing `0x`, without which a coin transfer can't be signed
+          const recipientAddress = adapter.normalizeAddress(recipient);
           if (!isSelectedAssetEthCoin.value) {
             // Or nothing would be sent, while it looks like a success
             if (!adapter.transferToken) {
@@ -115,7 +143,7 @@ export default defineComponent({
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.transferToken(
               amount,
-              recipient,
+              recipientAddress,
               selectedAsset.contractId,
               {
                 fromAccount: lastActiveEthAccount?.address,
@@ -124,11 +152,18 @@ export default defineComponent({
                 nonce: currentNonce,
               },
             );
+            addUnconfirmedTokenTransfer({
+              nodeUrl: nodeUrl.value,
+              from: lastActiveEthAccount?.address!,
+              contractId: selectedAsset.contractId,
+              nonce: currentNonce,
+              amount,
+            });
           } else {
             // eslint-disable-next-line no-await-in-loop
             actionResult = await adapter.spend(
               amount,
-              recipient,
+              recipientAddress,
               {
                 fromAccount: lastActiveEthAccount?.address,
                 maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
@@ -151,7 +186,7 @@ export default defineComponent({
                 senderId: lastActiveEthAccount?.address,
                 type: (isSelectedAssetEthCoin.value) ? 'SpendTx' : 'ContractCallTx',
                 function: 'transfer',
-                recipientId: recipient,
+                recipientId: recipientAddress,
                 arguments: [],
                 fee: 0,
                 nonce: currentNonce,

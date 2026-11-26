@@ -1,5 +1,5 @@
-import { computed, Ref } from 'vue';
-import { Tag } from '@aeternity/aepp-sdk';
+import { computed, Ref, watch } from 'vue';
+import { isAuctionName, isName, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 
 import type {
@@ -18,8 +18,10 @@ import {
   isAssetCoin,
 } from '@/utils';
 import { ASSET_TYPES, PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
+  AE_AENS_DOMAIN,
   AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
   TX_FUNCTIONS,
@@ -31,6 +33,8 @@ import {
   aettosToAe,
   getInnerTransaction,
   getOwnershipStatus,
+  getSuperheroTxAction,
+  getTransactionExecutionResult,
   getTransactionTokenInfoResolver,
   getTxDirection,
   getTxFunctionParsed,
@@ -47,11 +51,15 @@ import { useAeSdk } from './aeSdk';
 
 import { useTippingContracts } from './tippingContracts';
 
+const TOKEN_SALE_TRADE_FUNCTIONS = Object.values(TX_FUNCTIONS_TOKEN_SALE).flat();
+
 interface UseTransactionOptions {
   transaction: Ref<ITransaction | undefined>;
   transactionCustomOwner?: Ref<AccountAddress | undefined>;
   showDetailedAllowanceInfo?: boolean;
   hideFeeFromAssets?: boolean;
+  /** Look up the sale of a buy or sell that the token sales list is missing */
+  lookUpTokenSale?: boolean;
 }
 
 /**
@@ -62,8 +70,9 @@ export function useTransactionData({
   transactionCustomOwner,
   showDetailedAllowanceInfo = false,
   hideFeeFromAssets = false,
+  lookUpTokenSale = false,
 }: UseTransactionOptions) {
-  const { dexContracts } = useAeSdk();
+  const { dexContracts, superheroContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
   const {
@@ -75,11 +84,13 @@ export function useTransactionData({
   const {
     tokenFactories,
     tokenSaleAddresses,
+    loadTokenSaleOnce,
     tokenSaleAddressToTokenContractAddress,
   } = useAeTokenSales();
 
   const protocol = computed(() => transaction.value?.protocol || PROTOCOLS.aeternity);
   const outerTx = computed(() => transaction.value?.tx);
+  const executionResult = computed(() => getTransactionExecutionResult(outerTx.value));
   const innerTx = computed(() => outerTx.value ? getInnerTransaction(outerTx.value) : undefined);
   const outerTxTag = computed(() => outerTx.value ? getTxTag(outerTx.value) : null);
   const innerTxTag = computed(() => innerTx.value ? getTxTag(innerTx.value) : null);
@@ -87,17 +98,31 @@ export function useTransactionData({
   const txFunctionParsed = computed(() => getTxFunctionParsed(innerTx.value?.function));
   const txFunctionRaw = computed(() => getTxFunctionRaw(innerTx.value?.function));
 
+  const isNameBid = computed(() => {
+    const { name } = outerTx.value || {};
+    // Both the initial short-name claim and subsequent claims are auction bids.
+    return protocol.value === PROTOCOLS.aeternity
+      && outerTxTag.value === Tag.NameClaimTx
+      && isName(name)
+      && name.length > AE_AENS_DOMAIN.length
+      && isAuctionName(name);
+  });
+
   /**
    * Transaction TX type value converted into human readable label
    * displayed on the transaction details page.
    */
-  const txTypeLabel = computed((): string => txType.value ? getTxTypeLabel(txType.value) : '');
+  const txTypeLabel = computed((): string => {
+    if (isNameBid.value) return tg('transaction.type.nameBid');
+    return txType.value ? getTxTypeLabel(txType.value) : '';
+  });
 
   /**
    * Transaction TX type value converted into human readable label
    * displayed on the transaction lists.
    */
   const txTypeListLabel = computed((): string => {
+    if (isNameBid.value) return tg('transaction.listType.nameBid');
     const listTranslation = (txType.value) ? getTxTypeListLabel(txType.value) : '';
     return listTranslation ?? txTypeLabel.value;
   });
@@ -126,7 +151,7 @@ export function useTransactionData({
   );
 
   const isTokenSale = computed(
-    (): boolean => tokenSaleAddresses.value
+    (): boolean => !!innerTx.value?.contractId && tokenSaleAddresses.value
       .some((address) => address === innerTx.value?.contractId),
   );
 
@@ -143,6 +168,22 @@ export function useTransactionData({
       && includes(TX_FUNCTIONS_TOKEN_SALE.sell, txFunctionRaw.value)
     ),
   );
+
+  if (lookUpTokenSale) {
+    watch(
+      () => (
+        protocol.value === PROTOCOLS.aeternity
+        && includes(TOKEN_SALE_TRADE_FUNCTIONS, txFunctionRaw.value)
+        && !isTokenSale.value
+      ) ? innerTx.value?.contractId : undefined,
+      (contractId) => {
+        if (contractId) {
+          loadTokenSaleOnce(contractId);
+        }
+      },
+      { immediate: true },
+    );
+  }
 
   const isTokenSaleFactory = computed(
     (): boolean => tokenFactories.value
@@ -163,23 +204,30 @@ export function useTransactionData({
     && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
   ));
 
+  // Entrypoints like `withdraw` exist on non-DEX contracts as well
   const isDexLiquidityAdd = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunctionRaw.value),
   );
   const isDexLiquidityRemove = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunctionRaw.value),
+    (): boolean => (
+      isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunctionRaw.value)
+    ),
   );
   const isDexPool = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunctionRaw.value),
   );
   const isDexSwap = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunctionRaw.value),
   );
   const isDexMaxSpent = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunctionRaw.value),
   );
   const isDexMinReceived = computed(
-    (): boolean => includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunctionRaw.value),
+    (): boolean => isDex.value && includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunctionRaw.value),
+  );
+
+  const superheroTxAction = computed(
+    () => getSuperheroTxAction(transaction.value, superheroContracts.value),
   );
 
   const isMultisig = computed((): boolean => (
@@ -209,7 +257,7 @@ export function useTransactionData({
 
   const isErrorTransaction = computed(
     (): boolean => {
-      const { returnType } = outerTx.value || {};
+      const { returnType } = executionResult.value || {};
       return !!(returnType && returnType !== TX_RETURN_TYPE_OK);
     },
   );
@@ -368,6 +416,7 @@ export function useTransactionData({
     txFunctionRaw,
     isAex9,
     isErrorTransaction,
+    executionResult,
 
     isTokenSale,
     isTokenSaleBuy,
@@ -382,6 +431,8 @@ export function useTransactionData({
     isDexMinReceived,
     isDexPool,
     isDexSwap,
+
+    superheroTxAction,
 
     isMultisig,
     isTip,

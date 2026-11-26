@@ -8,6 +8,7 @@
     <BtnPlain
       class="icon-link"
       :class="status"
+      :aria-label="$t('a11y.urlStatusDetails', { status: statusData.title })"
       @click="showModal()"
     >
       <QuestionCircleIcon class="icon" />

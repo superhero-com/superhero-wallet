@@ -12,6 +12,7 @@
       <BtnIcon
         class="btn-refresh"
         size="sm"
+        :aria-label="$t('a11y.refreshTransactions')"
         :icon="RefreshIcon"
         :loading="areLatestTransactionsUpdating"
         @click="loadAllLatestTransactions()"
@@ -29,6 +30,8 @@
           :key="`${transaction.transactionOwner}-${transaction.hash}`"
           class="transaction-item"
           :transaction="transaction"
+          :transaction-route="TRANSACTION_ROUTE"
+          keeps-page
           show-transaction-owner
           hide-fee-from-assets
         />
@@ -53,6 +56,7 @@ import {
   useViewport,
 } from '@/composables';
 import { UNFINISHED_FEATURES } from '@/constants';
+import { ROUTE_ACCOUNT_TX_DETAILS } from '@/popup/router/routeNames';
 
 import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 import RefreshIcon from '@/icons/dapp/dapp-refresh.svg?vue-component';
@@ -62,6 +66,7 @@ import TransactionListItem from './TransactionListItem.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 
 const DASHBOARD_TRANSACTION_LIMIT = 3;
+const TRANSACTION_ROUTE = { name: ROUTE_ACCOUNT_TX_DETAILS };
 
 export default defineComponent({
   name: 'LatestTransactionsCard',
@@ -121,6 +126,7 @@ export default defineComponent({
     });
 
     return {
+      TRANSACTION_ROUTE,
       RefreshIcon,
       allLatestTransactions,
       accountsTransactionsPending,

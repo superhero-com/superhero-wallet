@@ -56,6 +56,7 @@
             :text="$t('common.swap')"
             :icon="SwapIcon"
             :href="AE_DEX_URL"
+            in-app-browser
           />
         </div>
 
@@ -68,7 +69,7 @@
               v-for="tab in tabs"
               :key="tab.routeName"
               :exact-path="tab.exact"
-              :to="{ name: tab.routeName, params: route.params }"
+              :to="{ name: tab.routeName, params: { id: contractId } }"
               :text="tab.text"
             />
           </Tabs>
@@ -93,10 +94,11 @@
 </template>
 
 <script lang="ts">
-import { IonRouterOutlet, onIonViewDidLeave } from '@ionic/vue';
+import { IonRouterOutlet } from '@ionic/vue';
 import {
   computed,
   defineComponent,
+  onBeforeUnmount,
   onMounted,
   ref,
   nextTick,
@@ -134,6 +136,7 @@ import {
   useUi,
   usePendingMultisigTransaction,
 } from '@/composables';
+import { usePageVisibility } from '@/composables/composablesHelpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fadeAnimation } from '@/popup/animations';
 import AedexV2PairACI from '@/protocols/aeternity/aci/AedexV2PairACI.json';
@@ -176,8 +179,9 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { t } = useI18n();
-    const { setSharedAssetDetails, resetSharedAssetDetails } = useAssetDetails();
+    const { setSharedAssetDetails } = useAssetDetails();
     const { setLoaderVisible } = useUi();
+    const isPageVisible = usePageVisibility();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
@@ -299,8 +303,10 @@ export default defineComponent({
      * Observe tabs wrapper height changes and recalculate router height.
      * Tabs change height when filters are shown/hidden
      */
+    let resizeObserver: ResizeObserver | undefined;
+
     function observeTabsWrapperHeight() {
-      const resizeObserver = new ResizeObserver(() => {
+      resizeObserver = new ResizeObserver(() => {
         calculateRouterHeight();
       });
       resizeObserver.observe(stickyTabsWrapperEl.value!);
@@ -373,25 +379,32 @@ export default defineComponent({
         setLoaderVisible(false);
       }
       setTimeout(() => {
-        observeTabsWrapperHeight();
-        calculateRouterHeight();
+        // The page can be left before this runs
+        if (stickyTabsWrapperEl.value) {
+          observeTabsWrapperHeight();
+          calculateRouterHeight();
+        }
       }, 250);
     });
 
-    watch(assetData, (newAssetData) => {
-      setSharedAssetDetails({
-        contractId,
-        tokenPairs: tokenPairs.value,
-        tokenData: newAssetData,
-        tokenBalance: fungibleTokenBalance.value,
-        tokens: tokens.value,
-        isMultisig: isMultisig.value,
-      });
-    }, { immediate: true });
-
-    onIonViewDidLeave(() => {
-      resetSharedAssetDetails();
+    onBeforeUnmount(() => {
+      resizeObserver?.disconnect();
     });
+
+    // The page stays mounted under pages pushed over it, like another asset's page.
+    // The pairs load after it's mounted.
+    watch([assetData, isPageVisible, tokenPairs], ([newAssetData, isVisible]) => {
+      if (isVisible) {
+        setSharedAssetDetails({
+          contractId,
+          tokenPairs: tokenPairs.value,
+          tokenData: newAssetData,
+          tokenBalance: fungibleTokenBalance.value,
+          tokens: tokens.value,
+          isMultisig: isMultisig.value,
+        });
+      }
+    }, { immediate: true });
 
     return {
       PROTOCOLS,
@@ -426,7 +439,6 @@ export default defineComponent({
       showFilterBar,
       routeName,
       isMultisig,
-      route,
       routerHeight,
       fadeAnimation,
     };

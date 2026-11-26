@@ -67,6 +67,8 @@ export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 
 export const DECIMAL_PLACES_HIGH_PRECISION = 9;
 export const DECIMAL_PLACES_LOW_PRECISION = 2;
+/** Balances and lists cut amounts to these significant digits */
+export const AMOUNT_SIGNIFICANT_DIGITS = 6;
 
 export const TX_DIRECTION = {
   sent: 'sent',
@@ -375,6 +377,7 @@ export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
 export const MODAL_CONFIRM_UNSAFE_SIGN = 'confirm-unsafe-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
+export const MODAL_CONFIRM_NETWORK_SWITCH = 'confirm-network-switch';
 export const MODAL_CONFIRM_ACCOUNT_LIST = 'confirm-account-list';
 export const MODAL_CONFIRM_DISABLE_ERROR_LOG = 'confirm-disable-error-log';
 export const MODAL_CONSENSUS_INFO = 'consensus-info';
@@ -412,6 +415,7 @@ export const MODAL_SET_PASSWORD = 'set-password';
 export const MODAL_PASSWORD_LOGIN = 'password-login';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
+export const POPUP_TYPE_NETWORK_SWITCH = 'network-switch';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
@@ -420,6 +424,7 @@ export const POPUP_TYPE_UNSAFE_SIGN = 'unsafeSign';
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
+  POPUP_TYPE_NETWORK_SWITCH,
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
@@ -442,6 +447,7 @@ export const POPUP_ACTIONS = {
 
 export const POPUP_METHODS = {
   openPopup: 'openPopup',
+  popupWindowRemoved: 'popupWindowRemoved',
   removePopup: 'removePopup',
   getPopup: 'getPopup',
   reload: 'reload',
@@ -455,6 +461,7 @@ export const SESSION_METHODS = {
   setSessionTimeout: 'setSessionTimeout',
   getSessionEncryptionKey: 'getSessionEncryptionKey',
   sessionKeyStored: 'sessionKeyStored',
+  mutateSessionKey: 'mutateSessionKey',
 } as const;
 
 export const AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE = 'airgap-signed-transaction';

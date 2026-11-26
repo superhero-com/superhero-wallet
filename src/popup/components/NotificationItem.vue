@@ -1,8 +1,14 @@
+<!--
+  Clicking anywhere on the row is a pointer shortcut; keyboard users press the button inside.
+  A row with a role would nest that button.
+-->
+<!-- eslint-disable vuejs-accessibility/click-events-have-key-events -->
 <template>
   <div
     class="notification-item"
     @click.stop="handleClick"
   >
+    <!-- eslint-enable vuejs-accessibility/click-events-have-key-events -->
     <div class="status-and-date">
       <span
         v-if="isUnread"
@@ -48,13 +54,15 @@
         class="redirect-button"
         variant="danger"
       />
-      <div
+      <!-- Its click reaches the row, which opens the link -->
+      <button
         v-else-if="redirectInfo"
+        type="button"
         class="external-link-button"
       >
         {{ redirectInfo }}
         <ExternalLinkIcon class="external-link-icon" />
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -195,6 +203,9 @@ export default defineComponent({
   }
 
   .content {
+    // Room for the link button's focus ring without moving the content
+    padding: 4px;
+    margin: -4px;
     overflow: hidden;
   }
 
@@ -264,11 +275,13 @@ export default defineComponent({
 
   .external-link-button {
     @include mixins.flex(flex-start, center);
+    @include mixins.focus-ring;
 
     @extend %face-sans-13-medium;
 
     color: $color-white;
     margin-top: 6px;
+    text-align: start;
 
     .external-link-icon {
       width: 24px;

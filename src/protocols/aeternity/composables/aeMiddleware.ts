@@ -1,23 +1,22 @@
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import {
-  camelCase,
-  flatMap,
-  groupBy,
-} from 'lodash-es';
-import { Tag } from '@aeternity/aepp-sdk';
+import { flatMap, groupBy } from 'lodash-es';
+import { AensName, Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
   AccountAddress,
-  IMiddleware,
   IMiddlewareStatus,
+  IPageableResponse,
   ITransaction,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { fetchJson, getActivityHash, watchUntilTruthy } from '@/utils';
-import { genSwaggerClient, mapObject } from '@/lib/swagger';
+import {
+  fetchJson,
+  getActivityHash,
+  isNotFoundError,
+  watchUntilTruthy,
+} from '@/utils';
 import JsonBig from '@/lib/json-big';
 
-import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
 import { ACTIVITIES_TYPES, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
 import { useTippingContracts } from '@/composables/tippingContracts';
@@ -26,40 +25,16 @@ import { useAeNetworkSettings } from './aeNetworkSettings';
 import { categorizeContractCallTxObject } from '../helpers';
 
 const POLLING_INTERVAL = 10000;
-/**
- * A hung init would otherwise block every middleware consumer for as long as the
- * socket stays open - `fetchJson` has no timeout of its own.
- */
-const INIT_TIMEOUT = 30000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
-const middleware = ref<IMiddleware | null>(null);
-let initMiddlewarePromise: Promise<void> | null = null;
-const isMiddlewareReady = computed(() => !!middleware.value);
 const isMiddlewareUnavailable = ref(false);
 const middlewareStatus = ref<IMiddlewareStatus>();
 
 /**
- * Store the last used network settings to detect network change
- * whenever the middleware is accessed.
+ * Requests to the middleware v3 API of the active network.
+ * @link https://github.com/aeternity/ae_mdw#readme
  */
-let middlewareCurrentAeNetworkSettings: IAeNetworkSettings;
-
-/**
- * Reject once `INIT_TIMEOUT` elapses so a stalled request cannot hold every
- * middleware consumer indefinitely. Callers already handle a rejected init.
- */
-function withInitTimeout<T>(promise: Promise<T>): Promise<T> {
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-  return Promise.race([
-    promise,
-    new Promise<never>((_r, reject) => {
-      timeout = setTimeout(() => reject(new Error('Middleware init timed out')), INIT_TIMEOUT);
-    }),
-  ]).finally(() => clearTimeout(timeout));
-}
-
 export function useAeMiddleware() {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
@@ -79,13 +54,16 @@ export function useAeMiddleware() {
     await watchUntilTruthy(aeActiveNetworkSettings);
     const response = await fetch(`${aeActiveNetworkSettings.value.middlewareUrl}${path}`);
     if (!response.ok) {
-      throw new Error(`Middleware responded with ${response.status} to ${path}`);
+      throw Object.assign(
+        new Error(`Middleware responded with ${response.status} to ${path}`),
+        { statusCode: response.status },
+      );
     }
     return camelCaseKeysDeep(JsonBig.parse(await response.text()));
   }
 
   async function fetchMiddlewareStatus(): Promise<IMiddlewareStatus> {
-    return fetchFromMiddlewareCamelCased('/status');
+    return fetchFromMiddlewareCamelCased('/v3/status');
   }
 
   async function checkMiddlewareStatus() {
@@ -101,59 +79,32 @@ export function useAeMiddleware() {
     }
   }
 
-  /**
-   * Force to initialize new middleware instance.
-   */
-  async function initMiddleware() {
-    await watchUntilTruthy(aeActiveNetworkSettings);
-    // Snapshot the settings: a switch mid-init must leave the recorded URL pointing at
-    // the client actually built, so the check below re-inits instead of keeping it.
-    const aeNetworkSettings = aeActiveNetworkSettings.value;
-    const { middlewareUrl } = aeNetworkSettings;
+  async function fetchTransaction(hash: string): Promise<ITransaction> {
+    return fetchFromMiddlewareCamelCasedPrecise(`/v3/transactions/${encodeURIComponent(hash)}`);
+  }
 
-    const spec = await withInitTimeout(fetchJson(`${middlewareUrl}/v2/api`));
-
-    middleware.value = mapObject(
-      (await withInitTimeout(genSwaggerClient(middlewareUrl, { spec }) as Promise<any>)).api,
-      ([key, value]: any[]) => [camelCase(key), value],
-    ) as any;
-    // Only once the client is live - a failed init must not look like a completed switch.
-    middlewareCurrentAeNetworkSettings = aeNetworkSettings;
+  async function fetchTransactions(
+    query: Record<string, string | number>,
+  ): Promise<IPageableResponse<ITransaction>> {
+    const searchParams = new URLSearchParams(
+      Object.entries(query).map(([key, value]) => [key, value.toString()]),
+    );
+    return fetchFromMiddlewareCamelCasedPrecise(`/v3/transactions?${searchParams}`);
   }
 
   /**
-   * Get the current middleware instance. Create new one if it's not instantiated
-   * or the currently used app network settings has different value for the `middlewareUrl`.
+   * A name in its first auction is found only among the auctions.
    */
-  async function getMiddleware(): Promise<IMiddleware> {
-    // While an init is in flight `middleware` still holds the PREVIOUS network's client,
-    // so wait for the init itself - waiting for the ref to be truthy returns the old one.
-    // Looped, not a single wait: if the one we were waiting on just failed, another
-    // waiter may already have started a fresh attempt - join that one too instead of
-    // starting a third.
-    while (initMiddlewarePromise) {
-      // Each iteration waits on whichever promise is current, not a static collection -
-      // re-checking after each wait is the point.
-      // eslint-disable-next-line no-await-in-loop
-      await initMiddlewarePromise.catch(() => {});
-    }
-
-    const previousMdwUrl = middlewareCurrentAeNetworkSettings?.middlewareUrl;
-    const currentMdwUrl = aeActiveNetworkSettings.value.middlewareUrl;
-
-    if (!middleware.value || previousMdwUrl !== currentMdwUrl) {
-      initMiddlewarePromise = initMiddleware();
-      try {
-        await initMiddlewarePromise;
-      } finally {
-        initMiddlewarePromise = null;
+  async function fetchNameByHash(hash: Encoded.Name): Promise<AensName> {
+    const encodedHash = encodeURIComponent(hash);
+    try {
+      return (await fetchFromMiddlewareCamelCased(`/v3/names/${encodedHash}`)).name;
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        throw error;
       }
+      return (await fetchFromMiddlewareCamelCased(`/v3/names/auctions/${encodedHash}`)).name;
     }
-    return middleware.value!;
-  }
-
-  function getMiddlewareRef() {
-    return middleware;
   }
 
   function normalizeActivitiesStructure(activities: any[]) {
@@ -247,15 +198,15 @@ export function useAeMiddleware() {
   initPollingWatcher(() => checkMiddlewareStatus());
 
   return {
-    getMiddleware,
-    getMiddlewareRef,
     fetchFromMiddleware,
     fetchFromMiddlewareCamelCased,
     fetchFromMiddlewareCamelCasedPrecise,
     fetchMiddlewareStatus,
+    fetchTransaction,
+    fetchTransactions,
+    fetchNameByHash,
     normalizeActivitiesStructure,
     normalizeMiddlewareTransactionStructure,
-    isMiddlewareReady,
     isMiddlewareUnavailable,
     middlewareStatus,
   };

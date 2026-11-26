@@ -10,7 +10,10 @@ import {
   POPUP_METHODS,
   PROTOCOLS,
   EVM_PROTOCOLS,
+  SESSION_METHODS,
 } from '@/constants';
+import { handleSessionKeyMutation } from '@/lib/ExtensionSessionStorage';
+import { getApprovalSourceTab } from '@/lib/approvalSourceTab';
 import {
   useWalletConnect,
   useNetworks,
@@ -129,6 +132,7 @@ watch(activeAccount, async (newVal, oldVal) => {
 // If browser is FF, load the redirectRule script because background is not loaded from the manifest
 // in FF we have to use the offscreen.html as background page
 if (IS_FIREFOX) {
+  browser.windows.onRemoved.addListener(wallet.handlePopupWindowRemoved);
   browser.runtime.onInstalled.addListener(updateDynamicRules);
   registerInPageContentScript();
 }
@@ -146,6 +150,15 @@ browser.runtime.onMessage.addListener(
       params: { aepp, rpcMethodParams } = {},
     } = msg;
 
+    if (method === POPUP_METHODS.popupWindowRemoved) {
+      // Chrome's service worker has no tab. Content scripts share its extension ID.
+      if (!IS_FIREFOX && !sender.tab && sender.url === browser.runtime.getURL('js/background.js')
+        && Number.isInteger(payload)) {
+        wallet.handlePopupWindowRemoved(payload);
+      }
+      return undefined;
+    }
+
     // Content scripts relay whatever a web page posts: EVM RPC calls only,
     // so take the origin from the browser, not from the message.
     if (!isExtensionPageSender(sender)) {
@@ -161,10 +174,15 @@ browser.runtime.onMessage.addListener(
           undefined,
           undefined,
           undefined,
-          sender.tab?.id,
+          getApprovalSourceTab(sender),
         );
       }
       return undefined;
+    }
+
+    // Firefox uses this page as its background owner. Chrome's worker handles mutations.
+    if (IS_FIREFOX && method === SESSION_METHODS.mutateSessionKey) {
+      return handleSessionKeyMutation(payload);
     }
 
     if (method === POPUP_METHODS.reload) {
@@ -184,7 +202,12 @@ browser.runtime.onMessage.addListener(
     }
     if (method === POPUP_METHODS.ledgerSignTransaction) {
       const { signTransaction } = useLedger();
-      return signTransaction(payload.address, payload.accountIndex, payload.transaction);
+      return signTransaction(
+        payload.address,
+        payload.accountIndex,
+        payload.transaction,
+        payload.networkId,
+      );
     }
 
     if (method === POPUP_METHODS.ledgerSignMessage) {

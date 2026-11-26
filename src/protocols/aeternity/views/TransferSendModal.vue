@@ -5,6 +5,7 @@
     :hide-arrow-send-icon="isMultisig"
     :custom-primary-button-text="customPrimaryButtonText"
     :sending-disabled="isSendingDisabled"
+    :loading="isNextPending"
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
@@ -122,6 +123,9 @@ export default defineComponent({
         && (!transferData.value.addresses?.length || !transferData.value.amount)
       )
     ));
+
+    // A Next press waiting for the node. Only the form step has one.
+    const isNextPending = computed(() => !!(currentRenderedComponent.value as any)?.isSubmitting);
 
     const customPrimaryButtonText = computed(() => {
       if (props.isMultisig) {
@@ -242,6 +246,7 @@ export default defineComponent({
       isAddressChain,
       isAddressUrl,
       isSendingDisabled,
+      isNextPending,
       customPrimaryButtonText,
       showCopyQrButton,
       CopyOutlinedIcon,

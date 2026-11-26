@@ -39,6 +39,7 @@ import {
   encode,
   unpackTx,
 } from '@aeternity/aepp-sdk';
+import { MODAL_CONFIRM_NETWORK_SWITCH, POPUP_TYPE_NETWORK_SWITCH } from '@/constants';
 
 const HOST = 'dapp.example';
 const AETTO = 1; // smallest aettos unit
@@ -223,6 +224,7 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
     const openModalMock = vi.fn();
     const SENDER = AccountMemory.generate().address;
     const RECIPIENT = AccountMemory.generate().address;
+    const EVM_ADDRESS = '0x1111111111111111111111111111111111111111';
 
     beforeEach(() => {
       openModalMock.mockReset();
@@ -233,7 +235,10 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
       }));
       vi.doMock('@/composables/accounts', async (importOriginal) => ({
         ...(await importOriginal()),
-        useAccounts: () => ({ activeAccount: { value: { address: SENDER } } }),
+        useAccounts: () => ({
+          activeAccount: { value: { address: SENDER } },
+          getLastActiveProtocolAccount: () => ({ address: EVM_ADDRESS }),
+        }),
       }));
     });
 
@@ -342,6 +347,61 @@ describe('usePermissions - checkTransactionSignLimit (black-box)', () => {
         vi.doUnmock('@/offscreen/popupHandler');
       });
 
+      it('distinguishes a failed approval window from a declined EVM connection', async () => {
+        vi.resetModules();
+        localStorage.clear();
+        await import('@/protocols/registerAdapters');
+        const { ApprovalWindowError } = await import('@/lib/errors');
+        const { handleEvmRpcRequest } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+        openPopupMock
+          .mockRejectedValueOnce(new ApprovalWindowError())
+          .mockRejectedValueOnce(undefined);
+        const connect = () => handleEvmRpcRequest(`https://${HOST}`, 'eth_requestAccounts', []);
+
+        await expect(connect()).resolves.toEqual({
+          error: { code: -32603, message: 'Could not open the approval window' },
+        });
+        await expect(connect()).resolves.toMatchObject({ error: { code: 4001 } });
+      });
+
+      it('releases a queued site when an approval closes before its page connects', async () => {
+        vi.doUnmock('@/offscreen/popupHandler');
+        vi.doMock('@/constants', async (importOriginal) => ({
+          ...(await importOriginal()), IS_OFFSCREEN_TAB: true, IS_FIREFOX: true,
+        }));
+        vi.resetModules();
+        localStorage.clear();
+        // Ahead of the adapters, so that the barrel binds the mocked accounts
+        const { usePermissions: useFreshPermissions } = await import('@/composables/permissions');
+        await import('@/protocols/registerAdapters');
+        const { handleEvmRpcRequest } = await import('@/protocols/evm/libs/EvmRpcMethodsHandler');
+        const { handlePopupWindowRemoved } = await import('@/offscreen/popupHandler');
+        const stored = useFreshPermissions();
+        stored.resetPermissions();
+        stored.addPermission(buildPermission({ host: 'connected.example' }));
+        const windowId = 7;
+        const create = vi.fn(async () => ({ id: windowId, tabs: [{ id: 53, windowId }] }));
+        vi.stubGlobal('browser', {
+          ...globalThis.browser,
+          runtime: { ...globalThis.browser.runtime, getURL: (path) => `moz-extension://wallet/${path}` },
+          tabs: { query: async () => [] },
+          windows: { create },
+        });
+        try {
+          const connect = (host) => handleEvmRpcRequest(`https://${host}`, 'eth_requestAccounts', []);
+          const first = connect(HOST);
+          await vi.waitFor(() => expect(create).toHaveBeenCalledOnce());
+          const second = connect('connected.example');
+
+          handlePopupWindowRemoved(windowId);
+          await expect(first).resolves.toMatchObject({ error: { code: 4001 } });
+          await expect(second).resolves.toEqual({ result: [EVM_ADDRESS] });
+          expect(create).toHaveBeenCalledOnce();
+        } finally {
+          vi.unstubAllGlobals();
+        }
+      });
+
       it('signs a spend under the limit while the wallet is unlocked', async () => {
         getSessionEncryptionKeyMock.mockResolvedValue('session-key');
 
@@ -419,5 +479,216 @@ describe('usePermissions - asking about the address of a connected site', () => 
       protocol: 'bnb',
     })).toBe(true);
     expect(openModalMock).toHaveBeenCalledTimes(modals);
+  });
+});
+
+describe('usePermissions - asking to switch the network for a dapp', () => {
+  const openModalMock = vi.fn();
+  const openPopupMock = vi.fn();
+  const target = {
+    networkName: 'Hyperchain',
+    nodeUrl: 'https://node.example',
+    networkId: 'hc_test',
+    isNewNetwork: true,
+  };
+
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    openModalMock.mockReset().mockResolvedValue(undefined);
+    openPopupMock.mockReset().mockResolvedValue(undefined);
+    vi.doMock('@/composables/modals', () => ({
+      useModals: () => ({ openModal: openModalMock }),
+    }));
+    vi.doMock('@/offscreen/popupHandler', () => ({
+      openPopup: openPopupMock,
+      getSessionEncryptionKey: vi.fn(),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('@/composables/modals');
+    vi.doUnmock('@/offscreen/popupHandler');
+    vi.doUnmock('@/constants');
+  });
+
+  it('shows the target in the network switch modal', async () => {
+    const { usePermissions } = await import('@/composables/permissions');
+
+    expect(await usePermissions().askPermission(METHODS.updateNetwork, `https://${HOST}`, target))
+      .toBe(true);
+    expect(openModalMock).toHaveBeenCalledWith(
+      MODAL_CONFIRM_NETWORK_SWITCH,
+      expect.objectContaining({
+        ...target,
+        app: expect.objectContaining({ href: `https://${HOST}/` }),
+      }),
+    );
+  });
+
+  it('shows the target in the network switch popup of the background page', async () => {
+    vi.doMock('@/constants', async (importOriginal) => ({
+      ...(await importOriginal()),
+      IS_OFFSCREEN_TAB: true,
+    }));
+    const { usePermissions } = await import('@/composables/permissions');
+
+    expect(await usePermissions().askPermission(METHODS.updateNetwork, `https://${HOST}`, target))
+      .toBe(true);
+    expect(openPopupMock).toHaveBeenCalledWith(
+      POPUP_TYPE_NETWORK_SWITCH,
+      `https://${HOST}/`,
+      expect.objectContaining(target),
+    );
+  });
+});
+
+describe('usePermissions with another window', () => {
+  const ITEM_KEY = 'sh-wallet_permissions';
+  const OTHER_HOST = 'other.example';
+  let usePermissions;
+  let storageListeners;
+
+  const nextTask = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+  const storedPermissions = () => JSON.parse(localStorage.getItem(ITEM_KEY));
+
+  function storeInOtherWindow(registry) {
+    const newValue = JSON.stringify(registry);
+    localStorage.setItem(ITEM_KEY, newValue);
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: ITEM_KEY, newValue, storageArea: localStorage,
+    }));
+  }
+
+  beforeEach(async () => {
+    vi.resetModules();
+    localStorage.clear();
+    storageListeners = [];
+    const addEventListener = window.addEventListener.bind(window);
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, listener, ...rest) => {
+      if (type === 'storage') storageListeners.push(listener);
+      addEventListener(type, listener, ...rest);
+    });
+    ({ usePermissions } = await import('@/composables/permissions'));
+    await nextTask();
+    usePermissions().addPermission(buildPermission({ transactionSignLimit: 10 }));
+    usePermissions().addPermission(buildPermission({ host: OTHER_HOST }));
+    await nextTask();
+  });
+
+  afterEach(() => {
+    storageListeners.forEach((listener) => window.removeEventListener('storage', listener));
+    vi.restoreAllMocks();
+  });
+
+  /** What the other window stores after spending `spent` AE of the daily limit. */
+  function spendInOtherWindow(spent) {
+    const registry = storedPermissions();
+    registry[HOST].transactionSignSpent = spent;
+    storeInOtherWindow(registry);
+  }
+
+  it('counts what another window spent towards the daily limit', () => {
+    const { checkTransactionSignLimit } = usePermissions();
+    spendInOtherWindow(8);
+
+    expect(checkTransactionSignLimit(HOST, { amount: 8 * ONE_AE_IN_AETTOS })).toBe(false);
+    expect(checkTransactionSignLimit(HOST, { amount: 2 * ONE_AE_IN_AETTOS })).toBe(true);
+  });
+
+  it('keeps what another window spent when the permission of another site is removed', async () => {
+    spendInOtherWindow(8);
+
+    usePermissions().removePermission(OTHER_HOST);
+    await nextTask();
+
+    expect(storedPermissions()[HOST].transactionSignSpent).toBe(8);
+    expect(storedPermissions()[OTHER_HOST]).toBeUndefined();
+  });
+
+  describe('saving an edited permission', () => {
+    /** The copy the permission form takes when it opens. */
+    const openForm = () => ({ ...usePermissions().permissions.value[HOST] });
+
+    it('keeps what was spent since the form opened', async () => {
+      const form = openForm();
+      spendInOtherWindow(8);
+
+      usePermissions().updatePermission(HOST, { ...form, transactionSignLimit: 20 });
+      await nextTask();
+
+      expect(storedPermissions()[HOST])
+        .toMatchObject({ transactionSignLimit: 20, transactionSignSpent: 8 });
+    });
+
+    it('keeps the day another window started counting since the form opened', async () => {
+      const registry = storedPermissions();
+      registry[HOST].transactionSignFirstAskedOn = new Date(Date.now() - 25 * 60 * 60 * 1000)
+        .toISOString();
+      storeInOtherWindow(registry);
+      const form = openForm();
+      const today = new Date().toISOString();
+      registry[HOST] = {
+        ...registry[HOST], transactionSignFirstAskedOn: today, transactionSignSpent: 8,
+      };
+      storeInOtherWindow(registry);
+
+      usePermissions().updatePermission(HOST, form);
+      await nextTask();
+
+      expect(storedPermissions()[HOST])
+        .toMatchObject({ transactionSignFirstAskedOn: today, transactionSignSpent: 8 });
+      // 2 AE are left of today's 10.
+      expect(usePermissions().checkTransactionSignLimit(HOST, { amount: 8 * ONE_AE_IN_AETTOS }))
+        .toBe(false);
+    });
+
+    it('keeps the scheme a connection set since the form opened', async () => {
+      const registry = storedPermissions();
+      registry[HOST] = { ...registry[HOST], protocol: 'http:' };
+      storeInOtherWindow(registry);
+      const form = openForm();
+      // Its https page connected.
+      registry[HOST] = { ...registry[HOST], protocol: 'https:' };
+      storeInOtherWindow(registry);
+
+      usePermissions().updatePermission(HOST, { ...form, name: 'Renamed' });
+      await nextTask();
+
+      expect(storedPermissions()[HOST]).toMatchObject({ name: 'Renamed', protocol: 'https:' });
+      expect(usePermissions().getPermissionForUrl(`http://${HOST}`)).toBeUndefined();
+    });
+
+    it('keeps what was spent when the host is renamed', async () => {
+      const form = openForm();
+      spendInOtherWindow(8);
+
+      usePermissions().updatePermission(HOST, { ...form, host: 'renamed.example' });
+      await nextTask();
+
+      expect(storedPermissions()[HOST]).toBeUndefined();
+      expect(storedPermissions()['renamed.example']).toMatchObject({ transactionSignSpent: 8 });
+    });
+
+    it('saves the form as it is when the permission was removed meanwhile', async () => {
+      const form = { ...openForm(), transactionSignSpent: 3 };
+      const registry = storedPermissions();
+      delete registry[HOST];
+      storeInOtherWindow(registry);
+
+      usePermissions().updatePermission(HOST, form);
+      await nextTask();
+
+      expect(storedPermissions()[HOST]).toMatchObject({ transactionSignSpent: 3 });
+    });
+  });
+
+  it('stops signing without asking once another window removed the permission', () => {
+    const registry = storedPermissions();
+    delete registry[HOST];
+    storeInOtherWindow(registry);
+
+    expect(usePermissions().checkTransactionSignLimit(HOST, { amount: ONE_AE_IN_AETTOS }))
+      .toBe(false);
   });
 });

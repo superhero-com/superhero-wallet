@@ -1,5 +1,10 @@
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
-import { FMT_BYTES, FMT_NUMBER, type ContractAbi } from 'web3-types';
+import {
+  FMT_BYTES,
+  FMT_NUMBER,
+  type BlockNumberOrTag,
+  type ContractAbi,
+} from 'web3-types';
 import { getBlock, getTransaction, getTransactionReceipt } from 'web3-eth';
 import { bigIntToHex } from 'web3-eth-accounts';
 import Contract from 'web3-eth-contract';
@@ -90,6 +95,19 @@ export function toEthChecksumAddress(address: string) {
   return (address?.startsWith('0x')) ? toChecksumAddress(address) : address;
 }
 
+/** By node and token. Only an answer is kept, so a hung request holds no later read */
+const decimalsByToken = new Map<string, number>();
+
+async function getTokenDecimals(contractId: string, nodeUrl: string): Promise<number> {
+  const key = `${nodeUrl} ${contractId}`;
+  if (!decimalsByToken.has(key)) {
+    const contract = new Contract(ERC20_ABI, contractId);
+    contract.setProvider(nodeUrl);
+    decimalsByToken.set(key, Number(await contract.methods.decimals().call()));
+  }
+  return decimalsByToken.get(key)!;
+}
+
 /**
  * Estimate gas limit for ERC20 token transfer
  * using the ERC20 ABI because fetching the contract ABI
@@ -110,7 +128,7 @@ export async function getTokenTransferGasLimit(
   );
   contract.setProvider(nodeUrl);
 
-  const tokenDecimals = Number(await contract.methods.decimals().call());
+  const tokenDecimals = await getTokenDecimals(contractId, nodeUrl);
   const hexAmount = bigIntToHex(toTokenBaseUnits(amount, tokenDecimals));
 
   const gasEstimation = await contract.methods.transfer(recipient, hexAmount)
@@ -119,6 +137,26 @@ export async function getTokenTransferGasLimit(
   const gasWithHeadroom = Number(withGasHeadroom(gasEstimation));
   const roundedToNextThousand = Math.ceil(gasWithHeadroom / 1000) * 1000;
   return roundedToNextThousand;
+}
+
+/**
+ * The token balance at the block, the latest by default, which the token APIs can lag
+ * behind by a minute.
+ */
+export async function getTokenBalance(
+  contractId: string,
+  owner: string,
+  nodeUrl: string,
+  block?: BlockNumberOrTag,
+): Promise<BigNumber> {
+  const contract = new Contract(ERC20_ABI, contractId);
+  contract.setProvider(nodeUrl);
+
+  const [balance, decimals] = await Promise.all([
+    contract.methods.balanceOf(owner).call(undefined, block),
+    getTokenDecimals(contractId, nodeUrl),
+  ]);
+  return new BigNumber(String(balance)).shiftedBy(-decimals);
 }
 
 async function fetchContractAbi(contractId: string, protocol: Protocol) {

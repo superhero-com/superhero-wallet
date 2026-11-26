@@ -10,6 +10,7 @@ import router from './router';
 import registerModals from './router/modals';
 import Logger from '../lib/logger';
 import { SidePanelConnection } from '../lib/SidePanelConnection';
+import { initStaleChunkReload } from '../lib/staleChunkReload';
 import AppRoot from './App.vue';
 
 import '@fontsource/ibm-plex-sans/300.css';
@@ -28,6 +29,7 @@ declare global {
   }
 }
 
+initStaleChunkReload();
 registerModals();
 const app = createApp(AppRoot);
 app.use(IonicVue);

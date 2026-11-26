@@ -34,6 +34,7 @@ const keys = Object.fromEntries([activeAccount, otherAccount].map((account) => [
 
 function createNode({
   getTransactionByHash = async (hash) => ({ hash, blockHeight: TOP_HEIGHT, tx: {} }),
+  onPost = undefined,
 } = {}) {
   const posted = [];
   const node = {
@@ -49,6 +50,7 @@ function createNode({
     getTopHeader: async () => ({ height: TOP_HEIGHT }),
     getCurrentKeyBlockHeight: async () => ({ height: TOP_HEIGHT }),
     postTransaction: async ({ tx }) => {
+      await onPost?.();
       posted.push(tx);
       return { txHash: buildTxHash(tx) };
     },
@@ -60,6 +62,9 @@ function createNode({
       }
       return node.nameEntry;
     },
+    getAuctionEntryByName: vi.fn().mockRejectedValue(
+      restError('Auction not found', { statusCode: 404 }),
+    ),
   };
   return node;
 }
@@ -89,11 +94,21 @@ async function createContext({
   preclaimedNames = {},
   ownedNames = [],
   getTransactionByHash = undefined,
+  beforePreclaimWrite = undefined,
+  onPost = undefined,
+  // The real `decryptedComputed` and a real key, instead of a plaintext stand-in.
+  realEncryption = false,
 } = {}) {
   vi.resetModules();
   localStorage.clear();
 
-  const node = createNode({ getTransactionByHash });
+  const node = createNode({ getTransactionByHash, onPost });
+  const authKey = ref('key-before-sending');
+  const selectedAccount = ref({ address: activeAccount.address });
+  const selectedNetworkId = ref(NETWORK_ID);
+  const isKeyCurrent = ref(true);
+  const removeUnreadableSecret = vi.fn().mockResolvedValue(undefined);
+  let decryptedComputedOptions = {};
   const sdk = {
     // As `AeSdkBase.getContext`; transactions are built as without `verify`
     getContext: (mergeWith = {}) => ({
@@ -107,27 +122,69 @@ async function createContext({
     api: node,
   };
   const openDefaultModal = vi.fn();
+  const openConfirmModal = vi.fn().mockResolvedValue(undefined);
 
-  vi.doMock('@/utils', async () => ({
-    ...(await vi.importActual('@/utils')),
-    decryptedComputed: (_key, encryptedState) => encryptedState,
-    fetchAllPages: vi.fn().mockResolvedValue([]),
-  }));
+  vi.doMock('@/utils', async () => {
+    const actual = await vi.importActual('@/utils');
+    const { readVault, refreshVault, writeVaultField } = await vi.importActual('@/lib/WalletVault');
+    const { STORAGE_KEYS } = await vi.importActual('@/constants');
+    return {
+      ...actual,
+      decryptedComputed: realEncryption ? actual.decryptedComputed : (
+        _key,
+        encryptedState,
+        _defaultValue,
+        options = {},
+      ) => {
+        decryptedComputedOptions = options;
+        return Object.assign(encryptedState, {
+          async update(transform) {
+            await beforePreclaimWrite?.();
+            await refreshVault();
+            const snapshot = readVault();
+            await writeVaultField(
+              STORAGE_KEYS.preclaimedNames,
+              transform(snapshot.values[STORAGE_KEYS.preclaimedNames] || '{}'),
+              snapshot,
+            );
+          },
+        });
+      },
+      // The middleware still has the names restored from the storage
+      fetchAllPages: vi.fn().mockResolvedValue(ownedNames.map(({
+        name, owner, expiresAt, createdAtHeight,
+      }) => ({
+        name,
+        activeFrom: createdAtHeight,
+        expireHeight: expiresAt,
+        ownership: { current: owner },
+        pointers: [],
+      }))),
+    };
+  });
   vi.doMock('@/composables/accounts', () => ({
     useAccounts: () => ({
       aeAccounts: ref([{ address: activeAccount.address }, { address: otherAccount.address }]),
-      activeAccount: ref({ address: activeAccount.address }),
+      activeAccount: selectedAccount,
+      areAccountsReady: ref(true),
       isLocalAccountAddress: () => true,
       getLastActiveProtocolAccount: () => ({ address: activeAccount.address }),
     }),
   }));
   vi.doMock('@/composables/aeSdk', () => ({
-    useAeSdk: () => ({ nodeNetworkId: ref(NETWORK_ID), getAeSdk: async () => sdk }),
+    useAeSdk: () => ({ nodeNetworkId: selectedNetworkId, getAeSdk: async () => sdk }),
   }));
   vi.doMock('@/composables/auth', () => ({
-    useAuth: () => ({ encryptionKey: ref('irrelevant-key-decryptedComputed-is-a-passthrough') }),
+    // The value is irrelevant: `decryptedComputed` is a passthrough.
+    useAuth: () => ({
+      encryptionKey: authKey,
+      isEncryptionKeyCurrent: () => isKeyCurrent.value,
+      removeUnreadableSecret,
+    }),
   }));
-  vi.doMock('@/composables/modals', () => ({ useModals: () => ({ openDefaultModal }) }));
+  vi.doMock('@/composables/modals', () => ({
+    useModals: () => ({ openConfirmModal, openDefaultModal }),
+  }));
   vi.doMock('@/composables/topHeader', () => ({
     useTopHeaderData: () => ({ topBlockHeight: ref(TOP_HEIGHT) }),
   }));
@@ -147,10 +204,9 @@ async function createContext({
   }));
   vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
     useAeMiddleware: () => ({
-      isMiddlewareReady: ref(false),
-      getMiddleware: vi.fn().mockResolvedValue({ getNames: vi.fn().mockResolvedValue([]) }),
       fetchFromMiddlewareCamelCased: vi.fn(),
       fetchFromMiddlewareCamelCasedPrecise: vi.fn(),
+      fetchNameByHash: vi.fn(),
     }),
   }));
   vi.doMock('@/protocols/aeternity/composables/aeAddressLinkContract', () => ({
@@ -169,7 +225,20 @@ async function createContext({
   // Before `registerAdapters`, which loads `aeNames.ts` and its storage refs on the way.
   const { WalletStorage } = await import('@/lib/WalletStorage');
   const { STORAGE_KEYS } = await import('@/constants');
-  WalletStorage.set(STORAGE_KEYS.preclaimedNames, JSON.stringify(preclaimedNames));
+  const crypto = await import('@/utils/crypto');
+  if (realEncryption) {
+    // A wallet whose seed and names are stored under the password key.
+    const salt = crypto.generateSalt();
+    authKey.value = await crypto.generateEncryptionKey('password', salt);
+    WalletStorage.set(STORAGE_KEYS.encryptionSalt, crypto.encodeBase64(salt));
+    WalletStorage.set(STORAGE_KEYS.mnemonic, await crypto.encrypt(authKey.value, 'seed'));
+    WalletStorage.set(
+      STORAGE_KEYS.preclaimedNames,
+      await crypto.encrypt(authKey.value, JSON.stringify(preclaimedNames)),
+    );
+  } else {
+    WalletStorage.set(STORAGE_KEYS.preclaimedNames, JSON.stringify(preclaimedNames));
+  }
   WalletStorage.set(STORAGE_KEYS.namesOwned, ownedNames);
   WalletStorage.set(STORAGE_KEYS.namesOwnedNetworkId, NETWORK_ID);
 
@@ -179,18 +248,38 @@ async function createContext({
     .mockResolvedValue([]);
 
   const aeNamesModule = await import('@/protocols/aeternity/composables/aeNames');
-  const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+  // Restored from the storage before the names are loaded, as the requests of the app
+  // take longer than that.
+  const { ensureVaultReady } = await import('@/lib/WalletVault');
+  await ensureVaultReady();
   await new Promise((resolve) => { setTimeout(resolve, 0); });
+  await new Promise((resolve) => { setTimeout(resolve, 0); });
+  const aeNames = aeNamesModule.useAeNames({ pollingDisabled: true });
+  await vi.waitFor(() => expect(aeNames.areNamesFetching.value).toBe(false));
 
   return {
     aeNames,
+    authKey,
+    isKeyCurrent,
+    selectedAccount,
+    networkId: selectedNetworkId,
+    sdk,
     node,
+    openConfirmModal,
     openDefaultModal,
+    removeUnreadableSecret,
+    /** As when the stored names don't decrypt with the current key */
+    failDecrypt: () => decryptedComputedOptions.onDecryptFailed?.(new Error('Unreadable')),
     NAME_CLAIM_STATUS: aeNamesModule.NAME_CLAIM_STATUS,
     /** As written to the storage, which settles a tick after the change */
     getStoredEntry: () => {
       const stored = JSON.parse(WalletStorage.get(STORAGE_KEYS.preclaimedNames) || '{}');
       return stored[NETWORK_ID]?.[NAME];
+    },
+    /** With `realEncryption`: the stored entry, as `key` decrypts it. */
+    async decryptStoredEntry(key) {
+      const ciphertext = WalletStorage.get(STORAGE_KEYS.preclaimedNames);
+      return JSON.parse(await crypto.decrypt(key, ciphertext))[NETWORK_ID]?.[NAME];
     },
   };
 }
@@ -198,6 +287,308 @@ async function createContext({
 describe('useAeNames with the real SDK', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('registration admission', () => {
+    it('sends no preclaim for an already registered name', async () => {
+      const ctx = await createContext();
+      ctx.node.nameEntry = nameEntry(otherAccount.address);
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+      expect(ctx.node.posted).toHaveLength(0);
+      expect(ctx.getStoredEntry()).toBeUndefined();
+    });
+
+    it.each([activeAccount.address, otherAccount.address])(
+      'sends no preclaim for an auction led by %s',
+      async (highestBidder) => {
+        const ctx = await createContext();
+        ctx.node.getAuctionEntryByName.mockResolvedValue({ highestBidder });
+
+        expect(await ctx.aeNames.addNameToClaimQueue('short.chain', otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.aeNames.preclaimedNames.value).toEqual({});
+      },
+    );
+
+    it('still preclaims a free short name to start its first auction', async () => {
+      const ctx = await createContext();
+
+      expect(await ctx.aeNames.addNameToClaimQueue('short.chain', otherAccount.address, false))
+        .toBe(true);
+
+      expect(postedTxs(ctx.node)).toMatchObject([{ tag: Tag.NamePreclaimTx }]);
+      expect(ctx.node.getAuctionEntryByName).toHaveBeenCalledWith('short.chain');
+      expect(ctx.aeNames.preclaimedNames.value[NETWORK_ID]['short.chain']).toMatchObject({
+        address: otherAccount.address,
+        status: 'preclaim-submitted',
+        salt: expect.any(Number),
+      });
+    });
+
+    it.each(['name', 'auction'])('does not spend on a failed %s lookup', async (lookup) => {
+      const ctx = await createContext();
+      const error = restError('Temporarily unavailable', { statusCode: 503 });
+      if (lookup === 'name') {
+        ctx.node.getNameEntryByName = vi.fn().mockRejectedValue(error);
+      } else {
+        ctx.node.getAuctionEntryByName.mockRejectedValue(error);
+      }
+
+      expect(await ctx.aeNames.addNameToClaimQueue('short.chain', otherAccount.address, false))
+        .toBe(false);
+
+      expect(ctx.node.posted).toHaveLength(0);
+      expect(ctx.openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+        msg: error.message,
+      }));
+    });
+
+    it.each(['preclaim-submitted', 'preclaimed', 'claim-submitted'])(
+      'keeps the original salt of a %s name',
+      async (status) => {
+        const original = {
+          name: NAME,
+          address: otherAccount.address,
+          salt: 123,
+          status,
+          blockHeight: TOP_HEIGHT,
+          autoExtend: false,
+        };
+        const ctx = await createContext({
+          preclaimedNames: { [NETWORK_ID]: { [NAME]: original } },
+        });
+
+        expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.getStoredEntry()).toEqual(original);
+      },
+    );
+
+    it('sends only one preclaim for concurrent admissions', async () => {
+      const ctx = await createContext();
+
+      const results = await Promise.all([
+        ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false),
+        ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false),
+      ]);
+
+      expect(results).toEqual([true, false]);
+      expect(ctx.node.posted).toHaveLength(1);
+      expect(ctx.getStoredEntry()?.salt).toBeTypeOf('number');
+    });
+
+    it.each(['account', 'network', 'node', 'lock'])(
+      'does not send when the %s changes while availability is checked',
+      async (change) => {
+        const ctx = await createContext();
+        ctx.node.getNameEntryByName = async () => {
+          if (change === 'account') ctx.selectedAccount.value = { address: otherAccount.address };
+          if (change === 'network') ctx.networkId.value = 'ae_other';
+          if (change === 'node') ctx.sdk.api = createNode();
+          if (change === 'lock') ctx.authKey.value = undefined;
+          throw restError('Name not found', { statusCode: 404 });
+        };
+
+        expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.getStoredEntry()).toBeUndefined();
+      },
+    );
+
+    it.each(['account', 'network'])(
+      'does not send when the %s changes while the SDK obtains the nonce',
+      async (change) => {
+        const ctx = await createContext();
+        ctx.node.getAccountNextNonce = async () => {
+          if (change === 'account') ctx.selectedAccount.value = { address: otherAccount.address };
+          else ctx.networkId.value = 'ae_other';
+          return { nextNonce: 5 };
+        };
+
+        expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false))
+          .toBe(false);
+
+        expect(ctx.node.posted).toHaveLength(0);
+        expect(ctx.getStoredEntry()).toBeUndefined();
+        expect(ctx.openDefaultModal).toHaveBeenCalledWith(expect.objectContaining({
+          msg: en.pages.names['claim-context-changed'],
+        }));
+      },
+    );
+  });
+
+  it('reports preclaim success only after its asynchronous salt write resolves', async () => {
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const beforePreclaimWrite = vi.fn(() => gate);
+    const ctx = await createContext({ beforePreclaimWrite });
+    let settled = false;
+    const queued = ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)
+      .then((result) => { settled = true; return result; });
+    await vi.waitFor(() => expect(beforePreclaimWrite).toHaveBeenCalled());
+    try {
+      expect(settled).toBe(false);
+      expect(ctx.getStoredEntry()).toBeUndefined();
+    } finally {
+      release();
+    }
+    expect(await queued).toBe(true);
+    await vi.waitFor(() => expect(ctx.getStoredEntry()?.salt).toBeTypeOf('number'));
+  });
+
+  it('reports a failed salt write and keeps the unsaved preclaim in memory', async () => {
+    const ctx = await createContext({
+      beforePreclaimWrite: vi.fn().mockRejectedValue(new Error('Vault storage full')),
+    });
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+    expect(ctx.aeNames.preclaimedNames.value[NETWORK_ID][NAME]).toMatchObject({
+      address: otherAccount.address,
+      salt: expect.any(Number),
+      status: 'preclaim-submitted',
+    });
+    expect(ctx.getStoredEntry()).toBeUndefined();
+    expect(ctx.openDefaultModal).toHaveBeenCalled();
+  });
+
+  it('stores the salt of a sent preclaim with the key taken before sending, after a lock meanwhile', async () => {
+    let lock;
+    const ctx = await createContext({ realEncryption: true, onPost: () => lock() });
+    const keyBeforeSending = ctx.authKey.value;
+    lock = () => { ctx.authKey.value = undefined; };
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+
+    expect(ctx.node.posted).toHaveLength(1);
+    expect(ctx.authKey.value).toBeUndefined();
+    expect(await ctx.decryptStoredEntry(keyBeforeSending)).toMatchObject({
+      address: otherAccount.address,
+      salt: expect.any(Number),
+    });
+  });
+
+  it('reports a failed claim and stores nothing when the password changes while it is sent', async () => {
+    let changePassword;
+    const ctx = await createContext({ realEncryption: true, onPost: () => changePassword() });
+    const crypto = await import('@/utils/crypto');
+    const vault = await import('@/lib/WalletVault');
+    const { STORAGE_KEYS } = await import('@/constants');
+    let changed;
+    // As another window's `setPassword`: every secret under the new key, in one commit.
+    changePassword = async () => {
+      const salt = crypto.generateSalt();
+      const newKey = await crypto.generateEncryptionKey('new-password', salt);
+      const current = vault.readVault();
+      changed = await vault.commitVault(current, {
+        ...current.values,
+        [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await crypto.encrypt(newKey, 'seed'),
+        [STORAGE_KEYS.preclaimedNames]: await crypto.encrypt(newKey, '{}'),
+      });
+    };
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+    expect(ctx.node.posted).toHaveLength(1);
+    expect(ctx.openDefaultModal).toHaveBeenCalled();
+    await vault.refreshVault();
+    expect(vault.readVault()).toEqual(changed);
+  });
+
+  it('sends no preclaim while the wallet is locked', async () => {
+    const ctx = await createContext();
+    ctx.authKey.value = undefined;
+
+    expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+    expect(ctx.node.posted).toHaveLength(0);
+    expect(ctx.openDefaultModal).toHaveBeenCalled();
+  });
+
+  describe('names that cannot be read with the current key', () => {
+    const removalOffer = expect.objectContaining({
+      title: en.pages.names.claimStorageUnreadableTitle,
+      msg: en.pages.names.claimStorageUnreadable,
+      buttonMessage: en.pages.names.claimStorageUnreadableRemove,
+    });
+
+    it('sends nothing, as its salt could not be stored with them, and offers to remove them', async () => {
+      const ctx = await createContext();
+      ctx.openConfirmModal.mockReturnValue(new Promise(() => {}));
+      ctx.failDecrypt();
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+      expect(ctx.node.posted).toHaveLength(0);
+      expect(ctx.openConfirmModal).toHaveBeenCalledWith(removalOffer);
+      expect(ctx.openDefaultModal).not.toHaveBeenCalled();
+    });
+
+    it('removes the vault the user was shown, after which a claim stores its salt', async () => {
+      const ctx = await createContext();
+      ctx.failDecrypt();
+      const { readVault } = await import('@/lib/WalletVault');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const shown = readVault();
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+      await vi.waitFor(() => expect(ctx.removeUnreadableSecret)
+        .toHaveBeenCalledWith(STORAGE_KEYS.preclaimedNames, shown));
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+      expect(ctx.node.posted).toHaveLength(1);
+      expect(ctx.getStoredEntry()?.salt).toBeTypeOf('number');
+    });
+
+    it('keeps them when the offer is dismissed, and offers again at the next claim', async () => {
+      const ctx = await createContext();
+      ctx.openConfirmModal.mockRejectedValue(new Error('Dismissed'));
+      ctx.failDecrypt();
+
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(false);
+
+      expect(ctx.openConfirmModal).toHaveBeenCalledTimes(2);
+      expect(ctx.removeUnreadableSecret).not.toHaveBeenCalled();
+      expect(ctx.node.posted).toHaveLength(0);
+    });
+
+    it('does not take the names of a new password for unreadable ones before its key arrives', async () => {
+      const ctx = await createContext({ realEncryption: true });
+      const crypto = await import('@/utils/crypto');
+      const vault = await import('@/lib/WalletVault');
+      const { STORAGE_KEYS } = await import('@/constants');
+      const salt = crypto.generateSalt();
+      const newKey = await crypto.generateEncryptionKey('new-password', salt);
+      // This window's own password change, which stores the names before its key is used.
+      ctx.isKeyCurrent.value = false;
+      const current = vault.readVault();
+      await vault.commitVault(current, {
+        ...current.values,
+        [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(salt),
+        [STORAGE_KEYS.mnemonic]: await crypto.encrypt(newKey, 'seed'),
+        [STORAGE_KEYS.preclaimedNames]: await crypto.encrypt(newKey, '{}'),
+      });
+      // Time for a decrypt with the old key to fail.
+      await new Promise((resolve) => { setTimeout(resolve, 50); });
+
+      // A claim right after the new key is published.
+      ctx.authKey.value = newKey;
+      ctx.isKeyCurrent.value = true;
+      expect(await ctx.aeNames.addNameToClaimQueue(NAME, otherAccount.address, false)).toBe(true);
+
+      expect(ctx.openConfirmModal).not.toHaveBeenCalled();
+      expect(ctx.node.posted).toHaveLength(1);
+    });
   });
 
   it('preclaims for the chosen account and stores the salt before the preclaim is mined', async () => {

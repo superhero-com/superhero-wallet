@@ -1,0 +1,40 @@
+name: iOS splash
+on:
+  push:
+    paths:
+      - '.github/workflows/ios-splash.yml'
+      - 'package.json'
+      - 'patches/*splash-screen*.patch'
+      - 'scripts/check-ios-splash.mjs'
+      - 'tests/ios/splash-screen/**'
+  pull_request:
+    paths:
+      - '.github/workflows/ios-splash.yml'
+      - 'package.json'
+      - 'patches/*splash-screen*.patch'
+      - 'scripts/check-ios-splash.mjs'
+      - 'tests/ios/splash-screen/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  splash:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:ios:splash
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: ios-splash-results
+          path: artifacts/ios-splash-*.xcresult
+          if-no-files-found: ignore

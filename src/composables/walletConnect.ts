@@ -46,7 +46,7 @@ let composableInitialized = false;
 let web3wallet: Awaited<ReturnType<typeof IWeb3Wallet.init>> | null;
 /**
  * Populated by `initWeb3wallet`. Kept out of the static import graph so the
- * WalletConnect tree stays in its own async chunk (see LAZY_VENDOR_PACKAGES).
+ * WalletConnect tree stays in its own async chunk.
  * Every consumer below runs only after a session exists, so it is always set
  * by the time it's read.
  */
@@ -402,7 +402,10 @@ export function useWalletConnect({ offscreen } = { offscreen: false }) {
             topic: wcSession.value.topic,
             namespaces: wcSession.value.namespaces,
           });
-          await acknowledged();
+          await acknowledged().catch((error) => {
+            // INVALID_UPDATE_REQUEST: another window of the wallet sent a newer update first
+            if (error?.code !== 1003) throw error;
+          });
 
           // Emit accountsChanged only when address actually changes
           if (!oldAccount || oldAccount.address !== newAccount.address) {

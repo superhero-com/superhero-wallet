@@ -36,7 +36,7 @@ const UNVERIFIED_RETRY_INTERVAL = 60000;
 let lastLoadedAt = 0;
 
 export function usePendingMultisigTransaction() {
-  const { getMiddleware } = useAeMiddleware();
+  const { fetchTransactions } = useAeMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts();
   const { fetchActiveMultisigTx } = useMultisigTransactions();
   const { topBlockHeight } = useTopHeaderData();
@@ -183,8 +183,10 @@ export function usePendingMultisigTransaction() {
   async function fetchLatestMultisigAccountTransaction() {
     try {
       const contractId = activeMultisigAccount.value?.contractId;
-      const middleware = await getMiddleware();
-      const { data: [latestTransaction] } = await middleware.getTxs({
+      if (!contractId) {
+        return null;
+      }
+      const { data: [latestTransaction] } = await fetchTransactions({
         direction: 'backward', limit: 1, contract: contractId,
       });
       return latestTransaction;

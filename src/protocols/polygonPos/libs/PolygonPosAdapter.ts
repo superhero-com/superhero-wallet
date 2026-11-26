@@ -23,6 +23,7 @@ import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSigned
 import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
 import {
   getLegacyGasPrice,
+  toEvmChecksumAddress,
   toTokenBaseUnits,
   withGasHeadroom,
 } from '@/protocols/evm/helpers';
@@ -56,6 +57,7 @@ import { tg } from '@/popup/plugins/i18n';
 import {
   POLYGON_POS_COIN_PRECISION,
   POLYGON_POS_COIN_SYMBOL,
+  POLYGON_POS_COINGECKO_COIN_ID,
   POLYGON_POS_CONTRACT_ID,
   POLYGON_POS_GAS_LIMIT,
   POLYGON_MDW_TO_NODE_APPROX_DELAY_TIME,
@@ -86,7 +88,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
 
   override coinContractId = POLYGON_POS_CONTRACT_ID;
 
-  override coinGeckoCoinId = 'matic-network';
+  override coinGeckoCoinId = POLYGON_POS_COINGECKO_COIN_ID;
 
   override coinPrecision = POLYGON_POS_COIN_PRECISION;
 
@@ -180,6 +182,10 @@ export class PolygonAdapter extends BaseProtocolAdapter {
 
   override isAccountAddressValid(address: AccountAddress) {
     return isAddress(address);
+  }
+
+  override normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return toEvmChecksumAddress(address);
   }
 
   override isValidAddressOrNameEncoding(address: string) {
@@ -522,8 +528,8 @@ export class PolygonAdapter extends BaseProtocolAdapter {
   async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
-  ): Promise<any> {
+    options: { fromAccount: AccountAddress; nonce: number; maxFeePerGas: string },
+  ): Promise<{ raw: Uint8Array; hash: string }> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { polygonActiveNetworkSettings } = usePolygonNetworkSettings();
 
@@ -548,7 +554,7 @@ export class PolygonAdapter extends BaseProtocolAdapter {
     );
 
     const txData: TxData = {
-      nonce: toHex(nonce),
+      nonce: toHex(String(nonce)),
       gasPrice,
       gasLimit: toHex(String(POLYGON_POS_GAS_LIMIT)),
       to: recipient,

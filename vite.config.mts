@@ -6,7 +6,6 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import vueI18n from '@intlify/unplugin-vue-i18n/vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { visualizer } from 'rollup-plugin-visualizer';
-import inject from '@rollup/plugin-inject';
 import { readFileSync } from 'fs';
 import path from 'path';
 
@@ -18,7 +17,6 @@ import {
   flattenHtmlPlugin,
   copyWebPlugin,
   stripWebOnlyHtmlPlugin,
-  vendorManualChunks,
   devProcessPolyfillPlugin,
 } from './build/plugins';
 
@@ -29,7 +27,7 @@ const r = (...p: string[]) => path.resolve(process.cwd(), ...p);
 /** Browser-extension build step, selected by the orchestrator (scripts/build-extension.mjs). */
 type BuildStep = 'html' | 'sw' | 'inject' | 'inpage';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   const PLATFORM = (process.env.PLATFORM || env.PLATFORM || 'web') as Platform;
@@ -67,9 +65,15 @@ export default defineConfig(({ mode }) => {
   };
 
   // inpage runs in the host page's main world — do not pollute its globals.
+  // On the dev server the polyfills stay plain globals, set by the pre-bundled
+  // deps and devProcessPolyfillPlugin. Imports injected into the source would
+  // hide the `process.env.*` defines, which Vite applies there only on the
+  // global, and the dependency scan misses them, so the first page load
+  // re-runs the optimizer and reloads.
+  const globalPolyfill = command === 'serve' ? 'dev' as const : true as const;
   const polyfillGlobals = isExtension && BUILD_STEP === 'inpage'
     ? { Buffer: false as const, global: false as const, process: false as const }
-    : { Buffer: true as const, global: true as const, process: true as const };
+    : { Buffer: globalPolyfill, global: globalPolyfill, process: globalPolyfill };
 
   const plugins: PluginOption[] = [
     devProcessPolyfillPlugin(),
@@ -108,6 +112,10 @@ export default defineConfig(({ mode }) => {
     nodePolyfills({
       globals: polyfillGlobals,
       protocolImports: true,
+      // vm-browserify's direct `eval` stops the minifier from renaming the
+      // top-level names of the whole vendor chunk. Its only user (asn1.js)
+      // falls back to a plain function without it.
+      overrides: { vm: r('build/empty.js') },
     }),
     stripWebOnlyHtmlPlugin(PLATFORM === 'web'),
   ];
@@ -126,8 +134,11 @@ export default defineConfig(({ mode }) => {
       // expects them (`icons/icon_48.png`, etc.).
       viteStaticCopy({
         targets: [
-          { src: 'public/favicons/favicon-48.png', dest: 'icons', rename: { stripBase: true, name: 'icon_48.png' } },
-          { src: 'public/favicons/favicon-128.png', dest: 'icons', rename: { stripBase: true, name: 'icon_128.png' } },
+          ...[16, 24, 32, 48, 128].map((size) => ({
+            src: `public/favicons/favicon-${size}.png`,
+            dest: 'icons',
+            rename: { stripBase: true, name: `icon_${size}.png` },
+          })),
           // keep the `cameraRequestPermission` folder, drop the `public/icons/` prefix
           { src: 'public/icons/cameraRequestPermission', dest: 'icons', rename: { stripBase: 2 } },
           { src: 'src/icons/logo.svg', dest: 'icons/cameraRequestPermission', rename: { stripBase: true } },
@@ -177,6 +188,11 @@ export default defineConfig(({ mode }) => {
     return { [name]: entry };
   })();
 
+  // Dependencies the pages load at startup share one chunk that changes only when they do,
+  // so an app-only release doesn't re-download them. Dependencies reached only through
+  // `import()` (WalletConnect, AirGap, QR, Capacitor web plugins) load on demand.
+  const vendorGroup = { name: 'vendor', test: /node_modules/, tags: ['$initial' as const] };
+
   return {
     base,
     publicDir: isExtension ? false : 'public',
@@ -184,7 +200,6 @@ export default defineConfig(({ mode }) => {
       alias: {
         ...sharedAlias,
         'core-js-pure': 'core-js',
-        vm: r('build/empty.js'),
       },
     },
     define: getDefine({ env, mode, platform: PLATFORM, reviewBuild: REVIEW_BUILD }),
@@ -205,18 +220,20 @@ export default defineConfig(({ mode }) => {
         'web3-eth',
         'webextension-polyfill',
       ],
-      esbuildOptions: {
-        // Keep in sync with `build.target` below so prebundled deps and the
-        // production output share one syntax floor.
-        target: 'es2020',
-        define: { global: 'globalThis' },
+      rolldownOptions: {
+        transform: {
+          // Keep in sync with `build.target` below so prebundled deps and the
+          // production output share one syntax floor.
+          target: 'es2020',
+          define: { global: 'globalThis' },
+        },
       },
     },
     build: {
       outDir,
       // The old webpack/babel build downleveled to '> 0.25%, not dead, not ie 11'
       // with core-js polyfills; that's gone, but syntax newer than the actual
-      // floor (Capacitor Android WebView defaults to 60+, iOS 15.5, extension
+      // floor (Capacitor Android WebView defaults to 60+, iOS 16.4, extension
       // manifest v3 Chrome 88+/Firefox 109+) can throw a parse-time SyntaxError
       // and blank the whole app. es2020 covers that floor without the cost of a
       // full legacy/polyfill toolchain for what's otherwise an evergreen-browser app.
@@ -225,16 +242,15 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: !isSingleFileStep && !skipEmptyOutDir,
       assetsInlineLimit: 4096,
       modulePreload: isExtension ? false : undefined,
-      commonjsOptions: { transformMixedEsModules: true },
-      rollupOptions: {
+      rolldownOptions: {
         ...(rollupInput ? { input: rollupInput } : {}),
         ...(isExtension
-          ? { plugins: [inject({ browser: 'webextension-polyfill' })] }
+          ? { transform: { inject: { browser: 'webextension-polyfill' } } }
           : {}),
         output: isSingleFileStep
           ? {
             format: 'iife',
-            inlineDynamicImports: true,
+            codeSplitting: false,
             entryFileNames: 'js/[name].js',
             assetFileNames: 'img/[name][extname]',
           }
@@ -246,10 +262,19 @@ export default defineConfig(({ mode }) => {
               assetFileNames: (info: any) => (/\.css$/.test(info.name ?? '')
                 ? 'css/[name][extname]'
                 : 'img/[name][extname]'),
-              manualChunks: vendorManualChunks,
+              codeSplitting: { groups: [vendorGroup] },
             }
             : {
-              manualChunks: vendorManualChunks,
+              codeSplitting: {
+                groups: [
+                  vendorGroup,
+                  // Unlike Rollup, Rolldown leaves app modules that the entry shares
+                  // with lazy routes in small chunks of their own (65 initial files
+                  // instead of 2). Not for the extension: its pages would all load
+                  // one chunk holding every page's entry.
+                  { name: 'app', tags: ['$initial'] },
+                ],
+              },
             },
       },
     },

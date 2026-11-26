@@ -7,10 +7,13 @@ import {
   Encoded,
   Encoding,
   isAddressValid,
+  isEncoded,
+  isNameValid,
   MemoryAccount,
   AccountMnemonicFactory,
 } from '@aeternity/aepp-sdk';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
+import { cloneDeep, sumBy, uniq } from 'lodash-es';
 
 import type {
   AccountAddress,
@@ -19,11 +22,11 @@ import type {
   AssetContractId,
   IAccount,
   IAccountRaw,
-  IAmountDecimalPlaces,
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
   IPageableResponse,
+  IRecipientDetails,
   IToken,
   ITokenBalance,
   ITokenBalanceResponse,
@@ -32,27 +35,31 @@ import type {
   ITransferResponse,
   MarketData,
   NetworkTypeDefault,
+  PrivateKeyFormat,
 } from '@/types';
 import JsonBig from '@/lib/json-big';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 import { ACCOUNT_TYPES, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  amountRounded,
   fetchAllPages,
+  fetchJson,
   getActivityHash,
   getLastNotEmptyAccountIndex,
   handleUnknownError,
   isNotFoundError,
   toShiftedBigNumber,
+  watchUntilTruthy,
 } from '@/utils';
 import Logger from '@/lib/logger';
 
 import type {
   AeNetworkProtocolSettings,
   ContractInitializeOptions,
+  SimpleGAMultiSigContractApi,
 } from '@/protocols/aeternity/types';
 import {
   AE_COIN_PRECISION,
@@ -69,7 +76,38 @@ import {
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings, useAeTokenSales } from '@/protocols/aeternity/composables';
 
-import { aettosToAe } from '../helpers';
+import { aettosToAe, getAddressByNameEntry, getNameIdOfSpelling } from '../helpers';
+
+/** Each transfer on a page can need the events of its transaction fetched */
+const TOKEN_TRANSFERS_PER_PAGE = 10;
+const TRANSACTION_ACTIVITIES_CACHE_SIZE = 500;
+/** Polling the first page of a token doesn't fetch the events of its transactions again */
+const transactionActivities = new Map<string, any[]>();
+/** By the middleware URL */
+const tokenTransfersSupport = new Map<string, Promise<boolean>>();
+/** A status request with no answer would stay cached and hold the token tab */
+export const MIDDLEWARE_STATUS_TIMEOUT = 30000;
+/** The middleware and a vault contract only add to a recipient's account, so they get this long */
+const RECIPIENT_EXTRAS_TIMEOUT = 5000;
+
+/** The token transfers by account include the mints and burns since mdw 1.109 */
+function isTokenTransfersVersion(mdwVersion?: string) {
+  const [major, minor] = (mdwVersion || '').split('.').map(Number);
+  return major > 1 || (major === 1 && minor >= 109);
+}
+
+/** `undefined` when the lookup takes longer */
+async function resolveWithin<T>(lookup: Promise<T>, ms: number): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      lookup,
+      new Promise<undefined>((resolve) => { timer = setTimeout(() => resolve(undefined), ms); }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export class AeternityAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.aeternity;
@@ -135,8 +173,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     );
   }
 
-  override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces = {}): number {
-    return (highPrecision || (amount && amount < 0.01)) ? 9 : 2;
+  override getAmountPrecision(): number {
+    return 9;
   }
 
   override getUrlTokenKey(): string {
@@ -185,10 +223,106 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return isAddressValid(address, Encoding.AccountAddress);
   }
 
+  override isRecipientAddressValid(address: string) {
+    return isAddressValid(address, Encoding.AccountAddress, Encoding.ContractAddress);
+  }
+
   override isValidAddressOrNameEncoding(address: string) {
     return isAddressValid(address, Encoding.ContractAddress)
       || isAddressValid(address, Encoding.AccountAddress)
       || isAddressValid(address, Encoding.Name);
+  }
+
+  override async fetchRecipientDetails(recipient: string): Promise<IRecipientDetails | null> {
+    const { getDryAeSdk } = useAeSdk();
+    const aeSdk = await getDryAeSdk();
+    const { api } = aeSdk;
+    const { fetchFromMiddlewareCamelCased, fetchNameByHash } = useAeMiddleware();
+    let name = isNameValid(recipient) ? recipient : undefined;
+    if (isAddressValid(recipient, Encoding.Name)) {
+      // The node can't look a name up by its hash, and the middleware isn't trusted to name it
+      name = await fetchNameByHash(recipient);
+      if (getNameIdOfSpelling(name) !== recipient) {
+        throw new Error(`The middleware gave ${recipient} the name ${name}`);
+      }
+    }
+    const address = name
+      ? await api.getNameEntryByName(name).then(
+        (nameEntry) => getAddressByNameEntry(nameEntry),
+        (error) => {
+          // Not claimed, expired, revoked, or still in its auction
+          if (isNotFoundError(error)) return undefined;
+          throw error;
+        },
+      )
+      : recipient;
+    if (!address) {
+      return null;
+    }
+
+    const isContract = isAddressValid(address, Encoding.ContractAddress);
+    const account = await api.getAccountByPubkey(address).catch((error) => {
+      if (isNotFoundError(error)) return null;
+      throw error;
+    });
+    if (!account) {
+      return { address, isUnused: true, type: isContract ? 'contract' : undefined };
+    }
+
+    // A basic account's nonce counts what it signed. A generalized account's stops at its
+    // attach transaction, so it is never 0.
+    const hasSent = !isContract && account.nonce > 0;
+    // `undefined` when the middleware can't tell
+    const fetchActivityTime = (query: string): Promise<number | null | undefined> => (
+      fetchFromMiddlewareCamelCased(
+        `/v3/accounts/${encodeURIComponent(address)}/activities?limit=1&${query}`,
+      ).then(
+        (response) => (response?.data ? (response.data[0]?.blockTime ?? null) : undefined),
+        () => undefined,
+      )
+    );
+    // A generalized account is a vault when its contract has the multisig interface
+    const fetchVaultConsensus = async (contractId: Encoded.ContractAddress) => {
+      try {
+        const vault = await Contract.initialize<SimpleGAMultiSigContractApi>({
+          ...aeSdk.getContext(),
+          aci: SimpleGAMultiSigAci,
+          address: contractId,
+        });
+        const [signers, consensus] = await Promise.all([
+          vault.get_signers(),
+          vault.get_consensus_info(),
+        ]);
+        return {
+          signersCount: signers.decodedResult.length,
+          confirmationsRequired: Number(consensus.decodedResult.confirmations_required),
+        };
+      } catch {
+        // Another interface, or the node didn't answer
+        return undefined;
+      }
+    };
+    // Left out when slow, rather than hold back the account
+    const inTime = <T>(lookup: Promise<T>) => resolveWithin(lookup, RECIPIENT_EXTRAS_TIMEOUT);
+    const [createdAt, lastSentAt, vaultConsensus] = await Promise.all([
+      inTime(fetchActivityTime('direction=forward')),
+      hasSent ? inTime(fetchActivityTime('direction=backward&owned_only=true')) : undefined,
+      account.kind === 'generalized' && account.contractId
+        ? inTime(fetchVaultConsensus(account.contractId as Encoded.ContractAddress))
+        : undefined,
+    ]);
+
+    return {
+      address,
+      isUnused: false,
+      type: (isContract && 'contract') || (vaultConsensus && 'multisig') || account.kind,
+      ...vaultConsensus,
+      balance: aettosToAe(account.balance.toString()),
+      // The genesis block's time is 0
+      createdAt: createdAt || undefined,
+      // A middleware that hasn't indexed what the account sent can't tell
+      lastSentAt: isContract || hasSent ? (lastSentAt || undefined) : null,
+    };
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
@@ -248,14 +382,52 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       };
     }
     if (rawAccount.type === ACCOUNT_TYPES.airGap || rawAccount.type === ACCOUNT_TYPES.ledger) {
+      const address = rawAccount.address as Encoded.AccountAddress;
       return {
         globalIdx,
         idx,
         ...rawAccount,
-        publicKey: Buffer.from(decode(rawAccount.address as Encoded.AccountAddress)),
-      } as any as IAccount; // https://github.com/superhero-com/superhero-wallet/issues/3312
+        address,
+        publicKey: Buffer.from(decode(address)),
+      };
     }
     return null;
+  }
+
+  /**
+   * Accepts `sk_…`, the 32-byte seed in hex, or the legacy hex of the seed and its public key.
+   */
+  override parsePrivateKey(input: string): Uint8Array {
+    const value = input.trim();
+    // Not a bare `decode`: it accepts any prefix, and its errors quote the input.
+    if (isEncoded(value, Encoding.AccountSecretKey)) {
+      return decode(value);
+    }
+    const isHexOfSeed = [SEED_LENGTH * 2, SEED_LENGTH * 4].includes(value.length)
+      && /^[0-9a-f]*$/i.test(value);
+    if (!isHexOfSeed) {
+      throw new Error('Invalid æternity private key');
+    }
+    const bytes = Buffer.from(value, 'hex');
+    const privateKey = Buffer.from(bytes.subarray(0, SEED_LENGTH));
+    if (bytes.length > SEED_LENGTH) {
+      const { address } = new MemoryAccount(encode(privateKey, Encoding.AccountSecretKey));
+      if (!bytes.subarray(SEED_LENGTH).equals(decode(address))) {
+        throw new Error('The private key does not match its public key');
+      }
+    }
+    return privateKey;
+  }
+
+  override getPrivateKeyFormats(): PrivateKeyFormat[] {
+    return ['hex', 'sk'];
+  }
+
+  override formatPrivateKey(secretKey: Uint8Array, format?: PrivateKeyFormat): string {
+    if (format === 'sk') {
+      return encode(secretKey.subarray(0, SEED_LENGTH), Encoding.AccountSecretKey);
+    }
+    return super.formatPrivateKey(secretKey, format);
   }
 
   override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
@@ -270,11 +442,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     : Promise<IToken | undefined> {
     const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
     try {
-      const token = await fetchFromMiddlewareCamelCased(`/v3/aex9/${contractId}`);
-      if (token.error) {
-        return undefined;
-      }
-      return token;
+      return await fetchFromMiddlewareCamelCased(`/v3/aex9/${contractId}`);
     } catch (error) {
       return undefined;
     }
@@ -307,7 +475,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     nextPageUrl?: string,
   ): Promise<IPageableResponse<IToken> | null> {
     return this.fetchAex9TokensPage(
-      nextPageUrl || '/v2/aex9?by=name&limit=100&direction=forward',
+      nextPageUrl || '/v3/aex9?by=name&limit=100&direction=forward',
     );
   }
 
@@ -316,7 +484,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     searchBy: 'name' | 'symbol',
     nextPageUrl?: string,
   ): Promise<IPageableResponse<IToken> | null> {
-    const searchPath = `/v2/aex9?by=${searchBy}&prefix=${encodeURIComponent(
+    const searchPath = `/v3/aex9?by=${searchBy}&prefix=${encodeURIComponent(
       searchTerm,
     )}&limit=100&direction=forward`;
 
@@ -330,7 +498,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       const [tokens]: ITokenBalanceResponse[][] = await Promise.all(
         [
           camelCaseKeysDeep(await fetchAllPages(
-            () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+            () => fetchFromMiddleware(`/v3/accounts/${address}/aex9/balances?limit=100`),
             fetchFromMiddleware,
           )),
           loadAllTokenSalesInfoByAccount(address as Encoded.AccountAddress),
@@ -342,7 +510,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         address,
         amount,
         contractId,
-        convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
+        convertedBalance: toShiftedBigNumber(amount, -decimals).toNumber(),
         decimals,
         name: tokenName,
         symbol: tokenSymbol,
@@ -389,13 +557,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       normalizeActivitiesStructure,
       normalizeMiddlewareTransactionStructure,
     } = useAeMiddleware();
-    /** @link https://github.com/aeternity/ae_mdw?tab=readme-ov-file#v2accountsidactivities */
-    const url = nextPageUrl || `/v2/accounts/${address}/activities?limit=${limit}`;
+    const url = nextPageUrl || `/v3/accounts/${address}/activities?limit=${limit}`;
 
-    let { data, next } = await fetchFromMiddlewareCamelCased(url);
+    const { data, next } = await fetchFromMiddlewareCamelCased(url);
 
-    // Some contract calls consist of several events
-    // this condition checking edge case when not all events in one chunk
+    // The events of a contract call can continue on the next page
     const lastActivity = data.at(-1);
     const lastActivityType = lastActivity?.type;
     if (
@@ -414,7 +580,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         }
       });
     }
-    let regularTransactions = normalizeActivitiesStructure(data || [])
+    const regularTransactions = normalizeActivitiesStructure(data || [])
       .map((responseData: any) => normalizeMiddlewareTransactionStructure(responseData, address));
 
     return {
@@ -477,25 +643,35 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     assetContractId: AssetContractId,
     { nextPageUrl }: ITransactionApiPaginationParams = {},
   ): Promise<IFetchTransactionResult> {
-    let paginationParams: ITransactionApiPaginationParams = {};
+    const paginationParams: ITransactionApiPaginationParams = {};
     let regularTransactions: ITransaction[] = [];
 
     try {
-      // Aeternity protocol APIs has no way for fetching the AE Coin or Token transactions only.
-      // For this purpose we are fetching all transactions and filter the asset.
-      // TODO update the logic when this issue is closed: https://github.com/aeternity/ae_mdw/issues/1678
-      const res = await this.fetchAccountTransactions(address, { nextPageUrl });
-      paginationParams = res.paginationParams;
-
-      if (assetContractId === this.coinContractId) {
-        regularTransactions = res.regularTransactions
-          .filter(({ tx }) => !tx.contractId || tx.contractId === this.coinContractId);
+      if (
+        assetContractId !== this.coinContractId
+        // A list continues from where its pages were loaded
+        && (nextPageUrl ? nextPageUrl.startsWith('/v3/aex9/') : await this.isTokenTransfersSupported())
+      ) {
+        const res = await this.fetchTokenTransactions(address, assetContractId, nextPageUrl);
+        regularTransactions = res.regularTransactions;
+        if (res.nextPageUrl) {
+          paginationParams.nextPageUrl = res.nextPageUrl;
+        }
       } else {
-        regularTransactions = res.regularTransactions
-          .filter(({ tx }) => (
-            tx.contractId === assetContractId
-            || JSON.stringify({ ...tx.arguments, ...tx.log }).includes(assetContractId)
-          ));
+        // The middleware can't list the AE coin transactions only, nor the token ones
+        // with their mints and burns before 1.109, so they are filtered here
+        const res = await this.fetchRegularTransactions(address, TXS_PER_PAGE, nextPageUrl);
+        if (res.nextPageUrl) {
+          paginationParams.nextPageUrl = res.nextPageUrl;
+        }
+        regularTransactions = res.regularTransactions.filter(({ tx }) => (
+          (assetContractId === this.coinContractId)
+            ? !tx.contractId || tx.contractId === this.coinContractId
+            : (
+              tx.contractId === assetContractId
+              || JSON.stringify({ ...tx.arguments, ...tx.log }).includes(assetContractId)
+            )
+        ));
       }
     } catch (error: any) {
       Logger.write(error);
@@ -508,22 +684,135 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     };
   }
 
+  private async isTokenTransfersSupported(): Promise<boolean> {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    await watchUntilTruthy(aeActiveNetworkSettings);
+    // Read once, so a network switch meanwhile can't store the answer of another middleware
+    const { middlewareUrl } = aeActiveNetworkSettings.value;
+    let isSupported = tokenTransfersSupport.get(middlewareUrl);
+    if (!isSupported) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      isSupported = Promise.race([
+        fetchJson(`${middlewareUrl}/v3/status`),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('Middleware status timed out')),
+            MIDDLEWARE_STATUS_TIMEOUT,
+          );
+        }),
+      ])
+        .then((status) => isTokenTransfersVersion(status?.mdw_version))
+        .finally(() => clearTimeout(timer));
+      tokenTransfersSupport.set(middlewareUrl, isSupported);
+      isSupported.catch(() => tokenTransfersSupport.delete(middlewareUrl));
+    }
+    return isSupported;
+  }
+
+  private async fetchTokenTransactions(
+    address: AccountAddress,
+    contractId: AssetContractId,
+    nextPageUrl?: string,
+  ): Promise<{ regularTransactions: ITransaction[]; nextPageUrl?: string }> {
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+    const { data, next } = await fetchFromMiddlewareCamelCased(
+      nextPageUrl
+      || `/v3/aex9/${encodeURIComponent(contractId)}/transfers?account=${encodeURIComponent(address)}&limit=${TOKEN_TRANSFERS_PER_PAGE}`,
+    );
+    const transactions = await Promise.all(
+      uniq<string>(data.map(({ txHash }: any) => txHash))
+        .map((hash) => this.fetchTokenTransaction(address, contractId, hash)),
+    );
+    return {
+      regularTransactions: transactions.filter((transaction) => !!transaction) as ITransaction[],
+      nextPageUrl: next,
+    };
+  }
+
+  /**
+   * Like the activities, the account's own transactions are shown whole
+   * and the transactions of others only by the tokens they moved.
+   */
+  private async fetchTokenTransaction(
+    address: AccountAddress,
+    contractId: AssetContractId,
+    hash: string,
+  ): Promise<ITransaction | undefined> {
+    const {
+      normalizeActivitiesStructure,
+      normalizeMiddlewareTransactionStructure,
+    } = useAeMiddleware();
+    // Normalizing changes the objects, the cached ones stay as fetched
+    const activities = cloneDeep(await this.fetchTransactionActivities(address, hash));
+
+    // The account is in the transaction itself. Other transactions of the generation that
+    // come along have no such activity.
+    const [ownTransaction] = normalizeActivitiesStructure(activities)
+      .filter(({ type }) => (
+        type !== ACTIVITIES_TYPES.aex9TransferEvent
+        && type !== ACTIVITIES_TYPES.internalContractCallEvent
+      ));
+    if (ownTransaction) {
+      return normalizeMiddlewareTransactionStructure(ownTransaction, address);
+    }
+
+    const transfers = activities.filter(({ type, payload }) => (
+      type === ACTIVITIES_TYPES.aex9TransferEvent && payload.contractId === contractId
+    ));
+    if (transfers.length < 2) {
+      return transfers[0] && normalizeMiddlewareTransactionStructure(transfers[0], address);
+    }
+    // Several transfers are shown as one by the amount the account got or gave
+    const netAmount = sumBy(transfers, ({ payload }) => (
+      (payload.recipientId === address ? payload.amount : 0)
+      - (payload.senderId === address ? payload.amount : 0)
+    ));
+    if (!netAmount) {
+      return undefined;
+    }
+    const transfer = transfers.find(({ payload }) => (
+      (netAmount > 0)
+        ? payload.recipientId === address && payload.senderId !== address
+        : payload.senderId === address
+    ));
+    return normalizeMiddlewareTransactionStructure(
+      { ...transfer, payload: { ...transfer.payload, amount: Math.abs(netAmount) } },
+      address,
+    );
+  }
+
+  private async fetchTransactionActivities(
+    address: AccountAddress,
+    hash: string,
+  ): Promise<any[]> {
+    const key = `${address}:${hash}`;
+    let activities = transactionActivities.get(key);
+    if (!activities) {
+      const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+      // 100 is the most the middleware returns
+      const { data } = await fetchFromMiddlewareCamelCased(
+        `/v3/accounts/${encodeURIComponent(address)}/activities?scope=transaction:${encodeURIComponent(hash)}&limit=100`,
+      );
+      activities = data as any[];
+      if (transactionActivities.size >= TRANSACTION_ACTIVITIES_CACHE_SIZE) {
+        transactionActivities.clear();
+      }
+      transactionActivities.set(key, activities);
+    }
+    return activities;
+  }
+
   async fetchTransactionByHash(
     hash: string,
     transactionOwner?: AccountAddress,
   ): Promise<ITransaction> {
-    const { getMiddleware } = useAeMiddleware();
-    const middleware = await getMiddleware();
+    const { fetchTransaction } = useAeMiddleware();
 
     return {
-      ...await middleware.getTx(hash),
+      ...await fetchTransaction(hash),
       protocol: PROTOCOLS.aeternity,
       transactionOwner,
     };
-  }
-
-  override constructAndSignTx(): Promise<any> {
-    throw new Error('Method not implemented.');
   }
 
   override async spend(
@@ -535,7 +824,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const aeSdk = await getAeSdk();
     return aeSdk.spendWithCustomOptions(
       amount,
-      recipient as Encoded.AccountAddress,
+      recipient as Encoded.AccountAddress | Encoded.ContractAddress,
       {
         waitMined: false,
         payload: encode(Buffer.from(options.payload), Encoding.Bytearray),

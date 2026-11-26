@@ -42,7 +42,8 @@ import {
   onMounted,
 } from 'vue';
 import type { Protocol } from '@/types';
-import { calculateFontSize, formatNumber } from '@/utils';
+import { AMOUNT_SIGNIFICANT_DIGITS } from '@/constants';
+import { calculateFontSize, formatAmount } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -78,16 +79,11 @@ export default defineComponent({
     }
 
     function updateAmountValues() {
-      amountRounded.value = formatNumber(
-        props.amount,
-        {
-          minimumFractionDigits: Number.isInteger(props.amount) || props.amount === 0 ? 0 : 2,
-          maximumFractionDigits: adapter.getAmountPrecision({
-            amount: props.amount,
-            highPrecision: props.highPrecision,
-          }),
-        },
-      );
+      amountRounded.value = formatAmount(props.amount, {
+        maxDecimals: adapter.getAmountPrecision(),
+        significantDigits: props.highPrecision ? undefined : AMOUNT_SIGNIFICANT_DIGITS,
+        minDecimals: Number.isInteger(props.amount) || props.amount === 0 ? 0 : 2,
+      });
       amountFiat.value = getAmountFiat();
     }
 

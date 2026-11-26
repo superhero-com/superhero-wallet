@@ -39,6 +39,7 @@ export const useUi = createCustomScopedComposable(() => {
     [],
     STORAGE_KEYS.hiddenCards,
     {
+      syncWithOtherWindows: true,
       migrations: [
         migrateHiddenCardsVuexToComposable,
       ],
@@ -49,6 +50,7 @@ export const useUi = createCustomScopedComposable(() => {
     STORAGE_KEYS.otherSettings,
     {
       backgroundSync: true,
+      syncWithOtherWindows: true,
       migrations: [
         migrateOtherSettingsVuexToComposable,
         migrateSecureLoginEnabledToBiometric,

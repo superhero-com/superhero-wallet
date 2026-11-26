@@ -124,7 +124,7 @@
         type="number"
         integer
         class="input-derivation-index"
-        @update:modelValue="debounceHandleInput"
+        @update:model-value="debounceHandleInput"
       />
       <AccountSkeleton
         v-if="deriving"

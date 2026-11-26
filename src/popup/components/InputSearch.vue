@@ -2,7 +2,7 @@
   <InputField
     class="input-search"
     v-bind="$attrs"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
     <template #after>
       <Search
@@ -28,6 +28,7 @@ export default {
     Search,
     Eraser,
   },
+  emits: ['update:modelValue'],
 };
 </script>
 

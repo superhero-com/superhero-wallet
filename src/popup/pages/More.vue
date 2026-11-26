@@ -81,6 +81,8 @@
       <PanelItem
         :href="AE_DEX_URL"
         :title="$t('pages.more.dex')"
+        data-cy="dex"
+        in-app-browser
       >
         <template #icon>
           <DexIcon />
@@ -101,7 +103,7 @@
         v-if="isLockWalletVisible"
         :title="$t('pages.secureLogin.lockWallet')"
         data-cy="lock-wallet"
-        @click="lockWallet()"
+        @click="lockWallet({ isUserInitiated: true })"
       >
         <template #icon>
           <SecureIcon />

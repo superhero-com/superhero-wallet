@@ -2,7 +2,6 @@ import { toChecksumAddress } from 'web3-utils';
 
 import type { IToken, ITokenBalance, Protocol } from '@/types';
 import {
-  amountRounded,
   postJson,
   toShiftedBigNumber,
 } from '@/utils';
@@ -29,6 +28,13 @@ type TokenMetadataResult = {
   symbol?: string;
   logo?: string;
 };
+
+/** By endpoint, protocol and contract; only found tokens are kept */
+const tokenMetadataCache = new Map<string, Promise<IToken | undefined>>();
+
+export function clearAlchemyTokenMetadataCache() {
+  tokenMetadataCache.clear();
+}
 
 export class AlchemyService {
   apiUrl: string;
@@ -57,7 +63,8 @@ export class AlchemyService {
       'alchemy_getTokenBalances',
       [toChecksumAddress(address), 'erc20'],
     );
-    const balances = result?.tokenBalances || [];
+    const balances = (result?.tokenBalances || [])
+      .filter((b) => !b.error && b.contractAddress);
 
     const metadataList = await Promise.all(
       balances.map(async (b) => {
@@ -70,7 +77,6 @@ export class AlchemyService {
     );
 
     return balances
-      .filter((b) => !b.error && b.contractAddress)
       .map((b, idx) => {
         const md = metadataList[idx];
         const decimals = Number(md?.decimals ?? 0);
@@ -79,7 +85,7 @@ export class AlchemyService {
           ? BigInt(rawHex).toString()
           : String(rawHex || '0');
         const convertedBalance = decimals
-          ? +amountRounded(toShiftedBigNumber(rawAmount, -decimals))
+          ? toShiftedBigNumber(rawAmount, -decimals).toNumber()
           : 0;
         return {
           address,
@@ -96,6 +102,25 @@ export class AlchemyService {
   }
 
   async getTokenMetadata(contractAddress: string): Promise<IToken | undefined> {
+    const key = `${this.apiUrl}|${this.protocol}|${contractAddress.toLowerCase()}`;
+    if (!tokenMetadataCache.has(key)) {
+      tokenMetadataCache.set(key, this.fetchTokenMetadata(contractAddress).then(
+        (token) => {
+          if (!token) tokenMetadataCache.delete(key);
+          return token;
+        },
+        (error) => {
+          tokenMetadataCache.delete(key);
+          throw error;
+        },
+      ));
+    }
+    const token = await tokenMetadataCache.get(key)!;
+    // Callers may change what they get
+    return token && { ...token };
+  }
+
+  private async fetchTokenMetadata(contractAddress: string): Promise<IToken | undefined> {
     const result = await this.rpcCall<TokenMetadataResult>(
       'alchemy_getTokenMetadata',
       [toChecksumAddress(contractAddress)],

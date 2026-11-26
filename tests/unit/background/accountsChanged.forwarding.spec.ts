@@ -18,6 +18,7 @@ describe('background accountsChanged forwarding', () => {
         onInstalled: { addListener: vi.fn() },
       },
       tabs: { query: queryMock, sendMessage: sendMessageMock },
+      windows: { onRemoved: { addListener: vi.fn() } },
     } as any;
     vi.doMock('@/background/utils', () => ({ registerInPageContentScript: vi.fn(), updateDynamicRules: vi.fn() }));
     vi.resetModules();

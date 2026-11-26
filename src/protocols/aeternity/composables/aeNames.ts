@@ -10,6 +10,7 @@ import {
   Encoded,
   Name,
   Tag,
+  TxTimedOutError,
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
@@ -19,7 +20,6 @@ import type {
   ChainName,
   IName,
   ITransaction,
-  ITx,
   NetworkId,
   IAddressNamePair,
   IAuction,
@@ -38,10 +38,12 @@ import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   IS_MOBILE_APP,
   PROTOCOLS,
+  RUNNING_IN_POPUP,
   STORAGE_KEYS,
 } from '@/constants';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 import Logger from '@/lib/logger';
+import { readVault } from '@/lib/WalletVault';
 import {
   useAccounts,
   useAeSdk,
@@ -55,13 +57,11 @@ import { createPollingBasedOnMountedComponents } from '@/composables/composables
 import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION, AE_AENS_NAME_AUCTION_MAX_LENGTH } from '@/protocols/aeternity/config';
-import {
-  aettosToAe,
-  getInnerTransaction,
-  isInsufficientBalanceError,
-} from '@/protocols/aeternity/helpers';
+import { aettosToAe, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { getNameRegistrationState } from '@/protocols/aeternity/helpers/nameRegistration';
 import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 import type { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
+import type { AeMdwName, AeMdwNameAuction, AeMdwNameClaim } from '@/protocols/aeternity/types';
 
 import { useAeAddressLinkContract } from './aeAddressLinkContract';
 import { useAeAddressLinkBackend } from './aeAddressLinkBackend';
@@ -87,6 +87,16 @@ const PENDING_DEFAULT_NAME_MAX_AGE = 5 * 60 * 1000;
  * entry is dropped even if it never showed up, so it cannot linger forever.
  */
 const CLAIMED_NAME_INDEXING_MAX_AGE = 5 * 60 * 1000;
+/**
+ * The pointer keys of the protocol. The others are kept by their encoded key,
+ * so that one like `account_pubkey_` can't pass for `accountPubkey`.
+ */
+const AENS_POINTER_KEYS = new Map([
+  ['account_pubkey', 'accountPubkey'],
+  ['oracle_pubkey', 'oraclePubkey'],
+  ['contract_pubkey', 'contractPubkey'],
+  ['channel', 'channel'],
+]);
 
 interface IUpdateNamePointerParams {
   name: ChainName;
@@ -170,12 +180,21 @@ type PendingDefaultNamesRegistry = Record<NetworkId, Record<AccountAddress, IPen
 
 let composableInitialized = false;
 let claimPreclaimedNamesPromise: Promise<void> | null = null;
+const pendingNamePreclaims = new Set<string>();
 let extendExpiringOwnedNamesPromise: Promise<void> | null = null;
 let updateDefaultNamesPromise: Promise<void> | null = null;
 let ownedNamesFetchGeneration = 0;
 let ownedNamesPublishedGeneration = 0;
 let ownedNamesFetchesInFlight = 0;
 let preclaimedNamesEncryptionInitialized = false;
+let flushPreclaimedNamesWrites: () => Promise<void> = () => Promise.resolve();
+/** The stored names didn't decrypt with the current key: a change couldn't be stored. */
+let arePreclaimedNamesUnreadable = false;
+/**
+ * Taken before sending a preclaim, whose salt is stored with it even after a lock meanwhile.
+ * Set only while applying that entry.
+ */
+let preclaimedNamesWriteKey: CryptoKey | undefined;
 
 /**
  * In-memory cache + in-flight dedup for `updateExternalName` lookups.
@@ -255,9 +274,11 @@ const latestClaimedNames = computed((): Record<AccountAddress, ChainName> => {
     owner,
     pending,
     createdAtHeight,
+    pointers,
   }) => {
-    // Skip names that aren't confirmed on-chain yet (pending claims/transfers).
-    if (!owner || pending) {
+    // Skip names that aren't confirmed on-chain yet (pending claims/transfers),
+    // and names leading to someone else, e.g. one transferred to the account.
+    if (!owner || pending || (pointers?.accountPubkey && pointers.accountPubkey !== owner)) {
       return;
     }
     const height = createdAtHeight ?? 0;
@@ -298,11 +319,12 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   const {
     aeAccounts,
     activeAccount,
+    areAccountsReady,
     isLocalAccountAddress,
     getLastActiveProtocolAccount,
   } = useAccounts();
-  const { onNetworkChange } = useNetworks();
-  const { openDefaultModal } = useModals();
+  const { activeNetwork, onNetworkChange } = useNetworks();
+  const { openConfirmModal, openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
   const { getPreferredName, isAddressLinkSupported } = useAeAddressLinkContract();
@@ -310,34 +332,99 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   const { topBlockHeight } = useTopHeaderData();
 
   const {
-    isMiddlewareReady,
-    getMiddleware,
     fetchFromMiddlewareCamelCased,
     fetchFromMiddlewareCamelCasedPrecise,
+    fetchNameByHash,
   } = useAeMiddleware();
 
   if (!preclaimedNamesEncryptionInitialized) {
     preclaimedNamesEncryptionInitialized = true;
-    const { encryptionKey } = useAuth();
-    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}');
+    const { encryptionKey, isEncryptionKeyCurrent } = useAuth();
+    const decryptedStr = decryptedComputed(encryptionKey, preclaimedNamesEncrypted, '{}', {
+      onDecrypted: () => { arePreclaimedNamesUnreadable = false; },
+      onDecryptFailed: () => { arePreclaimedNamesUnreadable = true; },
+      isKeyCurrent: isEncryptionKeyCurrent,
+    });
+    type Registry = typeof preclaimedNames.value;
+    type Change = { networkId: NetworkId; name: AensName; value: IPreclaimedName | null };
+    let baseline: Registry = {};
+    let applyingStoredNames = false;
+    let queue = Promise.resolve();
+    let latestWrite = queue;
+    // Keep unsaved salts visible even if a different pending write completes first.
+    const pending = new Map<string, Change>();
+    const changeKey = ({ networkId, name }: Change) => `${networkId}/${name}`;
+    const copy = (value: Registry): Registry => JSON.parse(JSON.stringify(value));
+    const applyChanges = (registry: Registry, changes: Change[]) => {
+      const updated = copy(registry);
+      changes.forEach(({ networkId, name, value }) => {
+        if (value) {
+          updated[networkId] ??= {};
+          updated[networkId][name] = value;
+        } else {
+          delete updated[networkId]?.[name];
+          if (isEmpty(updated[networkId])) delete updated[networkId];
+        }
+      });
+      return updated;
+    };
+    flushPreclaimedNamesWrites = () => latestWrite;
 
     watch(decryptedStr, (str) => {
       try {
-        const parsed = JSON.parse(str || '{}');
+        let parsed: Registry = JSON.parse(str || '{}');
+        pending.forEach((change, key) => {
+          if (isEqual(parsed[change.networkId]?.[change.name] ?? null, change.value)) {
+            pending.delete(key);
+          }
+        });
+        parsed = applyChanges(parsed, [...pending.values()]);
+        baseline = copy(parsed);
         if (!isEqual(parsed, preclaimedNames.value)) {
+          applyingStoredNames = true;
           preclaimedNames.value = parsed;
         }
       } catch {
-        preclaimedNames.value = {};
+        // A failed read must not discard the salt of an outstanding local preclaim.
+        baseline = applyChanges({}, [...pending.values()]);
+        applyingStoredNames = true;
+        preclaimedNames.value = baseline;
+      } finally {
+        applyingStoredNames = false;
       }
-    }, { immediate: true });
+    }, { immediate: true, flush: 'sync' });
 
     watch(preclaimedNames, (val) => {
-      const str = JSON.stringify(val);
-      if (decryptedStr.value !== str) {
-        decryptedStr.value = str;
-      }
-    }, { deep: true });
+      if (applyingStoredNames) return;
+      const next = copy(val);
+      const changes: Change[] = [];
+      new Set([...Object.keys(baseline), ...Object.keys(next)]).forEach((networkId) => {
+        const previousNames = baseline[networkId] || {};
+        const nextNames = next[networkId] || {};
+        new Set([...Object.keys(previousNames), ...Object.keys(nextNames)]).forEach((name) => {
+          if (!isEqual(previousNames[name as AensName], nextNames[name as AensName])) {
+            changes.push({
+              networkId,
+              name: name as AensName,
+              value: nextNames[name as AensName] ?? null,
+            });
+          }
+        });
+      });
+      baseline = next;
+      if (!changes.length) return;
+      changes.forEach((change) => pending.set(changeKey(change), change));
+      // Taken now: a lock before the queue gets to it mustn't drop a change made unlocked.
+      const writeKey = preclaimedNamesWriteKey ?? encryptionKey.value;
+      latestWrite = queue.then(async () => {
+        // Not with a key unlocked only later: that would authorize a change made locked.
+        if (!writeKey) throw new Error('The wallet is locked');
+        await decryptedStr.update((plaintext) => JSON.stringify(
+          applyChanges(JSON.parse(plaintext || '{}'), changes),
+        ), { encryptionKey: writeKey, isLockAllowed: true });
+      });
+      queue = latestWrite.catch(handleUnknownError);
+    }, { deep: true, flush: 'sync' });
   }
 
   function ensureExternalNameRegistryExists() {
@@ -442,8 +529,7 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       return '';
     }
     if (!resolvedChainNames.value[address]) {
-      const middleware = await getMiddleware();
-      resolvedChainNames.value[address] = (await middleware.getName(address)).name;
+      resolvedChainNames.value[address] = await fetchNameByHash(address);
     }
     return resolvedChainNames.value[address];
   }
@@ -478,26 +564,25 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   /**
-   * For an expired name that is auctioned again the middleware returns the previous
-   * owner's claims and activities, so only the auction itself has the current bids.
-   * The highest bid comes from the node: the middleware lists a claim made by a contract
-   * call without its amount.
+   * The highest bid comes from the node too, as a new bid gets there before the middleware.
    */
   async function fetchNameAuction(name: string): Promise<IAuction> {
-    const [{ info }, highestBid] = await Promise.all([
-      fetchFromMiddlewareCamelCasedPrecise(`/v2/names/${name}/auction?expand=true`),
+    const auctionPath = `/v3/names/auctions/${encodeURIComponent(name)}`;
+    const [{ auctionEnd }, claims, highestBid] = await Promise.all([
+      fetchFromMiddlewareCamelCasedPrecise(auctionPath) as Promise<AeMdwNameAuction>,
+      fetchAllPages<AeMdwNameClaim>(
+        () => fetchFromMiddlewareCamelCasedPrecise(`${auctionPath}/claims?limit=100`),
+        fetchFromMiddlewareCamelCasedPrecise,
+      ),
       fetchNodeAuctionHighestBid(name),
     ]);
     return {
-      expiration: info.auctionEnd,
-      bids: info.bids
-        .map(({ tx }: ITransaction) => getInnerTransaction(tx))
-        // A claim made by a contract call carries no bid amount
-        .filter((tx: ITx) => tx.type === Tag[Tag.NameClaimTx])
-        .map(({ accountId, nameFee }: ITx) => ({
-          accountId,
-          nameFee: new BigNumber(aettosToAe(nameFee!)),
-        })),
+      expiration: auctionEnd,
+      // Newest first, also those made through a contract call
+      bids: claims.map(({ tx: { accountId, nameFee } }) => ({
+        accountId,
+        nameFee: new BigNumber(aettosToAe(nameFee)),
+      })),
       highestBid,
     };
   }
@@ -742,6 +827,31 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
     });
   }
 
+  /** A new claim can't be stored next to names that don't decrypt, whose salts are lost. */
+  function offerToRemoveUnreadablePreclaimedNames() {
+    const ciphertext = preclaimedNamesEncrypted.value;
+    // What the user decides on, so a removal can't take names stored after it.
+    const vault = IS_MOBILE_APP ? undefined : readVault();
+    openConfirmModal({
+      title: tg('pages.names.claimStorageUnreadableTitle'),
+      msg: tg('pages.names.claimStorageUnreadable'),
+      icon: 'critical',
+      buttonMessage: tg('pages.names.claimStorageUnreadableRemove'),
+    })
+      .then(async () => {
+        if (!arePreclaimedNamesUnreadable || preclaimedNamesEncrypted.value !== ciphertext) {
+          return;
+        }
+        if (vault) {
+          await useAuth().removeUnreadableSecret(STORAGE_KEYS.preclaimedNames, vault);
+        } else {
+          preclaimedNamesEncrypted.value = null;
+        }
+        arePreclaimedNamesUnreadable = false;
+      }, () => { /* NOOP - kept */ })
+      .catch(handleUnknownError);
+  }
+
   function logSilentError(error: any) {
     Logger.write({
       message: error?.message || String(error),
@@ -829,18 +939,25 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   async function fetchAllNames(address: AccountAddress) {
-    const middleware = await getMiddleware();
-
-    const names = await fetchAllPages(
-      () => middleware.getNames({ owned_by: address as Encoded.AccountAddress, state: 'active', limit: 100 }),
+    const names = await fetchAllPages<AeMdwName>(
+      () => fetchFromMiddlewareCamelCased(`/v3/names?owned_by=${address}&state=active&limit=100`),
       fetchFromMiddlewareCamelCased,
     );
 
-    return names.map(({ info, name, hash }) => ({
-      createdAtHeight: info.activeFrom,
-      expiresAt: info.expireHeight,
-      owner: info.ownership.current,
-      pointers: info.pointers,
+    return names.map(({
+      activeFrom,
+      expireHeight,
+      ownership,
+      pointers,
+      name,
+      hash,
+    }) => ({
+      createdAtHeight: activeFrom,
+      expiresAt: expireHeight,
+      owner: ownership.current,
+      pointers: Object.fromEntries(pointers.map(
+        ({ key, id, encodedKey }) => [AENS_POINTER_KEYS.get(key) ?? encodedKey, id],
+      )),
       autoExtend: (
         ownedNames.value.find((n) => n.name === name)?.autoExtend
         || pendingAutoExtendNames.value?.includes(name)
@@ -1113,26 +1230,102 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
   }
 
   async function addNameToClaimQueue(name: AensName, address: string, autoExtend: boolean) {
+    let pendingKey: string | undefined;
     try {
-      const networkId = nodeNetworkId.value!;
+      const selectedNetwork = activeNetwork.value;
+      const selectedAddress = activeAccount.value.address;
+      // Checked before sending: the fee is lost if its salt can't be stored afterwards.
+      const writeKey = useAuth().encryptionKey.value;
+      if (!writeKey) throw new Error('The wallet is locked');
+      if (arePreclaimedNamesUnreadable && preclaimedNamesEncrypted.value) {
+        offerToRemoveUnreadablePreclaimedNames();
+        return false;
+      }
       const aeSdk = await getAeSdk();
-      const currentHeight = await aeSdk.getHeight();
-      const nameObj = await createNameInstance(name, getClaimOptions(address));
+      const networkId = nodeNetworkId.value;
+      const node = aeSdk.api;
+      const isContextCurrent = () => (
+        !!networkId
+        && nodeNetworkId.value === networkId
+        && activeNetwork.value === selectedNetwork
+        && activeAccount.value.address === selectedAddress
+        && aeSdk.api === node
+      );
+      if (!isContextCurrent()) return false;
+
+      const claimKey = `${networkId}:${name}`;
+      if (pendingNamePreclaims.has(claimKey)) return false;
+      pendingKey = claimKey;
+      pendingNamePreclaims.add(claimKey);
+
+      const hasPendingClaim = () => {
+        const queuedClaim = preclaimedNames.value[networkId!]?.[name];
+        return queuedClaim && [
+          NAME_CLAIM_STATUS.preclaimSubmitted,
+          NAME_CLAIM_STATUS.preclaimed,
+          NAME_CLAIM_STATUS.claimSubmitted,
+        ].some((status) => status === queuedClaim.status);
+      };
+      if (hasPendingClaim()) return false;
+
+      const registrationState = await getNameRegistrationState(name, node);
+      if (!isContextCurrent()) return false;
+      if (registrationState !== 'available') {
+        openDefaultModal({
+          title: tg('modals.name-exist.title'),
+          msg: tg('modals.name-exist.msg'),
+        });
+        return false;
+      }
+
+      const currentHeight = (await node.getCurrentKeyBlockHeight()).height;
+      if (!isContextCurrent() || hasPendingClaim()) return false;
+      if (useAuth().encryptionKey.value !== writeKey) return false;
+
+      // SDK defaults follow the live account and node, including while a transaction is built.
+      const signingAccount = new AeAccountHdWallet(ref(networkId));
+      const assertContext = () => {
+        if (!isContextCurrent()) throw new Error(tg('pages.names.claim-context-changed'));
+      };
+      const nameObj = new Name(name, aeSdk.getContext({
+        onNode: node,
+        onAccount: {
+          address,
+          signTransaction: async (...args: Parameters<AeAccountHdWallet['signTransaction']>) => {
+            assertContext();
+            const signedTx = await signingAccount.signTransaction(args[0], {
+              ...args[1],
+              fromAccount: address as Encoded.AccountAddress,
+            });
+            assertContext();
+            return signedTx;
+          },
+        },
+      } as any));
       const { nameSalt, hash } = await nameObj.preclaim({ waitMined: false });
-      upsertPreclaimedName(networkId, name, {
-        address,
-        name,
-        salt: nameSalt,
-        // Until the height the preclaim is mined at is known
-        blockHeight: currentHeight,
-        autoExtend,
-        status: NAME_CLAIM_STATUS.preclaimSubmitted,
-        preclaimTxHash: hash,
-      });
+      preclaimedNamesWriteKey = writeKey;
+      try {
+        upsertPreclaimedName(networkId!, name, {
+          address,
+          name,
+          salt: nameSalt,
+          // Until the height the preclaim is mined at is known
+          blockHeight: currentHeight,
+          autoExtend,
+          status: NAME_CLAIM_STATUS.preclaimSubmitted,
+          preclaimTxHash: hash,
+        });
+      } finally {
+        preclaimedNamesWriteKey = undefined;
+      }
+      // The salt cannot be recovered from the mnemonic. Success requires its write.
+      await flushPreclaimedNamesWrites();
       return true;
     } catch (error: any) {
       openClaimErrorModal(error);
       return false;
+    } finally {
+      if (pendingKey) pendingNamePreclaims.delete(pendingKey);
     }
   }
 
@@ -1267,6 +1460,10 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       try {
         await aeSdk.poll(currentClaimTxHash);
       } catch (error: any) {
+        // A polling deadline does not mean the node rejected the claim.
+        if (error instanceof TxTimedOutError) {
+          return;
+        }
         if (isTransientRequestError(error)) {
           logSilentError(error);
           return;
@@ -1467,12 +1664,18 @@ export function useAeNames({ pollingDisabled = false }: aeNamesOptions = {}) {
       await extendExpiringOwnedNames();
     });
 
-    // Populate owned + default names once accounts, middleware and network id exist,
+    // Populate owned + default names once accounts and network id exist,
     // so account cards show a name without opening the Names page.
+    // The imported accounts are decrypted after the others, so wait for them too.
+    // A request popup shows the stored ones. A switch is handled by `onNetworkChange`.
     watch(
-      [aeAccounts, isMiddlewareReady, nodeNetworkId] as const,
-      async ([accounts, middlewareReady, networkId]) => {
-        if (middlewareReady && networkId && accounts.length) {
+      [
+        () => aeAccounts.value.map(({ address }) => address).join(),
+        () => !!nodeNetworkId.value,
+        areAccountsReady,
+      ] as const,
+      async ([addresses, hasNetworkId, accountsReady]) => {
+        if (accountsReady && hasNetworkId && addresses && !RUNNING_IN_POPUP) {
           await Promise.all([
             updateOwnedNames(),
             updateDefaultNames(),

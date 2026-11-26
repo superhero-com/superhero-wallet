@@ -30,7 +30,7 @@
       </div>
       <AddressBookList
         is-selector
-        :selected-addresses="selectedAddresses"
+        :selected-addresses="selectedAddressesNormalized"
         :is-multiple="activeTab === dataTabs[1].name"
         @select-address="handleSelectAddresses"
       />
@@ -56,6 +56,7 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   onBeforeMount,
   PropType,
@@ -65,6 +66,7 @@ import { useI18n } from 'vue-i18n';
 import { IonPage } from '@ionic/vue';
 
 import type { ResolveCallback, RejectCallback, Protocol } from '@/types';
+import { normalizeAccountAddress } from '@/utils';
 import { useAccounts, useAddressBook } from '@/composables';
 
 import Modal from '@/popup/components/Modal.vue';
@@ -113,12 +115,17 @@ export default defineComponent({
     ];
     const activeTab = ref(dataTabs[props.preSelectedAddresses?.length > 1 ? 1 : 0].name);
 
+    /** As the list has them, so that a recipient typed in another case shows as selected */
+    const selectedAddressesNormalized = computed(
+      () => selectedAddresses.value.map((address) => normalizeAccountAddress(address)),
+    );
+
     function handleSelectAddresses(address: string) {
       if (activeTab.value === dataTabs[0].name) {
         props.resolve([address]);
         return;
       }
-      const index = selectedAddresses.value.indexOf(address);
+      const index = selectedAddressesNormalized.value.indexOf(normalizeAccountAddress(address));
 
       if (index !== -1) {
         // Remove it if it's already selected
@@ -148,6 +155,7 @@ export default defineComponent({
       dataTabs,
       activeTab,
       selectedAddresses,
+      selectedAddressesNormalized,
       setActiveTab,
       handleSelectAddresses,
       submit,

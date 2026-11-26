@@ -253,6 +253,7 @@ export function useTransferSendForm({
     clearPayload,
     handleAssetChange,
     validate,
+    validateField,
     updateFormModelValues,
   };
 }

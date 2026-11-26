@@ -41,6 +41,7 @@
         </div>
         <BtnIcon
           class="qrcode-wrapper"
+          :aria-label="$t('a11y.shareAddress')"
           :disabled="isPlaceholder"
           @click="shareAddress()"
         >
@@ -101,6 +102,7 @@
           >
             <template #label-after>
               <BtnIcon
+                :aria-label="$t('modals.qrCodeReader.scanQr')"
                 :icon="QrScanIcon"
                 data-cy="scan-button"
                 @click="scanQr()"

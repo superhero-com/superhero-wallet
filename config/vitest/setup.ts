@@ -1,5 +1,12 @@
 import { TextEncoder, TextDecoder } from 'util';
-import { vi } from 'vitest';
+import { beforeEach, vi } from 'vitest';
+import { IDBFactory } from 'fake-indexeddb';
+import 'fake-indexeddb/auto';
+
+// Match the browser's transactional storage. A simulated restart (resetModules)
+// retains the database. Each test gets an empty one, but a vault module loaded
+// earlier keeps its connection to the previous one: specs reload it to start empty.
+beforeEach(() => { globalThis.indexedDB = new IDBFactory(); });
 
 // Up to 3 s per fresh mobile key would slow down every mobile auth spec.
 vi.mock('@/utils/waitBeforeKeyReadRetry', () => ({
@@ -40,7 +47,7 @@ if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
 }
 
 /**
- * The webextension `browser` global is provided by @rollup/plugin-inject in the
+ * The webextension `browser` global is injected by the bundler (`transform.inject`) in the
  * real extension build. In unit tests we expose a minimal stub on globalThis so
  * source code that reads the bare `browser` global does not throw.
  */

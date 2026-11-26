@@ -196,6 +196,24 @@ describe('useAeSdk().resetNode', () => {
     expect(composable.isAeSdkReady.value).toBeTruthy();
   });
 
+  it('does not hold the SDK for the network id of a node that did not answer', async () => {
+    const { composable } = await createSdkOn(NETWORKS.A);
+    const getStatus = vi.mocked(Node.prototype.getStatus).getMockImplementation();
+    let requestsOfB = 0;
+    vi.mocked(Node.prototype.getStatus).mockImplementation(function getStatusOfB() {
+      if (this.$host !== NETWORKS.B.protocols.aeternity.nodeUrl) return getStatus.call(this);
+      requestsOfB += 1;
+      // The status request of the switch fails, the SDK's own one for the network id hangs
+      return (requestsOfB === 1) ? Promise.reject(new Error('Network down')) : new Promise(() => {});
+    });
+
+    await composable.resetNode(NETWORKS.B);
+
+    expect(requestsOfB).toBe(2);
+    expect(composable.isAeSdkReady.value).toBeTruthy();
+    await expect(composable.getAeSdk()).resolves.toBeDefined();
+  });
+
   it('applies a switch requested while the SDK is still being created', async () => {
     const composable = useAeSdk();
     const creating = composable.getAeSdk(); // waits for node A

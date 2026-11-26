@@ -171,4 +171,17 @@ describe('useCoinMaxAmount', () => {
 
     expect(max.value).toBe('50');
   });
+
+  it('token max works with decimals saved as a string', async () => {
+    const { useCoinMaxAmount, feeRef } = await setup({ balance: '1', fee: '0.5' });
+    const formModel = makeFormModel({
+      decimals: '6' as any,
+      contractId: 'ct_some_other_token',
+      tokenAmount: '12345678',
+    });
+
+    const { max } = useCoinMaxAmount({ formModel, fee: feeRef });
+
+    expect(max.value).toBe('12.345678');
+  });
 });

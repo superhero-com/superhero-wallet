@@ -15,7 +15,7 @@
         :checked="modelValue"
         type="checkbox"
         :disabled="disabled"
-        @change="$emit('update:modelValue', !modelValue)"
+        @change="toggle"
       >
       <span class="slider round" />
     </label>
@@ -34,6 +34,16 @@ export default defineComponent({
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     'update:modelValue': (checked: boolean) => true,
+  },
+  setup(props, { emit }) {
+    function toggle(event: Event) {
+      const input = event.target as HTMLInputElement;
+      // The value shows until the parent changes it, which it may not, e.g. on a dismissed prompt
+      input.checked = props.modelValue;
+      emit('update:modelValue', !props.modelValue);
+    }
+
+    return { toggle };
   },
 });
 </script>

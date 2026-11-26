@@ -34,11 +34,14 @@ import {
   ROUTE_MULTISIG_DETAILS_ASSETS,
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
+  ROUTE_ACCOUNT_TX_DETAILS,
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
   ROUTE_MULTISIG_COIN,
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_COIN_DETAILS,
   ROUTE_TOKEN_DETAILS,
+  ROUTE_COIN_TX_DETAILS,
+  ROUTE_TOKEN_TX_DETAILS,
   ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE,
@@ -49,6 +52,7 @@ import {
   ROUTE_POPUP_ACCOUNT_LIST,
   ROUTE_POPUP_SIGN_TX,
   ROUTE_POPUP_CONNECT,
+  ROUTE_POPUP_NETWORK_SWITCH,
   ROUTE_POPUP_RAW_SIGN,
   ROUTE_POPUP_UNSAFE_SIGN,
   ROUTE_POPUP_MESSAGE_SIGN,
@@ -103,6 +107,7 @@ import AuctionList from '../pages/Names/AuctionList.vue';
 import NameClaim from '../pages/Names/Claim.vue';
 import About from '../pages/About.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
+import NetworkSwitch from '../pages/Popups/NetworkSwitch.vue';
 import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
@@ -123,7 +128,7 @@ async function requireSeedPhraseReauth() {
 
   if (IS_MOBILE_APP) {
     if (isBiometricLoginEnabled.value && await canAuthenticateWithDevice()) {
-      await openBiometricLoginModal({ force: true });
+      await openBiometricLoginModal({ force: true, isCancelable: true });
       return;
     }
     await openConfirmModal({
@@ -141,7 +146,7 @@ async function requireSeedPhraseReauth() {
     return;
   }
 
-  await openPasswordLoginModal();
+  await openPasswordLoginModal({ isCancelable: true });
 }
 
 export const routes: WalletAppRouteConfig[] = [
@@ -160,6 +165,15 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/account',
     name: ROUTE_ACCOUNT,
     component: Dashboard,
+  },
+  {
+    path: '/account/transactions/:hash/:transactionOwner',
+    name: ROUTE_ACCOUNT_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      backRoute: { name: ROUTE_ACCOUNT },
+    },
   },
   {
     path: '/account-details',
@@ -308,13 +322,7 @@ export const routes: WalletAppRouteConfig[] = [
          */
         path: 'coins/:id?',
         component: AssetDetails,
-        beforeEnter: (to, from, next) => {
-          if (!to.params.id) {
-            next({ name: ROUTE_MULTISIG_ACCOUNT });
-            return;
-          }
-          next();
-        },
+        beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_MULTISIG_ACCOUNT }),
         children: [
           {
             name: ROUTE_MULTISIG_COIN,
@@ -369,6 +377,14 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/popup-unsafe-sign',
     component: ConfirmUnsafeSign,
     props: true,
+    meta: {
+      notPersist: true,
+    },
+  },
+  {
+    name: ROUTE_POPUP_NETWORK_SWITCH,
+    path: '/popup-network-switch',
+    component: NetworkSwitch,
     meta: {
       notPersist: true,
     },
@@ -434,19 +450,15 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings/seed-phrase/details',
     name: ROUTE_SEED_PHRASE_DETAILS,
     component: () => import('../pages/SeedPhraseDetailsSettings.vue'),
-    beforeEnter: async (_to, from, next) => {
+    beforeEnter: async (_to, from) => {
       try {
         await requireSeedPhraseReauth();
-        next();
+        return true;
       } catch {
-        // `next(false)` would leave the router with no matched route (and thus a blank
+        // Aborting would leave the router with no matched route (and thus a blank
         // page) when this route is entered directly, e.g. on a hard refresh, since there
         // is no previous in-app route to fall back to.
-        if (from.matched.length) {
-          next(false);
-        } else {
-          next({ name: ROUTE_ACCOUNT });
-        }
+        return from.matched.length ? false : { name: ROUTE_ACCOUNT };
       }
     },
   },
@@ -454,17 +466,13 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/more/settings/seed-phrase/details/verify',
     name: ROUTE_SEED_PHRASE_VERIFY,
     component: () => import('../pages/SeedPhraseVerifySettings.vue'),
-    beforeEnter: async (_to, from, next) => {
+    beforeEnter: async (_to, from) => {
       try {
         await requireSeedPhraseReauth();
-        next();
+        return true;
       } catch {
         // See comment in the `ROUTE_SEED_PHRASE_DETAILS` guard above.
-        if (from.matched.length) {
-          next(false);
-        } else {
-          next({ name: ROUTE_ACCOUNT });
-        }
+        return from.matched.length ? false : { name: ROUTE_ACCOUNT };
       }
     },
   },
@@ -642,12 +650,9 @@ export const routes: WalletAppRouteConfig[] = [
     // see https://github.com/vuejs/router/issues/845
     path: '/coins/:id?',
     component: AssetDetails,
-    beforeEnter: (to, from, next) => {
-      if (!to.params.id) {
-        next({ name: ROUTE_ACCOUNT });
-        return;
-      }
-      next();
+    beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_ACCOUNT }),
+    meta: {
+      isRestorableParent: true,
     },
     children: [
       {
@@ -676,12 +681,9 @@ export const routes: WalletAppRouteConfig[] = [
     // see https://github.com/vuejs/router/issues/845
     path: '/tokens/:id?',
     component: AssetDetails,
-    beforeEnter: (to, from, next) => {
-      if (!to.params.id) {
-        next({ name: ROUTE_ACCOUNT });
-        return;
-      }
-      next();
+    beforeEnter: (to) => (to.params.id ? true : { name: ROUTE_ACCOUNT }),
+    meta: {
+      isRestorableParent: true,
     },
     children: [
       {
@@ -705,6 +707,24 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
     ],
+  },
+  {
+    path: '/coins/:id/transactions/:hash/:transactionOwner',
+    name: ROUTE_COIN_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      backRoute: ({ params }) => ({ name: ROUTE_COIN, params: { id: params.id } }),
+    },
+  },
+  {
+    path: '/tokens/:id/transactions/:hash/:transactionOwner',
+    name: ROUTE_TOKEN_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      backRoute: ({ params }) => ({ name: ROUTE_TOKEN, params: { id: params.id } }),
+    },
   },
   {
     name: 'sign-message',
@@ -742,13 +762,12 @@ export const routes: WalletAppRouteConfig[] = [
       useDefaultHardwareBackButton: true,
       notPersist: true,
     },
-    beforeEnter: async (to, from, next) => {
+    beforeEnter: async (to) => {
       const { connect, wcSession } = useWalletConnect();
       const uriParam = to.query.uri as string | undefined;
 
       if (!uriParam) {
-        next({ name: ROUTE_NOT_FOUND });
-        return;
+        return { name: ROUTE_NOT_FOUND };
       }
 
       try {
@@ -759,7 +778,7 @@ export const routes: WalletAppRouteConfig[] = [
         // Let the error modal from connect handle user feedback
       }
 
-      next({ name: ROUTE_ACCOUNT });
+      return { name: ROUTE_ACCOUNT };
     },
   },
   {

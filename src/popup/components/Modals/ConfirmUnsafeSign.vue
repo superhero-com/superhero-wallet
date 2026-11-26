@@ -101,11 +101,14 @@ import {
   PROTOCOLS,
   SUPERHERO_CHAT_URLS,
 } from '@/constants';
+import type { Encoded } from '@aeternity/aepp-sdk';
+
 import type { IAccount, ISignModalResolution } from '@/types';
 import { fromBase64Url, handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
 import { useConfirmGuard } from '@/composables/confirmGuard';
+import { withSubJwk } from '@/protocols/aeternity/helpers';
 
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
@@ -135,17 +138,24 @@ export default defineComponent({
     } = usePopupProps();
     const { getLastActiveProtocolAccount, setActiveAccountByAddressAndProtocol } = useAccounts();
 
-    const isJwt = ref(false);
-    const messageToDisplay = ref('');
+    const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
+    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
+
+    // Parsed here, so the claims never pass through Vue's reactivity
+    const jwtClaims: Record<string, unknown> | undefined = popupProps.value?.jwtClaims
+      ? JSON.parse(popupProps.value.jwtClaims)
+      : undefined;
+    const isJwt = ref(!!jwtClaims);
+    let dataToDisplay = '';
 
     if (popupProps.value?.data) {
-      messageToDisplay.value = Buffer.from(popupProps.value?.data as any).toString();
+      dataToDisplay = Buffer.from(popupProps.value?.data as any).toString();
 
       if (Buffer.from(popupProps.value?.data as any).toString().startsWith(JWT_HEADER)) {
         try {
           const jwtToString = fromBase64Url(Buffer.from(popupProps.value?.data as any).toString().split('.')[1]).toString();
           JSON.parse(jwtToString);
-          messageToDisplay.value = jwtToString;
+          dataToDisplay = jwtToString;
           isJwt.value = true;
         } catch (e) {
           handleUnknownError(e);
@@ -153,15 +163,22 @@ export default defineComponent({
       }
     }
 
+    // Claims are signed with the key of the account picked here, so they follow the pick
+    const messageToDisplay = computed(() => {
+      if (!jwtClaims) {
+        return dataToDisplay;
+      }
+      const address = selectedAccount.value?.address as Encoded.AccountAddress | undefined;
+      return JSON.stringify(address ? withSubJwk(jwtClaims, address) : jwtClaims);
+    });
+
     const isAeppChatSuperhero = computed(
       () => SUPERHERO_CHAT_URLS
         .includes(`${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}`),
     );
 
-    const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
-    const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
-
     function confirm() {
+      if (isConfirmBlocked.value) return;
       if (selectedAccount.value) {
         setActiveAccountByAddressAndProtocol(
           selectedAccount.value.address!,

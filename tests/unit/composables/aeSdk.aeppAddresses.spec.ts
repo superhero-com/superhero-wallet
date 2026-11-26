@@ -12,6 +12,7 @@ import {
   MESSAGE_DIRECTION,
   METHODS,
   Node,
+  RpcInternalError,
   RpcNotAuthorizeError,
   SUBSCRIPTION_TYPES,
   Tag,
@@ -84,6 +85,7 @@ describe('useAeSdk, an aepp asking for addresses', () => {
         isAuthenticated: ref(true),
         isMnemonicUnreadable: ref(false),
         encryptionKey,
+        isEncryptionKeyCurrent: () => true,
       }),
     }));
   });
@@ -174,7 +176,7 @@ describe('useAeSdk, an aepp asking for addresses', () => {
       };
     };
     const aeppPort = createPort();
-    const walletPort = createPort({ url: DAPP_URL, tab: { id: 7 } });
+    const walletPort = createPort({ url: DAPP_URL, frameId: 1, tab: { id: 7, url: 'https://host.example/pay' } });
     const deliverTo = (port) => (msg) => setTimeout(() => {
       port.listeners.forEach((fn) => fn(structuredClone(msg), port));
     });
@@ -186,6 +188,23 @@ describe('useAeSdk, an aepp asking for addresses', () => {
     return aepp;
   }
 
+  it('reports an internal error to the aepp when its approval window cannot open', async () => {
+    const previousUrl = window.location.href;
+    window.history.replaceState(null, '', '/offscreen.html');
+    try {
+      seedHdAccounts([PROTOCOLS.aeternity]);
+      const aepp = await connectAeppThroughExtension();
+      const sendMessage = vi.fn().mockResolvedValue(null);
+      vi.stubGlobal('browser', { ...browser, runtime: { ...browser.runtime, sendMessage } });
+
+      await expect(aepp.askAddresses()).rejects.toBeInstanceOf(RpcInternalError);
+      expect(sendMessage).toHaveBeenCalledWith(expect.objectContaining({ method: 'openPopup' }));
+    } finally {
+      vi.unstubAllGlobals();
+      window.history.replaceState(null, '', previousUrl);
+    }
+  });
+
   it.each([
     ['listing the addresses', (aepp) => aepp.askAddresses()],
     ['subscribing to the address', (aepp) => aepp.subscribeAddress(SUBSCRIPTION_TYPES.subscribe, 'connected')],
@@ -195,7 +214,11 @@ describe('useAeSdk, an aepp asking for addresses', () => {
 
     await ask(aepp);
 
-    expect(openModal.mock.calls[0][1]).toMatchObject({ tabId: 7 });
+    expect(openModal.mock.calls[0][1]).toMatchObject({
+      tabId: 7,
+      topLevelOrigin: 'https://host.example',
+      app: { host: 'dapp.example' },
+    });
   });
 
   it('tell the modal no tab for an aepp in a frame', async () => {

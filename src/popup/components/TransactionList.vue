@@ -20,6 +20,7 @@
               :transaction="getTransaction(item)"
               :multisig-transaction="getMultisigTransaction(item)"
               :is-multisig="isMultisig"
+              :transaction-route="transactionRoute"
             />
           </template>
         </InfiniteScroll>
@@ -77,7 +78,7 @@ import { useI18n } from 'vue-i18n';
 import { IonContent } from '@ionic/vue';
 import { throttle } from 'lodash-es';
 
-import type { ICommonTransaction, ITransaction } from '@/types';
+import type { ICommonTransaction, ITransaction, ITransactionRoute } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT, TX_DIRECTION } from '@/constants';
 import { pipe, sortTransactionsByDate } from '@/utils';
 import {
@@ -109,8 +110,8 @@ import BackToTop from './BackToTop.vue';
 import BtnMain from './buttons/BtnMain.vue';
 
 /**
- * Pages loaded in a row only to fill the screen. A filter or a token can match few
- * transactions, so filling it can mean downloading the whole history.
+ * Pages loaded in a row only to fill the screen. A filter or an asset picked from all
+ * transactions can match few of them, so filling it can mean downloading the whole history.
  */
 const AUTO_LOAD_PAGE_LIMIT = 3;
 
@@ -129,6 +130,11 @@ export default defineComponent({
     isLoading: Boolean,
     isEndReached: Boolean, // TODO implement visual indication of the end of the list
     isMultisig: Boolean,
+    /** See `TransactionListItem` */
+    transactionRoute: {
+      type: Object as PropType<ITransactionRoute>,
+      default: null,
+    },
   },
   emits: [
     'load-more',
@@ -240,12 +246,6 @@ export default defineComponent({
 
     /**
      * A list that doesn't fill the viewport can't be scrolled to load the next page.
-     * For fungible tokens whose transactions were done long ago,
-     * this will result in a huge number of requests to load all user
-     * transactions that were done after and sort them out.
-     * TODO: Improve the fulfillment logic
-     * by moving to filtering on the mdw side
-     * and using the new fungible token endpoint https://github.com/aeternity/ae_mdw/issues/1678
      */
     async function checkLoadMore() {
       // nextTick is required because viewportElement scrollHeight

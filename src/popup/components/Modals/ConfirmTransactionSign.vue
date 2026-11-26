@@ -16,6 +16,15 @@
         :additional-tag="isUnknownDapp ? $t('common.unknown') : appName"
         :first-label-warning="isUnknownDapp"
       />
+      <div
+        v-if="spendRecipientId"
+        class="recipient-details-card"
+      >
+        <RecipientDetails
+          :address="spendRecipientId"
+          :protocol="protocol"
+        />
+      </div>
       <NoOriginWarning
         v-if="isUnknownDapp"
         :action="$t('unknownDapp.confirmTransactionAction')"
@@ -81,6 +90,17 @@
           {{ $t('modals.confirmTransactionSign.paidByDapp') }}
         </p>
       </span>
+      <EvmCallSummary
+        v-if="isEvm && popupProps?.evmCall"
+        :protocol="protocol"
+        :evm-call="popupProps.evmCall"
+      />
+      <!-- A coin transfer is told in full above -->
+      <EvmCallSimulation
+        v-if="isEvm && popupProps?.evmCall && !['', '0x'].includes(popupProps.evmCall.data)"
+        :protocol="protocol"
+        :evm-call="popupProps.evmCall"
+      />
       <DetailsItem
         v-if="decodedCallData?.functionName"
         :label="$t('modals.confirmTransactionSign.functionName')"
@@ -119,6 +139,7 @@
           <TokenAmount
             :amount="nameAeFee"
             :protocol="protocol"
+            high-precision
           />
         </DetailsItem>
 
@@ -131,6 +152,7 @@
             :symbol="tokenSymbol"
             :hide-fiat="!swapTokenData.isWrappedCoin || isAex9"
             :protocol="protocol"
+            high-precision
             data-cy="total"
           />
         </DetailsItem>
@@ -151,6 +173,7 @@
               :amount="+aettosToAe(gasPrice)"
               :symbol="AE_SYMBOL"
               :protocol="PROTOCOLS.aeternity"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -164,6 +187,7 @@
               :amount="+aettosToAe(gasCost)"
               :symbol="AE_SYMBOL"
               :protocol="PROTOCOLS.aeternity"
+              high-precision
             />
           </template>
         </DetailsItem>
@@ -172,6 +196,7 @@
           <TokenAmount
             :amount="fee"
             :protocol="protocol"
+            high-precision
             data-cy="fee"
           />
         </DetailsItem>
@@ -181,8 +206,10 @@
           :label="$t('common.total')"
         >
           <TokenAmount
-            :amount="executionCost || amountTotal"
-            :symbol="isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol"
+            :amount="isEvm ? evmCoinTotal : (executionCost || amountTotal)"
+            :symbol="isEvm
+              ? coinSymbol
+              : (isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol)"
             :hide-fiat="isAex9"
             :protocol="protocol"
             high-precision
@@ -228,9 +255,7 @@
         class="button-action-primary"
         data-cy="accept"
         third
-        :disabled="
-          isConfirmBlocked || !!error || verifying || loading || !canSignWithSelectedAccount
-        "
+        :disabled="isConfirmDisabled"
         :icon="verifying ? AnimatedSpinner : null"
         :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="confirm()"
@@ -313,11 +338,14 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import type { EthDecodedCallData } from '@/protocols/ethereum/types';
 import { useAeTokenSales } from '@/protocols/aeternity/composables/aeTokenSales';
+import EvmCallSimulation from '@/protocols/evm/components/EvmCallSimulation.vue';
+import EvmCallSummary from '@/protocols/evm/components/EvmCallSummary.vue';
 import { type SignAirGapTransactionResolvedVal } from './SignAirGapTransaction.vue';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TransactionOverview from '../TransactionOverview.vue';
+import RecipientDetails from '../TransferSend/RecipientDetails.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
@@ -352,6 +380,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     TransactionOverview,
+    RecipientDetails,
     DetailsItem,
     TokenAmount,
     TransactionDetailsPoolTokenRow,
@@ -360,6 +389,8 @@ export default defineComponent({
     SignAccountSelect,
     CheckBox,
     AnimatedSpinner,
+    EvmCallSimulation,
+    EvmCallSummary,
   },
   setup() {
     const { isConfirmBlocked } = useConfirmGuard();
@@ -543,11 +574,24 @@ export default defineComponent({
     const decodingCallData = ref(false);
     const dappBalanceError = ref(false);
 
+    const isConfirmDisabled = computed(() => (
+      isConfirmBlocked.value || !!error.value || verifying.value
+      || loading.value || !canSignWithSelectedAccount.value
+    ));
+
     const app = computed(() => popupProps.value?.app);
 
     const fee = computed(() => (protocol === PROTOCOLS.aeternity)
       ? getAeFee(popupProps.value?.tx?.fee!)
       : popupProps.value?.tx?.fee!);
+
+    const isEvm = EVM_PROTOCOLS.includes(protocol);
+    const { coinSymbol } = adapter;
+
+    /** What leaves the account in the coin: the value sent and the fee */
+    const evmCoinTotal = computed(() => new BigNumber(popupProps.value?.tx?.amount || 0)
+      .plus(popupProps.value?.tx?.fee || 0)
+      .toNumber());
 
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
     const gasCost = computed(() => new BigNumber(popupProps.value?.tx?.gasLimit ?? 0)
@@ -585,6 +629,13 @@ export default defineComponent({
     const decodedPayload = computed(() => popupProps.value?.tx?.payload
       ? decode(popupProps.value?.tx?.payload).toString()
       : undefined);
+
+    /** Where a spend sends the coins: an address, or a name's id */
+    const spendRecipientId = computed(() => (
+      outerTxTag.value === Tag.SpendTx && adapter.fetchRecipientDetails
+        ? popupProps.value?.tx?.recipientId
+        : undefined
+    ));
 
     const filteredTxFields = computed(
       () => (Object.keys(TX_FIELDS_TO_DISPLAY) as ITxKey[])
@@ -696,6 +747,7 @@ export default defineComponent({
     }
 
     async function confirm() {
+      if (isConfirmDisabled.value) return;
       if (selectedAccount.value) {
         setActiveAccountByAddressAndProtocol(
           selectedAccount.value.address!,
@@ -924,10 +976,9 @@ export default defineComponent({
 
     onMounted(async () => {
       if (popupProps.value) {
-        await loadContractInfo(popupProps.value?.tx?.contractId);
         await Promise.all([
           verifyTransaction(),
-          loadAdditionalContractCallInfo(),
+          loadContractInfo(popupProps.value.tx?.contractId).then(loadAdditionalContractCallInfo),
         ]);
       } else {
         error.value = t('modals.transaction-failed.msg');
@@ -939,7 +990,7 @@ export default defineComponent({
     });
 
     return {
-      isConfirmBlocked,
+      isConfirmDisabled,
       AE_SYMBOL,
       aettosToAe,
       AnimatedSpinner,
@@ -951,6 +1002,7 @@ export default defineComponent({
       cancel,
       decodedCallData,
       decodedPayload,
+      spendRecipientId,
       decodingCallData,
       direction,
       dappBalanceError,
@@ -990,6 +1042,9 @@ export default defineComponent({
       tokenSymbol,
       tokenList,
       amountTotal,
+      isEvm,
+      coinSymbol,
+      evmCoinTotal,
       transaction,
       transactionArguments,
       fee,
@@ -1030,6 +1085,15 @@ export default defineComponent({
 
   .transaction-overview {
     margin-bottom: 16px;
+  }
+
+  // As the recipient's card on the transfer review
+  .recipient-details-card {
+    margin-bottom: 16px;
+    padding-top: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: $color-border;
   }
 
   .rebuild-for-signer {

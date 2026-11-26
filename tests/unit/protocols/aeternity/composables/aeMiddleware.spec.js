@@ -1,184 +1,124 @@
 import { computed, ref } from 'vue';
 
-/**
- * `getMiddleware` concurrency. The middleware ref keeps the PREVIOUS network's client
- * until an init finishes, so a caller arriving mid-switch must wait for the init rather
- * than for the ref to be truthy - otherwise it fetches the network the user just left.
- */
 const MDW_TESTNET = 'https://mdw.testnet.test';
-// Mirrors `INIT_TIMEOUT` in the composable.
-const INIT_TIMEOUT = 30000;
 const MDW_MAINNET = 'https://mdw.mainnet.test';
 
-async function loadComposable() {
+function jsonResponse(body, status = 200) {
+  return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
+}
+
+async function loadComposable(respond) {
   vi.resetModules();
-
   const middlewareUrl = ref(MDW_TESTNET);
-  const fetchJson = vi.fn(async () => ({ spec: true }));
-  // Resolves on a later tick so a second caller can arrive while the init is in flight.
-  const genSwaggerClient = vi.fn(async (url) => new Promise((resolve) => {
-    setTimeout(() => resolve({ api: { url } }), 0);
-  }));
-
-  vi.doMock('@/utils', async (importOriginal) => ({
-    ...await importOriginal(),
-    fetchJson,
-  }));
-  vi.doMock('@/lib/swagger', () => ({
-    genSwaggerClient,
-    mapObject: (obj) => obj,
-  }));
   vi.doMock('../../../../../src/protocols/aeternity/composables/aeNetworkSettings', () => ({
     useAeNetworkSettings: () => ({
       aeActiveNetworkSettings: computed(() => ({ middlewareUrl: middlewareUrl.value })),
     }),
   }));
+  const fetchMock = vi.fn(async (url) => respond(url));
+  vi.stubGlobal('fetch', fetchMock);
 
   const { useAeMiddleware } = await import('@/protocols/aeternity/composables/aeMiddleware');
   return {
-    composable: useAeMiddleware(),
+    middleware: useAeMiddleware(),
     middlewareUrl,
-    fetchJson,
-    genSwaggerClient,
+    requestedUrls: () => fetchMock.mock.calls.map(([url]) => url),
   };
 }
 
-describe('useAeMiddleware getMiddleware', () => {
-  it('makes a caller arriving mid-switch wait for the new network\'s client', async () => {
-    const ctx = await loadComposable();
-    await ctx.composable.getMiddleware();
-
-    ctx.middlewareUrl.value = MDW_MAINNET;
-    const [first, second] = await Promise.all([
-      ctx.composable.getMiddleware(),
-      ctx.composable.getMiddleware(),
-    ]);
-
-    expect(first.url).toBe(MDW_MAINNET);
-    expect(second.url).toBe(MDW_MAINNET);
-    // The waiter reuses the in-flight init instead of starting a second one.
-    expect(ctx.genSwaggerClient).toHaveBeenCalledTimes(2);
-  });
-
-  it('retries the init after a failed one instead of serving the old client forever', async () => {
-    const ctx = await loadComposable();
-    await ctx.composable.getMiddleware();
-
-    ctx.middlewareUrl.value = MDW_MAINNET;
-    ctx.fetchJson.mockRejectedValueOnce(new Error('middleware unreachable'));
-    await expect(ctx.composable.getMiddleware()).rejects.toThrow('middleware unreachable');
-
-    const retried = await ctx.composable.getMiddleware();
-
-    expect(retried.url).toBe(MDW_MAINNET);
-  });
-
-  it('does not record the new network when building the client is what failed', async () => {
-    // Recording the settings before the client is live makes a failed init look like a
-    // completed switch, so the URL check passes and the previous client is served on.
-    const ctx = await loadComposable();
-    await ctx.composable.getMiddleware();
-
-    ctx.middlewareUrl.value = MDW_MAINNET;
-    ctx.genSwaggerClient.mockRejectedValueOnce(new Error('spec is not a swagger doc'));
-    await expect(ctx.composable.getMiddleware()).rejects.toThrow('spec is not a swagger doc');
-
-    const retried = await ctx.composable.getMiddleware();
-
-    expect(retried.url).toBe(MDW_MAINNET);
-  });
-
-  it('keys the client to the network it was built for, not the one current when it lands', async () => {
-    // The settings are read once at the start of the init. Reading them again at the end
-    // would file a mainnet client under testnet and never re-init for testnet again.
-    const ctx = await loadComposable();
-    await ctx.composable.getMiddleware();
-
-    let releaseInit;
-    ctx.genSwaggerClient.mockImplementationOnce(async (url) => new Promise((resolve) => {
-      releaseInit = () => resolve({ api: { url } });
-    }));
-
-    ctx.middlewareUrl.value = MDW_MAINNET;
-    const pendingMainnet = ctx.composable.getMiddleware();
-    await vi.waitFor(() => expect(releaseInit).toBeTypeOf('function'));
-    // The user switches back before the mainnet client finishes building.
-    ctx.middlewareUrl.value = MDW_TESTNET;
-    releaseInit();
-
-    expect((await pendingMainnet).url).toBe(MDW_MAINNET);
-    expect((await ctx.composable.getMiddleware()).url).toBe(MDW_TESTNET);
-  });
-
-  it('shares a single retry among every waiter after a failed concurrent init', async () => {
-    // Three callers arrive while one init is in flight; it fails. Only the caller that
-    // owns the attempt sees it reject - the other two must join a shared retry instead
-    // of each starting their own, or a struggling middleware gets hit with N requests
-    // instead of one.
-    const ctx = await loadComposable();
-    await ctx.composable.getMiddleware();
-
-    ctx.middlewareUrl.value = MDW_MAINNET;
-    ctx.fetchJson.mockRejectedValueOnce(new Error('middleware unreachable'));
-
-    await Promise.allSettled([
-      ctx.composable.getMiddleware(),
-      ctx.composable.getMiddleware(),
-      ctx.composable.getMiddleware(),
-    ]);
-
-    // 1 initial setup + 1 shared retry after the rejection. A caller per-waiter retry
-    // bug would instead produce 3 (each of the two waiters retrying on its own).
-    expect(ctx.genSwaggerClient).toHaveBeenCalledTimes(2);
-  });
-
-  it('gives up on an init that never settles instead of blocking every consumer', async () => {
-    vi.useFakeTimers();
-    try {
-      const ctx = await loadComposable();
-      ctx.fetchJson.mockImplementationOnce(() => new Promise(() => {}));
-
-      const timedOut = expect(ctx.composable.getMiddleware())
-        .rejects.toThrow('Middleware init timed out');
-      await vi.advanceTimersByTimeAsync(INIT_TIMEOUT);
-      await timedOut;
-
-      // The failed attempt must not leave a promise behind that later callers await.
-      const recovered = ctx.composable.getMiddleware();
-      await vi.advanceTimersByTimeAsync(0);
-      expect((await recovered).url).toBe(MDW_TESTNET);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-});
-
-describe('useAeMiddleware fetchFromMiddlewareCamelCasedPrecise', () => {
+describe('useAeMiddleware', () => {
   afterEach(() => {
+    vi.doUnmock('../../../../../src/protocols/aeternity/composables/aeNetworkSettings');
     vi.unstubAllGlobals();
   });
 
-  it('keeps amounts above the safe integer range exact', async () => {
-    const fetch = vi.fn().mockResolvedValue(new Response(
-      '{"info":{"last_bid":{"tx":{"name_fee":500000000000000000001}}}}',
-    ));
-    vi.stubGlobal('fetch', fetch);
-    const { composable } = await loadComposable();
+  it('asks the middleware of the network active at the time of the request', async () => {
+    const ctx = await loadComposable(() => jsonResponse({ mdw_version: '1.110.0' }));
 
-    const response = await composable.fetchFromMiddlewareCamelCasedPrecise('/v2/names/a.chain/auction');
+    await ctx.middleware.fetchMiddlewareStatus();
+    ctx.middlewareUrl.value = MDW_MAINNET;
+    await ctx.middleware.fetchMiddlewareStatus();
 
-    expect(fetch).toHaveBeenCalledWith(`${MDW_TESTNET}/v2/names/a.chain/auction`);
-    expect(response.info.lastBid.tx.nameFee).toBe('500000000000000000001');
+    expect(ctx.requestedUrls()).toEqual([
+      `${MDW_TESTNET}/v3/status`,
+      `${MDW_MAINNET}/v3/status`,
+    ]);
   });
 
-  it('rejects an error response instead of returning its body', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
-      '{"error":"not found: a.chain"}',
-      { status: 404 },
-    )));
-    const { composable } = await loadComposable();
+  it('reads a transaction with its keys camelCased and its big amounts exact', async () => {
+    const ctx = await loadComposable(() => jsonResponse(
+      '{"hash":"th_1","block_height":5,"tx":{"caller_id":"ak_1","amount":1319312684803176974291}}',
+    ));
 
-    await expect(composable.fetchFromMiddlewareCamelCasedPrecise('/v2/names/a.chain/auction'))
-      .rejects.toThrow('404');
+    const transaction = await ctx.middleware.fetchTransaction('th_1');
+
+    expect(ctx.requestedUrls()).toEqual([`${MDW_TESTNET}/v3/transactions/th_1`]);
+    expect(transaction).toEqual({
+      hash: 'th_1',
+      blockHeight: 5,
+      tx: { callerId: 'ak_1', amount: '1319312684803176974291' },
+    });
+  });
+
+  it('filters the transactions by the given query', async () => {
+    const ctx = await loadComposable(() => jsonResponse({ data: [{ hash: 'th_1' }], next: null }));
+
+    const { data } = await ctx.middleware.fetchTransactions({
+      contract: 'ct_vault', direction: 'backward', limit: 1,
+    });
+
+    expect(ctx.requestedUrls()).toEqual([
+      `${MDW_TESTNET}/v3/transactions?contract=ct_vault&direction=backward&limit=1`,
+    ]);
+    expect(data).toEqual([{ hash: 'th_1' }]);
+  });
+
+  it('keeps a hash in its path segment', async () => {
+    const ctx = await loadComposable(() => jsonResponse({ error: 'not found' }, 404));
+
+    await ctx.middleware.fetchTransaction('../../key-blocks#').catch(() => {});
+    await ctx.middleware.fetchNameByHash('../key-blocks#').catch(() => {});
+
+    expect(ctx.requestedUrls()).toEqual([
+      `${MDW_TESTNET}/v3/transactions/..%2F..%2Fkey-blocks%23`,
+      `${MDW_TESTNET}/v3/names/..%2Fkey-blocks%23`,
+      `${MDW_TESTNET}/v3/names/auctions/..%2Fkey-blocks%23`,
+    ]);
+  });
+
+  it('rejects with the status code the middleware answered with', async () => {
+    const ctx = await loadComposable(() => jsonResponse({ error: 'not found' }, 404));
+
+    await expect(ctx.middleware.fetchTransaction('th_missing'))
+      .rejects.toMatchObject({ statusCode: 404 });
+  });
+
+  describe('fetchNameByHash', () => {
+    it('resolves the name of a name hash', async () => {
+      const ctx = await loadComposable(() => jsonResponse({ name: 'owned.chain' }));
+
+      expect(await ctx.middleware.fetchNameByHash('nm_owned')).toBe('owned.chain');
+      expect(ctx.requestedUrls()).toEqual([`${MDW_TESTNET}/v3/names/nm_owned`]);
+    });
+
+    it('finds a name in its first auction among the auctions', async () => {
+      const ctx = await loadComposable((url) => (url.includes('/names/auctions/')
+        ? jsonResponse({ name: 'bidding.chain', auction_end: 1000 })
+        : jsonResponse({ error: 'not found' }, 404)));
+
+      expect(await ctx.middleware.fetchNameByHash('nm_bidding')).toBe('bidding.chain');
+      expect(ctx.requestedUrls()).toEqual([
+        `${MDW_TESTNET}/v3/names/nm_bidding`,
+        `${MDW_TESTNET}/v3/names/auctions/nm_bidding`,
+      ]);
+    });
+
+    it('does not look among the auctions when the middleware fails', async () => {
+      const ctx = await loadComposable(() => jsonResponse('Service Unavailable', 503));
+
+      await expect(ctx.middleware.fetchNameByHash('nm_owned'))
+        .rejects.toMatchObject({ statusCode: 503 });
+      expect(ctx.requestedUrls()).toEqual([`${MDW_TESTNET}/v3/names/nm_owned`]);
+    });
   });
 });

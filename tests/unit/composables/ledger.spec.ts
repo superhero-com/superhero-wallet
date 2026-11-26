@@ -108,4 +108,36 @@ describe('useLedger', () => {
       await expect(sign(await useLedger())).rejects.toThrow('Device disconnected');
     });
   });
+
+  describe('signTransaction for a network', () => {
+    it.each([
+      ['of the node by default', undefined, 'ae_uat'],
+      ['it is given', 'ae_mainnet', 'ae_mainnet'],
+    ])('signs for the network %s', async (_, networkId, signedFor) => {
+      await (await useLedger()).signTransaction(ADDRESS, 0, 'tx_unsigned', networkId);
+
+      expect(ledgerAccount.signTransaction)
+        .toHaveBeenCalledWith('tx_unsigned', { networkId: signedFor });
+    });
+
+    it('sends the network it is given from a popup to the offscreen tab', async () => {
+      vi.doMock('@/constants', async () => ({
+        ...(await vi.importActual('@/constants')),
+        IS_WEB: false,
+        IS_OFFSCREEN_TAB: false,
+      }));
+      const ledger = await useLedger();
+      const sendMessage = vi.fn(async () => 'tx_signed');
+      const originalBrowser = globalThis.browser;
+      // Set after the import, which can replace `browser`
+      globalThis.browser = { runtime: { sendMessage } };
+      onTestFinished(() => { globalThis.browser = originalBrowser; });
+
+      await expect(ledger.signTransaction(ADDRESS, 0, 'tx_unsigned', 'ae_mainnet'))
+        .resolves.toBe('tx_signed');
+      expect(sendMessage.mock.calls[0][0].payload)
+        .toMatchObject({ transaction: 'tx_unsigned', networkId: 'ae_mainnet' });
+      expect(ledgerAccount.signTransaction).not.toHaveBeenCalled();
+    });
+  });
 });

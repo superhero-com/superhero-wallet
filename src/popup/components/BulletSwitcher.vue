@@ -22,6 +22,8 @@
             active: idx === currentIdx,
           }"
           class="bullet-link"
+          :aria-label="$t('a11y.selectAccount', { number: idx + 1 })"
+          :aria-current="idx === currentIdx ? 'true' : undefined"
           @click="$emit('change', idx)"
         >
           <span class="bullet" />
@@ -71,6 +73,7 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ['change'],
   setup(props) {
     const isResizing = computed(() => props.optionsSize > RESIZE_THRESHOLD);
 

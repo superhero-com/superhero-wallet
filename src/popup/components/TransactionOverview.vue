@@ -28,9 +28,9 @@ import type {
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransactionData } from '@/composables';
-import { isEvm } from '@/utils';
+import { includes, isEvm } from '@/utils';
 
-import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { SUPERHERO_TX_ACTIONS_WITH_TARGET, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import TransactionInfo from './TransactionInfo.vue';
@@ -60,6 +60,7 @@ export default defineComponent({
       innerTxTag,
       outerTxTag,
       direction,
+      superheroTxAction,
       getOwnershipAddress,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
@@ -112,7 +113,9 @@ export default defineComponent({
               address: senderId,
               name: getName(senderId).value,
               url: protocolExplorer.prepareUrlForAccount(senderId),
-              label: t('transaction.overview.accountAddress'),
+              label: superheroTxAction.value
+                ? t('transaction.superhero.tag')
+                : t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
@@ -123,13 +126,28 @@ export default defineComponent({
           };
 
         case Tag.ContractCallTx: {
+          let contractLabel = t('common.smartContract');
+          if (protocol.value === PROTOCOLS.aeternity && isDex.value) {
+            contractLabel = t('transaction.overview.superheroDex');
+          } else if (superheroTxAction.value) {
+            contractLabel = t('transaction.superhero.tag');
+          }
           const contract: IAccountOverview = {
             address: contractId,
             url: protocolExplorer.prepareUrlForHash(contractId),
-            label: (isDex.value && protocol.value === PROTOCOLS.aeternity)
-              ? t('transaction.overview.superheroDex')
-              : t('common.smartContract'),
+            label: contractLabel,
           };
+
+          // The account the user followed, blocked or delegated to
+          if (
+            includes(SUPERHERO_TX_ACTIONS_WITH_TARGET, superheroTxAction.value)
+            && direction.value === TX_DIRECTION.sent
+          ) {
+            return {
+              sender: ownershipAccount.value,
+              recipient: getTransactionParty(innerTx.value.arguments?.[0]?.value),
+            };
+          }
 
           if (isEvm(protocol.value)) {
             return {

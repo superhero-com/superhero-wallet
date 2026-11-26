@@ -22,7 +22,7 @@
       />
       <BtnMain
         class="button-action-primary"
-        :disabled="!isOnline || sendingDisabled"
+        :disabled="!isOnline || sendingDisabled || loading"
         :icon="primaryButtonIcon"
         :text="primaryButtonText"
         data-cy="next-step-button"
@@ -45,6 +45,7 @@ import { useI18n } from 'vue-i18n';
 import { TRANSFER_SEND_STEPS } from '@/constants';
 import { useAccounts, useConnection } from '@/composables';
 
+import AnimatedSpinner from '@/icons/animated-spinner.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
@@ -73,6 +74,8 @@ export default defineComponent({
     customPrimaryButtonText: { type: String, default: '' },
     currentStep: { type: String as PropType<TransferSendStep>, required: true },
     sendingDisabled: Boolean,
+    /** Next waits for the current step */
+    loading: Boolean,
     hideArrowSendIcon: Boolean,
   },
   emits: [
@@ -111,6 +114,9 @@ export default defineComponent({
     });
 
     const primaryButtonIcon = computed(() => {
+      if (props.loading) {
+        return AnimatedSpinner;
+      }
       if (showSendButton.value && !showNextButton.value && !props.hideArrowSendIcon) {
         return ArrowSendIcon;
       }

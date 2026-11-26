@@ -20,7 +20,7 @@ import Web3Eth, {
   getTransactionReceipt,
 } from 'web3-eth';
 import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSignedTransaction';
-import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { toEvmChecksumAddress, toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
 import BigNumber from 'bignumber.js';
@@ -182,6 +182,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override isAccountAddressValid(address: AccountAddress) {
     return isAddress(address);
+  }
+
+  override normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return toEvmChecksumAddress(address);
   }
 
   override isValidAddressOrNameEncoding(address: string) {
@@ -542,10 +546,15 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async constructAndSignTx(
+  async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
+    options: {
+      fromAccount: AccountAddress;
+      nonce: number;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+    },
   ): Promise<FeeMarketEIP1559Transaction> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
@@ -578,7 +587,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       type: '0x02',
     };
 
-    return FeeMarketEIP1559Transaction.fromTxData(txData).sign(account.secretKey);
+    return FeeMarketEIP1559Transaction.fromTxData(txData).sign(account.secretKey!);
   }
 
   override async spend(

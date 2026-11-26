@@ -12,6 +12,7 @@
       <BtnIcon
         class="icon-btn"
         data-cy="back-arrow"
+        :aria-label="$t('a11y.back')"
         :icon="BackIcon"
         @click="back"
       />

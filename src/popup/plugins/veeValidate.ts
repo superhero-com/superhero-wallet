@@ -2,7 +2,7 @@ import { defineRule } from 'vee-validate';
 import { numeric, required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce, throttle } from 'lodash-es';
-import { isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
+import { Encoding, isAddressValid, isNameValid } from '@aeternity/aepp-sdk';
 import {
   IAddressBookEntry,
   INetwork,
@@ -19,6 +19,7 @@ import {
   getProtocolByAddress,
   isNotFoundError,
   isUrlValid,
+  normalizeAccountAddress,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
@@ -27,8 +28,15 @@ import {
   useAeSdk,
 } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
-import { getAddressByNameEntry } from '@/protocols/aeternity/helpers';
+import {
+  fetchAeNotPayableRecipients,
+  getAddressByNameEntry,
+} from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
+
+function isAeRecipientAddressValid(value: string) {
+  return ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).isRecipientAddressValid(value);
+}
 
 defineRule(
   'required',
@@ -157,9 +165,10 @@ defineRule(
 defineRule(
   'address_book_entry_exists',
   (value: string, [entries, savedValue, type]: [IAddressBookEntry[], string, 'name' | 'address']) => {
-    const exists = Object.values(entries).some(
-      (entry) => entry[type] === value && value
-       !== savedValue,
+    // Also the same address in another case. The edited entry itself is left out.
+    const searched = (type === 'address') ? normalizeAccountAddress(value) : value;
+    const exists = value !== savedValue && Object.values(entries).some(
+      (entry) => entry[type] !== savedValue && (entry[type] === searched || entry[type] === value),
     );
 
     const entryTypeText = type === 'name' ? tg('common.name') : tg('common.address');
@@ -178,7 +187,6 @@ export default () => {
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
     REGISTERED_ADDRESS: Symbol('name state: registered and points to address'),
-    UNREGISTERED: Symbol('name state: unregistered'),
     NOT_SAME: Symbol('name state: not same as provided'),
   };
   type CheckNameRequest = {
@@ -208,17 +216,13 @@ export default () => {
         resolve(({
           [NAME_STATES.REGISTERED]: true,
           [NAME_STATES.REGISTERED_ADDRESS]: !!address,
-          [NAME_STATES.UNREGISTERED]: false,
           [NAME_STATES.NOT_SAME]: comparedAddress !== address,
         }[expectedNameState]));
       } catch (error) {
         if (!isNotFoundError(error)) {
           reject(error);
         } else {
-          resolve(
-            expectedNameState === NAME_STATES.UNREGISTERED
-            || expectedNameState === NAME_STATES.NOT_SAME,
-          );
+          resolve(expectedNameState === NAME_STATES.NOT_SAME);
         }
       } finally {
         if (latestCheckNameRequest === request) {
@@ -271,14 +275,6 @@ export default () => {
   );
 
   defineRule(
-    'aens_name_unregistered',
-    async (value: string) => (
-      (await checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []))
-      || tg('validation.nameUnregistered')
-    ),
-  );
-
-  defineRule(
     'aens_name_registered_or_address',
     async (value: string[]) => {
       if (typeof value === 'string' || !value) return false;
@@ -289,7 +285,7 @@ export default () => {
         validationResults.push(isNameValid(item)
         // eslint-disable-next-line no-await-in-loop
           ? await checkNameRegisteredAddress(item)
-          : isAddressValid(item));
+          : isAeRecipientAddressValid(item));
       }
 
       const invalidItems = value.filter((_, index) => !validationResults[index]);
@@ -311,7 +307,7 @@ export default () => {
         validationResults.push(isNameValid(item)
         // eslint-disable-next-line no-await-in-loop
           ? await checkNameRegisteredAddress(item)
-          : isAddressValid(item) || isUrlValid(item));
+          : isAeRecipientAddressValid(item) || isUrlValid(item));
       }
 
       // Collect invalid items
@@ -324,15 +320,43 @@ export default () => {
   );
 
   /**
-   * AEX-9 tokens can be sent only to an address
+   * AEX-9 tokens can be sent only to an account address
    */
   defineRule(
     'token_to_an_address',
     (value: string[], [isToken]: [boolean]) => (
       !isToken
-      || !value?.some((address) => isNameValid(address))
+      || !value?.some((address) => (
+        isNameValid(address) || isAddressValid(address, Encoding.ContractAddress)
+      ))
       || tg('validation.tokenToAnAddress')
     ),
+  );
+
+  /**
+   * A spend to a contract that isn't payable always fails, and the transactions sent
+   * after it wait behind it. A recipient the node can't be asked about passes.
+   */
+  defineRule(
+    'ae_recipient_payable',
+    async (value: string[]) => {
+      if (!Array.isArray(value)) return true;
+
+      let notPayableRecipients: string[];
+      try {
+        const dryAeSdk = await getDryAeSdk();
+        notPayableRecipients = await fetchAeNotPayableRecipients(dryAeSdk.api, value);
+      } catch (error) {
+        return true;
+      }
+
+      if (notPayableRecipients.length === 0) return true;
+
+      return [
+        tg('validation.recipientNotPayable', [AE_SYMBOL]),
+        notPayableRecipients.join(','),
+      ].join('||');
+    },
   );
 
   /**
@@ -351,14 +375,16 @@ export default () => {
     (value: string[], [comparedAddress, protocol]: [string, Protocol]) => {
       if (typeof value === 'string' || !value) return false;
 
-      const invalidAddresses = value.filter((address) => address === comparedAddress);
+      const adapter = protocol ? ProtocolAdapterFactory.getAdapter(protocol) : undefined;
+      const normalize = (address: string) => adapter?.normalizeAddress(address) ?? address;
+      const ownAddress = normalize(comparedAddress);
+      // Listed as typed, as the field marks the recipients by it
+      const invalidAddresses = value.filter((address) => normalize(address) === ownAddress);
 
       if (invalidAddresses.length === 0) return true;
 
       return [tg('validation.addressNotSameAs', [
-        protocol
-          ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
-          : tg('common.tokens'),
+        adapter ? adapter.coinSymbol : tg('common.tokens'),
       ]), invalidAddresses.join(',')].join('||');
     },
   );

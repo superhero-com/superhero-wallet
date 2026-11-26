@@ -1,6 +1,9 @@
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { ref as mockRef } from 'vue';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 
+const mockActiveAccount = mockRef();
+const mockCopy = vi.fn();
 const mockGenerateEncryptionKey = vi.fn(async () => 'derived-key');
 const mockDecrypt = vi.fn(async () => 'decrypted mnemonic');
 const mockOpenBiometricLoginModal = vi.fn();
@@ -27,7 +30,7 @@ vi.mock('vue-i18n', () => ({
 
 vi.mock('@/composables', () => ({
   useAccounts: () => ({
-    activeAccount: mockRef({ secretKey: 'abc123' }),
+    activeAccount: mockActiveAccount,
   }),
   useAuth: () => ({
     canAuthenticateWithDevice: mockCanAuthenticateWithDevice,
@@ -36,7 +39,7 @@ vi.mock('@/composables', () => ({
     isUsingDefaultPassword: mockRef(false),
   }),
   useCopy: () => ({
-    copy: vi.fn(),
+    copy: mockCopy,
     copied: mockRef(false),
   }),
   useModals: () => ({
@@ -57,6 +60,8 @@ describe('PrivateKeyExport', () => {
     mockCanAuthenticateWithDevice.mockReset();
     mockIsBiometricLoginEnabled.value = false;
     platform.isMobileApp = false;
+    mockActiveAccount.value = { protocol: PROTOCOLS.ethereum, secretKey: 'abc123' };
+    mockCopy.mockClear();
   });
 
   it('uses password re-auth on mobile web instead of falling back to confirm-only', async () => {
@@ -94,7 +99,7 @@ describe('PrivateKeyExport', () => {
     wrapper.vm.handleMainButtonClick();
     await flushPromises();
 
-    expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true });
+    expect(mockOpenBiometricLoginModal).toHaveBeenCalledWith({ force: true, isCancelable: true });
     expect(mockOpenConfirmModal).not.toHaveBeenCalled();
     expect(wrapper.vm.privateKey).toBe(Buffer.from('abc123').toString('hex'));
   });
@@ -138,5 +143,81 @@ describe('PrivateKeyExport', () => {
     expect(mockOpenConfirmModal).toHaveBeenCalledTimes(1);
     expect(mockOpenBiometricLoginModal).not.toHaveBeenCalled();
     expect(wrapper.vm.privateKey).toBe(Buffer.from('abc123').toString('hex'));
+  });
+
+  describe('formats', () => {
+    const SEED_HEX = '9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60';
+    const SECRET_KEY = 'sk_2CK6vgUFHBTWVA9bMakzaB94Fhjuhwi4K6zQWU7tU8nKQ14rhM';
+
+    async function reveal() {
+      const PrivateKeyExport = (await import('../../../../../src/popup/components/Modals/PrivateKeyExport.vue')).default;
+      const wrapper = shallowMount(PrivateKeyExport, {
+        props: { resolve: vi.fn() },
+        global: {
+          renderStubDefaultSlot: true,
+          mocks: { $t: (key) => key },
+          stubs: { DetailsItem: { template: '<div><slot name="value" /></div>' } },
+        },
+      });
+      wrapper.vm.password = 'top-secret';
+      wrapper.vm.handleMainButtonClick();
+      await flushPromises();
+      return wrapper;
+    }
+
+    function getShownKey(wrapper) {
+      return wrapper.find('[data-cy=copy]').attributes('value');
+    }
+
+    it('shows an æternity key in hex, and as sk_ when picked', async () => {
+      mockActiveAccount.value = {
+        protocol: PROTOCOLS.aeternity,
+        secretKey: Buffer.from(SEED_HEX, 'hex'),
+      };
+      const wrapper = await reveal();
+
+      expect(getShownKey(wrapper)).toBe(SEED_HEX);
+      expect(wrapper.find('[data-cy=format-hex]').attributes('aria-pressed')).toBe('true');
+
+      await wrapper.find('[data-cy=format-sk]').trigger('click');
+      expect(getShownKey(wrapper)).toBe(SECRET_KEY);
+      expect(wrapper.find('[data-cy=format-sk]').attributes('aria-pressed')).toBe('true');
+      expect(mockDecrypt).toHaveBeenCalledTimes(1);
+
+      await wrapper.find('[data-cy=copy]').trigger('click');
+      expect(mockCopy).toHaveBeenCalledWith(SECRET_KEY);
+    });
+
+    it('keeps the key it revealed when the account changes', async () => {
+      mockActiveAccount.value = {
+        protocol: PROTOCOLS.aeternity,
+        secretKey: Buffer.from(SEED_HEX, 'hex'),
+      };
+      const wrapper = await reveal();
+
+      mockActiveAccount.value = { protocol: PROTOCOLS.ethereum, secretKey: 'abc123' };
+      await flushPromises();
+
+      expect(getShownKey(wrapper)).toBe(SEED_HEX);
+    });
+
+    it('closes without revealing a key when the account changes to one without it', async () => {
+      mockDecrypt.mockImplementationOnce(async () => {
+        mockActiveAccount.value = { protocol: PROTOCOLS.aeternity, type: ACCOUNT_TYPES.ledger };
+        return 'decrypted mnemonic';
+      });
+      const wrapper = await reveal();
+
+      expect(mockDecrypt).toHaveBeenCalledTimes(1);
+      expect(wrapper.find('[data-cy=copy]').exists()).toBe(false);
+      expect(wrapper.props('resolve')).toHaveBeenCalledTimes(1);
+    });
+
+    it('offers no choice for a protocol with one format', async () => {
+      const wrapper = await reveal();
+
+      expect(getShownKey(wrapper)).toBe(Buffer.from('abc123').toString('hex'));
+      expect(wrapper.find('[data-cy=format-hex]').exists()).toBe(false);
+    });
   });
 });

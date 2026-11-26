@@ -9,8 +9,15 @@ function getStoredItem(key) {
   return cy.window().then((win) => win.localStorage.getItem(key));
 }
 
+function getStoredMnemonic() {
+  return cy.getStoredVault().then((vault) => (
+    vault ? vault.values[STORAGE_KEYS.mnemonic] : getStoredItem(MNEMONIC_KEY).then(JSON.parse)
+  ));
+}
+
 describe('Onboarding', () => {
   it('creates a wallet on a fresh install without asking', () => {
+    cy.clearAllIndexedDB();
     cy.openPopup((contentWindow) => {
       contentWindow.localStorage.clear();
       // eslint-disable-next-line no-param-reassign
@@ -33,20 +40,22 @@ describe('Onboarding', () => {
       .click()
       .get('[data-cy=balance-info]')
       .should('be.visible');
-    getStoredItem(MNEMONIC_KEY).should('not.be.empty');
+    // A fresh install has no older copies: its seed must be stored in the vault.
+    cy.waitForStoredVault((vault) => !!vault?.values[STORAGE_KEYS.mnemonic]);
+    getStoredItem(MNEMONIC_KEY).should('be.null');
   });
 
   // E.g. the popup closed while an import was still discovering the accounts.
   it('opens a stored wallet that has no accounts instead of the start page', () => {
     cy.login({ accountsRaw: [] });
-    getStoredItem(MNEMONIC_KEY).then((storedMnemonic) => {
+    getStoredMnemonic().then((storedMnemonic) => {
       // Longer than the restore timeout, after which the first account is opened anyway.
       cy.get('[data-cy=balance-info]', { timeout: 40000 })
         .should('be.visible')
         .urlEquals('/account')
         .get('[data-cy=generate-wallet]')
         .should('not.exist');
-      getStoredItem(MNEMONIC_KEY).should('eq', storedMnemonic);
+      getStoredMnemonic().should('eq', storedMnemonic);
       getStoredItem(ACCOUNTS_KEY)
         .then((accountsRaw) => JSON.parse(accountsRaw))
         .should('have.length.at.least', 1);

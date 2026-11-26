@@ -16,8 +16,9 @@ import {
   PropType,
 } from 'vue';
 import type { Protocol } from '@/types';
+import { AMOUNT_SIGNIFICANT_DIGITS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { formatNumberParts } from '@/utils';
+import { formatAmountParts } from '@/utils';
 
 type AssetSize = 'lg' | 'md' | 'sm';
 
@@ -28,13 +29,10 @@ export default defineComponent({
   },
   setup(props) {
     const balanceParts = computed(() => {
-      const decimals = ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .getAmountPrecision({ amount: props.balance });
-
-      const { integer, fraction, decimal } = formatNumberParts(props.balance, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: decimals,
+      const { integer, fraction, decimal } = formatAmountParts(props.balance, {
+        maxDecimals: ProtocolAdapterFactory.getAdapter(props.protocol).getAmountPrecision(),
+        significantDigits: AMOUNT_SIGNIFICANT_DIGITS,
+        minDecimals: 2,
       }).reduce<{ integer: string; fraction: string; decimal: string }>((acc, current) => {
         if (current.type === 'decimal') {
           return { ...acc, decimal: current.value };

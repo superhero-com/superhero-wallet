@@ -3,6 +3,8 @@ import {
   AccountBase,
   DelegationTag,
   MemoryAccount,
+  RpcInternalError,
+  RpcInvalidTransactionError,
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   getTransactionSignerAddress,
@@ -11,6 +13,7 @@ import {
   Encoded,
   Encoding,
   METHODS,
+  decode,
   encode,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
@@ -26,7 +29,7 @@ import {
   MODAL_SIGN_AIR_GAP_TRANSACTION,
   PROTOCOLS,
 } from '@/constants';
-import { handleUnknownError, isAccountAirGap } from '@/utils';
+import { handleUnknownError, isAccountAirGap, watchUntilTruthy } from '@/utils';
 
 import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
@@ -36,11 +39,13 @@ import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import {
   canRebuildTransactionForSigner,
   fetchAccountNextNonce,
+  getNameIdOfSpelling,
   rebuildTransactionForSigner,
 } from '@/protocols/aeternity/helpers';
 import { SEED_LENGTH } from '@/protocols/aeternity/config';
 import { usePermissions } from '@/composables/permissions';
 import Logger from '@/lib/logger';
+import { getApprovalSourceTab } from '@/lib/approvalSourceTab';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -80,9 +85,23 @@ function assertAeppGivenAccounts(aeppRpcClientId?: string) {
   }
 }
 
-/** Of the browser tab the aepp asks from, see `IPopupProps.tabId` */
-function getAeppTabId(aeppRpcClientId?: string) {
-  return aeppRpcClientId ? useAeSdk().getAeppTabId(aeppRpcClientId) : undefined;
+/** A node switch keeps the previous network's id until the new node answers */
+export const NODE_SWITCH_TIMEOUT = 10000;
+
+async function waitForNodeSwitch() {
+  const { isAeSdkUpdating } = useAeSdk();
+  if (!isAeSdkUpdating.value) return;
+  if (!await watchUntilTruthy(() => !isAeSdkUpdating.value, NODE_SWITCH_TIMEOUT)) {
+    throw new Error('Not connected to any network');
+  }
+}
+
+function isNodeSwitching() {
+  return useAeSdk().isAeSdkUpdating.value;
+}
+
+function getAeppSourceTab(aeppRpcClientId?: string) {
+  return aeppRpcClientId ? useAeSdk().getAeppSourceTab(aeppRpcClientId) : getApprovalSourceTab();
 }
 
 function getTxSigner(txBase64: Encoded.Transaction): string | undefined {
@@ -90,6 +109,18 @@ function getTxSigner(txBase64: Encoded.Transaction): string | undefined {
     return getTransactionSignerAddress(txBase64);
   } catch {
     return undefined;
+  }
+}
+
+/**
+ * Every signer decodes the transaction first, so one that doesn't decode would fail only
+ * after the prompt. Zero bytes decode, but there is nothing to sign.
+ */
+function isDecodableTx(txBase64: Encoded.Transaction): boolean {
+  try {
+    return decode(txBase64).length > 0;
+  } catch {
+    return false;
   }
 }
 
@@ -156,6 +187,12 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Encoded.Transaction> {
     // Also before the Air Gap modal below
     assertAeppGivenAccounts(options?.aeppRpcClientId);
+    if (!isDecodableTx(txBase64)) {
+      throw new RpcInvalidTransactionError();
+    }
+    if (isDappRequest(options)) {
+      await waitForNodeSwitch();
+    }
     if (!this.nodeNetworkId.value) {
       // The initial node status request may have failed (e.g. no connectivity
       // right after a fresh browser start), leaving `nodeNetworkId` empty even
@@ -211,6 +248,8 @@ export class AeAccountHdWallet extends MemoryAccount {
        * that choice get to override `fromAccount` or trigger a rebuild.
        */
       let modalResolution: ISignModalResolution | undefined;
+      // Signed for, as approved, even if a switch lands while a rebuild awaits the node
+      const promptNetworkId = this.nodeNetworkId.value;
 
       if (wasConfirmationAsked) {
         const { checkOrAskPermission } = usePermissions();
@@ -221,12 +260,16 @@ export class AeAccountHdWallet extends MemoryAccount {
             ...options,
             txBase64,
             tx,
-            tabId: getAeppTabId(options?.aeppRpcClientId),
+            ...getAeppSourceTab(options?.aeppRpcClientId),
             ...(mayUseDailyLimit ? { protocol: PROTOCOLS.aeternity } : {}),
           },
           (payload) => { modalResolution = payload; },
         );
         if (!permissionGranted) {
+          throw new RpcRejectedByUserError();
+        }
+        // The prompt was for this network: a dapp can switch it meanwhile, e.g. over EVM
+        if (isNodeSwitching() || this.nodeNetworkId.value !== promptNetworkId) {
           throw new RpcRejectedByUserError();
         }
       }
@@ -263,6 +306,7 @@ export class AeAccountHdWallet extends MemoryAccount {
           signingAccount.address as Encoded.AccountAddress,
           signingAccount.idx,
           txToSign,
+          promptNetworkId,
         );
         if (!signedTransaction) {
           throw new RpcRejectedByUserError();
@@ -277,7 +321,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         // to name the same account the transaction was just rebuilt for. Leaving the
         // caller's value here would sign the rebuilt transaction with the wrong key.
         fromAccount: signingAccount?.address ?? options?.fromAccount,
-        networkId: this.nodeNetworkId.value,
+        networkId: promptNetworkId,
       } as any);
     } finally {
       // The listener has to be registered before the confirmation modal opens,
@@ -349,11 +393,16 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     if (isDappRequest(options)) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      // The prompt would be blank for an empty message, and shows anything but a string as JSON
+      // while its bytes are signed. A hex deep link, which has no RPC client, passes a Buffer.
+      if (options?.aeppRpcClientId && (typeof message !== 'string' || !message)) {
+        throw new RpcInternalError();
+      }
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessage,
         options.aeppOrigin,
-        { message, tabId: getAeppTabId(options.aeppRpcClientId) },
+        { message, ...getAeppSourceTab(options.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
@@ -421,7 +470,7 @@ export class AeAccountHdWallet extends MemoryAccount {
       const permissionGranted = await checkOrAskPermission(
         METHODS.signTypedData,
         options.aeppOrigin,
-        { message, tabId: getAeppTabId(options.aeppRpcClientId) },
+        { message, ...getAeppSourceTab(options.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
@@ -446,15 +495,26 @@ export class AeAccountHdWallet extends MemoryAccount {
     let message;
     let resolvedName;
     let modalResolution: ISignModalResolution | undefined;
-    const { getMiddleware } = useAeMiddleware();
+    const { fetchNameByHash } = useAeMiddleware();
 
     if (isDappRequest(options)) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      await waitForNodeSwitch();
+      // Known before the prompt, as in `signTransaction`, so the check after it applies
+      if (!this.nodeNetworkId.value) {
+        await useAeSdk().ensureNodeNetworkId();
+      }
+      const promptNetworkId = this.nodeNetworkId.value;
+      if (!promptNetworkId) {
+        throw new Error('Not connected to any network');
+      }
       const params = unpackDelegation(delegation);
       switch (params.tag) {
         case DelegationTag.AensName:
           try {
-            resolvedName = (await (await getMiddleware()).getName(params.nameId)).name;
+            const name = await fetchNameByHash(params.nameId);
+            // The middleware isn't trusted to name the signed name
+            if (getNameIdOfSpelling(name) === params.nameId) resolvedName = name;
           } catch (e) {
             handleUnknownError(e);
           }
@@ -479,10 +539,14 @@ export class AeAccountHdWallet extends MemoryAccount {
       const permissionGranted = await checkOrAskPermission(
         METHODS.signDelegation,
         options.aeppOrigin,
-        { message, tabId: getAeppTabId(options.aeppRpcClientId) },
+        { message, ...getAeppSourceTab(options.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+      // As in `signTransaction`
+      if (isNodeSwitching() || this.nodeNetworkId.value !== promptNetworkId) {
         throw new RpcRejectedByUserError();
       }
     }
@@ -518,12 +582,16 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     if (isDappRequest(options) && !this.isSigningAlreadyConfirmed) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      // The prompt would be blank
+      if (!data?.length) {
+        throw new RpcInternalError();
+      }
       this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
         METHODS.unsafeSign,
         options?.aeppOrigin,
-        { ...options, data, tabId: getAeppTabId(options?.aeppRpcClientId) },
+        { ...options, data, ...getAeppSourceTab(options?.aeppRpcClientId) },
         (payload) => { modalResolution = payload; },
       );
       if (!permissionGranted) {

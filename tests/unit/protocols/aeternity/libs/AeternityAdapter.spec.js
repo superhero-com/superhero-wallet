@@ -24,7 +24,7 @@ describe('AeternityAdapter token pagination', () => {
           name: 'Token',
           symbol: 'TKN',
         }],
-        next: '/v2/aex9?cursor=next-page',
+        next: '/v3/aex9?cursor=next-page',
       }),
     });
 
@@ -32,7 +32,7 @@ describe('AeternityAdapter token pagination', () => {
     const result = await adapter.fetchAvailableTokensPage();
 
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/v2/aex9?by=name&limit=100&direction=forward'),
+      expect.stringContaining('/v3/aex9?by=name&limit=100&direction=forward'),
       undefined,
     );
     expect(result).toEqual({
@@ -43,7 +43,7 @@ describe('AeternityAdapter token pagination', () => {
         symbol: 'TKN',
         protocol: PROTOCOLS.aeternity,
       }],
-      next: '/v2/aex9?cursor=next-page',
+      next: '/v3/aex9?cursor=next-page',
     });
   });
 
@@ -58,7 +58,7 @@ describe('AeternityAdapter token pagination', () => {
           name: 'Alpha Token',
           symbol: 'ALPHA',
         }],
-        next: '/v2/aex9?cursor=search-next-page',
+        next: '/v3/aex9?cursor=search-next-page',
       }),
     });
 
@@ -66,7 +66,7 @@ describe('AeternityAdapter token pagination', () => {
     const result = await adapter.fetchAvailableTokensSearchPage('alp', 'symbol');
 
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/v2/aex9?by=symbol&prefix=alp&limit=100&direction=forward'),
+      expect.stringContaining('/v3/aex9?by=symbol&prefix=alp&limit=100&direction=forward'),
       undefined,
     );
     expect(result).toEqual({
@@ -77,7 +77,7 @@ describe('AeternityAdapter token pagination', () => {
         symbol: 'ALPHA',
         protocol: PROTOCOLS.aeternity,
       }],
-      next: '/v2/aex9?cursor=search-next-page',
+      next: '/v3/aex9?cursor=search-next-page',
     });
   });
 });

@@ -12,7 +12,7 @@ const OTHER_TX_HASH = 'bb'.repeat(32);
 describe('usePendingMultisigTransaction', () => {
   let activeMultisigAccount;
   let fetchActiveMultisigTx;
-  let getTxs;
+  let fetchTransactions;
 
   const vault = (txHash) => ({
     gaAccountId: 'ak_vault',
@@ -32,7 +32,7 @@ describe('usePendingMultisigTransaction', () => {
     vi.resetModules();
     activeMultisigAccount = ref(null);
     fetchActiveMultisigTx = vi.fn();
-    getTxs = vi.fn().mockResolvedValue({ data: [{ tx: { function: 'propose' } }] });
+    fetchTransactions = vi.fn().mockResolvedValue({ data: [{ tx: { function: 'propose' } }] });
 
     // Before `registerAdapters`, which loads the composables on the way
     vi.doMock('@/composables/multisigAccounts', () => ({
@@ -42,7 +42,7 @@ describe('usePendingMultisigTransaction', () => {
       useMultisigTransactions: () => ({ fetchActiveMultisigTx }),
     }));
     vi.doMock('@/protocols/aeternity/composables/aeMiddleware', () => ({
-      useAeMiddleware: () => ({ getMiddleware: async () => ({ getTxs }) }),
+      useAeMiddleware: () => ({ fetchTransactions }),
     }));
     await import('@/protocols/registerAdapters');
   });
@@ -78,7 +78,10 @@ describe('usePendingMultisigTransaction', () => {
       expect(pendingMultisigTransaction.value.isTxVerified).toBe(true);
       expect(fetchActiveMultisigTx).toHaveBeenCalledTimes(2);
       // The latest action of the vault didn't change with it
-      expect(getTxs).toHaveBeenCalledTimes(1);
+      expect(fetchTransactions).toHaveBeenCalledTimes(1);
+      expect(fetchTransactions).toHaveBeenCalledWith({
+        direction: 'backward', limit: 1, contract: 'ct_vault',
+      });
 
       vi.advanceTimersByTime(60000);
       await pollVault();

@@ -39,7 +39,7 @@ describe('useFungibleTokens available tokens', () => {
   });
 
   it('loads the tokens of the other protocols when the aeternity token list fails', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (url) => (url.includes('/v2/aex9')
+    vi.stubGlobal('fetch', vi.fn(async (url) => (url.includes('/v3/aex9')
       ? new Response('Internal Server Error', { status: 500 })
       : new Response('{}', { status: 200 }))));
     const { ProtocolAdapterFactory } = await import('@/lib/ProtocolAdapterFactory');

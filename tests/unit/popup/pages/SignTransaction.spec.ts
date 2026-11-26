@@ -1,12 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { Tag } from '@aeternity/aepp-sdk';
 
-/**
- * The deep-link signing page. When an aepp asks the wallet to re-point a contract call
- * at the user's account, the transaction is signed AND broadcast from here, so its nonce
- * has to clear the mempool - the chain nonce collides with anything still pending.
- */
-
 const CALLER = 'ak_2dATVcZ9KJU5a8hdsVtTv21pYiGWiPbmVcU1Pz72FFqpk9pSRR';
 
 const unpackTx = vi.fn(() => ({ tag: Tag.ContractCallTx, callerId: 'ak_dapp', nonce: 0 }));
@@ -23,8 +17,10 @@ vi.mock('@aeternity/aepp-sdk', async (importOriginal) => ({
 const getAccountNextNonce = vi.fn(async () => ({ nextNonce: 7 }));
 const getAccountByPubkey = vi.fn(async () => ({ nonce: 2 }));
 const signTransaction = vi.fn(async (tx: string) => `sg_${tx}`);
+const postTransaction = vi.fn();
+const poll = vi.fn();
 const openCallbackOrGoHome = vi.fn(async () => {});
-const query: Record<string, string> = {};
+let query: Record<string, string | null | string[]>;
 
 vi.mock('vue-router', () => ({ useRoute: () => ({ query }) }));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }));
@@ -43,14 +39,15 @@ vi.mock('@/composables', async (importOriginal) => ({
   useAeSdk: () => ({
     nodeNetworkId: { value: 'ae_uat' },
     getAeSdk: async () => ({
-      api: { getAccountNextNonce, getAccountByPubkey, postTransaction: vi.fn() },
+      api: { getAccountNextNonce, getAccountByPubkey, postTransaction },
       signTransaction,
-      poll: vi.fn(),
+      poll,
     }),
   }),
 }));
 
 const SignTransaction = (await import('@/popup/pages/SignTransaction.vue')).default;
+const Logger = (await import('@/lib/logger')).default;
 
 const notFound = () => Object.assign(new Error('next-nonce error: Account not found'), {
   statusCode: 404,
@@ -70,11 +67,11 @@ describe('SignTransaction.vue', () => {
     rebuildUnpackedTx.mockImplementation((tx: any) => `tx_rebuilt:${tx.callerId}:${tx.nonce}`);
     signTransaction.mockImplementation(async (tx: string) => `sg_${tx}`);
     getAccountNextNonce.mockResolvedValue({ nextNonce: 7 });
-    Object.assign(query, {
+    query = {
       transaction: 'tx_original',
       networkId: 'ae_uat',
       'replace-caller': 'true',
-    });
+    };
   });
 
   it('re-points the caller with a nonce that clears the mempool', async () => {
@@ -97,12 +94,82 @@ describe('SignTransaction.vue', () => {
     expect(openCallbackOrGoHome).toHaveBeenCalledWith(true, expect.anything());
   });
 
-  it('leaves the transaction alone when the aepp did not ask to replace the caller', async () => {
+  it('returns the signed original transaction without submitting it when broadcast is omitted', async () => {
     query['replace-caller'] = 'false';
 
     await mountAndSettle();
 
     expect(getAccountNextNonce).not.toHaveBeenCalled();
     expect(signTransaction).toHaveBeenCalledWith('tx_original', expect.anything());
+    expect(openCallbackOrGoHome).toHaveBeenCalledWith(true, { transaction: 'sg_tx_original' });
+    expect(postTransaction).not.toHaveBeenCalled();
+  });
+
+  it('uses the cancel callback without signing when the network differs', async () => {
+    query.networkId = 'ae_mainnet';
+
+    await mountAndSettle();
+
+    expect(signTransaction).not.toHaveBeenCalled();
+    expect(openCallbackOrGoHome).toHaveBeenCalledExactlyOnceWith(false);
+  });
+
+  describe.each(['true', 'false'])('with replace-caller=%s', (replaceCaller) => {
+    it.each([
+      ['no', {}],
+      ['a valueless', { transaction: null }],
+      ['an empty', { transaction: '' }],
+      ['a repeated', { transaction: ['tx_original', 'tx_other'] }],
+    ])('uses the cancel callback without signing for %s transaction', async (_, transaction) => {
+      query = { networkId: 'ae_uat', 'replace-caller': replaceCaller, ...transaction };
+
+      await mountAndSettle();
+
+      expect(unpackTx).not.toHaveBeenCalled();
+      expect(signTransaction).not.toHaveBeenCalled();
+      expect(Logger.write).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'pages.signTransaction.noTransaction' }),
+      );
+      expect(openCallbackOrGoHome).toHaveBeenCalledExactlyOnceWith(false);
+    });
+  });
+
+  it('uses the cancel callback if polling fails after the node accepts the transaction', async () => {
+    query.broadcast = 'true';
+    query['replace-caller'] = 'false';
+    postTransaction.mockResolvedValueOnce({ txHash: 'th_accepted' });
+    poll.mockRejectedValueOnce(new Error('Node unavailable'));
+
+    await mountAndSettle();
+
+    expect(postTransaction).toHaveBeenCalledExactlyOnceWith({ tx: 'sg_tx_original' });
+    expect(poll).toHaveBeenCalledWith('th_accepted', expect.anything());
+    expect(openCallbackOrGoHome).toHaveBeenCalledExactlyOnceWith(false);
+  });
+
+  it.each(['true', 'false'])('submits and returns the hash for broadcast=%s', async (broadcast) => {
+    query.broadcast = broadcast;
+    query['replace-caller'] = 'false';
+    postTransaction.mockResolvedValueOnce({ txHash: 'th_accepted' });
+
+    await mountAndSettle();
+
+    expect(postTransaction).toHaveBeenCalledExactlyOnceWith({ tx: 'sg_tx_original' });
+    expect(poll).toHaveBeenCalledWith('th_accepted', expect.anything());
+    expect(openCallbackOrGoHome)
+      .toHaveBeenCalledExactlyOnceWith(true, { 'transaction-hash': 'th_accepted' });
+  });
+
+  it('signs an inner transaction for a sponsor without submitting it', async () => {
+    query.innerTx = 'true';
+    query['replace-caller'] = 'false';
+
+    await mountAndSettle();
+
+    expect(signTransaction)
+      .toHaveBeenCalledWith('tx_original', expect.objectContaining({ innerTx: true }));
+    expect(postTransaction).not.toHaveBeenCalled();
+    expect(openCallbackOrGoHome)
+      .toHaveBeenCalledExactlyOnceWith(true, { transaction: 'sg_tx_original' });
   });
 });

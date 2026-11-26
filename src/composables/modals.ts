@@ -6,6 +6,7 @@ import {
 } from 'vue';
 import type {
   IModalProps,
+  ISetPasswordResult,
   Protocol,
   ProtocolView,
   StatusIconType,
@@ -17,6 +18,7 @@ import {
   MODAL_CONFIRM,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_NETWORK_SWITCH,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_UNSAFE_SIGN,
@@ -64,6 +66,7 @@ interface IOpenModalParams {
 const DAPP_REQUEST_MODALS: string[] = [
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_NETWORK_SWITCH,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_UNSAFE_SIGN,
@@ -223,7 +226,7 @@ export function useModals() {
   }
 
   async function openSetPasswordModal(isRestoredWallet = false) {
-    return openModal<string>(MODAL_SET_PASSWORD, {
+    return openModal<ISetPasswordResult>(MODAL_SET_PASSWORD, {
       isRestoredWallet,
     });
   }
@@ -231,12 +234,14 @@ export function useModals() {
   function openBiometricLoginModal(options?: IModalProps & {
     force?: boolean;
     deferAuthStateUpdate?: boolean;
+    isLockScreen?: boolean;
+    isCancelable?: boolean;
   }) {
     return openModal(MODAL_BIOMETRIC_LOGIN, options);
   }
 
-  function openPasswordLoginModal() {
-    return openModal(MODAL_PASSWORD_LOGIN);
+  function openPasswordLoginModal(props?: { isCancelable?: boolean }) {
+    return openModal(MODAL_PASSWORD_LOGIN, props);
   }
 
   async function openEnableBiometricLoginModal() {

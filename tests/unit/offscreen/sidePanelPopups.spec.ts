@@ -25,17 +25,17 @@ describe('offscreen popups shown in a side panel', () => {
   let openPopup;
   let addSidePanel;
   let getPopup;
-  let popupCount;
+  const requestId = (index = 0) => sendMessage.mock.calls
+    .filter(([{ method }]) => method === POPUP_METHODS.openPopup)[index][0].params.id;
 
   function backgroundChooses(windowId?: number) {
     sendMessage.mockImplementation(async ({ method, params }) => {
       if (method !== POPUP_METHODS.openPopup) {
         return undefined;
       }
-      popupCount += 1;
       // Like the background: only a window that has a side panel.
       const sidePanelWindowId = params.sidePanelWindowIds.includes(windowId) ? windowId : undefined;
-      return { id: `popup-${popupCount}`, props, sidePanelWindowId };
+      return { id: params.id, props, sidePanelWindowId };
     });
   }
 
@@ -49,7 +49,6 @@ describe('offscreen popups shown in a side panel', () => {
   beforeEach(async () => {
     vi.resetModules();
     sendMessage = vi.fn();
-    popupCount = 0;
     ({ openPopup, addSidePanel, getPopup } = await import('@/offscreen/popupHandler'));
     // Set after the import, which installs its own `browser` stub.
     globalThis.browser = { runtime: { id: 'ext-id', getURL: (url) => url, sendMessage } };
@@ -68,6 +67,12 @@ describe('offscreen popups shown in a side panel', () => {
     expect(sendMessage.mock.calls[0][0].params.sidePanelWindowIds).toEqual([WINDOW_ID]);
   });
 
+  it('rejects the request when the background cannot open its window', async () => {
+    sendMessage.mockResolvedValue(null);
+    await expect(openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example', {}))
+      .rejects.toThrow('Could not open the approval window');
+  });
+
   it('sends the popup to the side panel and resolves with its answer', async () => {
     const port = connectSidePanel();
     backgroundChooses(WINDOW_ID);
@@ -75,15 +80,15 @@ describe('offscreen popups shown in a side panel', () => {
     await vi.waitFor(() => expect(port.postMessage).toHaveBeenCalled());
 
     expect(port.postMessage).toHaveBeenCalledWith({
-      id: 'popup-1',
+      id: requestId(),
       popupType: POPUP_TYPE_CONNECT,
       props,
     });
-    port.receive({ id: 'popup-1', type: POPUP_ACTIONS.resolve, payload: { selectedAddress: 'ak_1' } });
+    port.receive({ id: requestId(), type: POPUP_ACTIONS.resolve, payload: { selectedAddress: 'ak_1' } });
     await expect(result).resolves.toEqual({ selectedAddress: 'ak_1' });
     expect(sendMessage).toHaveBeenCalledWith(expect.objectContaining({
       method: POPUP_METHODS.removePopup,
-      params: { id: 'popup-1' },
+      params: { id: requestId() },
     }));
   });
 
@@ -93,22 +98,24 @@ describe('offscreen popups shown in a side panel', () => {
     const result = openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example', {});
     await vi.waitFor(() => expect(port.postMessage).toHaveBeenCalled());
 
-    port.receive({ id: 'popup-1', type: POPUP_ACTIONS.reject });
+    port.receive({ id: requestId(), type: POPUP_ACTIONS.reject });
     await expect(result).rejects.toBeUndefined();
   });
 
-  it('rejects when the side panel cannot take the popup', async () => {
+  it('reports a delivery error when the side panel cannot take the popup', async () => {
+    const { ApprovalWindowError } = await import('@/lib/errors');
     const port = connectSidePanel();
     port.postMessage.mockImplementation(() => {
       throw new Error('Attempting to use a disconnected port object');
     });
     backgroundChooses(WINDOW_ID);
 
-    await expect(openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example', {})).rejects.toBeUndefined();
-    expect(getPopup('popup-1')).toBeUndefined();
+    await expect(openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example', {}))
+      .rejects.toBeInstanceOf(ApprovalWindowError);
+    expect(getPopup(requestId())).toBeUndefined();
     expect(sendMessage).toHaveBeenCalledWith(expect.objectContaining({
       method: POPUP_METHODS.removePopup,
-      params: { id: 'popup-1' },
+      params: { id: requestId() },
     }));
   });
 
@@ -141,7 +148,7 @@ describe('offscreen popups shown in a side panel', () => {
     closedPanel.disconnect();
     await expect(closedPanelResult).rejects.toBeUndefined();
 
-    openPanel.receive({ id: 'popup-2', type: POPUP_ACTIONS.resolve, payload: 'answer' });
+    openPanel.receive({ id: requestId(1), type: POPUP_ACTIONS.resolve, payload: 'answer' });
     await expect(openPanelResult).resolves.toBe('answer');
   });
 
@@ -181,7 +188,7 @@ describe('offscreen popups shown in a side panel', () => {
     await vi.waitFor(() => expect(replies).toHaveLength(1));
 
     port.disconnect();
-    replies[0]({ id: 'popup-1', props, sidePanelWindowId: WINDOW_ID });
+    replies[0]({ id: requestId(), props, sidePanelWindowId: WINDOW_ID });
     await vi.waitFor(() => expect(replies).toHaveLength(2));
     expect(sendMessage).toHaveBeenCalledWith(expect.objectContaining({
       method: POPUP_METHODS.openPopup,
@@ -189,13 +196,13 @@ describe('offscreen popups shown in a side panel', () => {
     }));
     expect(sendMessage).toHaveBeenCalledWith(expect.objectContaining({
       method: POPUP_METHODS.removePopup,
-      params: { id: 'popup-1' },
+      params: { id: requestId() },
     }));
 
-    replies[1]({ id: 'popup-2', props });
+    replies[1]({ id: requestId(1), props });
     // The popup window answers over its own port.
-    await vi.waitFor(() => expect(getPopup('popup-2')).toBeDefined());
-    getPopup('popup-2').actions.resolve({ selectedAddress: 'ak_1' });
+    await vi.waitFor(() => expect(getPopup(requestId(1))).toBeDefined());
+    getPopup(requestId(1)).actions.resolve({ selectedAddress: 'ak_1' });
     await expect(result).resolves.toEqual({ selectedAddress: 'ak_1' });
     expect(port.postMessage).not.toHaveBeenCalled();
   });
@@ -217,8 +224,8 @@ describe('offscreen popups shown in a side panel', () => {
     const result = openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example', {});
     await vi.waitFor(() => expect(port.postMessage).toHaveBeenCalled());
 
-    otherPort.receive({ id: 'popup-1', type: POPUP_ACTIONS.resolve, payload: 'forged' });
-    port.receive({ id: 'popup-1', type: POPUP_ACTIONS.resolve, payload: 'real' });
+    otherPort.receive({ id: requestId(), type: POPUP_ACTIONS.resolve, payload: 'forged' });
+    port.receive({ id: requestId(), type: POPUP_ACTIONS.resolve, payload: 'real' });
     await expect(result).resolves.toBe('real');
   });
 
@@ -230,12 +237,16 @@ describe('offscreen popups shown in a side panel', () => {
         IS_FIREFOX: true,
       }));
       ({ openPopup, addSidePanel } = await import('@/offscreen/popupHandler'));
+      const activeTab = {
+        active: true, id: 4, windowId: WINDOW_ID, url: 'https://dapp.example/',
+      };
       globalThis.browser = {
         runtime: { id: 'ext-id', getURL: (url) => url },
-        // The active tab of a window shows the dapp
-        tabs: { query: vi.fn(async ({ windowId }) => (windowId ? [{ url: 'https://dapp.example/' }] : [])) },
+        tabs: { query: vi.fn().mockResolvedValue([activeTab]) },
         windows: {
-          getLastFocused: vi.fn().mockResolvedValue({ id: WINDOW_ID, focused: true, state: 'normal' }),
+          getLastFocused: vi.fn().mockResolvedValue({
+            id: WINDOW_ID, focused: true, state: 'normal', tabs: [activeTab],
+          }),
           create: vi.fn().mockResolvedValue({ id: 99 }),
         },
       };
@@ -243,6 +254,23 @@ describe('offscreen popups shown in a side panel', () => {
 
     afterEach(() => {
       vi.doUnmock('@/constants');
+    });
+
+    it('reports an opening failure without exposing the Firefox error', async () => {
+      browser.windows.create.mockRejectedValue(new Error('Internal browser details'));
+      await expect(openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example', {}))
+        .rejects.toThrow('Could not open the approval window');
+      expect(browser.windows.create).toHaveBeenCalledOnce();
+    });
+
+    it('settles an unconnected popup once Firefox removes its window', async () => {
+      const { handlePopupWindowRemoved } = await import('@/offscreen/popupHandler');
+      browser.windows.create.mockResolvedValue({ id: 99, tabs: [{ id: 53 }] });
+      const declined = expect(openPopup(POPUP_TYPE_CONNECT, 'https://dapp.example/'))
+        .rejects.toBeUndefined();
+      await vi.waitFor(() => expect(browser.windows.create).toHaveBeenCalledOnce());
+      handlePopupWindowRemoved(99);
+      await declined;
     });
 
     it('shows the popup in the side panel of the focused window', async () => {

@@ -32,6 +32,9 @@ const InviteItemStub = {
 };
 
 /** Unlocks a wallet stored as the current versions do. */
+// Storing goes through the vault and WebCrypto, which share the threads of a full run.
+const WAIT_FOR_STORAGE = { timeout: 10000 };
+
 async function unlockWallet() {
   const { WalletStorage } = await import('@/lib/WalletStorage');
   const { STORAGE_KEYS } = await import('@/constants');
@@ -47,7 +50,7 @@ async function unlockWallet() {
   WalletStorage.set(STORAGE_KEYS.encryptionSalt, encodeBase64(salt));
   WalletStorage.set(STORAGE_KEYS.mnemonic, await encrypt(key, MNEMONIC));
   const auth = useAuth();
-  await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
+  await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true), WAIT_FOR_STORAGE);
   expect(await auth.authenticateWithPassword(PASSWORD)).toBe(true);
 }
 
@@ -118,7 +121,7 @@ describe('Invite page', () => {
     // The key is encrypted before the funds are sent.
     await vi.waitFor(() => (untilSent
       ? expect(spend).toHaveBeenCalled()
-      : expect(setLoaderVisible).toHaveBeenLastCalledWith(false)));
+      : expect(setLoaderVisible).toHaveBeenLastCalledWith(false)), WAIT_FOR_STORAGE);
     await flushPromises();
     return wrapper;
   }
@@ -186,7 +189,10 @@ describe('Invite page', () => {
 
     const wrapper = await generateInvite();
 
-    await vi.waitFor(async () => expect(await getStoredInviteAddresses()).toEqual([]));
+    await vi.waitFor(
+      async () => expect(await getStoredInviteAddresses()).toEqual([]),
+      WAIT_FOR_STORAGE,
+    );
     expect(wrapper.findAllComponents(InviteItemStub)).toHaveLength(0);
     expect(openDefaultModal).toHaveBeenCalledWith({ msg: en.pages.invite['insufficient-balance'] });
     expect(errorHandler).not.toHaveBeenCalled();

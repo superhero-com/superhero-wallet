@@ -161,6 +161,37 @@ describe('WalletConnect accountsChanged behavior', () => {
       },
     }));
   });
+
+  async function switchNetworkOfApprovedSession(updateError: { code: number }) {
+    const web3wallet = await connectAndGetWallet();
+    await getLastHandler(web3wallet, 'session_proposal')(aescanProposal);
+    const { activeNetwork, networks } = (await import('@/composables/networks')).useNetworks();
+    networks.value.Sepolia = { protocols: { ethereum: { chainId: '11155111' } } };
+    web3wallet.updateSession.mockResolvedValueOnce({
+      acknowledged: () => Promise.reject(updateError),
+    });
+    web3wallet.emitSessionEvent.mockClear();
+    activeNetwork.value = { name: 'Sepolia' };
+    return web3wallet;
+  }
+
+  it('keeps the session when another window of the wallet sent a newer update', async () => {
+    const web3wallet = await switchNetworkOfApprovedSession({ code: 1003 });
+    const { useWalletConnect } = await import('@/composables/walletConnect');
+
+    await vi.waitFor(() => expect(web3wallet.emitSessionEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ event: { name: 'chainChanged', data: '11155111' } }),
+    ));
+    expect(useWalletConnect().wcSession.value?.topic).toBe('t');
+  });
+
+  it('ends the session when the dapp refuses an update for another reason', async () => {
+    const web3wallet = await switchNetworkOfApprovedSession({ code: 5000 });
+    const { useWalletConnect } = await import('@/composables/walletConnect');
+
+    await vi.waitFor(() => expect(useWalletConnect().wcSession.value).toBeNull());
+    expect(web3wallet.emitSessionEvent).not.toHaveBeenCalled();
+  });
 });
 
 describe('WalletConnect dapp requests', () => {

@@ -1,4 +1,4 @@
-import { METHODS, Tag } from '@aeternity/aepp-sdk';
+import { METHODS, RpcInternalError, Tag } from '@aeternity/aepp-sdk';
 import { isEmpty } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 
@@ -13,12 +13,14 @@ import {
   IS_OFFSCREEN_TAB,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_NETWORK_SWITCH,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
+  POPUP_TYPE_NETWORK_SWITCH,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_UNSAFE_SIGN,
   POPUP_TYPE_RAW_SIGN,
@@ -28,6 +30,7 @@ import {
   EVM_PROTOCOLS,
 } from '@/constants';
 import { createAppData, getCleanModalOptions, watchUntilTruthy } from '@/utils';
+import { ApprovalWindowError } from '@/lib/errors';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { getSessionEncryptionKey, openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
@@ -48,6 +51,7 @@ const permissions = useStorageRef<PermissionRegistry>(
   STORAGE_KEYS.permissions,
   {
     backgroundSync: true,
+    syncWithOtherWindows: true,
     migrations: [
       migratePermissionsVuexToComposable,
       migratePermissionsDropEmptyHost,
@@ -62,6 +66,10 @@ const permissions = useStorageRef<PermissionRegistry>(
 const DAILY_LIMIT_TX_TAGS: (Tag | undefined)[] = [Tag.SpendTx, Tag.NameClaimTx];
 
 const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType }>> = {
+  [METHODS.updateNetwork]: {
+    modal: MODAL_CONFIRM_NETWORK_SWITCH,
+    popup: POPUP_TYPE_NETWORK_SWITCH,
+  },
   [METHODS.subscribeAddress]: {
     modal: MODAL_CONFIRM_CONNECT,
     popup: POPUP_TYPE_CONNECT,
@@ -117,6 +125,27 @@ export function usePermissions() {
 
   function removePermission(host: string) {
     delete permissions.value[host];
+  }
+
+  /**
+   * Saves an edited permission. What the form doesn't edit is kept as stored,
+   * as it may have changed meanwhile, e.g. in another window.
+   */
+  function updatePermission(previousHost: string, permission: IPermission) {
+    const {
+      protocol,
+      transactionSignSpent,
+      transactionSignFirstAskedOn,
+    } = permissions.value[previousHost] ?? permission;
+    if (previousHost !== permission.host) {
+      removePermission(previousHost);
+    }
+    addPermission({
+      ...permission,
+      protocol,
+      transactionSignSpent,
+      transactionSignFirstAskedOn,
+    });
   }
 
   function hasDayPassed(isoDate: string) {
@@ -241,7 +270,10 @@ export function usePermissions() {
       );
       onModalResolved?.(resolvedWith);
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof ApprovalWindowError) {
+        throw Object.assign(new RpcInternalError(), { message: error.message });
+      }
       return false;
     }
   }
@@ -308,6 +340,7 @@ export function usePermissions() {
     permissions,
     addPermission,
     removePermission,
+    updatePermission,
     getPermissionForUrl,
     checkPermission,
     checkOrAskPermission,

@@ -6,11 +6,13 @@
     :resizable="false"
     :placeholder="placeholder"
     :message="message"
-    :disable-label-focus="isSingleRecipient"
     auto-height
     enter-submit
-    @update:modelValue="($event: any) => inputValue = $event"
+    @update:model-value="($event: any) => inputValue = $event"
     @submit="handleEnter"
+    @keydown="handleFieldKeydown"
+    @focusin="handleFocusIn"
+    @focusout="hasFocus = false"
   >
     <template
       v-if="isSingleRecipient"
@@ -26,7 +28,7 @@
       />
       <AddressTruncated
         v-if="!isNameValid(selectedAddresses[0].address)
-          && isAccountAddressValid(selectedAddresses[0].address)"
+          && isAddressValid(selectedAddresses[0].address)"
         :address="selectedAddresses[0].address"
         :protocol="protocol"
         :class="{
@@ -38,6 +40,7 @@
     <template #after>
       <BtnIcon
         v-if="!hideClearIcon && (selectedAddresses.length || inputValue.length)"
+        :aria-label="$t('a11y.clearAddresses')"
         :icon="CircleCloseIcon"
         data-cy="clear-address-button"
         class="close-icon"
@@ -64,7 +67,7 @@
             :str="account.name"
           />
           <AddressTruncated
-            v-if="!isNameValid(account.address) && isAccountAddressValid(account.address)"
+            v-if="!isNameValid(account.address) && isAddressValid(account.address)"
             :address="account.address"
             :protocol="protocol"
             :class="{
@@ -74,6 +77,7 @@
           />
           <BtnIcon
             v-if="!hideClearIcon"
+            :aria-label="$t('a11y.removeAddress', { address: account.address })"
             :icon="TrashIcon"
             data-cy="clear-address-button"
             class="close-icon"
@@ -93,14 +97,26 @@
 
     <template #before-main>
       <div
+        ref="dropdownEl"
         class="dropdown-wrapper styled-scrollbar"
         :class="{ open: isDropdownOpen }"
+        :aria-hidden="(isDropdownOpen && hasFocus) ? undefined : 'true'"
+        :inert="!isDropdownOpen || undefined"
       >
-        <div
+        <!--
+          Always rendered, so kept out of the tab order; ArrowDown in the field moves here.
+          A press keeps the focus in the field: its blur would show an error that moves the list.
+        -->
+        <button
           v-for="option in filteredOptions"
           :key="option.address"
+          type="button"
+          tabindex="-1"
           class="dropdown-item"
+          data-cy="address-suggestion"
+          @mousedown.prevent
           @click="selectValue(option, $event)"
+          @keydown="handleOptionKeydown"
         >
           <Avatar
             size="sm"
@@ -119,7 +135,7 @@
             :protocol="protocol"
             class="truncated-address"
           />
-        </div>
+        </button>
       </div>
     </template>
   </FormTextarea>
@@ -129,6 +145,7 @@
 import {
   computed,
   defineComponent,
+  nextTick,
   onMounted, PropType,
   ref,
   watch,
@@ -193,6 +210,8 @@ export default defineComponent({
     singleRecipient: Boolean,
     singleDefaultFormat: Boolean,
     isTipUrlEnabled: Boolean,
+    /** Accepts any address the coins can be sent to, not only account ones */
+    isRecipient: Boolean,
     protocol: { type: String as PropType<Protocol>, default: null },
   },
   emits: ['update:modelValue', 'submit'],
@@ -208,14 +227,27 @@ export default defineComponent({
 
     const inputValue = ref(props.singleDefaultFormat ? (props.modelValue[0] ?? '') : '');
     const isDropdownOpen = ref(false);
+    /** The CSS shows the open list only while the field or the list is focused */
+    const hasFocus = ref(false);
+    const dropdownEl = ref<HTMLElement>();
     const selectedAddresses = ref<IAddressBookEntry[]>([]);
+
+    /** An address in another case or format, e.g. lowercase EVM, is the same recipient */
+    function normalizeRecipient(address: string) {
+      return props.protocol
+        ? ProtocolAdapterFactory.getAdapter(props.protocol).normalizeAddress(address)
+        : address;
+    }
+
+    const selectedAddressesNormalized = computed(
+      () => selectedAddresses.value.map((account) => normalizeRecipient(account.address)),
+    );
     const filteredOptions = computed(() => (
       addressBookFiltered.value.filter((entry: IAddressBookEntry) => (
         (entry.address.toLowerCase().includes(inputValue.value.toLowerCase())
             || entry.name.toLowerCase().includes(inputValue.value.toLowerCase()))
             && (
-              !selectedAddresses.value.map((account) => account.address)
-                .includes(entry.address)
+              !selectedAddressesNormalized.value.includes(entry.address)
               || !selectedAddresses.value.map((account) => account.name)
                 .includes(entry.name)
             )
@@ -234,16 +266,17 @@ export default defineComponent({
       () => (messageAsObject.value?.status === INPUT_MESSAGE_STATUSES.warning),
     );
 
-    function isAccountAddressValid(value: string) {
-      return ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .isAccountAddressValid(value, activeNetwork.value?.type);
+    function isAddressValid(value: string) {
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      return props.isRecipient
+        ? adapter.isRecipientAddressValid(value, activeNetwork.value?.type)
+        : adapter.isAccountAddressValid(value, activeNetwork.value?.type);
     }
 
     const isSingleRecipient = computed(() => !!(
       props.singleDefaultFormat
       && selectedAddresses.value.length
-      && (!props.isTipUrlEnabled || isAccountAddressValid(selectedAddresses.value[0].address))
+      && (!props.isTipUrlEnabled || isAddressValid(selectedAddresses.value[0].address))
     ));
 
     function clearAddress(idx: number) {
@@ -257,7 +290,19 @@ export default defineComponent({
       emit('update:modelValue', []);
     }
 
-    function selectValue(entry: IAddressBookEntry, $event: Event) {
+    function getOptionElements() {
+      return Array.from(dropdownEl.value?.querySelectorAll<HTMLElement>('.dropdown-item') ?? []);
+    }
+
+    function getField() {
+      return dropdownEl.value?.closest('.input-wrapper')?.querySelector('textarea');
+    }
+
+    function focusOption(index: number) {
+      getOptionElements()[index]?.focus();
+    }
+
+    function selectValue(entry: IAddressBookEntry, $event: MouseEvent) {
       $event.preventDefault();
       if (props.singleDefaultFormat) {
         inputValue.value = entry.address;
@@ -266,6 +311,75 @@ export default defineComponent({
         emit('update:modelValue', [entry.address, ...props.modelValue]);
       }
       isDropdownOpen.value = false;
+
+      // A click from Enter or Space has no click count
+      if ($event.detail === 0) {
+        const wrapper = dropdownEl.value?.closest('.input-wrapper');
+        nextTick(() => {
+          // The single recipient view replaces the field with the chosen address
+          (getField() ?? wrapper?.querySelector<HTMLElement>('[data-cy=clear-address-button]'))
+            ?.focus();
+        });
+      } else {
+        // A pointer pick leaves the field, closing a phone keyboard. Blur after the re-render:
+        // the field's blur sends the text it shows.
+        nextTick(() => {
+          const active = document.activeElement;
+          if (
+            active instanceof HTMLElement
+            && (active === getField() || dropdownEl.value?.contains(active))
+          ) {
+            active.blur();
+          }
+        });
+      }
+    }
+
+    function handleFieldKeydown(event: KeyboardEvent) {
+      if (
+        !isDropdownOpen.value
+        || event.isComposing
+        || !(event.target instanceof HTMLTextAreaElement)
+      ) {
+        return;
+      }
+      if (event.key === 'ArrowDown' && getOptionElements().length) {
+        event.preventDefault();
+        focusOption(0);
+      } else if (event.key === 'Escape') {
+        // Keeps a surrounding modal open
+        event.preventDefault();
+        isDropdownOpen.value = false;
+      }
+    }
+
+    function handleOptionKeydown(event: KeyboardEvent) {
+      const index = getOptionElements().indexOf(event.currentTarget as HTMLElement);
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          focusOption(Math.min(index + 1, getOptionElements().length - 1));
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          if (index > 0) {
+            focusOption(index - 1);
+          } else {
+            getField()?.focus();
+          }
+          break;
+        case 'Escape':
+          event.preventDefault();
+          isDropdownOpen.value = false;
+          getField()?.focus();
+          break;
+        default:
+      }
+    }
+
+    function handleFocusIn(event: FocusEvent) {
+      hasFocus.value = event.target instanceof HTMLTextAreaElement
+        || !!dropdownEl.value?.contains(event.target as Node);
     }
 
     function handleEnter() {
@@ -273,22 +387,33 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      watch(() => [props.modelValue, allAccounts.value], () => {
+      watch(() => [props.modelValue, allAccounts.value] as const, (_, previous) => {
+        const normalizedAddresses = props.modelValue.map(normalizeRecipient);
         // Check and remove duplicates
-        if (new Set(props.modelValue).size !== props.modelValue.length) {
-          emit('update:modelValue', props.modelValue.filter(removeDuplicates));
+        if (new Set(normalizedAddresses).size !== normalizedAddresses.length) {
+          emit('update:modelValue', props.modelValue.filter(
+            (_address, index) => removeDuplicates(
+              normalizedAddresses[index],
+              index,
+              normalizedAddresses,
+            ),
+          ));
         } else if (props.modelValue.length > 0) {
           selectedAddresses.value = props.modelValue
             .filter(excludeFalsy)
             .map((address) => {
+              const normalizedAddress = normalizeRecipient(address);
+              // Found in another case: keeps the typed address, which the messages name
               const existingAccount = allAccounts.value.find((account) => (
                 account.address === address
-              ));
+              )) || allAccounts.value
+                .filter((account) => account.address === normalizedAddress)
+                .map((account) => ({ ...account, address }))[0];
 
               let name = address;
               if (isNameValid(address)) {
                 name = address;
-              } else if (isAccountAddressValid(address)) {
+              } else if (isAddressValid(address)) {
                 name = t('modals.send.recipientLabel');
               }
 
@@ -303,7 +428,10 @@ export default defineComponent({
             inputValue.value = selectedAddresses.value[0].address;
           }
         } else {
-          inputValue.value = '';
+          // Only for new recipients: the account list refreshes while one is being typed
+          if (props.modelValue !== previous?.[0]) {
+            inputValue.value = '';
+          }
           selectedAddresses.value = [];
         }
       }, { immediate: true });
@@ -324,7 +452,7 @@ export default defineComponent({
           } else {
             // Otherwise append only if the user has typed a valid address
             values.forEach((value) => {
-              if (value && (isNameValid(value) || isAccountAddressValid(value))) {
+              if (value && (isNameValid(value) || isAddressValid(value))) {
                 parsedValues.push(value);
               }
             });
@@ -354,10 +482,15 @@ export default defineComponent({
       clearAll,
       selectValue,
       handleEnter,
+      handleFieldKeydown,
+      handleOptionKeydown,
+      handleFocusIn,
       inputValue,
       isDropdownOpen,
+      hasFocus,
+      dropdownEl,
       isNameValid,
-      isAccountAddressValid,
+      isAddressValid,
       isSingleRecipient,
       CircleCloseIcon,
       TrashIcon,
@@ -414,9 +547,21 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       display: flex;
+      width: 100%;
       padding: 8px;
       gap: 6px;
+      background: none;
+      font: inherit;
+      line-height: inherit;
+      color: inherit;
+      text-align: inherit;
       cursor: pointer;
+
+      &:focus-visible {
+        // The list clips anything outside it
+        outline: 2px solid $color-primary;
+        outline-offset: -2px;
+      }
     }
 
     .dropdown-item:not(:last-child) {
@@ -445,7 +590,8 @@ export default defineComponent({
   &:where(
     &:has(input:focus),
     &:has(textarea:focus),
-    &:has(label:active)
+    &:has(label:active),
+    &:has(.dropdown-wrapper:focus-within)
   ) {
     .dropdown-wrapper.open {
       top: calc(100% + 4px);

@@ -4,6 +4,7 @@
  */
 import { ref } from 'vue';
 import { mnemonicToSeedSync } from '@scure/bip39';
+import { Tag } from '@aeternity/aepp-sdk';
 import HttpProvider from 'web3-providers-http';
 import { FeeMarketEIP1559Transaction, Transaction, TransactionFactory } from 'web3-eth-accounts';
 import {
@@ -11,6 +12,7 @@ import {
   hexToBytes,
   keccak256,
   numberToHex,
+  toChecksumAddress,
 } from 'web3-utils';
 
 import type { Protocol } from '@/types';
@@ -22,6 +24,7 @@ import {
   STORAGE_KEYS,
 } from '@/constants';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
 import { watchUntilTruthy } from '@/utils';
 
 const { openModal } = vi.hoisted(() => {
@@ -40,6 +43,7 @@ vi.mock('@/composables/auth', () => ({
     isAuthenticated: ref(true),
     isMnemonicUnreadable: ref(false),
     encryptionKey: ref(undefined),
+    isEncryptionKeyCurrent: () => true,
   }),
 }));
 vi.mock('@/composables/modals', async (importOriginal) => {
@@ -206,6 +210,8 @@ describe('eth_sendTransaction of a dapp', () => {
 
     const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...TX }], 'Dapp', 'eip155:43113');
 
+    // Refused after the confirmation, not by the check before it
+    expect(openModal).toHaveBeenCalledOnce();
     expect(response.error).toMatchObject({ code: -32602 });
     expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
   });
@@ -312,6 +318,161 @@ describe('eth_sendTransaction of a dapp', () => {
     const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
     expect(decodeTransaction(raw).data).toBe(input);
     expect(openModal.mock.calls[0][1].tx).toMatchObject({ data: input, type: 'ContractCallTx' });
+  });
+
+  it.each([
+    ['hex without 0x', TX.data.slice(2)],
+    ['a number', 12345],
+    // The confirmation can't read it, and the signer throws on it
+    ['an array of hex', [TX.data]],
+  ])('refuses call data that is %s', async (_, data) => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, data }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toMatchObject({ code: -32602 });
+    expect(openModal).not.toHaveBeenCalled();
+    expect(getNodeRequests('eth_estimateGas')).toEqual([]);
+    expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
+  });
+
+  it.each([
+    ['empty call data as a transfer', '', '0x'],
+    ['call data in upper-case hex', `0x${TX.data.slice(2).toUpperCase()}`, TX.data],
+  ])('signs %s', async (_, data, signed) => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, data }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toBeUndefined();
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).data).toBe(signed);
+  });
+
+  it.each(['0x', '', undefined])('shows call data %j as a coin transfer', async (data) => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, data }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toBeUndefined();
+    const { tx } = openModal.mock.calls[0][1];
+    expect(tx).toMatchObject({ tag: Tag.SpendTx, type: 'SpendTx', contractId: BNB_CONTRACT_ID });
+    expect(tx.data).toBeUndefined();
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).data).toBe('0x');
+  });
+
+  it('shows, estimates and signs odd-length call data with a 0 in front, as MetaMask does', async () => {
+    const { from } = getChain(PROTOCOLS.bnb);
+    const { gas, ...tx } = TX;
+    // approve(spender, max) with the 0 of its selector left out
+    const approve = `95ea7b3${'1'.padStart(64, '0')}${'f'.repeat(64)}`;
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...tx, from, data: `0x${approve}` }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toBeUndefined();
+    const padded = `0x0${approve}`;
+    expect(getNodeRequests('eth_estimateGas')[0].params[0].data).toBe(padded);
+    expect(openModal.mock.calls[0][1].tx.data).toBe(padded);
+    expect(openModal.mock.calls[0][1].evmCall.data).toBe(padded);
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).data).toBe(padded);
+  });
+
+  it('hands the confirmation the call as it will be signed', async () => {
+    const { from } = getChain(PROTOCOLS.bnb);
+    const { gas, ...tx } = TX;
+    // More than a double holds exactly
+    const value = '0x2386f26fc10001';
+
+    await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...tx, value }], 'Dapp', 'eip155:56');
+
+    const { evmCall } = openModal.mock.calls[0][1];
+    // 21000 estimated plus 15% headroom
+    expect(evmCall).toEqual({
+      from,
+      to: TX.to,
+      value,
+      data: TX.data,
+      gas: '0x5e56',
+      chainId: '56',
+      gasPrice: numberToHex(SIGNED_GAS_PRICE),
+    });
+    expect(JSON.parse(JSON.stringify(evmCall))).toEqual(evmCall);
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw)).toMatchObject({
+      value: BigInt(evmCall.value),
+      gasLimit: BigInt(evmCall.gas),
+      data: evmCall.data,
+      gasPrice: BigInt(evmCall.gasPrice),
+    });
+  });
+
+  it('hands the confirmation the Ethereum call as it will be signed', async () => {
+    const { from } = getChain(PROTOCOLS.ethereum);
+    const { gas, ...tx } = TX;
+    const value = '0x2386f26fc10001';
+
+    await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ from, ...tx, value }], 'Dapp', 'eip155:1');
+
+    const { evmCall } = openModal.mock.calls[0][1];
+    expect(evmCall.value).toBe(value);
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    // Ethereum has a signer of its own
+    const signed = TransactionFactory
+      .fromSerializedData(hexToBytes(raw)) as FeeMarketEIP1559Transaction;
+    expect(signed.type).toBe(2);
+    expect(evmCall).toEqual({
+      from: toChecksumAddress(signed.getSenderAddress().toString()),
+      to: toChecksumAddress(signed.to!.toString()),
+      value: numberToHex(signed.value),
+      data: bytesToHex(signed.data),
+      gas: numberToHex(signed.gasLimit),
+      chainId: String(signed.common.chainId()),
+      maxFeePerGas: numberToHex(signed.maxFeePerGas),
+      maxPriorityFeePerGas: numberToHex(signed.maxPriorityFeePerGas),
+    });
+  });
+
+  it.each([
+    ['no value', undefined, '0x0', 0n],
+    ['a JSON number', 1000, '0x3e8', 1000n],
+    ['hex with leading zeros', '0x03e8', '0x3e8', 1000n],
+    ['more than a double holds', '0x2386f26fc10001', '0x2386f26fc10001', 10000000000000001n],
+  ])('signs %s as the confirmation shows it', async (_, value, shown, signed) => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, value }], 'Dapp', 'eip155:56');
+
+    expect(response.error).toBeUndefined();
+    expect(openModal.mock.calls[0][1].evmCall.value).toBe(shown);
+    const [{ params: [raw] }] = getNodeRequests('eth_sendRawTransaction');
+    expect(decodeTransaction(raw).value).toBe(signed);
+  });
+
+  it.each([
+    ['a decimal value', '1000', '0x3e8'],
+    ['an upper-case hex value', '0X10', '0x10'],
+  ])('signs nothing for %s, which the signer can not read', async (_, value, shown) => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, value }], 'Dapp', 'eip155:56');
+
+    // Read otherwise, e.g. as hex as MetaMask does, it would differ from what is shown
+    expect(openModal.mock.calls[0][1].evmCall.value).toBe(shown);
+    expect(response.error).toMatchObject({ code: -32603 });
+    expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
+  });
+
+  it('hands the confirmation no call where the value is no quantity', async () => {
+    const { from } = getChain(PROTOCOLS.bnb);
+
+    const response = await handleEvmRpcRequest(DAPP, 'eth_sendTransaction', [{ ...TX, from, value: '-1' }], 'Dapp', 'eip155:56');
+
+    expect(openModal).toHaveBeenCalledTimes(1);
+    expect(openModal.mock.calls[0][1].evmCall).toBeUndefined();
+    expect(response.error).toBeDefined();
+    expect(getNodeRequests('eth_sendRawTransaction')).toEqual([]);
   });
 
   it('sends nothing when the user rejects', async () => {

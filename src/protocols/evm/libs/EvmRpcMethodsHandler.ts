@@ -15,6 +15,8 @@ import { isEmpty } from 'lodash-es';
 
 import type {
   AppOriginSource,
+  IApprovalSourceTab,
+  IEvmTypedData,
   IModalProps,
   ISignModalResolution,
   Protocol,
@@ -23,7 +25,7 @@ import type { IEthRpcMethodParameters, EthRpcSupportedMethods } from '@/protocol
 
 import { createAppData, fetchJson, watchUntilTruthy } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
+import { toRpcQuantity, toTokenBaseUnits, withGasHeadroom } from '@/protocols/evm/helpers';
 import { getActiveEvmNetworkSettings } from '@/protocols/evm/helpers/activeEvmNetworkSettings';
 import {
   getSignedTypedData,
@@ -37,7 +39,6 @@ import {
   ETH_CONTRACT_ID,
   ETH_RPC_METHODS,
   ETH_RPC_NODE_METHODS,
-  ETH_RPC_WALLET_EVENTS,
 } from '@/protocols/ethereum/config';
 import { AVALANCHE_CONTRACT_ID } from '@/protocols/avalanche/config';
 import { BNB_CONTRACT_ID } from '@/protocols/bnb/config';
@@ -124,7 +125,7 @@ async function checkOrAskEvmPermission(
   protocol: Protocol,
   originSource?: AppOriginSource,
   sessionTopic?: string,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ) {
   const { checkOrAskPermission, getPermissionForUrl } = usePermissions();
   const { activeAccount } = useAccounts();
@@ -147,17 +148,18 @@ async function checkOrAskEvmPermission(
           CONNECT_PERMISSIONS.networks,
           CONNECT_PERMISSIONS.transactions,
         ],
-        tabId,
+        ...sourceTab,
       },
     );
-    if (permission && sessionTopic) {
+    if (!permission) return false;
+    if (sessionTopic) {
       approveWalletConnectSession(sessionTopic);
-    } else if (permission && aepp && originSource !== 'self-reported') {
+    } else if (aepp && originSource !== 'self-reported') {
       // The popup answers before the permission it stores reaches this context
       await watchUntilTruthy(() => getPermissionForUrl(aepp), 3000);
     }
     await watchUntilTruthy(() => !isEmpty(activeAccount.value));
-    return permission;
+    return true;
   } finally {
     isCheckingPermissions.value = false;
   }
@@ -184,7 +186,7 @@ async function confirmProtocolSwitch(
   protocol: Protocol,
   networkName: string,
   originSource?: AppOriginSource,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ) {
   const { askPermission } = usePermissions();
   const {
@@ -226,7 +228,7 @@ async function confirmProtocolSwitch(
           CONNECT_PERMISSIONS.transactions,
         ],
         isChainSwitch: true,
-        tabId,
+        ...sourceTab,
       },
     );
     if (!isConfirmed) {
@@ -385,8 +387,7 @@ export async function handleEvmRpcMethod(
   originSource?: AppOriginSource,
   /** Of the WalletConnect session the request came in */
   sessionTopic?: string,
-  /** Of the browser tab the request came from */
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ): Promise<EvmRpcResponse> {
   const {
     checkPermission,
@@ -411,7 +412,7 @@ export async function handleEvmRpcMethod(
   const { chainId, nodeUrl } = getActiveEvmNetworkSettings(protocol);
 
   if (method === ETH_RPC_METHODS.requestPermissions) {
-    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId))
+    return (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, sourceTab))
       ? { result: { eth_accounts: true } }
       : ERROR_USER_REJECTED_REQUEST;
   }
@@ -431,22 +432,8 @@ export async function handleEvmRpcMethod(
   }
 
   if (method === ETH_RPC_METHODS.requestAccounts) {
-    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, tabId)) {
-      // ensure we emit connect event for EIP-1193 consumers
-      const account = getLastActiveProtocolAccount(protocol)!;
-      try {
-        const preferredChainId = `0x${BigInt(chainId).toString(16)}`;
-        // Guard browser for non-extension environments
-        if (typeof browser !== 'undefined' && browser?.runtime?.sendMessage) {
-          browser.runtime.sendMessage({
-            superheroWalletApproved: true,
-            method: ETH_RPC_WALLET_EVENTS.chainChanged,
-            result: preferredChainId,
-            type: 'result',
-          });
-        }
-      } catch (_) { /* noop */ }
-      return { result: [account.address] };
+    if (await checkOrAskEvmPermission(aepp, protocol, originSource, sessionTopic, sourceTab)) {
+      return { result: [getLastActiveProtocolAccount(protocol)!.address] };
     }
     return ERROR_USER_REJECTED_REQUEST;
   }
@@ -508,7 +495,7 @@ export async function handleEvmRpcMethod(
         target.protocol,
         target.network.name,
         originSource,
-        tabId,
+        sourceTab,
       )) {
         return ERROR_USER_REJECTED_REQUEST;
       }
@@ -527,7 +514,16 @@ export async function handleEvmRpcMethod(
 
     const url = aepp;
     // Dapps may send the call data as `input`, the name the execution API spec uses
-    const data = params.data ?? params.input;
+    const rawData = params.data ?? params.input;
+    // Hex text only: the signer throws on e.g. an array, which the confirmation can't read
+    if (
+      rawData != null && rawData !== ''
+      && (typeof rawData !== 'string' || !/^0x[\da-fA-F]*$/.test(rawData))
+    ) {
+      return { error: { code: -32602, message: 'Expected the call data in hex' } };
+    }
+    // As the signer and MetaMask read odd-length hex, for all below to show and sign the same
+    const data = (rawData && rawData.length % 2) ? `0x0${rawData.slice(2)}` : rawData;
 
     let gasHex = params.gas;
     if (!gasHex) {
@@ -542,12 +538,23 @@ export async function handleEvmRpcMethod(
     }
 
     const { gasPrice, maxFeePerGas, maxPriorityFeePerGas } = await getFeePerGas(protocol);
+    /** As signed, and for the confirmation to simulate the call with */
+    const feeFields = {
+      ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
+      ...(maxFeePerGas !== undefined) ? {
+        maxFeePerGas: numberToHex(maxFeePerGas),
+        maxPriorityFeePerGas: numberToHex(maxPriorityFeePerGas!),
+      } : {},
+    };
 
     const gas = Number(gasHex);
     const senderId = evmAccount.address;
     const recipientId = toChecksumAddress(params.to!);
-    const isCoinTransfer = !data;
+    // `0x` is no call data either, as the chain reads it
+    const isCoinTransfer = !data || data === '0x';
     const tag = isCoinTransfer ? Tag.SpendTx : Tag.ContractCallTx;
+    const valueQuantity = toRpcQuantity(params.value ?? 0);
+    const gasQuantity = toRpcQuantity(gasHex);
     const modalProps: IModalProps = {
       protocol,
       app: {
@@ -565,10 +572,19 @@ export async function handleEvmRpcMethod(
         tag,
         senderId,
         recipientId,
-        data,
+        data: isCoinTransfer ? undefined : data,
       },
+      evmCall: (valueQuantity !== undefined && gasQuantity !== undefined) ? {
+        from: senderId,
+        to: recipientId,
+        value: valueQuantity,
+        data: data ?? '0x',
+        gas: gasQuantity,
+        chainId: String(chainId),
+        ...feeFields,
+      } : undefined,
       fromAccount: senderId,
-      tabId,
+      ...sourceTab,
     };
 
     const permitted = await checkOrAskPermission(
@@ -589,11 +605,7 @@ export async function handleEvmRpcMethod(
             data,
             from: senderId,
             gas: gasHex,
-            ...(gasPrice !== undefined) ? { gasPrice: numberToHex(gasPrice) } : {},
-            ...(maxFeePerGas !== undefined) ? {
-              maxFeePerGas: numberToHex(maxFeePerGas),
-              maxPriorityFeePerGas: numberToHex(maxPriorityFeePerGas!),
-            } : {},
+            ...feeFields,
           });
           return actionResult?.hash
             ? { result: actionResult?.hash }
@@ -608,7 +620,8 @@ export async function handleEvmRpcMethod(
   if (method === ETH_RPC_METHODS.signPersonal) {
     if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
     const { data } = params;
-    if (typeof data !== 'string') {
+    // As MetaMask, which lets "0x" through: ethers and viem send that for an empty message
+    if (typeof data !== 'string' || !data) {
       return { error: { code: -32602, message: 'Missing the message to sign' } };
     }
     // "0x…" or "0X…" is bytes as in MetaMask, anything else a text as ethers and viem verify it
@@ -630,7 +643,7 @@ export async function handleEvmRpcMethod(
         app: aepp ? createAppData(aepp, originSource) : undefined,
         message: isHexMessage ? getMessageText(messageHex) : data,
         fromAccount: requestedAccount?.address,
-        tabId,
+        ...sourceTab,
       },
       (resolution: ISignModalResolution) => { selectedAddress = resolution?.selectedAddress; },
     );
@@ -670,15 +683,17 @@ export async function handleEvmRpcMethod(
     const evmAccount = getRequestedAccount(protocol, params.address, originSource);
     if (!evmAccount) return ERROR_UNAUTHORIZED;
 
+    const signedTypedData = getSignedTypedData(typedData);
     const permitted = await checkOrAskPermission(
       METHODS.signTypedData,
       aepp,
       {
         protocol,
         app: aepp ? createAppData(aepp, originSource) : undefined,
-        message: JSON.stringify(getSignedTypedData(typedData), null, 2),
+        message: JSON.stringify(signedTypedData, null, 2),
+        evmTypedData: { types: typedData.types, ...signedTypedData } as IEvmTypedData,
         fromAccount: evmAccount.address,
-        tabId,
+        ...sourceTab,
       },
     );
     if (permitted && evmAccount.secretKey) {
@@ -719,7 +734,7 @@ export async function handleEvmRpcRequest(
   caipChainId?: string,
   originSource?: AppOriginSource,
   sessionTopic?: string,
-  tabId?: number,
+  sourceTab?: IApprovalSourceTab,
 ): Promise<EvmRpcResponse> {
   const positionalParams = Array.isArray(params) ? params : [];
   // A dapp waits for an answer, also when e.g. its address is malformed
@@ -741,7 +756,7 @@ export async function handleEvmRpcRequest(
       caipChainId,
       originSource,
       sessionTopic,
-      tabId,
+      sourceTab,
     );
   } catch (error: any) {
     return getUnknownError(error.message);

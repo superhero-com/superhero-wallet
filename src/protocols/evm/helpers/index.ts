@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { toWei } from 'web3-utils';
+import { toChecksumAddress, toWei } from 'web3-utils';
+import { isAddress } from 'web3-validator';
 import type { BigNumberPublic } from '@/types';
 
 /**
@@ -10,9 +11,27 @@ export function withGasHeadroom(estimatedGas: bigint | number): bigint {
   return (BigInt(estimatedGas) * BigInt(115)) / BigInt(100);
 }
 
+/**
+ * The EIP-55 form of an EVM address. Anything else is returned as it is, also a mixed-case
+ * address with a wrong checksum, which `toChecksumAddress` would silently correct.
+ */
+export function toEvmChecksumAddress<T extends string | undefined>(address: T): T {
+  return (address && isAddress(address)) ? toChecksumAddress(address) as T : address;
+}
+
 /** ERC-20 amounts scale by the token's own `decimals()`, not the chain's 1e18. */
 export function toTokenBaseUnits(amount: BigNumberPublic, decimals: number): bigint {
   return BigInt(amount.shiftedBy(decimals).toFixed(0, BigNumber.ROUND_DOWN));
+}
+
+/** A JSON-RPC quantity (`0x…`, no leading zeros), `undefined` for what isn't a whole number */
+export function toRpcQuantity(value: unknown): string | undefined {
+  try {
+    const quantity = BigInt(value as any);
+    return quantity < BigInt(0) ? undefined : `0x${quantity.toString(16)}`;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

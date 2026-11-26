@@ -6,6 +6,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
+  POPUP_TYPE_NETWORK_SWITCH,
 } from '../../../src/constants';
 import { STUB_POPUP_PROPS, STUB_TX_PARAMS } from '../../../src/constants/stubs';
 import locale from '../../../src/popup/locales/en-US.json';
@@ -15,6 +16,7 @@ const popups = [
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
+  POPUP_TYPE_NETWORK_SWITCH,
 ];
 
 const txTags = [
@@ -50,16 +52,9 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.openAex2Popup(POPUP_TYPE_RAW_SIGN)
       .get('[data-cy=warning]')
       .should('be.visible')
-      // The account switcher can push `data` (and, once the modal is scrolled
-      // to it, `sender` above) further apart than fits in the viewport, so
-      // `sender` is checked before scrolling down to `data` rather than after.
       .get('[data-cy=sender]')
       .should('be.visible')
       .should('contain', props2.app.host)
-      .get('[data-cy=popup-aex2] > .container')
-      // Cypress 15 errors when scrollTo targets a non-scrollable element;
-      // ensureScrollable:false restores the lenient pre-15 no-op behavior.
-      .scrollTo('bottom', { ensureScrollable: false })
       .get('[data-cy=data]')
       .should('be.visible')
       .should('contain', props2.txBase64);
@@ -70,6 +65,38 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .should('contain', props3.app.name)
       .should('contain', props3.app.host);
+  });
+
+  // #3678: the badge left a 2px strip of the account card showing
+  it('Connect popup network badge reaches the account card edge', () => {
+    cy.openAex2Popup(POPUP_TYPE_CONNECT)
+      .get('[data-cy=popup-aex2] .account-select-input .option-wrapper')
+      .then(([card]) => {
+        cy.get('[data-cy=popup-aex2] .network-button').should(([badge]) => {
+          const cardBox = card.getBoundingClientRect();
+          const badgeBox = badge.getBoundingClientRect();
+          expect(badgeBox.right).to.be.closeTo(cardBox.right, 0.5);
+          expect(badgeBox.top).to.be.closeTo(cardBox.top, 0.5);
+          expect(badgeBox.bottom).to.be.closeTo(cardBox.bottom, 0.5);
+          expect(badge.scrollWidth, 'network name fits').to.be.at.most(badge.clientWidth);
+        });
+      });
+  });
+
+  it('Network switch popup displays the requesting site and the target network', () => {
+    const props = STUB_POPUP_PROPS[POPUP_TYPE_NETWORK_SWITCH];
+    cy.openAex2Popup(POPUP_TYPE_NETWORK_SWITCH)
+      .get('[data-cy=aepp]')
+      .should('be.visible')
+      .should('contain', props.app.href)
+      .get('[data-cy=new-network-warning]')
+      .should('be.visible')
+      .get('[data-cy=network-name]')
+      .should('contain', props.networkName)
+      .get('[data-cy=network-id]')
+      .should('contain', props.networkId)
+      .get('[data-cy=node-url]')
+      .should('contain', props.nodeUrl);
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
@@ -107,6 +134,12 @@ describe('Tests cases for AEX-2 popups', () => {
       } else {
         receiver = 'Contract create';
       }
+      if (txTag === Tag.SpendTx) {
+        cy.intercept(
+          { method: 'GET', hostname: 'testnet.aeternity.io', pathname: `/v3/accounts/${receiver}` },
+          { statusCode: 404, body: { reason: 'Account not found' } },
+        );
+      }
       cy.openAex2Popup(POPUP_TYPE_SIGN, Tag[txTag])
         .get('[data-cy=label]')
         .should('be.visible')
@@ -124,6 +157,14 @@ describe('Tests cases for AEX-2 popups', () => {
         .get('[data-cy=total]')
         .should('be.visible')
         .should('contain', parseFloat(amount + fee).toFixed(2));
+
+      if (txTag === Tag.SpendTx) {
+        // The node doesn't know the recipient
+        cy.get('[data-cy=recipient-unused]')
+          .should('contain', 'The recipient has no transactions yet.');
+      } else {
+        cy.get('[data-cy=recipient-details]').should('not.exist');
+      }
     });
   });
 });

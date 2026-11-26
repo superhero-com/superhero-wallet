@@ -107,7 +107,7 @@ describe('NameItem', () => {
     Transition: false,
   };
 
-  function mountNameItem(name, hash, entry = {}) {
+  function mountNameItem(name, hash, entry = {}, stubs = {}) {
     return mount(NameItem, {
       props: {
         nameEntry: {
@@ -123,8 +123,8 @@ describe('NameItem', () => {
         },
       },
       global: {
-        stubs: STUBS,
-        mocks: { $t: (key) => key },
+        stubs: { ...STUBS, ...stubs },
+        mocks: { $t: (key, params) => (params ? `${key}${JSON.stringify(params)}` : key) },
       },
     });
   }
@@ -183,5 +183,21 @@ describe('NameItem', () => {
     const wrapper = mountNameItem('queued.chain', undefined, { pending: true, pendingStatus });
 
     expect(wrapper.find('.pending').text()).toBe(label);
+  });
+
+  it('tells whether the details of the name are shown', async () => {
+    const wrapper = mountNameItem('toggle.chain', 'nm_toggle', {}, { BtnPlain: false });
+    const toggle = wrapper.get('button.btn-toggle');
+    const name = 'a11y.nameDetails{"name":"toggle.chain"}';
+
+    expect(toggle.attributes()).toMatchObject({ 'aria-label': name, 'aria-expanded': 'false' });
+    expect(wrapper.find('.expand').exists()).toBe(false);
+
+    await toggle.trigger('click');
+    expect(toggle.attributes()).toMatchObject({ 'aria-label': name, 'aria-expanded': 'true' });
+    expect(wrapper.find('.expand').exists()).toBe(true);
+
+    await toggle.trigger('click');
+    expect(toggle.attributes()).toMatchObject({ 'aria-label': name, 'aria-expanded': 'false' });
   });
 });

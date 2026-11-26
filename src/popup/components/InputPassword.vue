@@ -4,7 +4,7 @@
     v-bind="$attrs"
     :model-value="modelValue"
     :type="isPasswordVisible ? 'text' : 'password'"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
     <template #after>
       <component
@@ -46,6 +46,7 @@ export default defineComponent({
     showPasswordStrength: Boolean,
     hideEyeIcon: Boolean,
   },
+  emits: ['update:modelValue'],
   setup(props) {
     const { t } = useI18n();
     const isPasswordVisible = ref(false);

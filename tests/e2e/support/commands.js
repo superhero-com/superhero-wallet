@@ -2,6 +2,7 @@ import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import {
   APP_LINK_WEB,
+  LOCAL_STORAGE_PREFIX,
   NETWORK_NAME_TESTNET,
   PROTOCOLS,
   STORAGE_KEYS,
@@ -11,20 +12,10 @@ import {
   generateEncryptionKey,
   encrypt,
   encodeBase64,
-  formatDate,
-  formatTime,
   generateSalt,
   prepareStorageKey,
 } from '@/utils';
 import { TEST_ACCOUNT } from '../../fixtures/account';
-
-export function preparePendingTransactionToLocalStorage(pendingTransaction) {
-  const { address } = STUB_ACCOUNT;
-
-  return {
-    [address]: { loaded: [], localPendingTransaction: pendingTransaction },
-  };
-}
 
 Cypress.Commands.add('getByTestId', (testId) => {
   cy.get(`[data-cy=${testId}]`);
@@ -37,6 +28,62 @@ Cypress.Commands.add('getInputByTestId', (testId) => {
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(route || '', { onBeforeLoad });
 });
+
+// Cypress clears cookies and web storage, but IndexedDB needs an explicit reset
+// before a visit starts restoring the next fixture wallet.
+Cypress.Commands.add('clearAllIndexedDB', () => cy.then(() => (
+  window.indexedDB.databases().then((databases) => Cypress.Promise.all(databases
+    .filter(({ name }) => name)
+    .map(({ name }) => new Cypress.Promise((resolve, reject) => {
+      const request = window.indexedDB.deleteDatabase(name);
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => reject(new Error(`The fixture database "${name}" is still open`));
+    }))))
+)));
+
+// Read the persisted browser record directly; importing the app's vault service
+// here would create a separate cached instance in the Cypress support window.
+function readStoredVault(contentWindow) {
+  return new Cypress.Promise((resolve, reject) => {
+    const request = contentWindow.indexedDB.open(`${LOCAL_STORAGE_PREFIX}-vault`);
+    let missing = false;
+    request.onupgradeneeded = () => {
+      missing = true;
+      request.transaction.abort();
+    };
+    request.onerror = () => (missing ? resolve(null) : reject(request.error));
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('vault', 'readonly');
+      const read = transaction.objectStore('vault').get('current');
+      transaction.oncomplete = () => { db.close(); resolve(read.result ?? null); };
+      transaction.onabort = () => { db.close(); reject(transaction.error); };
+      transaction.onerror = () => { db.close(); reject(transaction.error); };
+    };
+  });
+}
+
+/** One read: `.should()` retries only the assertion, it never reads again. */
+Cypress.Commands.add('getStoredVault', () => cy.window().then(readStoredVault));
+
+/**
+ * Reads the stored vault again until `predicate` accepts it, as the app stores it
+ * asynchronously. Custom queries must be synchronous, so this polls instead of retrying.
+ */
+Cypress.Commands.add('waitForStoredVault', (predicate, { timeout = 10000 } = {}) => (
+  cy.window().then({ timeout: timeout + 1000 }, (contentWindow) => {
+    const deadline = Date.now() + timeout;
+    const poll = () => readStoredVault(contentWindow).then((vault) => {
+      if (predicate(vault)) return vault;
+      if (Date.now() > deadline) {
+        throw new Error(`The stored vault (revision ${vault?.revision}) never matched`);
+      }
+      return Cypress.Promise.delay(100).then(poll);
+    });
+    return poll();
+  })
+));
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
@@ -90,6 +137,7 @@ Cypress.Commands.add('loginUsingPassword', () => {
 });
 
 Cypress.Commands.add('login', (options, route) => {
+  cy.clearAllIndexedDB();
   cy.then(async () => {
     const salt = generateSalt();
     const encryptionKey = await generateEncryptionKey(TEST_ACCOUNT.password, salt);
@@ -98,7 +146,7 @@ Cypress.Commands.add('login', (options, route) => {
   }).then(([mnemonicEncryptionResult, salt]) => {
     const {
       isSeedBackedUp = false,
-      pendingTransaction,
+      pendingTransactions = [],
       network = null,
       accountsRaw = [{
         idx: 0,
@@ -108,9 +156,10 @@ Cypress.Commands.add('login', (options, route) => {
       }],
       privateKeyAccountsRaw,
       activeAccountGlobalIdx = 0,
+      addressBook,
     } = options || {};
 
-    cy.openPopup(async (contentWindow) => {
+    cy.openPopup((contentWindow) => {
       /**
        * Full clear before seeding avoids stale keys from a prior test or
        * `cy.login` chain leaving half-initialized state that skips the
@@ -130,11 +179,14 @@ Cypress.Commands.add('login', (options, route) => {
           isSeedBackedUp,
         },
         [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
-          [STUB_ACCOUNT.addressAeternity]: pendingTransaction || [],
+          [STUB_ACCOUNT.addressAeternity]: pendingTransactions,
         },
         [prepareStorageKey([STORAGE_KEYS.activeAccountGlobalIdx])]: activeAccountGlobalIdx,
         ...privateKeyAccountsRaw && {
           [prepareStorageKey([STORAGE_KEYS.privateKeyAccountsRaw])]: privateKeyAccountsRaw,
+        },
+        ...addressBook && {
+          [prepareStorageKey([STORAGE_KEYS.addressBook])]: addressBook,
         },
       };
 
@@ -148,7 +200,8 @@ Cypress.Commands.add('login', (options, route) => {
 });
 
 Cypress.Commands.add('logout', () => {
-  cy.openPopup(() => localStorage.clear());
+  cy.clearAllIndexedDB();
+  cy.openPopup((contentWindow) => contentWindow.localStorage.clear());
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to, shouldLogin = false) => {
@@ -167,18 +220,6 @@ Cypress.Commands.add('openPageMore', () => {
 
 Cypress.Commands.add('openSendModal', () => {
   cy.get('[data-cy=send]').click();
-});
-
-Cypress.Commands.add('pendingTx', (tx = {}) => {
-  cy.pendingTxItem().should((txItem) => {
-    txItem.find('[data-cy=amount]').should('contain', tx.amount);
-    txItem.find('[data-cy=status]').should('contain', 'Pending');
-    if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
-    if (tx.time) {
-      txItem.find('[data-cy=date]').should('contain', formatDate(tx.time));
-      txItem.find('[data-cy=time]').should('contain', formatTime(tx.time));
-    }
-  });
 });
 
 Cypress.Commands.add('enterInputAmount', (amount = 0) => {
@@ -223,23 +264,19 @@ Cypress.Commands.add('openSecureLoginSettings', () => {
     .urlEquals('/more/settings/secure-login');
 });
 
-/**
- * The form has a group of fields per protocol, each field's `data-cy` is its setting key.
- * Scrolling a field to the top would put it under the page header.
- */
+/** The form has a group of fields per protocol, each field's `data-cy` is its setting key. */
 Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl) => {
-  const options = { scrollBehavior: 'center' };
   cy.get('[data-cy=network-form]')
     .should('exist')
     .getInputByTestId('network-name')
-    .clear(options)
-    .type(name, options)
+    .clear()
+    .type(name)
     .get('[data-cy=group-aeternity] [data-cy=nodeUrl] input')
-    .clear(options)
-    .type(nodeUrl, options)
+    .clear()
+    .type(nodeUrl)
     .get('[data-cy=group-aeternity] [data-cy=middlewareUrl] input')
-    .clear(options)
-    .type(middlewareUrl, options);
+    .clear()
+    .type(middlewareUrl);
 });
 
 Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {
@@ -263,7 +300,7 @@ Cypress.Commands.add('openTransactions', () => {
 Cypress.Commands.add('splittedStringToBeEqual', (component, string) => {
   cy.get(component)
     .should('be.visible')
-    .then((splittedString) => {
+    .should((splittedString) => {
       expect(splittedString.text().replaceAll(' ', '')).to.equal(string);
     });
 });
@@ -289,7 +326,10 @@ Cypress.Commands.add('generateReceiveLinkAndVisit', (address, amount, token = nu
       .get('.modal .header [data-cy=input]')
       .type(token.contractId)
       .get('.tokens-list-item:first-child', { timeout: 16000 })
-      .click();
+      .click()
+      // The fading asset selector still has its search field
+      .get('.modal .header [data-cy=input]')
+      .should('not.exist');
   }
   cy.splittedStringToBeEqual('[data-cy=qr-code-info]', address)
     .get('[data-cy=input]')

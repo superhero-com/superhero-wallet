@@ -123,68 +123,6 @@ export function devProcessPolyfillPlugin(): Plugin {
 }
 
 /**
- * Packages that make up the AirGap dependency tree (~1.5 MB). They are needed
- * only for the AirGap import/sign flow, which `composables/airGap.ts` loads via
- * dynamic `import()`. None of them has a static importer in `src`, so they are
- * reachable only through that dynamic boundary — leaving them OUT of the forced
- * `vendor` chunk lets Rollup move the whole subtree into an on-demand async
- * chunk instead of the always-loaded `vendor` bundle.
- *
- * `swagger-client` (+ its `@swagger-api/*` dependencies) is the same shape: its
- * sole consumer, `lib/swagger.js`'s `genSwaggerClient`, loads it via dynamic
- * `import()` and has no other static importer in `src`.
- *
- * WalletConnect (`@walletconnect/*`, `@reown/`) is also the same shape:
- * `composables/walletConnect.ts` loads `@walletconnect/core`, `@reown/walletkit`
- * AND `@walletconnect/utils` all via dynamic `import()` inside `initWeb3wallet`;
- * only type-only imports of `@walletconnect/types`/`@reown/walletkit` remain
- * static (erased at compile time, so they don't pull in runtime code).
- */
-const LAZY_VENDOR_PACKAGES = [
-  'airgap-coin-lib',
-  '@airgap/',
-  '@polkadot/',
-  'libsodium',
-  'libsodium-wrappers',
-  'moment',
-  'ramda',
-  'ramda-adjunct',
-  'swagger-client',
-  '@swagger-api/',
-  '@walletconnect/',
-  '@reown/',
-];
-
-/**
- * Splits third-party dependencies out of the app bundle, replacing the old
- * webpack `splitChunks` config.
- *
- * IMPORTANT: nearly all of node_modules goes into a SINGLE `vendor` chunk. The
- * crypto stack (sha.js / create-hash / bitcoinjs / secp256k1 …) ships as
- * CommonJS with lazy `require()` wrappers; splitting those interdependent
- * modules across multiple chunks separates a module's synthetic `exports`
- * object from its initializer and crashes at runtime ("Object.defineProperty
- * called on non-object"). Keeping every dependency together avoids cross-chunk
- * CJS. The only exception is the AirGap tree (see `LAZY_VENDOR_PACKAGES`),
- * which is dynamically imported and self-contained, so returning `undefined`
- * lets Rollup code-split it out.
- */
-export function vendorManualChunks(id: string): string | undefined {
-  if (!id.includes('node_modules')) return undefined;
-  const normalized = id.replace(/\\/g, '/');
-  // Entries ending in `/` are scope prefixes and match as-is; bare package names
-  // must match a whole path segment, so `ramda` does not also swallow
-  // `ramda-adjunct`. Every id Rollup passes here is a file inside the package,
-  // so the trailing separator is always present.
-  if (LAZY_VENDOR_PACKAGES.some((pkg) => normalized.includes(
-    pkg.endsWith('/') ? `node_modules/${pkg}` : `node_modules/${pkg}/`,
-  ))) {
-    return undefined;
-  }
-  return 'vendor';
-}
-
-/**
  * Copies the `src/web` directory (nginx.conf, Dockerfile, root/ static assets)
  * into `dist/web` after the web build, replacing the old EventHooksPlugin step.
  *

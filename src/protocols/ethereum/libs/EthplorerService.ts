@@ -4,7 +4,6 @@ import {
   fetchJson,
   toShiftedBigNumber,
   sleep,
-  amountRounded,
 } from '@/utils';
 import { ETH_CONTRACT_ID_EXTERNAL } from '../config';
 import { toEthChecksumAddress } from '../helpers';
@@ -113,8 +112,9 @@ export class EthplorerService {
       address,
       amount: rawBalance,
       contractId: toEthChecksumAddress(contractId),
-      convertedBalance: +amountRounded(toShiftedBigNumber(rawBalance, -decimals)),
-      decimals,
+      convertedBalance: toShiftedBigNumber(rawBalance, -decimals).toNumber(),
+      // Sent as a string
+      decimals: Number(decimals),
       symbol,
       name,
       protocol,

@@ -5,6 +5,7 @@ import { useStorageRef } from './storageRef';
 const history = useStorageRef<IHistoryItem[]>(
   [],
   STORAGE_KEYS.appsBrowserHistory,
+  { syncWithOtherWindows: true },
 );
 
 export function useAppsBrowserHistory() {

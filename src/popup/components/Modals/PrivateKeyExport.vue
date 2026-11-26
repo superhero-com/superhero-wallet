@@ -34,6 +34,20 @@
         @input="isAuthFailed = false"
       />
       <template v-else-if="privateKey">
+        <Tabs
+          v-if="privateKeyFormats.length > 1"
+          class="formats"
+        >
+          <Tab
+            v-for="({ format, text }) in privateKeyFormats"
+            :key="format"
+            :data-cy="`format-${format}`"
+            :text="text"
+            :active="selectedFormat === format"
+            :aria-pressed="selectedFormat === format"
+            @click="selectedFormat = format"
+          />
+        </Tabs>
         <DetailsItem :label="$t('modals.privateKeyImport.privateKey')">
           <template #label>
             <BtnHelp
@@ -81,12 +95,15 @@ import {
   defineComponent,
   PropType,
   ref,
+  shallowRef,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Form } from 'vee-validate';
 
-import type { ResolveCallback } from '@/types';
+import type { PrivateKeyFormat, ResolveCallback } from '@/types';
+import type { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { decrypt, generateEncryptionKey } from '@/utils';
 import {
   useAccounts,
@@ -105,6 +122,8 @@ import DetailsItem from '@/popup/components/DetailsItem.vue';
 import InfoBox from '@/popup/components/InfoBox.vue';
 import InputPassword from '@/popup/components/InputPassword.vue';
 import Modal from '@/popup/components/Modal.vue';
+import Tab from '@/popup/components/tabs/Tab.vue';
+import Tabs from '@/popup/components/tabs/Tabs.vue';
 
 import PrivateKeyIcon from '@/icons/private-key.svg?vue-component';
 
@@ -119,17 +138,36 @@ export default defineComponent({
     InfoBox,
     InputPassword,
     Modal,
+    Tab,
+    Tabs,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
-  setup() {
+  setup(props) {
     const { t } = useI18n();
 
     const isAuthFailed = ref(false);
     const isAuthenticating = ref(false);
     const password = ref('');
-    const privateKey = ref('');
+    /** Taken when the user is verified, so switching accounts never shows another key. */
+    const revealedKey = shallowRef<{ adapter: BaseProtocolAdapter; secretKey: Uint8Array }>();
+    const selectedFormat = ref<PrivateKeyFormat>();
+
+    const privateKey = computed(() => revealedKey.value?.adapter.formatPrivateKey(
+      revealedKey.value.secretKey,
+      selectedFormat.value,
+    ) ?? '');
+
+    const privateKeyFormats = computed(() => {
+      const formats = revealedKey.value?.adapter.getPrivateKeyFormats() ?? [];
+      return formats.map((format) => ({
+        format,
+        text: (format === 'sk')
+          ? t('modals.privateKeyExport.formatSk')
+          : t('modals.privateKeyExport.formatHex'),
+      }));
+    });
 
     const { activeAccount } = useAccounts();
     const {
@@ -178,7 +216,7 @@ export default defineComponent({
           && isBiometricLoginEnabled.value
           && await canAuthenticateWithDevice()
         ) {
-          const authenticated = await openBiometricLoginModal({ force: true })
+          const authenticated = await openBiometricLoginModal({ force: true, isCancelable: true })
             .then(() => true)
             .catch(() => false);
           if (!authenticated) {
@@ -203,7 +241,15 @@ export default defineComponent({
             return;
           }
         }
-        privateKey.value = Buffer.from(activeAccount.value.secretKey).toString('hex');
+        const { protocol, secretKey } = activeAccount.value;
+        // Another window can switch to a Ledger or AirGap account meanwhile.
+        if (!secretKey) {
+          props.resolve();
+          return;
+        }
+        const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+        [selectedFormat.value] = adapter.getPrivateKeyFormats();
+        revealedKey.value = { adapter, secretKey: Buffer.from(secretKey) };
       } finally {
         isAuthenticating.value = false;
       }
@@ -232,6 +278,8 @@ export default defineComponent({
       mainButtonText,
       password,
       privateKey,
+      privateKeyFormats,
+      selectedFormat,
       copyPrivateKey,
       handleMainButtonClick,
     };
@@ -249,6 +297,10 @@ export default defineComponent({
 
   .warning {
     text-align: left;
+  }
+
+  .formats {
+    margin: 16px 0 8px;
   }
 
   .private-key {

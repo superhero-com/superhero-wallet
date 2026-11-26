@@ -86,7 +86,7 @@ const ERC20_TOKEN = {
 };
 
 /** Sepolia node, Ethplorer with a 50 TUSD balance and an empty Etherscan history */
-function stubSepolia() {
+function stubSepolia({ nodeTokenBalance = 50e6 } = {}) {
   const { baseFee, priorityFee, nonce } = SEPOLIA;
   const tokenInfo = {
     address: ERC20_TOKEN.address,
@@ -114,8 +114,10 @@ function stubSepolia() {
       miner: `0x${'00'.repeat(20)}`,
       transactions: [],
     },
-    // decimals() of the token
-    eth_call: `0x${ERC20_TOKEN.decimals.toString(16).padStart(64, '0')}`,
+    // balanceOf(address) or decimals() of the token
+    eth_call: ([{ data, input }]) => `0x${new BigNumber(
+      (data ?? input).startsWith('0x70a08231') ? nodeTokenBalance : ERC20_TOKEN.decimals,
+    ).toString(16).padStart(64, '0')}`,
     // Its 15% headroom is a whole thousand, which the form rounds the gas up to
     eth_estimateGas: toRpcHex(40000),
   }, 'eth_sendRawTransaction', `0x${'12'.repeat(32)}`);
@@ -148,6 +150,7 @@ describe('Send modal', () => {
     const address = STUB_ACCOUNT.addressAeternity;
     const amount = 0.1;
     const txHash = 'th_8WwpJCixn9cKe3jAyXvxNeo5JrBFKj43ULkUeTfeLMqLiZPjj';
+    const notPayableContract = 'ct_Xu6GSyjLWhwEvseUpdscRNr5H7LQ6KepqqYrP8QuVNRfZd5HF';
 
     cy.intercept({ method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${address}` }, {
       headers: { 'content-type': 'application/json' },
@@ -158,6 +161,9 @@ describe('Send modal', () => {
     cy.intercept({ method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${RECIPIENTS.aeternity}` }, {
       statusCode: 404,
       body: { reason: 'Account not found' },
+    });
+    cy.intercept({ method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${notPayableContract}` }, {
+      id: notPayableContract, balance: 0, nonce: 0, payable: false, kind: 'basic',
     });
     cy.intercept({ method: 'GET', hostname: nodeHost, pathname: '/v3/key-blocks/current/height' }, { height: 1000000 });
     // The SDK uses these endpoints to price transactions. A 404 makes it use
@@ -214,6 +220,15 @@ describe('Send modal', () => {
       .should('have.class', 'warning')
       .get('[data-cy=clear-address-button]')
       .first()
+      .click();
+    // Coins sent to it would never be mined
+    pasteAddress(notPayableContract);
+    cy.inputShouldHaveError('[data-cy=address]')
+      .get('[data-cy=address]')
+      .should('contain', "Contracts that don't accept AE can't be recipients.")
+      .buttonShouldBeDisabled('[data-cy=next-step-button]')
+      .get('[data-cy=clear-address-button]')
+      .first()
       .click()
       .enterAddress(RECIPIENTS.aeternity)
       .get('[data-cy=address]')
@@ -223,11 +238,26 @@ describe('Send modal', () => {
     // pricing inputs before asserting the asynchronously updated fee in the UI.
     cy.wait(['@protocolParameters', '@nodeSettings', '@recentGasPrices']);
     readAmount('[data-cy=review-fee]');
+    // Next asks the node about the recipient again; slowed down to see Next wait
+    cy.intercept(
+      { method: 'GET', hostname: nodeHost, pathname: `/v3/accounts/${RECIPIENTS.aeternity}` },
+      { statusCode: 404, body: { reason: 'Account not found' }, delay: 1000 },
+    ).as('recipientAtNext');
     cy.get('[data-cy=next-step-button]')
       .should('not.have.class', 'disabled')
-      .click()
-      .get('[data-cy=review-recipient]')
+      .click();
+    // Still the form's Next, not the review's Send that also has an icon while it loads
+    cy.get('[data-cy=next-step-button]').should(($button) => {
+      expect($button).to.have.class('disabled');
+      expect($button).to.contain('Next');
+      expect($button.find('.btn-main-icon')).to.have.length(1);
+    });
+    cy.wait('@recipientAtNext');
+    cy.get('[data-cy=review-recipient]')
       .should('contain', RECIPIENTS.aeternity.slice(0, 6))
+      // The node doesn't know the recipient
+      .find('[data-cy=recipient-unused]')
+      .should('contain', 'The recipient has no transactions yet.')
       .get('[data-cy=accordion-item-label]')
       .contains('Advanced transaction details')
       .click()
@@ -395,6 +425,30 @@ describe('Send modal', () => {
         expectSepoliaFees(tx, this);
       });
     cy.get('[data-cy=pending-txs]').should('exist');
+  });
+
+  it('sends the ERC-20 balance the node reports with Max', () => {
+    // Ethplorer still shows 50 TUSD, e.g. right after a send
+    stubSepolia({ nodeTokenBalance: 42.5e6 });
+    loginWith(PROTOCOLS.ethereum);
+    cy.openSendModal();
+    cy.get('[data-cy=select-asset]').click();
+    cy.get('.asset-selector [data-cy=list]').contains(ERC20_TOKEN.name).click();
+    pasteAddress(RECIPIENTS.evm);
+    cy.get('[data-cy=amount] .max-button').click();
+
+    cy.get('[data-cy=amount] [data-cy=input]').should('have.value', '42.5');
+    cy.get('[data-cy=next-step-button]')
+      .should('not.have.class', 'disabled')
+      .click();
+    cy.get('[data-cy=review-amount]').should('contain', '42.5');
+    cy.get('[data-cy=next-step-button]').click();
+
+    cy.wait('@broadcast').then(({ request }) => decodeBroadcast('evm', request.body.params[0]))
+      .then((tx) => {
+        expect(new BigNumber(tx.data.slice(72), 16).toFixed())
+          .to.eq(new BigNumber(42.5).shiftedBy(ERC20_TOKEN.decimals).toFixed());
+      });
   });
 
   it('sends BNB with the legacy gas price shown on the review', () => {

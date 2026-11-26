@@ -16,15 +16,26 @@ import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendR
 import FormAccountInput from '@/popup/components/form/FormAccountInput.vue';
 
 // The setup files already loaded the composables with the real deps; reload them to apply mocks.
-const { realAccounts } = vi.hoisted(() => {
+const {
+  realAccounts,
+  realAeSdk,
+  notPayableAddresses,
+  unreachableAddresses,
+} = vi.hoisted(() => {
   vi.resetModules();
-  return { realAccounts: { useAccounts: () => ({}) } };
+  return {
+    realAccounts: { useAccounts: () => ({}) },
+    realAeSdk: { useAeSdk: () => ({}) },
+    notPayableAddresses: new Set<string>(),
+    unreachableAddresses: new Set<string>(),
+  };
 });
 
 const OWN_ADDRESS = MemoryAccount.generate().address;
 const RECIPIENT = MemoryAccount.generate().address;
 const VAULT = MemoryAccount.generate().address;
 const NAME = 'superhero.chain';
+const CONTRACT = MemoryAccount.generate().address.replace('ak_', 'ct_');
 
 // Without a wallet the real store has no active account. The real store is loaded in
 // `beforeAll`: loading it in the factory would bind the composables barrel to it.
@@ -32,6 +43,23 @@ vi.mock('@/composables/accounts', () => ({
   useAccounts: () => ({
     ...realAccounts.useAccounts(),
     activeAccount: ref({ protocol: PROTOCOLS.aeternity, address: OWN_ADDRESS }),
+  }),
+}));
+
+// The node knows every account; only the ones in `notPayableAddresses` are not payable.
+vi.mock('@/composables/aeSdk', () => ({
+  useAeSdk: () => ({
+    ...realAeSdk.useAeSdk(),
+    getDryAeSdk: async () => ({
+      api: {
+        getAccountByPubkey: async (address: string) => {
+          if (unreachableAddresses.has(address)) {
+            throw new Error('Network error');
+          }
+          return { payable: !notPayableAddresses.has(address) };
+        },
+      },
+    }),
   }),
 }));
 
@@ -44,7 +72,15 @@ beforeAll(async () => {
   realAccounts.useAccounts = (
     await vi.importActual<typeof import('@/composables/accounts')>('@/composables/accounts')
   ).useAccounts;
+  realAeSdk.useAeSdk = (
+    await vi.importActual<typeof import('@/composables/aeSdk')>('@/composables/aeSdk')
+  ).useAeSdk;
   initVeeValidateRules();
+});
+
+afterEach(() => {
+  notPayableAddresses.clear();
+  unreachableAddresses.clear();
 });
 
 /**
@@ -137,6 +173,61 @@ describe('TransferSendRecipient rules', () => {
 
   it('lets a transfer go to another account by default', async () => {
     expect(await getRecipientMessage([RECIPIENT], {})).toEqual({ status: 'success' });
+  });
+
+  it('lets a coin transfer go to a contract address', async () => {
+    expect(await getRecipientMessage([CONTRACT], {
+      aens_name_registered_or_address: true,
+      token_to_an_address: [false],
+    })).toEqual({ status: 'success' });
+  });
+
+  it('stops a token transfer to a contract address', async () => {
+    expect(await getRecipientMessage([CONTRACT], {
+      aens_name_registered_or_address: true,
+      token_to_an_address: [true],
+    })).toEqual({ status: 'error', text: tg('validation.tokenToAnAddress') });
+  });
+
+  it('lets a tip URL field take a contract address', async () => {
+    expect(await getRecipientMessage([CONTRACT], {
+      aens_name_registered_or_address_or_url: true,
+    })).toEqual({ status: 'success' });
+  });
+
+  it('stops a coin transfer to a recipient that does not accept coins', async () => {
+    notPayableAddresses.add(CONTRACT);
+
+    const message = await getRecipientMessage([RECIPIENT, CONTRACT], {
+      ae_recipient_payable: true,
+    });
+
+    expect(message.status).toBe('error');
+    expect(message.text).toContain(tg('validation.recipientNotPayable', ['AE']));
+    expect(message.text).toContain(CONTRACT);
+    expect(message.text).not.toContain(RECIPIENT);
+  });
+
+  it('lets a coin transfer go to payable recipients', async () => {
+    expect(await getRecipientMessage([RECIPIENT, CONTRACT], { ae_recipient_payable: true }))
+      .toEqual({ status: 'success' });
+  });
+
+  it('lets a coin transfer go when the node cannot be asked about the recipient', async () => {
+    notPayableAddresses.add(CONTRACT);
+    unreachableAddresses.add(CONTRACT);
+
+    expect(await getRecipientMessage([CONTRACT], { ae_recipient_payable: true }))
+      .toEqual({ status: 'success' });
+  });
+
+  it('shows the AirGap error before the payability one', async () => {
+    notPayableAddresses.add(CONTRACT);
+
+    expect(await getRecipientMessage([CONTRACT, NAME], {
+      airgap_to_an_address: true,
+      ae_recipient_payable: true,
+    })).toEqual({ status: 'error', text: tg('validation.airGapToAnAddress') });
   });
 
   it('shows an error before the vault warning', async () => {

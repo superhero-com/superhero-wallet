@@ -53,15 +53,17 @@
               error: checkIfSignerAddressDuplicated(signer),
             }"
             :protocol="PROTOCOLS.aeternity"
-            @update:modelValue="($event) => updateSigner(index, $event[0])"
+            @update:model-value="($event) => updateSigner(index, $event[0])"
           >
             <template #label-after>
               <div class="buttons">
                 <BtnIcon
+                  :aria-label="$t('a11y.selectSignerAddress', { number: index + 1 })"
                   :icon="AddressBookIcon"
                   @click="updateSignerFromAddressBook(index)"
                 />
                 <BtnIcon
+                  :aria-label="$t('a11y.scanSignerAddress', { number: index + 1 })"
                   :icon="QrScanIcon"
                   @click.prevent="scanSignerAccountQrCode(index)"
                 />
@@ -73,6 +75,7 @@
                   signers.length > MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
                   && (!signer.address || signer.address.length === 0)
                 )"
+                :aria-label="$t('a11y.removeSigner', { number: index + 1 })"
                 :icon="TrashIcon"
                 data-cy="clear-address-button"
                 class="close-icon"
@@ -81,6 +84,7 @@
               />
               <BtnIcon
                 v-if="signer.address?.length! > 0"
+                :aria-label="$t('a11y.clearSigner', { number: index + 1 })"
                 :icon="CircleCloseIcon"
                 data-cy="clear-address-button"
                 class="close-icon"

@@ -1,4 +1,3 @@
-import os from 'os';
 import path from 'path';
 import {
   afterAll,
@@ -6,44 +5,14 @@ import {
   expect,
   it,
 } from 'vitest';
-import { webkit, type Browser } from 'playwright-core';
+import { devices, webkit, type Browser } from 'playwright-core';
 import { createServer, type ViteDevServer } from 'vite';
 import { TEST_ACCOUNT } from '../fixtures/account';
+import { seedWallet } from './fixtures/seed-wallet';
 
 const ROOT = path.resolve(__dirname, '../..');
 const PORT = Number(process.env.E2E_WEBKIT_PORT || 8093);
 const APP_URL = `http://localhost:${PORT}`;
-
-/** Stores a logged-in wallet the way the app does, with the app's own helpers. */
-const seedWallet = `async ({ mnemonic, password }) => {
-  const {
-    encodeBase64,
-    encrypt,
-    generateEncryptionKey,
-    generateSalt,
-    prepareStorageKey,
-  } = await import('/src/utils/index.ts');
-  const { NETWORK_NAME_TESTNET, PROTOCOLS, STORAGE_KEYS } = await import('/src/constants/index.ts');
-  const salt = generateSalt();
-  const encryptionKey = await generateEncryptionKey(password, salt);
-  const stored = {
-    [STORAGE_KEYS.activeNetworkName]: NETWORK_NAME_TESTNET,
-    [STORAGE_KEYS.mnemonic]: await encrypt(encryptionKey, mnemonic),
-    [STORAGE_KEYS.encryptionSalt]: encodeBase64(salt),
-    [STORAGE_KEYS.accountsRaw]: [{
-      idx: 0,
-      protocol: PROTOCOLS.aeternity,
-      isRestored: true,
-      type: 'hd-wallet',
-    }],
-    [STORAGE_KEYS.activeAccountGlobalIdx]: 0,
-    [STORAGE_KEYS.otherSettings]: { isSeedBackedUp: true },
-  };
-  localStorage.clear();
-  Object.entries(stored).forEach(([key, value]) => {
-    localStorage.setItem(prepareStorageKey([key]), JSON.stringify(value));
-  });
-}`;
 
 let server: ViteDevServer;
 let browser: Browser;
@@ -55,8 +24,9 @@ beforeAll(async () => {
     root: ROOT,
     configFile: path.join(ROOT, 'vite.config.mts'),
     mode: 'development',
-    // Apart from the prebundled dependencies of `npm run dev`
-    cacheDir: path.join(os.tmpdir(), 'superhero-wallet-e2e-webkit'),
+    // Apart from the prebundled dependencies of `npm run dev`. Vite resolves the
+    // polyfill shims they import from this folder, so it has to be in node_modules.
+    cacheDir: path.join(ROOT, 'node_modules/.vite-e2e-webkit'),
     server: { port: PORT, strictPort: true },
     logLevel: 'error',
   });
@@ -71,10 +41,10 @@ afterAll(async () => {
 
 // #3379: WebKit before 27 (iOS 26 and older) doesn't shrink a canvas wider than its box
 it('keeps the address book QR code inside its box', async () => {
-  const page = await browser.newPage();
+  // An iPhone's user agent turns on Ionic's iOS mode, as in the app
+  const page = await browser.newPage({ ...devices['iPhone 13'] });
   await page.goto(APP_URL);
-  // A string, so Vitest leaves the dev server imports alone
-  await page.evaluate(`(${seedWallet})(${JSON.stringify(TEST_ACCOUNT)})`);
+  await seedWallet(page);
 
   await page.goto(`${APP_URL}/more/address-book/add`);
   await page.fill('[data-cy=password] input', TEST_ACCOUNT.password);

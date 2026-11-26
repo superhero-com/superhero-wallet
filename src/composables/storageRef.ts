@@ -1,9 +1,22 @@
 import { Ref, ref, watch } from 'vue';
 import type { Migration, StorageKey } from '@/types';
 import { WalletStorage } from '@/lib/WalletStorage';
-import { asyncPipe, handleUnknownError } from '@/utils';
+import { asyncPipe, composeStorageKeys, handleUnknownError } from '@/utils';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
-import { IS_MOBILE_APP } from '@/constants';
+import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
+import {
+  ensureVaultReady,
+  isVaultKey,
+  readVault,
+  refreshVault,
+  subscribeVault,
+  VaultConflictError,
+  VaultResetError,
+  writeVaultField,
+} from '@/lib/WalletVault';
+import type { VaultSnapshot } from '@/lib/WalletVault';
+import { registerStorageRefWrites, registerVaultRef } from '@/utils/vaultRef';
+import { StorageMigrationWriteError } from '@/lib/errors';
 
 export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
   /**
@@ -15,6 +28,12 @@ export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
    * Enable state synchronization between the extension and the background.
    */
   backgroundSync?: boolean;
+  /**
+   * Follow the value other windows store, e.g. other tabs or the offscreen tab.
+   * Their values skip `migrations`, so a migration of the key must handle them as well.
+   * Replaces the listener of `backgroundSync`.
+   */
+  syncWithOtherWindows?: boolean;
   /**
    * Callbacks run on the data that will be saved and read from the browser storage.
    */
@@ -39,6 +58,26 @@ export interface ICreateStorageRefOptions<T, TSerialized = unknown> {
 }
 
 /**
+ * Mobile secrets whose migrated value is only in memory, as storing it failed: on iOS the
+ * original may be gone already. Other values are only logged, their original stays and is
+ * migrated again at the next start.
+ */
+const failedMigrationWrites = new Map<object, StorageMigrationWriteError>();
+
+export function hasFailedMigrationWrites() {
+  return failedMigrationWrites.size > 0;
+}
+
+/** Each one stored, or written since by a change of its own, is no longer reported. */
+export async function retryFailedMigrationWrites() {
+  const results = await Promise.allSettled(
+    [...failedMigrationWrites.values()].map((error) => error.retry()),
+  );
+  const failure = results.find((result) => result.status === 'rejected');
+  if (failure) throw (failure as PromiseRejectedResult).reason;
+}
+
+/**
  * Create a Vue ref with value synced in the Browser's storage.
  * Also allows to sync the state between the app and the extension background.
  * Inspired by `useStorage`: https://vueuse.org/core/useStorage/
@@ -55,6 +94,7 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
       write: (a: unknown) => a,
     } as unknown as NonNullable<typeof options['serializer']>,
     backgroundSync = false,
+    syncWithOtherWindows = false,
     migrations,
     onRestored,
     onRestoreFailed,
@@ -62,10 +102,91 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
   } = options;
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
+  let latestWrite = Promise.resolve();
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136/
   const storage = (enableSecureStorage && IS_MOBILE_APP) ? SecureMobileStorage : WalletStorage;
+  const vaultBacked = isVaultKey(storageKey);
+  const isSyncedWithOtherWindows = syncWithOtherWindows && !IS_MOBILE_APP && !vaultBacked
+    && storage === WalletStorage;
+  const storageItemKey = composeStorageKeys(storageKey);
+  /** The stored value as this window last saw it, which it doesn't write again. */
+  let lastKnownRaw: string | null = null;
+  let isRestoring = true;
+  /** Taken now, before the state can change it in place */
+  const initialRaw = isSyncedWithOtherWindows
+    ? JSON.stringify(initialState ? serializer.write(initialState) : initialState)
+    : null;
+
+  /** The value stored now: an event's own may be older than one this window wrote since. */
+  function applyStoredValue() {
+    const raw = localStorage.getItem(storageItemKey);
+    if (raw === lastKnownRaw) return;
+    // Removed, e.g. by a reset in another window: the initial value, not written back
+    const stored = raw ?? initialRaw;
+    if (stored === null) return;
+    let value: T;
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed === null) return;
+      value = serializer.read(parsed);
+    } catch {
+      return;
+    }
+    lastKnownRaw = stored;
+    state.value = value;
+  }
+
+  if (isSyncedWithOtherWindows) {
+    window.addEventListener('storage', (event) => {
+      // The restore catches up when it's done. `null` is a cleared storage.
+      if (isRestoring || (event.key !== null && event.key !== storageItemKey)) return;
+      if (event.storageArea && event.storageArea !== localStorage) return;
+      applyStoredValue();
+    });
+  }
+
+  function applyVaultValue(value: TSerialized | null) {
+    watcherDisabled = true;
+    try {
+      state.value = value === null ? initialState : serializer.read(value);
+    } finally {
+      watcherDisabled = false;
+    }
+  }
+
+  /** Not decoded again: a new object, e.g. of the salt, would look like a change to watchers. */
+  function isStateStoredAs(value: TSerialized | null) {
+    if (value === null) return state.value === initialState;
+    return !!state.value && serializer.write(state.value) === value;
+  }
+
+  function writeLogEntry(message: string, error: unknown) {
+    const { message: reason, stack } = (error instanceof Error)
+      ? error
+      : { message: String(error), stack: undefined };
+    // Loaded here, as the logger's imports lead back to this module.
+    import('@/lib/logger').then(({ default: Logger }) => Logger.write({
+      message: `${message}: ${reason}`,
+      stack,
+      type: 'api-response',
+      modal: false,
+    })).catch(handleUnknownError);
+  }
+
+  if (vaultBacked) {
+    registerVaultRef(state, {
+      storageKey,
+      apply: (value) => applyVaultValue(value as TSerialized | null),
+    });
+  } else {
+    registerStorageRefWrites(state, () => latestWrite);
+  }
 
   async function setLocalState(val: TSerialized | null) {
+    if (vaultBacked) {
+      applyVaultValue(val);
+      return;
+    }
     if (val !== null) {
       watcherDisabled = true;
       state.value = await serializer.read(val);
@@ -74,21 +195,78 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
   }
 
   async function setStorageState(val: T | null) {
-    storage.set(storageKey, val ? await serializer.write(val) : val);
+    const expected = vaultBacked ? readVault() : undefined;
+    const serialized = val ? serializer.write(val) : val;
+    if (vaultBacked) {
+      await writeVaultField(storageKey, serialized as string | null, expected);
+    } else {
+      await storage.set(storageKey, serialized);
+    }
+  }
+
+  /** Resolves with the value to use: a newer one stored meanwhile wins over the migration. */
+  async function storeMigratedValue(
+    value: TSerialized,
+    restoreSnapshot: VaultSnapshot | undefined,
+  ): Promise<TSerialized | null> {
+    if (!vaultBacked) {
+      await storage.set(storageKey, value);
+      return value;
+    }
+    let expected = restoreSnapshot!;
+    // Retried after an unrelated commit.
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await writeVaultField(storageKey, value as string, expected);
+        return value;
+      } catch (error) {
+        if (!(error instanceof VaultConflictError) || attempt >= 9) throw error;
+        // eslint-disable-next-line no-await-in-loop
+        await refreshVault();
+        expected = readVault();
+        if (expected.values[storageKey] !== restoreSnapshot!.values[storageKey]
+          || expected.values[STORAGE_KEYS.encryptionSalt]
+            !== restoreSnapshot!.values[STORAGE_KEYS.encryptionSalt]) {
+          return expected.values[storageKey] as TSerialized | null;
+        }
+      }
+    }
   }
 
   // Restore state and run watchers
   (async () => {
     let restoredValue: TSerialized | null = null;
     let isRestoreFailed = false;
+    let migrationWriteError: StorageMigrationWriteError | undefined;
     try {
+      if (vaultBacked) await ensureVaultReady();
+      const restoreSnapshot = vaultBacked ? readVault() : undefined;
+      if (isSyncedWithOtherWindows) lastKnownRaw = localStorage.getItem(storageItemKey);
       restoredValue = await storage.get<TSerialized | null>(storageKey);
-      if (migrations?.length) {
+      // Not once the vault exists, which older copies mustn't replace.
+      if (migrations?.length && (!vaultBacked || restoreSnapshot?.revision === null)) {
         // iOS Keychain writes delete the item first, so don't rewrite an unchanged value
         const storedValue = JSON.stringify(restoredValue);
         restoredValue = await asyncPipe<TSerialized | null>(migrations)(restoredValue!);
         if (restoredValue !== null && JSON.stringify(restoredValue) !== storedValue) {
-          storage.set(storageKey, restoredValue);
+          const migratedValue = restoredValue;
+          try {
+            restoredValue = await storeMigratedValue(migratedValue, restoreSnapshot);
+          } catch (error) {
+            // Another window deleted the wallet: keeping its old copy would bring it back.
+            if (error instanceof VaultResetError) throw error;
+            // Not unreadable: the migrated value is here, only storing it failed.
+            migrationWriteError = new StorageMigrationWriteError(
+              storageKey,
+              error,
+              async () => {
+                // The value now, with any change whose own write failed too.
+                await setStorageState(state.value);
+                failedMigrationWrites.delete(state);
+              },
+            );
+          }
         }
       }
       /**
@@ -102,20 +280,21 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
     } catch (error) {
       // E.g. Android rejects a Keystore read it can't decrypt; waiting callers must not hang.
       handleUnknownError(error);
-      // For the exportable error log; loaded here as the logger's imports lead back to this module.
-      const { message, stack } = (error instanceof Error)
-        ? error
-        : { message: String(error), stack: undefined };
-      import('@/lib/logger').then(({ default: Logger }) => Logger.write({
-        message: `Reading "${storageKey}" from the storage failed: ${message}`,
-        stack,
-        type: 'api-response',
-        modal: false,
-      })).catch(handleUnknownError);
+      // For the exportable error log.
+      writeLogEntry(`Reading "${storageKey}" from the storage failed`, error);
       restoredValue = null;
       isRestoreFailed = true;
       onRestoreFailed?.(error);
     }
+    if (migrationWriteError) {
+      handleUnknownError(migrationWriteError.cause);
+      writeLogEntry(migrationWriteError.message, migrationWriteError.cause);
+      if (enableSecureStorage && IS_MOBILE_APP) {
+        failedMigrationWrites.set(state, migrationWriteError);
+      }
+    }
+    isRestoring = false;
+    if (isSyncedWithOtherWindows) applyStoredValue();
     onRestored?.(
       restoredValue == null ? restoredValue as T : state.value,
     );
@@ -127,10 +306,21 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
      */
     if (!isRestoreFailed || onRestoreFailed) {
       watch(state, (val) => {
-        if (!watcherDisabled) {
-          setStorageState(val);
+        if (isSyncedWithOtherWindows) {
+          const raw = JSON.stringify(val ? serializer.write(val) : val);
+          if (raw === lastKnownRaw) return;
+          lastKnownRaw = raw;
+        } else if (watcherDisabled) {
+          return;
         }
-      }, { deep: true });
+        latestWrite = setStorageState(val);
+        latestWrite.then(() => failedMigrationWrites.delete(state), (error) => {
+          // Unknown now, so neither saving it again nor another window's value is skipped.
+          if (isSyncedWithOtherWindows) lastKnownRaw = null;
+          handleUnknownError(error);
+          writeLogEntry(`Saving "${storageKey}" failed`, error);
+        });
+      }, { deep: true, flush: vaultBacked ? 'sync' : 'pre' });
     }
 
     /**
@@ -138,7 +328,26 @@ export function useStorageRef<T = string | object | any[], TSerialized = unknown
      * Whenever the app saves the state to browser storage the extension background
      * and the offscreen tab pick this and synchronize their own state with the change.
      */
-    if (backgroundSync) {
+    if (vaultBacked) {
+      subscribeVault((snapshot) => {
+        const value = snapshot.values[storageKey as keyof typeof snapshot.values] as
+          TSerialized | null;
+        if (isStateStoredAs(value)) return;
+        applyVaultValue(value);
+        if (backgroundSync) onBackgroundSync?.(state.value);
+      });
+      // Catches up with commits made during the restore, keeping a migrated value not stored.
+      // Already cached: any later one, also of another window, reaches the listener.
+      if (!isRestoreFailed && !migrationWriteError) {
+        try {
+          const value = WalletStorage.get<TSerialized>(storageKey);
+          if (!isStateStoredAs(value)) applyVaultValue(value);
+        } catch (error) {
+          handleUnknownError(error);
+          onRestoreFailed?.(error);
+        }
+      }
+    } else if (backgroundSync && !isSyncedWithOtherWindows) {
       storage.watch?.(storageKey, (val) => {
         setLocalState(val);
         onBackgroundSync?.(val);

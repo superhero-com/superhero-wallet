@@ -15,7 +15,9 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
   }
 
   async function encryptMnemonicWith(key) {
-    auth.mnemonic.value = await crypto.encrypt(key, MNEMONIC);
+    const { STORAGE_KEYS } = await import('@/constants');
+    const { writeVaultField } = await import('@/lib/WalletVault');
+    await writeVaultField(STORAGE_KEYS.mnemonic, await crypto.encrypt(key, MNEMONIC));
   }
 
   beforeEach(async () => {
@@ -38,6 +40,7 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     crypto = await import('@/utils/crypto');
     const { useAuth } = await import('@/composables/auth');
     auth = useAuth();
+    await vi.waitFor(() => expect(auth.isMnemonicRestored.value).toBe(true));
   });
 
   afterEach(() => {
@@ -71,9 +74,12 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     const { key, exported } = await createSessionKey();
     await encryptMnemonicWith(key);
     vi.useFakeTimers();
+    const now = vi.spyOn(performance, 'now').mockReturnValue(0);
 
-    auth.syncBackgroundEncryptionKey(); // offscreen boot, nobody logged in yet
+    const initialSync = auth.syncBackgroundEncryptionKey(); // nobody logged in yet
+    now.mockReturnValue(30001);
     await vi.advanceTimersByTimeAsync(30000); // `CHECK_FOR_SESSION_KEY_TIMEOUT`
+    await initialSync;
     getSessionEncryptionKeyOffscreenMock.mockClear();
     await vi.advanceTimersByTimeAsync(60000);
     expect(getSessionEncryptionKeyOffscreenMock).not.toHaveBeenCalled();
@@ -132,6 +138,29 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalledTimes(2);
   });
 
+  it('publishes no key when this tab locks while the attempt reads the session', async () => {
+    const { key, exported } = await createSessionKey();
+    await encryptMnemonicWith(key);
+    let finishRead;
+    getSessionEncryptionKeyOffscreenMock
+      .mockReturnValueOnce(new Promise((resolve) => { finishRead = resolve; }))
+      .mockResolvedValue(exported);
+
+    const schedule = vi.spyOn(globalThis, 'setTimeout');
+    const syncing = auth.syncBackgroundEncryptionKey();
+    await vi.waitFor(() => expect(finishRead).toBeDefined());
+    await auth.logout();
+    finishRead(exported);
+    // The attempt is over once the next one is scheduled, `CHECK_FOR_SESSION_KEY_INTERVAL` later.
+    await vi.waitFor(() => expect(schedule.mock.calls.some(([, ms]) => ms > 1000)).toBe(true));
+
+    expect(getSessionEncryptionKeyOffscreenMock).toHaveBeenCalledTimes(1);
+    expect(auth.encryptionKey.value).toBeUndefined();
+    expect(auth.mnemonicDecrypted.value).toBe('');
+    auth.syncBackgroundEncryptionKey(); // ends the wait for the next attempt
+    await syncing;
+  });
+
   it('keeps the current encryptionKey object when the same key is synced again', async () => {
     const { key, exported } = await createSessionKey();
     await encryptMnemonicWith(key);
@@ -145,62 +174,39 @@ describe('useAuth().syncBackgroundEncryptionKey in the offscreen tab', () => {
     expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC);
   });
 
-  it('keeps the current key when the mnemonic is re-encrypted during an attempt', async () => {
+  it('locks on a password change in another window, then reads the data with the key it stores', async () => {
     const { STORAGE_KEYS } = await import('@/constants');
     const { WalletStorage } = await import('@/lib/WalletStorage');
+    const { commitVault, readVault } = await import('@/lib/WalletVault');
     const first = await createSessionKey();
     await encryptMnemonicWith(first.key);
     getSessionEncryptionKeyOffscreenMock.mockResolvedValue(first.exported);
     await auth.syncBackgroundEncryptionKey();
-    const firstKey = auth.encryptionKey.value;
     auth.secureLoginTimeoutDecrypted.value = '600000';
     await vi.waitFor(() => expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBeTruthy());
-    const storedTimeout = WalletStorage.get(STORAGE_KEYS.secureLoginTimeout);
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    // Password change: the new mnemonic arrives while this attempt decrypts with the old key.
+    // As that window's `setPassword`: the salt and every secret under the new key, at once.
     const second = await createSessionKey();
-    const { subtle } = globalThis.crypto;
-    const decryptOriginal = subtle.decrypt.bind(subtle);
-    vi.spyOn(subtle, 'decrypt').mockImplementationOnce(async (...args) => {
-      await encryptMnemonicWith(second.key);
-      return decryptOriginal(...args);
+    const rotatedTimeout = await crypto.encrypt(second.key, '600000');
+    const current = readVault();
+    await commitVault(current, {
+      ...current.values,
+      [STORAGE_KEYS.encryptionSalt]: crypto.encodeBase64(crypto.generateSalt()),
+      [STORAGE_KEYS.mnemonic]: await crypto.encrypt(second.key, MNEMONIC),
+      [STORAGE_KEYS.secureLoginTimeout]: rotatedTimeout,
     });
-    await auth.syncBackgroundEncryptionKey();
+    // The old key opens nothing stored any more.
+    expect(auth.encryptionKey.value).toBeUndefined();
+    expect(auth.mnemonicDecrypted.value).toBe('');
 
-    // A new object of the old key would re-encrypt the secrets under the old password.
-    expect(auth.encryptionKey.value).toBe(firstKey);
-    await new Promise((resolve) => { setTimeout(resolve, 50); });
-    expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBe(storedTimeout);
-
-    // The new key arrives: the real rotation.
+    // That window then stores its key in the session.
     getSessionEncryptionKeyOffscreenMock.mockResolvedValue(second.exported);
     await auth.syncBackgroundEncryptionKey();
-    expect(auth.encryptionKey.value).not.toBe(firstKey);
-    await vi.waitFor(async () => {
-      const stored = WalletStorage.get(STORAGE_KEYS.secureLoginTimeout);
-      expect(await crypto.decrypt(second.key, stored)).toBe('600000');
-    });
-  });
 
-  it('switches to a new key (password change) once the mnemonic is encrypted with it', async () => {
-    const first = await createSessionKey();
-    await encryptMnemonicWith(first.key);
-    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(first.exported);
-    await auth.syncBackgroundEncryptionKey();
-    const firstKey = auth.encryptionKey.value;
-
-    // The new key is published before the re-encrypted mnemonic reaches this tab.
-    const second = await createSessionKey();
-    getSessionEncryptionKeyOffscreenMock.mockResolvedValue(second.exported);
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    auth.syncBackgroundEncryptionKey();
-    await vi.waitFor(() => expect(warn).toHaveBeenCalled());
-    expect(auth.encryptionKey.value).toBe(firstKey);
-
-    await encryptMnemonicWith(second.key);
-    auth.encryptionSalt.value = crypto.generateSalt(); // synced along with the new mnemonic
-
-    await vi.waitFor(() => expect(auth.encryptionKey.value).not.toBe(firstKey));
     expect(auth.mnemonicDecrypted.value).toBe(MNEMONIC);
+    await vi.waitFor(() => expect(auth.secureLoginTimeoutDecrypted.value).toBe('600000'));
+    // Read with the new key, not stored again.
+    expect(WalletStorage.get(STORAGE_KEYS.secureLoginTimeout)).toBe(rotatedTimeout);
   });
 });

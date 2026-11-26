@@ -1,4 +1,4 @@
-import { camelCase, snakeCase } from 'lodash-es';
+import { camelCase, has, snakeCase } from 'lodash-es';
 import {
   AE_AMOUNT_FORMATS,
   Encoded,
@@ -11,7 +11,10 @@ import {
   encode,
   formatAmount,
   getTransactionSignerAddress,
+  hash as blake2b,
   isAddressValid,
+  isNameValid,
+  produceNameId,
   rebuildUnpackedTx,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -27,8 +30,11 @@ import type {
   IDexContracts,
   IGAAttachTx,
   IMultisigAccount,
+  ISuperheroContracts,
   ITransaction,
   ITx,
+  SuperheroContractType,
+  SuperheroTxAction,
   TxFunction,
   TxFunctionParsed,
   TxFunctionRaw,
@@ -40,6 +46,7 @@ import {
   errorHasValidationKey,
   includes,
   isNotFoundError,
+  toBase64Url,
 } from '@/utils';
 import {
   ACTIVITIES_TYPES,
@@ -50,8 +57,10 @@ import {
   AE_SIMPLEX_URL,
   AE_TRANSACTION_OWNERSHIP_STATUS,
   SEED_LENGTH,
+  SUPERHERO_TX_FUNCTIONS,
   TX_FUNCTIONS,
   TX_FUNCTIONS_TYPE_DEX,
+  TX_RETURN_TYPE_OK,
   TX_TAGS_SUPPORTED,
 } from '../config';
 
@@ -174,6 +183,14 @@ export function getAddressByNameEntry(nameEntry: NameEntry, pointer = 'account_p
 }
 
 /**
+ * The id of a name as the middleware spells it: as claimed, in Unicode, or in punycode,
+ * which `produceNameId` refuses.
+ */
+export function getNameIdOfSpelling(name: string): Encoded.Name {
+  return isNameValid(name) ? produceNameId(name) : encode(blake2b(name), Encoding.Name);
+}
+
+/**
  * Converts long raw values like '3280000000000000000' to human-readable 3.28
  */
 export function getAeFee(value: number | string) {
@@ -291,6 +308,24 @@ export function getTxTag({ tag, type }: ITx = {} as any): Tag | null {
   return null;
 }
 
+export interface TransactionExecutionResult {
+  returnType?: string;
+  return?: ITx['return'];
+}
+
+export function getTransactionExecutionResult(tx?: ITx): TransactionExecutionResult | undefined {
+  let currentTx = tx;
+  while (currentTx) {
+    if (currentTx.returnType && currentTx.returnType !== TX_RETURN_TYPE_OK) {
+      return currentTx;
+    }
+    const tag = getTxTag(currentTx);
+    if (tag !== Tag.PayingForTx && tag !== Tag.GaMetaTx) break;
+    currentTx = currentTx.tx?.tx as ITx | undefined;
+  }
+  return tx;
+}
+
 export function isInsufficientBalanceError(error: any) {
   return (
     error instanceof InvalidTxError
@@ -324,6 +359,49 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
     && Object.values(TX_FUNCTIONS_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
     && [...wae, ...router].includes(tx.contractId as Encoded.ContractAddress)
   );
+}
+
+export function getSuperheroTxAction(
+  transaction?: ITransaction,
+  superheroContracts?: ISuperheroContracts,
+): SuperheroTxAction | null {
+  const tx: ITx | undefined = transaction?.tx && getInnerTransaction(transaction.tx);
+
+  // An invite is redeemed with its own key, so the invitee only sees the treasury's payout.
+  // A transaction to sign has no hash yet and can name any sender.
+  if (
+    transaction?.hash
+    && tx
+    && getTxTag(tx) === Tag.SpendTx
+    && superheroContracts?.affiliation
+      .some((contractId) => contractId.replace('ct_', 'ak_') === tx.senderId)
+  ) {
+    return 'redeemInvite';
+  }
+
+  if (!tx?.contractId || !tx.function || !superheroContracts) {
+    return null;
+  }
+
+  const contractType = (Object.keys(superheroContracts) as SuperheroContractType[])
+    .find((type) => superheroContracts[type].includes(tx.contractId as Encoded.ContractAddress));
+  const functions = contractType && SUPERHERO_TX_FUNCTIONS[contractType];
+  // Not inherited names like `constructor`
+  const action = functions && has(functions, tx.function) ? functions[tx.function] : undefined;
+  if (!action) {
+    return null;
+  }
+
+  // A comment is a post whose media list starts with `comment:<parentPostId>`
+  const media = tx.arguments?.[1]?.value;
+  if (
+    action === 'post'
+    && Array.isArray(media)
+    && String(media[0]?.value ?? '').startsWith('comment:')
+  ) {
+    return 'comment';
+  }
+  return action;
 }
 
 export function validateHash(fullHash?: string) {
@@ -440,6 +518,34 @@ export async function fetchAccountNextNonce(
 }
 
 /**
+ * The recipients that can't receive coins: contracts that aren't payable, given by their
+ * `ak_`/`ct_` address or by a name pointing to one. A spend to them is never mined.
+ * A recipient whose account can't be looked up is left out.
+ */
+export async function fetchAeNotPayableRecipients(
+  api: Pick<Node, 'getAccountByPubkey' | 'getNameEntryByName'>,
+  recipients: string[],
+): Promise<string[]> {
+  const results = await Promise.all(recipients.map(async (recipient) => {
+    try {
+      // The chain resolves the name's account pointer, whatever the pointer's type
+      const address = isNameValid(recipient)
+        ? getAddressByNameEntry(await api.getNameEntryByName(recipient))
+        : recipient;
+      if (!address || !isAddressValid(address, Encoding.AccountAddress, Encoding.ContractAddress)) {
+        return false;
+      }
+      // An account the node doesn't know is created by the spend, so it is payable
+      const { payable } = await api.getAccountByPubkey(address);
+      return payable === false;
+    } catch (error) {
+      return false;
+    }
+  }));
+  return recipients.filter((_, index) => results[index]);
+}
+
+/**
  * Rebuild a transaction so that it is sent by `signerAddress` instead of the
  * account it was originally prepared for.
  *
@@ -477,4 +583,20 @@ export async function rebuildTransactionForSigner(
   }
 
   return rebuiltTx;
+}
+
+/**
+ * The claims of a JWT signed by `address`. The `sub_jwk` claim names the
+ * signer's key, replacing any the claims came with, so the token is what
+ * `unpackJwt(jwt, address)` accepts.
+ */
+export function withSubJwk(claims: Record<string, unknown>, address: Encoded.AccountAddress) {
+  return {
+    ...claims,
+    sub_jwk: {
+      kty: 'OKP',
+      crv: 'Ed25519',
+      x: toBase64Url(decode(address)),
+    },
+  };
 }

@@ -19,7 +19,7 @@
  *     imports from the same module, keeps working.
  *   - `@/composables/modals` — the real one mounts modal components.
  *   - `@/lib/logger` — telemetry side-effect, and the assertion target.
- *   - `window.open` — actual browser navigation.
+ *   - `window.open` and `location.assign` — actual browser navigation.
  */
 describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', () => {
   const routerReplace = vi.fn();
@@ -72,6 +72,60 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
+    window.opener = null;
+  });
+
+  describe('in a window with an opener', () => {
+    const locationAssign = vi.fn();
+    const callbackRoute = () => ({
+      query: { 'x-success': encodeURIComponent('https://superhero.com/callback?s={signature}') },
+    });
+
+    beforeEach(() => {
+      locationAssign.mockClear();
+      vi.stubGlobal('location', { ...window.location, assign: locationAssign });
+      window.opener = {};
+    });
+
+    it('leaves a popup with location.assign, so the callback page keeps the opener', async () => {
+      vi.useFakeTimers();
+      route = callbackRoute();
+      setup();
+
+      await (await loadApi()).openCallbackOrGoHome(true, { signature: 'SIG123' });
+      vi.runAllTimers();
+
+      expect(locationAssign).toHaveBeenCalledWith('https://superhero.com/callback?s=SIG123');
+      expect(windowOpen).not.toHaveBeenCalled();
+    });
+
+    it('leaves with window.open when the window is its own opener', async () => {
+      // As in Firefox and Safari after an earlier full-tab deep link in the same tab
+      window.opener = window;
+      vi.useFakeTimers();
+      route = callbackRoute();
+      setup();
+
+      await (await loadApi()).openCallbackOrGoHome(true, { signature: 'SIG123' });
+      vi.runAllTimers();
+
+      expect(windowOpen).toHaveBeenCalledWith('https://superhero.com/callback?s=SIG123', '_self');
+      expect(locationAssign).not.toHaveBeenCalled();
+    });
+
+    it('does not leave a popup for a rejected callback', async () => {
+      vi.useFakeTimers();
+      // eslint-disable-next-line no-script-url
+      route = { query: { 'x-success': encodeURIComponent('javascript:alert(1)') } };
+      setup();
+
+      await (await loadApi()).openCallbackOrGoHome(true);
+      vi.runAllTimers();
+
+      expect(locationAssign).not.toHaveBeenCalled();
+      expect(windowOpen).not.toHaveBeenCalled();
+    });
   });
 
   describe('rejected callbacks', () => {
@@ -342,6 +396,25 @@ describe('useDeepLinkApi.openCallbackOrGoHome — security gating (HIGH-09)', ()
   });
 
   describe('template expansion', () => {
+    it('returns the signed transaction in the fragment after callback approval', async () => {
+      vi.useFakeTimers();
+      const callbackPage = 'https://dapp.example/transaction-callback.html';
+      const state = 'payment-42';
+      const transaction = 'tx_+/8=';
+      route.query['x-success'] = `${callbackPage}#state=${state}&transaction={transaction}`;
+
+      await (await loadApi()).openCallbackOrGoHome(true, { transaction });
+      vi.runAllTimers();
+
+      expect(openConfirmModalMock).toHaveBeenCalledTimes(1);
+      expect(windowOpen).toHaveBeenCalledTimes(1);
+      const callback = new URL(windowOpen.mock.calls[0][0]);
+      expect(callback.href.split('#')[0]).toBe(callbackPage);
+      expect(Object.fromEntries(new URLSearchParams(callback.hash.slice(1)))).toEqual({
+        state, transaction,
+      });
+    });
+
     it('does not double-decode an already-decoded callback template', async () => {
       vi.useFakeTimers();
       route = {

@@ -1,5 +1,7 @@
 module.exports = {
   extends: ['@commitlint/config-conventional'],
+  // Dependabot's bodies hold long links
+  ignores: [(message) => message.includes('Signed-off-by: dependabot[bot]')],
   rules: {
     'subject-case': [
       2,

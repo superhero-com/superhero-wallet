@@ -34,6 +34,7 @@ export default defineComponent({
     option: { type: Object as PropType<IFormSelectOption>, default: () => {} },
     value: { type: [String, Number], default: null },
   },
+  emits: ['click'],
 });
 </script>
 

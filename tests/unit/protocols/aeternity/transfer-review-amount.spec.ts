@@ -2,8 +2,8 @@
  * [BLACK-BOX] The aeternity review screen signs exactly the amount the user
  * confirmed. The component, the adapter, `useAeSdk`, the SDK's spend and contract
  * calls and the wallet's signer are real; the node is stubbed at its API methods and
- * the signed transaction is read back from `postTransaction`. The account store and
- * the composables a transfer does not go through are stubbed too.
+ * the signed transaction is read back from `postTransaction`. The account store, the
+ * Ledger device and the composables a transfer does not go through are stubbed too.
  */
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import BigNumber from 'bignumber.js';
@@ -14,6 +14,7 @@ import {
   Tag,
   buildTxHash,
   decode,
+  produceNameId,
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { Encoder } from '@aeternity/aepp-calldata';
@@ -21,7 +22,7 @@ import { Encoder } from '@aeternity/aepp-calldata';
 import '@/protocols/registerAdapters';
 import TransferReview from '@/protocols/aeternity/components/TransferReview.vue';
 import TransferQRCodeGenerator from '@/popup/components/TransferQRCodeGenerator.vue';
-import { PROTOCOLS } from '@/constants';
+import { ACCOUNT_TYPES, PROTOCOLS } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { i18n } from '@/popup/plugins/i18n';
 import Logger from '@/lib/logger';
@@ -66,6 +67,12 @@ vi.mock('@/composables/accounts', async () => {
     }),
   };
 });
+
+const { ledgerSignTransaction } = vi.hoisted(() => ({ ledgerSignTransaction: vi.fn() }));
+
+vi.mock('@/composables/ledger', () => ({
+  useLedger: () => ({ signTransaction: ledgerSignTransaction }),
+}));
 
 const { generateTransactionURDataFragments } = vi.hoisted(() => ({
   generateTransactionURDataFragments: vi.fn(async () => ['ur:fragment']),
@@ -513,6 +520,62 @@ describe('aeternity TransferReview - several recipients', () => {
       { tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 6 },
       { tag: Tag.ContractCallTx, contractId: TOKEN, nonce: 7 },
     ]);
+  });
+});
+
+describe('aeternity TransferReview - contract recipient', () => {
+  const CONTRACT = MemoryAccount.generate().address.replace('ak_', 'ct_');
+
+  const NAME = 'superhero.chain';
+
+  async function sendCoins(recipient: string) {
+    const wrapper = mountReview({
+      amount: '1',
+      addresses: [recipient],
+      fee: new BigNumber('0.00002'),
+      nonce: 1,
+    });
+    await flushPromises();
+    await (wrapper.vm as any).submit();
+    return postedSpendTxs();
+  }
+
+  /** The Ledger mock signs as the device would */
+  async function sendCoinsFromLedger(recipient: string) {
+    ledgerSignTransaction.mockImplementation(
+      async (_address: string, _idx: number, tx: Encoded.Transaction) => (
+        signer.signTransaction(tx, { networkId: 'ae_uat' })
+      ),
+    );
+    const { type } = ACCOUNT;
+    ACCOUNT.type = ACCOUNT_TYPES.ledger;
+    try {
+      return await sendCoins(recipient);
+    } finally {
+      ACCOUNT.type = type;
+    }
+  }
+
+  it('sends coins to a contract address', async () => {
+    expect(await sendCoins(CONTRACT)).toMatchObject([{ recipientId: CONTRACT }]);
+  });
+
+  it('sends coins from a Ledger account to the contract\'s account address', async () => {
+    // The Ledger app refuses a spend to a contract id
+    expect(await sendCoinsFromLedger(CONTRACT))
+      .toMatchObject([{ recipientId: `ak_${CONTRACT.slice(3)}` }]);
+    expect(ledgerSignTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends coins from a Ledger account to a name as it is', async () => {
+    // The SDK checks that the name points to an account before it signs the name's id
+    vi.spyOn(Node.prototype, 'getNameEntryByName').mockResolvedValue({
+      pointers: [{ key: 'account_pubkey', id: RECIPIENT }],
+    } as any);
+
+    expect(await sendCoinsFromLedger(NAME))
+      .toMatchObject([{ recipientId: produceNameId(NAME) }]);
+    expect(ledgerSignTransaction).toHaveBeenCalledTimes(1);
   });
 });
 

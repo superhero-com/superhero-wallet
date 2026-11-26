@@ -2,7 +2,9 @@
 import { ref } from 'vue';
 
 const WALLET_PAGE = { id: 'test-extension-id', url: 'chrome-extension://test-extension-id/index.html?id=1' };
-const WEB_PAGE = { id: 'test-extension-id', url: 'https://aepp.example/', tab: { id: 1 } };
+const WEB_PAGE = {
+  id: 'test-extension-id', url: 'https://aepp.example/', frameId: 0, tab: { id: 1 },
+};
 
 describe('offscreen message listener', () => {
   const originalLocation = window.location;
@@ -14,14 +16,15 @@ describe('offscreen message listener', () => {
   };
   const handleEvmRpcRequest = vi.fn();
   const getConnectedSiteAccounts = vi.fn();
-  const wallet = { init: vi.fn(), disconnect: vi.fn() };
+  const wallet = { init: vi.fn(), disconnect: vi.fn(), handlePopupWindowRemoved: vi.fn() };
 
-  function mockOffscreenDependencies() {
+  function mockOffscreenDependencies(isFirefox = false) {
     Object.values(ledger).forEach((mock) => mock.mockReset());
     ledger.discoverAccounts.mockResolvedValue(['ledger-account']);
     handleEvmRpcRequest.mockReset().mockResolvedValue({ result: '0x1' });
     getConnectedSiteAccounts.mockReset().mockReturnValue(['0xabc']);
     wallet.disconnect.mockReset();
+    wallet.handlePopupWindowRemoved.mockReset();
 
     vi.doMock('vue', () => ({
       watch: vi.fn(),
@@ -29,8 +32,10 @@ describe('offscreen message listener', () => {
     vi.doMock('@/lib/initPolyfills', () => ({}));
     vi.doMock('@/protocols/registerAdapters', () => ({}));
     vi.doMock('@/constants', () => ({
-      IS_FIREFOX: false,
+      IS_FIREFOX: isFirefox,
+      SESSION_METHODS: { mutateSessionKey: 'mutateSessionKey' },
       POPUP_METHODS: {
+        popupWindowRemoved: 'popupWindowRemoved',
         reload: 'reload',
         ledgerDeriveAccount: 'ledgerDeriveAccount',
         ledgerDiscoverAccounts: 'ledgerDiscoverAccounts',
@@ -87,6 +92,7 @@ describe('offscreen message listener', () => {
         id: 'test-extension-id',
         getURL: (path) => `chrome-extension://test-extension-id/${path}`,
         onMessage: { addListener: vi.fn() },
+        onInstalled: { addListener: vi.fn() },
         sendMessage: vi.fn(),
       },
       tabs: {
@@ -94,6 +100,7 @@ describe('offscreen message listener', () => {
         sendMessage: vi.fn(),
       },
     };
+    browser.windows = { onRemoved: { addListener: vi.fn() } };
     Object.defineProperty(window, 'location', {
       configurable: true,
       value: { ...originalLocation, reload: vi.fn() },
@@ -120,6 +127,17 @@ describe('offscreen message listener', () => {
     expect(listener({ target: 'offscreen', method: 'unknownMethod' }, WALLET_PAGE)).toBeUndefined();
   });
 
+  it('has a Ledger sign for the network the wallet page asks for', async () => {
+    const listener = await loadListener();
+    const payload = {
+      address: 'ak_ledger', accountIndex: 1, transaction: 'tx_unsigned', networkId: 'ae_uat',
+    };
+
+    listener({ target: 'offscreen', method: 'ledgerSignTransaction', payload }, WALLET_PAGE);
+
+    expect(ledger.signTransaction).toHaveBeenCalledWith('ak_ledger', 1, 'tx_unsigned', 'ae_uat');
+  });
+
   it('still returns responses for handled offscreen messages', async () => {
     const listener = await loadListener();
 
@@ -127,6 +145,17 @@ describe('offscreen message listener', () => {
       { target: 'offscreen', method: 'ledgerDiscoverAccounts' },
       WALLET_PAGE,
     )).resolves.toEqual(['ledger-account']);
+  });
+
+  it('accepts a popup window removal only from the Chrome worker', async () => {
+    const listener = await loadListener();
+    const message = { target: 'offscreen', method: 'popupWindowRemoved', payload: 2 };
+    const worker = { id: 'test-extension-id', url: browser.runtime.getURL('js/background.js') };
+    [WEB_PAGE, WALLET_PAGE, { ...worker, tab: WEB_PAGE.tab }, { ...worker, id: 'other' }]
+      .forEach((sender) => listener(message, sender));
+    expect(wallet.handlePopupWindowRemoved).not.toHaveBeenCalled();
+    listener(message, worker);
+    expect(wallet.handlePopupWindowRemoved).toHaveBeenCalledExactlyOnceWith(2);
   });
 
   it('reloads when the wallet resets', async () => {
@@ -138,12 +167,57 @@ describe('offscreen message listener', () => {
     expect(window.location.reload).toHaveBeenCalled();
   });
 
+  describe('Firefox session mutation owner', () => {
+    const key = Buffer.alloc(32, 3).toString('base64');
+    const message = {
+      target: 'offscreen', method: 'mutateSessionKey', payload: { operation: 'set', key },
+    };
+
+    async function loadFirefoxListener() {
+      mockOffscreenDependencies(true);
+      const stored = {};
+      browser.storage = {
+        session: {
+          set: vi.fn(async (values) => { Object.assign(stored, values); }),
+          get: vi.fn(async (name) => ({ [name]: stored[name] })),
+          remove: vi.fn(async (name) => { delete stored[name]; }),
+        },
+      };
+      return { listener: await loadListener(), stored };
+    }
+
+    it('handles native window closures in the Firefox background page', async () => {
+      await loadFirefoxListener();
+      const [[onRemoved]] = browser.windows.onRemoved.addListener.mock.calls;
+      onRemoved(2);
+      expect(wallet.handlePopupWindowRemoved).toHaveBeenCalledExactlyOnceWith(2);
+    });
+
+    it('accepts a wallet page mutation and returns the persisted result', async () => {
+      const { listener, stored } = await loadFirefoxListener();
+      await expect(listener(message, WALLET_PAGE)).resolves.toEqual({ ok: true });
+      expect(Buffer.from(stored.exportedEncryptionKey).toString('base64')).toBe(key);
+    });
+
+    it('rejects a content script mutation without touching storage', async () => {
+      const { listener, stored } = await loadFirefoxListener();
+      expect(listener(message, WEB_PAGE)).toBeUndefined();
+      expect(stored).toEqual({});
+      expect(browser.storage.session.set).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed storage mutation explicitly', async () => {
+      const { listener } = await loadFirefoxListener();
+      browser.storage.session.set.mockRejectedValueOnce(new Error('Storage unavailable'));
+      await expect(listener(message, WALLET_PAGE))
+        .resolves.toEqual({ ok: false, error: 'Storage unavailable' });
+    });
+  });
+
   describe('messages a web page makes the content script relay', () => {
     /** The shape `sendToOffscreen` in `content-scripts/inject.ts` sends. */
     function relayed(method, params = {}) {
-      return {
-        target: 'offscreen', jsonrpc: '2.0', id: null, method, params,
-      };
+      return { target: 'offscreen', method, params };
     }
 
     it.each([
@@ -177,7 +251,7 @@ describe('offscreen message listener', () => {
         undefined,
         undefined,
         undefined,
-        WEB_PAGE.tab.id,
+        { tabId: WEB_PAGE.tab.id, topLevelOrigin: 'https://aepp.example' },
       );
     });
 
@@ -192,10 +266,14 @@ describe('offscreen message listener', () => {
       expect(handleEvmRpcRequest).not.toHaveBeenCalled();
     });
 
-    it('takes the origin and the tab from the sender, not from the message', async () => {
+    it.each([
+      ['https://embedding.example/checkout', 'https://embedding.example'],
+      ['about:blank', undefined],
+      [undefined, undefined],
+    ])('uses the frame identity and the embedding tab at %s', async (url, topLevelOrigin) => {
       const listener = await loadListener();
-
-      await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), WEB_PAGE);
+      const sender = { ...WEB_PAGE, frameId: 1, tab: { id: 1, url } };
+      await listener(relayed('eth_requestAccounts', { aepp: 'https://aescan.io' }), sender);
 
       expect(handleEvmRpcRequest).toHaveBeenCalledWith(
         'https://aepp.example',
@@ -205,7 +283,7 @@ describe('offscreen message listener', () => {
         undefined,
         undefined,
         undefined,
-        WEB_PAGE.tab.id,
+        { tabId: WEB_PAGE.tab.id, topLevelOrigin },
       );
     });
   });

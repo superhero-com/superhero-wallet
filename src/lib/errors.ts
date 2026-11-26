@@ -1,5 +1,12 @@
 /* eslint-disable max-classes-per-file */
 
+export class ApprovalWindowError extends Error {
+  constructor() {
+    super('Could not open the approval window');
+    this.name = this.constructor.name;
+  }
+}
+
 export class RejectedByUserError extends Error {
   constructor() {
     super('Rejected by user');
@@ -11,6 +18,31 @@ export class RejectedByUserError extends Error {
 export class StoredWalletFoundError extends Error {
   constructor() {
     super('A wallet is still stored on this device');
+    this.name = this.constructor.name;
+  }
+}
+
+/** A migrated value couldn't be stored and is kept in memory: `retry` stores it again. */
+export class StorageMigrationWriteError extends Error {
+  storageKey: string;
+
+  cause: unknown;
+
+  retry: () => Promise<void>;
+
+  constructor(storageKey: string, cause: unknown, retry: () => Promise<void>) {
+    super(`Saving the updated "${storageKey}" failed`);
+    this.name = this.constructor.name;
+    this.storageKey = storageKey;
+    this.cause = cause;
+    this.retry = retry;
+  }
+}
+
+/** The password entered doesn't open the wallet; other failures leave it unanswered. */
+export class WrongPasswordError extends Error {
+  constructor() {
+    super('The password is incorrect');
     this.name = this.constructor.name;
   }
 }

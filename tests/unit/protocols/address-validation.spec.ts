@@ -68,3 +68,42 @@ describe.each([
     expect(adapter.isAccountAddressValid(address, networkType)).toBe(isValid);
   });
 });
+
+describe.each([
+  PROTOCOLS.ethereum,
+  PROTOCOLS.bnb,
+  PROTOCOLS.avalanche,
+  PROTOCOLS.polygonPos,
+])('%s address normalization', (protocol) => {
+  const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+
+  it.each([
+    ['a checksummed address', EVM_ADDRESS],
+    ['an all lowercase address', EVM_ADDRESS.toLowerCase()],
+    ['an all uppercase address', `0x${EVM_ADDRESS.slice(2).toUpperCase()}`],
+    ['an address without 0x', EVM_ADDRESS.slice(2).toLowerCase()],
+    ['an address with 0X', `0X${EVM_ADDRESS.slice(2)}`],
+  ])('checksums %s, %s', (_, address) => {
+    expect(adapter.isAccountAddressValid(address)).toBe(true);
+    expect(adapter.normalizeAddress(address)).toBe(EVM_ADDRESS);
+  });
+
+  it.each([
+    ['a mixed case address with a wrong checksum', '0x909c407d6FD235DE14db97e2234fCB71E99d6E1c'],
+    ['an address one byte short', EVM_ADDRESS.slice(0, -2)],
+    ['an aeternity address', AE_ADDRESS],
+    ['an empty value', ''],
+    ['no value', undefined],
+  ])('keeps %s, %s', (_, value) => {
+    expect(adapter.normalizeAddress(value)).toBe(value);
+  });
+});
+
+it.each([
+  [PROTOCOLS.aeternity, AE_ADDRESS],
+  [PROTOCOLS.bitcoin, 'BC1QQURSWPC8QURSWPC8QURSWPC8QURSWPC89FE3YV'],
+  [PROTOCOLS.dogecoin, 'D5nFgspqgExJFLXP8prT1EfEqxAGsqmeNU'],
+  [PROTOCOLS.solana, 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'],
+])('keeps a %s address as it is', (protocol, address) => {
+  expect(ProtocolAdapterFactory.getAdapter(protocol).normalizeAddress(address)).toBe(address);
+});

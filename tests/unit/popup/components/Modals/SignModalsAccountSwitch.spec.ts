@@ -233,7 +233,6 @@ describe('ConfirmRawSign account switcher', () => {
           NoOriginWarning: true,
           DetailsItem: true,
           CopyText: true,
-          BtnMain: true,
           Warning: true,
         },
       },
@@ -250,20 +249,17 @@ describe('ConfirmRawSign account switcher', () => {
 
   it('blocks confirming a switch until the user opts into rebuilding', async () => {
     const wrapper = mountRawSign(buildSpendTxFor(ADDRESS_PREPARED));
+    const accept = wrapper.get<HTMLButtonElement>('[data-cy="accept"]');
 
     await wrapper.findComponent(SignAccountSelectStub).vm.$emit('select', accountActive);
-    expect((wrapper.vm as any).canSignWithSelectedAccount).toBe(false);
+    expect(accept.attributes('aria-disabled')).toBe('true');
+    accept.element.click();
+    expect(setActiveAccountByAddressAndProtocol).not.toHaveBeenCalled();
+    expect(resolve).not.toHaveBeenCalled();
 
     await wrapper.find('[data-cy="rebuild-for-signer"]').trigger('click');
-    expect((wrapper.vm as any).canSignWithSelectedAccount).toBe(true);
-  });
-
-  it('resolves with the rebuild opt-in for the signer to act on', async () => {
-    const wrapper = mountRawSign(buildSpendTxFor(ADDRESS_PREPARED));
-
-    await wrapper.findComponent(SignAccountSelectStub).vm.$emit('select', accountActive);
-    await wrapper.find('[data-cy="rebuild-for-signer"]').trigger('click');
-    await (wrapper.vm as any).confirm();
+    expect(accept.attributes('aria-disabled')).toBeUndefined();
+    accept.element.click();
 
     expect(resolve).toHaveBeenCalledWith(expect.objectContaining({
       selectedAddress: ADDRESS_ACTIVE,

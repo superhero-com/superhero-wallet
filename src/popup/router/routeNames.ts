@@ -18,12 +18,15 @@ export const ROUTE_MULTISIG_DETAILS_INFO = 'multisig-account-details-info';
 export const ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS = 'account-details-multisig-proposal-details';
 export const ROUTE_MULTISIG_DETAILS_ASSETS = 'multisig-account-details-assets';
 export const ROUTE_TX_DETAILS = 'tx-details';
+export const ROUTE_ACCOUNT_TX_DETAILS = 'account-tx-details';
 export const ROUTE_MORE = 'more';
 export const ROUTE_NOTIFICATIONS = 'notifications';
 export const ROUTE_COIN = 'coin';
 export const ROUTE_COIN_DETAILS = 'coin-details';
 export const ROUTE_TOKEN = 'token';
 export const ROUTE_TOKEN_DETAILS = 'token-details';
+export const ROUTE_COIN_TX_DETAILS = 'coin-tx-details';
+export const ROUTE_TOKEN_TX_DETAILS = 'token-tx-details';
 export const ROUTE_NOT_FOUND = 'not-found';
 export const ROUTE_NETWORK_SETTINGS = 'network-settings';
 export const ROUTE_NETWORK_ADD = 'network-add';
@@ -54,6 +57,7 @@ export const ROUTE_SEED_PHRASE_DETAILS = 'settings-seed-phrase-details';
  * Popup pages
  */
 export const ROUTE_POPUP_CONNECT = 'connect';
+export const ROUTE_POPUP_NETWORK_SWITCH = 'popup-network-switch';
 export const ROUTE_POPUP_SIGN_TX = 'popup-sign-tx';
 export const ROUTE_POPUP_ACCOUNT_LIST = 'account-list';
 export const ROUTE_POPUP_RAW_SIGN = 'popup-raw-sign';

@@ -59,7 +59,6 @@ import {
   IonPage,
   useBackButton,
 } from '@ionic/vue';
-import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import {
   computed,
@@ -87,7 +86,7 @@ import {
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
 } from '@/constants';
-import { setMobileStatusBarColor } from '@/utils/systemBars';
+import { hideSplashScreen, setMobileStatusBarColor } from '@/utils/systemBars';
 import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
@@ -151,7 +150,7 @@ export default defineComponent({
     useInvites();
 
     const innerElement = ref<HTMLDivElement>();
-    const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
+    const routeMeta = computed(() => route.meta as WalletRouteMeta | undefined);
 
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -271,7 +270,7 @@ export default defineComponent({
           StatusBar.setOverlaysWebView({ overlay: false });
         }
         StatusBar.setStyle({ style: Style.Dark });
-        setMobileStatusBarColor(IS_ANDROID ? '#000000' : '#141414');
+        setMobileStatusBarColor('#141414');
         // iOS uses Info.plist: portrait on iPhone, all orientations on iPad.
         if (IS_ANDROID) {
           window.screen.orientation?.lock?.('portrait');
@@ -288,13 +287,7 @@ export default defineComponent({
       // Hide splash screen programmatically when app is ready
       // to avoid white screen on app start
       if (IS_MOBILE_APP) {
-        setTimeout(() => {
-          SplashScreen.hide({
-            fadeOutDuration: 300,
-          }).finally(() => {
-            setMobileStatusBarColor('#141414');
-          });
-        }, 2000);
+        setTimeout(hideSplashScreen, 2000);
       }
 
       if (!RUNNING_IN_POPUP) {

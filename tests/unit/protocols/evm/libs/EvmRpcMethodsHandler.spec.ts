@@ -796,10 +796,19 @@ describe('handleEvmRpcMethod', () => {
       expect(checkOrAskPermission).toHaveBeenCalledOnce();
     });
 
-    it('rejects a request without a message without asking', async () => {
-      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { address: SIGNER.address });
+    it.each([undefined, ''])('rejects a request with the message %j without asking', async (data) => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data, address: SIGNER.address });
       expect(response.error?.code).toBe(-32602);
       expect(checkOrAskPermission).not.toHaveBeenCalled();
+    });
+
+    // What ethers and viem send for an empty message, and MetaMask lets through
+    it('signs "0x" as an empty message', async () => {
+      const response = await handleEvmRpcMethod(DAPP, 'personal_sign', { data: '0x', address: SIGNER.address });
+
+      // EIP-191 of no bytes, by @noble/curves
+      expect(response.result).toBe('0x68c36703cfae77b264e66cf9587aa39dd76b66ff1317e563b4566d9ea5d8d60e5b9be8c58a324e1dbb424365aa778a2faec2d3f922bf0339cda43d76c492a5ab1c');
+      expect(checkOrAskPermission).toHaveBeenCalledOnce();
     });
 
     it('returns the rejection of the user', async () => {
@@ -873,6 +882,12 @@ describe('handleEvmRpcMethod', () => {
       expect(response).toEqual({ result: PERMIT_SIGNATURE });
       expect(JSON.parse(checkOrAskPermission.mock.calls[0][2].message)).toEqual({
         primaryType: permit.primaryType, domain: permit.domain, message: permit.message,
+      });
+      expect(checkOrAskPermission.mock.calls[0][2].evmTypedData).toEqual({
+        types: permit.types,
+        primaryType: permit.primaryType,
+        domain: permit.domain,
+        message: permit.message,
       });
     });
 
@@ -1003,7 +1018,7 @@ describe('handleEvmRpcMethod', () => {
   });
 
   describe('from a browser tab', () => {
-    const TAB_ID = 5;
+    const sourceTab = { tabId: 5, topLevelOrigin: 'https://host.example' };
 
     it.each([
       ['eth_requestAccounts', {}, METHODS.subscribeAddress],
@@ -1019,11 +1034,11 @@ describe('handleEvmRpcMethod', () => {
         undefined,
         undefined,
         undefined,
-        TAB_ID,
+        sourceTab,
       );
 
       expect(checkOrAskPermission.mock.calls[0].slice(0, 3))
-        .toEqual([permissionMethod, DAPP, expect.objectContaining({ tabId: TAB_ID })]);
+        .toEqual([permissionMethod, DAPP, expect.objectContaining(sourceTab)]);
     });
 
     it('tells the prompt of a chain switch the tab', async () => {
@@ -1040,10 +1055,10 @@ describe('handleEvmRpcMethod', () => {
           undefined,
           undefined,
           undefined,
-          TAB_ID,
+          sourceTab,
         );
 
-        expect(askPermission.mock.calls[0][2]).toMatchObject({ tabId: TAB_ID });
+        expect(askPermission.mock.calls[0][2]).toMatchObject(sourceTab);
       } finally {
         activeProtocol.value = 'ethereum';
       }
@@ -1078,10 +1093,30 @@ describe('handleEvmRpcRequest', () => {
     vi.unstubAllGlobals();
   });
 
-  it('tells the prompt the tab of the request', async () => {
-    await handleEvmRpcRequest(DAPP, 'eth_requestAccounts', [], undefined, undefined, undefined, undefined, 5);
+  it('releases a denied connection while locked so another site can connect', async () => {
+    activeProtocol.value = undefined;
+    checkOrAskPermission
+      .mockResolvedValueOnce(false)
+      .mockImplementationOnce(async () => {
+        activeProtocol.value = 'ethereum';
+        return true;
+      });
+    try {
+      const denied = handleEvmRpcRequest(STRANGER, 'eth_requestAccounts', []);
+      const approved = handleEvmRpcRequest(DAPP, 'eth_requestAccounts', []);
+      await vi.waitFor(() => expect(checkOrAskPermission).toHaveBeenCalledTimes(2));
+      expect(await denied).toMatchObject({ error: { code: 4001 } });
+      expect(await approved).toEqual({ result: [SIGNER.address] });
+    } finally {
+      activeProtocol.value = 'ethereum';
+    }
+  });
 
-    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ tabId: 5 });
+  it('tells the prompt the tab of the request', async () => {
+    const sourceTab = { tabId: 5, topLevelOrigin: 'https://host.example' };
+    await handleEvmRpcRequest(DAPP, 'eth_requestAccounts', [], undefined, undefined, undefined, undefined, sourceTab);
+
+    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject(sourceTab);
   });
 
   it('passes a request that reads the chain to its node as is', async () => {

@@ -4,10 +4,11 @@ import {
   Encoded,
 } from '@aeternity/aepp-sdk';
 import type { AccountAddress, IInvite, IInviteSerialized } from '@/types';
-import { STORAGE_KEYS } from '@/constants';
+import { IS_MOBILE_APP, STORAGE_KEYS } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import { WalletStorage } from '@/lib/WalletStorage';
+import { updateVaultSecret, VaultSecretUnreadableError } from '@/lib/WalletVault';
 import {
   createCustomScopedComposable,
   decrypt,
@@ -78,8 +79,38 @@ const useInvitesStorage = createCustomScopedComposable(() => {
     }
   }
 
+  async function updateStoredInvites(
+    key: CryptoKey,
+    update: (plaintext: string | null) => string,
+  ) {
+    try {
+      return await updateVaultSecret(STORAGE_KEYS.invitesEncrypted, key, update, () => {
+        if (encryptionKey.value && encryptionKey.value !== key) {
+          throw new Error('The password changed while storing the invites');
+        }
+        checkKeyIsCurrent();
+      });
+    } catch (error) {
+      if (error instanceof VaultSecretUnreadableError) {
+        throw new Error('The stored invites are unreadable');
+      }
+      throw error;
+    }
+  }
+
   /** A lock meanwhile doesn't stop it: the stored salt still derives the key. */
   async function storeInvites(key: CryptoKey, updatedInvites: IInvite[]) {
+    if (!IS_MOBILE_APP) {
+      await updateStoredInvites(key, (plaintext) => {
+        const stored = plaintext ? parseInvites(JSON.parse(plaintext)) : [];
+        const merged = [...stored, ...updatedInvites.filter(({ secretKey }) => (
+          !stored.some((invite) => isSameKey(invite.secretKey, secretKey))
+        ))];
+        return JSON.stringify(serializeInvites(merged));
+      });
+      if (encryptionKey.value === key) showInvites(await readInvites(key));
+      return;
+    }
     const ciphertext = await encrypt(key, JSON.stringify(serializeInvites(updatedInvites)));
     if (encryptionKey.value && encryptionKey.value !== key) {
       throw new Error('The password changed while storing the invites');
@@ -97,6 +128,15 @@ const useInvitesStorage = createCustomScopedComposable(() => {
       const key = encryptionKey.value;
       if (!key) {
         throw new Error('The invites can\'t be stored while the wallet is locked');
+      }
+      if (!IS_MOBILE_APP) {
+        let updatedInvites: IInvite[] = [];
+        await updateStoredInvites(key, (plaintext) => {
+          updatedInvites = update(plaintext ? parseInvites(JSON.parse(plaintext)) : []);
+          return JSON.stringify(serializeInvites(updatedInvites));
+        });
+        if (encryptionKey.value === key) showInvites(updatedInvites);
+        return;
       }
       await storeInvites(key, update(await readInvites(key)));
     });
@@ -159,23 +199,13 @@ const useInvitesStorage = createCustomScopedComposable(() => {
     }
   }
 
-  watch(encryptionKey, (key, previousKey) => {
+  watch(encryptionKey, (key) => {
     if (!key) {
       invites.value = [];
       return;
     }
     enqueue(async () => {
-      let storedInvites: IInvite[];
-      try {
-        storedInvites = await readInvites(key);
-      } catch (error) {
-        // The password changed here: the invites are still under the previous key.
-        if (!previousKey) {
-          throw error;
-        }
-        storedInvites = await readInvites(previousKey);
-        await storeInvites(key, storedInvites);
-      }
+      const storedInvites = await readInvites(key);
       if (encryptionKey.value === key) {
         showInvites(storedInvites);
         await moveLegacyInvites(key);

@@ -67,12 +67,16 @@ async function waitForRemoval(page: Page, selector: string) {
 const isPopup = (target: Target, extensionId: string) => target.url()
   .startsWith(`chrome-extension://${extensionId}/index.html?id=`);
 
+// The dapp can get its answer before the answered popup has closed
+const returnedPopups = new WeakSet<Target>();
+
 /** The confirmation window the wallet opens for a dapp request. */
 export async function waitForPopup(browser: Browser, extensionId: string) {
   const target = await browser.waitForTarget(
-    (t) => isPopup(t, extensionId),
+    (t) => isPopup(t, extensionId) && !returnedPopups.has(t),
     { timeout: 30000 },
   );
+  returnedPopups.add(target);
   return (await target.asPage())!;
 }
 

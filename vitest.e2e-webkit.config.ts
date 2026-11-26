@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 
-// Layout checks in Playwright's WebKit (`npm run test:e2e:webkit`); not part of the unit run.
+// iOS checks in Playwright's WebKit (`npm run test:e2e:webkit`); not part of the unit run.
 export default defineConfig({
   test: {
     environment: 'node',

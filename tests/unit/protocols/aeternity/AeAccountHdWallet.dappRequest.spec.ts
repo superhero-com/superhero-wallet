@@ -1,16 +1,20 @@
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
 import {
   AccountMemory,
   DelegationTag,
   Encoded,
   Encoding,
   METHODS,
+  RpcInternalError,
+  RpcInvalidTransactionError,
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   Tag,
   decode,
   encode,
   packDelegation,
+  produceNameId,
+  verifyMessageSignature,
 } from '@aeternity/aepp-sdk';
 
 import { useAccounts } from '@/composables/accounts';
@@ -54,14 +58,17 @@ vi.mock('@/composables', () => ({
   useAeSdk: vi.fn(),
   useLedger: vi.fn(() => ({ signTransaction: vi.fn(), signMessage: vi.fn() })),
 }));
+const { fetchNameByHash } = vi.hoisted(() => ({ fetchNameByHash: vi.fn() }));
 vi.mock('@/protocols/aeternity/composables', () => ({
-  useAeMiddleware: vi.fn(() => ({ getMiddleware: vi.fn() })),
+  useAeMiddleware: vi.fn(() => ({ fetchNameByHash })),
 }));
 
 let sdk: typeof import('@aeternity/aepp-sdk');
 let AeAccountHdWallet: typeof import('@/protocols/aeternity/libs/AeAccountHdWallet').AeAccountHdWallet;
+let NODE_SWITCH_TIMEOUT: number;
 let checkOrAskPermission: ReturnType<typeof vi.fn>;
 let superSignTransaction: any;
+let isAeSdkUpdating: Ref<boolean>;
 
 const buildSpendTx = () => sdk.buildTx({
   tag: Tag.SpendTx,
@@ -103,14 +110,16 @@ beforeEach(async () => {
       ),
     ),
   });
+  isAeSdkUpdating = ref(false);
   // @ts-ignore
   (useAeSdk as vi.Mock).mockReturnValue({
     ensureNodeNetworkId: vi.fn(),
+    isAeSdkUpdating,
     getAeSdk: vi.fn(async () => ({ api: {} })),
     // The aepps the user let see the accounts
     isAeppGivenAccounts: (id: string) => id === 'subscribed',
     // Of the browser tab of the aepp
-    getAeppTabId: (id: string) => (id === 'subscribed' ? 5 : undefined),
+    getAeppSourceTab: (id: string) => (id === 'subscribed' ? { tabId: 5, topLevelOrigin: 'https://host.example' } : {}),
   });
 
   // `AeAccountHdWallet` is pulled in by `registerAdapters` (a setup file)
@@ -118,7 +127,7 @@ beforeEach(async () => {
   // alongside it so the spy lands on the class the fresh module extends.
   vi.resetModules();
   sdk = await import('@aeternity/aepp-sdk');
-  ({ AeAccountHdWallet } = await import('@/protocols/aeternity/libs/AeAccountHdWallet'));
+  ({ AeAccountHdWallet, NODE_SWITCH_TIMEOUT } = await import('@/protocols/aeternity/libs/AeAccountHdWallet'));
 
   superSignTransaction = vi
     .spyOn(sdk.MemoryAccount.prototype, 'signTransaction')
@@ -157,6 +166,45 @@ describe('signTransaction', () => {
     expect(checkOrAskPermission).not.toHaveBeenCalled();
     expect(superSignTransaction).toHaveBeenCalledTimes(1);
   });
+
+  // Every signer would fail on these, but only after the prompt
+  it.each([
+    ['no transaction', undefined],
+    ['an empty string', ''],
+    ['"undefined"', 'undefined'],
+    ['no payload', 'tx_'],
+    ['a bad checksum', `tx_${Buffer.from('no checksum').toString('base64')}`],
+    ['zero bytes', encode(new Uint8Array(), Encoding.Transaction)],
+  ])('rejects %s without asking', async (_, tx) => {
+    await expect(wallet().signTransaction(tx as any, { aeppOrigin: DAPP_ORIGIN } as any))
+      .rejects.toBeInstanceOf(RpcInvalidTransactionError);
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(superSignTransaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects one before an Air Gap account opens its signing modal', async () => {
+    const airGapAccount = { ...accountActive, type: 'airgap', secretKey: undefined };
+    // @ts-ignore
+    (useAccounts as vi.Mock).mockReturnValue({
+      aeAccounts: ref([airGapAccount]),
+      getLastActiveProtocolAccount: vi.fn(() => airGapAccount),
+    });
+
+    // The modal would answer instead
+    await expect(wallet().signTransaction('' as any, { aeppOrigin: DAPP_ORIGIN } as any))
+      .rejects.toBeInstanceOf(RpcInvalidTransactionError);
+  });
+
+  it('asks about bytes that decode but do not unpack, to sign them raw', async () => {
+    await wallet().signTransaction(
+      encode(Buffer.from('not rlp'), Encoding.Transaction),
+      { aeppOrigin: DAPP_ORIGIN } as any,
+    );
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(checkOrAskPermission.mock.calls[0][2].tx).toBeUndefined();
+    expect(superSignTransaction).toHaveBeenCalledOnce();
+  });
 });
 
 describe('signMessage', () => {
@@ -181,6 +229,40 @@ describe('signMessage', () => {
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
   });
+
+  // Anything but a string would be shown as JSON and signed as bytes, [72, 105] as "Hi"
+  it.each([
+    ['an empty string', ''],
+    ['no message', undefined],
+    ['null', null],
+    ['a number', 5],
+    ['an array', [72, 105]],
+    ['bytes', new Uint8Array([72, 105])],
+  ])('rejects %s from an aepp without asking', async (_, message) => {
+    await expect(wallet().signMessage(message as any, {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any)).rejects.toBeInstanceOf(RpcInternalError);
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+
+  it('signs the text of an aepp after asking', async () => {
+    const signature = await wallet().signMessage('Hi', {
+      aeppOrigin: DAPP_ORIGIN, aeppRpcClientId: 'subscribed',
+    } as any);
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(verifyMessageSignature('Hi', signature, ADDRESS_ACTIVE)).toBe(true);
+  });
+
+  // A hex deep link passes a Buffer and no options, so it's asked about only in a framed
+  // wallet, for which the origin stands in here
+  it('signs the bytes of a request without an RPC client', async () => {
+    const signature = await wallet()
+      .signMessage(Buffer.from('Hi') as any, { aeppOrigin: DAPP_ORIGIN } as any);
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(verifyMessageSignature('Hi', signature, ADDRESS_ACTIVE)).toBe(true);
+  });
 });
 
 describe('signDelegation', () => {
@@ -204,6 +286,231 @@ describe('signDelegation', () => {
     await wallet().signDelegation(delegation, {});
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+
+  describe('of a name', () => {
+    const nameId = produceNameId('delegated.chain');
+    const nameDelegation = packDelegation({
+      tag: DelegationTag.AensName,
+      accountAddress: ADDRESS_ACTIVE as Encoded.AccountAddress,
+      contractAddress: encode(new Uint8Array(32), Encoding.ContractAddress),
+      nameId,
+    });
+
+    it('names the name in the prompt', async () => {
+      fetchNameByHash.mockResolvedValueOnce('delegated.chain');
+
+      await wallet().signDelegation(nameDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+      expect(fetchNameByHash).toHaveBeenCalledWith(nameId);
+      expect(checkOrAskPermission.mock.calls[0][2].message)
+        .toMatch(/^sign delegation of delegated\.chain to ct_/);
+    });
+
+    // As spelled in Unicode or ASCII, and in punycode, which takes the other check
+    it.each(['other.chain', 'xn--fiq228c.chain'])(
+      'shows the name hash when the middleware names another name, %s',
+      async (otherName) => {
+        fetchNameByHash.mockResolvedValueOnce(otherName);
+
+        await wallet().signDelegation(nameDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+        const { message } = checkOrAskPermission.mock.calls[0][2];
+        expect(message).toMatch(new RegExp(`^sign delegation of ${nameId} to ct_`));
+        expect(message).not.toContain(otherName);
+      },
+    );
+
+    it.each([
+      ['in Unicode', 'rozciągnikmchuś77.chain'],
+      ['in punycode', 'xn--rozcignikmchu77-7zb48l.chain'],
+    ])('names a non-ASCII name the middleware spells %s', async (_, spelling) => {
+      // The middleware answers with the spelling the name was claimed in
+      fetchNameByHash.mockResolvedValueOnce(spelling);
+      const idnDelegation = packDelegation({
+        tag: DelegationTag.AensName,
+        accountAddress: ADDRESS_ACTIVE as Encoded.AccountAddress,
+        contractAddress: encode(new Uint8Array(32), Encoding.ContractAddress),
+        nameId: produceNameId('rozciągnikmchuś77.chain'),
+      });
+
+      await wallet().signDelegation(idnDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+      expect(checkOrAskPermission.mock.calls[0][2].message)
+        .toContain(`sign delegation of ${spelling} to ct_`);
+    });
+
+    it('shows the name hash when the name can\'t be looked up', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      onTestFinished(() => warn.mockRestore());
+      fetchNameByHash.mockRejectedValueOnce(new Error('Failed to fetch'));
+
+      await wallet().signDelegation(nameDelegation, { aeppOrigin: DAPP_ORIGIN } as any);
+
+      expect(checkOrAskPermission.mock.calls[0][2].message)
+        .toMatch(new RegExp(`^sign delegation of ${nameId} to ct_`));
+    });
+  });
+});
+
+describe('a network switched while the prompt is open', () => {
+  let signDelegation: any;
+  let nodeNetworkId: Ref<string | undefined>;
+
+  beforeEach(() => {
+    nodeNetworkId = ref('ae_uat');
+    signDelegation = vi
+      .spyOn(sdk.MemoryAccount.prototype, 'signDelegation')
+      .mockResolvedValue('sg_signed' as Encoded.Signature);
+  });
+
+  afterEach(() => signDelegation.mockRestore());
+
+  /** A wallet on Testnet whose network becomes `networkId` while its prompt is open */
+  function walletSwitchedTo(networkId: string) {
+    checkOrAskPermission = vi.fn(async () => {
+      // E.g. a site's `wallet_switchEthereumChain` meanwhile
+      nodeNetworkId.value = networkId;
+      return true;
+    });
+    // @ts-ignore
+    (usePermissions as vi.Mock).mockReturnValue({ checkOrAskPermission });
+    return new AeAccountHdWallet(nodeNetworkId);
+  }
+
+  const requests = [
+    ['a spend', (account: any) => account.signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN }), 'tx_signed'],
+    ['a delegation', (account: any) => account.signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN }), 'sg_signed'],
+  ] as const;
+
+  it.each(requests)('rejects %s', async (_, sign) => {
+    await expect(sign(walletSwitchedTo('ae_mainnet')))
+      .rejects.toBeInstanceOf(RpcRejectedByUserError);
+    expect(superSignTransaction).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
+  });
+
+  it.each(requests)('signs %s when the network stayed', async (_, sign, signed) => {
+    await expect(sign(walletSwitchedTo('ae_uat'))).resolves.toBe(signed);
+  });
+
+  it.each(requests)('rejects %s while a switch begun meanwhile waits for its node', async (_, sign) => {
+    checkOrAskPermission = vi.fn(async () => {
+      isAeSdkUpdating.value = true;
+      return true;
+    });
+    // @ts-ignore
+    (usePermissions as vi.Mock).mockReturnValue({ checkOrAskPermission });
+
+    await expect(sign(new AeAccountHdWallet(nodeNetworkId)))
+      .rejects.toBeInstanceOf(RpcRejectedByUserError);
+    expect(superSignTransaction).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
+  });
+
+  describe('whose id the request recovers', () => {
+    // E.g. the first status request failed as the browser started offline
+    beforeEach(() => {
+      nodeNetworkId.value = undefined;
+      // @ts-ignore
+      (useAeSdk as vi.Mock).mockReturnValue({
+        ...(useAeSdk as any)(),
+        ensureNodeNetworkId: vi.fn(async () => { nodeNetworkId.value = 'ae_uat'; }),
+      });
+    });
+
+    it('rejects a delegation', async () => {
+      await expect(walletSwitchedTo('ae_mainnet')
+        .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
+        .rejects.toBeInstanceOf(RpcRejectedByUserError);
+      expect(signDelegation).not.toHaveBeenCalled();
+    });
+
+    it('signs a delegation for that network when it stayed', async () => {
+      await expect(walletSwitchedTo('ae_uat')
+        .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
+        .resolves.toBe('sg_signed');
+      expect(signDelegation).toHaveBeenCalledWith(delegation, { networkId: 'ae_uat' });
+    });
+  });
+
+  it('rejects a delegation without asking when no network is known', async () => {
+    nodeNetworkId.value = undefined;
+
+    await expect(walletSwitchedTo('ae_uat')
+      .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any))
+      .rejects.toThrow('Not connected to any network');
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
+  });
+});
+
+describe('a request that came while the network switched', () => {
+  let signDelegation: any;
+  let nodeNetworkId: Ref<string | undefined>;
+
+  beforeEach(() => {
+    // The previous network's id stays until the new node answers
+    nodeNetworkId = ref('ae_mainnet');
+    isAeSdkUpdating.value = true;
+    signDelegation = vi
+      .spyOn(sdk.MemoryAccount.prototype, 'signDelegation')
+      .mockResolvedValue('sg_signed' as Encoded.Signature);
+  });
+
+  afterEach(() => {
+    signDelegation.mockRestore();
+    vi.useRealTimers();
+  });
+
+  const nextTask = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+
+  async function settleSwitch(networkId: string) {
+    await nextTask();
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    nodeNetworkId.value = networkId;
+    isAeSdkUpdating.value = false;
+  }
+
+  it('asks about a spend once the new node answered, and signs it for that network', async () => {
+    const signing = new AeAccountHdWallet(nodeNetworkId)
+      .signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN } as any);
+    await settleSwitch('ae_uat');
+
+    await expect(signing).resolves.toBe('tx_signed');
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(superSignTransaction)
+      .toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ networkId: 'ae_uat' }));
+  });
+
+  it.each([
+    ['the previous network', 'ae_mainnet'],
+    ['the connecting node', undefined],
+  ])('asks about a delegation once the switch from %s settled, and signs it for the new one', async (_, previousId) => {
+    nodeNetworkId.value = previousId;
+    const signing = new AeAccountHdWallet(nodeNetworkId)
+      .signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN } as any);
+    await settleSwitch('ae_uat');
+
+    await expect(signing).resolves.toBe('sg_signed');
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(signDelegation).toHaveBeenCalledWith(delegation, { networkId: 'ae_uat' });
+  });
+
+  it.each([
+    ['a spend', (account: any) => account.signTransaction(buildSpendTx(), { aeppOrigin: DAPP_ORIGIN })],
+    ['a delegation', (account: any) => account.signDelegation(delegation, { aeppOrigin: DAPP_ORIGIN })],
+  ] as const)('rejects %s without asking when the new node never answers', async (_, sign) => {
+    vi.useFakeTimers();
+    const signing = sign(new AeAccountHdWallet(nodeNetworkId));
+    const rejection = expect(signing).rejects.toThrow('Not connected to any network');
+
+    await vi.advanceTimersByTimeAsync(NODE_SWITCH_TIMEOUT);
+
+    await rejection;
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(superSignTransaction).not.toHaveBeenCalled();
+    expect(signDelegation).not.toHaveBeenCalled();
   });
 });
 
@@ -238,6 +545,12 @@ describe('unsafeSign', () => {
   it("signs the wallet's own data without an extra prompt", async () => {
     await wallet().unsafeSign(data, {});
 
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
+
+  it('rejects zero bytes from a dapp without asking', async () => {
+    await expect(wallet().unsafeSign(new Uint8Array(), { aeppOrigin: DAPP_ORIGIN }))
+      .rejects.toBeInstanceOf(RpcInternalError);
     expect(checkOrAskPermission).not.toHaveBeenCalled();
   });
 });
@@ -303,7 +616,7 @@ describe('a request of an aepp in a browser tab', () => {
     // Signing itself is not what this is about
     await sign().catch(() => {});
 
-    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ tabId: 5 });
+    expect(checkOrAskPermission.mock.calls[0][2]).toMatchObject({ tabId: 5, topLevelOrigin: 'https://host.example' });
   });
 });
 

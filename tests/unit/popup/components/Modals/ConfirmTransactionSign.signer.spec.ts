@@ -17,6 +17,7 @@ import {
 
 import type { IAppData } from '@/types';
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
+import RecipientDetails from '@/popup/components/TransferSend/RecipientDetails.vue';
 import {
   useAccounts,
   useAeSdk,
@@ -252,7 +253,7 @@ function mountModal(
     isTokenSaleFactory: computed(() => false),
     txFunctionParsed: computed(() => undefined),
     transactionAssets: computed(() => []),
-    outerTxTag: computed(() => undefined),
+    outerTxTag: computed(() => usePopupProps().popupProps.value?.tx?.tag),
   });
 
   return mount(ConfirmTransactionSign, {
@@ -268,7 +269,7 @@ function mountModal(
         NoOriginWarning: true,
         DetailsItem: true,
         TokenAmount: true,
-        BtnMain: true,
+        RecipientDetails: true,
       },
     },
   });
@@ -318,19 +319,30 @@ describe('ConfirmTransactionSign.vue signing account', () => {
     }));
   });
 
-  it('honours the user picking a different account in the switcher', async () => {
+  it('uses a different signing account only after the user opts into rebuilding', async () => {
     const wrapper = mountModal();
     await flushPromises();
 
     await findSelect(wrapper).vm.$emit('select', accountActive);
     expect(findSelect(wrapper).props('account')).toEqual(accountActive);
 
-    await (wrapper.vm as any).confirm();
+    const accept = wrapper.get<HTMLButtonElement>('[data-cy="accept"]');
+    accept.element.click();
+    expect(setActiveAccountByAddressAndProtocol).not.toHaveBeenCalled();
+    expect(resolve).not.toHaveBeenCalled();
+
+    await findRebuild(wrapper).trigger('click');
+    await flushPromises();
+    accept.element.click();
 
     expect(setActiveAccountByAddressAndProtocol).toHaveBeenCalledWith(
       ADDRESS_ACTIVE,
       PROTOCOLS.aeternity,
     );
+    expect(resolve).toHaveBeenCalledExactlyOnceWith({
+      selectedAddress: ADDRESS_ACTIVE,
+      rebuildForSelectedAccount: true,
+    });
   });
 
   it('flags a transaction prepared for an account the wallet does not hold', async () => {
@@ -410,6 +422,7 @@ describe('ConfirmTransactionSign.vue rebuilding for another signer', () => {
 
     await findSelect(wrapper).vm.$emit('select', accountActive);
     await findRebuild(wrapper).trigger('click');
+    await flushPromises();
 
     await (wrapper.vm as any).confirm();
 
@@ -474,6 +487,7 @@ describe('ConfirmTransactionSign.vue rebuilding for another signer', () => {
 
     await findSelect(wrapper).vm.$emit('select', accountAirGap);
     await findRebuild(wrapper).trigger('click');
+    await flushPromises();
 
     await (wrapper.vm as any).confirm();
 
@@ -565,19 +579,21 @@ describe('ConfirmTransactionSign.vue contract-call verification', () => {
 
   const DRY_RUN_OK = { callObj: { returnType: 'ok', gasPrice: 1000000000 } };
 
-  const mountContractCall = () => mountModal(
-    ADDRESS_PREPARED,
-    { txBase64: buildContractCallTxFor(ADDRESS_PREPARED) },
-    DRY_RUN_OK,
-  );
+  function mountContractCall(
+    dryRunResult: typeof DRY_RUN_OK | Promise<typeof DRY_RUN_OK> = DRY_RUN_OK,
+  ) {
+    return mountModal(
+      ADDRESS_PREPARED,
+      { txBase64: buildContractCallTxFor(ADDRESS_PREPARED) },
+      dryRunResult,
+    );
+  }
 
   const lastDryRunTx = () => txDryRun.mock.calls.at(-1)![0] as Encoded.Transaction;
   const lastDryRunAddress = () => txDryRun.mock.calls.at(-1)![1] as Encoded.AccountAddress;
   const lastDryRunNonce = () => (unpackTx(lastDryRunTx()) as any).nonce;
-  // The real footer gate is `!!error || verifying || loading || !canSign...`, so read
-  // the button itself; the stub renders boolean props as attribute strings.
   const isAcceptDisabled = (wrapper: any) => (
-    wrapper.find('[data-cy="accept"]').attributes('disabled') === 'true'
+    wrapper.find('[data-cy="accept"]').attributes('aria-disabled') === 'true'
   );
 
   const optIntoRebuild = async (wrapper: any) => {
@@ -585,6 +601,30 @@ describe('ConfirmTransactionSign.vue contract-call verification', () => {
     await findRebuild(wrapper).trigger('click');
     await flushPromises();
   };
+
+  it('keeps the request pending until transaction verification succeeds', async () => {
+    let finishVerification!: () => void;
+    const dryRun = new Promise<typeof DRY_RUN_OK>((resolveDryRun) => {
+      finishVerification = () => resolveDryRun(DRY_RUN_OK);
+    });
+    const wrapper = mountContractCall(dryRun);
+    const accept = wrapper.get<HTMLButtonElement>('[data-cy="accept"]');
+    accept.element.click();
+    await flushPromises();
+    expect(txDryRun).toHaveBeenCalledOnce();
+    expect(accept.attributes('aria-disabled')).toBe('true');
+    accept.element.click();
+    expect(setActiveAccountByAddressAndProtocol).not.toHaveBeenCalled();
+    expect(resolve).not.toHaveBeenCalled();
+
+    finishVerification();
+    await flushPromises();
+    expect(accept.attributes('aria-disabled')).toBeUndefined();
+    accept.element.click();
+    expect(resolve).toHaveBeenCalledExactlyOnceWith({
+      selectedAddress: ADDRESS_PREPARED, rebuildForSelectedAccount: false,
+    });
+  });
 
   it('simulates the dapp transaction as its own caller before any rebuild', async () => {
     mountContractCall();
@@ -687,6 +727,9 @@ describe('ConfirmTransactionSign.vue contract-call verification', () => {
 
     expect((wrapper.vm as any).error).not.toBe('');
     expect(isAcceptDisabled(wrapper)).toBe(true);
+    wrapper.get<HTMLButtonElement>('[data-cy="accept"]').element.click();
+    expect(setActiveAccountByAddressAndProtocol).not.toHaveBeenCalled();
+    expect(resolve).not.toHaveBeenCalled();
   });
 });
 
@@ -744,5 +787,54 @@ describe('ConfirmTransactionSign.vue EVM call data', () => {
       expect.objectContaining({ chainId: '56', action: 'getabi', address: TOKEN }),
     ]);
     expect(getCallDataDetails(wrapper).props('callDataDecoded')).toBeNull();
+  });
+});
+
+describe('ConfirmTransactionSign.vue total', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // The total sits in a DetailsItem
+    config.global.renderStubDefaultSlot = true;
+  });
+
+  afterEach(() => {
+    config.global.renderStubDefaultSlot = false;
+  });
+
+  it('keeps the total of an aeternity request as its execution cost', async () => {
+    const wrapper = mountModal();
+    await flushPromises();
+
+    const total = wrapper.findAllComponents({ name: 'TokenAmount' })
+      .find((amount: any) => amount.attributes('data-cy') === 'total');
+    // The 1 AE sent and the fee of the SpendTx
+    expect(total!.props('amount')).toBe(1.00002);
+    // No symbol: TokenAmount takes the coin's
+    expect(total!.props('symbol')).toBeNull();
+  });
+});
+
+describe('ConfirmTransactionSign.vue recipient details', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('shows the details of the account a spend sends the coins to', async () => {
+    const txBase64 = buildSpendTxFor(ADDRESS_PREPARED);
+    const wrapper = mountModal(ADDRESS_PREPARED, { txBase64, tx: unpackTx(txBase64) });
+    await flushPromises();
+
+    expect(wrapper.getComponent(RecipientDetails).props()).toMatchObject({
+      address: ADDRESS_RECIPIENT,
+      protocol: PROTOCOLS.aeternity,
+    });
+  });
+
+  it('has none for a contract call', async () => {
+    const wrapper = mountModal(ADDRESS_PREPARED, {
+      txBase64: buildContractCallTxFor(ADDRESS_PREPARED),
+      tx: { tag: Tag.ContractCallTx, fee: '200000000000000', amount: '0' },
+    });
+    await flushPromises();
+
+    expect(wrapper.findComponent(RecipientDetails).exists()).toBe(false);
   });
 });

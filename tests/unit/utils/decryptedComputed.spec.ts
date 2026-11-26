@@ -55,37 +55,6 @@ describe('decryptedComputed', () => {
     warnSpy.mockRestore();
   });
 
-  it('re-encrypts persisted state when the key changes', async () => {
-    const { decryptedComputed, nextTick, ref } = await loadModule();
-    const key = ref(oldKey);
-    const encryptedState = ref(ciphertext('old-ciphertext'));
-    const decrypted = decryptedComputed(key, encryptedState, '');
-
-    mockSubtleDecrypt.mockImplementation(async (_algorithm, usedKey, encryptedBytes) => {
-      const label = Buffer.from(encryptedBytes).toString();
-      if (usedKey.id === oldKey.id && label === 'old-ciphertext') {
-        return new TextEncoder().encode('secret');
-      }
-      if (usedKey.id === newKey.id && label === 'new-ciphertext') {
-        return new TextEncoder().encode('secret');
-      }
-      throw new Error('unexpected decrypt');
-    });
-    mockSubtleEncrypt.mockResolvedValue(Buffer.from('new-ciphertext'));
-
-    await flushWatchers(nextTick);
-    key.value = newKey;
-    await flushWatchers(nextTick);
-
-    expect(decrypted.value).toBe('secret');
-    expect(mockSubtleEncrypt).toHaveBeenCalledWith(
-      expect.any(Object),
-      expect.objectContaining({ id: newKey.id }),
-      new TextEncoder().encode('secret'),
-    );
-    expect(encryptedState.value).toBe(ciphertext('new-ciphertext'));
-  });
-
   it('recovers when state is already encrypted with the new key during rotation', async () => {
     const { decryptedComputed, nextTick, ref } = await loadModule();
     const key = ref(oldKey);

@@ -79,10 +79,6 @@ describe('Test cases for deeplinks', () => {
       .should('contain', tg('modals.confirm-raw-sign.title'))
       .get('[data-cy=warning]')
       .should('be.visible')
-      .get('[data-cy=popup-aex2] > .container')
-      // Cypress 15 errors when scrollTo targets a non-scrollable element;
-      // ensureScrollable:false restores the lenient pre-15 no-op behavior.
-      .scrollTo('bottom', { ensureScrollable: false })
       .get('[data-cy=data]')
       .should('be.visible')
       .should('contain', decodeURIComponent(encodedUnknownTx));
@@ -209,22 +205,6 @@ describe('Test cases for deeplinks', () => {
       .get('[data-cy=message]')
       .should('be.visible')
       .should('contain', '{"a":1,"b":2,"sub_jwk":{"kty":"OKP","crv":"Ed25519","x":"3CgyWh2tdZqs4BJVyb_oKE3hK81oYzteWEKnjfZSZ2c"}}');
-  });
-
-  // TODO: enable it back when decided on the flow
-  // Works with superhero.com only
-  it.skip('Tips deeplink', () => {
-    cy.login({}, `/tips?url=${callbackUrl}&x-success=https%3A%2F%2Fsuperhero.com&x-cancel=https%3A%2F%2Fsuperhero.com`)
-      .get('[data-cy=address] [data-cy=textarea]')
-      .should('have.attr', 'placeholder', tg('modals.send.recipientPlaceholderUrl'))
-      .get('[data-cy=address] [data-cy=textarea]')
-      .type('hello.com')
-      .get('[data-cy=address] + .status .title')
-      .should('contain', tg('modals.not-verified.title'));
-
-    cy.login({}, `/tips?url=${callbackUrl}&${callbackParams}`)
-      .get('.modal')
-      .should('not.exist');
   });
 
   describe('Transfer send modal from deeplink', () => {

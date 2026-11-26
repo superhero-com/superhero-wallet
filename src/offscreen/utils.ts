@@ -52,6 +52,7 @@ export async function executeOrSendMessageToBackground(
           params?.aepp!,
           params?.popupProps,
           params?.sidePanelWindowIds,
+          params?.id,
         );
       case POPUP_METHODS.removePopup:
         return removePopup(params?.id!);

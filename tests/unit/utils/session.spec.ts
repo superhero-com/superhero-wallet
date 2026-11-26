@@ -1,14 +1,18 @@
 // @ts-nocheck
+import { installSessionMutationHandler } from '../helpers/extensionSession';
+
 describe('extension session', () => {
   const originalBrowser = globalThis.browser;
   let port;
   let constants;
+  let stored;
 
-  async function importSessionStart({ isExtension }) {
+  async function importSessionStart({ isExtension, isFirefox = false }) {
     vi.doMock('@/constants', async () => ({
       ...(await vi.importActual('@/constants')),
       IS_EXTENSION: isExtension,
       IS_OFFSCREEN_TAB: !isExtension,
+      IS_FIREFOX: isFirefox,
     }));
     constants = await import('@/constants');
     return (await import('@/utils/session')).sessionStart;
@@ -25,19 +29,23 @@ describe('extension session', () => {
   beforeEach(() => {
     vi.resetModules();
     port = { postMessage: vi.fn(), disconnect: vi.fn() };
+    stored = {};
     globalThis.browser = {
-      runtime: { connect: vi.fn(() => port) },
+      runtime: { connect: vi.fn(() => port), sendMessage: vi.fn() },
       storage: {
         session: {
-          set: vi.fn(() => Promise.resolve()),
-          remove: vi.fn(() => Promise.resolve()),
+          get: vi.fn(async (key) => ({ [key]: stored[key] })),
+          set: vi.fn(async (values) => { Object.assign(stored, values); }),
+          remove: vi.fn(async (key) => { delete stored[key]; }),
         },
       },
     };
+    installSessionMutationHandler();
     vi.doMock('@/offscreen/popupHandler', () => ({ getSessionEncryptionKey: vi.fn() }));
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     globalThis.browser = originalBrowser;
   });
 
@@ -61,8 +69,8 @@ describe('extension session', () => {
     expect(port.postMessage).toHaveBeenCalledWith({
       method: constants.SESSION_METHODS.sessionKeyStored,
     });
-    const [stored] = globalThis.browser.storage.session.set.mock.calls[0];
-    expect(stored.exportedEncryptionKey).toBeInstanceOf(Uint8Array);
+    const [written] = globalThis.browser.storage.session.set.mock.calls[0];
+    expect(written.exportedEncryptionKey).toBeInstanceOf(Uint8Array);
   });
 
   it('does not signal the offscreen tab when the key could not be stored', async () => {
@@ -172,5 +180,83 @@ describe('extension session', () => {
 
     expect(globalThis.browser.runtime.connect).not.toHaveBeenCalled();
     expect(globalThis.browser.storage.session.set).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])('routes plain key data to the background owner (Firefox: %s)', async (isFirefox) => {
+    const sessionStart = await importSessionStart({ isExtension: true, isFirefox });
+    const key = await generateExtractableKey();
+    await sessionStart(key);
+
+    expect(globalThis.browser.runtime.sendMessage).toHaveBeenCalledWith({
+      target: isFirefox ? 'offscreen' : 'background',
+      method: constants.SESSION_METHODS.mutateSessionKey,
+      payload: {
+        operation: 'set',
+        key: Buffer.from(await crypto.subtle.exportKey('raw', key)).toString('base64'),
+      },
+    });
+  });
+
+  it('orders a logout after a start whose key export has not finished', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    const { sessionEnd } = await import('@/utils/session');
+    const key = await generateExtractableKey();
+    const exportKey = crypto.subtle.exportKey.bind(crypto.subtle);
+    let releaseExport;
+    vi.spyOn(crypto.subtle, 'exportKey').mockImplementationOnce((...args) => (
+      new Promise((resolve) => {
+        releaseExport = async () => resolve(await exportKey(...args));
+      })
+    ));
+    const starting = sessionStart(key);
+    const ending = sessionEnd();
+    await vi.waitFor(() => expect(releaseExport).toBeDefined());
+    expect(globalThis.browser.storage.session.remove).not.toHaveBeenCalled();
+
+    await releaseExport();
+    await Promise.all([starting, ending]);
+    expect(stored).toEqual({});
+    expect(port.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a later login and its port when a previous logout settles', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    const { sessionEnd } = await import('@/utils/session');
+    const ports = [];
+    globalThis.browser.runtime.connect.mockImplementation(() => {
+      const next = { postMessage: vi.fn(), disconnect: vi.fn() };
+      ports.push(next);
+      return next;
+    });
+    await sessionStart(await generateExtractableKey());
+    let releaseRemoval;
+    globalThis.browser.storage.session.remove.mockImplementationOnce((name) => (
+      new Promise((resolve) => {
+        releaseRemoval = () => { delete stored[name]; resolve(); };
+      })
+    ));
+    const ending = sessionEnd();
+    await vi.waitFor(() => expect(releaseRemoval).toBeDefined());
+    const key = await generateExtractableKey();
+    const starting = sessionStart(key);
+
+    releaseRemoval();
+    await Promise.all([ending, starting]);
+    expect(Buffer.from(stored.exportedEncryptionKey)).toEqual(
+      Buffer.from(await crypto.subtle.exportKey('raw', key)),
+    );
+    expect(ports[0].disconnect).toHaveBeenCalledTimes(1);
+    expect(ports[1].disconnect).not.toHaveBeenCalled();
+  });
+
+  it('does not poison later mutations when the background rejects one', async () => {
+    const sessionStart = await importSessionStart({ isExtension: true });
+    globalThis.browser.runtime.sendMessage.mockResolvedValueOnce({ ok: false, error: 'Storage unavailable' });
+    await expect(sessionStart(await generateExtractableKey())).rejects.toThrow('Storage unavailable');
+    const key = await generateExtractableKey();
+    await sessionStart(key);
+    expect(Buffer.from(stored.exportedEncryptionKey)).toEqual(
+      Buffer.from(await crypto.subtle.exportKey('raw', key)),
+    );
   });
 });

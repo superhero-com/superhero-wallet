@@ -6,6 +6,7 @@
     :amount-total="amountTotal"
     :fee="transactionFee"
     :is-error-transaction="isErrorTransaction"
+    :execution-result="executionResult"
     :payload="transaction ? getTransactionPayload(transaction) : ''"
     :hide-amount-total="(
       isDex
@@ -44,6 +45,14 @@
         :transaction="transaction"
         :tokens="transactionAssets"
         :reversed="isDexPool"
+      />
+
+      <DetailsItem
+        v-if="postContent"
+        :label="$t('transaction.superhero.postContent')"
+        :value="postContent"
+        class="post-content"
+        data-cy="post-content"
       />
 
       <DetailsItem
@@ -164,6 +173,7 @@
             :amount="+aettosToAe(gasPrice)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>
@@ -177,6 +187,7 @@
             :amount="+aettosToAe(gasCost)"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
+            high-precision
           />
         </template>
       </DetailsItem>
@@ -210,7 +221,7 @@ import {
   useLatestTransactionList,
   useMultisigAccounts,
   useTransactionData,
-  useTransactionList,
+  getCachedAccountTransactions,
   useUi,
 } from '@/composables';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
@@ -276,10 +287,9 @@ export default defineComponent({
           : activeAccount.value.address
       )));
 
-    const { transactionsLoaded } = useTransactionList({
-      accountAddress: transactionCustomOwner.value,
-      protocol: PROTOCOLS.aeternity,
-    });
+    const transactionsLoaded = computed(
+      () => getCachedAccountTransactions(transactionCustomOwner.value),
+    );
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
@@ -288,6 +298,7 @@ export default defineComponent({
       direction,
       isAex9,
       isErrorTransaction,
+      executionResult,
       isDex,
       isAllowance,
       isDexPool,
@@ -298,11 +309,13 @@ export default defineComponent({
       innerTx,
       innerTxTag,
       outerTxTag,
+      superheroTxAction,
       transactionAssets,
     } = useTransactionData({
       transaction,
       transactionCustomOwner,
       showDetailedAllowanceInfo: true,
+      lookUpTokenSale: true,
     });
 
     const hideFiat = computed(() => (
@@ -329,6 +342,11 @@ export default defineComponent({
     const preclaimCommitment = computed(() => (
       innerTxTag.value === Tag.NamePreclaimTx
         ? (innerTx.value?.commitmentId || (innerTx.value as ITx & { commitment_id?: string })?.commitment_id || '')
+        : ''
+    ));
+    const postContent = computed((): string => (
+      superheroTxAction.value === 'post' || superheroTxAction.value === 'comment'
+        ? String(innerTx.value?.arguments?.[0]?.value ?? '')
         : ''
     ));
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
@@ -363,9 +381,8 @@ export default defineComponent({
      */
     const transactionFee = computed((): number => {
       const { tx } = transaction.value ?? {};
-      const fee = tx?.fee ?? 0;
-      const extraFee = tx?.tx?.tx?.fee ?? 0;
-      return +aettosToAe(fee + extraFee);
+      // Big values come as strings (pending node txs, precise middleware reads)
+      return +aettosToAe(new BigNumber(tx?.fee ?? 0).plus(tx?.tx?.tx?.fee ?? 0));
     });
 
     onMounted(async () => {
@@ -445,6 +462,7 @@ export default defineComponent({
       hideFiat,
       isAex9,
       isErrorTransaction,
+      executionResult,
       isDex,
       isAllowance,
       isDexPool,
@@ -454,6 +472,7 @@ export default defineComponent({
       getTransactionPayload,
       aensName,
       preclaimCommitment,
+      postContent,
       tipUrl,
       tipLink,
       direction,
@@ -496,7 +515,8 @@ export default defineComponent({
     }
   }
 
-  .aens-name:deep() {
+  .aens-name:deep(),
+  .post-content:deep() {
     width: 100%;
 
     .value {
@@ -505,6 +525,10 @@ export default defineComponent({
       max-width: 100%;
       overflow-wrap: anywhere;
     }
+  }
+
+  .post-content:deep() .value {
+    white-space: pre-line;
   }
 
   .aens-commitment:deep() {

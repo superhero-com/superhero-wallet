@@ -23,6 +23,7 @@ import { broadcastSignedTransaction } from '@/protocols/evm/libs/broadcastSigned
 import { transferPreparedLegacyTransaction } from '@/protocols/evm/libs/transferPreparedLegacyTransaction';
 import {
   getLegacyGasPrice,
+  toEvmChecksumAddress,
   toTokenBaseUnits,
   withGasHeadroom,
 } from '@/protocols/evm/helpers';
@@ -183,6 +184,10 @@ export class BnbAdapter extends BaseProtocolAdapter {
 
   override isAccountAddressValid(address: AccountAddress) {
     return isAddress(address);
+  }
+
+  override normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return toEvmChecksumAddress(address);
   }
 
   override isValidAddressOrNameEncoding(address: string) {
@@ -540,8 +545,8 @@ export class BnbAdapter extends BaseProtocolAdapter {
   async constructAndSignTx(
     amount: number | string,
     recipient: string,
-    options: Record<string, any>,
-  ): Promise<any> {
+    options: { fromAccount: AccountAddress; nonce: number; maxFeePerGas: string },
+  ): Promise<{ raw: Uint8Array; hash: string }> {
     const { getAccountByProtocolAndAddress } = useAccounts();
     const { bnbActiveNetworkSettings } = useBnbNetworkSettings();
 
@@ -566,7 +571,7 @@ export class BnbAdapter extends BaseProtocolAdapter {
     );
 
     const txData: TxData = {
-      nonce: toHex(nonce),
+      nonce: toHex(String(nonce)),
       gasPrice,
       gasLimit: toHex(String(BNB_GAS_LIMIT)),
       to: recipient,

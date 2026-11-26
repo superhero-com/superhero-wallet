@@ -1,9 +1,10 @@
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
 import {
   AccountMemory,
   DelegationTag,
   Encoded,
   Encoding,
+  RpcRejectedByUserError,
   Tag,
   decode,
   encode,
@@ -98,12 +99,13 @@ vi.mock('@/composables/accounts', () => ({ useAccounts: vi.fn() }));
 vi.mock('@/composables/permissions', () => ({ usePermissions: vi.fn() }));
 vi.mock('@/composables/deepLinkApi', () => ({ useDeepLinkApi: vi.fn() }));
 vi.mock('@/composables/modals', () => ({ useModals: vi.fn(() => ({ openModal: vi.fn() })) }));
+const { ledgerSignTransaction } = vi.hoisted(() => ({ ledgerSignTransaction: vi.fn() }));
 vi.mock('@/composables', () => ({
   useAeSdk: vi.fn(),
-  useLedger: vi.fn(() => ({ signTransaction: vi.fn(), signMessage: vi.fn() })),
+  useLedger: vi.fn(() => ({ signTransaction: ledgerSignTransaction, signMessage: vi.fn() })),
 }));
 vi.mock('@/protocols/aeternity/composables', () => ({
-  useAeMiddleware: vi.fn(() => ({ getMiddleware: vi.fn() })),
+  useAeMiddleware: vi.fn(() => ({ fetchNameByHash: vi.fn() })),
 }));
 
 let sdk: typeof import('@aeternity/aepp-sdk');
@@ -175,9 +177,10 @@ beforeEach(async () => {
   // @ts-ignore
   (useAeSdk as vi.Mock).mockReturnValue({
     ensureNodeNetworkId: vi.fn(),
+    isAeSdkUpdating: ref(false),
     getAeSdk: vi.fn(async () => ({ api: { getAccountNextNonce } })),
     isAeppGivenAccounts: () => true,
-    getAeppTabId: () => undefined,
+    getAeppSourceTab: () => ({}),
   });
 
   vi.resetModules();
@@ -224,6 +227,45 @@ describe('AeAccountHdWallet.signTransaction', () => {
     expect((sdk.unpackTx(signedTx) as any).nonce).toBe(NEXT_NONCE);
     // The signing key is resolved from `fromAccount`, so it must name that account.
     expect(opts.fromAccount).toBe(ADDRESS_CHOSEN);
+  });
+
+  describe('of a rebuilt transaction, for the network the user approved', () => {
+    /** On Testnet, until a dapp's switch lands while the nonce of the chosen account is fetched */
+    function walletSwitchedDuringRebuild() {
+      const nodeNetworkId = ref('ae_uat');
+      getAccountNextNonce.mockImplementationOnce(async () => {
+        nodeNetworkId.value = 'ae_mainnet';
+        return { nextNonce: NEXT_NONCE };
+      });
+      return new AeAccountHdWallet(nodeNetworkId);
+    }
+
+    beforeEach(() => setWalletAccounts(ADDRESS_PREPARED));
+
+    it('signs with its key', async () => {
+      mockModalRanAndChose(ADDRESS_CHOSEN, true);
+
+      await walletSwitchedDuringRebuild()
+        .signTransaction(buildSpendTxFor(ADDRESS_PREPARED), {} as any);
+
+      const [, opts] = superSignTransaction.mock.calls[0];
+      expect(opts.networkId).toBe('ae_uat');
+    });
+
+    it('has a Ledger sign', async () => {
+      mockModalRanAndChose(ADDRESS_LEDGER, true);
+      ledgerSignTransaction.mockResolvedValueOnce('tx_signedByTheLedger');
+
+      await expect(walletSwitchedDuringRebuild()
+        .signTransaction(buildSpendTxFor(ADDRESS_PREPARED), {} as any))
+        .resolves.toBe('tx_signedByTheLedger');
+      expect(ledgerSignTransaction).toHaveBeenCalledWith(
+        ADDRESS_LEDGER,
+        accountLedger.idx,
+        expect.stringMatching(/^tx_/),
+        'ae_uat',
+      );
+    });
   });
 
   it('does not rebuild when the user picked another account without opting into the rebuild', async () => {
@@ -283,6 +325,7 @@ describe('AeAccountHdWallet.signTransaction Air Gap message listener', () => {
     mockModalRanAndChose(ADDRESS_AIR_GAP);
 
     const pending = signTx(buildSpendTxFor(ADDRESS_PREPARED), { fromAccount: ADDRESS_AIR_GAP });
+    await vi.waitFor(() => expect(onMessage().addListener).toHaveBeenCalled());
     // Stand in for the confirmation popup sending the signed transaction back.
     registeredHandler()({
       type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
@@ -333,6 +376,7 @@ describe('AeAccountHdWallet.signTransaction Air Gap message listener', () => {
     mockModalRanAndChose(ADDRESS_AIR_GAP, true);
 
     const pending = signTx(buildSpendTxFor(ADDRESS_PREPARED), { fromAccount: ADDRESS_PREPARED });
+    await vi.waitFor(() => expect(onMessage().addListener).toHaveBeenCalled());
     registeredHandler()({
       type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
       payload: 'tx_signedByTheAirGapDevice',
@@ -368,6 +412,51 @@ describe('AeAccountHdWallet.signTransaction Air Gap message listener', () => {
     await signTx(buildSpendTxFor(ADDRESS_PREPARED));
 
     expect(onMessage().addListener).not.toHaveBeenCalled();
+  });
+});
+
+/** A device signs past the check after the prompt, so the check covers it too */
+describe('AeAccountHdWallet.signTransaction by a device, for a network switched during the prompt', () => {
+  let nodeNetworkId: Ref<string | undefined>;
+
+  beforeEach(() => {
+    setWalletAccounts(ADDRESS_PREPARED);
+    nodeNetworkId = ref('ae_uat');
+  });
+
+  /** The user picks `selectedAddress`, as a dapp switches to Mainnet, e.g. over EVM */
+  function mockPromptSwitched(selectedAddress: string, whilePrompted = () => {}) {
+    // @ts-ignore
+    (usePermissions as vi.Mock).mockReturnValue({
+      checkOrAskPermission: vi.fn(
+        async (_method: any, _url: any, _props: any, onModalResolved: any) => {
+          whilePrompted();
+          nodeNetworkId.value = 'ae_mainnet';
+          onModalResolved({ selectedAddress });
+          return true;
+        },
+      ),
+    });
+  }
+
+  const sign = () => new AeAccountHdWallet(nodeNetworkId)
+    .signTransaction(buildSpendTxFor(ADDRESS_PREPARED), {} as any);
+
+  it('refuses the signature of an Air Gap device', async () => {
+    // The popup sends it once the device signed
+    mockPromptSwitched(ADDRESS_AIR_GAP, () => registeredHandler()({
+      type: AIRGAP_SIGNED_TRANSACTION_MESSAGE_TYPE,
+      payload: 'tx_signedByTheAirGapDevice',
+    }));
+
+    await expect(sign()).rejects.toBeInstanceOf(RpcRejectedByUserError);
+  });
+
+  it('does not have a Ledger sign', async () => {
+    mockPromptSwitched(ADDRESS_LEDGER);
+
+    await expect(sign()).rejects.toBeInstanceOf(RpcRejectedByUserError);
+    expect(ledgerSignTransaction).not.toHaveBeenCalled();
   });
 });
 

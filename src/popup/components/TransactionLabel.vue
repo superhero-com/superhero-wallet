@@ -12,7 +12,7 @@
       class="error"
     >
       <WarningIcon
-        v-if="transaction.tx.returnType === TX_RETURN_TYPE_ABORT"
+        v-if="executionResult?.returnType === TX_RETURN_TYPE_ABORT"
         class="icon"
       />
       <RevertedIcon
@@ -80,7 +80,7 @@ import { useI18n } from 'vue-i18n';
 
 import type { ITransaction } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
-import { getDefaultAccountLabel } from '@/utils';
+import { getDefaultAccountLabel, getSuperheroTxListLabel } from '@/utils';
 import { useAccounts, useFungibleTokens, useTransactionData } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import {
@@ -118,6 +118,7 @@ export default defineComponent({
       direction,
       innerTx,
       isDex,
+      isDexSwap,
       isAllowance,
       isDexLiquidityAdd,
       isDexLiquidityRemove,
@@ -125,7 +126,9 @@ export default defineComponent({
       isTokenSaleFactory,
       isTokenSaleSell,
       isErrorTransaction,
+      executionResult,
       isTip,
+      superheroTxAction,
       txTypeListLabel,
     } = useTransactionData({
       transaction: toRef(() => props.transaction),
@@ -142,7 +145,9 @@ export default defineComponent({
       let hasComma = !props.transaction.transactionOwner;
       let text = txTypeListLabel.value; // Default value
 
-      if (
+      if (outerTxTag.value === Tag.SpendTx && superheroTxAction.value) {
+        text = getSuperheroTxListLabel(superheroTxAction.value);
+      } else if (
         outerTxTag.value === Tag.SpendTx
         || (outerTxTag.value === Tag.GaMetaTx && innerTxTag.value === Tag.SpendTx)
       ) {
@@ -156,9 +161,21 @@ export default defineComponent({
       } else if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
         text = t('transaction.type.multisigVaultCreated');
       } else if (outerTxTag.value === Tag.PayingForTx) {
-        text = props.showTransactionOwner
-          ? t('transaction.type.transactionFeePaidBy')
-          : t('transaction.type.transactionFeePaid');
+        const rowOwner = props.transaction.transactionOwner
+          || (props.showTransactionOwner ? undefined : activeAccount.value.address);
+        if (
+          isDex.value
+          && isDexSwap.value
+          && !!rowOwner
+          && innerTx.value.callerId === rowOwner
+        ) {
+          text = t('common.swap');
+          hasComma = true;
+        } else {
+          text = props.showTransactionOwner
+            ? t('transaction.type.transactionFeePaidBy')
+            : t('transaction.type.transactionFeePaid');
+        }
       } else if (isAllowance.value) {
         text = t('transaction.dexType.allowToken');
       } else if (isDexLiquidityAdd.value) {
@@ -174,6 +191,8 @@ export default defineComponent({
         text = t('transaction.tokenSale.sold');
       } else if (isTokenSaleFactory.value) {
         text = t('transaction.tokenSale.createdToken');
+      } else if (superheroTxAction.value) {
+        text = getSuperheroTxListLabel(superheroTxAction.value);
       } else if (isTip.value && props.transaction.claim) {
         text = t('transaction.listType.tipReceived');
       } else if (isTip.value) {
@@ -213,7 +232,7 @@ export default defineComponent({
     });
 
     const errorTypeName = computed((): string | null => {
-      switch (props.transaction.tx.returnType) {
+      switch (executionResult.value?.returnType) {
         case TX_RETURN_TYPE_ABORT: return t('transaction.returnType.abort');
         case TX_RETURN_TYPE_REVERT: return t('transaction.returnType.revert');
         default: return null;
@@ -223,6 +242,7 @@ export default defineComponent({
     return {
       TX_RETURN_TYPE_ABORT,
       isErrorTransaction,
+      executionResult,
       ownerName,
       label,
       errorTypeName,

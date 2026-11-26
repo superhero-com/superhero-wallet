@@ -42,6 +42,7 @@
         class="card-close"
       >
         <BtnIcon
+          :aria-label="$t('a11y.dismissCard')"
           :icon="CloseIcon"
           @click="setCardHidden(cardId)"
         />

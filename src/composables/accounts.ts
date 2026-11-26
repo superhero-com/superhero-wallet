@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { pickBy, uniq } from 'lodash-es';
+import { mapValues, pickBy, uniq } from 'lodash-es';
 
 import type {
   AccountAddress,
@@ -32,6 +32,8 @@ import { tg } from '@/popup/plugins/i18n';
 import { AccountDiscoveryError, ImportedAccountsUnreadableError } from '@/lib/errors';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { SecureMobileStorage } from '@/lib/SecureMobileStorage';
+import { readVault, writeVaultField } from '@/lib/WalletVault';
+import { getVaultRef } from '@/utils/vaultRef';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMobileSensitiveDataEncryption from '@/migrations/011-mobile-sensitive-data-encryption';
 
@@ -60,6 +62,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     isAuthenticated,
     isMnemonicUnreadable,
     encryptionKey,
+    isEncryptionKeyCurrent,
   } = useAuth();
 
   const { openModal, openConfirmModal } = useModals();
@@ -121,6 +124,7 @@ export const useAccounts = createCustomScopedComposable(() => {
       onDecryptFailed: () => {
         arePrivateKeysAccountsUnreadable.value = true;
       },
+      isKeyCurrent: isEncryptionKeyCurrent,
     },
   );
 
@@ -286,13 +290,6 @@ export const useAccounts = createCustomScopedComposable(() => {
     return accounts.value.find((account) => account.protocol === protocol);
   }
 
-  function getLastProtocolAccount(protocol: Protocol): IAccount | undefined {
-    const protocolAccounts = accountsGroupedByProtocol.value[protocol];
-    return (protocolAccounts)
-      ? protocolAccounts[protocolAccounts.length - 1]
-      : undefined;
-  }
-
   function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
     const accountCurrent = activeAccount.value;
     const accountNew = getAccountByGlobalIdx(globalIdx);
@@ -335,27 +332,84 @@ export const useAccounts = createCustomScopedComposable(() => {
     return accountsAddressList.value.includes(address);
   }
 
+  /** Imported accounts come after `accountsRaw`, so adding to it moves their global indexes. */
+  function shiftImportedAccountIndexes(count: number) {
+    const rawCount = accountsRaw.value.length;
+    // Also one that can't be read now. A new wallet's index 0 is its first account.
+    const isImported = (globalIdx?: number) => globalIdx !== undefined
+      && rawCount > 0 && globalIdx >= rawCount;
+    const lastActive = protocolLastActiveGlobalIdx.value;
+    if (isImported(activeAccountGlobalIdx.value)) {
+      activeAccountGlobalIdx.value += count;
+    }
+    if (Object.values(lastActive).some(isImported)) {
+      protocolLastActiveGlobalIdx.value = mapValues(
+        lastActive,
+        (globalIdx) => (isImported(globalIdx) ? globalIdx! + count : globalIdx),
+      );
+    }
+  }
+
+  /** @returns Its global index. Imported accounts come after it, also those of its protocol. */
+  function appendRawAccount(account: IAccountRaw): number {
+    shiftImportedAccountIndexes(1);
+    return accountsRaw.value.push(account) - 1;
+  }
+
+  /** Another window may have added accounts since this one read them. */
+  function adoptAccountsAddedElsewhere() {
+    const current = accountsRaw.value;
+    // An empty list is a wallet being set up, or one that couldn't be read.
+    if (IS_MOBILE_APP || !current.length) return;
+    const stored = WalletStorage.get<IAccountRaw[]>(STORAGE_KEYS.accountsRaw);
+    if (
+      !Array.isArray(stored)
+      || stored.length <= current.length
+      || JSON.stringify(stored.slice(0, current.length)) !== JSON.stringify(current)
+    ) {
+      return;
+    }
+    const added = stored.slice(current.length);
+    shiftImportedAccountIndexes(added.length);
+    accountsRaw.value.push(...added);
+  }
+
   function addRawAccount(account: IAccountRaw): number {
-    accountsRaw.value.push(account);
-    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+    adoptAccountsAddedElsewhere();
+    // E.g. a Ledger account another window added meanwhile
+    const existingIdx = (account.type !== ACCOUNT_TYPES.hdWallet && account.address)
+      ? accountsRaw.value.findIndex(({ type, protocol, address }) => (
+        type === account.type && protocol === account.protocol && address === account.address
+      ))
+      : -1;
+    if (existingIdx !== -1) return existingIdx;
+    return appendRawAccount(account);
   }
 
   /**
-   * Imported accounts the key can't decrypt are lost, e.g. when the app closed while a
-   * password change re-encrypted them. Removing them lets the user import again.
+   * Older versions could leave imported accounts encrypted with an unavailable key.
+   * Removing unreadable entries lets the user import them again.
+   * @param options The text, e.g. for a password change they refused. The default explains it.
+   * @returns Settles once the offer was handled, never rejects.
    */
-  function offerToRemoveUnreadablePrivateKeyAccounts() {
+  function offerToRemoveUnreadablePrivateKeyAccounts(
+    { title, msg }: { title?: string; msg?: string } = {},
+  ) {
     // Nothing to decrypt means the secure-storage read failed, which reopening may fix.
     const isReadFailed = IS_MOBILE_APP && accountsPrivateKeysEncrypted.value === null;
-    openConfirmModal({
-      title: tg('modals.unreadablePrivateKeyAccounts.title'),
-      msg: tg(isReadFailed
+    // What the user decides on, so a removal can't take keys stored after it.
+    const offered = accountsPrivateKeysEncrypted.value;
+    return openConfirmModal({
+      title: title ?? tg('modals.unreadablePrivateKeyAccounts.title'),
+      msg: msg ?? tg(isReadFailed
         ? 'modals.unreadablePrivateKeyAccounts.readFailedMsg'
         : 'modals.unreadablePrivateKeyAccounts.msg'),
       icon: 'critical',
       buttonMessage: tg('modals.unreadablePrivateKeyAccounts.btnText'),
     })
       .then(async () => {
+        const expectedVault = IS_MOBILE_APP ? undefined : readVault();
+        if (!isAuthenticated.value || !isEncryptionKeyCurrent()) return;
         // Popups get no storage events, so the offscreen tab may have re-encrypted it meanwhile,
         // and a read that failed at startup may work now.
         let stored: string | null = null;
@@ -366,37 +420,58 @@ export const useAccounts = createCustomScopedComposable(() => {
           // As at startup, so mobile plaintext from before the encryption isn't taken as is.
           stored = await migrateMobileSensitiveDataEncryption(stored);
         } catch { /* Still unreadable */ }
-        if (!isAuthenticated.value || !arePrivateKeysAccountsUnreadable.value) {
+        if (!isAuthenticated.value || !isEncryptionKeyCurrent()
+          || !arePrivateKeysAccountsUnreadable.value) {
           return;
         }
         if (stored && stored !== accountsPrivateKeysEncrypted.value) {
-          accountsPrivateKeysEncrypted.value = stored;
+          const binding = getVaultRef(accountsPrivateKeysEncrypted);
+          if (binding) binding.apply(stored);
+          else accountsPrivateKeysEncrypted.value = stored;
           return;
         }
-        accountsPrivateKeysEncrypted.value = null;
+        // Replaced meanwhile, e.g. by an import in another window, whose decrypt is pending here.
+        if (expectedVault && stored && stored !== offered) return;
+        if (getVaultRef(accountsPrivateKeysEncrypted)) {
+          await writeVaultField(STORAGE_KEYS.privateKeyAccountsRaw, null, expectedVault);
+        } else {
+          accountsPrivateKeysEncrypted.value = null;
+        }
         arePrivateKeysAccountsUnreadable.value = false;
         // Imports reuse the removed accounts' indexes, possibly for another protocol.
         protocolLastActiveGlobalIdx.value = pickBy(
           protocolLastActiveGlobalIdx.value,
           (globalIdx) => globalIdx! < accountsRaw.value.length,
         );
-      })
-      .catch(() => { /* NOOP - dismissed */ });
+      }, () => { /* NOOP - dismissed */ })
+      .catch(handleUnknownError);
   }
 
   async function addPrivateKeyAccount(account: IAccountRaw): Promise<number> {
+    if (!isEncryptionKeyCurrent()) {
+      throw new Error('The password was changed in another window');
+    }
     if (arePrivateKeysAccountsUnreadable.value) {
       offerToRemoveUnreadablePrivateKeyAccounts();
       throw new ImportedAccountsUnreadableError();
     }
-    const length = privateKeyAccountsRaw.value.length || 0;
-    accountsPrivateKeysDecrypted.value = JSON.stringify([
-      ...privateKeyAccountsRaw.value,
-      account,
-    ]);
+    // Its global index comes after them.
+    adoptAccountsAddedElsewhere();
+    let importedIndex = 0;
+    await accountsPrivateKeysDecrypted.update((plaintext) => {
+      const currentAccounts: IAccountRaw[] = JSON.parse(plaintext || '[]');
+      // A second submit, or a retry after a conflict, finds it stored already.
+      const storedIdx = currentAccounts.findIndex(({ protocol, privateKey }) => (
+        protocol === account.protocol
+        && JSON.stringify(privateKey) === JSON.stringify(account.privateKey)
+      ));
+      importedIndex = storedIdx === -1 ? currentAccounts.length : storedIdx;
+      return JSON.stringify(storedIdx === -1 ? [...currentAccounts, account] : currentAccounts);
+    });
 
-    await watchUntilTruthy(() => privateKeyAccountsRaw.value.length === length + 1);
-    return getLastProtocolAccount(account.protocol)?.globalIdx || 0;
+    await watchUntilTruthy(() => privateKeyAccountsRaw.value.length > importedIndex);
+    const globalIdx = accountsRaw.value.length + importedIndex;
+    return accounts.value.find((item) => item.globalIdx === globalIdx)?.globalIdx || 0;
   }
 
   /**
@@ -420,9 +495,10 @@ export const useAccounts = createCustomScopedComposable(() => {
         })),
     );
 
+    // Not added to the accounts of another window, which may have discovered them too.
     PROTOCOL_LIST.forEach((protocol, index) => {
       for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
-        addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
+        appendRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       }
     });
 
@@ -433,11 +509,11 @@ export const useAccounts = createCustomScopedComposable(() => {
           title: tg('modals.createAccount.title'),
           subtitle: tg('modals.createAccount.generateOrImport'),
         });
-        addRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
+        appendRawAccount({ isRestored: true, protocol, type: ACCOUNT_TYPES.hdWallet });
       } catch (error) { /* NOOP */ }
     }
     if (!accountsRaw.value.length) {
-      addRawAccount({
+      appendRawAccount({
         isRestored: true,
         protocol: PROTOCOLS.aeternity,
         type: ACCOUNT_TYPES.hdWallet,
@@ -459,10 +535,13 @@ export const useAccounts = createCustomScopedComposable(() => {
     }
   }
 
+  /** On the web and the extension `WalletStorage.clear` empties the vault-backed refs first. */
   function resetAccounts() {
-    mnemonic.value = '';
+    if (IS_MOBILE_APP) {
+      mnemonic.value = '';
+      accountsPrivateKeysEncrypted.value = null;
+    }
     accountsRaw.value = [];
-    accountsPrivateKeysEncrypted.value = null;
     arePrivateKeysAccountsUnreadable.value = false;
     activeAccountGlobalIdx.value = 0;
   }
@@ -494,6 +573,7 @@ export const useAccounts = createCustomScopedComposable(() => {
     isLocalAccountAddress,
     addRawAccount,
     addPrivateKeyAccount,
+    offerToRemoveUnreadablePrivateKeyAccounts,
     getAccountByProtocolAndAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,

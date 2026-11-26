@@ -2,6 +2,7 @@ import { useIonRouter } from '@ionic/vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
+import type { WalletRouteMeta } from '@/types';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 import { useAccounts } from './accounts';
 import { useUi } from './ui';
@@ -20,8 +21,11 @@ export function usePageNavigation() {
   );
 
   function navigateBack() {
-    const { fullPath, meta } = route;
-    const { backRoute } = meta || {};
+    const { fullPath } = route;
+    const { backRoute: metaBackRoute } = route.meta as WalletRouteMeta;
+    const backRoute = (typeof metaBackRoute === 'function')
+      ? metaBackRoute(route)
+      : metaBackRoute;
 
     if (!isLoggedIn.value) {
       return ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');

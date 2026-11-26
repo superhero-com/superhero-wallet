@@ -38,7 +38,7 @@ import {
   useAccounts,
   useLatestTransactionList,
   useTransactionData,
-  useTransactionList,
+  getCachedAccountTransactions,
   useUi,
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -77,10 +77,9 @@ export default defineComponent({
       transactionCustomOwner: toRef(() => transactionOwner),
     });
 
-    const { transactionsLoaded } = useTransactionList({
-      accountAddress: transactionOwner || activeAccount.value.address,
-      protocol: PROTOCOLS.solana,
-    });
+    const transactionsLoaded = computed(
+      () => getCachedAccountTransactions(transactionOwner || activeAccount.value.address),
+    );
 
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
     const amount = computed((): number => transaction.value?.tx?.amount || 0);

@@ -24,9 +24,15 @@
       <div
         ref="scrollElem"
         class="container"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="labelId"
+        :tabindex="isContainerFocusable ? -1 : undefined"
+        @focusin="handleFocusIn"
       >
         <div
           v-if="showHeader"
+          ref="headerElem"
           class="header"
           :class="{
             transparent: hasCloseButton && !($slots.header || header),
@@ -66,6 +72,7 @@
 
         <FixedScreenFooter
           v-if="$slots.footer"
+          ref="footerComponent"
         >
           <slot name="footer" />
         </FixedScreenFooter>
@@ -73,8 +80,10 @@
         <BackToTop sticky />
       </div>
 
+      <!-- Keyboard users close with Escape or the close button -->
       <div
         class="cover"
+        aria-hidden="true"
         @click="handleClose"
       />
     </div>
@@ -88,15 +97,31 @@ import {
   ref,
   onBeforeUnmount,
   onMounted,
+  useId,
+  watch,
 } from 'vue';
 import { BackButtonEvent } from '@ionic/vue';
 
-import { IS_EXTENSION, IS_FIREFOX } from '@/constants';
+import { IS_EXTENSION, IS_FIREFOX, IS_MOBILE_DEVICE } from '@/constants';
 import { useScrollConfig, useViewport } from '@/composables';
 
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
 import BackToTop from './BackToTop.vue';
+
+const NON_TEXT_INPUT_TYPES = [
+  'button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit',
+];
+
+function isTextField(el: Element | null): el is HTMLInputElement | HTMLTextAreaElement {
+  return el instanceof HTMLTextAreaElement
+    || (el instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.includes(el.type));
+}
+
+const TITLE_SELECTOR = '.header-default-text:not(:empty), h1, h2, h3, h4, h5, h6';
+
+/** Shown modals in opening order; Escape closes only the last one. */
+const shownModals: symbol[] = [];
 
 export default defineComponent({
   components: {
@@ -124,16 +149,122 @@ export default defineComponent({
   emits: ['close', 'open'],
   setup(props, { slots, emit }) {
     const scrollElem = ref<HTMLElement>();
+    const headerElem = ref<HTMLElement>();
+    const footerComponent = ref<InstanceType<typeof FixedScreenFooter>>();
+    const titleId = useId();
+    const labelId = ref<string>();
+    /** Only until the focus moves on: on iOS a tap inside would focus it and close the keyboard */
+    const isContainerFocusable = ref(true);
+    let revealFrame: number | undefined;
+    /** Focused when the modal showed, gets the focus back when it closes */
+    let opener: Element | null = null;
 
     const { setScrollConf } = useScrollConfig();
     const { initViewport } = useViewport();
 
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
+    /** Only these variants scroll inside the container, under the sticky footer. */
+    const isScrollable = computed(() => props.fromBottom || props.fullScreen);
+
     const transitionName = computed(() => props.fromBottom ? 'from-bottom-transition' : 'pop-in-transition');
 
     function handleClose() {
       emit('close');
+    }
+
+    const modalKey = Symbol('modal');
+
+    function forgetModal() {
+      const idx = shownModals.indexOf(modalKey);
+      if (idx > -1) {
+        shownModals.splice(idx, 1);
+      }
+    }
+
+    function restoreFocus() {
+      const target = opener;
+      opener = null;
+      const active = document.activeElement;
+      if (
+        target instanceof HTMLElement
+        && target !== document.body
+        && (active === document.body || !!scrollElem.value?.contains(active))
+        // Would raise a phone keyboard
+        && !(IS_MOBILE_DEVICE && isTextField(target))
+      ) {
+        target.focus({ preventScroll: true });
+      }
+    }
+
+    // `show` turns false before the leave transition, while the modal is still mounted
+    watch(
+      () => props.show,
+      (show) => {
+        if (!show) {
+          forgetModal();
+          restoreFocus();
+        } else if (!shownModals.includes(modalKey)) {
+          shownModals.push(modalKey);
+          opener = document.activeElement;
+        }
+      },
+      { immediate: true },
+    );
+
+    function handleKeydown(event: KeyboardEvent) {
+      if (
+        event.key !== 'Escape'
+        || event.defaultPrevented
+        || event.isComposing
+        || event.repeat
+        || shownModals.at(-1) !== modalKey
+        // Stands in for the close button or the backdrop, which full-screen modals cover
+        || (props.fullScreen && !props.hasCloseButton)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      handleClose();
+    }
+
+    /**
+     * Native focus scrolling ignores the sticky footer, and the iOS keyboard
+     * shrinks the view only after the field is focused.
+     */
+    function revealFocusedField() {
+      revealFrame = undefined;
+      const container = scrollElem.value;
+      const footer: HTMLElement | undefined = footerComponent.value?.$el;
+      const field = document.activeElement;
+      if (!container || !footer || !isTextField(field) || !container.contains(field)) {
+        return;
+      }
+      // InputField's visible box
+      const fieldRect = (field.closest('.input-wrapper') ?? field).getBoundingClientRect();
+      const visibleTop = headerElem.value?.getBoundingClientRect().bottom
+        ?? container.getBoundingClientRect().top;
+      const lift = Math.min(
+        fieldRect.bottom - footer.getBoundingClientRect().top,
+        fieldRect.top - visibleTop,
+      );
+      if (lift > 0) {
+        // A fractional scroll offset can be rounded down
+        container.scrollTop += Math.ceil(lift);
+      }
+    }
+
+    function scheduleFocusedFieldReveal() {
+      if (isScrollable.value && revealFrame === undefined) {
+        revealFrame = requestAnimationFrame(revealFocusedField);
+      }
+    }
+
+    function handleFocusIn(event: FocusEvent) {
+      if (event.target !== scrollElem.value) {
+        isContainerFocusable.value = false;
+      }
+      scheduleFocusedFieldReveal();
     }
 
     function onBackButtonHandler(event: BackButtonEvent) {
@@ -146,25 +277,49 @@ export default defineComponent({
         initViewport(scrollElem.value!);
       }
       document.addEventListener('ionBackButton', onBackButtonHandler);
+      document.addEventListener('keydown', handleKeydown);
+      window.addEventListener('resize', scheduleFocusedFieldReveal);
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
+      }
+      // Most consumers render their title in the content
+      const title = scrollElem.value?.querySelector(TITLE_SELECTOR);
+      if (title) {
+        title.id ||= titleId;
+        labelId.value = title.id;
+      }
+      // A field the content focused keeps the focus
+      if (!scrollElem.value?.contains(document.activeElement)) {
+        scrollElem.value?.focus({ preventScroll: true });
       }
     });
 
     onBeforeUnmount(() => {
+      restoreFocus();
       if (props.initializeViewport) {
         setScrollConf(false);
         initViewport(undefined);
       }
       document.removeEventListener('ionBackButton', onBackButtonHandler);
+      document.removeEventListener('keydown', handleKeydown);
+      forgetModal();
+      window.removeEventListener('resize', scheduleFocusedFieldReveal);
+      if (revealFrame !== undefined) {
+        cancelAnimationFrame(revealFrame);
+      }
       document.body.style.overflow = '';
     });
 
     return {
       handleClose,
+      handleFocusIn,
+      isContainerFocusable,
+      labelId,
       IS_FIREFOX,
       IS_EXTENSION,
       scrollElem,
+      headerElem,
+      footerComponent,
       showHeader,
       transitionName,
     };
@@ -176,6 +331,8 @@ export default defineComponent({
 @use '@/styles/variables' as *;
 @use '@/styles/typography';
 @use '@/styles/mixins';
+
+$container-shadow: 0 0 0 1px $color-border, 2px 4px 12px rgba($color-black, 0.22);
 
 .modal {
   --screen-padding-x: 24px; // Default spacing
@@ -202,9 +359,11 @@ export default defineComponent({
     margin: auto;
     background-color: var(--screen-bg-color);
     border-radius: $border-radius-modal;
-    box-shadow:
-      0 0 0 1px $color-border,
-      2px 4px 12px rgba($color-black, 0.22);
+    box-shadow: $container-shadow;
+
+    &:focus {
+      outline: none;
+    }
 
     @include mixins.desktop {
       width: calc(#{$extension-width} - 32px);
@@ -301,6 +460,11 @@ export default defineComponent({
     .container {
       height: 100%;
       border-radius: 0;
+    }
+
+    &:not(.transparent) .container {
+      // Fill the home-indicator area without changing the content or footer position.
+      box-shadow: 0 env(safe-area-inset-bottom) 0 var(--screen-bg-color), $container-shadow;
     }
   }
 

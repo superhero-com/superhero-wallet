@@ -1,4 +1,5 @@
 import type { IBackgroundMessageData } from '@/types';
+import { handleSessionKeyMutation } from '@/lib/ExtensionSessionStorage';
 import {
   openPopup,
   removePopup,
@@ -72,11 +73,13 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
           }
         }));
         break;
-      case 'openPopup':
-        openPopup(popupType!, aepp!, popupProps, sidePanelWindowIds).then((popupConfig) => {
-          sendResponse(popupConfig);
-        });
+      case 'openPopup': {
+        const requestId = sender.url === browser.runtime.getURL('offscreen.html') && !sender.tab
+          ? id : undefined;
+        openPopup(popupType!, aepp!, popupProps, sidePanelWindowIds, requestId)
+          .then(sendResponse, () => sendResponse(null));
         return true;
+      }
       case 'removePopup':
         sendResponse(removePopup(id!));
         return undefined;
@@ -87,6 +90,9 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
         getSessionEncryptionKey().then((encryptionKey) => {
           sendResponse(encryptionKey);
         });
+        return true;
+      case 'mutateSessionKey':
+        handleSessionKeyMutation(msg.payload).then(sendResponse);
         return true;
       case 'setSessionTimeout':
         sendResponse(setSessionTimeout(msg.payload));
@@ -100,5 +106,11 @@ const handleMessage: Parameters<typeof browser.runtime.onMessage.addListener>[0]
 
 browser.runtime.onMessage.addListener(handleMessage);
 browser.runtime.onInstalled.addListener(updateDynamicRules);
+browser.windows.onRemoved.addListener((windowId) => {
+  // The offscreen document owns pending requests across worker restarts.
+  browser.runtime.sendMessage<IBackgroundMessageData>({
+    target: 'offscreen', method: 'popupWindowRemoved', payload: windowId,
+  }).catch(() => {});
+}, { windowTypes: ['popup'] });
 
 registerInPageContentScript();

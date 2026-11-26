@@ -17,10 +17,11 @@ import type {
   NetworkType,
   NetworkTypeDefault,
   Protocol,
-  IAmountDecimalPlaces,
   AssetAmount,
   IAccountRaw,
   IAccount,
+  IRecipientDetails,
+  PrivateKeyFormat,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -56,7 +57,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract getExplorer(): ProtocolExplorer;
 
-  abstract getAmountPrecision(args?: IAmountDecimalPlaces): number;
+  abstract getAmountPrecision(): number;
 
   abstract getUrlTokenKey(): string;
 
@@ -80,6 +81,22 @@ export abstract class BaseProtocolAdapter {
    * Validates if the account address matches the protocol.
    */
   abstract isAccountAddressValid(address: AccountAddress, networkType?: NetworkType): boolean;
+
+  /**
+   * The form of a valid address that the wallet stores and compares, e.g. EIP-55 for EVM.
+   * Any other value is returned as it is.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  normalizeAddress<T extends AccountAddress | undefined>(address: T): T {
+    return address;
+  }
+
+  /**
+   * Validates if coins of the protocol can be sent to the address.
+   */
+  isRecipientAddressValid(address: AccountAddress, networkType?: NetworkType): boolean {
+    return this.isAccountAddressValid(address, networkType);
+  }
 
   /**
    * Validates if the address or name encoding matches the protocol.
@@ -160,17 +177,33 @@ export abstract class BaseProtocolAdapter {
   ): IAccount | null;
 
   /**
+   * Bytes of a private key entered by the user.
+   * This default reads hex leniently and never throws: `resolveAccountRaw` rejects a non-key.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  parsePrivateKey(input: string): Uint8Array {
+    return Buffer.from(input.trim(), 'hex');
+  }
+
+  /**
+   * Formats the private key can be shown in, the default first.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  getPrivateKeyFormats(): PrivateKeyFormat[] {
+    return ['hex'];
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  formatPrivateKey(secretKey: Uint8Array, format?: PrivateKeyFormat): string {
+    return Buffer.from(secretKey).toString('hex');
+  }
+
+  /**
    * Discover accounts that have been used in the past
    * @param seed 12 word seed array buffer
    * @returns index of the last account that has any history records (-1 means no accounts found)
    */
   abstract discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number>;
-
-  abstract constructAndSignTx(
-    amount: number | string,
-    recipient: string,
-    options: Record<string, any>,
-  ): Promise<any>;
 
   fetchAvailableTokens?(): Promise<IToken[] | null>;
 
@@ -194,6 +227,12 @@ export abstract class BaseProtocolAdapter {
   transferPreparedTransaction?(transactionData: any): Promise<ITransferResponse | undefined>;
 
   async fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
+
+  /**
+   * @param recipient An address, a name, or a name's id
+   * @returns `null` when the recipient is a name that points to no account
+   */
+  fetchRecipientDetails?(recipient: string): Promise<IRecipientDetails | null>;
 
   abstract fetchBalance(address: AccountAddress): Promise<string>;
 

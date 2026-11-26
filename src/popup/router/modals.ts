@@ -8,6 +8,7 @@ import {
   MODAL_CONFIRM,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_NETWORK_SWITCH,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_UNSAFE_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
@@ -64,6 +65,7 @@ import Default from '@/popup/components/Modals/Default.vue';
 import ProtocolSpecificView from '@/popup/components/ProtocolSpecificView.vue';
 import Confirm from '@/popup/components/Modals/Confirm.vue';
 import ConfirmConnect from '@/popup/pages/Popups/Connect.vue';
+import NetworkSwitch from '@/popup/pages/Popups/NetworkSwitch.vue';
 import ConfirmAccountList from '@/popup/pages/Popups/AccountList.vue';
 import ConfirmTransactionSign from '@/popup/components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '@/popup/components/Modals/ConfirmRawSign.vue';
@@ -180,6 +182,10 @@ export default () => {
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
     component: ConfirmConnect,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_CONFIRM_NETWORK_SWITCH, {
+    component: NetworkSwitch,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {

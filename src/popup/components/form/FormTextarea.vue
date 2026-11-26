@@ -6,7 +6,7 @@
     :readonly="readonly"
     :text-limit="textLimit"
     :model-value="modelValue"
-    @update:modelValue="handleInput"
+    @update:model-value="handleInput"
   >
     <template #default="{ inputId }">
       <textarea
