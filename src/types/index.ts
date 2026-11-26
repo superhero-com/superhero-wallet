@@ -717,8 +717,11 @@ export interface IPopupData {
   txBase64?: Encoded.Transaction;
   aeppOrigin?: string;
   data?: string | Uint8Array;
-  /** Claims of a JWT the wallet signs, shown with the key of the account picked to sign */
-  jwtClaims?: Record<string, unknown>;
+  /**
+   * Claims of a JWT the wallet signs, shown with the key of the account picked to sign.
+   * JSON text, because Vue's reactivity shows a dapp's `{"__v_isRef": true}` as its `value`.
+   */
+  jwtClaims?: string;
   networkName?: string;
   nodeUrl?: string;
   networkId?: string;

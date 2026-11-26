@@ -141,7 +141,10 @@ export default defineComponent({
     const protocol = popupProps.value?.protocol || PROTOCOLS.aeternity;
     const selectedAccount = ref<IAccount | undefined>(getLastActiveProtocolAccount(protocol));
 
-    const jwtClaims = popupProps.value?.jwtClaims;
+    // Parsed here, so the claims never pass through Vue's reactivity
+    const jwtClaims: Record<string, unknown> | undefined = popupProps.value?.jwtClaims
+      ? JSON.parse(popupProps.value.jwtClaims)
+      : undefined;
     const isJwt = ref(!!jwtClaims);
     let dataToDisplay = '';
 

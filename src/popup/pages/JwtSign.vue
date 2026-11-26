@@ -84,7 +84,7 @@ export default defineComponent({
 
         const { selectedAddress } = await openModal<ISignModalResolution>(
           MODAL_CONFIRM_UNSAFE_SIGN,
-          { jwtClaims: claims, app },
+          { jwtClaims: JSON.stringify(claims), app },
         );
         // The user can pick another account on the confirmation
         const signerAddress = (selectedAddress || activeAddress) as Encoded.AccountAddress;
