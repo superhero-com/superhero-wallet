@@ -46,6 +46,7 @@ import {
   errorHasValidationKey,
   includes,
   isNotFoundError,
+  toBase64Url,
 } from '@/utils';
 import {
   ACTIVITIES_TYPES,
@@ -582,4 +583,20 @@ export async function rebuildTransactionForSigner(
   }
 
   return rebuiltTx;
+}
+
+/**
+ * The claims of a JWT signed by `address`. The `sub_jwk` claim names the
+ * signer's key, replacing any the claims came with, so the token is what
+ * `unpackJwt(jwt, address)` accepts.
+ */
+export function withSubJwk(claims: Record<string, unknown>, address: Encoded.AccountAddress) {
+  return {
+    ...claims,
+    sub_jwk: {
+      kty: 'OKP',
+      crv: 'Ed25519',
+      x: toBase64Url(decode(address)),
+    },
+  };
 }

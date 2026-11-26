@@ -118,7 +118,7 @@ https://wallet.superhero.com/sign-jwt
 
 |URL Params|Description|
 |--|--|
-|`payload` (required)| JSON object of claims. The wallet adds a `sub_jwk` claim with the signer's key and returns `header.payload.signature`. Verify it with the SDK's `unpackJwt(jwt, expectedAddress)`.|
+|`payload` (required)| JSON object of claims. The wallet adds a `sub_jwk` claim with the signer's key, replacing any the payload has, and returns `header.payload.signature`. Verify it with the SDK's `unpackJwt(jwt, expectedAddress)`.|
 |`x-success` (required to receive a result)| URL to open on approval. Use `{signed-payload}` for the signed JWT and `{address}` for the signer's address.|
 |`x-cancel` (required to receive a result)| URL to open when signing is declined or fails.|
 

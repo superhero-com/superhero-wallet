@@ -717,6 +717,8 @@ export interface IPopupData {
   txBase64?: Encoded.Transaction;
   aeppOrigin?: string;
   data?: string | Uint8Array;
+  /** Claims of a JWT the wallet signs, shown with the key of the account picked to sign */
+  jwtClaims?: Record<string, unknown>;
   networkName?: string;
   nodeUrl?: string;
   networkId?: string;
