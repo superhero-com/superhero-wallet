@@ -6,6 +6,8 @@ import {
   createAeAccount,
   createEthAccount,
   openDeepLinkPage,
+  PROPERTY_RUNS,
+  PROPERTY_TIMEOUT,
   type IWalletAccount,
 } from '../../helpers/deepLinkPage';
 
@@ -18,8 +20,6 @@ import {
  */
 
 const CALLBACK = 'https://superhero.com/callback';
-/** Each run opens the page anew */
-const PROPERTY_TIMEOUT = 60_000;
 
 function signMessageLink(message: string | undefined, encoding?: string) {
   return {
@@ -102,7 +102,7 @@ describe('/sign-message deep link', () => {
           expect(shownMessage).toBe(text);
           expect(verify(text, signature, address)).toBe(true);
         }),
-        { numRuns: 12 },
+        { numRuns: PROPERTY_RUNS },
       );
     }, PROPERTY_TIMEOUT);
 

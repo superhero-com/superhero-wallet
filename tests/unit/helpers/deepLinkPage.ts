@@ -41,6 +41,13 @@ export const NETWORK_ID = 'ae_uat';
 /** For what the page does on its own, also on a busy CI runner */
 const WAIT = { timeout: 5000 };
 
+/**
+ * For a property test of a page. Each run opens the page anew. 12 runs of the JWT page
+ * took over 60 s on CI, and the runs left over after a timeout broke the next tests.
+ */
+export const PROPERTY_RUNS = 4;
+export const PROPERTY_TIMEOUT = 60_000;
+
 enableAutoUnmount(afterEach);
 
 export interface IWalletAccount {
