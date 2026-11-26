@@ -37,11 +37,17 @@ export default defineComponent({
 
       try {
         setLoaderVisible(true);
-        const aeSdk = await getAeSdk();
         const rawMessage = route.query.message?.toString();
         const isHexEncodedMessage = !!rawMessage && route.query.encoding?.toString() === 'hex';
         const message = isHexEncodedMessage ? Buffer.from(rawMessage, 'hex') : rawMessage;
-        const displayMessage = message?.toString();
+
+        // A signature of nothing proves nothing, also when hex decodes to no bytes
+        if (!message?.length) {
+          throw new Error(t('pages.signMessage.noMessage'));
+        }
+
+        const aeSdk = await getAeSdk();
+        const displayMessage = message.toString();
         const { host, href } = callbackOrigin.value || {} as any;
         const app = host && href
           ? {

@@ -152,16 +152,19 @@ describe('/sign-message deep link', () => {
       expect(app.loggerWrite).not.toHaveBeenCalled();
     });
 
-    /**
-     * Fails today: the page asks the user to sign an empty message, and fails
-     * only once they approve. `/sign-jwt` refuses a link without its payload first.
-     */
-    it.fails('opens x-cancel without asking the user when the link has no message', async () => {
-      const app = await openSignMessage(signMessageLink(undefined), [createAeAccount(0)]);
+    it.each([
+      ['no message', undefined, undefined],
+      ['an empty message', '', undefined],
+      ['an empty hex message', '', 'hex'],
+      ['a hex message of no bytes', 'zz', 'hex'],
+    ])('opens x-cancel, and tells the user, without asking them to sign %s', async (_, message, encoding) => {
+      const app = await openSignMessage(signMessageLink(message, encoding), [createAeAccount(0)]);
 
       await expectCancelled(app);
       expect(app.findModal().exists()).toBe(false);
-      expect(app.loggerWrite).toHaveBeenCalledOnce();
+      expect(app.loggerWrite).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ message: en.pages.signMessage.noMessage }),
+      );
     });
 
     it('opens x-cancel, and tells the user, when the account cannot sign messages', async () => {

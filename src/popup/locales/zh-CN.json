@@ -1243,6 +1243,7 @@
       "signingFailedMessage": "JWT 签名因未知原因失败。"
     },
     "signMessage": {
+      "noMessage": "没有可签名的消息。",
       "signingFailedTitle": "消息签名失败",
       "signingFailedMessage": "消息签名因未知原因失败。"
     },

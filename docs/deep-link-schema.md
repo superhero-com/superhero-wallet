@@ -96,7 +96,7 @@ https://wallet.superhero.com/sign-message
 
 |URL Params|Description|
 |--|--|
-|`message` (required)| Message to sign.|
+|`message` (required)| Message to sign. The wallet refuses an empty one, also when it decodes to no bytes.|
 |`encoding` (optional)| Encoding of the message. Currently only `hex` is supported.|
 |`x-success` (required to receive a result)| URL to open on approval. Use `{signature}` for the hex signature and `{address}` for the signer's address.|
 |`x-cancel` (required to receive a result)| URL to open when signing is declined or fails.|

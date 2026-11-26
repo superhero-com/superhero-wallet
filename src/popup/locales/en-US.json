@@ -1243,6 +1243,7 @@
       "signingFailedMessage": "JWT signing failed for an unknown reason."
     },
     "signMessage": {
+      "noMessage": "There is no message to sign.",
       "signingFailedTitle": "Failed to sign message",
       "signingFailedMessage": "Message signing failed for an unknown reason."
     },
