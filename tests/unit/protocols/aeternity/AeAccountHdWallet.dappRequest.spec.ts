@@ -5,6 +5,7 @@ import {
   Encoded,
   Encoding,
   METHODS,
+  RpcInvalidTransactionError,
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   Tag,
@@ -162,6 +163,45 @@ describe('signTransaction', () => {
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
     expect(superSignTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  // Every signer would fail on these, but only after the prompt
+  it.each([
+    ['no transaction', undefined],
+    ['an empty string', ''],
+    ['"undefined"', 'undefined'],
+    ['no payload', 'tx_'],
+    ['a bad checksum', `tx_${Buffer.from('no checksum').toString('base64')}`],
+    ['zero bytes', encode(new Uint8Array(), Encoding.Transaction)],
+  ])('rejects %s without asking', async (_, tx) => {
+    await expect(wallet().signTransaction(tx as any, { aeppOrigin: DAPP_ORIGIN } as any))
+      .rejects.toBeInstanceOf(RpcInvalidTransactionError);
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+    expect(superSignTransaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects one before an Air Gap account opens its signing modal', async () => {
+    const airGapAccount = { ...accountActive, type: 'airgap', secretKey: undefined };
+    // @ts-ignore
+    (useAccounts as vi.Mock).mockReturnValue({
+      aeAccounts: ref([airGapAccount]),
+      getLastActiveProtocolAccount: vi.fn(() => airGapAccount),
+    });
+
+    // The modal would answer instead
+    await expect(wallet().signTransaction('' as any, { aeppOrigin: DAPP_ORIGIN } as any))
+      .rejects.toBeInstanceOf(RpcInvalidTransactionError);
+  });
+
+  it('asks about bytes that decode but do not unpack, to sign them raw', async () => {
+    await wallet().signTransaction(
+      encode(Buffer.from('not rlp'), Encoding.Transaction),
+      { aeppOrigin: DAPP_ORIGIN } as any,
+    );
+
+    expect(checkOrAskPermission).toHaveBeenCalledOnce();
+    expect(checkOrAskPermission.mock.calls[0][2].tx).toBeUndefined();
+    expect(superSignTransaction).toHaveBeenCalledOnce();
   });
 });
 
