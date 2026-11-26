@@ -20,7 +20,7 @@ const signTransaction = vi.fn(async (tx: string) => `sg_${tx}`);
 const postTransaction = vi.fn();
 const poll = vi.fn();
 const openCallbackOrGoHome = vi.fn(async () => {});
-let query: Record<string, string>;
+let query: Record<string, string | null | string[]>;
 
 vi.mock('vue-router', () => ({ useRoute: () => ({ query }) }));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }));
@@ -47,6 +47,7 @@ vi.mock('@/composables', async (importOriginal) => ({
 }));
 
 const SignTransaction = (await import('@/popup/pages/SignTransaction.vue')).default;
+const Logger = (await import('@/lib/logger')).default;
 
 const notFound = () => Object.assign(new Error('next-nonce error: Account not found'), {
   statusCode: 404,
@@ -111,6 +112,26 @@ describe('SignTransaction.vue', () => {
 
     expect(signTransaction).not.toHaveBeenCalled();
     expect(openCallbackOrGoHome).toHaveBeenCalledExactlyOnceWith(false);
+  });
+
+  describe.each(['true', 'false'])('with replace-caller=%s', (replaceCaller) => {
+    it.each([
+      ['no', {}],
+      ['a valueless', { transaction: null }],
+      ['an empty', { transaction: '' }],
+      ['a repeated', { transaction: ['tx_original', 'tx_other'] }],
+    ])('uses the cancel callback without signing for %s transaction', async (_, transaction) => {
+      query = { networkId: 'ae_uat', 'replace-caller': replaceCaller, ...transaction };
+
+      await mountAndSettle();
+
+      expect(unpackTx).not.toHaveBeenCalled();
+      expect(signTransaction).not.toHaveBeenCalled();
+      expect(Logger.write).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'pages.signTransaction.noTransaction' }),
+      );
+      expect(openCallbackOrGoHome).toHaveBeenCalledExactlyOnceWith(false);
+    });
   });
 
   it('uses the cancel callback if polling fails after the node accepts the transaction', async () => {

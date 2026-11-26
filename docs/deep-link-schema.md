@@ -40,7 +40,7 @@ https://wallet.superhero.com/sign-transaction
 
 |URL Params|Description|
 |--|--|
-|`transaction` (required)| Unsigned æternity transaction in the SDK's `tx_` encoding. [SDK encoding types](https://github.com/aeternity/aepp-sdk-js/blob/v15.0.1/src/utils/encoder-types.ts)|
+|`transaction` (required)| Unsigned æternity transaction in the SDK's `tx_` encoding. [SDK encoding types](https://github.com/aeternity/aepp-sdk-js/blob/v15.0.1/src/utils/encoder-types.ts) The wallet refuses a link without one, or with an empty or repeated one.|
 |`networkId` (required)|The `networkId` identifier of the network which the wallet should sign your transaction with.|
 |`broadcast` (optional)| **Omit the parameter for sign-only.** Set `broadcast=true` to submit the signed transaction. The handler treats any nonempty string, including `false`, as a request to broadcast.|
 |`replace-caller` (optional)| For a contract call, set `replace-caller=true` to use the wallet account's `callerId` and next nonce. For contract creation, supply the intended `ownerId` and its nonce and omit this flag. Rebuilding for a different signer in the confirmation screen requires the user's approval.|

@@ -1386,6 +1386,7 @@
       }
     },
     "signTransaction": {
+      "noTransaction": "没有可签名的交易。",
       "reject": "拒绝",
       "maxSpent": "最大花费",
       "minReceived": "最少接收",
