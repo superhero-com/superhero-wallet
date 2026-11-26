@@ -582,6 +582,10 @@ export class AeAccountHdWallet extends MemoryAccount {
 
     if (isDappRequest(options) && !this.isSigningAlreadyConfirmed) {
       assertAeppGivenAccounts(options?.aeppRpcClientId);
+      // The prompt would be blank
+      if (!data?.length) {
+        throw new RpcInternalError();
+      }
       this.isSigningAlreadyConfirmed = false;
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(

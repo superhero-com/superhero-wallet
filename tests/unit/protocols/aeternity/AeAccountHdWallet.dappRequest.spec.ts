@@ -547,6 +547,12 @@ describe('unsafeSign', () => {
 
     expect(checkOrAskPermission).not.toHaveBeenCalled();
   });
+
+  it('rejects zero bytes from a dapp without asking', async () => {
+    await expect(wallet().unsafeSign(new Uint8Array(), { aeppOrigin: DAPP_ORIGIN }))
+      .rejects.toBeInstanceOf(RpcInternalError);
+    expect(checkOrAskPermission).not.toHaveBeenCalled();
+  });
 });
 
 describe('a request of an aepp given no account', () => {
