@@ -119,13 +119,10 @@ describe('/sign-jwt deep link', () => {
     }, PROPERTY_TIMEOUT);
 
     /**
-     * Fails today: the confirmation shows the wallet's key in `sub_jwk`, but the
-     * page signs the payload as the dapp sent it, and `signJwt` keeps a `sub_jwk`
-     * the payload already has. With another key, `unpackJwt(jwt, address)`
-     * rejects the token; with `null`, it accepts a token that names no key.
-     * Either way the signed claims are not the ones the user was shown.
+     * `signJwt` keeps a `sub_jwk` the payload already has, so the wallet has to
+     * replace it with the key the user is shown, not sign the dapp's payload.
      */
-    it.fails.each([
+    it.each([
       ['another key', subJwkOf(createAeAccount(9).address)],
       ['null', null],
     ])('signs the key the user was shown when the dapp sends a sub_jwk of %s', async (_, subJwk) => {
@@ -138,22 +135,19 @@ describe('/sign-jwt deep link', () => {
       expect(verify().payload).toEqual(shownClaims);
     });
 
-    /**
-     * Fails today: the page reads the signer before the confirmation, so after
-     * the user picks another account there it returns the first account's
-     * address, and shows its key, with a token the picked account signed.
-     */
-    it.fails('signs with the account the user picks on the confirmation and returns it', async () => {
+    it('signs with the account the user picks on the confirmation, shows its key, and returns it', async () => {
       const first = createAeAccount(0);
       const picked = createAeAccount(1);
       const app = await openSignJwt('{"challenge":"n0nce"}', [first, picked]);
       await app.waitForModal();
 
       await app.pickAccount(picked);
-      const { address, verify } = await approveAndVerify(app);
+      const { shownClaims, address, verify } = await approveAndVerify(app);
 
+      expect(shownClaims.sub_jwk).toEqual(subJwkOf(picked.address));
       expect(address).toBe(picked.address);
       expect(verify().signer).toBe(picked.address);
+      expect(verify().payload).toEqual(shownClaims);
     });
   });
 
@@ -185,14 +179,17 @@ describe('/sign-jwt deep link', () => {
       );
     });
 
-    it.each(['not json', '{"unterminated":', '5', 'null', '"text"'])(
-      'opens x-cancel without asking the user for the payload %s',
+    // JWT claims are a JSON object
+    it.each(['not json', '{"unterminated":', '5', 'null', '"text"', '[1,2]', '[]'])(
+      'opens x-cancel, and tells the user, without asking them to sign the payload %s',
       async (payload) => {
         const app = await openSignJwt(payload, [createAeAccount(0)]);
 
         await expectCancelled(app);
         expect(app.findModal().exists()).toBe(false);
-        expect(app.loggerWrite).toHaveBeenCalledOnce();
+        expect(app.loggerWrite).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ message: en.pages.jwtSign.invalidPayload }),
+        );
       },
     );
 

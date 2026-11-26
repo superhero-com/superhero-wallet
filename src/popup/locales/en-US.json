@@ -1237,6 +1237,7 @@
     },
     "jwtSign": {
       "noPayload": "There is no payload to sign.",
+      "invalidPayload": "The payload is not a JSON object.",
       "wrongProtocol": "JWT signing is supported only by æternity accounts.",
       "signingFailedTitle": "Failed to sign JWT",
       "signingFailedMessage": "JWT signing failed for an unknown reason."

@@ -1237,6 +1237,7 @@
     },
     "jwtSign": {
       "noPayload": "没有可签名的载荷。",
+      "invalidPayload": "载荷不是 JSON 对象。",
       "wrongProtocol": "JWT 签名仅支持 æternity 账户。",
       "signingFailedTitle": "JWT 签名失败",
       "signingFailedMessage": "JWT 签名因未知原因失败。"
