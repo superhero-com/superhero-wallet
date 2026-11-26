@@ -620,7 +620,8 @@ export async function handleEvmRpcMethod(
   if (method === ETH_RPC_METHODS.signPersonal) {
     if (!isConnectedApp(aepp, originSource)) return ERROR_UNAUTHORIZED;
     const { data } = params;
-    if (typeof data !== 'string') {
+    // As MetaMask, which lets "0x" through: ethers and viem send that for an empty message
+    if (typeof data !== 'string' || !data) {
       return { error: { code: -32602, message: 'Missing the message to sign' } };
     }
     // "0x…" or "0X…" is bytes as in MetaMask, anything else a text as ethers and viem verify it

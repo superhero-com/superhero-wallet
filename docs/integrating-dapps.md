@@ -112,7 +112,7 @@ If your app offers a wallet selector, use the provider the user chose for the en
 | `wallet_requestPermissions` / `wallet_revokePermissions` | Pass `[{eth_accounts: {}}]`. Superhero returns `{eth_accounts: true}` on grant and `null` on revocation. |
 | `eth_getBalance` / `web3_clientVersion` | Read a balance in hex wei or the wallet version string. Supported node RPCs also include `eth_call`, `eth_estimateGas` and `eth_getTransactionReceipt`. [Node method list](../src/protocols/ethereum/config.ts) |
 
-Handle `4001` by returning the UI to idle after a refusal. For `4100`, recheck the connected account and request access from a user action. For `4902`, check that the chain is configured and the user has an account for its protocol. An unsupported method can return `-32004`. `-32602` means the request's chain differs from the active one, so recheck `eth_chainId`. `-32603` is a wallet or node failure. `wallet_addEthereumChain` is unsupported. [Wallet method handler](../src/protocols/evm/libs/EvmRpcMethodsHandler.ts)
+Handle `4001` by returning the UI to idle after a refusal. For `4100`, recheck the connected account and request access from a user action. For `4902`, check that the chain is configured and the user has an account for its protocol. An unsupported method can return `-32004`. `-32602` means a parameter is invalid, such as an empty `personal_sign` message, or the request's chain differs from the active one, so recheck `eth_chainId`. `-32603` is a wallet or node failure. `wallet_addEthereumChain` is unsupported. [Wallet method handler](../src/protocols/evm/libs/EvmRpcMethodsHandler.ts)
 
 ### EVM WalletConnect v2
 
