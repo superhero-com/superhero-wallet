@@ -3,6 +3,7 @@ import {
   AccountBase,
   DelegationTag,
   MemoryAccount,
+  RpcInvalidTransactionError,
   RpcNotAuthorizeError,
   RpcRejectedByUserError,
   getTransactionSignerAddress,
@@ -11,6 +12,7 @@ import {
   Encoded,
   Encoding,
   METHODS,
+  decode,
   encode,
 } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
@@ -109,6 +111,18 @@ function getTxSigner(txBase64: Encoded.Transaction): string | undefined {
   }
 }
 
+/**
+ * Every signer decodes the transaction first, so one that doesn't decode would fail only
+ * after the prompt. Zero bytes decode, but there is nothing to sign.
+ */
+function isDecodableTx(txBase64: Encoded.Transaction): boolean {
+  try {
+    return decode(txBase64).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
@@ -172,6 +186,9 @@ export class AeAccountHdWallet extends MemoryAccount {
   ): Promise<Encoded.Transaction> {
     // Also before the Air Gap modal below
     assertAeppGivenAccounts(options?.aeppRpcClientId);
+    if (!isDecodableTx(txBase64)) {
+      throw new RpcInvalidTransactionError();
+    }
     if (isDappRequest(options)) {
       await waitForNodeSwitch();
     }
