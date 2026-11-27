@@ -216,9 +216,7 @@
         >
           <TokenAmount
             :amount="isEvm ? evmCoinTotal : (executionCost || amountTotal)"
-            :symbol="isEvm
-              ? coinSymbol
-              : (isTokenSale || isTokenSaleFactory ? undefined : tokenSymbol)"
+            :symbol="isEvm ? coinSymbol : undefined"
             :hide-fiat="isAex9"
             :protocol="protocol"
             high-precision
