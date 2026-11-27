@@ -309,6 +309,17 @@ const changeAllowance: TransactionResolver = (transaction, tokens = null) => ({
 });
 
 /**
+ * ref: AEX9.transfer, AEX9.transfer_payload
+ */
+const transfer: TransactionResolver = (transaction, tokens = null) => ({
+  tokens: [{
+    amount: transaction.tx.arguments?.[1]?.value, // value: int
+    ...defaultToken,
+    ...tokens?.[transaction.tx.contractId],
+  }],
+});
+
+/**
  * ref: AedexV2Pair.transfer_allowance
  * @returns {{ tokens: [token], sender, recipient }}
  */
@@ -513,6 +524,8 @@ const resolvers: TransactionResolvers = {
   changeAllowance,
   createAllowance: changeAllowance,
   transferAllowance,
+  transfer,
+  transferPayload: transfer,
   deposit,
   withdraw,
   buy,
