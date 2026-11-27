@@ -252,6 +252,7 @@ function mountModal(
     isTokenSale: computed(() => false),
     isTokenSaleFactory: computed(() => false),
     txFunctionParsed: computed(() => undefined),
+    txFunctionRaw: computed(() => undefined),
     transactionAssets: computed(() => []),
     outerTxTag: computed(() => usePopupProps().popupProps.value?.tx?.tag),
   });

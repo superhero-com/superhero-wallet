@@ -110,7 +110,7 @@
       <!-- Aeternity DEX & Tokaen transactions any ETH transactions involving multiple assets -->
       <template
         v-if="(
-          (isDex || isTokenSale) && tokenList.length
+          (isDex || isAllowance || isTokenSale) && tokenList.length
           || EVM_PROTOCOLS.includes(protocol) && tokenList.length > 1
         )"
       >
@@ -124,6 +124,15 @@
           :protocol="protocol"
         />
       </template>
+      <DetailsItem
+        v-if="tokenCounterparty"
+        :label="tokenCounterparty.label"
+        data-cy="token-counterparty"
+      >
+        <template #value>
+          <AddressFormatted :address="tokenCounterparty.address" />
+        </template>
+      </DetailsItem>
 
       <DetailsItem
         v-if="isTokenSaleFactory && tokenList.length"
@@ -323,7 +332,7 @@ import {
   useTransactionData,
 } from '@/composables';
 import { useConfirmGuard } from '@/composables/confirmGuard';
-import { AE_SYMBOL, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   canRebuildTransactionForSigner,
@@ -350,6 +359,7 @@ import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import TransactionCallDataDetails from '../TransactionCallDataDetails.vue';
+import AddressFormatted from '../AddressFormatted.vue';
 import NoOriginWarning from '../NoOriginWarning.vue';
 import SignAccountSelect from '../SignAccountSelect.vue';
 import CheckBox from '../CheckBox.vue';
@@ -385,6 +395,7 @@ export default defineComponent({
     TokenAmount,
     TransactionDetailsPoolTokenRow,
     TransactionCallDataDetails,
+    AddressFormatted,
     NoOriginWarning,
     SignAccountSelect,
     CheckBox,
@@ -556,6 +567,7 @@ export default defineComponent({
       isTokenSale,
       isTokenSaleFactory,
       txFunctionParsed,
+      txFunctionRaw,
       transactionAssets,
       outerTxTag,
     } = useTransactionData({
@@ -637,6 +649,17 @@ export default defineComponent({
         : undefined
     ));
 
+    /** Who an allowance lets spend the tokens, or who gets them when it is spent */
+    const tokenCounterparty = computed(() => {
+      const args = (decodedCallData.value as AeDecodedCallData | undefined)?.args;
+      if (!isAllowance.value || !args) {
+        return undefined;
+      }
+      return txFunctionRaw.value === TX_FUNCTIONS.transferAllowance
+        ? { label: t('pages.send.recipient'), address: args[1] }
+        : { label: t('pages.signTransaction.spender'), address: args[0] };
+    });
+
     const filteredTxFields = computed(
       () => (Object.keys(TX_FIELDS_TO_DISPLAY) as ITxKey[])
         .filter((field) => field === PAYLOAD_FIELD
@@ -698,7 +721,12 @@ export default defineComponent({
 
     function getLabels(token: any, idx: number) {
       if (isAllowance.value) {
-        return t('pages.signTransaction.approveUseOfToken');
+        if (txFunctionRaw.value === TX_FUNCTIONS.changeAllowance) {
+          return t('pages.signTransaction.allowanceChange');
+        }
+        return txFunctionRaw.value === TX_FUNCTIONS.transferAllowance
+          ? t('common.amount')
+          : t('pages.signTransaction.approveUseOfToken');
       }
       if (isDexLiquidityAdd.value) {
         return token.isPool ? '' : t('pages.signTransaction.maximumDeposited');
@@ -1003,6 +1031,7 @@ export default defineComponent({
       decodedCallData,
       decodedPayload,
       spendRecipientId,
+      tokenCounterparty,
       decodingCallData,
       direction,
       dappBalanceError,
