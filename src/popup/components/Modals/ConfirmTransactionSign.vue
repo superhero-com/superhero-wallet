@@ -120,7 +120,7 @@
           :token="token"
           :tokens="token.tokens || null"
           :label="getLabels(token, idx)"
-          :hide-amount="isDexSwap || isTokenSale"
+          :hide-amount="isSwapBound(idx) || isTokenSale"
           :protocol="protocol"
         />
       </template>
@@ -153,7 +153,7 @@
         </DetailsItem>
 
         <DetailsItem
-          v-if="isDexSwap || isTokenSale || isTokenSaleFactory"
+          v-if="isDexMaxSpent || isDexMinReceived || isTokenSale || isTokenSaleFactory"
           :label="swapDirectionTranslation"
         >
           <TokenAmount
@@ -561,7 +561,6 @@ export default defineComponent({
       isDexMaxSpent,
       isDexMinReceived,
       isDexPool,
-      isDexSwap,
       isTokenSale,
       isTokenSaleFactory,
       txFunctionParsed,
@@ -735,6 +734,11 @@ export default defineComponent({
           : t('pages.signTransaction.minimumWithdrawn');
       }
       return (idx === 0) ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
+    }
+
+    /** The bound of a swap, which has a row of its own */
+    function isSwapBound(idx: number) {
+      return (isDexMaxSpent.value && idx === 0) || (isDexMinReceived.value && idx === 1);
     }
 
     async function loadContractInfo(contractId: string | undefined) {
@@ -1046,7 +1050,7 @@ export default defineComponent({
       isAllowance,
       isDexMaxSpent,
       isDexMinReceived,
-      isDexSwap,
+      isSwapBound,
       isTokenSale,
       isTokenSaleFactory,
       isHash,
