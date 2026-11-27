@@ -107,10 +107,10 @@
         :value="decodedCallData.functionName"
       />
 
-      <!-- Aeternity DEX & Tokaen transactions any ETH transactions involving multiple assets -->
+      <!-- aeternity DEX, token and token sale calls, and EVM calls with several assets -->
       <template
         v-if="(
-          (isDex || isAllowance || isTokenSale) && tokenList.length
+          (isDex || isAllowance || isTokenTransfer || isTokenSale) && tokenList.length
           || EVM_PROTOCOLS.includes(protocol) && tokenList.length > 1
         )"
       >
@@ -318,6 +318,7 @@ import {
 import {
   fetchJson,
   handleUnknownError,
+  includes,
   isNotFoundError,
   toShiftedBigNumber,
 } from '@/utils';
@@ -646,15 +647,31 @@ export default defineComponent({
         : undefined
     ));
 
-    /** Who an allowance lets spend the tokens, or who gets them when it is spent */
+    /** An AEX-9 token's transfer */
+    const isTokenTransfer = computed(() => (
+      protocol === PROTOCOLS.aeternity
+      && includes([TX_FUNCTIONS.transfer, TX_FUNCTIONS.transferPayload], txFunctionRaw.value)
+      && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value?.contractId]
+    ));
+
+    /**
+     * Who gets the tokens of a transfer, who an allowance lets spend them,
+     * or who gets them when it is spent
+     */
     const tokenCounterparty = computed(() => {
       const args = (decodedCallData.value as AeDecodedCallData | undefined)?.args;
-      if (!isAllowance.value || !args) {
+      if (!args) {
         return undefined;
       }
-      return txFunctionRaw.value === TX_FUNCTIONS.transferAllowance
-        ? { label: t('pages.send.recipient'), address: args[1] }
-        : { label: t('pages.signTransaction.spender'), address: args[0] };
+      if (isTokenTransfer.value) {
+        return { label: t('pages.send.recipient'), address: args[0] };
+      }
+      if (isAllowance.value) {
+        return txFunctionRaw.value === TX_FUNCTIONS.transferAllowance
+          ? { label: t('pages.send.recipient'), address: args[1] }
+          : { label: t('pages.signTransaction.spender'), address: args[0] };
+      }
+      return undefined;
     });
 
     const filteredTxFields = computed(
@@ -685,14 +702,22 @@ export default defineComponent({
       : undefined);
 
     async function getTokens(txParams: ITx): Promise<ITokenResolved[]> {
-      if (!isDex.value && !isAllowance.value && !isTokenSale.value && !isTokenSaleFactory.value) {
+      if (
+        !isDex.value && !isAllowance.value && !isTokenTransfer.value
+        && !isTokenSale.value && !isTokenSaleFactory.value
+      ) {
         return [singleToken.value];
       }
       const resolver = getTransactionTokenInfoResolver(txFunctionParsed.value!);
       if (!resolver) {
         return [];
       }
-      if (protocol === PROTOCOLS.aeternity && popupProps.value?.tx?.contractId) {
+      // Only the resolvers of a token sale read the sales, and a transfer is never one
+      if (
+        protocol === PROTOCOLS.aeternity
+        && popupProps.value?.tx?.contractId
+        && !isTokenTransfer.value
+      ) {
         await loadTokenSalesInfoByContractId(
           popupProps.value?.tx?.contractId as Encoded.ContractAddress,
         );
@@ -724,6 +749,9 @@ export default defineComponent({
         return txFunctionRaw.value === TX_FUNCTIONS.transferAllowance
           ? t('common.amount')
           : t('pages.signTransaction.approveUseOfToken');
+      }
+      if (isTokenTransfer.value) {
+        return t('common.amount');
       }
       if (isDexLiquidityAdd.value) {
         return token.isPool ? '' : t('pages.signTransaction.maximumDeposited');
@@ -1051,6 +1079,7 @@ export default defineComponent({
       isDexMaxSpent,
       isDexMinReceived,
       isSwapBound,
+      isTokenTransfer,
       isTokenSale,
       isTokenSaleFactory,
       isHash,
