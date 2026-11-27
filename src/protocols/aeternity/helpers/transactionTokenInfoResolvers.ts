@@ -48,6 +48,14 @@ const defaultPoolToken = {
   decimals: AE_COIN_PRECISION,
 };
 
+/**
+ * `min_liquidity: option(int)`. The middleware lists a variant as `[tag, ...args]`,
+ * call data decoded with the contract's bytecode as `{ [tag]: args }`.
+ */
+const getMinLiquidity = (option: any) => (
+  (Array.isArray(option) ? option[1]?.value : option?.[1]?.[0]) ?? 0
+);
+
 // liquidityMethod: null - not a liquidity, add, remove
 const genLiquiditySwapResolver: TransactionResolverGenerator = (
   tokenAMapper,
@@ -118,11 +126,10 @@ const addLiquidity = genLiquiditySwapResolver(
     minAmount: _arguments[5]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
   }),
-  // min_liquidity: int
   ({ tx: { arguments: _arguments } }) => new BigNumber(_arguments?.[2]?.value)
     .times(_arguments?.[3]?.value)
     .sqrt()
-    .minus(_arguments?.[7]?.value[1]?.value),
+    .minus(getMinLiquidity(_arguments?.[7]?.value)),
   'add',
 );
 
@@ -143,11 +150,10 @@ const addLiquidityAe = genLiquiditySwapResolver(
     amount, // amount_b_desired: int
     isWrappedCoin: true,
   }),
-  // min_liquidity: int
   ({ tx: { arguments: args = [], amount } }) => new BigNumber(args?.[1]?.value)
     .times(amount)
     .sqrt()
-    .minus(args[5]?.value[1]?.value),
+    .minus(getMinLiquidity(args[5]?.value)),
   'add',
 );
 
