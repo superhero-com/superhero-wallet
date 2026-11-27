@@ -1,0 +1,606 @@
+{
+  "router": {
+    "address": "ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3",
+    "bytecode": "cb_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AAAMAQQMAQIMAQACAxFKVbiLDwIGDAMADAIGAwD8EYoNEW83ADcDBwcHDwIIKC4KAAgoLgwCCCAkAgIHDAoMAgwMAgonDAQADAIKDAIMJwwEAP7/ezOlADcDBwcHBwwBBAwBAgwBAAQDEc7iCwm5BKkvLREOlTR4fS5BZWRleFYyTGlicmFyeS5fZ2V0X2Ftb3VudHNfaW4RE3fYBjkuTGlzdC5yZXZlcnNlXxEY886SYXN3YXBfdG9rZW5zX2Zvcl9leGFjdF9hZREhBgHfYXN3YXBfZXhhY3RfYWVfZm9yX3Rva2VucxEmTNBLNWFkZF9saXF1aWRpdHkRJrStEDUuTGlzdC5yZXZlcnNlESnuptJ9LkFlZGV4VjJMaWJyYXJ5LmdldF9hbW91bnRzX291dBEwpsdreS5BZWRleFYyTGlicmFyeS5nZXRfYW1vdW50c19pbhE1BNGXdS5BZWRleFYyTGlicmFyeS5nZXRfYW1vdW50X2luETfgD6cxLkxpc3QubGVuZ3RoETr27DllLkFlZGV4VjJMaWJyYXJ5LmFwcGx5X2ZlZRE9nvA+gS5BZWRleFYyTGlicmFyeS5fZ2V0X2Ftb3VudHNfb3V0EUImUQdhc3dhcF9leGFjdF90b2tlbnNfZm9yX2FlEUTWRB8RaW5pdBFF2HVNTXJlbW92ZV9saXF1aWRpdHlfYWURSXiaxDUuTGlzdC5sZW5ndGhfEUpVuIthLkFlZGV4VjJMaWJyYXJ5LnBhaXJfZm9yEVYM9u9tLkFlZGV4VjJMaWJyYXJ5LnNvcnRfdG9rZW5zEV4OyAwhd2FlX2FleDkRYf5mVZEuQWVkZXhWMlJvdXRlci5hYm9ydF9pbnZhbGlkX2Ftb3VudHMRcGesIB1mYWN0b3J5EXC7tYMNd2FlEX6Ez+M9Z2V0X2Ftb3VudHNfb3V0EYtE6i5RLkFlZGV4VjJSb3V0ZXIuc3dhcCcRoKxzz3Fzd2FwX2V4YWN0X3Rva2Vuc19mb3JfdG9rZW5zEaPG0+5BYWRkX2xpcXVpZGl0eV9hZRGoVEkWOWdldF9hbW91bnRfb3V0EakuUs5xc3dhcF90b2tlbnNfZm9yX2V4YWN0X3Rva2VucxGvfgy8eS5BZWRleFYyTGlicmFyeS5nZXRfYW1vdW50X291dBGxLuSpOWdldF9hbW91bnRzX2luEbSMFoQdYmFsYW5jZRG3mijBUS5BZWRleFYyUm91dGVyLmZpcnN0Ebt+PVRNLkFlZGV4VjJSb3V0ZXIubGFzdBG90Wv6QXJlbW92ZV9saXF1aWRpdHkRzKoAs2Fzd2FwX2FlX2Zvcl9leGFjdF90b2tlbnMRzuILCVUuQWVkZXhWMkxpYnJhcnkucXVvdGUR2FdJVSUuTGlzdC5nZXQR4fPUpj0uT3B0aW9uLmlzX25vbmUR6JqHgn0uQWVkZXhWMlJvdXRlci5yZXF1aXJlX2RlYWRsaW5lEfWamN6RLkFlZGV4VjJSb3V0ZXIuZW5zdXJlX3BhaXJfZXhpc3RlbmNlEfdnBTxlLkFlZGV4VjJSb3V0ZXIuZmlyc3RfcGFpchH4aVR0NWdldF9hbW91bnRfaW4R+7AfubEuQWVkZXhWMlJvdXRlci5jb21wdXRlX2FkZF9saXF1aWRpdHlfYW1vdW50cxH78oIocS5BZWRleFYyTGlicmFyeS5nZXRfcmVzZXJ2ZXMR/3szpRVxdW90ZYIvAIU2LjEuMAFkSs9R",
+    "aci": [
+      {
+        "contract": {
+          "event": {
+            "variant": [
+              {
+                "Transfer": [
+                  "address",
+                  "address",
+                  "int"
+                ]
+              },
+              {
+                "Approval": [
+                  "address",
+                  "address",
+                  "int"
+                ]
+              },
+              {
+                "Allowance": [
+                  "address",
+                  "address",
+                  "int"
+                ]
+              },
+              {
+                "Mint": [
+                  "address",
+                  "int"
+                ]
+              },
+              {
+                "Burn": [
+                  "address",
+                  "int"
+                ]
+              },
+              {
+                "Deposit": [
+                  "address",
+                  "int"
+                ]
+              },
+              {
+                "Withdrawal": [
+                  "address",
+                  "int"
+                ]
+              }
+            ]
+          },
+          "functions": [],
+          "kind": "contract_interface",
+          "name": "IAEX9Minimal",
+          "payable": false,
+          "typedefs": [
+            {
+              "name": "allowance_accounts",
+              "typedef": {
+                "record": [
+                  {
+                    "name": "from_account",
+                    "type": "address"
+                  },
+                  {
+                    "name": "for_account",
+                    "type": "address"
+                  }
+                ]
+              },
+              "vars": []
+            },
+            {
+              "name": "meta_info",
+              "typedef": {
+                "record": [
+                  {
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "symbol",
+                    "type": "string"
+                  },
+                  {
+                    "name": "decimals",
+                    "type": "int"
+                  }
+                ]
+              },
+              "vars": []
+            }
+          ]
+        }
+      },
+      {
+        "contract": {
+          "functions": [],
+          "kind": "contract_interface",
+          "name": "IAedexV2Callback",
+          "payable": false,
+          "typedefs": []
+        }
+      },
+      {
+        "contract": {
+          "functions": [
+            {
+              "arguments": [
+                {
+                  "name": "token_a",
+                  "type": "IAEX9Minimal"
+                },
+                {
+                  "name": "token_b",
+                  "type": "IAEX9Minimal"
+                },
+                {
+                  "name": "amount_a_desired",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_b_desired",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_a_min",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_b_min",
+                  "type": "int"
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "min_liquidity",
+                  "type": {
+                    "option": [
+                      "int"
+                    ]
+                  }
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                }
+              ],
+              "name": "add_liquidity",
+              "payable": false,
+              "returns": {
+                "tuple": [
+                  "AedexV2Router.amount_a",
+                  "AedexV2Router.amount_b",
+                  "AedexV2Router.liquidity"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "token",
+                  "type": "IAEX9Minimal"
+                },
+                {
+                  "name": "amount_token_desired",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_token_min",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_ae_min",
+                  "type": "int"
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "min_liquidity",
+                  "type": {
+                    "option": [
+                      "int"
+                    ]
+                  }
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                }
+              ],
+              "name": "add_liquidity_ae",
+              "payable": true,
+              "returns": {
+                "tuple": [
+                  "AedexV2Router.amount_token",
+                  "AedexV2Router.amount_ae",
+                  "AedexV2Router.liquidity"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "token_a",
+                  "type": "IAEX9Minimal"
+                },
+                {
+                  "name": "token_b",
+                  "type": "IAEX9Minimal"
+                },
+                {
+                  "name": "liquidity",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_a_min",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_b_min",
+                  "type": "int"
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                }
+              ],
+              "name": "remove_liquidity",
+              "payable": false,
+              "returns": {
+                "tuple": [
+                  "AedexV2Router.amount_a",
+                  "AedexV2Router.amount_b"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "token",
+                  "type": "IAEX9Minimal"
+                },
+                {
+                  "name": "liquidity",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_token_min",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_ae_min",
+                  "type": "int"
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                }
+              ],
+              "name": "remove_liquidity_ae",
+              "payable": true,
+              "returns": {
+                "tuple": [
+                  "AedexV2Router.amount_token",
+                  "AedexV2Router.amount_ae"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "amount_in",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_out_min",
+                  "type": "int"
+                },
+                {
+                  "name": "path",
+                  "type": {
+                    "list": [
+                      "IAEX9Minimal"
+                    ]
+                  }
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                },
+                {
+                  "name": "callback_opt",
+                  "type": {
+                    "option": [
+                      "IAedexV2Callback"
+                    ]
+                  }
+                }
+              ],
+              "name": "swap_exact_tokens_for_tokens",
+              "payable": false,
+              "returns": {
+                "list": [
+                  "int"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "amount_out",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_in_max",
+                  "type": "int"
+                },
+                {
+                  "name": "path",
+                  "type": {
+                    "list": [
+                      "IAEX9Minimal"
+                    ]
+                  }
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                },
+                {
+                  "name": "callback_opt",
+                  "type": {
+                    "option": [
+                      "IAedexV2Callback"
+                    ]
+                  }
+                }
+              ],
+              "name": "swap_tokens_for_exact_tokens",
+              "payable": false,
+              "returns": {
+                "list": [
+                  "int"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "amount_out_min",
+                  "type": "int"
+                },
+                {
+                  "name": "path",
+                  "type": {
+                    "list": [
+                      "IAEX9Minimal"
+                    ]
+                  }
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                },
+                {
+                  "name": "callback_opt",
+                  "type": {
+                    "option": [
+                      "IAedexV2Callback"
+                    ]
+                  }
+                }
+              ],
+              "name": "swap_exact_ae_for_tokens",
+              "payable": true,
+              "returns": {
+                "list": [
+                  "int"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "amount_out",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_in_max",
+                  "type": "int"
+                },
+                {
+                  "name": "path",
+                  "type": {
+                    "list": [
+                      "IAEX9Minimal"
+                    ]
+                  }
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                },
+                {
+                  "name": "callback_opt",
+                  "type": {
+                    "option": [
+                      "IAedexV2Callback"
+                    ]
+                  }
+                }
+              ],
+              "name": "swap_tokens_for_exact_ae",
+              "payable": false,
+              "returns": {
+                "list": [
+                  "int"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "amount_in",
+                  "type": "int"
+                },
+                {
+                  "name": "amount_out_min",
+                  "type": "int"
+                },
+                {
+                  "name": "path",
+                  "type": {
+                    "list": [
+                      "IAEX9Minimal"
+                    ]
+                  }
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                },
+                {
+                  "name": "callback_opt",
+                  "type": {
+                    "option": [
+                      "IAedexV2Callback"
+                    ]
+                  }
+                }
+              ],
+              "name": "swap_exact_tokens_for_ae",
+              "payable": false,
+              "returns": {
+                "list": [
+                  "int"
+                ]
+              },
+              "stateful": true
+            },
+            {
+              "arguments": [
+                {
+                  "name": "amount_out",
+                  "type": "int"
+                },
+                {
+                  "name": "path",
+                  "type": {
+                    "list": [
+                      "IAEX9Minimal"
+                    ]
+                  }
+                },
+                {
+                  "name": "to",
+                  "type": "address"
+                },
+                {
+                  "name": "deadline",
+                  "type": "int"
+                },
+                {
+                  "name": "callback_opt",
+                  "type": {
+                    "option": [
+                      "IAedexV2Callback"
+                    ]
+                  }
+                }
+              ],
+              "name": "swap_ae_for_exact_tokens",
+              "payable": true,
+              "returns": {
+                "list": [
+                  "int"
+                ]
+              },
+              "stateful": true
+            }
+          ],
+          "kind": "contract_main",
+          "name": "AedexV2Router",
+          "payable": true,
+          "state": {
+            "record": [
+              {
+                "name": "factory",
+                "type": "IAedexV2Factory"
+              },
+              {
+                "name": "wae",
+                "type": "IWAE"
+              },
+              {
+                "name": "wae_aex9",
+                "type": "IAEX9Minimal"
+              }
+            ]
+          },
+          "typedefs": [
+            {
+              "name": "amount_a",
+              "typedef": "int",
+              "vars": []
+            },
+            {
+              "name": "amount_b",
+              "typedef": "int",
+              "vars": []
+            },
+            {
+              "name": "amount_token",
+              "typedef": "int",
+              "vars": []
+            },
+            {
+              "name": "amount_ae",
+              "typedef": "int",
+              "vars": []
+            },
+            {
+              "name": "liquidity",
+              "typedef": "int",
+              "vars": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "wae": {
+    "address": "ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa",
+    "bytecode": "cb_+QgYRgOgVoaqJDkRAXLt6ng8/hawWGkLJkT4+IBWIjeoaatSdSbAuQfquQXZ/gBSINYCNwI3AkcARwAHBwwBAAIDEWoAFl4PAgAIPgAKBEY6AgAAFBgCAiIwAAcMCPsDSVdBRTogTE9XX0FMTE9XQU5DRQECAvsDbVdBRTogQUxMT1dBTkNFX05PVF9FWElTVEVOVP4UN7Q4ADcANwN3dwcBAztFV3JhcHBlZCBBZXRlcm5pdHkNV0FFJP4gJxMbAjcCNwJHAEcABzcADAECDAEAAgMRAFIg1g8CABQaAgACDAICAgMRIClRvg8Cb4Imzy2ahIQAAigcAAAoHAIADAICRPxDBgYEBAIGBAMRZaXgD/4gKVG+AjcBBzcAIjQAAAcMBPsDgVdBRTogTk9OX05FR0FUSVZFX1ZBTFVFX1JFUVVJUkVEAQM//iHf+rYANwNHAEcABzcADAEAVQAnDAQPAgIMAQQMAQIMAQACAxHi/QFlDwJvgibPFRwABAwCAgQDESAnExv+I8NcagA3AUcANwBVAAwBACcMBA8CAhoKBIQrKAQCFQwADAICBAMRICcTG/4tEMm9BDcANwBVAgYs6giCBgALABQICC0qgoIGVQALAET8QwYGBAQEBAQDEWWl4A/+McCNcwA3ACd3AQMTKWFsbG93YW5jZXP+PYVajgA3AkcABzcAVQAMAQAnDAQPAgIMAQIMAgIEAxEgJxMb/j5seDMANwFHAIcCNwA3AQcMAQBVACcMBAQDEWoAFl7+QQ/MnQA3AQc3ABoKAIJVACzKAgAAIhgCAAcMBPsDQVdBRTogTE9XX0JBTEFOQ0UVGAIAVQAtCoKCVQBlBABVAAwBAET8QwYGBAQGBAQDEWWl4A/+RNZEHwA3ADcAGg6CLwAaDoQvAFUChgEDP/5lpeAPAjcBhwQ3A0cARwAHNwNHAEcABzcCRwAHNwJHAAc3AAoNAEMCBAYIRjYAAABGNgIAAkY2BAAEZAKvX58BgSI8OeKd/2Rn/t2gl1jZF4HFNy4JH/hrOvnjEOOGVivvAAIEAQM/RjYAAABGNgIAAkY2BAAEZAKvX58BgQ7CIrFtTFj/Ng78oEvyYlSBG5YAVVwpT1amIZByiH9eAAIEAQM/RjYAAABGNgIAAmOvX58BgVtsO+RvbgWueLJe+3Ifqqb2xht1KAwaclsDSfyoBJQTAAIBAz9GNgAAAEY2AgACY69fnwGBL6WlLqVMDGsaTMXsM7p6Hvj2Kmnsz0nUIsGcCAZbOHsAAgEDP/5qABZeADcBNwJHAEcAhwI3ADcBBxoKAIQvGIQABwwEAQOvggABAD8rGAAARPwjAAICAgD+gCRrRwA3AGdHAAcBAoL+hKFdoQA3AkcABzcADAECDAEAVQAEAxHi/QFl/rIMpjAENwFHADcALNoGggAACwAUCAYtGoKCAFUACwBE/EMGBgQEBAQCAxFlpeAPDwJvgibPVQAMAQALAET8QwYGBAQABgQDEWWl4A/+tIwWhAA3AUcAhwI3ADcBBxoKAIIvGIIABwwEAQOvggABAD8rGAAARPwjAAICAgD+0Ez9YgI3AkcABzcAGgoAgizaAgAAACIYAgIHDAT7A0FXQUU6IExPV19CQUxBTkNFAQM//tdMFd4ANwBnNwJHAEcABwEChP7ZWkUPAjcBNwJHAEcAhwI3ADcB5wAMAQACAxFqABZeCDwEBgEDr4IAAQA/+wN9V0FFOiBBTExPV0FOQ0VfQUxSRUFEWV9FWElTVEVOVP7bY3WoADcAB1MAAP7i/QFlAjcDRwBHAAc3AAwBBAIDESApUb4PAm+CJs8MAQQMAQACAxHQTP1iDwJvgibPKxoKggAVGAoELRqCggAs2hqCAgAUGBoELRqCggIMAQAMAQIMAQRE/EMGBgQEAAYEAxFlpeAP/u/MWOEANwJHAAc3AAwBAgIDESApUb4PAm+CJs9VAAwBACcMBA8CBAwCBAIDEdlaRQ8PAm+CJs8taoSEBAJVAAwBAAwBAkT8QwYGBAQCBgQDEWWl4A/+/q6k+gA3AEcAAQKGuQIILxkRAFIg1lkuV0FFLnJlcXVpcmVfYWxsb3dhbmNlERQ3tDglbWV0YV9pbmZvESAnExt5LldBRS5pbnRlcm5hbF9jaGFuZ2VfYWxsb3dhbmNlESApUb59LldBRS5yZXF1aXJlX25vbl9uZWdhdGl2ZV92YWx1ZREh3/q2SXRyYW5zZmVyX2FsbG93YW5jZREjw1xqPXJlc2V0X2FsbG93YW5jZREtEMm9HWRlcG9zaXQRMcCNcz1hZXg5X2V4dGVuc2lvbnMRPYVajkFjaGFuZ2VfYWxsb3dhbmNlET5seDNRYWxsb3dhbmNlX2Zvcl9jYWxsZXIRQQ/MnSF3aXRoZHJhdxFE1kQfEWluaXQRZaXgDy1DaGFpbi5ldmVudBFqABZeJWFsbG93YW5jZRGAJGtHIWJhbGFuY2VzEYShXaEhdHJhbnNmZXIRsgymMClkZXBvc2l0X3RvEbSMFoQdYmFsYW5jZRHQTP1iUS5XQUUucmVxdWlyZV9iYWxhbmNlEddMFd4pYWxsb3dhbmNlcxHZWkUPjS5XQUUucmVxdWlyZV9hbGxvd2FuY2Vfbm90X2V4aXN0ZW50EdtjdagxdG90YWxfc3VwcGx5EeL9AWVZLldBRS5pbnRlcm5hbF90cmFuc2ZlchHvzFjhQWNyZWF0ZV9hbGxvd2FuY2UR/q6k+hVvd25lcoIvAIU2LjEuMAAjDBRd"
+  },
+  "token": {
+    "address": "ct_26GAggwrHJLw45vopxu1HA51t6pw4xjzqvq66kh1WPtZjNXMyL",
+    "bytecode": "cb_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AjcC5wCHAjcANwHnAOcADAECDAMRpgmQBwwDPycMBAwBAAQDESQ/2xH+78xY4QA3AkcABzcADAECAgMRlwV5zA8Cb4Imz1UADAEAJwwEDwICDAICAgMRi8f0xg8Cb4ImzyguCAiCLWgIAgIpLoIIglUADAEADAECRPxTBgYEBAQCBgQDEWWl4A/+/q6k+gA3AEcAKCwAggC5AsIvHxEDFHvNsS5GdW5naWJsZVRva2VuRnVsbC5pbnRlcm5hbF9jaGFuZ2VfYWxsb3dhbmNlEREAT6YRc3dhcBEUN7Q4JW1ldGFfaW5mbxEd7Gb/HXN3YXBwZWQRId/6tkl0cmFuc2Zlcl9hbGxvd2FuY2URI8Ncaj1yZXNldF9hbGxvd2FuY2URJD/bETUuT3B0aW9uLm1hdGNoES2dNN6RLkZ1bmdpYmxlVG9rZW5GdWxsLnJlcXVpcmVfYWxsb3dhbmNlETHAjXM9YWV4OV9leHRlbnNpb25zET2FWo5BY2hhbmdlX2FsbG93YW5jZRE+bHgzUWFsbG93YW5jZV9mb3JfY2FsbGVyEWWl4A8tQ2hhaW4uZXZlbnQRagAWXiVhbGxvd2FuY2URdkuBQYkuRnVuZ2libGVUb2tlbkZ1bGwucmVxdWlyZV9iYWxhbmNlEYAka0chYmFsYW5jZXMRhKFdoSF0cmFuc2ZlchGLx/TGxS5GdW5naWJsZVRva2VuRnVsbC5yZXF1aXJlX2FsbG93YW5jZV9ub3RfZXhpc3RlbnQRlwV5zLUuRnVuZ2libGVUb2tlbkZ1bGwucmVxdWlyZV9ub25fbmVnYXRpdmVfdmFsdWURpgmQBw0uXjcRse/BexFidXJuEbSMFoQdYmFsYW5jZRHCcCEigS5GdW5naWJsZVRva2VuRnVsbC5yZXF1aXJlX293bmVyEc/dmqIRbWludBHWOQ1+KWNoZWNrX3N3YXAR10wV3ilhbGxvd2FuY2VzEdtjdagxdG90YWxfc3VwcGx5Edt8XQENLl42Ee2RfN+RLkZ1bmdpYmxlVG9rZW5GdWxsLmludGVybmFsX3RyYW5zZmVyEe/LUO89Lk9wdGlvbi5kZWZhdWx0Ee/MWOFBY3JlYXRlX2FsbG93YW5jZRH+rqT6FW93bmVygi8Ah3Vua25vd24AkJMKyQ=="
+  }
+}
