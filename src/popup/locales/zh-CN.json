@@ -1393,6 +1393,8 @@
       "from": "从",
       "to": "到",
       "approveUseOfToken": "批准使用代币",
+      "spender": "被授权方",
+      "allowanceChange": "授权额度变动",
       "maximumDeposited": "最大存入",
       "poolTokenSpent": "消耗的资金池代币",
       "minimumWithdrawn": "最少提取"

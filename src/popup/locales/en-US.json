@@ -1393,6 +1393,8 @@
       "from": "From",
       "to": "To",
       "approveUseOfToken": "Approve use of token",
+      "spender": "Spender",
+      "allowanceChange": "Allowance change",
       "maximumDeposited": "Maximum deposited",
       "poolTokenSpent": "Pool token spent",
       "minimumWithdrawn": "Minimum withdrawn"
